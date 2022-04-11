@@ -1,0 +1,31 @@
+# sim_sig.fdo : Include file with signals
+# Copyright (C) 2021 CESNET z. s. p. o.
+# Author(s): Vladislav Valek <xvalek14@vutbr.cz>
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+proc rst { } {
+   exec make
+   restart -f
+   run 100 us
+   wave zoom full
+}
+
+# Paths
+set TB_PATH          "/testbench"
+
+# include signals
+source "signals.fdo"
+
+exec make
+view wave
+delete wave *
+
+all $TB_PATH
+
+restart -f
+run 6 us
+
+config wave -signalnamewidth 1
+
+wave zoom full

@@ -1,0 +1,317 @@
+# Modelsim.inc.tcl: Modelsim global include tcl script to compille all design
+# Copyright (C) 2003-2020 CESNET
+# Author: Martin Spinler <spinler@cesnet.cz>
+#         Tomas Martinek <martinek@liberouter.org>
+#         Viktor Pus     <pus@liberouter.org>
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+# For verification in OFM repository: OFM_PATH variables are set
+# from FIRMWARE_BASE variable (must refer to the root OFM directory).
+
+if {![info exists OFM_PATH]} {
+    set OFM_PATH $FIRMWARE_BASE
+}
+
+# Source scripts with further procedures utilized during design compilation
+source $OFM_PATH/build/Shared.tcl
+
+# ---------------------------------------------------------------------
+#                     Procedures and Functions
+# ---------------------------------------------------------------------
+
+# Decide which command should be used for particular file
+proc CompileMod {FNAME OPT} {
+    namespace upvar ::NDKBuild SIM_FLAGS SIM_FLAGS
+
+    set VMAKE_OPT "-vmake"
+
+    array set opt $OPT
+
+    set LIB "work"
+    if {[info exists opt(LIBRARY)]} {
+        set LIB $opt(LIBRARY)
+        eval vlib -type directory $LIB
+    }
+
+    set FEXT [file extension $FNAME]
+
+    # This file uses a simulation library which must be loaded: 'vsim -L mylibrary'
+    if {[info exists opt(SIM_LIB)]} {
+        lappend SIM_FLAGS(SIM_LIB) {*}$opt(SIM_LIB)
+    }
+    # This file uses a simulation module which must be loaded: vsim mymodule testbench'
+    if {[info exists opt(SIM_MODULE)]} {
+        lappend SIM_FLAGS(SIM_MODULE) {*}$opt(SIM_MODULE)
+    }
+
+    # Skip unknown file types
+    if {$opt(TYPE) != ""} {
+        return
+    }
+
+    set COVER_PARAMS [list ]
+    set COVER_PARAMS_SV [list ]
+    if {$SIM_FLAGS(CODE_COVERAGE)} {
+        lappend COVER_PARAMS -cover sbce
+    }
+    if {$SIM_FLAGS(CODE_COVERAGE_SV)} {
+        lappend COVER_PARAMS_SV -cover sbce
+    }
+    lappend opt(VLOG_SV_FLAGS)
+
+    # Source compiling
+    if {$FEXT in [list .v .vh]} {
+        set CMD [list vlog {*}$COVER_PARAMS -timescale "1ps/1ps" -work $LIB]
+    } elseif {$FEXT in [list .sv]} {
+        regsub "/\[^/\]+\$" $FNAME "/" DIR
+        set CMD [list vlog $VMAKE_OPT {*}$COVER_PARAMS_SV -sv -timescale "1ps/1ps" -work $LIB +incdir+$DIR {*}$SIM_FLAGS(VLOG_SV_FLAGS) {*}$opt(VLOG_SV_FLAGS)]
+    } else {
+        set CMD [list vcom -2008 -explicit {*}$COVER_PARAMS -work $LIB]
+    }
+
+    if {$SIM_FLAGS(BATCH_COMPILE)} {
+        nb_batch_add $CMD $FNAME
+    } else {
+        eval {*}$CMD $FNAME
+    }
+}
+
+proc nb_sim_run {} {
+    global env SIG_FILE
+
+    if {[catch {exec make}]} {
+    }
+
+    # Check if it is a Jenkins run; if so, don't add any waves
+    if {![info exists env(BUILD_TAG)]} {
+        if {[info exists SIG_FILE]} {
+            source $SIG_FILE
+        }
+    }
+    restart -f
+    run -all
+}
+
+
+# -------------------------------------------------------------------
+#                       Simulation procedures
+# -------------------------------------------------------------------
+
+# add_wave procedure checks if a signal does exist before it is added
+# into the wave window
+#   add_wave [<param> [...]] <SIGNAL>
+#   add_wave <params> <SIGNAL>               backward compatibility
+proc add_wave { FIRST args } {
+   # get last argument = signal name
+   # other arguments = flags
+   set SIG [lindex [linsert $args 0 $FIRST] end] ;# at least one argument required
+
+   if { [catch {eval "add wave $FIRST $args"}] ne 0 } {
+      puts "WARNING : I can't find signal \"$SIG\""
+      echo "WARNING : I can't find signal \"$SIG\""
+   }
+}
+
+# ---------------------------------------------------------------------
+#                         Compilation
+# ---------------------------------------------------------------------
+
+proc nb_vsim_prepare {} {
+    # Suppress warnings from arithm library
+    puts "Std Arith Warnings - Disabled"
+    set  StdArithNoWarnings 1
+
+    # Quit current simulation
+    quit -sim
+
+    # Clears old work directory and creates new one
+    eval vlib -type directory work
+    vdel -all
+    eval vlib -type directory work
+}
+
+proc nb_vsim_compile_svlibs {SV_LIBS} {
+    # INFO: ModelSim tries to load dynamic library only when encounter unknown symbol.
+    #       Global library is a solution of possible dependencies between libs.
+    #       Other possibility is load library with -gblso parameter (global scope).
+    set USE_GLOBAL_LIB true
+
+    set SV_FLAGS ""
+    set LD_FLAGS ""
+    foreach i $SV_LIBS {
+        array set opt [lassign $i i]
+
+        if {![info exists opt(MAKE_PARAMS)]} {
+            set opt(MAKE_PARAMS) [list]
+        }
+        regsub "/\[^/\]+\$" $i "" DIR
+        regsub ".+/" $i "" FILE
+
+        puts "Compiling SV_LIB $FILE: make -C $DIR"
+        exec make -C $DIR {*}$opt(MAKE_PARAMS)
+
+        if {[file exist "$DIR/lib$FILE.so"] || [file exist "$DIR/lib$FILE.dll"]} {
+            lappend SV_FLAGS -sv_lib $DIR/lib$FILE
+
+            #lappend LD_FLAGS -L$DIR -l$FILE
+            lappend LD_FLAGS -l$FILE
+            eval [list exec cp] [glob $DIR/lib$FILE.so*] ./
+        } else {
+            puts "Warning: SystemVerilog dynamic library $DIR/lib$FILE.so was not found nor compiled."
+        }
+    }
+
+    if {$USE_GLOBAL_LIB && $LD_FLAGS != ""} {
+        exec gcc -fvisibility=hidden -shared -o cdpi.so -L. {*}$LD_FLAGS
+        set SV_FLAGS "-sv_lib cdpi"
+    }
+
+    return $SV_FLAGS
+}
+
+proc nb_vsim_compile_project {sim_flags hierarchy} {
+    upvar 1 $sim_flags SIM_FLAGS $hierarchy HIERARCHY
+
+    set FILES [list ]
+    set SV_LIBS [list ]
+
+    if {$SIM_FLAGS(BATCH_COMPILE)} {
+        nb_batch_init
+    }
+
+    PrintLabel "Packages Compilation"
+    ApplyToMods $HIERARCHY(PACKAGES) "CompileMod" FILES
+
+    PrintLabel "Components compilation"
+    ApplyToComponents $HIERARCHY(COMPONENTS) "CompileMod" FILES SV_LIBS
+
+    PrintLabel "Modules compilation"
+    ApplyToMods $HIERARCHY(MOD) "CompileMod" FILES
+
+    PrintLabel "Testbench Compilation"
+    #ApplyToMods $HIERARCHY(TOP_LEVEL) "CompileMod" FILES
+    ApplyToMods $HIERARCHY(TB_FILE) "CompileMod" FILES
+
+    if {$SIM_FLAGS(BATCH_COMPILE)} {
+        nb_batch_finish
+    }
+
+    # Makefile generate hack
+    if {$SIM_FLAGS(MAKEFILE_GEN)} {
+        # This causes sometimes recompiling of all sources
+        exec vmake > $SIM_FLAGS(MAKEFILE_NAME)
+    } else {
+        # So generate empty makefile as default
+        exec echo "all:" > $SIM_FLAGS(MAKEFILE_NAME)
+    }
+
+    # Compile SV libs
+    set SIM_FLAGS(SV_LIBS_FLAGS) [nb_vsim_compile_svlibs $SV_LIBS]
+}
+
+proc nb_sim_sanitize_vars {user_sim_flags sim_flags hierarchy VARS} {
+    upvar 1 $user_sim_flags USER_SIM_FLAGS $sim_flags SIM_FLAGS $hierarchy HIERARCHY
+    foreach i $VARS {
+        upvar 1 $i $i
+    }
+
+    lappend PACKAGES
+    lappend COMPONENTS
+    lappend MOD
+    lappend TB_FILE
+
+    set HIERARCHY(PACKAGES) $PACKAGES
+    set HIERARCHY(COMPONENTS) $COMPONENTS
+    set HIERARCHY(MOD) $MOD
+    set HIERARCHY(TB_FILE) $TB_FILE
+
+    set SIM_FLAGS(SIM_LIB) {}
+    set SIM_FLAGS(EXTRA_VFLAGS) {}
+    set SIM_FLAGS(VSIM_MANUAL_START) false
+    set SIM_FLAGS(MAKEFILE_NAME) Makefile
+    set SIM_FLAGS(BATCH_COMPILE) true
+
+    # Copy all variables from user SIM_FLAGS variable
+    foreach i [array names USER_SIM_FLAGS] {
+        set SIM_FLAGS($i) $USER_SIM_FLAGS($i)
+    }
+
+    if {[info exists CODE_COVERAGE] && $CODE_COVERAGE} {
+        set SIM_FLAGS(CODE_COVERAGE) true
+    } elseif {![info exists SIM_FLAGS(CODE_COVERAGE)]} {
+        set SIM_FLAGS(CODE_COVERAGE) false
+    }
+
+    if {![info exists SIM_FLAGS(CODE_COVERAGE_SV)]} {
+        set SIM_FLAGS(CODE_COVERAGE_SV) false
+    }
+
+    if {[info exists MAKEFILE_GEN] && $MAKEFILE_GEN} {
+        set SIM_FLAGS(MAKEFILE_GEN) true
+    } elseif {![info exists SIM_FLAGS(MAKEFILE_GEN)]} {
+        set SIM_FLAGS(MAKEFILE_GEN) false
+    }
+
+    if {[info exists SIM_MODULE]} {
+        set SIM_FLAGS(SIM_MODULE) $SIM_MODULE
+    } else {
+        set SIM_FLAGS(SIM_MODULE) "testbench"
+    }
+
+    if {[info exists VLOG_SV_FLAGS]} {
+        set SIM_FLAGS(VLOG_SV_FLAGS) $VLOG_SV_FLAGS
+    } else {
+        set SIM_FLAGS(VLOG_SV_FLAGS) ""
+    }
+
+    lappend SIM_FLAGS(SVLIB_FLAGS)
+    if {[info exists USER_SIM_FLAGS(SVLIB_FLAGS]} {
+        lappend SIM_FLAGS(SVLIB_FLAGS) {*}$USER_SIM_FLAGS(SVLIB_FLAGS)
+    }
+}
+
+proc nb_vsim_set_flags {vsim_flags sim_flags} {
+    upvar 1 $vsim_flags VSIM_FLAGS $sim_flags SIM_FLAGS
+
+    set VSIM_FLAGS "-t 1ps -lib work -permit_unmatched_virtual_intf"
+    if {$SIM_FLAGS(CODE_COVERAGE)} {
+        lappend VSIM_FLAGS "-coverage"
+    }
+    foreach i [uniqueList $SIM_FLAGS(SIM_LIB)] {
+        lappend VSIM_FLAGS -L $i
+    }
+    lappend VSIM_FLAGS {*}$SIM_FLAGS(EXTRA_VFLAGS)
+    lappend VSIM_FLAGS {*}$SIM_FLAGS(SV_LIBS_FLAGS)
+    lappend VSIM_FLAGS {*}[uniqueList $SIM_FLAGS(SIM_MODULE)]
+}
+
+proc nb_sim_main {{user_sim_flags SIM_FLAGS}} {
+    # Let VSIM_FLAGS variable to be accessible in top level stack frame for running vsim by hand
+    upvar 1 VSIM_FLAGS VSIM_FLAGS
+
+    # Collect variables in user .fdo script and upvar them
+    lappend VARS CODE_COVERAGE MAKEFILE_GEN SIM_MODULE VLOG_SV_FLAGS
+    lappend VARS PACKAGES COMPONENTS TB_FILE MOD
+    upvar 1 $user_sim_flags USER_SIM_FLAGS
+    foreach i $VARS {
+        upvar 1 $i $i
+    }
+
+    # SIM_FLAGS variable will be visible in NDKBuild namespace
+    namespace eval NDKBuild {variable SIM_FLAGS}
+    namespace upvar NDKBuild SIM_FLAGS SIM_FLAGS
+
+    nb_sim_sanitize_vars USER_SIM_FLAGS SIM_FLAGS HIERARCHY $VARS
+
+    nb_vsim_prepare
+    nb_vsim_compile_project SIM_FLAGS HIERARCHY
+    nb_vsim_set_flags VSIM_FLAGS SIM_FLAGS
+
+    # Run simulation
+    if {!$SIM_FLAGS(VSIM_MANUAL_START)} {
+        vsim {*}$VSIM_FLAGS
+    }
+}
+
+nb_sim_main

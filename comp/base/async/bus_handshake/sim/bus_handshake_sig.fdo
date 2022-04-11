@@ -1,0 +1,27 @@
+# bus_handshake_sig.fdo : Include file with signals
+# Copyright (C) 2014 CESNET
+# Author: Jakub Cabal <jakubcabal@gmail.com>
+#
+# SPDX-License-Identifier: BSD-3-Clause
+#
+# $Id$
+#
+
+# Paths
+set TB_PATH            "/testbench"
+set bus_handshake_PATH "/testbench/uut"
+
+# include signals
+source      "signals.fdo"
+
+exec make
+view wave
+delete wave *
+
+blk_bus_handshake_ifc
+blk_bus_handshake_internals
+
+restart -f
+run 2000 ns
+
+wave zoomrange 0 1000ns

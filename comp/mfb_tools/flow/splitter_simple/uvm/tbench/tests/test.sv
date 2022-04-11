@@ -1,0 +1,86 @@
+//-- test.sv: Verification test 
+//-- Copyright (C) 2021 CESNET z. s. p. o.
+//-- Author(s): Tomáš Beneš <xbenes55@stud.fit.vutbr.cz>
+
+//-- SPDX-License-Identifier: BSD-3-Clause 
+
+
+class ex_test extends uvm_test;
+    `uvm_component_utils(test::ex_test);
+
+    splitter_simple_env::env_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH, SPLITTER_OUTPUTS) m_env;
+    int unsigned timeout;    
+    // ------------------------------------------------------------------------
+    // Functions
+    function new(string name, uvm_component parent);
+        super.new(name, parent);
+    endfunction
+
+    function void build_phase(uvm_phase phase);
+        m_env = splitter_simple_env::env_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH, SPLITTER_OUTPUTS)::type_id::create("m_env", this);
+    endfunction
+
+    virtual task tx_seq(uvm_phase phase, int unsigned index);
+        mfb::sequence_lib_tx#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) mfb_seq;
+
+        mfb_seq = mfb::sequence_lib_tx#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::type_id::create("mfb_eth_tx_seq", this);
+        mfb_seq.init_sequence();
+        mfb_seq.min_random_count = 100;
+        mfb_seq.max_random_count = 200;
+
+        //RUN ETH
+        forever begin
+            mfb_seq.randomize();
+            mfb_seq.start(m_env.m_env_tx[index].m_sequencer);
+        end
+    endtask
+
+    // ------------------------------------------------------------------------
+    // Create environment and Run sequences o their sequencers
+    virtual task run_phase(uvm_phase phase);
+        virt_seq #(META_WIDTH, SPLITTER_OUTPUTS) m_vseq;
+      
+        phase.raise_objection(this);
+        
+        //RUN MFB TX SEQUENCE
+        for (int unsigned it = 0; it < SPLITTER_OUTPUTS; it++) begin
+            fork
+                automatic int unsigned index = it;
+                tx_seq(phase, index);
+            join_none
+        end
+
+        //RUN MFB RX SEQUENCE
+        m_vseq = virt_seq #(META_WIDTH, SPLITTER_OUTPUTS)::type_id::create("m_vseq"); 
+        m_vseq.randomize();
+        m_vseq.start(m_env.m_env_rx.m_sequencer);
+
+
+        timeout = 1;
+        fork
+            test_wait_timeout(10);
+            test_wait_result();
+        join_any;
+
+        phase.drop_objection(this);
+
+    endtask
+
+    task test_wait_timeout(int unsigned time_length);
+        #(time_length*1us);
+    endtask
+
+    task test_wait_result();
+        do begin
+            #(600ns);
+        end while (m_env.sc.used() != 0);
+        timeout = 0;
+    endtask
+
+    function void report_phase(uvm_phase phase);
+        `uvm_info(this.get_full_name(), {"\n\tTEST : ", this.get_type_name(), " END\n"}, UVM_NONE);
+        if (timeout) begin
+            `uvm_error(this.get_full_name(), "\n\t===================================================\n\tTIMEOUT SOME PACKET STUCK IN DESIGN\n\t===================================================\n\n");
+        end
+    endfunction
+endclass

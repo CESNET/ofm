@@ -1,0 +1,25 @@
+# transformer_sig.fdo : Include file with signals
+# Copyright (C) 2020 CESNET
+# Author: Tomas Hak <xhakto01@stud.fit.vutbr.cz>
+
+# SPDX-License-Identifier: BSD-3-Clause
+set MFB_TRANSFORMER_PATH "/testbench/uut_i"
+
+exec make
+view wave
+delete wave *
+
+source "signals.fdo"
+
+add wave -divider "Clock/Reset"
+blk_MFB_TRANSFORMER_CR
+
+add wave -divider "Input interface"
+blk_MFB_TRANSFORMER_RX
+
+add wave -divider "Output interface"
+blk_MFB_TRANSFORMER_TX
+
+restart -f
+run 2 us
+wave zoomrange 0 400ns

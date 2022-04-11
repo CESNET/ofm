@@ -1,0 +1,31 @@
+/*
+ * ver_pcie_tools.jenkins: Jenkins configuration script
+ * Copyright (C) 2021 CESNET z. s. p. o.
+ * Author(s): Jakub Cabal <cabal@cesnet.cz>
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
+// Clean previous builds
+library 'liberouter'
+cleanBuilds()
+
+// /////////////////////////////////////////////////////////////////////////////
+// BASIC-VERIFICATION
+// /////////////////////////////////////////////////////////////////////////////
+// Add engines for automatic Jenkins verifications into the following list
+// FORMAT:
+//  [ 'name',                    'path_to_ver',                                     'script.fdo'   ],
+def COMPONENTS_VER = [\
+    ['MAC_SEG_RX',  'comp/nic/mac_lite/rx_mac_lite/comp/adapters/mac_seg/uvm',  'top_level.fdo'],\
+    ['MAC_SEG_TX',  'comp/nic/mac_lite/tx_mac_lite/comp/adapters/mac_seg/uvm',  'top_level.fdo'],\
+]
+// /////////////////////////////////////////////////////////////////////////////
+
+// Run component verifications using common script
+node('preklad') {
+    // fetch sources from GIT
+    checkout scm
+    def common_run = load "tests/jenkins/common.jenkins"
+    common_run.commonPrekladVerRun(COMPONENTS_VER)
+}

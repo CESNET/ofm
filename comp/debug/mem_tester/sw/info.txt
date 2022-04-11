@@ -1,0 +1,7 @@
+Stratix 10 DX FPGA Development Kit (DK-DEV-1SDX-P)
+
+DDR4 DIMM CH0 (same for CH1)
+- Data width = 72b (16b ECC)
+- Frequency = 1066.667 MHz
+- Capacity = 8 GB
+- 4 bank groups with 4 banks each
