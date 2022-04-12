@@ -43,7 +43,6 @@ class monitor_byte_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WI
 
     virtual function void write(mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) tr);
         if (reset_sync.has_been_reset()) begin
-            data.delete();
             hi_tr = null;
         end
 
@@ -58,6 +57,9 @@ class monitor_byte_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WI
                     int unsigned pos_end   = tr.EOF[it] ? tr.EOF_POS[it] : (REGION_SIZE*BLOCK_SIZE-1);
 
                     if (tr.SOF[it]) begin
+                        if (hi_tr != null) begin
+                            `uvm_error(this.get_full_name(), "\n\tSOF has been set before previous frame haven't correctly ended. EOF haven't been set on end of packet")
+                        end
                         hi_tr = byte_array::sequence_item::type_id::create("hi_tr");
                         data.delete();
                     end
@@ -69,8 +71,13 @@ class monitor_byte_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WI
                     end
 
                     if (tr.EOF[it] && hi_tr != null) begin
-                        hi_tr.data = data;
-                        analysis_port.write(hi_tr);
+                        if (hi_tr == null) begin
+                            `uvm_error(this.get_full_name(), "\n\tEOF has been set before frame heve been started. SOF havent been set before this EOF")
+                        end else begin
+                            hi_tr.data = data;
+                            analysis_port.write(hi_tr);
+                            hi_tr = null;
+                        end
                     end
                 end
             end
@@ -89,7 +96,6 @@ class monitor_logic_vector #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_
     int meta_behav;
 
     local logic_vector::sequence_item#(META_WIDTH) hi_tr;
-
 
     function new (string name, uvm_component parent);
         super.new(name, parent);
