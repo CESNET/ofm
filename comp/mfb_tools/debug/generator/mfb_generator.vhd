@@ -97,10 +97,14 @@ architecture BEHAV of MFB_GENERATOR is
     signal meta                 : slv_array_t(REGIONS-1 downto 0)(CHANNELS_WIDTH+LENGTH_WIDTH-1 downto 0);
     signal data                 : slv_array_t(REGIONS-1 downto 0)(REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
 
-    signal free_cnt             : unsigned(ITEM_WIDTH-1 downto 0);
-    signal data_block_arr       : slv_array_t(REGIONS*REGION_SIZE*BLOCK_SIZE-1 downto 0)(ITEM_WIDTH-1 downto 0);
-    signal data_block_arr_ser   : std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
-    signal data_region_arr      : slv_array_t(REGIONS-1 downto 0)(REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
+    signal free_cnt             : unsigned(16-1 downto 0);
+    signal eth_hdr_128b         : std_logic_vector(128-1 downto 0);
+    signal sof_pos_arr          : slv_array_t(REGIONS-1 downto 0)(max(1, log2(REGION_SIZE))-1 downto 0);
+    signal sof_index            : u_array_t(REGIONS-1 downto 0)(max(1, log2(REGIONS*REGION_SIZE))-1 downto 0);
+    signal data_word_plus       : slv_array_t(2*REGIONS*REGION_SIZE-1 downto 0)(BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
+    signal data_word_plus_reg   : slv_array_t(REGIONS*REGION_SIZE-1 downto 0)(BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
+    signal data_word            : slv_array_t(REGIONS*REGION_SIZE-1 downto 0)(BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
+    signal data_word_ser        : std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
 
 begin
 
@@ -295,23 +299,46 @@ begin
         if (rising_edge(CLK)) then
             if (RST = '1') then
                 free_cnt <= (others => '0');
-            else
+            elsif (dst_rdy = '1') then
                 free_cnt <= free_cnt + 1;
             end if;
         end if;
     end process;
 
-    data_block_arr <= (others => std_logic_vector(free_cnt));
-    data_block_arr_ser <= slv_array_ser(data_block_arr,REGIONS*REGION_SIZE*BLOCK_SIZE,ITEM_WIDTH);
-    data_region_arr    <= slv_array_deser(data_block_arr_ser,REGIONS,REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH);
+    eth_hdr_128b <= std_logic_vector(free_cnt) & ETHER_TYPE & CTRL_MAC_SRC & CTRL_MAC_DST;
+    sof_pos_arr <= slv_array_deser(sof_pos,REGIONS,max(1, log2(REGION_SIZE)));
 
-    zero_sig <= (others => '0');
+    process (all)
+    begin
+        for b in 0 to REGIONS*REGION_SIZE-1 loop
+            data_word_plus(b) <= data_word_plus_reg(b);
+        end loop;
+        for c in REGIONS*REGION_SIZE to 2*REGIONS*REGION_SIZE-1 loop
+            data_word_plus(c) <= (others => '0');
+        end loop;
+        for i in 0 to REGIONS-1 loop
+            sof_index(i) <= resize(unsigned(sof_pos_arr(i)),log2(REGIONS*REGION_SIZE)) + i*REGION_SIZE;
+            if (sof(i) = '1') then
+                data_word_plus(to_integer(sof_index(i))) <= eth_hdr_128b(64-1 downto 0);
+                data_word_plus(to_integer(sof_index(i))+1) <= eth_hdr_128b(128-1 downto 64);
+            end if;
+        end loop;
+    end process;
 
-    region_data_with_sof <= zero_sig & X"DEADCAFE" & ETHER_TYPE & CTRL_MAC_SRC & CTRL_MAC_DST;
+    process (CLK)
+    begin
+        if (rising_edge(CLK)) then
+            if (dst_rdy = '1') then
+                data_word_plus_reg <= data_word_plus(2*REGIONS*REGION_SIZE-1 downto REGIONS*REGION_SIZE);
+            end if;
+        end if;
+    end process;
+
+    data_word <= data_word_plus(REGIONS*REGION_SIZE-1 downto 0);
+    data_word_ser <= slv_array_ser(data_word,REGIONS*REGION_SIZE,BLOCK_SIZE*ITEM_WIDTH);
 
     data_meta_g : for i in 0 to REGIONS-1 generate
-        data(i)     <= region_data_with_sof when sof(i) = '1' else data_region_arr(i);
-        meta(i)     <= channel(i) & CTRL_LENGTH;
+        meta(i) <= channel(i) & CTRL_LENGTH;
     end generate;
 
     process (CLK)
@@ -337,7 +364,7 @@ begin
         CLK        => CLK,
         RESET      => RST,
 
-        RX_DATA    => slv_array_ser(data, REGIONS, REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH),
+        RX_DATA    => data_word_ser,
         RX_META    => slv_array_ser(meta, REGIONS, (CHANNELS_WIDTH+LENGTH_WIDTH)),
         RX_SOF_POS => sof_pos,
         RX_EOF_POS => eof_pos,
