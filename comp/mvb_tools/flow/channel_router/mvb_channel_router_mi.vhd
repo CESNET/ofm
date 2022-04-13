@@ -71,7 +71,6 @@ use work.type_pack.all;
 --   ch_out = ch_cnt + ch_min;
 --   ch_cnt = (ch_cnt + incr) and (ch_diff);
 --
-
 entity MVB_CHANNEL_ROUTER_MI is
     generic(
         -- MVB parameters: number of items in word
