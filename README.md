@@ -7,7 +7,8 @@ This repository is primarily used within the Network Development Kit (NDK). But 
 ## Documentation
 
 We use a documentation system based on the [Sphinx tool](https://www.sphinx-doc.org), which compiles complete documentation from source files in the [reStructuredText](https://docutils.sourceforge.io/rst.html) format. The documentation automatically build with each contribution to the devel branch and is available online here:
-- [**OFM documentation (private GitLab)**](https://ndk.gitlab.liberouter.org:5051/ofm/).
+- [**OFM documentation (public GitHub Pages - built from main branch)**](https://cesnet.github.io/ofm/).
+- [**OFM documentation (private GitLab Pages - built from devel branch)**](https://ndk.gitlab.liberouter.org:5051/ofm/).
 
 ### How to manually build documentation
 
