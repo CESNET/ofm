@@ -120,6 +120,7 @@ class env_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extends
     mfb::sequencer #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) m_sequencer;
     uvm_analysis_port #(byte_array::sequence_item)                analysis_port_data;
     uvm_analysis_port #(logic_vector::sequence_item#(META_WIDTH)) analysis_port_meta;
+    reset::sync_cbs                                               reset_sync;
 
     // ------------------------------------------------------------------------
     // Definition of agents 
@@ -166,6 +167,8 @@ class env_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extends
         m_byte_array_agent = byte_array::agent::type_id::create("m_byte_array_agent", this);
         m_logic_vector_agent = logic_vector::agent#(META_WIDTH)::type_id::create("m_logic_vector_agent", this);
         m_mfb_agent        = mfb::agent_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::type_id::create("m_mfb_agent", this);
+
+        reset_sync = new();
     endfunction
 
     // Connect agent's ports with ports from scoreboard.
@@ -177,11 +180,13 @@ class env_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extends
         $cast(m_byte_arr_monitor, m_byte_array_agent.m_monitor);
         m_mfb_agent.analysis_port.connect(m_byte_arr_monitor.analysis_export);
         analysis_port_data = m_byte_array_agent.m_monitor.analysis_port;
+        reset_sync.push_back(m_byte_arr_monitor.reset_sync);
 
         $cast(m_logic_vector_monitor, m_logic_vector_agent.m_monitor);
         m_mfb_agent.analysis_port.connect(m_logic_vector_monitor.analysis_export);
         m_logic_vector_monitor.meta_behav = m_config.meta_behav;
         analysis_port_meta = m_logic_vector_agent.m_monitor.analysis_port;
+        reset_sync.push_back(m_logic_vector_monitor.reset_sync);
 
         m_sequencer = m_mfb_agent.m_sequencer;
     endfunction
