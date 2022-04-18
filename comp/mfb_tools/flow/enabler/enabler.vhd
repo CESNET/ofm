@@ -65,7 +65,7 @@ architecture FULL of MFB_ENABLER is
    constant SOF_POS_SIZE    : natural := max(1,log2(REGION_SIZE));
    constant EOF_POS_SIZE    : natural := max(1,log2(REGION_SIZE*BLOCK_SIZE));
 
-   type fsm_states is (st_stop, st_wait_for_sof, st_run, st_wait_for_eof);
+   type fsm_states is (st_stop, st_run);
 
    signal s_some_sof             : std_logic;
    signal s_some_eof             : std_logic;
@@ -168,38 +168,18 @@ begin
       case (s_curr_state) is
          -- st_stop
          when st_stop =>
-            if (TX_ENABLE = '1' and s_some_sof = '0') then
-               s_next_state <= st_wait_for_sof;
-            elsif (TX_ENABLE = '1' and s_some_sof = '1') then
+            if (TX_ENABLE = '1' and s_some_sof = '1') then
                s_next_state <= st_run;
             else
                s_next_state <= st_stop;
-            end if;
-
-         -- st_wait_for_sof
-         when st_wait_for_sof =>
-            if (s_some_sof = '1') then
-               s_next_state <= st_run;
-            else
-               s_next_state <= st_wait_for_sof;
             end if;
 
          -- st_run
          when st_run =>
-            if (TX_ENABLE = '0' and s_some_eof = '0') then
-               s_next_state <= st_wait_for_eof;
-            elsif (TX_ENABLE = '0' and s_some_eof = '1') then
+            if (TX_ENABLE = '0' and s_some_eof = '1') then
                s_next_state <= st_stop;
             else
                s_next_state <= st_run;
-            end if;
-
-         -- st_wait_for_eof
-         when st_wait_for_eof =>
-            if (s_some_eof = '1') then
-               s_next_state <= st_stop;
-            else
-               s_next_state <= st_wait_for_eof;
             end if;
 
          -- other states
@@ -226,30 +206,12 @@ begin
                s_valid <= RX_SRC_RDY;
             end if;
 
-         -- st_wait_for_sof
-         when st_wait_for_sof =>
-            s_sof_fsm <= RX_SOF;
-            s_eof_fsm <= s_eof_masked;
-            s_valid   <= '0';
-            if (s_some_sof = '1') then
-               s_valid <= RX_SRC_RDY;
-            end if;
-
          -- st_run
          when st_run =>
             s_sof_fsm <= RX_SOF;
             s_eof_fsm <= RX_EOF;
             s_valid   <= RX_SRC_RDY;
             if (TX_ENABLE = '0' and s_some_eof = '1') then
-               s_sof_fsm <= s_sof_masked;
-            end if;
-
-         -- st_wait_for_eof
-         when st_wait_for_eof =>
-            s_sof_fsm <= RX_SOF;
-            s_eof_fsm <= RX_EOF;
-            s_valid   <= RX_SRC_RDY;
-            if (s_some_eof = '1') then
                s_sof_fsm <= s_sof_masked;
             end if;
 
