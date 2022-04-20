@@ -1,7 +1,7 @@
 /*
  * file       : reg2bus_convert.sv
  * Copyright (C) 2021 CESNET z. s. p. o.
- * description: this classes convert reg transaction to mi transactions 
+ * description: this classes convert reg transaction to mi transactions
  * date       : 2021
  * author     : Radek Iša <isa@cesnet.cz>
  *
@@ -20,9 +20,19 @@ class reg2bus_frontdoor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_re
     endfunction
 
     task body();
+        semaphore sem;
         mi::sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)  request;
         uvm_reg      target;
 
+        ////////////
+        // get semaphore
+        if (uvm_config_db#(semaphore)::get(sequencer, "", "sem", sem) == 0) begin
+            sem = new(1);
+            uvm_config_db#(semaphore)::set(sequencer, "", "sem", sem);
+        end
+
+        ////////////
+        // send request
         if (rw_info.element_kind != UVM_REG) begin
              `uvm_fatal(p_sequencer.get_full_name(), "\n\tThis sequence support only access to UVM_REG");
         end
@@ -32,6 +42,7 @@ class reg2bus_frontdoor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_re
         end
 
         request = mi::sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)::type_id::create("request");
+        sem.get();
         do begin
             start_item(request);
             request.randomize();
@@ -50,6 +61,17 @@ class reg2bus_frontdoor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_re
             end
             finish_item(request);
         end while(request.ardy != 1'b1);
+        sem.put();
+
+
+        if (request.rd == 1'b1) begin
+            mi::sequence_item_respons #(DATA_WIDTH) rsp;
+            uvm_sequence_item                       rsp_get;
+
+            get_response(rsp_get);
+            $cast(rsp, rsp_get);
+            rw_info.value[0] = rsp.drd;
+        end
     endtask
 endclass
 

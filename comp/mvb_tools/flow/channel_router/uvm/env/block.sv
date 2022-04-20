@@ -19,7 +19,7 @@ class regmodel #(INPUT_CHANNELS, OUTPUT_CHANNELS, RESET_TYPE) extends uvm_reg_bl
 
     function void set_frontdoor(uvm_reg_frontdoor frontdoor);
         for(int unsigned it = 0; it < INPUT_CHANNELS; it++) begin
-            channel[it].set_frontdoor(frontdoor);
+            channel[it].set_frontdoor(frontdoor.clone());
         end
     endfunction
 

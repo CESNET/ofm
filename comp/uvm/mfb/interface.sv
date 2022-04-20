@@ -5,7 +5,7 @@
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
 // Definition of mfb interface.
-interface mfb_if #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) (input logic CLK, RESET);
+interface mfb_if #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) (input logic CLK);
     initial VALID_PARAMETERS : assert(REGIONS > 0 && REGION_SIZE > 0 && BLOCK_SIZE > 0 && ITEM_WIDTH > 0);
 
     // ------------------------------------------------------------------------
@@ -31,18 +31,18 @@ interface mfb_if #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) (in
     // Driver clocking block
     clocking driver_rx_cb @(posedge CLK);
         output DATA, META, SOF_POS, EOF_POS, SOF, EOF, SRC_RDY;
-        input DST_RDY, RESET;
+        input DST_RDY;
     endclocking
 
     clocking driver_tx_cb @(posedge CLK);
-        input DATA, META, SOF_POS, EOF_POS, SOF, EOF, SRC_RDY, RESET;
+        input DATA, META, SOF_POS, EOF_POS, SOF, EOF, SRC_RDY;
         output DST_RDY;
     endclocking
 
     // ------------------------------------------------------------------------
     // Monitor point of view (clocking block)
     clocking monitor_cb @(posedge CLK);
-        input DATA, META, SOF_POS, EOF_POS, SOF, EOF, SRC_RDY, DST_RDY, RESET;
+        input DATA, META, SOF_POS, EOF_POS, SOF, EOF, SRC_RDY, DST_RDY;
     endclocking
 
     // ------------------------------------------------------------------------
