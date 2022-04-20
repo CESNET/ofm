@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
 */
 
-class sequencer_slave #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_sequencer #(sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH));
+class sequencer_slave #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_sequencer #(sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH), sequence_item_respons #(DATA_WIDTH));
     `uvm_component_param_utils(mi::sequencer_slave #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
 
     function new(string name = "sequencer", uvm_component parent);

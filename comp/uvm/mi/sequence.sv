@@ -11,9 +11,12 @@
 //////////////////////////////////////////////////////////////////////////////////
 // SLAVE SEQUENCE
 //////////////////////////////////////////////////////////////////////////////////
-class sequence_slave#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_sequence#(sequence_item_request#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH));
+class sequence_slave#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_sequence#(sequence_item_request#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH), sequence_item_respons #(DATA_WIDTH));
     `uvm_object_param_utils(mi::sequence_slave #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
     `uvm_declare_p_sequencer(sequencer_slave #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH ));
+
+    int unsigned rd_count;
+    int unsigned rsp_count;
 
     int unsigned transactions_min = 10;
     int unsigned transactions_max = 200;
@@ -29,14 +32,27 @@ class sequence_slave#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_sequen
 
     task body;
         req = sequence_item_request#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)::type_id::create("req");
+        rd_count  = 0;
+        rsp_count = 0;
+        use_response_handler(1);
         repeat(transactions) begin
             start_item(req);
             if(req.randomize() == 0) begin
                 `uvm_fatal(p_sequencer.get_full_name(), "sequence_slave cannot randomize");
             end
             finish_item(req);
+
+            if (req.rd == 1) begin
+                rd_count++;
+            end
         end
+
+        wait (rd_count == rsp_count);
     endtask
+
+    function void response_handler(uvm_sequence_item response);
+        rsp_count++;
+    endfunction
 endclass
 
 class sequence_slave_same_addr#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends sequence_slave#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH);
@@ -50,6 +66,9 @@ class sequence_slave_same_addr#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends 
 
     task body;
         req = sequence_item_request#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)::type_id::create("req");
+        rd_count  = 0;
+        rsp_count = 0;
+        use_response_handler(1);
 
         repeat(transactions) begin
             start_item(req);
@@ -57,7 +76,13 @@ class sequence_slave_same_addr#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends 
                 `uvm_fatal(p_sequencer.get_full_name(), "sequence_slave_same_addr cannot randomize");
             end
             finish_item(req);
+
+            if (req.rd == 1) begin
+                rd_count++;
+            end
         end
+
+        wait (rd_count == rsp_count);
     endtask
 endclass
 
@@ -80,6 +105,9 @@ class sequence_slave_incr_addr#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends 
 
     task body;
         req = sequence_item_request#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)::type_id::create("req");
+        rd_count  = 0;
+        rsp_count = 0;
+        use_response_handler(1);
 
         repeat(transactions) begin
             start_item(req);
@@ -95,7 +123,13 @@ class sequence_slave_incr_addr#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends 
                 rand_addr -= increment_size*DATA_WIDTH/8;
             end
             finish_item(req);
+
+            if (req.rd == 1) begin
+                rd_count++;
+            end
         end
+
+        wait (rd_count == rsp_count);
     endtask
 endclass
 
@@ -116,6 +150,9 @@ class sequence_slave_burst#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends sequ
 
     task body;
         req = sequence_item_request#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)::type_id::create("req");
+        rd_count  = 0;
+        rsp_count = 0;
+        use_response_handler(1);
 
         repeat(transactions) begin
             int unsigned rand_req;
@@ -129,7 +166,13 @@ class sequence_slave_burst#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends sequ
                 `uvm_fatal(p_sequencer.get_full_name(), "sequence_slave_burst cannot randomize");
             end
             finish_item(req);
+
+            if (req.rd == 1) begin
+                rd_count++;
+            end
         end
+
+        wait (rd_count == rsp_count);
     endtask
 endclass
 
