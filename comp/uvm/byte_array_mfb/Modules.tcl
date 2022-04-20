@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 set COMPONENTS [ list \
+    [list "RESET"           "$OFM_PATH/comp/uvm/reset"          "FULL"]\
     [list "BYTE_ARRAY"      "$OFM_PATH/comp/uvm/byte_array"     "FULL"]\
     [list "LOGIC_VECTOR"    "$OFM_PATH/comp/uvm/logic_vector"   "FULL"]\
     [list "MFB"             "$OFM_PATH/comp/uvm/mfb"            "FULL"]\
