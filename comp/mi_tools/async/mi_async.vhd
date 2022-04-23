@@ -98,7 +98,7 @@ architecture FULL of MI_ASYNC is
     signal m_drd_rdy      : std_logic;
 
     signal drdy_req       : std_logic;
-    signal drdy_status    : unsigned(log2(FIFO_ITEMS+1)-1 downto 0);
+    signal drdy_status    : unsigned(log2(FIFO_ITEMS+1)-1 downto 0) := (others => '0');
     signal drdy_rdy       : std_logic;
 
     type reset_state is (NO_RESET, MASTER_RESET, SLAVE_RESET, COMP_RESET);
