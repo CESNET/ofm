@@ -18,7 +18,7 @@ module testbench;
     logic CLK = 0;
    	reset_if                           reset(CLK);
  	intel_mac_seg_if #(test::SEGMENTS) rx_mac_seg(CLK);
-	mfb_if #(test::REGIONS, test::REGION_SIZE, 8, 8, 1) tx_mac_seg(CLK, reset.RESET);
+	mfb_if #(test::REGIONS, test::REGION_SIZE, 8, 8, 1) tx_mac_seg(CLK);
 
     always #(test::CLK_PERIOD/2) CLK = ~CLK;
     assign rx_mac_seg.READY = 1'b1;
