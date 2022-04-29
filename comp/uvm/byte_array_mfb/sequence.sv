@@ -205,6 +205,9 @@ class sequence_simple_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WI
 
                     gen.SOF[it]     = 1'b1;
                     gen.SOF_POS[it] = index;
+                    if (hl_sqr.meta_behav == 1 && META_WIDTH != 0) begin
+                        gen.META[it] = meta.data;
+                    end 
                     state_packet = state_packet_data;
                 end
 
@@ -219,7 +222,7 @@ class sequence_simple_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WI
 
                     // End of packet
                     if (data.data.size() <= data_index) begin
-                        if (META_WIDTH != 0) begin
+                        if (hl_sqr.meta_behav == 2 && META_WIDTH != 0) begin
                             gen.META[it] = meta.data;
                         end else begin
                             gen.META[it] = 'x;
@@ -286,6 +289,9 @@ class sequence_full_speed_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, MET
 
                     gen.SOF[it]     = 1'b1;
                     gen.SOF_POS[it] = index;
+                    if (hl_sqr.meta_behav == 1 && META_WIDTH != 0) begin
+                        gen.META[it] = meta.data;
+                    end 
                     state_packet = state_packet_data;
                 end
 
@@ -300,7 +306,7 @@ class sequence_full_speed_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, MET
 
                     // End of packet
                     if (data.data.size() <= data_index) begin
-                        if (META_WIDTH != 0) begin
+                        if (hl_sqr.meta_behav == 2 && META_WIDTH != 0) begin
                             gen.META[it] = meta.data;
                         end else begin
                             gen.META[it] = 'x;
