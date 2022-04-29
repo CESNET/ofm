@@ -43,14 +43,14 @@ entity RX_MAC_LITE_ADAPTER_MAC_SEG is
         OUT_MFB_SRC_RDY  : out std_logic;
         OUT_LINK_UP      : out std_logic;
         -- OUTPUT STATISTICS INTERFACE (about 2 clock cycles earlier than the word reaches output)
-        OUT_DISCARDED_PKTS  : out std_logic_vector(max(1, log2(SEGMENTS/2))-1 downto 0); -- number of discarded packets in the current word
-        OUT_DISCARDED_BYTES : out std_logic_vector(max(1, log2(2*SEGMENTS*8))-1 downto 0) -- 2*SEGMENTS*8 = bytes of 2 words.. --> 59 (s0) + 56 (s7) + 40 (s12) + 24 (s15) = 179 (for 16 segments)
+        OUT_DISCARDED_PKTS  : out std_logic_vector(log2(SEGMENTS/2)-1 downto 0); -- number of discarded packets in the current word
+        OUT_DISCARDED_BYTES : out std_logic_vector(max(6, log2(2*SEGMENTS*8))-1 downto 0) -- 2*SEGMENTS*8 = bytes of 2 words
     );
 end entity;
 
 architecture FULL of RX_MAC_LITE_ADAPTER_MAC_SEG is
 
-    constant MAX_FRAME_LENGTH : natural := 16383; --todo overfull
+    constant MAX_FRAME_LENGTH : natural := 16383;
 
     signal in_mac_boundary           : std_logic_vector(SEGMENTS-1 downto 0);
     signal in_mac_sop                : std_logic_vector(SEGMENTS-1 downto 0);
@@ -92,7 +92,7 @@ architecture FULL of RX_MAC_LITE_ADAPTER_MAC_SEG is
 
     -- statistic signals
     signal discarded_pkts            : std_logic_vector(log2(SEGMENTS+1)-1 downto 0);
-    signal discarded_bytes           : std_logic_vector(max(1, log2(2*SEGMENTS*8))-1 downto 0);
+    signal discarded_bytes           : std_logic_vector(max(6, log2(2*SEGMENTS*8))-1 downto 0);
 
     signal reg2_undersized           : std_logic_vector(SEGMENTS-1 downto 0);
     signal first_pkt_undersized      : std_logic;
@@ -272,12 +272,12 @@ begin
     );
 
     process(all)
-        variable dis_bytes_count : unsigned(max(1, log2(2*SEGMENTS*8))-1 downto 0);
+        variable dis_bytes_count : unsigned(max(6, log2(2*SEGMENTS*8))-1 downto 0);
     begin
         dis_bytes_count := (others => '0');
         for s in 0 to SEGMENTS-1 loop
             if (tx_mfb_lng_undersized(s) = '1') then
-                dis_bytes_count := dis_bytes_count + tx_mfb_lng_bytes_count(s)(log2(59)-1 downto 0);
+                dis_bytes_count := dis_bytes_count + tx_mfb_lng_bytes_count(s)(6-1 downto 0);
             end if;
         end loop;
         discarded_bytes <= std_logic_vector(dis_bytes_count);
@@ -290,7 +290,7 @@ begin
                 OUT_DISCARDED_PKTS  <= (others => '0');
                 OUT_DISCARDED_BYTES <= (others => '0');
             else
-                OUT_DISCARDED_PKTS  <= discarded_pkts(max(1, log2(SEGMENTS/2))-1 downto 0);
+                OUT_DISCARDED_PKTS  <= discarded_pkts(log2(SEGMENTS/2)-1 downto 0);
                 OUT_DISCARDED_BYTES <= discarded_bytes;
             end if;
         end if;
