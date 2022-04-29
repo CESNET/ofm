@@ -11,12 +11,12 @@ class config_item extends uvm_object;
     uvm_active_passive_enum active;
     string interface_name;
     int unsigned meta_behav;    // Metadata behaviour -----------------------------
-                                // 0 meen that metadata are not generating 
                                 // 1 meen that metadata are paird with SOF pozition
                                 // 2 meen that metadata are paird with EOF pozition
+                                // DONT CARE IF META_WIDTH = 0
                                 // ------------------------------------------------
 
-    // ------------------------------------------------------------------------ 
+    // ------------------------------------------------------------------------
     // functions
     function new (string name = "");
         super.new(name);

@@ -87,6 +87,7 @@ class env_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extends
         if (m_config.active == UVM_ACTIVE) begin
             m_sequencer.m_data = m_byte_array_agent.m_sequencer;
             m_sequencer.m_meta = m_logic_vector_agent.m_sequencer;
+            m_sequencer.meta_behav = m_config.meta_behav;
             reset_sync.push_back(m_mfb_agent.m_sequencer.reset_sync);
             uvm_config_db #(sequencer_rx #(META_WIDTH))::set(this, "m_mfb_agent.m_sequencer", "hl_sqr", m_sequencer);
         end
