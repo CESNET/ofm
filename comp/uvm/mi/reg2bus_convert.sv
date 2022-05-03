@@ -12,6 +12,9 @@ class reg2bus_frontdoor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_re
     `uvm_object_param_utils(mi::reg2bus_frontdoor#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
     `uvm_declare_p_sequencer(mi::sequencer_slave#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
 
+    semaphore sem;
+    uvm_reg   target;
+
     function new(string name = "reg2bus_frontdoor");
         super.new(name);
     endfunction
@@ -19,10 +22,69 @@ class reg2bus_frontdoor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_re
     function void configure(uvm_reg_map map);
     endfunction
 
-    task body();
-        semaphore sem;
+    task read_frame(logic [ADDR_WIDTH-1:0] addr);
         mi::sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)  request;
-        uvm_reg      target;
+        request = mi::sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)::type_id::create("request");
+
+        sem.get();
+        do begin
+            start_item(request);
+            request.randomize();
+
+            request.addr = addr;
+            request.be   = '1;
+            request.dwr  = 'x;
+            request.wr   = 0;
+            request.rd   = 1'b1;
+            finish_item(request);
+        end while(request.ardy != 1'b1);
+        sem.put();
+    endtask
+
+    task get_responses(int unsigned repetition, output bit [`UVM_REG_DATA_WIDTH-1:0] out[]);
+        logic [DATA_WIDTH-1:0] data[];
+        byte unsigned data_arr[];
+
+        data = new[repetition];
+        for (int unsigned it = 0; it < repetition; it++) begin
+            mi::sequence_item_respons #(DATA_WIDTH) rsp;
+            uvm_sequence_item                       rsp_get;
+
+            get_response(rsp_get);
+            $cast(rsp, rsp_get);
+            data[it] = rsp.drd;
+        end
+
+        data_arr = {<<DATA_WIDTH{ {<<byte{data}}}};
+
+        out = new[(data_arr.size()+`UVM_REG_DATA_WIDTH -1)/`UVM_REG_DATA_WIDTH];
+        for (int unsigned it = 0; it < data_arr.size(); it++) begin
+            out[it/(`UVM_REG_DATA_WIDTH/8)][(it%(`UVM_REG_DATA_WIDTH/8) + 1)*8-1 -: 8] = data_arr[it];
+        end
+    endtask
+
+
+    task send_frame(logic [DATA_WIDTH-1:0] data, logic [ADDR_WIDTH-1:0] addr);
+        mi::sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)  request;
+        request = mi::sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)::type_id::create("request");
+
+        sem.get();
+        do begin
+            start_item(request);
+            request.randomize();
+            request.addr = addr;
+            request.be   = '1;
+            request.dwr  = data;
+            request.wr   = 1'b1;
+            request.rd   = 1'b0;
+            finish_item(request);
+        end while(request.ardy != 1'b1);
+        sem.put();
+    endtask
+
+    task body();
+        int unsigned repetition;
+        logic [ADDR_WIDTH-1:0] addr;
 
         ////////////
         // get semaphore
@@ -41,36 +103,21 @@ class reg2bus_frontdoor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_re
             `uvm_fatal(p_sequencer.get_full_name(), "\n\tCannot get register");
         end
 
-        request = mi::sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)::type_id::create("request");
-        sem.get();
-        do begin
-            start_item(request);
-            request.randomize();
-
-            request.addr = target.get_address();
-            request.be   = '1;
-            request.wr   = 0;
-            request.rd   = 0;
-
-            if (rw_info.kind == UVM_WRITE) begin
-                request.dwr  = rw_info.value[0]; // 64 bit width
-                request.wr   = 1'b1;
-            end else if (rw_info.kind == UVM_READ) begin
-                request.dwr  = 'x;
-                request.rd   = 1'b1;
+        repetition = (target.get_n_bits()+DATA_WIDTH-1) /DATA_WIDTH;
+        addr = target.get_address();
+        //WRITE DATA
+        if (rw_info.kind == UVM_WRITE) begin
+            logic [DATA_WIDTH-1:0] data_array[];
+            data_array = {<<DATA_WIDTH{rw_info.value}};
+            for(int unsigned it = 0; it < repetition; it++) begin
+                send_frame(data_array[it], addr + (DATA_WIDTH/8)*it);
             end
-            finish_item(request);
-        end while(request.ardy != 1'b1);
-        sem.put();
-
-
-        if (request.rd == 1'b1) begin
-            mi::sequence_item_respons #(DATA_WIDTH) rsp;
-            uvm_sequence_item                       rsp_get;
-
-            get_response(rsp_get);
-            $cast(rsp, rsp_get);
-            rw_info.value[0] = rsp.drd;
+        //READ DATA
+        end else if (rw_info.kind == UVM_READ) begin
+            for(int unsigned it = 0; it < repetition; it++) begin
+                read_frame(addr + (DATA_WIDTH/8)*it);
+            end
+            get_responses(repetition, rw_info.value);
         end
     endtask
 endclass
