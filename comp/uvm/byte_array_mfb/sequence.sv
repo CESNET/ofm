@@ -215,7 +215,7 @@ class sequence_simple_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WI
                     int unsigned loop_end   = BLOCK_SIZE < (data.data.size() - data_index) ? BLOCK_SIZE : (data.data.size() - data_index);
                     gen.SRC_RDY = 1;
 
-                    for (int unsigned jt = index*REGION_SIZE; jt < (index*REGION_SIZE + loop_end); jt++) begin
+                    for (int unsigned jt = index*BLOCK_SIZE; jt < (index*BLOCK_SIZE + loop_end); jt++) begin
                         gen.ITEMS[it][(jt+1)*ITEM_WIDTH-1 -: ITEM_WIDTH] = data.data[data_index];
                         data_index++;
                     end
@@ -228,7 +228,7 @@ class sequence_simple_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WI
                             gen.META[it] = 'x;
                         end
                         gen.EOF[it]     = 1'b1;
-                        gen.EOF_POS[it] = index*REGION_SIZE + loop_end-1;
+                        gen.EOF_POS[it] = index*BLOCK_SIZE + loop_end-1;
                         data = null;
                         hl_sqr.m_data.item_done();
                         if (META_WIDTH != 0) begin
@@ -299,7 +299,7 @@ class sequence_full_speed_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, MET
                     int unsigned loop_end   = BLOCK_SIZE < (data.data.size() - data_index) ? BLOCK_SIZE : (data.data.size() - data_index);
                     gen.SRC_RDY = 1;
 
-                    for (int unsigned jt = index*REGION_SIZE; jt < (index*REGION_SIZE + loop_end); jt++) begin
+                    for (int unsigned jt = index*BLOCK_SIZE; jt < (index*BLOCK_SIZE + loop_end); jt++) begin
                         gen.ITEMS[it][(jt+1)*ITEM_WIDTH-1 -: ITEM_WIDTH] = data.data[data_index];
                         data_index++;
                     end
@@ -312,7 +312,7 @@ class sequence_full_speed_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, MET
                             gen.META[it] = 'x;
                         end
                         gen.EOF[it]     = 1'b1;
-                        gen.EOF_POS[it] = index*REGION_SIZE + loop_end-1;
+                        gen.EOF_POS[it] = index*BLOCK_SIZE + loop_end-1;
                         data = null;
                         hl_sqr.m_data.item_done();
                         if (META_WIDTH != 0) begin
