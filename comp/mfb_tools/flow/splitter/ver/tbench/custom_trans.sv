@@ -18,7 +18,7 @@ import sv_common_pkg::*;
 class CustomTransaction #(HDR_SIZE = 4, ITEM_WIDTH = 8) extends Transaction;
 
    rand bit [HDR_SIZE*ITEM_WIDTH-1 : 0] hdr;
-   rand bit switch = 0;
+   rand int switch = 0;
    rand bit payload = 0;
    rand bit [ITEM_WIDTH-1 : 0] data[];
    int dataSizeMax = 256;
@@ -27,9 +27,9 @@ class CustomTransaction #(HDR_SIZE = 4, ITEM_WIDTH = 8) extends Transaction;
    int payloadRate = 80;
 
    constraint c1 {
-      switch dist {1 := switchRate, 0 := (100-switchRate)};
       payload dist {1 := payloadRate, 0 := (100-payloadRate)};
       data.size inside {[dataSizeMin:dataSizeMax]};
+      switch inside {[0:SPLITTER_OUTPUTS-1]};
    };
 
    virtual function void display(string prefix = "");
@@ -39,7 +39,7 @@ class CustomTransaction #(HDR_SIZE = 4, ITEM_WIDTH = 8) extends Transaction;
          $write("---------------------------------------------------------\n");
       end
       $write("HDR: 0x%h\n", hdr);
-      $write("SWITCH: %1b\n", switch);
+      $write("SWITCH: %1d\n", switch);
       $write("PAYLOAD: %1b\n", payload);
       if (payload) begin
          $write("DATA SIZE: %1d ITEMS, DATA:", data.size);

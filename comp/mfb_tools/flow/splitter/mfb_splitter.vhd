@@ -26,6 +26,7 @@ entity MFB_SPLITTER is
    generic (
       -- TX MVB characteristics
       MVB_ITEMS       : integer := 2;  -- number of headers
+      MVB_META_WIDTH  : integer := 2;  -- width of each MVB meta item
       -- TX MFB characteristics
       MFB_REGIONS     : integer := 2;  -- number of regions in word
       MFB_REG_SIZE    : integer := 1;  -- number of blocks in region
@@ -56,10 +57,11 @@ entity MFB_SPLITTER is
       -- RX interface
       ---------------------------------------------------------------------------
 
-      RX_MVB_HDR      : in  std_logic_vector(MVB_ITEMS*HDR_WIDTH-1 downto 0);
-      RX_MVB_SWITCH   : in  std_logic_vector(MVB_ITEMS          -1 downto 0); -- output select for each header
-      RX_MVB_PAYLOAD  : in  std_logic_vector(MVB_ITEMS          -1 downto 0); -- header contains payload in MFB
-      RX_MVB_VLD      : in  std_logic_vector(MVB_ITEMS          -1 downto 0);
+      RX_MVB_HDR      : in  std_logic_vector(MVB_ITEMS*HDR_WIDTH     -1 downto 0);
+      RX_MVB_META     : in  std_logic_vector(MVB_ITEMS*MVB_META_WIDTH-1 downto 0) := (others => '0');
+      RX_MVB_SWITCH   : in  std_logic_vector(MVB_ITEMS               -1 downto 0); -- output select for each header
+      RX_MVB_PAYLOAD  : in  std_logic_vector(MVB_ITEMS               -1 downto 0); -- header contains payload in MFB
+      RX_MVB_VLD      : in  std_logic_vector(MVB_ITEMS               -1 downto 0);
       RX_MVB_SRC_RDY  : in  std_logic;
       RX_MVB_DST_RDY  : out std_logic;
 
@@ -76,7 +78,9 @@ entity MFB_SPLITTER is
       ---------------------------------------------------------------------------
 
       TX0_MVB_HDR     : out std_logic_vector(MVB_ITEMS*HDR_WIDTH-1 downto 0);
-      TX0_MVB_VLD     : out std_logic_vector(MVB_ITEMS          -1 downto 0);
+      TX0_MVB_META    : out std_logic_vector(MVB_ITEMS*MVB_META_WIDTH-1 downto 0);
+      TX0_MVB_PAYLOAD : out std_logic_vector(MVB_ITEMS-1 downto 0);
+      TX0_MVB_VLD     : out std_logic_vector(MVB_ITEMS-1 downto 0);
       TX0_MVB_SRC_RDY : out std_logic;
       TX0_MVB_DST_RDY : in  std_logic;
 
@@ -93,7 +97,9 @@ entity MFB_SPLITTER is
       ---------------------------------------------------------------------------
 
       TX1_MVB_HDR     : out std_logic_vector(MVB_ITEMS*HDR_WIDTH-1 downto 0);
-      TX1_MVB_VLD     : out std_logic_vector(MVB_ITEMS          -1 downto 0);
+      TX1_MVB_META    : out std_logic_vector(MVB_ITEMS*MVB_META_WIDTH-1 downto 0);
+      TX1_MVB_PAYLOAD : out std_logic_vector(MVB_ITEMS-1 downto 0);
+      TX1_MVB_VLD     : out std_logic_vector(MVB_ITEMS-1 downto 0);
       TX1_MVB_SRC_RDY : out std_logic;
       TX1_MVB_DST_RDY : in  std_logic;
 
@@ -158,10 +164,10 @@ architecture full of MFB_SPLITTER is
    signal tx_mfb_reg_out_dst_rdy : std_logic_vector(2-1 downto 0);
 
    -- MVB output fifox signals
-   signal mvb_out_fifox_di    : slv_array_t(1 downto 0)(MVB_ITEMS*HDR_WIDTH+MVB_ITEMS-1 downto 0);
+   signal mvb_out_fifox_di    : slv_array_t(1 downto 0)(MVB_ITEMS*(HDR_WIDTH+MVB_META_WIDTH+2)-1 downto 0);
    signal mvb_out_fifox_wr    : std_logic_vector(1 downto 0);
    signal mvb_out_fifox_full  : std_logic_vector(1 downto 0);
-   signal mvb_out_fifox_do    : slv_array_t(1 downto 0)(MVB_ITEMS*HDR_WIDTH+MVB_ITEMS-1 downto 0);
+   signal mvb_out_fifox_do    : slv_array_t(1 downto 0)(MVB_ITEMS*(HDR_WIDTH+MVB_META_WIDTH+2)-1 downto 0);
    signal mvb_out_fifox_rd    : std_logic_vector(1 downto 0);
    signal mvb_out_fifox_empty : std_logic_vector(1 downto 0);
 
@@ -302,17 +308,21 @@ begin
    mvb_out_fifox_wr(0) <= '1' when mvb_out_fifox_full(1)='0' and RX_MVB_SRC_RDY='1' and (or RX0_MVB_VLD)='1' and switch_fifoxm_full='0' else '0';
    mvb_out_fifox_wr(1) <= '1' when mvb_out_fifox_full(0)='0' and RX_MVB_SRC_RDY='1' and (or RX1_MVB_VLD)='1' and switch_fifoxm_full='0' else '0';
 
-   mvb_out_fifox_di(0)((MVB_ITEMS*HDR_WIDTH)+MVB_ITEMS-1 downto MVB_ITEMS) <= RX_MVB_HDR;
+   mvb_out_fifox_di(0)(MVB_ITEMS*(HDR_WIDTH+MVB_META_WIDTH+2)-1 downto MVB_ITEMS*(MVB_META_WIDTH+2)) <= RX_MVB_HDR;
+   mvb_out_fifox_di(0)(MVB_ITEMS*(MVB_META_WIDTH+2)-1 downto MVB_ITEMS*2) <= RX_MVB_META;
+   mvb_out_fifox_di(0)(MVB_ITEMS*2-1 downto MVB_ITEMS) <= RX_MVB_PAYLOAD;
    mvb_out_fifox_di(0)(MVB_ITEMS-1 downto 0) <= RX0_MVB_VLD;
-   mvb_out_fifox_di(1)((MVB_ITEMS*HDR_WIDTH)+MVB_ITEMS-1 downto MVB_ITEMS) <= RX_MVB_HDR;
+   mvb_out_fifox_di(1)(MVB_ITEMS*(HDR_WIDTH+MVB_META_WIDTH+2)-1 downto MVB_ITEMS*(MVB_META_WIDTH+2)) <= RX_MVB_HDR;
+   mvb_out_fifox_di(1)(MVB_ITEMS*(MVB_META_WIDTH+2)-1 downto MVB_ITEMS*2) <= RX_MVB_META;
+   mvb_out_fifox_di(1)(MVB_ITEMS*2-1 downto MVB_ITEMS) <= RX_MVB_PAYLOAD;
    mvb_out_fifox_di(1)(MVB_ITEMS-1 downto 0) <= RX1_MVB_VLD;
 
    mvb_out_fifox_ge : for i in 0 to 1 generate
       mvb_out_fifox_i : entity work.FIFOX
       generic map (
-         DATA_WIDTH => (MVB_ITEMS*HDR_WIDTH)+MVB_ITEMS,
-         ITEMS      => MVB_OUTPUT_FIFO_SIZE           ,
-         RAM_TYPE   => "AUTO"                         ,
+         DATA_WIDTH => MVB_ITEMS*(HDR_WIDTH+MVB_META_WIDTH+2),
+         ITEMS      => MVB_OUTPUT_FIFO_SIZE,
+         RAM_TYPE   => "AUTO",
          DEVICE     => DEVICE
       )
       port map (
@@ -330,12 +340,16 @@ begin
    end generate;
 
    -- TX MVB
-   TX0_MVB_HDR         <= mvb_out_fifox_do(0)((MVB_ITEMS*HDR_WIDTH)+MVB_ITEMS-1 downto MVB_ITEMS);
+   TX0_MVB_HDR         <= mvb_out_fifox_do(0)(MVB_ITEMS*(HDR_WIDTH+MVB_META_WIDTH+2)-1 downto MVB_ITEMS*(MVB_META_WIDTH+2));
+   TX0_MVB_META        <= mvb_out_fifox_do(0)(MVB_ITEMS*(MVB_META_WIDTH+2)-1 downto MVB_ITEMS*2);
+   TX0_MVB_PAYLOAD     <= mvb_out_fifox_do(0)(MVB_ITEMS*2-1 downto MVB_ITEMS);
    TX0_MVB_VLD         <= mvb_out_fifox_do(0)(MVB_ITEMS-1 downto 0);
    TX0_MVB_SRC_RDY     <= not mvb_out_fifox_empty(0);
    mvb_out_fifox_rd(0) <= TX0_MVB_DST_RDY;
 
-   TX1_MVB_HDR         <= mvb_out_fifox_do(1)((MVB_ITEMS*HDR_WIDTH)+MVB_ITEMS-1 downto MVB_ITEMS);
+   TX1_MVB_HDR         <= mvb_out_fifox_do(1)(MVB_ITEMS*(HDR_WIDTH+MVB_META_WIDTH+2)-1 downto MVB_ITEMS*(MVB_META_WIDTH+2));
+   TX1_MVB_META        <= mvb_out_fifox_do(1)(MVB_ITEMS*(MVB_META_WIDTH+2)-1 downto MVB_ITEMS*2);
+   TX1_MVB_PAYLOAD     <= mvb_out_fifox_do(1)(MVB_ITEMS*2-1 downto MVB_ITEMS);
    TX1_MVB_VLD         <= mvb_out_fifox_do(1)(MVB_ITEMS-1 downto 0);
    TX1_MVB_SRC_RDY     <= not mvb_out_fifox_empty(1);
    mvb_out_fifox_rd(1) <= TX1_MVB_DST_RDY;
