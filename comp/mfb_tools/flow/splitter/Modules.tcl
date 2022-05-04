@@ -4,17 +4,15 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-
-
 set FIFOXM_BASE         "$OFM_PATH/comp/base/fifo/fifox_multi" 
 set FIFOX_BASE          "$OFM_PATH/comp/base/fifo/fifox" 
 set SPLITTER_BASE       "$OFM_PATH/comp/mfb_tools/flow/splitter_simple" 
 
 set PKG_BASE            "$OFM_PATH/comp/base/pkg"
 
-set PACKAGES "$PACKAGES $PKG_BASE/math_pack.vhd"
-set PACKAGES "$PACKAGES $PKG_BASE/type_pack.vhd"
-set PACKAGES "$PACKAGES $PKG_BASE/dma_bus_pack.vhd"
+lappend PACKAGES "$PKG_BASE/math_pack.vhd"
+lappend PACKAGES "$PKG_BASE/type_pack.vhd"
+lappend PACKAGES "$PKG_BASE/dma_bus_pack.vhd"
 
 # list of sub-components
 set COMPONENTS [ list \
@@ -24,4 +22,5 @@ set COMPONENTS [ list \
 ]
 
 # entity and architecture
-set MOD "$MOD $ENTITY_BASE/mfb_splitter.vhd"
+lappend MOD "$ENTITY_BASE/mfb_splitter.vhd"
+lappend MOD "$ENTITY_BASE/mfb_splitter_gen.vhd"

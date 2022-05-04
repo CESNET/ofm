@@ -18,12 +18,10 @@ import sv_mfb_pkg::*;
 import test_pkg::*;
 
 class ScoreboardGeneratorCbs;
-   TransactionTable #(1) sc_table0;
-   TransactionTable #(1) sc_table1;
+   TransactionTable #(1) sc_table[SPLITTER_OUTPUTS-1:0];
 
-   function new (TransactionTable #(1) st0, TransactionTable #(1) st1);
-      sc_table0 = st0;
-      sc_table1 = st1;
+   function new (TransactionTable #(1) st[SPLITTER_OUTPUTS-1:0]);
+      sc_table = st;
    endfunction
 
    virtual task post_gen(Transaction transaction);
@@ -34,59 +32,43 @@ class ScoreboardGeneratorCbs;
          $write("POST GEN: TRANSACTION FOR PORT %d!\n", custom_tr.switch);
          custom_tr.display();
       end
-      if (custom_tr.switch) begin
-         sc_table1.add(transaction);
-      end else begin
-         sc_table0.add(transaction);
-      end
+      sc_table[custom_tr.switch].add(transaction);
    endtask
 endclass
 
-class ScoreboardMonitorCbs extends MonitorCbs;
-   mailbox mfbMbx0;
-   mailbox mvbMbx0;
-   mailbox mfbMbx1;
-   mailbox mvbMbx1;
+class ScoreboardMvbMonitorCbs extends MonitorCbs;
+   mailbox mvbMbx;
     
-   function new (mailbox fMbx0, mailbox vMbx0, mailbox fMbx1, mailbox vMbx1);
-      mfbMbx0 = fMbx0;
-      mvbMbx0 = vMbx0;
-      mfbMbx1 = fMbx1;
-      mvbMbx1 = vMbx1;
+   function new (mailbox fMbx);
+      mvbMbx = fMbx;
    endfunction
     
    virtual task post_rx(Transaction transaction, string inst);
       MvbTransaction #(HDR_WIDTH) mvb_tr;
+
+      if (FULL_PRINT) begin
+         $write("Monitor MVB: GET TRANSACTION!\n");
+      end
+      $cast(mvb_tr,transaction);
+      mvbMbx.put(mvb_tr);
+   endtask
+endclass
+
+class ScoreboardMfbMonitorCbs extends MonitorCbs;
+   mailbox mfbMbx;
+    
+   function new (mailbox fMbx);
+      mfbMbx = fMbx;
+   endfunction
+    
+   virtual task post_rx(Transaction transaction, string inst);
       MfbTransaction #(MFB_ITEM_WIDTH) mfb_tr;
 
-      if (inst == "Monitor MVB0") begin
-         if (FULL_PRINT) begin
-            $write("Monitor MVB0: GET TRANSACTION!\n");
-         end
-         $cast(mvb_tr,transaction);
-         mvbMbx0.put(mvb_tr);
-      end else if (inst == "Monitor MVB1") begin
-         if (FULL_PRINT) begin
-            $write("Monitor MVB1: GET TRANSACTION!\n");
-         end
-         $cast(mvb_tr,transaction);
-         mvbMbx1.put(mvb_tr);
-      end else if (inst == "Monitor MFB0") begin
-         if (FULL_PRINT) begin
-            $write("Monitor MFB0: GET TRANSACTION!\n");
-         end
-         $cast(mfb_tr,transaction);
-         mfbMbx0.put(mfb_tr);
-      end else if (inst == "Monitor MFB1") begin
-         if (FULL_PRINT) begin
-            $write("Monitor MFB1: GET TRANSACTION!\n");
-         end
-         $cast(mfb_tr,transaction);
-         mfbMbx1.put(mfb_tr);
-      end else begin
-         $write("VERIFICATION FAILED! BUG IN MONITOR CONFIGURATION?\n");
-         $stop;
+      if (FULL_PRINT) begin
+         $write("Monitor MFB: GET TRANSACTION!\n");
       end
+      $cast(mfb_tr,transaction);
+      mfbMbx.put(mfb_tr);
    endtask
 endclass
 
@@ -174,42 +156,42 @@ class Checker;
 endclass
 
 class Scoreboard;
-   TransactionTable #(1)  scoreTable0;
-   TransactionTable #(1)  scoreTable1;
-   ScoreboardGeneratorCbs generatorCbs;
-   ScoreboardMonitorCbs   monitorCbs;
-   Checker                dutCheck0;
-   Checker                dutCheck1;
-   mailbox                mvbMbx0;
-   mailbox                mfbMbx0;
-   mailbox                mvbMbx1;
-   mailbox                mfbMbx1;
+   TransactionTable #(1)   scoreTable[SPLITTER_OUTPUTS-1:0];
+   ScoreboardGeneratorCbs  generatorCbs;
+   ScoreboardMvbMonitorCbs mvbMonitorCbs[SPLITTER_OUTPUTS-1:0];
+   ScoreboardMfbMonitorCbs mfbMonitorCbs[SPLITTER_OUTPUTS-1:0];
+   Checker                 dutCheck[SPLITTER_OUTPUTS-1:0];
+   mailbox                 mvbMbx[SPLITTER_OUTPUTS-1:0];
+   mailbox                 mfbMbx[SPLITTER_OUTPUTS-1:0];
 
    function new ();
-      scoreTable0  = new;
-      scoreTable1  = new;
-      mvbMbx0      = new;
-      mfbMbx0      = new;
-      mvbMbx1      = new;
-      mfbMbx1      = new;
-      generatorCbs = new(scoreTable0,scoreTable1);
-      monitorCbs   = new(mfbMbx0,mvbMbx0,mfbMbx1,mvbMbx1);
-      dutCheck0    = new(scoreTable0,mfbMbx0,mvbMbx0,0);
-      dutCheck1    = new(scoreTable1,mfbMbx1,mvbMbx1,1);
+      for (int i = 0; i < SPLITTER_OUTPUTS; i++) begin
+         scoreTable[i]    = new;
+         mvbMbx[i]        = new;
+         mfbMbx[i]        = new;
+         mvbMonitorCbs[i] = new(mvbMbx[i]);
+         mfbMonitorCbs[i] = new(mfbMbx[i]);
+         dutCheck[i]      = new(scoreTable[i],mfbMbx[i],mvbMbx[i],i);
+      end
+      generatorCbs = new(scoreTable);
+      
    endfunction
 
    task setEnabled();
-      dutCheck0.setEnabled();
-      dutCheck1.setEnabled();
+      for (int i = 0; i < SPLITTER_OUTPUTS; i++) begin
+         dutCheck[i].setEnabled();
+      end
    endtask
         
    task setDisabled();
-      dutCheck0.setDisabled();
-      dutCheck1.setDisabled();
+      for (int i = 0; i < SPLITTER_OUTPUTS; i++) begin
+         dutCheck[i].setDisabled();
+      end
    endtask
 
    task display();
-      scoreTable0.display();
-      scoreTable1.display();
+      for (int i = 0; i < SPLITTER_OUTPUTS; i++) begin
+         scoreTable[i].display();
+      end
    endtask
 endclass

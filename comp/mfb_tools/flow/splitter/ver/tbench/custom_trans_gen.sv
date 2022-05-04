@@ -74,11 +74,11 @@ class CustomTransGenerator;
          // Create MVB header packet
          mvb_tr = new();
          // add header
-         mvb_tr.data[MVB_ITEM_WIDTH-1:2] = custom_tr.hdr;
-         // Add payload
-         mvb_tr.data[1] = custom_tr.payload;
+         mvb_tr.data[MVB_ITEM_WIDTH-1:SWITCH_WIDTH+1] = custom_tr.hdr;
          // Add switch
-         mvb_tr.data[0] = custom_tr.switch;
+         mvb_tr.data[SWITCH_WIDTH:1] = custom_tr.switch;
+         // Add payload
+         mvb_tr.data[0] = custom_tr.payload;
          // send mvb transaction to driver
          mvbTransMbx.put(mvb_tr);
 

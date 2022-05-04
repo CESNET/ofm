@@ -22,10 +22,8 @@ module testbench;
 
    iMvbRx #(MFB_REGIONS,MVB_ITEM_WIDTH) RX_MVB(CLK, RESET);
    iMfbRx #(MFB_REGIONS,MFB_REGION_SIZE,MFB_BLOCK_SIZE,MFB_ITEM_WIDTH) RX_MFB(CLK, RESET);
-   iMvbTx #(MFB_REGIONS,HDR_WIDTH) TX0_MVB(CLK, RESET);
-   iMvbTx #(MFB_REGIONS,HDR_WIDTH) TX1_MVB(CLK, RESET);
-   iMfbTx #(MFB_REGIONS,MFB_REGION_SIZE,MFB_BLOCK_SIZE,MFB_ITEM_WIDTH) TX0_MFB(CLK, RESET);
-   iMfbTx #(MFB_REGIONS,MFB_REGION_SIZE,MFB_BLOCK_SIZE,MFB_ITEM_WIDTH) TX1_MFB(CLK, RESET);
+   iMvbTx #(MFB_REGIONS,HDR_WIDTH) TX_MVB[SPLITTER_OUTPUTS-1:0](CLK, RESET);
+   iMfbTx #(MFB_REGIONS,MFB_REGION_SIZE,MFB_BLOCK_SIZE,MFB_ITEM_WIDTH) TX_MFB[SPLITTER_OUTPUTS-1:0](CLK, RESET);
 
    always #(CLK_PERIOD/2) CLK = ~CLK;
 
@@ -34,25 +32,19 @@ module testbench;
       .RESET   (RESET),
       .RX_MVB  (RX_MVB),
       .RX_MFB  (RX_MFB),
-      .TX0_MVB (TX0_MVB),
-      .TX1_MVB (TX1_MVB),
-      .TX0_MFB (TX0_MFB),
-      .TX1_MFB (TX1_MFB)
+      .TX_MVB (TX_MVB),
+      .TX_MFB (TX_MFB)
    );
 
    TEST TEST_U (
-      .CLK     (CLK),
-      .RESET   (RESET),
-      .RX_MVB  (RX_MVB),
-      .RX_MFB  (RX_MFB),
-      .TX0_MVB (TX0_MVB),
-      .TX1_MVB (TX1_MVB),
-      .TX0_MFB (TX0_MFB),
-      .TX1_MFB (TX1_MFB),
-      .MO0_MVB (TX0_MVB),
-      .MO1_MVB (TX1_MVB),
-      .MO0_MFB (TX0_MFB),
-      .MO1_MFB (TX1_MFB)
+      .CLK    (CLK),
+      .RESET  (RESET),
+      .RX_MVB (RX_MVB),
+      .RX_MFB (RX_MFB),
+      .TX_MVB (TX_MVB),
+      .TX_MFB (TX_MFB),
+      .MO_MVB (TX_MVB),
+      .MO_MFB (TX_MFB)
    );
 
 endmodule
