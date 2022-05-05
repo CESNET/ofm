@@ -3,6 +3,10 @@
 # Author: Tomáš Beneš <xbenes55@stud.fit.vutbr.cz> 
 # SPDX-License-Identifier: BSD-3-Clause
 
-set MOD "$MOD $ENTITY_BASE/interface.sv"
-set MOD "$MOD $ENTITY_BASE/property.sv"
-set MOD "$MOD $ENTITY_BASE/pkg.sv"
+lappend COMPONENTS [list "RESET"        "$OFM_PATH/comp/uvm/reset"          "FULL"]
+lappend COMPONENTS [list "COMMON"       "$OFM_PATH/comp/uvm/common"         "FULL"]
+
+
+lappend MOD "$ENTITY_BASE/interface.sv"
+lappend MOD "$ENTITY_BASE/property.sv"
+lappend MOD "$ENTITY_BASE/pkg.sv"

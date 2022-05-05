@@ -215,7 +215,7 @@ class sequence_simple_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WI
                     int unsigned loop_end   = BLOCK_SIZE < (data.data.size() - data_index) ? BLOCK_SIZE : (data.data.size() - data_index);
                     gen.SRC_RDY = 1;
 
-                    for (int unsigned jt = index*REGION_SIZE; jt < (index*REGION_SIZE + loop_end); jt++) begin
+                    for (int unsigned jt = index*BLOCK_SIZE; jt < (index*BLOCK_SIZE + loop_end); jt++) begin
                         gen.ITEMS[it][(jt+1)*ITEM_WIDTH-1 -: ITEM_WIDTH] = data.data[data_index];
                         data_index++;
                     end
@@ -228,7 +228,7 @@ class sequence_simple_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WI
                             gen.META[it] = 'x;
                         end
                         gen.EOF[it]     = 1'b1;
-                        gen.EOF_POS[it] = index*REGION_SIZE + loop_end-1;
+                        gen.EOF_POS[it] = index*BLOCK_SIZE + loop_end-1;
                         data = null;
                         hl_sqr.m_data.item_done();
                         if (META_WIDTH != 0) begin
@@ -299,7 +299,7 @@ class sequence_full_speed_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, MET
                     int unsigned loop_end   = BLOCK_SIZE < (data.data.size() - data_index) ? BLOCK_SIZE : (data.data.size() - data_index);
                     gen.SRC_RDY = 1;
 
-                    for (int unsigned jt = index*REGION_SIZE; jt < (index*REGION_SIZE + loop_end); jt++) begin
+                    for (int unsigned jt = index*BLOCK_SIZE; jt < (index*BLOCK_SIZE + loop_end); jt++) begin
                         gen.ITEMS[it][(jt+1)*ITEM_WIDTH-1 -: ITEM_WIDTH] = data.data[data_index];
                         data_index++;
                     end
@@ -312,7 +312,7 @@ class sequence_full_speed_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, MET
                             gen.META[it] = 'x;
                         end
                         gen.EOF[it]     = 1'b1;
-                        gen.EOF_POS[it] = index*REGION_SIZE + loop_end-1;
+                        gen.EOF_POS[it] = index*BLOCK_SIZE + loop_end-1;
                         data = null;
                         hl_sqr.m_data.item_done();
                         if (META_WIDTH != 0) begin
@@ -376,61 +376,3 @@ class sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)
     endfunction
 endclass
 
-
-
-
-// This low level sequence define bus functionality 
-class sequence_simple_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extends uvm_sequence #(mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH));
-    `uvm_object_param_utils(byte_array_mfb_env::sequence_simple_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH))  
-    // ------------------------------------------------------------------------
-    // Variables
-    mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) req;
-    common::rand_rdy          rdy;
-
-    int unsigned max_transaction_count = 2048;
-    int unsigned min_transaction_count = 32;
-    rand int unsigned transaction_count;
-
-    constraint c1 {transaction_count inside {[min_transaction_count: max_transaction_count]};}
-
-    // ------------------------------------------------------------------------
-    // Constructor
-    function new(string name = "Simple sequence tx");
-        super.new(name);
-        rdy = common::rand_rdy_rand::new();
-    endfunction
-
-    // ------------------------------------------------------------------------
-    // Generates transactions
-    task body;
-        // Generate transaction_count transactions
-        req = mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::type_id::create("req");
-        repeat(transaction_count) begin
-            // Create a request for sequence item
-            start_item(req);
-            void'(rdy.randomize());
-            void'(req.randomize() with {SRC_RDY == rdy.m_value;});
-            finish_item(req);
-            get_response(rsp);
-        end
-    endtask
-endclass
-
-
-/////////////////////////////////////////////////////////////////////////
-// SEQUENCE LIBRARY TX
-class sequence_lib_tx#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extends uvm_sequence_library#(mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH));
-  `uvm_object_param_utils(byte_array_mfb_env::sequence_lib_tx#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH))
-  `uvm_sequence_library_utils(byte_array_mfb_env::sequence_lib_tx#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH))
-
-  function new(string name = "");
-    super.new(name);
-    init_sequence_library();
-  endfunction
-
-    // subclass can redefine and change run sequences
-    // can be useful in specific tests
-    virtual function void init_sequence();
-        this.add_sequence(byte_array_mfb_env::sequence_simple_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::get_type());
-    endfunction
-endclass

@@ -9,7 +9,7 @@
 */
 
 
-class sequence_tx #(REGIONS, REGION_SIZE) extends byte_array_mfb_env::sequence_simple_tx #(REGIONS, REGION_SIZE, 8, 8, 1);
+class sequence_tx #(REGIONS, REGION_SIZE) extends mfb::sequence_simple_tx #(REGIONS, REGION_SIZE, 8, 8, 1);
     `uvm_object_param_utils(mac_seq_rx_ver::sequence_tx #(REGIONS, REGION_SIZE))
 
     // ------------------------------------------------------------------------

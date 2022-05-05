@@ -17,8 +17,8 @@ module testbench;
    
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // Interfaces
-    mfb_if #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, $clog2(SPLITTER_OUTPUTS) + META_WIDTH) mfb_rx(CLK, RST);
-    mfb_if #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)                            mfb_tx[SPLITTER_OUTPUTS](CLK, RST);
+    mfb_if #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, $clog2(SPLITTER_OUTPUTS) + META_WIDTH) mfb_rx(CLK);
+    mfb_if #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)                            mfb_tx[SPLITTER_OUTPUTS](CLK);
 
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // Define clock period

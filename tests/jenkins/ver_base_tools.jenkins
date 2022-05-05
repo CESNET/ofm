@@ -25,6 +25,7 @@ def COMPONENTS_VER = [\
     ['FIFO2NFIFO',          'comp/base/buffers/top/ver/fifo2nfifo', 'top_level.fdo'],\
     ['CNT_MULTI_MEMX',      'comp/base/logic/cnt_multi_memx/ver',   'top_level.fdo'],\
     ['ASFIFOX',             'comp/base/fifo/asfifox/ver',           'top_level.fdo'],\
+    ['ASFIFOX UVM',         'comp/base/fifo/asfifox/uvm',           'top_level.fdo'],\
     ['ASYNC_BUS_HANDSHAKE', 'comp/base/async/bus_handshake/ver',    'top_level.fdo'],\
 ]
 // /////////////////////////////////////////////////////////////////////////////
