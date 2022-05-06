@@ -6,8 +6,8 @@
 
 // Environment for functional verification of encode.
 // This environment containts two mii agents.
-class env_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH, SPLITTER_OUTPUTS) extends uvm_env;
-    `uvm_component_param_utils(splitter_simple_env::env_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH, SPLITTER_OUTPUTS));
+class env #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH, SPLITTER_OUTPUTS, META_BEHAV) extends uvm_env;
+    `uvm_component_param_utils(splitter_simple_env::env #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH, SPLITTER_OUTPUTS, META_BEHAV));
 
     byte_array_mfb_env::env_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, $clog2(SPLITTER_OUTPUTS) +META_WIDTH) m_env_rx;
     byte_array_mfb_env::env_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) m_env_tx[SPLITTER_OUTPUTS];
@@ -15,7 +15,7 @@ class env_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH, SPLIT
     byte_array_mfb_env::config_item m_config_rx;
     byte_array_mfb_env::config_item m_config_tx[SPLITTER_OUTPUTS];
 
-    scoreboard #(META_WIDTH, SPLITTER_OUTPUTS) sc; 
+    scoreboard #(META_WIDTH, SPLITTER_OUTPUTS) sc;
 
     // Constructor of environment.
     function new(string name, uvm_component parent);

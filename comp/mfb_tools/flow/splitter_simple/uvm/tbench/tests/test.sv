@@ -8,7 +8,7 @@
 class ex_test extends uvm_test;
     `uvm_component_utils(test::ex_test);
 
-    splitter_simple_env::env_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH, SPLITTER_OUTPUTS) m_env;
+    splitter_simple_env::env #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH, SPLITTER_OUTPUTS, META_BEHAV) m_env;
     int unsigned timeout;    
     // ------------------------------------------------------------------------
     // Functions
@@ -17,7 +17,7 @@ class ex_test extends uvm_test;
     endfunction
 
     function void build_phase(uvm_phase phase);
-        m_env = splitter_simple_env::env_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH, SPLITTER_OUTPUTS)::type_id::create("m_env", this);
+        m_env = splitter_simple_env::env #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH, SPLITTER_OUTPUTS, META_BEHAV)::type_id::create("m_env", this);
     endfunction
 
     virtual task tx_seq(uvm_phase phase, int unsigned index);

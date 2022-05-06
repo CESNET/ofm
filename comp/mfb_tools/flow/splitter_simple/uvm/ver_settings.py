@@ -10,6 +10,7 @@ SETTINGS = {
         "BLOCK_SIZE"         : "8",
         "ITEM_WIDTH"         : "8",
         "TRANSACTION_COUNT"  : "10000",
+        "META_BEHAV"         : "1",
     },
     "pcie" : {
         "REGIONS"            : "2",
@@ -59,14 +60,22 @@ SETTINGS = {
     "outputs_5" : {
         "SPLITTER_OUTPUTS"   : "5",
     },
+    "meta_sop" : {
+        "META_BEHAV"         : "1",
+    },
+    "meta_eop" : {
+        "META_BEHAV"         : "2",
+    },
+
+
     "_combinations_" : (
     (), # Works the same as '("default",),' as the "default" is applied in every combination
-    ("region_comb_1", "outputs_2",),
-    ("region_comb_2", "outputs_5",),
-    ("region_comb_3",),
-    ("region_comb_4", "outputs_2",),
-    ("region_comb_5", "outputs_5",),
-    ("region_comb_6",),
-    ("pcie",),
+    ("region_comb_1", "outputs_2", "meta_sop",),
+    ("region_comb_2", "outputs_5", "meta_eop",),
+    ("region_comb_3", "meta_sop",),
+    ("region_comb_4", "outputs_2", "meta_eop",),
+    ("region_comb_5", "outputs_5", "meta_sop",),
+    ("region_comb_6", "meta_eop",),
+    ("pcie", "meta_sop",),
     ),
 }
