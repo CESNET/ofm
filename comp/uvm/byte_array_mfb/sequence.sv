@@ -224,10 +224,7 @@ class sequence_simple_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WI
                     if (data.data.size() <= data_index) begin
                         if (hl_sqr.meta_behav == 2 && META_WIDTH != 0) begin
                             gen.META[it] = meta.data;
-                        end else begin
-                            gen.META[it] = 'x;
-                        end
-                        gen.EOF[it]     = 1'b1;
+                        end                        gen.EOF[it]     = 1'b1;
                         gen.EOF_POS[it] = index*BLOCK_SIZE + loop_end-1;
                         data = null;
                         hl_sqr.m_data.item_done();
@@ -308,8 +305,6 @@ class sequence_full_speed_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, MET
                     if (data.data.size() <= data_index) begin
                         if (hl_sqr.meta_behav == 2 && META_WIDTH != 0) begin
                             gen.META[it] = meta.data;
-                        end else begin
-                            gen.META[it] = 'x;
                         end
                         gen.EOF[it]     = 1'b1;
                         gen.EOF_POS[it] = index*BLOCK_SIZE + loop_end-1;

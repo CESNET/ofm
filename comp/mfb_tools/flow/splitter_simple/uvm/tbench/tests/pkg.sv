@@ -17,7 +17,8 @@ package test;
     parameter REGION_SIZE = 8;
     parameter BLOCK_SIZE  = 8;
     parameter ITEM_WIDTH  = 8;
-    parameter META_WIDTH  = SPLITTER_OUTPUTS + 128;   // Note that this width must be great enought to map all splitter outputs
+    parameter META_WIDTH  = 32; 
+    parameter META_BEHAV  = 1;
 
     parameter DEVICE = "AGILEX";
     parameter DRAIN_TIME = 20ns;

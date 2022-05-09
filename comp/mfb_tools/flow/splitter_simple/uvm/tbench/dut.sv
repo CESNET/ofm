@@ -31,20 +31,21 @@ module DUT (
     logic [REGIONS*$clog2(SPLITTER_OUTPUTS) -1:0] rx_mfb_sel;
 
     generate
-        
         for (genvar i = 0; i< SPLITTER_OUTPUTS; i++) begin
             assign mfb_tx[i].DATA    = tx_mfb_data[i];
-            assign mfb_tx[i].META    = tx_mfb_meta[i];  
+            assign mfb_tx[i].META    = tx_mfb_meta[i];
             assign mfb_tx[i].SOF     = tx_mfb_sof[i];
             assign mfb_tx[i].EOF     = tx_mfb_eof[i];
             assign mfb_tx[i].SOF_POS = tx_mfb_sof_pos[i];
             assign mfb_tx[i].EOF_POS = tx_mfb_eof_pos[i];
             assign mfb_tx[i].SRC_RDY = tx_mfb_src_rdy[i];
             assign tx_mfb_dst_rdy[i] = mfb_tx [i].DST_RDY;
+        end
 
-            assign rx_mfb_meta[(i+1)*META_WIDTH-1 -: META_WIDTH]                             = mfb_rx.META[i*(META_WIDTH +$clog2(SPLITTER_OUTPUTS)) +META_WIDTH -1 -: META_WIDTH];
-            assign rx_mfb_sel [(i+1)*$clog2(SPLITTER_OUTPUTS)-1 -: $clog2(SPLITTER_OUTPUTS)] = mfb_rx.META[i*(META_WIDTH +$clog2(SPLITTER_OUTPUTS)) +META_WIDTH +$clog2(SPLITTER_OUTPUTS) -1 -: $clog2(SPLITTER_OUTPUTS)];
-        end    
+        for (genvar it = 0; it < REGIONS; it++) begin
+            assign rx_mfb_meta[(it+1)*META_WIDTH-1 -: META_WIDTH]                             = mfb_rx.META[it*(META_WIDTH +$clog2(SPLITTER_OUTPUTS)) +META_WIDTH -1                           -: META_WIDTH];
+            assign rx_mfb_sel [(it+1)*$clog2(SPLITTER_OUTPUTS)-1 -: $clog2(SPLITTER_OUTPUTS)] = mfb_rx.META[it*(META_WIDTH +$clog2(SPLITTER_OUTPUTS)) +META_WIDTH +$clog2(SPLITTER_OUTPUTS) -1 -: $clog2(SPLITTER_OUTPUTS)];
+        end
     endgenerate
 
     MFB_SPLITTER_SIMPLE_GEN #(
