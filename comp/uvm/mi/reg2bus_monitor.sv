@@ -77,13 +77,13 @@ class reg2bus_monitor#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_monit
 
 
     function void write_rs(sequence_item_respons#(DATA_WIDTH) tr);
-            if (tr.drdy == 1 && rq_que.size() > 0) begin
-                reg2bus_class item = rq_que.pop_front();
+        if (tr.drdy == 1 && rq_que.size() > 0) begin
+            reg2bus_class item = rq_que.pop_front();
 
-                item.op.data   = tr.drd;
-                item.op.status = UVM_IS_OK;
-                analysis_port.write(item);
-            end
+            item.op.data   = tr.drd;
+            item.op.status = UVM_IS_OK;
+            analysis_port.write(item);
+        end
     endfunction
 endclass
 
