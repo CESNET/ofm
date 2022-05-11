@@ -91,7 +91,7 @@ class regmodel#(type REG_TYPE, int unsigned DATA_WIDTH, ADDR_WIDTH, META_WIDTH =
         end
 
         m_agent.m_monitor.analysis_port_rq.connect(reg2mi.monitor.analysis_imp_rq);
-        m_agent.m_monitor.analysis_port_rq.connect(reg2mi.monitor.analysis_imp_rq);
+        m_agent.m_monitor.analysis_port_rs.connect(reg2mi.monitor.analysis_imp_rs);
     endfunction
 endclass
 
