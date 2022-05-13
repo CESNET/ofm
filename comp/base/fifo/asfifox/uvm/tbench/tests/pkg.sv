@@ -18,7 +18,6 @@ package test;
     parameter ALMOST_FULL_OFFSET = FIFO_ITEMS/2;
     parameter ALMOST_EMPTY_OFFSET = FIFO_ITEMS/2;
 
-    parameter ITEMS = 1;    // There is only one item in mvb interface DO NOT CHANGE
     parameter ITEM_WIDTH = 32;
 
     parameter TRANSACTION_COUNT = 100000;

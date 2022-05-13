@@ -8,10 +8,10 @@
 class ex_test extends uvm_test;
     `uvm_component_utils(test::ex_test);
 
-    env::env_base #(ITEMS, ITEM_WIDTH) m_env;
-    mvb::sequence_simple_rx #(ITEMS, ITEM_WIDTH)h_seq_rx;
-    mvb::sequence_simple_tx #(ITEMS, ITEM_WIDTH)h_seq_tx;
-    
+    env::env_base #(ITEM_WIDTH)              m_env;
+    mvb::sequence_lib_rx#(1, ITEM_WIDTH)     h_seq_rx;
+    mvb::sequence_simple_tx #(1, ITEM_WIDTH) h_seq_tx;
+
     // ------------------------------------------------------------------------
     // Functions
     function new(string name, uvm_component parent);
@@ -19,7 +19,7 @@ class ex_test extends uvm_test;
     endfunction
 
     function void build_phase(uvm_phase phase);
-        m_env = env::env_base #(ITEMS, ITEM_WIDTH)::type_id::create("m_env", this);
+        m_env = env::env_base #(ITEM_WIDTH)::type_id::create("m_env", this);
     endfunction
 
     // ------------------------------------------------------------------------
@@ -30,18 +30,26 @@ class ex_test extends uvm_test;
         phase.drop_objection(this, "End of rx sequence");
     endtask
 
+
+    task run_seq_tx(uvm_phase phase);
+        forever begin
+            h_seq_tx.start(m_env.agent_tx.m_sequencer);
+        end
+    endtask
+
     virtual task run_phase(uvm_phase phase);
-        h_seq_rx = mvb::sequence_simple_rx #(ITEMS, ITEM_WIDTH)::type_id::create("h_seq_rx");
+        h_seq_rx = mvb::sequence_lib_rx #(1, ITEM_WIDTH)::type_id::create("h_seq_rx");
+        h_seq_rx.init_sequence();
         h_seq_rx.randomize();
 
-        h_seq_tx = mvb::sequence_simple_tx #(ITEMS, ITEM_WIDTH)::type_id::create("h_seq_tx");
+        h_seq_tx = mvb::sequence_simple_tx #(1, ITEM_WIDTH)::type_id::create("h_seq_tx");
         h_seq_tx.randomize();
-        
+
         phase.phase_done.set_drain_time(this, FIFO_ITEMS*RX_CLK_PERIOD);
-        
+
         fork
-            h_seq_tx.start(m_env.agent_tx.m_sequencer);
-            run_seq_rx(phase); 
+            run_seq_tx(phase);
+            run_seq_rx(phase);
         join
 
     endtask

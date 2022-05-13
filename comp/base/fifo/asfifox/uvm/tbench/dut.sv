@@ -17,16 +17,14 @@ module DUT (
 
     logic FIFO_EMPTY;
     logic FIFO_FULL;
-
     logic FIFO_VLD_AND_SRC_RDY;
-    always @(*) begin
-        
-        mvb_rd.VLD <= !FIFO_EMPTY;
-        mvb_rd.SRC_RDY <= !FIFO_EMPTY;
-    
-        mvb_wr.DST_RDY <= !FIFO_FULL;
-        FIFO_VLD_AND_SRC_RDY <= mvb_wr.SRC_RDY && mvb_wr.VLD;
-    end
+
+
+    assign mvb_rd.VLD     = ~FIFO_EMPTY;
+    assign mvb_rd.SRC_RDY = ~FIFO_EMPTY;
+    assign mvb_wr.DST_RDY = ~FIFO_FULL;
+    assign FIFO_VLD_AND_SRC_RDY = mvb_wr.SRC_RDY & mvb_wr.VLD[0];
+
     ASFIFOX #(
         .ITEMS       (FIFO_ITEMS),
         .DATA_WIDTH  (ITEM_WIDTH)
@@ -38,11 +36,11 @@ module DUT (
         .WR_FULL     (FIFO_FULL),
 
         .RD_CLK      (TX_CLK),
-        .RD_RST      (TX_RST), 
+        .RD_RST      (TX_RST),
         .RD_DATA     (mvb_rd.DATA),
         .RD_EMPTY    (FIFO_EMPTY),
         .RD_EN       (mvb_rd.DST_RDY)
     );
 
-    
+
 endmodule
