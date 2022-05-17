@@ -20,8 +20,8 @@ module testbench;
 
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // Interfaces
-    mvb_if #(1, ITEM_WIDTH) mvb_wr(RX_CLK, RX_RST);
-    mvb_if #(1, ITEM_WIDTH) mvb_rd(TX_CLK, TX_RST);
+    mvb_if #(1, ITEM_WIDTH) mvb_wr(RX_CLK);
+    mvb_if #(1, ITEM_WIDTH) mvb_rd(TX_CLK);
 
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // Define clock period
@@ -55,6 +55,7 @@ module testbench;
         m_root.set_report_id_action_hier("ILLEGALNAME",UVM_NO_ACTION);
 
         run_test();
+        $stop(2);
     end
 
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -75,7 +76,7 @@ module testbench;
         .ITEM_WIDTH  (ITEM_WIDTH)
     )
     property_rd(
-        .RESET  (TX_RESET),
+        .RESET  (TX_RST),
         .vif    (mvb_rd)
     );
 
@@ -84,7 +85,7 @@ module testbench;
         .ITEM_WIDTH  (ITEM_WIDTH)
     )
     property_wr (
-        .RESET  (RX_RESET),
+        .RESET  (RX_RST),
         .vif    (mvb_wr)
     );
 

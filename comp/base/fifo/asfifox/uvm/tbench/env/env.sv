@@ -16,11 +16,11 @@ class env_base #(ITEM_WIDTH) extends uvm_env;
     mvb::agent_tx #(1, ITEM_WIDTH) agent_tx;
     mvb::config_item cfg_tx;
 
-    scoreboard #(ITEM_WIDTH) sc; 
+    scoreboard #(ITEM_WIDTH) m_scoreboard;
 
     mvb::coverage #(1, ITEM_WIDTH) m_cover_rx;
     mvb::coverage #(1, ITEM_WIDTH) m_cover_tx;
-    
+
     // Constructor of environment.
     function new(string name, uvm_component parent);
         super.new(name, parent);
@@ -30,7 +30,7 @@ class env_base #(ITEM_WIDTH) extends uvm_env;
     function void build_phase(uvm_phase phase);
 
         m_cover_rx = new("m_cover_rx");
-        m_cover_tx = new("m_cover_tx"); 
+        m_cover_tx = new("m_cover_tx");
         cfg_tx = new;
         cfg_rx = new;
 
@@ -40,24 +40,22 @@ class env_base #(ITEM_WIDTH) extends uvm_env;
         cfg_tx.interface_name = "vif_tx";
         cfg_rx.interface_name = "vif_rx";
 
-        uvm_config_db #(mvb::config_item)::set(this, "agent_rx", "m_config", cfg_rx);
         uvm_config_db #(mvb::config_item)::set(this, "agent_tx", "m_config", cfg_tx);
+        uvm_config_db #(mvb::config_item)::set(this, "agent_rx", "m_config", cfg_rx);
 
-        agent_rx    = mvb::agent_rx #(1, ITEM_WIDTH)::type_id::create("agent_rx", this);
         agent_tx    = mvb::agent_tx #(1, ITEM_WIDTH)::type_id::create("agent_tx", this);
+        agent_rx    = mvb::agent_rx #(1, ITEM_WIDTH)::type_id::create("agent_rx", this);
 
-        sc  = scoreboard #(ITEM_WIDTH)::type_id::create("sc", this);
-
+        m_scoreboard  = scoreboard #(ITEM_WIDTH)::type_id::create("m_scoreboard", this);
     endfunction
 
     // Connect agent's ports with ports from scoreboard.
     function void connect_phase(uvm_phase phase);
 
-        agent_rx.analysis_port.connect(sc.analysis_imp_mvb_rx);
-        agent_tx.analysis_port.connect(sc.analysis_imp_mvb_tx);
+        agent_rx.analysis_port.connect(m_scoreboard.analysis_imp_mvb_rx);
+        agent_tx.analysis_port.connect(m_scoreboard.analysis_imp_mvb_tx);
 
         agent_rx.analysis_port.connect(m_cover_rx.analysis_export);
         agent_tx.analysis_port.connect(m_cover_tx.analysis_export);
     endfunction
-    
 endclass

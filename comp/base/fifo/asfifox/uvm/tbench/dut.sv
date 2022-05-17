@@ -23,7 +23,7 @@ module DUT (
     assign mvb_rd.VLD     = ~FIFO_EMPTY;
     assign mvb_rd.SRC_RDY = ~FIFO_EMPTY;
     assign mvb_wr.DST_RDY = ~FIFO_FULL;
-    assign FIFO_VLD_AND_SRC_RDY = mvb_wr.SRC_RDY & mvb_wr.VLD[0];
+    assign FIFO_VLD_AND_SRC_RDY = mvb_wr.SRC_RDY; //& mvb_wr.VLD[0];
 
     ASFIFOX #(
         .ITEMS       (FIFO_ITEMS),
