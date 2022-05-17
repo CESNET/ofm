@@ -19,7 +19,7 @@ class coverage #(ITEMS, ITEM_WIDTH) extends uvm_subscriber#(sequence_item #(ITEM
             bins higth  = {[ITEM_WIDTH'(2**(ITEM_WIDTH-2)+1)                : ITEM_WIDTH'(2**ITEM_WIDTH-1)]};
         }
 
-        vld_transfered_items : coverpoint vld iff (seq_item.SRC_RDY & seq_item.DST_RDY){
+        vld_transfered_items : coverpoint vld iff (seq_item.src_rdy & seq_item.dst_rdy){
             bins valid      = {1};
             bins non_valid  = {0};
         }
@@ -31,7 +31,7 @@ class coverage #(ITEMS, ITEM_WIDTH) extends uvm_subscriber#(sequence_item #(ITEM
     covergroup m_cov_rdy_sig;
         // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
         // -- Sequence of SRC_RDY.
-        src_rdy : coverpoint seq_item.SRC_RDY {
+        src_rdy : coverpoint seq_item.src_rdy {
             bins short   = (0 => 1 => 0);
             bins longer  = (0 => 1[*2:16]  => 0);
             bins long    = (0 => 1[*17:32] => 0);
@@ -39,7 +39,7 @@ class coverage #(ITEMS, ITEM_WIDTH) extends uvm_subscriber#(sequence_item #(ITEM
         }
         // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
         // -- Sequence of DST_RDY.
-        dst_rdy : coverpoint seq_item.DST_RDY {
+        dst_rdy : coverpoint seq_item.dst_rdy {
             bins short   = (0 => 1 => 0);
             bins longer  = (0 => 1[*2:16]  => 0);
             bins long    = (0 => 1[*17:32] => 0);
@@ -47,7 +47,7 @@ class coverage #(ITEMS, ITEM_WIDTH) extends uvm_subscriber#(sequence_item #(ITEM
         }
         // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
         // -- Sequence of transferred transactions.
-        read_sequence : coverpoint seq_item.SRC_RDY & seq_item.DST_RDY {
+        read_sequence : coverpoint seq_item.src_rdy & seq_item.dst_rdy {
             bins short   = (0 => 1 => 0);
             bins longer  = (0 => 1[*2:16]   => 0);
             bins long    = (0 => 1[*17:32]  => 0);
@@ -56,7 +56,7 @@ class coverage #(ITEMS, ITEM_WIDTH) extends uvm_subscriber#(sequence_item #(ITEM
 
     endgroup
 
-   
+
     function new (string name, uvm_component parent = null);
         super.new(name, parent);
         m_cov_rdy_sig = new();
@@ -67,8 +67,8 @@ class coverage #(ITEMS, ITEM_WIDTH) extends uvm_subscriber#(sequence_item #(ITEM
         seq_item = t;
         m_cov_rdy_sig.sample();
         for (int i = 0; i<ITEMS; i++) begin
-            item = t.DATA[i];
-            vld = t.VLD[i];
+            item = t.data[i];
+            vld = t.vld[i];
             m_cov_seq_item_data.sample();
         end
     endfunction

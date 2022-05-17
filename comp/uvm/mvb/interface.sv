@@ -5,7 +5,7 @@
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
 // Definition of mvb interface.
-interface mvb_if #(ITEMS, ITEM_WIDTH) (input logic CLK, RESET);
+interface mvb_if #(ITEMS, ITEM_WIDTH) (input logic CLK);
     initial VALID_PARAMETERS : assert(ITEMS > 0 && ITEM_WIDTH > 0);
 
     // ------------------------------------------------------------------------

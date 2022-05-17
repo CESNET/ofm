@@ -9,16 +9,12 @@
 
 // This low level sequence define bus functionality 
 class sequence_simple_rx #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(mvb::sequence_item #(ITEMS, ITEM_WIDTH));
-
-    // ------------------------------------------------------------------------
-    // Registration of agent to databaze
     `uvm_object_param_utils(mvb::sequence_simple_rx #(ITEMS, ITEM_WIDTH))
-  
+
     // ------------------------------------------------------------------------
     // Variables
     sequence_item #(ITEMS, ITEM_WIDTH) req;
-    sequence_item #(ITEMS, ITEM_WIDTH) rsp;
-    
+
     int unsigned transaction_count_max = 100;
     int unsigned transaction_count_min = 10;
     rand int unsigned transaction_count;
@@ -37,22 +33,16 @@ class sequence_simple_rx #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(mvb::sequen
         req = sequence_item #(ITEMS, ITEM_WIDTH)::type_id::create("req");
 
         repeat(transaction_count) begin
-            // Create a request for sequence item
             start_item(req);
-        
-            // Do not generate new data when SRC_RDY was 1 but the transaction does not transfare 
+
             if (!req.randomize()) begin
                 `uvm_fatal("sequence:", "Faile to randomize sequence.")
             end
             finish_item(req);
 
-            // Get response from driver
-            get_response(rsp);
-
-            while (rsp.SRC_RDY && !rsp.DST_RDY) begin
+            while (req.src_rdy && !req.dst_rdy) begin
                 start_item(req);
                 finish_item(req);
-                get_response(rsp);
             end
 
         end
@@ -105,15 +95,14 @@ class sequence_simple_tx #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(mvb::sequen
     // ------------------------------------------------------------------------
     // Generates transactions
     task body;
-        // Generate transaction_count transactions  
+        // Generate transaction_count transactions
         req = sequence_item#(ITEMS, ITEM_WIDTH)::type_id::create("req");
         repeat(transaction_count) begin
             // Create a request for sequence item
             start_item(req);
             void'(rdy.randomize());
-            void'(req.randomize() with {DST_RDY == rdy.m_value;});
+            void'(req.randomize() with {dst_rdy == rdy.m_value;});
             finish_item(req);
-            get_response(rsp);
         end
     endtask
 endclass
@@ -146,9 +135,8 @@ class sequence_full_speed_tx #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(mvb::se
         repeat(transaction_count) begin
             // Create a request for sequence item
             start_item(req);
-            void'(req.randomize() with {DST_RDY == 1'b1;});
+            void'(req.randomize() with {dst_rdy == 1'b1;});
             finish_item(req);
-            get_response(rsp);
         end
     endtask
 
@@ -180,9 +168,8 @@ class sequence_stop_tx #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(mvb::sequence
         repeat(transaction_count) begin
             // Create a request for sequence item
             start_item(req);
-            void'(req.randomize() with {DST_RDY == 1'b0;});
+            void'(req.randomize() with {dst_rdy == 1'b0;});
             finish_item(req);
-            get_response(rsp);
         end
     endtask
 

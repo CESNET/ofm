@@ -15,13 +15,13 @@ class sequence_item #(ITEMS, ITEM_WIDTH) extends uvm_sequence_item;
 
     // ------------------------------------------------------------------------
     // Member attributes, equivalent with interface pins
-    rand logic [ITEM_WIDTH-1 : 0] DATA [ITEMS];
-    rand logic [ITEMS-1 : 0] VLD;
-    rand logic SRC_RDY;
-    rand logic DST_RDY;
+    rand logic [ITEM_WIDTH-1 : 0] data [ITEMS];
+    rand logic [ITEMS-1 : 0] vld;
+    rand logic src_rdy;
+    rand logic dst_rdy;
 
-    constraint data_gen_cons { |VLD == 0 -> SRC_RDY == 0;}
-    
+    constraint data_gen_cons { |vld == 0 -> src_rdy == 0;}
+
     // ------------------------------------------------------------------------
     // Constructor
     function new(string name = "sequence_item");
@@ -42,10 +42,10 @@ class sequence_item #(ITEMS, ITEM_WIDTH) extends uvm_sequence_item;
 
         // Now copy all attributes.
         super.do_copy(rhs);
-        DATA        = rhs_.DATA;
-        VLD         = rhs_.VLD;
-        SRC_RDY     = rhs_.SRC_RDY;
-        DST_RDY     = rhs_.DST_RDY;
+        data        = rhs_.data;
+        vld         = rhs_.vld;
+        src_rdy     = rhs_.src_rdy;
+        dst_rdy     = rhs_.dst_rdy;
     endfunction
 
     // Properly compare all transaction attributes representing output pins.
@@ -56,35 +56,35 @@ class sequence_item #(ITEMS, ITEM_WIDTH) extends uvm_sequence_item;
             `uvm_fatal("do_compare:", "Failed to cast transaction object.")
             return 0;
         end
-        
+
         // Compare all attributes that maters
         return (super.do_compare(rhs, comparer) &&
-            (DATA       == rhs_.DATA) &&
-            (VLD        == rhs_.VLD)) && 
-            (SRC_RDY    == rhs_.SRC_RDY) &&
-            (DST_RDY    == rhs_.DST_RDY);
+            (data       == rhs_.data) &&
+            (vld        == rhs_.vld)) &&
+            (src_rdy    == rhs_.src_rdy) &&
+            (dst_rdy    == rhs_.dst_rdy);
     endfunction
 
-    // Visualize the sequence item to string 
+    // Visualize the sequence item to string
     function string convert2string();
         string output_string = "";
         string data = "";
 
         $sformat(output_string, {"%s\n\tSRC_RDY: %b\n\tDST_RDY: %b\n"},
             super.convert2string(),
-            SRC_RDY,
-            DST_RDY
+            src_rdy,
+            dst_rdy
         );
 
         // Add new line for each item with correspondence valid bit
         for (int i = 0 ; i < ITEMS ; i++) begin
             $sformat(data, {"\tDATA: 'h%0h\tVLD: %b\n"},
-            DATA[i],
-            VLD[i]
+            data[i],
+            vld[i]
             );
-            output_string = {output_string, data}; 
+            output_string = {output_string, data};
         end
-        
+
         return output_string;
     endfunction
 
