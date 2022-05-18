@@ -12,6 +12,7 @@ set MI_ASYNC_BASE    "$OFM_PATH/comp/mi_tools/async"
 # Components
 lappend COMPONENTS [list "ASYNC_RESET"     $ASYNC_RESET_BASE "FULL"]
 lappend COMPONENTS [list "ASYNC_OPEN_LOOP" $OPEN_LOOP_BASE   "FULL"]
+lappend COMPONENTS [list "MI_ASYNC"        $MI_ASYNC_BASE    "FULL"]
 
 # Source files
 lappend MOD "$ENTITY_BASE/pulse_extend.vhd"

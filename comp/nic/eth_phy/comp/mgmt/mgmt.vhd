@@ -1,34 +1,9 @@
 -- mgmt.vhd : 40/100GBASE-R management (status/control)
---                     
--- Copyright (C) 2011 CESNET
--- Author(s): Stepan Friedl <friedl@cesnet.cz>, Jakub Cabal <jakubcabal@gmail.com>
+-- Copyright (C) 2011 CESNET z. s. p. o.
+-- Author(s): Stepan Friedl <friedl@cesnet.cz>
+--            Jakub Cabal   <cabal@cesnet.cz>
 --
--- Redistribution and use in source and binary forms, with or without
--- modification, are permitted provided that the following conditions
--- are met:
--- 1. Redistributions of source code must retain the above copyright
---    notice, this list of conditions and the following disclaimer.
--- 2. Redistributions in binary form must reproduce the above copyright
---    notice, this list of conditions and the following disclaimer in
---    the documentation and/or other materials provided with the
---    distribution.
--- 3. Neither the name of the Company nor the names of its contributors
---    may be used to endorse or promote products derived from this
---    software without specific prior written permission.
---
--- This software is provided ``as is'', and any express or implied
--- warranties, including, but not limited to, the implied warranties of
--- merchantability and fitness for a particular purpose are disclaimed.
--- In no event shall the company or contributors be liable for any
--- direct, indirect, incidental, special, exemplary, or consequential
--- damages (including, but not limited to, procurement of substitute
--- goods or services; loss of use, data, or profits; or business
--- interruption) however caused and on any theory of liability, whether
--- in contract, strict liability, or tort (including negligence or
--- otherwise) arising in any way out of the use of this software, even
--- if advised of the possibility of such damage.
---
--- $Id: $
+-- SPDX-License-Identifier: BSD-3-Clause
 --
 -- NOTES:
 -- Address space is similar to standard MDIO register mapping, while the lower 
@@ -73,8 +48,6 @@ library ieee;
 use ieee.std_logic_1164.all;
 use IEEE.STD_LOGIC_ARITH.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
-library xpm;
-use xpm.vcomponents.all;
 
 entity mgmt is
    generic (
@@ -90,7 +63,10 @@ entity mgmt is
       PMA_CONTROL_INIT    : std_logic_vector(31 downto 0) := (others => '0'); -- PMA_CONTROL power-up and reset defaults
       PMA_PRECURSOR_INIT  : std_logic_vector(31 downto 0) := (others => '0');  
       PMA_POSTCURSOR_INIT : std_logic_vector(31 downto 0) := (others => '0'); 
-      PMA_DRIVE_INIT      : std_logic_vector(31 downto 0) := (others => '0')   
+      PMA_DRIVE_INIT      : std_logic_vector(31 downto 0) := (others => '0');
+      -- Select correct FPGA device.
+      -- "AGILEX", "STRATIX10", "ULTRASCALE", ...
+      DEVICE : string  := "ULTRASCALE"
    );
    port (
       RESET       : in  std_logic; 
@@ -172,8 +148,9 @@ end mgmt;
 
 architecture behavioral of mgmt is
 
+signal mi_addr_masked : std_logic_vector(31 downto 0);
 signal mi_drd_i     : std_logic_vector(31 downto 0);
-signal pma_mode     : std_logic_vector(1 downto 0);
+signal pma_mode     : std_logic_vector(2 downto 0);
 signal pma_fault    : std_logic;
 signal pma_rxl_stat : std_logic;
 signal pma_rst      : std_logic := '0'; 
@@ -267,12 +244,15 @@ signal FEC_TX_ALGN_STAT_sync       : std_logic_vector(FEC_TX_ALGN_STAT'range);
 signal fec_pcs_algn_stat            : std_logic;
 -- DRP signals
 signal drpdo_r       : std_logic_vector(DRPDO'range);
-signal drpdo_r_async : std_logic_vector(DRPDO'range);
 signal drpen_i       : std_logic;
 signal drpwe_r       : std_logic;
 signal drpaddr_r     : std_logic_vector(DRPADDR'range);
 signal drpdi_r       : std_logic_vector(DRPDI'range);
 signal drpsel_r      : std_logic_vector(DRPSEL'range);
+signal drp_drd_sync  : std_logic_vector(DRPDO'range);
+signal drp_drdy_sync : std_logic;
+signal drp_rd        : std_logic;
+signal drp_wr        : std_logic;
 signal speed_int     : natural;
 signal speed_cap_int : std_logic_vector(15 downto 0);
 
@@ -281,6 +261,8 @@ alias SPEED_CAP_25G  : std_logic is speed_cap_int(11);
 alias SPEED_CAP_40G  : std_logic is speed_cap_int(8);
 alias SPEED_CAP_50G  : std_logic is speed_cap_int(3);
 alias SPEED_CAP_100G : std_logic is speed_cap_int(9);
+alias SPEED_CAP_200G : std_logic is speed_cap_int(12);
+alias SPEED_CAP_400G : std_logic is speed_cap_int(15);
           
 function AND_REDUCE (D : in std_logic_vector) return std_logic is
 variable tmp : std_logic;
@@ -310,7 +292,7 @@ speed_int <= SPEED when SPEED /= 0 else
              40;
              
 -- PMA speed capabilities - IEEE 802.3 Table 45-6               
--- Bit 0: 10G, Bit 8: 40G, Bit 9: 100G, Bit 11: 25G
+-- Bit 0: 10G, Bit 3: 50G, Bit 8: 40G, Bit 9: 100G, Bit 11: 25G, Bit 12: 200G, Bit 15: 400G
 speed_cap_int <= SPEED_CAP when (SPEED_CAP /= X"0000") else
                  "000000" & GBASE100_ABLE & GBASE40_ABLE & "0000000" & SPEED10G;              
              
@@ -574,113 +556,51 @@ end generate; -- if RSFEC_ABLE
 
 ---------------------------------------------------
 
-DRPDO_FFS: process(DRPCLK)
+process(MI_CLK)
 begin
-   if DRPCLK'event and DRPCLK = '1' then
-      if (DRPRDY = '1') then
-         drpdo_r_async <= DRPDO;
+   if rising_edge(MI_CLK) then
+      if (drp_drdy_sync = '1') then
+         drpdo_r <= drp_drd_sync;
       end if;
    end if;
 end process;
 
-cdc_drpdo: xpm_cdc_array_single
+drp_cdc_i : entity work.MI_ASYNC
 generic map (
-   DEST_SYNC_FF   => 2, -- integer; range: 2-10
-   SIM_ASSERT_CHK => 0, -- integer; 0=disable simulation messages, 1=enable simulation messages
-   SRC_INPUT_REG  => 0, -- integer; 0=do not register input, 1=register input
-   WIDTH          => drpdo_r'high+1 -- integer; range: 2-1024
+   DATA_WIDTH => drpdo_r'high+1,
+   ADDR_WIDTH => drpaddr_r'high+1,
+   META_WIDTH => drpsel_r'high+1,
+   RAM_TYPE   => "LUT",
+   DEVICE     => DEVICE
 )
 port map (
-   src_clk  => DRPCLK, -- optional; required when SRC_INPUT_REG = 1
-   src_in   => drpdo_r_async,
-   dest_clk => MI_CLK,
-   dest_out => drpdo_r
+   CLK_M     => MI_CLK,
+   RESET_M   => RESET,
+   MI_M_DWR  => drpdi_r ,
+   MI_M_MWR  => drpsel_r ,
+   MI_M_ADDR => drpaddr_r,
+   MI_M_RD   => drpen_i and not drpwe_r,
+   MI_M_WR   => drpen_i and drpwe_r,
+   MI_M_BE   => (others => '1'),
+   MI_M_DRD  => drp_drd_sync,
+   MI_M_ARDY => open,
+   MI_M_DRDY => drp_drdy_sync,
+
+   CLK_S     => DRPCLK,
+   RESET_S   => '0',
+   MI_S_DWR  => DRPDI,
+   MI_S_MWR  => DRPSEL,
+   MI_S_ADDR => DRPADDR,
+   MI_S_RD   => drp_rd,
+   MI_S_WR   => drp_wr,
+   MI_S_BE   => open,
+   MI_S_DRD  => DRPDO,
+   MI_S_ARDY => '1',
+   MI_S_DRDY => DRPRDY
 );
 
-cdc_drpdi: xpm_cdc_array_single
-generic map (
-   DEST_SYNC_FF   => 2, -- integer; range: 2-10
-   SIM_ASSERT_CHK => 0, -- integer; 0=disable simulation messages, 1=enable simulation messages
-   SRC_INPUT_REG  => 0, -- integer; 0=do not register input, 1=register input
-   WIDTH          => DRPDI'high+1 -- integer; range: 2-1024
-)
-port map (
-   src_clk  => MI_CLK, -- optional; required when SRC_INPUT_REG = 1
-   src_in   => drpdi_r,
-   dest_clk => DRPCLK,
-   dest_out => DRPDI
-);
-
-cdc_drpaddr: xpm_cdc_array_single
-generic map (
-   DEST_SYNC_FF   => 2, -- integer; range: 2-10
-   SIM_ASSERT_CHK => 0, -- integer; 0=disable simulation messages, 1=enable simulation messages
-   SRC_INPUT_REG  => 0, -- integer; 0=do not register input, 1=register input
-   WIDTH          => DRPADDR'high+1 -- integer; range: 2-1024
-)
-port map (
-   src_clk  => MI_CLK, -- optional; required when SRC_INPUT_REG = 1
-   src_in   => drpaddr_r,
-   dest_clk => DRPCLK,
-   dest_out => DRPADDR
-);
-
-cdc_drpsel: xpm_cdc_array_single
-generic map (
-   DEST_SYNC_FF   => 2, -- integer; range: 2-10
-   SIM_ASSERT_CHK => 0, -- integer; 0=disable simulation messages, 1=enable simulation messages
-   SRC_INPUT_REG  => 0, -- integer; 0=do not register input, 1=register input
-   WIDTH          => drpsel_r'high+1 -- integer; range: 2-1024
-)
-port map (
-   src_clk  => MI_CLK, -- optional; required when SRC_INPUT_REG = 1
-   src_in   => drpsel_r,
-   dest_clk => DRPCLK,
-   dest_out => DRPSEL
-);
-
-cdc_drpwe: xpm_cdc_single
-generic map (
-   DEST_SYNC_FF   => 2, -- integer; range: 2-10
-   SIM_ASSERT_CHK => 0, -- integer; 0=disable simulation messages, 1=enable simulation messages
-   SRC_INPUT_REG  => 1 -- integer; 0=do not register input, 1=register input
-)
-port map (
-   src_clk  => MI_CLK, -- optional; required when SRC_INPUT_REG = 1
-   src_in   => drpwe_r,
-   dest_clk => DRPCLK,
-   dest_out => DRPWE
-);
-
---cdc_drpen: xpm_cdc_single
---generic map (
---   DEST_SYNC_FF   => 2, -- integer; range: 2-10
---   SIM_ASSERT_CHK => 0, -- integer; 0=disable simulation messages, 1=enable simulation messages
---   SRC_INPUT_REG  => 1 -- integer; 0=do not register input, 1=register input
---)
---port map (
---   src_clk  => MI_CLK, -- optional; required when SRC_INPUT_REG = 1
---   src_in   => drpen_i,
---   dest_clk => DRPCLK,
---   dest_out => DRPEN
---);
-
-cdc_drpen : xpm_cdc_pulse
-generic map (
-   DEST_SYNC_FF => 3,   -- DECIMAL; range: 2-10
-   INIT_SYNC_FF => 0,   -- DECIMAL; 0=disable simulation init values, 1=enable simulation init values
-   REG_OUTPUT   => 1,   -- DECIMAL; 0=disable registered output, 1=enable registered output
-   RST_USED     => 0,   -- DECIMAL; 0=no reset, 1=implement reset
-   SIM_ASSERT_CHK => 0  -- DECIMAL; 0=disable simulation messages, 1=enable simulation messages
-)
-port map (
-   dest_pulse => DRPEN,      -- 1-bit output: Outputs a pulse the size of one dest_clk period when a pulse
-   dest_clk   => DRPCLK,     -- 1-bit input: Destination clock.
-   dest_rst   => '0',        -- 1-bit input: optional; required when RST_USED = 1
-   src_clk    => MI_CLK,     -- 1-bit input: Source clock.
-   src_pulse  => drpen_i,
-   src_rst    => '0'         -- 1-bit input: optional; required when RST_USED = 1
-);
+DRPWE <= drp_wr;
+DRPEN <= drp_wr or drp_rd;
 
 ----
 
@@ -706,6 +626,8 @@ bip_ercntr_r(sync_bip_err_cntrs'high downto 0) <= sync_bip_err_cntrs;
 pcs_blk_lock_g <= AND_REDUCE(sync_blk_lock) and sync_algn_locked; -- ALGN_LOCKED should be included according to 802.2ba
 pcs_fault      <= (not pcs_blk_lock_g) or (pcs_hi_ber) or (not pcs_rxl_stat);
 
+mi_addr_masked <= MI_ADDR and X"0003FFFF";
+
 ADDR_DECODE: process(all)
 begin
    r333_rd  <= '0';
@@ -720,12 +642,15 @@ begin
    r1217_rd <= '0';
    r3200_rd <= (others => '0');
    mi_drd_i <= (others => '0');
-   if MI_ADDR(19 downto 15) = "00010" then -- select PMA (device 0x1)
-      case MI_ADDR(8 downto 2) is
+   if mi_addr_masked(19 downto 15) = "00010" then -- select PMA (device 0x1)
+      case mi_addr_masked(8 downto 2) is
           when "0000000" => -- PMA status1 & control 1        11    10:7      6:2          1             0
              mi_drd_i(15 downto  0) <= pma_rst & "010" & low_pwr & "0000" & "10000" & pma_rem_lpbk & pma_loc_lpbk; -- r1.0
              case speed_int is 
+                when 400 => mi_drd_i(5 downto  2)  <= "1001";
+                when 200 => mi_drd_i(5 downto  2)  <= "1000";
                 when 100 => mi_drd_i(5 downto  2)  <= "0011";
+                when 50  => mi_drd_i(5 downto  2)  <= "0101";
                 when 40  => mi_drd_i(5 downto  2)  <= "0010";
                 when 25  => mi_drd_i(5 downto  2)  <= "0100";
                 when others  => mi_drd_i(5 downto  2)  <= "0000"; -- 10G
@@ -742,6 +667,12 @@ begin
              --
              mi_drd_i(31 downto 22) <= "0000000000"; -- r1.7.15:6
              case speed_int is 
+                when 400 =>
+                   mi_drd_i(16+6 downto 16+3) <= "1011"; -- r1.7.6:3
+                   mi_drd_i(16+2 downto 16+0) <= pma_mode; -- r1.7.2:0
+                when 200 =>
+                   mi_drd_i(16+6 downto 16+1) <= "101010"; -- r1.7.6:1
+                   mi_drd_i(16+0) <= pma_mode(0); -- FR4 or -LR4
                 when 100 =>
                    mi_drd_i(16+5 downto 16+3) <= "101"; -- r1.7.5:3
                    if (PMA_LANES = 10) then
@@ -752,6 +683,9 @@ begin
                       mi_drd_i(16+1) <= '1';  -- r1.7.1: -SR4/-CR4/-LR4, no -KP4/-KR4 support                   
                    end if;      
                    mi_drd_i(16+0) <= pma_mode(0); --
+               when  50 =>
+                   mi_drd_i(16+6 downto 16+3) <= "1000"; -- r1.7.6:3
+                   mi_drd_i(16+2 downto 16+0) <= pma_mode; -- r1.7.1:0
                 when  40 =>
                    mi_drd_i(16+5 downto 16+3) <= "100"; -- r1.7.5:3
                    mi_drd_i(16+2) <= '0';  -- r1.7.2              
@@ -781,6 +715,10 @@ begin
           when "0000101" => -- PMA/PMD extended ability registers & receive signal detect
              mi_drd_i(15 downto 0)  <= "00000" & rx_sig_det & rx_sig_det_g; -- Receive signal detect r1.10
              mi_drd_i(31 downto 16) <= "0000000000000000"; -- Extended ability register r1.11
+             -- For 200/400G speeds enable extended abilities in r1.23 and r1.24
+             if (SPEED_CAP_200G = '1' or SPEED_CAP_400G = '1') then
+                mi_drd_i(16+13) <= '1';
+             end if;
              -- For 40/100G speeds enable extended abilities in r1.13
              if (SPEED_CAP_100G = '1' or SPEED_CAP_40G = '1') then
                 mi_drd_i(16+10) <= '1';
@@ -817,6 +755,31 @@ begin
              mi_drd_i(16+2) <= SPEED_CAP_25G;  -- 25GBASE-CR-S
              mi_drd_i(16+1) <= '0';            -- 25GBASE-KR-S
              mi_drd_i(16+0) <= '0';            -- 25GBASE-KR-S
+          when "0001010" => -- r 1.20, r1.21 - PMA/PMD extended ability register
+             mi_drd_i(15 downto 0)  <= X"0000"; -- r1.20 -- 50G PMA/PMD extended ability register
+             mi_drd_i(15) <= '1'; -- 50G PMA remote loopback ability
+             mi_drd_i(4) <= SPEED_CAP_50G; -- 50GBASE-LR
+             mi_drd_i(3) <= SPEED_CAP_50G; -- 50GBASE-FR
+             mi_drd_i(2) <= SPEED_CAP_50G; -- 50GBASE-SR
+             mi_drd_i(1) <= SPEED_CAP_50G; -- 50GBASE-CR
+             mi_drd_i(0) <= '0';           -- 50GBASE-KR
+             mi_drd_i(31 downto 16) <= X"0000"; -- r1.21 -- 2.5G/5G PMA/PMD extended ability register
+          when "0001011" => -- r 1.22, r1.23 - PMA/PMD extended ability register
+             mi_drd_i(15 downto 0)  <= X"0000"; -- r1.22 -- BASE-H PMA/PMD extended ability register
+             mi_drd_i(31 downto 16) <= X"0000"; -- r1.23 -- 200G PMA/PMD extended ability register
+             mi_drd_i(16+15) <= '1'; -- 200G PMA remote loopback ability
+             mi_drd_i(16+5) <= SPEED_CAP_200G; -- 200GBASE-LR4
+             mi_drd_i(16+4) <= SPEED_CAP_200G; -- 200GBASE-FR4
+             mi_drd_i(16+3) <= SPEED_CAP_200G; -- 200GBASE-DR4
+          when "0001100" => -- r 1.24, r1.25 - PMA/PMD extended ability register
+             mi_drd_i(15 downto 0)  <= X"0000"; -- r1.24 -- 400G PMA/PMD extended ability register
+             mi_drd_i(15) <= '1'; -- 400G PMA remote loopback ability
+             mi_drd_i(5) <= SPEED_CAP_400G; -- 400GBASE-LR8
+             mi_drd_i(4) <= SPEED_CAP_400G; -- 400GBASE-FR8
+             mi_drd_i(3) <= SPEED_CAP_400G; -- 400GBASE-DR8
+             mi_drd_i(31 downto 16) <= X"0000"; -- r1.25 -- PMA/PMD extended ability 2 register
+             mi_drd_i(16+0) <= SPEED_CAP_50G; -- enable 50G extended abilities (r1.20)
+             
           -- RS-FEC ---------------------------------------------------------------------------
           when "1100100" => -- 0x190 
              mi_drd_i(15 downto 0)  <= X"000" & "0" & fec_en_r & fec_ind_bypass_r & fec_cor_bypass_r; -- 1.200 RS-FEC control reg
@@ -870,8 +833,8 @@ begin
          end case;          
 
 
-   elsif MI_ADDR(19 downto 15) = "00011" then -- select PMA vendor specific registers 
-      case MI_ADDR(5 downto 2) is
+   elsif mi_addr_masked(19 downto 15) = "00011" then -- select PMA vendor specific registers 
+      case mi_addr_masked(5 downto 2) is
          when "0000" => -- 0x8000 - vendor specific PMA control register
             mi_drd_i <= pma_control_r;    
          when "0001" =>  -- 0x8004
@@ -893,13 +856,16 @@ begin
       end case;   
    end if;
    --- PCS registers -------------------------------------------------------
-   if MI_ADDR(19 downto 16) = X"3" then -- select PCS (device 0x3)
-      if MI_ADDR(9 downto 7) = "000" then
-         case MI_ADDR(6 downto 2) is
+   if mi_addr_masked(19 downto 16) = X"3" then -- select PCS (device 0x3)
+      if mi_addr_masked(9 downto 7) = "000" then
+         case mi_addr_masked(6 downto 2) is
             when "00000" => -- 0x0000
                mi_drd_i(15 downto  0) <= pcs_rst & pcs_lpbk & "10" & pcs_low_pwr & "00001" & "0000" & scr_bypass_r;-- 3.0 PCS control 1 -- r3.0
                case speed_int is
+                  when 400 =>    mi_drd_i( 5 downto  2) <= "1010"; -- 400G
+                  when 200 =>    mi_drd_i( 5 downto  2) <= "1001"; -- 200G
                   when 100 =>    mi_drd_i( 5 downto  2) <= "0100"; -- 100G
+                  when  50 =>    mi_drd_i( 5 downto  2) <= "0110"; -- 50G
                   when  40 =>    mi_drd_i( 5 downto  2) <= "0011"; -- 40G
                   when  25 =>    mi_drd_i( 5 downto  2) <= "0101"; -- 25G
                   when others => mi_drd_i( 5 downto  2) <= "0000"; -- 10G
@@ -915,19 +881,26 @@ begin
                mi_drd_i(2) <= SPEED_CAP_40G;      -- 3.4.2 40G
                mi_drd_i(3) <= SPEED_CAP_100G;     -- 3.4.3 100G
                mi_drd_i(4) <= SPEED_CAP_25G;      -- 3.4.4 25G
+               mi_drd_i(5) <= SPEED_CAP_50G;      -- 3.4.5 50G
+               mi_drd_i(8) <= SPEED_CAP_200G;     -- 3.4.8 200G
+               mi_drd_i(9) <= SPEED_CAP_400G;     -- 3.4.9 400G
                mi_drd_i(31 downto 16) <= X"0000"; -- 3.5 PCS devices in package -- r3.5
             when "00011" => -- 0x000C
                mi_drd_i(15 downto  0) <= X"0007"; -- 3.6 PCS devices in package -- r3.6
                mi_drd_i(31 downto 16) <= X"0000"; -- 3.7 10G PCS control 2      -- r3.7
                case speed_int is
-                  when 100 =>    mi_drd_i(16+2 downto  16+0) <= "101"; -- 100G
-                  when  40 =>    mi_drd_i(16+2 downto  16+0) <= "100"; -- 40G
-                  when  25 =>    mi_drd_i(16+2 downto  16+0) <= "111"; -- 25G
-                  when others => mi_drd_i(16+2 downto  16+0) <= "000"; -- 10G
+                  when 400 =>    mi_drd_i(16+3 downto  16+0) <= "1101"; -- 400G
+                  when 200 =>    mi_drd_i(16+3 downto  16+0) <= "1100"; -- 200G
+                  when 100 =>    mi_drd_i(16+3 downto  16+0) <= "0101"; -- 100G
+                  when  50 =>    mi_drd_i(16+3 downto  16+0) <= "1000"; -- 50G
+                  when  40 =>    mi_drd_i(16+3 downto  16+0) <= "0100"; -- 40G
+                  when  25 =>    mi_drd_i(16+3 downto  16+0) <= "0111"; -- 25G
+                  when others => mi_drd_i(16+3 downto  16+0) <= "0000"; -- 10G
                end case;
             when "00100" => -- 0x0010
-               mi_drd_i(15 downto  0) <= "1000" & '0' & pcs_fault_l & "000" & SPEED_CAP_25G & SPEED_CAP_100G & SPEED_CAP_40G & "000" & SPEED_CAP_10G; -- r3.8 10G PCS status 2
+               mi_drd_i(15 downto  0) <= "1000" & '0' & pcs_fault_l & "0" & SPEED_CAP_50G & SPEED_CAP_25G & '0' & SPEED_CAP_100G & SPEED_CAP_40G & "000" & SPEED_CAP_10G; -- r3.8 10G PCS status 2
                mi_drd_i(31 downto 16) <= X"0000"; -- 3.9 rsvd
+               mi_drd_i(16+1 downto 16+0) <= SPEED_CAP_400G & SPEED_CAP_200G;
                r308_rd <= MI_RD and (MI_BE(1) or MI_BE(0));
             when "00111" =>  -- 0x001C
                mi_drd_i(15 downto  0) <= X"0000"; -- 3.14 PCS package identifier 
@@ -966,8 +939,8 @@ begin
             when others => 
                mi_drd_i <= (others => '0');
          end case;
-      elsif MI_ADDR(9 downto 7) = "011" then -- xxx200 -- 0x...190
-         case MI_ADDR(5 downto 2) is
+      elsif mi_addr_masked(9 downto 7) = "011" then -- xxx200 -- 0x...190
+         case mi_addr_masked(5 downto 2) is
             -- BIP error counters, lanes 0 through 19
             when "0100" => 
                mi_drd_i(15 downto  0) <= bip_ercntr_r(1*16-1 downto 0*16); -- 3.200 BIP error counters, lane 0
@@ -1022,8 +995,8 @@ begin
             when others => 
                mi_drd_i <= (others => '0');
          end case;
-      elsif MI_ADDR(9 downto 7) = "110" then  -- 0x...320
-         case MI_ADDR(6 downto 2) is
+      elsif mi_addr_masked(9 downto 7) = "110" then  -- 0x...320
+         case mi_addr_masked(6 downto 2) is
             when "01000" => -- 3.400 PCS lane mapping registers, lanes 0 through 19
                mi_drd_i(15 downto  0) <= "00000000000" & lane_map_i(1*5-1 downto 0*5);
                mi_drd_i(31 downto 16) <= "00000000000" & lane_map_i(2*5-1 downto 1*5);
@@ -1094,6 +1067,16 @@ begin
       drpen_i    <= '0';
       drpwe_r    <= '0';
       if async_rst_mi = '1' then 
+         case speed_int is -- default PMA modes
+            when 400 => --400GBASE-LR8
+               pma_mode <= "100";
+            when 200 => --200GBASE-LR4
+               pma_mode <= "101";
+            when  50 => -- 50GBASE-LR
+               pma_mode <= "100";
+            when  others => -- TBD
+               pma_mode <= "000";
+         end case;
          scr_bypass_r <= "00";
          pcs_lpbk     <= '0';
          pcs_rst      <= '0';
@@ -1111,10 +1094,10 @@ begin
          pma_drive_r      <= PMA_DRIVE_INIT;         
       else
       --- PMA registers -------------------------------------------------------
-      if (MI_ADDR(19 downto 16) = X"1") and (MI_WR = '1') then -- select PMA (device 0x1)
+      if (mi_addr_masked(19 downto 16) = X"1") and (MI_WR = '1') then -- select PMA (device 0x1)
          -- 0x8000 : Vendor specific control registers
-         if MI_ADDR(15) = '1' then 
-            case MI_ADDR(5 downto 2) is
+         if mi_addr_masked(15) = '1' then 
+            case mi_addr_masked(5 downto 2) is
                when "0001" => -- 0x8004 - vendor specific PMA control register
                   pma_control_r <= MI_DWR(PMA_CONTROL'range);
                   PMA_RETUNE    <= MI_DWR(31);
@@ -1139,8 +1122,8 @@ begin
                when others => null; 
             end case;
          -- 0x0000 : IEEE standard PMA registers
-         elsif MI_ADDR(9 downto 7) = "000" then
-            case MI_ADDR(6 downto 2) is -- 1.0 PMA control 1
+         elsif mi_addr_masked(9 downto 7) = "000" then
+            case mi_addr_masked(6 downto 2) is -- 1.0 PMA control 1
                when "00000" => -- PMA control
                   if (MI_BE(0) = '1') then
                      pma_loc_lpbk  <= MI_DWR(0);
@@ -1151,7 +1134,7 @@ begin
                   end if;
                when "00011" => -- r1.7: PMA  control 2 & devices in package (high word)
                   if (MI_BE(2) = '1') then
-                     pma_mode  <= MI_DWR(17 downto 16);
+                     pma_mode  <= MI_DWR(18 downto 16);
                      fec_en_r  <= MI_DWR(18);
                   end if;
                when "00100" => -- PMA transmit disable 
@@ -1161,8 +1144,8 @@ begin
                   end if;
                when others => null;
             end case;
-         elsif MI_ADDR(9 downto 7) = "011" then -- FEC controls
-            if MI_ADDR(6 downto 2) = "00100" then -- 0x190, 1.200 RS-FEC control reg
+         elsif mi_addr_masked(9 downto 7) = "011" then -- FEC controls
+            if mi_addr_masked(6 downto 2) = "00100" then -- 0x190, 1.200 RS-FEC control reg
                if (MI_BE(0) = '1') then
                   fec_cor_bypass_r <= MI_DWR(0);
                   fec_ind_bypass_r <= MI_DWR(1);
@@ -1172,9 +1155,9 @@ begin
             end if;         
          end if;
       --- PCS registers -------------------------------------------------------
-      elsif (MI_ADDR(19 downto 16) = X"3") and (MI_WR = '1') then -- select PCS (device 0x3)
-         if MI_ADDR(9 downto 7) = "000" then
-            case MI_ADDR(6 downto 2) is -- 3.0 -- 3.0 PCS control 1
+      elsif (mi_addr_masked(19 downto 16) = X"3") and (MI_WR = '1') then -- select PCS (device 0x3)
+         if mi_addr_masked(9 downto 7) = "000" then
+            case mi_addr_masked(6 downto 2) is -- 3.0 -- 3.0 PCS control 1
                when "00000" => 
                   if (MI_BE(0) = '1') then
                      scr_bypass_r <= MI_DWR(1 downto 0);
