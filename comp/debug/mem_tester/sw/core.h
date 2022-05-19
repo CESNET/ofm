@@ -16,7 +16,7 @@ SPDX-License-Identifier: BSD-3-Clause
 #define AMM_READY_MAX_ASKS  1000     // Max times sw will ask for amm ready
 #define AMM_READY_ASK_DELAY 10000   // Amm ready ask delay [us]
 
-#define TEST_MAX_ASKS  100      // Max times sw will ask for test result
+#define TEST_MAX_ASKS  500      // Max times sw will ask for test result
 #define TEST_ASK_DELAY 50000   // Test result ask delay [us]
 
 #define TEST_ALL       "all"
@@ -45,7 +45,7 @@ void PrintRegs();
 bool Reset(bool emif);
 int Init(char *dev, char *compatibile, long index, bool printCompCnt);
 void Finish();
-
+void SetRefreshPeriod(uint32_t ticks);
 
 // ------------------- //
 // AMM probe functions //
@@ -56,7 +56,7 @@ void AMMProbeClearResults(struct AMMProbeResults_s *data);
 void AMMProbeCalcResults(struct AMMProbeData_s *data, struct AMMProbeResults_s *res);
 void AMMProbeAddResults(struct AMMProbeData_s *data, struct AMMProbeResults_s *res);
 void AMMProbeAvgResults(struct AMMProbeResults_s *res, unsigned resCnt);
-void AMMProbePrintResults(struct AMMProbeResults_s *data);
+void AMMProbePrintResults(struct AMMProbeData_s *rawData, struct AMMProbeResults_s *data);
 void AMMProbePrintResultsCSV(struct AMMProbeResults_s *data);
 //void AMMProbePrintData(struct AMMProbeData_s *data);
 void AMMProbePrintDataCSV(struct AMMProbeData_s *data);
@@ -66,19 +66,19 @@ void AMMProbePrintDataCSV(struct AMMProbeData_s *data);
 // AMM gen functions //
 // ----------------- //
 
-void PrintManualBuff();
-void FillManualBuff(long burst, char *data);
-void WriteManualBuff();
-void ReadManualBuff();
-void AMMGenSetAddr(long addr);
-void AMMGenSetBurst(long burst);
+void PrintManualBuff(bool mmr);
+void FillManualBuff(bool mmr, long burst, char *data);
+void WriteManualBuff(bool mmr);
+void ReadManualBuff(bool mmr);
+void AMMGenSetAddr(bool mmr, long addr);
+void AMMGenSetBurst(bool mmr, long burst);
 
 // ---------------------- //
 // Test related functions //
 // ---------------------- //
 
-void PrintTestResult();
-bool RunTest_intern(bool onlyCSV);
+void PrintTestResult(bool rand);
+bool RunTest_intern(bool onlyCSV, bool rand);
 void SetRandomAMMData(uint32_t burstCnt);
 unsigned CmpRandomAMMData(uint32_t burstCnt);
 bool RunLatTest_intern(bool rand);

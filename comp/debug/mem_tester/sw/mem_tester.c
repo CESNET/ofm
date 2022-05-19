@@ -8,10 +8,26 @@ SPDX-License-Identifier: BSD-3-Clause
 
 #include "common.h"
 #include "core.h"
+#include <getopt.h>
 
-#define ARGUMENTS       "d:c:i:a:m:n:t:s:k:rwbpfhvgou"
 #define COMPATIBILE     "netcope,mem_tester"
 #define REGS_TO_PRINT   64
+
+enum LongArgIDs
+{
+    AUTO_PRECHARGE = 1,
+    REFRESH_PERIOD_TICKS,
+    MMR,
+};
+
+const char *ShortOptions = "d:c:i:a:m:n:t:s:k:rwbpfhvgou";
+struct option LongOptions[] = {
+    {"help",            no_argument,        NULL,  'h' },
+    {"auto-precharge",  no_argument,        NULL,  AUTO_PRECHARGE },
+    {"refresh-period",  required_argument,  NULL,  REFRESH_PERIOD_TICKS },
+    {"mmr",             no_argument,        NULL,  MMR },
+    {0,                 0,                  NULL,  0 }
+};
 
 
 /*!
@@ -23,7 +39,7 @@ void usage(const char *me)
     printf("-d path         Path to device [default: %s]\n", NFB_PATH_DEV(0));
     printf("-c comp         Compatibile of the mem_tester componet [default: %s]\n", COMPATIBILE);
     printf("-i index        Index of the mem_tester componet (when more instances are used)\n"
-           "                When |index = g| it will return number of compatibile components");
+           "                When |index = g| it will return number of compatibile components\n");
     printf("-p              Print registers\n");
     printf("-g              Print device config (can be used with -v)\n");
     printf("-u              Print device status (can be used with -v)\n");
@@ -35,6 +51,8 @@ void usage(const char *me)
     printf("-k scale        Set address limit during test (1.0 = max.)\n");
     printf("-o              Only one simulateous read\n");
     printf("-v              Print only CSV\n");
+    printf("--auto-precharge\n");
+    printf("--refresh-period ticks\n");
 
     printf("AMM_GEN\n");
     printf("-m burst data   Content of a currently selected AMM word (512b hexa) inside manual r/w buffer\n");
@@ -42,6 +60,7 @@ void usage(const char *me)
     printf("-s burst        Manual set burst cnt\n");
     printf("-r              Manual read\n");
     printf("-w              Manual write\n");
+    printf("--mmr           MMR amm gen will be used\n");
 
     printf("AMM_PROBE\n");
     printf("-f              Measure latency to first word [default: to last]\n");
@@ -73,6 +92,8 @@ int main(int argc, char *argv[])
     bool printConfig        = false;
     bool printStatus        = false;
     bool printCompCnt       = false;
+    bool useMMR             = false;
+    bool setRefresh         = false;
 
     long manualAddr         = 0;
     char *manualData;
@@ -82,10 +103,12 @@ int main(int argc, char *argv[])
     char *file              = NFB_PATH_DEV(0);
     char *compatibile       = COMPATIBILE;
     long index              = 0;
+    long refreshPeriod      = 0;
 
     struct TestParams_s testParams = 
     {
         .latencyToFirst     = false,
+        .autoPrecharge      = false,
         .burstCnt           = DEFAULT_BURST_CNT,
         .onlyCSV            = false,
         .onlyOneSimultRead  = false,
@@ -98,8 +121,11 @@ int main(int argc, char *argv[])
     // Parse parameters //
     //////////////////////
 
-    char c;
-    while ((c = getopt(argc, argv, ARGUMENTS)) != -1) 
+    int c;
+    int optionIndex;    // Index of found long option
+
+    //while ((c = getopt(argc, argv, ARGUMENTS)) != -1) 
+    while ((c = getopt_long(argc, argv, ShortOptions, LongOptions, &optionIndex)) != -1) 
     {
         switch (c) 
         {
@@ -174,6 +200,16 @@ int main(int argc, char *argv[])
             case 'h':
                 printHelp = true;
                 break;
+            case AUTO_PRECHARGE:
+                testParams.autoPrecharge = true;
+                break;
+            case REFRESH_PERIOD_TICKS:
+                refreshPeriod = strtoul(optarg, NULL, 10);
+                setRefresh = true;
+                break;
+            case MMR:
+                useMMR = true;
+                break;
             default:
                 printf("Unknown argument: %c\n", c);
         }
@@ -207,6 +243,9 @@ int main(int argc, char *argv[])
         Reset(false);       // mem-tester
     }
 
+    if (setRefresh)
+        SetRefreshPeriod(refreshPeriod);
+
     if (runTest)
     {
         if ( ! RunTest(&testParams))
@@ -217,33 +256,33 @@ int main(int argc, char *argv[])
 
     if (manualBurstCnt > 0)
     {
-        AMMGenSetBurst(manualBurstCnt);
+        AMMGenSetBurst(useMMR, manualBurstCnt);
     }
 
     if (manualSetAddr)
     {
         printf("Setting manual addr ... \n");
-        AMMGenSetAddr(manualAddr);
+        AMMGenSetAddr(useMMR, manualAddr);
     }
 
     if (manualRead)
     {
         printf("Manual read ... \n");
-        ReadManualBuff();
+        ReadManualBuff(useMMR);
         // Todo wait for vld
-        PrintManualBuff();
+        PrintManualBuff(useMMR);
     }
 
     if (manualWrite)
     {
         printf("Manual write ... \n");
-        WriteManualBuff();
+        WriteManualBuff(useMMR);
     }
 
     if (manualWriteToBuff)
     {
         printf("Editing manual buffer\n");
-        FillManualBuff(manualBurst, manualData);
+        FillManualBuff(useMMR, manualBurst, manualData);
     }
 
     if (printRegs)

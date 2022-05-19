@@ -41,19 +41,21 @@ use work.type_pack.all;
 -- requests made        BASE + 0x18
 -- ----------------------------------
 -- latency sum          BASE + 0x1C
+--                      BASE + 0x20
 -- ----------------------------------
--- latency min          BASE + 0x20
+-- latency min          BASE + 0x24
 -- ----------------------------------
--- latency max          BASE + 0x24
+-- latency max          BASE + 0x28
 -- ----------------------------------
--- AMM data width reg   BASE + 0x28
+-- AMM data width reg   BASE + 0x2C
 -- -----------------------------------
--- AMM addr width reg   BASE + 0x2C
+-- AMM addr width reg   BASE + 0x30
 -- -----------------------------------
--- AMM burst width reg  BASE + 0x30
+-- AMM burst width reg  BASE + 0x34
 -- -----------------------------------
--- AMM freq reg [kHz]   BASE + 0x34
+-- AMM freq reg [kHz]   BASE + 0x38
 -- -----------------------------------
+-- Check register bases in mem-tester when adding new registers
 
 
 -- Measurement start at first r/w request
@@ -123,13 +125,14 @@ architecture FULL of AMM_PROBE is
     constant WR_WORDS_REG_ID            : integer := 4;
     constant RD_WORDS_REG_ID            : integer := 5;
     constant REQ_CNT_REG_ID             : integer := 6;
-    constant LATENCY_SUM_REG_ID         : integer := 7;
-    constant LATENCY_MIN_REG_ID         : integer := 8;
-    constant LATENCY_MAX_REG_ID         : integer := 9;
-    constant AMM_DATA_W_REG_ID          : integer := 10;
-    constant AMM_ADDR_W_REG_ID          : integer := 11;
-    constant AMM_BURST_W_REG_ID         : integer := 12;
-    constant AMM_FREQ_REG_ID            : integer := 13;
+    constant LATENCY_SUM_REG_1_ID       : integer := 7;
+    constant LATENCY_SUM_REG_2_ID       : integer := 8;
+    constant LATENCY_MIN_REG_ID         : integer := 9;
+    constant LATENCY_MAX_REG_ID         : integer := 10;
+    constant AMM_DATA_W_REG_ID          : integer := 11;
+    constant AMM_ADDR_W_REG_ID          : integer := 12;
+    constant AMM_BURST_W_REG_ID         : integer := 13;
+    constant AMM_FREQ_REG_ID            : integer := 14;
 
     -- Bits - IN                         
     constant RST_BIT                    : integer := 0;
@@ -144,10 +147,11 @@ architecture FULL of AMM_PROBE is
     constant REQ_CNT_OVF_BIT            : integer := 7;
     constant LATENCY_TICKS_OVF_BIT      : integer := 8;
     constant LATENCY_CNTERS_OVF_BIT     : integer := 9;
+    constant LATENCY_SUM_OVF_BIT        : integer := 10;
 
     -- Bits - constants                  
     constant CTRL_LAST_IN_BIT           : integer := LATENCY_TO_FIRST_BIT;
-    constant CTRL_LAST_OUT_BIT          : integer := LATENCY_CNTERS_OVF_BIT;
+    constant CTRL_LAST_OUT_BIT          : integer := LATENCY_SUM_OVF_BIT;
 
     -- PROBE --                          
     -- If larger ticks counters needed, one must break down data into multiple MI regs
@@ -158,8 +162,8 @@ architecture FULL of AMM_PROBE is
     constant WORDS_CNT_LIMIT            : std_logic_vector(WORDS_CNT_WIDTH - 1 downto 0) := (others => '1');
 
     constant LATENCY_TICKS_WIDTH        : integer := 16;
-    constant LATENCY_SUM_WIDTH          : integer := 32;
-    constant LATENCY_COUNTERS_CNT       : integer := 70;
+    constant LATENCY_SUM_WIDTH          : integer := MI_DATA_WIDTH * 2;
+    constant LATENCY_COUNTERS_CNT       : integer := 128;
 
     -- ----------------------------------------------------------------------- --
 
@@ -232,6 +236,12 @@ architecture FULL of AMM_PROBE is
     signal rd_ticks_en_delayed          : std_logic;
     signal rd_ticks_ovf_occ             : std_logic;
 
+    signal rw_ticks                     : std_logic_vector(TICKS_WIDTH - 1 downto 0);
+    signal rw_ticks_full                : std_logic;
+    signal rw_ticks_en                  : std_logic;
+    signal rw_ticks_en_delayed          : std_logic;
+    signal rw_ticks_ovf_occ             : std_logic;
+
     signal wr_words                     : std_logic_vector(WORDS_CNT_WIDTH - 1 downto 0);       
     signal wr_words_full                : std_logic;
     signal wr_words_ovf_occ             : std_logic;
@@ -250,9 +260,11 @@ architecture FULL of AMM_PROBE is
                              
     signal latency_ticks_ovf            : std_logic; 
     signal latency_counters_ovf         : std_logic;
+    signal latency_sum_ovf              : std_logic;
 
     signal latency_ticks_ovf_occ        : std_logic; 
     signal latency_counters_ovf_occ     : std_logic;
+    signal latency_sum_ovf_occ          : std_logic;
 
     -- 1 = measure latency to first received data, 0 = to last received data
     signal latency_to_first_word        : std_logic;
@@ -290,7 +302,8 @@ begin
         MAX_TICKS           => latency_max_ticks,
 
         TICKS_OVF           => latency_ticks_ovf,
-        COUNTERS_OVF        => latency_counters_ovf
+        COUNTERS_OVF        => latency_counters_ovf,
+        SUM_OVF             => latency_sum_ovf
     );
 
     -------------------------
@@ -307,12 +320,13 @@ begin
     latency_to_first_word           <= ctrl_reg(LATENCY_TO_FIRST_BIT);
 
     -- These are performed only on  a new r/w request
-    --ctrl_reg(WR_TICKS_OVF_BIT)       <= wr_words_ovf_occ;  
-    --ctrl_reg(RD_TICKS_OVF_BIT)       <= rd_words_ovf_occ;
-    ctrl_reg(RW_TICKS_OVF_BIT)      <= '0';                 -- TODO
     ctrl_reg(WR_WORDS_OVF_BIT)      <= wr_words_ovf_occ;
     ctrl_reg(RD_WORDS_OVF_BIT)      <= rd_words_ovf_occ;
     ctrl_reg(REQ_CNT_OVF_BIT)       <= req_cnt_ovf_occ;
+    ctrl_reg(LATENCY_TICKS_OVF_BIT ) <= latency_ticks_ovf_occ;
+    ctrl_reg(LATENCY_CNTERS_OVF_BIT) <= latency_counters_ovf_occ;
+    ctrl_reg(LATENCY_SUM_OVF_BIT)   <= latency_sum_ovf_occ;
+
     -- Ready signals                 
     MI_ARDY                         <= MI_RD or MI_WR;
 
@@ -351,9 +365,13 @@ begin
     -- PROBE --
     wr_ticks_en                     <= wr_ticks_en_delayed or amm_wr_req;
     rd_ticks_en                     <= rd_ticks_en_delayed or amm_rd_req;
+    rw_ticks_en                     <= rw_ticks_en_delayed or amm_wr_req or amm_rd_req;
+
     wr_ticks_full                   <= '1' when(wr_ticks = TICKS_LIMIT and wr_ticks_en = '1') else
                                        '0';
     rd_ticks_full                   <= '1' when(rd_ticks = TICKS_LIMIT and rd_ticks_en = '1') else
+                                       '0';
+    rw_ticks_full                   <= '1' when(rw_ticks = TICKS_LIMIT and rw_ticks_en = '1') else
                                        '0';
     wr_words_full                   <= '1' when(wr_words = WORDS_CNT_LIMIT and amm_wr_req = '1') else
                                        '0';
@@ -379,26 +397,42 @@ begin
     mi_out_p : process (CLK)
     begin
         if (rising_edge(CLK)) then
-            case mi_addr_sliced is
-                when id_to_addr_f(CTRL_REG_ID)          => MI_DRD <= ctrl_reg;
-                when id_to_addr_f(WR_TICKS_REG_ID)      => MI_DRD <= wr_ticks_reg;
-                when id_to_addr_f(RD_TICKS_REG_ID)      => MI_DRD <= rd_ticks_reg;
-                when id_to_addr_f(RW_TICKS_REG_ID)      => MI_DRD <= rw_ticks_reg;
-                when id_to_addr_f(WR_WORDS_REG_ID)      => MI_DRD <= wr_words;
-                when id_to_addr_f(RD_WORDS_REG_ID)      => MI_DRD <= rd_words;
-                when id_to_addr_f(REQ_CNT_REG_ID)       => MI_DRD <= req_cnt;
-                when id_to_addr_f(LATENCY_SUM_REG_ID)   => MI_DRD <= latency_sum_ticks;
-                when id_to_addr_f(LATENCY_MIN_REG_ID)   => 
-                    MI_DRD <= (LATENCY_TICKS_WIDTH - 1 downto 0 => latency_min_ticks, others => '0');
-                when id_to_addr_f(LATENCY_MAX_REG_ID)   => 
-                    MI_DRD <= (LATENCY_TICKS_WIDTH - 1 downto 0 => latency_max_ticks, others => '0');
-                -- Dev info registers
-                when id_to_addr_f(AMM_DATA_W_REG_ID)    => MI_DRD <= std_logic_vector(to_unsigned(AMM_DATA_WIDTH,           MI_DATA_WIDTH));
-                when id_to_addr_f(AMM_ADDR_W_REG_ID)    => MI_DRD <= std_logic_vector(to_unsigned(AMM_ADDR_WIDTH,           MI_DATA_WIDTH));
-                when id_to_addr_f(AMM_BURST_W_REG_ID)   => MI_DRD <= std_logic_vector(to_unsigned(AMM_BURST_COUNT_WIDTH,    MI_DATA_WIDTH));
-                when id_to_addr_f(AMM_FREQ_REG_ID)      => MI_DRD <= std_logic_vector(to_unsigned(AMM_FREQ_KHZ,             MI_DATA_WIDTH));
-                when others                             => MI_DRD <= X"DEADBEEF";
-            end case;
+            -- Case can't be used because of warning:
+            -- "case choice should be a locally static expression"
+            if (mi_addr_sliced = id_to_addr_f(CTRL_REG_ID)          ) then
+                MI_DRD <= ctrl_reg;
+            elsif (mi_addr_sliced = id_to_addr_f(WR_TICKS_REG_ID)   ) then 
+                MI_DRD <= wr_ticks_reg;
+            elsif (mi_addr_sliced = id_to_addr_f(RD_TICKS_REG_ID)   ) then 
+                MI_DRD <= rd_ticks_reg;
+            elsif (mi_addr_sliced = id_to_addr_f(RW_TICKS_REG_ID)   ) then 
+                MI_DRD <= rw_ticks_reg;
+            elsif (mi_addr_sliced = id_to_addr_f(WR_WORDS_REG_ID)   ) then 
+                MI_DRD <= wr_words;
+            elsif (mi_addr_sliced = id_to_addr_f(RD_WORDS_REG_ID)   ) then 
+                MI_DRD <= rd_words;
+            elsif (mi_addr_sliced = id_to_addr_f(REQ_CNT_REG_ID)    ) then 
+                MI_DRD <= req_cnt;
+            elsif (mi_addr_sliced = id_to_addr_f(LATENCY_SUM_REG_1_ID)) then 
+                MI_DRD <= latency_sum_ticks(MI_DATA_WIDTH - 1 downto 0);
+            elsif (mi_addr_sliced = id_to_addr_f(LATENCY_SUM_REG_2_ID)) then 
+                MI_DRD <= latency_sum_ticks(MI_DATA_WIDTH * 2 - 1 downto MI_DATA_WIDTH);
+            elsif (mi_addr_sliced = id_to_addr_f(LATENCY_MIN_REG_ID)) then 
+                MI_DRD <= (LATENCY_TICKS_WIDTH - 1 downto 0 => latency_min_ticks, others => '0');
+            elsif (mi_addr_sliced = id_to_addr_f(LATENCY_MAX_REG_ID)) then
+                MI_DRD <= (LATENCY_TICKS_WIDTH - 1 downto 0 => latency_max_ticks, others => '0');
+            -- Dev info registers
+            elsif (mi_addr_sliced = id_to_addr_f(AMM_DATA_W_REG_ID) ) then
+                MI_DRD <= std_logic_vector(to_unsigned(AMM_DATA_WIDTH,           MI_DATA_WIDTH));
+            elsif (mi_addr_sliced = id_to_addr_f(AMM_ADDR_W_REG_ID) ) then
+                MI_DRD <= std_logic_vector(to_unsigned(AMM_ADDR_WIDTH,           MI_DATA_WIDTH));
+            elsif (mi_addr_sliced = id_to_addr_f(AMM_BURST_W_REG_ID)) then
+                MI_DRD <= std_logic_vector(to_unsigned(AMM_BURST_COUNT_WIDTH,    MI_DATA_WIDTH));
+            elsif (mi_addr_sliced = id_to_addr_f(AMM_FREQ_REG_ID)   ) then
+                MI_DRD <= std_logic_vector(to_unsigned(AMM_FREQ_KHZ,             MI_DATA_WIDTH));
+            else
+                MI_DRD <= X"DEADBEEF";
+            end if;
         end if;
     end process;
 
@@ -409,10 +443,9 @@ begin
                 ctrl_reg(CTRL_LAST_IN_BIT downto 0)                         <= (others => '0');
                 ctrl_reg(MI_DATA_WIDTH - 1 downto CTRL_LAST_OUT_BIT + 1)    <= (others => '0');
             elsif (MI_WR = '1') then
-                case mi_addr_sliced is
-                    when id_to_addr_f(CTRL_REG_ID)  => ctrl_reg(CTRL_LAST_IN_BIT downto 0)  <= MI_DWR(CTRL_LAST_IN_BIT downto 0);
-                    when others                     =>
-                end case;
+                if (mi_addr_sliced = id_to_addr_f(CTRL_REG_ID)) then 
+                    ctrl_reg(CTRL_LAST_IN_BIT downto 0)  <= MI_DWR(CTRL_LAST_IN_BIT downto 0);
+                end if;
             end if;
         end if;
     end process;
@@ -489,6 +522,17 @@ begin
         end if;
     end process;
 
+   rw_ticks_p : process(CLK)
+    begin            
+        if (rising_edge(CLK)) then
+            if (total_rst = '1' or (rw_ticks_full = '1' and rw_ticks_en = '1')) then
+                rw_ticks    <= (0 => '1', others => '0');
+            elsif (rw_ticks_en = '1') then
+                rw_ticks    <= std_logic_vector(unsigned(rw_ticks) + 1);
+            end if;
+        end if;
+    end process;
+
     -- R/W tick EN (enable ticks counters on first r/w request)
     wr_ticks_en_p : process(CLK)
     begin            
@@ -512,6 +556,17 @@ begin
         end if;
     end process;
 
+    rw_ticks_en_p : process(CLK)
+    begin            
+        if (rising_edge(CLK)) then
+            if (total_rst = '1') then
+                rw_ticks_en_delayed <= '0';
+            elsif (amm_wr_req = '1' or amm_rd_req = '1') then
+                rw_ticks_en_delayed <= '1';
+            end if;
+        end if;
+    end process;
+
     -- R/W ticks overflow occured
     wr_ticks_ovf_occ_p : process(CLK)
     begin            
@@ -531,6 +586,17 @@ begin
                 rd_ticks_ovf_occ    <= '0';
             elsif (rd_ticks_full = '1') then
                 rd_ticks_ovf_occ    <= '1';
+            end if;
+        end if;
+    end process;
+
+    rw_ticks_ovf_occ_p : process(CLK)
+    begin            
+        if (rising_edge(CLK)) then
+            if (total_rst = '1') then
+                rw_ticks_ovf_occ    <= '0';
+            elsif (rw_ticks_full = '1') then
+                rw_ticks_ovf_occ    <= '1';
             end if;
         end if;
     end process;
@@ -559,6 +625,19 @@ begin
             elsif (amm_rd_req = '1' or amm_rd_resp = '1') then
                 rd_ticks_reg                <= rd_ticks;
                 ctrl_reg(RD_TICKS_OVF_BIT)  <= rd_ticks_ovf_occ;
+            end if;
+        end if;
+    end process;
+
+    rw_ticks_save_p : process(CLK)
+    begin            
+        if (rising_edge(CLK)) then
+            if (total_rst = '1') then
+                rw_ticks_reg                <= (others => '0');
+                ctrl_reg(RW_TICKS_OVF_BIT)  <= '0';
+            elsif (amm_wr_req = '1' or amm_rd_req = '1' or amm_rd_resp = '1') then
+                rw_ticks_reg                <= rw_ticks;
+                ctrl_reg(RW_TICKS_OVF_BIT)  <= rw_ticks_ovf_occ;
             end if;
         end if;
     end process;
@@ -646,10 +725,20 @@ begin
         if (rising_edge(CLK)) then
             if (total_rst = '1') then
                 latency_counters_ovf_occ   <= '0';
-            elsif (latency_ticks_ovf = '1') then
+            elsif (latency_counters_ovf = '1') then
                 latency_counters_ovf_occ   <= '1';
             end if;
         end if;
     end process;
 
+    latency_sum_ovf_occ_p : process(CLK)
+    begin            
+        if (rising_edge(CLK)) then
+            if (total_rst = '1') then
+                latency_sum_ovf_occ   <= '0';
+            elsif (latency_sum_ovf = '1') then
+                latency_sum_ovf_occ   <= '1';
+            end if;
+        end if;
+    end process;
 end architecture;

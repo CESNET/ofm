@@ -1,4 +1,4 @@
--- mem_tester.vhd: Component for testing DDR4 memory 
+-- mem_tester.vhd: Component for testing DDR4 memory
 -- Copyright (C) 2021 CESNET z. s. p. o.
 -- Author(s): Lukas Nevrkla <xnevrk03@stud.fit.vutbr.cz>
 --
@@ -17,8 +17,13 @@ generic (
     AMM_DATA_WIDTH          : integer := 512;
     AMM_ADDR_WIDTH          : integer := 26;
     AMM_BURST_COUNT_WIDTH   : integer := 7;
-    -- For dev info in amm probe
     AMM_FREQ_KHZ            : integer := 266660;
+
+    -- Bus registers --
+    MUX_LATENCY             : integer := 1;
+    SLAVE_INPUT_REG         : boolean := false;
+    MASTER_OUTPUT_REG       : boolean := false;
+    MASTER_INPUT_LATENCY    : integer := 1;
 
     -- MI bus --
     MI_DATA_WIDTH           : integer := 32;
@@ -41,9 +46,20 @@ generic (
     DEFAULT_BURST_CNT       : integer := 4;
     -- Until which address should be test done (to reduce simulation resources)
     -- Shoud be power of 2
-    DEFAULT_ADDR_LIMIT      : integer := 2**AMM_ADDR_WIDTH - 2 ** AMM_BURST_COUNT_WIDTH; 
+    DEFAULT_ADDR_LIMIT      : integer := 2**AMM_ADDR_WIDTH - 2 ** AMM_BURST_COUNT_WIDTH;
     -- Force random address generator to generate in range 0 to DEFAULT_ADDR_LIMIT (for simulation)
-    DEBUG_RAND_ADDR         : boolean := False;
+    DEBUG_RAND_ADDR         : boolean := false;
+
+    MANUAL_REFRESH          : boolean := true; -- TODO
+    PERIODIC_REFRESH        : boolean := true; --TODO: false;
+    REFRESH_PERIOD_WIDTH    : integer := 32;
+    DEF_REFRESH_PERIOD_TICKS: integer := 10_000;
+    RANK_CNT                : integer := 4;
+
+    MEM_MMR_ADDR_WIDTH      : integer := 10;
+    MEM_MMR_DATA_WIDTH      : integer := 32;
+    MEM_MMR_BURST_WIDTH     : integer := 2;
+
     DEVICE                  : string
 );
 port(
@@ -54,18 +70,29 @@ port(
     AMM_RST                 : in std_logic;
 
     -- Indicates when controller is ready
-    AMM_READY               : in   std_logic;                                             
+    AMM_READY               : in   std_logic;
     -- When asserted, transaction to current address with current burst count is generated
     AMM_READ                : out  std_logic;
     -- Has to be high for every word in transaction
     AMM_WRITE               : out  std_logic;
     -- Indexed by AMM words (can be set just for the first word of each transaction)
     AMM_ADDRESS             : out  std_logic_vector(AMM_ADDR_WIDTH - 1 downto 0);
-    AMM_READ_DATA           : in   std_logic_vector(AMM_DATA_WIDTH - 1 downto 0);                          
+    AMM_READ_DATA           : in   std_logic_vector(AMM_DATA_WIDTH - 1 downto 0);
     AMM_WRITE_DATA          : out  std_logic_vector(AMM_DATA_WIDTH - 1 downto 0);
     -- Number of AMM words in one r/w transaction (1 to 127)
     AMM_BURST_COUNT         : out  std_logic_vector(AMM_BURST_COUNT_WIDTH - 1 downto 0);
-    AMM_READ_DATA_VALID     : in   std_logic;                                    
+    AMM_READ_DATA_VALID     : in   std_logic;
+
+    -- MEM MMR interface (memory mapped registers)
+    MEM_MMR_ADDRESS            : out std_logic_vector(MEM_MMR_ADDR_WIDTH-1 downto 0);
+    MEM_MMR_READDATA           : in  std_logic_vector(MEM_MMR_DATA_WIDTH-1 downto 0)    := (others => '0');
+    MEM_MMR_WRITEDATA          : out std_logic_vector(MEM_MMR_DATA_WIDTH-1 downto 0);
+    MEM_MMR_BURSTCOUNT         : out std_logic_vector(MEM_MMR_BURST_WIDTH-1 downto 0);
+    MEM_MMR_WAITREQUEST        : in  std_logic := '1';
+    MEM_MMR_READ               : out std_logic;
+    MEM_MMR_WRITE              : out std_logic;
+    MEM_MMR_BEGINBURSTTRANSFER : out std_logic;
+    MEM_MMR_READDATAVALID      : in  std_logic := '0';
 
     -- Other EMIF IP signals --
     EMIF_RST_REQ            : out  std_logic;   -- Force reset and calibration, must be at least 2 clk at '1'
@@ -73,6 +100,7 @@ port(
     EMIF_ECC_ISR            : in   std_logic;   -- Interrupt to indicate whenever bit error occurred
     EMIF_CAL_SUCCESS        : in   std_logic;   -- Calibration successful
     EMIF_CAL_FAIL           : in   std_logic;   -- Calibration failed
+    EMIF_AUTO_PRECHARGE     : out  std_logic;   -- Auto precharge request
 
     ----------------------
     -- MI bus interface --
@@ -103,47 +131,48 @@ architecture FULL of MEM_TESTER is
     ---------------
 
     type STATES_T is (
-        INIT, 
+        INIT,
+        PERFORM_REFRESH,
         DATA_WRITE,
         DATA_READ,
         WRITE_DONE,
         READ_DONE,
         WAITING_READ
     );
-    
-    -- AMM PIPE --
-    -- Todo: this delay is probably not needed!
-    constant AMM_OUT_WIDTH          : integer := AMM_ADDR_WIDTH + AMM_DATA_WIDTH + AMM_BURST_COUNT_WIDTH + 2;
-    constant AMM_IN_WIDTH           : integer := AMM_DATA_WIDTH + 1;
-    
-    constant AMM_IN_DELAY           : integer := 3;
-    constant AMM_OUT_DELAY          : integer := 2;  -- There is additional 2 clk cycle delay in piped mux
-    constant AMM_INTERN_DELAY       : integer := 2;  -- To compensate delay in piped addr mux
 
-    constant EMIF_OUT_WIDTH         : integer := 1;
+    -- AMM MUX --
+    -- Indexes depend on mux_sel signal connection!
+    constant MUX_SLOT_MAIN          : integer := 0;
+    constant MUX_SLOT_RANDOM        : integer := 1; -- Same as MUX_SLOT_MAIN but random addr
+    constant MUX_SLOT_AMM_GEN       : integer := 2;
+    constant MUX_WIDTH              : integer := 3;
+
+    constant EMIF_OUT_WIDTH         : integer := 2;
     constant EMIF_IN_WIDTH          : integer := 4;
     constant EMIF_DELAY             : integer := 1;
 
+    constant MMR_MUX_SLOT_GEN       : integer := 0;
+    constant MMR_MUX_SLOT_REFRESH   : integer := 1;
+    constant MMR_MUX_WIDTH          : integer := 2;
+
     constant ERR_CMP_USE_OUT_REG    : boolean := True;
-
-
 
     -- EMIF user rst request should be at least 2 CLK cycles long
     -- Reset will be hold while mi rst req register bit is set to 1 + this ticks cnt
     constant RST_REQ_TICKS          : integer := 4;
-    constant RST_REQ_LIMIT          : std_logic_vector(log2(RST_REQ_TICKS) - 1 downto 0) 
+    constant RST_REQ_LIMIT          : std_logic_vector(log2(RST_REQ_TICKS) - 1 downto 0)
         := std_logic_vector(to_unsigned(RST_REQ_TICKS - 1, log2(RST_REQ_TICKS)));
 
     constant MI_ADDR_USED_BITS      : integer := 7; -- TODO: remove
     -- Max address: 0XFF
-    constant MI_ADDR_USAGE          : integer := 8;  
+    constant MI_ADDR_USAGE          : integer := 8;
     constant AMM_GEN_BASE           : std_logic_vector(MI_ADDR_USAGE - 1 downto 0) := X"40";
-    constant AMM_PROBE_BASE         : std_logic_vector(MI_ADDR_USAGE - 1 downto 0) := X"80";
+    constant AMM_PROBE_BASE         : std_logic_vector(MI_ADDR_USAGE - 1 downto 0) := X"50";
+    constant MMR_BASE               : std_logic_vector(MI_ADDR_USAGE - 1 downto 0) := X"90";
 
     -- AMM_ADDR MUX
     constant SEL_ADDR_CNT           : integer := 2;
     constant SEL_ADDR_WIDTH         : integer := log2(SEL_ADDR_CNT);
-
 
     -------------
     -- Signals --
@@ -153,11 +182,11 @@ architecture FULL of MEM_TESTER is
     signal total_rst                : std_logic;
     signal total_rst_raw            : std_logic;
 
-    -- State machine                
+    -- State machine
     signal curr_state               : STATES_T;
     signal next_state               : STATES_T;
 
-    -- Random gen                   
+    -- Random gen
     signal random_data              : std_logic_vector(AMM_DATA_WIDTH - 1 downto 0);
     signal random_en                : std_logic;
     signal random_en_req            : std_logic;
@@ -169,19 +198,19 @@ architecture FULL of MEM_TESTER is
     signal random_addr_en_req       : std_logic;
     signal random_addr_rst          : std_logic;
 
-    -- Err cnt                      
+    -- Err cnt
     signal err_found                : std_logic;
     signal read_data_match          : std_logic;
     signal err_rst                  : std_logic;
     signal err_cnt                  : std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
 
-    -- Others                       
+    -- Others
     signal receive_data             : std_logic;
     signal receive_data_delayed     : std_logic;        -- If ERR_CMP_USE_OUT_REG = True
     signal receive_data_delayed_2   : std_logic;        -- If ERR_CMP_USE_OUT_REG = True
     signal wait_for_read_data       : std_logic;
 
-    -- AMM R/W 
+    -- AMM R/W
     -- AMM R/W delayed (because manual buff BRAM is delayed by 1 clk)
     signal amm_write_delayed        : std_logic;
 
@@ -189,10 +218,10 @@ architecture FULL of MEM_TESTER is
     signal curr_address             : std_logic_vector(AMM_ADDR_WIDTH - 1 downto 0);
     signal addr_incr                : std_logic;
     signal addr_incr_req_wr         : std_logic;    -- Address incr only when burst is done
-    signal addr_incr_req_rd         : std_logic;    -- Does not depend on burst done 
+    signal addr_incr_req_rd         : std_logic;    -- Does not depend on burst done
     signal addr_lim_reached         : std_logic;
 
-    -- Memory address for receiving data 
+    -- Memory address for receiving data
     -- (readed data can be received while read requests are beeing generated)
     signal curr_read_address        : std_logic_vector(AMM_ADDR_WIDTH - 1 downto 0);
     signal read_addr_incr           : std_logic;
@@ -202,7 +231,7 @@ architecture FULL of MEM_TESTER is
     signal curr_burst_cnt           : std_logic_vector(AMM_BURST_COUNT_WIDTH - 1 downto 0);
     signal burst_done               : std_logic;
     signal burst_en                 : std_logic;
-    
+
     -- Burst for reading (indexed from 1 to match mi_burst_cnt)
     signal curr_read_burst_cnt      : std_logic_vector(AMM_BURST_COUNT_WIDTH - 1 downto 0);
     signal read_burst_done          : std_logic;
@@ -221,99 +250,127 @@ architecture FULL of MEM_TESTER is
     signal addr_limit               : std_logic_vector(AMM_ADDR_WIDTH - 1 downto 0);
 
     signal read_running             : std_logic;
-    -- 1 when only 1 simult read is disabled or when on other transaction is running 
+    -- 1 when only 1 simult read is disabled or when on other transaction is running
     signal simult_en_read           : std_logic;
 
     -- AMM bus mux --
-    signal amm_out_piped            : slv_array_t(0 to AMM_OUT_DELAY)(AMM_OUT_WIDTH - 1 downto 0);
-    signal amm_out_piped_2          : std_logic_vector(AMM_OUT_WIDTH - 1 downto 0);
-    signal amm_out                  : std_logic_vector(AMM_OUT_WIDTH - 1 downto 0);
-    signal amm_out_intern           : std_logic_vector(AMM_OUT_WIDTH - 1 downto 0);
-    signal amm_out_intern_piped     : slv_array_t(0 to AMM_INTERN_DELAY)(AMM_OUT_WIDTH - AMM_ADDR_WIDTH - 1 downto 0);
-    signal amm_out_amm_gen          : std_logic_vector(AMM_OUT_WIDTH - 1 downto 0);
+    signal mux_sel                  : std_logic_vector(log2(MUX_WIDTH) - 1 downto 0);
 
-    signal amm_addr_concat          : slv_array_t(0 to SEL_ADDR_CNT - 1)(AMM_ADDR_WIDTH - 1 downto 0);
-    signal amm_addr_muxed           : std_logic_vector(AMM_ADDR_WIDTH - 1 downto 0);
-    signal amm_addr_sel             : std_logic_vector(SEL_ADDR_WIDTH - 1 downto 0);
+    signal amm_muxed_ready           : std_logic_vector(MUX_WIDTH - 1 downto 0);
+    signal amm_muxed_read            : std_logic_vector(MUX_WIDTH - 1 downto 0);
+    signal amm_muxed_write           : std_logic_vector(MUX_WIDTH - 1 downto 0);
+    signal amm_muxed_read_data_valid : std_logic_vector(MUX_WIDTH - 1 downto 0);
+    signal amm_muxed_address         : slv_array_t(MUX_WIDTH - 1 downto 0)(AMM_ADDR_WIDTH - 1 downto 0);
+    signal amm_muxed_read_data       : slv_array_t(MUX_WIDTH - 1 downto 0)(AMM_DATA_WIDTH - 1 downto 0);
+    signal amm_muxed_write_data      : slv_array_t(MUX_WIDTH - 1 downto 0)(AMM_DATA_WIDTH - 1 downto 0);
+    signal amm_muxed_burst_count     : slv_array_t(MUX_WIDTH - 1 downto 0)(AMM_BURST_COUNT_WIDTH - 1 downto 0);
 
-    -- amm_in_piped(0) = orig           
-    signal amm_in_piped             : slv_array_t(0 to AMM_IN_DELAY)(AMM_IN_WIDTH - 1 downto 0);
-    signal amm_in_piped_2           : std_logic_vector(AMM_IN_WIDTH - 1 downto 0);
-    signal amm_in                   : std_logic_vector(AMM_IN_WIDTH - 1 downto 0);
-
-    signal amm_intern_ready             : std_logic;
-    signal amm_intern_read              : std_logic;
-    signal amm_intern_write             : std_logic;                                            
-    signal amm_intern_read_data         : std_logic_vector(AMM_DATA_WIDTH - 1 downto 0);        
-    signal amm_intern_write_data        : std_logic_vector(AMM_DATA_WIDTH - 1 downto 0);       
-    signal amm_intern_burst_count       : std_logic_vector(AMM_BURST_COUNT_WIDTH - 1 downto 0);
-    signal amm_intern_read_data_valid   : std_logic;                                    
-
-    signal emif_out_piped           : slv_array_t(0 to EMIF_DELAY)(EMIF_OUT_WIDTH - 1 downto 0);
-    signal emif_out                 : std_logic_vector(EMIF_OUT_WIDTH - 1 downto 0);
-    signal emif_in_piped            : slv_array_t(0 to EMIF_DELAY)(EMIF_IN_WIDTH - 1 downto 0);
-    signal emif_in                  : std_logic_vector(EMIF_IN_WIDTH - 1 downto 0);
+    signal amm_intern_ready         : std_logic;
+    signal amm_intern_read          : std_logic;
+    signal amm_intern_write         : std_logic;
+    signal amm_intern_read_data     : std_logic_vector(AMM_DATA_WIDTH - 1 downto 0);
+    signal amm_intern_write_data    : std_logic_vector(AMM_DATA_WIDTH - 1 downto 0);
+    signal amm_intern_burst_count   : std_logic_vector(AMM_BURST_COUNT_WIDTH - 1 downto 0);
+    signal amm_intern_read_data_valid : std_logic;
 
     signal emif_intern_rst_req      : std_logic;
     signal emif_intern_rst_done     : std_logic;
     signal emif_intern_ecc_isr      : std_logic;
     signal emif_intern_cal_success  : std_logic;
     signal emif_intern_cal_fail     : std_logic;
+    signal emif_intern_precharge    : std_logic;
+
+    signal emif_out_piped           : slv_array_t(0 to EMIF_DELAY)(EMIF_OUT_WIDTH - 1 downto 0);
+    signal emif_out                 : std_logic_vector(EMIF_OUT_WIDTH - 1 downto 0);
+    signal emif_in_piped            : slv_array_t(0 to EMIF_DELAY)(EMIF_IN_WIDTH - 1 downto 0);
+    signal emif_in                  : std_logic_vector(EMIF_IN_WIDTH - 1 downto 0);
+
+    -- MMR bus mux --
+    signal mmr_mux_sel               : std_logic_vector(log2(MMR_MUX_WIDTH) - 1 downto 0);
+
+    signal mmr_muxed_ready           : std_logic_vector(MMR_MUX_WIDTH - 1 downto 0);
+    signal mmr_muxed_read            : std_logic_vector(MMR_MUX_WIDTH - 1 downto 0);
+    signal mmr_muxed_write           : std_logic_vector(MMR_MUX_WIDTH - 1 downto 0);
+    signal mmr_muxed_read_data_valid : std_logic_vector(MMR_MUX_WIDTH - 1 downto 0);
+    signal mmr_muxed_address         : slv_array_t(MMR_MUX_WIDTH - 1 downto 0)(MEM_MMR_ADDR_WIDTH - 1 downto 0);
+    signal mmr_muxed_read_data       : slv_array_t(MMR_MUX_WIDTH - 1 downto 0)(MEM_MMR_DATA_WIDTH - 1 downto 0);
+    signal mmr_muxed_write_data      : slv_array_t(MMR_MUX_WIDTH - 1 downto 0)(MEM_MMR_DATA_WIDTH - 1 downto 0);
+    signal mmr_muxed_burst_count     : slv_array_t(MMR_MUX_WIDTH - 1 downto 0)(MEM_MMR_BURST_WIDTH - 1 downto 0);
+
+    -- EMIF refresh
+    signal manual_refresh_s         : std_logic;
+    signal refreshing_any           : std_logic;
+    signal refresh_ranks            : std_logic_vector(RANK_CNT - 1 downto 0);
+    signal refresh_start_any        : std_logic;
+    signal refresh_done_any         : std_logic;
 
     -- MI bus --
     signal mi_addr_cutted           : std_logic_vector(MI_ADDR_USAGE - 1 downto 0);
     -- in
     signal mi_rst_req               : std_logic;
     signal mi_rst_emif_req          : std_logic;
-    signal mi_run_test              : std_logic;        
+    signal mi_run_test              : std_logic;
     signal mi_manual_en             : std_logic;
     signal mi_random_addr_en        : std_logic;
     signal mi_one_simult_read       : std_logic;
+    signal mi_auto_precharge        : std_logic;
 
-    -- out                           
+    -- out
     signal mi_test_done             : std_logic;
     signal mi_test_success          : std_logic;
     signal mi_ecc_error             : std_logic;
     signal mi_calib_success         : std_logic;
     signal mi_calib_fail            : std_logic;
+    signal mi_refresh_dur_tic_ovf   : std_logic;
+    signal mi_refresh_dur_sum_ovf   : std_logic;
+    signal mi_refresh_dur_cnt_ovf   : std_logic;
+
     signal mi_err_cnt               : std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
     signal mi_burst_cnt             : std_logic_vector(AMM_BURST_COUNT_WIDTH - 1 downto 0);
+    signal mi_refresh_period        : std_logic_vector(REFRESH_PERIOD_WIDTH - 1 downto 0);
+    signal mi_refresh_dur_min       : std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
+    signal mi_refresh_dur_max       : std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
+    signal mi_refresh_dur_sum       : std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
+    signal mi_refresh_ticks_ovf     : std_logic;
+    signal mi_refresh_counters_ovf  : std_logic;
+    signal mi_refresh_sum_ovf       : std_logic;
 
     -- AMM_GEN --
-    signal amm_gen_ready            : std_logic;
-    signal amm_gen_read             : std_logic;
-    signal amm_gen_write            : std_logic;                                            
-    signal amm_gen_address          : std_logic_vector(AMM_ADDR_WIDTH - 1 downto 0);  
-    signal amm_gen_read_data        : std_logic_vector(AMM_DATA_WIDTH - 1 downto 0);        
-    signal amm_gen_write_data       : std_logic_vector(AMM_DATA_WIDTH - 1 downto 0);       
-    signal amm_gen_burst_count      : std_logic_vector(AMM_BURST_COUNT_WIDTH - 1 downto 0);
-    signal amm_gen_read_data_valid  : std_logic;                                    
-
-    signal amm_gen_dwr              : std_logic_vector(MI_DATA_WIDTH - 1 downto 0);  
+    signal amm_gen_dwr              : std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
     signal amm_gen_addr             : std_logic_vector(MI_ADDR_USAGE - 1 downto 0);
     signal amm_gen_be               : std_logic_vector(MI_DATA_WIDTH / 8 - 1 downto 0);
     signal amm_gen_rd               : std_logic;
     signal amm_gen_wr               : std_logic;
     signal amm_gen_ardy             : std_logic;
-    signal amm_gen_drd              : std_logic_vector(MI_DATA_WIDTH - 1 downto 0);    
+    signal amm_gen_drd              : std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
     signal amm_gen_drdy             : std_logic;
 
     -- AMM PROBE --
-    signal amm_probe_dwr            : std_logic_vector(MI_DATA_WIDTH - 1 downto 0);  
+    signal amm_probe_dwr            : std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
     signal amm_probe_addr           : std_logic_vector(MI_ADDR_USAGE - 1 downto 0);
     signal amm_probe_be             : std_logic_vector(MI_DATA_WIDTH / 8 - 1 downto 0);
     signal amm_probe_rd             : std_logic;
     signal amm_probe_wr             : std_logic;
     signal amm_probe_ardy           : std_logic;
-    signal amm_probe_drd            : std_logic_vector(MI_DATA_WIDTH - 1 downto 0);    
+    signal amm_probe_drd            : std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
     signal amm_probe_drdy           : std_logic;
+
+    -- MMR --
+    signal mmr_dwr                  : std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
+    signal mmr_addr                 : std_logic_vector(MI_ADDR_USAGE - 1 downto 0);
+    signal mmr_be                   : std_logic_vector(MI_DATA_WIDTH / 8 - 1 downto 0);
+    signal mmr_rd                   : std_logic;
+    signal mmr_wr                   : std_logic;
+    signal mmr_ardy                 : std_logic;
+    signal mmr_drd                  : std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
+    signal mmr_drdy                 : std_logic;
 
     -- RANDOM gen --
     component LFSR_SIMPLE_RANDOM_GEN is
         generic(
            DATA_WIDTH : natural := RAND_GEN_DATA_WIDTH;
            -- Reset seed value, all bits must NOT be set high!!!
-           RESET_SEED : std_logic_vector(DATA_WIDTH-1 downto 0) 
+           RESET_SEED : std_logic_vector(DATA_WIDTH-1 downto 0)
         );
         port(
            CLK    : in  std_logic;
@@ -322,7 +379,7 @@ architecture FULL of MEM_TESTER is
            DATA   : out std_logic_vector(DATA_WIDTH-1 downto 0)
         );
      end component;
- 
+
 begin
     ----------------
     -- Components --
@@ -334,11 +391,11 @@ begin
         generic map(
             DATA_WIDTH          => RAND_GEN_DATA_WIDTH,
             RESET_SEED          => RANDOM_DATA_SEED(i)
-        )                       
-        port map(               
+        )
+        port map(
             CLK                 => AMM_CLK,
             RESET               => random_rst,
-            ENABLE              => random_en,       
+            ENABLE              => random_en,
             DATA                => random_data(RAND_GEN_DATA_WIDTH * (i + 1) - 1 downto RAND_GEN_DATA_WIDTH * i)
         );
     end generate;
@@ -348,11 +405,11 @@ begin
         generic map(
             DATA_WIDTH          => RAND_GEN_ADDR_WIDTH,
             RESET_SEED          => RANDOM_ADDR_SEED
-        )                        
-        port map(                
+        )
+        port map(
             CLK                 => AMM_CLK,
             RESET               => random_addr_rst,
-            ENABLE              => random_addr_en,       
+            ENABLE              => random_addr_en,
             DATA                => random_addr_raw
         );
 
@@ -360,12 +417,12 @@ begin
     generic map (
         DATA_WIDTH              => AMM_DATA_WIDTH,
         IS_DSP                  => false,
-        REG_IN                  => ERR_CMP_USE_OUT_REG, 
+        REG_IN                  => ERR_CMP_USE_OUT_REG,
         REG_OUT                 => ERR_CMP_USE_OUT_REG,
         COMPARE_EQ              => true ,
         COMPARE_CMP             => false
-    )                           
-    port map (                  
+    )
+    port map (
         CLK                     => AMM_CLK,
         RESET                   => total_rst,
         A                       => amm_intern_read_data,
@@ -373,42 +430,40 @@ begin
         EQ                      => read_data_match
     );
 
-    amm_mux_out_i : entity work.GEN_MUX_PIPED
+    amm_mux_i : entity work.AMM_MUX
     generic map (
-        DATA_WIDTH              => AMM_OUT_WIDTH,
-        MUX_WIDTH               => 2,
-        MUX_LATENCY             => 0,
-        INPUT_REG               => true,
-        OUTPUT_REG              => true
-    )                           
-    port map (                  
-        CLK                     => AMM_CLK,
-        RESET                   => total_rst,
-        -- in                    
-        RX_DATA                 => amm_out_amm_gen & amm_out_intern,
-        RX_SEL                  => (0 => mi_manual_en),
-        -- out                   
-        TX_DATA                 => amm_out,
-        TX_DST_RDY              => amm_intern_ready
-    );
+        MUX_WIDTH               => MUX_WIDTH,
+        MUX_LATENCY             => MUX_LATENCY,
+        SLAVE_INPUT_REG         => SLAVE_INPUT_REG,
+        MASTER_OUTPUT_REG       => MASTER_OUTPUT_REG,
+        MASTER_INPUT_LATENCY    => MASTER_INPUT_LATENCY,
 
-    amm_mux_addr_i : entity work.GEN_MUX_PIPED
-    generic map (
-        DATA_WIDTH              => AMM_ADDR_WIDTH,
-        MUX_WIDTH               => SEL_ADDR_CNT,
-        MUX_LATENCY             => 0,
-        INPUT_REG               => true,
-        OUTPUT_REG              => true
-    )                            
-    port map (                   
-        CLK                     => AMM_CLK,
-        RESET                   => total_rst,
-        -- in                    
-        RX_DATA                 => slv_array_ser(amm_addr_concat),     --TODO CHEACK
-        RX_SEL                  => amm_addr_sel,
-        -- out                   
-        TX_DATA                 => amm_addr_muxed,
-        TX_DST_RDY              => amm_intern_ready
+        AMM_DATA_WIDTH          => AMM_DATA_WIDTH,
+        AMM_ADDR_WIDTH          => AMM_ADDR_WIDTH,
+        AMM_BURST_COUNT_WIDTH   => AMM_BURST_COUNT_WIDTH
+    )
+    port map (
+        AMM_CLK                     => AMM_CLK,
+        AMM_RST                     => AMM_RST,
+        MUX_SEL                     => mux_sel,
+
+        MASTER_AMM_READY            => AMM_READY,
+        MASTER_AMM_READ             => AMM_READ,
+        MASTER_AMM_WRITE            => AMM_WRITE,
+        MASTER_AMM_READ_DATA_VALID  => AMM_READ_DATA_VALID,
+        MASTER_AMM_ADDRESS          => AMM_ADDRESS,
+        MASTER_AMM_READ_DATA        => AMM_READ_DATA,
+        MASTER_AMM_WRITE_DATA       => AMM_WRITE_DATA,
+        MASTER_AMM_BURST_COUNT      => AMM_BURST_COUNT,
+
+        SLAVE_AMM_READY             => amm_muxed_ready,
+        SLAVE_AMM_READ              => amm_muxed_read,
+        SLAVE_AMM_WRITE             => amm_muxed_write,
+        SLAVE_AMM_READ_DATA_VALID   => amm_muxed_read_data_valid,
+        SLAVE_AMM_ADDRESS           => amm_muxed_address,
+        SLAVE_AMM_READ_DATA         => amm_muxed_read_data,
+        SLAVE_AMM_WRITE_DATA        => amm_muxed_write_data,
+        SLAVE_AMM_BURST_COUNT       => amm_muxed_burst_count
     );
 
     mem_tester_mi_i : entity work.MEM_TESTER_MI
@@ -417,83 +472,104 @@ begin
         MI_ADDR_WIDTH           => MI_ADDR_USAGE,
         AMM_ADDR_WIDTH          => AMM_ADDR_WIDTH,
         AMM_BURST_COUNT_WIDTH   => AMM_BURST_COUNT_WIDTH,
+        REFRESH_PERIOD_WIDTH    => REFRESH_PERIOD_WIDTH,
 
         AMM_GEN_BASE            => AMM_GEN_BASE,
         AMM_PROBE_BASE          => AMM_PROBE_BASE,
+        MMR_BASE                => MMR_BASE,
         DEFAULT_BURST_CNT       => DEFAULT_BURST_CNT,
         DEFAULT_ADDR_LIMIT      => DEFAULT_ADDR_LIMIT,
+        DEFAULT_REFRESH_TICKS   => DEF_REFRESH_PERIOD_TICKS,
 
         DEVICE                  => DEVICE
     )
-    port map(    
+    port map(
         -- MI master --
-        MI_CLK                  => MI_CLK, 
-        MI_RST                  => MI_RST, 
+        MI_CLK                  => MI_CLK,
+        MI_RST                  => MI_RST,
 
-        MI_DWR                  => MI_DWR, 
-        MI_ADDR                 => mi_addr_cutted, 
-        MI_BE                   => MI_BE, 
-        MI_RD                   => MI_RD, 
-        MI_WR                   => MI_WR, 
-        MI_ARDY                 => MI_ARDY, 
+        MI_DWR                  => MI_DWR,
+        MI_ADDR                 => mi_addr_cutted,
+        MI_BE                   => MI_BE,
+        MI_RD                   => MI_RD,
+        MI_WR                   => MI_WR,
+        MI_ARDY                 => MI_ARDY,
 
-        MI_DRD                  => MI_DRD, 
-        MI_DRDY                 => MI_DRDY,   
+        MI_DRD                  => MI_DRD,
+        MI_DRDY                 => MI_DRDY,
 
-        CLK                     => AMM_CLK,        
-        RST                     => amm_rst_delayed,        
+        CLK                     => AMM_CLK,
+        RST                     => amm_rst_delayed,
 
         -- Master => slave
-        RST_REQ                 => mi_rst_req, 
+        RST_REQ                 => mi_rst_req,
         RST_EMIF_REQ            => mi_rst_emif_req,
-        RUN_TEST                => mi_run_test, 
-        MANUAL_EN               => mi_manual_en, 
+        RUN_TEST                => mi_run_test,
+        MANUAL_EN               => mi_manual_en,
         RANDOM_ADDR_EN          => mi_random_addr_en,
         ONE_SIMULT_READ         => mi_one_simult_read,
+        AUTO_PRECHARGE          => mi_auto_precharge,
+        REFRESH_DUR_SUM         => mi_refresh_dur_sum,
+        REFRESH_DUR_MIN         => mi_refresh_dur_min,
+        REFRESH_DUR_MAX         => mi_refresh_dur_max,
 
-        -- Slave => master 
-        TEST_DONE               => mi_test_done, 
-        TEST_SUCCESS            => mi_test_success, 
-        ECC_ERROR               => mi_ecc_error, 
-        CALIB_SUCCESS           => mi_calib_success, 
-        CALIB_FAIL              => mi_calib_fail, 
+        -- Slave => master
+        TEST_DONE               => mi_test_done,
+        TEST_SUCCESS            => mi_test_success,
+        ECC_ERROR               => mi_ecc_error,
+        CALIB_SUCCESS           => mi_calib_success,
+        CALIB_FAIL              => mi_calib_fail,
+        AMM_READY               => AMM_READY,
+        REFRESH_TICKS_OVF       => mi_refresh_ticks_ovf,
+        REFRESH_COUNTERS_OVF    => mi_refresh_counters_ovf,
+        REFRESH_SUM_OVF         => mi_refresh_sum_ovf,
         ERR_CNT                 => mi_err_cnt,
         BURST_CNT               => mi_burst_cnt,
-        addr_limit              => addr_limit,
+        ADDR_LIMIT              => addr_limit,
+        REFRESH_PERIOD_TICKS    => mi_refresh_period,
 
-        AMM_GEN_DWR             => amm_gen_dwr,   
-        AMM_GEN_ADDR            => amm_gen_addr,  
-        AMM_GEN_BE              => amm_gen_be,    
-        AMM_GEN_RD              => amm_gen_rd,    
-        AMM_GEN_WR              => amm_gen_wr,    
-        AMM_GEN_ARDY            => amm_gen_ardy,  
-        AMM_GEN_DRD             => amm_gen_drd,   
+        AMM_GEN_DWR             => amm_gen_dwr,
+        AMM_GEN_ADDR            => amm_gen_addr,
+        AMM_GEN_BE              => amm_gen_be,
+        AMM_GEN_RD              => amm_gen_rd,
+        AMM_GEN_WR              => amm_gen_wr,
+        AMM_GEN_ARDY            => amm_gen_ardy,
+        AMM_GEN_DRD             => amm_gen_drd,
         AMM_GEN_DRDY            => amm_gen_drdy,
 
-        AMM_PROBE_DWR           => amm_probe_dwr,   
-        AMM_PROBE_ADDR          => amm_probe_addr,  
-        AMM_PROBE_BE            => amm_probe_be,    
-        AMM_PROBE_RD            => amm_probe_rd,    
-        AMM_PROBE_WR            => amm_probe_wr,    
-        AMM_PROBE_ARDY          => amm_probe_ardy,  
-        AMM_PROBE_DRD           => amm_probe_drd,   
-        AMM_PROBE_DRDY          => amm_probe_drdy
+        AMM_PROBE_DWR           => amm_probe_dwr,
+        AMM_PROBE_ADDR          => amm_probe_addr,
+        AMM_PROBE_BE            => amm_probe_be,
+        AMM_PROBE_RD            => amm_probe_rd,
+        AMM_PROBE_WR            => amm_probe_wr,
+        AMM_PROBE_ARDY          => amm_probe_ardy,
+        AMM_PROBE_DRD           => amm_probe_drd,
+        AMM_PROBE_DRDY          => amm_probe_drdy,
+
+        MMR_DWR                 => mmr_dwr,
+        MMR_ADDR                => mmr_addr,
+        MMR_BE                  => mmr_be,
+        MMR_RD                  => mmr_rd,
+        MMR_WR                  => mmr_wr,
+        MMR_ARDY                => mmr_ardy,
+        MMR_DRD                 => mmr_drd,
+        MMR_DRDY                => mmr_drdy
     );
 
     amm_gen_i : entity work.AMM_GEN
-    generic map (    
-        MI_DATA_WIDTH           => MI_DATA_WIDTH, 
-        MI_ADDR_WIDTH           => MI_ADDR_USAGE, 
+    generic map (
+        MI_DATA_WIDTH           => MI_DATA_WIDTH,
+        MI_ADDR_WIDTH           => MI_ADDR_USAGE,
 
-        AMM_DATA_WIDTH          => AMM_DATA_WIDTH, 
-        AMM_ADDR_WIDTH          => AMM_ADDR_WIDTH, 
-        AMM_BURST_COUNT_WIDTH   => AMM_BURST_COUNT_WIDTH, 
+        AMM_DATA_WIDTH          => AMM_DATA_WIDTH,
+        AMM_ADDR_WIDTH          => AMM_ADDR_WIDTH,
+        AMM_BURST_COUNT_WIDTH   => AMM_BURST_COUNT_WIDTH,
 
         MI_ADDR_BASE            => AMM_GEN_BASE,
         MI_ADDR_USED_BITS       => MI_ADDR_USED_BITS,
         DEVICE                  => DEVICE
     )
-    port map (    
+    port map (
         CLK                     => AMM_CLK,
         RST                     => total_rst,
 
@@ -506,31 +582,31 @@ begin
         MI_DRD                  => amm_gen_drd,
         MI_DRDY                 => amm_gen_drdy,
 
-        AMM_READY               => amm_gen_ready,
-        AMM_READ                => amm_gen_read,
-        AMM_WRITE               => amm_gen_write,          
-        AMM_ADDRESS             => amm_gen_address,        
-        AMM_READ_DATA           => amm_gen_read_data,      
-        AMM_WRITE_DATA          => amm_gen_write_data,     
-        AMM_BURST_COUNT         => amm_gen_burst_count,    
-        AMM_READ_DATA_VALID     => amm_gen_read_data_valid
+        AMM_READY               => amm_muxed_ready(MUX_SLOT_AMM_GEN),
+        AMM_READ                => amm_muxed_read(MUX_SLOT_AMM_GEN), 
+        AMM_WRITE               => amm_muxed_write(MUX_SLOT_AMM_GEN),
+        AMM_ADDRESS             => amm_muxed_address(MUX_SLOT_AMM_GEN),
+        AMM_READ_DATA           => amm_muxed_read_data(MUX_SLOT_AMM_GEN),
+        AMM_WRITE_DATA          => amm_muxed_write_data(MUX_SLOT_AMM_GEN),
+        AMM_BURST_COUNT         => amm_muxed_burst_count(MUX_SLOT_AMM_GEN),
+        AMM_READ_DATA_VALID     => amm_muxed_read_data_valid(MUX_SLOT_AMM_GEN)
     );
 
     amm_probe_i : entity work.AMM_PROBE
-    generic map (    
+    generic map (
         MI_DATA_WIDTH           => MI_DATA_WIDTH,
         MI_ADDR_WIDTH           => MI_ADDR_USAGE,
-                             
+
         AMM_DATA_WIDTH          => AMM_DATA_WIDTH,
         AMM_ADDR_WIDTH          => AMM_ADDR_WIDTH,
         AMM_BURST_COUNT_WIDTH   => AMM_BURST_COUNT_WIDTH,
         AMM_FREQ_KHZ            => AMM_FREQ_KHZ,
-                             
+
         MI_ADDR_BASE            => AMM_PROBE_BASE,
         MI_ADDR_USED_BITS       => MI_ADDR_USED_BITS,
         DEVICE                  => DEVICE
     )
-    port map (    
+    port map (
         CLK                     => AMM_CLK,
         RST                     => total_rst,
 
@@ -553,58 +629,183 @@ begin
         AMM_READ_DATA_VALID     => AMM_READ_DATA_VALID
     );
 
+   mmr_mux_i : entity work.AMM_MUX
+    generic map (
+        MUX_WIDTH               => MMR_MUX_WIDTH,
+
+        AMM_DATA_WIDTH          => MEM_MMR_DATA_WIDTH,
+        AMM_ADDR_WIDTH          => MEM_MMR_ADDR_WIDTH,
+        AMM_BURST_COUNT_WIDTH   => MEM_MMR_BURST_WIDTH
+    )
+    port map (
+        AMM_CLK                     => AMM_CLK,
+        AMM_RST                     => AMM_RST,
+        MUX_SEL                     => mmr_mux_sel,
+
+        MASTER_AMM_READY            => not MEM_MMR_WAITREQUEST,
+        MASTER_AMM_READ             => MEM_MMR_READ,
+        MASTER_AMM_WRITE            => MEM_MMR_WRITE,
+        MASTER_AMM_READ_DATA_VALID  => MEM_MMR_READDATAVALID,
+        MASTER_AMM_ADDRESS          => MEM_MMR_ADDRESS,
+        MASTER_AMM_READ_DATA        => MEM_MMR_READDATA,
+        MASTER_AMM_WRITE_DATA       => MEM_MMR_WRITEDATA,
+        MASTER_AMM_BURST_COUNT      => MEM_MMR_BURSTCOUNT,
+
+        SLAVE_AMM_READY             => mmr_muxed_ready,
+        SLAVE_AMM_READ              => mmr_muxed_read,
+        SLAVE_AMM_WRITE             => mmr_muxed_write,
+        SLAVE_AMM_READ_DATA_VALID   => mmr_muxed_read_data_valid,
+        SLAVE_AMM_ADDRESS           => mmr_muxed_address,
+        SLAVE_AMM_READ_DATA         => mmr_muxed_read_data,
+        SLAVE_AMM_WRITE_DATA        => mmr_muxed_write_data,
+        SLAVE_AMM_BURST_COUNT       => mmr_muxed_burst_count
+    );
+
+    mmr_amm_gen_i : entity work.AMM_GEN
+    generic map (
+        MI_DATA_WIDTH           => MI_DATA_WIDTH,
+        MI_ADDR_WIDTH           => MI_ADDR_USAGE,
+
+        AMM_DATA_WIDTH          => MEM_MMR_DATA_WIDTH,
+        AMM_ADDR_WIDTH          => MEM_MMR_ADDR_WIDTH,
+        AMM_BURST_COUNT_WIDTH   => MEM_MMR_BURST_WIDTH,
+
+        MI_ADDR_BASE            => MMR_BASE,
+        MI_ADDR_USED_BITS       => MI_ADDR_USED_BITS,
+        DEVICE                  => DEVICE
+    )
+    port map (
+        CLK                     => AMM_CLK,
+        RST                     => total_rst,
+
+        MI_DWR                  => mmr_dwr,
+        MI_ADDR                 => mmr_addr,
+        MI_BE                   => mmr_be,
+        MI_RD                   => mmr_rd,
+        MI_WR                   => mmr_wr,
+        MI_ARDY                 => mmr_ardy,
+        MI_DRD                  => mmr_drd,
+        MI_DRDY                 => mmr_drdy,
+
+        AMM_READY               => mmr_muxed_ready          (MMR_MUX_SLOT_GEN),
+        AMM_READ                => mmr_muxed_read           (MMR_MUX_SLOT_GEN),
+        AMM_WRITE               => mmr_muxed_write          (MMR_MUX_SLOT_GEN),
+        AMM_ADDRESS             => mmr_muxed_address        (MMR_MUX_SLOT_GEN),
+        AMM_READ_DATA           => mmr_muxed_read_data      (MMR_MUX_SLOT_GEN),
+        AMM_WRITE_DATA          => mmr_muxed_write_data     (MMR_MUX_SLOT_GEN),
+        AMM_BURST_COUNT         => mmr_muxed_burst_count    (MMR_MUX_SLOT_GEN),
+        AMM_READ_DATA_VALID     => mmr_muxed_read_data_valid(MMR_MUX_SLOT_GEN)
+    );
+
+    emif_refresh_i : entity work.EMIF_REFRESH
+    generic map (
+        AMM_DATA_WIDTH          => MEM_MMR_DATA_WIDTH,
+        AMM_ADDR_WIDTH          => MEM_MMR_ADDR_WIDTH,
+        AMM_BURST_COUNT_WIDTH   => MEM_MMR_BURST_WIDTH,
+
+        PERIODIC_REFRESH        => PERIODIC_REFRESH,
+        REFRESH_PERIOD_WIDTH    => REFRESH_PERIOD_WIDTH,
+  
+        RANK_CNT                => RANK_CNT,
+        DEVICE                  => DEVICE
+    )
+    port map (
+        CLK                     => AMM_CLK,
+        RST                     => total_rst,
+
+        REFRESH                 => refresh_ranks,
+        REFRESH_PERIOD_TICKS    => mi_refresh_period,
+        REFRESHING_ANY          => refreshing_any,
+        REFRESH_START_ANY       => refresh_start_any,
+        REFRESH_DONE_ANY        => refresh_done_any,
+
+        AMM_READY               => mmr_muxed_ready          (MMR_MUX_SLOT_REFRESH), 
+        AMM_READ                => mmr_muxed_read           (MMR_MUX_SLOT_REFRESH), 
+        AMM_WRITE               => mmr_muxed_write          (MMR_MUX_SLOT_REFRESH), 
+        AMM_ADDRESS             => mmr_muxed_address        (MMR_MUX_SLOT_REFRESH), 
+        AMM_READ_DATA           => mmr_muxed_read_data      (MMR_MUX_SLOT_REFRESH), 
+        AMM_WRITE_DATA          => mmr_muxed_write_data     (MMR_MUX_SLOT_REFRESH), 
+        AMM_BURST_COUNT         => mmr_muxed_burst_count    (MMR_MUX_SLOT_REFRESH), 
+        AMM_READ_DATA_VALID     => mmr_muxed_read_data_valid(MMR_MUX_SLOT_REFRESH)
+    );
+
+    mmr_meter_i : entity work.LATENCY_METER
+    generic map (
+        TICKS_WIDTH         => MI_DATA_WIDTH,
+        SUM_WIDTH           => MI_DATA_WIDTH,
+        COUNTERS_CNT        => 2
+    )
+    port map (
+        CLK                 => AMM_CLK,
+        RST                 => total_rst,
+
+        READ_REQ            => refresh_start_any,
+        READ_RESP           => refresh_done_any,
+
+        SUM_TICKS           => mi_refresh_dur_sum,
+        MIN_TICKS           => mi_refresh_dur_min,
+        MAX_TICKS           => mi_refresh_dur_max,
+
+        TICKS_OVF           => mi_refresh_ticks_ovf,
+        COUNTERS_OVF        => mi_refresh_counters_ovf,
+        SUM_OVF             => mi_refresh_sum_ovf
+    );
+
     ------------------------
     -- Interconnect logic --
     ------------------------
-   
-    -- Avalon interface pipe --
-    amm_intern_ready            <= AMM_READY;
-    (AMM_ADDRESS, AMM_WRITE_DATA, AMM_BURST_COUNT, AMM_WRITE, AMM_READ) 
-                                <= amm_out_piped(AMM_OUT_DELAY);
-    amm_out_piped(0)            <= amm_out;
-    amm_out_intern              <= amm_addr_muxed & amm_out_intern_piped(AMM_INTERN_DELAY);
 
-    amm_out_intern_piped(0)     <= amm_intern_write_data & amm_intern_burst_count & 
-                                   amm_intern_write & amm_intern_read;
+    -- Avalon interface mux --
+    amm_intern_ready           <= amm_muxed_ready          (MUX_SLOT_MAIN) or
+                                  amm_muxed_ready          (MUX_SLOT_RANDOM);
+    amm_intern_read_data_valid <= amm_muxed_read_data_valid(MUX_SLOT_MAIN) or
+                                  amm_muxed_read_data_valid(MUX_SLOT_RANDOM);
+    amm_intern_read_data       <= amm_muxed_read_data      (MUX_SLOT_MAIN);
+    amm_muxed_read       (MUX_SLOT_MAIN) <= amm_intern_read       ;
+    amm_muxed_write      (MUX_SLOT_MAIN) <= amm_intern_write      ;
+    amm_muxed_write_data (MUX_SLOT_MAIN) <= amm_intern_write_data ;
+    amm_muxed_burst_count(MUX_SLOT_MAIN) <= amm_intern_burst_count;
+    amm_muxed_address    (MUX_SLOT_MAIN) <= curr_address          ;
 
-    amm_out_amm_gen             <= amm_gen_address & amm_gen_write_data & amm_gen_burst_count & 
-                                   amm_gen_write & amm_gen_read;
+    amm_muxed_read       (MUX_SLOT_RANDOM) <= amm_intern_read       ;
+    amm_muxed_write      (MUX_SLOT_RANDOM) <= amm_intern_write      ;
+    amm_muxed_write_data (MUX_SLOT_RANDOM) <= amm_intern_write_data ;
+    amm_muxed_burst_count(MUX_SLOT_RANDOM) <= amm_intern_burst_count;
+    amm_muxed_address    (MUX_SLOT_RANDOM) <= random_addr           ;
 
-    amm_in                      <= AMM_READ_DATA & AMM_READ_DATA_VALID;
-    amm_in_piped(0)             <= amm_in;
-    (amm_intern_read_data, amm_intern_read_data_valid)
-                                <= amm_in_piped(amm_in_delay);
-    (amm_gen_read_data, amm_gen_read_data_valid)
-                                <= amm_in_piped(amm_in_delay);
-    amm_gen_ready               <= amm_intern_ready;
+    mux_sel <= 
+        std_logic_vector(to_unsigned(MUX_SLOT_MAIN, mux_sel'length)) when (mi_manual_en = '0' and mi_random_addr_en = '0') else
+        std_logic_vector(to_unsigned(MUX_SLOT_RANDOM, mux_sel'length)) when (mi_manual_en = '0' and mi_random_addr_en = '1') else
+        std_logic_vector(to_unsigned(MUX_SLOT_AMM_GEN, mux_sel'length));
+
+    mmr_mux_sel(0) <= refreshing_any;
 
     -- AMM bus intern --
-    amm_addr_concat(0)          <= curr_address;
-    amm_addr_concat(1)          <= random_addr;
-    amm_addr_sel(0)             <= mi_random_addr_en;
-
     amm_intern_burst_count      <= mi_burst_cnt;
     amm_intern_write_data       <= random_data;
-    
+
     -- Other EMIF signals --
-    (emif_intern_rst_done, emif_intern_ecc_isr, emif_intern_cal_success, emif_intern_cal_fail)        
+    (emif_intern_rst_done, emif_intern_ecc_isr, emif_intern_cal_success, emif_intern_cal_fail)
                                 <= emif_in_piped(EMIF_DELAY);
     emif_in_piped(0)            <= (EMIF_RST_DONE, EMIF_ECC_ISR, EMIF_CAL_SUCCESS, EMIF_CAL_FAIL);
 
-    emif_out_piped(0)           <= (0 => emif_intern_rst_req);
-    (0 => EMIF_RST_REQ)         <= emif_out_piped(EMIF_DELAY);
+    emif_out_piped(0)(0)        <= emif_intern_rst_req;
+    emif_out_piped(0)(1)        <= mi_auto_precharge;
+    EMIF_RST_REQ                <= emif_out_piped(EMIF_DELAY)(0);
+    EMIF_AUTO_PRECHARGE         <= emif_out_piped(EMIF_DELAY)(1);
+    MEM_MMR_BEGINBURSTTRANSFER  <= '0';
 
     -- Test related signals --
-    receive_data                <= amm_intern_read_data_valid and wait_for_read_data and (not mi_manual_en); 
+    receive_data                <= amm_intern_read_data_valid and wait_for_read_data and (not mi_manual_en);
 
-    err_found_cmp_reg_g : if (ERR_CMP_USE_OUT_REG = True) generate 
-        err_found               <= (not read_data_match) and receive_data_delayed_2;  
+    err_found_cmp_reg_g : if (ERR_CMP_USE_OUT_REG = True) generate
+        err_found               <= (not read_data_match) and receive_data_delayed_2;
     end generate;
-    err_found_cmp_no_reg_g : if (ERR_CMP_USE_OUT_REG = False) generate 
-        err_found               <= (not read_data_match) and receive_data;  
+    err_found_cmp_no_reg_g : if (ERR_CMP_USE_OUT_REG = False) generate
+        err_found               <= (not read_data_match) and receive_data;
     end generate;
 
-    test_success                <= '1' when (err_cnt = std_logic_vector(to_unsigned(0, err_cnt'length))) else 
+    test_success                <= '1' when (err_cnt = std_logic_vector(to_unsigned(0, err_cnt'length))) else
                                    '0';
 
     -- Enable signals --
@@ -614,30 +815,29 @@ begin
     simult_en_read              <= (not mi_one_simult_read) or (not read_running);
     addr_incr                   <= (burst_done and addr_incr_req_wr) or (addr_incr_req_rd and amm_intern_ready and simult_en_read);
     read_addr_incr              <= receive_data and read_burst_done;
-                                
-    -- Counters limits --       
-    addr_lim_reached            <= '1' when (curr_address = addr_limit and amm_intern_ready = '1' and simult_en_read = '1') else 
+
+    -- Counters limits --
+    addr_lim_reached            <= '1' when (curr_address = addr_limit and amm_intern_ready = '1' and simult_en_read = '1') else
                                    '0';
-    read_addr_lim_reached       <= '1' when (curr_read_address = addr_limit and amm_intern_read_data_valid = '1') else 
+    read_addr_lim_reached       <= '1' when (curr_read_address = addr_limit and amm_intern_read_data_valid = '1') else
                                    '0';
-    burst_done                  <= '1' when (curr_burst_cnt = mi_burst_cnt and amm_intern_ready = '1') else 
+    burst_done                  <= '1' when (curr_burst_cnt = mi_burst_cnt and amm_intern_ready = '1') else
                                    '0';
     read_burst_done             <= '1' when (curr_read_burst_cnt = mi_burst_cnt and amm_intern_read_data_valid = '1') else
                                    '0';
-    
+
     -- Reset logic --
     total_rst_raw               <= mi_rst_req or amm_rst_delayed;
-                                
-    -- Other signals --         
-    rst_req_done                <= '1' when (curr_rst_req_ticks = RST_REQ_LIMIT) else 
+
+    -- Other signals --
+    rst_req_done                <= '1' when (curr_rst_req_ticks = RST_REQ_LIMIT) else
                                    '0';
-                                
-    -- MI signals --            
+
+    -- MI signals --
     mi_addr_cutted              <= MI_ADDR(MI_ADDR_USAGE - 1 downto 0);
-    -- in                       
     run_test                    <= mi_run_test;
-                                
-    -- out                      
+
+    -- out
     mi_test_done                <= test_done;
     mi_test_success             <= test_success;
     mi_calib_success            <= emif_intern_cal_success;
@@ -657,6 +857,13 @@ begin
     ---------------
     -- Registers --
     ---------------
+    run_test_manual_refresh_g : if MANUAL_REFRESH generate 
+        manual_refresh_s <= '1';
+    end generate;
+    run_test_auto_refresh_g : if not MANUAL_REFRESH generate 
+        manual_refresh_s <= '0';
+    end generate;
+
     -- Addr counters --
     curr_address_reg_p : process (AMM_CLK)
     begin
@@ -700,7 +907,7 @@ begin
 
     -- Burst counters --
     burst_p : process(AMM_CLK)
-    begin            
+    begin
         if (rising_edge(AMM_CLK)) then
             if (total_rst = '1' or (burst_done = '1' and burst_en = '1')) then
                 curr_burst_cnt <= (0 => '1', others => '0');
@@ -711,7 +918,7 @@ begin
     end process;
 
     read_burst_p : process(AMM_CLK)
-    begin            
+    begin
         if (rising_edge(AMM_CLK)) then
             if (total_rst = '1' or (read_burst_done = '1' and read_burst_en = '1')) then
                 curr_read_burst_cnt <= (0 => '1', others => '0');
@@ -725,7 +932,7 @@ begin
     rst_req_tick_p : process(AMM_CLK)
     begin
         if (rising_edge(AMM_CLK)) then
-            if (total_rst = '1' or rst_req_done = '1') then 
+            if (total_rst = '1' or rst_req_done = '1') then
                 curr_rst_req_ticks <= (others => '0');
             elsif(rst_req_en = '1') then
                 curr_rst_req_ticks <= std_logic_vector(unsigned(curr_rst_req_ticks) + 1);
@@ -739,7 +946,7 @@ begin
             if (amm_rst_delayed = '1') then
                 rst_req_en <= '0';
                 emif_intern_rst_req <= '0';
-            elsif (mi_rst_emif_req = '1') then 
+            elsif (mi_rst_emif_req = '1') then
                 rst_req_en <= '1';
                 emif_intern_rst_req <= '1';
             elsif(rst_req_done = '1') then
@@ -753,7 +960,7 @@ begin
     test_done_p : process(AMM_CLK)
     begin
         if (rising_edge(AMM_CLK)) then
-            if (total_rst = '1') then 
+            if (total_rst = '1') then
                 test_done   <= '0';
             elsif(set_test_done = '1') then
                 test_done   <= '1';
@@ -767,65 +974,6 @@ begin
             total_rst   <= total_rst_raw;
         end if;
     end process;
-
-    -- MI signals --
-    ecc_err_p : process(AMM_CLK)
-    begin
-        if (rising_edge(AMM_CLK)) then
-            if (total_rst = '1') then 
-                mi_ecc_error     <= '0';
-            elsif(emif_intern_ecc_isr = '1') then
-                mi_ecc_error    <= '1';
-            end if;
-        end if;
-    end process;
-
-    -- AMM read / write delayed
-    amm_write_delayed_p : process(AMM_CLK)
-    begin
-        if (rising_edge(AMM_CLK)) then
-            if (total_rst = '1') then 
-                amm_write_delayed <= '0';
-            else
-                amm_write_delayed  <= amm_intern_write;
-            end if;
-        end if;
-    end process;
-
-    -- receive_data delayed
-    receive_data_delayed_p : process(AMM_CLK)
-    begin
-        if (rising_edge(AMM_CLK)) then
-            if (total_rst = '1') then 
-                receive_data_delayed    <= '0';
-                receive_data_delayed_2  <= '0';
-            else
-                receive_data_delayed    <= receive_data;
-                receive_data_delayed_2  <= receive_data_delayed;
-            end if;
-        end if;
-    end process;
-
-    -- AMM in piped
-    amm_in_piped_g : for i in 0 to AMM_IN_DELAY - 1 generate
-        amm_in_piped_p : process(AMM_CLK)
-        begin
-            if (rising_edge(AMM_CLK)) then
-                amm_in_piped(i + 1) <= amm_in_piped(i);
-            end if;
-        end process;
-    end generate;
-
-    amm_out_piped_g : for i in 0 to AMM_OUT_DELAY - 1 generate
-        amm_out_piped_p : process(AMM_CLK)
-        begin
-            if (rising_edge(AMM_CLK)) then
-                if (amm_intern_ready = '1') then
-                    amm_out_piped(i + 1) <= amm_out_piped(i);
-                end if;
-            end if;
-        end process;
-    end generate;
 
     emif_out_piped_g : for i in 0 to EMIF_DELAY - 1 generate
         emif_out_piped_p : process(AMM_CLK)
@@ -845,16 +993,43 @@ begin
         end process;
     end generate;
 
-    amm_intern_piped_g : for i in 0 to AMM_INTERN_DELAY - 1 generate
-        amm_out_intern_piped_p : process(AMM_CLK)
-        begin
-            if (rising_edge(AMM_CLK)) then
-                if (amm_intern_ready = '1') then
-                    amm_out_intern_piped(i + 1) <= amm_out_intern_piped(i);
-                end if;
+    -- MI signals --
+    ecc_err_p : process(AMM_CLK)
+    begin
+        if (rising_edge(AMM_CLK)) then
+            if (total_rst = '1') then
+                mi_ecc_error     <= '0';
+            elsif(emif_intern_ecc_isr = '1') then
+                mi_ecc_error    <= '1';
             end if;
-        end process;
-    end generate;
+        end if;
+    end process;
+
+    -- AMM read / write delayed
+    amm_write_delayed_p : process(AMM_CLK)
+    begin
+        if (rising_edge(AMM_CLK)) then
+            if (total_rst = '1') then
+                amm_write_delayed <= '0';
+            else
+                amm_write_delayed  <= amm_intern_write;
+            end if;
+        end if;
+    end process;
+
+    -- receive_data delayed
+    receive_data_delayed_p : process(AMM_CLK)
+    begin
+        if (rising_edge(AMM_CLK)) then
+            if (total_rst = '1') then
+                receive_data_delayed    <= '0';
+                receive_data_delayed_2  <= '0';
+            else
+                receive_data_delayed    <= receive_data;
+                receive_data_delayed_2  <= receive_data_delayed;
+            end if;
+        end if;
+    end process;
 
     amm_rst_delayed_p : process(AMM_CLK)
     begin
@@ -882,7 +1057,7 @@ begin
     -------------------
     -- STATE MACHINE --
     -------------------
-    
+
     -- next state logic
     state_reg_p : process (AMM_CLK)
     begin
@@ -915,6 +1090,8 @@ begin
         wait_for_read_data  <= '0';
         set_test_done       <= '0';
 
+        refresh_ranks       <= (others => '0');
+
         case curr_state is
 
             when INIT =>
@@ -924,10 +1101,16 @@ begin
                     err_rst             <= '1';
                 end if;
 
+                if (rst_req_en = '0' and mi_manual_en = '0' and run_test = '1') then
+                    refresh_ranks       <= (others => '1');
+                end if;
+
+            when PERFORM_REFRESH =>
+
             when DATA_WRITE =>
                 if (amm_intern_ready = '1') then
                     amm_intern_write    <= '1';
-                    addr_incr_req_wr    <= '1';  
+                    addr_incr_req_wr    <= '1';
                     burst_en            <= '1';
                     random_en_req       <= '1';
 
@@ -935,7 +1118,7 @@ begin
                         random_addr_en_req <= '1';
                     end if;
                 end if;
-            
+
             when DATA_READ =>
                 wait_for_read_data      <= '1';
                 addr_incr_req_rd        <= '1';
@@ -956,35 +1139,44 @@ begin
             when READ_DONE =>
                 set_test_done           <= '1';
 
-            when others => 
+            when others =>
                 null;
 
         end case;
     end process;
-    
+
     -- next state logic
-    process (all)   
+    process (all)
     begin
-        next_state <= curr_state;       
+        next_state <= curr_state;
 
         case curr_state is
 
             when INIT =>
                 if (rst_req_en = '0' and mi_manual_en = '0') then
                     if (run_test = '1') then
-                        next_state      <= DATA_WRITE;   
+                        if (manual_refresh_s = '1') then 
+                            next_state      <= PERFORM_REFRESH;
+                        else
+                            next_state      <= DATA_WRITE;
+                        end if;
                     end if;
+                end if;
+
+            when PERFORM_REFRESH =>
+                if (refreshing_any = '0') then 
+                    next_state      <= DATA_WRITE;
                 end if;
 
             when DATA_WRITE =>
                 -- Last write request
                 if (addr_lim_reached = '1' and burst_done = '1') then
-                    next_state      <= WRITE_DONE;   
+                    next_state      <= WRITE_DONE;
                 end if;
-              
+
             when DATA_READ =>
                 if (addr_lim_reached = '1') then
-                    next_state      <= WAITING_READ;         
+                    next_state      <= WAITING_READ;
                 end if;
 
             when WAITING_READ =>

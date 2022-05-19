@@ -73,8 +73,22 @@ struct DevConfig
 
 struct AMMProbeData_s
 {
-    uint32_t ctrlReg;
     bool     errOcc;
+    bool     eccErrOcc;
+
+    bool     latencyToFirst;
+    bool     wrTicksOvf;
+    bool     rdTicksOvf;
+    bool     rwTicksOvf;
+    bool     wrWordsOvf;
+    bool     rdWordsOvf;
+    bool     reqCntOvf;
+    bool     latencyTicksOvf;
+    bool     latencyCntersOvf;
+    bool     latencySumOvf;
+
+    uint32_t ctrlReg;
+    uint32_t burst;
     uint32_t errCnt;
     uint32_t writeTicks;
     uint32_t readTicks;
@@ -82,7 +96,7 @@ struct AMMProbeData_s
     uint32_t writeWords;
     uint32_t readWords;
     uint32_t reqCnt;
-    uint32_t latencySum;
+    uint64_t latencySum;
     uint32_t latencyMin;
     uint32_t latencyMax;
 };
@@ -90,8 +104,25 @@ struct AMMProbeData_s
 struct AMMProbeResults_s
 {
     bool        errOcc;
-    unsigned    errCnt;
-    unsigned    burst;
+    bool        eccErrOcc;
+
+    bool        latencyToFirst;
+    bool        wrTicksOvf;
+    bool        rdTicksOvf;
+    bool        rwTicksOvf;
+    bool        wrWordsOvf;
+    bool        rdWordsOvf;
+    bool        reqCntOvf;
+    bool        latencyTicksOvf;
+    bool        latencyCntersOvf;
+    bool        latencySumOvf;
+
+    uint32_t    errCnt;
+    uint32_t    burst;
+
+    uint32_t    writeWords;
+    uint32_t    readWords;
+    uint32_t    reqCnt;
 
     double      writeTime_ms;
     double      readTime_ms;
@@ -101,10 +132,6 @@ struct AMMProbeResults_s
     double      readFlow_bs;
     double      totalFlow_bs;
 
-    uint32_t    writeWords;
-    uint32_t    readWords;
-    uint32_t    reqCnt;
-
     double      avgLatency_ns; 
     double      minLatency_ns; 
     double      maxLatency_ns; 
@@ -113,6 +140,7 @@ struct AMMProbeResults_s
 struct TestParams_s
 {
     bool latencyToFirst;    // Measure latency to first AMM word [dafault: to last]
+    bool autoPrecharge;
     bool onlyCSV;
     bool onlyOneSimultRead;
     char *testType;
@@ -131,6 +159,10 @@ enum Registers_e
     ERR_CNT,
     BURST_CNT,
     ADDR_LIM,
+    REFRESH_PERIOD,
+    REFRESH_DUR_SUM,
+    REFRESH_DUR_MIN,
+    REFRESH_DUR_MAX,
 
     AMM_GEN_CTRL,
     AMM_GEN_ADDR,
@@ -144,13 +176,19 @@ enum Registers_e
     PROBE_WR_WORDS,
     PROBE_RD_WORDS,
     PROBE_REQ_CNT,
-    PROBE_LATENCY_SUM,
+    PROBE_LATENCY_SUM_1,
+    PROBE_LATENCY_SUM_2,
     PROBE_LATENCY_MIN,
     PROBE_LATENCY_MAX,
     AMM_DATA_WIDTH_REG,
     AMM_ADDR_WIDTH_REG,
     AMM_BURST_WIDTH_REG,
     AMM_FREQ_REG,
+
+    MMR_CTRL,
+    MMR_ADDR,
+    MMR_DATA,
+    MMR_BURST,
 
     REG_CNT
 };
@@ -164,6 +202,7 @@ enum CtrlIn_e
     AMM_GEN_EN,
     RANDOM_ADDR_EN,
     ONLY_ONE_SIMULT_READ,
+    AUTO_PRECHARGE_REQ,
 };
 
 enum CtrlOut_e
@@ -173,6 +212,10 @@ enum CtrlOut_e
     ECC_ERR,
     CALIB_SUCCESS,
     CALIB_FAIL,
+    MAIN_AMM_READY,
+    REFRESH_TICKS_OVF,
+    REFRESH_COUNTERS_OVF,
+    REFRESH_SUM_OVF,
 };
 
 enum AMM_GEN_Ctrl_e
@@ -196,6 +239,7 @@ enum AMM_PROBE_Ctrl_e
     REQ_CNT_OVF,
     LATENCY_TICKS_OVF,
     LATENCY_CNTERS_OVF,
+    LATENCY_SUM_OVF,
 };
 
 

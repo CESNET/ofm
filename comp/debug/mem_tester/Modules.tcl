@@ -17,6 +17,8 @@ set MI_SPLITER_BASE     "$OFM_PATH/comp/mi_tools/splitter_plus_gen"
 
 set AMM_GEN_BASE        "$ENTITY_BASE/amm_gen"
 set AMM_PROBE_BASE      "$ENTITY_BASE/amm_probe"
+set AMM_MUX_BASE        "$ENTITY_BASE/amm_mux"
+set EMIF_REFRESH_BASE   "$ENTITY_BASE/emif_refresh"
 
 # Packages
 set PACKAGES "$PACKAGES $OFM_PATH/comp/base/pkg/math_pack.vhd"
@@ -33,6 +35,8 @@ set COMPONENTS [concat $COMPONENTS [list \
     [ list "MI_SPLITTER"        $MI_SPLITER_BASE        "FULL" ] \
     [ list "AMM_GEN"            $AMM_GEN_BASE           "FULL" ] \
     [ list "AMM_PROBE"          $AMM_PROBE_BASE         "FULL" ] \
+    [ list "AMM_MUX"            $AMM_MUX_BASE           "FULL" ] \
+    [ list "EMIF_REFRESH"       $EMIF_REFRESH_BASE      "FULL" ] \
 ]]
 
 # Source files for implemented component

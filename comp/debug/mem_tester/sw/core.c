@@ -39,7 +39,7 @@ void PrintDevConfig(struct DevConfig *config)
     printf("    AMM_DATA_WIDTH          = %7d\n", config->amm_data_width);
     printf("    AMM_ADDR_WIDTH          = %7d\n", config->amm_addr_width);
     printf("    AMM_BURST_CNT_WIDTH     = %7d\n", config->amm_burst_width);
-    printf("    AMM_FREQ [kHz]          = %.2lf\n", config->amm_freq);
+    printf("    AMM_FREQ [MHz]          = %.2lf\n", config->amm_freq);
     printf("    slicesCnt               = %7d\n", config->slicesCnt);
 }
 
@@ -61,10 +61,10 @@ void PrintDevStatus()
     printf("  ecc error occured     = %7d\n", (data >> ECC_ERR)          & 1);
     printf("  calib success         = %7d\n", (data >> CALIB_SUCCESS)    & 1);
     printf("  calib fail            = %7d\n", (data >> CALIB_FAIL)       & 1);
-
-    data = ReadReg(component, AMM_GEN_CTRL);
-    printf("  amm ready             = %7d\n", (data >> AMM_READY)       & 1);
-
+    printf("  amm ready             = %7d\n", (data >> MAIN_AMM_READY)   & 1);
+    printf("  refresh ticks ovf     = %7d\n", (data >> REFRESH_TICKS_OVF)& 1);
+    printf("  refresh counters ovf  = %7d\n", (data >> REFRESH_COUNTERS_OVF)& 1);
+    printf("  refresh sum ovf       = %7d\n", (data >> REFRESH_SUM_OVF)& 1);
 }
 
 void PrintDevStatusCSV()
@@ -76,9 +76,7 @@ void PrintDevStatusCSV()
     printf("%7d %s", (data >> ECC_ERR)          & 1, CSV_DELIM);
     printf("%7d %s", (data >> CALIB_SUCCESS)    & 1, CSV_DELIM);
     printf("%7d %s", (data >> CALIB_FAIL)       & 1, CSV_DELIM);
-
-    data = ReadReg(component, AMM_GEN_CTRL);
-    printf("%7d \n", (data >> AMM_READY)          & 1);
+    printf("%7d \n", (data >> MAIN_AMM_READY)   & 1);
 }
 
 void PrintRegs()
@@ -95,6 +93,7 @@ void PrintRegs()
     printf("  AMM_GEN enable        = %7d\n", (data >> AMM_GEN_EN)      & 1);
     printf("  random addr en        = %7d\n", (data >> RANDOM_ADDR_EN)  & 1);
     printf("  only one simult read  = %7d\n", (data >> ONLY_ONE_SIMULT_READ)  & 1);
+    printf("  auto precharge        = %7d\n", (data >> AUTO_PRECHARGE_REQ)  & 1);
 
     printf("ctrl_out:\n");
     PrintDevStatus();
@@ -105,6 +104,14 @@ void PrintRegs()
     printf("burst cnt               = %7u\n", data);
     data = ReadReg(component, ADDR_LIM);
     printf("address limit           = %7u\n", data);
+    data = ReadReg(component, REFRESH_PERIOD);
+    printf("refresh period          = %7u\n", data);
+    data = ReadReg(component, REFRESH_DUR_SUM);
+    printf("refresh duration sum    = %7u\n", data);
+    data = ReadReg(component, REFRESH_DUR_MIN);
+    printf("refresh duration min    = %7u\n", data);
+    data = ReadReg(component, REFRESH_DUR_MAX);
+    printf("refresh duration max    = %7u\n", data);
 
     printf("Config:\n");
     PrintDevConfig(&devConfig);
@@ -128,14 +135,34 @@ void PrintRegs()
     data = ReadReg(component, AMM_GEN_BURST);
     printf("burst                   = %7u\n", data);
 
+    PrintManualBuff(false);
 
-    PrintManualBuff(component);
+    printf("------------------------------------------------------------\n");
+    printf("MMR:\n");
+
+    data = ReadReg(component, MMR_CTRL);
+    printf("ctrl:\n");
+    printf("  mem write             = %7d\n", (data >> MEM_WR)          & 1);
+    printf("  mem read              = %7d\n", (data >> MEM_RD)          & 1);
+    printf("  buff valid            = %7d\n", (data >> BUFF_VLD)        & 1);
+    printf("  amm ready             = %7d\n", (data >> AMM_READY)       & 1);
+
+    data = ReadReg(component, MMR_ADDR);
+    printf("addr                    = %7u\n", data);
+
+    data = ReadReg(component, MMR_DATA);
+    printf("data                    = %7u\n", data);
+
+    data = ReadReg(component, MMR_BURST);
+    printf("burst                   = %7u\n", data);
+
+    PrintManualBuff(true);
 
     struct AMMProbeData_s probeData;
     struct AMMProbeResults_s probeResults;
     AMMProbeLoadData(&probeData);
     AMMProbeCalcResults(&probeData, &probeResults);
-    AMMProbePrintResults(&probeResults);
+    AMMProbePrintResults(&probeData, &probeResults);
 
     printf("Raw CSV:\n");
     AMMProbePrintDataCSV(&probeData);
@@ -144,10 +171,13 @@ void PrintRegs()
 bool Reset(bool emif)
 {
     ToggleBit(component, CTRL_IN, (emif) ? RESET_EMIF : RESET);
-    if (! WaitForBit(component, AMM_GEN_CTRL, AMM_READY, 1, AMM_READY_MAX_ASKS, AMM_READY_ASK_DELAY))
+    if (emif)
     {
-        printf("AMM was not rested\n");
-        return false;
+        if (! WaitForBit(component, CTRL_OUT, MAIN_AMM_READY, 1, AMM_READY_MAX_ASKS, AMM_READY_ASK_DELAY))
+        {
+            printf("AMM was not rested\n");
+            return false;
+        }
     }
 
     return true;
@@ -196,6 +226,11 @@ void Finish()
     nfb_close(device);
 }
 
+void SetRefreshPeriod(uint32_t ticks)
+{
+    WriteReg(component, REFRESH_PERIOD, ticks);
+}
+
 // ------------------- //
 // AMM probe functions //
 // ------------------- //
@@ -203,6 +238,20 @@ void Finish()
 void AMMProbeLoadData(struct AMMProbeData_s *data)
 {
     data->errOcc            = ! ((ReadReg(component, CTRL_OUT) >> TEST_SUCCESS) & 1);
+    data->eccErrOcc         = (ReadReg(component, CTRL_OUT) >> ECC_ERR) & 1;
+        
+    data->latencyToFirst    = (ReadReg(component, PROBE_CTRL) >> LATENCY_TO_FIRST   ) & 1;
+    data->wrTicksOvf        = (ReadReg(component, PROBE_CTRL) >> WR_TICKS_OVF       ) & 1;
+    data->rdTicksOvf        = (ReadReg(component, PROBE_CTRL) >> RD_TICKS_OVF       ) & 1;
+    data->rwTicksOvf        = (ReadReg(component, PROBE_CTRL) >> RW_TICKS_OVF       ) & 1;
+    data->wrWordsOvf        = (ReadReg(component, PROBE_CTRL) >> WR_WORDS_OVF       ) & 1;
+    data->rdWordsOvf        = (ReadReg(component, PROBE_CTRL) >> RD_WORDS_OVF       ) & 1;
+    data->reqCntOvf         = (ReadReg(component, PROBE_CTRL) >> REQ_CNT_OVF        ) & 1;
+    data->latencyTicksOvf   = (ReadReg(component, PROBE_CTRL) >> LATENCY_TICKS_OVF  ) & 1;
+    data->latencyCntersOvf  = (ReadReg(component, PROBE_CTRL) >> LATENCY_CNTERS_OVF ) & 1;
+    data->latencySumOvf     = (ReadReg(component, PROBE_CTRL) >> LATENCY_SUM_OVF    ) & 1;
+
+    data->burst             = ReadReg(component, BURST_CNT);
     data->errCnt            = ReadReg(component, ERR_CNT);
     data->ctrlReg           = ReadReg(component, PROBE_CTRL);
     data->writeTicks        = ReadReg(component, PROBE_WR_TICKS);
@@ -211,14 +260,28 @@ void AMMProbeLoadData(struct AMMProbeData_s *data)
     data->writeWords        = ReadReg(component, PROBE_WR_WORDS);
     data->readWords         = ReadReg(component, PROBE_RD_WORDS);
     data->reqCnt            = ReadReg(component, PROBE_REQ_CNT);
-    data->latencySum        = ReadReg(component, PROBE_LATENCY_SUM);
+    data->latencySum        = ReadReg(component, PROBE_LATENCY_SUM_1);
+    data->latencySum        = ((uint64_t) ReadReg(component, PROBE_LATENCY_SUM_2) << 32) + data->latencySum;
     data->latencyMin        = ReadReg(component, PROBE_LATENCY_MIN);
     data->latencyMax        = ReadReg(component, PROBE_LATENCY_MAX);
 }
 
 void AMMProbeClearResults(struct AMMProbeResults_s *data)
 {
-    data->errOcc           = 0;
+    data->errOcc           = false;
+    data->eccErrOcc        = false;
+
+    data->latencyToFirst   = false;
+    data->wrTicksOvf       = false;
+    data->rdTicksOvf       = false;
+    data->rwTicksOvf       = false;
+    data->wrWordsOvf       = false;
+    data->rdWordsOvf       = false;
+    data->reqCntOvf        = false;
+    data->latencyTicksOvf  = false;
+    data->latencyCntersOvf = false;
+    data->latencySumOvf    = false;
+
     data->burst            = 0;
     data->writeTime_ms     = 0;
     data->readTime_ms      = 0;
@@ -236,11 +299,21 @@ void AMMProbeClearResults(struct AMMProbeResults_s *data)
 
 void AMMProbeCalcResults(struct AMMProbeData_s *data, struct AMMProbeResults_s *res)
 {
-    // TODO:
-    // errOcc
-    // burst
     res->errOcc             = data->errOcc;
+    res->eccErrOcc          = data->eccErrOcc;
     res->errCnt             = data->errCnt;
+    res->burst              = data->burst;
+
+    res->latencyToFirst     = data->latencyToFirst;
+    res->wrTicksOvf         = data->wrTicksOvf;
+    res->rdTicksOvf         = data->rdTicksOvf;
+    res->rwTicksOvf         = data->rwTicksOvf;
+    res->wrWordsOvf         = data->wrWordsOvf;
+    res->rdWordsOvf         = data->rdWordsOvf;
+    res->reqCntOvf          = data->reqCntOvf;
+    res->latencyTicksOvf    = data->latencyTicksOvf;
+    res->latencyCntersOvf   = data->latencyCntersOvf;
+    res->latencySumOvf      = data->latencySumOvf;
 
     res->writeTime_ms       = TicksToMS(devConfig.amm_freq, data->writeTicks);
     res->readTime_ms        = TicksToMS(devConfig.amm_freq, data->readTicks);
@@ -254,7 +327,8 @@ void AMMProbeCalcResults(struct AMMProbeData_s *data, struct AMMProbeResults_s *
     res->readWords          = data->readWords;
     res->reqCnt             = data->reqCnt;
 
-    res->avgLatency_ns      = TicksToNS(devConfig.amm_freq, data->latencySum) / res->reqCnt;
+    if (res->reqCnt != 0)
+        res->avgLatency_ns      = TicksToNS(devConfig.amm_freq, data->latencySum / res->reqCnt);
     res->minLatency_ns      = TicksToNS(devConfig.amm_freq, data->latencyMin);
     res->maxLatency_ns      = TicksToNS(devConfig.amm_freq, data->latencyMax);
 }
@@ -265,8 +339,20 @@ void AMMProbeAddResults(struct AMMProbeData_s *data, struct AMMProbeResults_s *r
     AMMProbeCalcResults(data, &tmp);
 
     res->errOcc           |= tmp.errOcc;
-    res->errCnt           += tmp.errCnt;
+    res->eccErrOcc        |= tmp.eccErrOcc;
 
+    data->latencyToFirst  |= data->latencyToFirst;
+    data->wrTicksOvf      |= data->wrTicksOvf;
+    data->rdTicksOvf      |= data->rdTicksOvf;
+    data->rwTicksOvf      |= data->rwTicksOvf;
+    data->wrWordsOvf      |= data->wrWordsOvf;
+    data->rdWordsOvf      |= data->rdWordsOvf;
+    data->reqCntOvf       |= data->reqCntOvf;
+    data->latencyTicksOvf |= data->latencyTicksOvf;
+    data->latencyCntersOvf|= data->latencyCntersOvf;
+    data->latencySumOvf   |= data->latencySumOvf;
+
+    res->errCnt           += tmp.errCnt;
     res->writeTime_ms     += tmp.writeTime_ms;
     res->readTime_ms      += tmp.readTime_ms;
     res->totalTime_ms     += tmp.totalTime_ms;
@@ -295,15 +381,49 @@ void AMMProbeAvgResults(struct AMMProbeResults_s *res, unsigned resCnt)
     res->avgLatency_ns    /= resCnt;
 }
 
-void AMMProbePrintResults(struct AMMProbeResults_s *data)
+void AMMProbePrintResults(struct AMMProbeData_s *rawData, struct AMMProbeResults_s *data)
 {
     printf("------------------------------------------------------------\n");
     printf("AMM probe:\n");
 
     printf("    err occ                 = %u\n", data->errOcc);
     printf("    err cnt                 = %u\n", data->errCnt);
+    printf("    ECC err occ             = %u\n", data->eccErrOcc);
     printf("    burst count             = %u\n", data->burst);
+    printf("    latency to first        = %u\n", data->latencyToFirst);
     printf("\n");
+
+    printf("    write ticks overflow    = %u\n", data->wrTicksOvf);
+    printf("    read ticks overflow     = %u\n", data->rdTicksOvf);
+    printf("    total ticks overflow    = %u\n", data->rwTicksOvf);
+    printf("    write words overflow    = %u\n", data->wrWordsOvf);
+    printf("    read words overflow     = %u\n", data->rdWordsOvf);
+    printf("    req cnt overflow        = %u\n", data->reqCntOvf);
+    printf("    latency ticks overflow  = %u\n", data->latencyTicksOvf);
+    printf("    latency counter overflow= %u\n", data->latencyCntersOvf);
+    printf("    latency sum overflow    = %u\n", data->latencySumOvf);
+    printf("\n");
+
+    if (data->wrTicksOvf)
+        printf("    !! Write ticks overflow occurred\n");
+    if (data->rdTicksOvf)
+        printf("    !! Read ticks overflow occurred\n");
+    if (data->rwTicksOvf)
+        printf("    !! ReadWrite ticks overflow occurred\n");
+    if (data->wrWordsOvf)
+        printf("    !! Write words overflow occurred\n");
+    if (data->rdWordsOvf)
+        printf("    !! Read words overflow occurred\n");
+    if (data->reqCntOvf)
+        printf("    !! Request cnt overflow occurred\n");
+    if (data->latencyTicksOvf)
+        printf("    !! Latency ticks overflow occurred\n");
+    if (data->latencyCntersOvf)
+        printf("    !! Latency counters overflow occurred\n");
+    if (data->latencySumOvf)
+        printf("    !! Latency sum counter overflow occurred\n");
+
+
     printf("    write time [ms]         = %.4lf\n", data->writeTime_ms);
     printf("    read  time [ms]         = %.4lf\n", data->readTime_ms);
     printf("    total time [ms]         = %.4lf\n", data->totalTime_ms);
@@ -323,15 +443,10 @@ void AMMProbePrintResults(struct AMMProbeResults_s *data)
     printf("    latency min [ns]        = %.4lf\n", data->minLatency_ns);
     printf("    latency max [ns]        = %.4lf\n", data->maxLatency_ns);
 
-    if (data->errOcc)
-        printf("Err occured\n");
- 
-    if (data->writeWords != data->readWords)
-        printf("Warning, readed word cnt do not match written word cnt\n");
-
-    //uint32_t burst_cnt = ReadReg(component, BURST_CNT);
-    //if (data->readWords != data->reqCnt * burst_cnt)
-    //    printf("Warning, requested and received word cnts do not match\n");
+    printf("\n");
+    printf("    latency avg [ticks]     = %.4lf\n", (double) rawData->latencySum / data->reqCnt);
+    printf("    latency min [ticks]     = %-u\n", rawData->latencyMin);
+    printf("    latency max [ticks]     = %-u\n", rawData->latencyMax);
 }
 
 void AMMProbePrintResultsCSV(struct AMMProbeResults_s *data)
@@ -352,42 +467,6 @@ void AMMProbePrintResultsCSV(struct AMMProbeResults_s *data)
     printf("%lf \n" , data->avgLatency_ns);
 }
 
-//void AMMProbePrintData(struct AMMProbeData_s *data)
-//{
-//    printf("------------------------------------------------------------\n");
-//    printf("AMM probe:\n");
-// 
-//    printf("ctrl:\n");
-//    printf("  reset                 = %7d\n", (data->ctrlReg >> PROBE_RESET)         & 1);
-//    printf("  to first              = %7d\n", (data->ctrlReg >> LATENCY_TO_FIRST)    & 1);
-//    printf("  write ticks overflow  = %7d\n", (data->ctrlReg >> WR_TICKS_OVF)        & 1);
-//    printf("  read ticks overflow   = %7d\n", (data->ctrlReg >> RD_TICKS_OVF)        & 1);
-//    printf("  r/w ticks overflow    = %7d\n", (data->ctrlReg >> RW_TICKS_OVF)        & 1);
-//    printf("  write words overflow  = %7d\n", (data->ctrlReg >> WR_WORDS_OVF)        & 1);
-//    printf("  read words overflow   = %7d\n", (data->ctrlReg >> RD_WORDS_OVF)        & 1);
-//    printf("  req words overflow    = %7d\n", (data->ctrlReg >> REQ_CNT_OVF)         & 1);
-//    printf("  latency tick overflow = %7d\n", (data->ctrlReg >> LATENCY_TICKS_OVF)   & 1);
-//    printf("  latency cnters ovf    = %7d\n", (data->ctrlReg >> LATENCY_CNTERS_OVF)  & 1);
-// 
-//    printf("write ticks             = ");   PrintTicks(&devConfig, data->writeTicks, data->writeWords);
-//    printf("read ticks              = ");   PrintTicks(&devConfig, data->readTicks , data->readWords);
-//    printf("total ticks             = ");   PrintTicks(&devConfig, data->totalTicks, data->writeWords + data->readWords);   //TODO
-//    printf("words written           = %7u\n", data->writeWords);
-//    printf("words read              = %7u\n", data->readWords);
-//    printf("request made            = %7u\n", data->reqCnt);
-//    printf("latency sum ticks       = %7u\n", data->latencySum);
-//    printf("latency avg ticks       = ");   PrintLatency(&devConfig, (double) data->latencySum / data->reqCnt);
-//    printf("latency min ticks       = ");   PrintLatency(&devConfig, data->latencyMin);
-//    printf("latency max ticks       = ");   PrintLatency(&devConfig, data->latencyMax);
-// 
-//    //uint32_t burst_cnt = ReadReg(component, BURST_CNT);
-// 
-//    if (data->writeWords != data->readWords)
-//        printf("Warning, readed word cnt do not match written word cnt\n");
-//    //if (data->readWords != data->reqCnt * burst_cnt)
-//    //    printf("Warning, requested and received word cnts do not match\n");
-//}
-
 void AMMProbePrintDataCSV(struct AMMProbeData_s *data)
 {
     uint32_t errCnt = ReadReg(component, ERR_CNT);
@@ -400,7 +479,7 @@ void AMMProbePrintDataCSV(struct AMMProbeData_s *data)
     printf("%7u %s ", data->writeWords, CSV_DELIM);
     printf("%7u %s ", data->readWords , CSV_DELIM);
     printf("%7u %s ", data->reqCnt    , CSV_DELIM);
-    printf("%7u %s ", data->latencySum, CSV_DELIM);
+    printf("%lu %s ", data->latencySum, CSV_DELIM);
     printf("%7u %s ", data->latencyMin, CSV_DELIM);
     printf("%7u \n", data->latencyMax);
 }
@@ -409,90 +488,137 @@ void AMMProbePrintDataCSV(struct AMMProbeData_s *data)
 // AMM gen functions //
 // ----------------- //
 
-void PrintManualBuff()
+void PrintManualBuff(bool mmr)
 {
-    uint32_t prevAddr = ReadReg(component, AMM_GEN_ADDR);
+    uint32_t prevAddr = ReadReg(component, mmr ? MMR_ADDR : AMM_GEN_ADDR);
     uint32_t burst_cnt = 0;
 
-    burst_cnt = ReadReg(component, AMM_GEN_BURST);
+    burst_cnt = ReadReg(component, mmr ? MMR_BURST : AMM_GEN_BURST);
 
     printf("manual data (%d bursts):\n", burst_cnt);
     for(unsigned b = 0; b < burst_cnt; b++)
     {
         printf("0x");
-        for(int s = devConfig.slicesCnt - 1; s >= 0; s--)
+        for(int s = (mmr ? 0 : (devConfig.slicesCnt - 1)); s >= 0; s--)
         {
-            WriteReg(component, AMM_GEN_ADDR, b * devConfig.slicesCnt + s);
-            printf("%08X", ReadReg(component, AMM_GEN_DATA));
+            WriteReg(component, mmr ? MMR_ADDR : AMM_GEN_ADDR, b * devConfig.slicesCnt + s);
+            printf("%08X", ReadReg(component,  mmr ? MMR_DATA : AMM_GEN_DATA));
         }
         printf("\n");
     }
 
-    WriteReg(component, AMM_GEN_ADDR, prevAddr);  // Restore address
+    WriteReg(component, mmr ? MMR_ADDR : AMM_GEN_ADDR, prevAddr);  // Restore address
 }
 
-void FillManualBuff(long burst, char *data)
+void FillManualBuff(bool mmr, long burst, char *data)
 {
-    uint32_t slicedData[devConfig.slicesCnt];
-    AMMHexaToMISlices(devConfig.slicesCnt, slicedData, data);
+    uint32_t slicedData[mmr ? 1 : devConfig.slicesCnt];
+    AMMHexaToMISlices(mmr ? 1 : devConfig.slicesCnt, slicedData, data);
 
-    uint32_t prevAddr = ReadReg(component, AMM_GEN_ADDR);
-    for(uint32_t s = 0; s < devConfig.slicesCnt; s++)
+    uint32_t prevAddr = ReadReg(component, mmr ? MMR_ADDR : AMM_GEN_ADDR);
+    for(uint32_t s = 0; s < (mmr ? 1 : devConfig.slicesCnt); s++)
     {
-        WriteReg(component, AMM_GEN_ADDR, burst * devConfig.slicesCnt + s);
-        WriteReg(component, AMM_GEN_DATA, slicedData[s]);
+        WriteReg(component, mmr ? MMR_ADDR : AMM_GEN_ADDR, burst * devConfig.slicesCnt + s);
+        WriteReg(component, mmr ? MMR_DATA : AMM_GEN_DATA, slicedData[s]);
     }
-    WriteReg(component, AMM_GEN_ADDR, prevAddr);  // Restore address
+    WriteReg(component, mmr ? MMR_ADDR : AMM_GEN_ADDR, prevAddr);  // Restore address
 }
 
-void WriteManualBuff()
+void WriteManualBuff(bool mmr)
 {
-    WriteReg_bit(component, CTRL_IN, AMM_GEN_EN, 1);
-    ToggleBit(component, AMM_GEN_CTRL, MEM_WR);
-    WriteReg_bit(component, CTRL_IN, AMM_GEN_EN, 0);
+    if ( ! mmr)
+    {
+        WriteReg_bit(component, CTRL_IN, AMM_GEN_EN, 1);
+        ToggleBit(component, PROBE_CTRL, PROBE_RESET);
+    }
+    else 
+    {
+        if (ReadReg(component, MMR_BURST) == 0)
+            AMMGenSetBurst(true, 1);
+    }
+
+    ToggleBit(component, mmr ? MMR_CTRL : AMM_GEN_CTRL, MEM_WR);
+
+    if ( ! mmr)
+        WriteReg_bit(component, CTRL_IN, AMM_GEN_EN, 0);
 }
 
-void ReadManualBuff()
+void ReadManualBuff(bool mmr)
 {
-    WriteReg_bit(component, CTRL_IN, AMM_GEN_EN, 1);
-    ToggleBit(component, AMM_GEN_CTRL, MEM_RD);
-    WriteReg_bit(component, CTRL_IN, AMM_GEN_EN, 0);
+    if ( ! mmr)
+    {
+        WriteReg_bit(component, CTRL_IN, AMM_GEN_EN, 1);
+        ToggleBit(component, PROBE_CTRL, PROBE_RESET);
+    }
+    else 
+    {
+        if (ReadReg(component, MMR_BURST) == 0)
+            AMMGenSetBurst(true, 1);
+    }
+
+    ToggleBit(component, mmr ? MMR_CTRL : AMM_GEN_CTRL, MEM_RD);
+
+    if ( ! mmr)
+        WriteReg_bit(component, CTRL_IN, AMM_GEN_EN, 0);
 }
 
-void AMMGenSetAddr(long addr)
+void AMMGenSetAddr(bool mmr, long addr)
 {
-    WriteReg(component, AMM_GEN_ADDR, addr);
+    WriteReg(component, mmr ? MMR_ADDR : AMM_GEN_ADDR, addr);
 }
 
-void AMMGenSetBurst(long burst)
+void AMMGenSetBurst(bool mmr, long burst)
 {
-    WriteReg(component, AMM_GEN_BURST, burst);
+    WriteReg(component, mmr ? MMR_BURST : AMM_GEN_BURST, burst);
 }
-
 
 // ---------------------- //
 // Test related functions //
 // ---------------------- //
 
-void PrintTestResult()
+void PrintTestResult(bool rand)
 {
-    uint32_t errCnt = ReadReg(component, ERR_CNT);
-    if (errCnt == 0)
-        printf("No errors found during test\n");
-    else
-        printf("Found %d wrong words during test\n", errCnt);
-
     struct AMMProbeData_s probeData;
-    struct AMMProbeResults_s    probeResults;
+    struct AMMProbeResults_s results;
     AMMProbeLoadData(&probeData);
-    //AMMProbePrintData(&probeData);
-    AMMProbeCalcResults(&probeData, &probeResults);
-    AMMProbePrintResults(&probeResults);
-    printf("Raw CSV:\n");
-    AMMProbePrintDataCSV(&probeData);
+    AMMProbeCalcResults(&probeData, &results);
+    AMMProbePrintResults(&probeData, &results);
+    //printf("Raw CSV:\n");
+    //AMMProbePrintDataCSV(&probeData);
+
+    bool success = true;
+    // Errors are allowed during random indexing
+    if (results.errCnt != 0 && ! rand)
+    {
+        printf("Found %d wrong words during test\n", results.errCnt);
+        success = false;
+    }
+    if (results.eccErrOcc)
+    {
+        printf("ECC error occurred during test \n");
+        success = false;
+    }
+    if (results.writeWords != results.readWords)
+    {
+        printf("Read word cnt do not match written word cnt\n");
+        success = false;
+    }
+    if (results.readWords != results.reqCnt * results.burst)
+    {
+        printf("Requested and received word counts do not match\n");
+        success = false;
+    }
+    if (results.errOcc && success && ! rand)
+    {
+        printf("Unknown error occurred (TEST_SUCCESS flag = 0)\n");
+        success = false;
+    }
+
+    if (success)
+        printf("Memory test was successful\n");
 }
 
-bool RunTest_intern(bool onlyCSV)
+bool RunTest_intern(bool onlyCSV, bool rand)
 {
     ToggleBit(component, CTRL_IN, RUN_TEST);
 
@@ -513,18 +639,21 @@ bool RunTest_intern(bool onlyCSV)
     }
     else
     {
-        PrintTestResult(component);
+        PrintTestResult(rand);
     }
 
     return true;
 }
 
-uint32_t GetAddLim(uint32_t burst, uint32_t maxAddr)
+uint32_t GetAddLim(uint32_t burst, uint32_t addrBits, double scale)
 {
     //uint32_t maxAddr = pow(2, devConfig.amm_addr_width);
-
     uint32_t addrLim = 0;
-    while (addrLim < maxAddr - 2 * burst)
+    uint32_t maxAddr = pow(2, addrBits) * scale;
+    if (scale >= 1.0)
+        maxAddr -= 2 * burst;
+
+    while (addrLim < maxAddr)
         addrLim += burst;
 
     return addrLim;
@@ -539,10 +668,12 @@ bool RunTest(struct TestParams_s *testParams)
     //WriteReg(component, ADDR_LIM, (unsigned) pow(2, devConfig.amm_addr_width) - pow(2, devConfig.amm_burst_width)); // testParams->burstCnt);
     WriteReg(component, ADDR_LIM, 
         GetAddLim(testParams->burstCnt, 
-        pow(2, devConfig.amm_addr_width) * testParams->addrLimScale));
+        devConfig.amm_addr_width, testParams->addrLimScale));
+
     WriteReg(component, BURST_CNT, testParams->burstCnt);
     WriteReg_bit(component, PROBE_CTRL, LATENCY_TO_FIRST, testParams->latencyToFirst);
     WriteReg_bit(component, CTRL_IN, ONLY_ONE_SIMULT_READ, testParams->onlyOneSimultRead);
+    WriteReg_bit(component, CTRL_IN, AUTO_PRECHARGE_REQ, testParams->autoPrecharge);
 
     // Select test type
     bool testTypeMatch = false;
@@ -554,7 +685,7 @@ bool RunTest(struct TestParams_s *testParams)
         testTypeMatch = true;
         WriteReg_bit(component, CTRL_IN, RANDOM_ADDR_EN, 0);
         // TODO Handle err
-        RunTest_intern(testParams->onlyCSV);
+        RunTest_intern(testParams->onlyCSV, false);
     }
     if (strcmp(testParams->testType, TEST_RAND) == 0 || strcmp(testParams->testType, TEST_ALL) == 0)
     {
@@ -563,7 +694,7 @@ bool RunTest(struct TestParams_s *testParams)
 
         testTypeMatch = true;
         WriteReg_bit(component, CTRL_IN, RANDOM_ADDR_EN, 1);
-        RunTest_intern(testParams->onlyCSV);
+        RunTest_intern(testParams->onlyCSV, true);
     }
     if (strcmp(testParams->testType, TEST_LAT_SEQ) == 0 || strcmp(testParams->testType, TEST_ALL) == 0)
     {
@@ -700,192 +831,3 @@ bool RunLatTest_intern(bool rand)
     WriteReg_bit(component, CTRL_IN, AMM_GEN_EN, 0);
     return true;
 }
-
-/*
-// Confuse writes and reads - to ensure data wont be buffered in EMIF
-void ConfuseEMIF(uint32_t burstCnt)
-{
-    for (unsigned c = 0; c < LatTestConfuseReads; c ++)
-    {
-        // generate random data
-        for (unsigned d = 0; d < burstCnt; d ++)
-        {
-            for(uint32_t s = 0; s < devConfig.slicesCnt; s++)
-            {
-                WriteReg(component, AMM_GEN_ADDR, d * devConfig.slicesCnt + s);
-                WriteReg(component, AMM_GEN_DATA, RandMIData());
-            }
-        }
-
-        WriteReg(component, AMM_GEN_ADDR, RandAddr(&devConfig));
-        ToggleBit(component, AMM_GEN_CTRL, MEM_WR);
-    }
-
-    for (unsigned c = 0; c < LatTestConfuseReads; c ++)
-    {
-        WriteReg(component, AMM_GEN_ADDR, RandAddr(&devConfig));
-        ToggleBit(component, AMM_GEN_CTRL, MEM_RD);
-    }
-}
-
-bool RunLatTest_intern(bool confuse, bool rand)
-{
-    struct AMMProbeResults_s avgProbeResults[LAT_TEST_BURST_CNT];
-    WriteReg_bit(component, CTRL_IN, AMM_GEN_EN, 1);
-    //WriteReg_bit(component, PROBE_CTRL, LATENCY_TO_FIRST, 0);
-
-    for (unsigned b = 0; b < LAT_TEST_BURST_CNT; b ++)
-    {
-        uint32_t burstCnt = LatTestBurst[b];
-        uint32_t addr = 0;
-
-        AMMProbeClearResults(&avgProbeResults[b]);
-        avgProbeResults[b].burst = burstCnt;
-        WriteReg(component, AMM_GEN_BURST, burstCnt);
-
-        if (rand)
-        {
-            for (unsigned i = 0; i < LatTestMeasCnt; i ++)
-            {
-                addr = RandAddr(&devConfig);
-
-                // generate random data
-                for (unsigned d = 0; d < burstCnt; d ++)
-                {
-                    for(uint32_t s = 0; s < devConfig.slicesCnt; s++)
-                    {
-                        WriteReg(component, AMM_GEN_ADDR, d * devConfig.slicesCnt + s);
-                        WriteReg(component, AMM_GEN_DATA, d * devConfig.slicesCnt + s);    // TODO - create random data
-                    }
-                }
-
-                // Write test data
-                WriteReg(component, AMM_GEN_ADDR, addr);
-                ToggleBit(component, AMM_GEN_CTRL, MEM_WR);
-
-                if (confuse)
-                    ConfuseEMIF(burstCnt);    // Can overwite correct data!
-
-                usleep(1000);
-
-                // Correct read
-                ToggleBit(component, PROBE_CTRL, PROBE_RESET);
-                WriteReg(component, AMM_GEN_ADDR, addr);
-                ToggleBit(component, AMM_GEN_CTRL, MEM_RD);
-                if (! WaitForBit(component, AMM_GEN_CTRL, BUFF_VLD, 1, AMM_READY_MAX_ASKS, AMM_READY_ASK_DELAY))
-                {
-                    printf("BUFF VLD wait error");
-                    return false;
-                }
-
-                // Check data
-                unsigned errCnt = 0;
-                for (unsigned d = 0; d < burstCnt; d ++)
-                {
-                    for(uint32_t s = 0; s < devConfig.slicesCnt; s++)
-                    {
-                        uint32_t data;
-                        WriteReg(component, AMM_GEN_ADDR, d * devConfig.slicesCnt + s);
-                        data = ReadReg(component, AMM_GEN_DATA);
-                        if (data != d * devConfig.slicesCnt + s)
-                            errCnt ++;
-                    }
-                }
-
-                if (errCnt)
-                    printf("%d errors found during test\n", errCnt);
-
-                //PrintManualBuff(component);
-                //PrintTestResult(component);
-
-                struct AMMProbeData_s probeData;
-                AMMProbeLoadData(&probeData);
-                //AMMProbePrintData(&probeData);
-
-                if (probeData.readWords != burstCnt)
-                    printf("%d words readed (requested %d)\n", probeData.readWords, burstCnt);
-                if (probeData.reqCnt != 1)
-                    printf("%d request made (requested %d)\n", probeData.reqCnt, 1);
-
-                AMMProbeAddResults(&probeData, &avgProbeResults[b]);
-            }
-        }
-        else
-        {
-            //TODO - Make it better
-
-            for (unsigned i = 0; i < LatTestMeasCnt; i ++, addr += burstCnt)
-            {
-                // generate random data
-                for (unsigned d = 0; d < burstCnt; d ++)
-                {
-                    for(uint32_t s = 0; s < devConfig.slicesCnt; s++)
-                    {
-                        WriteReg(component, AMM_GEN_ADDR, d * devConfig.slicesCnt + s);
-                        WriteReg(component, AMM_GEN_DATA, d * devConfig.slicesCnt + s);    // TODO - create random data
-                    }
-                }
-
-                // Write test data
-                WriteReg(component, AMM_GEN_ADDR, addr);
-                ToggleBit(component, AMM_GEN_CTRL, MEM_WR);
-            }
-
-            usleep(1000);
-            addr = 0;
-
-            for (unsigned i = 0; i < LatTestMeasCnt; i ++, addr += burstCnt)
-            {
-                ToggleBit(component, PROBE_CTRL, PROBE_RESET);
-                WriteReg(component, AMM_GEN_ADDR, addr);
-                ToggleBit(component, AMM_GEN_CTRL, MEM_RD);
-                if (! WaitForBit(component, AMM_GEN_CTRL, BUFF_VLD, 1, AMM_READY_MAX_ASKS, AMM_READY_ASK_DELAY))
-                {
-                    printf("BUFF VLD wait error");
-                    return false;
-                }
-
-                // Check data
-                unsigned errCnt = 0;
-                for (unsigned d = 0; d < burstCnt; d ++)
-                {
-                    for(uint32_t s = 0; s < devConfig.slicesCnt; s++)
-                    {
-                        uint32_t data;
-                        WriteReg(component, AMM_GEN_ADDR, d * devConfig.slicesCnt + s);
-                        data = ReadReg(component, AMM_GEN_DATA);
-                        if (data != d * devConfig.slicesCnt + s)
-                            errCnt ++;
-                    }
-                }
-
-                if (errCnt)
-                    printf("%d errors found during test\n", errCnt);
-
-                //PrintManualBuff(component);
-                //PrintTestResult(component);
-
-                struct AMMProbeData_s probeData;
-                AMMProbeLoadData(&probeData);
-                //AMMProbePrintData(&probeData);
-
-                if (probeData.readWords != burstCnt)
-                    printf("%d words readed (requested %d)\n", probeData.readWords, burstCnt);
-                if (probeData.reqCnt != 1)
-                    printf("%d request made (requested %d)\n", probeData.reqCnt, 1);
-
-                AMMProbeAddResults(&probeData, &avgProbeResults[b]);
-            } 
-        }
-
-        AMMProbeAvgResults(&avgProbeResults[b], LatTestMeasCnt);
-        //AMMProbePrintResults(&avgProbeResults[b]);
-    }
-
-    for (unsigned b = 0; b < LAT_TEST_BURST_CNT; b ++)
-        AMMProbePrintResultsCSV(&avgProbeResults[b]);
-
-    WriteReg_bit(component, CTRL_IN, AMM_GEN_EN, 0);
-    return true;
-}
-*/

@@ -13,6 +13,7 @@ from pdf_gen import *   # TODO
 DEBUG           = False
 csv_delim       = ','
 burst_step      = 3
+burst_prec_lim  = 10    # All bursts will be sampled in range <1,this threshold>
 test_cnt        = 5
 test_scale      = .0001    # How many % of memory will be tested
 
@@ -136,14 +137,31 @@ def get_test_res(index, test_type, burst):
         "lat_avg"       :       arr[9],
     }, str
 
-def test_multiple_bursts(index, test_type, max_burst):
-    data, str = get_test_res(index, test_type, 1)
-    data = {k: np.array([v]) for (k,v) in data.items()}
+def burst_seq(max_burst):
+    precBursts = list(range(1, burst_prec_lim + 1))
+    restBursts = list(range(precBursts[-1], max_burst + 1, burst_step))
+    return [*precBursts, *restBursts]
 
-    for b in range(1 + burst_step, max_burst + 1, burst_step):
+def test_multiple_bursts(index, test_type, max_burst):
+    #data, str = get_test_res(index, test_type, 1)
+    #data = {k: np.array([v]) for (k,v) in data.items()}
+    #for b in range(1 + burst_step, max_burst + 1, burst_step):
+
+    raw_data = []
+    str = ""
+
+    for b in burst_seq(max_burst):
         new_data, new_str = get_test_res(index, test_type, b)
-        data = {k: np.array([*v, new_data[k]]) for (k,v) in data.items()}
+        #data = {k: np.array([*v, new_data[k]]) for (k,v) in data.items()}
+        raw_data.append(new_data) 
         str += new_str
+
+    # Transform data (list of dicts => dict of lists)
+    for i, d in enumerate(raw_data):
+        if (i == 0):
+            data = {k: np.array([v]) for (k,v) in d.items()}
+        else:
+            data = {k: np.array([*v, d[k]]) for (k,v) in data.items()}
 
     return data, str
 
@@ -193,7 +211,8 @@ def plot_range(x, min, max, color, label):
 
 def plot_all_data(all_data, test_type, max_burst, burst_size, amm_freq, test_str):
     burst_size_B = burst_size / 8
-    x_words = np.arange(1, max_burst + 1, burst_step)
+    x_words = np.array(burst_seq(max_burst))
+    #np.arange(1, max_burst + 1, burst_step)
     x = x_words * burst_size_B
 
     # plot flow #

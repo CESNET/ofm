@@ -23,6 +23,10 @@ architecture BEHAVIORAL Of TESTBENCH is
     constant AMM_ADDR_WIDTH         : integer := 26;
     constant AMM_BURST_COUNT_WIDTH  : integer := 7;
 
+    constant MEM_MMR_ADDR_WIDTH     : integer := 10;
+    constant MEM_MMR_DATA_WIDTH     : integer := 32;
+    constant MEM_MMR_BURST_WIDTH    : integer := 2;
+
     constant MI_DATA_WIDTH          : integer := 32;
     constant MI_ADDR_WIDTH          : integer := 32;
  
@@ -34,7 +38,7 @@ architecture BEHAVIORAL Of TESTBENCH is
 
     constant DEFAULT_BURST_CNT      : integer  := 4;
     -- Used as max memory size for simulation
-    constant ADDR_LIMIT             : integer  := DEFAULT_BURST_CNT * 16;   
+    constant ADDR_LIMIT             : integer  := DEFAULT_BURST_CNT * 128;   
     constant MEM_SIZE               : integer  := ADDR_LIMIT + 2 ** AMM_BURST_COUNT_WIDTH;
 
     ------------
@@ -42,13 +46,15 @@ architecture BEHAVIORAL Of TESTBENCH is
     ------------
     -- Comp address bases
     constant AMM_GEN_BASE           : integer := 64;
-    constant AMM_PROBE_BASE         : integer := 128;
+    constant AMM_PROBE_BASE         : integer := 80;
 
     -- Register addresses
     constant MI_CTRL_IN_ADDR        : integer := 0;
     constant MI_CTRL_OUT_ADDR       : integer := 4;
     constant MI_ERR_CNT_ADDR        : integer := 8;
     constant MI_BURST_CNT_ADDR      : integer := 12;
+    constant MI_ADDR_LIM_ADDR       : integer := 16;
+    constant MI_REFRESH_PERIOD_ADDR : integer := 20;
 
     constant AMM_GEN_CTRL_ADDR      : integer := AMM_GEN_BASE;
     constant AMM_GEN_ADDR_ADDR      : integer := AMM_GEN_BASE + 4;
@@ -62,9 +68,10 @@ architecture BEHAVIORAL Of TESTBENCH is
     constant AMM_PROB_WR_WORDS_ADDR : integer := AMM_PROBE_BASE + 16;
     constant AMM_PROB_RD_WORDS_ADDR : integer := AMM_PROBE_BASE + 20;
     constant AMM_PROB_REQ_WORDS_ADDR      : integer := AMM_PROBE_BASE + 24;
-    constant AMM_PROB_LATENCY_SUM_ADDR    : integer := AMM_PROBE_BASE + 28;
-    constant AMM_PROB_LATENCY_MIN_ADDR    : integer := AMM_PROBE_BASE + 32;
-    constant AMM_PROB_LATENCY_MAX_ADDR    : integer := AMM_PROBE_BASE + 36;
+    constant AMM_PROB_LATENCY_SUM_1_ADDR    : integer := AMM_PROBE_BASE + 28;
+    constant AMM_PROB_LATENCY_SUM_2_ADDR    : integer := AMM_PROBE_BASE + 32;
+    constant AMM_PROB_LATENCY_MIN_ADDR    : integer := AMM_PROBE_BASE + 36;
+    constant AMM_PROB_LATENCY_MAX_ADDR    : integer := AMM_PROBE_BASE + 40;
 
     -- Bits in registers
     -- CORE
@@ -131,6 +138,18 @@ architecture BEHAVIORAL Of TESTBENCH is
     signal mi32_ardy                : std_logic;
     signal mi32_drd                 : std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
     signal mi32_drdy                : std_logic; 
+
+    -- MMR bus 
+    signal mmr_ready                : std_logic                      := '0';                                         
+    signal mmr_read                 : std_logic                      := '0';             
+    signal mmr_write                : std_logic                      := '0';             
+    signal mmr_address              : std_logic_vector(MEM_MMR_ADDR_WIDTH - 1 downto 0) := (others => '0'); 
+    signal mmr_read_data            : std_logic_vector(MEM_MMR_DATA_WIDTH - 1 downto 0) := (others => '0');                    
+    signal mmr_write_data           : std_logic_vector(MEM_MMR_DATA_WIDTH - 1 downto 0) := (others => '0'); 
+    signal mmr_burst_count          : std_logic_vector(MEM_MMR_BURST_WIDTH - 1 downto 0) := (others => '0'); 
+    signal mmr_read_data_valid      : std_logic                      := '0';                                         
+
+    signal mmr_refresh_done : boolean := false;
 
     procedure toggleBit_p (addr_int : in integer; bit_pos : in integer; signal mi_status : inout TCommandStatus; constant mi_id : in integer)
     is
@@ -212,9 +231,14 @@ architecture BEHAVIORAL Of TESTBENCH is
         report "Words requested: " & integer'image(to_integer(unsigned(data)));
         wait for 1 * MI_CLK_PERIOD;
 
-        addr := std_logic_vector(to_unsigned(AMM_PROB_LATENCY_SUM_ADDR, addr'length));
+        addr := std_logic_vector(to_unsigned(AMM_PROB_LATENCY_SUM_1_ADDR, addr'length));
         work.mi_sim_pkg.ReadData(addr, data, be, mi_status, mi_id); 
-        report "Latency sum: " & integer'image(to_integer(unsigned(data)));
+        report "Latency sum 1: " & integer'image(to_integer(unsigned(data)));
+        wait for 1 * MI_CLK_PERIOD;
+
+        addr := std_logic_vector(to_unsigned(AMM_PROB_LATENCY_SUM_2_ADDR, addr'length));
+        work.mi_sim_pkg.ReadData(addr, data, be, mi_status, mi_id); 
+        report "Latency sum 2: " & integer'image(to_integer(unsigned(data)));
         wait for 1 * MI_CLK_PERIOD;
 
         addr := std_logic_vector(to_unsigned(AMM_PROB_LATENCY_MIN_ADDR, addr'length));
@@ -419,6 +443,11 @@ begin
         DEFAULT_ADDR_LIMIT      => ADDR_LIMIT,
         DEFAULT_BURST_CNT       => DEFAULT_BURST_CNT,
         DEBUG_RAND_ADDR         => True,
+
+        MEM_MMR_ADDR_WIDTH      => MEM_MMR_ADDR_WIDTH,
+        MEM_MMR_DATA_WIDTH      => MEM_MMR_DATA_WIDTH,
+        MEM_MMR_BURST_WIDTH     => MEM_MMR_BURST_WIDTH,
+
         DEVICE                  => DEVICE
     )
     port map(
@@ -433,6 +462,15 @@ begin
         AMM_WRITE_DATA          => amm_write_data,
         AMM_BURST_COUNT         => amm_burst_count,
         AMM_READ_DATA_VALID     => amm_read_data_valid,
+
+        MEM_MMR_WAITREQUEST     => not mmr_ready      ,
+        MEM_MMR_READ            => mmr_read           ,
+        MEM_MMR_WRITE           => mmr_write          ,
+        MEM_MMR_ADDRESS         => mmr_address        ,
+        MEM_MMR_READDATA        => mmr_read_data      ,
+        MEM_MMR_WRITEDATA       => mmr_write_data     ,
+        MEM_MMR_BURSTCOUNT      => mmr_burst_count    ,
+        MEM_MMR_READDATAVALID   => mmr_read_data_valid,
 
         EMIF_RST_REQ            => emif_rst_req, 
         EMIF_RST_DONE           => emif_rst_done, 
@@ -560,6 +598,35 @@ begin
         wait;        
     end process;
 
+    mmr_resp_p : process
+    begin 
+        if (sim_done = '1') then
+            wait;
+        end if;
+
+        mmr_read_data_valid <= '0';
+        mmr_read_data(0)    <= '0';
+        wait until mmr_read = '1';
+
+        wait for AMM_CLK_PERIOD * 9;
+        mmr_read_data_valid     <= '1';
+
+        if (mmr_refresh_done = true) then 
+            mmr_read_data(0)        <= '0';
+            mmr_refresh_done        <= false;
+        else
+            mmr_read_data(0)        <= '1';
+            mmr_refresh_done        <= true;
+        end if;
+
+        wait for AMM_CLK_PERIOD;
+        mmr_read_data_valid     <= '0';
+        mmr_read_data(0)        <= '0';
+
+    end process;
+
+    mmr_ready <= '1';
+
     mi_test_p : process
         variable addr               : std_logic_vector(MI_DATA_WIDTH - 1 downto 0)        := (others => '0');
         variable data               : std_logic_vector(MI_DATA_WIDTH - 1 downto 0)        := (others => '0');
@@ -581,6 +648,12 @@ begin
         -- force reset via MI bus
         toggleBit_p(MI_CTRL_IN_ADDR, MI_RST_BIT, status(0), 0);
         wait for 5 * MI_CLK_PERIOD;
+
+
+        addr := std_logic_vector(to_unsigned(MI_REFRESH_PERIOD_ADDR, addr'length));
+        data := std_logic_vector(to_unsigned(20, data'length));     
+        work.mi_sim_pkg.WriteData(addr, data, be, status(0),0);
+        wait for 1 * MI_CLK_PERIOD;
 
         -- To measure to first response data (default to last response data)
         --setBit_p(AMM_PROB_CTRL_ADDR, AMM_PROBE_LATENCY_TO_FIRST_BIT, '1', status(0), 0);

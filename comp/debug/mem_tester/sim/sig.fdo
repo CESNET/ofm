@@ -34,6 +34,9 @@ add wave -divider ""
 add_wave "-group { uut_mi } -noupdate -hex"   $UUT_PATH/mem_tester_mi_i/*
 
 add wave -divider ""
+add_wave "-group { uut_mux } -noupdate -hex"   $UUT_PATH/amm_mux_i/*
+
+add wave -divider ""
 add_wave "-group { uut_amm_gen } -noupdate -hex"   $UUT_PATH/amm_gen_i/*
 
 add wave -divider ""
@@ -46,8 +49,19 @@ add wave -divider ""
 add_wave "-group { uut_latency_meter } -noupdate -hex"   $UUT_PATH/amm_probe_i/latency_meter_i/*
 
 add wave -divider ""
-add_wave "-group { emif_sim } -noupdate -hex"   $EMIF_SIM_PATH/*
+add_wave "-group { emif_refresh } -noupdate -hex"   $UUT_PATH/emif_refresh_i/*
 
+add wave -divider ""
+add_wave "-group { mmr_amm_gen } -noupdate -hex"   $UUT_PATH/mmr_amm_gen_i/*
+
+add wave -divider ""
+add_wave "-group { mmr_meter } -noupdate -hex"   $UUT_PATH/mmr_meter_i/*
+
+add wave -divider ""
+add_wave "-group { mmr_mux } -noupdate -hex"   $UUT_PATH/mmr_mux_i/*
+
+add wave -divider ""
+add_wave "-group { emif_sim } -noupdate -hex"   $EMIF_SIM_PATH/*
 
 config wave -signalnamewidth 1
 

@@ -9,9 +9,7 @@
 proc mem_tester {base id} {
 	set    ret ""
 	append ret "mem_tester_$id {"
-	# base + size
-	#TODO - can be reduced
-	append ret "reg = <$base 0xC0>;"
+	append ret "reg = <$base 0x100>;"
 	append ret "compatible = \"netcope,mem_tester\";"
 	append ret "};"
 	return $ret
