@@ -5,16 +5,16 @@
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
 class model #(META_WIDTH, CHANNELS) extends uvm_component;
-    `uvm_component_param_utils(splitter_simple_env::model#(META_WIDTH, CHANNELS))
+    `uvm_component_param_utils(uvm_splitter_simple::model#(META_WIDTH, CHANNELS))
 
     localparam SEL_WIDTH = $clog2(CHANNELS);
     
 
-    uvm_tlm_analysis_fifo #(byte_array::sequence_item)                             input_data;
-    uvm_tlm_analysis_fifo #(logic_vector::sequence_item #(SEL_WIDTH + META_WIDTH)) input_meta;
+    uvm_tlm_analysis_fifo #(uvm_byte_array::sequence_item)                             input_data;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(SEL_WIDTH + META_WIDTH)) input_meta;
 
-    uvm_analysis_port #(byte_array::sequence_item)                 out_data[CHANNELS];
-    uvm_analysis_port #(logic_vector::sequence_item #(META_WIDTH)) out_meta[CHANNELS];
+    uvm_analysis_port #(uvm_byte_array::sequence_item)                 out_data[CHANNELS];
+    uvm_analysis_port #(uvm_logic_vector::sequence_item #(META_WIDTH)) out_meta[CHANNELS];
 
     function new(string name = "model", uvm_component parent = null);
         super.new(name, parent);
@@ -33,9 +33,9 @@ class model #(META_WIDTH, CHANNELS) extends uvm_component;
 
     task run_phase(uvm_phase phase);
         int unsigned channel;
-        byte_array::sequence_item                               tr_input_packet;
-        logic_vector::sequence_item #(SEL_WIDTH + META_WIDTH)   tr_input_meta;
-        logic_vector::sequence_item #(META_WIDTH)               tr_output_meta;
+        uvm_byte_array::sequence_item                               tr_input_packet;
+        uvm_logic_vector::sequence_item #(SEL_WIDTH + META_WIDTH)   tr_input_meta;
+        uvm_logic_vector::sequence_item #(META_WIDTH)               tr_output_meta;
 
         forever begin
             input_data.get(tr_input_packet);
@@ -48,7 +48,7 @@ class model #(META_WIDTH, CHANNELS) extends uvm_component;
                 $swrite(msg, "\n\tWrong channel num %0d Channel range is 0-%0d", channel, CHANNELS-1);
                 `uvm_fatal(this.get_full_name(), msg);
             end else begin
-                tr_output_meta      = logic_vector::sequence_item #(META_WIDTH)::type_id::create("tr_output_meta"); 
+                tr_output_meta      = uvm_logic_vector::sequence_item #(META_WIDTH)::type_id::create("tr_output_meta"); 
                 tr_output_meta.data = tr_input_meta.data[META_WIDTH-1:0];
                 out_data[channel].write(tr_input_packet);
                 out_meta[channel].write(tr_output_meta);

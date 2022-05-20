@@ -5,15 +5,15 @@
 //-- SPDX-License-Identifier: BSD-3-Clause
 
 class mfb_compare #(META_WIDTH) extends uvm_component;
-    `uvm_component_param_utils(splitter_simple_env::mfb_compare #(META_WIDTH))
+    `uvm_component_param_utils(uvm_splitter_simple::mfb_compare #(META_WIDTH))
 
     int unsigned errors;
     int unsigned compared;
-    uvm_tlm_analysis_fifo #(byte_array::sequence_item)                 model_data;
-    uvm_tlm_analysis_fifo #(logic_vector::sequence_item #(META_WIDTH)) model_meta;
+    uvm_tlm_analysis_fifo #(uvm_byte_array::sequence_item)                 model_data;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(META_WIDTH)) model_meta;
 
-    uvm_tlm_analysis_fifo #(byte_array::sequence_item)                 dut_data;
-    uvm_tlm_analysis_fifo #(logic_vector::sequence_item #(META_WIDTH)) dut_meta;
+    uvm_tlm_analysis_fifo #(uvm_byte_array::sequence_item)                 dut_data;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(META_WIDTH)) dut_meta;
 
 
     function new(string name, uvm_component parent);
@@ -36,11 +36,11 @@ class mfb_compare #(META_WIDTH) extends uvm_component;
     endfunction
 
     task run_phase(uvm_phase phase);
-        byte_array::sequence_item                tr_model_packet;
-        logic_vector::sequence_item#(META_WIDTH) tr_model_meta;
+        uvm_byte_array::sequence_item                tr_model_packet;
+        uvm_logic_vector::sequence_item#(META_WIDTH) tr_model_meta;
 
-        byte_array::sequence_item                tr_dut_packet;
-        logic_vector::sequence_item#(META_WIDTH) tr_dut_meta;
+        uvm_byte_array::sequence_item                tr_dut_packet;
+        uvm_logic_vector::sequence_item#(META_WIDTH) tr_dut_meta;
 
         forever begin
             model_data.get(tr_model_packet);
@@ -63,14 +63,14 @@ class mfb_compare #(META_WIDTH) extends uvm_component;
 endclass
 
 class scoreboard #(META_WIDTH, CHANNELS) extends uvm_scoreboard;
-    `uvm_component_param_utils(splitter_simple_env::scoreboard #(META_WIDTH, CHANNELS))
+    `uvm_component_param_utils(uvm_splitter_simple::scoreboard #(META_WIDTH, CHANNELS))
 
 
-    uvm_analysis_export #(byte_array::sequence_item)                                    input_data;
-    uvm_analysis_export #(logic_vector::sequence_item #($clog2(CHANNELS) + META_WIDTH)) input_meta;
+    uvm_analysis_export #(uvm_byte_array::sequence_item)                                    input_data;
+    uvm_analysis_export #(uvm_logic_vector::sequence_item #($clog2(CHANNELS) + META_WIDTH)) input_meta;
 
-    uvm_analysis_export #(byte_array::sequence_item)                 out_data[CHANNELS];
-    uvm_analysis_export #(logic_vector::sequence_item #(META_WIDTH)) out_meta[CHANNELS];
+    uvm_analysis_export #(uvm_byte_array::sequence_item)                 out_data[CHANNELS];
+    uvm_analysis_export #(uvm_logic_vector::sequence_item #(META_WIDTH)) out_meta[CHANNELS];
 
     mfb_compare #(META_WIDTH)     out_compare[CHANNELS];
     model #(META_WIDTH, CHANNELS) m_model;

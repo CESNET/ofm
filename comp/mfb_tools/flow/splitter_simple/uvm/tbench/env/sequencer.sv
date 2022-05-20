@@ -8,8 +8,8 @@ class virt_sequencer#(META_WIDTH) extends uvm_sequencer;
 
     `uvm_component_param_utils(virt_sequencer#(META_WIDTH))
 
-    byte_array::sequencer m_byte_array_sqr;
-    logic_vector::sequencer#(META_WIDTH) m_logic_vector_sqr;
+    uvm_byte_array::sequencer m_byte_array_sqr;
+    uvm_logic_vector::sequencer#(META_WIDTH) m_logic_vector_sqr;
     
     function new(string name = "virt_sequencer", uvm_component parent);
         super.new(name, parent);
