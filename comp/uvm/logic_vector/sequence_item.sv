@@ -8,7 +8,7 @@
 class sequence_item #(DATA_WIDTH)extends uvm_sequence_item;
 
     // Registration of object tools.
-    `uvm_object_param_utils(logic_vector::sequence_item#(DATA_WIDTH))
+    `uvm_object_param_utils(uvm_logic_vector::sequence_item#(DATA_WIDTH))
 
     // -----------------------
     // Variables.

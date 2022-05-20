@@ -9,12 +9,12 @@
 */
 
 
-class monitor_logic_vector#(WIDTH, SEGMENTS) extends logic_vector::monitor #(WIDTH);
-    `uvm_component_param_utils(byte_array_intel_mac_seg::monitor_logic_vector#(WIDTH, SEGMENTS))
+class monitor_logic_vector#(WIDTH, SEGMENTS) extends uvm_logic_vector::monitor #(WIDTH);
+    `uvm_component_param_utils(uvm_byte_array_intel_mac_seg::monitor_logic_vector#(WIDTH, SEGMENTS))
 
-    uvm_analysis_imp #(intel_mac_seg::sequence_item #(SEGMENTS), monitor_logic_vector#(WIDTH, SEGMENTS)) analysis_export;
-    logic_vector::sequence_item#(WIDTH) hl_tr;
-    reset::sync_terminate reset_sync;
+    uvm_analysis_imp #(uvm_intel_mac_seg::sequence_item #(SEGMENTS), monitor_logic_vector#(WIDTH, SEGMENTS)) analysis_export;
+    uvm_logic_vector::sequence_item#(WIDTH) hl_tr;
+    uvm_reset::sync_terminate reset_sync;
 
     typedef enum {FRAME, NO_FRAME} state_t;
     state_t state;
@@ -27,7 +27,7 @@ class monitor_logic_vector#(WIDTH, SEGMENTS) extends logic_vector::monitor #(WID
         reset_sync = new();
     endfunction
 
-    virtual function void write(intel_mac_seg::sequence_item #(SEGMENTS) tr);
+    virtual function void write(uvm_intel_mac_seg::sequence_item #(SEGMENTS) tr);
         //check if in past has been set reset
         if (reset_sync.has_been_reset()) begin
             state = NO_FRAME;
@@ -46,7 +46,7 @@ class monitor_logic_vector#(WIDTH, SEGMENTS) extends logic_vector::monitor #(WID
             //detection eof
             if (state == FRAME && tr.inframe[it] == 0) begin
                 state = NO_FRAME;
-                hl_tr = logic_vector::sequence_item#(WIDTH)::type_id::create("hl_tr", this);
+                hl_tr = uvm_logic_vector::sequence_item#(WIDTH)::type_id::create("hl_tr", this);
                 hl_tr.data = {tr.fcs_error[it], tr.error[it], tr.status_data[it]};
                 analysis_port.write(hl_tr);
             end

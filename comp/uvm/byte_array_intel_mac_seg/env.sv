@@ -10,27 +10,27 @@
 
 
 class env_rx#(SEGMENTS) extends uvm_env;
-    `uvm_component_param_utils(byte_array_intel_mac_seg::env_rx#(SEGMENTS))
+    `uvm_component_param_utils(uvm_byte_array_intel_mac_seg::env_rx#(SEGMENTS))
 
     // fcs_error, tr.error, tr.status_data
     localparam LOGIC_WIDTH = 6;
 
     //exporting
-    uvm_analysis_port #(byte_array::sequence_item) analysis_port_packet;
-    uvm_analysis_port #(logic_vector::sequence_item#(LOGIC_WIDTH)) analysis_port_error;
+    uvm_analysis_port #(uvm_byte_array::sequence_item) analysis_port_packet;
+    uvm_analysis_port #(uvm_logic_vector::sequence_item#(LOGIC_WIDTH)) analysis_port_error;
     sequencer                                      m_sequencer;
-    reset::sync_cbs                                reset_sync;
+    uvm_reset::sync_cbs                                reset_sync;
 
     // high level agent
-    byte_array::agent       m_byte_array_agent;
-    byte_array::config_item m_byte_array_cfg;
+    uvm_byte_array::agent       m_byte_array_agent;
+    uvm_byte_array::config_item m_byte_array_cfg;
 
-    logic_vector::agent #(LOGIC_WIDTH) m_logic_vector_agent;
-    logic_vector::config_item         m_logic_vector_cfg;
+    uvm_logic_vector::agent #(LOGIC_WIDTH) m_logic_vector_agent;
+    uvm_logic_vector::config_item         m_logic_vector_cfg;
 
     // low level aget
-    intel_mac_seg::agent_rx #(SEGMENTS) m_intel_mac_seg_agent;
-    intel_mac_seg::config_item          m_intel_mac_seg_cfg;
+    uvm_intel_mac_seg::agent_rx #(SEGMENTS) m_intel_mac_seg_agent;
+    uvm_intel_mac_seg::config_item          m_intel_mac_seg_cfg;
 
     config_item m_config;
 
@@ -47,23 +47,23 @@ class env_rx#(SEGMENTS) extends uvm_env;
         //create byte array agent
         m_byte_array_cfg = new;
         m_byte_array_cfg.active = m_config.active;
-        uvm_config_db #(byte_array::config_item)::set(this, "m_byte_array_agent", "m_config", m_byte_array_cfg);
-        byte_array::monitor::type_id::set_inst_override(monitor_byte_array#(SEGMENTS)::get_type(), {this.get_full_name(), ".m_byte_array_agent.*"});
-        m_byte_array_agent    = byte_array::agent::type_id::create("m_byte_array_agent", this);
+        uvm_config_db #(uvm_byte_array::config_item)::set(this, "m_byte_array_agent", "m_config", m_byte_array_cfg);
+        uvm_byte_array::monitor::type_id::set_inst_override(monitor_byte_array#(SEGMENTS)::get_type(), {this.get_full_name(), ".m_byte_array_agent.*"});
+        m_byte_array_agent    = uvm_byte_array::agent::type_id::create("m_byte_array_agent", this);
 
         //create logic vector
         m_logic_vector_cfg = new;
         m_logic_vector_cfg.active = m_config.active;
-        uvm_config_db #(logic_vector::config_item)::set(this, "m_logic_vector_agent", "m_config", m_logic_vector_cfg);
-        logic_vector::monitor#(LOGIC_WIDTH)::type_id::set_inst_override(monitor_logic_vector#(LOGIC_WIDTH, SEGMENTS)::get_type(), {this.get_full_name(), ".m_logic_vector_agent.*"});
-        m_logic_vector_agent = logic_vector::agent #(LOGIC_WIDTH)::type_id::create("m_logic_vector_agent", this);
+        uvm_config_db #(uvm_logic_vector::config_item)::set(this, "m_logic_vector_agent", "m_config", m_logic_vector_cfg);
+        uvm_logic_vector::monitor#(LOGIC_WIDTH)::type_id::set_inst_override(monitor_logic_vector#(LOGIC_WIDTH, SEGMENTS)::get_type(), {this.get_full_name(), ".m_logic_vector_agent.*"});
+        m_logic_vector_agent = uvm_logic_vector::agent #(LOGIC_WIDTH)::type_id::create("m_logic_vector_agent", this);
 
         //create intel seq mac agent
         m_intel_mac_seg_cfg = new;
         m_intel_mac_seg_cfg.active         = m_config.active;
         m_intel_mac_seg_cfg.interface_name = m_config.interface_name;
-        uvm_config_db #(intel_mac_seg::config_item)::set(this, "m_intel_mac_seg_agent", "m_config", m_intel_mac_seg_cfg);
-        m_intel_mac_seg_agent = intel_mac_seg::agent_rx #(SEGMENTS)::type_id::create("m_intel_mac_seg_agent", this);
+        uvm_config_db #(uvm_intel_mac_seg::config_item)::set(this, "m_intel_mac_seg_agent", "m_config", m_intel_mac_seg_cfg);
+        m_intel_mac_seg_agent = uvm_intel_mac_seg::agent_rx #(SEGMENTS)::type_id::create("m_intel_mac_seg_agent", this);
 
         if (m_config.active == UVM_ACTIVE) begin
             m_sequencer = sequencer::type_id::create("m_sequencer", this);
@@ -115,28 +115,28 @@ endclass
 
 
 class env_tx#(SEGMENTS) extends uvm_env;
-    `uvm_component_param_utils(byte_array_intel_mac_seg::env_tx#(SEGMENTS))
+    `uvm_component_param_utils(uvm_byte_array_intel_mac_seg::env_tx#(SEGMENTS))
 
     // fcs_error, tr.error, tr.status_data
     localparam LOGIC_WIDTH = 6;
 
-    uvm_analysis_port #(byte_array::sequence_item)                 analysis_port_packet;
-    uvm_analysis_port #(logic_vector::sequence_item#(LOGIC_WIDTH)) analysis_port_error;
+    uvm_analysis_port #(uvm_byte_array::sequence_item)                 analysis_port_packet;
+    uvm_analysis_port #(uvm_logic_vector::sequence_item#(LOGIC_WIDTH)) analysis_port_error;
 
-    intel_mac_seg::sequencer#(SEGMENTS)            m_sequencer;
+    uvm_intel_mac_seg::sequencer#(SEGMENTS)            m_sequencer;
 
     //high level agents
-    byte_array::agent       m_byte_array_agent;
-    byte_array::config_item m_byte_array_cfg;
+    uvm_byte_array::agent       m_byte_array_agent;
+    uvm_byte_array::config_item m_byte_array_cfg;
 
-    logic_vector::agent#(LOGIC_WIDTH) m_logic_vector_agent;
-    logic_vector::config_item         m_logic_vector_cfg;
+    uvm_logic_vector::agent#(LOGIC_WIDTH) m_logic_vector_agent;
+    uvm_logic_vector::config_item         m_logic_vector_cfg;
     //RESET
-    reset::sync_cbs                                reset_sync;
+    uvm_reset::sync_cbs                                reset_sync;
 
     // Definition of agents, LII agents are used on both sides.
-    intel_mac_seg::agent_tx #(SEGMENTS) m_intel_mac_seg_agent;
-    intel_mac_seg::config_item          m_intel_mac_seg_cfg;
+    uvm_intel_mac_seg::agent_tx #(SEGMENTS) m_intel_mac_seg_agent;
+    uvm_intel_mac_seg::config_item          m_intel_mac_seg_cfg;
 
     config_item m_config;
 
@@ -153,23 +153,23 @@ class env_tx#(SEGMENTS) extends uvm_env;
         //create byte array agent
         m_byte_array_cfg = new;
         m_byte_array_cfg.active = UVM_PASSIVE;
-        uvm_config_db #(byte_array::config_item)::set(this, "m_byte_array_agent", "m_config", m_byte_array_cfg);
-        byte_array::monitor::type_id::set_inst_override(monitor_byte_array#(SEGMENTS)::get_type(), {this.get_full_name(), ".m_byte_array_agent.*"});
-        m_byte_array_agent    = byte_array::agent::type_id::create("m_byte_array_agent", this);
+        uvm_config_db #(uvm_byte_array::config_item)::set(this, "m_byte_array_agent", "m_config", m_byte_array_cfg);
+        uvm_byte_array::monitor::type_id::set_inst_override(monitor_byte_array#(SEGMENTS)::get_type(), {this.get_full_name(), ".m_byte_array_agent.*"});
+        m_byte_array_agent    = uvm_byte_array::agent::type_id::create("m_byte_array_agent", this);
 
         //create logic vector
         m_logic_vector_cfg = new;
         m_logic_vector_cfg.active = UVM_PASSIVE;
-        uvm_config_db #(logic_vector::config_item)::set(this, "m_logic_vector_agent", "m_config", m_logic_vector_cfg);
-        logic_vector::monitor#(LOGIC_WIDTH)::type_id::set_inst_override(monitor_logic_vector#(LOGIC_WIDTH, SEGMENTS)::get_type(), {this.get_full_name(), ".m_logic_vector_agent.*"});
-        m_logic_vector_agent = logic_vector::agent #(LOGIC_WIDTH)::type_id::create("m_logic_vector_agent", this);
+        uvm_config_db #(uvm_logic_vector::config_item)::set(this, "m_logic_vector_agent", "m_config", m_logic_vector_cfg);
+        uvm_logic_vector::monitor#(LOGIC_WIDTH)::type_id::set_inst_override(monitor_logic_vector#(LOGIC_WIDTH, SEGMENTS)::get_type(), {this.get_full_name(), ".m_logic_vector_agent.*"});
+        m_logic_vector_agent = uvm_logic_vector::agent #(LOGIC_WIDTH)::type_id::create("m_logic_vector_agent", this);
 
         //create intel seq mac agent
         m_intel_mac_seg_cfg = new;
         m_intel_mac_seg_cfg.active         = m_config.active;
         m_intel_mac_seg_cfg.interface_name = m_config.interface_name;
-        uvm_config_db #(intel_mac_seg::config_item)::set(this, "m_intel_mac_seg_agent", "m_config", m_intel_mac_seg_cfg);
-        m_intel_mac_seg_agent = intel_mac_seg::agent_tx #(SEGMENTS)::type_id::create("m_intel_mac_seg_agent", this);
+        uvm_config_db #(uvm_intel_mac_seg::config_item)::set(this, "m_intel_mac_seg_agent", "m_config", m_intel_mac_seg_cfg);
+        m_intel_mac_seg_agent = uvm_intel_mac_seg::agent_tx #(SEGMENTS)::type_id::create("m_intel_mac_seg_agent", this);
 
         reset_sync = new();
     endfunction

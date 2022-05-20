@@ -10,8 +10,8 @@
 
 
 /* first seuqnce generate restart on start and then generate no reset */
-class sequence_reset extends uvm_sequence#(reset::sequence_item);
-    `uvm_object_utils(reset::sequence_reset)
+class sequence_reset extends uvm_sequence#(uvm_reset::sequence_item);
+    `uvm_object_utils(uvm_reset::sequence_reset)
 
     int unsigned length_min = 2;
     int unsigned length_max = 20;
@@ -36,8 +36,8 @@ class sequence_reset extends uvm_sequence#(reset::sequence_item);
 endclass
 
 
-class sequence_run extends uvm_sequence#(reset::sequence_item);
-    `uvm_object_utils(reset::sequence_run)
+class sequence_run extends uvm_sequence#(uvm_reset::sequence_item);
+    `uvm_object_utils(uvm_reset::sequence_run)
 
     int unsigned length_min =  10000;
     int unsigned length_max = 400000;
@@ -61,9 +61,9 @@ class sequence_run extends uvm_sequence#(reset::sequence_item);
     endtask
 endclass
 
-class sequence_simple extends uvm_sequence#(reset::sequence_item);
-    `uvm_object_utils(reset::sequence_simple)
-    `uvm_declare_p_sequencer(reset::sequencer);
+class sequence_simple extends uvm_sequence#(uvm_reset::sequence_item);
+    `uvm_object_utils(uvm_reset::sequence_simple)
+    `uvm_declare_p_sequencer(uvm_reset::sequencer);
 
     sequence_reset reset;
     sequence_run   run;
@@ -85,9 +85,9 @@ class sequence_simple extends uvm_sequence#(reset::sequence_item);
     endtask
 endclass
 
-class sequence_start extends uvm_sequence#(reset::sequence_item);
-    `uvm_object_utils(reset::sequence_start)
-    `uvm_declare_p_sequencer(reset::sequencer);
+class sequence_start extends uvm_sequence#(uvm_reset::sequence_item);
+    `uvm_object_utils(uvm_reset::sequence_start)
+    `uvm_declare_p_sequencer(uvm_reset::sequencer);
 
     sequence_reset reset;
     sequence_run   run;
@@ -113,8 +113,8 @@ endclass
 
 /* second sequence generate no reset */
  /* first seuqnce generate restart on start and then generate no reset */
-class sequence_rand extends uvm_sequence#(reset::sequence_item);
-    `uvm_object_utils(reset::sequence_rand)
+class sequence_rand extends uvm_sequence#(uvm_reset::sequence_item);
+    `uvm_object_utils(uvm_reset::sequence_rand)
 
     int unsigned reset_dist = 1;
     int unsigned run_dist   = 200000;

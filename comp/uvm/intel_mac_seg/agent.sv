@@ -9,7 +9,7 @@
 */
 
 class agent_rx #(SEGMENTS) extends uvm_agent;
-    `uvm_component_param_utils(intel_mac_seg::agent_rx#(SEGMENTS))
+    `uvm_component_param_utils(uvm_intel_mac_seg::agent_rx#(SEGMENTS))
 
     // ------------------------------------------------------------------------
     // Variables
@@ -76,7 +76,7 @@ endclass
 
 
 class agent_tx #(SEGMENTS) extends uvm_agent;
-    `uvm_component_param_utils(intel_mac_seg::agent_tx#(SEGMENTS))
+    `uvm_component_param_utils(uvm_intel_mac_seg::agent_tx#(SEGMENTS))
 
     // ------------------------------------------------------------------------
     // Variables

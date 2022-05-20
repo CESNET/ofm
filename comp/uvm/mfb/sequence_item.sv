@@ -8,7 +8,7 @@ class sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) 
 
     // ------------------------------------------------------------------------
     // Registration of object tools
-    `uvm_object_param_utils(mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH))
+    `uvm_object_param_utils(uvm_mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH))
 
     // ------------------------------------------------------------------------
     // Member attributes, equivalent with interface pins

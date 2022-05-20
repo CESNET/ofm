@@ -10,7 +10,7 @@
 
 
 class sequence_simple_rx #(SEGMENTS) extends uvm_sequence #(sequence_item #(SEGMENTS));
-    `uvm_object_param_utils(intel_mac_seg::sequence_simple_rx #(SEGMENTS))
+    `uvm_object_param_utils(uvm_intel_mac_seg::sequence_simple_rx #(SEGMENTS))
 
     // ------------------------------------------------------------------------
     // Variables
@@ -58,12 +58,12 @@ endclass
 
 
 class sequence_simple_tx #(SEGMENTS) extends uvm_sequence #(sequence_item #(SEGMENTS));
-    `uvm_object_param_utils(intel_mac_seg::sequence_simple_tx #(SEGMENTS))
+    `uvm_object_param_utils(uvm_intel_mac_seg::sequence_simple_tx #(SEGMENTS))
 
     // ------------------------------------------------------------------------
     // Variables
     sequence_item #(SEGMENTS) req;
-    common::rand_rdy          rdy;
+    uvm_common::rand_rdy          rdy;
 
     int unsigned max_transaction_count = 2048;
     int unsigned min_transaction_count = 32;
@@ -74,7 +74,7 @@ class sequence_simple_tx #(SEGMENTS) extends uvm_sequence #(sequence_item #(SEGM
     // Constructor
     function new(string name = "Simple sequence rx");
         super.new(name);
-        rdy = common::rand_rdy_rand::new();
+        rdy = uvm_common::rand_rdy_rand::new();
     endfunction
 
     task send_frame();

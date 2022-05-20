@@ -33,12 +33,12 @@ Folowing example show commonly used for generating space between packet and inte
     //simple sequence
     class sequence_simple extends uvm_sequence#(sequence_item);
         `uvm_object_utils(test::sequence_simple);
-        common::rand_rdy    rdy;    //inter frame gabs
-        common::rand_length space;  //space between frames
+        uvm_common::rand_rdy    rdy;    //inter frame gabs
+        uvm_common::rand_length space;  //space between frames
         function new(string name, uvm_component parent = null);
             super.new(name, parent);
-            rdy   = common::rand_rdy_rand::new();
-            space = common::rand_length_rand::new();
+            rdy   = uvm_common::rand_rdy_rand::new();
+            space = uvm_common::rand_length_rand::new();
         endfunction
         task body();
             forever begin

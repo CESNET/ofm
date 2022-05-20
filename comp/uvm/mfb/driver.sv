@@ -9,7 +9,7 @@ class driver_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) exte
 
     // ------------------------------------------------------------------------
     // Register component to database
-    `uvm_component_param_utils(mfb::driver_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH))
+    `uvm_component_param_utils(uvm_mfb::driver_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH))
 
     // ------------------------------------------------------------------------
     // Virtual interface of rx driver
@@ -70,7 +70,7 @@ endclass
 
 // Driver of mfb tx interface
 class driver_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extends uvm_driver #(sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH));
-    `uvm_component_param_utils(mfb::driver_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH))
+    `uvm_component_param_utils(uvm_mfb::driver_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH))
 
     // ------------------------------------------------------------------------
     // Virtual interface of driver
@@ -85,7 +85,7 @@ class driver_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) exte
     // ------------------------------------------------------------------------
     // Starts driving signals to interface
     task run_phase(uvm_phase phase);
-        req = mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::type_id::create("mfb_rsp");;
+        req = uvm_mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::type_id::create("mfb_rsp");;
 
         forever begin
             // Get new sequence item to drive to interface

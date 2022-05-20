@@ -5,6 +5,7 @@
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
 class coverage #(ITEMS, ITEM_WIDTH) extends uvm_subscriber#(sequence_item #(ITEMS, ITEM_WIDTH));
+    `uvm_component_param_utils(uvm_mvb::coverage #(ITEMS, ITEM_WIDTH))
 
     sequence_item #(ITEMS, ITEM_WIDTH) seq_item;
     logic [ITEM_WIDTH-1 : 0] item;

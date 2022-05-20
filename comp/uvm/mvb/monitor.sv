@@ -12,7 +12,7 @@ class monitor #(ITEMS, ITEM_WIDTH) extends uvm_monitor;
 
     // ------------------------------------------------------------------------
     // Registration of agent to databaze
-    `uvm_component_param_utils(mvb::monitor #(ITEMS, ITEM_WIDTH))
+    `uvm_component_param_utils(uvm_mvb::monitor #(ITEMS, ITEM_WIDTH))
 
     // ------------------------------------------------------------------------
     // Variables

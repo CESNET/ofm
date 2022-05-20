@@ -8,8 +8,8 @@
 `define MVB_SEQUENCE_SV
 
 // This low level sequence define bus functionality 
-class sequence_simple_rx #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(mvb::sequence_item #(ITEMS, ITEM_WIDTH));
-    `uvm_object_param_utils(mvb::sequence_simple_rx #(ITEMS, ITEM_WIDTH))
+class sequence_simple_rx #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(uvm_mvb::sequence_item #(ITEMS, ITEM_WIDTH));
+    `uvm_object_param_utils(uvm_mvb::sequence_simple_rx #(ITEMS, ITEM_WIDTH))
 
     // ------------------------------------------------------------------------
     // Variables
@@ -51,9 +51,9 @@ endclass
 
 //////////////////////////////////////
 // RX LIBRARY
-class sequence_lib_rx#(ITEMS, ITEM_WIDTH) extends uvm_sequence_library#(mvb::sequence_item#(ITEMS, ITEM_WIDTH));
-  `uvm_object_param_utils(mvb::sequence_lib_rx#(ITEMS, ITEM_WIDTH))
-  `uvm_sequence_library_utils(mvb::sequence_lib_rx#(ITEMS, ITEM_WIDTH))
+class sequence_lib_rx#(ITEMS, ITEM_WIDTH) extends uvm_sequence_library#(uvm_mvb::sequence_item#(ITEMS, ITEM_WIDTH));
+  `uvm_object_param_utils(uvm_mvb::sequence_lib_rx#(ITEMS, ITEM_WIDTH))
+  `uvm_sequence_library_utils(uvm_mvb::sequence_lib_rx#(ITEMS, ITEM_WIDTH))
 
     function new(string name = "");
         super.new(name);
@@ -68,16 +68,16 @@ class sequence_lib_rx#(ITEMS, ITEM_WIDTH) extends uvm_sequence_library#(mvb::seq
 endclass
 
 // This low level sequence define how can data looks like
-class sequence_simple_tx #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(mvb::sequence_item #(ITEMS, ITEM_WIDTH));
+class sequence_simple_tx #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(uvm_mvb::sequence_item #(ITEMS, ITEM_WIDTH));
 
     // ------------------------------------------------------------------------
     // Registration of agent to databaze
-    `uvm_object_param_utils(mvb::sequence_simple_tx #(ITEMS, ITEM_WIDTH))
+    `uvm_object_param_utils(uvm_mvb::sequence_simple_tx #(ITEMS, ITEM_WIDTH))
 
     // ------------------------------------------------------------------------
     // Variables
     sequence_item #(ITEMS, ITEM_WIDTH) req;
-    common::rand_rdy          rdy;
+    uvm_common::rand_rdy          rdy;
 
     int unsigned max_transaction_count = 100;
     int unsigned min_transaction_count = 10;
@@ -89,7 +89,7 @@ class sequence_simple_tx #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(mvb::sequen
     // Constructor
     function new(string name = "Simple sequence tx");
         super.new(name);
-        rdy = common::rand_rdy_rand::new();
+        rdy = uvm_common::rand_rdy_rand::new();
     endfunction
 
     // ------------------------------------------------------------------------
@@ -109,8 +109,8 @@ endclass
 
 
 // This low level sequence that have every tact dst rdy at tx side
-class sequence_full_speed_tx #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(mvb::sequence_item #(ITEMS, ITEM_WIDTH));
-    `uvm_object_param_utils(mvb::sequence_full_speed_tx #(ITEMS, ITEM_WIDTH))
+class sequence_full_speed_tx #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(uvm_mvb::sequence_item #(ITEMS, ITEM_WIDTH));
+    `uvm_object_param_utils(uvm_mvb::sequence_full_speed_tx #(ITEMS, ITEM_WIDTH))
 
     // ------------------------------------------------------------------------
     // Variables
@@ -142,8 +142,8 @@ class sequence_full_speed_tx #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(mvb::se
 
 endclass
 
-class sequence_stop_tx #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(mvb::sequence_item #(ITEMS, ITEM_WIDTH));
-    `uvm_object_param_utils(mvb::sequence_stop_tx #(ITEMS, ITEM_WIDTH))
+class sequence_stop_tx #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(uvm_mvb::sequence_item #(ITEMS, ITEM_WIDTH));
+    `uvm_object_param_utils(uvm_mvb::sequence_stop_tx #(ITEMS, ITEM_WIDTH))
 
     // ------------------------------------------------------------------------
     // Variables
@@ -180,8 +180,8 @@ endclass
 //////////////////////////////////////
 // TX LIBRARY
 class sequence_lib_tx#(ITEMS, ITEM_WIDTH) extends uvm_sequence_library#(sequence_item#(ITEMS, ITEM_WIDTH));
-  `uvm_object_param_utils(mvb::sequence_lib_tx#(ITEMS, ITEM_WIDTH))
-  `uvm_sequence_library_utils(mvb::sequence_lib_tx#(ITEMS, ITEM_WIDTH))
+  `uvm_object_param_utils(uvm_mvb::sequence_lib_tx#(ITEMS, ITEM_WIDTH))
+  `uvm_sequence_library_utils(uvm_mvb::sequence_lib_tx#(ITEMS, ITEM_WIDTH))
 
     function new(string name = "");
         super.new(name);

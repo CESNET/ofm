@@ -9,7 +9,7 @@ class monitor #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extend
 
     // ------------------------------------------------------------------------
     // Registration of agent to databaze
-    `uvm_component_param_utils(mfb::monitor #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH))
+    `uvm_component_param_utils(uvm_mfb::monitor #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH))
 
     // ------------------------------------------------------------------------
     // Parameters

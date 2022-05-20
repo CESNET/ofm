@@ -12,7 +12,7 @@ class driver_rx #(ITEMS, ITEM_WIDTH) extends uvm_driver #(sequence_item #(ITEMS,
 
     // ------------------------------------------------------------------------
     // Register component to database
-    `uvm_component_param_utils(mvb::driver_rx #(ITEMS, ITEM_WIDTH))
+    `uvm_component_param_utils(uvm_mvb::driver_rx #(ITEMS, ITEM_WIDTH))
 
     // ------------------------------------------------------------------------
     // Virtual interface of rx driver
@@ -59,7 +59,7 @@ class driver_tx #(ITEMS, ITEM_WIDTH) extends uvm_driver #(sequence_item #(ITEMS,
 
     // ------------------------------------------------------------------------
     // Register component to database
-    `uvm_component_param_utils(mvb::driver_tx #(ITEMS, ITEM_WIDTH))
+    `uvm_component_param_utils(uvm_mvb::driver_tx #(ITEMS, ITEM_WIDTH))
 
 
     // ------------------------------------------------------------------------

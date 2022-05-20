@@ -11,7 +11,7 @@ class sequence_item #(ITEMS, ITEM_WIDTH) extends uvm_sequence_item;
 
     // ------------------------------------------------------------------------
     // Registration of object tools
-    `uvm_object_param_utils(mvb::sequence_item #(ITEMS, ITEM_WIDTH))
+    `uvm_object_param_utils(uvm_mvb::sequence_item #(ITEMS, ITEM_WIDTH))
 
     // ------------------------------------------------------------------------
     // Member attributes, equivalent with interface pins

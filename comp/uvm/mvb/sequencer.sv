@@ -7,14 +7,14 @@
 `ifndef MVB_SEQUENCER_SV
 `define MVB_SEQUENCER_SV
 
-class sequencer #(ITEMS, ITEM_WIDTH) extends uvm_sequencer #(mvb::sequence_item #(ITEMS, ITEM_WIDTH));
+class sequencer #(ITEMS, ITEM_WIDTH) extends uvm_sequencer #(uvm_mvb::sequence_item #(ITEMS, ITEM_WIDTH));
 
     // ------------------------------------------------------------------------
     // Registration of agent to databaze
-    `uvm_component_param_utils(mvb::sequencer #(ITEMS, ITEM_WIDTH))
+    `uvm_component_param_utils(uvm_mvb::sequencer #(ITEMS, ITEM_WIDTH))
     
     // RESET
-    reset::sync_terminate reset_sync;
+    uvm_reset::sync_terminate reset_sync;
 
     // Constructor
     function new(string name = "sequencer", uvm_component parent = null);

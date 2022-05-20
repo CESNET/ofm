@@ -7,7 +7,7 @@
 `ifndef LOGIC_VECTOR_PKG
 `define LOGIC_VECTOR_PKG
 
-package logic_vector;
+package uvm_logic_vector;
 
     `include "uvm_macros.svh"
     import uvm_pkg::*;

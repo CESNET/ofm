@@ -11,7 +11,7 @@
 class driver_slave #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_driver #(sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH), sequence_item_respons #(DATA_WIDTH));
 
     // Register component to database.
-    `uvm_component_param_utils(mi::driver_slave #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
+    `uvm_component_param_utils(uvm_mi::driver_slave #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
 
     // Virtual interface of driver
     virtual mi_if #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH).tb_slave vif;
@@ -73,7 +73,7 @@ endclass
 
 class driver_master #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_driver #(sequence_item_respons #(DATA_WIDTH), sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH));
     // Register component to database.
-    `uvm_component_param_utils(mi::driver_master#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
+    `uvm_component_param_utils(uvm_mi::driver_master#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
 
     // Virtual interface of driver
     virtual mi_if #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH).tb_master vif;
