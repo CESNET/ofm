@@ -193,7 +193,7 @@ class sequence_simple_rx #(SEGMENTS) extends sequence_simple_rx_base #(SEGMENTS)
                     hl_tr = null;
                     hl_sqr.m_packet.item_done();
                     hl_sqr.m_error.item_done();
-                    rdy_length.randomize();
+                    assert(rdy_length.randomize());
                     space_size = rdy_length.m_value;
                 end
                 hl_tr_index += 8;
@@ -247,7 +247,7 @@ class sequence_sop_pos_rx #(SEGMENTS) extends sequence_simple_rx_base #(SEGMENTS
                     hl_tr = null;
                     hl_sqr.m_packet.item_done();
                     hl_sqr.m_error.item_done();
-                    rdy_length.randomize();
+                    assert(rdy_length.randomize());
                     space_size = rdy_length.m_value;
                 end
                 hl_tr_index += 8;
