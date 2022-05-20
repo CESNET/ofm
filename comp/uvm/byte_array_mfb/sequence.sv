@@ -7,16 +7,16 @@
 
 
 // This low level sequence define bus functionality
-class sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extends uvm_sequence #(mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH));
-    `uvm_object_param_utils(byte_array_mfb_env::sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH))
-    `uvm_declare_p_sequencer(mfb::sequencer#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH));
+class sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends uvm_sequence #(uvm_mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, 8, META_WIDTH));
+    `uvm_object_param_utils(uvm_byte_array_mfb::sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH))
+    `uvm_declare_p_sequencer(uvm_mfb::sequencer#(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH));
 
     int unsigned space_size = 0;
     int unsigned                              data_index;
-    byte_array::sequence_item                 data;
-    logic_vector::sequence_item #(META_WIDTH) meta;
+    uvm_byte_array::sequence_item                 data;
+    uvm_logic_vector::sequence_item #(META_WIDTH) meta;
     sequencer_rx #(META_WIDTH)                                          hl_sqr;
-    mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)  gen;
+    uvm_mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, 8, META_WIDTH)  gen;
     typedef enum {state_last, state_next, state_reset} state_t;
     state_t state;
 
@@ -128,8 +128,8 @@ class sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, ME
         space_size = 0;
         state_packet = state_packet_space_new;
 
-        req = mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::type_id::create("req");
-        gen = mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::type_id::create("reg");
+        req = uvm_mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, 8, META_WIDTH)::type_id::create("req");
+        gen = uvm_mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, 8, META_WIDTH)::type_id::create("reg");
 
         //send empty frame to get first response
         send_empty_frame();
@@ -147,19 +147,19 @@ class sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, ME
 endclass
 
 
-class sequence_simple_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extends sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH);
-    `uvm_object_param_utils(byte_array_mfb_env::sequence_simple_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH))
-    common::rand_length   rdy_length;
-    common::rand_rdy      rdy_rdy;
+class sequence_simple_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH);
+    `uvm_object_param_utils(uvm_byte_array_mfb::sequence_simple_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH))
+    uvm_common::rand_length   rdy_length;
+    uvm_common::rand_rdy      rdy_rdy;
 
     function new (string name = "req");
         super.new(name);
-        rdy_length = common::rand_length_rand::new();
-        rdy_rdy    = common::rand_rdy_rand::new();
+        rdy_length = uvm_common::rand_length_rand::new();
+        rdy_rdy    = uvm_common::rand_rdy_rand::new();
     endfunction
 
     /////////
-    // CREATE intel_mac_seg::Sequence_item
+    // CREATE uvm_intel_mac_seg::Sequence_item
     virtual task create_sequence_item();
         int unsigned index = 0;
         gen.randomize();
@@ -216,7 +216,7 @@ class sequence_simple_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WI
                     gen.SRC_RDY = 1;
 
                     for (int unsigned jt = index*BLOCK_SIZE; jt < (index*BLOCK_SIZE + loop_end); jt++) begin
-                        gen.ITEMS[it][(jt+1)*ITEM_WIDTH-1 -: ITEM_WIDTH] = data.data[data_index];
+                        gen.ITEMS[it][(jt+1)*8-1 -: 8] = data.data[data_index];
                         data_index++;
                     end
 
@@ -241,15 +241,15 @@ class sequence_simple_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WI
     endtask
 endclass
 
-class sequence_full_speed_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extends sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH);
-    `uvm_object_param_utils(byte_array_mfb_env::sequence_full_speed_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH))
+class sequence_full_speed_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH);
+    `uvm_object_param_utils(uvm_byte_array_mfb::sequence_full_speed_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH))
 
     function new (string name = "req");
         super.new(name);
     endfunction
 
     /////////
-    // CREATE intel_mac_seg::Sequence_item
+    // CREATE uvm_intel_mac_seg::Sequence_item
     virtual task create_sequence_item();
         int unsigned index = 0;
         gen.randomize();
@@ -297,7 +297,7 @@ class sequence_full_speed_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, MET
                     gen.SRC_RDY = 1;
 
                     for (int unsigned jt = index*BLOCK_SIZE; jt < (index*BLOCK_SIZE + loop_end); jt++) begin
-                        gen.ITEMS[it][(jt+1)*ITEM_WIDTH-1 -: ITEM_WIDTH] = data.data[data_index];
+                        gen.ITEMS[it][(jt+1)*8-1 -: 8] = data.data[data_index];
                         data_index++;
                     end
 
@@ -322,8 +322,8 @@ class sequence_full_speed_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, MET
     endtask
 endclass
 
-class sequence_stop_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extends sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH);
-    `uvm_object_param_utils(byte_array_mfb_env::sequence_stop_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH))
+class sequence_stop_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH);
+    `uvm_object_param_utils(uvm_byte_array_mfb::sequence_stop_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH))
 
     function new (string name = "req");
         super.new(name);
@@ -336,7 +336,7 @@ class sequence_stop_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDT
     }
 
     /////////
-    // CREATE intel_mac_seg::Sequence_item
+    // CREATE uvm_intel_mac_seg::Sequence_item
     virtual task create_sequence_item();
         int unsigned index = 0;
         gen.randomize();
@@ -353,9 +353,15 @@ endclass
 
 /////////////////////////////////////////////////////////////////////////
 // SEQUENCE LIBRARY RX
-class sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extends uvm_sequence_library#(mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH));
-  `uvm_object_param_utils(byte_array_mfb_env::sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH))
-  `uvm_sequence_library_utils(byte_array_mfb_env::sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH))
+<<<<<<< HEAD
+class sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends uvm_sequence_library#(mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH));
+  `uvm_object_param_utils(byte_array_mfb::sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH))
+  `uvm_sequence_library_utils(byte_array_mfb::sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH))
+=======
+class sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends uvm_sequence_library#(uvm_mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, 8, META_WIDTH));
+  `uvm_object_param_utils(uvm_byte_array_mfb::sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH))
+  `uvm_sequence_library_utils(uvm_byte_array_mfb::sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH))
+>>>>>>> cbf0f31... fix byte_array_mfb
 
   function new(string name = "");
     super.new(name);
@@ -365,9 +371,9 @@ class sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)
     // subclass can redefine and change run sequences
     // can be useful in specific tests
     virtual function void init_sequence();
-        this.add_sequence(byte_array_mfb_env::sequence_simple_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::get_type());
-        this.add_sequence(byte_array_mfb_env::sequence_full_speed_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::get_type());
-        this.add_sequence(byte_array_mfb_env::sequence_stop_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::get_type());
+        this.add_sequence(uvm_byte_array_mfb::sequence_simple_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH)::get_type());
+        this.add_sequence(uvm_byte_array_mfb::sequence_full_speed_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH)::get_type());
+        this.add_sequence(uvm_byte_array_mfb::sequence_stop_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH)::get_type());
     endfunction
 endclass
 
