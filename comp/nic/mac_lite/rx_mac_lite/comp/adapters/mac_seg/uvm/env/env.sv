@@ -9,14 +9,14 @@
 */
 
 class env#(SEGMENTS, REGIONS, REGION_SIZE) extends uvm_env;
-   `uvm_component_param_utils(mac_seq_rx_ver::env#(SEGMENTS, REGIONS, REGION_SIZE))
+   `uvm_component_param_utils(uvm_mac_seg_rx::env#(SEGMENTS, REGIONS, REGION_SIZE))
 
     //sequnecer
     sequencer m_sequencer;
 
-    reset::agent                                m_reset;
-    byte_array_intel_mac_seg::env_rx#(SEGMENTS) m_env_rx;
-	byte_array_mfb_env::env_tx      #(REGIONS, REGION_SIZE, 8, 8, 1) m_env_tx;
+    uvm_reset::agent                                m_reset;
+    uvm_byte_array_intel_mac_seg::env_rx#(SEGMENTS) m_env_rx;
+    uvm_byte_array_mfb::env_tx      #(REGIONS, REGION_SIZE, 8, 1) m_env_tx;
     //scoreboard
     scoreboard sc;
 
@@ -26,33 +26,33 @@ class env#(SEGMENTS, REGIONS, REGION_SIZE) extends uvm_env;
 
     function void build_phase(uvm_phase phase);
         //create configuration
-        reset::config_item m_reset_cfg;
-        byte_array_intel_mac_seg::config_item m_env_rx_cfg;
-        byte_array_mfb_env::config_item           m_env_tx_cfg;
+        uvm_reset::config_item m_reset_cfg;
+        uvm_byte_array_intel_mac_seg::config_item m_env_rx_cfg;
+        uvm_byte_array_mfb::config_item           m_env_tx_cfg;
 
-		//reset
+        //reset
         m_reset_cfg = new();
         m_reset_cfg.active = UVM_ACTIVE;
         m_reset_cfg.interface_name = "RESET_IF";
-        uvm_config_db#(reset::config_item)::set(this, "m_reset", "m_config", m_reset_cfg);
-		m_reset = reset::agent::type_id::create("m_reset", this);
+        uvm_config_db#(uvm_reset::config_item)::set(this, "m_reset", "m_config", m_reset_cfg);
+        m_reset = uvm_reset::agent::type_id::create("m_reset", this);
 
         m_env_rx_cfg = new();
         m_env_rx_cfg.active         = UVM_ACTIVE;
         m_env_rx_cfg.interface_name = "RX_MAC_SEQ_IF";
-        uvm_config_db#(byte_array_intel_mac_seg::config_item)::set(this, "m_env_rx", "m_config", m_env_rx_cfg);
-        m_env_rx = byte_array_intel_mac_seg::env_rx#(SEGMENTS)::type_id::create("m_env_rx", this);
+        uvm_config_db#(uvm_byte_array_intel_mac_seg::config_item)::set(this, "m_env_rx", "m_config", m_env_rx_cfg);
+        m_env_rx = uvm_byte_array_intel_mac_seg::env_rx#(SEGMENTS)::type_id::create("m_env_rx", this);
 
-		m_env_tx_cfg = new();
-		m_env_tx_cfg.active         = UVM_ACTIVE;
-		m_env_tx_cfg.interface_name = "TX_MAC_SEQ_IF";
-		m_env_tx_cfg.meta_behav     = 2;
-        uvm_config_db#(byte_array_mfb_env::config_item)::set(this, "m_env_tx", "m_config", m_env_tx_cfg);
-		m_env_tx = byte_array_mfb_env::env_tx  #(REGIONS, REGION_SIZE, 8, 8, 1)::type_id::create("m_env_tx", this);
+        m_env_tx_cfg = new();
+        m_env_tx_cfg.active         = UVM_ACTIVE;
+        m_env_tx_cfg.interface_name = "TX_MAC_SEQ_IF";
+        m_env_tx_cfg.meta_behav     = 2;
+        uvm_config_db#(uvm_byte_array_mfb::config_item)::set(this, "m_env_tx", "m_config", m_env_tx_cfg);
+        m_env_tx = uvm_byte_array_mfb::env_tx  #(REGIONS, REGION_SIZE, 8, 1)::type_id::create("m_env_tx", this);
 
         sc       = scoreboard::type_id::create("sc", this);
 
-		m_sequencer = sequencer::type_id::create("m_sequencer", this);
+        m_sequencer = sequencer::type_id::create("m_sequencer", this);
     endfunction
 
     function void connect_phase(uvm_phase phase);
@@ -66,18 +66,18 @@ class env#(SEGMENTS, REGIONS, REGION_SIZE) extends uvm_env;
         m_sequencer.rx_error   = m_env_rx.m_sequencer.m_error;
         m_sequencer.reset      = m_reset.m_sequencer;
 
-		m_reset.sync_connect(m_env_rx.reset_sync);
+        m_reset.sync_connect(m_env_rx.reset_sync);
     endfunction
 
-	task run_phase(uvm_phase phase);
-		//TX have to allways ready
-		sequence_tx #(REGIONS, REGION_SIZE) tx_seq;
+    task run_phase(uvm_phase phase);
+        //TX have to allways ready
+        sequence_tx #(REGIONS, REGION_SIZE) tx_seq;
 
-		tx_seq = sequence_tx #(REGIONS, REGION_SIZE)::type_id::create("tx_seq");
-		tx_seq.randomize();
-		fork
-			tx_seq.start(m_env_tx.m_sequencer);
-		join_none
-	endtask
+        tx_seq = sequence_tx #(REGIONS, REGION_SIZE)::type_id::create("tx_seq");
+        tx_seq.randomize();
+        fork
+            tx_seq.start(m_env_tx.m_sequencer);
+        join_none
+    endtask
 endclass
 

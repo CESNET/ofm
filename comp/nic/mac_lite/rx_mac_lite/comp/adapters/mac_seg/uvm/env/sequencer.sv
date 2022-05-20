@@ -12,14 +12,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 // vurtual sequencer.
 class sequencer extends uvm_sequencer;
-    `uvm_component_utils(mac_seq_rx_ver::sequencer);
+    `uvm_component_utils(uvm_mac_seg_rx::sequencer);
 
     localparam LOGIC_WIDTH = 6;
 
     // variables
-    reset::sequencer                      reset;
-    byte_array::sequencer                 rx_packet;
-    logic_vector::sequencer#(LOGIC_WIDTH) rx_error;
+    uvm_reset::sequencer                      reset;
+    uvm_byte_array::sequencer                 rx_packet;
+    uvm_logic_vector::sequencer#(LOGIC_WIDTH) rx_error;
 
     //functions
     function new (string name, uvm_component parent);

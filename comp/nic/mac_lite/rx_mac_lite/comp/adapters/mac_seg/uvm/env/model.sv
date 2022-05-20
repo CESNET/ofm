@@ -10,15 +10,15 @@
 
 
 class model extends uvm_component;
-    `uvm_component_param_utils(mac_seq_rx_ver::model)
+    `uvm_component_param_utils(uvm_mac_seg_rx::model)
 
 	localparam LOGIC_WIDTH = 6;
 
-    uvm_tlm_analysis_fifo #(byte_array::sequence_item)                 rx_packet;
-    uvm_tlm_analysis_fifo #(logic_vector::sequence_item#(LOGIC_WIDTH)) rx_error;
+    uvm_tlm_analysis_fifo #(uvm_byte_array::sequence_item)                 rx_packet;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(LOGIC_WIDTH)) rx_error;
 
-    uvm_analysis_port#(byte_array::sequence_item)                 tx_packet;
-    uvm_analysis_port#(logic_vector::sequence_item#(1))           tx_error;
+    uvm_analysis_port#(uvm_byte_array::sequence_item)                 tx_packet;
+    uvm_analysis_port#(uvm_logic_vector::sequence_item#(1))           tx_error;
 
     function new(string name, uvm_component parent = null);
         super.new(name, parent);
@@ -29,11 +29,11 @@ class model extends uvm_component;
     endfunction
 
     task run();
-        byte_array::sequence_item                 rx_tr_packet;
-        logic_vector::sequence_item#(LOGIC_WIDTH) rx_tr_error;
+        uvm_byte_array::sequence_item                 rx_tr_packet;
+        uvm_logic_vector::sequence_item#(LOGIC_WIDTH) rx_tr_error;
 
-        byte_array::sequence_item                 tx_tr_packet;
-        logic_vector::sequence_item#(1)           tx_tr_error;
+        uvm_byte_array::sequence_item                 tx_tr_packet;
+        uvm_logic_vector::sequence_item#(1)           tx_tr_error;
 
         forever begin
 			logic [1-1:0] fcs_error;
@@ -44,7 +44,7 @@ class model extends uvm_component;
             rx_error.get(rx_tr_error);
 
             $cast(tx_tr_packet, rx_tr_packet.clone());
-			tx_tr_error = logic_vector::sequence_item#(1)::type_id::create("model_result_error");
+			tx_tr_error = uvm_logic_vector::sequence_item#(1)::type_id::create("model_result_error");
 			{fcs_error, error, status} = rx_tr_error.data;
             tx_tr_error.data = fcs_error;
 

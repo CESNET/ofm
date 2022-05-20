@@ -9,8 +9,8 @@
 */
 
 
-class sequence_tx #(REGIONS, REGION_SIZE) extends mfb::sequence_simple_tx #(REGIONS, REGION_SIZE, 8, 8, 1);
-    `uvm_object_param_utils(mac_seq_rx_ver::sequence_tx #(REGIONS, REGION_SIZE))
+class sequence_tx #(REGIONS, REGION_SIZE) extends uvm_mfb::sequence_simple_tx #(REGIONS, REGION_SIZE, 8, 8, 1);
+    `uvm_object_param_utils(uvm_mac_seg_rx::sequence_tx #(REGIONS, REGION_SIZE))
 
     // ------------------------------------------------------------------------
     // Constructor
@@ -19,7 +19,7 @@ class sequence_tx #(REGIONS, REGION_SIZE) extends mfb::sequence_simple_tx #(REGI
     endfunction
 
     task body;
-        req = mfb::sequence_item #(REGIONS, REGION_SIZE, 8, 8, 1)::type_id::create("req");
+        req = uvm_mfb::sequence_item #(REGIONS, REGION_SIZE, 8, 8, 1)::type_id::create("req");
         forever begin
             // Create a request for sequence item
             start_item(req);

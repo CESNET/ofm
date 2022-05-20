@@ -8,10 +8,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
 */
 
-`ifndef MAC_SEQ_RX_VER
-`define MAC_SEQ_RX_VER
+`ifndef MAC_SEG_RX_VER
+`define MAC_SEG_RX_VER
 
-package mac_seq_rx_ver
+package uvm_mac_seg_rx
 
 	`include "uvm_macros.svh";
 	import uvm_pkg::*;

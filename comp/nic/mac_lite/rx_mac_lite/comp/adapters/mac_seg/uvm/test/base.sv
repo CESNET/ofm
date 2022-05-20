@@ -13,7 +13,7 @@ class base extends uvm_test;
 
     /////////////////////
     // variables
-    mac_seq_rx_ver::env#(SEGMENTS, REGIONS, REGION_SIZE) m_env;
+    uvm_mac_seg_rx::env#(SEGMENTS, REGIONS, REGION_SIZE) m_env;
     bit   timeout;
 
     /////////////////////
@@ -23,7 +23,7 @@ class base extends uvm_test;
     endfunction
 
     function void build_phase(uvm_phase phase);
-        m_env = mac_seq_rx_ver::env#(SEGMENTS, REGIONS, REGION_SIZE)::type_id::create("m_env", this);
+        m_env = uvm_mac_seg_rx::env#(SEGMENTS, REGIONS, REGION_SIZE)::type_id::create("m_env", this);
     endfunction
 
     task test_wait_timeout(int unsigned time_length);
@@ -39,7 +39,7 @@ class base extends uvm_test;
 
     //run virtual sequence on virtual sequencer
     virtual task run_phase(uvm_phase phase);
-        mac_seq_rx_ver::sequence_simple_1 seq;
+        uvm_mac_seg_rx::sequence_simple_1 seq;
 
         uvm_component c;
         c = uvm_root::get();
@@ -48,7 +48,7 @@ class base extends uvm_test;
 
         phase.raise_objection(this);
 
-        seq = mac_seq_rx_ver::sequence_simple_1::type_id::create("seq");
+        seq = uvm_mac_seg_rx::sequence_simple_1::type_id::create("seq");
         seq.seq_create();
         seq.randomize();
         seq.start(m_env.m_sequencer);

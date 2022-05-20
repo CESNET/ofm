@@ -353,15 +353,10 @@ endclass
 
 /////////////////////////////////////////////////////////////////////////
 // SEQUENCE LIBRARY RX
-<<<<<<< HEAD
-class sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends uvm_sequence_library#(mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH));
-  `uvm_object_param_utils(byte_array_mfb::sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH))
-  `uvm_sequence_library_utils(byte_array_mfb::sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH))
-=======
+
 class sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends uvm_sequence_library#(uvm_mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, 8, META_WIDTH));
   `uvm_object_param_utils(uvm_byte_array_mfb::sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH))
   `uvm_sequence_library_utils(uvm_byte_array_mfb::sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH))
->>>>>>> cbf0f31... fix byte_array_mfb
 
   function new(string name = "");
     super.new(name);

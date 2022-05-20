@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
 */
 
-`include "uvm_macros.svh";
+`include "uvm_macros.svh"
 import uvm_pkg::*;
 
 

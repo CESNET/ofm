@@ -8,8 +8,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
 */
 
-class seq_small_pkt extends byte_array::sequence_simple;
-    `uvm_object_utils(mac_seq_rx_ver::seq_small_pkt)
+class seq_small_pkt extends uvm_byte_array::sequence_simple;
+    `uvm_object_utils(uvm_mac_seg_rx::seq_small_pkt)
     function new(string name="seq_small_pkt");
         super.new(name);
         data_size_max = 128;
@@ -20,9 +20,9 @@ class seq_small_pkt extends byte_array::sequence_simple;
     endfunction
 endclass
 
-class sequence_lib extends byte_array::sequence_lib;
-  `uvm_object_utils(mac_seq_rx_ver::sequence_lib)
-  `uvm_sequence_library_utils(mac_seq_rx_ver::sequence_lib)
+class sequence_lib extends uvm_byte_array::sequence_lib;
+  `uvm_object_utils(uvm_mac_seg_rx::sequence_lib)
+  `uvm_sequence_library_utils(uvm_mac_seg_rx::sequence_lib)
 
     function new(string name = "");
         super.new(name);
@@ -37,8 +37,8 @@ class sequence_lib extends byte_array::sequence_lib;
     endfunction
 endclass
 
-class sequence_error#(LOGIC_WIDTH) extends logic_vector::sequence_simple#(LOGIC_WIDTH);
-    `uvm_object_param_utils(mac_seq_rx_ver::sequence_error#(LOGIC_WIDTH))
+class sequence_error#(LOGIC_WIDTH) extends uvm_logic_vector::sequence_simple#(LOGIC_WIDTH);
+    `uvm_object_param_utils(uvm_mac_seg_rx::sequence_error#(LOGIC_WIDTH))
 
 	function new (string name = "");
 		super.new(name);
@@ -54,16 +54,16 @@ class sequence_error#(LOGIC_WIDTH) extends logic_vector::sequence_simple#(LOGIC_
 endclass
 
 class sequence_simple_1 extends uvm_sequence;
-    `uvm_object_utils(mac_seq_rx_ver::sequence_simple_1)
-    `uvm_declare_p_sequencer(mac_seq_rx_ver::sequencer);
+    `uvm_object_utils(uvm_mac_seg_rx::sequence_simple_1)
+    `uvm_declare_p_sequencer(uvm_mac_seg_rx::sequencer);
 
     localparam LOGIC_WIDTH = 6;
 
     //////////////////////////////////
     // variables
-    uvm_sequence #(byte_array::sequence_item)   rx_packet;
-    logic_vector::sequence_simple#(LOGIC_WIDTH) rx_error;
-    uvm_sequence#(reset::sequence_item)         reset_seq;
+    uvm_sequence #(uvm_byte_array::sequence_item)   rx_packet;
+    uvm_logic_vector::sequence_simple#(LOGIC_WIDTH) rx_error;
+    uvm_sequence#(uvm_reset::sequence_item)         reset_seq;
 
     //////////////////////////////////
     // functions
@@ -72,15 +72,15 @@ class sequence_simple_1 extends uvm_sequence;
     endfunction
 
     virtual function void seq_create();
-		mac_seq_rx_ver::sequence_lib rx_packet_lib;
+		uvm_mac_seg_rx::sequence_lib rx_packet_lib;
 
-        rx_packet_lib = mac_seq_rx_ver::sequence_lib::type_id::create("seq_data");
+        rx_packet_lib = uvm_mac_seg_rx::sequence_lib::type_id::create("seq_data");
         rx_packet_lib.init_sequence();
         rx_packet_lib.min_random_count = 100;
         rx_packet_lib.max_random_count = 200;
 
         rx_error  = sequence_error#(LOGIC_WIDTH)::type_id::create("avalon_rx_seq_base");
-        reset_seq = reset::sequence_start::type_id::create("reset_simple");
+        reset_seq = uvm_reset::sequence_start::type_id::create("reset_simple");
 
 		rx_packet = rx_packet_lib;
 	endfunction

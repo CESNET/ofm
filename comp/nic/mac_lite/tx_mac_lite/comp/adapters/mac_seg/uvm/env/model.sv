@@ -10,15 +10,15 @@
 
 
 class model extends uvm_component;
-    `uvm_component_param_utils(mac_seq_tx_ver::model)
+    `uvm_component_param_utils(uvm_mac_seg_tx::model)
 
 	localparam LOGIC_WIDTH = 6;
 
-    uvm_tlm_analysis_fifo #(byte_array::sequence_item)                 rx_packet;
-    uvm_tlm_analysis_fifo #(logic_vector::sequence_item#(1))           rx_error;
+    uvm_tlm_analysis_fifo #(uvm_byte_array::sequence_item)                 rx_packet;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(1))           rx_error;
 
-    uvm_analysis_port#(byte_array::sequence_item)                 tx_packet;
-    uvm_analysis_port#(logic_vector::sequence_item#(LOGIC_WIDTH)) tx_error;
+    uvm_analysis_port#(uvm_byte_array::sequence_item)                 tx_packet;
+    uvm_analysis_port#(uvm_logic_vector::sequence_item#(LOGIC_WIDTH)) tx_error;
 
     function new(string name, uvm_component parent = null);
         super.new(name, parent);
@@ -29,18 +29,18 @@ class model extends uvm_component;
     endfunction
 
     task run();
-        byte_array::sequence_item                 rx_tr_packet;
-        logic_vector::sequence_item#(1)           rx_tr_error;
+        uvm_byte_array::sequence_item                 rx_tr_packet;
+        uvm_logic_vector::sequence_item#(1)           rx_tr_error;
 
-        byte_array::sequence_item                 tx_tr_packet;
-        logic_vector::sequence_item#(LOGIC_WIDTH) tx_tr_error;
+        uvm_byte_array::sequence_item                 tx_tr_packet;
+        uvm_logic_vector::sequence_item#(LOGIC_WIDTH) tx_tr_error;
 
         forever begin
             rx_packet.get(rx_tr_packet);
             rx_error.get(rx_tr_error);
 
             $cast(tx_tr_packet, rx_tr_packet.clone());
-            tx_tr_error = logic_vector::sequence_item#(LOGIC_WIDTH)::type_id::create("model_tx_meta");
+            tx_tr_error = uvm_logic_vector::sequence_item#(LOGIC_WIDTH)::type_id::create("model_tx_meta");
             tx_tr_error.data = 'z;
             if (rx_tr_error.data == 0) begin
                 tx_tr_error.data[5] = 1'b0;
