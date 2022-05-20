@@ -9,9 +9,9 @@ class ex_test extends uvm_test;
     `uvm_component_utils(test::ex_test);
 
     bit timeout;
-    env::env_base #(ITEM_WIDTH)              m_env;
-    mvb::sequence_lib_rx#(1, ITEM_WIDTH)     h_seq_rx;
-    mvb::sequence_simple_tx #(1, ITEM_WIDTH) h_seq_tx;
+    uvm_asfifox::env #(ITEM_WIDTH)               m_env;
+    uvm_mvb::sequence_lib_rx#(1, ITEM_WIDTH)     h_seq_rx;
+    uvm_mvb::sequence_simple_tx #(1, ITEM_WIDTH) h_seq_tx;
 
     // ------------------------------------------------------------------------
     // Functions
@@ -20,7 +20,7 @@ class ex_test extends uvm_test;
     endfunction
 
     function void build_phase(uvm_phase phase);
-        m_env = env::env_base #(ITEM_WIDTH)::type_id::create("m_env", this);
+        m_env = uvm_asfifox::env #(ITEM_WIDTH)::type_id::create("m_env", this);
     endfunction
 
     task test_wait_timeout(int unsigned time_length);
@@ -60,12 +60,12 @@ class ex_test extends uvm_test;
 
     virtual task run_phase(uvm_phase phase);
 
-        h_seq_rx = mvb::sequence_lib_rx #(1, ITEM_WIDTH)::type_id::create("h_seq_rx");
+        h_seq_rx = uvm_mvb::sequence_lib_rx #(1, ITEM_WIDTH)::type_id::create("h_seq_rx");
         h_seq_rx.init_sequence();
         h_seq_rx.min_random_count = 30;
         h_seq_rx.max_random_count = 50;
 
-        h_seq_tx = mvb::sequence_simple_tx #(1, ITEM_WIDTH)::type_id::create("h_seq_tx");
+        h_seq_tx = uvm_mvb::sequence_simple_tx #(1, ITEM_WIDTH)::type_id::create("h_seq_tx");
 
         fork
             run_seq_tx(phase);

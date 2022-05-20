@@ -6,20 +6,20 @@
 
 // Environment for functional verification of encode.
 // This environment containts two mii agents.
-class env_base #(ITEM_WIDTH) extends uvm_env;
+class env #(ITEM_WIDTH) extends uvm_env;
 
-    `uvm_component_param_utils(env::env_base #(ITEM_WIDTH));
+    `uvm_component_param_utils(uvm_asfifox::env #(ITEM_WIDTH));
 
-    mvb::agent_rx #(1, ITEM_WIDTH) agent_rx;
-    mvb::config_item cfg_rx;
+    uvm_mvb::agent_rx #(1, ITEM_WIDTH) agent_rx;
+    uvm_mvb::config_item cfg_rx;
 
-    mvb::agent_tx #(1, ITEM_WIDTH) agent_tx;
-    mvb::config_item cfg_tx;
+    uvm_mvb::agent_tx #(1, ITEM_WIDTH) agent_tx;
+    uvm_mvb::config_item cfg_tx;
 
     scoreboard #(ITEM_WIDTH) m_scoreboard;
 
-    mvb::coverage #(1, ITEM_WIDTH) m_cover_rx;
-    mvb::coverage #(1, ITEM_WIDTH) m_cover_tx;
+    uvm_mvb::coverage #(1, ITEM_WIDTH) m_cover_rx;
+    uvm_mvb::coverage #(1, ITEM_WIDTH) m_cover_tx;
 
     // Constructor of environment.
     function new(string name, uvm_component parent);
@@ -40,11 +40,11 @@ class env_base #(ITEM_WIDTH) extends uvm_env;
         cfg_tx.interface_name = "vif_tx";
         cfg_rx.interface_name = "vif_rx";
 
-        uvm_config_db #(mvb::config_item)::set(this, "agent_tx", "m_config", cfg_tx);
-        uvm_config_db #(mvb::config_item)::set(this, "agent_rx", "m_config", cfg_rx);
+        uvm_config_db #(uvm_mvb::config_item)::set(this, "agent_tx", "m_config", cfg_tx);
+        uvm_config_db #(uvm_mvb::config_item)::set(this, "agent_rx", "m_config", cfg_rx);
 
-        agent_tx    = mvb::agent_tx #(1, ITEM_WIDTH)::type_id::create("agent_tx", this);
-        agent_rx    = mvb::agent_rx #(1, ITEM_WIDTH)::type_id::create("agent_rx", this);
+        agent_tx    = uvm_mvb::agent_tx #(1, ITEM_WIDTH)::type_id::create("agent_tx", this);
+        agent_rx    = uvm_mvb::agent_rx #(1, ITEM_WIDTH)::type_id::create("agent_rx", this);
 
         m_scoreboard  = scoreboard #(ITEM_WIDTH)::type_id::create("m_scoreboard", this);
     endfunction

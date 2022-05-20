@@ -6,23 +6,23 @@
 
 
 // Scoreboard. Check if DUT implementation is correct.
-class mvb_converter#(ITEM_WIDTH) extends uvm_subscriber#(mvb::sequence_item #(1, ITEM_WIDTH));
-    `uvm_component_param_utils(env::mvb_converter#(ITEM_WIDTH))
+class mvb_converter#(ITEM_WIDTH) extends uvm_subscriber#(uvm_mvb::sequence_item #(1, ITEM_WIDTH));
+    `uvm_component_param_utils(uvm_asfifox::mvb_converter#(ITEM_WIDTH))
 
-    uvm_analysis_port #(logic_vector::sequence_item#(ITEM_WIDTH)) analysis_port;
+    uvm_analysis_port #(uvm_logic_vector::sequence_item#(ITEM_WIDTH)) analysis_port;
 
     function new(string name, uvm_component parent = null);
         super.new(name, parent);
         analysis_port = new("analysis port", this);
     endfunction
 
-    function void write(mvb::sequence_item #(1, ITEM_WIDTH) t);
-        logic_vector::sequence_item#(ITEM_WIDTH) tr_out;
+    function void write(uvm_mvb::sequence_item #(1, ITEM_WIDTH) t);
+        uvm_logic_vector::sequence_item#(ITEM_WIDTH) tr_out;
 
         if(t.src_rdy && t.dst_rdy) begin
             for (int unsigned it = 0; it < 1; it++) begin
                 if (t.vld[it] == 1) begin
-                    tr_out = logic_vector::sequence_item#(ITEM_WIDTH)::type_id::create("tr_out", this);
+                    tr_out = uvm_logic_vector::sequence_item#(ITEM_WIDTH)::type_id::create("tr_out", this);
                     tr_out.data = t.data[it];
                     analysis_port.write(tr_out);
                 end
@@ -34,16 +34,16 @@ endclass
 
 class scoreboard #(ITEM_WIDTH) extends uvm_scoreboard;
 
-    `uvm_component_utils(env::scoreboard #(ITEM_WIDTH))
+    `uvm_component_utils(uvm_asfifox::scoreboard #(ITEM_WIDTH))
     // Analysis components.
-    uvm_analysis_export #(mvb::sequence_item #(1, ITEM_WIDTH)) analysis_imp_mvb_rx;
-    uvm_analysis_export #(mvb::sequence_item #(1, ITEM_WIDTH)) analysis_imp_mvb_tx;
+    uvm_analysis_export #(uvm_mvb::sequence_item #(1, ITEM_WIDTH)) analysis_imp_mvb_rx;
+    uvm_analysis_export #(uvm_mvb::sequence_item #(1, ITEM_WIDTH)) analysis_imp_mvb_tx;
 
-    local uvm_tlm_analysis_fifo #(logic_vector::sequence_item#(ITEM_WIDTH)) rx_fifo;
-    local uvm_tlm_analysis_fifo #(logic_vector::sequence_item#(ITEM_WIDTH)) tx_fifo;
+    local uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(ITEM_WIDTH)) rx_fifo;
+    local uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(ITEM_WIDTH)) tx_fifo;
 
-    //uvm_tlm_analysis_fifo #(mvb::sequence_item #(1, ITEM_WIDTH)) analysis_imp_mvb_rx;
-    //uvm_tlm_analysis_fifo #(mvb::sequence_item #(1, ITEM_WIDTH)) analysis_imp_mvb_tx;
+    //uvm_tlm_analysis_fifo #(uvm_mvb::sequence_item #(1, ITEM_WIDTH)) analysis_imp_mvb_rx;
+    //uvm_tlm_analysis_fifo #(uvm_mvb::sequence_item #(1, ITEM_WIDTH)) analysis_imp_mvb_tx;
 
     local mvb_converter#(ITEM_WIDTH) mvb_converter_rx;
     local mvb_converter#(ITEM_WIDTH) mvb_converter_tx;
@@ -85,8 +85,8 @@ class scoreboard #(ITEM_WIDTH) extends uvm_scoreboard;
 
     task run_phase(uvm_phase phase);
         string msg;
-        logic_vector::sequence_item#(ITEM_WIDTH) tr_model;
-        logic_vector::sequence_item#(ITEM_WIDTH) tr_dut;
+        uvm_logic_vector::sequence_item#(ITEM_WIDTH) tr_model;
+        uvm_logic_vector::sequence_item#(ITEM_WIDTH) tr_dut;
 
         forever begin
             rx_fifo.get(tr_model);
