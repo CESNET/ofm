@@ -16,7 +16,7 @@ class seq_small_pkt extends uvm_byte_array::sequence_simple;
         data_size_min = 12;
         transaction_count_min = 1;
         transaction_count_max = 20;
-        
+
     endfunction
 endclass
 

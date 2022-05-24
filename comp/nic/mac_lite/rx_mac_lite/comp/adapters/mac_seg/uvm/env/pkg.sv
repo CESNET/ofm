@@ -19,7 +19,6 @@ package uvm_mac_seg_rx
 	`include "model.sv"
 	`include "scoreboard.sv"
 	`include "sequencer.sv"
-	`include "sequence_tx.sv"
 	`include "env.sv"
 
 	`include "sequence.sv"
