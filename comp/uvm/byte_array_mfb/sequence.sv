@@ -9,7 +9,7 @@
 // This low level sequence define bus functionality
 class sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends uvm_sequence #(uvm_mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, 8, META_WIDTH));
     `uvm_object_param_utils(uvm_byte_array_mfb::sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH))
-    `uvm_declare_p_sequencer(uvm_mfb::sequencer#(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH));
+    `uvm_declare_p_sequencer(uvm_mfb::sequencer#(REGIONS, REGION_SIZE, BLOCK_SIZE, 8, META_WIDTH));
 
     int unsigned space_size = 0;
     int unsigned                              data_index;
@@ -41,7 +41,7 @@ class sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) ex
     task send_empty_frame();
         start_item(req);
         req.randomize();
-        req.SRC_RDY = 0;
+        req.src_rdy = 0;
         finish_item(req);
     endtask
 
@@ -88,7 +88,7 @@ class sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) ex
 
         //GET response
         get_response(rsp);
-        if (rsp.SRC_RDY == 1'b1 && rsp.DST_RDY == 1'b0) begin
+        if (rsp.src_rdy == 1'b1 && rsp.dst_rdy == 1'b0) begin
             state = state_last;
         end else begin
             state = state_next;
@@ -105,7 +105,7 @@ class sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) ex
             end
 
             gen.randomize();
-            gen.SRC_RDY = 0;
+            gen.src_rdy = 0;
             state_packet = state_packet_space_new;
             state = state_next;
         end
@@ -134,11 +134,11 @@ class sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) ex
         //send empty frame to get first response
         send_empty_frame();
         //when reset on start then wait
-        req.SRC_RDY = 0;
-        gen.SRC_RDY = 0;
+        req.src_rdy = 0;
+        gen.src_rdy = 0;
         state = state_next;
 
-        while (hl_transactions > 0 || data != null || state == state_last || gen.SRC_RDY == 1) begin
+        while (hl_transactions > 0 || data != null || state == state_last || gen.src_rdy == 1) begin
             send_frame();
         end
         //Get last response
@@ -167,13 +167,13 @@ class sequence_simple_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends
         //randomization of rdy
         void'(rdy_rdy.randomize());
         if (rdy_rdy.m_value == 0) begin
-            gen.SRC_RDY = 0;
+            gen.src_rdy = 0;
             return;
         end
 
-        gen.SRC_RDY = 0;
-        gen.SOF     = '0;
-        gen.EOF     = '0;
+        gen.src_rdy = 0;
+        gen.sof     = '0;
+        gen.eof     = '0;
 
         for (int unsigned it = 0; it < REGIONS; it++) begin
             int unsigned index = 0;
@@ -199,33 +199,34 @@ class sequence_simple_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends
 
                 if (state_packet == state_packet_new) begin
                     // Check SOF and EOF position if we can insert packet into this region
-                    if (gen.SOF[it] == 1 || (gen.EOF[it] == 1'b1 && (REGION_SIZE*BLOCK_SIZE) > (index*BLOCK_SIZE + data.data.size()))) begin
+                    if (gen.sof[it] == 1 || (gen.eof[it] == 1'b1 && (REGION_SIZE*BLOCK_SIZE) > (index*BLOCK_SIZE + data.data.size()))) begin
                         break;
                     end
 
-                    gen.SOF[it]     = 1'b1;
-                    gen.SOF_POS[it] = index;
+                    gen.sof[it]     = 1'b1;
+                    gen.sof_pos[it] = index;
                     if (hl_sqr.meta_behav == 1 && META_WIDTH != 0) begin
-                        gen.META[it] = meta.data;
+                        gen.meta[it] = meta.data;
                     end 
                     state_packet = state_packet_data;
                 end
 
                 if (state_packet == state_packet_data) begin
                     int unsigned loop_end   = BLOCK_SIZE < (data.data.size() - data_index) ? BLOCK_SIZE : (data.data.size() - data_index);
-                    gen.SRC_RDY = 1;
+                    gen.src_rdy = 1;
 
                     for (int unsigned jt = index*BLOCK_SIZE; jt < (index*BLOCK_SIZE + loop_end); jt++) begin
-                        gen.ITEMS[it][(jt+1)*8-1 -: 8] = data.data[data_index];
+                        gen.data[it][(jt+1)*8-1 -: 8] = data.data[data_index];
                         data_index++;
                     end
 
                     // End of packet
                     if (data.data.size() <= data_index) begin
                         if (hl_sqr.meta_behav == 2 && META_WIDTH != 0) begin
-                            gen.META[it] = meta.data;
-                        end                        gen.EOF[it]     = 1'b1;
-                        gen.EOF_POS[it] = index*BLOCK_SIZE + loop_end-1;
+                            gen.meta[it] = meta.data;
+                        end
+                        gen.eof[it]     = 1'b1;
+                        gen.eof_pos[it] = index*BLOCK_SIZE + loop_end-1;
                         data = null;
                         hl_sqr.m_data.item_done();
                         if (META_WIDTH != 0) begin
@@ -254,9 +255,9 @@ class sequence_full_speed_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) ext
         int unsigned index = 0;
         gen.randomize();
 
-        gen.SRC_RDY = 0;
-        gen.SOF     = '0;
-        gen.EOF     = '0;
+        gen.src_rdy = 0;
+        gen.sof     = '0;
+        gen.eof     = '0;
         for (int unsigned it = 0; it < REGIONS; it++) begin
             int unsigned index = 0;
             while (index < REGION_SIZE) begin
@@ -280,34 +281,34 @@ class sequence_full_speed_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) ext
 
                 if (state_packet == state_packet_new) begin
                     // Check SOF and EOF position if we can insert packet into this region
-                    if (gen.SOF[it] == 1 || (gen.EOF[it] == 1'b1 && (REGION_SIZE*BLOCK_SIZE) > (index*BLOCK_SIZE + data.data.size()))) begin
+                    if (gen.sof[it] == 1 || (gen.eof[it] == 1'b1 && (REGION_SIZE*BLOCK_SIZE) > (index*BLOCK_SIZE + data.data.size()))) begin
                         break;
                     end
 
-                    gen.SOF[it]     = 1'b1;
-                    gen.SOF_POS[it] = index;
+                    gen.sof[it]     = 1'b1;
+                    gen.sof_pos[it] = index;
                     if (hl_sqr.meta_behav == 1 && META_WIDTH != 0) begin
-                        gen.META[it] = meta.data;
-                    end 
+                        gen.meta[it] = meta.data;
+                    end
                     state_packet = state_packet_data;
                 end
 
                 if (state_packet == state_packet_data) begin
                     int unsigned loop_end   = BLOCK_SIZE < (data.data.size() - data_index) ? BLOCK_SIZE : (data.data.size() - data_index);
-                    gen.SRC_RDY = 1;
+                    gen.src_rdy = 1;
 
                     for (int unsigned jt = index*BLOCK_SIZE; jt < (index*BLOCK_SIZE + loop_end); jt++) begin
-                        gen.ITEMS[it][(jt+1)*8-1 -: 8] = data.data[data_index];
+                        gen.data[it][(jt+1)*8-1 -: 8] = data.data[data_index];
                         data_index++;
                     end
 
                     // End of packet
                     if (data.data.size() <= data_index) begin
                         if (hl_sqr.meta_behav == 2 && META_WIDTH != 0) begin
-                            gen.META[it] = meta.data;
+                            gen.meta[it] = meta.data;
                         end
-                        gen.EOF[it]     = 1'b1;
-                        gen.EOF_POS[it] = index*BLOCK_SIZE + loop_end-1;
+                        gen.eof[it]     = 1'b1;
+                        gen.eof_pos[it] = index*BLOCK_SIZE + loop_end-1;
                         data = null;
                         hl_sqr.m_data.item_done();
                         if (META_WIDTH != 0) begin
@@ -341,9 +342,9 @@ class sequence_stop_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends s
         int unsigned index = 0;
         gen.randomize();
 
-        gen.SRC_RDY = 0;
-        gen.SOF     = '0;
-        gen.EOF     = '0;
+        gen.src_rdy = 0;
+        gen.sof     = '0;
+        gen.eof     = '0;
 
         if (hl_transactions != 0) begin
             hl_transactions--;

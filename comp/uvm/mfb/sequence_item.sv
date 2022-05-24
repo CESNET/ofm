@@ -18,14 +18,14 @@ class sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) 
 
     // ------------------------------------------------------------------------
     // Bus structure of mfb
-    rand logic [DATA_WIDTH       -1 : 0] ITEMS [REGIONS];
-    rand logic [META_WIDTH       -1 : 0] META [REGIONS];
-    rand logic [SOF_POS_WIDTH    -1 : 0] SOF_POS [REGIONS];
-    rand logic [EOF_POS_WIDTH    -1 : 0] EOF_POS [REGIONS];
-    rand logic [REGIONS          -1 : 0] SOF;
-    rand logic [REGIONS          -1 : 0] EOF;
-    rand logic SRC_RDY;
-    rand logic DST_RDY;
+    rand logic [DATA_WIDTH       -1 : 0] data [REGIONS];
+    rand logic [META_WIDTH       -1 : 0] meta [REGIONS];
+    rand logic [SOF_POS_WIDTH    -1 : 0] sof_pos [REGIONS];
+    rand logic [EOF_POS_WIDTH    -1 : 0] eof_pos [REGIONS];
+    rand logic [REGIONS          -1 : 0] sof;
+    rand logic [REGIONS          -1 : 0] eof;
+    rand logic src_rdy;
+    rand logic dst_rdy;
 
 
     // ------------------------------------------------------------------------
@@ -48,14 +48,14 @@ class sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) 
 
         // Now copy all attributes.
         super.do_copy(rhs);
-        ITEMS       = rhs_.ITEMS;
-        META        = rhs_.META;
-        SOF_POS     = rhs_.SOF_POS;
-        EOF_POS     = rhs_.EOF_POS;
-        SOF         = rhs_.SOF;
-        EOF         = rhs_.EOF;
-        SRC_RDY     = rhs_.SRC_RDY;
-        DST_RDY     = rhs_.DST_RDY;
+        data       = rhs_.data;
+        meta        = rhs_.meta;
+        sof_pos     = rhs_.sof_pos;
+        eof_pos     = rhs_.eof_pos;
+        sof         = rhs_.sof;
+        eof         = rhs_.eof;
+        src_rdy     = rhs_.src_rdy;
+        dst_rdy     = rhs_.dst_rdy;
     endfunction
 
     // Properly compare all transaction attributes representing output pins.
@@ -69,14 +69,14 @@ class sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) 
 
         // Compare all attributes that maters
         return (super.do_compare(rhs, comparer) &&
-            (ITEMS      == rhs_.ITEMS) &&
-            (META       == rhs_.META) &&
-            (SOF_POS       == rhs_.SOF_POS) &&
-            (EOF_POS       == rhs_.EOF_POS) &&
-            (SOF       == rhs_.SOF) &&
-            (EOF       == rhs_.EOF) &&
-            (SRC_RDY    == rhs_.SRC_RDY) &&
-            (DST_RDY    == rhs_.DST_RDY));
+            (data      == rhs_.data) &&
+            (meta       == rhs_.meta) &&
+            (sof_pos    == rhs_.sof_pos) &&
+            (eof_pos    == rhs_.eof_pos) &&
+            (sof        == rhs_.sof) &&
+            (eof        == rhs_.eof) &&
+            (src_rdy    == rhs_.src_rdy) &&
+            (dst_rdy    == rhs_.dst_rdy));
 
     endfunction
 
@@ -86,25 +86,14 @@ class sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) 
         string data = "";
 
         $sformat(output_string, {"\n\tSRC_RDY: %b\n\tDST_RDY: %b\n"},
-            SRC_RDY,
-            DST_RDY
+            src_rdy,
+            dst_rdy
         );
 
         for (int unsigned it = 0; it < REGIONS; it++) begin
-            $swrite(output_string, "%s\n\t-- id %0d\n\tEOF %b EOF_POS %0d\n\tSOF %b SOF_POS %0d\n\tDATA %h\n\tMETA %h\n",output_string, it, EOF[it], EOF_POS[it], SOF[it], SOF_POS[it], ITEMS[it], META[it]);
+            $swrite(output_string, "%s\n\t-- id %0d\n\tEOF %b EOF_POS %0d\n\tSOF %b SOF_POS %0d\n\tDATA %h\n\tMETA %h\n",output_string, it, eof[it], eof_pos[it], sof[it], sof_pos[it], data[it], meta[it]);
         end
 
-        // Print out all  items
-        // TODO - přidat výpis všech itemů
-/*
-        for (int i = 0 ; i < ITEMS ; i++) begin
-            $sformat(data, {"\tDATA: 'h%0h\tVLD: %b\n"},
-            DATA[i],
-            VLD[i]
-            );
-            output_string = {output_string, data}; 
-        end
-*/       
         return output_string;
     endfunction
 

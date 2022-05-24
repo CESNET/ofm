@@ -27,7 +27,7 @@ class sequence_simple_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WI
     task send_frame();
         start_item(req);
         void'(rdy.randomize());
-        void'(req.randomize() with {DST_RDY == rdy.m_value;});
+        void'(req.randomize() with {dst_rdy == rdy.m_value;});
         finish_item(req);
         get_response(rsp);
     endtask
@@ -65,7 +65,7 @@ class sequence_full_speed_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, MET
 
     task send_frame();
         start_item(req);
-        void'(req.randomize() with {DST_RDY == 1'b1;});
+        void'(req.randomize() with {dst_rdy == 1'b1;});
         finish_item(req);
         get_response(rsp);
     endtask
@@ -103,7 +103,7 @@ class sequence_stop_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDT
 
     task send_frame();
         start_item(req);
-        void'(req.randomize() with {DST_RDY == 1'b0;});
+        void'(req.randomize() with {dst_rdy == 1'b0;});
         finish_item(req);
         get_response(rsp);
     endtask
