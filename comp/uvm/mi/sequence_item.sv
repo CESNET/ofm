@@ -14,7 +14,7 @@
 class sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_sequence_item;
 
     // registration of object tools
-    `uvm_object_param_utils(mi::sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
+    `uvm_object_param_utils(uvm_mi::sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
 
     //variables
     rand logic [ADDR_WIDTH-1:0]   addr;
@@ -107,7 +107,7 @@ endclass
 class sequence_item_respons #(DATA_WIDTH) extends uvm_sequence_item;
 
     // registration of object tools
-    `uvm_object_param_utils(mi::sequence_item_respons#(DATA_WIDTH))
+    `uvm_object_param_utils(uvm_mi::sequence_item_respons#(DATA_WIDTH))
 
     //variables
     //logic [DATA_WIDTH/8-1:0] be; // for comaring data

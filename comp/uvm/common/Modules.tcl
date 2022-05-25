@@ -4,5 +4,5 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-set MOD "$MOD $ENTITY_BASE/pkg.sv"
+lappend MOD "$ENTITY_BASE/pkg.sv"
 

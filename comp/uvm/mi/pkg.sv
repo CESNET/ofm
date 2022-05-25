@@ -12,7 +12,7 @@
 `ifndef MI_PKG
 `define MI_PKG
 
-package mi;
+package uvm_mi;
 
     `include "uvm_macros.svh"
     import uvm_pkg::*;

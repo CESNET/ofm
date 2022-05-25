@@ -9,8 +9,8 @@
 */
 
 class reg2bus_frontdoor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_reg_frontdoor;
-    `uvm_object_param_utils(mi::reg2bus_frontdoor#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
-    `uvm_declare_p_sequencer(mi::sequencer_slave#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
+    `uvm_object_param_utils(uvm_mi::reg2bus_frontdoor#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
+    `uvm_declare_p_sequencer(uvm_mi::sequencer_slave#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
 
     semaphore sem;
     uvm_reg   target;
@@ -23,8 +23,8 @@ class reg2bus_frontdoor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_re
     endfunction
 
     task read_frame(logic [ADDR_WIDTH-1:0] addr);
-        mi::sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)  request;
-        request = mi::sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)::type_id::create("request");
+        uvm_mi::sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)  request;
+        request = uvm_mi::sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)::type_id::create("request");
 
         sem.get();
         do begin
@@ -47,7 +47,7 @@ class reg2bus_frontdoor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_re
 
         data = new[repetition];
         for (int unsigned it = 0; it < repetition; it++) begin
-            mi::sequence_item_respons #(DATA_WIDTH) rsp;
+            uvm_mi::sequence_item_respons #(DATA_WIDTH) rsp;
             uvm_sequence_item                       rsp_get;
 
             get_response(rsp_get);
@@ -65,8 +65,8 @@ class reg2bus_frontdoor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_re
 
 
     task send_frame(logic [DATA_WIDTH-1:0] data, logic [ADDR_WIDTH-1:0] addr);
-        mi::sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)  request;
-        request = mi::sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)::type_id::create("request");
+        uvm_mi::sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)  request;
+        request = uvm_mi::sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)::type_id::create("request");
 
         sem.get();
         do begin
@@ -125,7 +125,7 @@ endclass
 
 
 class reg2bus_adapter#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_reg_adapter;
-    `uvm_object_param_utils(mi::reg2bus_adapter#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
+    `uvm_object_param_utils(uvm_mi::reg2bus_adapter#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
 
     function new(string name = "reg2mi_adapter");
         super.new(name);
@@ -141,7 +141,7 @@ class reg2bus_adapter#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_reg_a
         string text;
 
         if(!$cast(item, bus_item)) begin
-           `uvm_fatal("mi::reg2bus_adapter", "\n\tCanont convert uvm_sequence_item to mi::response");
+           `uvm_fatal("mi::reg2bus_adapter", "\n\tCanont convert uvm_sequence_item to uvm_mi::response");
         end
         rw = item.op;
     endfunction

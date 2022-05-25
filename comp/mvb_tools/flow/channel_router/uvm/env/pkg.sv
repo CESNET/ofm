@@ -11,7 +11,7 @@
 `ifndef CHANNEL_ROUTER_PKG
 `define CHANNEL_ROUTER_PKG
 
-package channel_router;
+package uvm_channel_router;
 
     `include "uvm_macros.svh"
     import uvm_pkg::*;

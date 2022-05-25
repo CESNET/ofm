@@ -10,7 +10,7 @@
 
 
 class agent_slave#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_agent;
-    `uvm_component_param_utils(mi::agent_slave #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
+    `uvm_component_param_utils(uvm_mi::agent_slave #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
 
 
     uvm_analysis_port #(sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)) analysis_port_rq;
@@ -77,7 +77,7 @@ class agent_master #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_agent;
     config_item m_config;
 
     //reset sync
-    reset::sync_cbs sync;
+    uvm_reset::sync_cbs sync;
 
     // Constructor.
     function new(string name, uvm_component parent);

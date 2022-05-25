@@ -9,7 +9,7 @@
 */
 
 class regmodel #(INPUT_CHANNELS, OUTPUT_CHANNELS, RESET_TYPE) extends uvm_reg_block;
-    `uvm_object_param_utils(channel_router::regmodel#(INPUT_CHANNELS, OUTPUT_CHANNELS, RESET_TYPE))
+    `uvm_object_param_utils(uvm_channel_router::regmodel#(INPUT_CHANNELS, OUTPUT_CHANNELS, RESET_TYPE))
 
     rand reg_dist channel[INPUT_CHANNELS];
 

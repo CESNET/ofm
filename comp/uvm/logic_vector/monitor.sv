@@ -6,7 +6,7 @@
 
 class monitor #(DATA_WIDTH) extends uvm_monitor;
 
-    `uvm_component_param_utils(logic_vector::monitor#(DATA_WIDTH))
+    `uvm_component_param_utils(uvm_logic_vector::monitor#(DATA_WIDTH))
 
     // Used to send transactions to all connected components.
     uvm_analysis_port #(sequence_item #(DATA_WIDTH)) analysis_port;

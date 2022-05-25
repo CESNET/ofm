@@ -7,16 +7,16 @@
 
 
 // This low level sequence define bus functionality
-class sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extends uvm_sequence #(mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH));
-    `uvm_object_param_utils(byte_array_mfb_env::sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH))
-    `uvm_declare_p_sequencer(mfb::sequencer#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH));
+class sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends uvm_sequence #(uvm_mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, 8, META_WIDTH));
+    `uvm_object_param_utils(uvm_byte_array_mfb::sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH))
+    `uvm_declare_p_sequencer(uvm_mfb::sequencer#(REGIONS, REGION_SIZE, BLOCK_SIZE, 8, META_WIDTH));
 
     int unsigned space_size = 0;
     int unsigned                              data_index;
-    byte_array::sequence_item                 data;
-    logic_vector::sequence_item #(META_WIDTH) meta;
+    uvm_byte_array::sequence_item                 data;
+    uvm_logic_vector::sequence_item #(META_WIDTH) meta;
     sequencer_rx #(META_WIDTH)                                          hl_sqr;
-    mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)  gen;
+    uvm_mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, 8, META_WIDTH)  gen;
     typedef enum {state_last, state_next, state_reset} state_t;
     state_t state;
 
@@ -41,7 +41,7 @@ class sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, ME
     task send_empty_frame();
         start_item(req);
         req.randomize();
-        req.SRC_RDY = 0;
+        req.src_rdy = 0;
         finish_item(req);
     endtask
 
@@ -88,7 +88,7 @@ class sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, ME
 
         //GET response
         get_response(rsp);
-        if (rsp.SRC_RDY == 1'b1 && rsp.DST_RDY == 1'b0) begin
+        if (rsp.src_rdy == 1'b1 && rsp.dst_rdy == 1'b0) begin
             state = state_last;
         end else begin
             state = state_next;
@@ -105,7 +105,7 @@ class sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, ME
             end
 
             gen.randomize();
-            gen.SRC_RDY = 0;
+            gen.src_rdy = 0;
             state_packet = state_packet_space_new;
             state = state_next;
         end
@@ -128,17 +128,17 @@ class sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, ME
         space_size = 0;
         state_packet = state_packet_space_new;
 
-        req = mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::type_id::create("req");
-        gen = mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::type_id::create("reg");
+        req = uvm_mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, 8, META_WIDTH)::type_id::create("req");
+        gen = uvm_mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, 8, META_WIDTH)::type_id::create("reg");
 
         //send empty frame to get first response
         send_empty_frame();
         //when reset on start then wait
-        req.SRC_RDY = 0;
-        gen.SRC_RDY = 0;
+        req.src_rdy = 0;
+        gen.src_rdy = 0;
         state = state_next;
 
-        while (hl_transactions > 0 || data != null || state == state_last || gen.SRC_RDY == 1) begin
+        while (hl_transactions > 0 || data != null || state == state_last || gen.src_rdy == 1) begin
             send_frame();
         end
         //Get last response
@@ -147,19 +147,19 @@ class sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, ME
 endclass
 
 
-class sequence_simple_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extends sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH);
-    `uvm_object_param_utils(byte_array_mfb_env::sequence_simple_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH))
-    common::rand_length   rdy_length;
-    common::rand_rdy      rdy_rdy;
+class sequence_simple_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH);
+    `uvm_object_param_utils(uvm_byte_array_mfb::sequence_simple_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH))
+    uvm_common::rand_length   rdy_length;
+    uvm_common::rand_rdy      rdy_rdy;
 
     function new (string name = "req");
         super.new(name);
-        rdy_length = common::rand_length_rand::new();
-        rdy_rdy    = common::rand_rdy_rand::new();
+        rdy_length = uvm_common::rand_length_rand::new();
+        rdy_rdy    = uvm_common::rand_rdy_rand::new();
     endfunction
 
     /////////
-    // CREATE intel_mac_seg::Sequence_item
+    // CREATE uvm_intel_mac_seg::Sequence_item
     virtual task create_sequence_item();
         int unsigned index = 0;
         gen.randomize();
@@ -167,13 +167,13 @@ class sequence_simple_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WI
         //randomization of rdy
         void'(rdy_rdy.randomize());
         if (rdy_rdy.m_value == 0) begin
-            gen.SRC_RDY = 0;
+            gen.src_rdy = 0;
             return;
         end
 
-        gen.SRC_RDY = 0;
-        gen.SOF     = '0;
-        gen.EOF     = '0;
+        gen.src_rdy = 0;
+        gen.sof     = '0;
+        gen.eof     = '0;
 
         for (int unsigned it = 0; it < REGIONS; it++) begin
             int unsigned index = 0;
@@ -199,33 +199,34 @@ class sequence_simple_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WI
 
                 if (state_packet == state_packet_new) begin
                     // Check SOF and EOF position if we can insert packet into this region
-                    if (gen.SOF[it] == 1 || (gen.EOF[it] == 1'b1 && (REGION_SIZE*BLOCK_SIZE) > (index*BLOCK_SIZE + data.data.size()))) begin
+                    if (gen.sof[it] == 1 || (gen.eof[it] == 1'b1 && (REGION_SIZE*BLOCK_SIZE) > (index*BLOCK_SIZE + data.data.size()))) begin
                         break;
                     end
 
-                    gen.SOF[it]     = 1'b1;
-                    gen.SOF_POS[it] = index;
+                    gen.sof[it]     = 1'b1;
+                    gen.sof_pos[it] = index;
                     if (hl_sqr.meta_behav == 1 && META_WIDTH != 0) begin
-                        gen.META[it] = meta.data;
+                        gen.meta[it] = meta.data;
                     end 
                     state_packet = state_packet_data;
                 end
 
                 if (state_packet == state_packet_data) begin
                     int unsigned loop_end   = BLOCK_SIZE < (data.data.size() - data_index) ? BLOCK_SIZE : (data.data.size() - data_index);
-                    gen.SRC_RDY = 1;
+                    gen.src_rdy = 1;
 
                     for (int unsigned jt = index*BLOCK_SIZE; jt < (index*BLOCK_SIZE + loop_end); jt++) begin
-                        gen.ITEMS[it][(jt+1)*ITEM_WIDTH-1 -: ITEM_WIDTH] = data.data[data_index];
+                        gen.data[it][(jt+1)*8-1 -: 8] = data.data[data_index];
                         data_index++;
                     end
 
                     // End of packet
                     if (data.data.size() <= data_index) begin
                         if (hl_sqr.meta_behav == 2 && META_WIDTH != 0) begin
-                            gen.META[it] = meta.data;
-                        end                        gen.EOF[it]     = 1'b1;
-                        gen.EOF_POS[it] = index*BLOCK_SIZE + loop_end-1;
+                            gen.meta[it] = meta.data;
+                        end
+                        gen.eof[it]     = 1'b1;
+                        gen.eof_pos[it] = index*BLOCK_SIZE + loop_end-1;
                         data = null;
                         hl_sqr.m_data.item_done();
                         if (META_WIDTH != 0) begin
@@ -241,22 +242,22 @@ class sequence_simple_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WI
     endtask
 endclass
 
-class sequence_full_speed_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extends sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH);
-    `uvm_object_param_utils(byte_array_mfb_env::sequence_full_speed_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH))
+class sequence_full_speed_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH);
+    `uvm_object_param_utils(uvm_byte_array_mfb::sequence_full_speed_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH))
 
     function new (string name = "req");
         super.new(name);
     endfunction
 
     /////////
-    // CREATE intel_mac_seg::Sequence_item
+    // CREATE uvm_intel_mac_seg::Sequence_item
     virtual task create_sequence_item();
         int unsigned index = 0;
         gen.randomize();
 
-        gen.SRC_RDY = 0;
-        gen.SOF     = '0;
-        gen.EOF     = '0;
+        gen.src_rdy = 0;
+        gen.sof     = '0;
+        gen.eof     = '0;
         for (int unsigned it = 0; it < REGIONS; it++) begin
             int unsigned index = 0;
             while (index < REGION_SIZE) begin
@@ -280,34 +281,34 @@ class sequence_full_speed_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, MET
 
                 if (state_packet == state_packet_new) begin
                     // Check SOF and EOF position if we can insert packet into this region
-                    if (gen.SOF[it] == 1 || (gen.EOF[it] == 1'b1 && (REGION_SIZE*BLOCK_SIZE) > (index*BLOCK_SIZE + data.data.size()))) begin
+                    if (gen.sof[it] == 1 || (gen.eof[it] == 1'b1 && (REGION_SIZE*BLOCK_SIZE) > (index*BLOCK_SIZE + data.data.size()))) begin
                         break;
                     end
 
-                    gen.SOF[it]     = 1'b1;
-                    gen.SOF_POS[it] = index;
+                    gen.sof[it]     = 1'b1;
+                    gen.sof_pos[it] = index;
                     if (hl_sqr.meta_behav == 1 && META_WIDTH != 0) begin
-                        gen.META[it] = meta.data;
-                    end 
+                        gen.meta[it] = meta.data;
+                    end
                     state_packet = state_packet_data;
                 end
 
                 if (state_packet == state_packet_data) begin
                     int unsigned loop_end   = BLOCK_SIZE < (data.data.size() - data_index) ? BLOCK_SIZE : (data.data.size() - data_index);
-                    gen.SRC_RDY = 1;
+                    gen.src_rdy = 1;
 
                     for (int unsigned jt = index*BLOCK_SIZE; jt < (index*BLOCK_SIZE + loop_end); jt++) begin
-                        gen.ITEMS[it][(jt+1)*ITEM_WIDTH-1 -: ITEM_WIDTH] = data.data[data_index];
+                        gen.data[it][(jt+1)*8-1 -: 8] = data.data[data_index];
                         data_index++;
                     end
 
                     // End of packet
                     if (data.data.size() <= data_index) begin
                         if (hl_sqr.meta_behav == 2 && META_WIDTH != 0) begin
-                            gen.META[it] = meta.data;
+                            gen.meta[it] = meta.data;
                         end
-                        gen.EOF[it]     = 1'b1;
-                        gen.EOF_POS[it] = index*BLOCK_SIZE + loop_end-1;
+                        gen.eof[it]     = 1'b1;
+                        gen.eof_pos[it] = index*BLOCK_SIZE + loop_end-1;
                         data = null;
                         hl_sqr.m_data.item_done();
                         if (META_WIDTH != 0) begin
@@ -322,8 +323,8 @@ class sequence_full_speed_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, MET
     endtask
 endclass
 
-class sequence_stop_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extends sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH);
-    `uvm_object_param_utils(byte_array_mfb_env::sequence_stop_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH))
+class sequence_stop_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH);
+    `uvm_object_param_utils(uvm_byte_array_mfb::sequence_stop_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH))
 
     function new (string name = "req");
         super.new(name);
@@ -336,14 +337,14 @@ class sequence_stop_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDT
     }
 
     /////////
-    // CREATE intel_mac_seg::Sequence_item
+    // CREATE uvm_intel_mac_seg::Sequence_item
     virtual task create_sequence_item();
         int unsigned index = 0;
         gen.randomize();
 
-        gen.SRC_RDY = 0;
-        gen.SOF     = '0;
-        gen.EOF     = '0;
+        gen.src_rdy = 0;
+        gen.sof     = '0;
+        gen.eof     = '0;
 
         if (hl_transactions != 0) begin
             hl_transactions--;
@@ -353,9 +354,10 @@ endclass
 
 /////////////////////////////////////////////////////////////////////////
 // SEQUENCE LIBRARY RX
-class sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extends uvm_sequence_library#(mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH));
-  `uvm_object_param_utils(byte_array_mfb_env::sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH))
-  `uvm_sequence_library_utils(byte_array_mfb_env::sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH))
+
+class sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends uvm_sequence_library#(uvm_mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, 8, META_WIDTH));
+  `uvm_object_param_utils(uvm_byte_array_mfb::sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH))
+  `uvm_sequence_library_utils(uvm_byte_array_mfb::sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH))
 
   function new(string name = "");
     super.new(name);
@@ -365,9 +367,9 @@ class sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)
     // subclass can redefine and change run sequences
     // can be useful in specific tests
     virtual function void init_sequence();
-        this.add_sequence(byte_array_mfb_env::sequence_simple_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::get_type());
-        this.add_sequence(byte_array_mfb_env::sequence_full_speed_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::get_type());
-        this.add_sequence(byte_array_mfb_env::sequence_stop_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::get_type());
+        this.add_sequence(uvm_byte_array_mfb::sequence_simple_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH)::get_type());
+        this.add_sequence(uvm_byte_array_mfb::sequence_full_speed_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH)::get_type());
+        this.add_sequence(uvm_byte_array_mfb::sequence_stop_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH)::get_type());
     endfunction
 endclass
 

@@ -15,7 +15,7 @@
 class sequence_item extends uvm_sequence_item;
 
     // Registration of object tools.
-    `uvm_object_utils(byte_array::sequence_item)
+    `uvm_object_utils(uvm_byte_array::sequence_item)
 
     // -----------------------
     // Variables.

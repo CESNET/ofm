@@ -12,7 +12,7 @@
 `ifndef RESET_PKG
 `define RESET_PKG
 
-package reset;
+package uvm_reset;
 
     `include "uvm_macros.svh"
     import uvm_pkg::*;

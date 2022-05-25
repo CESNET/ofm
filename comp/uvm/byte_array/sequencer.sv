@@ -10,9 +10,9 @@
 
 
 class sequencer  extends uvm_sequencer #(sequence_item);
-    `uvm_component_utils(byte_array::sequencer)
+    `uvm_component_utils(uvm_byte_array::sequencer)
 
-    reset::sync_terminate reset_sync;
+    uvm_reset::sync_terminate reset_sync;
 
     function new(string name, uvm_component parent = null);
         super.new(name, parent);

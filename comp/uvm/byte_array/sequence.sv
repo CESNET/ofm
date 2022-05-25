@@ -11,7 +11,7 @@
 
 // Reusable high level sequence. Contains transaction, which has only data part.
 class sequence_simple extends uvm_sequence #(sequence_item);
-    `uvm_object_utils(byte_array::sequence_simple)
+    `uvm_object_utils(uvm_byte_array::sequence_simple)
 
     rand int unsigned transaction_count;
     int unsigned data_size_max = 2048; // 2048
@@ -45,7 +45,7 @@ endclass
 // High level sequence with same size.
 
 class sequence_simple_const extends uvm_sequence #(sequence_item);
-    `uvm_object_utils(byte_array::sequence_simple_const)
+    `uvm_object_utils(uvm_byte_array::sequence_simple_const)
 
     rand int unsigned data_size;
     rand int unsigned transaction_count;
@@ -81,7 +81,7 @@ endclass
 // High level sequence with Gaussian distribution.
 
 class sequence_simple_gauss extends uvm_sequence #(sequence_item);
-    `uvm_object_utils(byte_array::sequence_simple_gauss)
+    `uvm_object_utils(uvm_byte_array::sequence_simple_gauss)
 
     rand int unsigned transaction_count;
     rand int unsigned mean; // Mean of data size
@@ -128,7 +128,7 @@ endclass
 // High level sequence with increment size.
 
 class sequence_simple_inc extends uvm_sequence #(sequence_item);
-    `uvm_object_utils(byte_array::sequence_simple_inc)
+    `uvm_object_utils(uvm_byte_array::sequence_simple_inc)
 
     rand int unsigned transaction_count;
     rand int unsigned step;
@@ -179,7 +179,7 @@ endclass
 // High level sequence which is used for measuring
 
 class sequence_simple_meas extends uvm_sequence #(sequence_item);
-    `uvm_object_utils(byte_array::sequence_simple_meas)
+    `uvm_object_utils(uvm_byte_array::sequence_simple_meas)
 
     int unsigned transaction_count = 370;
     int unsigned data_size    = 64;
@@ -218,7 +218,7 @@ endclass
 // High level sequence with decrement size.
 
 class sequence_simple_dec extends uvm_sequence #(sequence_item);
-    `uvm_object_utils(byte_array::sequence_simple_dec)
+    `uvm_object_utils(uvm_byte_array::sequence_simple_dec)
 
     rand int unsigned transaction_count;
     rand int unsigned step;
@@ -269,8 +269,8 @@ endclass
 /////////////////////////////////////////////////////////////////////////
 // SEQUENCE LIBRARY
 class sequence_lib extends uvm_sequence_library#(sequence_item );
-  `uvm_object_utils(byte_array::sequence_lib)
-  `uvm_sequence_library_utils(byte_array::sequence_lib)
+  `uvm_object_utils(uvm_byte_array::sequence_lib)
+  `uvm_sequence_library_utils(uvm_byte_array::sequence_lib)
 
     function new(string name = "");
         super.new(name);

@@ -8,8 +8,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
 */
 
-class sequence_meta extends uvm_sequence #(logic_vector::sequence_item #(1));
-    `uvm_object_utils(mac_seq_tx_ver::sequence_meta)
+class sequence_meta extends uvm_sequence #(uvm_logic_vector::sequence_item #(1));
+    `uvm_object_utils(uvm_mac_seg_tx::sequence_meta)
 
     function new(string name = "sequence_meta");
         super.new(name);
@@ -27,14 +27,14 @@ endclass
 
 
 class sequence_simple_1#(SEGMENTS) extends uvm_sequence;
-    `uvm_object_param_utils(mac_seq_tx_ver::sequence_simple_1#(SEGMENTS))
-    `uvm_declare_p_sequencer(mac_seq_tx_ver::sequencer#(SEGMENTS));
+    `uvm_object_param_utils(uvm_mac_seg_tx::sequence_simple_1#(SEGMENTS))
+    `uvm_declare_p_sequencer(uvm_mac_seg_tx::sequencer#(SEGMENTS));
 
 	//byte_array::sequence_simple rx_seq;
-	uvm_sequence#(reset::sequence_item)          reset_seq;
-    uvm_sequence #(logic_vector::sequence_item #(1)) rx_seq_meta;
-    uvm_sequence #(byte_array::sequence_item)        rx_seq_data;
-    intel_mac_seg::sequence_simple_tx#(SEGMENTS) tx_seq;
+	uvm_sequence#(uvm_reset::sequence_item)          reset_seq;
+    uvm_sequence #(uvm_logic_vector::sequence_item #(1)) rx_seq_meta;
+    uvm_sequence #(uvm_byte_array::sequence_item)        rx_seq_data;
+    uvm_intel_mac_seg::sequence_simple_tx#(SEGMENTS) tx_seq;
 
     //////////////////////////////////
     // functions
@@ -43,15 +43,15 @@ class sequence_simple_1#(SEGMENTS) extends uvm_sequence;
     endfunction
 
     virtual function void seq_create();
-        byte_array::sequence_lib rx_seq_data_lib;
+        uvm_byte_array::sequence_lib rx_seq_data_lib;
 
         rx_seq_meta = sequence_meta::type_id::create("seq_meta");
-        rx_seq_data_lib = byte_array::sequence_lib::type_id::create("seq_data");
+        rx_seq_data_lib = uvm_byte_array::sequence_lib::type_id::create("seq_data");
         rx_seq_data_lib.init_sequence();
         rx_seq_data_lib.min_random_count = 50;
         rx_seq_data_lib.max_random_count = 100;
-        reset_seq   = reset::sequence_start::type_id::create("reset_simple");
-        tx_seq      = intel_mac_seg::sequence_simple_tx#(SEGMENTS)::type_id::create("intel_mac_tx_seq");
+        reset_seq   = uvm_reset::sequence_start::type_id::create("reset_simple");
+        tx_seq      = uvm_intel_mac_seg::sequence_simple_tx#(SEGMENTS)::type_id::create("intel_mac_tx_seq");
 
         rx_seq_data = rx_seq_data_lib;
     endfunction

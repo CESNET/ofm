@@ -12,7 +12,7 @@
 
 
 class env#(RESETS) extends uvm_env;
-    `uvm_component_param_utils(reset::env#(RESETS));
+    `uvm_component_param_utils(uvm_reset::env#(RESETS));
 
     //high level
     env_config_item#(RESETS) m_config;

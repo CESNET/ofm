@@ -10,7 +10,7 @@
 
 
 class reg_dist extends uvm_reg;
-    `uvm_object_utils(channel_router::reg_dist)
+    `uvm_object_utils(uvm_channel_router::reg_dist)
 
     //rand uvm_reg_field rsvd; //RESERVED
     rand uvm_reg_field ch_max;

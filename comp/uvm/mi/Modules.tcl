@@ -4,10 +4,8 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-set COMPONENTS [ list \
-    [list "RESET"        "$OFM_PATH/comp/uvm/reset"        "FULL"] \
-]
+lappend COMPONENTS [list "RESET"        "$OFM_PATH/comp/uvm/reset"        "FULL"]
 
 
-set MOD "$MOD $ENTITY_BASE/interface.sv"
-set MOD "$MOD $ENTITY_BASE/pkg.sv"
+lappend MOD "$ENTITY_BASE/interface.sv"
+lappend MOD "$ENTITY_BASE/pkg.sv"

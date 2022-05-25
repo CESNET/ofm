@@ -7,7 +7,7 @@
 `ifndef INTEL_MAC_SEG_PKG
 `define INTEL_MAC_SEG_PKG
 
-package intel_mac_seg;
+package uvm_intel_mac_seg;
 
     `include "uvm_macros.svh"
     import uvm_pkg::*;

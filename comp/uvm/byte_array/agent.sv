@@ -14,7 +14,7 @@
 class agent extends uvm_agent;
 
     // registration of component tools
-    `uvm_component_utils(byte_array::agent)
+    `uvm_component_utils(uvm_byte_array::agent)
 
     // -----------------------
     // Variables.

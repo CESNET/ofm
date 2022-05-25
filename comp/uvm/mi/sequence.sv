@@ -12,7 +12,7 @@
 // SLAVE SEQUENCE
 //////////////////////////////////////////////////////////////////////////////////
 class sequence_slave#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_sequence#(sequence_item_request#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH), sequence_item_respons #(DATA_WIDTH));
-    `uvm_object_param_utils(mi::sequence_slave #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
+    `uvm_object_param_utils(uvm_mi::sequence_slave #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
     `uvm_declare_p_sequencer(sequencer_slave #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH ));
 
     int unsigned rd_count;
@@ -56,7 +56,7 @@ class sequence_slave#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_sequen
 endclass
 
 class sequence_slave_same_addr#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends sequence_slave#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH);
-    `uvm_object_param_utils(mi::sequence_slave_same_addr #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
+    `uvm_object_param_utils(uvm_mi::sequence_slave_same_addr #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
 
     rand logic [DATA_WIDTH-1:0] rand_addr;
 
@@ -87,7 +87,7 @@ class sequence_slave_same_addr#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends 
 endclass
 
 class sequence_slave_incr_addr#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends sequence_slave#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH);
-    `uvm_object_param_utils(mi::sequence_slave_incr_addr #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
+    `uvm_object_param_utils(uvm_mi::sequence_slave_incr_addr #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
 
     rand logic [DATA_WIDTH-1:0] rand_addr;
     rand int unsigned           increment_size;
@@ -134,7 +134,7 @@ class sequence_slave_incr_addr#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends 
 endclass
 
 class sequence_slave_burst#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends sequence_slave#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH);
-    `uvm_object_param_utils(mi::sequence_slave_burst #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
+    `uvm_object_param_utils(uvm_mi::sequence_slave_burst #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
 
     rand logic [ADDR_WIDTH-1:0] addr_min;
     rand logic [ADDR_WIDTH-1:0] addr_max;
@@ -178,8 +178,8 @@ endclass
 
 
 class sequence_slave_library#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_sequence_library#(sequence_item_request#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH), sequence_item_respons #(DATA_WIDTH));
-    `uvm_object_param_utils(mi::sequence_slave_library#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
-    `uvm_sequence_library_utils(mi::sequence_slave_library#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
+    `uvm_object_param_utils(uvm_mi::sequence_slave_library#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
+    `uvm_sequence_library_utils(uvm_mi::sequence_slave_library#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
 
 
     function new(string name = "");
@@ -189,10 +189,10 @@ class sequence_slave_library#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uv
         this.min_random_count = 100;
         this.max_random_count = 500;
 
-        this.add_sequence(mi::sequence_slave#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)::get_type());
-        this.add_sequence(mi::sequence_slave_same_addr#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)::get_type());
-        this.add_sequence(mi::sequence_slave_incr_addr#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)::get_type());
-        this.add_sequence(mi::sequence_slave_burst#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)::get_type());
+        this.add_sequence(uvm_mi::sequence_slave#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)::get_type());
+        this.add_sequence(uvm_mi::sequence_slave_same_addr#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)::get_type());
+        this.add_sequence(uvm_mi::sequence_slave_incr_addr#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)::get_type());
+        this.add_sequence(uvm_mi::sequence_slave_burst#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)::get_type());
     endfunction
 endclass
 
@@ -201,7 +201,7 @@ endclass
 // Master SEQUENCE
 ////////////////////////////////////////////////////////////////////////////////////
 class sequence_master#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_sequence#(sequence_item_respons #(DATA_WIDTH), sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH));
-    `uvm_object_param_utils(mi::sequence_master #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
+    `uvm_object_param_utils(uvm_mi::sequence_master #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
     `uvm_declare_p_sequencer(sequencer_master #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH ));
 
     int unsigned transactions_min = 10;
@@ -250,7 +250,7 @@ endclass
 
 
 class sequence_master_burst#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends sequence_master#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH);
-    `uvm_object_param_utils(mi::sequence_master_burst#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
+    `uvm_object_param_utils(uvm_mi::sequence_master_burst#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
 
     rand logic [2-1:0] type_tr; // 0x01 => READ, 0x02 => WR
 
@@ -283,7 +283,7 @@ class sequence_master_burst#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends seq
 endclass
 
 class sequence_master_max#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends sequence_master#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH);
-    `uvm_object_param_utils(mi::sequence_master_max#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
+    `uvm_object_param_utils(uvm_mi::sequence_master_max#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
 
     function new (string name = "sequence_reset");
         super.new(name);
@@ -312,8 +312,8 @@ endclass
 
 
 class sequence_master_library#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_sequence_library#(sequence_item_request#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH), sequence_item_respons #(DATA_WIDTH));
-    `uvm_object_param_utils(mi::sequence_master_library#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
-    `uvm_sequence_library_utils(mi::sequence_master_library#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
+    `uvm_object_param_utils(uvm_mi::sequence_master_library#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
+    `uvm_sequence_library_utils(uvm_mi::sequence_master_library#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
 
 
     function new(string name = "");
@@ -323,9 +323,9 @@ class sequence_master_library#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends u
         this.min_random_count = 100;
         this.max_random_count = 500;
 
-        this.add_sequence(mi::sequence_master#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)::get_type());
-        this.add_sequence(mi::sequence_master_burst#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)::get_type());
-        this.add_sequence(mi::sequence_master_max#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)::get_type());
+        this.add_sequence(uvm_mi::sequence_master#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)::get_type());
+        this.add_sequence(uvm_mi::sequence_master_burst#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)::get_type());
+        this.add_sequence(uvm_mi::sequence_master_max#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)::get_type());
     endfunction
 endclass
 

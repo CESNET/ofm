@@ -5,25 +5,26 @@
 //-- SPDX-License-Identifier: BSD-3-Clause
 
 // Definition of mfb environment
-class env_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extends uvm_env;
+class env_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends uvm_env;
+    `uvm_component_param_utils(uvm_byte_array_mfb::env_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH));
 
-    `uvm_component_param_utils(byte_array_mfb_env::env_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH));
+    localparam  ITEM_WIDTH = 8;
 
     // ------------------------------------------------------------------------
     // Definition of agents
     sequencer_rx #(META_WIDTH) m_sequencer;
-    uvm_analysis_port #(byte_array::sequence_item)                analysis_port_data;
-    uvm_analysis_port #(logic_vector::sequence_item#(META_WIDTH)) analysis_port_meta;
-    reset::sync_cbs            reset_sync;
+    uvm_analysis_port #(uvm_byte_array::sequence_item)                analysis_port_data;
+    uvm_analysis_port #(uvm_logic_vector::sequence_item#(META_WIDTH)) analysis_port_meta;
+    uvm_reset::sync_cbs            reset_sync;
 
-    byte_array::agent m_byte_array_agent;
-    byte_array::config_item byte_array_agent_cfg;
+    uvm_byte_array::agent m_byte_array_agent;
+    uvm_byte_array::config_item byte_array_agent_cfg;
 
-    logic_vector::agent#(META_WIDTH) m_logic_vector_agent;
-    logic_vector::config_item logic_vector_agent_cfg;
+    uvm_logic_vector::agent#(META_WIDTH) m_logic_vector_agent;
+    uvm_logic_vector::config_item logic_vector_agent_cfg;
 
-    mfb::agent_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) m_mfb_agent;
-    mfb::config_item mfb_agent_cfg;
+    uvm_mfb::agent_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) m_mfb_agent;
+    uvm_mfb::config_item mfb_agent_cfg;
 
     config_item m_config;
 
@@ -49,16 +50,16 @@ class env_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extends
         mfb_agent_cfg.active = m_config.active;
         mfb_agent_cfg.interface_name = m_config.interface_name;
 
-        uvm_config_db #(byte_array::config_item)::set(this, "m_byte_array_agent", "m_config", byte_array_agent_cfg);
-        uvm_config_db #(logic_vector::config_item)::set(this, "m_logic_vector_agent", "m_config", logic_vector_agent_cfg);
-        uvm_config_db #(mfb::config_item)::set(this, "m_mfb_agent", "m_config", mfb_agent_cfg);
+        uvm_config_db #(uvm_byte_array::config_item)::set(this, "m_byte_array_agent", "m_config", byte_array_agent_cfg);
+        uvm_config_db #(uvm_logic_vector::config_item)::set(this, "m_logic_vector_agent", "m_config", logic_vector_agent_cfg);
+        uvm_config_db #(uvm_mfb::config_item)::set(this, "m_mfb_agent", "m_config", mfb_agent_cfg);
 
-        byte_array::monitor::type_id::set_inst_override(monitor_byte_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::get_type(), {this.get_full_name(), ".m_byte_array_agent.*"});
-        logic_vector::monitor#(META_WIDTH)::type_id::set_inst_override(monitor_logic_vector #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::get_type(), {this.get_full_name(), ".m_logic_vector_agent.*"});
+        uvm_byte_array::monitor::type_id::set_inst_override(monitor_byte_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH)::get_type(), {this.get_full_name(), ".m_byte_array_agent.*"});
+        uvm_logic_vector::monitor#(META_WIDTH)::type_id::set_inst_override(monitor_logic_vector #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH)::get_type(), {this.get_full_name(), ".m_logic_vector_agent.*"});
 
-        m_byte_array_agent = byte_array::agent::type_id::create("m_byte_array_agent", this);
-        m_logic_vector_agent = logic_vector::agent#(META_WIDTH)::type_id::create("m_logic_vector_agent", this);
-        m_mfb_agent        = mfb::agent_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::type_id::create("m_mfb_agent", this);
+        m_byte_array_agent = uvm_byte_array::agent::type_id::create("m_byte_array_agent", this);
+        m_logic_vector_agent = uvm_logic_vector::agent#(META_WIDTH)::type_id::create("m_logic_vector_agent", this);
+        m_mfb_agent        = uvm_mfb::agent_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::type_id::create("m_mfb_agent", this);
 
         if (m_config.active == UVM_ACTIVE) begin
             m_sequencer = sequencer_rx #(META_WIDTH)::type_id::create("m_sequencer", this);
@@ -70,8 +71,8 @@ class env_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extends
     // Connect agent's ports with ports from scoreboard.
     function void connect_phase(uvm_phase phase);
 
-        monitor_byte_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) m_byte_arr_monitor;
-        monitor_logic_vector #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) m_logic_vector_monitor;
+        monitor_byte_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) m_byte_arr_monitor;
+        monitor_logic_vector #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) m_logic_vector_monitor;
 
         $cast(m_byte_arr_monitor, m_byte_array_agent.m_monitor);
         m_mfb_agent.analysis_port.connect(m_byte_arr_monitor.analysis_export);
@@ -95,9 +96,9 @@ class env_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extends
 
     virtual task run_phase(uvm_phase phase);
         if (m_config.active == UVM_ACTIVE) begin
-            sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) mfb_seq;
+            sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) mfb_seq;
 
-            mfb_seq = sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::type_id::create("mfb_seq", this);
+            mfb_seq = sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH)::type_id::create("mfb_seq", this);
             mfb_seq.min_random_count = 20;
             mfb_seq.max_random_count = 100;
             mfb_seq.init_sequence();
@@ -113,26 +114,27 @@ class env_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extends
 endclass
 
 
-class env_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extends uvm_env;
+class env_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends uvm_env;
+    `uvm_component_param_utils(uvm_byte_array_mfb::env_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH));
 
-    `uvm_component_param_utils(byte_array_mfb_env::env_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH));
+    localparam  ITEM_WIDTH = 8;
 
     //Access component
-    mfb::sequencer #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) m_sequencer;
-    uvm_analysis_port #(byte_array::sequence_item)                analysis_port_data;
-    uvm_analysis_port #(logic_vector::sequence_item#(META_WIDTH)) analysis_port_meta;
-    reset::sync_cbs                                               reset_sync;
+    uvm_mfb::sequencer #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) m_sequencer;
+    uvm_analysis_port #(uvm_byte_array::sequence_item)                analysis_port_data;
+    uvm_analysis_port #(uvm_logic_vector::sequence_item#(META_WIDTH)) analysis_port_meta;
+    uvm_reset::sync_cbs                                               reset_sync;
 
     // ------------------------------------------------------------------------
     // Definition of agents 
-    byte_array::agent m_byte_array_agent;
-    byte_array::config_item byte_array_agent_cfg;
+    uvm_byte_array::agent m_byte_array_agent;
+    uvm_byte_array::config_item byte_array_agent_cfg;
 
-    logic_vector::agent#(META_WIDTH) m_logic_vector_agent;
-    logic_vector::config_item logic_vector_agent_cfg;
+    uvm_logic_vector::agent#(META_WIDTH) m_logic_vector_agent;
+    uvm_logic_vector::config_item logic_vector_agent_cfg;
 
-    mfb::agent_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) m_mfb_agent;
-    mfb::config_item mfb_agent_cfg;
+    uvm_mfb::agent_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) m_mfb_agent;
+    uvm_mfb::config_item mfb_agent_cfg;
 
     config_item m_config;
 
@@ -158,16 +160,16 @@ class env_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extends
         mfb_agent_cfg.active = m_config.active;
         mfb_agent_cfg.interface_name = m_config.interface_name;
 
-        uvm_config_db #(byte_array::config_item)::set(this, "m_byte_array_agent", "m_config", byte_array_agent_cfg);
-        uvm_config_db #(logic_vector::config_item)::set(this, "m_logic_vector_agent", "m_config", logic_vector_agent_cfg);
-        uvm_config_db #(mfb::config_item)::set(this, "m_mfb_agent", "m_config", mfb_agent_cfg);
+        uvm_config_db #(uvm_byte_array::config_item)::set(this, "m_byte_array_agent", "m_config", byte_array_agent_cfg);
+        uvm_config_db #(uvm_logic_vector::config_item)::set(this, "m_logic_vector_agent", "m_config", logic_vector_agent_cfg);
+        uvm_config_db #(uvm_mfb::config_item)::set(this, "m_mfb_agent", "m_config", mfb_agent_cfg);
 
-        byte_array::monitor::type_id::set_inst_override(monitor_byte_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::get_type(), {this.get_full_name(), ".m_byte_array_agent.*"});
-        logic_vector::monitor#(META_WIDTH)::type_id::set_inst_override(monitor_logic_vector #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::get_type(), {this.get_full_name(), ".m_logic_vector_agent.*"});
+        uvm_byte_array::monitor::type_id::set_inst_override(monitor_byte_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH)::get_type(), {this.get_full_name(), ".m_byte_array_agent.*"});
+        uvm_logic_vector::monitor#(META_WIDTH)::type_id::set_inst_override(monitor_logic_vector #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH)::get_type(), {this.get_full_name(), ".m_logic_vector_agent.*"});
 
-        m_byte_array_agent = byte_array::agent::type_id::create("m_byte_array_agent", this);
-        m_logic_vector_agent = logic_vector::agent#(META_WIDTH)::type_id::create("m_logic_vector_agent", this);
-        m_mfb_agent        = mfb::agent_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::type_id::create("m_mfb_agent", this);
+        m_byte_array_agent = uvm_byte_array::agent::type_id::create("m_byte_array_agent", this);
+        m_logic_vector_agent = uvm_logic_vector::agent#(META_WIDTH)::type_id::create("m_logic_vector_agent", this);
+        m_mfb_agent        = uvm_mfb::agent_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::type_id::create("m_mfb_agent", this);
 
         reset_sync = new();
     endfunction
@@ -175,8 +177,8 @@ class env_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extends
     // Connect agent's ports with ports from scoreboard.
     function void connect_phase(uvm_phase phase);
 
-        monitor_byte_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)   m_byte_arr_monitor;
-        monitor_logic_vector #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) m_logic_vector_monitor;
+        monitor_byte_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH)   m_byte_arr_monitor;
+        monitor_logic_vector #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) m_logic_vector_monitor;
 
         $cast(m_byte_arr_monitor, m_byte_array_agent.m_monitor);
         m_mfb_agent.analysis_port.connect(m_byte_arr_monitor.analysis_export);

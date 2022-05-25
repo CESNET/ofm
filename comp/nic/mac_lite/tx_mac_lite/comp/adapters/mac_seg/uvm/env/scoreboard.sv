@@ -9,20 +9,20 @@
 */
 
 class scoreboard extends uvm_scoreboard;
-   `uvm_component_utils(mac_seq_tx_ver::scoreboard)
+   `uvm_component_utils(uvm_mac_seg_tx::scoreboard)
     //CONNECT DUT
-	localparam LOGIC_WIDTH = 6;
+    localparam LOGIC_WIDTH = 6;
 
     //CONNECT DUT
-    uvm_analysis_export #(byte_array::sequence_item)                 analysis_export_rx_packet;
-    uvm_analysis_export #(logic_vector::sequence_item#(1))           analysis_export_rx_error;
-    uvm_analysis_export #(byte_array::sequence_item)                 analysis_export_tx_packet;
-    uvm_analysis_export #(logic_vector::sequence_item#(LOGIC_WIDTH)) analysis_export_tx_error;
+    uvm_analysis_export #(uvm_byte_array::sequence_item)                 analysis_export_rx_packet;
+    uvm_analysis_export #(uvm_logic_vector::sequence_item#(1))           analysis_export_rx_error;
+    uvm_analysis_export #(uvm_byte_array::sequence_item)                 analysis_export_tx_packet;
+    uvm_analysis_export #(uvm_logic_vector::sequence_item#(LOGIC_WIDTH)) analysis_export_tx_error;
     //output fifos
-    uvm_tlm_analysis_fifo #(byte_array::sequence_item) model_fifo_packet;
-    uvm_tlm_analysis_fifo #(logic_vector::sequence_item#(LOGIC_WIDTH)) model_fifo_error;
-    uvm_tlm_analysis_fifo #(byte_array::sequence_item) dut_fifo_packet;
-    uvm_tlm_analysis_fifo #(logic_vector::sequence_item#(LOGIC_WIDTH)) dut_fifo_error;
+    uvm_tlm_analysis_fifo #(uvm_byte_array::sequence_item) model_fifo_packet;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(LOGIC_WIDTH)) model_fifo_error;
+    uvm_tlm_analysis_fifo #(uvm_byte_array::sequence_item) dut_fifo_packet;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(LOGIC_WIDTH)) dut_fifo_error;
     //models
     model m_model;
     //statistic
@@ -46,8 +46,8 @@ class scoreboard extends uvm_scoreboard;
     endfunction
 
     function void build_phase(uvm_phase phase);
-		m_model = model::type_id::create("m_model", this);
-	endfunction
+        m_model = model::type_id::create("m_model", this);
+    endfunction
 
     //recive packet
     //recive packet
@@ -62,10 +62,10 @@ class scoreboard extends uvm_scoreboard;
     endfunction
 
     task run_phase(uvm_phase phase);
-		byte_array::sequence_item tr_model_packet;
-		logic_vector::sequence_item#(LOGIC_WIDTH) tr_model_error;
-		byte_array::sequence_item tr_dut_packet;
-		logic_vector::sequence_item#(LOGIC_WIDTH) tr_dut_error;
+        uvm_byte_array::sequence_item tr_model_packet;
+        uvm_logic_vector::sequence_item#(LOGIC_WIDTH) tr_model_error;
+        uvm_byte_array::sequence_item tr_dut_packet;
+        uvm_logic_vector::sequence_item#(LOGIC_WIDTH) tr_dut_error;
 
         forever begin
             model_fifo_packet.get(tr_model_packet);
@@ -77,8 +77,8 @@ class scoreboard extends uvm_scoreboard;
             if (tr_model_packet.compare(tr_dut_packet) == 0 || tr_model_error.compare(tr_dut_error) == 0) begin
             //if (tr_model_packet.compare(tr_dut_packet) == 0 || tr_model_error.data != tr_dut_error.data) begin
                 string str = "";
-	            errors++;
-				$swrite(str, "\n\tError num %0d Packet num %0d", errors, compared);
+                errors++;
+                $swrite(str, "\n\tError num %0d Packet num %0d", errors, compared);
                 $swrite(str, "%s\n\tPACKET FROM DUT\n\t%s\n\tEXPECTED PACKET\n\t%s",str, tr_dut_packet.convert2string(), tr_model_packet.convert2string());
                 $swrite(str, "%s\n\tERROR FROM DUT\n\t%b\n\tEXPECTED ERROR\n\t%b",str, tr_dut_error.data, tr_model_error.data);
                `uvm_error(this.get_full_name(), str);
@@ -91,7 +91,7 @@ class scoreboard extends uvm_scoreboard;
         string str = "";
 
         $swrite(str, "\n\tCompared transaction %d\n\tErrors %d\n\tDUT TX fifo %d\n\tModel TX fifo %d", compared, errors, dut_fifo_packet.used(), model_fifo_packet.used());
-		$swrite(str, "%s\n\tDUT TX fifo error : %d\n\tModel TX fifo error : %d\n", str, dut_fifo_error.used(), model_fifo_error.used());
+        $swrite(str, "%s\n\tDUT TX fifo error : %d\n\tModel TX fifo error : %d\n", str, dut_fifo_error.used(), model_fifo_error.used());
 
         if (errors == 0 && dut_fifo_packet.used() == 0 && model_fifo_packet.used() == 0 && dut_fifo_error.used() == 0 && model_fifo_error.used() == 0) begin
             `uvm_info(get_type_name(), {str, "\n\t---------------------------------------\n\t----     VERIFICATION SUCCESS      ----\n\t---------------------------------------"}, UVM_NONE)

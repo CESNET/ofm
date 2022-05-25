@@ -13,6 +13,7 @@ module DUT (
     mfb_if.dut_tx   mfb_tx[SPLITTER_OUTPUTS]
     );
 
+    localparam ITEM_WIDTH = 8;
     localparam DATA_WIDTH = REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH;
     localparam META_FOR_ONE_OUTPUT_WIDTH = REGIONS*META_WIDTH;
     localparam SOF_POS_WIDTH = REGIONS*$clog2(REGION_SIZE);
