@@ -6,19 +6,18 @@
 ..
 .. SPDX-License-Identifier: BSD-3-Clause
 
-.. Common package contain common randomization object
-
+.. Common package
 .. _uvm_common:
 
-
-COMMON PACKAGE
----------------------------
+**************
+Common package
+**************
 
 common package contain commonly used small components.
 
 
 Random
-^^^^^^^^^
+------
 Common randomization is required for generating space between frame and space between
 packets. For this purpose two classes have been created (rand_rdy, rand_length). Fist class
 generates rdy signal. Second class generate number reprezenting length.
