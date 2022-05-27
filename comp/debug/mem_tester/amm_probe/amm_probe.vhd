@@ -11,20 +11,24 @@ use ieee.numeric_std.all;
 
 use work.math_pack.all;
 use work.type_pack.all;
+use work.hist_types.all;
 
 -- MI ADDRESS SPACE --
 -- ----------------------------------
 -- ctrl                 BASE
---              R       0. in  - reset
---                      1. in  - latency: req -> first data [default: req -> last data]  
---                      2. out - write ticks      overflow occured
---                      3. out - read  ticks      overflow occured
---                      4. out - r/w   ticks      overflow occured
---                      5. out - write words      overflow occured
---                      6. out - read  words      overflow occured
---                      7. out - req   cnt        overflow occured
---                      8. out - latency ticks    overflow occured
---                      9. out - latency counters overflow occured
+--              R       0. in   - reset
+--                      1. in   - latency: req -> first data [default: req -> last data]  
+--                      2. out  - write ticks                  overflow occured
+--                      3. out  - read  ticks                  overflow occured
+--                      4. out  - r/w   ticks                  overflow occured
+--                      5. out  - write words                  overflow occured
+--                      6. out  - read  words                  overflow occured
+--                      7. out  - req   cnt                    overflow occured
+--                      8. out  - latency ticks                overflow occured
+--                      9. out  - latency counters             overflow occured
+--                      10. out - latency sum                  overflow occured
+--                      11. out - latency histogramer counters overflow occured
+--                      12. out - latency histogramer is LINEAR (else LOG)
 -- *(R = bit is rising edge triggered)
 -- ----------------------------------
 -- write ticks          BASE + 0x04  
@@ -47,13 +51,23 @@ use work.type_pack.all;
 -- ----------------------------------
 -- latency max          BASE + 0x28
 -- ----------------------------------
--- AMM data width reg   BASE + 0x2C
+-- latency hist cnt     BASE + 0x2C
+-- ----------------------------------
+-- latency hist sel     BASE + 0x30
+-- ----------------------------------
+-- AMM data width reg   BASE + 0x34
 -- -----------------------------------
--- AMM addr width reg   BASE + 0x30
+-- AMM addr width reg   BASE + 0x38
 -- -----------------------------------
--- AMM burst width reg  BASE + 0x34
+-- AMM burst width reg  BASE + 0x3C
 -- -----------------------------------
--- AMM freq reg [kHz]   BASE + 0x38
+-- AMM freq reg [kHz]   BASE + 0x40
+-- -----------------------------------
+-- latency ticks width  BASE + 0x44
+--                      For histogramer select signal (in LOG mode)
+-- -----------------------------------
+-- hist cnter cnt       BASE + 0x48
+--                      For histogramer in LINEAR mode
 -- -----------------------------------
 -- Check register bases in mem-tester when adding new registers
 
@@ -129,10 +143,14 @@ architecture FULL of AMM_PROBE is
     constant LATENCY_SUM_REG_2_ID       : integer := 8;
     constant LATENCY_MIN_REG_ID         : integer := 9;
     constant LATENCY_MAX_REG_ID         : integer := 10;
-    constant AMM_DATA_W_REG_ID          : integer := 11;
-    constant AMM_ADDR_W_REG_ID          : integer := 12;
-    constant AMM_BURST_W_REG_ID         : integer := 13;
-    constant AMM_FREQ_REG_ID            : integer := 14;
+    constant LATENCY_HIST_CNT_ID        : integer := 11;
+    constant LATENCY_HIST_SEL_ID        : integer := 12;
+    constant AMM_DATA_W_REG_ID          : integer := 13;
+    constant AMM_ADDR_W_REG_ID          : integer := 14;
+    constant AMM_BURST_W_REG_ID         : integer := 15;
+    constant AMM_FREQ_REG_ID            : integer := 16;
+    constant LATENCY_TICKS_WIDTH_ID     : integer := 17;
+    constant HIST_CNTER_CNT_ID          : integer := 18;
 
     -- Bits - IN                         
     constant RST_BIT                    : integer := 0;
@@ -148,10 +166,12 @@ architecture FULL of AMM_PROBE is
     constant LATENCY_TICKS_OVF_BIT      : integer := 8;
     constant LATENCY_CNTERS_OVF_BIT     : integer := 9;
     constant LATENCY_SUM_OVF_BIT        : integer := 10;
+    constant LATENCY_HIST_OVF_BIT       : integer := 11;
+    constant HIST_IS_LINEAR_BIT         : integer := 12;
 
     -- Bits - constants                  
     constant CTRL_LAST_IN_BIT           : integer := LATENCY_TO_FIRST_BIT;
-    constant CTRL_LAST_OUT_BIT          : integer := LATENCY_SUM_OVF_BIT;
+    constant CTRL_LAST_OUT_BIT          : integer := HIST_IS_LINEAR_BIT;
 
     -- PROBE --                          
     -- If larger ticks counters needed, one must break down data into multiple MI regs
@@ -161,9 +181,15 @@ architecture FULL of AMM_PROBE is
     constant WORDS_CNT_WIDTH            : integer := MI_DATA_WIDTH;
     constant WORDS_CNT_LIMIT            : std_logic_vector(WORDS_CNT_WIDTH - 1 downto 0) := (others => '1');
 
-    constant LATENCY_TICKS_WIDTH        : integer := 16;
+    -- Max latency ticks = 4095 => with freq = 333.33 Mhz => max. latency = 12us 
+    constant LATENCY_TICKS_WIDTH        : integer := 12;
     constant LATENCY_SUM_WIDTH          : integer := MI_DATA_WIDTH * 2;
-    constant LATENCY_COUNTERS_CNT       : integer := 128;
+    constant LATENCY_COUNTERS_CNT       : integer := 128;   -- TODO
+
+    constant HIST_VARIANT               : HIST_T  := LINEAR;
+    -- When LOG hist used => set to LATENCY_TICKS_WIDTH
+    constant HIST_CNTER_CNT             : integer := 512;   -- TODO
+    constant HIST_CNT_WIDTH             : integer := MI_DATA_WIDTH;
 
     -- ----------------------------------------------------------------------- --
 
@@ -257,10 +283,14 @@ architecture FULL of AMM_PROBE is
     signal latency_sum_ticks            : std_logic_vector(LATENCY_SUM_WIDTH - 1 downto 0);
     signal latency_min_ticks            : std_logic_vector(LATENCY_TICKS_WIDTH - 1 downto 0);
     signal latency_max_ticks            : std_logic_vector(LATENCY_TICKS_WIDTH - 1 downto 0);
+
+    signal latency_hist_sel_cnter       : std_logic_vector(log2(HIST_CNTER_CNT) - 1 downto 0);
+    signal latency_hist_cnt             : std_logic_vector(HIST_CNT_WIDTH - 1 downto 0);
                              
     signal latency_ticks_ovf            : std_logic; 
     signal latency_counters_ovf         : std_logic;
     signal latency_sum_ovf              : std_logic;
+    signal latency_hist_cnt_ovf         : std_logic;
 
     signal latency_ticks_ovf_occ        : std_logic; 
     signal latency_counters_ovf_occ     : std_logic;
@@ -288,7 +318,11 @@ begin
     generic map (
         TICKS_WIDTH         => LATENCY_TICKS_WIDTH,
         SUM_WIDTH           => LATENCY_SUM_WIDTH,
-        COUNTERS_CNT        => LATENCY_COUNTERS_CNT
+        COUNTERS_CNT        => LATENCY_COUNTERS_CNT,
+
+        HIST_VARIANT        => HIST_VARIANT  ,
+        HIST_CNTER_CNT      => HIST_CNTER_CNT,
+        HIST_CNT_WIDTH      => HIST_CNT_WIDTH
     )
     port map (
         CLK                 => CLK,
@@ -301,9 +335,13 @@ begin
         MIN_TICKS           => latency_min_ticks,
         MAX_TICKS           => latency_max_ticks,
 
+        HIST_CNT            => latency_hist_cnt,
+        HIST_SEL_CNTER      => latency_hist_sel_cnter,
+
         TICKS_OVF           => latency_ticks_ovf,
         COUNTERS_OVF        => latency_counters_ovf,
-        SUM_OVF             => latency_sum_ovf
+        SUM_OVF             => latency_sum_ovf,
+        HIST_CNT_OVF        => latency_hist_cnt_ovf
     );
 
     -------------------------
@@ -326,6 +364,9 @@ begin
     ctrl_reg(LATENCY_TICKS_OVF_BIT ) <= latency_ticks_ovf_occ;
     ctrl_reg(LATENCY_CNTERS_OVF_BIT) <= latency_counters_ovf_occ;
     ctrl_reg(LATENCY_SUM_OVF_BIT)   <= latency_sum_ovf_occ;
+    ctrl_reg(LATENCY_HIST_OVF_BIT)  <= latency_hist_cnt_ovf;
+    ctrl_reg(HIST_IS_LINEAR_BIT)    <= '1' when (HIST_VARIANT = LINEAR) else 
+                                       '0';
 
     -- Ready signals                 
     MI_ARDY                         <= MI_RD or MI_WR;
@@ -421,6 +462,11 @@ begin
                 MI_DRD <= (LATENCY_TICKS_WIDTH - 1 downto 0 => latency_min_ticks, others => '0');
             elsif (mi_addr_sliced = id_to_addr_f(LATENCY_MAX_REG_ID)) then
                 MI_DRD <= (LATENCY_TICKS_WIDTH - 1 downto 0 => latency_max_ticks, others => '0');
+            elsif (mi_addr_sliced = id_to_addr_f(LATENCY_HIST_CNT_ID)) then
+                MI_DRD <= (HIST_CNT_WIDTH - 1 downto 0 => latency_hist_cnt, others => '0');
+            elsif (mi_addr_sliced = id_to_addr_f(LATENCY_HIST_SEL_ID)) then
+                MI_DRD <= (latency_hist_sel_cnter'length - 1 downto 0 => latency_hist_sel_cnter, others => '0');
+
             -- Dev info registers
             elsif (mi_addr_sliced = id_to_addr_f(AMM_DATA_W_REG_ID) ) then
                 MI_DRD <= std_logic_vector(to_unsigned(AMM_DATA_WIDTH,           MI_DATA_WIDTH));
@@ -430,6 +476,11 @@ begin
                 MI_DRD <= std_logic_vector(to_unsigned(AMM_BURST_COUNT_WIDTH,    MI_DATA_WIDTH));
             elsif (mi_addr_sliced = id_to_addr_f(AMM_FREQ_REG_ID)   ) then
                 MI_DRD <= std_logic_vector(to_unsigned(AMM_FREQ_KHZ,             MI_DATA_WIDTH));
+            elsif (mi_addr_sliced = id_to_addr_f(LATENCY_TICKS_WIDTH_ID)) then
+                MI_DRD <= std_logic_vector(to_unsigned(LATENCY_TICKS_WIDTH,      MI_DATA_WIDTH));
+            elsif (mi_addr_sliced = id_to_addr_f(HIST_CNTER_CNT_ID)) then
+                MI_DRD <= std_logic_vector(to_unsigned(HIST_CNTER_CNT,           MI_DATA_WIDTH));
+
             else
                 MI_DRD <= X"DEADBEEF";
             end if;
@@ -442,9 +493,12 @@ begin
             if (RST = '1') then
                 ctrl_reg(CTRL_LAST_IN_BIT downto 0)                         <= (others => '0');
                 ctrl_reg(MI_DATA_WIDTH - 1 downto CTRL_LAST_OUT_BIT + 1)    <= (others => '0');
+                latency_hist_sel_cnter                                      <= (others => '0');
             elsif (MI_WR = '1') then
                 if (mi_addr_sliced = id_to_addr_f(CTRL_REG_ID)) then 
                     ctrl_reg(CTRL_LAST_IN_BIT downto 0)  <= MI_DWR(CTRL_LAST_IN_BIT downto 0);
+                elsif (mi_addr_sliced = id_to_addr_f(LATENCY_HIST_SEL_ID)) then 
+                    latency_hist_sel_cnter  <= MI_DWR(latency_hist_sel_cnter'length - 1 downto 0);
                 end if;
             end if;
         end if;

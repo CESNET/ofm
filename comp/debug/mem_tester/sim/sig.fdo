@@ -49,6 +49,9 @@ add wave -divider ""
 add_wave "-group { uut_latency_meter } -noupdate -hex"   $UUT_PATH/amm_probe_i/latency_meter_i/*
 
 add wave -divider ""
+add_wave "-group { uut_histogramer } -noupdate -hex"   $UUT_PATH/amm_probe_i/latency_meter_i/histogramer_i/*
+
+add wave -divider ""
 add_wave "-group { emif_refresh } -noupdate -hex"   $UUT_PATH/emif_refresh_i/*
 
 add wave -divider ""

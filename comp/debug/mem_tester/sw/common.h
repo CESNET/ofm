@@ -35,6 +35,16 @@ SPDX-License-Identifier: BSD-3-Clause
 
 #define MI_DATA_WIDTH   32
 
+#define TEST_ALL       "all"
+#define TEST_SEQ       "seq"
+#define TEST_RAND      "rand"
+
+enum TestType_e
+{
+    SEQUENTIAL,
+    RANDOM,
+};
+
 // -------------- //
 // Support macros //
 // -------------- //
@@ -67,8 +77,11 @@ struct DevConfig
     uint32_t amm_data_width;
     uint32_t amm_addr_width;
     uint32_t amm_burst_width;
+    uint32_t lat_ticks_width;
+    uint32_t hist_cnter_cnt;
     double   amm_freq;  //MHz
     uint32_t slicesCnt;
+    uint32_t defRefreshPeriod;
 };
 
 struct AMMProbeData_s
@@ -86,43 +99,31 @@ struct AMMProbeData_s
     bool     latencyTicksOvf;
     bool     latencyCntersOvf;
     bool     latencySumOvf;
+    bool     histCntOvf;
+    bool     histIsLinear;
 
     uint32_t ctrlReg;
     uint32_t burst;
     uint32_t errCnt;
+
     uint32_t writeTicks;
     uint32_t readTicks;
     uint32_t totalTicks;
+
     uint32_t writeWords;
     uint32_t readWords;
     uint32_t reqCnt;
+
     uint64_t latencySum;
     uint32_t latencyMin;
     uint32_t latencyMax;
+
+    uint32_t *latencyHist;
 };
 
 struct AMMProbeResults_s
 {
-    bool        errOcc;
-    bool        eccErrOcc;
-
-    bool        latencyToFirst;
-    bool        wrTicksOvf;
-    bool        rdTicksOvf;
-    bool        rwTicksOvf;
-    bool        wrWordsOvf;
-    bool        rdWordsOvf;
-    bool        reqCntOvf;
-    bool        latencyTicksOvf;
-    bool        latencyCntersOvf;
-    bool        latencySumOvf;
-
-    uint32_t    errCnt;
-    uint32_t    burst;
-
-    uint32_t    writeWords;
-    uint32_t    readWords;
-    uint32_t    reqCnt;
+    struct AMMProbeData_s raw;
 
     double      writeTime_ms;
     double      readTime_ms;
@@ -142,10 +143,12 @@ struct TestParams_s
     bool latencyToFirst;    // Measure latency to first AMM word [dafault: to last]
     bool autoPrecharge;
     bool onlyCSV;
+    bool onlyXML;
     bool onlyOneSimultRead;
-    char *testType;
+    char *typeStr;
     long burstCnt;
     double addrLimScale;
+    enum TestType_e type;
 };
 
 // -------------------- //
@@ -160,12 +163,11 @@ enum Registers_e
     BURST_CNT,
     ADDR_LIM,
     REFRESH_PERIOD,
-    REFRESH_DUR_SUM,
-    REFRESH_DUR_MIN,
-    REFRESH_DUR_MAX,
+    DEF_REFRESH_PERIOD,
 
     AMM_GEN_CTRL,
     AMM_GEN_ADDR,
+    AMM_GEN_SLICE,
     AMM_GEN_DATA,
     AMM_GEN_BURST,
 
@@ -180,15 +182,14 @@ enum Registers_e
     PROBE_LATENCY_SUM_2,
     PROBE_LATENCY_MIN,
     PROBE_LATENCY_MAX,
+    PROBE_HIST_CNT,
+    PROBE_HIST_SEL,
     AMM_DATA_WIDTH_REG,
     AMM_ADDR_WIDTH_REG,
     AMM_BURST_WIDTH_REG,
     AMM_FREQ_REG,
-
-    MMR_CTRL,
-    MMR_ADDR,
-    MMR_DATA,
-    MMR_BURST,
+    LAT_TICKS_WIDTH_REG,
+    HIST_CNTER_CNT_REG,
 
     REG_CNT
 };
@@ -213,9 +214,6 @@ enum CtrlOut_e
     CALIB_SUCCESS,
     CALIB_FAIL,
     MAIN_AMM_READY,
-    REFRESH_TICKS_OVF,
-    REFRESH_COUNTERS_OVF,
-    REFRESH_SUM_OVF,
 };
 
 enum AMM_GEN_Ctrl_e
@@ -240,6 +238,8 @@ enum AMM_PROBE_Ctrl_e
     LATENCY_TICKS_OVF,
     LATENCY_CNTERS_OVF,
     LATENCY_SUM_OVF,
+    HIST_CNT_OVF,
+    HIST_IS_LINEAR,
 };
 
 

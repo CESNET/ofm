@@ -11,6 +11,7 @@ use ieee.numeric_std.all;
 
 use work.math_pack.all;
 use work.type_pack.all;
+use work.hist_types.all;
 
 entity LATENCY_METER is
 generic (
@@ -20,7 +21,11 @@ generic (
     SUM_WIDTH                       : integer := 32;
     -- Number of tick counters (it limits how much request can run in parallel)
     -- If parallel requests count exceed this value, COUNTER_OVF is asserted
-    COUNTERS_CNT                    : integer := 50
+    COUNTERS_CNT                    : integer := 50;
+
+    HIST_VARIANT                    : HIST_T  := LOG;
+    HIST_CNTER_CNT                  : integer := 32;
+    HIST_CNT_WIDTH                  : integer := 32
 );
 port(
     -- Base
@@ -37,10 +42,15 @@ port(
     MIN_TICKS                       : out std_logic_vector(TICKS_WIDTH - 1 downto 0);
     MAX_TICKS                       : out std_logic_vector(TICKS_WIDTH - 1 downto 0);
 
+    -- Histogramer
+    HIST_SEL_CNTER                  : in  std_logic_vector(log2(HIST_CNTER_CNT) - 1 downto 0);
+    HIST_CNT                        : out std_logic_vector(HIST_CNT_WIDTH - 1 downto 0);
+
     -- Error detection
     TICKS_OVF                       : out std_logic; 
     COUNTERS_OVF                    : out std_logic;
-    SUM_OVF                         : out std_logic
+    SUM_OVF                         : out std_logic;
+    HIST_CNT_OVF                    : out std_logic
 );
 end entity;
 
@@ -127,6 +137,25 @@ begin
     port map (
         DI              => tick_cnts_full and tick_cnts_en,
         DO              => TICKS_OVF
+    );
+
+    histogramer_i : entity work.HISTOGRAMER
+    generic map (    
+        VARIANT         => HIST_VARIANT,
+        DATA_WIDTH      => TICKS_WIDTH,
+        CNT_WIDTH       => HIST_CNT_WIDTH,
+        CNTER_CNT       => HIST_CNTER_CNT
+    )
+    port map (    
+        CLK             => CLK,
+        RST             => RST,
+
+        INPUT_VLD       => ticks_to_process_vld,
+        INPUT           => ticks_to_process,
+
+        SEL_CNTER       => HIST_SEL_CNTER,
+        OUTPUT          => HIST_CNT,
+        CNT_OVF         => HIST_CNT_OVF
     );
 
     ------------------------

@@ -32,9 +32,6 @@ use work.type_pack.all;
 --         3.      out     calib successful
 --         4.      out     calib failed
 --         5.      out     amm ready
---         6.      out     refresh ticks ovf
---         7.      out     refresh counters ovf
---         8.      out     refresh sum ovf
 -- ----------------------------------
 -- err cnt reg
 -- 0X08    all     out     err cnt
@@ -48,14 +45,8 @@ use work.type_pack.all;
 -- refresh period reg 
 -- 0X14    all     i/o     refresh period ticks when manual refresh is used
 -- ----------------------------------
--- refresh duration sum reg 
+-- default refresh period reg 
 -- 0X18    all     o     
--- ----------------------------------
--- refresh duration min reg 
--- 0X1C    all     o     
--- ----------------------------------
--- refresh duration max reg 
--- 0X20    all     o     
 -- ----------------------------------
 -- amm_gen
 -- AMM_GEN_BASE
@@ -79,15 +70,14 @@ generic (
     MI_ADDR_WIDTH           : integer := 32;
     AMM_ADDR_WIDTH          : integer := 26;
     AMM_BURST_COUNT_WIDTH   : integer := 7;
-    REFRESH_PERIOD_WIDTH    : integer := 32;
+    REFR_PERIOD_WIDTH       : integer := 32;
 
     -- Others --
     AMM_GEN_BASE            : std_logic_vector(MI_ADDR_WIDTH - 1 downto 0);
     AMM_PROBE_BASE          : std_logic_vector(MI_ADDR_WIDTH - 1 downto 0);
-    MMR_BASE                : std_logic_vector(MI_ADDR_WIDTH - 1 downto 0);
     DEFAULT_BURST_CNT       : integer := 4;
     DEFAULT_ADDR_LIMIT      : integer;
-    DEFAULT_REFRESH_TICKS   : integer;
+    DEF_REFR_PERIOD         : std_logic_vector(REFR_PERIOD_WIDTH - 1 downto 0);
     DEVICE                  : string
 );
 port(    
@@ -125,7 +115,7 @@ port(
     AUTO_PRECHARGE          : out std_logic;
     BURST_CNT               : out std_logic_vector(AMM_BURST_COUNT_WIDTH - 1 downto 0);
     ADDR_LIMIT              : out std_logic_vector(AMM_ADDR_WIDTH - 1 downto 0);
-    REFRESH_PERIOD_TICKS    : out std_logic_vector(REFRESH_PERIOD_WIDTH - 1 downto 0);
+    REFR_PERIOD             : out std_logic_vector(REFR_PERIOD_WIDTH - 1 downto 0);
 
     -- Slave => master
     TEST_DONE               : in  std_logic;
@@ -160,33 +150,21 @@ port(
     AMM_PROBE_WR            : out std_logic;
     AMM_PROBE_ARDY          : in  std_logic;
     AMM_PROBE_DRD           : in  std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
-    AMM_PROBE_DRDY          : in  std_logic;
-
-    -- MMR bus
-    MMR_DWR                 : out std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
-    MMR_ADDR                : out std_logic_vector(MI_ADDR_WIDTH - 1 downto 0);
-    MMR_BE                  : out std_logic_vector(MI_DATA_WIDTH / 8 - 1 downto 0);
-    MMR_RD                  : out std_logic;
-    MMR_WR                  : out std_logic;
-    MMR_ARDY                : in  std_logic;
-    MMR_DRD                 : in  std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
-    MMR_DRDY                : in  std_logic
+    AMM_PROBE_DRDY          : in  std_logic
 );
 end entity;
 
 architecture FULL of MEM_TESTER_MI is
 
     -- MI SPLITTER
-    constant MI_PORTS           : integer := 4;
+    constant MI_PORTS           : integer := 3;
 
-    constant MI_BASE_PORT       : integer := 3;
-    constant AMM_GEN_PORT       : integer := 2;
-    constant AMM_PROBE_PORT     : integer := 1;
-    constant MMR_PORT           : integer := 0;
+    constant MI_BASE_PORT       : integer := 2;
+    constant AMM_GEN_PORT       : integer := 1;
+    constant AMM_PROBE_PORT     : integer := 0;
 
     constant ADDR_BASES         : slv_array_t(MI_PORTS - 1 downto 0)(MI_ADDR_WIDTH - 1 downto 0) := 
         (
-            3 => MMR_BASE,
             2 => AMM_PROBE_BASE,
             1 => AMM_GEN_BASE,
             0 => std_logic_vector(to_unsigned(0, MI_ADDR_WIDTH))
@@ -203,9 +181,7 @@ architecture FULL of MEM_TESTER_MI is
     constant BURST_CNT_REG      : std_logic_vector(MI_ADDR_LIMIT downto MI_ADDR_CUTOFF) := "000011"; -- 0x0C
     constant ADDR_LIM_REG       : std_logic_vector(MI_ADDR_LIMIT downto MI_ADDR_CUTOFF) := "000100"; -- 0x10
     constant REFRESH_TICKS_REG  : std_logic_vector(MI_ADDR_LIMIT downto MI_ADDR_CUTOFF) := "000101"; -- 0x14
-    constant REFRESH_DUR_SUM_REG: std_logic_vector(MI_ADDR_LIMIT downto MI_ADDR_CUTOFF) := "000110"; -- 0x18
-    constant REFRESH_DUR_MIN_REG: std_logic_vector(MI_ADDR_LIMIT downto MI_ADDR_CUTOFF) := "000111"; -- 0x1C
-    constant REFRESH_DUR_MAX_REG: std_logic_vector(MI_ADDR_LIMIT downto MI_ADDR_CUTOFF) := "001000"; -- 0x20
+    constant DEF_REFR_REG       : std_logic_vector(MI_ADDR_LIMIT downto MI_ADDR_CUTOFF) := "000110"; -- 0x18
                                 
     -- Bits in registers        
     -- CTRL IN REG              
@@ -224,9 +200,6 @@ architecture FULL of MEM_TESTER_MI is
     constant CALIB_SUCCESS_BIT  : integer := 3;     
     constant CALIB_FAIL_BIT     : integer := 4;  
     constant AMM_READY_BIT      : integer := 5;  
-    constant REFRESH_TICKS_OVF_BIT      : integer := 6;  
-    constant REFRESH_COUNTERS_OVF_BIT   : integer := 7;  
-    constant REFRESH_SUM_OVF_BIT        : integer := 8;  
 
     ------------
     -- MI bus --
@@ -377,12 +350,12 @@ begin
     ctrl_out(CALIB_FAIL_BIT)            <= CALIB_FAIL;
     ctrl_out(AMM_READY_BIT)             <= AMM_READY;
     -- refresh ovf bits asserted in process bellow
-    ctrl_out(MI_DATA_WIDTH - 1 downto REFRESH_SUM_OVF_BIT + 1) 
+    ctrl_out(MI_DATA_WIDTH - 1 downto AMM_READY_BIT + 1) 
                                         <= (others => '0');
 
     BURST_CNT                           <= burst_cnt_intern(AMM_BURST_COUNT_WIDTH   - 1 downto 0);
     ADDR_LIMIT                          <= addr_lim_intern (AMM_ADDR_WIDTH          - 1 downto 0);
-    REFRESH_PERIOD_TICKS                <= refresh_period_intern(REFRESH_PERIOD_WIDTH    - 1 downto 0);
+    REFR_PERIOD                         <= refresh_period_intern(REFR_PERIOD_WIDTH  - 1 downto 0);
 
     -- Base port --
     sel_reg                             <= mi_splitted_addr(MI_BASE_PORT)(MI_ADDR_LIMIT downto MI_ADDR_CUTOFF);
@@ -408,16 +381,6 @@ begin
     mi_splitted_drd (AMM_PROBE_PORT)    <= AMM_PROBE_DRD;
     mi_splitted_drdy(AMM_PROBE_PORT)    <= AMM_PROBE_DRDY;
 
-    -- MMR port
-    MMR_DWR                             <= mi_splitted_dwr (MMR_PORT);    
-    MMR_ADDR                            <= mi_splitted_addr(MMR_PORT);
-    MMR_BE                              <= mi_splitted_be  (MMR_PORT);
-    MMR_RD                              <= mi_splitted_rd  (MMR_PORT);
-    MMR_WR                              <= mi_splitted_wr  (MMR_PORT);
-    mi_splitted_ardy(MMR_PORT)          <= MMR_ARDY;
-    mi_splitted_drd (MMR_PORT)          <= MMR_DRD;
-    mi_splitted_drdy(MMR_PORT)          <= MMR_DRDY;
-
     ---------------
     -- Registers --
     ---------------
@@ -432,9 +395,8 @@ begin
                 when BURST_CNT_REG      => mi_splitted_drd(MI_BASE_PORT) <= burst_cnt_intern;
                 when ADDR_LIM_REG       => mi_splitted_drd(MI_BASE_PORT) <= addr_lim_intern;
                 when REFRESH_TICKS_REG  => mi_splitted_drd(MI_BASE_PORT) <= refresh_period_intern;
-                when REFRESH_DUR_SUM_REG=> mi_splitted_drd(MI_BASE_PORT) <= REFRESH_DUR_SUM;
-                when REFRESH_DUR_MIN_REG=> mi_splitted_drd(MI_BASE_PORT) <= REFRESH_DUR_MIN;
-                when REFRESH_DUR_MAX_REG=> mi_splitted_drd(MI_BASE_PORT) <= REFRESH_DUR_MAX;
+                when DEF_REFR_REG       => mi_splitted_drd(MI_BASE_PORT)(REFR_PERIOD_WIDTH - 1 downto 0) 
+                                                                         <= DEF_REFR_PERIOD;
                 when others             => mi_splitted_drd(MI_BASE_PORT) <= X"DEADBEEF";
             end case;
          end if;
@@ -448,13 +410,14 @@ begin
                 ctrl_in                 <= (others => '0');
                 burst_cnt_intern        <= std_logic_vector(to_unsigned(DEFAULT_BURST_CNT,  MI_DATA_WIDTH));
                 addr_lim_intern         <= std_logic_vector(to_unsigned(DEFAULT_ADDR_LIMIT, MI_DATA_WIDTH));
-                refresh_period_intern   <= std_logic_vector(to_unsigned(DEFAULT_REFRESH_TICKS, MI_DATA_WIDTH));
+                refresh_period_intern(REFR_PERIOD_WIDTH - 1 downto 0)   
+                                        <= DEF_REFR_PERIOD;
             elsif (mi_splitted_wr(MI_BASE_PORT) = '1') then
                 case(sel_reg) is
                     when CTRL_IN_REG        => ctrl_in              <= mi_splitted_dwr(MI_BASE_PORT);
                     when BURST_CNT_REG      => burst_cnt_intern     <= mi_splitted_dwr(MI_BASE_PORT);
                     when ADDR_LIM_REG       => addr_lim_intern      <= mi_splitted_dwr(MI_BASE_PORT);
-                    when REFRESH_TICKS_REG  => refresh_period_intern <= mi_splitted_dwr(MI_BASE_PORT);
+                    when REFRESH_TICKS_REG  => refresh_period_intern<= mi_splitted_dwr(MI_BASE_PORT);
                     when others             =>
                 end case;
             end if;
@@ -466,39 +429,6 @@ begin
     begin
         if (rising_edge(CLK)) then
             mi_splitted_drdy(MI_BASE_PORT)  <= mi_splitted_rd(MI_BASE_PORT);
-        end if;
-    end process;
-
-    refresh_ticks_ovf_p : process (CLK)
-    begin
-        if (rising_edge(CLK)) then
-            if (RST = '1') then
-                ctrl_out(REFRESH_TICKS_OVF_BIT)     <= '0';
-            elsif (REFRESH_TICKS_OVF = '1')  then
-                ctrl_out(REFRESH_TICKS_OVF_BIT)     <= '1';
-            end if;
-        end if;
-    end process;
-
-    refresh_counters_ovf_p : process (CLK)
-    begin
-        if (rising_edge(CLK)) then
-            if (RST = '1') then
-                ctrl_out(REFRESH_COUNTERS_OVF_BIT) <= '0';
-            elsif (REFRESH_COUNTERS_OVF = '1')  then
-                ctrl_out(REFRESH_COUNTERS_OVF_BIT) <= '1';
-            end if;
-        end if;
-    end process;
-
-    refresh_sum_ovf_p : process (CLK)
-    begin
-        if (rising_edge(CLK)) then
-            if (RST = '1') then
-                ctrl_out(REFRESH_SUM_OVF_BIT)     <= '0';
-            elsif (REFRESH_SUM_OVF = '1')  then
-                ctrl_out(REFRESH_SUM_OVF_BIT)     <= '1';
-            end if;
         end if;
     end process;
 

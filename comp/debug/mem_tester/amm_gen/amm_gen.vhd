@@ -21,11 +21,16 @@ use work.type_pack.all;
 -- ----------------------------------
 -- address      BASE + 0x04  
 --              address for read/write (indexed by AMM words in burst)
+--              also used for burst index when writing / reading to buffer
 -- ----------------------------------
--- r/w data     BASE + 0x08 
+-- slice        BASE + 0x08
+--              slice address in selected AMM word
+--              used when writing / reading to buffer
+-- ----------------------------------
+-- r/w data     BASE + 0x0C 
 --              one silce of the AMM word for manual r/w burst 
 -- ----------------------------------
--- burst cnt    BASE + 0x0C
+-- burst cnt    BASE + 0x10
 -- ----------------------------------
 
 entity AMM_GEN is
@@ -108,12 +113,6 @@ architecture FULL of AMM_GEN is
 
     constant MI_ADDR_CUTOFF         : integer := log2(MI_DATA_WIDTH / 8); 
 
-    -- MI registers --
-    --constant CTRL_REG_ID            : integer := 0;
-    --constant ADDR_REG_ID            : integer := 1;
-    --constant DATA_REG_ID            : integer := 2;
-    --constant BURST_REG_ID           : integer := 3;
-
     -- in
     constant MEM_WR_BIT             : integer := 0;
     constant MEM_RD_BIT             : integer := 1;
@@ -144,8 +143,9 @@ architecture FULL of AMM_GEN is
 
     constant CTRL_REG_ADDR          : std_logic_vector(MI_ADDR_USED_BITS - 1 downto MI_ADDR_CUTOFF) := id_to_addr_f(0);
     constant ADDR_REG_ADDR          : std_logic_vector(MI_ADDR_USED_BITS - 1 downto MI_ADDR_CUTOFF) := id_to_addr_f(1);
-    constant DATA_REG_ADDR          : std_logic_vector(MI_ADDR_USED_BITS - 1 downto MI_ADDR_CUTOFF) := id_to_addr_f(2);
-    constant BURST_REG_ADDR         : std_logic_vector(MI_ADDR_USED_BITS - 1 downto MI_ADDR_CUTOFF) := id_to_addr_f(3);
+    constant SLICE_REG_ADDR         : std_logic_vector(MI_ADDR_USED_BITS - 1 downto MI_ADDR_CUTOFF) := id_to_addr_f(2);
+    constant DATA_REG_ADDR          : std_logic_vector(MI_ADDR_USED_BITS - 1 downto MI_ADDR_CUTOFF) := id_to_addr_f(3);
+    constant BURST_REG_ADDR         : std_logic_vector(MI_ADDR_USED_BITS - 1 downto MI_ADDR_CUTOFF) := id_to_addr_f(4);
 
     -- ----------------------------------------------------------------------- --
 
@@ -186,6 +186,7 @@ architecture FULL of AMM_GEN is
     -- Registers
     signal ctrl_reg                 : std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
     signal addr_reg                 : std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
+    signal slice_reg                : std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
     signal data_reg                 : std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
 
     signal curr_slice               : std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
@@ -287,8 +288,8 @@ begin
         ctrl_reg(MEM_WR_BIT);
     
     -- Parsing addr reg
-    sel_slice               <= addr_reg(SLICES_BITS - 1 downto 0);
-    sel_burst               <= addr_reg(SLICES_BITS + BURST_BITS - 1 downto SLICES_BITS);
+    sel_slice               <= slice_reg(SLICES_BITS - 1 downto 0);
+    sel_burst               <= addr_reg(BURST_BITS - 1 downto 0);
     
     --buff_wr                 <= '1' when (buff_mi_wr_ticks = BUFF_WR_DELAY and buff_mi_wr_runing = '1') else
     --                           '0';
@@ -350,6 +351,8 @@ begin
                 MI_DRD <= ctrl_reg;
             elsif (mi_addr_sliced = ADDR_REG_ADDR)  then 
                 MI_DRD <= addr_reg;
+            elsif (mi_addr_sliced = SLICE_REG_ADDR)  then 
+                MI_DRD <= slice_reg;
             elsif (mi_addr_sliced = DATA_REG_ADDR)  then 
                 MI_DRD <= curr_slice_delayed;
             elsif (mi_addr_sliced = BURST_REG_ADDR) then 
@@ -368,6 +371,7 @@ begin
                 ctrl_reg(CTRL_LAST_IN_BIT downto 0)                         <= (others => '0');
                 ctrl_reg(MI_DATA_WIDTH - 1 downto CTRL_LAST_OUT_BIT + 1)    <= (others => '0');
                 addr_reg                                                    <= (others => '0');
+                slice_reg                                                   <= (others => '0');
                 data_reg                                                    <= (others => '0');
                 target_burst_cnt                                            <= std_logic_vector(to_unsigned(INIT_BURST_CNT, target_burst_cnt'length));
             elsif (MI_WR = '1') then
@@ -375,6 +379,8 @@ begin
                     ctrl_reg(CTRL_LAST_IN_BIT downto 0)  <= MI_DWR(CTRL_LAST_IN_BIT downto 0);
                 elsif (mi_addr_sliced = ADDR_REG_ADDR)  then 
                     addr_reg                             <= MI_DWR;
+                elsif (mi_addr_sliced = SLICE_REG_ADDR)  then 
+                    slice_reg                            <= MI_DWR;
                 elsif (mi_addr_sliced = DATA_REG_ADDR)  then 
                     data_reg                             <= MI_DWR;
                 elsif (mi_addr_sliced = BURST_REG_ADDR) then 

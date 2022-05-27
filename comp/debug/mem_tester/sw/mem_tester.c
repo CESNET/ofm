@@ -17,7 +17,8 @@ enum LongArgIDs
 {
     AUTO_PRECHARGE = 1,
     REFRESH_PERIOD_TICKS,
-    MMR,
+    XML,
+    HIST,
 };
 
 const char *ShortOptions = "d:c:i:a:m:n:t:s:k:rwbpfhvgou";
@@ -25,7 +26,8 @@ struct option LongOptions[] = {
     {"help",            no_argument,        NULL,  'h' },
     {"auto-precharge",  no_argument,        NULL,  AUTO_PRECHARGE },
     {"refresh-period",  required_argument,  NULL,  REFRESH_PERIOD_TICKS },
-    {"mmr",             no_argument,        NULL,  MMR },
+    {"xml",             no_argument,        NULL,  XML },
+    {"print-hist",      no_argument,        NULL,  HIST },
     {0,                 0,                  NULL,  0 }
 };
 
@@ -43,9 +45,11 @@ void usage(const char *me)
     printf("-p              Print registers\n");
     printf("-g              Print device config (can be used with -v)\n");
     printf("-u              Print device status (can be used with -v)\n");
+    printf("--print-hist    Prints latency histogram from last measurement\n");
 
     printf("Test related\n");
-    printf("-t type         Run test (type = %s/%s/%s/%s/%s)\n", TEST_ALL, TEST_SEQ, TEST_RAND, TEST_LAT_SEQ, TEST_LAT_RAND);
+    //printf("-t type         Run test (type = %s/%s/%s/%s/%s)\n", TEST_ALL, TEST_SEQ, TEST_RAND, TEST_LAT_SEQ, TEST_LAT_RAND);
+    printf("-t type         Run test (type = %s/%s/%s)\n", TEST_ALL, TEST_SEQ, TEST_RAND);
     printf("-b              Boot again - reset\n");
     printf("-n burst        Set burst count during test\n");
     printf("-k scale        Set address limit during test (1.0 = max.)\n");
@@ -60,13 +64,13 @@ void usage(const char *me)
     printf("-s burst        Manual set burst cnt\n");
     printf("-r              Manual read\n");
     printf("-w              Manual write\n");
-    printf("--mmr           MMR amm gen will be used\n");
 
     printf("AMM_PROBE\n");
     printf("-f              Measure latency to first word [default: to last]\n");
 
     printf("Others\n");
     printf("-h              Show this text\n");
+    printf("--xml           Print in XML format\n");
 }
 
 
@@ -92,8 +96,8 @@ int main(int argc, char *argv[])
     bool printConfig        = false;
     bool printStatus        = false;
     bool printCompCnt       = false;
-    bool useMMR             = false;
     bool setRefresh         = false;
+    bool printHist          = false;
 
     long manualAddr         = 0;
     char *manualData;
@@ -111,6 +115,7 @@ int main(int argc, char *argv[])
         .autoPrecharge      = false,
         .burstCnt           = DEFAULT_BURST_CNT,
         .onlyCSV            = false,
+        .onlyXML            = false,
         .onlyOneSimultRead  = false,
         .addrLimScale        = 1.0,
     };
@@ -143,7 +148,7 @@ int main(int argc, char *argv[])
                 break;
             case 't':
                 runTest = true;
-                testParams.testType = optarg;
+                testParams.typeStr = optarg;
                 break;
             case 'a':
                 manualAddr = strtoul(optarg, NULL, 10);
@@ -207,8 +212,11 @@ int main(int argc, char *argv[])
                 refreshPeriod = strtoul(optarg, NULL, 10);
                 setRefresh = true;
                 break;
-            case MMR:
-                useMMR = true;
+            case XML:
+                testParams.onlyXML = true;
+                break;
+            case HIST:
+                printHist = true;
                 break;
             default:
                 printf("Unknown argument: %c\n", c);
@@ -248,41 +256,60 @@ int main(int argc, char *argv[])
 
     if (runTest)
     {
-        if ( ! RunTest(&testParams))
+        bool testTypeMatch = false;
+
+        if (strcmp(testParams.typeStr, TEST_SEQ) == 0 || strcmp(testParams.typeStr, TEST_ALL) == 0)
         {
-            fprintf(stderr, "%s is invalid test type\n", testParams.testType);
+            testTypeMatch   = true;
+            testParams.type = SEQUENTIAL;
+
+            if ( ! testParams.onlyCSV && ! testParams.onlyXML)
+                printf("Running sequential test ...\n");
+            RunTest(&testParams);
         }
+        if (strcmp(testParams.typeStr, TEST_RAND) == 0 || strcmp(testParams.typeStr, TEST_ALL) == 0)
+        {
+            testTypeMatch   = true;
+            testParams.type = RANDOM;
+
+            if ( ! testParams.onlyCSV && ! testParams.onlyXML)
+                printf("Running random indexing test ...\n");
+            RunTest(&testParams);
+        }
+        
+        if ( ! testTypeMatch)
+            fprintf(stderr, "%s is invalid test type\n", testParams.typeStr);
     }
 
     if (manualBurstCnt > 0)
     {
-        AMMGenSetBurst(useMMR, manualBurstCnt);
+        AMMGenSetBurst(manualBurstCnt);
     }
 
     if (manualSetAddr)
     {
         printf("Setting manual addr ... \n");
-        AMMGenSetAddr(useMMR, manualAddr);
+        AMMGenSetAddr(manualAddr);
     }
 
     if (manualRead)
     {
         printf("Manual read ... \n");
-        ReadManualBuff(useMMR);
+        ReadManualBuff();
         // Todo wait for vld
-        PrintManualBuff(useMMR);
+        PrintManualBuff();
     }
 
     if (manualWrite)
     {
         printf("Manual write ... \n");
-        WriteManualBuff(useMMR);
+        WriteManualBuff();
     }
 
     if (manualWriteToBuff)
     {
         printf("Editing manual buffer\n");
-        FillManualBuff(useMMR, manualBurst, manualData);
+        FillManualBuff(manualBurst, manualData);
     }
 
     if (printRegs)
@@ -307,6 +334,8 @@ int main(int argc, char *argv[])
 
         if (testParams.onlyCSV)
             PrintDevConfigCSV(&config);
+        else if (testParams.onlyXML)
+            PrintDevConfigXML(&config);
         else
             PrintDevConfig(&config);
     }
@@ -315,9 +344,14 @@ int main(int argc, char *argv[])
     {
         if (testParams.onlyCSV)
             PrintDevStatusCSV();
+        else if (testParams.onlyXML)
+            PrintDevStatusXML();
         else
             PrintDevStatus();
     }
+
+    if (printHist)
+        PrintHist();
 
     Finish();
     return res_code;
