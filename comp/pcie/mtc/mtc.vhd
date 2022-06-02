@@ -231,7 +231,7 @@ architecture FULL of MTC is
     constant CC_MEM_ITEMS    : natural := CC_MAX_SIZE/(CC_DATA_WIDTH/8);
     constant AXI_PIPE_WIDTH  : natural := AXI_DATA_WIDTH + AXI_DATA_WIDTH/32 + 1;
 
-    type mi_fsm_t is (st_idle, st_write, st_wait_for_data, st_read, st_wait_for_drdy, st_cc_done_mtu, st_error, st_cc_done_last);
+    type mi_fsm_t is (st_idle, st_write, st_wait_for_data, st_read, st_wait_for_drdy, st_cc_done_mtu, st_error, st_ignore, st_cc_done_last);
     type cc_fsm_t is (st_idle, st_start_read, st_read, st_error, st_cc_done);
 
     signal reg_mps                   : unsigned(12 downto 0);
@@ -281,6 +281,7 @@ architecture FULL of MTC is
     signal tr_cq_mfb_addr64          : std_logic_vector(61 downto 0);
     signal tr_cq_mfb_addr            : std_logic_vector(61 downto 0);
     signal tr_cq_mfb_req_type        : std_logic_vector(1 downto 0);
+    signal tr_cq_mfb_req_msg         : std_logic;
     signal tr_cq_index_begin         : unsigned(3-1 downto 0);
 
     signal cq_hdr_tag                : std_logic_vector(10-1 downto 0);
@@ -301,6 +302,7 @@ architecture FULL of MTC is
     signal cq_meta_tph_st_tag        : std_logic_vector(7 downto 0);
     signal cq_wr_req                 : std_logic;
     signal cq_rd_req                 : std_logic;
+    signal cq_ignore                 : std_logic;
     signal cq_data                   : std_logic_vector(CQ_DATA_WIDTH-1 downto 0);
     signal cq_data_index_begin       : unsigned(3-1 downto 0);
     signal cq_sot                    : std_logic;
@@ -551,6 +553,7 @@ begin
                     cq_data   <= cq_axi_data_in;
                     cq_wr_req <= cq_axi_wr_req;
                     cq_rd_req <= cq_axi_rd_req;
+                    cq_ignore <= '0';
                     cq_sot    <= cq_axi_user_sop;
                     cq_eot    <= cq_axi_last_in;
                 end if;
@@ -667,6 +670,11 @@ begin
                               "10" when "01100000", -- 64b mem wr
                               "00" when others;
 
+        with tr_cq_mfb_hdr(31 downto 27) select
+        tr_cq_mfb_req_msg <= '1' when "00110", -- Msg
+                             '1' when "01110", -- MsgD
+                             '0' when others;
+
         tr_cq_index_begin_p : process (all)
         begin
             if (IS_MFB_META_DEV) then -- header is not in DATA signal
@@ -703,6 +711,7 @@ begin
                     cq_data   <= tr_cq_mfb_data;
                     cq_wr_req <= tr_cq_mfb_req_type(1);
                     cq_rd_req <= tr_cq_mfb_req_type(0);
+                    cq_ignore <= tr_cq_mfb_req_msg;
                     cq_sot    <= tr_cq_mfb_sof;
                     cq_eot    <= tr_cq_mfb_eof;
                 end if;
@@ -1020,7 +1029,11 @@ begin
                     elsif (cq_wr_req = '1') then
                         mi_fsm_nst <= st_write;
                     else
-                        mi_fsm_nst <= st_error;
+                        if (cq_ignore = '1') then
+                            mi_fsm_nst <= st_ignore;
+                        else
+                            mi_fsm_nst <= st_error;
+                        end if;
                     end if;
                 end if;
 
@@ -1099,6 +1112,13 @@ begin
                 if (reg1_cq_valid = '1' and reg1_cq_eot = '1') then
                     cc_request <= '1';
                     mi_fsm_nst <= st_cc_done_last;
+                else
+                    cq_ready <= '1';
+                end if;
+
+            when st_ignore =>  
+                if (reg1_cq_valid = '1' and reg1_cq_eot = '1') then
+                    mi_fsm_nst <= st_idle;
                 else
                     cq_ready <= '1';
                 end if;
