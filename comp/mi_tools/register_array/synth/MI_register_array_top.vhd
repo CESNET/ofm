@@ -71,8 +71,8 @@ begin
       NUM_REGS => NUM_REGS,
       SIGN_BITS_ADDR => 32,
       MI_PIPE => false,
-      FIRST_ADDR(MI_ADDR_WIDTH-1 downto 0) => (MI_ADDR_WIDTH-1 downto 0 => '0'),
-      INICIAL(3*32-1 downto 0)=> X"C0000003C0000002C0000001",
+      FIRST_ADDR => (MI_ADDR_WIDTH-1 downto 0 => '0'),
+      INICIAL => X"C0000003C0000002C0000001",
 
       --! range musi byt od "1 to (pocet registov)"                                              
       GENER_REGS(1 to 3) =>  ( --! registers data width
