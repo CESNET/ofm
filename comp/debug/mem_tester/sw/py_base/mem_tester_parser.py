@@ -72,7 +72,7 @@ class MemTesterParser:
     @classmethod
     def get_comp_cnt(cls):
         try:
-            compCnt     = int(run_cmd("./mem_tester -i g"))
+            compCnt     = int(run_cmd("./mem_tester -i ?"))
         except (ValueError, KeyError):
             raise MemTesterException(cls.errStr("invalid comp-cnt"))
         return compCnt
@@ -138,7 +138,7 @@ class MemTesterParser:
     @classmethod
     def get_test_res_raw(cls, testParams):
         testStr = "seq" if not testParams.randOn else "rand"
-        cmd = "./mem_tester -t {0} -n {1} -i {2} -k {3} --xml".format(
+        cmd = "./mem_tester -t {0} -b {1} -i {2} -k {3} --xml".format(
             testStr, testParams.burst, testParams.index, testParams.testScale)
         str = run_cmd(cmd)
         root, raw = parseXML(str)

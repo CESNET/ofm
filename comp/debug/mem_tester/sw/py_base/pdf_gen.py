@@ -31,9 +31,9 @@ class PDF(FPDF):
         #self.cell(0, 10, 'Page ' + str(self.page_no()) + '/{nb}', 0, 0, 'C')
 
 class PDFGen:
-    def __init__(self, cardInfoFile, resultFile):
-        self.cardInfoFile   = cardInfoFile
-        self.resultFile     = resultFile
+    def __init__(self, resultFile, textInfo = None):
+        self.resultFile = resultFile
+        self.textInfo   = textInfo
 
         pdf = PDF()
         pdf.alias_nb_pages()
@@ -42,29 +42,20 @@ class PDFGen:
         pdf.add_page()
         self.heading("Memory tester report", 22)
 
-        self.heading("Card info", 15)
-        self.from_file(self.cardInfoFile)
+        if self.textInfo is not None:
+            self.heading("User test info", 15)
+            self.from_text(self.textInfo)
 
         self.heading("Info about measurement and testing", 15)
         self.text(
-            "The test was performed using mem-tester component "
-            "which tries to write and read pseudo-random numbers "
-            "to every address of the external memory "
-            "and checks if all data were saved and loaded correctly."
-            "The amm-probe measures word count, latency and ticks "
-            "during this test.\n"
-            "There were performed multiple of these tests with different "
-            "burst counts (AMM transaction lengths) and with sequention or "
-            "random indexing. "
-            "Error checking is performed only during sequential indexing. "
-            "Because the mem-tester generates as much transactions as possible, "
-            "average latencies are due to transaction overlaping larger. "
-            "Therefore there was performed another test where "
-            "maximal paralel transaction count was limited to 1. "
-            "All of these situations are displayed using graphs bellow. "
+            "This measurement was performed using mem-tester component. "
+            "It tests external memory using writes and reads to different addresses. "
+            "During these tests the amm-probe measures latency and data flow.\n"
+
+            "Multiple tests with different burst counts and indexing types "
+            "were performed.\n"
+            "Note: error checking is performed only during sequential indexing.\n"
             )
-
-
 
     def heading(self, text, size):
         self.pdf.set_font('Times', 'B', size)
@@ -78,6 +69,9 @@ class PDFGen:
     def from_file(self, file):
         with open(file, 'r') as f:
             txt = f.read()
+        self.from_text(txt)
+
+    def from_text(self, txt):
         self.pdf.set_font('Times', '', 12)
         self.pdf.multi_cell(0, 5, txt)
         self.pdf.ln()

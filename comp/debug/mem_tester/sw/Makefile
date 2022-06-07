@@ -8,8 +8,10 @@ NFB_CFLAGS      = $(LIBNFB_CFLAGS) -std=gnu11
 NFB_LDFLAGS     = $(LIBNFB_LDFLAGS)
 NFB_LDLIBS      = -lnfb -lfdt -lm
 
+C_BASE 			= c_base
+
 TARGET          = mem_tester
-SRCS            = mem_tester.c common.c core.c
+SRCS            = $(C_BASE)/mem_tester.c $(C_BASE)/common.c $(C_BASE)/core.c
 
 CC = gcc
 CFLAGS = -pedantic -Wall -Wextra 

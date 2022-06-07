@@ -2,10 +2,6 @@
 # Copyright (C) 2022 CESNET z. s. p. o.
 # Author(s): Lukas Nevrkla <xnevrk03@stud.fit.vutbr.cz>
 
-import enum
-from multiprocessing.spawn import prepare
-import os
-import sys
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors

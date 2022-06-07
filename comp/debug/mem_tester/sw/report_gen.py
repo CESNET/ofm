@@ -2,21 +2,23 @@
 # Copyright (C) 2022 CESNET z. s. p. o.
 # Author(s): Lukas Nevrkla <xnevrk03@stud.fit.vutbr.cz>
 
+from ast import Str
 import os
 import sys
+import argparse
 
-from data_manager       import DataLoader, DataSaver
-from mem_tester_parser  import MemTestParams
-from graph_gen          import GraphGen
-from pdf_gen            import PDFGen
+from py_base.mem_tester_parser import MemTestParams
+from py_base.data_manager      import DataLoader, DataSaver
+from py_base.graph_gen         import GraphGen
+from py_base.pdf_gen           import PDFGen
 
 burst_step      = 3
-#burst_prec_lim  = 10    # All bursts will be sampled in range <1,this threshold>
 # Causes problems with spectrogram
+#burst_prec_lim  = 10    # All bursts will be sampled in range <1,this threshold>
 burst_prec_lim  = 1    # All bursts will be sampled in range <1,this threshold>
 test_cnt        = 2
 test_scale      = .001    # How many % of memory will be tested
-# To overcome the refresh
+# To overcome the refresh:
 #test_scale      = 0.0000006  # How many % of memory will be tested
 
 fig_path        = "fig/"
@@ -36,6 +38,19 @@ prevIter        = 0
 def err(code, txt):
     print(txt, file = sys.stderr)
     sys.exit(code)
+
+def parseParams():
+    parser = argparse.ArgumentParser(description =
+        """This program runs multiple memory tests using mem_tester component
+        and creates PDF report of measured results using amm_probe component 
+        inside mem_tester.""")
+    parser.add_argument('--infoFile', metavar='file', type=argparse.FileType('r'),
+                        help = """File with additional info about performed tests.""")
+    parser.add_argument('--info', action='store_true',
+                        help = """User input with additional info about performed tests.""")
+
+    args = parser.parse_args()
+    return args
 
 # https://stackoverflow.com/questions/3173320/text-progress-bar-in-terminal-with-block-characters
 def printProgressBar (iteration, total, prefix = 'Progress', suffix = 'Complete', decimals = 1, length = 30, fill = '█', printEnd = "\r"):
@@ -83,6 +98,14 @@ def burst_seq(maxBurst, burstPrecLim, burstStep):
 ########
 
 if __name__ == '__main__':
+    args = parseParams()
+
+    testInfo = None
+    if args.info:
+        testInfo = sys.stdin.read()
+    elif args.infoFile:
+        testInfo = args.infoFile.read()
+
     if not os.path.isdir(fig_path):
         os.makedirs(fig_path)
 
@@ -93,7 +116,7 @@ if __name__ == '__main__':
             ))
 
     compCnt     = DataLoader.get_comp_cnt()
-    pdfGen      = PDFGen(card_info_file, result_report)
+    pdfGen      = PDFGen(result_report, testInfo)
     dataSaver   = DataSaver()
     dataSaver.add_value("comp_cnt", compCnt)
 

@@ -2,7 +2,7 @@
 # Copyright (C) 2022 CESNET z. s. p. o.
 # Author(s): Lukas Nevrkla <xnevrk03@stud.fit.vutbr.cz>
 
-from mem_tester_parser import MemTesterParser, MemTestParams
+from py_base.mem_tester_parser import MemTesterParser, MemTestParams
 
 # Run: python3 -m pytest -sv mem_tester.py 
 # -s ... to show measured data

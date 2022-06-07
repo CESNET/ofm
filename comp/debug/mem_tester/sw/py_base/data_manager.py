@@ -5,7 +5,7 @@
 import sys
 import numpy as np
 import xml.etree.ElementTree as ET
-from mem_tester_parser import MemTesterParser, MemTestParams
+from .mem_tester_parser import MemTesterParser, MemTestParams
 
 #####################
 # Support functions #
