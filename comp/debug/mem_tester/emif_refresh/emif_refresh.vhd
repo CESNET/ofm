@@ -79,6 +79,9 @@ architecture FULL of EMIF_REFRESH is
     constant ACK_REG_ADDR_VEC : std_logic_vector(AMM_ADDR_WIDTH - 1 downto 0) 
         := std_logic_vector(to_unsigned(ACK_REG_ADDR, AMM_ADDR_WIDTH)); 
 
+    -- To overcome timing issues
+    signal rst_intern               : std_logic;
+
     -- State machine                
     signal curr_state               : STATES_T;
     signal next_state               : STATES_T;
@@ -129,11 +132,18 @@ begin
     -- Registers --
     ---------------
 
+    rst_p : process(CLK)
+    begin
+        if (rising_edge(CLK)) then 
+            rst_intern <= RST;
+        end if;
+    end process;
+
     refresh_cnter_g : if PERIODIC_REFRESH generate
         refresh_period_p : process (CLK)
         begin
             if (rising_edge(CLK)) then
-                if (RST = '1' or refresh_cnter_full = '1' or any_refresh = '1') then
+                if (rst_intern = '1' or refresh_cnter_full = '1' or any_refresh = '1') then
                     refresh_cnter <= (others => '0');
                 else
                     refresh_cnter <= std_logic_vector(unsigned(refresh_cnter) + 1);
@@ -145,7 +155,7 @@ begin
     refreshing_reg_p : process (CLK)
     begin
         if (rising_edge(CLK)) then
-            if (RST = '1' or next_state = INIT) then
+            if (rst_intern = '1' or next_state = INIT) then
                 REFRESHING      <= (others => '0');
                 REFRESHING_ANY  <= '0';
             elsif (next_state = PERFORM_REFRESH) then
@@ -163,7 +173,7 @@ begin
     state_reg_p : process (CLK)
     begin
         if (rising_edge(CLK)) then
-            if (RST = '1') then
+            if (rst_intern = '1') then
                 curr_state <= INIT;
             else
                 curr_state <= next_state;
@@ -178,7 +188,7 @@ begin
         AMM_WRITE           <= '0';
         AMM_ADDRESS         <= (others => '0');
         AMM_WRITE_DATA      <= (others => '0');
-        AMM_BURST_COUNT     <= (0 => '1', others => '0');
+        AMM_BURST_COUNT     <= (0 => '1', others => '0'); 
 
         REFRESH_DONE_ANY    <= '0';
         REFRESH_START_ANY   <= '0';

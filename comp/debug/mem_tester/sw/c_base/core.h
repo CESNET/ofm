@@ -13,10 +13,10 @@ SPDX-License-Identifier: BSD-3-Clause
 
 #define DEFAULT_BURST_CNT 4
 
-#define AMM_READY_MAX_ASKS  1000     // Max times sw will ask for amm ready
+#define AMM_READY_MAX_ASKS  2000     // Max times sw will ask for amm ready
 #define AMM_READY_ASK_DELAY 10000   // Amm ready ask delay [us]
 
-#define TEST_MAX_ASKS  500      // Max times sw will ask for test result
+#define TEST_MAX_ASKS  2000      // Max times sw will ask for test result
 #define TEST_ASK_DELAY 50000   // Test result ask delay [us]
 
 #define CSV_DELIM       ","

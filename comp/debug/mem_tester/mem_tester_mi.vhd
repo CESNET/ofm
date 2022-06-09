@@ -124,13 +124,7 @@ port(
     CALIB_SUCCESS           : in  std_logic;
     CALIB_FAIL              : in  std_logic;
     AMM_READY               : in  std_logic;
-    REFRESH_TICKS_OVF       : in  std_logic;
-    REFRESH_COUNTERS_OVF    : in  std_logic;
-    REFRESH_SUM_OVF         : in  std_logic;
     ERR_CNT                 : in  std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
-    REFRESH_DUR_SUM         : in  std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
-    REFRESH_DUR_MIN         : in  std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
-    REFRESH_DUR_MAX         : in  std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
 
     -- AMM GEN MI bus
     AMM_GEN_DWR             : out std_logic_vector(MI_DATA_WIDTH - 1 downto 0);

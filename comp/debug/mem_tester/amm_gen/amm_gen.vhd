@@ -101,7 +101,7 @@ architecture FULL of AMM_GEN is
         MI_BUFF_RD,
         MI_BUFF_RD_REG,     -- DP_BRAM_OUT_REG
         MI_SEL_SLICE,       -- sel_slice_delayed
-        MI_SLICE_REG,        -- curr_slice_delayed
+        MI_SLICE_REG,       -- curr_slice_delayed
         MI_SET_DRDY
     );
 
@@ -276,10 +276,6 @@ begin
     -- MI BUS --
     mi_addr_sliced          <= MI_ADDR(MI_ADDR_USED_BITS - 1 downto MI_ADDR_CUTOFF);
 
-    -- MI ready signals
-    --MI_DRDY                 <= mi_drdy_intern;
-    --MI_ARDY                 <= MI_RD or MI_WR;
-
     -- CTRL reg
     ctrl_reg(BUFF_VLD_BIT)  <= buff_vld;
     ctrl_reg(AMM_READY_BIT) <= AMM_READY;
@@ -291,13 +287,6 @@ begin
     sel_slice               <= slice_reg(SLICES_BITS - 1 downto 0);
     sel_burst               <= addr_reg(BURST_BITS - 1 downto 0);
     
-    --buff_wr                 <= '1' when (buff_mi_wr_ticks = BUFF_WR_DELAY and buff_mi_wr_runing = '1') else
-    --                           '0';
-    --curr_word_from_mi       <= '1' when (buff_mi_wr_ticks = WORD_FROM_MI_DELAY and buff_mi_wr_runing = '1') else
-    --                           '0';
-    --mi_drdy_intern          <= '1' when ((buff_mi_rd_ticks = MI_DRDY_DELAY and buff_mi_rd_runing = '1') or (MI_RD = '1' and RST = '0' and buff_mi_rd_runing = '0')) else
-    --                           '0';
-
     word_from_buff          <= slv_array_to_deser(word_from_buff_slv, SLICES_CNT);
     word_to_buff_g : for i in 0 to SLICES_CNT - 1 generate
         word_to_buff(i)     <= data_reg     when (mi_to_buff_en_delayed(i)) else
@@ -347,6 +336,7 @@ begin
         if (rising_edge(CLK)) then
             -- Case can't be used because of warning:
             -- "case choice should be a locally static expression"
+            -- (constants are inicialized with function that adds amm_gen base addr)
             if (mi_addr_sliced = CTRL_REG_ADDR)     then 
                 MI_DRD <= ctrl_reg;
             elsif (mi_addr_sliced = ADDR_REG_ADDR)  then 

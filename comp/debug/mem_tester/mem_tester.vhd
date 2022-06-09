@@ -283,16 +283,10 @@ architecture FULL of MEM_TESTER is
     signal mi_ecc_error             : std_logic;
     signal mi_calib_success         : std_logic;
     signal mi_calib_fail            : std_logic;
-    signal mi_refresh_dur_tic_ovf   : std_logic;
-    signal mi_refresh_dur_sum_ovf   : std_logic;
-    signal mi_refresh_dur_cnt_ovf   : std_logic;
 
     signal mi_err_cnt               : std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
     signal mi_burst_cnt             : std_logic_vector(AMM_BURST_COUNT_WIDTH - 1 downto 0);
     signal mi_refresh_period        : std_logic_vector(REFR_PERIOD_WIDTH - 1 downto 0);
-    signal mi_refresh_dur_min       : std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
-    signal mi_refresh_dur_max       : std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
-    signal mi_refresh_dur_sum       : std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
     signal mi_refresh_ticks_ovf     : std_logic;
     signal mi_refresh_counters_ovf  : std_logic;
     signal mi_refresh_sum_ovf       : std_logic;
@@ -471,13 +465,7 @@ begin
         CALIB_SUCCESS           => mi_calib_success,
         CALIB_FAIL              => mi_calib_fail,
         AMM_READY               => AMM_READY,
-        REFRESH_TICKS_OVF       => mi_refresh_ticks_ovf,
-        REFRESH_COUNTERS_OVF    => mi_refresh_counters_ovf,
-        REFRESH_SUM_OVF         => mi_refresh_sum_ovf,
         ERR_CNT                 => mi_err_cnt,
-        REFRESH_DUR_SUM         => mi_refresh_dur_sum,
-        REFRESH_DUR_MIN         => mi_refresh_dur_min,
-        REFRESH_DUR_MAX         => mi_refresh_dur_max,
 
         AMM_GEN_DWR             => amm_gen_dwr,
         AMM_GEN_ADDR            => amm_gen_addr,
