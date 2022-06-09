@@ -8,10 +8,32 @@ SPDX-License-Identifier: BSD-3-Clause
 
 #include "common.h"
 #include "core.h"
+#include <getopt.h>
 
-#define ARGUMENTS       "d:c:i:a:m:n:t:s:k:rwbpfhvgou"
-#define COMPATIBILE     "netcope,mem_tester"
+#define COMPATIBLE     "netcope,mem_tester"
 #define REGS_TO_PRINT   64
+
+enum LongArgIDs
+{
+    RST = 1,
+    RST_EMIF,
+    AUTO_PRECHARGE,
+    REFRESH_PERIOD_TICKS,
+    XML,
+    HIST,
+};
+
+const char *ShortOptions = "d:c:i:a:m:b:t:s:k:rwpfhvgou";
+struct option LongOptions[] = {
+    {"help",            no_argument,        NULL,  'h' },
+    {"rst",             no_argument,        NULL,  RST },
+    {"rst-emif",        no_argument,        NULL,  RST_EMIF },
+    {"auto-precharge",  no_argument,        NULL,  AUTO_PRECHARGE },
+    {"refresh-period",  required_argument,  NULL,  REFRESH_PERIOD_TICKS },
+    {"xml",             no_argument,        NULL,  XML },
+    {"print-hist",      no_argument,        NULL,  HIST },
+    {0,                 0,                  NULL,  0 }
+};
 
 
 /*!
@@ -20,21 +42,24 @@ SPDX-License-Identifier: BSD-3-Clause
 void usage(const char *me)
 {
     printf("Usage: %s [-h] [-d path]\n", me);
+    printf("------------------------\n");
+    printf("Control\n");
     printf("-d path         Path to device [default: %s]\n", NFB_PATH_DEV(0));
-    printf("-c comp         Compatibile of the mem_tester componet [default: %s]\n", COMPATIBILE);
-    printf("-i index        Index of the mem_tester componet (when more instances are used)\n"
-           "                When |index = g| it will return number of compatibile components");
+    printf("-c comp         Compatible of the mem_tester component [default: %s]\n", COMPATIBLE);
+    printf("-i index        Index of the mem_tester component (when more instances are used)\n"
+           "                When |index is '?'| it will return number of compatible components\n");
     printf("-p              Print registers\n");
-    printf("-g              Print device config (can be used with -v)\n");
-    printf("-u              Print device status (can be used with -v)\n");
+    printf("-rst            Resets mem_tester component\n");
+    printf("-rst--emif      Resets EMIF IP and mem_tester component\n");
 
     printf("Test related\n");
-    printf("-t type         Run test (type = %s/%s/%s/%s/%s)\n", TEST_ALL, TEST_SEQ, TEST_RAND, TEST_LAT_SEQ, TEST_LAT_RAND);
-    printf("-b              Boot again - reset\n");
-    printf("-n burst        Set burst count during test\n");
+    printf("-t type         Run test (type = %s/%s/%s)\n", TEST_ALL, TEST_SEQ, TEST_RAND);
+    printf("-b burst        Set burst count during test\n");
     printf("-k scale        Set address limit during test (1.0 = max.)\n");
-    printf("-o              Only one simulateous read\n");
-    printf("-v              Print only CSV\n");
+    printf("-o              Only one simultaneous read\n");
+    printf("--auto-precharge\n");
+    printf("--refresh-period ticks\n");
+    printf("--print-hist    Prints latency histogram from last measurement\n");
 
     printf("AMM_GEN\n");
     printf("-m burst data   Content of a currently selected AMM word (512b hexa) inside manual r/w buffer\n");
@@ -48,6 +73,10 @@ void usage(const char *me)
 
     printf("Others\n");
     printf("-h              Show this text\n");
+    printf("-g              Print device config (can be used with -v)\n");
+    printf("-u              Print device status (can be used with -v)\n");
+    printf("--xml           Print in XML format\n");
+    printf("-v              Print in CSV format [depreciated]\n");
 }
 
 
@@ -64,7 +93,8 @@ int main(int argc, char *argv[])
 {
     bool printHelp          = false;
     bool runTest            = false;
-    bool reset              = false;
+    bool rst                = false;
+    bool rstEmif            = false;
     bool manualSetAddr      = false;
     bool manualRead         = false;
     bool manualWrite        = false;
@@ -73,6 +103,8 @@ int main(int argc, char *argv[])
     bool printConfig        = false;
     bool printStatus        = false;
     bool printCompCnt       = false;
+    bool setRefresh         = false;
+    bool printHist          = false;
 
     long manualAddr         = 0;
     char *manualData;
@@ -80,14 +112,17 @@ int main(int argc, char *argv[])
     long manualBurstCnt     = -1;
     int res_code            = 0;
     char *file              = NFB_PATH_DEV(0);
-    char *compatibile       = COMPATIBILE;
+    char *compatibile       = COMPATIBLE;
     long index              = 0;
+    long refreshPeriod      = 0;
 
     struct TestParams_s testParams = 
     {
         .latencyToFirst     = false,
+        .autoPrecharge      = false,
         .burstCnt           = DEFAULT_BURST_CNT,
         .onlyCSV            = false,
+        .onlyXML            = false,
         .onlyOneSimultRead  = false,
         .addrLimScale        = 1.0,
     };
@@ -98,8 +133,11 @@ int main(int argc, char *argv[])
     // Parse parameters //
     //////////////////////
 
-    char c;
-    while ((c = getopt(argc, argv, ARGUMENTS)) != -1) 
+    int c;
+    int optionIndex;    // Index of found long option
+
+    //while ((c = getopt(argc, argv, ARGUMENTS)) != -1) 
+    while ((c = getopt_long(argc, argv, ShortOptions, LongOptions, &optionIndex)) != -1) 
     {
         switch (c) 
         {
@@ -110,14 +148,14 @@ int main(int argc, char *argv[])
                 compatibile = optarg;
                 break;
             case 'i':
-                if (optarg[0] == 'g')
+                if (optarg[0] == '?')
                     printCompCnt = true;
                 else
                     index = strtoul(optarg, NULL, 10);
                 break;
             case 't':
                 runTest = true;
-                testParams.testType = optarg;
+                testParams.typeStr = optarg;
                 break;
             case 'a':
                 manualAddr = strtoul(optarg, NULL, 10);
@@ -126,7 +164,7 @@ int main(int argc, char *argv[])
             case 's':
                 manualBurstCnt = strtoul(optarg, NULL, 10);
                 break;
-            case 'n':
+            case 'b':
                 testParams.burstCnt = strtoul(optarg, NULL, 10);
                 break;
             case 'k':
@@ -156,9 +194,6 @@ int main(int argc, char *argv[])
             case 'w':
                 manualWrite = true;
                 break;
-            case 'b':
-                reset = true;
-                break;
             case 'p':
                 printRegs = true;
                 break;
@@ -173,6 +208,25 @@ int main(int argc, char *argv[])
                 break;
             case 'h':
                 printHelp = true;
+                break;
+            case RST:
+                rst = true;
+                break;
+            case RST_EMIF:
+                rstEmif = true;
+                break;
+            case AUTO_PRECHARGE:
+                testParams.autoPrecharge = true;
+                break;
+            case REFRESH_PERIOD_TICKS:
+                refreshPeriod = strtoul(optarg, NULL, 10);
+                setRefresh = true;
+                break;
+            case XML:
+                testParams.onlyXML = true;
+                break;
+            case HIST:
+                printHist = true;
                 break;
             default:
                 printf("Unknown argument: %c\n", c);
@@ -200,19 +254,46 @@ int main(int argc, char *argv[])
     // Main part //
     ///////////////
 
-    if (reset)
+    if (rstEmif)
     {
-        printf("Reseting ... \n");
+        printf("Reseting EMIF and mem_tester ... \n");
         Reset(true);        // EMIF
-        Reset(false);       // mem-tester
+        Reset(false);       // mem-tester TODO: not needed?
     }
+    else if (rst)
+    {
+        printf("Reseting mem_tester ... \n");
+        Reset(false);
+    }
+
+    if (setRefresh)
+        SetRefreshPeriod(refreshPeriod);
 
     if (runTest)
     {
-        if ( ! RunTest(&testParams))
+        bool testTypeMatch = false;
+
+        if (strcmp(testParams.typeStr, TEST_SEQ) == 0 || strcmp(testParams.typeStr, TEST_ALL) == 0)
         {
-            fprintf(stderr, "%s is invalid test type\n", testParams.testType);
+            testTypeMatch   = true;
+            testParams.type = SEQUENTIAL;
+
+            if ( ! testParams.onlyCSV && ! testParams.onlyXML)
+                printf("Running sequential test ...\n");
+            RunTest(&testParams);
         }
+        if (strcmp(testParams.typeStr, TEST_RAND) == 0 || strcmp(testParams.typeStr, TEST_ALL) == 0)
+        {
+            testTypeMatch   = true;
+            testParams.type = RANDOM;
+
+            if ( ! testParams.onlyCSV && ! testParams.onlyXML)
+                printf("Running random indexing test ...\n");
+            RunTest(&testParams);
+        }
+        
+        if ( ! testTypeMatch)
+            fprintf(stderr, "%s is invalid test type\n", testParams.typeStr);
     }
 
     if (manualBurstCnt > 0)
@@ -268,6 +349,8 @@ int main(int argc, char *argv[])
 
         if (testParams.onlyCSV)
             PrintDevConfigCSV(&config);
+        else if (testParams.onlyXML)
+            PrintDevConfigXML(&config);
         else
             PrintDevConfig(&config);
     }
@@ -276,9 +359,14 @@ int main(int argc, char *argv[])
     {
         if (testParams.onlyCSV)
             PrintDevStatusCSV();
+        else if (testParams.onlyXML)
+            PrintDevStatusXML();
         else
             PrintDevStatus();
     }
+
+    if (printHist)
+        PrintHist();
 
     Finish();
     return res_code;

@@ -19,7 +19,7 @@ end entity;
 architecture BEHAVIORAL Of TESTBENCH is
     constant DEVICE                 : string := "STRATIX10";
 
-    constant AMM_DATA_WIDTH         : integer := 512;
+    constant AMM_DATA_WIDTH         : integer := 576;   --512;
     constant AMM_ADDR_WIDTH         : integer := 26;
     constant AMM_BURST_COUNT_WIDTH  : integer := 7;
 
@@ -34,7 +34,7 @@ architecture BEHAVIORAL Of TESTBENCH is
 
     constant DEFAULT_BURST_CNT      : integer  := 4;
     -- Used as max memory size for simulation
-    constant ADDR_LIMIT             : integer  := DEFAULT_BURST_CNT * 16;   
+    constant ADDR_LIMIT             : integer  := DEFAULT_BURST_CNT * 128;   
     constant MEM_SIZE               : integer  := ADDR_LIMIT + 2 ** AMM_BURST_COUNT_WIDTH;
 
     ------------
@@ -42,18 +42,21 @@ architecture BEHAVIORAL Of TESTBENCH is
     ------------
     -- Comp address bases
     constant AMM_GEN_BASE           : integer := 64;
-    constant AMM_PROBE_BASE         : integer := 128;
+    constant AMM_PROBE_BASE         : integer := 96;
 
     -- Register addresses
     constant MI_CTRL_IN_ADDR        : integer := 0;
     constant MI_CTRL_OUT_ADDR       : integer := 4;
     constant MI_ERR_CNT_ADDR        : integer := 8;
     constant MI_BURST_CNT_ADDR      : integer := 12;
+    constant MI_ADDR_LIM_ADDR       : integer := 16;
+    constant MI_REFRESH_PERIOD_ADDR : integer := 20;
 
     constant AMM_GEN_CTRL_ADDR      : integer := AMM_GEN_BASE;
     constant AMM_GEN_ADDR_ADDR      : integer := AMM_GEN_BASE + 4;
-    constant AMM_GEN_DATA_ADDR      : integer := AMM_GEN_BASE + 8;
-    constant AMM_GEN_BURST_ADDR     : integer := AMM_GEN_BASE + 12;
+    constant AMM_GEN_SLICE_ADDR     : integer := AMM_GEN_BASE + 8;
+    constant AMM_GEN_DATA_ADDR      : integer := AMM_GEN_BASE + 12;
+    constant AMM_GEN_BURST_ADDR     : integer := AMM_GEN_BASE + 16;
 
     constant AMM_PROB_CTRL_ADDR     : integer := AMM_PROBE_BASE;
     constant AMM_PROB_WR_TICKS_ADDR : integer := AMM_PROBE_BASE + 4;
@@ -62,9 +65,12 @@ architecture BEHAVIORAL Of TESTBENCH is
     constant AMM_PROB_WR_WORDS_ADDR : integer := AMM_PROBE_BASE + 16;
     constant AMM_PROB_RD_WORDS_ADDR : integer := AMM_PROBE_BASE + 20;
     constant AMM_PROB_REQ_WORDS_ADDR      : integer := AMM_PROBE_BASE + 24;
-    constant AMM_PROB_LATENCY_SUM_ADDR    : integer := AMM_PROBE_BASE + 28;
-    constant AMM_PROB_LATENCY_MIN_ADDR    : integer := AMM_PROBE_BASE + 32;
-    constant AMM_PROB_LATENCY_MAX_ADDR    : integer := AMM_PROBE_BASE + 36;
+    constant AMM_PROB_LATENCY_SUM_1_ADDR    : integer := AMM_PROBE_BASE + 28;
+    constant AMM_PROB_LATENCY_SUM_2_ADDR    : integer := AMM_PROBE_BASE + 32;
+    constant AMM_PROB_LATENCY_MIN_ADDR    : integer := AMM_PROBE_BASE + 36;
+    constant AMM_PROB_LATENCY_MAX_ADDR    : integer := AMM_PROBE_BASE + 40;
+    constant AMM_PROB_HIST_CNT     : integer := AMM_PROBE_BASE + 44;
+    constant AMM_PROB_HIST_SEL     : integer := AMM_PROBE_BASE + 48;
 
     -- Bits in registers
     -- CORE
@@ -212,9 +218,14 @@ architecture BEHAVIORAL Of TESTBENCH is
         report "Words requested: " & integer'image(to_integer(unsigned(data)));
         wait for 1 * MI_CLK_PERIOD;
 
-        addr := std_logic_vector(to_unsigned(AMM_PROB_LATENCY_SUM_ADDR, addr'length));
+        addr := std_logic_vector(to_unsigned(AMM_PROB_LATENCY_SUM_1_ADDR, addr'length));
         work.mi_sim_pkg.ReadData(addr, data, be, mi_status, mi_id); 
-        report "Latency sum: " & integer'image(to_integer(unsigned(data)));
+        report "Latency sum 1: " & integer'image(to_integer(unsigned(data)));
+        wait for 1 * MI_CLK_PERIOD;
+
+        addr := std_logic_vector(to_unsigned(AMM_PROB_LATENCY_SUM_2_ADDR, addr'length));
+        work.mi_sim_pkg.ReadData(addr, data, be, mi_status, mi_id); 
+        report "Latency sum 2: " & integer'image(to_integer(unsigned(data)));
         wait for 1 * MI_CLK_PERIOD;
 
         addr := std_logic_vector(to_unsigned(AMM_PROB_LATENCY_MIN_ADDR, addr'length));
@@ -249,7 +260,6 @@ architecture BEHAVIORAL Of TESTBENCH is
 
         setBit_p(MI_CTRL_IN_ADDR, MI_MANUAL_EN_BIT, '1', mi_status, mi_id);
 
-        manual_wr_addr := 0;
         manual_wr_data := 0;
 
         -- Fill buffer
@@ -257,7 +267,12 @@ architecture BEHAVIORAL Of TESTBENCH is
             for s in 0 to AMM_DATA_WIDTH / MI_DATA_WIDTH - 1 loop
                 -- set address in mi2amm buffer
                 addr := std_logic_vector(to_unsigned(AMM_GEN_ADDR_ADDR, addr'length));
-                data := std_logic_vector(to_unsigned(manual_wr_addr, data'length));     
+                data := std_logic_vector(to_unsigned(b, data'length));     
+                work.mi_sim_pkg.WriteData(addr, data, be, mi_status, mi_id);
+                wait for 1 * MI_CLK_PERIOD;
+
+                addr := std_logic_vector(to_unsigned(AMM_GEN_SLICE_ADDR, addr'length));
+                data := std_logic_vector(to_unsigned(s, data'length));     
                 work.mi_sim_pkg.WriteData(addr, data, be, mi_status, mi_id);
                 wait for 1 * MI_CLK_PERIOD;
 
@@ -267,7 +282,6 @@ architecture BEHAVIORAL Of TESTBENCH is
                 work.mi_sim_pkg.WriteData(addr, data, be, mi_status, mi_id);
                 wait for 1 * MI_CLK_PERIOD;
 
-                manual_wr_addr := manual_wr_addr + 1;
                 manual_wr_data := manual_wr_data + test_data_incr;
             end loop;
         end loop;
@@ -289,7 +303,12 @@ architecture BEHAVIORAL Of TESTBENCH is
             for s in 0 to AMM_DATA_WIDTH / MI_DATA_WIDTH - 1 loop
                 -- set address in mi2amm buffer
                 addr := std_logic_vector(to_unsigned(AMM_GEN_ADDR_ADDR, addr'length));
-                data := std_logic_vector(to_unsigned(manual_wr_addr, data'length));     
+                data := std_logic_vector(to_unsigned(b, data'length));     
+                work.mi_sim_pkg.WriteData(addr, data, be, mi_status, mi_id);
+                wait for 1 * MI_CLK_PERIOD;
+
+                addr := std_logic_vector(to_unsigned(AMM_GEN_SLICE_ADDR, addr'length));
+                data := std_logic_vector(to_unsigned(s, data'length));     
                 work.mi_sim_pkg.WriteData(addr, data, be, mi_status, mi_id);
                 wait for 1 * MI_CLK_PERIOD;
 
@@ -311,7 +330,12 @@ architecture BEHAVIORAL Of TESTBENCH is
             for s in 0 to AMM_DATA_WIDTH / MI_DATA_WIDTH - 1 loop
                 -- set address in mi2amm buffer
                 addr := std_logic_vector(to_unsigned(AMM_GEN_ADDR_ADDR, addr'length));
-                data := std_logic_vector(to_unsigned(manual_wr_addr, data'length));     
+                data := std_logic_vector(to_unsigned(b, data'length));     
+                work.mi_sim_pkg.WriteData(addr, data, be, mi_status, mi_id);
+                wait for 1 * MI_CLK_PERIOD;
+
+                addr := std_logic_vector(to_unsigned(AMM_GEN_SLICE_ADDR, addr'length));
+                data := std_logic_vector(to_unsigned(s, data'length));     
                 work.mi_sim_pkg.WriteData(addr, data, be, mi_status, mi_id);
                 wait for 1 * MI_CLK_PERIOD;
 
@@ -353,7 +377,12 @@ architecture BEHAVIORAL Of TESTBENCH is
             for s in 0 to AMM_DATA_WIDTH / MI_DATA_WIDTH - 1 loop
                 -- set address in mi2amm buffer
                 addr := std_logic_vector(to_unsigned(AMM_GEN_ADDR_ADDR, addr'length));
-                data := std_logic_vector(to_unsigned(manual_wr_addr, data'length));     
+                data := std_logic_vector(to_unsigned(b, data'length));     
+                work.mi_sim_pkg.WriteData(addr, data, be, mi_status, mi_id);
+                wait for 1 * MI_CLK_PERIOD;
+
+                addr := std_logic_vector(to_unsigned(AMM_GEN_SLICE_ADDR, addr'length));
+                data := std_logic_vector(to_unsigned(s, data'length));     
                 work.mi_sim_pkg.WriteData(addr, data, be, mi_status, mi_id);
                 wait for 1 * MI_CLK_PERIOD;
 
@@ -381,7 +410,6 @@ architecture BEHAVIORAL Of TESTBENCH is
 
         test_fail := test_fail_intern;
     end procedure;
-
 
 
 begin
@@ -412,6 +440,7 @@ begin
                 X"fc21f22c3ad6d735",
                 X"5d06b6ae01cf86f8",
                 X"38fc9671a56bb8e8",
+                X"38fc9671a56bb8e8",
                 X"457a2fb6bd25f1fa"
             ),
         RANDOM_ADDR_SEED            => X"FEFE01" & "01",
@@ -419,6 +448,7 @@ begin
         DEFAULT_ADDR_LIMIT      => ADDR_LIMIT,
         DEFAULT_BURST_CNT       => DEFAULT_BURST_CNT,
         DEBUG_RAND_ADDR         => True,
+
         DEVICE                  => DEVICE
     )
     port map(
@@ -582,6 +612,12 @@ begin
         toggleBit_p(MI_CTRL_IN_ADDR, MI_RST_BIT, status(0), 0);
         wait for 5 * MI_CLK_PERIOD;
 
+
+        addr := std_logic_vector(to_unsigned(MI_REFRESH_PERIOD_ADDR, addr'length));
+        data := std_logic_vector(to_unsigned(20, data'length));     
+        work.mi_sim_pkg.WriteData(addr, data, be, status(0),0);
+        wait for 1 * MI_CLK_PERIOD;
+
         -- To measure to first response data (default to last response data)
         --setBit_p(AMM_PROB_CTRL_ADDR, AMM_PROBE_LATENCY_TO_FIRST_BIT, '1', status(0), 0);
 
@@ -612,6 +648,14 @@ begin
         -- AMM probe results --
         -----------------------
         probe_res_p(status(0), 0);
+
+        -- Test histogrammer
+        -- for i in 0 to 512 - 1 loop
+        --     addr := std_logic_vector(to_unsigned(AMM_PROB_HIST_SEL, addr'length));
+        --     data := std_logic_vector(to_unsigned(i, data'length));     
+        --     work.mi_sim_pkg.WriteData(addr, data, be, status(0),0);
+        --     wait for 1 * MI_CLK_PERIOD;
+        -- end loop;
 
         -----------------------------------
         -- Run memory test (random addr) --

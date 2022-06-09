@@ -24,14 +24,14 @@ use work.type_pack.all;
 --         3.      in      amm_gen enable
 --         4.      in      random addressing during test 
 --         5.      in      only 1 simultaneous read transaction 
+--         6.      in      auto precharge req 
 -- ctrl out reg
 -- 0X04    0.      out     test done
 --         1.      out     test succesfull
 --         2.      out     ecc err occured
 --         3.      out     calib successful
 --         4.      out     calib failed
---         5.      out     write ticks overflow occured  
---         6.      out     read ticks overflow occured  
+--         5.      out     amm ready
 -- ----------------------------------
 -- err cnt reg
 -- 0X08    all     out     err cnt
@@ -42,28 +42,42 @@ use work.type_pack.all;
 -- addr lim reg 
 -- 0X10    all     i/o     last address that will be tested (must be multiple of burst cnt)
 -- ----------------------------------
+-- refresh period reg 
+-- 0X14    all     i/o     refresh period ticks when manual refresh is used
+-- ----------------------------------
+-- default refresh period reg 
+-- 0X18    all     o     
+-- ----------------------------------
 -- amm_gen
 -- AMM_GEN_BASE
 -- ----------------------------------
 -- amm_probe
 -- AMM_PROBE_BASE
 -- ----------------------------------
+-- amm_gen for MMR
+-- MMR_BASE
+-- ----------------------------------
+-- amm_probe for MMR
+-- MMR_PROBE_BASE
+-- ----------------------------------
 
 -- TODO: Make MI ctrl in and out one register
 
 entity MEM_TESTER_MI is
 generic (
-    -- MI bus --
+    -- Buses --
     MI_DATA_WIDTH           : integer := 32;
     MI_ADDR_WIDTH           : integer := 32;
     AMM_ADDR_WIDTH          : integer := 26;
     AMM_BURST_COUNT_WIDTH   : integer := 7;
+    REFR_PERIOD_WIDTH       : integer := 32;
 
     -- Others --
     AMM_GEN_BASE            : std_logic_vector(MI_ADDR_WIDTH - 1 downto 0);
     AMM_PROBE_BASE          : std_logic_vector(MI_ADDR_WIDTH - 1 downto 0);
     DEFAULT_BURST_CNT       : integer := 4;
     DEFAULT_ADDR_LIMIT      : integer;
+    DEF_REFR_PERIOD         : std_logic_vector(REFR_PERIOD_WIDTH - 1 downto 0);
     DEVICE                  : string
 );
 port(    
@@ -98,8 +112,10 @@ port(
     MANUAL_EN               : out std_logic;
     RANDOM_ADDR_EN          : out std_logic;
     ONE_SIMULT_READ         : out std_logic;
+    AUTO_PRECHARGE          : out std_logic;
     BURST_CNT               : out std_logic_vector(AMM_BURST_COUNT_WIDTH - 1 downto 0);
     ADDR_LIMIT              : out std_logic_vector(AMM_ADDR_WIDTH - 1 downto 0);
+    REFR_PERIOD             : out std_logic_vector(REFR_PERIOD_WIDTH - 1 downto 0);
 
     -- Slave => master
     TEST_DONE               : in  std_logic;
@@ -107,6 +123,7 @@ port(
     ECC_ERROR               : in  std_logic;
     CALIB_SUCCESS           : in  std_logic;
     CALIB_FAIL              : in  std_logic;
+    AMM_READY               : in  std_logic;
     ERR_CNT                 : in  std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
 
     -- AMM GEN MI bus
@@ -157,6 +174,8 @@ architecture FULL of MEM_TESTER_MI is
     constant ERR_CNT_REG        : std_logic_vector(MI_ADDR_LIMIT downto MI_ADDR_CUTOFF) := "000010"; -- 0x08
     constant BURST_CNT_REG      : std_logic_vector(MI_ADDR_LIMIT downto MI_ADDR_CUTOFF) := "000011"; -- 0x0C
     constant ADDR_LIM_REG       : std_logic_vector(MI_ADDR_LIMIT downto MI_ADDR_CUTOFF) := "000100"; -- 0x10
+    constant REFRESH_TICKS_REG  : std_logic_vector(MI_ADDR_LIMIT downto MI_ADDR_CUTOFF) := "000101"; -- 0x14
+    constant DEF_REFR_REG       : std_logic_vector(MI_ADDR_LIMIT downto MI_ADDR_CUTOFF) := "000110"; -- 0x18
                                 
     -- Bits in registers        
     -- CTRL IN REG              
@@ -166,6 +185,7 @@ architecture FULL of MEM_TESTER_MI is
     constant MANUAL_EN_BIT      : integer := 3;
     constant RANDOM_ADDR_EN_BIT : integer := 4;
     constant ONE_SIMULT_READ_BIT : integer := 5;
+    constant AUTO_PRECHARGE_BIT : integer := 6;
                                 
     -- CTRL OUT REG             
     constant TEST_DONE_BIT      : integer := 0; 
@@ -173,6 +193,7 @@ architecture FULL of MEM_TESTER_MI is
     constant ECC_ERROR_BIT      : integer := 2; 
     constant CALIB_SUCCESS_BIT  : integer := 3;     
     constant CALIB_FAIL_BIT     : integer := 4;  
+    constant AMM_READY_BIT      : integer := 5;  
 
     ------------
     -- MI bus --
@@ -206,6 +227,7 @@ architecture FULL of MEM_TESTER_MI is
     signal ctrl_out             : std_logic_vector(MI_DATA_WIDTH - 1 downto 0);     
     signal burst_cnt_intern     : std_logic_vector(MI_DATA_WIDTH - 1 downto 0);     
     signal addr_lim_intern      : std_logic_vector(MI_DATA_WIDTH - 1 downto 0);     
+    signal refresh_period_intern: std_logic_vector(MI_DATA_WIDTH - 1 downto 0);     
 
     signal reset_raw            : std_logic;
     signal reset_emif_raw       : std_logic;
@@ -313,17 +335,21 @@ begin
     MANUAL_EN                           <= ctrl_in(MANUAL_EN_BIT);
     RANDOM_ADDR_EN                      <= ctrl_in(RANDOM_ADDR_EN_BIT);
     ONE_SIMULT_READ                     <= ctrl_in(ONE_SIMULT_READ_BIT);
+    AUTO_PRECHARGE                      <= ctrl_in(AUTO_PRECHARGE_BIT);
 
     ctrl_out(TEST_DONE_BIT)             <= TEST_DONE;
     ctrl_out(TEST_SUCCESS_BIT)          <= TEST_SUCCESS;
     ctrl_out(ECC_ERROR_BIT)             <= ECC_ERROR;
     ctrl_out(CALIB_SUCCESS_BIT)         <= CALIB_SUCCESS;
     ctrl_out(CALIB_FAIL_BIT)            <= CALIB_FAIL;
-    ctrl_out(MI_DATA_WIDTH - 1 downto CALIB_FAIL_BIT + 1) 
+    ctrl_out(AMM_READY_BIT)             <= AMM_READY;
+    -- refresh ovf bits asserted in process bellow
+    ctrl_out(MI_DATA_WIDTH - 1 downto AMM_READY_BIT + 1) 
                                         <= (others => '0');
 
     BURST_CNT                           <= burst_cnt_intern(AMM_BURST_COUNT_WIDTH   - 1 downto 0);
     ADDR_LIMIT                          <= addr_lim_intern (AMM_ADDR_WIDTH          - 1 downto 0);
+    REFR_PERIOD                         <= refresh_period_intern(REFR_PERIOD_WIDTH  - 1 downto 0);
 
     -- Base port --
     sel_reg                             <= mi_splitted_addr(MI_BASE_PORT)(MI_ADDR_LIMIT downto MI_ADDR_CUTOFF);
@@ -362,6 +388,9 @@ begin
                 when ERR_CNT_REG        => mi_splitted_drd(MI_BASE_PORT) <= err_cnt;
                 when BURST_CNT_REG      => mi_splitted_drd(MI_BASE_PORT) <= burst_cnt_intern;
                 when ADDR_LIM_REG       => mi_splitted_drd(MI_BASE_PORT) <= addr_lim_intern;
+                when REFRESH_TICKS_REG  => mi_splitted_drd(MI_BASE_PORT) <= refresh_period_intern;
+                when DEF_REFR_REG       => mi_splitted_drd(MI_BASE_PORT)(REFR_PERIOD_WIDTH - 1 downto 0) 
+                                                                         <= DEF_REFR_PERIOD;
                 when others             => mi_splitted_drd(MI_BASE_PORT) <= X"DEADBEEF";
             end case;
          end if;
@@ -375,12 +404,15 @@ begin
                 ctrl_in                 <= (others => '0');
                 burst_cnt_intern        <= std_logic_vector(to_unsigned(DEFAULT_BURST_CNT,  MI_DATA_WIDTH));
                 addr_lim_intern         <= std_logic_vector(to_unsigned(DEFAULT_ADDR_LIMIT, MI_DATA_WIDTH));
+                refresh_period_intern(REFR_PERIOD_WIDTH - 1 downto 0)   
+                                        <= DEF_REFR_PERIOD;
             elsif (mi_splitted_wr(MI_BASE_PORT) = '1') then
                 case(sel_reg) is
-                    when CTRL_IN_REG    => ctrl_in              <= mi_splitted_dwr(MI_BASE_PORT);
-                    when BURST_CNT_REG  => burst_cnt_intern     <= mi_splitted_dwr(MI_BASE_PORT);
-                    when ADDR_LIM_REG   => addr_lim_intern      <= mi_splitted_dwr(MI_BASE_PORT);
-                    when others         =>
+                    when CTRL_IN_REG        => ctrl_in              <= mi_splitted_dwr(MI_BASE_PORT);
+                    when BURST_CNT_REG      => burst_cnt_intern     <= mi_splitted_dwr(MI_BASE_PORT);
+                    when ADDR_LIM_REG       => addr_lim_intern      <= mi_splitted_dwr(MI_BASE_PORT);
+                    when REFRESH_TICKS_REG  => refresh_period_intern<= mi_splitted_dwr(MI_BASE_PORT);
+                    when others             =>
                 end case;
             end if;
         end if;

@@ -11,10 +11,7 @@ use ieee.numeric_std.all;
 
 use work.math_pack.all;
 use work.type_pack.all;
-
--- TODO: 
---  Ticks OVF do not work in HW
---  Add ticks sum ovf 
+use work.hist_types.all;
 
 entity LATENCY_METER is
 generic (
@@ -24,7 +21,11 @@ generic (
     SUM_WIDTH                       : integer := 32;
     -- Number of tick counters (it limits how much request can run in parallel)
     -- If parallel requests count exceed this value, COUNTER_OVF is asserted
-    COUNTERS_CNT                    : integer := 50
+    COUNTERS_CNT                    : integer := 50;
+
+    HIST_VARIANT                    : HIST_T  := LOG;
+    HIST_CNTER_CNT                  : integer := 32;
+    HIST_CNT_WIDTH                  : integer := 32
 );
 port(
     -- Base
@@ -41,9 +42,15 @@ port(
     MIN_TICKS                       : out std_logic_vector(TICKS_WIDTH - 1 downto 0);
     MAX_TICKS                       : out std_logic_vector(TICKS_WIDTH - 1 downto 0);
 
+    -- Histogramer
+    HIST_SEL_CNTER                  : in  std_logic_vector(log2(HIST_CNTER_CNT) - 1 downto 0);
+    HIST_CNT                        : out std_logic_vector(HIST_CNT_WIDTH - 1 downto 0);
+
     -- Error detection
     TICKS_OVF                       : out std_logic; 
-    COUNTERS_OVF                    : out std_logic
+    COUNTERS_OVF                    : out std_logic;
+    SUM_OVF                         : out std_logic;
+    HIST_CNT_OVF                    : out std_logic
 );
 end entity;
 
@@ -53,8 +60,9 @@ architecture FULL of LATENCY_METER is
     -- Constants --
     ---------------
     constant INDEX_CNTERS_LIM       : std_logic_vector(log2(COUNTERS_CNT) - 1 downto 0)
-        := std_logic_vector(to_unsigned(COUNTERS_CNT - 1, log2(COUNTERS_CNT)));
-    constant TICKS_CNTERS_LIM       : std_logic_vector(TICKS_WIDTH - 1 downto 0) := (others => '1');
+        := std_logic_vector(to_unsigned(COUNTERS_CNT - 1, log2(COUNTERS_CNT))); -- When COUNTERS_CNT is not power of 2
+    constant TICKS_CNTERS_LIM       : std_logic_vector(TICKS_WIDTH - 1 downto 0)        := (others => '1');
+    constant SUM_LIM                : std_logic_vector(SUM_WIDTH - 1 downto 0)          := (others => '1');
 
     -------------
     -- Signals --
@@ -88,8 +96,15 @@ architecture FULL of LATENCY_METER is
     -- Indicates which index counter was recently incremented
     -- To determine if cyclic pool of counters was overflowed or is empty
     signal newest_incr              : std_logic;
+    signal oldest_incr              : std_logic;
+    -- Increment is made after CLK cycle => delayed incr signals
     signal newest_incr_delayed      : std_logic;
+    signal oldest_incr_delayed      : std_logic;
     signal index_cnters_eq          : std_logic;
+    signal pool_empty               : std_logic;
+
+    -- Sum ticks with additional 1b to detect overflow
+    signal sum_ticks_intern         : std_logic_vector(SUM_WIDTH downto 0);
 
 begin
 
@@ -114,6 +129,35 @@ begin
         DO              => oldest_cnter_onehot
     );
 
+    -- Check for overflow in one or more tick counters
+    tick_ovf_or_i : entity work.GEN_OR
+    generic map (
+        OR_WIDTH        => COUNTERS_CNT
+    )
+    port map (
+        DI              => tick_cnts_full and tick_cnts_en,
+        DO              => TICKS_OVF
+    );
+
+    histogramer_i : entity work.HISTOGRAMER
+    generic map (    
+        VARIANT         => HIST_VARIANT,
+        DATA_WIDTH      => TICKS_WIDTH,
+        CNT_WIDTH       => HIST_CNT_WIDTH,
+        CNTER_CNT       => HIST_CNTER_CNT
+    )
+    port map (    
+        CLK             => CLK,
+        RST             => RST,
+
+        INPUT_VLD       => ticks_to_process_vld,
+        INPUT           => ticks_to_process,
+
+        SEL_CNTER       => HIST_SEL_CNTER,
+        OUTPUT          => HIST_CNT,
+        CNT_OVF         => HIST_CNT_OVF
+    );
+
     ------------------------
     -- Interconnect logic --
     ------------------------
@@ -134,21 +178,14 @@ begin
         tick_cnts_en_clr(i)     <= oldest_cnter_onehot(i) and oldest_cnter_en;
     end generate;
 
-    newest_incr                 <= newest_cnter_en  and (not oldest_cnter_en);
+    newest_incr                 <= newest_cnter_en and (not oldest_cnter_en);
+    oldest_incr                 <= oldest_cnter_en and (not newest_cnter_en);
     index_cnters_eq             <= '1' when (unsigned(newest_cnter) = unsigned(oldest_cnter)) else
                                    '0';
-    COUNTERS_OVF                <= newest_incr_delayed and index_cnters_eq;
-
-    -- Check for overflow in one or more tick counters
-    ticks_ovf_p : process(all)
-        variable tmp : std_logic;
-    begin
-        tmp         := '0';
-        for i in 0 to COUNTERS_CNT - 1 loop
-            tmp     := tmp or (tick_cnts_full(i) and tick_cnts_en(i));
-        end loop;
-        TICKS_OVF   <= tmp;
-    end process;
+    SUM_OVF                     <= '1' when (sum_ticks_intern(SUM_WIDTH) = '1' and ticks_to_process_vld = '1') else 
+                                   '0'; 
+    SUM_TICKS                   <= sum_ticks_intern(SUM_WIDTH - 1 downto 0);
+    COUNTERS_OVF                <= newest_incr_delayed and index_cnters_eq and not pool_empty;
 
     ---------------
     -- Registers --
@@ -235,10 +272,10 @@ begin
     sum_ticks_p : process (CLK)
     begin
         if (rising_edge(CLK)) then
-            if (RST = '1') then
-                SUM_TICKS       <= (others => '0');
+            if (RST = '1' or SUM_OVF = '1') then
+                sum_ticks_intern <= (others => '0');
             elsif (ticks_to_process_vld = '1') then
-                SUM_TICKS       <= std_logic_vector(unsigned(SUM_TICKS) + unsigned(ticks_to_process));
+                sum_ticks_intern <= std_logic_vector(unsigned(sum_ticks_intern) + unsigned(ticks_to_process));
             end if;
         end if;
     end process;
@@ -269,6 +306,28 @@ begin
     begin
         if (rising_edge(CLK)) then
             newest_incr_delayed <= newest_incr;
+        end if;
+    end process;
+
+    oldest_incr_delayed_p : process (CLK)
+    begin
+        if (rising_edge(CLK)) then
+            oldest_incr_delayed <= oldest_incr;
+        end if;
+    end process;
+
+    pool_empty_p : process (CLK)
+    begin
+        if (rising_edge(CLK)) then
+            if (RST = '1') then
+                pool_empty      <= '1';
+            elsif (index_cnters_eq = '1') then 
+                if (newest_incr_delayed = '1') then 
+                    pool_empty      <= '0';
+                elsif (oldest_incr_delayed = '1') then 
+                    pool_empty      <= '1';
+                end if;
+            end if;
         end if;
     end process;
 

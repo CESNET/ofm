@@ -8,32 +8,44 @@ SPDX-License-Identifier: BSD-3-Clause
 
 #include "common.h"
 
+const unsigned AMM_GEN_BASE     = 0x00040;
+const unsigned AMM_PROBE_BASE   = 0x00060;
+const unsigned MMR_BASE         = 0x000B0;
+
 const unsigned RegAddr[] = {
     [CTRL_IN]               = 0x000000,
     [CTRL_OUT]              = 0x000004,
     [ERR_CNT]               = 0x000008,
     [BURST_CNT]             = 0x00000C,
     [ADDR_LIM]              = 0x000010,
+    [REFRESH_PERIOD]        = 0x000014,
+    [DEF_REFRESH_PERIOD]    = 0x000018,
 
-    [AMM_GEN_CTRL]          = 0x000040,
-    [AMM_GEN_ADDR]          = 0x000044,
-    [AMM_GEN_DATA]          = 0x000048,
-    [AMM_GEN_BURST]         = 0x00004C,
+    [AMM_GEN_CTRL]          = AMM_GEN_BASE + 0x000000,
+    [AMM_GEN_ADDR]          = AMM_GEN_BASE + 0x000004,
+    [AMM_GEN_SLICE]         = AMM_GEN_BASE + 0x000008,
+    [AMM_GEN_DATA]          = AMM_GEN_BASE + 0x00000C,
+    [AMM_GEN_BURST]         = AMM_GEN_BASE + 0x000010,
 
-    [PROBE_CTRL]            = 0x000080,
-    [PROBE_WR_TICKS]        = 0x000084,
-    [PROBE_RD_TICKS]        = 0x000088,
-    [PROBE_RW_TICKS]        = 0x00008C,
-    [PROBE_WR_WORDS]        = 0x000090,
-    [PROBE_RD_WORDS]        = 0x000094,
-    [PROBE_REQ_CNT]         = 0x000098,
-    [PROBE_LATENCY_SUM]     = 0x00009C,
-    [PROBE_LATENCY_MIN]     = 0x0000A0,
-    [PROBE_LATENCY_MAX]     = 0x0000A4,
-    [AMM_DATA_WIDTH_REG]    = 0x0000A8,
-    [AMM_ADDR_WIDTH_REG]    = 0x0000AC,
-    [AMM_BURST_WIDTH_REG]   = 0x0000B0,
-    [AMM_FREQ_REG]          = 0x0000B4,
+    [PROBE_CTRL]            = AMM_PROBE_BASE + 0x000000,
+    [PROBE_WR_TICKS]        = AMM_PROBE_BASE + 0x000004,
+    [PROBE_RD_TICKS]        = AMM_PROBE_BASE + 0x000008,
+    [PROBE_RW_TICKS]        = AMM_PROBE_BASE + 0x00000C,
+    [PROBE_WR_WORDS]        = AMM_PROBE_BASE + 0x000010,
+    [PROBE_RD_WORDS]        = AMM_PROBE_BASE + 0x000014,
+    [PROBE_REQ_CNT]         = AMM_PROBE_BASE + 0x000018,
+    [PROBE_LATENCY_SUM_1]   = AMM_PROBE_BASE + 0x00001C,
+    [PROBE_LATENCY_SUM_2]   = AMM_PROBE_BASE + 0x000020,
+    [PROBE_LATENCY_MIN]     = AMM_PROBE_BASE + 0x000024,
+    [PROBE_LATENCY_MAX]     = AMM_PROBE_BASE + 0x000028,
+    [PROBE_HIST_CNT]        = AMM_PROBE_BASE + 0x00002C,
+    [PROBE_HIST_SEL]        = AMM_PROBE_BASE + 0x000030,
+    [AMM_DATA_WIDTH_REG]    = AMM_PROBE_BASE + 0x000034,
+    [AMM_ADDR_WIDTH_REG]    = AMM_PROBE_BASE + 0x000038,
+    [AMM_BURST_WIDTH_REG]   = AMM_PROBE_BASE + 0x00003C,
+    [AMM_FREQ_REG]          = AMM_PROBE_BASE + 0x000040,
+    [LAT_TICKS_WIDTH_REG]   = AMM_PROBE_BASE + 0x000044,
+    [HIST_CNTER_CNT_REG]    = AMM_PROBE_BASE + 0x000048,
 };
 
 

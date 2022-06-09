@@ -21,11 +21,16 @@ use work.type_pack.all;
 -- ----------------------------------
 -- address      BASE + 0x04  
 --              address for read/write (indexed by AMM words in burst)
+--              also used for burst index when writing / reading to buffer
 -- ----------------------------------
--- r/w data     BASE + 0x08 
+-- slice        BASE + 0x08
+--              slice address in selected AMM word
+--              used when writing / reading to buffer
+-- ----------------------------------
+-- r/w data     BASE + 0x0C 
 --              one silce of the AMM word for manual r/w burst 
 -- ----------------------------------
--- burst cnt    BASE + 0x0C
+-- burst cnt    BASE + 0x10
 -- ----------------------------------
 
 entity AMM_GEN is
@@ -96,7 +101,7 @@ architecture FULL of AMM_GEN is
         MI_BUFF_RD,
         MI_BUFF_RD_REG,     -- DP_BRAM_OUT_REG
         MI_SEL_SLICE,       -- sel_slice_delayed
-        MI_SLICE_REG,        -- curr_slice_delayed
+        MI_SLICE_REG,       -- curr_slice_delayed
         MI_SET_DRDY
     );
 
@@ -104,15 +109,9 @@ architecture FULL of AMM_GEN is
     constant SLICES_CNT             : integer := AMM_DATA_WIDTH / MI_DATA_WIDTH;
 
     constant BURST_BITS             : integer := log2(MAX_BURST_CNT);
-    constant SLICES_BITS            : integer := log2(SLICES_CNT);
+    constant SLICES_BITS            : integer := max(log2(SLICES_CNT), 1);
 
     constant MI_ADDR_CUTOFF         : integer := log2(MI_DATA_WIDTH / 8); 
-
-    -- MI registers --
-    constant CTRL_REG_ID            : integer := 0;
-    constant ADDR_REG_ID            : integer := 1;
-    constant DATA_REG_ID            : integer := 2;
-    constant BURST_REG_ID           : integer := 3;
 
     -- in
     constant MEM_WR_BIT             : integer := 0;
@@ -135,12 +134,18 @@ architecture FULL of AMM_GEN is
     constant BUFF_WR_DELAY          : integer := 1;
     constant MI_DRDY_DELAY          : integer := 4;
 
-    function id_to_addr_f (addr : integer)
+    pure function id_to_addr_f (addr : integer)
     return std_logic_vector is 
         constant mi_addr_base_int   : integer := to_integer(unsigned(MI_ADDR_BASE(MI_ADDR_USED_BITS - 1 downto MI_ADDR_CUTOFF))); 
     begin
         return std_logic_vector(to_unsigned(mi_addr_base_int + addr, MI_ADDR_USED_BITS - MI_ADDR_CUTOFF));
     end function;
+
+    constant CTRL_REG_ADDR          : std_logic_vector(MI_ADDR_USED_BITS - 1 downto MI_ADDR_CUTOFF) := id_to_addr_f(0);
+    constant ADDR_REG_ADDR          : std_logic_vector(MI_ADDR_USED_BITS - 1 downto MI_ADDR_CUTOFF) := id_to_addr_f(1);
+    constant SLICE_REG_ADDR         : std_logic_vector(MI_ADDR_USED_BITS - 1 downto MI_ADDR_CUTOFF) := id_to_addr_f(2);
+    constant DATA_REG_ADDR          : std_logic_vector(MI_ADDR_USED_BITS - 1 downto MI_ADDR_CUTOFF) := id_to_addr_f(3);
+    constant BURST_REG_ADDR         : std_logic_vector(MI_ADDR_USED_BITS - 1 downto MI_ADDR_CUTOFF) := id_to_addr_f(4);
 
     -- ----------------------------------------------------------------------- --
 
@@ -157,8 +162,8 @@ architecture FULL of AMM_GEN is
 
     -- Slice from MI addr register
     signal sel_burst                : std_logic_vector(BURST_BITS - 1 downto 0);
-    signal sel_slice                : std_logic_vector(log2(SLICES_CNT) - 1 downto 0);
-    signal sel_slice_delayed        : std_logic_vector(log2(SLICES_CNT) - 1 downto 0);
+    signal sel_slice                : std_logic_vector(SLICES_BITS - 1 downto 0);
+    signal sel_slice_delayed        : std_logic_vector(SLICES_BITS - 1 downto 0);
     signal curr_word_from_mi        : std_logic;
     signal buff_wr                  : std_logic;
 
@@ -181,6 +186,7 @@ architecture FULL of AMM_GEN is
     -- Registers
     signal ctrl_reg                 : std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
     signal addr_reg                 : std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
+    signal slice_reg                : std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
     signal data_reg                 : std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
 
     signal curr_slice               : std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
@@ -270,10 +276,6 @@ begin
     -- MI BUS --
     mi_addr_sliced          <= MI_ADDR(MI_ADDR_USED_BITS - 1 downto MI_ADDR_CUTOFF);
 
-    -- MI ready signals
-    --MI_DRDY                 <= mi_drdy_intern;
-    --MI_ARDY                 <= MI_RD or MI_WR;
-
     -- CTRL reg
     ctrl_reg(BUFF_VLD_BIT)  <= buff_vld;
     ctrl_reg(AMM_READY_BIT) <= AMM_READY;
@@ -282,16 +284,9 @@ begin
         ctrl_reg(MEM_WR_BIT);
     
     -- Parsing addr reg
-    sel_slice               <= addr_reg(SLICES_BITS - 1 downto 0);
-    sel_burst               <= addr_reg(SLICES_BITS + BURST_BITS - 1 downto SLICES_BITS);
+    sel_slice               <= slice_reg(SLICES_BITS - 1 downto 0);
+    sel_burst               <= addr_reg(BURST_BITS - 1 downto 0);
     
-    --buff_wr                 <= '1' when (buff_mi_wr_ticks = BUFF_WR_DELAY and buff_mi_wr_runing = '1') else
-    --                           '0';
-    --curr_word_from_mi       <= '1' when (buff_mi_wr_ticks = WORD_FROM_MI_DELAY and buff_mi_wr_runing = '1') else
-    --                           '0';
-    --mi_drdy_intern          <= '1' when ((buff_mi_rd_ticks = MI_DRDY_DELAY and buff_mi_rd_runing = '1') or (MI_RD = '1' and RST = '0' and buff_mi_rd_runing = '0')) else
-    --                           '0';
-
     word_from_buff          <= slv_array_to_deser(word_from_buff_slv, SLICES_CNT);
     word_to_buff_g : for i in 0 to SLICES_CNT - 1 generate
         word_to_buff(i)     <= data_reg     when (mi_to_buff_en_delayed(i)) else
@@ -302,9 +297,9 @@ begin
 
     curr_slice              <= word_from_buff(to_integer(unsigned(sel_slice_delayed)));
                      
-    buff_mi_wr_start        <= '1' when (mi_addr_sliced = id_to_addr_f(DATA_REG_ID) and MI_WR = '1') else
+    buff_mi_wr_start        <= '1' when (mi_addr_sliced = DATA_REG_ADDR and MI_WR = '1') else
                                '0';
-    buff_mi_rd_start        <= '1' when (mi_addr_sliced = id_to_addr_f(DATA_REG_ID) and MI_RD = '1') else
+    buff_mi_rd_start        <= '1' when (mi_addr_sliced = DATA_REG_ADDR and MI_RD = '1') else
                                '0';
     buff_mi_wr_end          <= '1' when (buff_mi_wr_ticks = WR_MAX_TICKS - 1) else
                                '0';
@@ -339,13 +334,22 @@ begin
     mi_out_p : process (CLK)
     begin
         if (rising_edge(CLK)) then
-            case mi_addr_sliced is
-                when id_to_addr_f(CTRL_REG_ID)      => MI_DRD <= ctrl_reg;
-                when id_to_addr_f(ADDR_REG_ID)      => MI_DRD <= addr_reg;
-                when id_to_addr_f(DATA_REG_ID)      => MI_DRD <= curr_slice_delayed;
-                when id_to_addr_f(BURST_REG_ID)     => MI_DRD <= (BURST_BITS - 1 downto 0 => target_burst_cnt, others => '0');
-                when others                         => MI_DRD <= X"DEADBEEF";
-            end case;
+            -- Case can't be used because of warning:
+            -- "case choice should be a locally static expression"
+            -- (constants are inicialized with function that adds amm_gen base addr)
+            if (mi_addr_sliced = CTRL_REG_ADDR)     then 
+                MI_DRD <= ctrl_reg;
+            elsif (mi_addr_sliced = ADDR_REG_ADDR)  then 
+                MI_DRD <= addr_reg;
+            elsif (mi_addr_sliced = SLICE_REG_ADDR)  then 
+                MI_DRD <= slice_reg;
+            elsif (mi_addr_sliced = DATA_REG_ADDR)  then 
+                MI_DRD <= curr_slice_delayed;
+            elsif (mi_addr_sliced = BURST_REG_ADDR) then 
+                MI_DRD <= (BURST_BITS - 1 downto 0 => target_burst_cnt, others => '0');
+            else
+                MI_DRD <= X"DEADBEEF";
+            end if;
         end if;
     end process;
 
@@ -357,16 +361,21 @@ begin
                 ctrl_reg(CTRL_LAST_IN_BIT downto 0)                         <= (others => '0');
                 ctrl_reg(MI_DATA_WIDTH - 1 downto CTRL_LAST_OUT_BIT + 1)    <= (others => '0');
                 addr_reg                                                    <= (others => '0');
+                slice_reg                                                   <= (others => '0');
                 data_reg                                                    <= (others => '0');
                 target_burst_cnt                                            <= std_logic_vector(to_unsigned(INIT_BURST_CNT, target_burst_cnt'length));
             elsif (MI_WR = '1') then
-                case mi_addr_sliced is
-                    when id_to_addr_f(CTRL_REG_ID)      => ctrl_reg(CTRL_LAST_IN_BIT downto 0)  <= MI_DWR(CTRL_LAST_IN_BIT downto 0);
-                    when id_to_addr_f(ADDR_REG_ID)      => addr_reg                             <= MI_DWR;
-                    when id_to_addr_f(DATA_REG_ID)      => data_reg                             <= MI_DWR;
-                    when id_to_addr_f(BURST_REG_ID)     => target_burst_cnt                     <= MI_DWR(BURST_BITS - 1 downto 0);
-                    when others                         =>
-                end case;
+                if (mi_addr_sliced = CTRL_REG_ADDR)     then 
+                    ctrl_reg(CTRL_LAST_IN_BIT downto 0)  <= MI_DWR(CTRL_LAST_IN_BIT downto 0);
+                elsif (mi_addr_sliced = ADDR_REG_ADDR)  then 
+                    addr_reg                             <= MI_DWR;
+                elsif (mi_addr_sliced = SLICE_REG_ADDR)  then 
+                    slice_reg                            <= MI_DWR;
+                elsif (mi_addr_sliced = DATA_REG_ADDR)  then 
+                    data_reg                             <= MI_DWR;
+                elsif (mi_addr_sliced = BURST_REG_ADDR) then 
+                    target_burst_cnt                     <= MI_DWR(BURST_BITS - 1 downto 0);
+                end if;
             end if;
         end if;
     end process;
@@ -679,7 +688,7 @@ begin
             when MI_READY       =>
                 MI_ARDY             <= '1'; 
 
-                if (mi_addr_sliced /= id_to_addr_f(DATA_REG_ID) and MI_RD = '1') then
+                if (mi_addr_sliced /= DATA_REG_ADDR and MI_RD = '1') then
                     MI_DRDY     <= '1';
                 end if;
 
@@ -714,9 +723,9 @@ begin
         case curr_mi_state is
 
             when MI_READY       =>
-                if      (mi_addr_sliced = id_to_addr_f(DATA_REG_ID) and MI_WR = '1') then
+                if      (mi_addr_sliced = DATA_REG_ADDR and MI_WR = '1') then
                     next_mi_state       <= MI_DEC_SLICE;
-                elsif   (mi_addr_sliced = id_to_addr_f(DATA_REG_ID) and MI_RD = '1') then
+                elsif   (mi_addr_sliced = DATA_REG_ADDR and MI_RD = '1') then
                     next_mi_state       <= MI_BUFF_RD;
                 end if;
                    

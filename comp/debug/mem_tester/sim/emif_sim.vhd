@@ -51,11 +51,11 @@ end entity;
 architecture FULL of EMIF_SIM is
     constant MEM_INIT_TIME                  : time := CLK_PERIOD * 4;   
     -- Max random CLK cycles cnt of AMM READY being at 0
-    constant NOT_READY_MAX_DELAY            : integer := 5;
+    constant NOT_READY_MAX_DELAY            : integer := 20;
     -- Max random period of asserting AMM READY to 0 for random time
-    constant NOT_READY_MAX_PERIOD           : integer := 10;     
+    constant NOT_READY_MAX_PERIOD           : integer := 20;     
 
-    constant NOT_VALID_MAX_DELAY            : integer := 10;
+    constant NOT_VALID_MAX_DELAY            : integer := 100;
     constant NOT_VALID_MAX_DELAY_CHANCE     : real := 0.1;     
 
     constant MEM_READ_TIME                  : time := CLK_PERIOD * 4;   
