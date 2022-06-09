@@ -1,7 +1,7 @@
 /*
  * file       : convertor to  
  * Copyright (C) 2021 CESNET z. s. p. o.
- * description: convertor from mi::monitor to reg2bus predictor 
+ * description: convertor from uvm_mi::monitor to reg2bus predictor 
  * date       : 2021
  * author     : Radek Iša <isa@cesnet.cz>
  *
@@ -34,7 +34,7 @@ endclass
 
 // Monitor convert bus transaction to reg transaction 
 class reg2bus_monitor#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_monitor;
-    `uvm_component_param_utils(mi::reg2bus_monitor#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
+    `uvm_component_param_utils(uvm_mi::reg2bus_monitor#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
     
     reg2bus_class rq_que[$];
     // Reference to the virtual interface, initialized during the connect phase by parent agent.

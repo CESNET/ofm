@@ -9,7 +9,7 @@ class driver_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) exte
 
     // ------------------------------------------------------------------------
     // Register component to database
-    `uvm_component_param_utils(mfb::driver_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH))
+    `uvm_component_param_utils(uvm_mfb::driver_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH))
 
     // ------------------------------------------------------------------------
     // Virtual interface of rx driver
@@ -35,14 +35,14 @@ class driver_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) exte
 
             if (req != null) begin
                 for (int i = 0; i < REGIONS; i++) begin
-                    vif.driver_rx_cb.DATA[(i+1)*DATA_WIDTH - 1 -: DATA_WIDTH]         <= req.ITEMS[i];
-                    vif.driver_rx_cb.META[(i+1)*META_WIDTH - 1 -: META_WIDTH]         <= req.META[i];
-                    vif.driver_rx_cb.SOF_POS[(i+1)*SOF_POS_WIDTH -1 -: SOF_POS_WIDTH] <= req.SOF_POS[i];
-                    vif.driver_rx_cb.EOF_POS[(i+1)*EOF_POS_WIDTH -1 -: EOF_POS_WIDTH] <= req.EOF_POS[i];
+                    vif.driver_rx_cb.DATA[(i+1)*DATA_WIDTH - 1 -: DATA_WIDTH]         <= req.data[i];
+                    vif.driver_rx_cb.META[(i+1)*META_WIDTH - 1 -: META_WIDTH]         <= req.meta[i];
+                    vif.driver_rx_cb.SOF_POS[(i+1)*SOF_POS_WIDTH -1 -: SOF_POS_WIDTH] <= req.sof_pos[i];
+                    vif.driver_rx_cb.EOF_POS[(i+1)*EOF_POS_WIDTH -1 -: EOF_POS_WIDTH] <= req.eof_pos[i];
                 end
-                vif.driver_rx_cb.SOF      <= req.SOF;
-                vif.driver_rx_cb.EOF      <= req.EOF;
-                vif.driver_rx_cb.SRC_RDY  <= req.SRC_RDY;
+                vif.driver_rx_cb.SOF      <= req.sof;
+                vif.driver_rx_cb.EOF      <= req.eof;
+                vif.driver_rx_cb.SRC_RDY  <= req.src_rdy;
                 rsp.copy(req);
                 rsp.set_id_info(req);
                 seq_item_port.item_done();
@@ -60,7 +60,7 @@ class driver_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) exte
             @(vif.driver_rx_cb);
 
             if (req != null) begin
-                rsp.DST_RDY = vif.driver_rx_cb.DST_RDY;
+                rsp.dst_rdy = vif.driver_rx_cb.DST_RDY;
                 seq_item_port.put_response(rsp);
             end
         end
@@ -70,7 +70,7 @@ endclass
 
 // Driver of mfb tx interface
 class driver_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extends uvm_driver #(sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH));
-    `uvm_component_param_utils(mfb::driver_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH))
+    `uvm_component_param_utils(uvm_mfb::driver_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH))
 
     // ------------------------------------------------------------------------
     // Virtual interface of driver
@@ -85,7 +85,7 @@ class driver_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) exte
     // ------------------------------------------------------------------------
     // Starts driving signals to interface
     task run_phase(uvm_phase phase);
-        req = mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::type_id::create("mfb_rsp");;
+        req = uvm_mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::type_id::create("mfb_rsp");;
 
         forever begin
             // Get new sequence item to drive to interface
@@ -93,7 +93,7 @@ class driver_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) exte
 
             // Assign values from requested sequence item to the interface
             if (req != null) begin
-                vif.driver_tx_cb.DST_RDY <= req.DST_RDY;
+                vif.driver_tx_cb.DST_RDY <= req.dst_rdy;
                 seq_item_port.item_done();
             end else begin
                 vif.driver_tx_cb.DST_RDY <= 1'b0;
@@ -107,5 +107,4 @@ class driver_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) exte
             end
         end
     endtask
-
 endclass

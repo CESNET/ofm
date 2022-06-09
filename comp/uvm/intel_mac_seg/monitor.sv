@@ -10,7 +10,7 @@
 
 // Definition of mvb monitor
 class monitor#(SEGMENTS) extends uvm_monitor;
-    `uvm_component_param_utils(intel_mac_seg::monitor#(SEGMENTS))
+    `uvm_component_param_utils(uvm_intel_mac_seg::monitor#(SEGMENTS))
 
     // ------------------------------------------------------------------------
     // Variables

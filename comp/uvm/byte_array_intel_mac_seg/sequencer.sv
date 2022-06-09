@@ -9,11 +9,11 @@
 */
 
 class sequencer extends uvm_sequencer;
-    `uvm_component_utils(byte_array_intel_mac_seg::sequencer)
+    `uvm_component_utils(uvm_byte_array_intel_mac_seg::sequencer)
     localparam LOGIC_WIDTH = 6;
 
-    byte_array::sequencer                          m_packet;
-    logic_vector::sequencer#(LOGIC_WIDTH)          m_error;
+    uvm_byte_array::sequencer                      m_packet;
+    uvm_logic_vector::sequencer#(LOGIC_WIDTH)          m_error;
 
     logic ready[$];
 

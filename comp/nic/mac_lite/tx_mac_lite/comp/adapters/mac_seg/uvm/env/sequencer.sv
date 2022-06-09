@@ -12,12 +12,12 @@
 ////////////////////////////////////////////////////////////////////////////////
 // vurtual sequencer.
 class sequencer#(SEGMENTS) extends uvm_sequencer;
-    `uvm_component_param_utils(mac_seq_tx_ver::sequencer#(SEGMENTS));
+    `uvm_component_param_utils(uvm_mac_seg_tx::sequencer#(SEGMENTS));
 
     // variables
-    reset::sequencer                      reset_sequencer;
-    byte_array_mfb_env::sequencer_rx#(1)  rx_sequencer;
-    intel_mac_seg::sequencer#(SEGMENTS)   tx_sequencer;
+    uvm_reset::sequencer                      reset_sequencer;
+    uvm_byte_array_mfb::sequencer_rx#(1)  rx_sequencer;
+    uvm_intel_mac_seg::sequencer#(SEGMENTS)   tx_sequencer;
 
     //functions
     function new (string name, uvm_component parent);

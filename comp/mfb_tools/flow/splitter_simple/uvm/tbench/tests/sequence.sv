@@ -4,7 +4,7 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause
 
-class meta_sequence #(META_WIDTH, CHANNELS) extends uvm_sequence#(logic_vector::sequence_item#($clog2(CHANNELS) + META_WIDTH));
+class meta_sequence #(META_WIDTH, CHANNELS) extends uvm_sequence#(uvm_logic_vector::sequence_item#($clog2(CHANNELS) + META_WIDTH));
     `uvm_object_param_utils(test::meta_sequence #(META_WIDTH, CHANNELS));
 
     function new (string name = "meta_sequence");
@@ -13,7 +13,7 @@ class meta_sequence #(META_WIDTH, CHANNELS) extends uvm_sequence#(logic_vector::
 
     task body();
         forever begin
-            req = logic_vector::sequence_item#($clog2(CHANNELS) + META_WIDTH)::type_id::create("req");
+            req = uvm_logic_vector::sequence_item#($clog2(CHANNELS) + META_WIDTH)::type_id::create("req");
 
             start_item(req);
             assert(req.randomize() with {data[$clog2(CHANNELS) + META_WIDTH-1 : META_WIDTH] inside {[0: CHANNELS-1]}; });
@@ -24,17 +24,17 @@ endclass
 
 class virt_seq #(META_WIDTH, CHANNELS) extends uvm_sequence;
     `uvm_object_param_utils(test::virt_seq #(META_WIDTH, CHANNELS))
-    `uvm_declare_p_sequencer(byte_array_mfb_env::sequencer_rx#($clog2(CHANNELS) + META_WIDTH))
+    `uvm_declare_p_sequencer(uvm_byte_array_mfb::sequencer_rx#($clog2(CHANNELS) + META_WIDTH))
 
     function new (string name = "virt_seq");
         super.new(name);
     endfunction
 
-    byte_array::sequence_lib              m_byte_array_seq;
+    uvm_byte_array::sequence_lib              m_byte_array_seq;
     meta_sequence #(META_WIDTH, CHANNELS) m_logic_vector_seq;
 
     task pre_body();
-        m_byte_array_seq   = byte_array::sequence_lib::type_id::create("m_byte_array_seq");
+        m_byte_array_seq   = uvm_byte_array::sequence_lib::type_id::create("m_byte_array_seq");
         m_byte_array_seq.init_sequence();
         m_byte_array_seq.min_random_count = 50;
         m_byte_array_seq.max_random_count = 70;

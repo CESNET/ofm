@@ -7,7 +7,7 @@
 `ifndef SPLITTER_SIMPLE_GEN_ENV_SV
 `define SPLITTER_SIMPLE_GEN_ENV_SV
 
-package splitter_simple_env;
+package uvm_splitter_simple;
     
     `include "uvm_macros.svh"
     import uvm_pkg::*;

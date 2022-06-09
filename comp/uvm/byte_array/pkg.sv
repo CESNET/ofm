@@ -11,7 +11,7 @@
 `ifndef BYTE_ARRAY_PKG
 `define BYTE_ARRAY_PKG
 
-package byte_array;
+package uvm_byte_array;
 
     `include "uvm_macros.svh"
     import uvm_pkg::*;

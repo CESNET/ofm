@@ -12,7 +12,7 @@ class monitor #(ITEMS, ITEM_WIDTH) extends uvm_monitor;
 
     // ------------------------------------------------------------------------
     // Registration of agent to databaze
-    `uvm_component_param_utils(mvb::monitor #(ITEMS, ITEM_WIDTH))
+    `uvm_component_param_utils(uvm_mvb::monitor #(ITEMS, ITEM_WIDTH))
 
     // ------------------------------------------------------------------------
     // Variables
@@ -44,13 +44,13 @@ class monitor #(ITEMS, ITEM_WIDTH) extends uvm_monitor;
 
             // Capture actual data at interface
 	        si = sequence_item #(ITEMS, ITEM_WIDTH)::type_id::create("si");
-            for (int i = 1 ; i <= ITEMS ; i++ ) begin
-                si.DATA[i-1] = vif.monitor_cb.DATA[i*ITEM_WIDTH - 1 -: ITEM_WIDTH];
+            for (int i = 0 ; i < ITEMS ; i++ ) begin
+                si.data[i] = vif.monitor_cb.DATA[(i+1)*ITEM_WIDTH - 1 -: ITEM_WIDTH];
             end
 
-            si.VLD      = vif.monitor_cb.VLD;
-            si.SRC_RDY  = vif.monitor_cb.SRC_RDY;
-            si.DST_RDY  = vif.monitor_cb.DST_RDY;
+            si.vld      = vif.monitor_cb.VLD;
+            si.src_rdy  = vif.monitor_cb.SRC_RDY;
+            si.dst_rdy  = vif.monitor_cb.DST_RDY;
 
             // Write sequence item to analysis port.
             analysis_port.write(si);

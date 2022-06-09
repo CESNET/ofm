@@ -8,7 +8,7 @@
 class agent #(DATA_WIDTH) extends uvm_agent;
 
     // registration of component tools
-    `uvm_component_param_utils(logic_vector::agent #(DATA_WIDTH))
+    `uvm_component_param_utils(uvm_logic_vector::agent #(DATA_WIDTH))
 
     // -----------------------
     // Variables.

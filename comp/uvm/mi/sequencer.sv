@@ -9,7 +9,7 @@
 */
 
 class sequencer_slave #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_sequencer #(sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH), sequence_item_respons #(DATA_WIDTH));
-    `uvm_component_param_utils(mi::sequencer_slave #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
+    `uvm_component_param_utils(uvm_mi::sequencer_slave #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
 
     function new(string name = "sequencer", uvm_component parent);
         super.new(name, parent);
@@ -18,10 +18,10 @@ endclass
 
 
 class sequencer_master #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_sequencer #(sequence_item_respons #(DATA_WIDTH), sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH));
-    `uvm_component_param_utils(mi::sequencer_master #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
+    `uvm_component_param_utils(uvm_mi::sequencer_master #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
 
     sequence_item_request#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH) tr_rd[$];
-    reset::sync_terminate sync;
+    uvm_reset::sync_terminate sync;
 
     function new(string name = "sequencer", uvm_component parent);
         super.new(name, parent);

@@ -13,7 +13,7 @@
 
 class monitor extends uvm_monitor;
 
-    `uvm_component_utils(byte_array::monitor)
+    `uvm_component_utils(uvm_byte_array::monitor)
 
     // Used to send transactions to all connected components.
     uvm_analysis_port #(sequence_item) analysis_port;

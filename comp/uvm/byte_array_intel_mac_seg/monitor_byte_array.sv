@@ -9,12 +9,12 @@
 */
 
 
-class monitor_byte_array#(SEGMENTS) extends byte_array::monitor;
-    `uvm_component_param_utils(byte_array_intel_mac_seg::monitor_byte_array#(SEGMENTS))
+class monitor_byte_array#(SEGMENTS) extends uvm_byte_array::monitor;
+    `uvm_component_param_utils(uvm_byte_array_intel_mac_seg::monitor_byte_array#(SEGMENTS))
 
-    uvm_analysis_imp #(intel_mac_seg::sequence_item #(SEGMENTS), monitor_byte_array#(SEGMENTS)) analysis_export;
-    byte_array::sequence_item hl_tr;
-    reset::sync_terminate reset_sync;
+    uvm_analysis_imp #(uvm_intel_mac_seg::sequence_item #(SEGMENTS), monitor_byte_array#(SEGMENTS)) analysis_export;
+    uvm_byte_array::sequence_item hl_tr;
+    uvm_reset::sync_terminate reset_sync;
 
     typedef enum {FRAME, NO_FRAME} state_t;
     state_t state;
@@ -26,7 +26,7 @@ class monitor_byte_array#(SEGMENTS) extends byte_array::monitor;
         reset_sync = new();
     endfunction
 
-    virtual function void write(intel_mac_seg::sequence_item #(SEGMENTS) tr);
+    virtual function void write(uvm_intel_mac_seg::sequence_item #(SEGMENTS) tr);
         //check if in past has been set reset
         if (reset_sync.has_been_reset()) begin
             state = NO_FRAME;
@@ -58,7 +58,7 @@ class monitor_byte_array#(SEGMENTS) extends byte_array::monitor;
                 end
 
                 state = NO_FRAME;
-                hl_tr = byte_array::sequence_item::type_id::create("hl_tr", this);
+                hl_tr = uvm_byte_array::sequence_item::type_id::create("hl_tr", this);
                 hl_tr.data = data;
                 analysis_port.write(hl_tr);
             end

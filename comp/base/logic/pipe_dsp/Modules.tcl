@@ -4,9 +4,9 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-set PKG_BASE2 "$COMP_BASE/base/pkg"
-
-set COMPONENTS [list [list "VCOMP" $PKG_BASE2 "VCOMPONENTS"]]
+#set PKG_BASE2 "$COMP_BASE/base/pkg"
+#
+#set COMPONENTS [list [list "VCOMP" $PKG_BASE2 "VCOMPONENTS"]]
 
 set MOD "$MOD $ENTITY_BASE/dsp_pipe_3x48.vhd"
 set MOD "$MOD $ENTITY_BASE/dsp_pipe_3x.vhd"

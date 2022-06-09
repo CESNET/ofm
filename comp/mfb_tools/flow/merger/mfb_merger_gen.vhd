@@ -110,8 +110,9 @@ architecture FULL of MFB_MERGER_GEN is
 
     function get_payload_en (stage, index : integer) return boolean is
     begin
-        report "inputs " & to_string(MERGER_INPUTS) & "; inputs 2 pow " & to_string(MERGER_INPUTS_2_POW) & "; stages " & to_string(TREE_STAGES);
-        report "gen_payload_en ( " & to_string(stage) & " , " & to_string(index) & " )";
+        --JC: Reports do not work in Vivado!
+        --report "inputs " & to_string(MERGER_INPUTS) & "; inputs 2 pow " & to_string(MERGER_INPUTS_2_POW) & "; stages " & to_string(TREE_STAGES);
+        --report "gen_payload_en ( " & to_string(stage) & " , " & to_string(index) & " )";
         if (stage /= 0) then
             -- Recursive call to previous stage
             return get_payload_en(stage-1,2*index) or get_payload_en(stage-1,2*index+1);

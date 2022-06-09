@@ -7,7 +7,7 @@
 `ifndef MVB_PKG
 `define MVB_PKG
 
-package mvb;
+package uvm_mvb;
 
     `include "uvm_macros.svh"
     import uvm_pkg::*;

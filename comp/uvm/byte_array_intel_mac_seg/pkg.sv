@@ -7,7 +7,7 @@
 `ifndef BYTE_ARRAY_INTEL_MAC_SEG_PKG
 `define BYTE_ARRAY_INTEL_MAC_SEG_PKG
 
-package byte_array_intel_mac_seg;
+package uvm_byte_array_intel_mac_seg;
 
     `include "uvm_macros.svh"
     import uvm_pkg::*;

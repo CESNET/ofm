@@ -9,10 +9,7 @@
 
 // This is mvb rx agent, which declares basic components.
 class agent_rx #(ITEMS, ITEM_WIDTH) extends uvm_agent;
-
-    // ------------------------------------------------------------------------
-    // Registration of agent to databaze
-    `uvm_component_param_utils(mvb::agent_rx #(ITEMS, ITEM_WIDTH))
+    `uvm_component_param_utils(uvm_mvb::agent_rx #(ITEMS, ITEM_WIDTH))
 
     // ------------------------------------------------------------------------
     // Variables
@@ -20,7 +17,7 @@ class agent_rx #(ITEMS, ITEM_WIDTH) extends uvm_agent;
 
     // ------------------------------------------------------------------------
     // Agent's base components
-    reset::sync_cbs                      reset_sync;
+    uvm_reset::sync_cbs                  reset_sync;
     sequencer       #(ITEMS, ITEM_WIDTH) m_sequencer;
     driver_rx       #(ITEMS, ITEM_WIDTH) m_driver;
     monitor         #(ITEMS, ITEM_WIDTH) m_monitor;
@@ -73,24 +70,21 @@ class agent_rx #(ITEMS, ITEM_WIDTH) extends uvm_agent;
         if(get_is_active() == UVM_ACTIVE) begin
             m_driver.vif = vif;
             m_driver.seq_item_port.connect(m_sequencer.seq_item_export);
+            // Connect reset
+            reset_sync.push_back(m_sequencer.reset_sync);
         end
 
         // Connect monitor
         m_monitor.vif = vif;
         analysis_port = m_monitor.analysis_port;
 
-        // Connect reset
-        reset_sync.push_back(m_sequencer.reset_sync);
     endfunction
 
 endclass
 
 // This is mvb tx agent, which declares basic components.
 class agent_tx #(ITEMS, ITEM_WIDTH) extends uvm_agent;
-
-    // ------------------------------------------------------------------------
-    // Registration of agent to databaze
-    `uvm_component_param_utils(mvb::agent_tx #(ITEMS, ITEM_WIDTH))
+    `uvm_component_param_utils(uvm_mvb::agent_tx #(ITEMS, ITEM_WIDTH))
 
     // ------------------------------------------------------------------------
     // Variables
@@ -98,7 +92,7 @@ class agent_tx #(ITEMS, ITEM_WIDTH) extends uvm_agent;
 
     // ------------------------------------------------------------------------
     // Agent's base components
-    reset::sync_cbs                      reset_sync;
+    uvm_reset::sync_cbs                      reset_sync;
     sequencer       #(ITEMS, ITEM_WIDTH) m_sequencer;
     driver_tx       #(ITEMS, ITEM_WIDTH) m_driver;
     monitor         #(ITEMS, ITEM_WIDTH) m_monitor;

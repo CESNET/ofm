@@ -7,7 +7,7 @@
 `ifndef FIFOX_ENV_SV
 `define FIFOX_ENV_SV
 
-package env;
+package uvm_asfifox;
     
     `include "uvm_macros.svh"
     import uvm_pkg::*;

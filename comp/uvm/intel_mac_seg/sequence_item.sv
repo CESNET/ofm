@@ -9,7 +9,7 @@
 */
 
 class sequence_item #(SEGMENTS)extends uvm_sequence_item;
-    `uvm_object_param_utils(intel_mac_seg::sequence_item#(SEGMENTS));
+    `uvm_object_param_utils(uvm_intel_mac_seg::sequence_item#(SEGMENTS));
 
     rand logic [64-1:0] data[SEGMENTS];
     rand logic          inframe[SEGMENTS];

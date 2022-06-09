@@ -9,7 +9,7 @@
 */
 
 class reg2bus#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_env;
-    `uvm_component_param_utils(mi::reg2bus#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
+    `uvm_component_param_utils(uvm_mi::reg2bus#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
 
     uvm_reg_predictor #(reg2bus_class)                      predictor;
     reg2bus_adapter#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)    adapter;
@@ -47,7 +47,7 @@ endclass
 
 
 class regmodel#(type REG_TYPE, int unsigned DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_env;
-    `uvm_component_param_utils(mi::regmodel#(REG_TYPE, DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
+    `uvm_component_param_utils(uvm_mi::regmodel#(REG_TYPE, DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
     
     regmodel_config                                   m_config; 
     agent_slave #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH) m_agent;
@@ -69,7 +69,7 @@ class regmodel#(type REG_TYPE, int unsigned DATA_WIDTH, ADDR_WIDTH, META_WIDTH =
             `uvm_fatal(this.get_full_name(), "\n\tThis component doesnt support PASSIVE version. It is implemented in future if it will be needed")
         end
 
-        uvm_config_db#(mi::config_item)::set(this, "m_agent", "m_config", m_config.agent);
+        uvm_config_db#(uvm_mi::config_item)::set(this, "m_agent", "m_config", m_config.agent);
 
 
         m_agent     = agent_slave #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)::type_id::create("m_agent", this);

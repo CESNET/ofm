@@ -4,10 +4,10 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause
 
-`ifndef BYTE_ARRAY_MFB_ENV_PKG
-`define BYTE_ARRAY_MFB_ENV_PKG
+`ifndef BYTE_ARRAY_MFB_PKG
+`define BYTE_ARRAY_MFB_PKG
 
-package byte_array_mfb_env;
+package uvm_byte_array_mfb;
 
     `include "uvm_macros.svh"
     import uvm_pkg::*;

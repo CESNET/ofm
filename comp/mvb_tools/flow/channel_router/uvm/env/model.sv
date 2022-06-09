@@ -29,7 +29,7 @@ class reg_cbs extends uvm_reg_cbs;
 endclass
 
 class model#(INPUT_CHANNELS, OUTPUT_CHANNELS, RESET_TYPE, OPT_MODE) extends uvm_component;
-    `uvm_component_param_utils(channel_router::model#(INPUT_CHANNELS, OUTPUT_CHANNELS, RESET_TYPE, OPT_MODE))
+    `uvm_component_param_utils(uvm_channel_router::model#(INPUT_CHANNELS, OUTPUT_CHANNELS, RESET_TYPE, OPT_MODE))
 
     local regmodel#(INPUT_CHANNELS, OUTPUT_CHANNELS, RESET_TYPE) m_regmodel;
     local model_data channel[INPUT_CHANNELS];
