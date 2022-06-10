@@ -6,8 +6,9 @@ from ast import Str
 import os
 import sys
 import argparse
+from unittest import TestProgram, result
 
-from py_base.mem_tester_parser import MemTestParams
+from py_base.mem_tester_parser import MemTestParams, MemTesterParser
 from py_base.data_manager      import DataLoader, DataSaver
 from py_base.graph_gen         import GraphGen
 from py_base.pdf_gen           import PDFGen
@@ -39,6 +40,18 @@ def err(code, txt):
     print(txt, file = sys.stderr)
     sys.exit(code)
 
+def argparse_float_range(min, max):
+    def float_range_checker(arg):
+        try:
+            f = float(arg)
+        except ValueError:    
+            raise argparse.ArgumentTypeError("must be a floating point number")
+        if f < min or f > max:
+            raise argparse.ArgumentTypeError("must be in range [" + str(min) + " .. " + str(max) + "]")
+        return f
+
+    return float_range_checker
+
 def parseParams():
     parser = argparse.ArgumentParser(description =
         """This program runs multiple memory tests using mem_tester component
@@ -46,8 +59,13 @@ def parseParams():
         inside mem_tester.""")
     parser.add_argument('--infoFile', metavar='file', type=argparse.FileType('r'),
                         help = """File with additional info about performed tests.""")
-    parser.add_argument('--info', action='store_true',
+    parser.add_argument('-i', '--info', action='store_true',
                         help = """User input with additional info about performed tests.""")
+    parser.add_argument('-k', '--scale', type = argparse_float_range(0.0, 1.0),
+                        help = 
+                            "Size of the memory address space that will be tested [0.0 - 1.0]. "
+                            "Can be used to reduce test duration. "
+                            "Default value is " + str(test_scale))
 
     args = parser.parse_args()
     return args
@@ -106,6 +124,9 @@ if __name__ == '__main__':
     elif args.infoFile:
         testInfo = args.infoFile.read()
 
+    if args.scale:
+        test_scale = args.scale
+
     if not os.path.isdir(fig_path):
         os.makedirs(fig_path)
 
@@ -116,7 +137,7 @@ if __name__ == '__main__':
             ))
 
     compCnt     = DataLoader.get_comp_cnt()
-    pdfGen      = PDFGen(result_report, testInfo)
+    pdfGen      = PDFGen(result_report, test_scale, testInfo)
     dataSaver   = DataSaver()
     dataSaver.add_value("comp_cnt", compCnt)
 
@@ -130,38 +151,79 @@ if __name__ == '__main__':
 
         graphGen    = GraphGen(fig_path, test_cnt, burstSeq, max_burst, burst_size, freq)
 
-        print ("Testing memory: {0}".format(i))
-        iterCnt = int(test_cnt * (max_burst / burst_step) * 4 + 1)
+        print ("Resetting tester {0} ...".format(i))
+        MemTesterParser.rst_tester(i)
+        print ("Testing memory iterace {0} ...".format(i))
+        iterCnt = int(6 * test_cnt * len(burstSeq) + 1)
         currIter = 0
         prevIter = 0
         printProgressBar(currIter, iterCnt)
 
+        all_data = { }
         testParams  = MemTestParams(testScale=test_scale)
+        testParams.burst = 1
+        testParams.refreshPeriod = dataLoader.devConfig["DEF_REFRESH_PERIOD"]
+
+        # test on the whole memory to check for errors
+        testParams.testScale = 1.0
+        tree = dataSaver.create_sub_tree("seq_long_test")
+        all_data["seq_long"] = dataLoader.get_test_res(testParams, tree) 
+        testParams.testScale = test_scale
 
         tree = dataSaver.create_sub_tree("seq_test")
-        all_data_seq = dataLoader.test_multiple(testParams, test_cnt, burstSeq, tree)
-        graphGen.plot_all_data(all_data_seq, "{0}_seq".format(i), "Sequential indexing")
+        all_data["seq"] = dataLoader.test_multiple(testParams, test_cnt, burstSeq, tree)
+        graphGen.plot_all_data(all_data["seq"], "{0}_seq".format(i), "Sequential indexing")
 
         tree = dataSaver.create_sub_tree("rand_test")
         testParams.randOn = True
-        all_data_rand = dataLoader.test_multiple(testParams, test_cnt, burstSeq, tree)
-        graphGen.plot_all_data(all_data_rand, "{0}_rand".format(i), "Random indexing")
+        all_data["rand"] = dataLoader.test_multiple(testParams, test_cnt, burstSeq, tree)
+        graphGen.plot_all_data(all_data["rand"], "{0}_rand".format(i), "Random indexing")
 
         # only one simultanous read transaction
         tree = dataSaver.create_sub_tree("seq_o_test")
         testParams.randOn = False
         testParams.oneSimult = True
-        all_data_seq_o = dataLoader.test_multiple(testParams, test_cnt, burstSeq, tree)
-        graphGen.plot_all_data(all_data_seq_o, "{0}_seq_o".format(i), "Sequential indexing (only 1 simult)")
+        all_data["seq_o"] = dataLoader.test_multiple(testParams, test_cnt, burstSeq, tree)
+        graphGen.plot_all_data(all_data["seq_o"], "{0}_seq_o".format(i), "Sequential indexing (only 1 simult)")
 
         tree = dataSaver.create_sub_tree("rand_o_test")
         testParams.randOn = True
         testParams.oneSimult = True
-        all_data_rand_o = dataLoader.test_multiple(testParams, test_cnt, burstSeq, tree)
-        graphGen.plot_all_data(all_data_rand_o, "{0}_rand_o".format(i), "Random indexing (only 1 simult)")
+        all_data["rand_o"] = dataLoader.test_multiple(testParams, test_cnt, burstSeq, tree)
+        graphGen.plot_all_data(all_data["rand_o"], "{0}_rand_o".format(i), "Random indexing (only 1 simult)")
 
-        pdfGen.report(fig_path, i, dataLoader.devConfig, all_data_seq, all_data_rand, all_data_seq_o, all_data_rand_o)
+        # without refresh #
+        testParams.randOn = False
+        testParams.oneSimult = True
+        testParams.refreshPeriod = 2 ** 32 - 1  # set max refresh period
 
+        # first test whole memory to see how much errors occurs with disabled refreshing
+        testParams.testScale = 1.0
+        testParams.burst = 1
+        testParams.oneSimult = False
+        tree = dataSaver.create_sub_tree("seq_o_no_refr_long_test")
+        all_data["seq_o_no_refr_long"] = dataLoader.get_test_res(testParams, tree) 
+        testParams.testScale = test_scale
+        testParams.oneSimult = True
+
+        tree = dataSaver.create_sub_tree("seq_o_no_refr_test")
+        testParams.randOn = False
+        all_data["seq_o_no_refr"] = dataLoader.test_multiple(testParams, test_cnt, burstSeq, tree)
+        graphGen.plot_all_data(all_data["seq_o_no_refr"], "{0}_seq_o_no_refr".format(i), "Sequential indexing (only 1 simult) with no refresh")
+
+        tree = dataSaver.create_sub_tree("rand_o_no_refr_test")
+        testParams.randOn = True
+        all_data["rand_o_no_refr"] = dataLoader.test_multiple(testParams, test_cnt, burstSeq, tree)
+        graphGen.plot_all_data(all_data["rand_o_no_refr"], "{0}_rand_o_no_refr".format(i), "Random indexing (only 1 simult) with no refresh")
+
+        #print("Tests done on interface {0}".format(i))
+        pdfGen.report(fig_path, i, dataLoader.devConfig, all_data)
+        print()
+        print ("Resetting tester {0} again (to clear ECC flags, ...)".format(i))
+        MemTesterParser.rst_tester(i)
+
+    print("Generating PDF report to '{0}' ...".format(result_report))
     pdfGen.fin()
+    print("Saving raw data to '{0}' ...".format(raw_file))
     dataSaver.save(raw_file)
 

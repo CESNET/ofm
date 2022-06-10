@@ -78,6 +78,10 @@ class MemTesterParser:
         return compCnt
 
     @classmethod
+    def rst_tester(cls, index):
+        run_cmd("./mem_tester --rst-emif")
+
+    @classmethod
     def get_dev_config_raw(cls, index):
         str = run_cmd("./mem_tester -g -i {0} --xml".format(index))
         root, raw = parseXML(str)
@@ -138,8 +142,14 @@ class MemTesterParser:
     @classmethod
     def get_test_res_raw(cls, testParams):
         testStr = "seq" if not testParams.randOn else "rand"
-        cmd = "./mem_tester -t {0} -b {1} -i {2} -k {3} --xml".format(
-            testStr, testParams.burst, testParams.index, testParams.testScale)
+        extra = "--auto-precharge " if testParams.autoPrecharge else ""
+        if testParams.refreshPeriod is not None:
+            extra += "--refresh-period {0} ". format(testParams.refreshPeriod)
+        if testParams.oneSimult:
+            extra += "-o "
+        cmd = "./mem_tester -t {0} -b {1} -i {2} -k {3} {4} --xml".format(
+            testStr, testParams.burst, testParams.index, testParams.testScale, extra)
+
         str = run_cmd(cmd)
         root, raw = parseXML(str)
         if "probe_data" not in root:
@@ -171,6 +181,9 @@ class MemTesterParser:
             res["min_latency"]          = float(res["min_latency"])
             res["max_latency"]          = float(res["max_latency"])
             res["avg_latency"]          = float(res["avg_latency"])
+            res["read_time"]            = float(res["read_time"])
+            res["write_time"]           = float(res["write_time"])
+            res["total_time"]           = float(res["total_time"])
 
             devConfig = cls.get_dev_config(testParams.index)
             res["latency_hist_to"]      = devConfig["latency_hist_to"]
