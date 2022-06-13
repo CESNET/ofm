@@ -149,10 +149,9 @@ class agent_tx #(ITEMS, ITEM_WIDTH) extends uvm_agent;
         if(get_is_active() == UVM_ACTIVE) begin
             m_driver.vif = vif;
             m_driver.seq_item_port.connect(m_sequencer.seq_item_export);
+            // Connect reset
+            reset_sync.push_back(m_sequencer.reset_sync);
         end
-
-        // Connect reset
-        reset_sync.push_back(m_sequencer.reset_sync);
     endfunction
 
 endclass
