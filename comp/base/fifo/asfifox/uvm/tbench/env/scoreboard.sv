@@ -4,49 +4,21 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
-
-// Scoreboard. Check if DUT implementation is correct.
-class mvb_converter#(ITEM_WIDTH) extends uvm_subscriber#(uvm_mvb::sequence_item #(1, ITEM_WIDTH));
-    `uvm_component_param_utils(uvm_asfifox::mvb_converter#(ITEM_WIDTH))
-
-    uvm_analysis_port #(uvm_logic_vector::sequence_item#(ITEM_WIDTH)) analysis_port;
-
-    function new(string name, uvm_component parent = null);
-        super.new(name, parent);
-        analysis_port = new("analysis port", this);
-    endfunction
-
-    function void write(uvm_mvb::sequence_item #(1, ITEM_WIDTH) t);
-        uvm_logic_vector::sequence_item#(ITEM_WIDTH) tr_out;
-
-        if(t.src_rdy && t.dst_rdy) begin
-            for (int unsigned it = 0; it < 1; it++) begin
-                if (t.vld[it] == 1) begin
-                    tr_out = uvm_logic_vector::sequence_item#(ITEM_WIDTH)::type_id::create("tr_out", this);
-                    tr_out.data = t.data[it];
-                    analysis_port.write(tr_out);
-                end
-            end
-        end
-    endfunction
-endclass
-
-
 class scoreboard #(ITEM_WIDTH) extends uvm_scoreboard;
 
     `uvm_component_utils(uvm_asfifox::scoreboard #(ITEM_WIDTH))
     // Analysis components.
-    uvm_analysis_export #(uvm_mvb::sequence_item #(1, ITEM_WIDTH)) analysis_imp_mvb_rx;
-    uvm_analysis_export #(uvm_mvb::sequence_item #(1, ITEM_WIDTH)) analysis_imp_mvb_tx;
+    uvm_analysis_export #(uvm_logic_vector::sequence_item#(ITEM_WIDTH)) analysis_imp_mvb_rx;
+    uvm_analysis_export #(uvm_logic_vector::sequence_item#(ITEM_WIDTH)) analysis_imp_mvb_tx;
 
-    local uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(ITEM_WIDTH)) rx_fifo;
-    local uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(ITEM_WIDTH)) tx_fifo;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(ITEM_WIDTH)) rx_fifo;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(ITEM_WIDTH)) tx_fifo;
 
     //uvm_tlm_analysis_fifo #(uvm_mvb::sequence_item #(1, ITEM_WIDTH)) analysis_imp_mvb_rx;
     //uvm_tlm_analysis_fifo #(uvm_mvb::sequence_item #(1, ITEM_WIDTH)) analysis_imp_mvb_tx;
 
-    local mvb_converter#(ITEM_WIDTH) mvb_converter_rx;
-    local mvb_converter#(ITEM_WIDTH) mvb_converter_tx;
+    //local mvb_converter#(ITEM_WIDTH) mvb_converter_rx;
+    //local mvb_converter#(ITEM_WIDTH) mvb_converter_tx;
     //model m_model;
     local int unsigned compared = 0;
     local int unsigned errors   = 0;
@@ -68,18 +40,9 @@ class scoreboard #(ITEM_WIDTH) extends uvm_scoreboard;
         return ret;
     endfunction
 
-    function void build_phase(uvm_phase phase);
-        mvb_converter_rx = mvb_converter#(ITEM_WIDTH)::type_id::create("mvb_converter_rx", this);
-        mvb_converter_tx = mvb_converter#(ITEM_WIDTH)::type_id::create("mvb_converter_tx", this);
-    endfunction
-
-
     function void connect_phase(uvm_phase phase);
-        analysis_imp_mvb_rx.connect(mvb_converter_rx.analysis_export);
-        analysis_imp_mvb_tx.connect(mvb_converter_tx.analysis_export);
-
-        mvb_converter_rx.analysis_port.connect(rx_fifo.analysis_export);
-        mvb_converter_tx.analysis_port.connect(tx_fifo.analysis_export);
+        analysis_imp_mvb_rx.connect(rx_fifo.analysis_export);
+        analysis_imp_mvb_tx.connect(tx_fifo.analysis_export);
     endfunction
 
 
@@ -103,7 +66,8 @@ class scoreboard #(ITEM_WIDTH) extends uvm_scoreboard;
     virtual function void report_phase(uvm_phase phase);
         string msg = "\n";
         $swrite(msg, "%sCompared/errors: %0d/%0d \n", msg, compared, errors);
-        $swrite(msg, "%sCount of items inside fifo: %d \n", msg, rx_fifo.used());
+        $swrite(msg, "%sCount of items inside RX fifo: %d \n", msg, rx_fifo.used());
+        $swrite(msg, "%sCount of items inside TX fifo: %d \n", msg, tx_fifo.used());
         $swrite(msg, "%sErrors : %d \n", msg, errors);
 
         if (errors == 0 && this.used() == 0) begin
