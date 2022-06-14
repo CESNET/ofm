@@ -27,6 +27,8 @@ class driver_rx #(ITEMS, ITEM_WIDTH) extends uvm_driver #(sequence_item #(ITEMS,
     // ------------------------------------------------------------------------
     // Starts driving signals to interface
     task run_phase(uvm_phase phase);
+        rsp = sequence_item #(ITEMS, ITEM_WIDTH)::type_id::create("mvb_rsp");
+
         forever begin
             seq_item_port.try_next_item(req);
 
@@ -36,17 +38,21 @@ class driver_rx #(ITEMS, ITEM_WIDTH) extends uvm_driver #(sequence_item #(ITEMS,
                 end
                 vif.driver_rx_cb.VLD     <= req.vld;
                 vif.driver_rx_cb.SRC_RDY <= req.src_rdy;
+                rsp.copy(req);
+                rsp.set_id_info(req);
+                seq_item_port.item_done();
             end else begin
                 vif.driver_rx_cb.DATA    <= 'X;
                 vif.driver_rx_cb.VLD     <= 'X;
                 vif.driver_rx_cb.SRC_RDY <= 1'b0;
             end
 
+            // Wait for the clocking block to write values to the registres
             @(vif.driver_rx_cb);
 
             if (req != null) begin
-                req.dst_rdy = vif.driver_rx_cb.DST_RDY;
-                seq_item_port.item_done();
+                rsp.dst_rdy = vif.driver_rx_cb.DST_RDY;
+                seq_item_port.put_response(rsp);
             end
 
         end
