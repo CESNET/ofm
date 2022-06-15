@@ -22,7 +22,7 @@ class sequence_simple extends uvm_sequence #(sequence_item);
     constraint c1 {transaction_count inside {[transaction_count_min : transaction_count_max]};}
 
     // Constructor - creates new instance of this class
-    function new(string name = "sequence");
+    function new(string name = "sequence_simple");
         super.new(name);
     endfunction
 
@@ -58,7 +58,7 @@ class sequence_simple_const extends uvm_sequence #(sequence_item);
     constraint c2 {data_size inside {[data_size_min : data_size_max]};}
 
     // Constructor - creates new instance of this class
-    function new(string name = "sequence");
+    function new(string name = "sequence_simple_const");
         super.new(name);
     endfunction
 
@@ -103,7 +103,7 @@ class sequence_simple_gauss extends uvm_sequence #(sequence_item);
 
 
     // Constructor - creates new instance of this class
-    function new(string name = "sequence");
+    function new(string name = "sequence_simple_gauss");
         super.new(name);
     endfunction
 
@@ -150,7 +150,7 @@ class sequence_simple_inc extends uvm_sequence #(sequence_item);
     constraint c3 {data_size inside {[data_size_min : data_size_max]};}
 
     // Constructor - creates new instance of this class
-    function new(string name = "sequence");
+    function new(string name = "sequence_simple_inc");
         super.new(name);
     endfunction
 
@@ -190,7 +190,7 @@ class sequence_simple_meas extends uvm_sequence #(sequence_item);
     logic meas_done           = 0;
 
     // Constructor - creates new instance of this class
-    function new(string name = "sequence");
+    function new(string name = "sequence_simple_meas");
         super.new(name);
     endfunction
 
@@ -240,7 +240,7 @@ class sequence_simple_dec extends uvm_sequence #(sequence_item);
     constraint c3 {data_size inside {[data_size_min : data_size_max]};}
 
     // Constructor - creates new instance of this class
-    function new(string name = "sequence");
+    function new(string name = "sequence_simple_dec");
         super.new(name);
     endfunction
 
@@ -272,7 +272,7 @@ class sequence_lib extends uvm_sequence_library#(sequence_item );
   `uvm_object_utils(uvm_byte_array::sequence_lib)
   `uvm_sequence_library_utils(uvm_byte_array::sequence_lib)
 
-    function new(string name = "");
+    function new(string name = "sequence_library");
         super.new(name);
         init_sequence_library();
     endfunction
