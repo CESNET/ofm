@@ -11,13 +11,13 @@
 `ifndef TEST_MONITOR_SV
 `define TEST_MONITOR_SV
 
-class monitor #(DATA_WIDTH) extends byte_array::monitor;
+class monitor #(DATA_WIDTH) extends uvm_byte_array::monitor;
 
-    `uvm_component_param_utils(byte_array_pma_env::monitor #(DATA_WIDTH))
+    `uvm_component_param_utils(uvm_byte_array_pma::monitor #(DATA_WIDTH))
     
     // Analysis port
-    uvm_analysis_imp #(pma::sequence_item #(DATA_WIDTH), monitor #(DATA_WIDTH)) analysis_export;
-    byte_array::sequence_item h_tr;
+    uvm_analysis_imp #(uvm_pma::sequence_item #(DATA_WIDTH), monitor #(DATA_WIDTH)) analysis_export;
+    uvm_byte_array::sequence_item h_tr;
     local byte unsigned tr_data_fifo[$];
     // Variables
     logic [57 : 0]  descramble_reg;
@@ -39,7 +39,7 @@ class monitor #(DATA_WIDTH) extends byte_array::monitor;
         descramble_reg  = 58'h0;
     endfunction
 
-    function void descramble(pma::sequence_item #(DATA_WIDTH) tr);
+    function void descramble(uvm_pma::sequence_item #(DATA_WIDTH) tr);
         logic [DATA_WIDTH-1 : 0] dout;
 
         for (int i=0; i<DATA_WIDTH; i++) begin
@@ -52,10 +52,10 @@ class monitor #(DATA_WIDTH) extends byte_array::monitor;
 
     function int check_header(bit hdr_vld, logic [1 : 0] hdr);
         if(hdr_vld == 1'b1) begin
-            if (hdr == pma::C_HDR) begin
+            if (hdr == uvm_pma::C_HDR) begin
                 return 1;
             end
-            else if (hdr == pma::D_HDR) begin
+            else if (hdr == uvm_pma::D_HDR) begin
                 return 2;
             end else begin
                 hdr_err++;
@@ -72,13 +72,13 @@ class monitor #(DATA_WIDTH) extends byte_array::monitor;
 
     function void check_sequence(logic [31 : 0] data, int hdr_type);
         if (hdr_type == 1) begin
-            if (data[7 : 0] == pma::BT_S_D || data[7 : 0] == pma::BT_C_S || data[7 : 0] == pma::BT_O_S) begin
+            if (data[7 : 0] == uvm_pma::BT_S_D || data[7 : 0] == uvm_pma::BT_C_S || data[7 : 0] == uvm_pma::BT_O_S) begin
                 state = INFRAME;
             end
-            else if (data[7 : 0] == pma::BT_T_C  || data[7 : 0] == pma::BT_D1_C  ||
-                     data[7 : 0] == pma::BT_D2_C || data[7 : 0] == pma::BT_D3_C  ||
-                     data[7 : 0] == pma::BT_D4_C || data[7 : 0] == pma::BT_D5_C ||
-                     data[7 : 0] == pma::BT_D6_C || data[7 : 0] == pma::BT_D7_T)
+            else if (data[7 : 0] == uvm_pma::BT_T_C  || data[7 : 0] == uvm_pma::BT_D1_C  ||
+                     data[7 : 0] == uvm_pma::BT_D2_C || data[7 : 0] == uvm_pma::BT_D3_C  ||
+                     data[7 : 0] == uvm_pma::BT_D4_C || data[7 : 0] == uvm_pma::BT_D5_C ||
+                     data[7 : 0] == uvm_pma::BT_D6_C || data[7 : 0] == uvm_pma::BT_D7_T)
             begin
                 state = LAST_WORD;
             end
@@ -95,17 +95,15 @@ class monitor #(DATA_WIDTH) extends byte_array::monitor;
     endfunction
 
     // Write 32 transactions to data stream and send it to scoreboard.
-    virtual function void write(pma::sequence_item #(DATA_WIDTH) tr);
+    virtual function void write(uvm_pma::sequence_item #(DATA_WIDTH) tr);
         if (tr.hdr_vld == 1'b1 && timer_cnt_en == 1'b1) begin
-            if (timer_cnt >= TIMER_125US) begin
+            if (timer_cnt >= TIMER_125US && state != LINK_DOWN) begin
                 timer_cnt = 0;
             end
             timer_cnt++;
-            //$write("TIMER CNT: %d TIME: %t\n", timer_cnt, $time);
         end
         if (tr.data_vld == 1'b1) begin
             if (hdr_err == 16) begin
-                //hdr_err = 0;
                 tr_data_fifo.delete();
                 state = LINK_DOWN;
             end
@@ -138,21 +136,17 @@ class monitor #(DATA_WIDTH) extends byte_array::monitor;
                         check_sequence(tr.data, check_header(tr.hdr_vld, tr.hdr));
                         insert_header(tr.hdr_vld, tr.hdr);
                         insert_data(tr.data);
-                        h_tr    = byte_array::sequence_item::type_id::create("h_tr");
+                        h_tr    = uvm_byte_array::sequence_item::type_id::create("h_tr");
                         h_tr.data = new[tr_data_fifo.size()];
                         h_tr.data = tr_data_fifo;
                         analysis_port.write(h_tr);
                         tr_data_fifo.delete();
                         state = FIRST_WORD;
-                        //state = IDLE;
                     end
                 LINK_DOWN :
                     begin
-                        // Upravit citani az to Stepan opravi
-                        // Ma to byt tak, ze cita do 125us, pak vynuluje citac a cita jeste jednou, nakonec pak nahodi linku
                         if (timer_cnt >= TIMER_125US) begin
                             timer_cnt = 0;
-                            hdr_err = 0;
                             if (tr.data == 32'h0000001e) begin
                                 state = IDLE;
                                 insert_header(tr.hdr_vld, tr.hdr);
@@ -160,6 +154,10 @@ class monitor #(DATA_WIDTH) extends byte_array::monitor;
                             end else begin
                                 state = FIRST_WORD;
                             end
+                            if (hdr_err > 0) begin
+                                state = LINK_DOWN;
+                            end
+                            hdr_err = 0;
                         end
                         check_header(tr.hdr_vld, tr.hdr);
                     end

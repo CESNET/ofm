@@ -19,7 +19,7 @@ import crc32_ethernet_pkg::*;
 // In the end of the packet is generate CRC and last chunk of data
 class sequence_simple_rx_random_errors #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH) extends sequence_simple #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH);
 
-    `uvm_object_param_utils(byte_array_lii_env::sequence_simple_rx_random_errors #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH))
+    `uvm_object_param_utils(uvm_byte_array_lii::sequence_simple_rx_random_errors #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH))
 
     // -----------------------
     // Parameters.
@@ -27,9 +27,9 @@ class sequence_simple_rx_random_errors #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC
 
     localparam BYTE_NUM = DATA_WIDTH/8;
 
-    common::rand_length number_of_idles;
-    common::rand_rdy rxdecerr;
-    common::rand_rdy rxseqerr;
+    uvm_common::rand_length number_of_idles;
+    uvm_common::rand_rdy rxdecerr;
+    uvm_common::rand_rdy rxseqerr;
 
     localparam BYTES_VLD_LENGTH        = $clog2(DATA_WIDTH/8)+1;
     logic [31 : 0] crc;
@@ -39,9 +39,9 @@ class sequence_simple_rx_random_errors #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC
     // Constructor - creates new instance of this class
     function new(string name = "sequence");
         super.new("sequence_simple_rx_random_errors");
-        rxdecerr        = common::rand_rdy_swap::new(1, 1000);
-        rxseqerr        = common::rand_rdy_swap::new(1, 2000);
-        number_of_idles = common::rand_length_rand::new;
+        rxdecerr        = uvm_common::rand_rdy_swap::new(1, 1500);
+        rxseqerr        = uvm_common::rand_rdy_swap::new(1, 500);
+        number_of_idles = uvm_common::rand_length_rand::new;
     endfunction
 
     // Method which define how the transaction will look.
@@ -113,8 +113,8 @@ class sequence_simple_rx_random_errors #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC
                         req.sof        = 1'b0;
                         req.data       = preambule;
                         preambule_done = 1'b1;
-                        req.rxdecerr   = 1'b0;
-                        req.rxseqerr   = 1'b0;
+                        req.rxdecerr = rxdecerr.m_value;
+                        req.rxseqerr = rxseqerr.m_value;
                         if (req.rxseqerr == 1'b1) begin
                             set_meta();
                             link_down    = 1'b1;
@@ -132,7 +132,7 @@ class sequence_simple_rx_random_errors #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC
 
                     set_default();
                     req.rxdecerr    = rxdecerr.m_value;
-                    req.rxseqerr    = rxseqerr.m_value;
+                    req.rxseqerr    = 1'b1;
                     if (rxdecerr.m_value == 1'b1) begin
                         error_trig = 1'b1;
                     end

@@ -10,10 +10,10 @@
 */
 
 // This low level sequence define how can data looks like.
-class sequence_hdr_err_inj #(DATA_WIDTH) extends uvm_sequence #(pma::sequence_item #(DATA_WIDTH));
+class sequence_hdr_err_inj #(DATA_WIDTH) extends uvm_sequence #(uvm_pma::sequence_item #(DATA_WIDTH));
 
-    `uvm_object_param_utils(byte_array_pma_env::sequence_hdr_err_inj #(DATA_WIDTH))
-    `uvm_declare_p_sequencer(pma::sequencer #(DATA_WIDTH))
+    `uvm_object_param_utils(uvm_byte_array_pma::sequence_hdr_err_inj #(DATA_WIDTH))
+    `uvm_declare_p_sequencer(uvm_pma::sequencer #(DATA_WIDTH))
 
     // -----------------------
     // Parameters.
@@ -25,11 +25,11 @@ class sequence_hdr_err_inj #(DATA_WIDTH) extends uvm_sequence #(pma::sequence_it
     logic [(DATA_WIDTH-8)-1 : 0] start_data = 0;
     int                          frame_cnt = 0;
 
-    byte_array_pma_env::data_reg simple_reg;
+    uvm_byte_array_pma::data_reg simple_reg;
     // High level transaction
-    byte_array::sequence_item frame;
+    uvm_byte_array::sequence_item frame;
     // High level sequencer
-    byte_array_pma_env::sequencer hi_sqr;
+    uvm_byte_array_pma::sequencer hi_sqr;
 
     //////////////////////////////////
     // RANDOMIZATION
@@ -60,19 +60,19 @@ class sequence_hdr_err_inj #(DATA_WIDTH) extends uvm_sequence #(pma::sequence_it
     // Generates transactions
     task body;
 
-        if(!uvm_config_db #(byte_array_pma_env::sequencer)::get(p_sequencer, "", "hi_sqr", hi_sqr)) begin
+        if(!uvm_config_db #(uvm_byte_array_pma::sequencer)::get(p_sequencer, "", "hi_sqr", hi_sqr)) begin
             `uvm_fatal(get_type_name(), "Unable to get configuration object")
         end
 
-        if(!uvm_config_db #(byte_array_pma_env::data_reg)::get(p_sequencer, "", "simple_reg", simple_reg)) begin
+        if(!uvm_config_db #(uvm_byte_array_pma::data_reg)::get(p_sequencer, "", "simple_reg", simple_reg)) begin
             simple_reg = new();
-            uvm_config_db #(byte_array_pma_env::data_reg)::set(p_sequencer, "", "simple_reg", simple_reg);
+            uvm_config_db #(uvm_byte_array_pma::data_reg)::set(p_sequencer, "", "simple_reg", simple_reg);
         end
 
 
         `uvm_info(get_full_name(), "sequence_hdr_err_inj is running", UVM_LOW)
         // Create a request for sequence item
-        req = pma::sequence_item #(DATA_WIDTH)::type_id::create("req");
+        req = uvm_pma::sequence_item #(DATA_WIDTH)::type_id::create("req");
         while (hl_transactions > 0 || frame != null) begin
             try_get();
             // Send frame
@@ -88,17 +88,12 @@ class sequence_hdr_err_inj #(DATA_WIDTH) extends uvm_sequence #(pma::sequence_it
         end
     endtask
 
-    task send_data(byte_array::sequence_item frame);
+    task send_data(uvm_byte_array::sequence_item frame);
             for (int i = ((BYTE_NUM-1)+BYTE_NUM); i < frame.data.size(); i = i + BYTE_NUM) begin
                 // Together with finish_item initiate operation of sequence item (handshake with driver).
                 start_item(req);
                 req.block_lock = 1'b1;
-                while (!simple_reg.data_vld) begin
-                    req.data_vld = 1'b1;
-                    simple_reg.data_vld = req.data_vld;
-                    finish_item(req);
-                    start_item(req);
-                end
+                send_same();
 
                 if(i % 8 == 7) begin
                     void'(std::randomize(req.hdr) with {req.hdr inside {0, 3, 4};});
@@ -115,7 +110,7 @@ class sequence_hdr_err_inj #(DATA_WIDTH) extends uvm_sequence #(pma::sequence_it
             end
     endtask
 
-    task scramble(pma::sequence_item #(DATA_WIDTH) req);
+    task scramble(uvm_pma::sequence_item #(DATA_WIDTH) req);
         logic [DATA_WIDTH-1 : 0] scrambled_data;
 
         for (int i=0; i<DATA_WIDTH; i++) begin
@@ -141,6 +136,22 @@ class sequence_hdr_err_inj #(DATA_WIDTH) extends uvm_sequence #(pma::sequence_it
             req.data_vld = 1'b1;
         end
         simple_reg.data_vld = req.data_vld;
+        simple_reg.hdr_vld = req.hdr_vld;
+        simple_reg.data = req.data;
+        simple_reg.hdr = req.hdr;
+    endtask
+
+    task send_same();
+        while (!simple_reg.data_vld) begin
+            req.data_vld = 1'b1;
+            simple_reg.data_vld = req.data_vld;
+
+            req.hdr_vld = simple_reg.hdr_vld;
+            req.data = simple_reg.data;
+            req.hdr = simple_reg.hdr;
+            finish_item(req);
+            start_item(req);
+        end
     endtask
 
 endclass

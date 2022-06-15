@@ -14,7 +14,7 @@
 // Definition of MII monitor
 class monitor #(DATA_WIDTH) extends uvm_monitor;
 
-    `uvm_component_param_utils(pma::monitor #(DATA_WIDTH))
+    `uvm_component_param_utils(uvm_pma::monitor #(DATA_WIDTH))
 
     sequence_item #(DATA_WIDTH) tr;
     // Reference to the virtual interface, initialized during the connect phase by parent agent.
