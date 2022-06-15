@@ -17,7 +17,7 @@
 // There is also logic vector sequence item for generation of error signals
 class sequence_simple_tx_mac #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH) extends sequence_simple #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH);
 
-    `uvm_object_param_utils(byte_array_lii_env::sequence_simple_tx_mac #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH))
+    `uvm_object_param_utils(uvm_byte_array_lii::sequence_simple_tx_mac #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH))
 
     // -----------------------
     // Parameters.
@@ -25,7 +25,7 @@ class sequence_simple_tx_mac #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH) ex
 
     localparam BYTE_NUM = DATA_WIDTH/8;
 
-    common::rand_length number_of_idles;
+    uvm_common::rand_length number_of_idles;
 
     localparam BYTES_VLD_LENGTH        = $clog2(DATA_WIDTH/8)+1;
     logic [BYTES_VLD_LENGTH : 0] bytes = '0;
@@ -33,7 +33,7 @@ class sequence_simple_tx_mac #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH) ex
     // Constructor - creates new instance of this class
     function new(string name = "sequence");
         super.new("sequence_simple_tx_mac");
-        number_of_idles    = common::rand_length_stable::new();
+        number_of_idles    = uvm_common::rand_length_stable::new();
     endfunction
 
     // Method which define how the transaction will look.
@@ -44,14 +44,6 @@ class sequence_simple_tx_mac #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH) ex
             start_item(req);
             if (!req.randomize()) `uvm_fatal(this.get_full_name(), "failed to radnomize");
 
-            //req.sof         = 1'b0;
-            //req.eof         = 1'b0;
-            //req.eeof        = 1'b0;
-            //req.edb         = '0;
-            //req.meta        = '0;
-            //req.link_status = 1'b1;
-            //req.rxdecerr    = 1'b0;
-            //req.rxseqerr    = 1'b0;
             set_default();
 
             // First chunk has SOF = 1
@@ -81,14 +73,6 @@ class sequence_simple_tx_mac #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH) ex
                     end
                     send_same();
                     start_item(req);
-                    //req.sof         = 1'b0;
-                    //req.eof         = 1'b0;
-                    //req.eeof        = 1'b0;
-                    //req.edb         = '0;
-                    //req.meta        = '0;
-                    //req.link_status = 1'b1;
-                    //req.rxdecerr    = 1'b0;
-                    //req.rxseqerr    = 1'b0;
                     set_default();
                 end
             end

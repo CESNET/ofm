@@ -14,7 +14,7 @@
 class sequence_item #(DATA_WIDTH) extends uvm_sequence_item;
 
     // registration of object tools
-    `uvm_object_param_utils(pma::sequence_item #(DATA_WIDTH))
+    `uvm_object_param_utils(uvm_pma::sequence_item #(DATA_WIDTH))
 
     // Member attributes, equivalent with interface pins
     // make input attributes random, except for clocks

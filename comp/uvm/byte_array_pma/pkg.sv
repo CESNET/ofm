@@ -12,7 +12,7 @@
 `ifndef BYTE_ARRAY_PMA_ENV_PKG
 `define BYTE_ARRAY_PMA_ENV_PKG
 
-package byte_array_pma_env;
+package uvm_byte_array_pma;
 
     `include "uvm_macros.svh"
     import uvm_pkg::*;

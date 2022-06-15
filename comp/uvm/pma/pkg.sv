@@ -11,7 +11,7 @@
 `ifndef PMA_PKG
 `define PMA_PKG
 
-package pma;
+package uvm_pma;
 
     `include "uvm_macros.svh"
     import uvm_pkg::*;

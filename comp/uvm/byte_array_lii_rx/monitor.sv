@@ -12,13 +12,13 @@
 `define TEST_MONITOR_SV
 
 // For RX path of ETH PHY
-class monitor_byte_array #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH) extends byte_array::monitor;
+class monitor_byte_array #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH) extends uvm_byte_array::monitor;
 
-    `uvm_component_param_utils(byte_array_lii_rx_env::monitor_byte_array #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH))
+    `uvm_component_param_utils(uvm_byte_array_lii_rx::monitor_byte_array #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH))
     
     // Analysis port
-    uvm_analysis_imp #(lii_rx::sequence_item #(DATA_WIDTH, META_WIDTH), monitor_byte_array #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH)) analysis_export;
-    byte_array::sequence_item h_tr;
+    uvm_analysis_imp #(uvm_lii_rx::sequence_item #(DATA_WIDTH, META_WIDTH), monitor_byte_array #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH)) analysis_export;
+    uvm_byte_array::sequence_item h_tr;
     local byte unsigned tr_data_fifo[$];
     local int BYTE_NUM;
 
@@ -157,7 +157,7 @@ class monitor_byte_array #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH) extends by
 
     // Deficit idle count
     // DIC_EN - DIC is count only at TX MAC at LII TX interface.
-    function void gap_control(lii_rx::sequence_item #(DATA_WIDTH, META_WIDTH) tr);
+    function void gap_control(uvm_lii_rx::sequence_item #(DATA_WIDTH, META_WIDTH) tr);
         if (DIC_EN == 1'b1) begin
             if (VERBOSITY >= 2) begin
                 $write("Transaction data: %h time %t RDY %b SOF %b EOF %b \n", tr.data, $time(), tr.rdy, tr.sof, tr.eof);
@@ -206,14 +206,14 @@ class monitor_byte_array #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH) extends by
     endfunction
 
     // Write 32 transactions to data stream and send it to scoreboard.
-    virtual function void write(lii_rx::sequence_item #(DATA_WIDTH, META_WIDTH) tr);
+    virtual function void write(uvm_lii_rx::sequence_item #(DATA_WIDTH, META_WIDTH) tr);
 
         gap_control(tr);
 
         // Write to scoreboard logic
         if (tr.rdy === 1'b1) begin
             if(tr.sof === 1'b1 && tr.link_status === 1'b1) begin
-                h_tr    = byte_array::sequence_item::type_id::create("h_tr");
+                h_tr    = uvm_byte_array::sequence_item::type_id::create("h_tr");
                 inframe = 1'b1;
                 tr_data_fifo.delete();
                 BYTE_NUM = DATA_WIDTH/8;
@@ -252,24 +252,25 @@ class monitor_byte_array #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH) extends by
 
 endclass
 
-class monitor_logic_vector #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH) extends logic_vector::monitor #(LOGIC_WIDTH);
+class monitor_logic_vector #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH) extends uvm_logic_vector::monitor #(LOGIC_WIDTH);
 
-    `uvm_component_param_utils(byte_array_lii_rx_env::monitor_logic_vector #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH))
+    `uvm_component_param_utils(uvm_byte_array_lii_rx::monitor_logic_vector #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH))
 
     // Analysis port
-    uvm_analysis_imp #(lii_rx::sequence_item#(DATA_WIDTH, META_WIDTH), monitor_logic_vector #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH)) analysis_export;
+    uvm_analysis_imp #(uvm_lii_rx::sequence_item#(DATA_WIDTH, META_WIDTH), monitor_logic_vector #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH)) analysis_export;
 
 
-    logic_vector::sequence_item #(LOGIC_WIDTH) h_tr;
+    uvm_logic_vector::sequence_item #(LOGIC_WIDTH) h_tr;
     logic inframe = 1'b0;
     logic err_trig = 1'b0;
+    logic link_down = 1'b0;
 
     function new (string name, uvm_component parent);
         super.new(name, parent);
         analysis_export = new("analysis_export", this);
     endfunction
 
-    virtual function void write(lii_rx::sequence_item #(DATA_WIDTH, META_WIDTH) tr);
+    virtual function void write(uvm_lii_rx::sequence_item #(DATA_WIDTH, META_WIDTH) tr);
         if (tr.rdy == 1'b1) begin
             if (tr.sof == 1'b1) begin
                 inframe  = 1'b1;
@@ -280,11 +281,15 @@ class monitor_logic_vector #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WI
                 if (tr.err == 1'b1) begin
                     err_trig = 1'b1;
                 end
+                if (tr.eof == 1'b1 && tr.link_status == 1'b0) begin
+                    link_down = 1'b1;
+                end
             end
         end
+
         if (tr.crc_vld == 1'b1 && inframe == 1'b1) begin
-            h_tr = logic_vector::sequence_item #(LOGIC_WIDTH)::type_id::create("h_tr");
-            h_tr.data[0] = !tr.link_status; // Link status trigger
+            h_tr = uvm_logic_vector::sequence_item #(LOGIC_WIDTH)::type_id::create("h_tr");
+            h_tr.data[0] = link_down;       // Link status trigger
             h_tr.data[1] = err_trig;        // Error trigger
             h_tr.data[2] = tr.crc_ok;       // CRC OK
             h_tr.data[3] = tr.crc_vld;      // CRC VLD
@@ -293,6 +298,7 @@ class monitor_logic_vector #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WI
             end
             inframe  = 1'b0;
             err_trig = 1'b0;
+            link_down = 1'b0;
             analysis_port.write(h_tr);
         end
     endfunction

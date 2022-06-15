@@ -13,9 +13,9 @@
 
 class sequencer extends uvm_sequencer;
 
-    byte_array::sequencer m_packet;
+    `uvm_component_param_utils(uvm_byte_array_pma::sequencer)
 
-    `uvm_component_param_utils(byte_array_pma_env::sequencer)
+    uvm_byte_array::sequencer m_packet;
 
     function new(string name = "sequencer", uvm_component parent = null);
         super.new(name, parent);

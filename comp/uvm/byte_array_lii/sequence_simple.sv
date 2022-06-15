@@ -8,10 +8,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
 */
 
-class sequence_simple #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH) extends uvm_sequence #(lii::sequence_item #(DATA_WIDTH, META_WIDTH));
+class sequence_simple #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH) extends uvm_sequence #(uvm_lii::sequence_item #(DATA_WIDTH, META_WIDTH));
 
-    `uvm_object_param_utils(byte_array_lii_env::sequence_simple #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH))
-    `uvm_declare_p_sequencer(lii::sequencer #(DATA_WIDTH, META_WIDTH))
+    `uvm_object_param_utils(uvm_byte_array_lii::sequence_simple #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH))
+    `uvm_declare_p_sequencer(uvm_lii::sequencer #(DATA_WIDTH, META_WIDTH))
 
     // -----------------------
     // Parameters.
@@ -20,12 +20,12 @@ class sequence_simple #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH) extends u
     localparam BYTE_NUM = DATA_WIDTH/8;
 
     // High level transaction
-    byte_array::sequence_item frame;
+    uvm_byte_array::sequence_item frame;
     // High level sequencer
-    byte_array_lii_env::sequencer #(LOGIC_WIDTH) hi_sqr;
+    uvm_byte_array_lii::sequencer #(LOGIC_WIDTH) hi_sqr;
     //common::rand_length number_of_idles;
 
-    logic_vector::sequence_item #(LOGIC_WIDTH) meta;
+    uvm_logic_vector::sequence_item #(LOGIC_WIDTH) meta;
 
     localparam BYTES_VLD_LENGTH        = $clog2(DATA_WIDTH/8)+1;
     logic [31 : 0] idle                = 32'h55555555;
@@ -90,11 +90,11 @@ class sequence_simple #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH) extends u
     // Generates transactions
     task body;
         // Create a request for sequence item
-        if(!uvm_config_db #(byte_array_lii_env::sequencer #(LOGIC_WIDTH))::get(p_sequencer, "", "hi_sqr", hi_sqr)) begin
+        if(!uvm_config_db #(uvm_byte_array_lii::sequencer #(LOGIC_WIDTH))::get(p_sequencer, "", "hi_sqr", hi_sqr)) begin
             `uvm_fatal(get_type_name(), "Unable to get configuration object")
         end
         `uvm_info(get_full_name(), $sformatf("%s is running", name), UVM_DEBUG)
-        req = lii::sequence_item #(DATA_WIDTH, META_WIDTH)::type_id::create("req");
+        req = uvm_lii::sequence_item #(DATA_WIDTH, META_WIDTH)::type_id::create("req");
         while (hl_transactions > 0 || frame != null) begin
             try_get();
             // Send frame
@@ -115,7 +115,7 @@ class sequence_simple #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH) extends u
         end
     endtask
     // Method which define how the transaction will look.
-    task send(byte_array::sequence_item frame);
+    task send(uvm_byte_array::sequence_item frame);
         send_empty();
         create_sequence_item();
     endtask

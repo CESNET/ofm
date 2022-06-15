@@ -14,7 +14,7 @@
 // Definition of LII monitor
 class monitor #(DATA_WIDTH, FAST_SOF, META_WIDTH) extends uvm_monitor;
 
-    `uvm_component_param_utils(lii_rx::monitor #(DATA_WIDTH, FAST_SOF, META_WIDTH))
+    `uvm_component_param_utils(uvm_lii_rx::monitor #(DATA_WIDTH, FAST_SOF, META_WIDTH))
 
     sequence_item #(DATA_WIDTH, META_WIDTH) tr;
     // Reference to the virtual interface, initialized during the connect phase by parent agent.
