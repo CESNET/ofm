@@ -1,8 +1,8 @@
 //-- env.sv: Verification environment
-//-- Copyright (C) 2021 CESNET z. s. p. o.
-//-- Author(s): Tomáš Beneš <xbenes55@stud.fit.vutbr.cz>
+//-- Copyright (C) 2022 CESNET z. s. p. o.
+//-- Author:   Daniel Kříž <xkrizd01@vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 // Environment for functional verification of encode.
 // This environment containts two mii agents.
@@ -17,8 +17,8 @@ class env #(ITEMS, ITEM_WIDTH) extends uvm_env;
 
     scoreboard #(ITEM_WIDTH) m_scoreboard;
 
-    //uvm_mvb::coverage #(ITEMS, ITEM_WIDTH) m_cover_rx;
-    //uvm_mvb::coverage #(ITEMS, ITEM_WIDTH) m_cover_tx;
+    uvm_mvb::coverage #(ITEMS, ITEM_WIDTH) m_cover_rx;
+    uvm_mvb::coverage #(ITEMS, ITEM_WIDTH) m_cover_tx;
 
     // Constructor of environment.
     function new(string name, uvm_component parent);
@@ -28,8 +28,8 @@ class env #(ITEMS, ITEM_WIDTH) extends uvm_env;
     // Create base components of environment.
     function void build_phase(uvm_phase phase);
 
-        //m_cover_rx = new("m_cover_rx");
-        //m_cover_tx = new("m_cover_tx");
+        m_cover_rx = new("m_cover_rx");
+        m_cover_tx = new("m_cover_tx");
         cfg_tx = new;
         cfg_rx = new;
 
@@ -54,7 +54,7 @@ class env #(ITEMS, ITEM_WIDTH) extends uvm_env;
         rx_env.analysis_port.connect(m_scoreboard.analysis_imp_mvb_rx);
         tx_env.analysis_port.connect(m_scoreboard.analysis_imp_mvb_tx);
 
-        //agent_rx.analysis_port.connect(m_cover_rx.analysis_export);
-        //agent_tx.analysis_port.connect(m_cover_tx.analysis_export);
+        rx_env.m_mvb_agent.analysis_port.connect(m_cover_rx.analysis_export);
+        tx_env.m_mvb_agent.analysis_port.connect(m_cover_tx.analysis_export);
     endfunction
 endclass

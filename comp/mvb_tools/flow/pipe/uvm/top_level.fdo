@@ -1,6 +1,6 @@
 # top_level.fdo: Top Level Function simulation file
-# Copyright (C) 2021 CESNET z. s. p. o.
-# Author:   Tomáš Beneš <xbenes55@stud.fit.vutbr.cz>
+# Copyright (C) 2022 CESNET z. s. p. o.
+# Author:   Daniel Kříž <xkrizd01@vutbr.cz>
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
@@ -12,10 +12,9 @@ set DUT_UVM_BASE          "."
 set TB_FILE               "./tbench/testbench.sv"
 set SIG_FILE              "./signals_sig.fdo"
 
-set COMPONENTS [list \
+lappend COMPONENTS \
     [list "DUT"      $DUT_BASE       "FULL"]\
     [list "DUT_UVM"  $DUT_UVM_BASE   "FULL"]\
-]
 
 # Disable Code Coverage
 set SIM_FLAGS(CODE_COVERAGE) "true"
@@ -24,13 +23,10 @@ set SIM_FLAGS(EXTRA_VFLAGS) "+UVM_TESTNAME=test::ex_test -uvmcontrol=all +UVM_MA
 # Global include file for compilation
 source "$FIRMWARE_BASE/build/Modelsim.inc.fdo"
 
-source "$SIG_FILE"
-
 # Suppress warnings from arithm library
 puts "Std Arith Warnings - Disabled"
 set StdArithNoWarnings 1
-restart -f
-run -all
+nb_sim_run
 #coverage save -assert -directive -cvg -code bcefst -verbose actual.ucdb
 quit
 

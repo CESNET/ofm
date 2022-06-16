@@ -1,8 +1,8 @@
 //-- dut.sv: Design under test 
-//-- Copyright (C) 2021 CESNET z. s. p. o.
-//-- Author(s): Tomáš Beneš <xbenes55@stud.fit.vutbr.cz>
+//-- Copyright (C) 2022 CESNET z. s. p. o.
+//-- Author:   Daniel Kříž <xkrizd01@vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 import test::*;
 
