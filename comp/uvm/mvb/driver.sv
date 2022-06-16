@@ -81,11 +81,16 @@ class driver_tx #(ITEMS, ITEM_WIDTH) extends uvm_driver #(sequence_item #(ITEMS,
     // ------------------------------------------------------------------------
     // Starts driving signals to interface
     task run_phase(uvm_phase phase);
+        rsp = sequence_item #(ITEMS, ITEM_WIDTH)::type_id::create("mvb_rsp");
+
         forever begin
             seq_item_port.try_next_item(req);
 
             if (req != null) begin
                 vif.driver_tx_cb.DST_RDY <= req.dst_rdy;
+                rsp.copy(req);
+                rsp.set_id_info(req);
+                seq_item_port.item_done();
             end else begin
                 vif.driver_tx_cb.DST_RDY <= 1'b0;
             end
@@ -94,11 +99,11 @@ class driver_tx #(ITEMS, ITEM_WIDTH) extends uvm_driver #(sequence_item #(ITEMS,
 
             if (req != null) begin
                 for (int i = 0 ; i < ITEMS ; i++ ) begin
-                    req.data[i] = vif.driver_tx_cb.DATA[(i+1)*ITEM_WIDTH - 1 -: ITEM_WIDTH];
+                    rsp.data[i] = vif.driver_tx_cb.DATA[(i+1)*ITEM_WIDTH - 1 -: ITEM_WIDTH];
                 end
-                req.vld     <= vif.driver_tx_cb.VLD;
-                req.src_rdy <= vif.driver_tx_cb.SRC_RDY;
-                seq_item_port.item_done();
+                rsp.vld     <= vif.driver_tx_cb.VLD;
+                rsp.src_rdy <= vif.driver_tx_cb.SRC_RDY;
+                seq_item_port.put_response(rsp);
             end
         end
     endtask

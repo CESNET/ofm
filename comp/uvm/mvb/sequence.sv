@@ -103,6 +103,7 @@ class sequence_simple_tx #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(uvm_mvb::se
             void'(rdy.randomize());
             void'(req.randomize() with {dst_rdy == rdy.m_value;});
             finish_item(req);
+            get_response(rsp);
         end
     endtask
 endclass
@@ -137,6 +138,7 @@ class sequence_full_speed_tx #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(uvm_mvb
             start_item(req);
             void'(req.randomize() with {dst_rdy == 1'b1;});
             finish_item(req);
+            get_response(rsp);
         end
     endtask
 
@@ -170,6 +172,7 @@ class sequence_stop_tx #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(uvm_mvb::sequ
             start_item(req);
             void'(req.randomize() with {dst_rdy == 1'b0;});
             finish_item(req);
+            get_response(rsp);
         end
     endtask
 
