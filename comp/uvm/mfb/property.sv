@@ -17,6 +17,16 @@ module mfb_property #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)
     string module_name = "";
     logic START = 1'b1;
 
+    ///////////////////
+    // Start check properties after first clock
+    initial begin
+        $sformat(module_name, "%m");
+        @(posedge vif.CLK)
+        #(10ps)
+        START = 1'b0;
+    end
+
+
     // -----------------------
     // Properties.
     // -----------------------
@@ -50,11 +60,24 @@ module mfb_property #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)
         vif.SRC_RDY |-> !$isunknown(vif.SOF);
     endproperty
 
-    property sof_pos_undefined (int unsigned region);
-        @(posedge vif.CLK)
-        disable iff(RESET || START)
-        (vif.SRC_RDY && vif.SOF[region]) |-> !$isunknown(vif.SOF_POS[(region+1)*$clog2(REGION_SIZE) -1 -: $clog2(REGION_SIZE)]);
-    endproperty
+    generate if (REGION_SIZE > 1) begin
+        property sof_pos_undefined (int unsigned region);
+            @(posedge vif.CLK)
+            disable iff(RESET || START)
+            (vif.SRC_RDY && vif.SOF[region]) |-> !$isunknown(vif.SOF_POS[(region+1)*$clog2(REGION_SIZE) -1 -: $clog2(REGION_SIZE)]);
+        endproperty
+
+        for(genvar it = 0; it < REGIONS; it++) begin
+            assert property (sof_pos_undefined(it))
+                else begin
+                    string num_it;
+                    string hi_index;
+                    num_it.itoa(it);
+                    hi_index.itoa((it+1)*$clog2(REGION_SIZE));
+                    `uvm_error(module_name, {"\n\tMFB interface: if SRC_RDY and SOF[", num_it, "] is asserted then coresponding part of SOF_POS [", hi_index ,"-1 -: $clog2(REGION_SIZE)] have to be valid" });
+                end
+        end
+    end endgenerate
 
 
     //////////////////////
@@ -65,18 +88,25 @@ module mfb_property #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)
         vif.SRC_RDY |-> !$isunknown(vif.EOF);
     endproperty
 
-    property eof_pos_undefined (int unsigned region);
-        @(posedge vif.CLK)
-        disable iff(RESET || START)
-        (vif.SRC_RDY && vif.EOF[region]) |-> !$isunknown(vif.EOF_POS[(region+1)*$clog2(REGION_SIZE * BLOCK_SIZE) -1 -: $clog2(REGION_SIZE * BLOCK_SIZE)]);
-    endproperty
+    
+    generate if (REGION_SIZE * BLOCK_SIZE > 1) begin
+        property eof_pos_undefined (int unsigned region);
+            @(posedge vif.CLK)
+            disable iff(RESET || START)
+            (vif.SRC_RDY && vif.EOF[region]) |-> !$isunknown(vif.EOF_POS[(region+1)*$clog2(REGION_SIZE * BLOCK_SIZE) -1 -: $clog2(REGION_SIZE * BLOCK_SIZE)]);
+        endproperty
 
-    initial begin
-        $sformat(module_name, "%m");
-        @(posedge vif.CLK)
-        #(10ps)
-        START = 1'b0;
-    end
+        for(genvar it = 0; it < REGIONS; it++) begin
+            assert property (eof_pos_undefined(it))
+                else begin
+                    string num_it;
+                    string hi_index;
+                    num_it.itoa(it);
+                    hi_index.itoa((it+1)*$clog2(REGION_SIZE * BLOCK_SIZE));
+                    `uvm_error(module_name, {"\n\tMFB interface: if SRC_RDY and EOF[", num_it, "] is asserted then coresponding part of EOF_POS [", hi_index ,"-1 -: $clog2(REGION_SIZE)] have to be valid" });
+                end
+        end
+    end endgenerate
 
     // -----------------------
     // Assertion.
@@ -106,26 +136,5 @@ module mfb_property #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)
         else begin
             `uvm_error(module_name, "\n\tMFB interface: if SRC_RDY is asserted then EOF signals have to be valid");
         end
-
-
-    for(genvar it = 0; it < REGIONS; it++) begin
-        assert property (sof_pos_undefined(it))
-            else begin
-                string num_it;
-                string hi_index;
-                num_it.itoa(it);
-                hi_index.itoa((it+1)*$clog2(REGION_SIZE));
-                `uvm_error(module_name, {"\n\tMFB interface: if SRC_RDY and SOF[", num_it, "] is asserted then coresponding part of SOF_POS [", hi_index ,"-1 -: $clog2(REGION_SIZE)] have to be valid" });
-            end
-
-        assert property (eof_pos_undefined(it))
-            else begin
-                string num_it;
-                string hi_index;
-                num_it.itoa(it);
-                hi_index.itoa((it+1)*$clog2(REGION_SIZE * BLOCK_SIZE));
-                `uvm_error(module_name, {"\n\tMFB interface: if SRC_RDY and EOF[", num_it, "] is asserted then coresponding part of EOF_POS [", hi_index ,"-1 -: $clog2(REGION_SIZE)] have to be valid" });
-            end
-    end
 
 endmodule
