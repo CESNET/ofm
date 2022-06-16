@@ -4,8 +4,8 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
-`ifndef BYTE_ARRAY_MFB_PKG
-`define BYTE_ARRAY_MFB_PKG
+`ifndef LOGIC_VECTOR_MVB_PKG
+`define LOGIC_VECTOR_MVB_PKG
 
 package uvm_logic_vector_mvb;
 
@@ -14,7 +14,6 @@ package uvm_logic_vector_mvb;
 
     `include "config.sv"
     `include "monitor.sv"
-    `include "sequencer.sv"
     `include "sequence.sv"
     `include "env.sv"
 

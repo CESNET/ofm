@@ -13,7 +13,6 @@ class monitor #(ITEMS, ITEM_WIDTH) extends uvm_logic_vector::monitor#(ITEM_WIDTH
 
     uvm_reset::sync_terminate reset_sync;
     local uvm_logic_vector::sequence_item#(ITEM_WIDTH) hi_tr;
-    local int unsigned vld_cnt;
 
     function new (string name, uvm_component parent);
         super.new(name, parent);

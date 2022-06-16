@@ -10,17 +10,16 @@ class env_rx #(ITEMS, ITEM_WIDTH) extends uvm_env;
 
     // ------------------------------------------------------------------------
     // Definition of agents
-    sequencer_rx #(ITEM_WIDTH) m_sequencer;
+    //sequencer_rx #(ITEM_WIDTH) m_sequencer;
+    uvm_logic_vector::sequencer#(ITEM_WIDTH) m_sequencer;
     uvm_analysis_port #(uvm_logic_vector::sequence_item#(ITEM_WIDTH)) analysis_port;
     uvm_reset::sync_cbs            reset_sync;
 
     uvm_logic_vector::agent#(ITEM_WIDTH) m_logic_vector_agent;
-    uvm_logic_vector::config_item logic_vector_agent_cfg;
 
     uvm_mvb::agent_rx #(ITEMS, ITEM_WIDTH) m_mvb_agent;
-    uvm_mvb::config_item mvb_agent_cfg;
 
-    config_item m_config;
+    local config_item m_config;
 
     // Constructor of environment.
     function new(string name, uvm_component parent);
@@ -29,6 +28,9 @@ class env_rx #(ITEMS, ITEM_WIDTH) extends uvm_env;
 
     // Create base components of environment.
     function void build_phase(uvm_phase phase);
+
+        uvm_mvb::config_item mvb_agent_cfg;
+        uvm_logic_vector::config_item logic_vector_agent_cfg;
 
         if(!uvm_config_db #(config_item)::get(this, "", "m_config", m_config)) begin
             `uvm_fatal(get_type_name(), "Unable to get configuration object")
@@ -51,7 +53,7 @@ class env_rx #(ITEMS, ITEM_WIDTH) extends uvm_env;
         m_mvb_agent          = uvm_mvb::agent_rx #(ITEMS, ITEM_WIDTH)::type_id::create("m_mvb_agent", this);
 
         if (m_config.active == UVM_ACTIVE) begin
-            m_sequencer = sequencer_rx #(ITEM_WIDTH)::type_id::create("m_sequencer", this);
+            m_sequencer = uvm_logic_vector::sequencer#(ITEM_WIDTH)::type_id::create("m_sequencer", this);
         end
 
         reset_sync = new();
@@ -68,9 +70,9 @@ class env_rx #(ITEMS, ITEM_WIDTH) extends uvm_env;
         reset_sync.push_back(m_logic_vector_monitor.reset_sync);
 
         if (m_config.active == UVM_ACTIVE) begin
-            m_sequencer.m_data = m_logic_vector_agent.m_sequencer;
+            m_sequencer = m_logic_vector_agent.m_sequencer;
             reset_sync.push_back(m_mvb_agent.m_sequencer.reset_sync);
-            uvm_config_db #(sequencer_rx #(ITEM_WIDTH))::set(this, "m_mvb_agent.m_sequencer", "hi_sqr", m_sequencer);
+            uvm_config_db #(uvm_logic_vector::sequencer#(ITEM_WIDTH))::set(this, "m_mvb_agent.m_sequencer", "hi_sqr", m_sequencer);
         end
     endfunction
 
@@ -83,7 +85,7 @@ class env_rx #(ITEMS, ITEM_WIDTH) extends uvm_env;
             mvb_seq.init_sequence();
 
             forever begin
-                if(!mvb_seq.randomize()) `uvm_fatal(this.get_full_name(), "\n\tCannot randomize byte_array_mfb rx_seq");
+                if(!mvb_seq.randomize()) `uvm_fatal(this.get_full_name(), "\n\tCannot randomize logic_vector_mvb rx_seq");
                 mvb_seq.start(m_mvb_agent.m_sequencer);
             end
         end
@@ -104,12 +106,12 @@ class env_tx #(ITEMS, ITEM_WIDTH) extends uvm_env;
     // Definition of agents 
 
     uvm_logic_vector::agent#(ITEM_WIDTH) m_logic_vector_agent;
-    uvm_logic_vector::config_item logic_vector_agent_cfg;
+    //uvm_logic_vector::config_item logic_vector_agent_cfg;
 
     uvm_mvb::agent_tx #(ITEMS, ITEM_WIDTH) m_mvb_agent;
-    uvm_mvb::config_item mvb_agent_cfg;
+    //uvm_mvb::config_item mvb_agent_cfg;
 
-    config_item m_config;
+    local config_item m_config;
 
     // Constructor of environment.
     function new(string name, uvm_component parent);
@@ -118,6 +120,9 @@ class env_tx #(ITEMS, ITEM_WIDTH) extends uvm_env;
 
     // Create base components of environment.
     function void build_phase(uvm_phase phase);
+
+        uvm_mvb::config_item mvb_agent_cfg;
+        uvm_logic_vector::config_item logic_vector_agent_cfg;
 
         if(!uvm_config_db #(config_item)::get(this, "", "m_config", m_config)) begin
             `uvm_fatal(get_type_name(), "Unable to get configuration object")
