@@ -1,12 +1,12 @@
 //-- scoreboard.sv: Scoreboard for verification
-//-- Copyright (C) 2021 CESNET z. s. p. o.
-//-- Author(s): Tomáš Beneš <xbenes55@stud.fit.vutbr.cz>
+//-- Copyright (C) 2022 CESNET z. s. p. o.
+//-- Author:   Daniel Kříž <xkrizd01@vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 class scoreboard #(ITEM_WIDTH) extends uvm_scoreboard;
 
-    `uvm_component_utils(uvm_asfifox::scoreboard #(ITEM_WIDTH))
+    `uvm_component_utils(uvm_pipe::scoreboard #(ITEM_WIDTH))
     // Analysis components.
     uvm_analysis_export #(uvm_logic_vector::sequence_item#(ITEM_WIDTH)) analysis_imp_mvb_rx;
     uvm_analysis_export #(uvm_logic_vector::sequence_item#(ITEM_WIDTH)) analysis_imp_mvb_tx;
@@ -14,12 +14,6 @@ class scoreboard #(ITEM_WIDTH) extends uvm_scoreboard;
     uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(ITEM_WIDTH)) rx_fifo;
     uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(ITEM_WIDTH)) tx_fifo;
 
-    //uvm_tlm_analysis_fifo #(uvm_mvb::sequence_item #(1, ITEM_WIDTH)) analysis_imp_mvb_rx;
-    //uvm_tlm_analysis_fifo #(uvm_mvb::sequence_item #(1, ITEM_WIDTH)) analysis_imp_mvb_tx;
-
-    //local mvb_converter#(ITEM_WIDTH) mvb_converter_rx;
-    //local mvb_converter#(ITEM_WIDTH) mvb_converter_tx;
-    //model m_model;
     local int unsigned compared = 0;
     local int unsigned errors   = 0;
 
@@ -39,6 +33,7 @@ class scoreboard #(ITEM_WIDTH) extends uvm_scoreboard;
         ret |= (tx_fifo.used() != 0);
         return ret;
     endfunction
+
 
     function void connect_phase(uvm_phase phase);
         analysis_imp_mvb_rx.connect(rx_fifo.analysis_export);

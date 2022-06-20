@@ -1,6 +1,6 @@
 //-- test.sv: Verification test 
-//-- Copyright (C) 2021 CESNET z. s. p. o.
-//-- Author(s): Tomáš Beneš <xbenes55@stud.fit.vutbr.cz>
+//-- Copyright (C) 2022 CESNET z. s. p. o.
+//-- Author:   Daniel Kříž <xkrizd01@vutbr.cz>
 
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
@@ -9,9 +9,9 @@ class ex_test extends uvm_test;
     `uvm_component_utils(test::ex_test);
 
     bit timeout;
-    uvm_asfifox::env #(ITEM_WIDTH)                 m_env;
+    uvm_pipe::env #(ITEMS, ITEM_WIDTH)                 m_env;
     uvm_logic_vector::sequence_simple#(ITEM_WIDTH) h_seq_rx;
-    uvm_mvb::sequence_simple_tx #(1, ITEM_WIDTH)   h_seq_tx;
+    uvm_mvb::sequence_simple_tx #(ITEMS, ITEM_WIDTH)   h_seq_tx;
 
     // ------------------------------------------------------------------------
     // Functions
@@ -20,7 +20,7 @@ class ex_test extends uvm_test;
     endfunction
 
     function void build_phase(uvm_phase phase);
-        m_env = uvm_asfifox::env #(ITEM_WIDTH)::type_id::create("m_env", this);
+        m_env = uvm_pipe::env #(ITEMS, ITEM_WIDTH)::type_id::create("m_env", this);
     endfunction
 
     task test_wait_timeout(int unsigned time_length);
@@ -38,7 +38,7 @@ class ex_test extends uvm_test;
     // Create environment and Run sequences o their sequencers
     task run_seq_rx(uvm_phase phase);
         phase.raise_objection(this, "Start of rx sequence");
-        for(int i = 0; i < 100; i++) begin
+        for(int i = 0; i < 500; i++) begin
             h_seq_rx.randomize();
             h_seq_rx.start(m_env.rx_env.m_logic_vector_agent.m_sequencer);
         end
@@ -64,7 +64,7 @@ class ex_test extends uvm_test;
 
         h_seq_rx = uvm_logic_vector::sequence_simple#(ITEM_WIDTH)::type_id::create("h_seq_rx");
 
-        h_seq_tx = uvm_mvb::sequence_simple_tx #(1, ITEM_WIDTH)::type_id::create("h_seq_tx");
+        h_seq_tx = uvm_mvb::sequence_simple_tx #(ITEMS, ITEM_WIDTH)::type_id::create("h_seq_tx");
 
         fork
             run_seq_tx(phase);

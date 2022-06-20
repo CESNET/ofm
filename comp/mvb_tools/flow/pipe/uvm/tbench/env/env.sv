@@ -1,24 +1,24 @@
 //-- env.sv: Verification environment
-//-- Copyright (C) 2021 CESNET z. s. p. o.
-//-- Author(s): Tomáš Beneš <xbenes55@stud.fit.vutbr.cz>
+//-- Copyright (C) 2022 CESNET z. s. p. o.
+//-- Author:   Daniel Kříž <xkrizd01@vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 // Environment for functional verification of encode.
 // This environment containts two mii agents.
-class env #(ITEM_WIDTH) extends uvm_env;
+class env #(ITEMS, ITEM_WIDTH) extends uvm_env;
 
-    `uvm_component_param_utils(uvm_asfifox::env #(ITEM_WIDTH));
+    `uvm_component_param_utils(uvm_pipe::env #(ITEMS, ITEM_WIDTH));
 
-    uvm_logic_vector_mvb::env_rx #(1, ITEM_WIDTH) rx_env;
+    uvm_logic_vector_mvb::env_rx #(ITEMS, ITEM_WIDTH) rx_env;
     uvm_logic_vector_mvb::config_item cfg_rx;
-    uvm_logic_vector_mvb::env_tx #(1, ITEM_WIDTH) tx_env;
+    uvm_logic_vector_mvb::env_tx #(ITEMS, ITEM_WIDTH) tx_env;
     uvm_logic_vector_mvb::config_item cfg_tx;
 
     scoreboard #(ITEM_WIDTH) m_scoreboard;
 
-    uvm_mvb::coverage #(1, ITEM_WIDTH) m_cover_rx;
-    uvm_mvb::coverage #(1, ITEM_WIDTH) m_cover_tx;
+    uvm_mvb::coverage #(ITEMS, ITEM_WIDTH) m_cover_rx;
+    uvm_mvb::coverage #(ITEMS, ITEM_WIDTH) m_cover_tx;
 
     // Constructor of environment.
     function new(string name, uvm_component parent);
@@ -42,8 +42,8 @@ class env #(ITEM_WIDTH) extends uvm_env;
         uvm_config_db #(uvm_logic_vector_mvb::config_item)::set(this, "tx_env", "m_config", cfg_tx);
         uvm_config_db #(uvm_logic_vector_mvb::config_item)::set(this, "rx_env", "m_config", cfg_rx);
 
-        tx_env    = uvm_logic_vector_mvb::env_tx #(1, ITEM_WIDTH)::type_id::create("tx_env", this);
-        rx_env    = uvm_logic_vector_mvb::env_rx #(1, ITEM_WIDTH)::type_id::create("rx_env", this);
+        tx_env    = uvm_logic_vector_mvb::env_tx #(ITEMS, ITEM_WIDTH)::type_id::create("tx_env", this);
+        rx_env    = uvm_logic_vector_mvb::env_rx #(ITEMS, ITEM_WIDTH)::type_id::create("rx_env", this);
 
         m_scoreboard  = scoreboard #(ITEM_WIDTH)::type_id::create("m_scoreboard", this);
     endfunction
@@ -55,6 +55,6 @@ class env #(ITEM_WIDTH) extends uvm_env;
         tx_env.analysis_port.connect(m_scoreboard.analysis_imp_mvb_tx);
 
         rx_env.m_mvb_agent.analysis_port.connect(m_cover_rx.analysis_export);
-        rx_env.m_mvb_agent.analysis_port.connect(m_cover_tx.analysis_export);
+        tx_env.m_mvb_agent.analysis_port.connect(m_cover_tx.analysis_export);
     endfunction
 endclass
