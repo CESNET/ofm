@@ -222,8 +222,7 @@ begin
             "000"                                               & -- padding
             '0'                                                 & -- ECRC
             '0'                                                 & -- poisoned request
-            -- tagm_mvb_out_relaxed(i) & '0'                      & -- relaxed bit & no snoop
-            "00" &
+            tagm_mvb_out_relaxed(i) & '0'                       & -- relaxed bit & no snoop
             "00"                                                & -- padding
             tagm_mvb_out_len(i)(10-1 downto 0)                    -- Dword count
 
@@ -247,8 +246,7 @@ begin
             "000"                                               & -- padding
             '0'                                                 & -- ECRC
             '0'                                                 & -- poisoned request
-            -- tagm_mvb_out_relaxed(i) & '0'                      & -- relaxed bit & no snoop
-            "00" &
+            tagm_mvb_out_relaxed(i) & '0'                       & -- relaxed bit & no snoop
             "00"                                                & -- padding
             tagm_mvb_out_len(i)(10-1 downto 0);                   -- Dword count
 
