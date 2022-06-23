@@ -22,7 +22,7 @@ class sequence_simple_rx #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(uvm_mvb::se
     constraint tr_cnt_cons {transaction_count inside {[transaction_count_min:transaction_count_max]};}
     // ------------------------------------------------------------------------
     // Constructor
-    function new(string name = "Simple sequence rx");
+    function new(string name = "Simple_sequence_rx");
         super.new(name);
     endfunction
 
@@ -55,7 +55,7 @@ class sequence_lib_rx#(ITEMS, ITEM_WIDTH) extends uvm_sequence_library#(uvm_mvb:
   `uvm_object_param_utils(uvm_mvb::sequence_lib_rx#(ITEMS, ITEM_WIDTH))
   `uvm_sequence_library_utils(uvm_mvb::sequence_lib_rx#(ITEMS, ITEM_WIDTH))
 
-    function new(string name = "");
+    function new(string name = "sequence_lib_rx");
         super.new(name);
         init_sequence_library();
     endfunction
@@ -87,7 +87,7 @@ class sequence_simple_tx #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(uvm_mvb::se
 
     // ------------------------------------------------------------------------
     // Constructor
-    function new(string name = "Simple sequence tx");
+    function new(string name = "Simple_sequence_tx");
         super.new(name);
         rdy = uvm_common::rand_rdy_rand::new();
     endfunction
@@ -124,7 +124,7 @@ class sequence_full_speed_tx #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(uvm_mvb
 
     // ------------------------------------------------------------------------
     // Constructor
-    function new(string name = "Simple sequence tx");
+    function new(string name = "sequence_full_speed_tx");
         super.new(name);
     endfunction
 
@@ -158,7 +158,7 @@ class sequence_stop_tx #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(uvm_mvb::sequ
 
     // ------------------------------------------------------------------------
     // Constructor
-    function new(string name = "Simple sequence tx");
+    function new(string name = "sequence_stop_tx");
         super.new(name);
     endfunction
 
@@ -186,7 +186,7 @@ class sequence_lib_tx#(ITEMS, ITEM_WIDTH) extends uvm_sequence_library#(sequence
   `uvm_object_param_utils(uvm_mvb::sequence_lib_tx#(ITEMS, ITEM_WIDTH))
   `uvm_sequence_library_utils(uvm_mvb::sequence_lib_tx#(ITEMS, ITEM_WIDTH))
 
-    function new(string name = "");
+    function new(string name = "sequence_lib_tx");
         super.new(name);
         init_sequence_library();
     endfunction
