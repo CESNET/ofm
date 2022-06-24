@@ -20,7 +20,7 @@ class sequence_simple_tx_random_rdy #(DATA_WIDTH, META_WIDTH) extends uvm_sequen
 
     // ------------------------------------------------------------------------
     // Constructor
-    function new(string name = "Simple sequence tx");
+    function new(string name = "sequence_simple_tx_random_rdy");
         super.new(name);
         rdy = uvm_common::rand_rdy_rand::new();
     endfunction

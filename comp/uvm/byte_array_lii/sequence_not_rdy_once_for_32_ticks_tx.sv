@@ -22,7 +22,7 @@ class sequence_not_rdy_once_for_32_ticks_tx #(DATA_WIDTH, META_WIDTH) extends uv
     uvm_common::rand_rdy rdy;
     // ------------------------------------------------------------------------
     // Constructor
-    function new(string name = "Simple sequence tx");
+    function new(string name = "sequence_not_rdy_once_for_32_ticks_tx");
         super.new(name);
         rdy = uvm_common::rand_rdy_swap::new(32, 1);
     endfunction
