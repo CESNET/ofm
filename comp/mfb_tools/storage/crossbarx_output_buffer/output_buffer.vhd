@@ -405,7 +405,7 @@ begin
     hdr_fifoxm_i : entity work.FIFOX_MULTI
     generic map(
         DATA_WIDTH          => HDR_WIDTH    ,
-        ITEMS               => 32           ,
+        ITEMS               => (MFB_REGIONS+1)*32,
         WRITE_PORTS         => MFB_REGIONS  ,
         READ_PORTS          => MFB_REGIONS+1,
         RAM_TYPE            => "AUTO"       ,
