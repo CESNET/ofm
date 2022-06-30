@@ -20,8 +20,8 @@ class sequence_simple_rx_base #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(uvm_mv
     //////////////////////////////////
     // RANDOMIZATION
     rand int unsigned hl_transactions;
-    int unsigned hl_transactions_min = 100;
-    int unsigned hl_transactions_max = 200;
+    int unsigned hl_transactions_min =  20;
+    int unsigned hl_transactions_max = 300;
 
     constraint c_hl_transactions{
         hl_transactions inside {[hl_transactions_min:hl_transactions_max]};
@@ -105,22 +105,21 @@ class sequence_simple_rx #(ITEMS, ITEM_WIDTH) extends sequence_simple_rx_base #(
     virtual task create_sequence_item();
         if (!gen.randomize()) `uvm_fatal(this.get_full_name(), "failed to radnomize");
         for (int i = 0; i < ITEMS; i++) begin
-            if (frame == null && hl_transactions != 0) begin
+            if (gen.vld[i] == 1'b1 && hl_transactions != 0) begin
                 hi_sqr.try_next_item(frame);
                 if (frame != null) begin
-                    if (gen.vld[i] == 1'b1) begin
-                        gen.data[i] = frame.data;
-                    end else begin
-                        gen.vld[i] = 1'b0;
-                    end
-                    frame = null;
+                    gen.data[i] = frame.data;
                     hi_sqr.item_done();
+                    frame = null;
                     hl_transactions--;
                 end else begin
-                    gen.src_rdy = 1'b0;
+                    gen.vld[i] = 1'b0;
                 end
+            end else begin
+                gen.vld[i] = 1'b0;
             end
         end
+
         if (gen.vld == '0) begin
             gen.src_rdy = 1'b0;
         end
@@ -139,8 +138,11 @@ class sequence_full_speed_rx #(ITEMS, ITEM_WIDTH) extends sequence_simple_rx_bas
 
     virtual task create_sequence_item();
         if (!gen.randomize()) `uvm_fatal(this.get_full_name(), "failed to radnomize");
+        gen.vld     = 0;
+        gen.src_rdy = 1'b0;
+
         for (int i = 0; i < ITEMS; i++) begin
-            if (frame == null && hl_transactions != 0) begin
+            if (hl_transactions != 0) begin
                 hi_sqr.try_next_item(frame);
                 if (frame != null) begin
                     gen.src_rdy = 1'b1;
@@ -149,8 +151,6 @@ class sequence_full_speed_rx #(ITEMS, ITEM_WIDTH) extends sequence_simple_rx_bas
                     frame = null;
                     hi_sqr.item_done();
                     hl_transactions--;
-                end else begin
-                    gen.src_rdy = 1'b0;
                 end
             end
         end
@@ -167,59 +167,11 @@ class sequence_stop_rx #(ITEMS, ITEM_WIDTH) extends sequence_simple_rx_base #(IT
     endfunction
 
     virtual task create_sequence_item();
-        if (!gen.randomize()) `uvm_fatal(this.get_full_name(), "failed to radnomize");
-        for (int i = 0; i < ITEMS; i++) begin
-            if (frame == null && hl_transactions != 0) begin
-                hi_sqr.try_next_item(frame);
-                if (frame != null) begin
-                    gen.src_rdy = 1'b0;
-                    if (gen.vld[i] == 1'b1) begin
-                        gen.data[i] = frame.data;
-                    end else begin
-                        gen.vld[i] = 1'b0;
-                    end
-                    frame = null;
-                    hi_sqr.item_done();
-                    hl_transactions--;
-                end
-            end
-        end
+        if (!gen.randomize() with {src_rdy == 0;}) `uvm_fatal(this.get_full_name(), "failed to radnomize");
+        hl_transactions--;
     endtask
 endclass
 
-class sequence_empty_rx #(ITEMS, ITEM_WIDTH) extends sequence_simple_rx_base #(ITEMS, ITEM_WIDTH);
-
-    `uvm_object_param_utils(uvm_logic_vector_mvb::sequence_empty_rx #(ITEMS, ITEM_WIDTH))
-
-    // Constructor - creates new instance of this class
-    function new(string name = "sequence");
-        super.new("sequence_empty_rx");
-    endfunction
-
-    virtual task create_sequence_item();
-        if (!gen.randomize() with {vld == '0;}) `uvm_fatal(this.get_full_name(), "failed to radnomize");
-        for (int i = 0; i < ITEMS; i++) begin
-            if (frame == null && hl_transactions != 0) begin
-                hi_sqr.try_next_item(frame);
-                if (frame != null) begin
-                    if (gen.vld[i] == 1'b1) begin
-                        gen.data[i] = frame.data;
-                    end else begin
-                        gen.vld[i] = 1'b0;
-                    end
-                    frame = null;
-                    hi_sqr.item_done();
-                    hl_transactions--;
-                end else begin
-                    gen.src_rdy = 1'b0;
-                end
-            end
-        end
-        if (gen.vld == '0) begin
-            gen.src_rdy = 1'b0;
-        end
-    endtask
-endclass
 
 //////////////////////////////////////
 // TX LIBRARY
@@ -238,6 +190,5 @@ class sequence_lib_rx#(ITEMS, ITEM_WIDTH) extends uvm_sequence_library#(uvm_mvb:
         this.add_sequence(sequence_simple_rx#(ITEMS, ITEM_WIDTH)::get_type());
         this.add_sequence(sequence_full_speed_rx#(ITEMS, ITEM_WIDTH)::get_type());
         this.add_sequence(sequence_stop_rx#(ITEMS, ITEM_WIDTH)::get_type());
-        this.add_sequence(sequence_empty_rx#(ITEMS, ITEM_WIDTH)::get_type());
     endfunction
 endclass
