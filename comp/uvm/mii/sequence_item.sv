@@ -19,9 +19,7 @@ class sequence_item #(CHANNELS, WIDTH) extends uvm_sequence_item;
     //  Group: Variables
     rand logic [WIDTH - 1 : 0] data [CHANNELS];
     rand logic [BYTES - 1 : 0] control [CHANNELS];
-
-    //  Group: Constraints
-
+    rand logic clk_en;
 
     //  Group: Functions
 
@@ -44,6 +42,7 @@ class sequence_item #(CHANNELS, WIDTH) extends uvm_sequence_item;
         super.do_copy(rhs);
         this.data        = rhs_.data;
         this.control     = rhs_.control;
+        this.clk_en      = rhs_.clk_en;
     endfunction
 
     //  Function: do_compare
@@ -58,7 +57,8 @@ class sequence_item #(CHANNELS, WIDTH) extends uvm_sequence_item;
         // Compare all attributes that maters
         return (super.do_compare(rhs, comparer) &&
             (this.data       == rhs_.data) &&
-            (this.control    == rhs_.control));
+            (this.control    == rhs_.control) &&
+            (this.clk_en     == rhs_.clk_en));
     endfunction
 
     //  Function: convert2string
@@ -66,10 +66,11 @@ class sequence_item #(CHANNELS, WIDTH) extends uvm_sequence_item;
         string output_string = "";
         string data = "";
 
-        $sformat(output_string, {"%s\n\tDATA: %b\n\tCONTROL: %b\n"},
+        $sformat(output_string, {"%s\n\tDATA: %b\n\tCONTROL: %b\n\t CLK_EN: %b\n"},
             super.convert2string(),
             this.data,
-            this.control
+            this.control,
+            this.clk_en
         );
 
         return output_string;
