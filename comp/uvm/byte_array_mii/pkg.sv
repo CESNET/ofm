@@ -25,8 +25,12 @@ package uvm_byte_array_mii;
     `include "wrapper.sv"
 
     `include "config.sv"
+    `include "ce_generator.sv"
     `include "sequencer.sv"
-    `include "sequence.sv"
+    `include "sequence_rx_base.sv"
+    `include "sequence_rx.sv"
+    `include "sequence_tx_base.sv"
+    `include "sequence_tx.sv"
     `include "sequence_lib.sv"
     `include "monitor.sv"
     `include "env.sv"

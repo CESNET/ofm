@@ -52,6 +52,7 @@ class monitor #(CHANNELS, WIDTH) extends uvm_monitor;
 
             si.data = vif.monitor_cb.DATA;
             si.control = vif.monitor_cb.CONTROL;
+            si.clk_en = vif.monitor_cb.CLK_EN;
 
             // Write sequence item to analysis port.
             analysis_port.write(si);

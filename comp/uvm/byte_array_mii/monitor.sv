@@ -66,7 +66,7 @@ class monitor #(CHANNELS, CHANNEL_WIDTH) extends uvm_byte_array::monitor;
                         end
                     end
                     if (init_counter > 1024 * 10) begin
-                        `uvm_error(get_full_name(), "uvm_byte_array_mii::monitor - Failed to initialize MII line!\n")
+                        `uvm_fatal(get_full_name(), "uvm_byte_array_mii::monitor - Failed to initialize MII line!\n")
                     end
                 end
             IDLE : 
@@ -94,7 +94,7 @@ class monitor #(CHANNELS, CHANNEL_WIDTH) extends uvm_byte_array::monitor;
                         `uvm_error(get_full_name(), "uvm_byte_array_mii::monitor - Data started without start of frame delimiter!\n")
                     end else begin
                         this.fsm_print_state();
-                        `uvm_warning(get_full_name(), "uvm_byte_array_mii::monitor - Undefined control signal!\n");
+                        `uvm_fatal(get_full_name(), "uvm_byte_array_mii::monitor - Undefined control signal!\n");
                     end
                 end
             PREAMBLE :
@@ -118,7 +118,7 @@ class monitor #(CHANNELS, CHANNEL_WIDTH) extends uvm_byte_array::monitor;
                         end
                     end else begin
                         this.fsm_print_state();
-                        `uvm_warning(get_full_name(), "uvm_byte_array_mii::monitor - Undefined control signal!\n");
+                        `uvm_fatal(get_full_name(), "uvm_byte_array_mii::monitor - Undefined control signal!\n");
                     end
                 end
             DATA :
@@ -139,7 +139,7 @@ class monitor #(CHANNELS, CHANNEL_WIDTH) extends uvm_byte_array::monitor;
                         state = DATA;
                     end else begin
                         this.fsm_print_state();
-                        `uvm_warning(get_full_name(), "uvm_byte_array_mii::monitor - Undefined control signal!\n");
+                        `uvm_fatal(get_full_name(), "uvm_byte_array_mii::monitor - Undefined control signal!\n");
                     end
                 end
         endcase
@@ -159,6 +159,10 @@ class monitor #(CHANNELS, CHANNEL_WIDTH) extends uvm_byte_array::monitor;
     virtual function void write(uvm_mii::sequence_item #(CHANNELS, CHANNEL_WIDTH) tr);
         byte unsigned channel_data[] = {<<8{{<<CHANNEL_WIDTH{tr.data}}}};
         logic channel_control[] = {<<1{{<<BYTES{tr.control}}}};
+
+        if (tr.clk_en != 1) begin
+            return;
+        end
         
         for (int i = 0; i < CHANNELS * BYTES; i++) begin    
             current_byte = channel_data[i];
