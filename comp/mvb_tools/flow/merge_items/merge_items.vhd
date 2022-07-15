@@ -1,0 +1,141 @@
+-- merge_items.vhd: Merge MVB items from two streams to single MVB item
+-- Copyright (C) 2022 CESNET
+-- Author(s): Jakub Cabal <cabal@cesnet.cz>
+--
+-- SPDX-License-Identifier: BSD-3-Clause
+--
+
+library IEEE;
+use IEEE.std_logic_1164.all;
+use IEEE.numeric_std.all;
+
+use work.math_pack.all;
+use work.type_pack.all;
+
+entity MVB_MERGE_ITEMS is
+    generic(
+        -- Number of RX0 items, same for output
+        RX0_ITEMS      : natural := 4;
+        -- RX0 item width in bits
+        RX0_ITEM_WIDTH : natural := 32;
+        -- Number of RX0 items, same for output
+        RX1_ITEMS      : natural := 4;
+        -- RX1 item width in bits
+        RX1_ITEM_WIDTH : natural := 16;
+        -- TX item width in bits (sum of RX0 and RX1)
+        TX_ITEM_WIDTH  : natural := RX0_ITEM_WIDTH+RX1_ITEM_WIDTH;
+        -- Depth of FIFOX Multi on RX1 input
+        FIFO_DEPTH     : natural := 32;
+        DEVICE         : string := "STRATIX10"
+    );
+    port(
+        CLK         : in  std_logic;
+        RESET       : in  std_logic;
+
+        RX0_DATA    : in  std_logic_vector(RX0_ITEMS*RX0_ITEM_WIDTH-1 downto 0);
+        RX0_VLD     : in  std_logic_vector(RX0_ITEMS-1 downto 0);
+        RX0_SRC_RDY : in  std_logic;
+        RX0_DST_RDY : out std_logic;
+
+        RX1_DATA    : in  std_logic_vector(RX1_ITEMS*RX1_ITEM_WIDTH-1 downto 0);
+        RX1_VLD     : in  std_logic_vector(RX1_ITEMS-1 downto 0);
+        RX1_SRC_RDY : in  std_logic;
+        RX1_DST_RDY : out std_logic;
+
+        -- TX MVB has same item aligment as RX0 MVB input!
+        TX_DATA     : out std_logic_vector(RX0_ITEMS*TX_ITEM_WIDTH-1 downto 0);
+        TX_DATA0    : out std_logic_vector(RX0_ITEMS*RX0_ITEM_WIDTH-1 downto 0);
+        TX_DATA1    : out std_logic_vector(RX0_ITEMS*RX1_ITEM_WIDTH-1 downto 0);
+        TX_VLD      : out std_logic_vector(RX0_ITEMS-1 downto 0);
+        TX_SRC_RDY  : out std_logic;
+        TX_DST_RDY  : in  std_logic
+    );
+end entity;
+
+architecture FULL of MVB_MERGE_ITEMS is
+
+    signal fifoxm_wr     : std_logic_vector(RX1_ITEMS-1 downto 0);
+    signal fifoxm_full   : std_logic;
+    signal fifoxm_do     : std_logic_vector(RX0_ITEMS*RX1_ITEM_WIDTH-1 downto 0);
+    signal fifoxm_do_arr : slv_array_t(RX0_ITEMS-1 downto 0)(RX1_ITEM_WIDTH-1 downto 0);
+    signal fifoxm_rd     : std_logic_vector(RX0_ITEMS-1 downto 0);
+    signal fifoxm_empty  : std_logic_vector(RX0_ITEMS-1 downto 0);
+    signal demux_sel     : u_array_t(RX0_ITEMS-1 downto 0)(log2(RX0_ITEMS)-1 downto 0);
+    signal must_wait     : std_logic;
+    signal rd_vector     : std_logic_vector(RX0_ITEMS-1 downto 0);
+    signal rx0_data_arr  : slv_array_t(RX0_ITEMS-1 downto 0)(RX0_ITEM_WIDTH-1 downto 0);
+    signal tx_data1_arr  : slv_array_t(RX0_ITEMS-1 downto 0)(RX1_ITEM_WIDTH-1 downto 0);
+    signal tx_data_arr   : slv_array_t(RX0_ITEMS-1 downto 0)(TX_ITEM_WIDTH-1 downto 0);
+
+begin
+
+    fifoxm_wr <= RX1_VLD and RX1_SRC_RDY;
+    RX1_DST_RDY <= not fifoxm_full;
+
+    fifoxm_i : entity work.FIFOX_MULTI
+    generic map(
+        DATA_WIDTH     => RX1_ITEM_WIDTH,
+        ITEMS          => max(RX0_ITEMS,RX1_ITEMS)*FIFO_DEPTH,
+        WRITE_PORTS    => RX1_ITEMS,
+        READ_PORTS     => RX0_ITEMS,
+        RAM_TYPE       => "AUTO",
+        SAFE_READ_MODE => false,
+        DEVICE         => DEVICE
+    )
+    port map(
+        CLK    => CLK,
+        RESET  => RESET,
+
+        DI     => RX1_DATA,
+        WR     => fifoxm_wr,
+        FULL   => fifoxm_full,
+
+        DO     => fifoxm_do,
+        RD     => fifoxm_rd,
+        EMPTY  => fifoxm_empty
+    );
+
+    fifoxm_do_arr <= slv_array_deser(fifoxm_do,RX0_ITEMS,RX1_ITEM_WIDTH);
+
+    process (all)
+        variable v_vld_count : unsigned(log2(RX0_ITEMS+1)-1 downto 0);
+        variable v_emp_count : unsigned(log2(RX0_ITEMS+1)-1 downto 0);
+    begin
+        v_vld_count := (others => '0');
+        v_emp_count := (others => '0');
+        demux_sel <= (others => (others => '0'));
+        must_wait <= '0';
+        rd_vector <= (others => '0');
+        for i in 0 to RX0_ITEMS-1 loop
+            demux_sel(i) <= resize(v_vld_count,log2(RX0_ITEMS));
+            if (RX0_VLD(i) = '1') then
+                rd_vector(to_integer(v_vld_count)) <= '1';
+                v_vld_count := v_vld_count + 1;
+            end if;
+            if (fifoxm_empty(i) = '0') then
+                v_emp_count := v_emp_count + 1;
+            end if;
+        end loop;
+
+        if (v_emp_count < v_vld_count) then
+            must_wait <= '1';
+        end if;
+    end process;
+
+    fifoxm_rd <= rd_vector and not must_wait and RX0_SRC_RDY and TX_DST_RDY;
+
+    rx0_data_arr <= slv_array_deser(RX0_DATA,RX0_ITEMS,RX0_ITEM_WIDTH);
+    RX0_DST_RDY <= TX_DST_RDY and not must_wait;
+
+    tx_data_g : for i in 0 to RX0_ITEMS-1 generate
+        tx_data1_arr(i) <= fifoxm_do_arr(to_integer(demux_sel(i)));
+        tx_data_arr(i) <= tx_data1_arr(i) & rx0_data_arr(i);
+    end generate;
+
+    TX_DATA     <= slv_array_ser(tx_data_arr,RX0_ITEMS,TX_ITEM_WIDTH);
+    TX_DATA0    <= RX0_DATA;
+    TX_DATA1    <= slv_array_ser(tx_data1_arr,RX0_ITEMS,RX1_ITEM_WIDTH);
+    TX_VLD      <= RX0_VLD;
+    TX_SRC_RDY  <= RX0_SRC_RDY and not must_wait;
+
+end architecture;
