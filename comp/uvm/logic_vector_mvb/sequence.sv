@@ -104,6 +104,13 @@ class sequence_simple_rx #(ITEMS, ITEM_WIDTH) extends sequence_simple_rx_base #(
 
     virtual task create_sequence_item();
         if (!gen.randomize()) `uvm_fatal(this.get_full_name(), "failed to radnomize");
+
+        //return if src_rdy is zero
+        if (gen.src_rdy == 1'b0) begin
+            return;
+        end
+
+        // generate valid data if src_rdy is set to 1
         for (int i = 0; i < ITEMS; i++) begin
             if (gen.vld[i] == 1'b1 && hl_transactions != 0) begin
                 hi_sqr.try_next_item(frame);
