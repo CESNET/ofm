@@ -12,44 +12,64 @@ use IEEE.numeric_std.all;
 use work.math_pack.all;
 use work.type_pack.all;
 
+-- This MVB_MERGE_ITEMS component allows to merge two different MVB streams by
+-- merging items from both streams into one item. Both input MVB streams must
+-- receive the same number of items in the same order, but they can be aligned
+-- differently. TX MVB has same item aligment as RX0 MVB input.
 entity MVB_MERGE_ITEMS is
     generic(
-        -- Number of RX0 items, same for output
+        -- Number of RX0 items, same for output (TX)
         RX0_ITEMS      : natural := 4;
         -- RX0 item width in bits
         RX0_ITEM_WIDTH : natural := 32;
-        -- Number of RX0 items, same for output
+        -- Number of RX1 items
         RX1_ITEMS      : natural := 4;
         -- RX1 item width in bits
         RX1_ITEM_WIDTH : natural := 16;
-        -- TX item width in bits (sum of RX0 and RX1)
+        -- TX item width in bits (must be sum of RX0 and RX1)
         TX_ITEM_WIDTH  : natural := RX0_ITEM_WIDTH+RX1_ITEM_WIDTH;
         -- Enable of FIFOX on RX0 input
         RX0_FIFO_EN    : boolean := False;
         -- Depth of FIFOs on inputs
         FIFO_DEPTH     : natural := 32;
+        -- FPGA device string (required for FIFOs)
         DEVICE         : string := "STRATIX10"
     );
     port(
+        -- Clock input
         CLK         : in  std_logic;
+        -- Reset input synchronized with CLK
         RESET       : in  std_logic;
 
+        -- RX0 MVB: data word with MVB items
         RX0_DATA    : in  std_logic_vector(RX0_ITEMS*RX0_ITEM_WIDTH-1 downto 0);
+        -- RX0 MVB: valid of each MVB item
         RX0_VLD     : in  std_logic_vector(RX0_ITEMS-1 downto 0);
+        -- RX0 MVB: source ready
         RX0_SRC_RDY : in  std_logic;
+        -- RX0 MVB: destination ready
         RX0_DST_RDY : out std_logic;
 
+        -- RX1 MVB: data word with MVB items
         RX1_DATA    : in  std_logic_vector(RX1_ITEMS*RX1_ITEM_WIDTH-1 downto 0);
+        -- RX1 MVB: valid of each MVB item
         RX1_VLD     : in  std_logic_vector(RX1_ITEMS-1 downto 0);
+        -- RX1 MVB: source ready
         RX1_SRC_RDY : in  std_logic;
+        -- RX1 MVB: destination ready
         RX1_DST_RDY : out std_logic;
 
-        -- TX MVB has same item aligment as RX0 MVB input!
+        -- TX MVB: Data word from both inputs (concatenated)
         TX_DATA     : out std_logic_vector(RX0_ITEMS*TX_ITEM_WIDTH-1 downto 0);
+        -- TX MVB: Data word from RX0 input
         TX_DATA0    : out std_logic_vector(RX0_ITEMS*RX0_ITEM_WIDTH-1 downto 0);
+        -- TX MVB: Data word from RX1 input
         TX_DATA1    : out std_logic_vector(RX0_ITEMS*RX1_ITEM_WIDTH-1 downto 0);
+        -- TX MVB: valid of each MVB item
         TX_VLD      : out std_logic_vector(RX0_ITEMS-1 downto 0);
+        -- TX MVB: source ready
         TX_SRC_RDY  : out std_logic;
+        -- TX MVB: destination ready
         TX_DST_RDY  : in  std_logic
     );
 end entity;
@@ -99,7 +119,6 @@ begin
         TX_SRC_RDY => fifo_rx0_src_rdy,
         TX_DST_RDY => fifo_rx0_dst_rdy
     );
-
 
     fifoxm_wr <= RX1_VLD and RX1_SRC_RDY;
     RX1_DST_RDY <= not fifoxm_full;
