@@ -4,8 +4,8 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
-FIRMWARE_BASE = ../../../../../..
-include $(FIRMWARE_BASE)/build/paths.mk
+OFM_PATH = ../../../../../..
+include $(OFM_PATH)/build/paths.mk
 
 TARGET1 = paramsctl
 TARGET2 = directctl

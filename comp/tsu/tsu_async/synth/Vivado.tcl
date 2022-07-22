@@ -10,10 +10,10 @@
 global env
 
 # Basic path defined within Makefile
-if { [info exists env(FIRMWARE_BASE)] } {
-   set FIRMWARE_BASE $env(FIRMWARE_BASE)
+if { [info exists env(OFM_PATH)] } {
+   set OFM_PATH $env(OFM_PATH)
 } else {
-   set FIRMWARE_BASE "../../../.."
+   set OFM_PATH "../../../.."
 }
 
 # Source NetCOPE and aplication packages with constants, if they were defined
@@ -57,7 +57,7 @@ set HIERARCHY(COMPONENTS) [list [list "tsu_async" ".." "SRC"]]
 # ----- Synthesis of the module -----------------------------------------------
 
 # Including synthesis procedures
-source $FIRMWARE_BASE/build/Vivado.inc.tcl
+source $OFM_PATH/build/Vivado.inc.tcl
 
 # Manual sythtesis
 SetupDesign SYNTH_FLAGS

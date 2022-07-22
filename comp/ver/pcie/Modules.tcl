@@ -4,8 +4,6 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-global FIRMWARE_BASE
-
 set COMPONENTS [list \
     [list "NDP"    $OFM_PATH/comp/ver/ndp        "FULL"] \
     [list "AVALON" $OFM_PATH/comp/ver/avst       "FULL"] \
@@ -13,5 +11,5 @@ set COMPONENTS [list \
 ]
 
 if { $ARCHGRP == "FULL" } {
-  set MOD "$MOD $ENTITY_BASE/sv_pcie_pkg.sv"
+    lappend MOD "$ENTITY_BASE/sv_pcie_pkg.sv"
 }

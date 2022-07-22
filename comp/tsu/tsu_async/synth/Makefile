@@ -11,7 +11,7 @@
 # ##### Definition of variables ###############################################
 
 # Basic paths
-FIRMWARE_BASE = ../../../../..
+OFM_PATH = ../../../../..
 
 # Tcl file with NetCOPE values for generic parameters
 # (if defined, uses the value from top level Makefile)
@@ -22,13 +22,13 @@ NETCOPE_CONST ?=
 USER_CONST ?=
 
 # Definition of export command for selected variables used by build system
-# (variable used in $(FIRMWARE_BASE)/build/Makefile.Vivado.inc)
-USER_ENV = FIRMWARE_BASE=$(FIRMWARE_BASE) \
+# (variable used in $(OFM_PATH)/build/Makefile.Vivado.inc)
+USER_ENV = OFM_PATH=$(OFM_PATH) \
 	NETCOPE_CONST=$(NETCOPE_CONST) \
 	USER_CONST=$(USER_CONST)
 
 # Module name
-# (variable used also in $(FIRMWARE_BASE)/build/Makefile.Vivado.inc)
+# (variable used also in $(OFM_PATH)/build/Makefile.Vivado.inc)
 MODULE = tsu_async
 
 
@@ -44,4 +44,4 @@ build_module : $(MODULE).dcp
 # General Makefile for builds using Vivado
 # * defines target for building *.dcp file
 # * defines 'clean' target depending also on CLEAN_DEPENDS variable
-include $(FIRMWARE_BASE)/build/Makefile.Vivado.inc
+include $(OFM_PATH)/build/Makefile.Vivado.inc
