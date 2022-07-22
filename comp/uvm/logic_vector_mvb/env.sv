@@ -15,8 +15,7 @@ class env_rx #(ITEMS, ITEM_WIDTH) extends uvm_env;
     uvm_analysis_port #(uvm_logic_vector::sequence_item#(ITEM_WIDTH)) analysis_port;
     uvm_reset::sync_cbs            reset_sync;
 
-    uvm_logic_vector::agent#(ITEM_WIDTH) m_logic_vector_agent;
-
+    uvm_logic_vector::agent#(ITEM_WIDTH)   m_logic_vector_agent;
     uvm_mvb::agent_rx #(ITEMS, ITEM_WIDTH) m_mvb_agent;
 
     local config_item m_config;

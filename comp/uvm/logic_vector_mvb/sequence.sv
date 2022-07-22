@@ -33,6 +33,7 @@ class sequence_simple_rx_base #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(uvm_mv
         this.name = name;
     endfunction
 
+
     // Generates transactions
     task body;
         // Create a request for sequence item
@@ -61,17 +62,25 @@ class sequence_simple_rx_base #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(uvm_mv
 
     // Method which define how the transaction will look.
     task send(uvm_logic_vector::sequence_item#(ITEM_WIDTH) frame);
-        if (state == state_next) begin
-            create_sequence_item();
-        end
 
-        //GET response
-        get_response(rsp);
-
-        if (rsp.src_rdy == 1'b1 && rsp.dst_rdy == 1'b0) begin
-            state = state_last;
-        end else begin
+        if (p_sequencer.reset_sync.has_been_reset()) begin
+            //SETUP RESET
+            gen.randomize() with {src_rdy == 0;};
             state = state_next;
+            get_response(rsp);
+        end else begin
+            if (state == state_next) begin
+                create_sequence_item();
+            end
+
+            //GET response
+            get_response(rsp);
+
+            if (req.src_rdy == 1'b1 && rsp.dst_rdy == 1'b0) begin
+                state = state_last;
+            end else begin
+                state = state_next;
+            end
         end
 
         start_item(req);
@@ -155,8 +164,8 @@ class sequence_full_speed_rx #(ITEMS, ITEM_WIDTH) extends sequence_simple_rx_bas
                     gen.src_rdy = 1'b1;
                     gen.vld[i]  = 1'b1;
                     gen.data[i] = frame.data;
-                    frame = null;
                     hi_sqr.item_done();
+                    frame = null;
                     hl_transactions--;
                 end
             end
