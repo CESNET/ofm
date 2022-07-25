@@ -281,9 +281,9 @@ class sequence_lib #(ITEM_WIDTH) extends uvm_sequence_library#(sequence_item #(I
     // can be useful in specific tests
     virtual function void init_sequence();
         this.add_sequence(sequence_simple #(ITEM_WIDTH)::get_type());
-        //this.add_sequence(sequence_simple_const #(ITEM_WIDTH)::get_type());
-        //this.add_sequence(sequence_simple_gauss #(ITEM_WIDTH)::get_type());
-        //this.add_sequence(sequence_simple_inc #(ITEM_WIDTH)::get_type());
-        //this.add_sequence(sequence_simple_dec #(ITEM_WIDTH)::get_type());
+        this.add_sequence(sequence_simple_const #(ITEM_WIDTH)::get_type());
+        this.add_sequence(sequence_simple_gauss #(ITEM_WIDTH)::get_type());
+        this.add_sequence(sequence_simple_inc #(ITEM_WIDTH)::get_type());
+        this.add_sequence(sequence_simple_dec #(ITEM_WIDTH)::get_type());
     endfunction
 endclass
