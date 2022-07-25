@@ -12,16 +12,16 @@ package test;
     `include "uvm_macros.svh"
     import uvm_pkg::*;
 
-    parameter SPLITTER_OUTPUTS = 8;
-    parameter REGIONS     = 4;
+    parameter SPLITTER_OUTPUTS = 5;
+    parameter REGIONS     = 2;
     parameter REGION_SIZE = 8;
     parameter BLOCK_SIZE  = 8;
     parameter META_WIDTH  = 32; 
-    parameter META_BEHAV  = 1;
+    parameter META_BEHAV  = 2;
 
     parameter DEVICE = "AGILEX";
     parameter DRAIN_TIME = 20ns;
-    parameter TRANSACTION_COUNT = 100000;
+    parameter TRANSACTION_COUNT = 3000;
 
     parameter CLK_PERIOD = 4ns;
 

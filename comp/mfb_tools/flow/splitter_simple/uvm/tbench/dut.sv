@@ -8,7 +8,7 @@ import test::*;
 
 module DUT (
     input logic     CLK,
-    input logic     RST,
+    reset_if        reset,
     mfb_if.dut_rx   mfb_rx,
     mfb_if.dut_tx   mfb_tx[SPLITTER_OUTPUTS]
     );
@@ -59,7 +59,7 @@ module DUT (
         .DEVICE             (DEVICE)
     ) VHDL_DUT_U (
         .CLK                (CLK),
-        .RESET              (RST),
+        .RESET              (reset.RESET),
         .RX_MFB_SEL         (rx_mfb_sel),
         .RX_MFB_DATA        (mfb_rx.DATA),
         .RX_MFB_META        (rx_mfb_meta),

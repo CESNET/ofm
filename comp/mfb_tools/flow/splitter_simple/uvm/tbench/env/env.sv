@@ -9,11 +9,9 @@
 class env #(REGIONS, REGION_SIZE, BLOCK_SIZE,  META_WIDTH, SPLITTER_OUTPUTS, META_BEHAV) extends uvm_env;
     `uvm_component_param_utils(uvm_splitter_simple::env #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH, SPLITTER_OUTPUTS, META_BEHAV));
 
+    uvm_reset::agent                                                           m_reset;
     uvm_byte_array_mfb::env_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, $clog2(SPLITTER_OUTPUTS) +META_WIDTH) m_env_rx;
     uvm_byte_array_mfb::env_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) m_env_tx[SPLITTER_OUTPUTS];
-
-    uvm_byte_array_mfb::config_item m_config_rx;
-    uvm_byte_array_mfb::config_item m_config_tx[SPLITTER_OUTPUTS];
 
     scoreboard #(META_WIDTH, SPLITTER_OUTPUTS) sc;
 
@@ -24,15 +22,23 @@ class env #(REGIONS, REGION_SIZE, BLOCK_SIZE,  META_WIDTH, SPLITTER_OUTPUTS, MET
 
     // Create base components of environment.
     function void build_phase(uvm_phase phase);
+        uvm_reset::config_item          m_config_reset;
+        uvm_byte_array_mfb::config_item m_config_rx;
+        uvm_byte_array_mfb::config_item m_config_tx[SPLITTER_OUTPUTS];
 
-        m_config_rx= new;
+        m_config_reset = new();
+        m_config_reset.active         = UVM_ACTIVE;
+        m_config_reset.interface_name = "vif_reset";
+        uvm_config_db#(uvm_reset::config_item)::set(this, "m_reset", "m_config", m_config_reset);
+        m_reset  = uvm_reset::agent::type_id::create("m_reset", this);
+
+
+        m_config_rx = new;
         m_config_rx.active = UVM_ACTIVE;
         m_config_rx.interface_name = "vif_rx";
         m_config_rx.meta_behav = 1;
-
         uvm_config_db #(uvm_byte_array_mfb::config_item)::set(this, "m_env_rx", "m_config", m_config_rx);
         m_env_rx = uvm_byte_array_mfb::env_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, $clog2(SPLITTER_OUTPUTS) +META_WIDTH)::type_id::create("m_env_rx", this);
-
 
         for(int i = 0; i < SPLITTER_OUTPUTS; i++) begin
             string i_string;
@@ -42,7 +48,6 @@ class env #(REGIONS, REGION_SIZE, BLOCK_SIZE,  META_WIDTH, SPLITTER_OUTPUTS, MET
             m_config_tx[i].active = UVM_ACTIVE;
             m_config_tx[i].interface_name = {"vif_tx_", i_string};
             m_config_tx[i].meta_behav = 1;
-
             uvm_config_db #(uvm_byte_array_mfb::config_item)::set(this, {"m_env_tx_", i_string}, "m_config", m_config_tx[i]);
             m_env_tx[i]    = uvm_byte_array_mfb::env_tx#(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH)::type_id::create({"m_env_tx_", i_string}, this);
         end
@@ -56,10 +61,12 @@ class env #(REGIONS, REGION_SIZE, BLOCK_SIZE,  META_WIDTH, SPLITTER_OUTPUTS, MET
 
         m_env_rx.m_byte_array_agent.analysis_port.connect(sc.input_data);
         m_env_rx.m_logic_vector_agent.analysis_port.connect(sc.input_meta);
+        m_reset.sync_connect(m_env_rx.reset_sync);
 
         for (int i = 0; i < SPLITTER_OUTPUTS; i++) begin
             m_env_tx[i].m_byte_array_agent.analysis_port.connect(sc.out_data[i]);
             m_env_tx[i].m_logic_vector_agent.analysis_port.connect(sc.out_meta[i]);
+            m_reset.sync_connect(m_env_tx[i].reset_sync);
         end
     endfunction
 

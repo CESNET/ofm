@@ -20,6 +20,28 @@ class ex_test extends uvm_test;
         m_env = uvm_splitter_simple::env #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH, SPLITTER_OUTPUTS, META_BEHAV)::type_id::create("m_env", this);
     endfunction
 
+    virtual task run_reset(uvm_phase phase);
+        uvm_reset::sequence_reset reset;
+        uvm_reset::sequence_run   run;
+
+        reset = uvm_reset::sequence_reset::type_id::create("reset_reset");
+        run   = uvm_reset::sequence_run::type_id::create("reset_run");
+        run.length_min = 1000;
+        run.length_max = 2000;
+
+        //
+        forever begin
+            //reset.set_starting_phase(phase);
+            void'(reset.randomize());
+            reset.start(m_env.m_reset.m_sequencer);
+            forever begin
+                //run.set_starting_phase(phase);
+                void'(run.randomize());
+                run.start(m_env.m_reset.m_sequencer);
+            end
+        end
+    endtask
+
     virtual task tx_seq(uvm_phase phase, int unsigned index);
         uvm_mfb::sequence_lib_tx#(REGIONS, REGION_SIZE, BLOCK_SIZE, 8, META_WIDTH) mfb_seq;
 
@@ -41,6 +63,11 @@ class ex_test extends uvm_test;
         virt_seq #(META_WIDTH, SPLITTER_OUTPUTS) m_vseq;
 
         phase.raise_objection(this);
+
+        fork
+            run_reset(phase);
+        join_none;
+
 
         //RUN MFB TX SEQUENCE
         for (int unsigned it = 0; it < SPLITTER_OUTPUTS; it++) begin
