@@ -45,6 +45,15 @@ class sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) ex
         finish_item(req);
     endtask
 
+    function void item_done();
+        hl_sqr.m_data.item_done();
+        if (META_WIDTH != 0) begin
+            hl_sqr.m_meta.item_done();
+        end
+        data = null;
+        meta = null;
+    endfunction
+
     task try_get();
         if (data == null && hl_transactions != 0) begin
             hl_sqr.m_data.try_next_item(data);
@@ -53,61 +62,45 @@ class sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) ex
                 if (META_WIDTH != 0) begin
                     hl_sqr.m_meta.get_next_item(meta);
                 end
-                hl_transactions--;
-                state_packet = state_packet_new;
+
+                if (data.data.size() == 0) begin
+                    item_done();
+                    state_packet = state_packet_none;
+                end else begin
+                    hl_transactions--;
+                    state_packet = state_packet_new;
+                end
             end else begin
                 state_packet = state_packet_none;
             end
         end
     endtask
 
-    task reset_handle();
-        //wait until stop reset
-        while (p_sequencer.reset_sync.has_been_reset()) begin
-            //SETUP RESET
-            if (data != null) begin
-                hl_sqr.m_data.item_done();
-                if (META_WIDTH != 0) begin
-                    hl_sqr.m_meta.item_done();
-                end
-                data = null;
-                meta = null;
-            end
-
-            state_packet = state_packet_space_new;
-            send_empty_frame();
-            get_response(rsp);
-        end
-    endtask
-
     task send_frame();
-        // get next item
-        if (state == state_next) begin
-            create_sequence_item();
-        end
-
-        //GET response
-        get_response(rsp);
-        if (rsp.src_rdy == 1'b1 && rsp.dst_rdy == 1'b0) begin
-            state = state_last;
-        end else begin
-            state = state_next;
-        end
-
+        // If reset then send empty frame
         if (p_sequencer.reset_sync.has_been_reset()) begin
             if (data != null) begin
-                hl_sqr.m_data.item_done();
-                if (META_WIDTH != 0) begin
-                    hl_sqr.m_meta.item_done();
-                end
-                data = null;
-                meta = null;
+                item_done();
             end
 
             gen.randomize();
             gen.src_rdy = 0;
             state_packet = state_packet_space_new;
             state = state_next;
+            get_response(rsp);
+        end else begin
+            // get next item
+            if (state == state_next) begin
+                create_sequence_item();
+            end
+
+            //GET response
+            get_response(rsp);
+            if (rsp.src_rdy == 1'b1 && rsp.dst_rdy == 1'b0) begin
+                state = state_last;
+            end else begin
+                state = state_next;
+            end
         end
 
         //SEND FRAME
@@ -227,11 +220,7 @@ class sequence_simple_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends
                         end
                         gen.eof[it]     = 1'b1;
                         gen.eof_pos[it] = index*BLOCK_SIZE + loop_end-1;
-                        data = null;
-                        hl_sqr.m_data.item_done();
-                        if (META_WIDTH != 0) begin
-                            hl_sqr.m_meta.item_done();
-                        end
+                        item_done();
                         state_packet = state_packet_space_new;
                     end
                 end
@@ -309,11 +298,7 @@ class sequence_full_speed_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) ext
                         end
                         gen.eof[it]     = 1'b1;
                         gen.eof_pos[it] = index*BLOCK_SIZE + loop_end-1;
-                        data = null;
-                        hl_sqr.m_data.item_done();
-                        if (META_WIDTH != 0) begin
-                            hl_sqr.m_meta.item_done();
-                        end
+                        item_done();
                         state_packet = state_packet_space_new;
                     end
                 end
