@@ -7,7 +7,11 @@
 
 source $OFM_PATH/build/misc/getopt.tcl
 
-set NB_COMP_BASE $FIRMWARE_BASE/comp
+if {[info exists env(FIRMWARE_BASE)]} {
+    set NB_COMP_BASE $env(FIRMWARE_BASE)/comp
+} else {
+    set NB_COMP_BASE $OFM_PATH/comp
+}
 set NB_FLAGS(VERBOSITY) 1
 
 proc nb_batch_init {} {
