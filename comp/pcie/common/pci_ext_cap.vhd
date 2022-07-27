@@ -114,8 +114,8 @@ begin
                 end if;
             elsif (cfg_register = VSEC_BASE_REG + 3) then
                 if (DEVICE_TREE_ENABLE) then
-                    CFG_EXT_READ_DATA <= std_logic_vector(to_unsigned(DTB_PF0_DATA'length, 32)) when cfg_function = 0 else
-                                         std_logic_vector(to_unsigned(DTB_VF0_DATA'length, 32));
+                    CFG_EXT_READ_DATA <= std_logic_vector(to_unsigned(DTB_PF0_DATA'length / 8, 32)) when cfg_function = 0 else
+                                         std_logic_vector(to_unsigned(DTB_VF0_DATA'length / 8, 32));
                 else
                     CFG_EXT_READ_DATA <= (others => '0');
                 end if;
