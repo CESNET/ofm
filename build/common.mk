@@ -51,3 +51,9 @@ $(GEN_MK_NAME):
 $(GEN_MK_TARGETS): $(GEN_MK_NAME)
 	@$(MAKE_REC) $(GEN_MK_ENV) GEN_MK_TARGET=1 $@
 endif
+
+.PHONY: cocotb
+COCOTB_SIM_SCRIPT ?= $(OFM_PATH)/build/scripts/cocotb/cocotb.fdo
+COCOTB_MODULE ?= cocotb_test
+cocotb:
+	$(NETCOPE_ENV) SYNTHFILES=$(SYNTHFILES) COCOTB_MODULE=$(COCOTB_MODULE) vsim -64 -do $(COCOTB_SIM_SCRIPT)
