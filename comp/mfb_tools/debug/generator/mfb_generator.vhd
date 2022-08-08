@@ -206,18 +206,18 @@ begin
     -- | ch_max                       | ch_min                    |
     -- +----------------------------------------------------------+
 
-    -- Controls distribution of ethernet frames received from network to DMA channels
+    -- Distribution of Ethernet frames to channels
     --   incr       : RR increment. 0 = round-robin disable (stay on zero channel). Default 0x01
     --   CONFIG     : CONFIG[0] = channel reverse enable, others bit are reserved. Default 0x00
     --   burst_size : number of packets to begenerated before channel is changed
-    --   ch_min     : low DMA channel limit for round-robin distribution. Default 0x0000
-    --   ch_max     : high DMA channel limit for round-robin distribution. Default 0xFFFF
+    --   ch_min     : the lowest channel number for round-robin distribution. Default 0x0000
+    --   ch_max     : the highest channel number for round-robin distribution. Default 0xFFFF
     -- Distribution examples:
-    --    0x000000: Do not distribute frames - frame from Eth chan N is routed to DMA chan N
-    --    0xff0001: Distribute frames to all available DMA channels
-    --    0x070401: Distribute frames to DMA channels 4 to 7
-    --    0xff0002: Distribute frames to even DMA channels
-    --    0x050501: Send all frames to DMA channel 5 only
+    --    0x000000: Do not distribute frames
+    --    0xff0001: Distribute frames to all available channels
+    --    0x070401: Distribute frames to channels 4 to 7
+    --    0xff0002: Distribute frames to all even channels (0, 2, 4, ...)
+    --    0x050501: Send all frames to channel number 5 only
 
     chan_inc        <= unsigned(CTRL_CHAN_INC(8-1 downto 0));
     chan_reverse_en <= CTRL_CHAN_INC(8);

@@ -13,6 +13,56 @@ library work;
 use work.type_pack.all;
 use work.math_pack.all;
 
+-- ============================================================================
+--  Description
+-- ============================================================================
+
+-- This component allows the user to generate MFB frames with some configurable
+-- options (like frame length) accessible over the MI.
+--
+-- The MI address space is (considering only the lowest 6 bits):
+-- 
+-- - 0x00 - Control (write 1 to start, 0 to stop)
+-- - 0x04 - Length (set length of generated frames)
+-- - 0x08 - Channel increment
+-- - 0x0C - Channel minimum and maximum
+-- - 0x10 - Dst MAC Low  (lower  part of destination MAC address)
+-- - 0x14 - Dst MAC High (higher part of destination MAC address)
+-- - 0x18 - Src MAC Low  (lower  part of source MAC address)
+-- - 0x1C - Src MAC High (higher part of source MAC address)
+-- - 0x20 - Cntr Low  (lower  part of counter for generated frames)
+-- - 0x24 - Cntr High (higher part of counter for generated frames)
+--
+-- **Register format**
+--
+-- - Channel increment register (0x08):
+--
+-- .. code-block::
+--
+--   +------------------------------+--------------+-------------+
+--   | 31                         16|15           8|7           0|
+--   +------------------------------+--------------+-------------+
+--   | burst_size                   | CONFIG       | incr        |
+--   +------------------------------+--------------+-------------+
+--
+-- - Min Max channel value register (0x0C):
+--
+-- .. code-block::
+--
+--   +------------------------------+----------------------------+
+--   |31                          16|15                         0|
+--   +------------------------------+----------------------------+
+--   | ch_max                       | ch_min                     |
+--   +------------------------------+----------------------------+
+--
+-- Distribution of Ethernet frames to channels
+--
+-- - incr       : RR increment. 0 = round-robin disable (stay on zero channel). Default 0x01
+-- - CONFIG     : CONFIG[0] = channel reverse enable, others bit are reserved. Default 0x00
+-- - burst_size : number of packets to begenerated before channel is changed
+-- - ch_min     : the lowest channel number for round-robin distribution. Default 0x0000
+-- - ch_max     : the highest channel number for round-robin distribution. Default 0xFFFF
+--
 entity MFB_GENERATOR_MI32 is
     generic(
         -- number of regions in a data word
@@ -39,29 +89,22 @@ entity MFB_GENERATOR_MI32 is
         RST             : in  std_logic;
 
         -- MI32 interface
-        -- Address space (only the lowest 6 bits of address considered):
-        -- 0x00 - Control (write 1 to start, 0 to stop)
-        -- 0x04 - Length (set length of generated frames)
-        -- 0x08 - Channel increment
-        -- 0x0C - Channel minimum and maximum
-        -- 0x10 - Dst MAC Low  (lower  part of destination MAC address)
-        -- 0x14 - Dst MAC High (higher part of destination MAC address)
-        -- 0x18 - Src MAC Low  (lower  part of source MAC address)
-        -- 0x1C - Src MAC High (higher part of source MAC address)
-        -- 0x20 - Cntr Low  (lower  part of counter for generated frames)
-        -- 0x24 - Cntr High (higher part of counter for generated frames)
+
         MI_DWR          : in  std_logic_vector(31 downto 0);
         MI_ADDR         : in  std_logic_vector(31 downto 0);
-        MI_BE           : in  std_logic_vector(3 downto 0); -- Not supported!
+        -- Byte enabling is not supported!
+        MI_BE           : in  std_logic_vector(3 downto 0);
         MI_RD           : in  std_logic;
         MI_WR           : in  std_logic;
         MI_ARDY         : out std_logic;
         MI_DRD          : out std_logic_vector(31 downto 0);
         MI_DRDY         : out std_logic;
 
-        -- tx interface
+        -- TX interface
+
         TX_MFB_DATA     : out std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
-        TX_MFB_META     : out std_logic_vector(REGIONS*(CHANNELS_WIDTH+LENGTH_WIDTH)-1 downto 0); -- packet channel & packet length
+        -- Contains the packet's channel number & it's length
+        TX_MFB_META     : out std_logic_vector(REGIONS*(CHANNELS_WIDTH+LENGTH_WIDTH)-1 downto 0);
         TX_MFB_SOF      : out std_logic_vector(REGIONS-1 downto 0);
         TX_MFB_EOF      : out std_logic_vector(REGIONS-1 downto 0);
         TX_MFB_SOF_POS  : out std_logic_vector(REGIONS*max(1,log2(REGION_SIZE))-1 downto 0);
