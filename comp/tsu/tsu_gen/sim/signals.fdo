@@ -12,8 +12,7 @@ delete wave *
 #                       Waveform Definition 
 # -------------------------------------------------------------------------
 
-proc blk_TSU_GEN { PARAM } {
-   global TSU_GEN_PATH
+proc blk_TSU_GEN { TSU_GEN_PATH } {
 
 add wave -divider "TSU_GEN_UNIT"
 # User signals
