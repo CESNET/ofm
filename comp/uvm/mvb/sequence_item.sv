@@ -79,8 +79,8 @@ class sequence_item #(ITEMS, ITEM_WIDTH) extends uvm_sequence_item;
         // Add new line for each item with correspondence valid bit
         for (int i = 0 ; i < ITEMS ; i++) begin
             $sformat(data, {"\tDATA: 'h%0h\tVLD: %b\n"},
-            data[i],
-            vld[i]
+            this.data[i],
+            this.vld[i]
             );
             output_string = {output_string, data};
         end

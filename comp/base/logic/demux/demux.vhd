@@ -26,7 +26,7 @@ entity GEN_DEMUX is
    );
    port(
       DATA_IN     : in  std_logic_vector(DATA_WIDTH-1 downto 0);
-      SEL         : in  std_logic_vector(log2(DEMUX_WIDTH)-1 downto 0);
+      SEL         : in  std_logic_vector(max(log2(DEMUX_WIDTH), 1)-1 downto 0);
       DATA_OUT    : out std_logic_vector(DATA_WIDTH*DEMUX_WIDTH-1 downto 0)
    );
 end entity GEN_DEMUX;

@@ -121,8 +121,8 @@ begin
         end generate;
         full_delay_g: if JITTER /= 0 generate
             delay_randomize_p: process(CLK)
-                variable s1   : integer;
-                variable s2   : integer;
+                variable s1   : positive;
+                variable s2   : positive;
                 variable rand : real;
             begin
                 if rising_edge(CLK) then
