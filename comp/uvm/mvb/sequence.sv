@@ -39,10 +39,13 @@ class sequence_simple_rx #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(uvm_mvb::se
                 `uvm_fatal("sequence:", "Faile to randomize sequence.")
             end
             finish_item(req);
+            get_response(rsp);
 
-            while (req.src_rdy && !req.dst_rdy) begin
+            while (rsp.src_rdy && !rsp.dst_rdy) begin
                 start_item(req);
                 finish_item(req);
+
+                get_response(rsp);
             end
 
         end
