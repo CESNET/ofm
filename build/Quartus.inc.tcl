@@ -303,7 +303,21 @@ proc SaveDesign {synth_flags} {
     # Close project
     project_close
 
+    # Convert programming image to RBF format
+    nb_convert_to_rbf SYNTH_FLAGS
+
+    # Create .nfw archive
     nb_nfw_archive_create SYNTH_FLAGS
+}
+
+proc nb_convert_to_rbf {synth_flags} {
+    global env
+    upvar 1 $synth_flags SYNTH_FLAGS
+
+    # Run quartus_pfg utility
+    if {[catch {exec quartus_pfg -c $SYNTH_FLAGS(OUTPUT).sof $SYNTH_FLAGS(OUTPUT).rbf} msg]} {
+        puts stderr "Converting the firmware file failed:\n$msg"
+    }
 }
 
 proc nb_nfw_archive_create {synth_flags} {
@@ -316,8 +330,12 @@ proc nb_nfw_archive_create {synth_flags} {
     # List of target files to be copied
     lappend NFW_FILES
 
-    # FIXME: Add output bitstream to .nfw archive
-    lappend SYNTH_FLAGS(NFW_FILES) [list $SYNTH_FLAGS(OUTPUT).sof $SYNTH_FLAGS(FPGA).sof]
+    # Add output bitstream to .nfw archive
+    if { [info exist SYNTH_FLAGS(BITSTREAM)] && $SYNTH_FLAGS(BITSTREAM) == "RBF"} {
+        lappend SYNTH_FLAGS(NFW_FILES) [list $SYNTH_FLAGS(OUTPUT).rbf $SYNTH_FLAGS(FPGA).rbf]
+    } else {
+        lappend SYNTH_FLAGS(NFW_FILES) [list $SYNTH_FLAGS(OUTPUT).sof $SYNTH_FLAGS(FPGA).sof]
+    }
 
     # Copy each file from SYNTH_FLAGS(NFW_FILES) list to temporary directory
     foreach f $SYNTH_FLAGS(NFW_FILES) {
@@ -325,8 +343,12 @@ proc nb_nfw_archive_create {synth_flags} {
         lappend NFW_FILES [lindex $f 1]
     }
 
-    # Run tar utility
+    # Run tar utility (obsolete .tar.gz file format, will be removed in the future)
     if {[catch {exec tar -czf $SYNTH_FLAGS(OUTPUT).tar.gz -C $env(NETCOPE_TEMP)build_save_design {*}$NFW_FILES} msg]} {
+        puts stderr "Packaging the firmware file failed:\n$msg"
+    }
+    # Run tar utility (new .nfw file format)
+    if {[catch {exec tar -czf $SYNTH_FLAGS(OUTPUT).nfw -C $env(NETCOPE_TEMP)build_save_design {*}$NFW_FILES} msg]} {
         puts stderr "Packaging the firmware file failed:\n$msg"
     }
 
