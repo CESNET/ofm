@@ -48,6 +48,8 @@ class env#(SEGMENTS, REGIONS, REGION_SIZE) extends uvm_env;
         m_env_rx_cfg.active         = UVM_ACTIVE;
 		m_env_rx_cfg.meta_behav     = 2;
         m_env_rx_cfg.interface_name = "RX_MAC_SEQ_IF";
+        m_env_rx_cfg.seq_cfg = new();
+        m_env_rx_cfg.seq_cfg.probability_set(100, 100);
         uvm_config_db#(uvm_byte_array_mfb::config_item)::set(this, "m_env_rx", "m_config", m_env_rx_cfg);
         m_env_rx = uvm_byte_array_mfb::env_rx#(REGIONS, REGION_SIZE, 8, 1)::type_id::create("m_env_rx", this);
 

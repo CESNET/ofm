@@ -27,7 +27,7 @@ module testbench;
         .REGION_SIZE  (test::REGION_SIZE),
         .SEGMENTS     (test::SEGMENTS)
     )
-    DUT (
+    DUT_U (
         .CLK              (CLK),
         .RESET            (reset.RESET),
         // INPUT
@@ -64,10 +64,18 @@ module testbench;
 
 
     initial begin
+        uvm_root m_root;
+
         uvm_config_db#(virtual reset_if)::set(null, "", "RESET_IF", reset);
         uvm_config_db#(virtual intel_mac_seg_if #(test::SEGMENTS))::set(null, "", "TX_MAC_SEQ_IF", tx_mac_seg);
         uvm_config_db#(virtual mfb_if #(test::REGIONS, test::REGION_SIZE, 8, 8, 1))::set(null, "", "RX_MAC_SEQ_IF", rx_mac_seg);
+
+        m_root = uvm_root::get();
+        m_root.set_report_id_action_hier("ILLEGALNAME",UVM_NO_ACTION);
+        m_root.finish_on_completion = 0;
+
         run_test();
+        $stop();
     end
 
 endmodule

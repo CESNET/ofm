@@ -4,15 +4,17 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause
 
-class mfb_compare #(META_WIDTH) extends uvm_component;
-    `uvm_component_param_utils(uvm_splitter_simple::mfb_compare #(META_WIDTH))
+
+
+class mfb_compare #(ITEM_WIDTH, META_WIDTH) extends uvm_component;
+    `uvm_component_param_utils(uvm_splitter_simple::mfb_compare #(ITEM_WIDTH, META_WIDTH))
 
     int unsigned errors;
     int unsigned compared;
-    uvm_tlm_analysis_fifo #(uvm_byte_array::sequence_item)                 model_data;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))                 model_data;
     uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(META_WIDTH)) model_meta;
 
-    uvm_tlm_analysis_fifo #(uvm_byte_array::sequence_item)                 dut_data;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))                 dut_data;
     uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(META_WIDTH)) dut_meta;
 
 
@@ -36,10 +38,10 @@ class mfb_compare #(META_WIDTH) extends uvm_component;
     endfunction
 
     task run_phase(uvm_phase phase);
-        uvm_byte_array::sequence_item                tr_model_packet;
+        uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)                tr_model_packet;
         uvm_logic_vector::sequence_item#(META_WIDTH) tr_model_meta;
 
-        uvm_byte_array::sequence_item                tr_dut_packet;
+        uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)                tr_dut_packet;
         uvm_logic_vector::sequence_item#(META_WIDTH) tr_dut_meta;
 
         forever begin
@@ -54,7 +56,7 @@ class mfb_compare #(META_WIDTH) extends uvm_component;
                 string msg;
 
                 errors++;
-                $swrite(msg, "\n\tCheck meta or packet failed.\n\tModel meta %s\n\tDUT meta %s\n\n\tModel Packet\n%s\n\tDUT PACKET\n%s", tr_model_meta.convert2string(), tr_dut_meta.convert2string(), tr_model_packet.convert2string(), tr_dut_packet.convert2string());
+                $swrite(msg, "\n\tCheck meta or packet failed. errors %0d/%0d\n\tModel meta %s\n\tDUT meta %s\n\n\tModel Packet\n%s\n\tDUT PACKET\n%s", errors, compared, tr_model_meta.convert2string(), tr_dut_meta.convert2string(), tr_model_packet.convert2string(), tr_dut_packet.convert2string());
                 `uvm_error(this.get_full_name(), msg);
             end
         end
@@ -62,18 +64,22 @@ class mfb_compare #(META_WIDTH) extends uvm_component;
 
 endclass
 
-class scoreboard #(META_WIDTH, CHANNELS) extends uvm_scoreboard;
-    `uvm_component_param_utils(uvm_splitter_simple::scoreboard #(META_WIDTH, CHANNELS))
+class scoreboard #(ITEM_WIDTH, META_WIDTH, CHANNELS) extends uvm_scoreboard;
+    `uvm_component_param_utils(uvm_splitter_simple::scoreboard #(ITEM_WIDTH, META_WIDTH, CHANNELS))
 
 
-    uvm_analysis_export #(uvm_byte_array::sequence_item)                                    input_data;
+    uvm_analysis_export #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))                                    input_data;
     uvm_analysis_export #(uvm_logic_vector::sequence_item #($clog2(CHANNELS) + META_WIDTH)) input_meta;
 
-    uvm_analysis_export #(uvm_byte_array::sequence_item)                 out_data[CHANNELS];
+    uvm_analysis_export #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))                 out_data[CHANNELS];
     uvm_analysis_export #(uvm_logic_vector::sequence_item #(META_WIDTH)) out_meta[CHANNELS];
 
-    mfb_compare #(META_WIDTH)     out_compare[CHANNELS];
-    model #(META_WIDTH, CHANNELS) m_model;
+    typedef scoreboard #(ITEM_WIDTH, META_WIDTH, CHANNELS) this_type;
+    uvm_analysis_imp_reset#(uvm_reset::sequence_item, this_type) analysis_imp_reset;
+
+
+    mfb_compare #(ITEM_WIDTH, META_WIDTH)     out_compare[CHANNELS];
+    model #(ITEM_WIDTH, META_WIDTH, CHANNELS) m_model;
 
     // Contructor of scoreboard.
     function new(string name, uvm_component parent);
@@ -87,16 +93,18 @@ class scoreboard #(META_WIDTH, CHANNELS) extends uvm_scoreboard;
             out_data[it]   = new({"out_data_", it_str}, this);
             out_meta[it]   = new({"out_meta_", it_str}, this);
         end
+
+        analysis_imp_reset = new("analysis_imp_reset", this);
     endfunction
 
     function void build_phase(uvm_phase phase);
-        m_model = model #(META_WIDTH, CHANNELS)::type_id::create("m_model", this);
+        m_model = model #(ITEM_WIDTH, META_WIDTH, CHANNELS)::type_id::create("m_model", this);
 
         for (int it = 0; it < CHANNELS; it++) begin
             string it_string;
 
             it_string.itoa(it);
-            out_compare[it] = mfb_compare #(META_WIDTH)::type_id::create({"out_compare_", it_string}, this);
+            out_compare[it] = mfb_compare #(ITEM_WIDTH, META_WIDTH)::type_id::create({"out_compare_", it_string}, this);
         end
 
     endfunction
@@ -123,6 +131,18 @@ class scoreboard #(META_WIDTH, CHANNELS) extends uvm_scoreboard;
             ret |= out_compare[it].used();
         end
         return ret;
+    endfunction
+
+    function void write_reset(uvm_reset::sequence_item tr);
+        if (tr.reset == 1'b1) begin
+            m_model.reset();
+            for (int unsigned it = 0; it < CHANNELS; it++) begin
+                out_compare[it].model_data.flush();
+                out_compare[it].model_meta.flush();
+                out_compare[it].dut_data.flush();
+                out_compare[it].dut_meta.flush();
+            end
+        end
     endfunction
 
 

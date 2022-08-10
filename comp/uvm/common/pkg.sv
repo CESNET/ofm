@@ -19,6 +19,9 @@ package uvm_common;
 
     `include "rand_rdy.sv"
     `include "rand_length.sv"
+    `include "sequence.sv"
+    `include "sequence_library.sv"
+    `include "model_item.sv"
 endpackage
 
 

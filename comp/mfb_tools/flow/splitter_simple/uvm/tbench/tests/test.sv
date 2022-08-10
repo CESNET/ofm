@@ -8,7 +8,7 @@
 class ex_test extends uvm_test;
     `uvm_component_utils(test::ex_test);
 
-    uvm_splitter_simple::env #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH, SPLITTER_OUTPUTS, META_BEHAV) m_env;
+    uvm_splitter_simple::env #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH, SPLITTER_OUTPUTS, META_BEHAV) m_env;
     int unsigned timeout;
     // ------------------------------------------------------------------------
     // Functions
@@ -17,7 +17,7 @@ class ex_test extends uvm_test;
     endfunction
 
     function void build_phase(uvm_phase phase);
-        m_env = uvm_splitter_simple::env #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH, SPLITTER_OUTPUTS, META_BEHAV)::type_id::create("m_env", this);
+        m_env = uvm_splitter_simple::env #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH, SPLITTER_OUTPUTS, META_BEHAV)::type_id::create("m_env", this);
     endfunction
 
     virtual task run_reset(uvm_phase phase);
@@ -43,9 +43,9 @@ class ex_test extends uvm_test;
     endtask
 
     virtual task tx_seq(uvm_phase phase, int unsigned index);
-        uvm_mfb::sequence_lib_tx#(REGIONS, REGION_SIZE, BLOCK_SIZE, 8, META_WIDTH) mfb_seq;
+        uvm_mfb::sequence_lib_tx#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) mfb_seq;
 
-        mfb_seq = uvm_mfb::sequence_lib_tx#(REGIONS, REGION_SIZE, BLOCK_SIZE, 8, META_WIDTH)::type_id::create("mfb_eth_tx_seq", this);
+        mfb_seq = uvm_mfb::sequence_lib_tx#(REGIONS, REGION_SIZE, BLOCK_SIZE,  ITEM_WIDTH, META_WIDTH)::type_id::create("mfb_eth_tx_seq", this);
         mfb_seq.init_sequence();
         mfb_seq.min_random_count = 100;
         mfb_seq.max_random_count = 200;
@@ -60,7 +60,7 @@ class ex_test extends uvm_test;
     // ------------------------------------------------------------------------
     // Create environment and Run sequences o their sequencers
     virtual task run_phase(uvm_phase phase);
-        virt_seq #(META_WIDTH, SPLITTER_OUTPUTS) m_vseq;
+        virt_seq #(ITEM_WIDTH, META_WIDTH, SPLITTER_OUTPUTS) m_vseq;
 
         phase.raise_objection(this);
 
@@ -78,7 +78,7 @@ class ex_test extends uvm_test;
         end
 
         //RUN MFB RX SEQUENCE
-        m_vseq = virt_seq #(META_WIDTH, SPLITTER_OUTPUTS)::type_id::create("m_vseq");
+        m_vseq = virt_seq #(ITEM_WIDTH, META_WIDTH, SPLITTER_OUTPUTS)::type_id::create("m_vseq");
         m_vseq.randomize();
         m_vseq.start(m_env.m_env_rx.m_sequencer);
 

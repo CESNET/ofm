@@ -10,12 +10,11 @@
 
 
 // Reusable high level sequence. Contains transaction, which has only data part.
-class sequence_simple extends uvm_sequence #(sequence_item);
+class sequence_simple extends uvm_common::sequence_base#(config_sequence, sequence_item);
     `uvm_object_utils(uvm_byte_array::sequence_simple)
+    `uvm_declare_p_sequencer(uvm_byte_array::sequencer);
 
     rand int unsigned transaction_count;
-    int unsigned data_size_max = 2048; // 2048
-    int unsigned data_size_min = 64;
     int unsigned transaction_count_min = 10;
     int unsigned transaction_count_max = 200;
 
@@ -29,14 +28,13 @@ class sequence_simple extends uvm_sequence #(sequence_item);
     // -----------------------
     // Functions.
     // -----------------------
-
-    // Generates transactions
     task body;
         `uvm_info(get_full_name(), "sequence_simple is running", UVM_DEBUG)
+
         repeat(transaction_count)
         begin
             // Generate random request, which must be in interval from min length to max length
-            `uvm_do_with(req, {data.size inside{[data_size_min : data_size_max]}; });
+            `uvm_do_with(req, {data.size inside{[cfg.array_size_min : cfg.array_size_max]}; });
         end
     endtask
 
@@ -44,18 +42,17 @@ endclass
 
 // High level sequence with same size.
 
-class sequence_simple_const extends uvm_sequence #(sequence_item);
+class sequence_simple_const extends uvm_common::sequence_base#(config_sequence, sequence_item);
     `uvm_object_utils(uvm_byte_array::sequence_simple_const)
+    `uvm_declare_p_sequencer(uvm_byte_array::sequencer);
 
     rand int unsigned data_size;
     rand int unsigned transaction_count;
     int unsigned transaction_count_min = 10;
     int unsigned transaction_count_max = 200;
-    int unsigned data_size_min = 60;
-    int unsigned data_size_max = 1500;
 
     constraint c1 {transaction_count inside {[transaction_count_min : transaction_count_max]};}
-    constraint c2 {data_size inside {[data_size_min : data_size_max]};}
+    constraint c2 {data_size inside {[cfg.array_size_min : cfg.array_size_max]};}
 
     // Constructor - creates new instance of this class
     function new(string name = "sequence_simple_const");
@@ -65,10 +62,10 @@ class sequence_simple_const extends uvm_sequence #(sequence_item);
     // -----------------------
     // Functions.
     // -----------------------
-
     // Generates transactions
     task body;
-        `uvm_info(get_full_name(), "sequence_simple_const is running", UVM_DEBUG)
+        `uvm_info(get_full_name(), "\tsequence_simple_const is running", UVM_DEBUG)
+
         repeat(transaction_count)
         begin
             // Generate random request, which must be in interval from min length to max length
@@ -80,25 +77,31 @@ endclass
 
 // High level sequence with Gaussian distribution.
 
-class sequence_simple_gauss extends uvm_sequence #(sequence_item);
+class sequence_simple_gauss extends uvm_common::sequence_base#(config_sequence, sequence_item);
     `uvm_object_utils(uvm_byte_array::sequence_simple_gauss)
+    `uvm_declare_p_sequencer(uvm_byte_array::sequencer);
 
     rand int unsigned transaction_count;
     rand int unsigned mean; // Mean of data size
     rand int unsigned std_deviation; // Standard deviation
     int unsigned transaction_count_min = 10;
     int unsigned transaction_count_max = 200;
-    int unsigned mean_min = 256;
-    int unsigned mean_max = 4096;
     int unsigned std_deviation_min = 1;
-    int unsigned std_deviation_max = 20;
+    int unsigned std_deviation_max = 32;
 
     constraint c1 {transaction_count inside {[transaction_count_min : transaction_count_max]};}
-    constraint c2 {mean inside {[mean_min : mean_max]};}
+    constraint c2 {mean inside {[cfg.array_size_min : cfg.array_size_max]};}
     constraint c3 {std_deviation inside {[std_deviation_min : std_deviation_max]};}
 
     function int gaussian_dist();
-        return $dist_normal($urandom(), mean, std_deviation);
+        int unsigned value;
+        value = $dist_normal($urandom(), mean, std_deviation);
+
+        if (cfg.array_size_min < value && value < cfg.array_size_max) begin
+            return value;
+        end
+
+        return mean;
     endfunction
 
 
@@ -110,11 +113,11 @@ class sequence_simple_gauss extends uvm_sequence #(sequence_item);
     // -----------------------
     // Functions.
     // -----------------------
-
     // Generates transactions
     task body;
         int unsigned data_size;
         `uvm_info(get_full_name(), "sequence_simple_gauss is running", UVM_DEBUG)
+
         repeat(transaction_count)
         begin
             data_size = gaussian_dist();
@@ -127,8 +130,9 @@ endclass
 
 // High level sequence with increment size.
 
-class sequence_simple_inc extends uvm_sequence #(sequence_item);
+class sequence_simple_inc extends uvm_common::sequence_base#(config_sequence, sequence_item);
     `uvm_object_utils(uvm_byte_array::sequence_simple_inc)
+    `uvm_declare_p_sequencer(uvm_byte_array::sequencer);
 
     rand int unsigned transaction_count;
     rand int unsigned step;
@@ -136,18 +140,10 @@ class sequence_simple_inc extends uvm_sequence #(sequence_item);
     int unsigned border = 4096;
     int unsigned transaction_count_min = 10;
     int unsigned transaction_count_max = 200;
-    int unsigned data_size_min = 64;
-    int unsigned data_size_max = 2048;
-    int unsigned mean = 50; // Mean of data size
-    int unsigned std_deviation = 5; // Standard deviation
-
-    function int gaussian_dist();
-        return $dist_normal($urandom(), mean, std_deviation);
-    endfunction
 
     constraint c1 {transaction_count inside {[transaction_count_min : transaction_count_max]};}
-    constraint c2 {step == gaussian_dist();}
-    constraint c3 {data_size inside {[data_size_min : data_size_max]};}
+    constraint c2 {step  inside {[1:16]};}
+    constraint c3 {data_size inside {[cfg.array_size_min : cfg.array_size_max]};}
 
     // Constructor - creates new instance of this class
     function new(string name = "sequence_simple_inc");
@@ -157,12 +153,13 @@ class sequence_simple_inc extends uvm_sequence #(sequence_item);
     // -----------------------
     // Functions.
     // -----------------------
-
     // Generates transactions
     task body;
+        int unsigned it;
         `uvm_info(get_full_name(), "sequence_simple_inc is running", UVM_DEBUG)
-        repeat(transaction_count)
-        begin
+
+        it = 0;
+        while (it < transaction_count && data_size <= cfg.array_size_max)begin
             // Generate random request, which must be in interval from min length to max length
             if (data_size <= border) begin
                 `uvm_do_with(req, {data.size == data_size; });
@@ -170,16 +167,66 @@ class sequence_simple_inc extends uvm_sequence #(sequence_item);
             end else begin
                 break;
             end
+
+            it++;
         end
     endtask
 
 endclass
 
 
-// High level sequence which is used for measuring
+// High level sequence with decrement size.
 
+class sequence_simple_dec extends uvm_common::sequence_base#(config_sequence, sequence_item);
+    `uvm_object_utils(uvm_byte_array::sequence_simple_dec)
+    `uvm_declare_p_sequencer(uvm_byte_array::sequencer);
+
+    rand int unsigned transaction_count;
+    rand int unsigned step;
+    rand int unsigned data_size;
+    int unsigned border = 64;
+    int unsigned transaction_count_min = 10;
+    int unsigned transaction_count_max = 200;
+
+
+    constraint c1 {transaction_count inside {[transaction_count_min : transaction_count_max]};}
+    constraint c2 {step  inside {[1:16]};}
+    constraint c3 {data_size inside {[cfg.array_size_min : cfg.array_size_max]};}
+
+    // Constructor - creates new instance of this class
+    function new(string name = "sequence_simple_dec");
+        super.new(name);
+    endfunction
+
+    // -----------------------
+    // Functions.
+    // -----------------------
+
+    // Generates transactions
+    task body;
+        int unsigned it;
+        `uvm_info(get_full_name(), "sequence_simple_dec is running", UVM_DEBUG)
+
+        it = 0;
+        while (it < transaction_count && data_size >= cfg.array_size_min)begin
+            // Generate random request, which must be in interval from min length to max length
+            if (data_size >= border) begin
+                `uvm_do_with(req, {data.size == data_size; });
+                data_size -= step;
+            end else begin
+                break;
+            end
+
+            it++;
+        end
+    endtask
+
+endclass
+
+// High level sequence which is used for measuring
 class sequence_simple_meas extends uvm_sequence #(sequence_item);
     `uvm_object_utils(uvm_byte_array::sequence_simple_meas)
+    `uvm_declare_p_sequencer(uvm_byte_array::sequencer);
 
     int unsigned transaction_count = 370;
     int unsigned data_size    = 64;
@@ -215,60 +262,10 @@ class sequence_simple_meas extends uvm_sequence #(sequence_item);
 
 endclass
 
-// High level sequence with decrement size.
-
-class sequence_simple_dec extends uvm_sequence #(sequence_item);
-    `uvm_object_utils(uvm_byte_array::sequence_simple_dec)
-
-    rand int unsigned transaction_count;
-    rand int unsigned step;
-    rand int unsigned data_size;
-    int unsigned border = 64;
-    int unsigned transaction_count_min = 10;
-    int unsigned transaction_count_max = 200;
-    int unsigned data_size_min = 1024;
-    int unsigned data_size_max = 4096;
-    int unsigned mean = 50; // Mean of data size
-    int unsigned std_deviation = 5; // Standard deviation
-
-    function int gaussian_dist();
-        return $dist_normal($urandom(), mean, std_deviation);
-    endfunction
-
-    constraint c1 {transaction_count inside {[transaction_count_min : transaction_count_max]};}
-    constraint c2 {step == gaussian_dist();}
-    constraint c3 {data_size inside {[data_size_min : data_size_max]};}
-
-    // Constructor - creates new instance of this class
-    function new(string name = "sequence_simple_dec");
-        super.new(name);
-    endfunction
-
-    // -----------------------
-    // Functions.
-    // -----------------------
-
-    // Generates transactions
-    task body;
-        `uvm_info(get_full_name(), "sequence_simple_dec is running", UVM_DEBUG)
-        repeat(transaction_count)
-        begin
-            // Generate random request, which must be in interval from min length to max length
-            if (data_size >= border) begin
-                `uvm_do_with(req, {data.size == data_size; });
-                data_size -= step;
-            end else begin
-                break;
-            end
-        end
-    endtask
-
-endclass
-
 
 /////////////////////////////////////////////////////////////////////////
 // SEQUENCE LIBRARY
-class sequence_lib extends uvm_sequence_library#(sequence_item );
+class sequence_lib extends uvm_common::sequence_library#(config_sequence, sequence_item);
   `uvm_object_utils(uvm_byte_array::sequence_lib)
   `uvm_sequence_library_utils(uvm_byte_array::sequence_lib)
 

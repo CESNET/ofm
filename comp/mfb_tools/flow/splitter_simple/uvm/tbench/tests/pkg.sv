@@ -16,6 +16,7 @@ package test;
     parameter REGIONS     = 2;
     parameter REGION_SIZE = 8;
     parameter BLOCK_SIZE  = 8;
+    parameter ITEM_WIDTH  = 8;
     parameter META_WIDTH  = 32; 
     parameter META_BEHAV  = 2;
 

@@ -1,22 +1,22 @@
 .. readme.rst: Documentation of single component
-.. Copyright (C) 2021 CESNET z. s. p. o.
-.. Author(s): Tomáš Beneš <xbenes55@stud.fit.vutbr.cz>
+.. Copyright (C) 2022 CESNET z. s. p. o.
+.. Author(s): Radek Iša <isa@cesnet.cz>
 ..
 .. SPDX-License-Identifier: BSD-3-Clause
 
-.. Byte array to mfb enviroment
-.. _uvm_byte_array_mfb:
+..  logic_vector_array to mfb enviroment
+.. _logic_vector_array_mfb_mfb:
 
-**************************
-Byte_array_mfb environment
-**************************
-This enviroment have two high level agents. First agents is byte array and it is care about data. Second high level acent is logic vector wchich care about metadata.
+**********************************
+logic_vector_array_mfb environment
+**********************************
+This enviroment have two high level agents. First agents is logic vector array and it is care about data. Second high level acent is logic vector wchich care about metadata.
 This package containt two enviroment. Enviroment RX sending data to DUT. It generatest data and metadata which is send to DUT. Enviroment TX generatest DST_RDY and
 observed interface.
 
 .. image:: ../docs/byte_array_mfb_env.svg
     :align: center
-    :alt: byte array mfb schema
+    :alt: logic_vector_array_mfb schema
 
 
 The environment is configured by four parameters: For more information see :ref:`mfb documentation<mfb_bus>`.
@@ -27,16 +27,17 @@ Parameter
 REGIONS
 REGIONS_SIZE
 BLOCK_SIZE
+ITEM_SIZE
 META_WIDTH
 ============== =
 
 Top sequencers and sequences
 ------------------------------
-In the RX direction there are two sequencers: the first is Byte Array sequencer and handles MFB_DATA, the second is logic vector sequencer and handles MFB_METADATA. Both sequencers pulls the data from sequences together.
+In the RX direction there are two sequencers: the first is Logic vector array sequencer and handles MFB_DATA, the second is logic vector sequencer and handles MFB_METADATA. Both sequencers pulls the data from sequences together.
 
 In the TX direction there is one sequencer of type mfb::sequencer #() which generate DST_RDY signal.
 
-Both directions have two analysis_exports. One export is for Byte Array transactions. Second is for logic vector (metadata) transactions.
+Both directions have two analysis_exports. One export is for logic vector array transactions. Second is for logic vector (metadata) transactions.
 
 
 Configuration
@@ -50,24 +51,24 @@ Variable          Description
 active            Set to UVM_ACTIVE if agent is active otherwise UVM_PASSIVE
 interface_name    name of interface under which you can find it in uvm config database
 meta_behave       Moment of Metadata signal is being generated and valid: 1 => valid with the SOF. 2 => valid with the EOF.
-seq_cfg           Configure low leve sequence which convert byte_array to mfb words
+seq_cfg           Configure low leve sequence which convert logic_vector_array to mfb words
 ===============   ======================================================
 
-Top level of environment contains reset_sync class which is required for reset synchronization. The example shows how to connect the reset to byte_array_mfb environment and basic configuration.
+Top level of environment contains reset_sync class which is required for reset synchronization. The example shows how to connect the reset to logic_vector_array_mfb environment and basic configuration.
 
 .. code-block:: systemverilog
 
     class test extends uvm_test
         `uvm_componet_utils(test::base)
         reset::agent                m_resets;
-        byte_array_mfb::env_rx#(...) m_env;
+        logic_vector_array_mfb::env_rx#(...) m_env;
 
         function new(string name, uvm_component parent = null);
             super.new(name, parent);
         endfunction
 
         function void build_phase(uvm_phase phase);
-             byte_array_mfb::config_item m_cfg;
+             logic_vector_array_mfb::config_item m_cfg;
 
              m_resets = reset::agent::type_id::create("m_reset", this);
 
@@ -77,8 +78,8 @@ Top level of environment contains reset_sync class which is required for reset s
              m_cfg.meta_behav     = 1;
              m_cfg.cfg = new();
              m_cfg.cfg.space_size_set(128, 1024);
-             uvm_config_db#(byte_array_mfb_env::config_item)::set(this, "m_eth", "m_config", m_cfg);
-             m_env = byte_arra_mfb::env_rx#(...)::type_id::create("m_env", this);
+             uvm_config_db#(logic_vector_array_mfb_env::config_item)::set(this, "m_eth", "m_config", m_cfg);
+             m_env = logic_vector_array_mfb::env_rx#(...)::type_id::create("m_env", this);
         endfunction
 
          function void connect_phase(uvm_phase phase);
@@ -93,7 +94,7 @@ Low sequence configuration
 configuration object `config_sequence` contain two function.
 
 =========================  ======================  ======================================================
-Function                   Type                    Description
+Variable                   Type                    Description
 =========================  ======================  ======================================================
 probability_set(min, max)  [percentige]            set probability of no inframe gap. probability_set(100,100) => no inframe gap
 space_size_set(min, max)   [bytes]                 set min and max space between two packets.
@@ -134,7 +135,7 @@ sequence_lib_rx                  randomly run pick and run previous sequences
 
 .. code-block:: systemverilog
 
-    class mfb_rx_speed#(...) extends byte_array_mfb_env::sequence_lib_rx#(...);
+    class mfb_rx_speed#(...) extends logic_vector_array_mfb_env::sequence_lib_rx#(...);
 
         function new(string name = "mfb_rx_speed");
             super.new(name);
@@ -142,14 +143,14 @@ sequence_lib_rx                  randomly run pick and run previous sequences
         endfunction
 
         virtual function void init_sequence();
-            this.add_sequence(byte_array_mfb_env::sequence_full_speed_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::get_type());
+            this.add_sequence(logic_vector_array_mfb_env::sequence_full_speed_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::get_type());
         endfunction
     endclass
 
 
     class test extends uvm_test
         `uvm_componet_utils(test::base)
-        byte_arra_mfb::env_rx#(...) m_env;
+        logic_vector_array_mfb::env_rx#(...) m_env;
 
         function new(string name, uvm_component parent = null);
             super.new(name, parent);
@@ -157,8 +158,8 @@ sequence_lib_rx                  randomly run pick and run previous sequences
 
         function void build_phase(uvm_phase phase);
             ...
-             byte_array_mfb_env::sequence_lib_rx#(...)::type_id::set_inst_override(mfb_rx_speed#(...)::get_type(),
+             logic_vector_array_mfb_env::sequence_lib_rx#(...)::type_id::set_inst_override(mfb_rx_speed#(...)::get_type(),
              {this.get_full_name(), ".m_env.*"});
-             m_env = byte_arra_mfb::env_rx#(...)::type_id::create("m_env", this);
+             m_env = logic_vector_array_mfb::env_rx#(...)::type_id::create("m_env", this);
         endfunction
     endclass
