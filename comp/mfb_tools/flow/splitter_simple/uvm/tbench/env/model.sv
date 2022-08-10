@@ -4,17 +4,16 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
-class model #(META_WIDTH, CHANNELS) extends uvm_component;
-    `uvm_component_param_utils(uvm_splitter_simple::model#(META_WIDTH, CHANNELS))
+class model #(ITEM_WIDTH, META_WIDTH, CHANNELS) extends uvm_component;
+    `uvm_component_param_utils(uvm_splitter_simple::model#(ITEM_WIDTH, META_WIDTH, CHANNELS))
 
     localparam SEL_WIDTH = $clog2(CHANNELS);
-    
 
-    uvm_tlm_analysis_fifo #(uvm_byte_array::sequence_item)                             input_data;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))                     input_data;
     uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(SEL_WIDTH + META_WIDTH)) input_meta;
 
-    uvm_analysis_port #(uvm_byte_array::sequence_item)                 out_data[CHANNELS];
-    uvm_analysis_port #(uvm_logic_vector::sequence_item #(META_WIDTH)) out_meta[CHANNELS];
+    uvm_analysis_port #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))  out_data[CHANNELS];
+    uvm_analysis_port #(uvm_logic_vector::sequence_item #(META_WIDTH))       out_meta[CHANNELS];
 
     function new(string name = "model", uvm_component parent = null);
         super.new(name, parent);
@@ -30,19 +29,29 @@ class model #(META_WIDTH, CHANNELS) extends uvm_component;
         end
     endfunction
 
+    function void reset();
+       input_data.flush();
+       input_meta.flush();
+    endfunction
 
     task run_phase(uvm_phase phase);
         int unsigned channel;
-        uvm_byte_array::sequence_item                               tr_input_packet;
+        uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)                       tr_input_packet;
         uvm_logic_vector::sequence_item #(SEL_WIDTH + META_WIDTH)   tr_input_meta;
         uvm_logic_vector::sequence_item #(META_WIDTH)               tr_output_meta;
 
         forever begin
-            input_data.get(tr_input_packet);
+
+            //wait (dma_mvb_rx[index].used() != 0 && dma_mfb_rx[index].used() != 0)
+            do  begin
+                #(10ns);
+            end while(input_meta.used() == 0 || input_data.used() == 0);
+
             input_meta.get(tr_input_meta);
+            input_data.get(tr_input_packet);
 
             channel = tr_input_meta.data[SEL_WIDTH + META_WIDTH-1 : META_WIDTH];
-            
+
             if (channel >= CHANNELS) begin
                 string msg;
                 $swrite(msg, "\n\tWrong channel num %0d Channel range is 0-%0d", channel, CHANNELS-1);

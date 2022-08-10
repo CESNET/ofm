@@ -50,10 +50,13 @@ class sequence_simple_1#(SEGMENTS) extends uvm_sequence;
         rx_seq_data_lib.init_sequence();
         rx_seq_data_lib.min_random_count = 50;
         rx_seq_data_lib.max_random_count = 100;
+        rx_seq_data_lib.cfg = new();
+
         reset_seq   = uvm_reset::sequence_start::type_id::create("reset_simple");
         tx_seq      = uvm_intel_mac_seg::sequence_simple_tx#(SEGMENTS)::type_id::create("intel_mac_tx_seq");
 
         rx_seq_data = rx_seq_data_lib;
+        //rx_seq_data = uvm_byte_array::sequence_simple::type_id::create("seq_data");
     endfunction
 
 	task intel_mac_seg_tx();

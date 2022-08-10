@@ -1,13 +1,13 @@
 //-- sequence.sv: Mfb sequence
 //-- Copyright (C) 2021 CESNET z. s. p. o.
-//-- Author(s): Tomáš Beneš <xbenes55@stud.fit.vutbr.cz>
+//-- Author(s): Radek Iša <isa@cesnet> 
 
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
 
 
 // This low level sequence define bus functionality
-class sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends uvm_sequence #(uvm_mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, 8, META_WIDTH));
+class sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends uvm_common::sequence_base#(config_sequence, uvm_mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, 8, META_WIDTH));
     `uvm_object_param_utils(uvm_byte_array_mfb::sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH))
     `uvm_declare_p_sequencer(uvm_mfb::sequencer#(REGIONS, REGION_SIZE, BLOCK_SIZE, 8, META_WIDTH));
 
@@ -145,7 +145,7 @@ class sequence_simple_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends
     uvm_common::rand_length   rdy_length;
     uvm_common::rand_rdy      rdy_rdy;
 
-    function new (string name = "req");
+    function new (string name = "sequence_simple_rx");
         super.new(name);
         rdy_length = uvm_common::rand_length_rand::new();
         rdy_rdy    = uvm_common::rand_rdy_rand::new();
@@ -154,7 +154,6 @@ class sequence_simple_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends
     /////////
     // CREATE uvm_intel_mac_seg::Sequence_item
     virtual task create_sequence_item();
-        int unsigned index = 0;
         gen.randomize();
 
         //randomization of rdy
@@ -200,7 +199,7 @@ class sequence_simple_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends
                     gen.sof_pos[it] = index;
                     if (hl_sqr.meta_behav == 1 && META_WIDTH != 0) begin
                         gen.meta[it] = meta.data;
-                    end 
+                    end
                     state_packet = state_packet_data;
                 end
 
@@ -229,12 +228,264 @@ class sequence_simple_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends
             end
         end
     endtask
+
+    task body;
+        rdy_length.bound_set(cfg.space_size_min, cfg.space_size_max);
+        rdy_rdy.bound_set(cfg.rdy_probability_min, cfg.rdy_probability_max);
+
+        super.body();
+    endtask
 endclass
+
+class sequence_burst_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH);
+    `uvm_object_param_utils(uvm_byte_array_mfb::sequence_burst_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH))
+    uvm_common::rand_length   rand_burst_size;
+    uvm_common::rand_length   rand_space_size;
+    uvm_common::rand_length   rand_rdy_length;
+
+    typedef enum{SPACE, PACKET} fsm_t;
+    fsm_t burst_state = SPACE;
+    int unsigned size = 0;
+
+    function new (string name = "sequence_burst_rx");
+        uvm_common::rand_length_rand  bound_burst;
+        uvm_common::rand_length_rand  bound_space_size;
+        uvm_common::rand_length_rand  bound_rdy;
+        uvm_common::length_bounds rand_bound[3];
+        uvm_common::length_bounds rand_bound_burst[3];
+        uvm_common::length_bounds rand_bound_space[4];
+
+        super.new(name);
+
+        bound_burst = new();
+        bound_burst.bound_set(300, 1000);
+        rand_burst_size = bound_burst; //uvm_common::rand_length_rand::new(rand_bound_burst);
+
+        bound_space_size = new();
+        bound_space_size.bound_set(100, 700);
+        rand_space_size = bound_space_size; //uvm_common::rand_length_rand::new(rand_bound_space);
+
+        bound_rdy = new();
+        bound_rdy.bound_set(0, 100);
+        rand_rdy_length = bound_rdy; // uvm_common::rand_length_rand::new(rand_bound);
+    endfunction
+
+    /////////
+    // CREATE uvm_intel_mac_seg::Sequence_item
+    virtual task create_sequence_item();
+        gen.randomize();
+
+        gen.src_rdy = 0;
+        gen.sof     = '0;
+        gen.eof     = '0;
+
+
+        for (int unsigned it = 0; it < REGIONS; it++) begin
+            if (burst_state == SPACE) begin
+                gen.data[it] = 'x;
+                if (size == 0) begin
+                    assert(rand_burst_size.randomize());
+                    size = rand_burst_size.m_value * REGION_SIZE;
+                    burst_state = PACKET;
+                end
+            end else if (burst_state == PACKET) begin
+                int unsigned index = 0;
+                while (index < REGION_SIZE && burst_state == PACKET) begin
+                    if (state_packet == state_packet_space_new) begin
+                        assert(rand_rdy_length.randomize());
+                        space_size = rand_rdy_length.m_value;
+                        state_packet = state_packet_space;
+                    end
+
+
+                    if (state_packet == state_packet_space) begin
+                        if (space_size != 0) begin
+                            space_size--;
+                        end else begin
+                            state_packet = state_packet_none;
+                        end
+                    end
+
+                    if (state_packet == state_packet_none) begin
+                        try_get();
+                    end
+
+                    if (state_packet == state_packet_new) begin
+                        // Check SOF and EOF position if we can insert packet into this region
+                        if (gen.sof[it] == 1 || (gen.eof[it] == 1'b1 && (REGION_SIZE*BLOCK_SIZE) > (index*BLOCK_SIZE + data.data.size()))) begin
+                            break;
+                        end
+
+                        gen.sof[it]     = 1'b1;
+                        gen.sof_pos[it] = index;
+                        if (hl_sqr.meta_behav == 1 && META_WIDTH != 0) begin
+                            gen.meta[it] = meta.data;
+                        end
+                        state_packet = state_packet_data;
+                    end
+
+                    if (state_packet == state_packet_data) begin
+                        int unsigned loop_end   = BLOCK_SIZE < (data.data.size() - data_index) ? BLOCK_SIZE : (data.data.size() - data_index);
+                        gen.src_rdy = 1;
+
+                        for (int unsigned jt = index*BLOCK_SIZE; jt < (index*BLOCK_SIZE + loop_end); jt++) begin
+                            gen.data[it][(jt+1)*8-1 -: 8] = data.data[data_index];
+                            data_index++;
+                        end
+
+                        // End of packet
+                        if (data.data.size() <= data_index) begin
+                            if (hl_sqr.meta_behav == 2 && META_WIDTH != 0) begin
+                                gen.meta[it] = meta.data;
+                            end
+                            gen.eof[it]     = 1'b1;
+                            gen.eof_pos[it] = index*BLOCK_SIZE + loop_end-1;
+                            item_done();
+                            state_packet = state_packet_space_new;
+                            if (size == 0) begin
+                                if (cfg.rdy_probability_min < 100) begin
+                                    assert(rand_space_size.randomize());
+                                    size = rand_space_size.m_value  * REGION_SIZE;
+                                    burst_state = SPACE;
+                                end else begin
+                                    assert(rand_burst_size.randomize());
+                                    size = rand_burst_size.m_value * REGION_SIZE;
+                                    burst_state = PACKET;
+                                end
+                            end
+                        end
+                    end
+                    index++;
+                //while end
+                end
+            //end if burst_packet == PACKET
+            end
+
+            //decrement burst size
+            if (size != 0) begin
+                size--;
+            end
+        end
+    endtask
+
+    task body;
+        rand_rdy_length.bound_set(cfg.space_size_min, cfg.space_size_max);
+        rand_burst_size.bound_set(cfg.rdy_probability_min*10, cfg.rdy_probability_max*10);
+        rand_space_size.bound_set((100 - cfg.rdy_probability_max) * 10,  (100 - cfg.rdy_probability_min) * 10);
+
+        super.body();
+    endtask
+endclass
+
+
+class sequence_position_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH);
+    `uvm_object_param_utils(uvm_byte_array_mfb::sequence_position_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH))
+
+    uvm_common::rand_length      rdy_length;
+    uvm_common::rand_rdy         rdy_rdy;
+    rand logic [REGION_SIZE-1:0] sof_pos;
+
+    constraint sof_pos_c {sof_pos > 0;};
+
+    function new (string name = "sequence_simple_rx");
+        super.new(name);
+        rdy_length = uvm_common::rand_length_rand::new();
+        rdy_rdy    = uvm_common::rand_rdy_rand::new();
+    endfunction
+
+    /////////
+    // CREATE uvm_intel_mac_seg::Sequence_item
+    virtual task create_sequence_item();
+        gen.randomize();
+
+        //randomization of rdy
+        void'(rdy_rdy.randomize());
+        if (rdy_rdy.m_value == 0) begin
+            gen.src_rdy = 0;
+            return;
+        end
+
+        gen.src_rdy = 0;
+        gen.sof     = '0;
+        gen.eof     = '0;
+
+        for (int unsigned it = 0; it < REGIONS; it++) begin
+            int unsigned index = 0;
+            while (index < REGION_SIZE) begin
+                if (state_packet == state_packet_space_new) begin
+                    void'(rdy_length.randomize());
+                    space_size   = rdy_length.m_value;
+                    state_packet = state_packet_space;
+                end
+
+
+                if (state_packet == state_packet_space) begin
+                    if (space_size != 0) begin
+                        space_size--;
+                    end else begin
+                        state_packet = state_packet_none;
+                    end
+                end
+
+                if (state_packet == state_packet_none) begin
+                    if (sof_pos[index] == 1) begin //get next packet only if there is position for sof
+                        try_get();
+                    end
+                end
+
+                if (state_packet == state_packet_new) begin
+                    // Check SOF and EOF position if we can insert packet into this region
+                    if (gen.sof[it] == 1 || (gen.eof[it] == 1'b1 && (REGION_SIZE*BLOCK_SIZE) > (index*BLOCK_SIZE + data.data.size()))) begin
+                        break;
+                    end
+
+                    gen.sof[it]     = 1'b1;
+                    gen.sof_pos[it] = index;
+                    if (hl_sqr.meta_behav == 1 && META_WIDTH != 0) begin
+                        gen.meta[it] = meta.data;
+                    end
+                    state_packet = state_packet_data;
+                end
+
+                if (state_packet == state_packet_data) begin
+                    int unsigned loop_end   = BLOCK_SIZE < (data.data.size() - data_index) ? BLOCK_SIZE : (data.data.size() - data_index);
+                    gen.src_rdy = 1;
+
+                    for (int unsigned jt = index*BLOCK_SIZE; jt < (index*BLOCK_SIZE + loop_end); jt++) begin
+                        gen.data[it][(jt+1)*8-1 -: 8] = data.data[data_index];
+                        data_index++;
+                    end
+
+                    // End of packet
+                    if (data.data.size() <= data_index) begin
+                        if (hl_sqr.meta_behav == 2 && META_WIDTH != 0) begin
+                            gen.meta[it] = meta.data;
+                        end
+                        gen.eof[it]     = 1'b1;
+                        gen.eof_pos[it] = index*BLOCK_SIZE + loop_end-1;
+                        item_done();
+                        state_packet = state_packet_space_new;
+                    end
+                end
+
+                index++;
+            end
+        end
+    endtask
+
+    task body;
+        rdy_length.bound_set(cfg.space_size_min, cfg.space_size_max);
+        rdy_rdy.bound_set(cfg.rdy_probability_min, cfg.rdy_probability_max);
+
+        super.body();
+    endtask
+endclass
+
 
 class sequence_full_speed_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH);
     `uvm_object_param_utils(uvm_byte_array_mfb::sequence_full_speed_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH))
 
-    function new (string name = "req");
+    function new (string name = "sequence_full_speed_rx");
         super.new(name);
     endfunction
 
@@ -252,7 +503,7 @@ class sequence_full_speed_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) ext
             while (index < REGION_SIZE) begin
                 if (state_packet == state_packet_space_new) begin
                     state_packet = state_packet_space;
-                    space_size   = 0;
+                    space_size   = cfg.space_size_min;
                 end
 
 
@@ -306,20 +557,21 @@ class sequence_full_speed_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) ext
             end
         end
     endtask
+
 endclass
 
 class sequence_stop_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH);
     `uvm_object_param_utils(uvm_byte_array_mfb::sequence_stop_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH))
 
-    function new (string name = "req");
+    constraint c_hl_transations_stop {
+        hl_transactions dist {[hl_transactions_min:hl_transactions_min + 100] :/ 50, [hl_transactions_max-100:hl_transactions_max] :/ 50, [hl_transactions_min:hl_transactions_max] :/100};
+    }
+
+    function new (string name = "sequence_stop_rx");
         super.new(name);
         hl_transactions_min = 10;
         hl_transactions_max = 1000;
     endfunction
-
-    constraint c_hl_transations_stop {
-        hl_transactions dist {[hl_transactions_min:hl_transactions_min + 100] :/ 50, [hl_transactions_max-100:hl_transactions_max] :/ 50, [hl_transactions_min:hl_transactions_max] :/100};
-    }
 
     /////////
     // CREATE uvm_intel_mac_seg::Sequence_item
@@ -340,11 +592,11 @@ endclass
 /////////////////////////////////////////////////////////////////////////
 // SEQUENCE LIBRARY RX
 
-class sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends uvm_sequence_library#(uvm_mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, 8, META_WIDTH));
+class sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends uvm_common::sequence_library#(config_sequence, uvm_mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, 8, META_WIDTH));
   `uvm_object_param_utils(uvm_byte_array_mfb::sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH))
   `uvm_sequence_library_utils(uvm_byte_array_mfb::sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH))
 
-  function new(string name = "");
+  function new(string name = "sequence_lib_rx");
     super.new(name);
     init_sequence_library();
   endfunction
@@ -355,6 +607,8 @@ class sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends uvm
         this.add_sequence(uvm_byte_array_mfb::sequence_simple_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH)::get_type());
         this.add_sequence(uvm_byte_array_mfb::sequence_full_speed_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH)::get_type());
         this.add_sequence(uvm_byte_array_mfb::sequence_stop_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH)::get_type());
+        this.add_sequence(uvm_byte_array_mfb::sequence_burst_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH)::get_type());
+        this.add_sequence(uvm_byte_array_mfb::sequence_position_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH)::get_type());
     endfunction
 endclass
 

@@ -11,6 +11,21 @@
 `ifndef SIZE_GEN_CONFIG_SV 
 `define SIZE_GEN_CONFIG_SV 
 
+
+class config_sequence extends uvm_object;
+    // this configuration is aproximation
+    // there is no quratte that currently running sequence will follow this rules.
+
+    // Default value is ethernet MTU (64-1500)
+    int unsigned array_size_min = 64;   // size have to be bigger than zero
+    int unsigned array_size_max = 1500;
+
+    function void array_size_set(int unsigned min, int unsigned max);
+        array_size_min = min;
+        array_size_max = max;
+    endfunction
+endclass
+
 class config_item extends uvm_object;
 
    ////////////////
