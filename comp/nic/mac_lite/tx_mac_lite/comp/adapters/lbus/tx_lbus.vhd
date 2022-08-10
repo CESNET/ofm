@@ -47,7 +47,7 @@ end entity;
 
 architecture FULL of TX_MAC_LITE_ADAPTER_LBUS is
 
-    constant BYTES : natural := (SEGMENTS*128)/8;
+    constant BYTES : natural := 128/8;
 
     signal reconf_mfb_data     : std_logic_vector(REGIONS*SEGMENTS*128-1 downto 0);
     signal reconf_mfb_sof      : std_logic_vector(REGIONS-1 downto 0);
@@ -75,8 +75,8 @@ architecture FULL of TX_MAC_LITE_ADAPTER_LBUS is
     signal align_mfb_block_vld : std_logic_vector(REGIONS*SEGMENTS-1 downto 0);
 
     signal lbus_rdy_reg        : std_logic;
-    signal mfb_data_rot        : std_logic_vector(SEGMENTS*128-1 downto 0);
     signal lbus_data_comb      : slv_array_t(SEGMENTS-1 downto 0)(128-1 downto 0);
+    signal lbus_data_rot       : slv_array_t(SEGMENTS-1 downto 0)(128-1 downto 0);
     signal lbus_sop_comb       : std_logic_vector(SEGMENTS-1 downto 0);
     signal lbus_eop_comb       : std_logic_vector(SEGMENTS-1 downto 0);
     signal lbus_mty_common     : unsigned(4-1 downto 0);
@@ -203,11 +203,13 @@ begin
         end if;
     end process;
 
-    in_data_rot_g : for i in 0 to BYTES-1 generate
-        mfb_data_rot((BYTES-1-i+1)*8-1 downto (BYTES-1-i)*8) <= align_mfb_data((i+1)*8-1 downto i*8);
-    end generate;
+    lbus_data_comb <= slv_array_deser(align_mfb_data,SEGMENTS,128);
 
-    lbus_data_comb <= slv_array_deser(mfb_data_rot,SEGMENTS,128);
+    data_rot_g : for s in 0 to SEGMENTS-1 generate
+        data_rot_g2 : for i in 0 to BYTES-1 generate
+            lbus_data_rot(s)((BYTES-1-i+1)*8-1 downto (BYTES-1-i)*8) <= lbus_data_comb(s)((i+1)*8-1 downto i*8);
+        end generate;
+    end generate;
 
     process (all)
     begin
@@ -242,7 +244,7 @@ begin
             -- after OUT_LBUS_RDY is negated, then OUT_LBUS_ENA must be in low.
             OUT_LBUS_ENA <= (others => '0');
             if (lbus_rdy_reg = '1') then
-                OUT_LBUS_DATA <= lbus_data_comb;
+                OUT_LBUS_DATA <= lbus_data_rot;
                 OUT_LBUS_MTY  <= lbus_mty_comb;
                 OUT_LBUS_ENA  <= lbus_ena_comb;
                 OUT_LBUS_SOP  <= lbus_sop_comb;
