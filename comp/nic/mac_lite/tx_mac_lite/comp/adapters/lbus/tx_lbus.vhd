@@ -238,6 +238,9 @@ begin
     process (CLK)
     begin
         if (rising_edge(CLK)) then
+            -- Up to four valid (OUT_LBUS_ENA) cycles might be safely performed
+            -- after OUT_LBUS_RDY is negated, then OUT_LBUS_ENA must be in low.
+            OUT_LBUS_ENA <= (others => '0');
             if (lbus_rdy_reg = '1') then
                 OUT_LBUS_DATA <= lbus_data_comb;
                 OUT_LBUS_MTY  <= lbus_mty_comb;
