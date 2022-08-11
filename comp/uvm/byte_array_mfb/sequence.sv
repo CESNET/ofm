@@ -560,6 +560,94 @@ class sequence_full_speed_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) ext
 
 endclass
 
+// This is only a slight modification of the sequence_full_speed_rx class where no gaps inside frame are inserted.
+// But there are abitrary long gaps getween frames.
+class seqv_no_inframe_gap_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH);
+    `uvm_object_param_utils(uvm_byte_array_mfb::seqv_no_inframe_gap_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH))
+
+    uvm_common::rand_length   rdy_length;
+
+    function new (string name = "req");
+        super.new(name);
+        rdy_length = uvm_common::rand_length_rand::new();
+    endfunction
+
+    /////////
+    // CREATE uvm_intel_mac_seg::Sequence_item
+    virtual task create_sequence_item();
+        int unsigned index = 0;
+        gen.randomize();
+
+        gen.src_rdy = 0;
+        gen.sof     = '0;
+        gen.eof     = '0;
+
+        for (int unsigned it = 0; it < REGIONS; it++) begin
+            int unsigned index = 0;
+            while (index < REGION_SIZE) begin
+                if (state_packet == state_packet_space_new) begin
+                    void'(rdy_length.randomize());
+                    space_size = rdy_length.m_value;
+                    state_packet = state_packet_space;
+                end
+
+
+                if (state_packet == state_packet_space) begin
+                    if (space_size != 0) begin
+                        space_size--;
+                    end else begin
+                        state_packet = state_packet_none;
+                    end
+                end
+
+                if (state_packet == state_packet_none) begin
+                    try_get();
+                end
+
+                if (state_packet == state_packet_new) begin
+                    // Check SOF and EOF position if we can insert packet into this region
+                    if (gen.sof[it] == 1 || (gen.eof[it] == 1'b1 && (REGION_SIZE*BLOCK_SIZE) > (index*BLOCK_SIZE + data.data.size()))) begin
+                        break;
+                    end
+
+                    gen.sof[it]     = 1'b1;
+                    gen.sof_pos[it] = index;
+                    if (hl_sqr.meta_behav == 1 && META_WIDTH != 0) begin
+                        gen.meta[it] = meta.data;
+                    end
+                    state_packet = state_packet_data;
+                end
+
+                if (state_packet == state_packet_data) begin
+                    int unsigned loop_end   = BLOCK_SIZE < (data.data.size() - data_index) ? BLOCK_SIZE : (data.data.size() - data_index);
+                    gen.src_rdy = 1;
+
+                    for (int unsigned jt = index*BLOCK_SIZE; jt < (index*BLOCK_SIZE + loop_end); jt++) begin
+                        gen.data[it][(jt+1)*8-1 -: 8] = data.data[data_index];
+                        data_index++;
+                    end
+
+                    // End of packet
+                    if (data.data.size() <= data_index) begin
+                        if (hl_sqr.meta_behav == 2 && META_WIDTH != 0) begin
+                            gen.meta[it] = meta.data;
+                        end
+                        gen.eof[it]     = 1'b1;
+                        gen.eof_pos[it] = index*BLOCK_SIZE + loop_end-1;
+                        data = null;
+                        hl_sqr.m_data.item_done();
+                        if (META_WIDTH != 0) begin
+                            hl_sqr.m_meta.item_done();
+                        end
+                        state_packet = state_packet_space_new;
+                    end
+                end
+                index++;
+            end
+        end
+    endtask
+endclass
+
 class sequence_stop_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH);
     `uvm_object_param_utils(uvm_byte_array_mfb::sequence_stop_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH))
 
@@ -607,6 +695,7 @@ class sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends uvm
         this.add_sequence(uvm_byte_array_mfb::sequence_simple_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH)::get_type());
         this.add_sequence(uvm_byte_array_mfb::sequence_full_speed_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH)::get_type());
         this.add_sequence(uvm_byte_array_mfb::sequence_stop_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH)::get_type());
+        this.add_sequence(uvm_byte_array_mfb::seqv_no_inframe_gap_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH)::get_type());
         this.add_sequence(uvm_byte_array_mfb::sequence_burst_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH)::get_type());
         this.add_sequence(uvm_byte_array_mfb::sequence_position_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH)::get_type());
     endfunction

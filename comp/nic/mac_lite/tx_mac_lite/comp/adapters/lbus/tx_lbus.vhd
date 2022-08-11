@@ -89,45 +89,26 @@ begin
     --  FRAMES REALIGN TO 128b SEGMENTS
     -- -------------------------------------------------------------------------
 
-    -- TODO:
-    -- Replace the MFB_RECONFIGURATOR with a more efficient module.
-
-    mfb_reconf_i : entity work.MFB_RECONFIGURATOR
-    generic map(
-        RX_REGIONS            => REGIONS,
-        RX_REGION_SIZE        => REGION_SIZE,
-        RX_BLOCK_SIZE         => 8,
-        RX_ITEM_WIDTH         => 8,
-        TX_REGIONS            => REGIONS,
-        TX_REGION_SIZE        => SEGMENTS,
-        TX_BLOCK_SIZE         => 16,
-        TX_ITEM_WIDTH         => 8,
-        META_WIDTH            => 0,
-        META_MODE             => 0,
-        FIFO_SIZE             => 32,
-        FRAMES_OVER_TX_BLOCK  => 0,
-        FRAMES_OVER_TX_REGION => 0,
-        DEVICE                => DEVICE
-    )
+    mfb_to_lbus_reconf_i : entity work.MFB_TO_LBUS_RECONF
     port map(
         CLK        => CLK,
-        RESET      => RESET,
+        RST        => RESET,
 
-        RX_DATA    => IN_MFB_DATA,
-        RX_SOF     => IN_MFB_SOF,
-        RX_EOF     => IN_MFB_EOF,
-        RX_SOF_POS => IN_MFB_SOF_POS,
-        RX_EOF_POS => IN_MFB_EOF_POS,
-        RX_SRC_RDY => IN_MFB_SRC_RDY,
-        RX_DST_RDY => IN_MFB_DST_RDY,
+        RX_MFB_DATA    => IN_MFB_DATA,
+        RX_MFB_SOF     => IN_MFB_SOF(0),
+        RX_MFB_EOF     => IN_MFB_EOF(0),
+        RX_MFB_SOF_POS => IN_MFB_SOF_POS,
+        RX_MFB_EOF_POS => IN_MFB_EOF_POS,
+        RX_MFB_SRC_RDY => IN_MFB_SRC_RDY,
+        RX_MFB_DST_RDY => IN_MFB_DST_RDY,
 
-        TX_DATA    => reconf_mfb_data,
-        TX_SOF     => reconf_mfb_sof,
-        TX_EOF     => reconf_mfb_eof,
-        TX_SOF_POS => reconf_mfb_sof_pos,
-        TX_EOF_POS => reconf_mfb_eof_pos,
-        TX_SRC_RDY => reconf_mfb_src_rdy,
-        TX_DST_RDY => reconf_mfb_dst_rdy
+        TX_MFB_DATA    => reconf_mfb_data,
+        TX_MFB_SOF     => reconf_mfb_sof(0),
+        TX_MFB_EOF     => reconf_mfb_eof(0),
+        TX_MFB_SOF_POS => reconf_mfb_sof_pos,
+        TX_MFB_EOF_POS => reconf_mfb_eof_pos,
+        TX_MFB_SRC_RDY => reconf_mfb_src_rdy,
+        TX_MFB_DST_RDY => reconf_mfb_dst_rdy
     );
 
     process (CLK)
