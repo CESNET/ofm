@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MVB agent &mdash; OFM User Guide 1.0 documentation</title>
@@ -14,12 +14,13 @@
         <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="next" title="UVM MI agent" href="../mi/readme.html" />
-    <link rel="prev" title="LII agent" href="../lii/readme.html" /> 
+    <link rel="next" title="MFB Agent" href="../mfb/readme.html" />
+    <link rel="prev" title="LII agent" href="../lii_rx/readme.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -53,13 +54,26 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../nic.html">Network Tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pcie.html">PCIe Tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../debug.html">Debug Tools</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../../../ver.html">Verifications</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="../readme.html">UVM Verification</a><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../../ver.html">UVM Verification</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../manual.html">SystemVerilog and UVM tutorial</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../componets.html">Components</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../reset/readme.html">RESET agent</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../logic_vector/readme.html">Logic vector agent</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../logic_vector_array_mfb/readme.html">logic_vector_array_mfb environment</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../byte_array/readme.html">Byte Array agent</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../byte_array_lii/readme.html">Byte Array to LII convert enviroment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../byte_array_mfb/readme.html">Byte_array_mfb environment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../byte_array_intel_mac_seg/readme.html">byte array to MAC SEG</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../byte_array_pma/readme.html">Byte array to pma convert enviroment</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../common/readme.html">COMMON PACKAGE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../byte_array_mii/readme.html">Byte array to MII transitional environment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../byte_array_lii/readme.html">Byte Array to LII convert enviroment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../byte_array_lii_rx/readme.html">Byte Array to LII convert enviroment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../common/readme.html">Common package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../lii/readme.html">LII agent</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../lii_rx/readme.html">LII agent</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../lii_rx/readme.html#lii-interface">LII interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../lii_rx/readme.html#lii-sequence-item">LII sequence item</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../lii_rx/readme.html#lii-monitor">LII monitor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../lii_rx/readme.html#lii-driver">LII driver</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">MVB agent</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#interface">Interface</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#sequence-item">Sequence item</a></li>
@@ -70,19 +84,10 @@
 <li class="toctree-l4"><a class="reference internal" href="#agent">Agent</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="../mi/readme.html">UVM MI agent</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../mfb/readme.html">MFB Agent</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../mi/readme.html">MI agent</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pma/readme.html">PMA agent</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../reset/readme.html">RESET agent</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../readme.html#systemverilog-and-uvm-tutorial">SystemVerilog and UVM tutorial</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../readme.html#basic-usage-of-uvm-methodology-in-ofm">Basic usage of UVM methodology in OFM</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../readme.html#layered-agents">Layered agents</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../readme.html#common-environment">Common environment</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../readme.html#request-response-agents">Request response Agents</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../readme.html#reset">Reset</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../readme.html#coverage">Coverage</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../readme.html#verification-example">Verification example</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../readme.html#notes">NOTES</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../readme.html#ofm-verification-environment">OFM verification environment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../intel_mac_seg/readme.html">Intel MAC SEG</a></li>
 </ul>
 </li>
 </ul>
@@ -107,8 +112,8 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../../../ver.html">Verifications</a> &raquo;</li>
-          <li><a href="../readme.html">UVM Verification</a> &raquo;</li>
+          <li><a href="../../../ver.html">UVM Verification</a> &raquo;</li>
+          <li><a href="../componets.html">Components</a> &raquo;</li>
       <li>MVB agent</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../../_sources/comp/uvm/mvb/readme.rst.txt" rel="nofollow"> View page source</a>
@@ -120,16 +125,11 @@
            <div itemprop="articleBody">
              
   <section id="mvb-agent">
-<span id="uvm-mvb"></span><h1>MVB agent<a class="headerlink" href="#mvb-agent" title="Permalink to this headline"></a></h1>
+<span id="uvm-mvb"></span><h1>MVB agent<a class="headerlink" href="#mvb-agent" title="Permalink to this heading"></a></h1>
 <section id="interface">
-<h2>Interface<a class="headerlink" href="#interface" title="Permalink to this headline"></a></h2>
+<h2>Interface<a class="headerlink" href="#interface" title="Permalink to this heading"></a></h2>
 <p>MVB interface is simple interface which is composed of signals below.</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 7%" />
-<col style="width: 10%" />
-<col style="width: 83%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Name</p></th>
 <th class="head"><p>Width</p></th>
@@ -162,13 +162,13 @@ Also there is one modport for monitor. This modport is used for both RX and TX.<
 <p>There are asserts to check correct settings and functionality of interface.</p>
 </section>
 <section id="sequence-item">
-<h2>Sequence item<a class="headerlink" href="#sequence-item" title="Permalink to this headline"></a></h2>
+<h2>Sequence item<a class="headerlink" href="#sequence-item" title="Permalink to this heading"></a></h2>
 <p>Sequence item have same signals as interface accept for <code class="docutils literal notranslate"><span class="pre">DATA</span></code>. In the <code class="docutils literal notranslate"><span class="pre">DATA</span></code> is saved all items in the array.
 There is <code class="docutils literal notranslate"><span class="pre">ITEMS</span></code>’s logic vector items with width of <code class="docutils literal notranslate"><span class="pre">ITEM_WIDTH</span></code>.</p>
 <p>All of those signals are randomized. There also are overridden UVM functions(“do_compare”, “do_copy” and “convert2string”).</p>
 </section>
 <section id="sequence">
-<h2>Sequence<a class="headerlink" href="#sequence" title="Permalink to this headline"></a></h2>
+<h2>Sequence<a class="headerlink" href="#sequence" title="Permalink to this heading"></a></h2>
 <p>There is <code class="docutils literal notranslate"><span class="pre">req</span></code> which is instance of sequence_item. There are 2 unsigned integers <code class="docutils literal notranslate"><span class="pre">max_transaction_count</span></code> and <code class="docutils literal notranslate"><span class="pre">min_transaction_count</span></code>.
 Last variable is randomized <code class="docutils literal notranslate"><span class="pre">transaction_count</span></code>. This variable is randomized in range of &lt;<code class="docutils literal notranslate"><span class="pre">max_transaction_count</span></code>, <code class="docutils literal notranslate"><span class="pre">min_transaction_count</span></code>&gt;.</p>
 <p>There are 2 sequences. One for RX and one for TX. This is because TX, and RX behave differently.
@@ -176,20 +176,20 @@ Signal <code class="docutils literal notranslate"><span class="pre">SRC_RDY</spa
 <p>Because of this there is one bit variable <code class="docutils literal notranslate"><span class="pre">next_action</span></code>. This bit decide on contents of actual <code class="docutils literal notranslate"><span class="pre">req</span></code> based on previous sequence item.</p>
 </section>
 <section id="driver">
-<h2>Driver<a class="headerlink" href="#driver" title="Permalink to this headline"></a></h2>
+<h2>Driver<a class="headerlink" href="#driver" title="Permalink to this heading"></a></h2>
 <p>The driver gets sequence_item from sequence and assign corresponding signals to interface.</p>
 <p>Because of behaviour described above there are also 2 drivers. One for RX and one for TX. The RX driver have to also create response and sand it back to sequence.</p>
 </section>
 <section id="monitor">
-<h2>Monitor<a class="headerlink" href="#monitor" title="Permalink to this headline"></a></h2>
+<h2>Monitor<a class="headerlink" href="#monitor" title="Permalink to this heading"></a></h2>
 <p>Monitor just waiting for monitor clocking block and than sample values at interface. And at the end he write this sample to the analysis port.</p>
 </section>
 <section id="config">
-<h2>Config<a class="headerlink" href="#config" title="Permalink to this headline"></a></h2>
+<h2>Config<a class="headerlink" href="#config" title="Permalink to this heading"></a></h2>
 <p>In the config 2 variables. First is <code class="docutils literal notranslate"><span class="pre">active</span></code> that decides if the driver and sequencer will be created. And the second one is <code class="docutils literal notranslate"><span class="pre">interface_name</span></code>.</p>
 </section>
 <section id="agent">
-<h2>Agent<a class="headerlink" href="#agent" title="Permalink to this headline"></a></h2>
+<h2>Agent<a class="headerlink" href="#agent" title="Permalink to this heading"></a></h2>
 <p>There are also 2 agents. Agent only connect everything together.</p>
 </section>
 </section>
@@ -198,8 +198,8 @@ Signal <code class="docutils literal notranslate"><span class="pre">SRC_RDY</spa
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../lii/readme.html" class="btn btn-neutral float-left" title="LII agent" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../mi/readme.html" class="btn btn-neutral float-right" title="UVM MI agent" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../lii_rx/readme.html" class="btn btn-neutral float-left" title="LII agent" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../mfb/readme.html" class="btn btn-neutral float-right" title="MFB Agent" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
