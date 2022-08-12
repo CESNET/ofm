@@ -30,10 +30,6 @@ use ieee.std_logic_1164.all;
 use IEEE.STD_LOGIC_ARITH.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
-library UNISIM;
-use UNISIM.vcomponents.all;
-
-
 entity flashctrl is
    generic ( CLK_PERIOD : natural := 8 ); -- Period of the CLK (truncated when non-integer)
    port (
