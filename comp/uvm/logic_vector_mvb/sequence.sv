@@ -143,6 +143,40 @@ class sequence_simple_rx #(ITEMS, ITEM_WIDTH) extends sequence_simple_rx_base #(
 endclass
 
 
+class sequence_rand_rx #(ITEMS, ITEM_WIDTH) extends sequence_simple_rx_base #(ITEMS, ITEM_WIDTH);
+    `uvm_object_param_utils(uvm_logic_vector_mvb::sequence_rand_rx #(ITEMS, ITEM_WIDTH))
+    uvm_common::rand_rdy rdy;
+
+    // Constructor - creates new instance of this class
+    function new(string name = "sequence");
+        super.new("sequence_full_speed_rx");
+        rdy = uvm_common::rand_rdy_rand::new();
+    endfunction
+
+    virtual task create_sequence_item();
+        if (!gen.randomize()) `uvm_fatal(this.get_full_name(), "failed to radnomize");
+
+        gen.vld     = 0;
+        gen.src_rdy = 1'b0;
+
+        for (int i = 0; i < ITEMS; i++) begin
+            rdy.randomize();
+            if (hl_transactions != 0 && rdy.m_value == 1'b1) begin
+                hi_sqr.try_next_item(frame);
+                if (frame != null) begin
+                    gen.src_rdy = 1'b1;
+                    gen.vld[i]  = 1'b1;
+                    gen.data[i] = frame.data;
+                    hi_sqr.item_done();
+                    frame = null;
+                    hl_transactions--;
+                end
+            end
+        end
+    endtask
+endclass
+
+
 class sequence_full_speed_rx #(ITEMS, ITEM_WIDTH) extends sequence_simple_rx_base #(ITEMS, ITEM_WIDTH);
 
     `uvm_object_param_utils(uvm_logic_vector_mvb::sequence_full_speed_rx #(ITEMS, ITEM_WIDTH))
@@ -172,6 +206,8 @@ class sequence_full_speed_rx #(ITEMS, ITEM_WIDTH) extends sequence_simple_rx_bas
         end
     endtask
 endclass
+
+
 
 class sequence_stop_rx #(ITEMS, ITEM_WIDTH) extends sequence_simple_rx_base #(ITEMS, ITEM_WIDTH);
 
@@ -203,6 +239,7 @@ class sequence_lib_rx#(ITEMS, ITEM_WIDTH) extends uvm_sequence_library#(uvm_mvb:
     // subclass can redefine and change run sequences
     // can be useful in specific tests
     virtual function void init_sequence();
+        this.add_sequence(sequence_rand_rx #(ITEMS, ITEM_WIDTH)::get_type());
         this.add_sequence(sequence_simple_rx#(ITEMS, ITEM_WIDTH)::get_type());
         this.add_sequence(sequence_full_speed_rx#(ITEMS, ITEM_WIDTH)::get_type());
         this.add_sequence(sequence_stop_rx#(ITEMS, ITEM_WIDTH)::get_type());
