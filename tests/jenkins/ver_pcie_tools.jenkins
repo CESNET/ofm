@@ -20,6 +20,7 @@ def COMPONENTS_VER = [\
     //['MFB2DMA',                  'comp/pcie/others/mfb2dma/ver',                    'top_level.fdo'],\ 
     ['PTC - Frame Eraser',       'comp/pcie/ptc/comp/frame_eraser_upto96bits/ver',  'top_level.fdo'],\
     ['PTC - Header Data Merge',  'comp/pcie/ptc/comp/hdr_data_merge/ver',           'top_level.fdo'],\
+    ['RX DMA Calypte',           'comp/dma/dma_calypte/comp/rx/uvm',                'top_level.fdo'],\
 ]
 // /////////////////////////////////////////////////////////////////////////////
 
