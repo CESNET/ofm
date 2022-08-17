@@ -12,30 +12,15 @@ class seq_small_pkt extends uvm_byte_array::sequence_simple;
     `uvm_object_utils(uvm_mac_seg_rx::seq_small_pkt)
     function new(string name="seq_small_pkt");
         super.new(name);
-        data_size_max = 128;
-        data_size_min = 12;
-        transaction_count_min = 1;
-        transaction_count_max = 20;
-
+        cfg = new();
+        cfg.array_size_set(12, 128);
+        cfg.transaction_count_set(1, 20);
     endfunction
+
+    function void config_set(uvm_byte_array::config_sequence cfg);
+   endfunction
 endclass
 
-class sequence_lib extends uvm_byte_array::sequence_lib;
-  `uvm_object_utils(uvm_mac_seg_rx::sequence_lib)
-  `uvm_sequence_library_utils(uvm_mac_seg_rx::sequence_lib)
-
-    function new(string name = "");
-        super.new(name);
-        init_sequence_library();
-    endfunction
-
-    // subclass can redefine and change run sequences
-    // can be useful in specific tests
-    virtual function void init_sequence();
-        super.init_sequence();
-        this.add_sequence(seq_small_pkt::get_type());
-    endfunction
-endclass
 
 class sequence_error#(LOGIC_WIDTH) extends uvm_logic_vector::sequence_simple#(LOGIC_WIDTH);
     `uvm_object_param_utils(uvm_mac_seg_rx::sequence_error#(LOGIC_WIDTH))
@@ -72,10 +57,11 @@ class sequence_simple_1 extends uvm_sequence;
     endfunction
 
     virtual function void seq_create();
-		uvm_mac_seg_rx::sequence_lib rx_packet_lib;
+		uvm_byte_array::sequence_lib rx_packet_lib;
 
-        rx_packet_lib = uvm_mac_seg_rx::sequence_lib::type_id::create("seq_data");
+        rx_packet_lib = uvm_byte_array::sequence_lib::type_id::create("seq_data");
         rx_packet_lib.init_sequence();
+        rx_packet_lib.add_sequence(seq_small_pkt::get_type());
         rx_packet_lib.min_random_count = 100;
         rx_packet_lib.max_random_count = 200;
 
