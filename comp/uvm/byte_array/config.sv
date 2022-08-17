@@ -19,11 +19,23 @@ class config_sequence extends uvm_object;
     int unsigned array_size_min = 64;   // size have to be bigger than zero
     int unsigned array_size_max = 1500;
 
+    // this configuration works for all sequences run by sequences library.
+    // if two sequences will run by sequences library then 20 to 400 transactios
+    // are going to be generated
+    int unsigned transaction_count_min = 10;   // size have to be bigger than zero
+    int unsigned transaction_count_max = 200;
+
     function void array_size_set(int unsigned min, int unsigned max);
         array_size_min = min;
         array_size_max = max;
     endfunction
+
+    function void transaction_count_set(int unsigned min, int unsigned max);
+        transaction_count_min = min;
+        transaction_count_max = max;
+    endfunction
 endclass
+
 
 class config_item extends uvm_object;
 
