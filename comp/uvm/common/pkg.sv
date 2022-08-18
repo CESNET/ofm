@@ -9,8 +9,8 @@
 */
 
 
-`ifndef RESET_PKG
-`define RESET_PKG
+`ifndef COMMON_PKG
+`define COMMON_PKG
 
 package uvm_common;
 
@@ -27,6 +27,7 @@ package uvm_common;
     `include "model_item.sv"
     `include "comparer_base.sv"
     `include "comparer.sv"
+    `include "stats.sv"
 endpackage
 
 
