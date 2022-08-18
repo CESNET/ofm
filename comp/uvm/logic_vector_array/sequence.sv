@@ -15,10 +15,8 @@ class sequence_simple#(ITEM_WIDTH) extends uvm_common::sequence_base#(config_seq
     `uvm_declare_p_sequencer(uvm_logic_vector_array::sequencer#(ITEM_WIDTH));
 
     rand int unsigned transaction_count;
-    int unsigned transaction_count_min = 10;
-    int unsigned transaction_count_max = 200;
 
-    constraint c1 {transaction_count inside {[transaction_count_min : transaction_count_max]};}
+    constraint c1 {transaction_count inside {[cfg.transaction_count_min : cfg.transaction_count_max]};}
 
     // Constructor - creates new instance of this class
     function new(string name = "sequence_simple");
@@ -48,10 +46,8 @@ class sequence_simple_const#(ITEM_WIDTH) extends uvm_common::sequence_base#(conf
 
     rand int unsigned data_size;
     rand int unsigned transaction_count;
-    int unsigned transaction_count_min = 10;
-    int unsigned transaction_count_max = 200;
 
-    constraint c1 {transaction_count inside {[transaction_count_min : transaction_count_max]};}
+    constraint c1 {transaction_count inside {[cfg.transaction_count_min : cfg.transaction_count_max]};}
     constraint c2 {data_size inside {[cfg.array_size_min : cfg.array_size_max]};}
 
     // Constructor - creates new instance of this class
@@ -84,12 +80,10 @@ class sequence_simple_gauss#(ITEM_WIDTH) extends uvm_common::sequence_base#(conf
     rand int unsigned transaction_count;
     rand int unsigned mean; // Mean of data size
     rand int unsigned std_deviation; // Standard deviation
-    int unsigned transaction_count_min = 10;
-    int unsigned transaction_count_max = 200;
     int unsigned std_deviation_min = 1;
     int unsigned std_deviation_max = 32;
 
-    constraint c1 {transaction_count inside {[transaction_count_min : transaction_count_max]};}
+    constraint c1 {transaction_count inside {[cfg.transaction_count_min : cfg.transaction_count_max]};}
     constraint c2 {mean inside {[cfg.array_size_min : cfg.array_size_max]};}
     constraint c3 {std_deviation inside {[std_deviation_min : std_deviation_max]};}
 
@@ -138,10 +132,8 @@ class sequence_simple_inc#(ITEM_WIDTH) extends uvm_common::sequence_base#(config
     rand int unsigned step;
     rand int unsigned data_size;
     int unsigned border = 4096;
-    int unsigned transaction_count_min = 10;
-    int unsigned transaction_count_max = 200;
 
-    constraint c1 {transaction_count inside {[transaction_count_min : transaction_count_max]};}
+    constraint c1 {transaction_count inside {[cfg.transaction_count_min : cfg.transaction_count_max]};}
     constraint c2 {step  inside {[1:16]};}
     constraint c3 {data_size inside {[cfg.array_size_min : cfg.array_size_max]};}
 
@@ -185,11 +177,9 @@ class sequence_simple_dec#(ITEM_WIDTH) extends uvm_common::sequence_base#(config
     rand int unsigned step;
     rand int unsigned data_size;
     int unsigned border = 64;
-    int unsigned transaction_count_min = 10;
-    int unsigned transaction_count_max = 200;
 
 
-    constraint c1 {transaction_count inside {[transaction_count_min : transaction_count_max]};}
+    constraint c1 {transaction_count inside {[cfg.transaction_count_min : cfg.transaction_count_max]};}
     constraint c2 {step  inside {[1:16]};}
     constraint c3 {data_size inside {[cfg.array_size_min : cfg.array_size_max]};}
 

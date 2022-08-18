@@ -17,7 +17,7 @@ class sequence_base#(type CONFIG_TYPE, REQ=uvm_sequence_item, RSP=REQ) extends u
         super.new(name);
     endfunction
 
-    function void config_set(CONFIG_TYPE cfg);
+    virtual function void config_set(CONFIG_TYPE cfg);
         this.cfg = cfg;
     endfunction
 endclass
