@@ -57,7 +57,7 @@ class sequence_simple_1 extends uvm_sequence;
     endfunction
 
     virtual function void seq_create();
-		uvm_byte_array::sequence_lib rx_packet_lib;
+              uvm_byte_array::sequence_lib rx_packet_lib;
 
         rx_packet_lib = uvm_byte_array::sequence_lib::type_id::create("seq_data");
         rx_packet_lib.init_sequence();
