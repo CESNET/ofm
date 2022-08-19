@@ -55,6 +55,7 @@ def COMPONENTS_MULTIVER = [\
     ['FRAME_LENGTH_COUNTER'               , 'comp/mfb_tools/logic/frame_lng/ver'                                              , 'top_level.fdo'      , 'tbench/test_pkg.sv' , 'ver_settings.py'    ],\
     ['GET_ITEMS'                          , 'comp/mfb_tools/logic/get_items/ver'                                              , 'top_level.fdo'      , 'tbench/test_pkg.sv' , 'ver_settings.py'    ],\
     ['FIFOX'                              , 'comp/mfb_tools/storage/fifox/ver'                                                , 'top_level.fdo'      , 'tbench/test_pkg.sv' , 'ver_settings.py'    ],\
+    ['FIFOX UVM'                          , 'comp/mfb_tools/storage/fifox/uvm'                                                , 'top_level.fdo'      , 'tbench/tests/pkg.sv' , 'ver_settings.py'    ],\
     ['FIFO_BRAM'                          , 'comp/mfb_tools/storage/fifo_bram/ver'                                            , 'top_level.fdo'      , 'tbench/test_pkg.sv' , 'ver_settings.py'    ],\
     ['FIFO_BRAM_Xilinx'                   , 'comp/mfb_tools/storage/fifo_bram_xilinx/ver'                                     , 'top_level.fdo'      , 'tbench/test_pkg.sv' , 'ver_settings.py'    ],\
     ['ASFIFO_BRAM_Xilinx'                 , 'comp/mfb_tools/storage/asfifo_bram_xilinx/ver'                                   , 'top_level.fdo'      , 'tbench/test_pkg.sv' , 'ver_settings.py'    ],\
