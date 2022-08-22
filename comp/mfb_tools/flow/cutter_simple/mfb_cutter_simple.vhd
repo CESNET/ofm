@@ -20,17 +20,21 @@ entity MFB_CUTTER_SIMPLE is
         -- Frame size restrictions:
         -- For REGION_SIZE =  1: MIN = (CUTTED_ITEMS+1)*ITEM_WIDTH bits
         -- For REGION_SIZE >= 2: MIN = (REGION_SIZE*BLOCK_SIZE+CUTTED_ITEMS)*ITEM_WIDTH bits
-        REGIONS      : natural := 2; -- any positive
-        REGION_SIZE  : natural := 8; -- any power of two
-        BLOCK_SIZE   : natural := 8; -- any power of two except 1
-        ITEM_WIDTH   : natural := 8; -- any positive
+        REGIONS        : natural := 2; -- any positive
+        REGION_SIZE    : natural := 8; -- any power of two
+        BLOCK_SIZE     : natural := 8; -- any power of two except 1
+        ITEM_WIDTH     : natural := 8; -- any positive
         -- Width of MFB Metadata
-        META_WIDTH   : natural := 0;
+        META_WIDTH     : natural := 0;
+        -- Metadata is valid either with:
+        --   - SOF (MODE 0) or
+        --   - EOF (MODE 1)
+        META_ALIGNMENT : natural := 0;
         -- =======================================================================
         -- OTHER CONFIGURATION:
         -- =======================================================================
         -- Count of cutted items from SOF. Maximum value is REGION_SIZE*BLOCK_SIZE.
-        CUTTED_ITEMS : natural := 4
+        CUTTED_ITEMS   : natural := 4
     );
     port(
         -- =======================================================================
@@ -43,7 +47,7 @@ entity MFB_CUTTER_SIMPLE is
         -- INPUT MFB INTERFACE WITH CUT ENABLE FLAGS
         -- =======================================================================
         RX_DATA    : in  std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
-        RX_META    : in  std_logic_vector(REGIONS*META_WIDTH-1 downto 0) := (others => '0'); -- valid on SOF
+        RX_META    : in  std_logic_vector(REGIONS*META_WIDTH-1 downto 0) := (others => '0');
         RX_SOF     : in  std_logic_vector(REGIONS-1 downto 0);
         RX_EOF     : in  std_logic_vector(REGIONS-1 downto 0);
         RX_SOF_POS : in  std_logic_vector(REGIONS*max(1,log2(REGION_SIZE))-1 downto 0);
@@ -62,7 +66,7 @@ entity MFB_CUTTER_SIMPLE is
         TX_EOF     : out std_logic_vector(REGIONS-1 downto 0);
         TX_SOF_POS : out std_logic_vector(REGIONS*max(1,log2(REGION_SIZE))-1 downto 0);
         TX_EOF_POS : out std_logic_vector(REGIONS*max(1,log2(REGION_SIZE*BLOCK_SIZE))-1 downto 0);
-        TX_SRC_RDY : out std_logic;
+        TX_SRC_RDY : out std_logic := '0';
         TX_DST_RDY : in  std_logic
     );
 end MFB_CUTTER_SIMPLE;
@@ -84,6 +88,7 @@ architecture FULL of MFB_CUTTER_SIMPLE is
     signal s_rx_sof_vld               : std_logic_vector(REGIONS-1 downto 0);
     signal s_rx_sof_pos_arr           : slv_array_t(REGIONS-1 downto 0)(SOF_POS_WIDTH-1 downto 0);
     signal s_rx_eof_pos_arr           : slv_array_t(REGIONS-1 downto 0)(EOF_POS_WIDTH-1 downto 0);
+    signal s_rx_meta_arr              : slv_array_t(REGIONS-1 downto 0)(META_WIDTH-1 downto 0);
 
     signal s_rx_sof_pos_items_arr     : uns_array_t(REGIONS-1 downto 0)(LOG2_REGION_ITEMS-1 downto 0);
     signal s_sof_items                : std_logic_vector(WORD_ITEMS-1 downto 0);
@@ -94,6 +99,7 @@ architecture FULL of MFB_CUTTER_SIMPLE is
     signal s_new_eof_pos_curr_arr_wid : uns_array_t(REGIONS-1 downto 0)(LOG2_REGION_ITEMS downto 0);
     signal s_new_eof_pos_curr_arr     : slv_array_t(REGIONS-1 downto 0)(LOG2_REGION_ITEMS-1 downto 0);
     signal s_new_eof_pos_arr          : slv_array_t(REGIONS-1 downto 0)(LOG2_REGION_ITEMS-1 downto 0);
+    signal s_new_meta_arr             : slv_array_t(REGIONS-1 downto 0)(META_WIDTH-1 downto 0);
     signal s_new_eof_curr             : std_logic_vector(REGIONS-1 downto 0);
     signal s_new_eof_prev             : std_logic_vector(REGIONS-1 downto 0);
     signal s_new_eof                  : std_logic_vector(REGIONS-1 downto 0);
@@ -103,10 +109,12 @@ architecture FULL of MFB_CUTTER_SIMPLE is
     signal s_rx_sof_pos_reg           : std_logic_vector(REGIONS*SOF_POS_WIDTH-1 downto 0);
     signal s_rx_sof_reg               : std_logic_vector(REGIONS-1 downto 0);
     signal s_new_eof_pos_reg          : slv_array_t(REGIONS-1 downto 0)(LOG2_REGION_ITEMS-1 downto 0);
+    signal s_new_meta_reg             : slv_array_t(REGIONS-1 downto 0)(META_WIDTH-1 downto 0);
     signal s_new_eof_reg              : std_logic_vector(REGIONS-1 downto 0);
     signal s_mux_sel_reg              : std_logic_vector(WORD_ITEMS-1 downto 0);
     signal s_new_eof_reg_fix          : std_logic_vector(REGIONS-1 downto 0);
     signal s_new_eof_pos_reg_fix      : slv_array_t(REGIONS-1 downto 0)(LOG2_REGION_ITEMS-1 downto 0);
+    signal s_new_meta_reg_fix         : slv_array_t(REGIONS-1 downto 0)(META_WIDTH-1 downto 0);
     signal s_rx_src_rdy_reg           : std_logic;
     signal s_rx_dst_rdy               : std_logic;
     signal s_dst_rdy                  : std_logic;
@@ -139,6 +147,7 @@ begin
 
     s_rx_sof_pos_arr <= slv_array_downto_deser(RX_SOF_POS,REGIONS,SOF_POS_WIDTH);
     s_rx_eof_pos_arr <= slv_array_downto_deser(RX_EOF_POS,REGIONS,EOF_POS_WIDTH);
+    s_rx_meta_arr    <= slv_array_downto_deser(RX_META   ,REGIONS,META_WIDTH   );
 
     -----------------------------------------------------------------------------
     -- COMPUTE SELECTS FOR MULTIPLEXORS
@@ -203,9 +212,11 @@ begin
     new_eof_g : for r in 0 to REGIONS-2 generate
         s_new_eof(r) <= '1' when (s_new_eof_prev(r+1) = '1') else s_new_eof_curr(r);
         s_new_eof_pos_arr(r) <= s_new_eof_pos_curr_arr(r+1) when (s_new_eof_prev(r+1) = '1') else s_new_eof_pos_curr_arr(r);
+        s_new_meta_arr   (r) <= s_rx_meta_arr         (r+1) when (s_new_eof_prev(r+1) = '1') else s_rx_meta_arr         (r);
     end generate;
     s_new_eof(REGIONS-1) <= s_new_eof_curr(REGIONS-1);
     s_new_eof_pos_arr(REGIONS-1) <= s_new_eof_pos_curr_arr(REGIONS-1);
+    s_new_meta_arr   (REGIONS-1) <= s_rx_meta_arr         (REGIONS-1);
 
     -----------------------------------------------------------------------------
     -- MFB REGISTERS
@@ -221,7 +232,9 @@ begin
                 s_rx_meta_reg     <= RX_META;
                 s_rx_sof_pos_reg  <= RX_SOF_POS;
                 s_rx_sof_reg      <= RX_SOF;
+
                 s_new_eof_pos_reg <= s_new_eof_pos_arr;
+                s_new_meta_reg    <= s_new_meta_arr;
                 s_new_eof_reg     <= s_new_eof;
                 s_mux_sel_reg     <= s_mux_sel;
             end if;
@@ -232,9 +245,11 @@ begin
     new_eof_reg_fix_g : for r in 0 to REGIONS-2 generate
         s_new_eof_reg_fix(r) <= s_new_eof_reg(r);
         s_new_eof_pos_reg_fix(r) <= s_new_eof_pos_reg(r);
+        s_new_meta_reg_fix   (r) <= s_new_meta_reg   (r);
     end generate;
     s_new_eof_reg_fix(REGIONS-1) <= '1' when (s_new_eof_prev(0) = '1') else s_new_eof_reg(REGIONS-1);
     s_new_eof_pos_reg_fix(REGIONS-1) <= s_new_eof_pos_curr_arr(0) when (s_new_eof_prev(0) = '1') else s_new_eof_pos_reg(REGIONS-1);
+    s_new_meta_reg_fix   (REGIONS-1) <= s_new_meta_arr        (0) when (s_new_eof_prev(0) = '1') else s_new_meta_reg   (REGIONS-1);
 
     rx_src_rdy_reg_p : process (CLK)
     begin
@@ -298,9 +313,9 @@ begin
     -----------------------------------------------------------------------------
 
     s_tx_data    <= slv_array_ser(s_data_muxed_arr,WORD_ITEMS,ITEM_WIDTH);
+    s_tx_meta    <= tsel(META_ALIGNMENT=1, slv_array_ser(s_new_meta_reg_fix), s_rx_meta_reg);
     s_tx_eof_pos <= slv_array_ser(s_new_eof_pos_reg_fix,REGIONS,EOF_POS_WIDTH);
     s_tx_eof     <= s_new_eof_reg_fix;
-    s_tx_meta    <= s_rx_meta_reg;
     s_tx_sof_pos <= s_rx_sof_pos_reg;
     s_tx_sof     <= s_rx_sof_reg;
     s_tx_src_rdy <= s_valid_word and s_valid_word_mask;
