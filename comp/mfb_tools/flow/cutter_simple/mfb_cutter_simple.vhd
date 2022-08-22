@@ -234,7 +234,7 @@ begin
         s_new_eof_pos_reg_fix(r) <= s_new_eof_pos_reg(r);
     end generate;
     s_new_eof_reg_fix(REGIONS-1) <= '1' when (s_new_eof_prev(0) = '1') else s_new_eof_reg(REGIONS-1);
-    s_new_eof_pos_reg_fix(REGIONS-1) <= s_new_eof_pos_arr(0) when (s_new_eof_prev(0) = '1') else s_new_eof_pos_reg(REGIONS-1);
+    s_new_eof_pos_reg_fix(REGIONS-1) <= s_new_eof_pos_curr_arr(0) when (s_new_eof_prev(0) = '1') else s_new_eof_pos_reg(REGIONS-1);
 
     rx_src_rdy_reg_p : process (CLK)
     begin
