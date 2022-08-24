@@ -60,6 +60,7 @@ def COMPONENTS_MULTIVER = [\
     ['FIFO_BRAM_Xilinx'                   , 'comp/mfb_tools/storage/fifo_bram_xilinx/ver'                                     , 'top_level.fdo'      , 'tbench/test_pkg.sv' , 'ver_settings.py'    ],\
     ['ASFIFO_BRAM_Xilinx'                 , 'comp/mfb_tools/storage/asfifo_bram_xilinx/ver'                                   , 'top_level.fdo'      , 'tbench/test_pkg.sv' , 'ver_settings.py'    ],\
     ['PACKET_DISCARDING_ASFIFO'           , 'comp/mfb_tools/storage/pd_asfifo/ver'                                            , 'top_level.fdo'      , 'tbench/test_pkg.sv' , 'ver_settings.py'    ],\
+    ['SUPERUNPACKETER'                    , 'comp/mfb_tools/flow/superunpacketer/uvm'                                         , 'top_level.fdo'      , 'tbench/test_pkg.sv' , 'ver_settings.py'    ],\
 ]
 // /////////////////////////////////////////////////////////////////////////////
 

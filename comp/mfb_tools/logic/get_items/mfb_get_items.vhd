@@ -68,7 +68,7 @@ entity MFB_GET_ITEMS is
       -- =======================================================================
       EX_DATA    : out std_logic_vector(REGIONS*EXTRACTED_ITEMS*ITEM_WIDTH-1 downto 0);
       EX_VLD     : out std_logic_vector(REGIONS-1 downto 0);
-      EX_SRC_RDY : out std_logic;
+      EX_SRC_RDY : out std_logic := '0';
       EX_DST_RDY : in  std_logic := '1'
    );
 end MFB_GET_ITEMS;
