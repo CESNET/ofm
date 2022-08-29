@@ -37,9 +37,9 @@ use work.type_pack.all;
 entity SUPERUNPACKETER is
 generic(
     -- Number of Regions within a data word, must be power of 2.
-    MFB_REGIONS           : natural := 1;
+    MFB_REGIONS           : natural := 2;
     -- Region size (in Blocks).
-    MFB_REGION_SIZE       : natural := 2;
+    MFB_REGION_SIZE       : natural := 8;
     -- Block size (in Items), must be 8.
     MFB_BLOCK_SIZE        : natural := 8;
     -- Item width (in bits), must be 8.
@@ -119,7 +119,7 @@ architecture FULL of SUPERUNPACKETER is
     --                                     Mask + Loop_id + Timestamp
     constant MISC_WIDTH       : natural := 4*8  + 2*8     + 8*8;
     -- Header length (in bits).
-    constant HDR_WIDTH        : natural := LENGTH_WIDTH + 1 + MISC_WIDTH; -- = OUT_META_WIDTH-1
+    constant HDR_WIDTH        : natural := LENGTH_WIDTH + 1 + MISC_WIDTH;
     -- Header length (in Items).
     constant HDR_ITEMS        : natural := HDR_WIDTH/MFB_ITEM_WIDTH;
     -- Maximum amount of Words a single packet can stretch over.
@@ -129,71 +129,31 @@ architecture FULL of SUPERUNPACKETER is
     --                                 SIGNALS
     -- ========================================================================
 
-    -- first register stage
-    signal rx_supkt_data    : std_logic_vector(MFB_WORD_WIDTH-1 downto 0);
-    signal rx_supkt_sof_pos : std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE))-1 downto 0);
-    signal rx_supkt_eof_pos : std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE))-1 downto 0);
-    signal rx_supkt_sof     : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal rx_supkt_eof     : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal rx_supkt_src_rdy : std_logic;
-    signal rx_supkt_dst_rdy : std_logic;
+    -- SuperPacket header extraction
+    signal rx_supkt_data_arr    : slv_array_t     (MFB_REGIONS-1 downto 0)(MFB_REGION_WIDTH-1 downto 0);
+    signal rx_supkt_sof_pos_arr : slv_array_t     (MFB_REGIONS-1 downto 0)(max(1,log2(MFB_REGION_SIZE))-1 downto 0);
+    signal rx_supkt_sof_pos_ptr : u_array_t       (MFB_REGIONS-1 downto 0)(max(1,log2(MFB_REGION_WIDTH))-1 downto 0);
 
-    -- MFB Get Items
-    signal getit_supkt_data    : std_logic_vector(MFB_WORD_WIDTH-1 downto 0);
-    signal getit_supkt_sof_pos : std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE))-1 downto 0);
-    signal getit_supkt_eof_pos : std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE))-1 downto 0);
-    signal getit_supkt_sof     : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal getit_supkt_eof     : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal getit_supkt_src_rdy : std_logic;
-    signal getit_supkt_dst_rdy : std_logic;
+    signal rx_supkt_len_arr     : slv_array_t     (MFB_REGIONS-1 downto 0)(LENGTH_WIDTH-1 downto 0);
+    signal rx_supkt_next_arr    : std_logic_vector(MFB_REGIONS-1 downto 0);
 
-    signal getit_supkt_hdr_data    : std_logic_vector(MFB_REGIONS*HDR_WIDTH-1 downto 0);
-    signal getit_supkt_hdr_vld     : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal getit_supkt_hdr_src_rdy : std_logic;
-    signal getit_supkt_hdr_dst_rdy : std_logic;
+    -- First stage register
+    signal rx_supkt_data_reg0        : std_logic_vector(MFB_WORD_WIDTH-1 downto 0);
+    signal rx_supkt_sof_pos_reg0     : std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE))-1 downto 0);
+    signal rx_supkt_eof_pos_reg0     : std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE))-1 downto 0);
+    signal rx_supkt_sof_reg0         : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal rx_supkt_eof_reg0         : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal rx_supkt_src_rdy_reg0     : std_logic;
+    signal rx_supkt_dst_rdy_reg0     : std_logic;
 
-    -- MFB Pipe
-    signal pipe_supkt_data    : std_logic_vector(MFB_WORD_WIDTH-1 downto 0);
-    signal pipe_supkt_sof_pos : std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE))-1 downto 0);
-    signal pipe_supkt_eof_pos : std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE))-1 downto 0);
-    signal pipe_supkt_sof     : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal pipe_supkt_eof     : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal pipe_supkt_src_rdy : std_logic;
-    signal pipe_supkt_dst_rdy : std_logic;
+    signal rx_supkt_vld_sof_reg0     : std_logic_vector(MFB_REGIONS-1 downto 0);
 
-    signal pipe_supkt_hdr_data    : std_logic_vector(MFB_REGIONS*HDR_WIDTH-1 downto 0);
-    signal pipe_supkt_hdr_vld     : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal pipe_supkt_hdr_src_rdy : std_logic;
-    signal pipe_supkt_hdr_dst_rdy : std_logic;
+    signal rx_supkt_length_reg0_arr  : slv_array_t     (MFB_REGIONS-1 downto 0)(LENGTH_WIDTH-1 downto 0);
+    signal rx_supkt_next_reg0_arr    : std_logic_vector(MFB_REGIONS-1 downto 0);
 
-    -- Metadata Insertor
-    signal metains_supkt_data    : std_logic_vector(MFB_WORD_WIDTH-1 downto 0);
-    signal metains_supkt_hdr     : std_logic_vector(MFB_REGIONS*HDR_WIDTH-1 downto 0);
-    signal metains_supkt_sof_pos : std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE))-1 downto 0);
-    signal metains_supkt_eof_pos : std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE))-1 downto 0);
-    signal metains_supkt_sof     : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal metains_supkt_eof     : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal metains_supkt_src_rdy : std_logic;
-    signal metains_supkt_dst_rdy : std_logic;
-    
-    -- second register stage
-    signal metains_supkt_data_reg    : std_logic_vector(MFB_WORD_WIDTH-1 downto 0);
-    signal metains_supkt_hdr_reg     : std_logic_vector(MFB_REGIONS*HDR_WIDTH-1 downto 0);
-    signal metains_supkt_sof_pos_reg : std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE))-1 downto 0);
-    signal metains_supkt_eof_pos_reg : std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE))-1 downto 0);
-    signal metains_supkt_sof_reg     : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal metains_supkt_eof_reg     : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal metains_supkt_src_rdy_reg : std_logic;
-
-    signal metains_supkt_data_arr    : slv_array_t(MFB_REGIONS-1 downto 0)(MFB_REGION_WIDTH-1 downto 0);
-    signal metains_supkt_sof_pos_arr : slv_array_t(MFB_REGIONS-1 downto 0)(max(1,log2(MFB_REGION_SIZE))-1 downto 0);
-    signal metains_supkt_eof_pos_arr : slv_array_t(MFB_REGIONS-1 downto 0)(max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE))-1 downto 0);
-
-    signal metains_supkt_hdr_reg_arr : slv_array_t     (MFB_REGIONS-1 downto 0)(HDR_WIDTH-1 downto 0);
-    signal metains_supkt_hdr_length  : slv_array_t     (MFB_REGIONS-1 downto 0)(LENGTH_WIDTH-1 downto 0);
-    signal metains_supkt_hdr_next    : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal metains_supkt_hdr_misc    : slv_array_t     (MFB_REGIONS-1 downto 0)(MISC_WIDTH-1 downto 0);
-    signal metains_supkt_hdr_reg_vld : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal rx_supkt_data_reg0_arr    : slv_array_t(MFB_REGIONS-1 downto 0)(MFB_REGION_WIDTH-1 downto 0);
+    signal rx_supkt_sof_pos_reg0_arr : slv_array_t(MFB_REGIONS-1 downto 0)(max(1,log2(MFB_REGION_SIZE))-1 downto 0);
+    signal rx_supkt_eof_pos_reg0_arr : slv_array_t(MFB_REGIONS-1 downto 0)(max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE))-1 downto 0);
 
     -- Word counter
     signal some_sof     : std_logic;
@@ -211,7 +171,7 @@ architecture FULL of SUPERUNPACKETER is
     signal pkt_length      : u_array_t(MFB_REGIONS-1 downto 0)(log2(PKT_MAX_WORDS*MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE)-1 downto 0);
 
     -- SuperPacket Header Extractor (SPHE)
-    signal sphe_rx_data_arr    : slv_array_t(MFB_REGIONS-1 downto 0)(MFB_REGION_WIDTH-1 downto 0);
+    signal sphe_rx_data        : slv_array_t(MFB_REGIONS-1 downto 0)(MFB_REGION_WIDTH-1 downto 0);
     signal sphe_rx_sof_offset  : slv_array_t(MFB_REGIONS-1 downto 0)(log2(PKT_MAX_WORDS*MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE)-1 downto 0);
     signal sphe_rx_word_cnt    : slv_array_t(MFB_REGIONS-1 downto 0)(log2(PKT_MAX_WORDS)-1 downto 0);
 
@@ -234,7 +194,7 @@ architecture FULL of SUPERUNPACKETER is
     signal sphe_tx_src_rdy_new : std_logic;
     signal sphe_tx_dst_rdy_new : std_logic;
 
-    -- third stage register
+    -- Second stage register
     signal indv_pkt_data    : std_logic_vector(MFB_WORD_WIDTH-1 downto 0);
     signal indv_pkt_sof_pos : std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE))-1 downto 0);
     signal indv_pkt_eof_pos : std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE))-1 downto 0);
@@ -243,7 +203,7 @@ architecture FULL of SUPERUNPACKETER is
     signal indv_pkt_src_rdy : std_logic;
     signal indv_pkt_dst_rdy : std_logic;
 
-    -- MFB Get Items 2
+    -- MFB Get Items
     signal getit_indv_pkt_data    : std_logic_vector(MFB_WORD_WIDTH-1 downto 0);
     signal getit_indv_pkt_sof_pos : std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE))-1 downto 0);
     signal getit_indv_pkt_eof_pos : std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE))-1 downto 0);
@@ -261,7 +221,7 @@ architecture FULL of SUPERUNPACKETER is
     signal getit_indv_hdr_misc_arr   : slv_array_t(MFB_REGIONS-1 downto 0)(MISC_WIDTH-1 downto 0);
     signal getit_indv_hdr_length_arr : slv_array_t(MFB_REGIONS-1 downto 0)(LENGTH_WIDTH-1 downto 0);
 
-    -- Pipe 2
+    -- Pipe
     signal pipe_indv_pkt_data    : std_logic_vector(MFB_WORD_WIDTH-1 downto 0);
     signal pipe_indv_pkt_hdr     : std_logic_vector(MFB_REGIONS*OUT_META_WIDTH-1 downto 0);
     signal pipe_indv_pkt_sof_pos : std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE))-1 downto 0);
@@ -277,7 +237,7 @@ architecture FULL of SUPERUNPACKETER is
     signal pipe_indv_hdr_src_rdy  : std_logic;
     signal pipe_indv_hdr_dst_rdy  : std_logic;
 
-    -- Metadata Insertor 2
+    -- Metadata Insertor
     signal metains_indv_pkt_data    : std_logic_vector(MFB_WORD_WIDTH-1 downto 0);
     signal metains_indv_pkt_hdr     : std_logic_vector(MFB_REGIONS*OUT_META_WIDTH-1 downto 0);
     signal metains_indv_pkt_sof_pos : std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE))-1 downto 0);
@@ -293,7 +253,7 @@ architecture FULL of SUPERUNPACKETER is
     signal metains_indv_hdr_src_rdy  : std_logic;
     signal metains_indv_hdr_dst_rdy  : std_logic;
 
-    -- output
+    -- Output
     signal cut_data    : std_logic_vector(MFB_WORD_WIDTH-1 downto 0);
     signal cut_meta    : std_logic_vector(MFB_REGIONS*OUT_META_WIDTH-1 downto 0);
     signal cut_sof_pos : std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE))-1 downto 0);
@@ -305,203 +265,53 @@ architecture FULL of SUPERUNPACKETER is
 
 begin
 
-    RX_MFB_DST_RDY <= rx_supkt_dst_rdy;
-
-    -- ========================================================================
-    -- Input register
-    -- ========================================================================
-
-    process(CLK)
-    begin
-        if rising_edge(CLK) then
-            if (rx_supkt_dst_rdy = '1') then
-                rx_supkt_data    <= RX_MFB_DATA;
-                rx_supkt_sof_pos <= RX_MFB_SOF_POS;
-                rx_supkt_eof_pos <= RX_MFB_EOF_POS;
-                rx_supkt_sof     <= RX_MFB_SOF;
-                rx_supkt_eof     <= RX_MFB_EOF;
-                rx_supkt_src_rdy <= RX_MFB_SRC_RDY;
-            end if;
-
-            if (RESET = '1') then
-                rx_supkt_src_rdy <= '0';
-            end if;
-        end if;
-    end process;
+    RX_MFB_DST_RDY <= sphe_tx_dst_rdy_new;
 
     -- ========================================================================
     -- Extraction of the first header of each SuperPacket
     -- ========================================================================
 
-    mfb_get_items_i : entity work.MFB_GET_ITEMS
-    generic map(
-        REGIONS          => MFB_REGIONS    ,
-        REGION_SIZE      => MFB_REGION_SIZE,
-        BLOCK_SIZE       => MFB_BLOCK_SIZE ,
-        ITEM_WIDTH       => MFB_ITEM_WIDTH ,
-        META_WIDTH       => 0              ,
+    rx_supkt_data_arr    <= slv_array_deser(RX_MFB_DATA   , MFB_REGIONS);
+    rx_supkt_sof_pos_arr <= slv_array_deser(RX_MFB_SOF_POS, MFB_REGIONS);
+    
+    supkt_hdr_extract_g : for r in 0 to MFB_REGIONS-1 generate
+        -- convert to bits (-> create a pointer to the SOF)
+        rx_supkt_sof_pos_ptr(r) <= resize_right(unsigned(rx_supkt_sof_pos_arr(r)), log2(MFB_REGION_WIDTH));
 
-        MAX_FRAME_LENGHT => PKT_MTU        ,
-        EXTRACTED_ITEMS  => HDR_ITEMS      ,
-        EXTRACTED_OFFSET => 0
-    )
-    port map(
-        CLK   => CLK,
-        RESET => RESET,
-
-        RX_DATA    => rx_supkt_data          ,
-        RX_META    => (others => '0')        ,
-        RX_SOF_POS => rx_supkt_sof_pos       ,
-        RX_EOF_POS => rx_supkt_eof_pos       ,
-        RX_SOF     => rx_supkt_sof           ,
-        RX_EOF     => rx_supkt_eof           ,
-        RX_SRC_RDY => rx_supkt_src_rdy       ,
-        RX_DST_RDY => rx_supkt_dst_rdy       ,
-
-        TX_DATA    => getit_supkt_data       ,
-        TX_META    => open                   ,
-        TX_SOF_POS => getit_supkt_sof_pos    ,
-        TX_EOF_POS => getit_supkt_eof_pos    ,
-        TX_SOF     => getit_supkt_sof        ,
-        TX_EOF     => getit_supkt_eof        ,
-        TX_SRC_RDY => getit_supkt_src_rdy    ,
-        TX_DST_RDY => getit_supkt_dst_rdy    ,
-
-        -- Output register inside
-        EX_DATA    => getit_supkt_hdr_data   ,
-        EX_VLD     => getit_supkt_hdr_vld    ,
-        EX_SRC_RDY => getit_supkt_hdr_src_rdy,
-        EX_DST_RDY => getit_supkt_hdr_dst_rdy
-    );
-
-    -- Delay MFB stream
-    mfb_pipe_i : entity work.MFB_PIPE
-    generic map(
-        REGIONS     => MFB_REGIONS    ,
-        REGION_SIZE => MFB_REGION_SIZE,
-        BLOCK_SIZE  => MFB_BLOCK_SIZE ,
-        ITEM_WIDTH  => MFB_ITEM_WIDTH ,
-        META_WIDTH  => 0              ,
-
-        FAKE_PIPE   => false          ,
-        USE_DST_RDY => true           ,
-        PIPE_TYPE   => "SHREG"        ,
-        DEVICE      => DEVICE
-    )
-    port map(
-        CLK   => CLK,
-        RESET => RESET,
-
-        RX_DATA    => getit_supkt_data   ,
-        RX_META    => (others => '0')    ,
-        RX_SOF_POS => getit_supkt_sof_pos,
-        RX_EOF_POS => getit_supkt_eof_pos,
-        RX_SOF     => getit_supkt_sof    ,
-        RX_EOF     => getit_supkt_eof    ,
-        RX_SRC_RDY => getit_supkt_src_rdy,
-        RX_DST_RDY => getit_supkt_dst_rdy,
-
-        TX_DATA     => pipe_supkt_data   ,
-        TX_META     => open              ,
-        TX_SOF_POS  => pipe_supkt_sof_pos,
-        TX_EOF_POS  => pipe_supkt_eof_pos,
-        TX_SOF      => pipe_supkt_sof    ,
-        TX_EOF      => pipe_supkt_eof    ,
-        TX_SRC_RDY  => pipe_supkt_src_rdy,
-        TX_DST_RDY  => pipe_supkt_dst_rdy
-    );
-
-    pipe_supkt_hdr_data    <= getit_supkt_hdr_data;
-    pipe_supkt_hdr_vld     <= getit_supkt_hdr_vld;
-    pipe_supkt_hdr_src_rdy <= getit_supkt_hdr_src_rdy;
-    getit_supkt_hdr_dst_rdy <= pipe_supkt_hdr_dst_rdy;
-
-    -- Align Headers to SOFs as metadata
-    metadata_insertor_i : entity work.METADATA_INSERTOR
-    generic map(
-        MVB_ITEMS       => MFB_REGIONS    ,
-        MVB_ITEM_WIDTH  => HDR_WIDTH      ,
-
-        MFB_REGIONS     => MFB_REGIONS    ,
-        MFB_REGION_SIZE => MFB_REGION_SIZE,
-        MFB_BLOCK_SIZE  => MFB_BLOCK_SIZE ,
-        MFB_ITEM_WIDTH  => MFB_ITEM_WIDTH ,
-        MFB_META_WIDTH  => 0              ,
-
-        INSERT_MODE     => 0              , -- meta valid with SOF
-        MVB_FIFO_SIZE   => 4              ,
-        DEVICE          => DEVICE
-    )
-    port map(
-        CLK   => CLK,
-        RESET => RESET,
-
-        RX_MVB_DATA    => pipe_supkt_hdr_data   ,
-        RX_MVB_VLD     => pipe_supkt_hdr_vld    ,
-        RX_MVB_SRC_RDY => pipe_supkt_hdr_src_rdy,
-        RX_MVB_DST_RDY => pipe_supkt_hdr_dst_rdy,
-
-        RX_MFB_DATA    => pipe_supkt_data       ,
-        RX_MFB_META    => (others => '0')       ,
-        RX_MFB_SOF_POS => pipe_supkt_sof_pos    ,
-        RX_MFB_EOF_POS => pipe_supkt_eof_pos    ,
-        RX_MFB_SOF     => pipe_supkt_sof        ,
-        RX_MFB_EOF     => pipe_supkt_eof        ,
-        RX_MFB_SRC_RDY => pipe_supkt_src_rdy    ,
-        RX_MFB_DST_RDY => pipe_supkt_dst_rdy    ,
-
-        TX_MFB_DATA     => metains_supkt_data   ,
-        TX_MFB_META     => open                 ,
-        TX_MFB_META_NEW => metains_supkt_hdr    ,
-        TX_MFB_SOF_POS  => metains_supkt_sof_pos,
-        TX_MFB_EOF_POS  => metains_supkt_eof_pos,
-        TX_MFB_SOF      => metains_supkt_sof    ,
-        TX_MFB_EOF      => metains_supkt_eof    ,
-        TX_MFB_SRC_RDY  => metains_supkt_src_rdy,
-        TX_MFB_DST_RDY  => metains_supkt_dst_rdy
-    );
-
-    metains_supkt_dst_rdy <= sphe_tx_dst_rdy_new;
+        rx_supkt_len_arr (r) <= rx_supkt_data_arr(r)(to_integer(rx_supkt_sof_pos_ptr(r))+LENGTH_WIDTH-1 downto to_integer(rx_supkt_sof_pos_ptr(r)));
+        rx_supkt_next_arr(r) <= rx_supkt_data_arr(r)(to_integer(rx_supkt_sof_pos_ptr(r))+LENGTH_WIDTH);
+    end generate;
 
     -- ========================================================================
-    -- Second stage register
+    -- Input (first stage) register
     -- ========================================================================
 
     process(CLK)
     begin
         if rising_edge(CLK) then
             if (sphe_tx_dst_rdy_new = '1') then
-                metains_supkt_data_reg    <= metains_supkt_data;
-                metains_supkt_hdr_reg     <= metains_supkt_hdr;
-                metains_supkt_sof_pos_reg <= metains_supkt_sof_pos;
-                metains_supkt_eof_pos_reg <= metains_supkt_eof_pos;
-                metains_supkt_sof_reg     <= metains_supkt_sof;
-                metains_supkt_eof_reg     <= metains_supkt_eof;
-                metains_supkt_src_rdy_reg <= metains_supkt_src_rdy;
+                rx_supkt_data_reg0    <= RX_MFB_DATA;
+                rx_supkt_sof_pos_reg0 <= RX_MFB_SOF_POS;
+                rx_supkt_eof_pos_reg0 <= RX_MFB_EOF_POS;
+                rx_supkt_sof_reg0     <= RX_MFB_SOF;
+                rx_supkt_eof_reg0     <= RX_MFB_EOF;
+                rx_supkt_src_rdy_reg0 <= RX_MFB_SRC_RDY;
+
+                rx_supkt_vld_sof_reg0 <= RX_MFB_SRC_RDY and RX_MFB_SOF;
+
+                rx_supkt_length_reg0_arr  <= rx_supkt_len_arr;
+                rx_supkt_next_reg0_arr    <= rx_supkt_next_arr;
             end if;
 
             if (RESET = '1') then
-                metains_supkt_src_rdy_reg <= '0';
+                rx_supkt_src_rdy_reg0 <= '0';
             end if;
         end if;
     end process;
 
-    -- ========================================================================
-    -- Parse the header of each SuperPacket
-    -- ========================================================================
-
-    metains_supkt_data_arr    <= slv_array_deser(metains_supkt_data_reg   , MFB_REGIONS);
-    metains_supkt_sof_pos_arr <= slv_array_deser(metains_supkt_sof_pos_reg, MFB_REGIONS);
-    metains_supkt_eof_pos_arr <= slv_array_deser(metains_supkt_eof_pos_reg, MFB_REGIONS);
-
-    metains_supkt_hdr_reg_arr <= slv_array_deser(metains_supkt_hdr_reg, MFB_REGIONS);
-    supkt_hdr_g : for r in 0 to MFB_REGIONS-1 generate
-        metains_supkt_hdr_misc  (r) <= metains_supkt_hdr_reg_arr(r)(HDR_WIDTH-1 downto HDR_WIDTH-MISC_WIDTH); -- Not used, TODO
-        metains_supkt_hdr_next  (r) <= metains_supkt_hdr_reg_arr(r)(LENGTH_WIDTH);
-        metains_supkt_hdr_length(r) <= metains_supkt_hdr_reg_arr(r)(LENGTH_WIDTH-1 downto 0);
-    end generate;
-
-    metains_supkt_hdr_reg_vld <= metains_supkt_src_rdy_reg and metains_supkt_sof_reg;
+    rx_supkt_data_reg0_arr    <= slv_array_deser(rx_supkt_data_reg0   , MFB_REGIONS);
+    rx_supkt_sof_pos_reg0_arr <= slv_array_deser(rx_supkt_sof_pos_reg0, MFB_REGIONS);
+    rx_supkt_eof_pos_reg0_arr <= slv_array_deser(rx_supkt_eof_pos_reg0, MFB_REGIONS);
 
     -- ========================================================================
     -- Control logic for the SuperPacket Header Extractors (SPHEs)
@@ -512,7 +322,7 @@ begin
     -- --------------
     some_sof <= or sphe_tx_sof_new;
 
-    word_cnt_en <= metains_supkt_src_rdy_reg and sphe_tx_dst_rdy_new;
+    word_cnt_en <= rx_supkt_src_rdy_reg0 and sphe_tx_dst_rdy_new;
 
     word_cnt_reg_p : process (CLK)
     begin
@@ -548,7 +358,7 @@ begin
                          pkt_length     (0);  -- Length of the packet (w/o the header)
 
     -- Calculate a   new sof_offset    if   there was a SOF              or   copy the previous sof_offset
-    sof_offset(0) <= sof_offset_new(0) when (metains_supkt_hdr_reg_vld(0) = '1') else sof_offset_reg;
+    sof_offset(0) <= sof_offset_new(0) when (rx_supkt_vld_sof_reg0(0) = '1') else sof_offset_reg;
 
     sof_offset_g : for r in 1 to MFB_REGIONS-1 generate
         regional_offset(r) <= to_unsigned((r-1)*MFB_REGION_SIZE*MFB_BLOCK_SIZE                                                  , sof_offset_reg'length);
@@ -568,7 +378,7 @@ begin
     sof_offset_reg_p : process (CLK)
     begin
         if (rising_edge(CLK)) then
-            if (metains_supkt_src_rdy_reg = '1') and (sphe_tx_dst_rdy_new = '1') then
+            if (rx_supkt_src_rdy_reg0 = '1') and (sphe_tx_dst_rdy_new = '1') then
                 -- Same condition as in the ``for generate`` above, just for the last Region
                 if (sphe_tx_sof_new(MFB_REGIONS-1) = '1') then
 
@@ -593,8 +403,8 @@ begin
     -- SuperPacket Header Extractors
     -- ========================================================================
 
+    sphe_rx_data <= rx_supkt_data_reg0_arr;
     sphe_rx_g: for r in 0 to MFB_REGIONS-1 generate
-        sphe_rx_data_arr  (r) <= metains_supkt_data_arr     (r) ;
         sphe_rx_sof_offset(r) <= std_logic_vector(sof_offset(r));
         sphe_rx_word_cnt  (r) <= std_logic_vector(word_cnt  (r));
     end generate;
@@ -615,7 +425,7 @@ begin
             CLK   => CLK,
             RESET => RESET,
 
-            RX_DATA     => sphe_rx_data_arr  (r),
+            RX_DATA     => sphe_rx_data      (r),
             RX_OFFSET   => sphe_rx_sof_offset(r),
             RX_WORD_CNT => sphe_rx_word_cnt  (r),
 
@@ -650,27 +460,28 @@ begin
     --     the first Metadata Insertor (when there is a SOF or EOF in the SuperPacket) or
     --     the output of the SUPKT_HDR_EXTRACTOR
     sphe_output_mux_g : for r in 0 to MFB_REGIONS-1 generate
-        sphe_tx_sof_new    (r) <= metains_supkt_sof_reg    (r) when (metains_supkt_hdr_reg_vld(r) = '1') else
-                                  sphe_tx_sof              (r) when (sphe_tx_next_propg       (r) = '1') else
+        sphe_tx_sof_new    (r) <= rx_supkt_sof_reg0        (r) when (rx_supkt_vld_sof_reg0(r) = '1') else
+                                  sphe_tx_sof              (r) when (sphe_tx_next_propg   (r) = '1') else
                                   '0';
-        sphe_tx_sof_pos_new(r) <= metains_supkt_sof_pos_arr(r) when (metains_supkt_hdr_reg_vld(r) = '1') else sphe_tx_sof_pos(r);
+        sphe_tx_sof_pos_new(r) <= rx_supkt_sof_pos_reg0_arr(r) when (rx_supkt_vld_sof_reg0(r) = '1') else sphe_tx_sof_pos(r);
 
-        sphe_tx_eof_new    (r) <= metains_supkt_eof_reg    (r) when (sphe_tx_next_propg       (r) = '0') else sphe_tx_eof    (r);
-        sphe_tx_eof_pos_new(r) <= metains_supkt_eof_pos_arr(r) when (sphe_tx_next_propg       (r) = '0') else sphe_tx_eof_pos(r);
+        sphe_tx_eof_new    (r) <= rx_supkt_eof_reg0        (r) when (sphe_tx_next_propg   (r) = '0') else sphe_tx_eof    (r);
+        sphe_tx_eof_pos_new(r) <= rx_supkt_eof_pos_reg0_arr(r) when (sphe_tx_next_propg   (r) = '0') else sphe_tx_eof_pos(r);
 
-        sphe_tx_length_new (r) <= metains_supkt_hdr_length (r) when (metains_supkt_hdr_reg_vld(r) = '1') else sphe_tx_length (r);
-        sphe_tx_next_new   (r) <= metains_supkt_hdr_next   (r) when (metains_supkt_hdr_reg_vld(r) = '1') else sphe_tx_next   (r);
+        sphe_tx_length_new (r) <= rx_supkt_length_reg0_arr (r) when (rx_supkt_vld_sof_reg0(r) = '1') else sphe_tx_length (r);
+        sphe_tx_next_new   (r) <= rx_supkt_next_reg0_arr   (r) when (rx_supkt_vld_sof_reg0(r) = '1') else sphe_tx_next   (r);
     end generate;
     -- DATA are just propagated through the SUPKT_HDR_EXTRACTOR without any change
     sphe_tx_data_new    <= sphe_tx_data;
-    -- SRC RDY is also just renamed
-    sphe_tx_src_rdy_new <= metains_supkt_src_rdy_reg;
 
-    -- ========================================================================
-    -- Third stage register
-    -- ========================================================================
-
+    -- SRC and DST RDY signals are also just renamed
+    sphe_tx_src_rdy_new <= rx_supkt_src_rdy_reg0;
     sphe_tx_dst_rdy_new <= indv_pkt_dst_rdy;
+
+    -- ========================================================================
+    -- Second stage register
+    -- ========================================================================
+
     process (CLK)
     begin
         if (rising_edge(CLK)) then
