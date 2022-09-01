@@ -43,6 +43,11 @@ entity TCAM2 is
         --     otherwise (false) READ_DATA and READ_MASK are ready in the next clock cycle after request
         OUTPUT_READ_REGS   : boolean := true;
 
+        -- If true, writing a masked bit (mask=0) has two different meanings:
+        --    If the bit is 0, then it is don't care
+        --    But if the bit is 1, then it is UNMATCHABLE!
+        USE_UNMATCHABLE    : boolean := false;
+
         -- FPGA device
         --    available are "7SERIES", "ULTRASCALE", "ARRIA10", "STRATIX10", "AGILEX"
         DEVICE             : string := "ULTRASCALE"
@@ -499,7 +504,11 @@ begin
     -- memory element write data
     mem_wr_data_g : for i in 0 to COLUMNS-1 generate
         masked_cnt(i)  <= wr_cnt and input_wr_mask_reg_aug_arr(i);
-        masked_data(i) <= input_wr_data_reg_aug_arr(i) and input_wr_mask_reg_aug_arr(i);
+        use_unmatchable_g: if USE_UNMATCHABLE = true generate
+            masked_data(i) <= input_wr_data_reg_aug_arr(i);
+        else generate
+            masked_data(i) <= input_wr_data_reg_aug_arr(i) and input_wr_mask_reg_aug_arr(i);
+        end generate;
         mem_wr_data(i) <= '1' when (masked_cnt(i) = masked_data(i)) else '0';
     end generate;
 
