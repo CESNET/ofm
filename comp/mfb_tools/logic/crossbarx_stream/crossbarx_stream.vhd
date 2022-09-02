@@ -473,7 +473,7 @@ begin
     -- FIFOX Multi
     fifoxm_wr_g : for i in MFB_REGIONS-1 downto 0 generate
         rx_buf_ptr_with_discard_arr(i) <= trgen_trans_addr(i) & trgen_trans_discard(i);
-        rx_buf_fifoxm_wr           (i) <= (trgen_trans_vld(i) and trgen_trans_src_rdy) and (not pacp_rx_pkt_afull(0));
+        rx_buf_fifoxm_wr           (i) <= trgen_trans_vld(i) and (not rx_buf_fifoxm_full) and (not pacp_rx_pkt_afull(0));
     end generate;
 
     rx_buf_fifoxm_di <= slv_array_ser(rx_buf_ptr_with_discard_arr);
@@ -494,7 +494,7 @@ begin
 
         DI     => rx_buf_fifoxm_di              ,
         WR     => rx_buf_fifoxm_wr              ,
-        FULL   => open                          ,
+        FULL   => rx_buf_fifoxm_full            ,
 
         DO     => rx_buf_fifoxm_do              ,
         RD     => rx_buf_fifoxm_rd              ,
@@ -628,7 +628,7 @@ begin
         TX_TRANS_DST_RDY   => trgen_trans_dst_rdy
     );
 
-    trgen_trans_dst_rdy <= not pacp_rx_pkt_afull(0);
+    trgen_trans_dst_rdy <= (not pacp_rx_pkt_afull(0)) and (not rx_buf_fifoxm_full);
 
     -- =====================================================================
     --  Packet Planner (Gap counter)
