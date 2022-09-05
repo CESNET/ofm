@@ -5,13 +5,13 @@
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
 
-class sequence_simple_rx_base #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(uvm_mvb::sequence_item #(ITEMS, ITEM_WIDTH));
+class sequence_simple_rx_base #(ITEMS, ITEM_WIDTH) extends  uvm_common::sequence_base #(config_sequence, uvm_mvb::sequence_item #(ITEMS, ITEM_WIDTH));
     `uvm_object_param_utils(uvm_logic_vector_mvb::sequence_simple_rx_base #(ITEMS, ITEM_WIDTH))
     `uvm_declare_p_sequencer(uvm_mvb::sequencer #(ITEMS, ITEM_WIDTH))
 
-    uvm_logic_vector::sequencer #(ITEM_WIDTH) hi_sqr;
-    uvm_logic_vector::sequence_item #(ITEM_WIDTH)    frame;
-    uvm_mvb::sequence_item #(ITEMS, ITEM_WIDTH)      gen;
+    uvm_logic_vector::sequencer #(ITEM_WIDTH)     hi_sqr;
+    uvm_logic_vector::sequence_item #(ITEM_WIDTH) frame;
+    uvm_mvb::sequence_item #(ITEMS, ITEM_WIDTH)   gen;
     string name;
 
     typedef enum {state_last, state_next} state_t;
@@ -28,7 +28,7 @@ class sequence_simple_rx_base #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(uvm_mv
     };
 
     // Constructor - creates new instance of this class
-    function new(string name = "sequence");
+    function new(string name = "sequence_simple_rx_base");
         super.new(name);
         this.name = name;
     endfunction
@@ -41,15 +41,14 @@ class sequence_simple_rx_base #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(uvm_mv
             `uvm_fatal(get_type_name(), "Unable to get configuration object")
         end
         `uvm_info(get_full_name(), $sformatf("%s is running", name), UVM_DEBUG)
-        frame = null;
         req = uvm_mvb::sequence_item #(ITEMS, ITEM_WIDTH)::type_id::create("req");
         gen = uvm_mvb::sequence_item #(ITEMS, ITEM_WIDTH)::type_id::create("gen");
         send_empty();
         req.src_rdy = 0;
         gen.src_rdy = 0;
         state = state_next;
-        while (hl_transactions > 0 || frame != null || state == state_last) begin
-            send(frame);
+        while (hl_transactions > 0 || state == state_last) begin
+            send();
         end
         //Get last response
         get_response(rsp);
@@ -61,7 +60,7 @@ class sequence_simple_rx_base #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(uvm_mv
     endtask
 
     // Method which define how the transaction will look.
-    task send(uvm_logic_vector::sequence_item#(ITEM_WIDTH) frame);
+    task send();
 
         if (p_sequencer.reset_sync.has_been_reset()) begin
             //SETUP RESET
@@ -102,13 +101,146 @@ class sequence_simple_rx_base #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(uvm_mv
 
 endclass
 
+class sequence_rand_rx #(ITEMS, ITEM_WIDTH) extends sequence_simple_rx_base #(ITEMS, ITEM_WIDTH);
+    `uvm_object_param_utils(uvm_logic_vector_mvb::sequence_rand_rx #(ITEMS, ITEM_WIDTH))
+    uvm_common::rand_length   rdy;
+    int unsigned space = 0;
+
+    // Constructor - creates new instance of this class
+    function new(string name = "sequence_rand_rx");
+        super.new(name);
+        rdy = uvm_common::rand_length_rand::new();
+    endfunction
+
+    virtual task create_sequence_item();
+        if (!gen.randomize()) `uvm_fatal(this.get_full_name(), "failed to radnomize");
+
+        gen.vld     = 0;
+        gen.src_rdy = 1'b0;
+
+        for (int i = 0; i < ITEMS; i++) begin
+            if (hl_transactions != 0) begin
+                if (space == 0) begin
+                    hi_sqr.try_next_item(frame);
+                    if (frame != null) begin
+                        gen.src_rdy = 1'b1;
+                        gen.vld[i]  = 1'b1;
+                        gen.data[i] = frame.data;
+                        hi_sqr.item_done();
+                        frame = null;
+                        hl_transactions--;
+
+                        rdy.randomize();
+                        space = rdy.m_value;
+                    end
+                end else begin
+                    space--;
+                end
+            end
+        end
+    endtask
+
+    virtual function void config_set(config_sequence cfg);
+        this.cfg = cfg;
+        rdy.bound_set(cfg.space_size_min, cfg.space_size_max);
+    endfunction
+endclass
+
+
+class sequence_full_speed_rx #(ITEMS, ITEM_WIDTH) extends sequence_simple_rx_base #(ITEMS, ITEM_WIDTH);
+
+    `uvm_object_param_utils(uvm_logic_vector_mvb::sequence_full_speed_rx #(ITEMS, ITEM_WIDTH))
+
+    int unsigned space = 0;
+    // Constructor - creates new instance of this class
+    function new(string name = "sequence_full_speed_rx");
+        super.new(name);
+    endfunction
+
+    virtual task create_sequence_item();
+        if (!gen.randomize()) `uvm_fatal(this.get_full_name(), "failed to radnomize");
+        gen.vld     = 0;
+        gen.src_rdy = 1'b0;
+
+        for (int i = 0; i < ITEMS; i++) begin
+            if (hl_transactions != 0) begin
+                if (space == 0) begin
+                    hi_sqr.try_next_item(frame);
+                    if (frame != null) begin
+                        gen.src_rdy = 1'b1;
+                        gen.vld[i]  = 1'b1;
+                        gen.data[i] = frame.data;
+                        hi_sqr.item_done();
+                        hl_transactions--;
+                        space = cfg.space_size_min;
+                    end
+                end else begin
+                    space--;
+                end
+            end
+        end
+    endtask
+
+    virtual function void config_set(config_sequence cfg);
+        this.cfg = cfg;
+        space = cfg.space_size_min;
+    endfunction
+endclass
+
+
+
+class sequence_stop_rx #(ITEMS, ITEM_WIDTH) extends sequence_simple_rx_base #(ITEMS, ITEM_WIDTH);
+
+    `uvm_object_param_utils(uvm_logic_vector_mvb::sequence_stop_rx #(ITEMS, ITEM_WIDTH))
+
+    // Constructor - creates new instance of this class
+    function new(string name = "sequence_stop_rx");
+        super.new(name);
+    endfunction
+
+    virtual task create_sequence_item();
+        if (!gen.randomize() with {src_rdy == 0;}) `uvm_fatal(this.get_full_name(), "\n\tfailed to radnomize");
+        hl_transactions--;
+    endtask
+
+
+    virtual function void config_set(config_sequence cfg);
+        this.cfg = cfg;
+        hl_transactions_min = (cfg.space_size_min + 100) > cfg.space_size_max ? cfg.space_size_min : (cfg.space_size_max - 100);
+        hl_transactions_max = cfg.space_size_max;
+    endfunction
+endclass
+
+
+//////////////////////////////////////
+// TX LIBRARY
+class sequence_lib_rx#(ITEMS, ITEM_WIDTH) extends uvm_common::sequence_library#(config_sequence, uvm_mvb::sequence_item#(ITEMS, ITEM_WIDTH));
+  `uvm_object_param_utils(uvm_logic_vector_mvb::sequence_lib_rx#(ITEMS, ITEM_WIDTH))
+  `uvm_sequence_library_utils(uvm_logic_vector_mvb::sequence_lib_rx#(ITEMS, ITEM_WIDTH))
+
+    function new(string name = "");
+        super.new(name);
+        init_sequence_library();
+    endfunction
+
+    // subclass can redefine and change run sequences
+    // can be useful in specific tests
+    virtual function void init_sequence();
+        this.add_sequence(sequence_rand_rx #(ITEMS, ITEM_WIDTH)::get_type());
+        this.add_sequence(sequence_full_speed_rx#(ITEMS, ITEM_WIDTH)::get_type());
+        this.add_sequence(sequence_stop_rx#(ITEMS, ITEM_WIDTH)::get_type());
+    endfunction
+endclass
+
+//////////////////////////////////////
+// DEPRECATED PLS DONT USE. 
 class sequence_simple_rx #(ITEMS, ITEM_WIDTH) extends sequence_simple_rx_base #(ITEMS, ITEM_WIDTH);
 
     `uvm_object_param_utils(uvm_logic_vector_mvb::sequence_simple_rx #(ITEMS, ITEM_WIDTH))
 
     // Constructor - creates new instance of this class
-    function new(string name = "sequence");
-        super.new("sequence_simple_rx");
+    function new(string name = "sequence_simple_rx");
+        super.new(name);
     endfunction
 
     virtual task create_sequence_item();
@@ -142,106 +274,3 @@ class sequence_simple_rx #(ITEMS, ITEM_WIDTH) extends sequence_simple_rx_base #(
     endtask
 endclass
 
-
-class sequence_rand_rx #(ITEMS, ITEM_WIDTH) extends sequence_simple_rx_base #(ITEMS, ITEM_WIDTH);
-    `uvm_object_param_utils(uvm_logic_vector_mvb::sequence_rand_rx #(ITEMS, ITEM_WIDTH))
-    uvm_common::rand_rdy rdy;
-
-    // Constructor - creates new instance of this class
-    function new(string name = "sequence");
-        super.new("sequence_full_speed_rx");
-        rdy = uvm_common::rand_rdy_rand::new();
-    endfunction
-
-    virtual task create_sequence_item();
-        if (!gen.randomize()) `uvm_fatal(this.get_full_name(), "failed to radnomize");
-
-        gen.vld     = 0;
-        gen.src_rdy = 1'b0;
-
-        for (int i = 0; i < ITEMS; i++) begin
-            rdy.randomize();
-            if (hl_transactions != 0 && rdy.m_value == 1'b1) begin
-                hi_sqr.try_next_item(frame);
-                if (frame != null) begin
-                    gen.src_rdy = 1'b1;
-                    gen.vld[i]  = 1'b1;
-                    gen.data[i] = frame.data;
-                    hi_sqr.item_done();
-                    frame = null;
-                    hl_transactions--;
-                end
-            end
-        end
-    endtask
-endclass
-
-
-class sequence_full_speed_rx #(ITEMS, ITEM_WIDTH) extends sequence_simple_rx_base #(ITEMS, ITEM_WIDTH);
-
-    `uvm_object_param_utils(uvm_logic_vector_mvb::sequence_full_speed_rx #(ITEMS, ITEM_WIDTH))
-
-    // Constructor - creates new instance of this class
-    function new(string name = "sequence");
-        super.new("sequence_full_speed_rx");
-    endfunction
-
-    virtual task create_sequence_item();
-        if (!gen.randomize()) `uvm_fatal(this.get_full_name(), "failed to radnomize");
-        gen.vld     = 0;
-        gen.src_rdy = 1'b0;
-
-        for (int i = 0; i < ITEMS; i++) begin
-            if (hl_transactions != 0) begin
-                hi_sqr.try_next_item(frame);
-                if (frame != null) begin
-                    gen.src_rdy = 1'b1;
-                    gen.vld[i]  = 1'b1;
-                    gen.data[i] = frame.data;
-                    hi_sqr.item_done();
-                    frame = null;
-                    hl_transactions--;
-                end
-            end
-        end
-    endtask
-endclass
-
-
-
-class sequence_stop_rx #(ITEMS, ITEM_WIDTH) extends sequence_simple_rx_base #(ITEMS, ITEM_WIDTH);
-
-    `uvm_object_param_utils(uvm_logic_vector_mvb::sequence_stop_rx #(ITEMS, ITEM_WIDTH))
-
-    // Constructor - creates new instance of this class
-    function new(string name = "sequence");
-        super.new("sequence_stop_rx");
-    endfunction
-
-    virtual task create_sequence_item();
-        if (!gen.randomize() with {src_rdy == 0;}) `uvm_fatal(this.get_full_name(), "failed to radnomize");
-        hl_transactions--;
-    endtask
-endclass
-
-
-//////////////////////////////////////
-// TX LIBRARY
-class sequence_lib_rx#(ITEMS, ITEM_WIDTH) extends uvm_sequence_library#(uvm_mvb::sequence_item#(ITEMS, ITEM_WIDTH));
-  `uvm_object_param_utils(uvm_logic_vector_mvb::sequence_lib_rx#(ITEMS, ITEM_WIDTH))
-  `uvm_sequence_library_utils(uvm_logic_vector_mvb::sequence_lib_rx#(ITEMS, ITEM_WIDTH))
-
-    function new(string name = "");
-        super.new(name);
-        init_sequence_library();
-    endfunction
-
-    // subclass can redefine and change run sequences
-    // can be useful in specific tests
-    virtual function void init_sequence();
-        this.add_sequence(sequence_rand_rx #(ITEMS, ITEM_WIDTH)::get_type());
-        this.add_sequence(sequence_simple_rx#(ITEMS, ITEM_WIDTH)::get_type());
-        this.add_sequence(sequence_full_speed_rx#(ITEMS, ITEM_WIDTH)::get_type());
-        this.add_sequence(sequence_stop_rx#(ITEMS, ITEM_WIDTH)::get_type());
-    endfunction
-endclass
