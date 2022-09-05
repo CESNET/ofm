@@ -66,7 +66,6 @@ class env #(MFB_DOWN_REGIONS, MFB_DOWN_REG_SIZE, MFB_DOWN_BLOCK_SIZE, MFB_DOWN_I
         m_env_rc_mfb_cfg                = new;
         m_env_rc_mfb_cfg.active         = m_config.active;
         m_env_rc_mfb_cfg.interface_name = m_config.interface_name_mfb;
-        m_env_rc_mfb_cfg.meta_behav     = 1; // meta with sof
 
         m_env_rc_mvb_cfg                = new;
         m_env_rc_mvb_cfg.active         = m_config.active;

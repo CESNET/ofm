@@ -106,7 +106,7 @@ class monitor_logic_vector #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_
     // Analysis por
     uvm_analysis_imp #(uvm_mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH), this_type) analysis_export;
     uvm_reset::sync_terminate reset_sync;
-    int meta_behav;
+    config_item::meta_type meta_behav;
 
     local uvm_logic_vector::sequence_item#(META_WIDTH) hi_tr;
 
@@ -119,11 +119,11 @@ class monitor_logic_vector #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_
     virtual function void write(uvm_mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) tr);
         if (tr.src_rdy && tr.dst_rdy) begin
             for (int i = 0; i<REGIONS; i++) begin
-                if (tr.sof[i] && meta_behav == 1) begin
+                if (tr.sof[i] && meta_behav == config_item::META_SOF) begin
                     hi_tr = uvm_logic_vector::sequence_item#(META_WIDTH)::type_id::create("hi_tr");
                     hi_tr.data = tr.meta[i];
                     analysis_port.write(hi_tr);
-                end else if (tr.eof[i] && meta_behav == 2) begin
+                end else if (tr.eof[i] && meta_behav == config_item::META_EOF) begin
                     hi_tr = uvm_logic_vector::sequence_item#(META_WIDTH)::type_id::create("hi_tr");
                     hi_tr.data = tr.meta[i];
                     analysis_port.write(hi_tr);

@@ -46,7 +46,7 @@ class env#(SEGMENTS, REGIONS, REGION_SIZE) extends uvm_env;
 
         m_env_rx_cfg = new();
         m_env_rx_cfg.active         = UVM_ACTIVE;
-		m_env_rx_cfg.meta_behav     = 2;
+		m_env_rx_cfg.meta_behav     = config_item::META_EOF;
         m_env_rx_cfg.interface_name = "RX_MAC_SEQ_IF";
         m_env_rx_cfg.seq_cfg = new();
         m_env_rx_cfg.seq_cfg.probability_set(100, 100);

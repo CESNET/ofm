@@ -56,9 +56,7 @@ class env #(DMA_MVB_UP_ITEMS, DMA_MFB_UP_REGIONS, MFB_UP_REG_SIZE, MFB_UP_BLOCK_
         // Low level agent
         m_env_up_mfb_cfg                = new;
         m_env_up_mfb_cfg.active         = m_config.active;
-        // m_env_up_mfb_cfg.interface_name = m_config.interface_name_mfb;
         m_env_up_mfb_cfg.interface_name = {m_config.interface_name, $sformatf("_mfb_%d", m_config.port)};
-        m_env_up_mfb_cfg.meta_behav     = 1; // meta with sof
 
         m_env_up_mvb_cfg                = new;
         m_env_up_mvb_cfg.active         = m_config.active;

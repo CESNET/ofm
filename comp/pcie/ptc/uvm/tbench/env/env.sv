@@ -84,7 +84,6 @@ class env #(DMA_MFB_UP_REGIONS, MFB_UP_REGIONS, MFB_UP_REG_SIZE,
         m_config_rq_mfb                       = new;
         m_config_rq_mfb.active                = UVM_ACTIVE;
         m_config_rq_mfb.interface_name        = "vif_rq_mfb";
-        m_config_rq_mfb.meta_behav            = 1;
 
         m_config_rq_mvb                       = new;
         m_config_rq_mvb.active                = UVM_PASSIVE;
@@ -122,7 +121,6 @@ class env #(DMA_MFB_UP_REGIONS, MFB_UP_REGIONS, MFB_UP_REG_SIZE,
             m_config_down_mfb[i]                = new;
             m_config_down_mfb[i].active         = UVM_ACTIVE;
             m_config_down_mfb[i].interface_name = {"vif_down_mfb_", i_string};
-            m_config_down_mfb[i].meta_behav     = 1;
 
             m_config_down_mvb[i]                = new;
             m_config_down_mvb[i].active         = UVM_ACTIVE;

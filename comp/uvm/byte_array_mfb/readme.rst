@@ -74,7 +74,7 @@ Top level of environment contains reset_sync class which is required for reset s
              m_cfg = new();
              m_cfg.active = UVM_ACTIVE;
              m_cfg.interface_name = "MFB_IF";
-             m_cfg.meta_behav     = 1;
+             m_cfg.meta_behav     = config_item::META_SOF;
              m_cfg.cfg = new();
              m_cfg.cfg.space_size_set(128, 1024);
              uvm_config_db#(byte_array_mfb_env::config_item)::set(this, "m_eth", "m_config", m_cfg);

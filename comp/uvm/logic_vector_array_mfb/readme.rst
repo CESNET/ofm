@@ -50,7 +50,7 @@ Variable          Description
 ===============   ======================================================
 active            Set to UVM_ACTIVE if agent is active otherwise UVM_PASSIVE
 interface_name    name of interface under which you can find it in uvm config database
-meta_behave       Moment of Metadata signal is being generated and valid: 1 => valid with the SOF. 2 => valid with the EOF.
+meta_behave       Moment of Metadata signal is being generated and valid: config_item::META_SOF => valid with the SOF. config_item::META_EOF => valid with the EOF.
 seq_cfg           Configure low leve sequence which convert logic_vector_array to mfb words
 ===============   ======================================================
 
@@ -75,7 +75,7 @@ Top level of environment contains reset_sync class which is required for reset s
              m_cfg = new();
              m_cfg.active = UVM_ACTIVE;
              m_cfg.interface_name = "MFB_IF";
-             m_cfg.meta_behav     = 1;
+             m_cfg.meta_behav     = config_item::META_SOF;
              m_cfg.cfg = new();
              m_cfg.cfg.space_size_set(128, 1024);
              uvm_config_db#(logic_vector_array_mfb_env::config_item)::set(this, "m_eth", "m_config", m_cfg);

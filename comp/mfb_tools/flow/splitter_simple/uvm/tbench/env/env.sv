@@ -35,7 +35,7 @@ class env #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH,  META_WIDTH, SPLITTER_
         m_config_rx = new;
         m_config_rx.active = UVM_ACTIVE;
         m_config_rx.interface_name = "vif_rx";
-        m_config_rx.meta_behav = 1;
+        m_config_rx.meta_behav = uvm_logic_vector_array_mfb::config_item::META_SOF;
         uvm_config_db #(uvm_logic_vector_array_mfb::config_item)::set(this, "m_env_rx", "m_config", m_config_rx);
         m_env_rx = uvm_logic_vector_array_mfb::env_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, $clog2(SPLITTER_OUTPUTS) +META_WIDTH)::type_id::create("m_env_rx", this);
 
@@ -46,7 +46,7 @@ class env #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH,  META_WIDTH, SPLITTER_
             m_config_tx[i] = new;
             m_config_tx[i].active = UVM_ACTIVE;
             m_config_tx[i].interface_name = {"vif_tx_", i_string};
-            m_config_tx[i].meta_behav = 1;
+            m_config_tx[i].meta_behav = uvm_logic_vector_array_mfb::config_item::META_SOF;
             uvm_config_db #(uvm_logic_vector_array_mfb::config_item)::set(this, {"m_env_tx_", i_string}, "m_config", m_config_tx[i]);
             m_env_tx[i]    = uvm_logic_vector_array_mfb::env_tx#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::type_id::create({"m_env_tx_", i_string}, this);
         end
