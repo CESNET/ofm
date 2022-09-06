@@ -19,7 +19,7 @@ set COMPONENTS [list \
 ]
 
 # Disable Code Coverage
-set SIM_FLAGS(CODE_COVERAGE) "true"
+set SIM_FLAGS(CODE_COVERAGE) false
 
 
 # Global include file for compilation
@@ -30,8 +30,8 @@ puts "Std Arith Warnings - Disabled"
 set StdArithNoWarnings 1
 nb_sim_run
 
-# Reports
-# Uncomment lines below to generate html coce coverage report
-# coverage save -assert -directive -cvg -code bcefst -verbose actual.ucdb
-# vcover merge final.ucdb final.ucdb actual.ucdb
-# vcover report -html -htmldir cov_html -instance /testbench/DUT_U -source -details -assert -directive -cvg -code bcefst -verbose -threshL 50 -threshH 90 final.ucdb
+
+if {$SIM_FLAGS(CODE_COVERAGE)} {
+    coverage save  -assert -directive -cvg -code bcefst -verbose actual.ucdb
+}
+quit

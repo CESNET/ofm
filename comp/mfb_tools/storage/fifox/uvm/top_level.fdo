@@ -18,7 +18,7 @@ set COMPONENTS [list \
 ]
 
 # Disable Code Coverage
-set SIM_FLAGS(CODE_COVERAGE) "false"
+set SIM_FLAGS(CODE_COVERAGE) false
 set SIM_FLAGS(EXTRA_VFLAGS) "+UVM_TESTNAME=test::ex_test +UVM_VERBOSITY=UVM_NONE -uvmcontrol=all +UVM_MAX_QUIT_COUNT=1"
 
 # Global include file for compilation
@@ -39,5 +39,5 @@ if {$SIM_FLAGS(CODE_COVERAGE)} {
     # vcover merge final.ucdb final.ucdb actual.ucdb
     # vcover report -html -output cov_html -details -threshL 50 -threshH 90 final.ucdb
 }
-#
+
 quit

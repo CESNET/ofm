@@ -18,7 +18,7 @@ set COMPONENTS [list \
 ]
 
 # Disable Code Coverage
-set SIM_FLAGS(CODE_COVERAGE) "false"
+set SIM_FLAGS(CODE_COVERAGE) false
 
 set SIM_FLAGS(EXTRA_VFLAGS) "+UVM_TESTNAME=test::ex_test +UVM_VERBOSITY=UVM_MEDIUM -uvmcontrol=all +UVM_MAX_QUIT_COUNT=1"
 
@@ -39,8 +39,6 @@ nb_sim_run
 # Uncomment lines below to generate html coce coverage report
 if {$SIM_FLAGS(CODE_COVERAGE)} {
     coverage save -instance /testbench/DUT_U -assert -directive -cvg -code bcefst -verbose actual.ucdb
-    vcover merge final.ucdb final.ucdb actual.ucdb
-    # vcover report -html -output cov_html -details -threshL 50 -threshH 90 final.ucdb
 }
 
 quit
