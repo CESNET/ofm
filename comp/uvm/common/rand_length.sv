@@ -184,7 +184,7 @@ class length_bounds_long extends length_bounds;
         if (max < (min + 300)) begin
             return 0;
         end
-        bound_max = max - 300;
+        bound_max = max;
         return 1;
     endfunction
 endclass
