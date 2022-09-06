@@ -15,7 +15,12 @@ class mfb_to_lbus_seqv_lib #(RX_REGIONS, RX_REGION_SIZE, RX_BLOCK_SIZE, META_WID
   endfunction
 
     virtual function void init_sequence(uvm_byte_array_mfb::config_sequence param_cfg = null);
-        super.init_sequence(param_cfg);
+        //super.init_sequence(param_cfg);
+        if (param_cfg == null) begin
+            this.cfg = new();
+        end else begin
+            this.cfg = param_cfg;
+        end
         this.add_sequence(uvm_byte_array_mfb::seqv_no_inframe_gap_rx #(RX_REGIONS, RX_REGION_SIZE, RX_BLOCK_SIZE, META_WIDTH)::get_type());
         this.add_sequence(uvm_byte_array_mfb::sequence_full_speed_rx #(RX_REGIONS, RX_REGION_SIZE, RX_BLOCK_SIZE, META_WIDTH)::get_type());
     endfunction

@@ -4,11 +4,11 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause
 
-class monitor_byte_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extends uvm_logic_vector_array::monitor #(ITEM_WIDTH);
-    `uvm_component_param_utils(uvm_logic_vector_array_mfb::monitor_byte_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH))
+class monitor_logic_vector_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extends uvm_logic_vector_array::monitor #(ITEM_WIDTH);
+    `uvm_component_param_utils(uvm_logic_vector_array_mfb::monitor_logic_vector_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH))
 
     // Analysis port
-    typedef monitor_byte_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) this_type;
+    typedef monitor_logic_vector_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) this_type;
     uvm_analysis_imp #(uvm_mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH), this_type) analysis_export;
 
     uvm_reset::sync_terminate reset_sync;
@@ -83,7 +83,7 @@ class monitor_byte_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WI
                             `uvm_error(this.get_full_name(), "\n\tEOF has been set before frame heve been started. SOF havent been set before this EOF")
                         end else begin
                             hi_tr.data = data;
-                            //if (this.get_full_name() == "uvm_test_top.m_env.m_env_rq_mfb.m_byte_array_agent.m_monitor") begin
+                            //if (this.get_full_name() == "uvm_test_top.m_env.m_env_rq_mfb.m_logic_vector_array_agent.m_monitor") begin
                             //    $write("MFB MON TR \n");
                             //    `uvm_info(this.get_full_name(), hi_tr.convert2string() ,UVM_LOW)
                             //end

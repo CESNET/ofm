@@ -59,13 +59,13 @@ class env #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH,  META_WIDTH, SPLITTER_
     function void connect_phase(uvm_phase phase);
         m_reset.analysis_port.connect(sc.analysis_imp_reset);
 
-        m_env_rx.m_byte_array_agent.analysis_port.connect(sc.input_data);
-        m_env_rx.m_logic_vector_agent.analysis_port.connect(sc.input_meta);
+        m_env_rx.analysis_port_data.connect(sc.input_data);
+        m_env_rx.analysis_port_meta.connect(sc.input_meta);
         m_reset.sync_connect(m_env_rx.reset_sync);
 
         for (int i = 0; i < SPLITTER_OUTPUTS; i++) begin
-            m_env_tx[i].m_byte_array_agent.analysis_port.connect(sc.out_data[i]);
-            m_env_tx[i].m_logic_vector_agent.analysis_port.connect(sc.out_meta[i]);
+            m_env_tx[i].analysis_port_data.connect(sc.out_data[i]);
+            m_env_tx[i].analysis_port_meta.connect(sc.out_meta[i]);
             m_reset.sync_connect(m_env_tx[i].reset_sync);
         end
     endfunction

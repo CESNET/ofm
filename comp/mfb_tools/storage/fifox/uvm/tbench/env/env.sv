@@ -62,11 +62,11 @@ class env #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extends uv
     // Connect agent's ports with ports from the scoreboard.
     function void connect_phase(uvm_phase phase);
 
-        m_env_rx.m_byte_array_agent.analysis_port.connect(sc.input_data);
-        m_env_rx.m_logic_vector_agent.analysis_port.connect(sc.input_meta);
+        m_env_rx.analysis_port_data.connect(sc.input_data);
+        m_env_rx.analysis_port_meta.connect(sc.input_meta);
 
-        m_env_tx.m_byte_array_agent.analysis_port.connect(sc.out_data);
-        m_env_tx.m_logic_vector_agent.analysis_port.connect(sc.out_meta);
+        m_env_tx.analysis_port_data.connect(sc.out_data);
+        m_env_tx.analysis_port_meta.connect(sc.out_meta);
 
         m_reset.sync_connect(m_env_rx.reset_sync);
         m_reset.sync_connect(m_env_tx.reset_sync);
