@@ -141,7 +141,12 @@ sequence_lib_rx                  randomly run pick and run previous sequences
             init_sequence_library();
         endfunction
 
-        virtual function void init_sequence();
+        virtual function void init_sequence(config_sequence param_cfg = null);
+            if (param_cfg == null) begin
+                this.cfg = new();
+            end else begin
+                this.cfg = param_cfg;
+            end
             this.add_sequence(byte_array_mfb_env::sequence_full_speed_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::get_type());
         endfunction
     endclass

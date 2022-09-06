@@ -14,7 +14,8 @@ class mfb_to_lbus_seqv_lib #(RX_REGIONS, RX_REGION_SIZE, RX_BLOCK_SIZE, META_WID
     init_sequence_library();
   endfunction
 
-    virtual function void init_sequence();
+    virtual function void init_sequence(uvm_byte_array_mfb::config_sequence param_cfg = null);
+        super.init_sequence(param_cfg);
         this.add_sequence(uvm_byte_array_mfb::seqv_no_inframe_gap_rx #(RX_REGIONS, RX_REGION_SIZE, RX_BLOCK_SIZE, META_WIDTH)::get_type());
         this.add_sequence(uvm_byte_array_mfb::sequence_full_speed_rx #(RX_REGIONS, RX_REGION_SIZE, RX_BLOCK_SIZE, META_WIDTH)::get_type());
     endfunction
@@ -63,7 +64,7 @@ class env #(RX_REGIONS, RX_REGION_SIZE, RX_BLOCK_SIZE, TX_REGIONS, TX_REGION_SIZ
         m_config_rx                  = new;
         m_config_rx.active           = UVM_ACTIVE;
         m_config_rx.interface_name   = "vif_rx";
-        m_config_rx.meta_behav       = config_item::META_SOF;
+        m_config_rx.meta_behav       = uvm_byte_array_mfb::config_item::META_SOF;
 
         uvm_config_db #(uvm_byte_array_mfb::config_item)::set(this, "m_env_rx", "m_config", m_config_rx);
         m_env_rx = uvm_byte_array_mfb::env_rx#(RX_REGIONS, RX_REGION_SIZE, RX_BLOCK_SIZE,0)::type_id::create("m_env_rx", this);
@@ -71,7 +72,7 @@ class env #(RX_REGIONS, RX_REGION_SIZE, RX_BLOCK_SIZE, TX_REGIONS, TX_REGION_SIZ
         m_config_tx                  = new;
         m_config_tx.active           = UVM_ACTIVE;
         m_config_tx.interface_name   = "vif_tx";
-        m_config_tx.meta_behav       = config_item::META_SOF;
+        m_config_tx.meta_behav       = uvm_byte_array_mfb::config_item::META_SOF;
 
         uvm_config_db #(uvm_byte_array_mfb::config_item)::set(this, "m_env_tx", "m_config", m_config_tx);
         m_env_tx = uvm_byte_array_mfb::env_tx#(TX_REGIONS, TX_REGION_SIZE, TX_BLOCK_SIZE, 0)::type_id::create("m_env_tx", this);

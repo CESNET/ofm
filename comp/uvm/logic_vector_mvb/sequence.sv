@@ -64,7 +64,7 @@ class sequence_simple_rx_base #(ITEMS, ITEM_WIDTH) extends  uvm_common::sequence
 
         if (p_sequencer.reset_sync.has_been_reset()) begin
             //SETUP RESET
-            gen.randomize() with {src_rdy == 0;};
+            assert(gen.randomize() with {src_rdy == 0;});
             state = state_next;
             get_response(rsp);
         end else begin
@@ -130,7 +130,7 @@ class sequence_rand_rx #(ITEMS, ITEM_WIDTH) extends sequence_simple_rx_base #(IT
                         frame = null;
                         hl_transactions--;
 
-                        rdy.randomize();
+                        assert(rdy.randomize());
                         space = rdy.m_value;
                     end
                 end else begin
@@ -225,7 +225,8 @@ class sequence_lib_rx#(ITEMS, ITEM_WIDTH) extends uvm_common::sequence_library#(
 
     // subclass can redefine and change run sequences
     // can be useful in specific tests
-    virtual function void init_sequence();
+    virtual function void init_sequence(config_sequence param_cfg = null);
+        super.init_sequence(param_cfg);
         this.add_sequence(sequence_rand_rx #(ITEMS, ITEM_WIDTH)::get_type());
         this.add_sequence(sequence_full_speed_rx#(ITEMS, ITEM_WIDTH)::get_type());
         this.add_sequence(sequence_stop_rx#(ITEMS, ITEM_WIDTH)::get_type());

@@ -46,7 +46,7 @@ class env#(SEGMENTS, REGIONS, REGION_SIZE) extends uvm_env;
         m_env_tx_cfg = new();
         m_env_tx_cfg.active         = UVM_ACTIVE;
         m_env_tx_cfg.interface_name = "TX_MAC_SEQ_IF";
-        m_env_tx_cfg.meta_behav     = config_item::META_EOF;
+        m_env_tx_cfg.meta_behav     = uvm_byte_array_mfb::config_item::META_EOF;
         uvm_config_db#(uvm_byte_array_mfb::config_item)::set(this, "m_env_tx", "m_config", m_env_tx_cfg);
         m_env_tx = uvm_byte_array_mfb::env_tx  #(REGIONS, REGION_SIZE, 8, 1)::type_id::create("m_env_tx", this);
 

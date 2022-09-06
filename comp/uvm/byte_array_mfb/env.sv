@@ -101,10 +101,9 @@ class env_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends uvm_env;
             uvm_byte_array_mfb::sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) mfb_seq;
 
             mfb_seq = uvm_byte_array_mfb::sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH)::type_id::create("mfb_seq", this);
-            mfb_seq.cfg = m_config.seq_cfg;
             mfb_seq.min_random_count = 20;
             mfb_seq.max_random_count = 100;
-            mfb_seq.init_sequence();
+            mfb_seq.init_sequence(m_config.seq_cfg);
 
             forever begin
                 //mfb_seq.set_starting_phase(phase);

@@ -266,7 +266,8 @@ class sequence_lib#(ITEM_WIDTH) extends uvm_common::sequence_library#(config_seq
 
     // subclass can redefine and change run sequences
     // can be useful in specific tests
-    virtual function void init_sequence();
+    virtual function void init_sequence(config_sequence param_cfg = null);
+        super.init_sequence(param_cfg);
         this.add_sequence(sequence_simple#(ITEM_WIDTH)::get_type());
         this.add_sequence(sequence_simple_const#(ITEM_WIDTH)::get_type());
         this.add_sequence(sequence_simple_gauss#(ITEM_WIDTH)::get_type());

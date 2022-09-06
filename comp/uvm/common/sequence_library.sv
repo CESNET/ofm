@@ -21,7 +21,12 @@ class sequence_library#(type CONFIG_TYPE, REQ=uvm_sequence_item, RSP=REQ) extend
 
     // subclass can redefine and change run sequences
     // can be useful in specific tests
-    virtual function void init_sequence();
+    virtual function void init_sequence(CONFIG_TYPE param_cfg = null);
+        if (param_cfg == null) begin
+            this.cfg = new();
+        end else begin
+            this.cfg = param_cfg;
+        end
     endfunction
 
     task body();

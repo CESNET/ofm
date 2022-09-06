@@ -17,7 +17,6 @@ set COMPONENTS [list \
 
 # Enable Code Coverage
 set SIM_FLAGS(CODE_COVERAGE) "false"
-
 set SIM_FLAGS(EXTRA_VFLAGS) "+UVM_TESTNAME=test::base +UVM_VERBOSITY=UVM_NONE -uvmcontrol=all +UVM_MAX_QUIT_COUNT=1"
 
 # Global include file for compilation
@@ -30,7 +29,6 @@ set NumericStdNoWarnings 1
 
 #run verification
 nb_sim_run
-
 
 # Reports
 if {$SIM_FLAGS(CODE_COVERAGE)} {
