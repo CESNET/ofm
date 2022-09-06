@@ -239,9 +239,18 @@ endclass
 
 class sequence_burst_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extends sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH);
     `uvm_object_param_utils(uvm_logic_vector_array_mfb::sequence_burst_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH))
-    uvm_common::rand_length   rand_burst_size;
-    uvm_common::rand_length   rand_space_size;
-    uvm_common::rand_length   rand_rdy_length;
+    uvm_common::rand_length   rand_burst_size; //burst set to 1
+    uvm_common::rand_length   rand_space_size; //burst set to 0
+
+    rand int unsigned rdy_probability_min;
+    rand int unsigned rdy_probability_max;
+
+    constraint c_probability {
+        rdy_probability_min dist {[0:29] :/ 10, [30:49] :/ 20, [50:79] :/ 50, [80:99] :/ 20};
+        rdy_probability_max dist {[0:29] :/ 5 , [30:49] :/ 15, [50:79] :/ 30, [80:99] :/ 50};
+        rdy_probability_min <= rdy_probability_max;
+    }
+
 
     typedef enum{SPACE, PACKET} fsm_t;
     fsm_t burst_state = SPACE;
@@ -264,10 +273,6 @@ class sequence_burst_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WID
         bound_space_size = new();
         bound_space_size.bound_set(100, 700);
         rand_space_size = bound_space_size; //uvm_common::rand_length_rand::new(rand_bound_space);
-
-        bound_rdy = new();
-        bound_rdy.bound_set(0, 100);
-        rand_rdy_length = bound_rdy; // uvm_common::rand_length_rand::new(rand_bound);
     endfunction
 
     /////////
@@ -280,20 +285,39 @@ class sequence_burst_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WID
         gen.eof     = '0;
 
 
+        if (size == 0) begin
+            case (burst_state)
+                SPACE : begin
+                    assert(rand_burst_size.randomize());
+                    size = rand_burst_size.m_value;
+                    burst_state = PACKET;
+                end
+
+                PACKET : begin
+                    if (cfg.rdy_probability_min < 100) begin
+                        assert(rand_space_size.randomize());
+                        size = rand_space_size.m_value;
+                        burst_state = SPACE;
+                    end else begin
+                        assert(rand_burst_size.randomize());
+                        size = rand_burst_size.m_value;
+                        burst_state = PACKET;
+                    end
+                end
+            endcase
+        end else begin
+           size--;
+        end
+
+
         for (int unsigned it = 0; it < REGIONS; it++) begin
             if (burst_state == SPACE) begin
                 gen.data[it] = 'x;
-                if (size == 0) begin
-                    assert(rand_burst_size.randomize());
-                    size = rand_burst_size.m_value * REGION_SIZE;
-                    burst_state = PACKET;
-                end
             end else if (burst_state == PACKET) begin
                 int unsigned index = 0;
                 while (index < REGION_SIZE && burst_state == PACKET) begin
                     if (state_packet == state_packet_space_new) begin
-                        assert(rand_rdy_length.randomize());
-                        space_size = rand_rdy_length.m_value;
+                        space_size   = cfg.space_size_min + $urandom_range(0, REGION_SIZE);
                         state_packet = state_packet_space;
                     end
 
@@ -342,17 +366,6 @@ class sequence_burst_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WID
                             gen.eof_pos[it] = index*BLOCK_SIZE + loop_end-1;
                             item_done();
                             state_packet = state_packet_space_new;
-                            if (size == 0) begin
-                                if (cfg.rdy_probability_min < 100) begin
-                                    assert(rand_space_size.randomize());
-                                    size = rand_space_size.m_value  * REGION_SIZE;
-                                    burst_state = SPACE;
-                                end else begin
-                                    assert(rand_burst_size.randomize());
-                                    size = rand_burst_size.m_value * REGION_SIZE;
-                                    burst_state = PACKET;
-                                end
-                            end
                         end
                     end
                     index++;
@@ -360,18 +373,19 @@ class sequence_burst_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WID
                 end
             //end if burst_packet == PACKET
             end
-
-            //decrement burst size
-            if (size != 0) begin
-                size--;
-            end
         end
     endtask
 
     task body;
-        rand_rdy_length.bound_set(cfg.space_size_min, cfg.space_size_max);
-        rand_burst_size.bound_set(cfg.rdy_probability_min*10, cfg.rdy_probability_max*10);
-        rand_space_size.bound_set((100 - cfg.rdy_probability_max) * 10,  (100 - cfg.rdy_probability_min) * 10);
+        const int unsigned coeficient = REGION_SIZE;
+        int unsigned probability_min;
+        int unsigned probability_max;
+
+        probability_min = cfg.rdy_probability_min + ((cfg.rdy_probability_max - cfg.rdy_probability_min)*rdy_probability_min)/100;
+        probability_max = cfg.rdy_probability_min + ((cfg.rdy_probability_max - cfg.rdy_probability_min)*rdy_probability_max)/100;
+
+        rand_burst_size.bound_set(probability_min*coeficient, probability_max*coeficient);
+        rand_space_size.bound_set((100 - probability_max) *coeficient,  (100 - probability_min) *coeficient);
 
         super.body();
     endtask
@@ -563,14 +577,20 @@ endclass
 class sequence_stop_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extends sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH);
     `uvm_object_param_utils(uvm_logic_vector_array_mfb::sequence_stop_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH))
 
+    int unsigned hl_transactions_step;
+
     constraint c_hl_transations_stop {
-        hl_transactions dist {[hl_transactions_min:hl_transactions_min + 100] :/ 50, [hl_transactions_max-100:hl_transactions_max] :/ 50, [hl_transactions_min:hl_transactions_max] :/100};
+        hl_transactions dist {[hl_transactions_min:(hl_transactions_min + hl_transactions_step)] :/ 60,
+                              [(hl_transactions_min+hl_transactions_step)  :(hl_transactions_max - hl_transactions_step)] :/ 30,
+                              [(hl_transactions_max - hl_transactions_step):hl_transactions_max] :/10};
     }
 
     function new (string name = "sequence_stop_rx");
         super.new(name);
         hl_transactions_min = 10;
-        hl_transactions_max = 1000;
+        hl_transactions_max = 300;
+
+        hl_transactions_step = (hl_transactions_max - hl_transactions_min)/10;
     endfunction
 
     /////////
