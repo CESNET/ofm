@@ -1583,9 +1583,12 @@ generate coverage.
 
             m_root                          = uvm_root::get();           //get root component
             m_root.finish_on_completion     = 0;    //now finish on end. required stop command after run_test
-
             //stop reporting ILLEGALNAME when sequence in sequence library have been started
             m_root.set_report_id_action_tier("ILLEGALNAME",UVM_NO_ACTION);
+
+            // Stop reporting for us unusefull information
+            uvm_config_db#(int)            ::set(null, "", "recording_detail", 0);
+            uvm_config_db#(uvm_bitstream_t)::set(null, "", "recording_detail", 0);
 
             run_test();
             $stop(2);

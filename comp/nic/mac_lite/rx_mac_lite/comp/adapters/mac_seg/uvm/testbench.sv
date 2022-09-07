@@ -66,10 +66,21 @@ module testbench;
 
 
     initial begin
+        uvm_root m_root;
+
         uvm_config_db#(virtual reset_if)::set(null, "", "RESET_IF", reset);
         uvm_config_db#(virtual intel_mac_seg_if #(test::SEGMENTS))::set(null, "", "RX_MAC_SEQ_IF", rx_mac_seg);
         uvm_config_db#(virtual mfb_if #(test::REGIONS, test::REGION_SIZE, 8, 8, 1))::set(null, "", "TX_MAC_SEQ_IF", tx_mac_seg);
+
+        m_root = uvm_root::get();
+        m_root.set_report_id_action_hier("ILLEGALNAME",UVM_NO_ACTION);
+        m_root.finish_on_completion = 0;
+
+        uvm_config_db#(int)            ::set(null, "", "recording_detail", 0);
+        uvm_config_db#(uvm_bitstream_t)::set(null, "", "recording_detail", 0);
+
         run_test();
+        $stop(2);
     end
 
 endmodule
