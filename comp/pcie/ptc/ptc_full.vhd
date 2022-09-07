@@ -756,20 +756,14 @@ begin
 
         mfb2pcie_axi_i : entity work.PTC_MFB2PCIE_AXI
         generic map(
-            DEVICE           => DEVICE           ,
-
             MFB_REGIONS      => MFB_UP_REGIONS   ,
             MFB_REGION_SIZE  => MFB_UP_REG_SIZE  ,
             MFB_BLOCK_SIZE   => MFB_UP_BLOCK_SIZE,
             MFB_ITEM_WIDTH   => MFB_UP_ITEM_WIDTH,
 
-            AXI_DATA_WIDTH   => MFB_UP_WIDTH     ,
             AXI_RQUSER_WIDTH => RQ_TUSER_WIDTH
         )
         port map(
-            CLK     => CLK  ,
-            RESET   => RESET,
-
             RX_MFB_DATA    => up_mfb_hdr_merge_out_data   ,
             RX_MFB_SOF     => up_mfb_hdr_merge_out_sof    ,
             RX_MFB_EOF     => up_mfb_hdr_merge_out_eof    ,

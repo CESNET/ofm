@@ -437,7 +437,7 @@ begin
     assert (ENDPOINT_TYPE = "H_TILE" OR ENDPOINT_TYPE = "P_TILE" OR ENDPOINT_TYPE = "R_TILE" OR IS_INTEL_DEV = False)
         report "MTC: unsupported ENDPOINT_TYPE (Intel FPGA only)!" severity failure;
 
-    assert (AXI_CQUSER_WIDTH = 85 or AXI_CQUSER_WIDTH = 183)
+    assert (AXI_CQUSER_WIDTH = 85 or AXI_CQUSER_WIDTH = 88 or AXI_CQUSER_WIDTH = 183)
         report "MTC: doesn't supports specified CQUSER_WIDTH"
         severity failure;
 
@@ -507,7 +507,7 @@ begin
         cq_axi_user_in <= cq_axi_pipe_dout(AXI_CQUSER_WIDTH+1-1 downto 1);
         cq_axi_last_in <= cq_axi_pipe_dout(0);
 
-        axi_256b_g: if (AXI_CQUSER_WIDTH = 85) generate
+        axi_256b_g: if (AXI_CQUSER_WIDTH = 88 or AXI_CQUSER_WIDTH = 85) generate
             cq_axi_cq_hdr_first_be  <= cq_axi_user_in(3 downto 0);
             cq_axi_cq_hdr_last_be   <= cq_axi_user_in(7 downto 4);
             cq_axi_user_sop         <= cq_axi_user_in(40);

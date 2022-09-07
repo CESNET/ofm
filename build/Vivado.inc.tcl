@@ -318,7 +318,9 @@ proc SynthesizeDesignRun {synth_flags} {
     }
 
     # Export to file
-    write_edif -force $SYNTH_FLAGS(OUTPUT)
+    if {[info exist SYNTH_FLAGS(WRITE_EDIF)] } {
+        write_edif -force $SYNTH_FLAGS(OUTPUT)
+    }
 }
 
 # -----------------------------------------------------------------------------

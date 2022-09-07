@@ -32,6 +32,8 @@ entity MVB_MERGE_ITEMS is
         RX0_FIFO_EN    : boolean := False;
         -- Depth of FIFOs on inputs
         FIFO_DEPTH     : natural := 32;
+        -- Enable output register on TX MVB
+        OUTPUT_REG     : boolean := False;
         -- FPGA device string (required for FIFOs)
         DEVICE         : string := "STRATIX10"
     );
@@ -183,10 +185,30 @@ begin
         tx_data_arr(i) <= tx_data1_arr(i) & rx0_data_arr(i);
     end generate;
 
-    TX_DATA     <= slv_array_ser(tx_data_arr,RX0_ITEMS,TX_ITEM_WIDTH);
-    TX_DATA0    <= fifo_rx0_data;
-    TX_DATA1    <= slv_array_ser(tx_data1_arr,RX0_ITEMS,RX1_ITEM_WIDTH);
-    TX_VLD      <= fifo_rx0_vld;
-    TX_SRC_RDY  <= fifo_rx0_src_rdy and not must_wait;
+    out_reg_on_g: if OUTPUT_REG generate
+        process (CLK)
+        begin
+            if (rising_edge(CLK)) then
+                if (TX_DST_RDY = '1') then
+                    TX_DATA    <= slv_array_ser(tx_data_arr,RX0_ITEMS,TX_ITEM_WIDTH);
+                    TX_DATA0   <= fifo_rx0_data;
+                    TX_DATA1   <= slv_array_ser(tx_data1_arr,RX0_ITEMS,RX1_ITEM_WIDTH);
+                    TX_VLD     <= fifo_rx0_vld;
+                    TX_SRC_RDY <= fifo_rx0_src_rdy and not must_wait;
+                end if;
+                if (RESET = '1') then
+                    TX_SRC_RDY <= '0';
+                end if;
+            end if;
+        end process;
+    end generate;
+
+    out_reg_off_g: if not OUTPUT_REG generate
+        TX_DATA    <= slv_array_ser(tx_data_arr,RX0_ITEMS,TX_ITEM_WIDTH);
+        TX_DATA0   <= fifo_rx0_data;
+        TX_DATA1   <= slv_array_ser(tx_data1_arr,RX0_ITEMS,RX1_ITEM_WIDTH);
+        TX_VLD     <= fifo_rx0_vld;
+        TX_SRC_RDY <= fifo_rx0_src_rdy and not must_wait;
+    end generate;
 
 end architecture;
