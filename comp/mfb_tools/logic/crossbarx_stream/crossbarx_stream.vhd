@@ -3,7 +3,6 @@
 -- Author(s): Daniel Kondys <xkondy00@vutbr.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
--- SPDX-License-Identifier: BSD-3-Clause
 
 library IEEE;
 use IEEE.std_logic_1164.all;
@@ -12,40 +11,48 @@ use IEEE.numeric_std.all;
 use work.math_pack.all;
 use work.type_pack.all;
 
+
 -- =========================================================================
 --  Description
 -- =========================================================================
--- This unit can discard packets,
---     insert gaps between packets and
---     extend or shrink them from the front or from the back.
 
+-- This unit can:
+--
+-- - discard packets,
+-- - insert gaps between packets and
+-- - extend and/or shrink them from the front and/or from the back.
+--
+-- The CrossbarX component transfers the transactions from the Input buffer
+-- to the Output buffer according to the instructions provided by the Packet
+-- Planner component.
+-- The instructions consist of a transaction's length, its address in the
+-- Input buffer, and in the Output buffer.
 entity CROSSBARX_STREAM is
 generic(
     -- Clock settings for 1) CrossbarX and 2) Output buffer
     -- 1) CrossbarX
-    -- Transfer data on double frequency Clock
+    -- Transfer data on double frequency Clock.
     CX_USE_CLK2           : boolean := true;
-    -- Transfer data on arbitrary frequency Clock
+    -- Transfer data on arbitrary frequency Clock.
     -- (Overrides CX_USE_CLK2 when set to True.)
     -- See entity of CrossbarX for more detail.
     CX_USE_CLK_ARB        : boolean := false;
     -- 2) Output buffer
-    -- Clock signal relations
-    -- Set True when RX_CLK has the same period as TX_CLK
+    -- Set True when RX_CLK has the same period as TX_CLK.
     OBUF_META_EQ_OUTPUT   : boolean := false;
-    -- set True when not using CLK2 or CLK_ARB and 
-    --               RX_CLK has the same period as TX_CLK
+    -- Set True when not using CLK2 or CLK_ARB and 
+    -- RX_CLK has the same period as TX_CLK.
     OBUF_INPUT_EQ_OUTPUT  : boolean := false;
 
-    -- Number of regions within a data word, must be power of 2.
+    -- Number of Regions within a data word, must be power of 2.
     MFB_REGIONS           : natural := 4;
-    -- Region size (in blocks).
+    -- Region size (in Blocks).
     MFB_REGION_SIZE       : natural := 8;
-    -- Block size (in items).
+    -- Block size (in Items).
     MFB_BLOCK_SIZE        : natural := 8;
     -- Item width (in bits), must be 8.
     MFB_ITEM_WIDTH        : natural := 8;
-
+    -- Width of MFB metadata (in bits).
     MFB_META_WIDTH        : natural := 1;
 
     -- Maximum packet size in MFB ITEMS.
@@ -78,13 +85,14 @@ generic(
     -- In MFB ITEMS, negative number for packet shrinking.
     F_EXTEND_END_SIZE     : integer := -5;
 
-    -- FPGA device name.
-    DEVICE                : string := "STRATIX10" -- ULTRASCALE, STRATIX10, ..
+    -- FPGA device name: ULTRASCALE, STRATIX10, ..
+    DEVICE                : string := "STRATIX10"
 );
 port(
     -- =====================================================================
     --  Clock and Reset
     -- =====================================================================
+
     RX_CLK         : in  std_logic;
     -- Double frequency and same source as RX_CLK
     -- Only used when CX_USE_CLK2==True and CX_USE_CLK_ARB==False
@@ -99,9 +107,12 @@ port(
     -- =====================================================================
     --  RX MFB STREAM
     -- =====================================================================
+
     RX_MFB_DATA    : in  std_logic_vector(MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH-1 downto 0);
-    RX_MFB_META    : in  std_logic_vector(MFB_REGIONS*MFB_META_WIDTH-1 downto 0) := (others => '0'); -- valid with EOF
-    RX_MFB_DISCARD : in  std_logic_vector(MFB_REGIONS-1 downto 0); -- valid with EOF
+    -- valid with EOF
+    RX_MFB_META    : in  std_logic_vector(MFB_REGIONS*MFB_META_WIDTH-1 downto 0) := (others => '0');
+    -- valid with EOF
+    RX_MFB_DISCARD : in  std_logic_vector(MFB_REGIONS-1 downto 0);
     RX_MFB_SOF_POS : in  std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE))-1 downto 0);
     RX_MFB_EOF_POS : in  std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE))-1 downto 0);
     RX_MFB_SOF     : in  std_logic_vector(MFB_REGIONS-1 downto 0);
@@ -112,8 +123,10 @@ port(
     -- =====================================================================
     --  TX MFB STREAM 
     -- =====================================================================
+
     TX_MFB_DATA    : out std_logic_vector(MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH-1 downto 0);
-    TX_MFB_META    : out std_logic_vector(MFB_REGIONS*MFB_META_WIDTH-1 downto 0); -- valid with EOF
+    -- valid with EOF
+    TX_MFB_META    : out std_logic_vector(MFB_REGIONS*MFB_META_WIDTH-1 downto 0);
     TX_MFB_SOF_POS : out std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE))-1 downto 0);
     TX_MFB_EOF_POS : out std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE))-1 downto 0);
     TX_MFB_SOF     : out std_logic_vector(MFB_REGIONS-1 downto 0);
