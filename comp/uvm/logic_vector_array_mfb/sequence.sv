@@ -377,7 +377,7 @@ class sequence_burst_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WID
     endtask
 
     task body;
-        const int unsigned coeficient = REGION_SIZE;
+        const int unsigned coeficient = REGION_SIZE; //This is just some magic number. which modified length of burst.
         int unsigned probability_min;
         int unsigned probability_max;
 

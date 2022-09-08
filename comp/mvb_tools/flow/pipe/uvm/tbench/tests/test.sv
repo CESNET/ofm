@@ -66,9 +66,8 @@ class ex_test extends uvm_test;
         h_seq_rx.transaction_count_max = 250000;
 
         h_seq_tx = uvm_mvb::sequence_lib_tx #(ITEMS, ITEM_WIDTH)::type_id::create("h_seq_tx");
-        h_seq_tx.cfg = new();
-        h_seq_tx.cfg.probability_set(60, 100);
         h_seq_tx.init_sequence();
+        h_seq_tx.cfg.probability_set(60, 100);
         h_seq_tx.min_random_count = 200;
         h_seq_tx.max_random_count = 500;
 

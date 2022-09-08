@@ -10,7 +10,7 @@
 
 class config_sequence extends uvm_object;
     // configuration of probability of rdy signal in percentige
-    int unsigned rdy_probability_min = 0;   // inside [0:100:ta]
+    int unsigned rdy_probability_min = 0;   // inside [0:100]
     int unsigned rdy_probability_max = 100; // inside [0:100]
 
     function void probability_set(int unsigned min, int unsigned max);
