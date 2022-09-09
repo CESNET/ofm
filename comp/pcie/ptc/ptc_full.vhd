@@ -1241,7 +1241,7 @@ begin
             REGION_SIZE         => MFB_DOWN_REG_SIZE          ,
             BLOCK_SIZE          => MFB_DOWN_BLOCK_SIZE        ,
             ITEM_WIDTH          => MFB_DOWN_ITEM_WIDTH        ,
-            FIFO_DEPTH          => 2*(MRRS*4*8)/MFB_DOWN_WIDTH, -- Must fit at least 1 MRRS transaction + possible gap
+            FIFO_DEPTH          => 4*(MRRS*4*8)/MFB_DOWN_WIDTH, -- Must fit at least 1 MRRS transaction + possible gap
             RAM_TYPE            => "AUTO"                     ,
             DEVICE              => DEVICE                     ,
             ALMOST_FULL_OFFSET  => 0                          ,
