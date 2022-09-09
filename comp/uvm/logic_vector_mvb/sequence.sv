@@ -163,7 +163,7 @@ class sequence_burst_rx #(ITEMS, ITEM_WIDTH) extends sequence_simple_rx_base #(I
     int unsigned space;
 
     // modified length of burst.
-    rand int unsigned burst_percentige;
+    rand int unsigned burst_percentage;
     rand int unsigned burst_length_min;
     rand int unsigned burst_length_max;
 
@@ -172,7 +172,7 @@ class sequence_burst_rx #(ITEMS, ITEM_WIDTH) extends sequence_simple_rx_base #(I
         burst_length_max inside {[10:100]};
         burst_length_min <= burst_length_max;
 
-        burst_percentige dist {[0:29] :/ 10, [30:49] :/ 20, [50:79] :/ 40, [80:100] :/ 30};
+        burst_percentage dist {[0:29] :/ 10, [30:49] :/ 20, [50:79] :/ 40, [80:100] :/ 30};
     }
 
 
@@ -239,8 +239,8 @@ class sequence_burst_rx #(ITEMS, ITEM_WIDTH) extends sequence_simple_rx_base #(I
         const real burst_max = real'(burst_length_max*(cfg.space_size_min + 1))/100;
 
         //BURST SIZE
-        rand_burst_length.bound_set(burst_min*burst_percentige, burst_max*burst_percentige);
-        rand_space_length.bound_set(burst_min*(100 - burst_percentige), burst_max*(100 - burst_percentige));
+        rand_burst_length.bound_set(burst_min*burst_percentage, burst_max*burst_percentage);
+        rand_space_length.bound_set(burst_min*(100 - burst_percentage), burst_max*(100 - burst_percentage));
 
         super.body();
     endtask

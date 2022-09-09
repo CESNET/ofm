@@ -13,38 +13,35 @@ logic_vector_mvb environment
 This environment convert logic_vector transaction to mvb transactions.
 
 
-The environment is configured by four parameters: For more information see :ref:`mvb documentation<mvb_bus>`.
+The environment is configured by these four parameters: For more information see :ref:`mvb documentation<mvb_bus>`.
 
-============== =
-Parameter
-============== =
-ITEMS
-ITEMS_WIDTH
-============== =
+- ITEMS
+- ITEMS_WIDTH
 
 Top sequencers and sequences
 ------------------------------
-In RX directin there is one sequencer which generates logic_vector transactions. Transaction are going to be ordered with random delay put into mvb transactions.
+In the RX direction, there is one sequencer that generates logic_vector transactions. The generated transactions will be randomly ordered and then converted to MVB transactions.
 
-In the TX direction there is one sequencer of type mvb::sequencer #() which generate DST_RDY signal.
+In the TX direction, there is one sequencer of type mvb::sequencer #() which generates the DST_RDY signal.
 
-Both environment send logic_vector transaction throught analysis_export.
+Both environments send logic_vector transactions through the analysis_export.
 
 
 Configuration
 ------------------------------
 
-config class have 3 variables.
+The config class has three variables.
 
 ===============   ======================================================
 Variable          Description
 ===============   ======================================================
-active            Set to UVM_ACTIVE if agent is active otherwise UVM_PASSIVE
-interface_name    name of interface under which you can find it in uvm config database
-seq_cfg           Configure low level sequence which convert logic_vector to mvb words
+active            Set to UVM_ACTIVE if the agent is active, otherwise set it to UVM_PASSIVE.
+interface_name    The name of the interface under which you can find it in uvm config database.
+seq_cfg           Configure a low-level sequence that converts logic_vector to MVB words.
 ===============   ======================================================
 
-Top level of environment contains reset_sync class which is required for reset synchronization. The example shows how to connect the reset to logic_vector_array_mfb environment and basic configuration.
+The top level environment contains the reset_sync class, which is required for reset synchronization. The example shows how to connect the reset to the logic_vector_array_mfb environment and its basic configuration.
+
 
 .. code-block:: systemverilog
 
@@ -81,35 +78,36 @@ Top level of environment contains reset_sync class which is required for reset s
 Low sequence configuration
 --------------------------
 
-configuration object `config_sequence` contain one function.
+The configuration object `config_sequence` contains one function.
 
 =========================  ======================  ======================================================
 Variable                   Type                    Description
 =========================  ======================  ======================================================
-space_size_set(min, max)   [bytes]                 set min and max space between two logic_vector items in mvb transaction.
+space_size_set(min, max)   [bytes]                 Set min and max space between two logic_vector items in a MVB transaction.
 =========================  ======================  ======================================================
 
 
 RX Inner sequences
 ------------------------------
 
-For the RX direction exists one base sequence class "sequence_simple_rx_base" which simplifies creating others sequences. It processes the reset signal and exports virtual
-function create_sequence_item. In this function can child create mvb::sequence_item what they like.
+For the RX direction, there is one basic sequence class called "sequence_simple_rx_base", which simplifies creating other sequences. It processes the reset signal and exports the create_sequence_item virtual
+function. In this function, a child can create a mvb::sequence_item as they like.
 
-The environment have three sequences. Table below describes them. In default RX env runs sequence_lib_rx.
+The environment has three sequences. The table below describes them. In the default state, the RX env runs sequence_lib_rx.
 
 ==========================       ======================================================
 Sequence                         Description
 ==========================       ======================================================
-sequence_rand_rx                 base random sequence. This sequence is behavioral very variably.
-sequence_burst_rx                Operate in burst mode.
-sequence_full_speed_rx           if sequence get data then send them as quicky as possible.
-sequence_stop_rx                 Sequence dosnt send any data. Sumulate no data on interface.
-sequence_lib_rx                  randomly run pick and run previous sequences
+sequence_rand_rx                 A basic random sequence. This sequence behaves very variably.
+sequence_burst_rx                The sequence sends data in bursts.
+sequence_full_speed_rx           The sequence gets data and then sends them as quickly as possible.
+sequence_stop_rx                 This sequence doesn't send any data. There are no data on the interface.
+sequence_lib_rx                  Repetitively Randomly choose one of the sequences above and run it.
 ==========================       ======================================================
 
 
-    An example below shows how to change the inner sequence to test maximal throughput. Environment run the sequence_full_speed_rx instead of the sequence_lib_rx.
+    The example below shows how to change the inner sequence to test the maximum throughput. The environment runs the sequence_full_speed_rx sequence instead of the sequence_lib_rx.
+
 
 .. code-block:: systemverilog
 
