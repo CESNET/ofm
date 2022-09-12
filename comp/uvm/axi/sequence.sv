@@ -1,15 +1,15 @@
-//-- sequence.sv: Mvb sequence
-//-- Copyright (C) 2021 CESNET z. s. p. o.
-//-- Author(s): Radek Iša <isa@cesnet.cz>
+//-- sequence.sv: AXI sequence
+//-- Copyright (C) 2022 CESNET z. s. p. o.
+//-- Author(s): Daniel Kříž <xkrizd01@vutbr.cz>
 
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
-class sequence_simple_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extends uvm_common::sequence_base #(config_sequence, sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH));
-    `uvm_object_param_utils(uvm_mfb::sequence_simple_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH))
+class sequence_simple_tx #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends uvm_common::sequence_base #(config_sequence, uvm_axi::sequence_item #(DATA_WIDTH, TUSER_WIDTH, REGIONS));
+    `uvm_object_param_utils(uvm_axi::sequence_simple_tx #(DATA_WIDTH, TUSER_WIDTH, REGIONS))
 
     // ------------------------------------------------------------------------
     // Variables
-    sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) req;
+    sequence_item #(DATA_WIDTH, TUSER_WIDTH, REGIONS) req;
     uvm_common::rand_rdy          rdy;
 
     int unsigned max_transaction_count = 100;
@@ -27,7 +27,7 @@ class sequence_simple_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WI
     task send_frame();
         start_item(req);
         void'(rdy.randomize());
-        void'(req.randomize() with {dst_rdy == rdy.m_value;});
+        void'(req.randomize() with {tready == rdy.m_value;});
         finish_item(req);
         get_response(rsp);
     endtask
@@ -39,7 +39,7 @@ class sequence_simple_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WI
         rdy.bound_set(cfg.rdy_probability_min, cfg.rdy_probability_max);
 
         // Generate transaction_count transactions
-        req = sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::type_id::create("req");
+        req = sequence_item #(DATA_WIDTH, TUSER_WIDTH, REGIONS)::type_id::create("req");
         repeat(transaction_count) begin
             // Create a request for sequence item
             send_frame();
@@ -47,12 +47,12 @@ class sequence_simple_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WI
     endtask
 endclass
 
-class sequence_full_speed_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extends uvm_common::sequence_base #(config_sequence, sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH));
-    `uvm_object_param_utils(uvm_mfb::sequence_full_speed_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH))
+class sequence_full_speed_tx #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends uvm_common::sequence_base #(config_sequence, sequence_item #(DATA_WIDTH, TUSER_WIDTH, REGIONS));
+    `uvm_object_param_utils(uvm_axi::sequence_full_speed_tx #(DATA_WIDTH, TUSER_WIDTH, REGIONS))
 
     // ------------------------------------------------------------------------
     // Variables
-    sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) req;
+    sequence_item #(DATA_WIDTH, TUSER_WIDTH, REGIONS) req;
 
     int unsigned max_transaction_count = 100;
     int unsigned min_transaction_count = 10;
@@ -67,7 +67,7 @@ class sequence_full_speed_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, MET
 
     task send_frame();
         start_item(req);
-        void'(req.randomize() with {dst_rdy == 1'b1;});
+        void'(req.randomize() with {tready == 1'b1;});
         finish_item(req);
         get_response(rsp);
     endtask
@@ -77,7 +77,7 @@ class sequence_full_speed_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, MET
     // Generates transactions
     task body;
         // Generate transaction_count transactions
-        req = sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::type_id::create("req");
+        req = sequence_item #(DATA_WIDTH, TUSER_WIDTH, REGIONS)::type_id::create("req");
         repeat(transaction_count) begin
             // Create a request for sequence item
             send_frame();
@@ -85,12 +85,12 @@ class sequence_full_speed_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, MET
     endtask
 endclass
 
-class sequence_stop_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extends uvm_common::sequence_base #(config_sequence, sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH));
-    `uvm_object_param_utils(uvm_mfb::sequence_stop_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH))
+class sequence_stop_tx #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends uvm_common::sequence_base #(config_sequence, sequence_item #(DATA_WIDTH, TUSER_WIDTH, REGIONS));
+    `uvm_object_param_utils(uvm_axi::sequence_stop_tx #(DATA_WIDTH, TUSER_WIDTH, REGIONS))
 
     // ------------------------------------------------------------------------
     // Variables
-    sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) req;
+    sequence_item #(DATA_WIDTH, TUSER_WIDTH, REGIONS) req;
 
     int unsigned max_transaction_count = 50;
     int unsigned min_transaction_count = 10;
@@ -105,7 +105,7 @@ class sequence_stop_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDT
 
     task send_frame();
         start_item(req);
-        void'(req.randomize() with {dst_rdy == 1'b0;});
+        void'(req.randomize() with {tready == 1'b0;});
         finish_item(req);
         get_response(rsp);
     endtask
@@ -115,7 +115,7 @@ class sequence_stop_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDT
     // Generates transactions
     task body;
         // Generate transaction_count transactions
-        req = sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::type_id::create("req");
+        req = sequence_item #(DATA_WIDTH, TUSER_WIDTH, REGIONS)::type_id::create("req");
         repeat(transaction_count) begin
             // Create a request for sequence item
             send_frame();
@@ -126,9 +126,9 @@ endclass
 
 /////////////////////////////////////////////////////////////////////////
 // SEQUENCE LIBRARY RX
-class sequence_lib_tx#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extends uvm_common::sequence_library#(config_sequence, uvm_mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH));
-  `uvm_object_param_utils(uvm_mfb::sequence_lib_tx#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH))
-  `uvm_sequence_library_utils(uvm_mfb::sequence_lib_tx#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH))
+class sequence_lib_tx#(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends uvm_common::sequence_library#(config_sequence, uvm_axi::sequence_item #(DATA_WIDTH, TUSER_WIDTH, REGIONS));
+  `uvm_object_param_utils(uvm_axi::sequence_lib_tx#(DATA_WIDTH, TUSER_WIDTH, REGIONS))
+  `uvm_sequence_library_utils(uvm_axi::sequence_lib_tx#(DATA_WIDTH, TUSER_WIDTH, REGIONS))
 
   function new(string name = "sequence_lib_tx");
     super.new(name);
@@ -138,9 +138,9 @@ class sequence_lib_tx#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)
     // subclass can redefine and change run sequences
     // can be useful in specific tests
     virtual function void init_sequence();
-        this.add_sequence(uvm_mfb::sequence_simple_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::get_type());
-        this.add_sequence(uvm_mfb::sequence_full_speed_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::get_type());
-        this.add_sequence(uvm_mfb::sequence_stop_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::get_type());
+        this.add_sequence(uvm_axi::sequence_simple_tx #(DATA_WIDTH, TUSER_WIDTH, REGIONS)::get_type());
+        this.add_sequence(uvm_axi::sequence_full_speed_tx #(DATA_WIDTH, TUSER_WIDTH, REGIONS)::get_type());
+        this.add_sequence(uvm_axi::sequence_stop_tx #(DATA_WIDTH, TUSER_WIDTH, REGIONS)::get_type());
     endfunction
 endclass
 
