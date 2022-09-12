@@ -1,8 +1,9 @@
-//-- config.sv: Configuration object for mfb env
-//-- Copyright (C) 2021 CESNET z. s. p. o.
-//-- Author(s): Tomáš Beneš <xbenes55@stud.fit.vutbr.cz>
+//-- config.sv: Configuration object for AXI env
+//-- Copyright (C) 2022 CESNET z. s. p. o.
+//-- Author(s): Daniel Kříž <xkrizd01@vutbr.cz>
 
 //-- SPDX-License-Identifier: BSD-3-Clause 
+
 `ifndef AXI_CONFIG_SV
 `define AXI_CONFIG_SV
 
