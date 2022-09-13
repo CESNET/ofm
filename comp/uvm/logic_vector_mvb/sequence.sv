@@ -47,16 +47,11 @@ class sequence_simple_rx_base #(ITEMS, ITEM_WIDTH) extends  uvm_common::sequence
         req.src_rdy = 0;
         gen.src_rdy = 0;
         state = state_next;
-        while (hl_transactions > 0 || state == state_last) begin
+        while (hl_transactions > 0 || state == state_last || gen.src_rdy == 1'b1) begin
             send();
         end
         //Get last response
         get_response(rsp);
-        while (rsp.src_rdy && !rsp.dst_rdy) begin
-            start_item(req);
-            finish_item(req);
-            get_response(rsp);
-        end
     endtask
 
     // Method which define how the transaction will look.
