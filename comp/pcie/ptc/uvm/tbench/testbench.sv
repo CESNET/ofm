@@ -26,8 +26,7 @@ module testbench;
     mvb_if #(MFB_UP_REGIONS, PCIE_UPHDR_WIDTH)                                                                      RQ_MVB             (CLK);
     mvb_if #(MFB_UP_REGIONS, PCIE_PREFIX_WIDTH)                                                                     RQ_PREFIX_MVB      (CLK);
 
-    mfb_if #(MFB_DOWN_REGIONS, MFB_DOWN_REG_SIZE, MFB_DOWN_BLOCK_SIZE, MFB_DOWN_ITEM_WIDTH, META_WIDTH)             RC_MFB             (CLK);
-    mvb_if #(MFB_DOWN_REGIONS, PCIE_DOWNHDR_WIDTH)                                                                  RC_MVB             (CLK);
+    mfb_if #(MFB_DOWN_REGIONS, MFB_DOWN_REG_SIZE, MFB_DOWN_BLOCK_SIZE, MFB_DOWN_ITEM_WIDTH, PCIE_DOWNHDR_WIDTH)     RC_MFB             (CLK);
     mvb_if #(MFB_DOWN_REGIONS, PCIE_PREFIX_WIDTH)                                                                   RC_PREFIX_MVB      (CLK);
 
     mfb_if #(DMA_MFB_DOWN_REGIONS, MFB_DOWN_REG_SIZE, MFB_DOWN_BLOCK_SIZE, MFB_DOWN_ITEM_WIDTH, META_WIDTH)         DOWN_MFB[DMA_PORTS](CLK_DMA);
@@ -68,8 +67,7 @@ module testbench;
         uvm_config_db#(virtual mvb_if #(MFB_UP_REGIONS, PCIE_UPHDR_WIDTH))::set(null, "", "vif_rq_mvb", RQ_MVB);
         uvm_config_db#(virtual mvb_if #(MFB_UP_REGIONS, PCIE_PREFIX_WIDTH))::set(null, "", "vif_rq_prefix_mvb", RQ_PREFIX_MVB);
 
-        uvm_config_db#(virtual mfb_if #(MFB_DOWN_REGIONS, MFB_DOWN_REG_SIZE, MFB_DOWN_BLOCK_SIZE, MFB_DOWN_ITEM_WIDTH, META_WIDTH))::set(null, "", "vif_rc_mfb", RC_MFB);
-        uvm_config_db#(virtual mvb_if #(MFB_DOWN_REGIONS, PCIE_DOWNHDR_WIDTH))::set(null, "", "vif_rc_mvb", RC_MVB);
+        uvm_config_db#(virtual mfb_if #(MFB_DOWN_REGIONS, MFB_DOWN_REG_SIZE, MFB_DOWN_BLOCK_SIZE, MFB_DOWN_ITEM_WIDTH, PCIE_DOWNHDR_WIDTH))::set(null, "", "vif_rc_mfb", RC_MFB);
         uvm_config_db#(virtual mvb_if #(MFB_DOWN_REGIONS, PCIE_PREFIX_WIDTH))::set(null, "", "vif_rc_prefix_mvb", RC_PREFIX_MVB);
 
         for (int i = 0; i < DMA_PORTS; i++) begin
@@ -107,7 +105,6 @@ module testbench;
         .RQ_MVB        (RQ_MVB),
         .RQ_PREFIX_MVB (RQ_PREFIX_MVB),
         .RC_MFB        (RC_MFB),
-        .RC_MVB        (RC_MVB),
         .RC_PREFIX_MVB (RC_PREFIX_MVB),
         .DOWN_MFB      (DOWN_MFB),
         .DOWN_MVB      (DOWN_MVB)
@@ -142,8 +139,7 @@ module testbench;
         .rq_mvb_vif   (RQ_MVB),
         .down_mfb_vif (DOWN_MFB),
         .down_mvb_vif (DOWN_MVB),
-        .rc_mfb_vif   (RC_MFB),
-        .rc_mvb_vif   (RC_MVB)
+        .rc_mfb_vif   (RC_MFB)
     );
 
 endmodule

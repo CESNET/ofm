@@ -213,7 +213,7 @@ class down_model #(DMA_PORTS, PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH) extends uvm
     
     // Model inputs
     uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item #(32))           model_rc_mfb_in;
-    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(PCIE_DOWNHDR_WIDTH)) model_rc_mvb_in;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(PCIE_DOWNHDR_WIDTH)) model_rc_meta_in;
     uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(PCIE_PREFIX_WIDTH))  model_rc_prefix_mvb_in;
 
 
@@ -225,7 +225,7 @@ class down_model #(DMA_PORTS, PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH) extends uvm
         super.new(name, parent);
 
         model_rc_mfb_in         = new("model_rc_mfb_in",         this);
-        model_rc_mvb_in         = new("model_rc_mvb_in",         this);
+        model_rc_meta_in        = new("model_rc_meta_in",         this);
         model_rc_prefix_mvb_in  = new("model_rc_prefix_mvb_in",  this);
 
         for (int unsigned it = 0; it < DMA_PORTS; it++) begin
@@ -241,7 +241,7 @@ class down_model #(DMA_PORTS, PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH) extends uvm
     task run_phase(uvm_phase phase);
 
         uvm_logic_vector_array::sequence_item #(32)           tr_rc_mfb_in;
-        uvm_logic_vector::sequence_item #(PCIE_DOWNHDR_WIDTH) tr_rc_mvb_in;
+        uvm_logic_vector::sequence_item #(PCIE_DOWNHDR_WIDTH) tr_rc_meta_in;
         //uvm_logic_vector::sequence_item #(MFB_DOWN_REGIONS) tr_rc_prefix_mvb_in;
 
         uvm_logic_vector_array::sequence_item #(32)           tr_down_mfb_out;
@@ -252,13 +252,13 @@ class down_model #(DMA_PORTS, PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH) extends uvm
             tr_down_mvb_out = uvm_logic_vector::sequence_item #(sv_dma_bus_pack::DMA_DOWNHDR_WIDTH)::type_id::create("tr_down_mvb_out");
 
             model_rc_mfb_in.get(tr_rc_mfb_in);
-            model_rc_mvb_in.get(tr_rc_mvb_in);
+            model_rc_meta_in.get(tr_rc_meta_in);
 
             tr_down_mfb_out = tr_rc_mfb_in;
-            tr_down_mvb_out.data = {8'b00000000, tr_rc_mvb_in.data[90-1 : 82], 1'b1, tr_rc_mvb_in.data[10-1 :0]};
+            tr_down_mvb_out.data = {8'b00000000, tr_rc_meta_in.data[90-1 : 82], 1'b1, tr_rc_meta_in.data[10-1 :0]};
 
-            model_down_mfb_out[tr_rc_mvb_in.data[(PCIE_DOWNHDR_WIDTH-16)]].write(tr_down_mfb_out);
-            model_down_mvb_out[tr_rc_mvb_in.data[(PCIE_DOWNHDR_WIDTH-16)]].write(tr_down_mvb_out);
+            model_down_mfb_out[tr_rc_meta_in.data[(PCIE_DOWNHDR_WIDTH-16)]].write(tr_down_mfb_out);
+            model_down_mvb_out[tr_rc_meta_in.data[(PCIE_DOWNHDR_WIDTH-16)]].write(tr_down_mvb_out);
         end
     endtask
 endclass

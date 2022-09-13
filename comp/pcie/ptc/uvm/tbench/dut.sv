@@ -20,7 +20,6 @@ module DUT (
     //reset_if.dut    RST             //,
     // DOWNSTREAM
     mfb_if.dut_rx   RC_MFB             ,
-    mvb_if.dut_rx   RC_MVB             ,
     mvb_if.dut_rx   RC_PREFIX_MVB      ,
     mfb_if.dut_tx   DOWN_MFB[DMA_PORTS],
     mvb_if.dut_tx   DOWN_MVB[DMA_PORTS]
@@ -57,15 +56,9 @@ module DUT (
     logic [DMA_PORTS-1:0]                                                                        down_mvb_dst_rdy;
     logic [DMA_MVB_DOWN_ITEMS*sv_dma_bus_pack::DMA_DOWNHDR_WIDTH-1 : 0]                          down_mvb_data     [DMA_PORTS-1:0];
     logic [DMA_MVB_DOWN_ITEMS-1 : 0]                                                             down_mvb_vld      [DMA_PORTS-1:0];
-    logic [MFB_DOWN_REGIONS-1 : 0]                                                               rc_mvb_vld;
     logic [UP_SOF_POS_WIDTH -1:0]                                                                rq_mfb_sof_pos;
     logic [DOWN_SOF_POS_WIDTH -1:0]                                                              rc_mfb_sof_pos;
 
-    generate
-        for (genvar i = 0; i < MFB_DOWN_REGIONS; i++) begin
-            assign rc_mvb_vld[i] = RC_MVB.VLD[i] && RC_MVB.SRC_RDY;
-        end
-    endgenerate
     generate
         for (genvar i = 0; i < DMA_PORTS; i++) begin
             assign DOWN_MFB[i].DATA    = down_mfb_data[i];
@@ -106,7 +99,6 @@ module DUT (
     assign RQ_MVB.DST_RDY      = RQ_MFB.DST_RDY;
     assign RQ_MFB.SOF_POS      = rq_mfb_sof_pos;
 
-    assign RC_MVB.DST_RDY      = RC_MFB.DST_RDY && RC_MFB.SRC_RDY;
     if ((DMA_MFB_DOWN_REGIONS*$clog2(MFB_DOWN_REG_SIZE)) == 0) begin
         assign rc_mfb_sof_pos = '0;
     end else
@@ -220,9 +212,9 @@ module DUT (
         // Used in Intel DEVICEs with P_TILE Endpoint type
         //-------------------------------------------------------------------------
 
-        .RC_MVB_HDR_DATA    (RC_MVB.DATA),
+        .RC_MVB_HDR_DATA    (RC_MFB.META),
         .RC_MVB_PREFIX_DATA ()           ,
-        .RC_MVB_VLD         (rc_mvb_vld) ,
+        .RC_MVB_VLD         (RC_MFB.SOF) ,
 
         //-------------------------------------------------------------------------
         // Input from PCIe Endpoint (Requester Completion Interface (RC))
