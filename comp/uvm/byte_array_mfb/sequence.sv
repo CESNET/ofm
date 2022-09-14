@@ -47,7 +47,7 @@ class sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) ex
 
     function void item_done();
         hl_sqr.m_data.item_done();
-        if (META_WIDTH != 0) begin
+        if (hl_sqr.meta_behav != config_item::META_NONE && META_WIDTH != 0) begin
             hl_sqr.m_meta.item_done();
         end
         data = null;
@@ -59,7 +59,7 @@ class sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) ex
             hl_sqr.m_data.try_next_item(data);
             data_index = 0;
             if (data != null) begin
-                if (META_WIDTH != 0) begin
+                if (hl_sqr.meta_behav != config_item::META_NONE && META_WIDTH != 0) begin
                     hl_sqr.m_meta.get_next_item(meta);
                 end
 
@@ -197,7 +197,7 @@ class sequence_simple_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends
 
                     gen.sof[it]     = 1'b1;
                     gen.sof_pos[it] = index;
-                    if (hl_sqr.meta_behav == 1 && META_WIDTH != 0) begin
+                    if (hl_sqr.meta_behav == config_item::META_SOF && META_WIDTH != 0) begin
                         gen.meta[it] = meta.data;
                     end
                     state_packet = state_packet_data;
@@ -214,7 +214,7 @@ class sequence_simple_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends
 
                     // End of packet
                     if (data.data.size() <= data_index) begin
-                        if (hl_sqr.meta_behav == 2 && META_WIDTH != 0) begin
+                        if (hl_sqr.meta_behav == config_item::META_EOF && META_WIDTH != 0) begin
                             gen.meta[it] = meta.data;
                         end
                         gen.eof[it]     = 1'b1;
@@ -318,7 +318,7 @@ class sequence_burst_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends 
 
                         gen.sof[it]     = 1'b1;
                         gen.sof_pos[it] = index;
-                        if (hl_sqr.meta_behav == 1 && META_WIDTH != 0) begin
+                        if (hl_sqr.meta_behav == config_item::META_SOF && META_WIDTH != 0) begin
                             gen.meta[it] = meta.data;
                         end
                         state_packet = state_packet_data;
@@ -335,7 +335,7 @@ class sequence_burst_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends 
 
                         // End of packet
                         if (data.data.size() <= data_index) begin
-                            if (hl_sqr.meta_behav == 2 && META_WIDTH != 0) begin
+                            if (hl_sqr.meta_behav == config_item::META_EOF && META_WIDTH != 0) begin
                                 gen.meta[it] = meta.data;
                             end
                             gen.eof[it]     = 1'b1;
@@ -441,7 +441,7 @@ class sequence_position_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) exten
 
                     gen.sof[it]     = 1'b1;
                     gen.sof_pos[it] = index;
-                    if (hl_sqr.meta_behav == 1 && META_WIDTH != 0) begin
+                    if (hl_sqr.meta_behav == config_item::META_SOF && META_WIDTH != 0) begin
                         gen.meta[it] = meta.data;
                     end
                     state_packet = state_packet_data;
@@ -458,7 +458,7 @@ class sequence_position_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) exten
 
                     // End of packet
                     if (data.data.size() <= data_index) begin
-                        if (hl_sqr.meta_behav == 2 && META_WIDTH != 0) begin
+                        if (hl_sqr.meta_behav == config_item::META_EOF && META_WIDTH != 0) begin
                             gen.meta[it] = meta.data;
                         end
                         gen.eof[it]     = 1'b1;
@@ -527,7 +527,7 @@ class sequence_full_speed_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) ext
 
                     gen.sof[it]     = 1'b1;
                     gen.sof_pos[it] = index;
-                    if (hl_sqr.meta_behav == 1 && META_WIDTH != 0) begin
+                    if (hl_sqr.meta_behav == config_item::META_SOF && META_WIDTH != 0) begin
                         gen.meta[it] = meta.data;
                     end
                     state_packet = state_packet_data;
@@ -544,7 +544,7 @@ class sequence_full_speed_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) ext
 
                     // End of packet
                     if (data.data.size() <= data_index) begin
-                        if (hl_sqr.meta_behav == 2 && META_WIDTH != 0) begin
+                        if (hl_sqr.meta_behav == config_item::META_EOF && META_WIDTH != 0) begin
                             gen.meta[it] = meta.data;
                         end
                         gen.eof[it]     = 1'b1;
@@ -612,7 +612,7 @@ class seqv_no_inframe_gap_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) ext
 
                     gen.sof[it]     = 1'b1;
                     gen.sof_pos[it] = index;
-                    if (hl_sqr.meta_behav == 1 && META_WIDTH != 0) begin
+                    if (hl_sqr.meta_behav == config_item::META_SOF && META_WIDTH != 0) begin
                         gen.meta[it] = meta.data;
                     end
                     state_packet = state_packet_data;
@@ -629,7 +629,7 @@ class seqv_no_inframe_gap_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) ext
 
                     // End of packet
                     if (data.data.size() <= data_index) begin
-                        if (hl_sqr.meta_behav == 2 && META_WIDTH != 0) begin
+                        if (hl_sqr.meta_behav == config_item::META_EOF && META_WIDTH != 0) begin
                             gen.meta[it] = meta.data;
                         end
                         gen.eof[it]     = 1'b1;
@@ -691,7 +691,8 @@ class sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends uvm
 
     // subclass can redefine and change run sequences
     // can be useful in specific tests
-    virtual function void init_sequence();
+    virtual function void init_sequence(config_sequence param_cfg = null);
+        super.init_sequence(param_cfg);
         this.add_sequence(uvm_byte_array_mfb::sequence_simple_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH)::get_type());
         this.add_sequence(uvm_byte_array_mfb::sequence_full_speed_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH)::get_type());
         this.add_sequence(uvm_byte_array_mfb::sequence_stop_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH)::get_type());

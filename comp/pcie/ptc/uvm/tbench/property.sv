@@ -4,6 +4,8 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
+`include "uvm_macros.svh"
+import uvm_pkg::*;
 
 module ptc_property #(DMA_MFB_UP_REGIONS, MFB_UP_REG_SIZE, MFB_UP_BLOCK_SIZE, MFB_UP_ITEM_WIDTH,
                       DMA_MVB_UP_ITEMS, MFB_UP_REGIONS, PCIE_UPHDR_WIDTH, 
@@ -18,9 +20,20 @@ module ptc_property #(DMA_MFB_UP_REGIONS, MFB_UP_REG_SIZE, MFB_UP_BLOCK_SIZE, MF
         mfb_if rc_mfb_vif,
         mvb_if up_mvb_vif [DMA_PORTS],
         mvb_if rq_mvb_vif,
-        mvb_if down_mvb_vif [DMA_PORTS],
-        mvb_if rc_mvb_vif
+        mvb_if down_mvb_vif [DMA_PORTS]
     );
+    string module_name = "";
+    logic START = 1'b1;
+
+    ///////////////////
+    // Start check properties after first clock
+    initial begin
+        $sformat(module_name, "%m");
+        @(posedge rq_mvb_vif.CLK)
+        #(10ps)
+        START = 1'b0;
+    end
+
     for (genvar dma_port = 0; dma_port < DMA_PORTS; dma_port++) begin
         mfb_property #(
             .REGIONS      (DMA_MFB_UP_REGIONS),
@@ -98,13 +111,18 @@ module ptc_property #(DMA_MFB_UP_REGIONS, MFB_UP_REG_SIZE, MFB_UP_BLOCK_SIZE, MF
         .vif   (rc_mfb_vif)
     );
 
-    mvb_property #(
-        .ITEMS      (MFB_DOWN_REGIONS),
-        .ITEM_WIDTH (PCIE_DOWNHDR_WIDTH)
-    )
-    rc_mvb_prop (
-        .RESET (RESET),
-        .vif   (rc_mvb_vif)
-    );
+    // This property check if MFB SOF is same as MVB VLD
+    property sof_with_vld(int unsigned region);
+        @(posedge rq_mvb_vif.CLK)
+        disable iff(RESET || START)
+        $rose(rq_mfb_vif.SOF[region]) |-> (rq_mfb_vif.SOF[region] == rq_mvb_vif.VLD[region]);
+    endproperty
+
+    for(genvar it = 0; it < MFB_UP_REGIONS; it++) begin
+        assert property (sof_with_vld(it))
+            else begin
+                `uvm_error(module_name, "\n\tMVB interface: MFB SOF is not same as MVB VLD.");
+            end
+    end
 
 endmodule

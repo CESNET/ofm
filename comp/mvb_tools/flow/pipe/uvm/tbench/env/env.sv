@@ -39,6 +39,9 @@ class env #(ITEMS, ITEM_WIDTH) extends uvm_env;
         cfg_tx.interface_name = "vif_tx";
         cfg_rx.interface_name = "vif_rx";
 
+        cfg_rx.seq_cfg = new();
+        cfg_rx.seq_cfg.space_size_set(0, 5);
+
         uvm_config_db #(uvm_logic_vector_mvb::config_item)::set(this, "tx_env", "m_config", cfg_tx);
         uvm_config_db #(uvm_logic_vector_mvb::config_item)::set(this, "rx_env", "m_config", cfg_rx);
 

@@ -64,7 +64,7 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, OUT_ME
         m_config_rx                = new;
         m_config_rx.active         = UVM_ACTIVE;
         m_config_rx.interface_name = "vif_rx";
-        m_config_rx.meta_behav     = (OUT_META_MODE == 0) ? 1 : 2;
+        m_config_rx.meta_behav     = (OUT_META_MODE == 0) ? uvm_logic_vector_array_mfb::config_item::META_SOF : uvm_logic_vector_array_mfb::config_item::META_EOF;
 
         uvm_config_db #(uvm_logic_vector_array_mfb::config_item)::set(this, "m_env_rx", "m_config", m_config_rx);
         m_env_rx = uvm_logic_vector_array_mfb::env_rx#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, 8, 0)::type_id::create("m_env_rx", this);
@@ -72,7 +72,7 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, OUT_ME
         m_config_tx                = new;
         m_config_tx.active         = UVM_ACTIVE;
         m_config_tx.interface_name = "vif_tx";
-        m_config_tx.meta_behav     = (OUT_META_MODE == 0) ? 1 : 2;
+        m_config_tx.meta_behav     = (OUT_META_MODE == 0) ? uvm_logic_vector_array_mfb::config_item::META_SOF : uvm_logic_vector_array_mfb::config_item::META_EOF;
 
 
         uvm_config_db #(uvm_logic_vector_array_mfb::config_item)::set(this, "m_env_tx", "m_config", m_config_tx);
@@ -94,9 +94,8 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, OUT_ME
     // Connect agent's ports with ports from the scoreboard.
     function void connect_phase(uvm_phase phase);
 
-        m_env_rx.m_byte_array_agent.analysis_port.connect(sc.input_data);
-
-        m_env_tx.m_byte_array_agent.analysis_port.connect(sc.out_data);
+        m_env_rx.analysis_port_data.connect(sc.input_data);
+        m_env_tx.analysis_port_data.connect(sc.out_data);
         if (OUT_META_MODE == 2) begin
             m_env_tx_mvb.analysis_port.connect(sc.out_meta);
         end else

@@ -62,7 +62,7 @@ class scoreboard extends uvm_scoreboard;
 
             if (tr_model.compare(tr_dut) == 0) begin
                 string msg;
-error++
+                error++;
                 $swrite(msg, "\n\tPacket comparison failed! \n\tModel packet:\n%s\n\tDUT packet:\n%s", tr_model.convert2string(), tr_dut.convert2string());
                 `uvm_error(this.get_full_name(), msg);
             end

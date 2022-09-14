@@ -79,7 +79,7 @@ class scoreboard extends uvm_scoreboard;
             dut_fifo_error.get(tr_dut_error);
 
             compared++;
-            if (($time() - tr_model_packet.start) >= 4us) begin
+            if (($time() - tr_model_packet.start) >= 10us) begin
                 string msg;
                 $sformat(msg, "\n\tDelay %0dns is too long\n\tinput time %0dns output time %0dns\n%s", ($time() - tr_model_packet.start)/1ns, tr_model_packet.start/1ns, $time()/1ns, tr_model_packet.item.convert2string());
                 `uvm_error(this.get_full_name(), msg); 

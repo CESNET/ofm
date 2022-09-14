@@ -28,7 +28,7 @@ class env #(DMA_MFB_UP_REGIONS, MFB_UP_REGIONS, MFB_UP_REG_SIZE,
     uvm_logic_vector_mvb::env_tx #(MFB_UP_REGIONS, PCIE_PREFIX_WIDTH)                                                                                                      m_env_rq_prefix_mvb;
     // DOWNSTREAM
     uvm_logic_vector_array_mfb::env_tx   #(DMA_MFB_DOWN_REGIONS, MFB_DOWN_REG_SIZE, MFB_DOWN_BLOCK_SIZE, MFB_DOWN_ITEM_WIDTH, 0)                                           m_env_down_mfb[DMA_PORTS];
-    uvm_logic_vector_mvb::env_tx #(DMA_MVB_DOWN_ITEMS, sv_dma_bus_pack::DMA_DOWNHDR_WIDTH)                                                                                                  m_env_down_mvb[DMA_PORTS];
+    uvm_logic_vector_mvb::env_tx #(DMA_MVB_DOWN_ITEMS, sv_dma_bus_pack::DMA_DOWNHDR_WIDTH)                                                                                 m_env_down_mvb[DMA_PORTS];
 
     uvm_pcie_rc::env             #(MFB_DOWN_REGIONS, MFB_DOWN_REG_SIZE, MFB_DOWN_BLOCK_SIZE, MFB_DOWN_ITEM_WIDTH, PCIE_UPHDR_WIDTH, PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH) m_env_rc;
 
@@ -60,7 +60,6 @@ class env #(DMA_MFB_UP_REGIONS, MFB_UP_REGIONS, MFB_UP_REG_SIZE,
         m_config_rc                         = new;
         m_config_rc.active                  = UVM_ACTIVE;
         m_config_rc.interface_name_mfb      = "vif_rc_mfb";
-        m_config_rc.interface_name_mvb      = "vif_rc_mvb";
         m_config_rc.interface_name_mvb_pref = "vif_rc_prefix_mvb";
 
         uvm_config_db #(uvm_pcie_rc::config_item)::set(this, "m_env_rc", "m_config", m_config_rc);
@@ -84,7 +83,6 @@ class env #(DMA_MFB_UP_REGIONS, MFB_UP_REGIONS, MFB_UP_REG_SIZE,
         m_config_rq_mfb                       = new;
         m_config_rq_mfb.active                = UVM_ACTIVE;
         m_config_rq_mfb.interface_name        = "vif_rq_mfb";
-        m_config_rq_mfb.meta_behav            = 1;
 
         m_config_rq_mvb                       = new;
         m_config_rq_mvb.active                = UVM_PASSIVE;
@@ -122,7 +120,6 @@ class env #(DMA_MFB_UP_REGIONS, MFB_UP_REGIONS, MFB_UP_REG_SIZE,
             m_config_down_mfb[i]                = new;
             m_config_down_mfb[i].active         = UVM_ACTIVE;
             m_config_down_mfb[i].interface_name = {"vif_down_mfb_", i_string};
-            m_config_down_mfb[i].meta_behav     = 1;
 
             m_config_down_mvb[i]                = new;
             m_config_down_mvb[i].active         = UVM_ACTIVE;
@@ -155,7 +152,7 @@ class env #(DMA_MFB_UP_REGIONS, MFB_UP_REGIONS, MFB_UP_REG_SIZE,
     function void connect_phase(uvm_phase phase);
 
         m_env_rc.m_env_rc_mfb.analysis_port_data.connect(sc.rc_mfb_in);
-        m_env_rc.m_env_rc_mvb.analysis_port.connect(sc.rc_mvb_in);
+        m_env_rc.m_env_rc_mfb.analysis_port_meta.connect(sc.rc_meta_in);
         m_env_rc.m_env_rc_prefix_mvb.analysis_port.connect(sc.rc_prefix_mvb_in);
 
         m_env_rq_mvb.analysis_port.connect(m_env_rc.m_monitor.analysis_export);

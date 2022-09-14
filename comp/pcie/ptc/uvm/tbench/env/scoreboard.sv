@@ -239,7 +239,7 @@ class scoreboard #(META_WIDTH, MFB_DOWN_REGIONS, MFB_UP_REGIONS, DMA_MVB_UP_ITEM
 
 
     uvm_analysis_export #(uvm_logic_vector_array::sequence_item #(32))           rc_mfb_in;
-    uvm_analysis_export #(uvm_logic_vector::sequence_item #(PCIE_DOWNHDR_WIDTH)) rc_mvb_in;
+    uvm_analysis_export #(uvm_logic_vector::sequence_item #(PCIE_DOWNHDR_WIDTH)) rc_meta_in;
     uvm_analysis_export #(uvm_logic_vector::sequence_item #(PCIE_PREFIX_WIDTH))  rc_prefix_mvb_in;
 
     uvm_analysis_export #(uvm_logic_vector_array::sequence_item #(32))           rq_mfb_out;
@@ -268,7 +268,7 @@ class scoreboard #(META_WIDTH, MFB_DOWN_REGIONS, MFB_UP_REGIONS, DMA_MVB_UP_ITEM
     uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(PCIE_PREFIX_WIDTH))  dut_rq_prefix_mvb_out;
 
     uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item #(32))           dut_rc_mfb_out;
-    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(PCIE_DOWNHDR_WIDTH)) dut_rc_mvb_out;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(PCIE_DOWNHDR_WIDTH)) dut_rc_meta_out;
     uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(PCIE_PREFIX_WIDTH))  dut_rc_prefix_mvb_out;
 
     //uvm_ptc_info::sync_tag tag_sync[DMA_PORTS];
@@ -286,11 +286,11 @@ class scoreboard #(META_WIDTH, MFB_DOWN_REGIONS, MFB_UP_REGIONS, DMA_MVB_UP_ITEM
     function new(string name, uvm_component parent);
         super.new(name, parent);
         rc_mfb_in             = new("rc_mfb_in",             this);
-        rc_mvb_in             = new("rc_mvb_in",             this);
+        rc_meta_in            = new("rc_meta_in",             this);
         rc_prefix_mvb_in      = new("rc_prefix_mvb_in",      this);
 
         dut_rc_mfb_out        = new("dut_rc_mfb_out",        this);
-        dut_rc_mvb_out        = new("dut_rc_mvb_out",        this);
+        dut_rc_meta_out       = new("dut_rc_meta_out",        this);
         dut_rc_prefix_mvb_out = new("dut_rc_prefix_mvb_out", this);
 
         rq_mfb_out            = new("rq_mfb_out",            this);
@@ -328,7 +328,7 @@ class scoreboard #(META_WIDTH, MFB_DOWN_REGIONS, MFB_UP_REGIONS, DMA_MVB_UP_ITEM
         ret |= (dut_rq_mfb_out.used() != 0);
         ret |= (dut_rq_mvb_out.used() != 0);
         ret |= (dut_rc_mfb_out.used() != 0);
-        ret |= (dut_rc_mvb_out.used() != 0);
+        ret |= (dut_rc_meta_out.used() != 0);
         ret |= (model_up_mfb_out.used() != 0);
         ret |= (model_up_mvb_out.used() != 0);
 
@@ -364,7 +364,7 @@ class scoreboard #(META_WIDTH, MFB_DOWN_REGIONS, MFB_UP_REGIONS, DMA_MVB_UP_ITEM
     function void connect_phase(uvm_phase phase);
         // Model inputs
         rc_mfb_in.connect(m_down_model.model_rc_mfb_in.analysis_export);
-        rc_mvb_in.connect(m_down_model.model_rc_mvb_in.analysis_export);
+        rc_meta_in.connect(m_down_model.model_rc_meta_in.analysis_export);
         rc_prefix_mvb_in.connect(m_down_model.model_rc_prefix_mvb_in.analysis_export);
 
         // DUT outputs
@@ -444,15 +444,15 @@ class scoreboard #(META_WIDTH, MFB_DOWN_REGIONS, MFB_UP_REGIONS, DMA_MVB_UP_ITEM
             $swrite(msg, "%s\n\t dut_rq_mfb_out USED [%0d]",   msg, dut_rq_mfb_out.used());
             $swrite(msg, "%s\n\t dut_rq_mvb_out USED [%0d]",   msg, dut_rq_mvb_out.used());
             $swrite(msg, "%s\n\t dut_rc_mfb_out USED [%0d]",   msg, dut_rc_mfb_out.used());
-            $swrite(msg, "%s\n\t dut_rc_mvb_out USED [%0d]",   msg, dut_rc_mvb_out.used());
+            $swrite(msg, "%s\n\t dut_rc_meta_out USED [%0d]",   msg, dut_rc_meta_out.used());
             $swrite(msg, "%s\n\t model_up_mfb_out USED [%0d]", msg, model_up_mfb_out.used());
             $swrite(msg, "%s\n\t model_up_mvb_out USED [%0d]\n", msg, model_up_mvb_out.used());
             $swrite(msg, "%s\n\t Final USED [%0d]",              msg, this.used());
 
        if (this.error_cnt() == 0 && this.used() == 0) begin
-           `uvm_info(get_type_name(), {msg, "\n\n\t---------------------------------------\n\t----     VERIFICATION SUCCESS      ----\n\t---------------------------------------"}, UVM_LOW)
+           `uvm_info(get_type_name(), {msg, "\n\n\t---------------------------------------\n\t----     VERIFICATION SUCCESS      ----\n\t---------------------------------------"}, UVM_NONE)
        end else begin
-           `uvm_info(get_type_name(), {msg, "\n\n\t---------------------------------------\n\t----     VERIFICATION FAIL      ----\n\t---------------------------------------"}, UVM_LOW)
+           `uvm_info(get_type_name(), {msg, "\n\n\t---------------------------------------\n\t----     VERIFICATION FAIL      ----\n\t---------------------------------------"}, UVM_NONE)
        end
     endfunction
 

@@ -9,9 +9,9 @@ class ex_test extends uvm_test;
     `uvm_component_utils(test::ex_test);
 
     bit timeout;
-    uvm_pipe::env #(ITEMS, ITEM_WIDTH)                 m_env;
+    uvm_pipe::env #(ITEMS, ITEM_WIDTH)             m_env;
     uvm_logic_vector::sequence_simple#(ITEM_WIDTH) h_seq_rx;
-    uvm_mvb::sequence_simple_tx #(ITEMS, ITEM_WIDTH)   h_seq_tx;
+    uvm_mvb::sequence_lib_tx#(ITEMS, ITEM_WIDTH)   h_seq_tx;
 
     // ------------------------------------------------------------------------
     // Functions
@@ -38,10 +38,9 @@ class ex_test extends uvm_test;
     // Create environment and Run sequences o their sequencers
     task run_seq_rx(uvm_phase phase);
         phase.raise_objection(this, "Start of rx sequence");
-        for(int i = 0; i < 500; i++) begin
-            h_seq_rx.randomize();
-            h_seq_rx.start(m_env.rx_env.m_logic_vector_agent.m_sequencer);
-        end
+
+        assert(h_seq_rx.randomize());
+        h_seq_rx.start(m_env.rx_env.m_logic_vector_agent.m_sequencer);
 
         timeout = 1;
         fork
@@ -63,8 +62,15 @@ class ex_test extends uvm_test;
     virtual task run_phase(uvm_phase phase);
 
         h_seq_rx = uvm_logic_vector::sequence_simple#(ITEM_WIDTH)::type_id::create("h_seq_rx");
+        h_seq_rx.transaction_count_min = 100000;
+        h_seq_rx.transaction_count_max = 250000;
 
-        h_seq_tx = uvm_mvb::sequence_simple_tx #(ITEMS, ITEM_WIDTH)::type_id::create("h_seq_tx");
+        h_seq_tx = uvm_mvb::sequence_lib_tx #(ITEMS, ITEM_WIDTH)::type_id::create("h_seq_tx");
+        h_seq_tx.init_sequence();
+        h_seq_tx.cfg.probability_set(60, 100);
+        h_seq_tx.min_random_count = 200;
+        h_seq_tx.max_random_count = 500;
+
 
         fork
             run_seq_tx(phase);
