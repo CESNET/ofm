@@ -28,6 +28,8 @@ source "$FIRMWARE_BASE/build/Modelsim.inc.fdo"
 # Suppress warnings from arithm library
 puts "Std Arith Warnings - Disabled"
 set StdArithNoWarnings 1
+# Bug in MFB_GET_ITEMS, bad generation of data for simulation when data are not valid.
+#set NumericStdNoWarnings 1
 nb_sim_run
 #coverage save -assert -directive -cvg -code bcefst -verbose actual.ucdb
 

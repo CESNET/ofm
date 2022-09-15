@@ -22,7 +22,10 @@ module DUT (
     mfb_if.dut_rx   RC_MFB             ,
     mvb_if.dut_rx   RC_PREFIX_MVB      ,
     mfb_if.dut_tx   DOWN_MFB[DMA_PORTS],
-    mvb_if.dut_tx   DOWN_MVB[DMA_PORTS]
+    mvb_if.dut_tx   DOWN_MVB[DMA_PORTS],
+    // AXI
+    axi_if.dut_tx   AXI_RQ,
+    axi_if.dut_rx   AXI_RC
     );
 
 
@@ -30,6 +33,8 @@ module DUT (
     localparam DOWN_EOF_POS_WIDTH = DMA_MFB_DOWN_REGIONS*$clog2(MFB_DOWN_REG_SIZE*MFB_DOWN_BLOCK_SIZE);
     localparam UP_SOF_POS_WIDTH = (($clog2(MFB_UP_REG_SIZE)*DMA_MFB_UP_REGIONS) == 0) ? (DMA_MFB_UP_REGIONS) : (DMA_MFB_UP_REGIONS*$clog2(MFB_UP_REG_SIZE));
     localparam UP_EOF_POS_WIDTH   = DMA_MFB_UP_REGIONS*$clog2(MFB_UP_REG_SIZE*MFB_UP_BLOCK_SIZE);
+    localparam RQ_SOF_POS_WIDTH = (($clog2(MFB_UP_REG_SIZE)*MFB_UP_REGIONS) == 0) ? (MFB_UP_REGIONS) : (MFB_UP_REGIONS*$clog2(MFB_UP_REG_SIZE));
+    localparam RC_SOF_POS_WIDTH = (($clog2(MFB_DOWN_REG_SIZE)*MFB_DOWN_REGIONS) == 0) ? (MFB_DOWN_REGIONS) : (MFB_DOWN_REGIONS*$clog2(MFB_DOWN_REG_SIZE));
 
     logic [DMA_MFB_DOWN_REGIONS*MFB_DOWN_REG_SIZE*MFB_DOWN_BLOCK_SIZE*MFB_DOWN_ITEM_WIDTH -1:0]  down_mfb_data     [DMA_PORTS-1:0];
     logic [DMA_MFB_DOWN_REGIONS -1:0]                                                            down_mfb_sof      [DMA_PORTS-1:0];
@@ -56,8 +61,9 @@ module DUT (
     logic [DMA_PORTS-1:0]                                                                        down_mvb_dst_rdy;
     logic [DMA_MVB_DOWN_ITEMS*sv_dma_bus_pack::DMA_DOWNHDR_WIDTH-1 : 0]                          down_mvb_data     [DMA_PORTS-1:0];
     logic [DMA_MVB_DOWN_ITEMS-1 : 0]                                                             down_mvb_vld      [DMA_PORTS-1:0];
-    logic [UP_SOF_POS_WIDTH -1:0]                                                                rq_mfb_sof_pos;
-    logic [DOWN_SOF_POS_WIDTH -1:0]                                                              rc_mfb_sof_pos;
+
+    logic [RQ_SOF_POS_WIDTH -1:0]                                                                rq_mfb_sof_pos;
+    logic [RC_SOF_POS_WIDTH -1:0]                                                                rc_mfb_sof_pos;
 
     generate
         for (genvar i = 0; i < DMA_PORTS; i++) begin
@@ -95,8 +101,13 @@ module DUT (
         end
     endgenerate
 
-    assign RQ_MVB.SRC_RDY      = RQ_MFB.SRC_RDY;
-    assign RQ_MVB.DST_RDY      = RQ_MFB.DST_RDY;
+    if (DEVICE == "STRATIX10" || DEVICE == "AGILEX") begin
+        assign RQ_MVB.SRC_RDY      = RQ_MFB.SRC_RDY;
+        assign RQ_MVB.DST_RDY      = RQ_MFB.DST_RDY;
+    end else begin
+        assign RQ_MVB.SRC_RDY      = AXI_RQ.TVALID;
+        assign RQ_MVB.DST_RDY      = AXI_RQ.TREADY;
+    end
     assign RQ_MFB.SOF_POS      = rq_mfb_sof_pos;
 
     if ((DMA_MFB_DOWN_REGIONS*$clog2(MFB_DOWN_REG_SIZE)) == 0) begin
@@ -174,12 +185,12 @@ module DUT (
         //-------------------------------------------------------------------------
 
         // Data bus
-        .RQ_TDATA  (), // TODO
-        .RQ_TUSER  (), // TODO
-        .RQ_TLAST  (), // TODO
-        .RQ_TKEEP  (), // TODO
-        .RQ_TREADY (), // TODO
-        .RQ_TVALID (), // TODO
+        .RQ_TDATA  (AXI_RQ.TDATA) ,
+        .RQ_TUSER  (AXI_RQ.TUSER) ,
+        .RQ_TLAST  (AXI_RQ.TLAST) ,
+        .RQ_TKEEP  (AXI_RQ.TKEEP) ,
+        .RQ_TREADY (AXI_RQ.TREADY),
+        .RQ_TVALID (AXI_RQ.TVALID),
 
         //-------------------------------------------------------------------------
         // Header output to PCIe Endpoint (Requester request interface (RQ))
@@ -234,12 +245,12 @@ module DUT (
         // Used in Xilinx DEVICEs
         //-------------------------------------------------------------------------
 
-        .RC_TDATA  (), // TODO
-        .RC_TUSER  (), // TODO
-        .RC_TLAST  (), // TODO
-        .RC_TKEEP  (), // TODO
-        .RC_TVALID (), // TODO
-        .RC_TREADY (), // TODO
+        .RC_TDATA  (AXI_RC.TDATA) ,
+        .RC_TUSER  (AXI_RC.TUSER) ,
+        .RC_TLAST  (AXI_RC.TLAST) ,
+        .RC_TKEEP  (AXI_RC.TKEEP) ,
+        .RC_TVALID (AXI_RC.TVALID),
+        .RC_TREADY (AXI_RC.TREADY),
 
         //-------------------------------------------------------------------------
         // Output to DMA Module (MVB+MFB bus) (runs on CLK_DMA)

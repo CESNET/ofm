@@ -12,7 +12,8 @@ class ex_test extends uvm_test;
                    MFB_UP_BLOCK_SIZE, MFB_UP_ITEM_WIDTH, MFB_DOWN_REGIONS,
                    DMA_MFB_DOWN_REGIONS, MFB_DOWN_REG_SIZE, MFB_DOWN_BLOCK_SIZE,
                    MFB_DOWN_ITEM_WIDTH, PCIE_UPHDR_WIDTH, PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH, DMA_MVB_UP_ITEMS,
-                   DMA_MVB_DOWN_ITEMS, META_WIDTH, DMA_PORTS, ENDPOINT_TYPE) m_env;
+                   DMA_MVB_DOWN_ITEMS, RQ_TUSER_WIDTH, RC_TUSER_WIDTH, RQ_TDATA_WIDTH, RQ_TDATA_WIDTH, META_WIDTH, DMA_PORTS, ENDPOINT_TYPE, DEVICE) m_env;
+
     int unsigned timeout;
     logic [DMA_PORTS-1 : 0] event_vseq;
 
@@ -27,20 +28,28 @@ class ex_test extends uvm_test;
                                MFB_UP_BLOCK_SIZE, MFB_UP_ITEM_WIDTH, MFB_DOWN_REGIONS,
                                DMA_MFB_DOWN_REGIONS, MFB_DOWN_REG_SIZE, MFB_DOWN_BLOCK_SIZE,
                                MFB_DOWN_ITEM_WIDTH, PCIE_UPHDR_WIDTH, PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH, DMA_MVB_UP_ITEMS,
-                               DMA_MVB_DOWN_ITEMS, META_WIDTH, DMA_PORTS, ENDPOINT_TYPE)::type_id::create("m_env", this);
+                               DMA_MVB_DOWN_ITEMS, RQ_TUSER_WIDTH, RC_TUSER_WIDTH, RQ_TDATA_WIDTH, RQ_TDATA_WIDTH, META_WIDTH, DMA_PORTS, ENDPOINT_TYPE, DEVICE)::type_id::create("m_env", this);
     endfunction
 
     virtual task rq_seq;
-        uvm_mfb::sequence_lib_tx#(MFB_UP_REGIONS, MFB_UP_REG_SIZE, MFB_UP_BLOCK_SIZE, 32, 0) mfb_seq;
+        uvm_mfb::sequence_lib_tx#(MFB_UP_REGIONS, MFB_UP_REG_SIZE, MFB_UP_BLOCK_SIZE, 32, 0) rq_mfb_lib;
+        uvm_axi::sequence_lib_tx #(RQ_TDATA_WIDTH, RQ_TUSER_WIDTH, MFB_UP_REGIONS) rq_axi_lib;
+        rq_mfb_lib = uvm_mfb::sequence_lib_tx#(MFB_UP_REGIONS, MFB_UP_REG_SIZE, MFB_UP_BLOCK_SIZE, 32, 0)::type_id::create("mfb_eth_rq_seq", this);
+        rq_axi_lib = uvm_axi::sequence_lib_tx #(RQ_TDATA_WIDTH, RQ_TUSER_WIDTH, MFB_UP_REGIONS)::type_id::create("axi_rq_seq", this);
 
-        mfb_seq = uvm_mfb::sequence_lib_tx#(MFB_UP_REGIONS, MFB_UP_REG_SIZE, MFB_UP_BLOCK_SIZE, 32, 0)::type_id::create("mfb_eth_rq_seq", this);
+        rq_mfb_lib.init_sequence();
+        rq_mfb_lib.min_random_count = 60;
+        rq_mfb_lib.max_random_count = 80;
 
-        mfb_seq.init_sequence();
-        mfb_seq.min_random_count = 60;
-        mfb_seq.max_random_count = 80;
+        rq_axi_lib.init_sequence();
+        rq_axi_lib.min_random_count = 60;
+        rq_axi_lib.max_random_count = 80;
 
         forever begin
-            mfb_seq.start(m_env.m_env_rq_mfb.m_sequencer);
+            if (DEVICE == "STRATIX10" || DEVICE == "AGILEX") begin
+                rq_mfb_lib.start(m_env.m_env_rq_mfb.m_sequencer);
+            end else
+                rq_axi_lib.start(m_env.m_env_rq_axi.m_sequencer);
         end
     endtask
 

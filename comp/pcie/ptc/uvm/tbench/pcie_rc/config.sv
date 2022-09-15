@@ -12,6 +12,7 @@ class config_item extends uvm_object;
     string interface_name_mvb;
     string interface_name_mvb_pref;
     string interface_name_mfb;
+    string interface_name_axi;
 
     // ------------------------------------------------------------------------ 
     // functions

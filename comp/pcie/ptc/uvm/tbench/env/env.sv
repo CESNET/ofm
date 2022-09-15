@@ -10,29 +10,30 @@ class env #(DMA_MFB_UP_REGIONS, MFB_UP_REGIONS, MFB_UP_REG_SIZE,
             MFB_UP_BLOCK_SIZE, MFB_UP_ITEM_WIDTH, MFB_DOWN_REGIONS,
             DMA_MFB_DOWN_REGIONS, MFB_DOWN_REG_SIZE, MFB_DOWN_BLOCK_SIZE,
             MFB_DOWN_ITEM_WIDTH, PCIE_UPHDR_WIDTH, PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH, DMA_MVB_UP_ITEMS,
-            DMA_MVB_DOWN_ITEMS, META_WIDTH, DMA_PORTS, ENDPOINT_TYPE) extends uvm_env;
+            DMA_MVB_DOWN_ITEMS, RQ_TUSER_WIDTH, RC_TUSER_WIDTH, RQ_TDATA_WIDTH, RC_TDATA_WIDTH, META_WIDTH, DMA_PORTS, ENDPOINT_TYPE, DEVICE) extends uvm_env;
 
     `uvm_component_param_utils(uvm_ptc::env #(DMA_MFB_UP_REGIONS, MFB_UP_REGIONS, MFB_UP_REG_SIZE,
                                               MFB_UP_BLOCK_SIZE, MFB_UP_ITEM_WIDTH, MFB_DOWN_REGIONS,
                                               DMA_MFB_DOWN_REGIONS, MFB_DOWN_REG_SIZE, MFB_DOWN_BLOCK_SIZE,
                                               MFB_DOWN_ITEM_WIDTH, PCIE_UPHDR_WIDTH, PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH, DMA_MVB_UP_ITEMS,
-                                              DMA_MVB_DOWN_ITEMS, META_WIDTH, DMA_PORTS, ENDPOINT_TYPE));
+                                              DMA_MVB_DOWN_ITEMS, RQ_TUSER_WIDTH, RC_TUSER_WIDTH, RQ_TDATA_WIDTH, RC_TDATA_WIDTH, META_WIDTH, DMA_PORTS, ENDPOINT_TYPE, DEVICE));
 
     //uvm_reset::agent m_reset;
     //uvm_reset::agent m_reset_1;
     uvm_ptc_info::sync_tag tag_sync[DMA_PORTS];
     // UPSTREAM
-    uvm_dma_up::env              #(DMA_MVB_UP_ITEMS, DMA_MFB_UP_REGIONS, MFB_UP_REG_SIZE, MFB_UP_BLOCK_SIZE, MFB_UP_ITEM_WIDTH, DMA_PORTS)  m_env_up[DMA_PORTS];
-    uvm_logic_vector_array_mfb::env_tx   #(MFB_UP_REGIONS, MFB_UP_REG_SIZE, MFB_UP_BLOCK_SIZE, 32, 0)                                                                      m_env_rq_mfb;
-    uvm_logic_vector_mvb::env_tx #(MFB_UP_REGIONS, PCIE_UPHDR_WIDTH)                                                                                                       m_env_rq_mvb;
-    uvm_logic_vector_mvb::env_tx #(MFB_UP_REGIONS, PCIE_PREFIX_WIDTH)                                                                                                      m_env_rq_prefix_mvb;
+    uvm_dma_up::env              #(DMA_MVB_UP_ITEMS, DMA_MFB_UP_REGIONS, MFB_UP_REG_SIZE, MFB_UP_BLOCK_SIZE, MFB_UP_ITEM_WIDTH, DMA_PORTS) m_env_up[DMA_PORTS];
+    uvm_logic_vector_array_mfb::env_tx   #(MFB_UP_REGIONS, MFB_UP_REG_SIZE, MFB_UP_BLOCK_SIZE, 32, 0)                                      m_env_rq_mfb;
+    uvm_logic_vector_mvb::env_tx #(MFB_UP_REGIONS, PCIE_UPHDR_WIDTH)                                                                       m_env_rq_mvb;
+    uvm_logic_vector_mvb::env_tx #(MFB_UP_REGIONS, PCIE_PREFIX_WIDTH)                                                                      m_env_rq_prefix_mvb;
+    uvm_logic_vector_array_axi::env_tx #(RQ_TDATA_WIDTH, RQ_TUSER_WIDTH, 32, MFB_UP_REGIONS)                                               m_env_rq_axi;
     // DOWNSTREAM
-    uvm_logic_vector_array_mfb::env_tx   #(DMA_MFB_DOWN_REGIONS, MFB_DOWN_REG_SIZE, MFB_DOWN_BLOCK_SIZE, MFB_DOWN_ITEM_WIDTH, 0)                                           m_env_down_mfb[DMA_PORTS];
-    uvm_logic_vector_mvb::env_tx #(DMA_MVB_DOWN_ITEMS, sv_dma_bus_pack::DMA_DOWNHDR_WIDTH)                                                                                 m_env_down_mvb[DMA_PORTS];
+    uvm_logic_vector_array_mfb::env_tx   #(DMA_MFB_DOWN_REGIONS, MFB_DOWN_REG_SIZE, MFB_DOWN_BLOCK_SIZE, MFB_DOWN_ITEM_WIDTH, 0)           m_env_down_mfb[DMA_PORTS];
+    uvm_logic_vector_mvb::env_tx #(DMA_MVB_DOWN_ITEMS, sv_dma_bus_pack::DMA_DOWNHDR_WIDTH)                                                 m_env_down_mvb[DMA_PORTS];
 
-    uvm_pcie_rc::env             #(MFB_DOWN_REGIONS, MFB_DOWN_REG_SIZE, MFB_DOWN_BLOCK_SIZE, MFB_DOWN_ITEM_WIDTH, PCIE_UPHDR_WIDTH, PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH) m_env_rc;
+    uvm_pcie_rc::env #(MFB_DOWN_REGIONS, MFB_DOWN_REG_SIZE, MFB_DOWN_BLOCK_SIZE, MFB_DOWN_ITEM_WIDTH, PCIE_UPHDR_WIDTH, PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH, RC_TDATA_WIDTH, RC_TUSER_WIDTH, RQ_TUSER_WIDTH, DEVICE) m_env_rc;
 
-    scoreboard #(META_WIDTH, MFB_DOWN_REGIONS, MFB_UP_REGIONS, DMA_MVB_UP_ITEMS, PCIE_PREFIX_WIDTH, PCIE_UPHDR_WIDTH, DMA_MVB_DOWN_ITEMS, PCIE_DOWNHDR_WIDTH, DMA_PORTS, ENDPOINT_TYPE) sc;
+    scoreboard #(META_WIDTH, MFB_DOWN_REGIONS, MFB_UP_REGIONS, DMA_MVB_UP_ITEMS, PCIE_PREFIX_WIDTH, PCIE_UPHDR_WIDTH, RQ_TUSER_WIDTH, DMA_MVB_DOWN_ITEMS, PCIE_DOWNHDR_WIDTH, DMA_PORTS, ENDPOINT_TYPE, DEVICE) sc;
     // Constructor of environment.
     function new(string name, uvm_component parent);
         super.new(name, parent);
@@ -48,6 +49,7 @@ class env #(DMA_MFB_UP_REGIONS, MFB_UP_REGIONS, MFB_UP_REG_SIZE,
         uvm_logic_vector_array_mfb::config_item m_config_rq_mfb;
         uvm_logic_vector_mvb::config_item       m_config_rq_mvb;
         uvm_logic_vector_mvb::config_item       m_config_rq_prefix_mvb;
+        uvm_logic_vector_array_axi::config_item m_config_rq_axi;
         // DOWNSTREAM
         uvm_logic_vector_array_mfb::config_item m_config_down_mfb[DMA_PORTS];
         uvm_logic_vector_mvb::config_item       m_config_down_mvb[DMA_PORTS];
@@ -60,10 +62,12 @@ class env #(DMA_MFB_UP_REGIONS, MFB_UP_REGIONS, MFB_UP_REG_SIZE,
         m_config_rc                         = new;
         m_config_rc.active                  = UVM_ACTIVE;
         m_config_rc.interface_name_mfb      = "vif_rc_mfb";
+        m_config_rc.interface_name_mvb      = "vif_rc_mvb";
         m_config_rc.interface_name_mvb_pref = "vif_rc_prefix_mvb";
+        m_config_rc.interface_name_axi      = "vif_rc";
 
         uvm_config_db #(uvm_pcie_rc::config_item)::set(this, "m_env_rc", "m_config", m_config_rc);
-        m_env_rc = uvm_pcie_rc::env #(MFB_DOWN_REGIONS, MFB_DOWN_REG_SIZE, MFB_DOWN_BLOCK_SIZE, MFB_DOWN_ITEM_WIDTH, PCIE_UPHDR_WIDTH, PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH)::type_id::create("m_env_rc", this);
+        m_env_rc = uvm_pcie_rc::env #(MFB_DOWN_REGIONS, MFB_DOWN_REG_SIZE, MFB_DOWN_BLOCK_SIZE, MFB_DOWN_ITEM_WIDTH, PCIE_UPHDR_WIDTH, PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH, RC_TDATA_WIDTH, RC_TUSER_WIDTH, RQ_TUSER_WIDTH, DEVICE)::type_id::create("m_env_rc", this);
 
         ///////////////
         // RESETS
@@ -92,13 +96,21 @@ class env #(DMA_MFB_UP_REGIONS, MFB_UP_REGIONS, MFB_UP_REG_SIZE,
         m_config_rq_prefix_mvb.active         = UVM_PASSIVE;
         m_config_rq_prefix_mvb.interface_name = "vif_rq_prefix_mvb";
 
-        uvm_config_db #(uvm_logic_vector_array_mfb::config_item)::set(this,   "m_env_rq_mfb",        "m_config", m_config_rq_mfb);
-        uvm_config_db #(uvm_logic_vector_mvb::config_item)::set(this,         "m_env_rq_mvb",        "m_config", m_config_rq_mvb);
-        uvm_config_db #(uvm_logic_vector_mvb::config_item)::set(this,         "m_env_rq_prefix_mvb", "m_config", m_config_rq_prefix_mvb);
+        m_config_rq_axi                       = new;
+        m_config_rq_axi.active                = UVM_ACTIVE;
+        m_config_rq_axi.interface_name        = "vif_rq";
+        m_config_rq_axi.meta_behav            = uvm_logic_vector_array_axi::config_item::META_EOF;
+
+
+        uvm_config_db #(uvm_logic_vector_array_mfb::config_item)::set(this, "m_env_rq_mfb", "m_config", m_config_rq_mfb);
+        uvm_config_db #(uvm_logic_vector_mvb::config_item)::set(this, "m_env_rq_mvb", "m_config", m_config_rq_mvb);
+        uvm_config_db #(uvm_logic_vector_mvb::config_item)::set(this, "m_env_rq_prefix_mvb", "m_config", m_config_rq_prefix_mvb);
+        uvm_config_db #(uvm_logic_vector_array_axi::config_item)::set(this, "m_env_rq_axi", "m_config", m_config_rq_axi);
 
         m_env_rq_mfb        = uvm_logic_vector_array_mfb::env_tx   #(MFB_UP_REGIONS, MFB_UP_REG_SIZE, MFB_UP_BLOCK_SIZE, 32, 0)::type_id::create("m_env_rq_mfb", this);
         m_env_rq_mvb        = uvm_logic_vector_mvb::env_tx #(MFB_UP_REGIONS, PCIE_UPHDR_WIDTH)::type_id::create("m_env_rq_mvb", this);
         m_env_rq_prefix_mvb = uvm_logic_vector_mvb::env_tx #(MFB_UP_REGIONS, PCIE_PREFIX_WIDTH)::type_id::create("m_env_rq_prefix_mvb", this);
+        m_env_rq_axi        = uvm_logic_vector_array_axi::env_tx#(RQ_TDATA_WIDTH, RQ_TUSER_WIDTH, 32, MFB_UP_REGIONS)::type_id::create("m_env_rq_axi", this);
 
         //m_config_reset = new;
         //for (int i = 0; i < (DMA_PORTS+1); i++)  begin
@@ -110,7 +122,7 @@ class env #(DMA_MFB_UP_REGIONS, MFB_UP_REGIONS, MFB_UP_REG_SIZE,
         //end
         //uvm_config_db #(uvm_reset::env_config_item #(DMA_PORTS+1))::set(this, "m_reset", "m_config", m_config_reset);
         //m_reset    = uvm_reset::env #(DMA_PORTS+1)::type_id::create("m_reset", this);
-        sc  = scoreboard #(META_WIDTH, MFB_DOWN_REGIONS, MFB_UP_REGIONS, DMA_MVB_UP_ITEMS, PCIE_PREFIX_WIDTH, PCIE_UPHDR_WIDTH, DMA_MVB_DOWN_ITEMS, PCIE_DOWNHDR_WIDTH, DMA_PORTS, ENDPOINT_TYPE)::type_id::create("sc", this);
+        sc  = scoreboard #(META_WIDTH, MFB_DOWN_REGIONS, MFB_UP_REGIONS, DMA_MVB_UP_ITEMS, PCIE_PREFIX_WIDTH, PCIE_UPHDR_WIDTH, RQ_TUSER_WIDTH, DMA_MVB_DOWN_ITEMS, PCIE_DOWNHDR_WIDTH, DMA_PORTS, ENDPOINT_TYPE, DEVICE)::type_id::create("sc", this);
 
         for(int i = 0; i < DMA_PORTS; i++) begin
             string i_string;
@@ -151,15 +163,22 @@ class env #(DMA_MFB_UP_REGIONS, MFB_UP_REGIONS, MFB_UP_REG_SIZE,
     // Connect agent's ports with ports from scoreboard.
     function void connect_phase(uvm_phase phase);
 
-        m_env_rc.m_env_rc_mfb.analysis_port_data.connect(sc.rc_mfb_in);
-        m_env_rc.m_env_rc_mfb.analysis_port_meta.connect(sc.rc_meta_in);
         m_env_rc.m_env_rc_prefix_mvb.analysis_port.connect(sc.rc_prefix_mvb_in);
 
-        m_env_rq_mvb.analysis_port.connect(m_env_rc.m_monitor.analysis_export);
-
-        m_env_rq_mfb.analysis_port_data.connect(sc.rq_mfb_out);
+        // m_env_rq_mvb.analysis_port.connect(m_env_rc.m_monitor.analysis_export);
+        sc.rq_hdr_user_out.connect(m_env_rc.m_monitor.analysis_export);
         m_env_rq_mvb.analysis_port.connect(sc.rq_mvb_out);
         m_env_rq_prefix_mvb.analysis_port.connect(sc.rq_prefix_mvb_out);
+
+        if (DEVICE == "STRATIX10" || DEVICE == "AGILEX") begin
+            m_env_rq_mfb.analysis_port_data.connect(sc.rq_mfb_out);
+            m_env_rc.m_env_rc_mfb.analysis_port_data.connect(sc.rc_mfb_in);
+            m_env_rc.m_env_rc_mfb.analysis_port_meta.connect(sc.rc_meta_in);
+        end else begin
+            m_env_rq_axi.analysis_port_data.connect(sc.rq_mfb_out);
+            m_env_rq_axi.analysis_port_meta.connect(sc.rq_axi_meta_out);
+            m_env_rc.m_env_rc_axi.analysis_port_data.connect(sc.rc_mfb_in);
+        end
 
         //m_sequencer.m_reset    = m_reset.m_sequencer;
 

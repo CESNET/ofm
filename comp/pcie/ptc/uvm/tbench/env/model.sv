@@ -4,8 +4,8 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
-class model #(META_WIDTH, MFB_DOWN_REGIONS, MFB_UP_REGIONS, DMA_PORTS, DMA_MVB_UP_ITEMS, PCIE_UPHDR_WIDTH, PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH, ENDPOINT_TYPE) extends uvm_component;
-    `uvm_component_param_utils(uvm_ptc::model#(META_WIDTH, MFB_DOWN_REGIONS, MFB_UP_REGIONS, DMA_PORTS, DMA_MVB_UP_ITEMS, PCIE_UPHDR_WIDTH, PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH, ENDPOINT_TYPE))
+class model #(META_WIDTH, MFB_DOWN_REGIONS, MFB_UP_REGIONS, DMA_PORTS, DMA_MVB_UP_ITEMS, PCIE_UPHDR_WIDTH, PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH, ENDPOINT_TYPE, DEVICE) extends uvm_component;
+    `uvm_component_param_utils(uvm_ptc::model#(META_WIDTH, MFB_DOWN_REGIONS, MFB_UP_REGIONS, DMA_PORTS, DMA_MVB_UP_ITEMS, PCIE_UPHDR_WIDTH, PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH, ENDPOINT_TYPE, DEVICE))
     
     // Model inputs
     uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item #(32))                         model_up_mfb_in[DMA_PORTS];
@@ -14,8 +14,6 @@ class model #(META_WIDTH, MFB_DOWN_REGIONS, MFB_UP_REGIONS, DMA_PORTS, DMA_MVB_U
     // Model outputs
     uvm_analysis_port #(uvm_logic_vector_array::sequence_item #(32))         model_up_mfb_out;
     uvm_analysis_port #(uvm_logic_vector::sequence_item #(PCIE_UPHDR_WIDTH)) model_up_mvb_out;
-
-    int unsigned tag_cnt = 0;
 
     function new(string name = "model", uvm_component parent = null);
         super.new(name, parent);
@@ -84,13 +82,15 @@ class model #(META_WIDTH, MFB_DOWN_REGIONS, MFB_UP_REGIONS, DMA_PORTS, DMA_MVB_U
         uvm_logic_vector_array::sequence_item #(32)                         tr_up_mfb_in;
         uvm_logic_vector::sequence_item #(sv_dma_bus_pack::DMA_UPHDR_WIDTH) tr_up_mvb_in;
 
-        uvm_logic_vector_array::sequence_item #(32)           tr_up_mfb_out;
-        uvm_logic_vector::sequence_item #(PCIE_UPHDR_WIDTH)   tr_up_mvb_out;
+        uvm_logic_vector_array::sequence_item #(32)         tr_up_mfb_out;
+        uvm_logic_vector::sequence_item #(PCIE_UPHDR_WIDTH) tr_up_mvb_out;
 
         model_up_mvb_in[index].get(tr_up_mvb_in);
 
+        // Check if data size is same as size in HEADER
         if (tr_up_mvb_in.data[sv_dma_bus_pack::DMA_REQUEST_FIRSTIB_O-1 : sv_dma_bus_pack::DMA_REQUEST_TYPE_O] == 1'b1) begin
             model_up_mfb_in[index].get(tr_up_mfb_in);
+
             if (tr_up_mfb_in.size() != tr_up_mvb_in.data[sv_dma_bus_pack::DMA_REQUEST_TYPE_O-1 : sv_dma_bus_pack::DMA_REQUEST_LENGTH_O]) begin
                 $swrite(msg, "%s\n\tDATA SIZE: %d META SIZE: %d", msg, tr_up_mfb_in.size(), tr_up_mvb_in.data[sv_dma_bus_pack::DMA_REQUEST_TYPE_O-1 : sv_dma_bus_pack::DMA_REQUEST_LENGTH_O]);
                 `uvm_fatal(this.get_full_name(), msg);
@@ -122,6 +122,7 @@ class model #(META_WIDTH, MFB_DOWN_REGIONS, MFB_UP_REGIONS, DMA_PORTS, DMA_MVB_U
             be = {4'h0, (fbe & lbe)};
         else
             be = {lbe, fbe};
+
         pcie_header_out.len     = header_rq.packet_size[10-1 : 0];
         pcie_header_out.at      = '0;
         pcie_header_out.relaxed = header_rq.relaxed;
@@ -148,6 +149,7 @@ class model #(META_WIDTH, MFB_DOWN_REGIONS, MFB_UP_REGIONS, DMA_PORTS, DMA_MVB_U
 
         pcie_header_out.firstbe = be[4-1 : 0];
         pcie_header_out.lastbe  = be[8-1 : 4];
+
         if (header_rq.read_write == 1'b0) begin
             pcie_header_out.tag = header_rq.tag;
         end else
@@ -161,19 +163,35 @@ class model #(META_WIDTH, MFB_DOWN_REGIONS, MFB_UP_REGIONS, DMA_PORTS, DMA_MVB_U
         end else
             pcie_header_out.global_id = {header_rq.global_id[32-1 : 2], pcie_header_out.padd_1, 32'h0000};
 
-        tr_up_mvb_out.data = {pcie_header_out.global_id, pcie_header_out.req_id, pcie_header_out.tag,
-                                pcie_header_out.lastbe, pcie_header_out.firstbe, pcie_header_out.fmt, pcie_header_out.type_n,
-                                pcie_header_out.tag_9, pcie_header_out.tc, pcie_header_out.tag_8, pcie_header_out.padd_0,
-                                pcie_header_out.td, pcie_header_out.ep, pcie_header_out.relaxed, pcie_header_out.snoop,
-                                pcie_header_out.at, pcie_header_out.len};
+        if (DEVICE == "STRATIX10" || DEVICE ==  "AGILEX") begin
+            tr_up_mvb_out.data = {pcie_header_out.global_id, pcie_header_out.req_id, pcie_header_out.tag,
+                                    pcie_header_out.lastbe, pcie_header_out.firstbe, pcie_header_out.fmt, pcie_header_out.type_n,
+                                    pcie_header_out.tag_9, pcie_header_out.tc, pcie_header_out.tag_8, pcie_header_out.padd_0,
+                                    pcie_header_out.td, pcie_header_out.ep, pcie_header_out.relaxed, pcie_header_out.snoop,
+                                    pcie_header_out.at, pcie_header_out.len};
+        end else begin
+            tr_up_mvb_out.data = {'0, pcie_header_out.tag, pcie_header_out.req_id,
+                        1'b0, 3'b000, header_rq.read_write, header_rq.packet_size,
+                        header_rq.global_id[63 : 2], 2'b00};
+            // padding    [end : 106] ('0)
+            // TAG        [103 : 96]
+            // REQUEST ID [95 : 80]
+            // padding    [79 : 79]
+            // TYPE       [78 : 75]
+            // SIZE       [74 : 64]
+            // ADDRESS    [63 : 2]
+            // padding    [1 : 0]
+        end
 
         if (tr_up_mvb_in.data[sv_dma_bus_pack::DMA_REQUEST_FIRSTIB_O-1 : sv_dma_bus_pack::DMA_REQUEST_TYPE_O] == 1'b1) begin
-            if (ENDPOINT_TYPE == "H_TILE") begin
+            if (ENDPOINT_TYPE == "H_TILE" || DEVICE == "7SERIES" || DEVICE == "ULTRASCALE") begin
                 if (header_rq.read_write == 1'b1) begin
                     tr_up_mfb_out.data = new[tr_up_mfb_in.data.size + 4];
                 end else
                     tr_up_mfb_out.data = new[4];
+
                 tr_up_mfb_out.data[0 : 4-1] = {<<32{tr_up_mvb_out.data}};
+
                 if (header_rq.read_write == 1'b1) begin
                     for (int j = 0; j < tr_up_mfb_in.data.size; j++) begin
                         tr_up_mfb_out.data[j+4] = tr_up_mfb_in.data[j];
@@ -181,12 +199,13 @@ class model #(META_WIDTH, MFB_DOWN_REGIONS, MFB_UP_REGIONS, DMA_PORTS, DMA_MVB_U
                 end
             end else begin
                 tr_up_mfb_out.data = new[tr_up_mfb_in.data.size];
+
                 for (int j = 0; j < tr_up_mfb_in.data.size; j++) begin
                     tr_up_mfb_out.data[j] = tr_up_mfb_in.data[j];
                 end
             end
         end else begin
-            tr_up_mfb_out.data = new[1];
+            tr_up_mfb_out.data    = new[1];
             tr_up_mfb_out.data[0] = 32'h12345678;
         end
 
@@ -208,8 +227,8 @@ class model #(META_WIDTH, MFB_DOWN_REGIONS, MFB_UP_REGIONS, DMA_PORTS, DMA_MVB_U
 endclass
 
 
-class down_model #(DMA_PORTS, PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH) extends uvm_component;
-    `uvm_component_param_utils(uvm_ptc::down_model#(DMA_PORTS, PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH))
+class down_model #(DMA_PORTS, PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH, DEVICE) extends uvm_component;
+    `uvm_component_param_utils(uvm_ptc::down_model#(DMA_PORTS, PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH, DEVICE))
     
     // Model inputs
     uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item #(32))           model_rc_mfb_in;
@@ -217,23 +236,22 @@ class down_model #(DMA_PORTS, PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH) extends uvm
     uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(PCIE_PREFIX_WIDTH))  model_rc_prefix_mvb_in;
 
 
-    uvm_analysis_port #(uvm_logic_vector_array::sequence_item #(32))          model_down_mfb_out[DMA_PORTS];
+    uvm_analysis_port #(uvm_logic_vector_array::sequence_item #(32))                           model_down_mfb_out[DMA_PORTS];
     uvm_analysis_port #(uvm_logic_vector::sequence_item #(sv_dma_bus_pack::DMA_DOWNHDR_WIDTH)) model_down_mvb_out[DMA_PORTS];
-    int unsigned tag_cnt = 0;
 
     function new(string name = "model", uvm_component parent = null);
         super.new(name, parent);
 
-        model_rc_mfb_in         = new("model_rc_mfb_in",         this);
-        model_rc_meta_in        = new("model_rc_meta_in",         this);
-        model_rc_prefix_mvb_in  = new("model_rc_prefix_mvb_in",  this);
+        model_rc_mfb_in        = new("model_rc_mfb_in",        this);
+        model_rc_meta_in       = new("model_rc_meta_in",       this);
+        model_rc_prefix_mvb_in = new("model_rc_prefix_mvb_in", this);
 
         for (int unsigned it = 0; it < DMA_PORTS; it++) begin
             string str_it;
 
             str_it.itoa(it);
-            model_down_mfb_out[it] = new({"model_down_mfb_out_",    str_it}, this);
-            model_down_mvb_out[it] = new({"model_down_mvb_out_",      str_it}, this);
+            model_down_mfb_out[it] = new({"model_down_mfb_out_", str_it}, this);
+            model_down_mvb_out[it] = new({"model_down_mvb_out_", str_it}, this);
         end
 
     endfunction
@@ -242,23 +260,52 @@ class down_model #(DMA_PORTS, PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH) extends uvm
 
         uvm_logic_vector_array::sequence_item #(32)           tr_rc_mfb_in;
         uvm_logic_vector::sequence_item #(PCIE_DOWNHDR_WIDTH) tr_rc_meta_in;
-        //uvm_logic_vector::sequence_item #(MFB_DOWN_REGIONS) tr_rc_prefix_mvb_in;
 
-        uvm_logic_vector_array::sequence_item #(32)           tr_down_mfb_out;
-        uvm_logic_vector::sequence_item #(sv_dma_bus_pack::DMA_DOWNHDR_WIDTH)  tr_down_mvb_out;
+        uvm_logic_vector_array::sequence_item #(32)                           tr_down_mfb_out;
+        uvm_logic_vector::sequence_item #(sv_dma_bus_pack::DMA_DOWNHDR_WIDTH) tr_down_mvb_out;
 
         forever begin
+            string debug_msg = "";
+
             tr_down_mfb_out = uvm_logic_vector_array::sequence_item #(32)::type_id::create("tr_down_mfb_out");
             tr_down_mvb_out = uvm_logic_vector::sequence_item #(sv_dma_bus_pack::DMA_DOWNHDR_WIDTH)::type_id::create("tr_down_mvb_out");
 
+
             model_rc_mfb_in.get(tr_rc_mfb_in);
-            model_rc_meta_in.get(tr_rc_meta_in);
+            if (DEVICE == "STRATIX10" || DEVICE == "AGILEX") begin
+                model_rc_meta_in.get(tr_rc_meta_in);
+                tr_down_mfb_out = tr_rc_mfb_in;
+                tr_down_mvb_out.data = {8'b00000000, tr_rc_meta_in.data[90-1 : 82], 1'b1, tr_rc_meta_in.data[10-1 :0]};
+                model_down_mfb_out[tr_rc_meta_in.data[(PCIE_DOWNHDR_WIDTH-16)]].write(tr_down_mfb_out);
+                model_down_mvb_out[tr_rc_meta_in.data[(PCIE_DOWNHDR_WIDTH-16)]].write(tr_down_mvb_out);
+            end else begin
+                tr_rc_meta_in   = uvm_logic_vector::sequence_item #(PCIE_DOWNHDR_WIDTH)::type_id::create("tr_rc_meta_in");
 
-            tr_down_mfb_out = tr_rc_mfb_in;
-            tr_down_mvb_out.data = {8'b00000000, tr_rc_meta_in.data[90-1 : 82], 1'b1, tr_rc_meta_in.data[10-1 :0]};
+                tr_down_mfb_out.data = new[tr_rc_mfb_in.data.size - (PCIE_DOWNHDR_WIDTH/32)];
 
-            model_down_mfb_out[tr_rc_meta_in.data[(PCIE_DOWNHDR_WIDTH-16)]].write(tr_down_mfb_out);
-            model_down_mvb_out[tr_rc_meta_in.data[(PCIE_DOWNHDR_WIDTH-16)]].write(tr_down_mvb_out);
+                // FILL HEADER
+                for (int unsigned it = 0; it < (PCIE_DOWNHDR_WIDTH/32); it++) begin
+                    tr_rc_meta_in.data[((it+1)*32-1) -: 32] = tr_rc_mfb_in.data[it];
+                end
+
+                // FILL DATA
+                for (int j = 0; j < tr_rc_mfb_in.data.size; j++) begin
+                    tr_down_mfb_out.data[j] = tr_rc_mfb_in.data[j+(PCIE_DOWNHDR_WIDTH/32)];
+                end
+
+                tr_down_mvb_out.data = {8'b00000000, tr_rc_meta_in.data[72-1 : 64], tr_rc_meta_in.data[75], tr_rc_meta_in.data[43-1 : 32]};
+
+                $swrite(debug_msg, "%s\n\t PORT:           %d\n", debug_msg, tr_rc_meta_in.data[48]);
+                $swrite(debug_msg, "%s\n\t DOWN MODEL MFB IN:   %s\n", debug_msg, tr_rc_mfb_in.convert2string());
+                $swrite(debug_msg, "%s\n\t DOWN MODEL META IN:  %s\n", debug_msg, tr_rc_meta_in.convert2string());
+                $swrite(debug_msg, "%s\n\t DOWN MODEL MFB OUT:  %s\n", debug_msg, tr_down_mfb_out.convert2string());
+                $swrite(debug_msg, "%s\n\t DOWN MODEL META OUT: %s\n", debug_msg, tr_down_mvb_out.convert2string());
+                `uvm_info(this.get_full_name(), debug_msg ,UVM_MEDIUM);
+
+                model_down_mfb_out[tr_rc_meta_in.data[48]].write(tr_down_mfb_out);
+                model_down_mvb_out[tr_rc_meta_in.data[48]].write(tr_down_mvb_out);
+            end
+
         end
     endtask
 endclass
