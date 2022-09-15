@@ -174,15 +174,18 @@ class sequence_simple_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends sequence_si
         if (TUSER_WIDTH == 161) begin
             gen.tuser[67 : 64] = '0;
             gen.tuser[79 : 76] = '0;
+            gen.tuser[63 : 0] = '1;
         end else begin
             gen.tuser[33 : 32] = '0;
             gen.tuser[34] = 1'b0;
             gen.tuser[38] = 1'b0;
+            gen.tuser[31 : 0] = '1;
         end
         // EOF
         is_eop = '0;
         sop_cnt = 0;
         eop_cnt = 0;
+        gen.tlast = 1'b0;
 
         for (int unsigned it = 0; it < REGIONS; it++) begin
             int unsigned index = 0;
@@ -226,17 +229,19 @@ class sequence_simple_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends sequence_si
                     int unsigned loop_end   = REGION_ITEMS < (data.data.size() - data_index) ? REGION_ITEMS : (data.data.size() - data_index);
                     gen.tvalid = 1;
 
-                    for (int unsigned jt = index*REGION_ITEMS; jt < (index*REGION_ITEMS + loop_end); jt++) begin
-                        gen.tdata[it][(jt+1)*ITEM_WIDTH-1 -: ITEM_WIDTH] = data.data[data_index];
-                        data_index++;
-                    end
+                    gen.tdata[it][(index+1)*ITEM_WIDTH-1 -: ITEM_WIDTH] = data.data[data_index];
+                    data_index++;
 
                     // End of packet
                     if (data.data.size() <= data_index) begin
-                        is_eop[eop_cnt]    = 1'b1;
+                        is_eop[eop_cnt]     = 1'b1;
                         is_eop_ptr[eop_cnt] = it*4 + index;
+                        gen.tlast           = 1'b1;
+                        gen.tkeep           = '0;
+                        for (int unsigned jt = 0; jt < (it*4 + index); jt++) begin
+                            gen.tkeep[jt] = 1'b1;
+                        end
                         eop_cnt++;
-                        gen.tlast                   = 1'b1;
                         item_done();
                         state_packet = state_packet_space_new;
                     end
@@ -327,15 +332,18 @@ class sequence_full_speed_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends sequenc
         if (TUSER_WIDTH == 161) begin
             gen.tuser[67 : 64] = '0;
             gen.tuser[79 : 76] = '0;
+            gen.tuser[63 : 0] = '1;
         end else begin
             gen.tuser[33 : 32] = '0;
             gen.tuser[34] = 1'b0;
             gen.tuser[38] = 1'b0;
+            gen.tuser[31 : 0] = '1;
         end
         // EOF
         is_eop = '0;
         sop_cnt = 0;
         eop_cnt = 0;
+        gen.tlast = 1'b0;
 
         for (int unsigned it = 0; it < REGIONS; it++) begin
             int unsigned index = 0;
@@ -377,17 +385,19 @@ class sequence_full_speed_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends sequenc
                     int unsigned loop_end   = REGION_ITEMS < (data.data.size() - data_index) ? REGION_ITEMS : (data.data.size() - data_index);
                     gen.tvalid = 1;
 
-                    for (int unsigned jt = index*REGION_ITEMS; jt < (index*REGION_ITEMS + loop_end); jt++) begin
-                        gen.tdata[it][(jt+1)*ITEM_WIDTH-1 -: ITEM_WIDTH] = data.data[data_index];
-                        data_index++;
-                    end
+                    gen.tdata[it][(index+1)*ITEM_WIDTH-1 -: ITEM_WIDTH] = data.data[data_index];
+                    data_index++;
 
                     // End of packet
                     if (data.data.size() <= data_index) begin
-                        is_eop[eop_cnt]    = 1'b1;
+                        is_eop[eop_cnt]     = 1'b1;
                         is_eop_ptr[eop_cnt] = it*4 + index;
+                        gen.tlast           = 1'b1;
+                        gen.tkeep           = '0;
+                        for (int unsigned jt = 0; jt < (it*4 + index); jt++) begin
+                            gen.tkeep[jt] = 1'b1;
+                        end
                         eop_cnt++;
-                        gen.tlast                   = 1'b1;
                         item_done();
                         state_packet = state_packet_space_new;
                     end
@@ -474,7 +484,8 @@ class sequence_lib_rx#(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends uvm_common::seq
 
     // subclass can redefine and change run sequences
     // can be useful in specific tests
-    virtual function void init_sequence();
+    virtual function void init_sequence(config_sequence param_cfg = null);
+        super.init_sequence(param_cfg);
         this.add_sequence(uvm_logic_vector_array_axi::sequence_simple_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS)::get_type());
         this.add_sequence(uvm_logic_vector_array_axi::sequence_full_speed_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS)::get_type());
         this.add_sequence(uvm_logic_vector_array_axi::sequence_stop_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS)::get_type());
