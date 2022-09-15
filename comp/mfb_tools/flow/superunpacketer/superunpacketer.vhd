@@ -131,13 +131,31 @@ architecture FULL of SUPERUNPACKETER is
     --                                 SIGNALS
     -- ========================================================================
 
-    -- SuperPacket header extraction
-    signal rx_supkt_data_arr    : slv_array_t     (MFB_REGIONS*MFB_REGION_SIZE-1 downto 0)(MFB_BLOCK_SIZE*MFB_ITEM_WIDTH-1 downto 0);
-    signal rx_supkt_sof_pos_arr : slv_array_t     (MFB_REGIONS-1 downto 0)(max(1,log2(MFB_REGION_SIZE))-1 downto 0);
-    signal rx_supkt_sof_pos_ptr : u_array_t       (MFB_REGIONS-1 downto 0)(max(1,log2(MFB_REGIONS*MFB_REGION_SIZE))-1 downto 0);
+    -- Input logic
+    signal rx_supkt_data_arr     : slv_array_t     (MFB_REGIONS*MFB_REGION_SIZE-1 downto 0)(MFB_BLOCK_SIZE*MFB_ITEM_WIDTH-1 downto 0);
+    signal rx_supkt_sof_pos_arr  : slv_array_t     (MFB_REGIONS-1 downto 0)(max(1,log2(MFB_REGION_SIZE))-1 downto 0);
+    signal rx_supkt_sof_pos_word : u_array_t       (MFB_REGIONS-1 downto 0)(max(1,log2(MFB_REGIONS*MFB_REGION_SIZE))-1 downto 0);
+    signal rx_supkt_len_arr      : slv_array_t     (MFB_REGIONS-1 downto 0)(LENGTH_WIDTH-1 downto 0);
 
-    signal rx_supkt_len_arr     : slv_array_t     (MFB_REGIONS-1 downto 0)(LENGTH_WIDTH-1 downto 0);
-    signal rx_supkt_next_arr    : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal regional_offset     : u_array_t(MFB_REGIONS-1 downto 0)(SOF_OFFSET_W-1 downto 0);
+    signal sof_pos_offset      : u_array_t(MFB_REGIONS-1 downto 0)(SOF_OFFSET_W-1 downto 0);
+    signal hdr_length          : u_array_t(MFB_REGIONS-1 downto 0)(SOF_OFFSET_W-1 downto 0);
+    signal pkt_length          : u_array_t(MFB_REGIONS-1 downto 0)(SOF_OFFSET_W-1 downto 0);
+    signal rx_supkt_offset_arr : u_array_t(MFB_REGIONS-1 downto 0)(SOF_OFFSET_W-1 downto 0);
+
+    signal eof_propg_reg         : std_logic;
+    signal eof_propg             : std_logic_vector(MFB_REGIONS   downto 0);
+    signal sphe_tx_sof_mask      : std_logic_vector(MFB_REGIONS-1 downto 0);
+
+    -- Word counter
+    signal word_cnt_reg : unsigned                       (log2(PKT_MAX_WORDS)-1 downto 0) := (others => '0');
+    signal word_cnt     : u_array_t(MFB_REGIONS downto 0)(log2(PKT_MAX_WORDS)-1 downto 0);
+
+    -- SOF offset
+    signal sphe_tx_sof_masked       : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal sof_offset               : u_array_t       (MFB_REGIONS-1 downto 0)(SOF_OFFSET_W-1 downto 0);
+    signal sof_offset_prev          : u_array_t       (MFB_REGIONS-1 downto 0)(SOF_OFFSET_W-1 downto 0);
+    signal sof_offset_prev_reg      : unsigned                                (SOF_OFFSET_W-1 downto 0);
 
     -- First stage register
     signal rx_supkt_data_reg0        : std_logic_vector(MFB_WORD_WIDTH-1 downto 0);
@@ -148,29 +166,12 @@ architecture FULL of SUPERUNPACKETER is
     signal rx_supkt_src_rdy_reg0     : std_logic;
     signal rx_supkt_dst_rdy_reg0     : std_logic;
 
-    signal rx_supkt_length_reg0_arr  : slv_array_t     (MFB_REGIONS-1 downto 0)(LENGTH_WIDTH-1 downto 0);
+    signal rx_supkt_offset_reg0_arr : u_array_t  (MFB_REGIONS-1 downto 0)(SOF_OFFSET_W-1 downto 0);
+    signal sphe_tx_sof_mask_reg0    : std_logic_vector(MFB_REGIONS-1 downto 0);
 
     signal rx_supkt_data_reg0_arr    : slv_array_t(MFB_REGIONS-1 downto 0)(MFB_REGION_WIDTH-1 downto 0);
     signal rx_supkt_sof_pos_reg0_arr : slv_array_t(MFB_REGIONS-1 downto 0)(max(1,log2(MFB_REGION_SIZE))-1 downto 0);
     signal rx_supkt_eof_pos_reg0_arr : slv_array_t(MFB_REGIONS-1 downto 0)(max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE))-1 downto 0);
-
-    -- Word counter
-    signal some_sof     : std_logic;
-    signal word_cnt_en  : std_logic;
-    signal word_cnt_reg : unsigned                       (log2(PKT_MAX_WORDS)-1 downto 0) := (others => '0');
-    signal word_cnt     : u_array_t(MFB_REGIONS downto 0)(log2(PKT_MAX_WORDS)-1 downto 0);
-
-    -- SOF offset
-    signal rx_supkt_offset_reg0_arr : u_array_t  (MFB_REGIONS-1 downto 0)(SOF_OFFSET_W-1 downto 0);
-    signal sphe_tx_offset           : slv_array_t(MFB_REGIONS-1 downto 0)(SOF_OFFSET_W-1 downto 0);
-    signal sof_offset               : u_array_t  (MFB_REGIONS-1 downto 0)(SOF_OFFSET_W-1 downto 0);
-    signal sof_offset_prev          : u_array_t  (MFB_REGIONS-1 downto 0)(SOF_OFFSET_W-1 downto 0);
-    signal sof_offset_prev_reg      : unsigned                           (SOF_OFFSET_W-1 downto 0);
-
-    signal regional_offset : u_array_t(MFB_REGIONS-1 downto 0)(SOF_OFFSET_W-1 downto 0);
-    signal sof_pos_offset  : u_array_t(MFB_REGIONS-1 downto 0)(SOF_OFFSET_W-1 downto 0);
-    signal hdr_length      : u_array_t(MFB_REGIONS-1 downto 0)(SOF_OFFSET_W-1 downto 0);
-    signal pkt_length      : u_array_t(MFB_REGIONS-1 downto 0)(SOF_OFFSET_W-1 downto 0);
 
     -- SuperPacket Header Extractor (SPHE)
     signal sphe_rx_data        : slv_array_t(MFB_REGIONS-1 downto 0)(MFB_REGION_WIDTH-1 downto 0);
@@ -182,11 +183,23 @@ architecture FULL of SUPERUNPACKETER is
     signal sphe_tx_sof_pos    : slv_array_t     (MFB_REGIONS-1 downto 0)(max(1,log2(MFB_REGION_SIZE))-1 downto 0);
     signal sphe_tx_eof        : std_logic_vector(MFB_REGIONS-1 downto 0);
     signal sphe_tx_eof_pos    : slv_array_t     (MFB_REGIONS-1 downto 0)(max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE))-1 downto 0);
+    signal sphe_tx_offset     : slv_array_t     (MFB_REGIONS-1 downto 0)(SOF_OFFSET_W-1 downto 0);
+    signal sphe_tx_src_rdy    : std_logic;
+    signal sphe_tx_dst_rdy    : std_logic;
 
-    signal eof_propg_reg      : std_logic;
-    signal eof_propg          : std_logic_vector(MFB_REGIONS   downto 0);
-    signal sphe_tx_sof_mask   : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal sphe_tx_sof_masked : std_logic_vector(MFB_REGIONS-1 downto 0);
+    -- Second stage register
+    signal rx_supkt_sof_pos_reg1_arr : slv_array_t     (MFB_REGIONS-1 downto 0)(max(1,log2(MFB_REGION_SIZE))-1 downto 0);
+    signal rx_supkt_eof_pos_reg1_arr : slv_array_t     (MFB_REGIONS-1 downto 0)(max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE))-1 downto 0);
+    signal rx_supkt_sof_reg1         : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal rx_supkt_eof_reg1         : std_logic_vector(MFB_REGIONS-1 downto 0);
+
+    signal sphe_tx_data_reg1    : slv_array_t     (MFB_REGIONS-1 downto 0)(MFB_REGION_WIDTH-1 downto 0);
+    signal sphe_tx_sof_pos_reg1 : slv_array_t     (MFB_REGIONS-1 downto 0)(max(1,log2(MFB_REGION_SIZE))-1 downto 0);
+    signal sphe_tx_eof_pos_reg1 : slv_array_t     (MFB_REGIONS-1 downto 0)(max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE))-1 downto 0);
+    signal sphe_tx_sof_reg1     : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal sphe_tx_eof_reg1     : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal sphe_tx_src_rdy_reg1 : std_logic;
+    signal sphe_tx_dst_rdy_reg1 : std_logic;
 
     signal sphe_tx_data_new    : slv_array_t     (MFB_REGIONS-1 downto 0)(MFB_REGION_WIDTH-1 downto 0);
     signal sphe_tx_sof_new     : std_logic_vector(MFB_REGIONS-1 downto 0);
@@ -196,7 +209,7 @@ architecture FULL of SUPERUNPACKETER is
     signal sphe_tx_src_rdy_new : std_logic;
     signal sphe_tx_dst_rdy_new : std_logic;
 
-    -- Second stage register
+    -- Third stage register
     signal indv_pkt_data    : std_logic_vector(MFB_WORD_WIDTH-1 downto 0);
     signal indv_pkt_sof_pos : std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE))-1 downto 0);
     signal indv_pkt_eof_pos : std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE))-1 downto 0);
@@ -267,38 +280,89 @@ architecture FULL of SUPERUNPACKETER is
 
 begin
 
-    RX_MFB_DST_RDY <= sphe_tx_dst_rdy_new;
+    -- ========================================================================
+    -- Input logic
+    -- ========================================================================
 
-    -- ========================================================================
-    -- Extraction of the first header of each SuperPacket
-    -- ========================================================================
+    -- ----------------------------------------------------
+    --  Extraction of the first header of each SuperPacket
+    -- ----------------------------------------------------
 
     rx_supkt_data_arr    <= slv_array_deser(RX_MFB_DATA   , MFB_REGIONS*MFB_REGION_SIZE);
     rx_supkt_sof_pos_arr <= slv_array_deser(RX_MFB_SOF_POS, MFB_REGIONS);
     
     supkt_hdr_extract_g : for r in 0 to MFB_REGIONS-1 generate
-        -- convert to bits (-> create a pointer to the SOF)
-        rx_supkt_sof_pos_ptr(r) <= to_unsigned(r,log2(MFB_REGIONS)) & unsigned(rx_supkt_sof_pos_arr(r));
+        -- Create a global SOF POS (per one word)
+        rx_supkt_sof_pos_word(r) <= to_unsigned(r,log2(MFB_REGIONS)) & unsigned(rx_supkt_sof_pos_arr(r));
 
-        rx_supkt_len_arr(r) <= rx_supkt_data_arr(to_integer(rx_supkt_sof_pos_ptr(r)))(LENGTH_WIDTH-1 downto 0);
+        rx_supkt_len_arr(r) <= rx_supkt_data_arr(to_integer(rx_supkt_sof_pos_word(r)))(LENGTH_WIDTH-1 downto 0);
     end generate;
+
+    -- -------------------------------
+    --  Precalculate SuPkt SOF offset
+    -- -------------------------------
+
+    sof_offset_count_g : for r in 0 to MFB_REGIONS-1 generate
+        regional_offset(r) <= to_unsigned((r)*MFB_REGION_SIZE*MFB_BLOCK_SIZE                                                   , SOF_OFFSET_W);
+        sof_pos_offset (r) <= resize     (resize_right(unsigned(rx_supkt_sof_pos_arr(r)), log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE)), SOF_OFFSET_W);
+        hdr_length     (r) <= to_unsigned(HDR_ITEMS                                                                            , SOF_OFFSET_W);
+        pkt_length     (r) <= resize     (unsigned(rx_supkt_len_arr(r))                                                        , SOF_OFFSET_W);
+
+        -- SuperPacket SOF offset (calculated from the first packet of a SP)
+        rx_supkt_offset_arr(r) <= regional_offset(r) + -- Regional offset
+                                  sof_pos_offset (r) + -- SOF POS (conv to Items)
+                                  hdr_length     (r) + -- Header length
+                                  pkt_length     (r);  -- Length of the packet (w/o the header)
+    end generate;
+
+    -- use the Next bit?
+    -- -------------------------------------------
+    --  Precalculate the mask for the SPHE TX SOF
+    -- -------------------------------------------
+
+    process(CLK)
+    begin
+        if rising_edge(CLK) then
+            if (RX_MFB_SRC_RDY = '1') and (RX_MFB_DST_RDY = '1') then
+                eof_propg_reg <= eof_propg(MFB_REGIONS);
+            end if;
+            if (RESET = '1') then
+                eof_propg_reg <= '0';
+            end if;
+        end if;
+    end process;
+
+    eof_propg(0) <= '1' when (RX_MFB_EOF(0) = '1') else eof_propg_reg;
+    eof_propg_g : for r in 1 to MFB_REGIONS-1 generate
+        eof_propg(r) <= '0'            when (RX_MFB_SOF(r-1) = '1') else
+                        '1'            when (RX_MFB_EOF(r  ) = '1') else
+                        eof_propg(r-1);
+    end generate;
+    eof_propg(MFB_REGIONS) <= '0' when (RX_MFB_SOF(MFB_REGIONS-1) = '1') else eof_propg(MFB_REGIONS-1);
+
+    sphe_tx_sof_mask <= not eof_propg(MFB_REGIONS-1 downto 0);
 
     -- ========================================================================
     -- Input (first stage) register
     -- ========================================================================
 
+    RX_MFB_DST_RDY <= sphe_tx_dst_rdy;
+
     process(CLK)
     begin
         if rising_edge(CLK) then
-            if (sphe_tx_dst_rdy_new = '1') then
+            if (sphe_tx_dst_rdy = '1') then
                 rx_supkt_data_reg0    <= RX_MFB_DATA;
                 rx_supkt_sof_pos_reg0 <= RX_MFB_SOF_POS;
                 rx_supkt_eof_pos_reg0 <= RX_MFB_EOF_POS;
-                rx_supkt_sof_reg0     <= RX_MFB_SOF and RX_MFB_SRC_RDY;
-                rx_supkt_eof_reg0     <= RX_MFB_EOF and RX_MFB_SRC_RDY;
-                rx_supkt_src_rdy_reg0 <= RX_MFB_SRC_RDY;
+                rx_supkt_sof_reg0     <= RX_MFB_SOF and RX_MFB_SRC_RDY; -- TODO: RX_MFB_SOF
+                rx_supkt_eof_reg0     <= RX_MFB_EOF and RX_MFB_SRC_RDY; -- TODO: RX_MFB_EOF
+                
+                rx_supkt_offset_reg0_arr <= rx_supkt_offset_arr;
 
-                rx_supkt_length_reg0_arr  <= rx_supkt_len_arr;
+                sphe_tx_sof_mask_reg0 <= sphe_tx_sof_mask;
+                
+                rx_supkt_src_rdy_reg0 <= RX_MFB_SRC_RDY;
             end if;
 
             if (RESET = '1') then
@@ -311,20 +375,20 @@ begin
     rx_supkt_sof_pos_reg0_arr <= slv_array_deser(rx_supkt_sof_pos_reg0, MFB_REGIONS);
     rx_supkt_eof_pos_reg0_arr <= slv_array_deser(rx_supkt_eof_pos_reg0, MFB_REGIONS);
 
+    sphe_tx_src_rdy <= rx_supkt_src_rdy_reg0;
+
     -- ========================================================================
     -- Control logic for the SuperPacket Header Extractors (SPHEs)
     -- ========================================================================
 
     -- --------------
-    --  WORD COUNTER
+    --  Word counter
     -- --------------
-
-    word_cnt_en <= rx_supkt_src_rdy_reg0 and sphe_tx_dst_rdy_new;
 
     word_cnt_reg_p : process (CLK)
     begin
         if (rising_edge(CLK)) then
-            if (word_cnt_en = '1') then
+            if (sphe_tx_src_rdy = '1') and (sphe_tx_dst_rdy = '1') then
                 word_cnt_reg <= word_cnt(MFB_REGIONS) + 1;
             end if;
             if (RESET = '1') then
@@ -341,43 +405,26 @@ begin
     -- ------------------------
     --  SOF offset calculation
     -- ------------------------
-    regional_offset(0) <= to_unsigned(0*MFB_REGION_SIZE*MFB_BLOCK_SIZE                                                          , SOF_OFFSET_W);
-    sof_pos_offset (0) <= resize     (resize_right(unsigned(rx_supkt_sof_pos_reg0_arr(0)), log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE)), SOF_OFFSET_W);
-    hdr_length     (0) <= to_unsigned(HDR_ITEMS                                                                                 , SOF_OFFSET_W);
-    pkt_length     (0) <= resize     (unsigned(rx_supkt_length_reg0_arr(0))                                                     , SOF_OFFSET_W);
 
-    -- SuperPacket SOF offset (calculated from the first packet of a SP)
-    rx_supkt_offset_reg0_arr(0) <= regional_offset(0) + -- Regional offset
-                                   sof_pos_offset (0) + -- SOF POS (conv to Items)
-                                   hdr_length     (0) + -- Header length
-                                   pkt_length     (0);  -- Length of the packet (w/o the header)
+    -- Validate SPHE TX SOF
+    sphe_tx_sof_masked <= sphe_tx_sof and sphe_tx_sof_mask_reg0;
 
     --               SuperPacket SOF offset      if   there was a SuPkt SOF        or   copy the SOF offset from the previous word
     sof_offset(0) <= rx_supkt_offset_reg0_arr(0) when (rx_supkt_sof_reg0(0) = '1') else sof_offset_prev_reg;
 
     sof_offset_g : for r in 1 to MFB_REGIONS-1 generate
-        regional_offset(r) <= to_unsigned((r)*MFB_REGION_SIZE*MFB_BLOCK_SIZE                                                        , SOF_OFFSET_W);
-        sof_pos_offset (r) <= resize     (resize_right(unsigned(rx_supkt_sof_pos_reg0_arr(r)), log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE)), SOF_OFFSET_W);
-        hdr_length     (r) <= to_unsigned(HDR_ITEMS                                                                                 , SOF_OFFSET_W);
-        pkt_length     (r) <= resize     (unsigned(rx_supkt_length_reg0_arr(r))                                                     , SOF_OFFSET_W);
-
-        -- SuperPacket SOF offset (calculated from the first packet of a SP)
-        rx_supkt_offset_reg0_arr(r) <= regional_offset(r) + -- Regional offset
-                                       sof_pos_offset (r) + -- SOF POS (conv to Items)
-                                       hdr_length     (r) + -- Header length
-                                       pkt_length     (r);  -- Length of the packet (w/o the header)
-
-        --               SuperPacket SOF offset      if   there was a SuPkt SOF        or   ...
+        --               SuperPacket SOF offset      if   there was a SuPkt SOF        or ...
         sof_offset(r) <= rx_supkt_offset_reg0_arr(r) when (rx_supkt_sof_reg0(r) = '1') else sof_offset_prev(r-1);
         --                  ... calculated SOF offset         if   there is a SOF of an indiv pkt  or   propagate the previous SOF offset
         sof_offset_prev(r-1) <= unsigned(sphe_tx_offset(r-1)) when (sphe_tx_sof_masked(r-1) = '1') else sof_offset(r-1);
     end generate;
+
     sof_offset_prev(MFB_REGIONS-1) <= unsigned(sphe_tx_offset(MFB_REGIONS-1)) when (sphe_tx_sof_masked(MFB_REGIONS-1) = '1') else sof_offset(MFB_REGIONS-1);
 
     sof_offset_reg_p : process (CLK)
     begin
         if (rising_edge(CLK)) then
-            if (rx_supkt_src_rdy_reg0 = '1') and (sphe_tx_dst_rdy_new = '1') then
+            if (sphe_tx_src_rdy = '1') and (sphe_tx_dst_rdy = '1') then
                 sof_offset_prev_reg <= sof_offset_prev(MFB_REGIONS-1);
             end if;
         end if;
@@ -386,6 +433,8 @@ begin
     -- ========================================================================
     -- SuperPacket Header Extractors
     -- ========================================================================
+
+    sphe_tx_dst_rdy <= sphe_tx_dst_rdy_reg1;
 
     sphe_rx_data <= rx_supkt_data_reg0_arr;
     sphe_rx_g: for r in 0 to MFB_REGIONS-1 generate
@@ -423,52 +472,58 @@ begin
     end generate;
 
     -- ========================================================================
-    -- SPHE output logic
+    -- Second stage register
     -- ========================================================================
-    process(CLK)
+
+    sphe_tx_dst_rdy_reg1 <= sphe_tx_dst_rdy_new;
+
+    process (CLK)
     begin
-        if rising_edge(CLK) then
-            if (sphe_tx_src_rdy_new = '1') and (sphe_tx_dst_rdy_new = '1') then
-                eof_propg_reg <= eof_propg(MFB_REGIONS);
+        if (rising_edge(CLK)) then
+            if (sphe_tx_dst_rdy_reg1 = '1') then
+                rx_supkt_sof_pos_reg1_arr <= rx_supkt_sof_pos_reg0_arr;
+                rx_supkt_eof_pos_reg1_arr <= rx_supkt_eof_pos_reg0_arr;
+                rx_supkt_sof_reg1         <= rx_supkt_sof_reg0;
+                rx_supkt_eof_reg1         <= rx_supkt_eof_reg0;
+
+                sphe_tx_data_reg1    <= sphe_tx_data;
+                sphe_tx_sof_pos_reg1 <= sphe_tx_sof_pos;
+                sphe_tx_eof_pos_reg1 <= sphe_tx_eof_pos;
+                sphe_tx_sof_reg1     <= sphe_tx_sof_masked;
+                sphe_tx_eof_reg1     <= sphe_tx_eof;
+
+                sphe_tx_src_rdy_reg1 <= sphe_tx_src_rdy;
             end if;
             if (RESET = '1') then
-                eof_propg_reg <= '0';
+                sphe_tx_src_rdy_reg1 <= '0';
             end if;
         end if;
     end process;
 
-    eof_propg(0) <= '1' when (rx_supkt_eof_reg0(0) = '1') else eof_propg_reg;
-    eof_propg_g : for r in 1 to MFB_REGIONS-1 generate
-        eof_propg(r) <= '0'            when (rx_supkt_sof_reg0(r-1) = '1') else
-                        '1'            when (rx_supkt_eof_reg0(r  ) = '1') else
-                        eof_propg(r-1);
-    end generate;
-    eof_propg(MFB_REGIONS) <= '0' when (rx_supkt_sof_reg0(MFB_REGIONS-1) = '1') else eof_propg(MFB_REGIONS-1);
+    -- ========================================================================
+    -- SPHE output logic
+    -- ========================================================================
 
-    sphe_tx_sof_mask <= not eof_propg(MFB_REGIONS-1 downto 0);
-    sphe_tx_sof_masked <= sphe_tx_sof and sphe_tx_sof_mask;
-
+    sphe_tx_data_new <= sphe_tx_data_reg1;
 
     -- MUX which chooses between data either from:
-    --     the input register or
-    --     the output of the SUPKT_HDR_EXTRACTOR
+    --     the input or
+    --     the SUPKT_HDR_EXTRACTOR
     sphe_output_mux_g : for r in 0 to MFB_REGIONS-1 generate
-        sphe_tx_sof_new    (r) <= '1'                          when (rx_supkt_sof_reg0(r) = '1') else sphe_tx_sof_masked(r);
-        sphe_tx_sof_pos_new(r) <= rx_supkt_sof_pos_reg0_arr(r) when (rx_supkt_sof_reg0(r) = '1') else sphe_tx_sof_pos   (r);
+        sphe_tx_sof_new    (r) <= '1'                          when (rx_supkt_sof_reg1(r) = '1') else sphe_tx_sof_reg1    (r);
+        sphe_tx_sof_pos_new(r) <= rx_supkt_sof_pos_reg1_arr(r) when (rx_supkt_sof_reg1(r) = '1') else sphe_tx_sof_pos_reg1(r);
 
-        sphe_tx_eof_new    (r) <= '1'                          when (rx_supkt_eof_reg0(r) = '1') else sphe_tx_eof       (r);
-        sphe_tx_eof_pos_new(r) <= rx_supkt_eof_pos_reg0_arr(r) when (rx_supkt_eof_reg0(r) = '1') else sphe_tx_eof_pos   (r);
+        sphe_tx_eof_new    (r) <= '1'                          when (rx_supkt_eof_reg1(r) = '1') else sphe_tx_eof_reg1    (r);
+        sphe_tx_eof_pos_new(r) <= rx_supkt_eof_pos_reg1_arr(r) when (rx_supkt_eof_reg1(r) = '1') else sphe_tx_eof_pos_reg1(r);
     end generate;
-    -- DATA are just propagated through the SUPKT_HDR_EXTRACTOR without any change
-    sphe_tx_data_new    <= sphe_tx_data;
 
-    -- SRC and DST RDY signals are also just renamed
-    sphe_tx_src_rdy_new <= rx_supkt_src_rdy_reg0;
+    sphe_tx_src_rdy_new <= sphe_tx_src_rdy_reg1;
+
+    -- ========================================================================
+    -- Third stage register
+    -- ========================================================================
+
     sphe_tx_dst_rdy_new <= indv_pkt_dst_rdy;
-
-    -- ========================================================================
-    -- Second stage register
-    -- ========================================================================
 
     process (CLK)
     begin

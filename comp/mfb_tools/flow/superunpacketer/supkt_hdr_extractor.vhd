@@ -82,10 +82,10 @@ architecture FULL of SUPKT_HDR_EXTRACTOR is
 
     signal eof_offset        : unsigned(SOF_OFFSET_W-1 downto 0);
 
-    signal sof_target_word       : unsigned(log2(MAX_WORDS)-1 downto 0);
-    signal sof_target_region     : unsigned(max(1,log2(REGIONS))-1 downto 0);
-    signal sof_target_block      : unsigned(log2(REGION_SIZE)-1 downto 0);
-    signal sof_target_item       : unsigned(log2(BLOCK_SIZE)-1 downto 0);
+    signal sof_target_word   : unsigned(log2(MAX_WORDS)-1 downto 0);
+    signal sof_target_region : unsigned(max(1,log2(REGIONS))-1 downto 0);
+    signal sof_target_block  : unsigned(log2(REGION_SIZE)-1 downto 0);
+    signal sof_target_item   : unsigned(log2(BLOCK_SIZE)-1 downto 0);
 
     signal eof_target_word   : unsigned(log2(MAX_WORDS)-1 downto 0);
     signal eof_target_region : unsigned(max(1,log2(REGIONS))-1 downto 0);
@@ -95,7 +95,6 @@ architecture FULL of SUPKT_HDR_EXTRACTOR is
     signal sof               : std_logic;
     signal eof               : std_logic;
 
-    -- signal sof_pos_ptr       : integer range REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-EXT_HDR_WIDTH downto 0;
     signal rx_data_arr       : slv_array_t(REGION_SIZE-1 downto 0)(BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
     signal ext_block         : std_logic_vector(BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
     signal ext_hdr           : std_logic_vector(EXT_HDR_WIDTH-1 downto 0);
