@@ -15,12 +15,13 @@ package test;
     parameter ITEM_WIDTH = 8;
     parameter ITEMS = 4;
 
-    parameter TRANSACTION_COUNT = 100000;
+    parameter REPEAT = 20;
 
     parameter CLK_PERIOD = 4ns;
 
     parameter RESET_CLKS = 10;
 
+    `include "sequence.sv"
     `include "test.sv"
     
 endpackage

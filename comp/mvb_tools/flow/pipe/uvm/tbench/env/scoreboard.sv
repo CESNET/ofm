@@ -11,33 +11,38 @@ class scoreboard #(ITEM_WIDTH) extends uvm_scoreboard;
     uvm_analysis_export #(uvm_logic_vector::sequence_item#(ITEM_WIDTH)) analysis_imp_mvb_rx;
     uvm_analysis_export #(uvm_logic_vector::sequence_item#(ITEM_WIDTH)) analysis_imp_mvb_tx;
 
-    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(ITEM_WIDTH)) rx_fifo;
-    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(ITEM_WIDTH)) tx_fifo;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(ITEM_WIDTH)) dut_out_fifo;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(ITEM_WIDTH)) model_out_fifo;
+
+    model#(ITEM_WIDTH) m_model;
 
     local int unsigned compared = 0;
     local int unsigned errors   = 0;
-
 
     // Contructor of scoreboard.
     function new(string name, uvm_component parent);
         super.new(name, parent);
         analysis_imp_mvb_rx = new("analysis_imp_mvb_rx", this);
         analysis_imp_mvb_tx = new("analysis_imp_mvb_tx", this);
-        rx_fifo = new("rx_fifo", this);
-        tx_fifo = new("tx_fifo", this);
+        dut_out_fifo = new("dut_out_fifo", this);
+        model_out_fifo = new("model_out_fifo", this);
     endfunction
 
     function int unsigned used();
         int unsigned ret = 0;
-        ret |= (rx_fifo.used() != 0);
-        ret |= (tx_fifo.used() != 0);
+        ret |= (dut_out_fifo.used() != 0);
+        ret |= (model_out_fifo.used() != 0);
         return ret;
     endfunction
 
+        function void build_phase(uvm_phase phase);
+        m_model = model #(ITEM_WIDTH)::type_id::create("m_model", this);
+    endfunction
 
     function void connect_phase(uvm_phase phase);
-        analysis_imp_mvb_rx.connect(rx_fifo.analysis_export);
-        analysis_imp_mvb_tx.connect(tx_fifo.analysis_export);
+        analysis_imp_mvb_rx.connect(m_model.model_mvb_in.analysis_export);
+        m_model.model_mvb_out.connect(model_out_fifo.analysis_export);
+        analysis_imp_mvb_tx.connect(dut_out_fifo.analysis_export);
     endfunction
 
 
@@ -47,13 +52,20 @@ class scoreboard #(ITEM_WIDTH) extends uvm_scoreboard;
         uvm_logic_vector::sequence_item#(ITEM_WIDTH) tr_dut;
 
         forever begin
-            rx_fifo.get(tr_model);
-            tx_fifo.get(tr_dut);
+            string debug_msg = "";
+
+            dut_out_fifo.get(tr_dut);
+            model_out_fifo.get(tr_model);
+
+            $swrite(debug_msg, "%s\n\t Model MVB TR: %s\n", debug_msg, tr_model.convert2string());
+            $swrite(debug_msg, "%s\n\t DUT MVB TR: %s\n",   debug_msg, tr_dut.convert2string());
+            `uvm_info(this.get_full_name(), debug_msg ,UVM_MEDIUM);
 
             compared++;
             if (tr_model.compare(tr_dut) == 0) begin
                 errors++;
                 $swrite(msg, "\nTransactions doesnt match\n\tMODEL Transaction\n%s\n\n\tDUT Transaction\n%s", tr_model.convert2string(), tr_dut.convert2string());
+                `uvm_error(this.get_full_name(), msg);
             end
         end
     endtask
@@ -61,8 +73,8 @@ class scoreboard #(ITEM_WIDTH) extends uvm_scoreboard;
     virtual function void report_phase(uvm_phase phase);
         string msg = "\n";
         $swrite(msg, "%sCompared/errors: %0d/%0d \n", msg, compared, errors);
-        $swrite(msg, "%sCount of items inside RX fifo: %d \n", msg, rx_fifo.used());
-        $swrite(msg, "%sCount of items inside TX fifo: %d \n", msg, tx_fifo.used());
+        $swrite(msg, "%sCount of items inside RX fifo: %d \n", msg, dut_out_fifo.used());
+        $swrite(msg, "%sCount of items inside TX fifo: %d \n", msg, model_out_fifo.used());
         $swrite(msg, "%sErrors : %d \n", msg, errors);
 
         if (errors == 0 && this.used() == 0) begin
