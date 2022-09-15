@@ -124,15 +124,17 @@ architecture FULL of SUPERUNPACKETER is
     constant HDR_ITEMS        : natural := HDR_WIDTH/MFB_ITEM_WIDTH;
     -- Maximum amount of Words a single packet can stretch over.
     constant PKT_MAX_WORDS    : natural := PKT_MTU/(MFB_WORD_WIDTH/MFB_ITEM_WIDTH);
+    -- SOF offset width.
+    constant SOF_OFFSET_W     : natural := log2(PKT_MAX_WORDS*MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE);
 
     -- ========================================================================
     --                                 SIGNALS
     -- ========================================================================
 
     -- SuperPacket header extraction
-    signal rx_supkt_data_arr    : slv_array_t     (MFB_REGIONS-1 downto 0)(MFB_REGION_WIDTH-1 downto 0);
+    signal rx_supkt_data_arr    : slv_array_t     (MFB_REGIONS*MFB_REGION_SIZE-1 downto 0)(MFB_BLOCK_SIZE*MFB_ITEM_WIDTH-1 downto 0);
     signal rx_supkt_sof_pos_arr : slv_array_t     (MFB_REGIONS-1 downto 0)(max(1,log2(MFB_REGION_SIZE))-1 downto 0);
-    signal rx_supkt_sof_pos_ptr : u_array_t       (MFB_REGIONS-1 downto 0)(max(1,log2(MFB_REGION_WIDTH))-1 downto 0);
+    signal rx_supkt_sof_pos_ptr : u_array_t       (MFB_REGIONS-1 downto 0)(max(1,log2(MFB_REGIONS*MFB_REGION_SIZE))-1 downto 0);
 
     signal rx_supkt_len_arr     : slv_array_t     (MFB_REGIONS-1 downto 0)(LENGTH_WIDTH-1 downto 0);
     signal rx_supkt_next_arr    : std_logic_vector(MFB_REGIONS-1 downto 0);
@@ -159,18 +161,20 @@ architecture FULL of SUPERUNPACKETER is
     signal word_cnt     : u_array_t(MFB_REGIONS downto 0)(log2(PKT_MAX_WORDS)-1 downto 0);
 
     -- SOF offset
-    signal sof_offset_new : u_array_t(MFB_REGIONS-1 downto 0)(log2(PKT_MAX_WORDS*MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE)-1 downto 0);
-    signal sof_offset     : u_array_t(MFB_REGIONS-1 downto 0)(log2(PKT_MAX_WORDS*MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE)-1 downto 0);
-    signal sof_offset_reg : unsigned                         (log2(PKT_MAX_WORDS*MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE)-1 downto 0);
+    signal rx_supkt_offset_reg0_arr : u_array_t  (MFB_REGIONS-1 downto 0)(SOF_OFFSET_W-1 downto 0);
+    signal sphe_tx_offset           : slv_array_t(MFB_REGIONS-1 downto 0)(SOF_OFFSET_W-1 downto 0);
+    signal sof_offset               : u_array_t  (MFB_REGIONS-1 downto 0)(SOF_OFFSET_W-1 downto 0);
+    signal sof_offset_prev          : u_array_t  (MFB_REGIONS-1 downto 0)(SOF_OFFSET_W-1 downto 0);
+    signal sof_offset_prev_reg      : unsigned                           (SOF_OFFSET_W-1 downto 0);
 
-    signal regional_offset : u_array_t(MFB_REGIONS-1 downto 0)(log2(PKT_MAX_WORDS*MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE)-1 downto 0);
-    signal sof_pos_offset  : u_array_t(MFB_REGIONS-1 downto 0)(log2(PKT_MAX_WORDS*MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE)-1 downto 0);
-    signal hdr_length      : u_array_t(MFB_REGIONS-1 downto 0)(log2(PKT_MAX_WORDS*MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE)-1 downto 0);
-    signal pkt_length      : u_array_t(MFB_REGIONS-1 downto 0)(log2(PKT_MAX_WORDS*MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE)-1 downto 0);
+    signal regional_offset : u_array_t(MFB_REGIONS-1 downto 0)(SOF_OFFSET_W-1 downto 0);
+    signal sof_pos_offset  : u_array_t(MFB_REGIONS-1 downto 0)(SOF_OFFSET_W-1 downto 0);
+    signal hdr_length      : u_array_t(MFB_REGIONS-1 downto 0)(SOF_OFFSET_W-1 downto 0);
+    signal pkt_length      : u_array_t(MFB_REGIONS-1 downto 0)(SOF_OFFSET_W-1 downto 0);
 
     -- SuperPacket Header Extractor (SPHE)
     signal sphe_rx_data        : slv_array_t(MFB_REGIONS-1 downto 0)(MFB_REGION_WIDTH-1 downto 0);
-    signal sphe_rx_sof_offset  : slv_array_t(MFB_REGIONS-1 downto 0)(log2(PKT_MAX_WORDS*MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE)-1 downto 0);
+    signal sphe_rx_sof_offset  : slv_array_t(MFB_REGIONS-1 downto 0)(SOF_OFFSET_W-1 downto 0);
     signal sphe_rx_word_cnt    : slv_array_t(MFB_REGIONS-1 downto 0)(log2(PKT_MAX_WORDS)-1 downto 0);
 
     signal sphe_tx_data       : slv_array_t     (MFB_REGIONS-1 downto 0)(MFB_REGION_WIDTH-1 downto 0);
@@ -178,7 +182,6 @@ architecture FULL of SUPERUNPACKETER is
     signal sphe_tx_sof_pos    : slv_array_t     (MFB_REGIONS-1 downto 0)(max(1,log2(MFB_REGION_SIZE))-1 downto 0);
     signal sphe_tx_eof        : std_logic_vector(MFB_REGIONS-1 downto 0);
     signal sphe_tx_eof_pos    : slv_array_t     (MFB_REGIONS-1 downto 0)(max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE))-1 downto 0);
-    signal sphe_tx_length     : slv_array_t     (MFB_REGIONS-1 downto 0)(LENGTH_WIDTH-1 downto 0);
 
     signal eof_propg_reg      : std_logic;
     signal eof_propg          : std_logic_vector(MFB_REGIONS   downto 0);
@@ -190,7 +193,6 @@ architecture FULL of SUPERUNPACKETER is
     signal sphe_tx_sof_pos_new : slv_array_t     (MFB_REGIONS-1 downto 0)(max(1,log2(MFB_REGION_SIZE))-1 downto 0);
     signal sphe_tx_eof_new     : std_logic_vector(MFB_REGIONS-1 downto 0);
     signal sphe_tx_eof_pos_new : slv_array_t     (MFB_REGIONS-1 downto 0)(max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE))-1 downto 0);
-    signal sphe_tx_length_new  : slv_array_t     (MFB_REGIONS-1 downto 0)(LENGTH_WIDTH-1 downto 0);
     signal sphe_tx_src_rdy_new : std_logic;
     signal sphe_tx_dst_rdy_new : std_logic;
 
@@ -271,14 +273,14 @@ begin
     -- Extraction of the first header of each SuperPacket
     -- ========================================================================
 
-    rx_supkt_data_arr    <= slv_array_deser(RX_MFB_DATA   , MFB_REGIONS);
+    rx_supkt_data_arr    <= slv_array_deser(RX_MFB_DATA   , MFB_REGIONS*MFB_REGION_SIZE);
     rx_supkt_sof_pos_arr <= slv_array_deser(RX_MFB_SOF_POS, MFB_REGIONS);
     
     supkt_hdr_extract_g : for r in 0 to MFB_REGIONS-1 generate
         -- convert to bits (-> create a pointer to the SOF)
-        rx_supkt_sof_pos_ptr(r) <= resize_right(unsigned(rx_supkt_sof_pos_arr(r)), log2(MFB_REGION_WIDTH));
+        rx_supkt_sof_pos_ptr(r) <= to_unsigned(r,log2(MFB_REGIONS)) & unsigned(rx_supkt_sof_pos_arr(r));
 
-        rx_supkt_len_arr(r) <= rx_supkt_data_arr(r)(to_integer(rx_supkt_sof_pos_ptr(r))+LENGTH_WIDTH-1 downto to_integer(rx_supkt_sof_pos_ptr(r)));
+        rx_supkt_len_arr(r) <= rx_supkt_data_arr(to_integer(rx_supkt_sof_pos_ptr(r)))(LENGTH_WIDTH-1 downto 0);
     end generate;
 
     -- ========================================================================
@@ -292,8 +294,8 @@ begin
                 rx_supkt_data_reg0    <= RX_MFB_DATA;
                 rx_supkt_sof_pos_reg0 <= RX_MFB_SOF_POS;
                 rx_supkt_eof_pos_reg0 <= RX_MFB_EOF_POS;
-                rx_supkt_sof_reg0     <= RX_MFB_SOF;
-                rx_supkt_eof_reg0     <= RX_MFB_EOF;
+                rx_supkt_sof_reg0     <= RX_MFB_SOF and RX_MFB_SRC_RDY;
+                rx_supkt_eof_reg0     <= RX_MFB_EOF and RX_MFB_SRC_RDY;
                 rx_supkt_src_rdy_reg0 <= RX_MFB_SRC_RDY;
 
                 rx_supkt_length_reg0_arr  <= rx_supkt_len_arr;
@@ -316,7 +318,6 @@ begin
     -- --------------
     --  WORD COUNTER
     -- --------------
-    some_sof <= or sphe_tx_sof_new;
 
     word_cnt_en <= rx_supkt_src_rdy_reg0 and sphe_tx_dst_rdy_new;
 
@@ -324,11 +325,7 @@ begin
     begin
         if (rising_edge(CLK)) then
             if (word_cnt_en = '1') then
-                if (some_sof = '1') then
-                    word_cnt_reg <= to_unsigned(1, word_cnt_reg'length);
-                else
-                    word_cnt_reg <= word_cnt(MFB_REGIONS) + 1;
-                end if;
+                word_cnt_reg <= word_cnt(MFB_REGIONS) + 1;
             end if;
             if (RESET = '1') then
                 word_cnt_reg <= (others => '0');
@@ -338,60 +335,50 @@ begin
 
     word_cnt(0) <= word_cnt_reg when (rx_supkt_sof_reg0(0) = '0') else (others => '0');
     word_cnt_g: for r in 0 to MFB_REGIONS-1 generate
-        word_cnt(r+1) <= word_cnt(r) when (sphe_tx_sof_new(r) = '0') else (others => '0');
+        word_cnt(r+1) <= word_cnt(r) when (rx_supkt_sof_reg0(r) = '0') else (others => '0');
     end generate;
 
     -- ------------------------
     --  SOF offset calculation
     -- ------------------------
-    regional_offset(0) <= to_unsigned(0*MFB_REGION_SIZE*MFB_BLOCK_SIZE                                                    , sof_offset_reg'length);
-    sof_pos_offset (0) <= resize     (resize_right(unsigned(sphe_tx_sof_pos_new(0)), log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE)), sof_offset_reg'length);
-    hdr_length     (0) <= to_unsigned(HDR_ITEMS                                                                           , sof_offset_reg'length);
-    pkt_length     (0) <= resize     (unsigned(sphe_tx_length_new(0))                                                     , sof_offset_reg'length);
+    regional_offset(0) <= to_unsigned(0*MFB_REGION_SIZE*MFB_BLOCK_SIZE                                                          , SOF_OFFSET_W);
+    sof_pos_offset (0) <= resize     (resize_right(unsigned(rx_supkt_sof_pos_reg0_arr(0)), log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE)), SOF_OFFSET_W);
+    hdr_length     (0) <= to_unsigned(HDR_ITEMS                                                                                 , SOF_OFFSET_W);
+    pkt_length     (0) <= resize     (unsigned(rx_supkt_length_reg0_arr(0))                                                     , SOF_OFFSET_W);
 
-    sof_offset_new(0) <= regional_offset(0) + -- Regional offset
-                         sof_pos_offset (0) + -- SOF POS (conv to Items)
-                         hdr_length     (0) + -- Header length
-                         pkt_length     (0);  -- Length of the packet (w/o the header)
+    -- SuperPacket SOF offset (calculated from the first packet of a SP)
+    rx_supkt_offset_reg0_arr(0) <= regional_offset(0) + -- Regional offset
+                                   sof_pos_offset (0) + -- SOF POS (conv to Items)
+                                   hdr_length     (0) + -- Header length
+                                   pkt_length     (0);  -- Length of the packet (w/o the header)
 
-    -- Calculate a   new sof_offset    if   there was a SOF              or   copy the previous sof_offset
-    sof_offset(0) <= sof_offset_new(0) when (rx_supkt_sof_reg0(0) = '1') else sof_offset_reg;
+    --               SuperPacket SOF offset      if   there was a SuPkt SOF        or   copy the SOF offset from the previous word
+    sof_offset(0) <= rx_supkt_offset_reg0_arr(0) when (rx_supkt_sof_reg0(0) = '1') else sof_offset_prev_reg;
 
     sof_offset_g : for r in 1 to MFB_REGIONS-1 generate
-        regional_offset(r) <= to_unsigned((r-1)*MFB_REGION_SIZE*MFB_BLOCK_SIZE                                                  , sof_offset_reg'length);
-        sof_pos_offset (r) <= resize     (resize_right(unsigned(sphe_tx_sof_pos_new(r-1)), log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE)), sof_offset_reg'length);
-        hdr_length     (r) <= to_unsigned(HDR_ITEMS                                                                             , sof_offset_reg'length);
-        pkt_length     (r) <= resize     (unsigned(sphe_tx_length_new(r-1))                                                     , sof_offset_reg'length);
+        regional_offset(r) <= to_unsigned((r)*MFB_REGION_SIZE*MFB_BLOCK_SIZE                                                        , SOF_OFFSET_W);
+        sof_pos_offset (r) <= resize     (resize_right(unsigned(rx_supkt_sof_pos_reg0_arr(r)), log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE)), SOF_OFFSET_W);
+        hdr_length     (r) <= to_unsigned(HDR_ITEMS                                                                                 , SOF_OFFSET_W);
+        pkt_length     (r) <= resize     (unsigned(rx_supkt_length_reg0_arr(r))                                                     , SOF_OFFSET_W);
 
-        sof_offset_new(r) <= regional_offset(r) + -- Regional offset
-                             sof_pos_offset (r) + -- SOF POS (conv to Items)
-                             hdr_length     (r) + -- Header length
-                             pkt_length     (r);  -- Length of the packet (w/o the header)
+        -- SuperPacket SOF offset (calculated from the first packet of a SP)
+        rx_supkt_offset_reg0_arr(r) <= regional_offset(r) + -- Regional offset
+                                       sof_pos_offset (r) + -- SOF POS (conv to Items)
+                                       hdr_length     (r) + -- Header length
+                                       pkt_length     (r);  -- Length of the packet (w/o the header)
 
-        -- Calculate a   new sof_offset    if   there was a SOF              or   copy the previous sof_offset
-        sof_offset(r) <= sof_offset_new(r) when (sphe_tx_sof_new(r-1) = '1') else sof_offset(r-1);
+        --               SuperPacket SOF offset      if   there was a SuPkt SOF        or   ...
+        sof_offset(r) <= rx_supkt_offset_reg0_arr(r) when (rx_supkt_sof_reg0(r) = '1') else sof_offset_prev(r-1);
+        --                  ... calculated SOF offset         if   there is a SOF of an indiv pkt  or   propagate the previous SOF offset
+        sof_offset_prev(r-1) <= unsigned(sphe_tx_offset(r-1)) when (sphe_tx_sof_masked(r-1) = '1') else sof_offset(r-1);
     end generate;
+    sof_offset_prev(MFB_REGIONS-1) <= unsigned(sphe_tx_offset(MFB_REGIONS-1)) when (sphe_tx_sof_masked(MFB_REGIONS-1) = '1') else sof_offset(MFB_REGIONS-1);
 
     sof_offset_reg_p : process (CLK)
     begin
         if (rising_edge(CLK)) then
             if (rx_supkt_src_rdy_reg0 = '1') and (sphe_tx_dst_rdy_new = '1') then
-                -- Same condition as in the ``for generate`` above, just for the last Region
-                if (sphe_tx_sof_new(MFB_REGIONS-1) = '1') then
-
-                    -- debug
-                    -- report "regional_offset: " & to_string((MFB_REGIONS-1)*MFB_REGION_SIZE*MFB_BLOCK_SIZE);
-                    -- report "sof_pos_offset : " & to_string(resize_right(unsigned(sphe_tx_sof_pos_new(MFB_REGIONS-1)), log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE)));
-                    -- report "hdr_length     : " & to_string(HDR_WIDTH/MFB_ITEM_WIDTH);
-                    -- report "pkt_length     : " & to_string(unsigned(sphe_tx_length_new(MFB_REGIONS-1)));
-
-                    sof_offset_reg <= to_unsigned((MFB_REGIONS-1)*MFB_REGION_SIZE*MFB_BLOCK_SIZE                                                  , sof_offset_reg'length) +
-                                      resize     (resize_right(unsigned(sphe_tx_sof_pos_new(MFB_REGIONS-1)), log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE)), sof_offset_reg'length) +
-                                      to_unsigned(HDR_ITEMS                                                                                       , sof_offset_reg'length) +
-                                      resize     (unsigned(sphe_tx_length_new(MFB_REGIONS-1))                                                     , sof_offset_reg'length);
-                else
-                    sof_offset_reg <= sof_offset(MFB_REGIONS-1);
-                end if;
+                sof_offset_prev_reg <= sof_offset_prev(MFB_REGIONS-1);
             end if;
         end if;
     end process;
@@ -431,8 +418,7 @@ begin
             TX_SOF_POS  => sphe_tx_sof_pos   (r),
             TX_EOF      => sphe_tx_eof       (r),
             TX_EOF_POS  => sphe_tx_eof_pos   (r),
-            TX_LENGTH   => sphe_tx_length    (r),
-            TX_NEXT     => open
+            TX_NEW_OFF  => sphe_tx_offset    (r)
         );
     end generate;
 
@@ -472,8 +458,6 @@ begin
 
         sphe_tx_eof_new    (r) <= '1'                          when (rx_supkt_eof_reg0(r) = '1') else sphe_tx_eof       (r);
         sphe_tx_eof_pos_new(r) <= rx_supkt_eof_pos_reg0_arr(r) when (rx_supkt_eof_reg0(r) = '1') else sphe_tx_eof_pos   (r);
-
-        sphe_tx_length_new (r) <= rx_supkt_length_reg0_arr (r) when (rx_supkt_sof_reg0(r) = '1') else sphe_tx_length    (r);
     end generate;
     -- DATA are just propagated through the SUPKT_HDR_EXTRACTOR without any change
     sphe_tx_data_new    <= sphe_tx_data;

@@ -65,8 +65,7 @@ port(
     TX_SOF_POS  : out std_logic_vector(log2(REGION_SIZE)-1 downto 0);
     TX_EOF      : out std_logic;
     TX_EOF_POS  : out std_logic_vector(log2(REGION_SIZE*BLOCK_SIZE)-1 downto 0);
-    TX_LENGTH   : out std_logic_vector(LENGTH_WIDTH-1 downto 0);
-    TX_NEXT     : out std_logic
+    TX_NEW_OFF  : out std_logic_vector(log2(MAX_WORDS*REGIONS*REGION_SIZE*BLOCK_SIZE)-1 downto 0)
 );
 end entity;
 
@@ -74,37 +73,43 @@ architecture FULL of SUPKT_HDR_EXTRACTOR is
 
     -- Extracted header width is:       Length       + Next
     constant EXT_HDR_WIDTH : natural := LENGTH_WIDTH + 1;
+    -- SOF offset width.
+    constant SOF_OFFSET_W  : natural := log2(MAX_WORDS*REGIONS*REGION_SIZE*BLOCK_SIZE);
 
-    signal eof_offset        : unsigned(log2(MAX_WORDS*REGIONS*REGION_SIZE*BLOCK_SIZE)-1 downto 0);
+    signal multiple_items        : std_logic;
+    signal rx_offset_round_block : unsigned(log2(MAX_WORDS*REGIONS*REGION_SIZE)-1 downto 0);
+    signal rx_offset_round_item  : unsigned(SOF_OFFSET_W-1 downto 0);
 
-    signal sof_target_word       : std_logic_vector(log2(MAX_WORDS)-1 downto 0);
-    signal sof_target_region     : std_logic_vector(max(1,log2(REGIONS))-1 downto 0);
-    signal sof_target_block      : std_logic_vector(log2(REGION_SIZE)-1 downto 0);
-    signal sof_target_item       : std_logic_vector(log2(BLOCK_SIZE)-1 downto 0);
+    signal eof_offset        : unsigned(SOF_OFFSET_W-1 downto 0);
 
-    signal sof_target_word_adj   : unsigned(log2(MAX_WORDS)-1 downto 0);
-    signal sof_target_region_adj : unsigned(max(1,log2(REGIONS))-1 downto 0);
-    signal sof_target_block_adj  : unsigned(log2(REGION_SIZE)-1 downto 0);
+    signal sof_target_word       : unsigned(log2(MAX_WORDS)-1 downto 0);
+    signal sof_target_region     : unsigned(max(1,log2(REGIONS))-1 downto 0);
+    signal sof_target_block      : unsigned(log2(REGION_SIZE)-1 downto 0);
+    signal sof_target_item       : unsigned(log2(BLOCK_SIZE)-1 downto 0);
 
     signal eof_target_word   : unsigned(log2(MAX_WORDS)-1 downto 0);
     signal eof_target_region : unsigned(max(1,log2(REGIONS))-1 downto 0);
     signal eof_target_block  : unsigned(log2(REGION_SIZE)-1 downto 0);
     signal eof_target_item   : unsigned(log2(BLOCK_SIZE)-1 downto 0);
 
-    signal sof_hit_word          : std_logic;
-    signal sof_hit_region        : std_logic;
     signal sof               : std_logic;
-
-    signal eof_hit_word      : std_logic;
-    signal eof_hit_region    : std_logic;
     signal eof               : std_logic;
 
-    signal sof_pos_ptr       : integer range REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-EXT_HDR_WIDTH downto 0;
+    -- signal sof_pos_ptr       : integer range REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-EXT_HDR_WIDTH downto 0;
+    signal rx_data_arr       : slv_array_t(REGION_SIZE-1 downto 0)(BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
+    signal ext_block         : std_logic_vector(BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
     signal ext_hdr           : std_logic_vector(EXT_HDR_WIDTH-1 downto 0);
     signal ext_next          : std_logic;
     signal ext_length        : std_logic_vector(LENGTH_WIDTH-1 downto 0);
+    signal ext_length_res    : unsigned(SOF_OFFSET_W-1 downto 0);
 
 begin
+
+    multiple_items <= or (RX_OFFSET(log2(BLOCK_SIZE)-1 downto 0));
+    -- Round RX offset to Blocks (increment the number of Blocks if the SOF offest is not aligned to a Block)
+    rx_offset_round_block <= (unsigned(RX_OFFSET(log2(MAX_WORDS*REGIONS*REGION_SIZE*BLOCK_SIZE)-1 downto log2(BLOCK_SIZE))) + multiple_items);
+    -- Convert to Items
+    rx_offset_round_item <= rx_offset_round_block & to_unsigned(0, log2(BLOCK_SIZE));
 
     -- EOF is on the previous Item
     eof_offset <= unsigned(RX_OFFSET) - 1;
@@ -114,15 +119,10 @@ begin
         -- --------------------
         -- Parse the SOF offset
         -- --------------------
-        sof_target_word   <= RX_OFFSET(RX_OFFSET'high                                                 downto RX_OFFSET'high-log2(MAX_WORDS)                                +1);
-        sof_target_region <= RX_OFFSET(RX_OFFSET'high-log2(MAX_WORDS)                                 downto RX_OFFSET'high-log2(MAX_WORDS)-log2(REGIONS)                  +1);
-        sof_target_block  <= RX_OFFSET(RX_OFFSET'high-log2(MAX_WORDS)-log2(REGIONS)                   downto RX_OFFSET'high-log2(MAX_WORDS)-log2(REGIONS)-log2(REGION_SIZE)+1);
-        sof_target_item   <= RX_OFFSET(RX_OFFSET'high-log2(MAX_WORDS)-log2(REGIONS)-log2(REGION_SIZE) downto 0                                                               );
-
-        -- Block, Region, and Word corrections (adjustments)
-        sof_target_block_adj  <= unsigned(sof_target_block ) when  ((or sof_target_item) = '0'                                                                                              ) else unsigned(sof_target_block ) + 1;
-        sof_target_region_adj <= unsigned(sof_target_region) when (((or sof_target_item) = '0') or (unsigned(sof_target_block) < REGION_SIZE-1)                                             ) else unsigned(sof_target_region) + 1;
-        sof_target_word_adj   <= unsigned(sof_target_word  ) when (((or sof_target_item) = '0') or (unsigned(sof_target_block) < REGION_SIZE-1) or (unsigned(sof_target_region) < REGIONS-1)) else unsigned(sof_target_word  ) + 1;
+        sof_target_word   <= rx_offset_round_item(RX_OFFSET'high                                                 downto RX_OFFSET'high-log2(MAX_WORDS)                                +1);
+        sof_target_region <= rx_offset_round_item(RX_OFFSET'high-log2(MAX_WORDS)                                 downto RX_OFFSET'high-log2(MAX_WORDS)-log2(REGIONS)                  +1);
+        sof_target_block  <= rx_offset_round_item(RX_OFFSET'high-log2(MAX_WORDS)-log2(REGIONS)                   downto RX_OFFSET'high-log2(MAX_WORDS)-log2(REGIONS)-log2(REGION_SIZE)+1);
+        sof_target_item   <= rx_offset_round_item(RX_OFFSET'high-log2(MAX_WORDS)-log2(REGIONS)-log2(REGION_SIZE) downto 0                                                               );
 
         -- --------------------
         -- Parse the EOF offset
@@ -138,15 +138,10 @@ begin
         -- Parse the SOF offset
         -- --------------------
         sof_target_region    (0) <= '0';
-        sof_target_region_adj(0) <= '0';
 
-        sof_target_word  <= RX_OFFSET(RX_OFFSET'high                                   downto RX_OFFSET'high-log2(MAX_WORDS)                  +1);
-        sof_target_block <= RX_OFFSET(RX_OFFSET'high-log2(MAX_WORDS)                   downto RX_OFFSET'high-log2(MAX_WORDS)-log2(REGION_SIZE)+1);
-        sof_target_item  <= RX_OFFSET(RX_OFFSET'high-log2(MAX_WORDS)-log2(REGION_SIZE) downto 0                                                 );
-
-        -- Block and Word corrections (adjustments)
-        sof_target_block_adj <= unsigned(sof_target_block) when  ((or sof_target_item) = '0'                                                 ) else unsigned(sof_target_block) + 1;
-        sof_target_word_adj  <= unsigned(sof_target_word ) when (((or sof_target_item) = '0') or (unsigned(sof_target_block) < REGION_SIZE-1)) else unsigned(sof_target_word ) + 1;
+        sof_target_word  <= rx_offset_round_item(RX_OFFSET'high                                   downto RX_OFFSET'high-log2(MAX_WORDS)                  +1);
+        sof_target_block <= rx_offset_round_item(RX_OFFSET'high-log2(MAX_WORDS)                   downto RX_OFFSET'high-log2(MAX_WORDS)-log2(REGION_SIZE)+1);
+        sof_target_item  <= rx_offset_round_item(RX_OFFSET'high-log2(MAX_WORDS)-log2(REGION_SIZE) downto 0                                                 );
 
         -- --------------------
         -- Parse the EOF offset
@@ -162,35 +157,32 @@ begin
     -- --------------------------------
     -- Word and region evaluation - SOF
     -- --------------------------------
-    sof_hit_word   <= '1' when (unsigned(RX_WORD_CNT) = sof_target_word_adj  ) else '0';
-    sof_hit_region <= '1' when (REGION_NUMBER         = sof_target_region_adj) else '0';
-    sof            <= sof_hit_word and sof_hit_region;
+    sof <= '1' when (unsigned(RX_WORD_CNT) = sof_target_word) and (REGION_NUMBER = sof_target_region) else '0';
 
     -- --------------
     -- Header parsing
     -- --------------
     -- NOTE: One header (Length and Next bit) won't ever be in two Regions at once.
-    sof_pos_ptr <= to_integer(resize_right(sof_target_block_adj, sof_target_block_adj'length+log2(BLOCK_SIZE*ITEM_WIDTH)));
-    ext_hdr     <= RX_DATA(sof_pos_ptr+EXT_HDR_WIDTH-1 downto sof_pos_ptr);
-    ext_next    <= ext_hdr(ext_hdr'high);
-    ext_length  <= ext_hdr(ext_hdr'high-1 downto 0);
+    rx_data_arr    <= slv_array_deser(RX_DATA, REGION_SIZE);
+    ext_block      <= rx_data_arr(to_integer(sof_target_block));
+    ext_hdr        <= ext_block(EXT_HDR_WIDTH-1 downto 0);
+    ext_next       <= ext_hdr(ext_hdr'high);
+    ext_length     <= ext_hdr(ext_hdr'high-1 downto 0);
+    ext_length_res <= resize(unsigned(ext_length) + EXT_HDR_WIDTH, log2(MAX_WORDS*REGIONS*REGION_SIZE*BLOCK_SIZE));
 
     -- --------------------------------
     -- Word and region evaluation - EOF
     -- --------------------------------
-    eof_hit_word   <= '1' when (unsigned(RX_WORD_CNT) = eof_target_word  ) else '0';
-    eof_hit_region <= '1' when (REGION_NUMBER         = eof_target_region) else '0';
-    eof            <= eof_hit_word and eof_hit_region;
+    eof <= '1' when (unsigned(RX_WORD_CNT) = eof_target_word) and (REGION_NUMBER = eof_target_region) else '0';
 
     -- -----------------
     -- Output assignment
     -- -----------------
     TX_DATA    <= RX_DATA;
     TX_SOF     <= sof;
-    TX_SOF_POS <= std_logic_vector(sof_target_block_adj);
+    TX_SOF_POS <= std_logic_vector(sof_target_block);
     TX_EOF     <= eof;
     TX_EOF_POS <= std_logic_vector(eof_target_block) & std_logic_vector(eof_target_item);
-    TX_LENGTH  <= ext_length;
-    TX_NEXT    <= ext_next;
+    TX_NEW_OFF <= std_logic_vector(ext_length_res + rx_offset_round_item);
 
 end architecture;
