@@ -14,9 +14,9 @@ class sequence_simple_rx_base #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends uvm_co
     localparam REGION_ITEMS = DATA_WIDTH/ITEM_WIDTH/REGIONS;
     int unsigned space_size = 0;
     int unsigned data_index;
-    uvm_logic_vector_array::sequence_item#(ITEM_WIDTH) data;
-    sequencer_rx #(ITEM_WIDTH)                         hl_sqr;
-    uvm_axi::sequence_item #(DATA_WIDTH, TUSER_WIDTH, REGIONS)  gen;
+    uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)         data;
+    sequencer_rx #(ITEM_WIDTH)                                 hl_sqr;
+    uvm_axi::sequence_item #(DATA_WIDTH, TUSER_WIDTH, REGIONS) gen;
     typedef enum {state_last, state_next, state_reset} state_t;
     state_t state;
 
@@ -174,12 +174,14 @@ class sequence_simple_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends sequence_si
         if (TUSER_WIDTH == 161) begin
             gen.tuser[67 : 64] = '0;
             gen.tuser[79 : 76] = '0;
-            gen.tuser[63 : 0] = '1;
+            // TODO
+            gen.tuser[63 : 0]  = '0;
         end else begin
             gen.tuser[33 : 32] = '0;
-            gen.tuser[34] = 1'b0;
-            gen.tuser[38] = 1'b0;
-            gen.tuser[31 : 0] = '1;
+            gen.tuser[34]      = 1'b0;
+            gen.tuser[38]      = 1'b0;
+            // TODO
+            gen.tuser[31 : 0]  = '0;
         end
         // EOF
         is_eop = '0;
@@ -277,6 +279,10 @@ class sequence_simple_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends sequence_si
                 gen.tuser[((it*4) + 34)] = is_eop[it];
             end
         end
+        if (|is_eop) begin
+            gen.tlast = 1'b1;
+        end
+
     endtask
 
     task body;
@@ -332,17 +338,15 @@ class sequence_full_speed_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends sequenc
         if (TUSER_WIDTH == 161) begin
             gen.tuser[67 : 64] = '0;
             gen.tuser[79 : 76] = '0;
-            gen.tuser[63 : 0] = '1;
         end else begin
             gen.tuser[33 : 32] = '0;
-            gen.tuser[34] = 1'b0;
-            gen.tuser[38] = 1'b0;
-            gen.tuser[31 : 0] = '1;
+            gen.tuser[34]      = 1'b0;
+            gen.tuser[38]      = 1'b0;
         end
         // EOF
-        is_eop = '0;
-        sop_cnt = 0;
-        eop_cnt = 0;
+        is_eop    = '0;
+        sop_cnt   = 0;
+        eop_cnt   = 0;
         gen.tlast = 1'b0;
 
         for (int unsigned it = 0; it < REGIONS; it++) begin
@@ -392,7 +396,6 @@ class sequence_full_speed_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends sequenc
                     if (data.data.size() <= data_index) begin
                         is_eop[eop_cnt]     = 1'b1;
                         is_eop_ptr[eop_cnt] = it*4 + index;
-                        gen.tlast           = 1'b1;
                         gen.tkeep           = '0;
                         for (int unsigned jt = 0; jt < (it*4 + index); jt++) begin
                             gen.tkeep[jt] = 1'b1;
@@ -433,6 +436,9 @@ class sequence_full_speed_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends sequenc
                 gen.tuser[((it*4) + 34)] = is_eop[it];
             end
         end
+        if (|is_eop) begin
+            gen.tlast = 1'b1;
+        end
     endtask
 endclass
 
@@ -460,8 +466,8 @@ class sequence_stop_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends sequence_simp
             gen.tuser[79 : 76] = '0;
         end else begin
             gen.tuser[33 : 32] = '0;
-            gen.tuser[34] = 1'b0;
-            gen.tuser[38] = 1'b0;
+            gen.tuser[34]      = 1'b0;
+            gen.tuser[38]      = 1'b0;
         end
 
         if (hl_transactions != 0) begin
