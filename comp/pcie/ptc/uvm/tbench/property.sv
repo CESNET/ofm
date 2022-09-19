@@ -10,7 +10,7 @@ import uvm_pkg::*;
 module ptc_property #(DMA_MFB_UP_REGIONS, MFB_UP_REG_SIZE, MFB_UP_BLOCK_SIZE, MFB_UP_ITEM_WIDTH,
                       DMA_MVB_UP_ITEMS, MFB_UP_REGIONS, PCIE_UPHDR_WIDTH, 
                       MFB_DOWN_REGIONS, MFB_DOWN_REG_SIZE, MFB_DOWN_BLOCK_SIZE, MFB_DOWN_ITEM_WIDTH,
-                      PCIE_DOWNHDR_WIDTH, DMA_MFB_DOWN_REGIONS, DMA_MVB_DOWN_ITEMS, META_WIDTH, DMA_PORTS) 
+                      PCIE_DOWNHDR_WIDTH, DMA_MFB_DOWN_REGIONS, DMA_MVB_DOWN_ITEMS, META_WIDTH, DMA_PORTS, DEVICE) 
     (
         input RESET,
         input RESET_DMA,
@@ -20,7 +20,9 @@ module ptc_property #(DMA_MFB_UP_REGIONS, MFB_UP_REG_SIZE, MFB_UP_BLOCK_SIZE, MF
         mfb_if rc_mfb_vif,
         mvb_if up_mvb_vif [DMA_PORTS],
         mvb_if rq_mvb_vif,
-        mvb_if down_mvb_vif [DMA_PORTS]
+        mvb_if down_mvb_vif [DMA_PORTS],
+        axi_if rq_axi_vif,
+        axi_if rc_axi_vif
     );
     string module_name = "";
     logic START = 1'b1;
@@ -78,18 +80,6 @@ module ptc_property #(DMA_MFB_UP_REGIONS, MFB_UP_REG_SIZE, MFB_UP_BLOCK_SIZE, MF
         );
     end
 
-    mfb_property #(
-        .REGIONS      (MFB_UP_REGIONS),
-        .REGION_SIZE  (MFB_UP_REG_SIZE),
-        .BLOCK_SIZE   (MFB_UP_BLOCK_SIZE),
-        .ITEM_WIDTH   (MFB_UP_ITEM_WIDTH),
-        .META_WIDTH   (META_WIDTH)
-    )
-    rq_mfb_prop (
-        .RESET (RESET),
-        .vif   (rq_mfb_vif)
-    );
-
     mvb_property #(
         .ITEMS      (MFB_UP_REGIONS),
         .ITEM_WIDTH (PCIE_UPHDR_WIDTH)
@@ -99,17 +89,42 @@ module ptc_property #(DMA_MFB_UP_REGIONS, MFB_UP_REG_SIZE, MFB_UP_BLOCK_SIZE, MF
         .vif   (rq_mvb_vif)
     );
 
-    mfb_property #(
-        .REGIONS      (MFB_DOWN_REGIONS),
-        .REGION_SIZE  (MFB_DOWN_REG_SIZE),
-        .BLOCK_SIZE   (MFB_DOWN_BLOCK_SIZE),
-        .ITEM_WIDTH   (MFB_DOWN_ITEM_WIDTH),
-        .META_WIDTH   (META_WIDTH)
-    )
-    rc_mfb_prop (
-        .RESET (RESET),
-        .vif   (rc_mfb_vif)
-    );
+    generate
+        if (DEVICE == "AGILEX" || DEVICE == "STRATIX10") begin
+            mfb_property #(
+                .REGIONS      (MFB_DOWN_REGIONS),
+                .REGION_SIZE  (MFB_DOWN_REG_SIZE),
+                .BLOCK_SIZE   (MFB_DOWN_BLOCK_SIZE),
+                .ITEM_WIDTH   (MFB_DOWN_ITEM_WIDTH),
+                .META_WIDTH   (META_WIDTH)
+            )
+            rc_mfb_prop (
+                .RESET (RESET),
+                .vif   (rc_mfb_vif)
+            );
+
+            mfb_property #(
+                .REGIONS      (MFB_UP_REGIONS),
+                .REGION_SIZE  (MFB_UP_REG_SIZE),
+                .BLOCK_SIZE   (MFB_UP_BLOCK_SIZE),
+                .ITEM_WIDTH   (MFB_UP_ITEM_WIDTH),
+                .META_WIDTH   (META_WIDTH)
+            )
+            rq_mfb_prop (
+                .RESET (RESET),
+                .vif   (rq_mfb_vif)
+            );
+        end else begin
+            axi_property AXI_RQ (
+                .RESET (RESET),
+                .vif   (rq_axi_vif)
+            );
+            axi_property AXI_RC (
+                .RESET (RESET_DMA),
+                .vif   (rc_axi_vif)
+            );
+        end
+    endgenerate
 
     // This property check if MFB SOF is same as MVB VLD
     property sof_with_vld(int unsigned region);

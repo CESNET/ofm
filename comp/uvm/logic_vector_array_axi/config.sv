@@ -30,10 +30,15 @@ endclass
 
 class config_item extends uvm_object;
 
+    typedef enum {META_EOF, META_NONE} meta_type;
     // ------------------------------------------------------------------------ 
     // configuration variables
     uvm_active_passive_enum active;
     string interface_name;
+    meta_type meta_behav = META_NONE;  // Metadata behaviour -----------------------------
+                                // META_EOF means that metadata are paired with EOF position
+                                // META_NONE DONT CARE IF META_WIDTH = 0
+                                // ------------------------------------------------
 
     config_sequence seq_cfg;
 

@@ -137,7 +137,8 @@ class sequence_lib_tx#(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends uvm_common::seq
 
     // subclass can redefine and change run sequences
     // can be useful in specific tests
-    virtual function void init_sequence();
+    virtual function void init_sequence(config_sequence param_cfg = null);
+        super.init_sequence(param_cfg);
         this.add_sequence(uvm_axi::sequence_simple_tx #(DATA_WIDTH, TUSER_WIDTH, REGIONS)::get_type());
         this.add_sequence(uvm_axi::sequence_full_speed_tx #(DATA_WIDTH, TUSER_WIDTH, REGIONS)::get_type());
         this.add_sequence(uvm_axi::sequence_stop_tx #(DATA_WIDTH, TUSER_WIDTH, REGIONS)::get_type());

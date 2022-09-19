@@ -59,18 +59,3 @@ package test;
     //          (Can only be used on Xilinx FPGAs)
     // This option must correspond with the PCIe settings.
     parameter AUTO_ASSIGN_TAGS      = 1;
-    parameter DEVICE                = "STRATIX10"; // "VIRTEX6", "7SERIES", "ULTRASCALE", "STRATIX10"
-    // Connected PCIe endpoint type ("H_TILE" or "P_TILE" or "R_TILE") (only relevant on Intel FPGAs)
-    parameter ENDPOINT_TYPE         = "P_TILE";
-    // PCIE header is in MVB data only if ENDPOINT is P_TILE and DEVICE is STRATIX10 or DEVICE is Agilex
-
-    // VERIFICATION PARAMETERS
-    parameter CLK_PERIOD            = 2.22222222ns;
-    parameter CLK_DMA_PERIOD        = 5ns;
-    parameter RESET_CLKS            = 10;
-    parameter META_WIDTH            = 0;
-
-    `include "sequence.sv"
-    `include "test.sv"
-endpackage
-`endif

@@ -28,7 +28,6 @@ class monitor_logic_vector_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH,
         if (hi_tr != null) begin
             for (int unsigned it = start_pos; it <= tr.eof_pos[index]; it++) begin
                 data.push_back(tr.data[index][(it+1)*ITEM_WIDTH-1 -: ITEM_WIDTH]);
-                //$write("MFB MON TR %h\n", tr.data[it][(it+1)*ITEM_WIDTH-1 -: ITEM_WIDTH]);
             end
             hi_tr.data = data;
             analysis_port.write(hi_tr);
@@ -72,10 +71,8 @@ class monitor_logic_vector_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH,
                     if (hi_tr != null) begin
                         for (int unsigned jt = pos_start; jt <= pos_end; jt++) begin
                             data.push_back(tr.data[it][(jt+1)*ITEM_WIDTH-1 -: ITEM_WIDTH]);
-                            //$write("MFB MON TR %h\n", tr.data[it][(jt+1)*ITEM_WIDTH-1 -: ITEM_WIDTH]);
                             data_index++;
                         end
-                        //$write("MFB MON FIFO %h\n", tr.data[it]);
                     end
 
                     if (tr.eof[it] && hi_tr != null) begin
@@ -83,10 +80,6 @@ class monitor_logic_vector_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH,
                             `uvm_error(this.get_full_name(), "\n\tEOF has been set before frame heve been started. SOF havent been set before this EOF")
                         end else begin
                             hi_tr.data = data;
-                            //if (this.get_full_name() == "uvm_test_top.m_env.m_env_rq_mfb.m_logic_vector_array_agent.m_monitor") begin
-                            //    $write("MFB MON TR \n");
-                            //    `uvm_info(this.get_full_name(), hi_tr.convert2string() ,UVM_LOW)
-                            //end
                             analysis_port.write(hi_tr);
                             hi_tr = null;
                         end

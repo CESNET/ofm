@@ -230,3 +230,43 @@ class monitor_logic_vector_array #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS)
         end
     endfunction
 endclass
+
+class monitor_logic_vector #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS) extends uvm_logic_vector::monitor#(TUSER_WIDTH);
+    `uvm_component_param_utils(uvm_logic_vector_array_axi::monitor_logic_vector #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS))
+
+    typedef monitor_logic_vector #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS) this_type;
+    // Analysis port
+    uvm_analysis_imp #(uvm_axi::sequence_item #(DATA_WIDTH, TUSER_WIDTH, REGIONS), this_type) analysis_export;
+
+    uvm_reset::sync_terminate reset_sync;
+    config_item::meta_type    meta_behav;
+
+    local uvm_logic_vector::sequence_item#(TUSER_WIDTH) hi_tr;
+
+    function new (string name, uvm_component parent);
+        super.new(name, parent);
+        analysis_export = new("analysis_export", this);
+        reset_sync = new();
+    endfunction
+
+    virtual function void write(uvm_axi::sequence_item #(DATA_WIDTH, TUSER_WIDTH, REGIONS) tr);
+        if (tr.tvalid == 1'b1 && tr.tready == 1'b1) begin
+            if (TUSER_WIDTH == 60) begin
+                if (tr.tlast && meta_behav == config_item::META_EOF) begin
+                    hi_tr      = uvm_logic_vector::sequence_item#(TUSER_WIDTH)::type_id::create("hi_tr");
+                    hi_tr.data = tr.tuser;
+                    analysis_port.write(hi_tr);
+                end
+            end
+            if (TUSER_WIDTH == 137) begin
+                for (int unsigned it = 0; it < REGIONS; it++) begin
+                    if ((tr.tuser[it + 26] == 1'b1) && meta_behav == config_item::META_EOF) begin
+                        hi_tr      = uvm_logic_vector::sequence_item#(TUSER_WIDTH)::type_id::create("hi_tr");
+                        hi_tr.data = tr.tuser;
+                        analysis_port.write(hi_tr);
+                    end
+                end
+            end
+       end
+    endfunction
+endclass
