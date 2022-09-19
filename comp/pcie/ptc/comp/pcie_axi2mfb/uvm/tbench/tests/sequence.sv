@@ -44,7 +44,7 @@ class virt_sequence#(ITEM_WIDTH) extends uvm_sequence;
             run_reset();
         join_none
 
-        // #(200ns);
+        #(10ns);
 
         run_mfb();
 
