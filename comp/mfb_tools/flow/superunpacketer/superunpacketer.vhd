@@ -166,6 +166,13 @@ architecture FULL of SUPERUNPACKETER is
     signal rx_supkt_src_rdy_reg0     : std_logic;
     signal rx_supkt_dst_rdy_reg0     : std_logic;
 
+    -- Debug cnt
+    signal rx_supkt_pkt_cnt_reg0     : u_array_t(MFB_REGIONS downto 0)(16-1 downto 0);
+    -- attribute noprune: boolean;
+    -- attribute noprune of rx_supkt_pkt_cnt_reg0 : signal is true;
+    attribute preserve_for_debug : boolean;
+    attribute preserve_for_debug of rx_supkt_pkt_cnt_reg0 : signal is true;
+
     signal rx_supkt_offset_reg0_arr : u_array_t  (MFB_REGIONS-1 downto 0)(SOF_OFFSET_W-1 downto 0);
     signal sphe_tx_sof_mask_reg0    : std_logic_vector(MFB_REGIONS-1 downto 0);
 
@@ -376,6 +383,28 @@ begin
     rx_supkt_eof_pos_reg0_arr <= slv_array_deser(rx_supkt_eof_pos_reg0, MFB_REGIONS);
 
     sphe_tx_src_rdy <= rx_supkt_src_rdy_reg0;
+
+    -- ========================================================================
+    -- Debug counter
+    -- ========================================================================
+
+    process(CLK)
+    begin
+        if rising_edge(CLK) then
+            if (sphe_tx_src_rdy = '1') and (sphe_tx_dst_rdy = '1') then
+                rx_supkt_pkt_cnt_reg0(0) <= rx_supkt_pkt_cnt_reg0(MFB_REGIONS);
+                -- report "Packet count: " & to_string(to_integer(rx_supkt_pkt_cnt_reg0(0)));
+            end if;
+
+            if (RESET = '1') then
+                rx_supkt_pkt_cnt_reg0(0) <= (others => '0');
+            end if;
+        end if;
+    end process;
+
+    dbg_cnt_g : for r in 0 to MFB_REGIONS-1 generate
+        rx_supkt_pkt_cnt_reg0(r+1) <= rx_supkt_pkt_cnt_reg0(r) when (rx_supkt_eof_reg0(r) = '1') else rx_supkt_pkt_cnt_reg0(r) + 1;
+    end generate;
 
     -- ========================================================================
     -- Control logic for the SuperPacket Header Extractors (SPHEs)
