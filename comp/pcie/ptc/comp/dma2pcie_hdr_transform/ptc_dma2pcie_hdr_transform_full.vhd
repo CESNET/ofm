@@ -177,80 +177,23 @@ begin
    -- -------------------------------------------------------------------------
    -- TX PCIe MVB composing
    -- -------------------------------------------------------------------------
-
-   xilinx_pcie_hdr_gen : if (DEVICE="ULTRASCALE" or DEVICE="7SERIES") generate
-      tx_mvb_gen : for i in 0 to MVB_ITEMS-1 generate
-
-         TX_MVB_DATA(PCIE_UPHDR_WIDTH*(i+1)-1 downto PCIE_UPHDR_WIDTH*i)  <=
-            TAGM_MVB_OUT_arr(i)(DMA_UPHDR_WIDTH-128-1 downto 0) & -- padding
-            '0'                          & -- force ECRC
-            "000"                        & -- attributes
-            "000"                        & -- transaction class
-            '0'                          & -- requester ID enable
-            X"0000"                      & -- completer ID
-            tagm_mvb_out_tag_low(i)      & -- tag
-            X"00" & tagm_mvb_out_vfid(i) & -- requester ID
-            '0'                          & -- poisoned request
-            "000" & tagm_mvb_out_type(i) & -- request type
-            tagm_mvb_out_len(i)          & -- Dword count
-            tagm_mvb_out_addr(i)         & -- address
-            "00";                          -- address type
-
-      end generate;
-   end generate;
-
-   intel_pcie_hdr_gen : if (DEVICE="STRATIX10" or DEVICE="AGILEX") generate
-      tx_mvb_gen : for i in 0 to MVB_ITEMS-1 generate
-
-         TX_MVB_DATA(PCIE_UPHDR_WIDTH*(i+1)-1 downto PCIE_UPHDR_WIDTH*i)  <=
-
-            -- 96 bit header type
-            TAGM_MVB_OUT_arr(i)(DMA_UPHDR_WIDTH-128-1 downto 0) & -- padding
-            (32-1 downto 0 => '0')                              & -- padding
-            tagm_mvb_out_addr(i)(32-1 downto 2)                 & -- lower address
-            "00"                                                & -- padding
-            X"00" & tagm_mvb_out_vfid(i)                        & -- requester ID
-            tagm_mvb_out_tag_low(i)                             & -- tag
-            TX_MVB_BE(i*8+8-1 downto i*8+4)                     & -- last byte enable
-            TX_MVB_BE(i*8+4-1 downto i*8+0)                     & -- first byte enable
-            "0" & tagm_mvb_out_type(i)                          & -- request type
-            '0'                                                 & -- 96 bit header type
-            "00000"                                             & -- padding
-            tagm_mvb_out_tag_9(i)                               & -- bit 9 of tag
-            "000"                                               & -- priority
-            tagm_mvb_out_tag_8(i)                               & -- bit 8 of tag
-            "000"                                               & -- padding
-            '0'                                                 & -- ECRC
-            '0'                                                 & -- poisoned request
-            tagm_mvb_out_relaxed(i) & '0'                       & -- relaxed bit & no snoop
-            "00"                                                & -- padding
-            tagm_mvb_out_len(i)(10-1 downto 0)                    -- Dword count
-
-            when tagm_mvb_out_addr(i)(64-1 downto 32)=(64-1 downto 32 => '0') else
-
-            -- 128 bit header type
-            TAGM_MVB_OUT_arr(i)(DMA_UPHDR_WIDTH-128-1 downto 0) & -- padding
-            tagm_mvb_out_addr(i)(32-1 downto 2)                 & -- lower address
-            "00"                                                & -- padding
-            tagm_mvb_out_addr(i)(64-1 downto 32)                & -- higher address
-            X"00" & tagm_mvb_out_vfid(i)                        & -- requester ID
-            tagm_mvb_out_tag_low(i)                             & -- tag
-            TX_MVB_BE(i*8+8-1 downto i*8+4)                     & -- last byte enable
-            TX_MVB_BE(i*8+4-1 downto i*8+0)                     & -- first byte enable
-            "0" & tagm_mvb_out_type(i)                          & -- request type
-            '1'                                                 & -- 128 bit header type
-            "00000"                                             & -- padding
-            tagm_mvb_out_tag_9(i)                               & -- bit 9 of tag
-            "000"                                               & -- priority
-            tagm_mvb_out_tag_8(i)                               & -- bit 8 of tag
-            "000"                                               & -- padding
-            '0'                                                 & -- ECRC
-            '0'                                                 & -- poisoned request
-            tagm_mvb_out_relaxed(i) & '0'                       & -- relaxed bit & no snoop
-            "00"                                                & -- padding
-            tagm_mvb_out_len(i)(10-1 downto 0);                   -- Dword count
-
-      end generate;
+   tx_mvb_gen : for i in 0 to MVB_ITEMS-1 generate
+      pcie_rq_hdr_gen_i : entity work.PCIE_RQ_HDR_GEN
+      generic map(
+         DEVICE       => DEVICE
+      )
+      port map(
+         IN_ADDRESS    => tagm_mvb_out_addr(i),
+         IN_VFID       => tagm_mvb_out_vfid(i),
+         IN_TAG        => tagm_mvb_out_tag_9(i) & tagm_mvb_out_tag_8(i) & tagm_mvb_out_tag_low(i),
+         IN_FBE        => TX_MVB_BE(i*8+4-1 downto i*8+0),
+         IN_LBE        => TX_MVB_BE(i*8+8-1 downto i*8+4),
+         IN_REQ_TYPE   => tagm_mvb_out_type(i)(DMA_REQUEST_TYPE_O),
+         IN_ADDR_LEN   => TX_MVB_TYPE(i),
+         IN_ATTRIBUTES => '0' & tagm_mvb_out_relaxed(i) & '0',
+         IN_DW_CNT     => tagm_mvb_out_len(i),
+         OUT_HEADER    => TX_MVB_DATA(PCIE_UPHDR_WIDTH*(i+1)-1 downto PCIE_UPHDR_WIDTH*i)
+      );
    end generate;
 
    TX_MVB_VLD           <= TAGM_MVB_OUT_VLD;

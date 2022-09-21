@@ -170,10 +170,10 @@ class model #(META_WIDTH, MFB_DOWN_REGIONS, MFB_UP_REGIONS, DMA_PORTS, DMA_MVB_U
                                     pcie_header_out.td, pcie_header_out.ep, pcie_header_out.relaxed, pcie_header_out.snoop,
                                     pcie_header_out.at, pcie_header_out.len};
         end else begin
-            tr_up_mvb_out.data = {'0, pcie_header_out.tag, pcie_header_out.req_id,
-                        1'b0, 3'b000, header_rq.read_write, header_rq.packet_size,
-                        header_rq.global_id[63 : 2], 2'b00};
-            // padding    [end : 106] ('0)
+            tr_up_mvb_out.data = {1'b0, pcie_header_out.relaxed, 21'b000000000000000000000, pcie_header_out.tag,
+                                  pcie_header_out.req_id, 1'b0, 3'b000, header_rq.read_write, header_rq.packet_size,
+                                  header_rq.global_id[63 : 2], 2'b00};
+            // padding    [end : 126] ('0)
             // TAG        [103 : 96]
             // REQUEST ID [95 : 80]
             // padding    [79 : 79]
