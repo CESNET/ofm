@@ -246,8 +246,6 @@ architecture FULL of MTC is
     signal cq_axi_last_in            : std_logic;
     signal cq_axi_vld_in             : std_logic;
 
-    signal cq_axi_cq_hdr_first_be    : std_logic_vector(3 downto 0);
-    signal cq_axi_cq_hdr_last_be     : std_logic_vector(3 downto 0);
     signal cq_axi_user_sop           : std_logic; 
     signal cq_axi_user_tph_present   : std_logic;
     signal cq_axi_user_tph_type      : std_logic_vector(1 downto 0);
@@ -276,13 +274,26 @@ architecture FULL of MTC is
     signal tr_cq_mfb_meta_prefix     : std_logic_vector(32-1 downto 0);
     signal tr_cq_mfb_meta_hdr        : std_logic_vector(128-1 downto 0);
     signal tr_cq_mfb_hdr             : std_logic_vector(128-1 downto 0);
-    signal tr_cq_mfb_dw_count        : std_logic_vector(11-1 downto 0);
-    signal tr_cq_mfb_addr32          : std_logic_vector(61 downto 0);
-    signal tr_cq_mfb_addr64          : std_logic_vector(61 downto 0);
-    signal tr_cq_mfb_addr            : std_logic_vector(61 downto 0);
     signal tr_cq_mfb_req_type        : std_logic_vector(1 downto 0);
     signal tr_cq_mfb_req_msg         : std_logic;
+    signal tr_cq_mfb_wr              : std_logic;
+    signal tr_cq_mfb_rd              : std_logic;
     signal tr_cq_index_begin         : unsigned(3-1 downto 0);
+
+    signal cq_hdr_gen_dword_count    : std_logic_vector(11-1 downto 0);
+    signal cq_hdr_gen_attr           : std_logic_vector(3-1 downto 0);
+    signal cq_hdr_gen_tag            : std_logic_vector(10-1 downto 0);
+    signal cq_hdr_gen_tc             : std_logic_vector(3-1 downto 0);
+    signal cq_hdr_gen_req_type       : std_logic_vector(4-1 downto 0);
+    signal cq_hdr_gen_fbe            : std_logic_vector(4-1 downto 0);
+    signal cq_hdr_gen_lbe            : std_logic_vector(4-1 downto 0);
+    signal cq_hdr_gen_req_id         : std_logic_vector(16-1 downto 0);
+    signal cq_hdr_gen_addr           : std_logic_vector(64-1 downto 0);
+    signal cq_hdr_gen_addr_type      : std_logic_vector(2-1 downto 0);
+    signal cq_hdr_gen_hdr_type       : std_logic;
+    signal cq_hdr_gen_target_func    : std_logic_vector(8-1 downto 0);
+    signal cq_hdr_gen_bar_id         : std_logic_vector(3-1 downto 0);
+    signal cq_hdr_gen_bar_aperture   : std_logic_vector(6-1 downto 0);
 
     signal cq_hdr_tag                : std_logic_vector(10-1 downto 0);
     signal cq_hdr_addr               : std_logic_vector(64-1 downto 0);
@@ -293,7 +304,6 @@ architecture FULL of MTC is
     signal cq_hdr_tc                 : std_logic_vector(3-1 downto 0);
     signal cq_hdr_dword_count        : unsigned(11-1 downto 0);
     signal cq_hdr_attr               : std_logic_vector(3-1 downto 0);
-    signal cq_hdr_fmt_type           : std_logic_vector(8-1 downto 0);
     signal cq_meta_function_id       : std_logic_vector(8-1 downto 0);
     signal cq_meta_bar_id            : std_logic_vector(3-1 downto 0);
     signal cq_meta_bar_aperture      : std_logic_vector(6-1 downto 0);
@@ -406,8 +416,6 @@ architecture FULL of MTC is
     signal cc_low_addr               : unsigned(7-1 downto 0);
     signal cc_low_addr_reg           : unsigned(7-1 downto 0);
     signal cc_byte_count             : unsigned(13-1 downto 0);
-    signal cc_byte_count_slv         : std_logic_vector(13-1 downto 0);
-    signal byte_count_intel          : std_logic_vector(12-1 downto 0);
     signal cc_hdr                    : std_logic_vector(96-1 downto 0);
     signal cc_xilinx_error           : std_logic_vector(32-1 downto 0);
     signal cc_fsm_pst                : cc_fsm_t;
@@ -508,8 +516,6 @@ begin
         cq_axi_last_in <= cq_axi_pipe_dout(0);
 
         axi_256b_g: if (AXI_CQUSER_WIDTH = 88 or AXI_CQUSER_WIDTH = 85) generate
-            cq_axi_cq_hdr_first_be  <= cq_axi_user_in(3 downto 0);
-            cq_axi_cq_hdr_last_be   <= cq_axi_user_in(7 downto 4);
             cq_axi_user_sop         <= cq_axi_user_in(40);
             cq_axi_user_tph_present <= cq_axi_user_in(42);
             cq_axi_user_tph_type    <= cq_axi_user_in(44 downto 43);
@@ -518,34 +524,58 @@ begin
 
         -- No straddling supported!
         axi_512b_g: if (AXI_CQUSER_WIDTH = 183) generate
-            cq_axi_cq_hdr_first_be  <= cq_axi_user_in(3 downto 0);
-            cq_axi_cq_hdr_last_be   <= cq_axi_user_in(11 downto 8);
             cq_axi_user_sop         <= cq_axi_user_in(80);
             cq_axi_user_tph_present <= cq_axi_user_in(97);
             cq_axi_user_tph_type    <= cq_axi_user_in(100 downto 99);
             cq_axi_user_tph_st_tag  <= cq_axi_user_in(110 downto 103);
         end generate;
 
-        cq_axi_rd_req <= '1' when (unsigned(cq_axi_data_in(78 downto 75)) = 0) else '0';
-        cq_axi_wr_req <= '1' when (unsigned(cq_axi_data_in(78 downto 75)) = 1) else '0';
+
+        pcie_cq_hdr_gen_i : entity work.PCIE_CQ_HDR_DEPARSER
+        generic map(
+           DEVICE       => DEVICE,
+           CQUSER_WIDTH => AXI_CQUSER_WIDTH
+        )
+        port map(
+            OUT_ADDRESS      => cq_hdr_gen_addr,
+            OUT_ADDRESS_TYPE => cq_hdr_gen_addr_type,
+            OUT_DW_CNT       => cq_hdr_gen_dword_count,
+            OUT_REQ_ID       => cq_hdr_gen_req_id,
+            OUT_TAG          => cq_hdr_gen_tag,
+            OUT_TARGET_FUNC  => cq_hdr_gen_target_func,
+            OUT_BAR_ID       => cq_hdr_gen_bar_id,
+            OUT_BAR_APERTURE => cq_hdr_gen_bar_aperture,
+            OUT_TC           => cq_hdr_gen_tc,
+            OUT_ATTRIBUTES   => cq_hdr_gen_attr,
+            OUT_FBE          => cq_hdr_gen_fbe,
+            OUT_LBE          => cq_hdr_gen_lbe,
+            OUT_ADDR_LEN     => cq_hdr_gen_hdr_type,
+            OUT_REQ_TYPE     => cq_hdr_gen_req_type,
+
+            IN_AXI_TUSER     => cq_axi_user_in,
+            IN_HEADER        => cq_axi_data_in(128-1 downto 0)
+        );
+
+        cq_axi_rd_req <= cq_hdr_gen_req_type(0);
+        cq_axi_wr_req <= cq_hdr_gen_req_type(1);
 
         process(CLK)
         begin
             if (rising_edge(CLK)) then
                 if (cq_ready = '1' and cq_axi_vld_in = '1') then
                     if (cq_axi_user_sop = '1') then 
-                        cq_hdr_tag           <= "00" & cq_axi_data_in(103 downto 96);
-                        cq_hdr_addr_type     <= cq_axi_data_in(1 downto 0);
-                        cq_hdr_addr          <= cq_axi_data_in(63 downto 2) & "00";
-                        cq_hdr_first_be      <= cq_axi_cq_hdr_first_be;
-                        cq_hdr_last_be       <= cq_axi_cq_hdr_last_be;
-                        cq_hdr_request_id    <= cq_axi_data_in(95 downto 80);
-                        cq_hdr_tc            <= cq_axi_data_in(123 downto 121);
-                        cq_hdr_dword_count   <= unsigned(cq_axi_data_in(74 downto 64));
-                        cq_hdr_attr          <= cq_axi_data_in(126 downto 124);
-                        cq_meta_function_id  <= cq_axi_data_in(111 downto 104);
-                        cq_meta_bar_id       <= cq_axi_data_in(114 downto 112);
-                        cq_meta_bar_aperture <= cq_axi_data_in(120 downto 115);
+                        cq_hdr_tag           <= cq_hdr_gen_tag;
+                        cq_hdr_addr_type     <= cq_hdr_gen_addr_type;
+                        cq_hdr_addr          <= cq_hdr_gen_addr;
+                        cq_hdr_first_be      <= cq_hdr_gen_fbe;
+                        cq_hdr_last_be       <= cq_hdr_gen_lbe;
+                        cq_hdr_request_id    <= cq_hdr_gen_req_id;
+                        cq_hdr_tc            <= cq_hdr_gen_tc;
+                        cq_hdr_dword_count   <= unsigned(cq_hdr_gen_dword_count);
+                        cq_hdr_attr          <= cq_hdr_gen_attr;
+                        cq_meta_function_id  <= cq_hdr_gen_target_func;
+                        cq_meta_bar_id       <= cq_hdr_gen_bar_id;
+                        cq_meta_bar_aperture <= cq_hdr_gen_bar_aperture;
                         cq_meta_tph_present  <= cq_axi_user_tph_present;
                         cq_meta_tph_type     <= cq_axi_user_tph_type;
                         cq_meta_tph_st_tag   <= cq_axi_user_tph_st_tag;
@@ -655,32 +685,40 @@ begin
             tr_cq_mfb_hdr <= tr_cq_mfb_data(128-1 downto 0);
         end generate;
 
-        tr_cq_mfb_dw_count <= '0' & tr_cq_mfb_hdr(9 downto 0);
+        pcie_cq_hdr_gen_i : entity work.PCIE_CQ_HDR_DEPARSER
+        generic map(
+           DEVICE       => DEVICE
+        )
+        port map(
+            OUT_DW_CNT        => cq_hdr_gen_dword_count,
+            OUT_ATTRIBUTES    => cq_hdr_gen_attr,
+            OUT_TAG           => cq_hdr_gen_tag,
+            OUT_TC            => cq_hdr_gen_tc,
+            OUT_REQ_TYPE      => cq_hdr_gen_req_type,
+            OUT_FBE           => cq_hdr_gen_fbe,
+            OUT_LBE           => cq_hdr_gen_lbe,
+            OUT_REQ_ID        => cq_hdr_gen_req_id,
+            OUT_ADDRESS       => cq_hdr_gen_addr,
+            OUT_ADDRESS_TYPE  => cq_hdr_gen_addr_type,
+            OUT_ADDR_LEN      => cq_hdr_gen_hdr_type,
+            OUT_TARGET_FUNC   => cq_hdr_gen_target_func,
+            OUT_BAR_ID        => cq_hdr_gen_bar_id,
+            OUT_BAR_APERTURE  => cq_hdr_gen_bar_aperture,
 
-        tr_cq_mfb_addr32 <= std_logic_vector(to_unsigned(0,32)) & tr_cq_mfb_hdr(95 downto 66);
-        tr_cq_mfb_addr64 <= tr_cq_mfb_hdr(95 downto 64) & tr_cq_mfb_hdr(127 downto 98);
-        -- 64bit or 32bit address
-        tr_cq_mfb_addr <= tr_cq_mfb_addr64 when (tr_cq_mfb_hdr(29) = '1') else
-                        tr_cq_mfb_addr32;
+            IN_HEADER        => tr_cq_mfb_hdr,
+            IN_INTEL_META    => CTL_BAR_APERTURE & tr_cq_mfb_meta_bar_range & "00000000"
+        );
 
-        with tr_cq_mfb_hdr(31 downto 24) select
-        tr_cq_mfb_req_type <= "01" when "00000000", -- 32b mem rd
-                              "01" when "00100000", -- 64b mem rd
-                              "10" when "01000000", -- 32b mem wr
-                              "10" when "01100000", -- 64b mem wr
-                              "00" when others;
-
-        with tr_cq_mfb_hdr(31 downto 27) select
-        tr_cq_mfb_req_msg <= '1' when "00110", -- Msg
-                             '1' when "01110", -- MsgD
-                             '0' when others;
+        tr_cq_mfb_rd      <= cq_hdr_gen_req_type(0);
+        tr_cq_mfb_wr      <= cq_hdr_gen_req_type(1);
+        tr_cq_mfb_req_msg <= cq_hdr_gen_req_type(2);
 
         tr_cq_index_begin_p : process (all)
         begin
             if (IS_MFB_META_DEV) then -- header is not in DATA signal
                 tr_cq_index_begin <= to_unsigned(0,3);
             else -- H-Tile - 3 or 4 dword header
-                if (tr_cq_mfb_hdr(29) = '1') then
+                if (cq_hdr_gen_hdr_type = '1') then
                     tr_cq_index_begin <= to_unsigned(4,3);
                 else
                     tr_cq_index_begin <= to_unsigned(3,3);
@@ -693,24 +731,23 @@ begin
             if (rising_edge(CLK)) then
                 if (cq_ready = '1' and tr_cq_mfb_src_rdy = '1') then
                     if (tr_cq_mfb_sof = '1') then 
-                        cq_hdr_tag           <= tr_cq_mfb_hdr(23) & tr_cq_mfb_hdr(19) & tr_cq_mfb_hdr(47 downto 40);
-                        cq_hdr_addr_type     <= (others => '0'); -- unused
-                        cq_hdr_addr          <= tr_cq_mfb_addr & "00";
-                        cq_hdr_first_be      <= tr_cq_mfb_hdr(35 downto 32);
-                        cq_hdr_last_be       <= tr_cq_mfb_hdr(39 downto 36);
-                        cq_hdr_request_id    <= tr_cq_mfb_hdr(63 downto 48);
-                        cq_hdr_tc            <= tr_cq_mfb_hdr(22 downto 20);
-                        cq_hdr_dword_count   <= unsigned(tr_cq_mfb_dw_count);
-                        cq_hdr_attr          <= tr_cq_mfb_hdr(18) & tr_cq_mfb_hdr(13 downto 12);
-                        cq_hdr_fmt_type      <= tr_cq_mfb_hdr(31 downto 24);
-                        cq_meta_function_id  <= (others => '0'); -- todo
-                        cq_meta_bar_id       <= tr_cq_mfb_meta_bar_range;
-                        cq_meta_bar_aperture <= CTL_BAR_APERTURE;
+                        cq_hdr_tag           <= cq_hdr_gen_tag;
+                        cq_hdr_addr_type     <= cq_hdr_gen_addr_type; -- unused
+                        cq_hdr_addr          <= cq_hdr_gen_addr;
+                        cq_hdr_first_be      <= cq_hdr_gen_fbe;
+                        cq_hdr_last_be       <= cq_hdr_gen_lbe;
+                        cq_hdr_request_id    <= cq_hdr_gen_req_id;
+                        cq_hdr_tc            <= cq_hdr_gen_tc;
+                        cq_hdr_dword_count   <= unsigned(cq_hdr_gen_dword_count);
+                        cq_hdr_attr          <= cq_hdr_gen_attr;
+                        cq_meta_function_id  <= cq_hdr_gen_target_func; -- todo
+                        cq_meta_bar_id       <= cq_hdr_gen_bar_id;
+                        cq_meta_bar_aperture <= cq_hdr_gen_bar_aperture;
                         cq_data_index_begin  <= tr_cq_index_begin;
                     end if;
                     cq_data   <= tr_cq_mfb_data;
-                    cq_wr_req <= tr_cq_mfb_req_type(1);
-                    cq_rd_req <= tr_cq_mfb_req_type(0);
+                    cq_wr_req <= tr_cq_mfb_wr;
+                    cq_rd_req <= tr_cq_mfb_rd;
                     cq_ignore <= tr_cq_mfb_req_msg;
                     cq_sot    <= tr_cq_mfb_sof;
                     cq_eot    <= tr_cq_mfb_eof;
@@ -1249,62 +1286,26 @@ begin
     --  CC HEADER TEMPLATE
     -- -------------------------------------------------------------------------
 
-    cc_byte_count_slv <= std_logic_vector(cc_byte_count);
+    pcie_cc_hdr_gen_i : entity work.PCIE_CC_HDR_GEN
+    generic map(
+        DEVICE       => DEVICE
+    )
+    port map(
 
-    cc_hdr_xilinx_g: if IS_XILINX_DEV generate
-        cc_hdr <=
-            '0'                             & -- force ECRC
-            reg1_cq_hdr_attr                & -- attributes
-            reg1_cq_hdr_tc                  & -- transaction class
-            '0'                             & -- completer ID enable
-            "00000000"                      & -- completer bus number
-            reg1_cq_meta_function_id        & -- target function/device number
-            reg1_cq_hdr_tag(7 downto 0)     & -- tag
-            reg1_cq_hdr_request_id          & -- requester ID
-            '0'                             & -- RESERVED
-            '0'                             & -- poisoned completion
-            cc_status                       & -- completion status
-            std_logic_vector(cc_dwords_reg) & -- Dword count
-            "00"                            & -- RESERVED
-            '0'                             & -- locked read completion
-            cc_byte_count_slv               & -- byte count
-            "000000"                        & -- RESERVED
-            reg1_cq_hdr_addr_type           & -- address type
-            '0'                             & -- RESERVED
-            std_logic_vector(cc_low_addr_reg);  -- lower address
-
-        cc_xilinx_error <=
-            "00000000"               & -- RESERVED
-            reg1_cq_meta_tph_st_tag  & -- tph_st_tag
-            "00000"                  & -- RESERVED
-            reg1_cq_meta_tph_type    & -- tph_type
-            reg1_cq_meta_tph_present & -- tph_present
-            reg1_cq_hdr_last_be      & -- last_be
-            reg1_cq_hdr_first_be;      -- first_be
-    end generate;
-
-    cc_hdr_intel_g: if IS_INTEL_DEV generate
-        byte_count_intel <= std_logic_vector(resize(cc_byte_count,12));
-
-        cc_hdr <=
-            reg1_cq_hdr_request_id          & -- Requester ID
-            reg1_cq_hdr_tag(7 downto 0)     & -- Tag[7:0]
-            '0'                             & -- reserved bit  
-            std_logic_vector(cc_low_addr_reg) & -- lower address
-            X"0000"                         & -- completer ID
-            cc_status                       & -- completion status
-            '0'                             & -- reserved bit    
-            byte_count_intel                & -- byte count
-            "01001010"                      & -- fmt & type (only Completion with Data is supported)
-            reg1_cq_hdr_tag(9)              & -- Tag[9] in PCIe Gen4 else reserved bit
-            reg1_cq_hdr_tc                  & -- transaction class
-            reg1_cq_hdr_tag(8)              & -- Tag[8] in PCIe Gen4 else reserved bit
-            reg1_cq_hdr_attr(2)             & -- attributes[2]
-            "0000"                          & -- reserved bits
-            reg1_cq_hdr_attr(1 downto 0)    & -- attributes[1:0]
-            "00"                            & -- address type
-            std_logic_vector(cc_dwords_reg(9 downto 0)); -- dword count
-    end generate;
+        IN_LOWER_ADDR   => std_logic_vector(cc_low_addr_reg),
+        IN_ADDRESS_TYPE => reg1_cq_hdr_addr_type,
+        IN_BYTE_CNT     => std_logic_vector(cc_byte_count),
+        IN_DW_CNT       => std_logic_vector(cc_dwords_reg),
+        IN_COMP_ST      => cc_status,
+        IN_REQ_ID       => reg1_cq_hdr_request_id,
+        IN_TAG          => reg1_cq_hdr_tag,
+        IN_META_FUNC_ID => reg1_cq_meta_function_id,
+        IN_BUS_NUM      => "00000000",
+        IN_TC           => reg1_cq_hdr_tc,
+        IN_ATTRIBUTES   => reg1_cq_hdr_attr,
+        COMP_WITH_DATA  => '1',
+        OUT_HEADER      => cc_hdr
+    );
 
     -- -------------------------------------------------------------------------
     --  CC FSM LOGIC
