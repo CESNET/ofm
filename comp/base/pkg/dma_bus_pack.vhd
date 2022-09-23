@@ -61,7 +61,7 @@ package dma_bus_pack is
 
     constant DMA_COMPLETION_LENGTH_O    : natural := 0;
     constant DMA_COMPLETION_COMPLETED_O : natural := DMA_COMPLETION_LENGTH_O        + DMA_COMPLETION_LENGTH_W;
-    constant DMA_COMPLETION_TAG_O       : natural := DMA_COMPLETION_COMPLETED_O     + DMA_COMPLETION_COMPLETED_W + 4;
+    constant DMA_COMPLETION_TAG_O       : natural := DMA_COMPLETION_COMPLETED_O     + DMA_COMPLETION_COMPLETED_W;
     constant DMA_COMPLETION_UNITID_O    : natural := DMA_COMPLETION_TAG_O           + DMA_COMPLETION_TAG_W;
 
     subtype DMA_REQUEST_LENGTH          is natural range DMA_REQUEST_LENGTH_O       + DMA_REQUEST_LENGTH_W      -1 downto DMA_REQUEST_LENGTH_O;

@@ -17,6 +17,7 @@ module testbench;
 
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // Interfaces
+    reset_if  reset(CLK);
     mvb_if #(ITEMS, ITEM_WIDTH) mvb_wr(CLK);
     mvb_if #(ITEMS, ITEM_WIDTH) mvb_rd(CLK);
 
@@ -37,12 +38,16 @@ module testbench;
     initial begin
         uvm_root m_root;
         // Configuration of database
+        uvm_config_db#(virtual reset_if)::set(null, "", "vif_reset", reset);
         uvm_config_db#(virtual mvb_if #(ITEMS, ITEM_WIDTH))::set(null, "", "vif_rx", mvb_wr);
         uvm_config_db#(virtual mvb_if #(ITEMS, ITEM_WIDTH))::set(null, "", "vif_tx", mvb_rd);
 
         m_root = uvm_root::get();
         m_root.finish_on_completion = 0;
         m_root.set_report_id_action_hier("ILLEGALNAME",UVM_NO_ACTION);
+
+        uvm_config_db#(int)            ::set(null, "", "recording_detail", 0);
+        uvm_config_db#(uvm_bitstream_t)::set(null, "", "recording_detail", 0);
 
         run_test();
         $stop(2);
@@ -51,10 +56,10 @@ module testbench;
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // DUT
     DUT DUT_U (
-        .CLK     (CLK),
-        .RST     (RST),
-        .mvb_wr     (mvb_wr),
-        .mvb_rd     (mvb_rd)
+        .CLK    (CLK),
+        .RST    (reset.RESET),
+        .mvb_wr (mvb_wr),
+        .mvb_rd (mvb_rd)
     );
 
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -64,17 +69,17 @@ module testbench;
         .ITEM_WIDTH  (ITEM_WIDTH)
     )
     property_rd(
-        .RESET  (RST),
-        .vif    (mvb_rd)
+        .RESET (reset.RESET),
+        .vif   (mvb_rd)
     );
 
     mvb_property  #(
-        .ITEMS       (ITEMS),
-        .ITEM_WIDTH  (ITEM_WIDTH)
+        .ITEMS      (ITEMS),
+        .ITEM_WIDTH (ITEM_WIDTH)
     )
     property_wr (
-        .RESET  (RST),
-        .vif    (mvb_wr)
+        .RESET (reset.RESET),
+        .vif   (mvb_wr)
     );
 
 endmodule

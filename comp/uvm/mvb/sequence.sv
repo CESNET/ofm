@@ -71,7 +71,7 @@ class sequence_lib_rx#(ITEMS, ITEM_WIDTH) extends uvm_sequence_library#(uvm_mvb:
 endclass
 
 // This low level sequence define how can data looks like
-class sequence_simple_tx #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(uvm_mvb::sequence_item #(ITEMS, ITEM_WIDTH));
+class sequence_simple_tx #(ITEMS, ITEM_WIDTH) extends uvm_common::sequence_base#(config_sequence, uvm_mvb::sequence_item #(ITEMS, ITEM_WIDTH));
 
     // ------------------------------------------------------------------------
     // Registration of agent to databaze
@@ -109,11 +109,16 @@ class sequence_simple_tx #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(uvm_mvb::se
             get_response(rsp);
         end
     endtask
+
+    virtual function void config_set(CONFIG_TYPE cfg);
+        super.config_set(cfg);
+        rdy.bound_set(cfg.rdy_probability_min, cfg.rdy_probability_max);
+    endfunction
 endclass
 
 
 // This low level sequence that have every tact dst rdy at tx side
-class sequence_full_speed_tx #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(uvm_mvb::sequence_item #(ITEMS, ITEM_WIDTH));
+class sequence_full_speed_tx #(ITEMS, ITEM_WIDTH) extends uvm_common::sequence_base#(config_sequence, uvm_mvb::sequence_item #(ITEMS, ITEM_WIDTH));
     `uvm_object_param_utils(uvm_mvb::sequence_full_speed_tx #(ITEMS, ITEM_WIDTH))
 
     // ------------------------------------------------------------------------
@@ -147,7 +152,7 @@ class sequence_full_speed_tx #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(uvm_mvb
 
 endclass
 
-class sequence_stop_tx #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(uvm_mvb::sequence_item #(ITEMS, ITEM_WIDTH));
+class sequence_stop_tx #(ITEMS, ITEM_WIDTH) extends uvm_common::sequence_base#(config_sequence, uvm_mvb::sequence_item #(ITEMS, ITEM_WIDTH));
     `uvm_object_param_utils(uvm_mvb::sequence_stop_tx #(ITEMS, ITEM_WIDTH))
 
     // ------------------------------------------------------------------------
@@ -185,7 +190,7 @@ endclass
 
 //////////////////////////////////////
 // TX LIBRARY
-class sequence_lib_tx#(ITEMS, ITEM_WIDTH) extends uvm_sequence_library#(sequence_item#(ITEMS, ITEM_WIDTH));
+class sequence_lib_tx#(ITEMS, ITEM_WIDTH) extends uvm_common::sequence_library#(config_sequence, sequence_item#(ITEMS, ITEM_WIDTH));
   `uvm_object_param_utils(uvm_mvb::sequence_lib_tx#(ITEMS, ITEM_WIDTH))
   `uvm_sequence_library_utils(uvm_mvb::sequence_lib_tx#(ITEMS, ITEM_WIDTH))
 
@@ -196,7 +201,8 @@ class sequence_lib_tx#(ITEMS, ITEM_WIDTH) extends uvm_sequence_library#(sequence
 
     // subclass can redefine and change run sequences
     // can be useful in specific tests
-    virtual function void init_sequence();
+    virtual function void init_sequence(config_sequence param_cfg = null);
+        super.init_sequence(param_cfg);
         this.add_sequence(sequence_simple_tx#(ITEMS, ITEM_WIDTH)::get_type());
         this.add_sequence(sequence_full_speed_tx#(ITEMS, ITEM_WIDTH)::get_type());
         this.add_sequence(sequence_stop_tx#(ITEMS, ITEM_WIDTH)::get_type());

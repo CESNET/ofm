@@ -61,16 +61,20 @@ class sequence_item #(ITEM_WIDTH) extends uvm_sequence_item;
 
     // Convert transaction into human readable form.
     function string convert2string();
+        return convert2block(4, 8);
+    endfunction
+
+    function string convert2block(int unsigned regions, int unsigned region_width);
         string ret;
 
         $sformat(ret, "%s\n\tByte_array::sequence_item size %0d", super.convert2string(), data.size());
         for (int unsigned it = 0; it < data.size(); it++) begin
-            if (it % 32 == 0) begin
-                $sformat(ret, "%s\n\t\t%2h", ret, data[it]);
-            end else if (it % 8 == 0) begin
-                $sformat(ret, "%s    %2h", ret, data[it]);
+            if (it % (regions*region_width) == 0) begin
+                $sformat(ret, "%s\n\t\t%x", ret, data[it]);
+            end else if (it % region_width == 0) begin
+                $sformat(ret, "%s    %x", ret, data[it]);
             end else begin
-                $sformat(ret, "%s %2h", ret, data[it]);
+                $sformat(ret, "%s %x", ret, data[it]);
             end
         end
         return ret;

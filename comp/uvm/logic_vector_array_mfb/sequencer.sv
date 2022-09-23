@@ -7,8 +7,8 @@
 class sequencer_rx #(ITEM_WIDTH, META_WIDTH) extends uvm_sequencer;
     `uvm_component_param_utils(uvm_logic_vector_array_mfb::sequencer_rx #(ITEM_WIDTH, META_WIDTH));
 
-    uvm_logic_vector::sequencer#(META_WIDTH)  m_meta;
-    int unsigned                              meta_behav;
+    uvm_logic_vector::sequencer#(META_WIDTH)        m_meta;
+    config_item::meta_type                          meta_behav;
     uvm_logic_vector_array::sequencer #(ITEM_WIDTH) m_data;
 
     function new(string name, uvm_component parent = null);

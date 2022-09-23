@@ -12,45 +12,57 @@ library work;
 use work.math_pack.all;
 use work.type_pack.all;
 
+
+-- =========================================================================
+--  Description
+-- =========================================================================
+
+-- This is a 1:N MFB splitter.
+-- It consists of numerous 1:2 MFB splitters in ``log2(SPLITTER_OUTPUTS)`` stages.
 entity MFB_SPLITTER_SIMPLE_GEN is
     generic(
-        -- number of splitter outputs
+        -- Number of splitter outputs.
         SPLITTER_OUTPUTS   : integer := 8;
-        -- number of regions in word
+        -- Number of Regions in a word.
         REGIONS     : integer := 4;
-        -- number of blocks in region
+        -- Number of Blocks in a Region.
         REGION_SIZE : integer := 8;
-        -- number of items in block
+        -- Number of Items in a Block.
         BLOCK_SIZE  : integer := 8;
-        -- width  of one item (in bits)
+        -- Width  of one Item (in bits).
         ITEM_WIDTH  : integer := 8;
-        -- width of MFB metadata
+        -- Width of MFB metadata (in bits).
         META_WIDTH  : integer := 1;
 
-        -- Input PIPEs enable for all 2:1 Mergers
+        -- Input PIPEs enable for all 1:2 Splitters.
         -- Input registers are created when this is set to false.
-        --IN_PIPE_EN      : boolean := false;
+        -- IN_PIPE_EN      : boolean := false;
 
-        -- Output PIPE enable for all 2:1 Mergers
+        -- Output PIPE enable for all 1:2 Splitters.
         -- Output register are created when this is set to false.
-        --OUT_PIPE_EN     : boolean := true;
+        -- OUT_PIPE_EN     : boolean := true;
 
+        -- FPGA device name: ULTRASCALE, STRATIX10, AGILEX, ...
         DEVICE : string := "AGILEX"
     );
     port(
         -- =====================================================================
         -- Clock and Reset
         -- =====================================================================
+    
         CLK            : in  std_logic;
         RESET          : in  std_logic;
 
         -- =====================================================================
         -- RX interface
         -- =====================================================================
-        -- One select bit for each stage (and for each region ofc), bit RX_MFB_SEL(0)(x) is for Stage 0, and so on
-        RX_MFB_SEL     : in  std_logic_vector(REGIONS*max(1,log2(SPLITTER_OUTPUTS))-1 downto 0); -- Valid with SOF
+    
+        -- One select bit for each stage (and for each region ofc), bit RX_MFB_SEL(0)(x) is for Stage 0, and so on.
+        -- Expected to be valid with SOF!
+        RX_MFB_SEL     : in  std_logic_vector(REGIONS*max(1,log2(SPLITTER_OUTPUTS))-1 downto 0);
         RX_MFB_DATA    : in  std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
-        RX_MFB_META    : in  std_logic_vector(REGIONS*META_WIDTH-1 downto 0); -- Always valid, metadata merged by words
+        -- Valid whenever, metadata is split by words
+        RX_MFB_META    : in  std_logic_vector(REGIONS*META_WIDTH-1 downto 0);
         RX_MFB_SOF     : in  std_logic_vector(REGIONS-1 downto 0);
         RX_MFB_EOF     : in  std_logic_vector(REGIONS-1 downto 0);
         RX_MFB_SOF_POS : in  std_logic_vector(REGIONS*max(1,log2(REGION_SIZE))-1 downto 0);
@@ -61,8 +73,10 @@ entity MFB_SPLITTER_SIMPLE_GEN is
         -- =====================================================================
         -- TX interface
         -- =====================================================================
+    
         TX_MFB_DATA    : out slv_array_t     (SPLITTER_OUTPUTS-1 downto 0)(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
-        TX_MFB_META    : out slv_array_t     (SPLITTER_OUTPUTS-1 downto 0)(REGIONS*META_WIDTH-1 downto 0) := (others => (others => '0')); -- Always valid, metadata merged by words
+        -- Valid whenever, metadata is split by words
+        TX_MFB_META    : out slv_array_t     (SPLITTER_OUTPUTS-1 downto 0)(REGIONS*META_WIDTH-1 downto 0) := (others => (others => '0'));
         TX_MFB_SOF     : out slv_array_t     (SPLITTER_OUTPUTS-1 downto 0)(REGIONS-1 downto 0);
         TX_MFB_EOF     : out slv_array_t     (SPLITTER_OUTPUTS-1 downto 0)(REGIONS-1 downto 0);
         TX_MFB_SOF_POS : out slv_array_t     (SPLITTER_OUTPUTS-1 downto 0)(REGIONS*max(1,log2(REGION_SIZE))-1 downto 0);

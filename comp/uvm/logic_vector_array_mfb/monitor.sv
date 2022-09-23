@@ -4,11 +4,11 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause
 
-class monitor_byte_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extends uvm_logic_vector_array::monitor #(ITEM_WIDTH);
-    `uvm_component_param_utils(uvm_logic_vector_array_mfb::monitor_byte_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH))
+class monitor_logic_vector_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extends uvm_logic_vector_array::monitor #(ITEM_WIDTH);
+    `uvm_component_param_utils(uvm_logic_vector_array_mfb::monitor_logic_vector_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH))
 
     // Analysis port
-    typedef monitor_byte_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) this_type;
+    typedef monitor_logic_vector_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) this_type;
     uvm_analysis_imp #(uvm_mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH), this_type) analysis_export;
 
     uvm_reset::sync_terminate reset_sync;
@@ -28,7 +28,6 @@ class monitor_byte_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WI
         if (hi_tr != null) begin
             for (int unsigned it = start_pos; it <= tr.eof_pos[index]; it++) begin
                 data.push_back(tr.data[index][(it+1)*ITEM_WIDTH-1 -: ITEM_WIDTH]);
-                //$write("MFB MON TR %h\n", tr.data[it][(it+1)*ITEM_WIDTH-1 -: ITEM_WIDTH]);
             end
             hi_tr.data = data;
             analysis_port.write(hi_tr);
@@ -72,10 +71,8 @@ class monitor_byte_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WI
                     if (hi_tr != null) begin
                         for (int unsigned jt = pos_start; jt <= pos_end; jt++) begin
                             data.push_back(tr.data[it][(jt+1)*ITEM_WIDTH-1 -: ITEM_WIDTH]);
-                            //$write("MFB MON TR %h\n", tr.data[it][(jt+1)*ITEM_WIDTH-1 -: ITEM_WIDTH]);
                             data_index++;
                         end
-                        //$write("MFB MON FIFO %h\n", tr.data[it]);
                     end
 
                     if (tr.eof[it] && hi_tr != null) begin
@@ -83,10 +80,6 @@ class monitor_byte_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WI
                             `uvm_error(this.get_full_name(), "\n\tEOF has been set before frame heve been started. SOF havent been set before this EOF")
                         end else begin
                             hi_tr.data = data;
-                            //if (this.get_full_name() == "uvm_test_top.m_env.m_env_rq_mfb.m_byte_array_agent.m_monitor") begin
-                            //    $write("MFB MON TR \n");
-                            //    `uvm_info(this.get_full_name(), hi_tr.convert2string() ,UVM_LOW)
-                            //end
                             analysis_port.write(hi_tr);
                             hi_tr = null;
                         end
@@ -106,7 +99,7 @@ class monitor_logic_vector #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_
     // Analysis por
     uvm_analysis_imp #(uvm_mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH), this_type) analysis_export;
     uvm_reset::sync_terminate reset_sync;
-    int meta_behav;
+    config_item::meta_type meta_behav;
 
     local uvm_logic_vector::sequence_item#(META_WIDTH) hi_tr;
 
@@ -119,11 +112,11 @@ class monitor_logic_vector #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_
     virtual function void write(uvm_mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) tr);
         if (tr.src_rdy && tr.dst_rdy) begin
             for (int i = 0; i<REGIONS; i++) begin
-                if (tr.sof[i] && meta_behav == 1) begin
+                if (tr.sof[i] && meta_behav == config_item::META_SOF) begin
                     hi_tr = uvm_logic_vector::sequence_item#(META_WIDTH)::type_id::create("hi_tr");
                     hi_tr.data = tr.meta[i];
                     analysis_port.write(hi_tr);
-                end else if (tr.eof[i] && meta_behav == 2) begin
+                end else if (tr.eof[i] && meta_behav == config_item::META_EOF) begin
                     hi_tr = uvm_logic_vector::sequence_item#(META_WIDTH)::type_id::create("hi_tr");
                     hi_tr.data = tr.meta[i];
                     analysis_port.write(hi_tr);

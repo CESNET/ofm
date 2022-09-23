@@ -12,9 +12,10 @@ package uvm_pipe;
     `include "uvm_macros.svh"
     import uvm_pkg::*;
 
+    `include "sequencer.sv"
+    `include "model.sv"
     `include "scoreboard.sv"
     `include "env.sv"
-    `include "model.sv"
 
 endpackage
 

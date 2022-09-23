@@ -41,7 +41,7 @@ class env #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extends uv
         m_config_rx                  = new;
         m_config_rx.active           = UVM_ACTIVE;
         m_config_rx.interface_name   = "vif_rx";
-        m_config_rx.meta_behav       = 1;
+        m_config_rx.meta_behav       = uvm_logic_vector_array_mfb::config_item::META_SOF;
 
         uvm_config_db #(uvm_logic_vector_array_mfb::config_item)::set(this, "m_env_rx", "m_config", m_config_rx);
         m_env_rx = uvm_logic_vector_array_mfb::env_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::type_id::create("m_env_rx", this);
@@ -49,7 +49,7 @@ class env #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extends uv
         m_config_tx                  = new;
         m_config_tx.active           = UVM_ACTIVE;
         m_config_tx.interface_name   = "vif_tx";
-        m_config_tx.meta_behav       = 1;
+        m_config_tx.meta_behav       = uvm_logic_vector_array_mfb::config_item::META_SOF;
 
         uvm_config_db #(uvm_logic_vector_array_mfb::config_item)::set(this, "m_env_tx", "m_config", m_config_tx);
         m_env_tx = uvm_logic_vector_array_mfb::env_tx#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::type_id::create("m_env_tx", this);
@@ -62,11 +62,11 @@ class env #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extends uv
     // Connect agent's ports with ports from the scoreboard.
     function void connect_phase(uvm_phase phase);
 
-        m_env_rx.m_byte_array_agent.analysis_port.connect(sc.input_data);
-        m_env_rx.m_logic_vector_agent.analysis_port.connect(sc.input_meta);
+        m_env_rx.analysis_port_data.connect(sc.input_data);
+        m_env_rx.analysis_port_meta.connect(sc.input_meta);
 
-        m_env_tx.m_byte_array_agent.analysis_port.connect(sc.out_data);
-        m_env_tx.m_logic_vector_agent.analysis_port.connect(sc.out_meta);
+        m_env_tx.analysis_port_data.connect(sc.out_data);
+        m_env_tx.analysis_port_meta.connect(sc.out_meta);
 
         m_reset.sync_connect(m_env_rx.reset_sync);
         m_reset.sync_connect(m_env_tx.reset_sync);

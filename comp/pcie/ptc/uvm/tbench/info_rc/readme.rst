@@ -4,11 +4,11 @@
 
 .. SPDX-License-Identifier: BSD-3-Clause
 
-.. Size agent
-.. _uvm_size:
+.. Byte Array agent
+.. _uvm_byte_array:
 
 ****************
-Size agent
+Info agent
 ****************
 
-This agent generates SP size for SUPERUNPACKETER verification
+This agent generates channel and metadata for DMA LL verification

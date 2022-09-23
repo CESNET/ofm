@@ -13,7 +13,8 @@ use ieee.std_logic_unsigned.all;
 entity SLR_CROSSING_DST is
   generic(
     DATA_WIDTH      : integer := 64;
-    USE_OUTREG      : boolean := true
+    USE_OUTREG      : boolean := true;
+    DEVICE          : string := "7SERIES"
   );
   port(
     CLK              : in std_logic;
@@ -74,7 +75,8 @@ begin
       DATA_WIDTH => DATA_WIDTH+1,
       NUM_BITS   => 4,
       INIT_TYPE  => 0,
-      OPT        => "SRL"
+      OPT        => "SRL",
+      DEVICE     => DEVICE
     )
     port map(
       CLK  => CLK,
