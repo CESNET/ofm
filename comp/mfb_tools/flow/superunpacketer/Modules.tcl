@@ -24,4 +24,5 @@ lappend COMPONENTS [ list "MFB_PIPE"          $MFB_PIPE_BASE          "FULL" ]
 # Source files for implemented component
 lappend MOD "$ENTITY_BASE/supkt_hdr_extractor.vhd"
 lappend MOD "$ENTITY_BASE/superunpacketer.vhd"
+lappend MOD "$ENTITY_BASE/DevTree.tcl"
 
