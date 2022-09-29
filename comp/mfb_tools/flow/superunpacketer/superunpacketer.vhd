@@ -148,8 +148,8 @@ architecture FULL of SUPERUNPACKETER is
     signal sphe_tx_sof_mask      : std_logic_vector(MFB_REGIONS-1 downto 0);
 
     -- Word counter
-    signal word_cnt_reg : unsigned                       (log2(PKT_MAX_WORDS)-1 downto 0) := (others => '0');
-    signal word_cnt     : u_array_t(MFB_REGIONS downto 0)(log2(PKT_MAX_WORDS)-1 downto 0);
+    signal word_cnt_reg : unsigned                         (log2(PKT_MAX_WORDS)-1 downto 0) := (others => '0');
+    signal word_cnt     : u_array_t(MFB_REGIONS-1 downto 0)(log2(PKT_MAX_WORDS)-1 downto 0);
 
     -- SOF offset
     signal sphe_tx_sof_masked       : std_logic_vector(MFB_REGIONS-1 downto 0);
@@ -341,13 +341,15 @@ begin
 
     eof_propg(0) <= '1' when (RX_MFB_EOF(0) = '1') else eof_propg_reg;
     eof_propg_g : for r in 1 to MFB_REGIONS-1 generate
-        eof_propg(r) <= '0'            when (RX_MFB_SOF(r-1) = '1') else
-                        '1'            when (RX_MFB_EOF(r  ) = '1') else
+        eof_propg(r) <= '1'            when (RX_MFB_EOF(r  ) = '1') else
+                        '0'            when (RX_MFB_SOF(r-1) = '1') else
                         eof_propg(r-1);
     end generate;
     eof_propg(MFB_REGIONS) <= '0' when (RX_MFB_SOF(MFB_REGIONS-1) = '1') else eof_propg(MFB_REGIONS-1);
 
     sphe_tx_sof_mask <= not eof_propg(MFB_REGIONS-1 downto 0);
+
+
 
     -- ========================================================================
     -- Input (first stage) register
@@ -418,7 +420,7 @@ begin
     begin
         if (rising_edge(CLK)) then
             if (sphe_tx_src_rdy = '1') and (sphe_tx_dst_rdy = '1') then
-                word_cnt_reg <= word_cnt(MFB_REGIONS) + 1;
+                word_cnt_reg <= word_cnt(MFB_REGIONS-1) + 1;
             end if;
             if (RESET = '1') then
                 word_cnt_reg <= (others => '0');
@@ -427,8 +429,8 @@ begin
     end process;
 
     word_cnt(0) <= word_cnt_reg when (rx_supkt_sof_reg0(0) = '0') else (others => '0');
-    word_cnt_g: for r in 0 to MFB_REGIONS-1 generate
-        word_cnt(r+1) <= word_cnt(r) when (rx_supkt_sof_reg0(r) = '0') else (others => '0');
+    word_cnt_g: for r in 1 to MFB_REGIONS-1 generate
+        word_cnt(r) <= word_cnt(r-1) when (rx_supkt_sof_reg0(r) = '0') else (others => '0');
     end generate;
 
     -- ------------------------
