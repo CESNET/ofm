@@ -8,7 +8,7 @@
 set MFB_GET_ITEMS_BASE       "$OFM_PATH/comp/mfb_tools/logic/get_items"
 set MFB_CUTTER_SIMPLE_BASE   "$OFM_PATH/comp/mfb_tools/flow/cutter_simple"
 set META_INSERTOR_BASE       "$OFM_PATH/comp/mfb_tools/flow/metadata_insertor"
-set MFB_PIPE_BASE            "$OFM_PATH/comp/mfb_tools/flow/pipe"
+set MFB_FIFOX_BASE           "$OFM_PATH/comp/mfb_tools/storage/fifox"
 # set SUPKT_HDR_EXTRACTOR_BASE "$OFM_PATH/comp/mfb_tools/flow/superunpacketer/comp/supkt_hdr_extractor"
 
 # Packages
@@ -18,7 +18,7 @@ lappend PACKAGES "$OFM_PATH/comp/base/pkg/type_pack.vhd"
 lappend COMPONENTS [ list "MFB_GET_ITEMS"     $MFB_GET_ITEMS_BASE     "FULL" ]
 lappend COMPONENTS [ list "MFB_CUTTER_SIMPLE" $MFB_CUTTER_SIMPLE_BASE "FULL" ]
 lappend COMPONENTS [ list "META_INSERTOR"     $META_INSERTOR_BASE     "FULL" ]
-lappend COMPONENTS [ list "MFB_PIPE"          $MFB_PIPE_BASE          "FULL" ]
+lappend COMPONENTS [ list "MFB_FIFOX"         $MFB_FIFOX_BASE         "FULL" ]
 # lappend COMPONENTS [ list "SUPKT_HDR_EXTRACTOR" $SUPKT_HDR_EXTRACTOR_BASE "FULL" ]
 
 # Source files for implemented component

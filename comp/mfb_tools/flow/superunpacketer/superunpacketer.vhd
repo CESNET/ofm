@@ -623,7 +623,7 @@ begin
     -- ========================================================================
 
         -- Delay MFB stream
-        mfb_pipe_i2 : entity work.MFB_PIPE
+        mfb_fifox_i2 : entity work.MFB_FIFOX
         generic map(
             REGIONS     => MFB_REGIONS    ,
             REGION_SIZE => MFB_REGION_SIZE,
@@ -631,14 +631,15 @@ begin
             ITEM_WIDTH  => MFB_ITEM_WIDTH ,
             META_WIDTH  => 0              ,
 
-            FAKE_PIPE   => false          ,
-            USE_DST_RDY => true           ,
-            PIPE_TYPE   => "SHREG"        ,
-            DEVICE      => DEVICE
+            FIFO_DEPTH          => 512,
+            RAM_TYPE            => "AUTO",
+            DEVICE              => DEVICE,
+            ALMOST_FULL_OFFSET  => 0,
+            ALMOST_EMPTY_OFFSET => 0
         )
         port map(
-            CLK   => CLK,
-            RESET => RESET,
+            CLK => CLK,
+            RST => RESET,
 
             RX_DATA    => getit_indv_pkt_data   ,
             RX_META    => (others => '0')       ,
@@ -685,7 +686,7 @@ begin
             MFB_META_WIDTH       => 0              ,
 
             INSERT_MODE   => OUT_META_MODE         ,
-            MVB_FIFO_SIZE => 4                     ,
+            MVB_FIFO_SIZE => 32                    ,
             DEVICE        => DEVICE
         )
         port map(
