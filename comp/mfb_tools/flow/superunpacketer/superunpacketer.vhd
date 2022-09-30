@@ -405,7 +405,7 @@ begin
     end process;
 
     dbg_cnt_g : for r in 0 to MFB_REGIONS-1 generate
-        rx_supkt_pkt_cnt_reg0(r+1) <= rx_supkt_pkt_cnt_reg0(r) when (rx_supkt_eof_reg0(r) = '1') else rx_supkt_pkt_cnt_reg0(r) + 1;
+        rx_supkt_pkt_cnt_reg0(r+1) <= rx_supkt_pkt_cnt_reg0(r) + 1 when (rx_supkt_eof_reg0(r) = '1') else rx_supkt_pkt_cnt_reg0(r);
     end generate;
 
     -- ========================================================================
