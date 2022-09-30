@@ -305,6 +305,27 @@ begin
         rx_supkt_len_arr(r) <= rx_supkt_data_arr(to_integer(rx_supkt_sof_pos_word(r)))(LENGTH_WIDTH-1 downto 0);
     end generate;
 
+        -- --------------
+        --  Word counter
+        -- --------------
+    
+        word_cnt_reg_p : process (CLK)
+        begin
+            if (rising_edge(CLK)) then
+                if (RX_MFB_SRC_RDY = '1') and (RX_MFB_DST_RDY = '1') then
+                    word_cnt_reg <= word_cnt(MFB_REGIONS-1) + 1;
+                end if;
+                if (RESET = '1') then
+                    word_cnt_reg <= (others => '0');
+                end if;
+            end if;
+        end process;
+    
+        word_cnt(0) <= word_cnt_reg when (RX_MFB_SOF(0) = '0') else (others => '0');
+        word_cnt_g: for r in 1 to MFB_REGIONS-1 generate
+            word_cnt(r) <= word_cnt(r-1) when (RX_MFB_SOF(r) = '0') else (others => '0');
+        end generate;
+
     -- -------------------------------
     --  Precalculate SuPkt SOF offset
     -- -------------------------------
@@ -349,8 +370,6 @@ begin
 
     sphe_tx_sof_mask <= not eof_propg(MFB_REGIONS-1 downto 0);
 
-
-
     -- ========================================================================
     -- Input (first stage) register
     -- ========================================================================
@@ -369,6 +388,7 @@ begin
                 
                 rx_supkt_offset_reg0_arr <= rx_supkt_offset_arr;
 
+                sphe_rx_word_cnt      <= u_arr_to_slv_arr(word_cnt, MFB_REGIONS);
                 sphe_tx_sof_mask_reg0 <= sphe_tx_sof_mask;
                 
                 rx_supkt_src_rdy_reg0 <= RX_MFB_SRC_RDY;
@@ -412,27 +432,6 @@ begin
     -- Control logic for the SuperPacket Header Extractors (SPHEs)
     -- ========================================================================
 
-    -- --------------
-    --  Word counter
-    -- --------------
-
-    word_cnt_reg_p : process (CLK)
-    begin
-        if (rising_edge(CLK)) then
-            if (sphe_tx_src_rdy = '1') and (sphe_tx_dst_rdy = '1') then
-                word_cnt_reg <= word_cnt(MFB_REGIONS-1) + 1;
-            end if;
-            if (RESET = '1') then
-                word_cnt_reg <= (others => '0');
-            end if;
-        end if;
-    end process;
-
-    word_cnt(0) <= word_cnt_reg when (rx_supkt_sof_reg0(0) = '0') else (others => '0');
-    word_cnt_g: for r in 1 to MFB_REGIONS-1 generate
-        word_cnt(r) <= word_cnt(r-1) when (rx_supkt_sof_reg0(r) = '0') else (others => '0');
-    end generate;
-
     -- ------------------------
     --  SOF offset calculation
     -- ------------------------
@@ -470,7 +469,6 @@ begin
     sphe_rx_data <= rx_supkt_data_reg0_arr;
     sphe_rx_g: for r in 0 to MFB_REGIONS-1 generate
         sphe_rx_sof_offset(r) <= std_logic_vector(sof_offset(r));
-        sphe_rx_word_cnt  (r) <= std_logic_vector(word_cnt  (r));
     end generate;
 
     supkt_hdr_extractor_g : for r in 0 to MFB_REGIONS-1 generate
