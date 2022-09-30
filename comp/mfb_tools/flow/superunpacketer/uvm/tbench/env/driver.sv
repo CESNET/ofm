@@ -83,7 +83,7 @@ class driver#(META_WIDTH, HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_S
         seq_item_port_header     = new("seq_item_port_header", this);
         seq_item_port_sp_size    = new("seq_item_port_sp_size", this);
 
-        byte_array_export   = new(10);
+        byte_array_export        = new(10);
     endfunction
 
     // ------------------------------------------------------------------------
@@ -102,14 +102,14 @@ class driver#(META_WIDTH, HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_S
                 info_req.length = byte_array_new.data.size();
                 header = '0;
                 if (state == FIRST) begin
-                    state = DATA;
-                    byte_array_out   = uvm_logic_vector_array::sequence_item #(8)::type_id::create("byte_array_out");
+                    state          = DATA;
+                    byte_array_out = uvm_logic_vector_array::sequence_item #(8)::type_id::create("byte_array_out");
                     seq_item_port_sp_size.get_next_item(size_of_sp);
                 end
                 header = fill_header(info_req, 1'b1);
                 fill_tr(byte_array_new, header);
                 if (header[15] == 1'b0) begin
-                    done = 1'b1;
+                    done                = 1'b1;
                     byte_array_out.data = data_fifo;
                     if (byte_array_out.size() > size_of_sp.sp_size) begin
                         `uvm_fatal(this.get_full_name(), "Data length is too long.");
