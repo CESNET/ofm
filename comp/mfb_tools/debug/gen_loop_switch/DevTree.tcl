@@ -1,11 +1,16 @@
-# 1. no   - numero sign of dts_gen_loop_switch (order number of dts_gen_loop_switch in design)
-# 2. base - base address of dts_gen_loop_switch for access
-proc dts_gen_loop_switch {no base} {
-    set   size 0x80
+# 1. base - base address on MI bus
+# 2. name - instantion name inside device tree hierarchy
+proc dts_gen_loop_switch {base name} {
+    set size 0x100
+    set gen2dma_base [expr $base + 0x80]
+    set gen2eth_base [expr $base + 0xC0]
     set    ret ""
-    append ret "dbg_gls$no {"
-    append ret "compatible = \"netcope,gen_loop_switch\";"
+    append ret "$name {"
+    append ret "compatible = \"cesnet,ofm,gen_loop_switch\";"
     append ret "reg = <$base $size>;"
+    append ret "version = <1>;"
+    append ret [dts_mfb_generator $gen2dma_base "mfb_gen2dma"]
+    append ret [dts_mfb_generator $gen2eth_base "mfb_gen2eth"]
     append ret "};"
     return $ret
 }
