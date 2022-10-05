@@ -37,9 +37,9 @@ architecture full of PTC_PCIE2DMA_HDR_TRANSFORM is
     signal rx_mvb_vld_reg0      : std_logic_vector(MVB_ITEMS-1 downto 0);
 
     -- Field selection from input headers
-    signal rx_mvb_low_addr   : slv_array_t(MVB_ITEMS-1 downto 0)(PCIE_LOW_ADDR_WIDTH-1 downto 0);
+    signal rx_mvb_low_addr   : slv_array_t(MVB_ITEMS-1 downto 0)(12-1 downto 0);
     signal rx_mvb_len        : slv_array_t(MVB_ITEMS-1 downto 0)(DMA_COMPLETION_LENGTH);
-    signal rx_mvb_pcie_tag   : slv_array_t(MVB_ITEMS-1 downto 0)(PCIE_TAG_WIDTH-1 downto 0);
+    signal rx_mvb_pcie_tag   : slv_array_t(MVB_ITEMS-1 downto 0)(10-1 downto 0);
     signal rx_mvb_complete   : std_logic_vector(MVB_ITEMS-1 downto 0);
 
     constant REMAINING_BYTES_WIDTH : natural := 12;
@@ -94,52 +94,23 @@ begin
     -- Selecting fields from RX headers; creating input to Tag manager
     -- -------------------------------------------------------------------------
 
-    xilinx_header_tansform : if (DEVICE="ULTRASCALE" or DEVICE="7SERIES") generate
-        rx_sel_gen : for i in 0 to MVB_ITEMS-1 generate
+    rx_deparse_gen : for i in 0 to MVB_ITEMS-1 generate
+        pcie_rc_hdr_deparser_i : entity work.PCIE_RC_HDR_DEPARSER
+        generic map(
+           DEVICE       => DEVICE
+        )
+        port map(
 
-            rx_mvb_low_addr(i) <= rx_mvb_data_reg0(PCIE_DOWNHDR_WIDTH*i   +PCIE_LOW_ADDR_WIDTH-1 downto PCIE_DOWNHDR_WIDTH*i   );
-            rx_mvb_len     (i) <= rx_mvb_data_reg0(PCIE_DOWNHDR_WIDTH*i+32+11                 -1 downto PCIE_DOWNHDR_WIDTH*i+32);
-            rx_mvb_pcie_tag(i) <= rx_mvb_data_reg0(PCIE_DOWNHDR_WIDTH*i+64+PCIE_TAG_WIDTH     -1 downto PCIE_DOWNHDR_WIDTH*i+64);
-            rx_mvb_complete(i) <= rx_mvb_data_reg0(PCIE_DOWNHDR_WIDTH*i+30);
+           OUT_LOW_ADDR   => rx_mvb_low_addr(i),
+           OUT_COMPLETE   => rx_mvb_complete(i),
+           OUT_DW_CNT     => rx_mvb_len     (i),
+           OUT_TAG        => rx_mvb_pcie_tag(i),
+           OUT_BYTE_CNT   => open,
+           OUT_ATTRIBUTES => open,
+           OUT_COMP_ST    => open,
 
-        end generate;
-    end generate;
-
-    intel_header_tansform : if (DEVICE="STRATIX10" or DEVICE="AGILEX") generate
-        rx_sel_gen : for i in 0 to MVB_ITEMS-1 generate
-
-            rx_mvb_low_addr(i) <=       rx_mvb_data_reg0(PCIE_DOWNHDR_WIDTH*i+PCIE_LOW_ADDR_WIDTH+64-1 downto PCIE_DOWNHDR_WIDTH*i+64);
-            rx_mvb_len     (i) <= "0" & rx_mvb_data_reg0(PCIE_DOWNHDR_WIDTH*i+10                    -1 downto PCIE_DOWNHDR_WIDTH*i   );
-
-            -- Numer of remaining VALID bytes (according to request BE)
-            rx_mvb_rem_bytes_vld(i) <= unsigned(rx_mvb_data_reg0(PCIE_DOWNHDR_WIDTH*i+REMAINING_BYTES_WIDTH+32-1 downto PCIE_DOWNHDR_WIDTH*i+32));
-            -- Numer of remaining bytes (including those disabled by request BE)
-            rx_mvb_rem_bytes_all(i) <= round_up(rx_mvb_rem_bytes_vld(i)+unsigned(rx_mvb_low_addr(i)(2-1 downto 0)),log2(4));
-
-            --                    '1' when (dword count in all remaining completion parts (including bytes disabled by BE))=(              dword count in this completion part                 ) else '0';
-            rx_mvb_complete(i) <= '1' when (  std_logic_vector(rx_mvb_rem_bytes_all(i)(REMAINING_BYTES_WIDTH-1 downto 2)) )=(rx_mvb_data_reg0(PCIE_DOWNHDR_WIDTH*i+10-1 downto PCIE_DOWNHDR_WIDTH*i)) else '0';
-
-        end generate;
-
-        -- In case of 10-bit Tag, the Tag must be extracted from 3 different places in the header
-        pcie_tag_pr : process (rx_mvb_data_reg0)
-            variable tag_low : std_logic_vector(8-1 downto 0);
-            variable tag_8   : std_logic;
-            variable tag_9   : std_logic;
-        begin
-            for i in 0 to MVB_ITEMS-1 loop
-                tag_low := rx_mvb_data_reg0(PCIE_DOWNHDR_WIDTH*i+8+72-1 downto PCIE_DOWNHDR_WIDTH*i+72);
-                tag_8   := rx_mvb_data_reg0(PCIE_DOWNHDR_WIDTH*i+19);
-                tag_9   := rx_mvb_data_reg0(PCIE_DOWNHDR_WIDTH*i+23);
-
-                if (PCIE_TAG_WIDTH=10) then
-                     rx_mvb_pcie_tag(i) <= tag_9 & tag_8 & tag_low;
-                else
-                     rx_mvb_pcie_tag(i) <= std_logic_vector(resize_left(unsigned(tag_low),PCIE_TAG_WIDTH));
-                end if;
-            end loop;
-        end process;
-
+           IN_HEADER      => rx_mvb_data_reg0(PCIE_DOWNHDR_WIDTH*(i+1)-1 downto PCIE_DOWNHDR_WIDTH*i)
+        );
     end generate;
 
     rx_sel_gen : for i in 0 to MVB_ITEMS-1 generate
@@ -147,8 +118,8 @@ begin
         begin
             if (CLK'event and CLK='1') then
                 for i in 0 to MVB_ITEMS-1 loop
-                    TAG(PCIE_TAG_WIDTH*(i+1)-1 downto PCIE_TAG_WIDTH*i)                          <= rx_mvb_pcie_tag(i);
-                    TAG_COMPL_LOW_ADDR(PCIE_LOW_ADDR_WIDTH*(i+1)-1 downto PCIE_LOW_ADDR_WIDTH*i) <= rx_mvb_low_addr(i);
+                    TAG(PCIE_TAG_WIDTH*(i+1)-1 downto PCIE_TAG_WIDTH*i)                          <= rx_mvb_pcie_tag(i)(PCIE_TAG_WIDTH-1 downto 0);
+                    TAG_COMPL_LOW_ADDR(PCIE_LOW_ADDR_WIDTH*(i+1)-1 downto PCIE_LOW_ADDR_WIDTH*i) <= rx_mvb_low_addr(i)(PCIE_LOW_ADDR_WIDTH-1 downto 0);
                     TAG_COMPL_LEN(DMA_LEN_WIDTH*(i+1)-1 downto DMA_LEN_WIDTH*i)                  <= rx_mvb_len(i);
                     TAG_RELEASE(i)                                                               <= rx_mvb_complete(i) and rx_mvb_vld_reg0(i);
                     TAG_VLD(i)                                                                   <= rx_mvb_vld_reg0(i);
