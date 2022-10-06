@@ -128,7 +128,7 @@ entity MVB_CHANNEL_ROUTER_MI is
         MI_DRDY    : out std_logic;
 
         -- =====================================================================
-        --  INPUT MVB INTERFACE
+        -- INPUT MVB INTERFACE
         -- =====================================================================
 
         -- RX MVB: data word with MVB items
@@ -143,7 +143,7 @@ entity MVB_CHANNEL_ROUTER_MI is
         RX_DST_RDY : out std_logic;
 
         -- =====================================================================
-        --  OUTPUT MVB INTERFACE
+        -- OUTPUT MVB INTERFACE
         -- =====================================================================
 
         -- TX MVB: data word with MVB items

@@ -58,7 +58,7 @@ entity MVB_CHANNEL_ROUTER is
         CTRL_REGS_WR : in  std_logic_vector(SRC_CHANNELS-1 downto 0);
 
         -- =====================================================================
-        --  INPUT MVB INTERFACE
+        -- INPUT MVB INTERFACE
         -- =====================================================================
         RX_DATA    : in  std_logic_vector(ITEMS*ITEM_WIDTH-1 downto 0);
         RX_CHANNEL : in  std_logic_vector(ITEMS*log2(SRC_CHANNELS)-1 downto 0);
@@ -67,7 +67,7 @@ entity MVB_CHANNEL_ROUTER is
         RX_DST_RDY : out std_logic;
 
         -- =====================================================================
-        --  OUTPUT MVB INTERFACE
+        -- OUTPUT MVB INTERFACE
         -- =====================================================================
         TX_DATA    : out std_logic_vector(ITEMS*ITEM_WIDTH-1 downto 0);
         TX_CHANNEL : out std_logic_vector(ITEMS*log2(DST_CHANNELS)-1 downto 0);
