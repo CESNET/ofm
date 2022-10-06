@@ -89,7 +89,7 @@ entity MTC is
         RESET             : in  std_logic;
 
         -- =====================================================================
-        --  Configuration Status Interface
+        -- Configuration Status Interface
         -- =====================================================================
 
         -- Maximum allowed size of completion payload: 000b = 128 bytes;
@@ -100,7 +100,7 @@ entity MTC is
         CTL_BAR_APERTURE     : in  std_logic_vector(5 downto 0);
 
         -- =====================================================================
-        --  MFB Completer Request Interface (CQ) - Intel FPGA Only
+        -- MFB Completer Request Interface (CQ) - Intel FPGA Only
         -- =====================================================================
 
         -- CQ_MFB: data word with frames (packets)
@@ -122,7 +122,7 @@ entity MTC is
         CQ_MFB_DST_RDY    : out std_logic;
 
         -- =====================================================================
-        --  MFB Completer Completion Interface (CC) - Intel FPGA Only
+        -- MFB Completer Completion Interface (CC) - Intel FPGA Only
         -- =====================================================================
 
         -- CC_MFB: data word with frames (packets)
@@ -144,9 +144,10 @@ entity MTC is
         CC_MFB_DST_RDY    : in  std_logic;
 
         -- =====================================================================
-        --  AXI Completer Request Interface (CQ) - Xilinx FPGA Only
-        -- =====================================================================
+        -- AXI Completer Request Interface (CQ) - Xilinx FPGA Only
+        --
         -- See Xilinx PG213 (UltraScale+ Devices Integrated Block for PCI Express).
+        -- =====================================================================
 
         -- CQ_AXI: Data word. For detailed specifications, see Xilinx PG213.
         CQ_AXI_DATA       : in  std_logic_vector(AXI_DATA_WIDTH-1 downto 0);
@@ -167,9 +168,10 @@ entity MTC is
         CQ_AXI_READY      : out std_logic;
 
         -- =====================================================================
-        --  AXI Completer Completion Interface (CC) - Xilinx FPGA Only
-        -- =====================================================================
+        -- AXI Completer Completion Interface (CC) - Xilinx FPGA Only
+        --
         -- See Xilinx PG213 (UltraScale+ Devices Integrated Block for PCI Express).
+        -- =====================================================================
 
         -- CC_AXI: Data word. For detailed specifications, see Xilinx PG213.
         CC_AXI_DATA       : out std_logic_vector(AXI_DATA_WIDTH-1 downto 0);
@@ -190,7 +192,7 @@ entity MTC is
         CC_AXI_READY      : in  std_logic;
 
         -- =====================================================================
-        --  MI32 interface (master)
+        -- MI32 interface (master)
         -- =====================================================================
 
         -- MI bus: PCIe function number that generated the current MI request
