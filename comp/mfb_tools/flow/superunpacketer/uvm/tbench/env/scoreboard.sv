@@ -101,7 +101,7 @@ class scoreboard #(HEADER_SIZE, VERBOSITY, OUT_META_WIDTH) extends uvm_scoreboar
                 string msg;
                 errors++;
 
-                $swrite(msg, "\n\tPacket comparison failed! \n\tModel packet:\n%s\n\tDUT packet:\n%s", tr_model.convert2string(), tr_dut.convert2string());
+                $swrite(msg, "\n\t Comparison failed at packet number %d! \n\tModel packet:\n%s\n\tDUT packet:\n%s", compared, tr_model.convert2string(), tr_dut.convert2string());
                 `uvm_error(this.get_full_name(), msg);
             end
 
@@ -109,7 +109,7 @@ class scoreboard #(HEADER_SIZE, VERBOSITY, OUT_META_WIDTH) extends uvm_scoreboar
                 string msg;
                 errors++;
 
-                $swrite(msg, "\n\tMeta comparison failed! \n\tModel meta:\n%s\n\tDUT meta:\n%s\n compared: %d\n", tr_model_meta.convert2string(), tr_dut_meta.convert2string(), compared);
+                $swrite(msg, "\n\t Comparison failed at meta number %d! \n\tModel meta:\n%s\n\tDUT meta:\n%s\n", compared, tr_model_meta.convert2string(), tr_dut_meta.convert2string());
                 `uvm_error(this.get_full_name(), msg);
             end
         end
