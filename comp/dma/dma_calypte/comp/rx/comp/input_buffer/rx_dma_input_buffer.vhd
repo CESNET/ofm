@@ -12,10 +12,17 @@ use IEEE.numeric_std.all;
 use work.type_pack.all;
 use work.math_pack.all;
 
+-- This component accepts incoming data on the input and aligns them to the beginning block of the
+-- MFB bus. This component also splits a word which contains two packets. The purpose is to align
+-- the data se they can be easily buffered by whole words in the following component.
 entity RX_DMA_INPUT_BUFFER is
 
     generic (
-        -- MFB bus parameters (the amount of regions is set to 1)
+        -- =========================================================================================
+        -- MFB bus parameters
+        --
+        -- The number of regions is always set to 1
+        -- =========================================================================================
         REGION_SIZE : integer := 4;
         BLOCK_SIZE  : integer := 8;
         ITEM_WIDTH  : integer := 8

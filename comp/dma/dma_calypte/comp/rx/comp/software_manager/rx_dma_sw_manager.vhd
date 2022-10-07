@@ -13,6 +13,9 @@ use work.type_pack.all;
 
 use work.dma_bus_pack.all;
 
+-- This entity initializes configuration and status registers for RX DMA Calypte controller. Its generic
+-- implementation allows to create configuration space for arbitrary number of channels. It also
+-- provides the access to registers from MI interface connected to designated software driver.
 entity RX_DMA_SW_MANAGER is
 generic(
     -- Traget device
@@ -21,10 +24,10 @@ generic(
     -- Total number of DMA Channels within this DMA Endpoint
     CHANNELS           : natural := 8;
 
-    -- Width of Software and Hardware Descriptor/Header Pointer
-    -- Defines width of signals used for these values in DMA Module
-    -- Affects logic complexity
-    -- Maximum value: 32 (restricted by size of pointer MI registers)
+    -- * Width of Software and Hardware Descriptor/Header Pointer
+    -- * Defines width of signals used for these values in DMA Module
+    -- * Affects logic complexity
+    -- * Maximum value: 32 (restricted by size of pointer MI registers)
     POINTER_WIDTH      : natural := 16;
 
     -- Width of RAM address
@@ -36,8 +39,8 @@ generic(
     DISC_PKT_CNT_WIDTH : natural := 64;
     DISC_BTS_CNT_WIDTH : natural := 64;
 
-    -- Maximum size of a packet (in bytes)
-    -- Defines width of Packet length signals.
+    -- * Maximum size of a packet (in bytes)
+    -- * Defines width of Packet length signals.
     PKT_SIZE_MAX       : natural := 2**12;
 
     -- Width of MI bus
@@ -45,13 +48,13 @@ generic(
 );
 port (
     -- =====================================================================
-    --  Clock and Reset
+    -- Clock and Reset
     -- =====================================================================
     CLK                  : in  std_logic;
     RESET                : in  std_logic;
 
     -- =====================================================================
-    --  MI interface for SW access
+    -- MI interface for SW access
     -- =====================================================================
     MI_ADDR              : in  std_logic_vector(MI_WIDTH-1 downto 0);
     MI_DWR               : in  std_logic_vector(MI_WIDTH-1 downto 0);
@@ -63,7 +66,7 @@ port (
     MI_DRDY              : out std_logic;
 
     -- =====================================================================
-    --  Input packet discart/sent interface
+    -- Input packet discart/sent interface
     -- =====================================================================
     PKT_SENT_CHAN        : in  std_logic_vector(log2(CHANNELS)-1 downto 0);
     PKT_SENT_INC         : in  std_logic;
@@ -73,7 +76,7 @@ port (
     PKT_DISCARD_BYTES    : in  std_logic_vector(log2(PKT_SIZE_MAX+1)-1 downto 0);
 
     -- =====================================================================
-    --  Channel status interface
+    -- Channel status interface
     -- =====================================================================
     START_REQ_CHAN       : out std_logic_vector(log2(CHANNELS)-1 downto 0);
     START_REQ_VLD        : out std_logic;
@@ -89,7 +92,7 @@ port (
     ENABLED_CHAN         : out std_logic_vector(CHANNELS-1 downto 0);
 
     -- =====================================================================
-    --  Header manager interface
+    -- Header manager interface
     -- =====================================================================
     -- Software pointers reading interface
     SDP_RD_CHAN     : in  std_logic_vector(log2(CHANNELS)-1 downto 0);

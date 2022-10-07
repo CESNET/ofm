@@ -1,7 +1,6 @@
-.. _hdr_manager:
+.. _rx_dma_pcie_addr_gen:
 
-HEADER MANAGER
---------------
+PCIe Addres Generator
+---------------------
 
-.. vhdl:autoentity:: ADDR_MANAGER
-
+.. vhdl:autoentity:: PCIE_ADDR_GEN

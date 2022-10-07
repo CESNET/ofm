@@ -1,3 +1,9 @@
+-- pcie_hdr_gen.vhd: generates PCIe header accoring tho input data fields
+-- Copyright (c) 2022 CESNET z.s.p.o.
+-- Author(s): Radek Iša <isa@cesnet.cz>
+--
+-- SPDX-License-Identifier: BSD-3-CLause
+
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -6,10 +12,36 @@ library work;
 use work.math_pack.all;
 use work.type_pack.all;
 
+-- This component generates pcie headers depending on a device.
+entity PCIE_HDR_GEN is
+    generic (
+            -- Supported devices:
+            --
+            -- * ULTRASCALE
+            -- * STRATIX10
+            -- * AGILEX
+            DEVICE        : string  := "ULTRASCALE"
+        );
+    port (
+        -- =====================================================================
+        -- REQUIRED DATA FOR PCIE HEADERS
+        -- =====================================================================
+        ADDR           : in std_logic_vector(64-1 downto 0);
+        DWORD_COUNT    : in std_logic_vector(11-1 downto 0);
+        TAG            : in std_logic_vector(8-1  downto 0);
+
+        -- =====================================================================
+        -- GENERATED PCIE HEADER
+        -- =====================================================================
+        PCIE_HDR      : out std_logic_vector(128-1 downto 0);
+        -- * 0 => PCIE_HDR(3*32-1 downto 0) bits are valid,
+        -- * 1 => PCIE_HDR(4*32-1 downto 0) bits are valid
+        PCIE_HDR_SIZE : out std_logic
+    );
+end entity;
 
 architecture FULL of PCIE_HDR_GEN is
 begin
-
 
     --=====================================================================
     -- PCIE header for AXI interface 
@@ -52,7 +84,6 @@ begin
                                      & TAG;
 
     end generate;
-
 
     --=====================================================================
     -- PCIE header for AVALON interface
@@ -99,9 +130,5 @@ begin
                                      & pcie_hdr_attr
                                      & (2-1 downto 0 => '0') 
                                      & DWORD_COUNT;
-
     end generate;
-
-
 end architecture;
-

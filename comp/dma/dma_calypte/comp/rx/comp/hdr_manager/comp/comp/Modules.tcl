@@ -6,8 +6,5 @@
 
 
 
-lappend MOD "$ENTITY_BASE/addr_manager_ent.vhd"
-lappend MOD "$ENTITY_BASE/addr_manager_arch.vhd"
-lappend MOD "$ENTITY_BASE/pcie_hdr_ent.vhd"
-lappend MOD "$ENTITY_BASE/pcie_hdr_arch.vhd"
-
+lappend MOD "$ENTITY_BASE/addr_manager.vhd"
+lappend MOD "$ENTITY_BASE/pcie_hdr_gen.vhd"

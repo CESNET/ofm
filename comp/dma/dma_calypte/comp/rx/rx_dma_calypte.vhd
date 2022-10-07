@@ -34,10 +34,10 @@ entity RX_DMA_CALYPTE is
         -- Total number of DMA Channels within this DMA Endpoint
         CHANNELS : natural := 8;
 
-        -- Width of Software and Hardware Descriptor/Header Pointer
-        -- Defines width of signals used for these values in DMA Module
-        -- Affects logic complexity
-        -- Maximum value: 32 (restricted by size of pointer MI registers)
+        -- * Width of Software and Hardware Descriptor/Header Pointer
+        -- * Defines width of signals used for these values in DMA Module
+        -- * Affects logic complexity
+        -- * Maximum value: 32 (restricted by size of pointer MI registers)
         POINTER_WIDTH : natural := 16;
 
         -- Width of RAM address
@@ -48,8 +48,9 @@ entity RX_DMA_CALYPTE is
 
         HDR_META_WIDTH : natural := 24;
 
-        -- Maximum size of a packet (in bytes)
-        -- Defines width of Packet length signals.
+        -- * Maximum size of a packet (in bytes).
+        -- * Defines width of Packet length signals.
+        -- * Maximum allowed value is 2**16 - 1
         PKT_SIZE_MAX : natural := 2**16 - 1;
 
         TRBUF_FIFO_EN           : boolean := FALSE
@@ -60,7 +61,7 @@ entity RX_DMA_CALYPTE is
         RESET : in std_logic;
 
         -- =====================================================================
-        --  MI interface for SW access
+        -- MI interface for SW access
         -- =====================================================================
         MI_ADDR : in  std_logic_vector(MI_WIDTH-1 downto 0);
         MI_DWR  : in  std_logic_vector(MI_WIDTH-1 downto 0);
@@ -70,11 +71,10 @@ entity RX_DMA_CALYPTE is
         MI_DRD  : out std_logic_vector(MI_WIDTH-1 downto 0);
         MI_ARDY : out std_logic;
         MI_DRDY : out std_logic;
-        --=========================================================================================================
 
-        --=========================================================================================================
+        -- =========================================================================================================
         -- MFB input interface
-        --=========================================================================================================
+        -- =========================================================================================================
         USER_RX_MFB_META_HDR_META : in  std_logic_vector(HDR_META_WIDTH-1 downto 0)       := (others => '0');
         USER_RX_MFB_META_CHAN     : in  std_logic_vector(log2(CHANNELS)-1 downto 0)       := (others => '0');
         USER_RX_MFB_META_PKT_SIZE : in  std_logic_vector(log2(PKT_SIZE_MAX+1)-1 downto 0) := (others => '0');
@@ -86,12 +86,11 @@ entity RX_DMA_CALYPTE is
         USER_RX_MFB_EOF_POS  : in  std_logic_vector(USER_RX_MFB_REGIONS*max(1, log2(USER_RX_MFB_REGION_SIZE*USER_RX_MFB_BLOCK_SIZE))-1 downto 0);
         USER_RX_MFB_SRC_RDY  : in  std_logic;
         USER_RX_MFB_DST_RDY  : out std_logic;
-        --=========================================================================================================
 
 
-        --=========================================================================================================
+        -- =========================================================================================================
         -- MFB output interface
-        --=========================================================================================================
+        -- =========================================================================================================
         PCIE_UP_MFB_DATA    : out std_logic_vector(PCIE_UP_MFB_REGIONS*PCIE_UP_MFB_REGION_SIZE*PCIE_UP_MFB_BLOCK_SIZE*PCIE_UP_MFB_ITEM_WIDTH-1 downto 0);
         PCIE_UP_MFB_SOF     : out std_logic_vector(PCIE_UP_MFB_REGIONS - 1 downto 0);
         PCIE_UP_MFB_EOF     : out std_logic_vector(PCIE_UP_MFB_REGIONS - 1 downto 0);
@@ -99,8 +98,6 @@ entity RX_DMA_CALYPTE is
         PCIE_UP_MFB_EOF_POS : out std_logic_vector(PCIE_UP_MFB_REGIONS*max(1, log2(PCIE_UP_MFB_REGION_SIZE*PCIE_UP_MFB_BLOCK_SIZE))-1 downto 0);
         PCIE_UP_MFB_SRC_RDY : out std_logic;
         PCIE_UP_MFB_DST_RDY : in  std_logic
-        --=========================================================================================================
-
         );
 
 end entity;

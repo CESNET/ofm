@@ -12,38 +12,44 @@ use ieee.numeric_std.all;
 use work.type_pack.all;
 use work.math_pack.all;
 
+-- This component contols the successfull buffering of input data on the block specified by the
+-- `BUFFERED_DATA_SIZE` generic parameter. Whole buffer content is then set on the output MFB bus.
 entity RX_DMA_TRANS_BUFFER is
     generic (
-        -- MFB bus parameters (the amount of regions is set to 1)
+        -- The amount of data which needs to be buffered in bytes
+        BUFFERED_DATA_SIZE : integer := 128;
+
+        -- =========================================================================================
+        -- MFB bus parameters
+        --
+        -- The amount of regions is always set to 1
+        -- =========================================================================================
         RX_REGION_SIZE : integer := 1;
         RX_BLOCK_SIZE  : integer := 4*8;
-        RX_ITEM_WIDTH  : integer := 8;
-
-        -- the amount of data which needs to be buffered
-        BUFFERED_DATA_SIZE : integer := 128
+        RX_ITEM_WIDTH  : integer := 8
         );
 
     port (
         CLK : in std_logic;
         RST : in std_logic;
 
-        --=====================================================================
+        -- =========================================================================================
         -- Data from the DMA input buffer
-        --=====================================================================
-        -- NOTE: does not have a SOF_POS because every input word is aligned to the beginning of the word
+        --
+        -- There is no SOF_POS because every input word is aligned to the beginning of the word
+        -- =========================================================================================
         RX_MFB_DATA    : in  std_logic_vector(RX_REGION_SIZE*RX_BLOCK_SIZE*RX_ITEM_WIDTH-1 downto 0);
         RX_MFB_EOF_POS : in  std_logic_vector(max(1, log2(RX_REGION_SIZE*RX_BLOCK_SIZE))-1 downto 0);
         RX_MFB_SOF     : in  std_logic;
         RX_MFB_EOF     : in  std_logic;
         RX_MFB_SRC_RDY : in  std_logic;
         RX_MFB_DST_RDY : out std_logic;
-        --=====================================================================
 
-        --=====================================================================
-        -- output MFB to Header insertor
-        --=====================================================================
+        -- =========================================================================================
+        -- Output MFB to Header insertor
+        -- =========================================================================================
         TX_MFB_DATA    : out std_logic_vector((BUFFERED_DATA_SIZE/(RX_REGION_SIZE*RX_BLOCK_SIZE))*RX_REGION_SIZE*RX_BLOCK_SIZE*RX_ITEM_WIDTH-1 downto 0);
-        -- the SOF_POS os propably useless because each output packet is aligned to the beginning of a word, only
+        -- The SOF_POS is propably useless because each output packet is aligned to the beginning of a word, only
         -- one block is used
         TX_MFB_SOF_POS : out std_logic_vector(max(1, log2(RX_REGION_SIZE))-1 downto 0) := (others => '0');
         TX_MFB_EOF_POS : out std_logic_vector(max(1, log2((BUFFERED_DATA_SIZE/(RX_REGION_SIZE*RX_BLOCK_SIZE))*RX_REGION_SIZE*RX_BLOCK_SIZE))-1 downto 0);
@@ -51,7 +57,6 @@ entity RX_DMA_TRANS_BUFFER is
         TX_MFB_EOF     : out std_logic;
         TX_MFB_SRC_RDY : out std_logic;
         TX_MFB_DST_RDY : in  std_logic
-     --=====================================================================
         );
 
 end entity;

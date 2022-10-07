@@ -8,48 +8,56 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+-- Note:
+
 use work.math_pack.all;
 use work.type_pack.all;
 
+-- This component accepts buffered PCIe transactions (currently set to 128 Bytes). And sends them
+-- with appropriate PCIe header. When end of a packet is processed, the DMA header is sent after
+-- that.
 entity RX_DMA_HDR_INSERTOR is
-
     generic (
+        -- =========================================================================================
         -- RX MFB configuration
+        --
+        -- Number of regions is always 1
+        -- =========================================================================================
         RX_REGION_SIZE : natural := 1;
         RX_BLOCK_SIZE  : natural := 128;
         RX_ITEM_WIDTH  : natural := 8;
 
+        -- =========================================================================================
         -- TX MFB configuration
+        -- =========================================================================================
         TX_REGIONS     : natural := 2;
         TX_REGION_SIZE : natural := 1;
         TX_BLOCK_SIZE  : natural := 8;
         TX_ITEM_WIDTH  : natural := 32;
 
-        -- chenerics for the control signals of the packet counter
         CHANNELS     : natural := 8;
         PKT_SIZE_MAX : natural := 2**16 - 1
         );
-
     port (
         CLK : in std_logic;
         RST : in std_logic;
 
-        --=========================================================================================================
+        -- =========================================================================================
         -- MFB input interface
-        --=========================================================================================================
-        -- NOTE: EOF_POS is not used because the input word is send as a whole every time. The SOF_POS is not used
-        -- either because the input words are aligned to the beginning of the word.
+        --
+        -- EOF_POS is not used because. when the input word ends (signalized by EOF), whole word is
+        -- valid. The SOF_POS is not used either because the input words are aligned to the
+        -- beginning of the word.
+        -- =========================================================================================
         RX_MFB_DATA    : in  std_logic_vector(RX_REGION_SIZE*RX_BLOCK_SIZE*RX_ITEM_WIDTH-1 downto 0);
         RX_MFB_SOF     : in  std_logic;
         RX_MFB_EOF     : in  std_logic;
         RX_MFB_SRC_RDY : in  std_logic;
         RX_MFB_DST_RDY : out std_logic;
-        --=========================================================================================================
 
-
-        --=========================================================================================================
+        -- =========================================================================================
         -- MFB output interface
-        --=========================================================================================================
+        -- =========================================================================================
         TX_MFB_DATA    : out std_logic_vector(TX_REGIONS*TX_REGION_SIZE*TX_BLOCK_SIZE*TX_ITEM_WIDTH-1 downto 0);
         TX_MFB_SOF     : out std_logic_vector(TX_REGIONS-1 downto 0);
         TX_MFB_EOF     : out std_logic_vector(TX_REGIONS-1 downto 0);
@@ -57,16 +65,16 @@ entity RX_DMA_HDR_INSERTOR is
         TX_MFB_EOF_POS : out std_logic_vector(TX_REGIONS*max(1, log2(TX_REGION_SIZE*TX_BLOCK_SIZE))-1 downto 0);
         TX_MFB_SRC_RDY : out std_logic;
         TX_MFB_DST_RDY : in  std_logic;
-        --=========================================================================================================
 
-
-        --=========================================================================================================
-        -- Header manager interface (adheres to MVB specification)
-        --=========================================================================================================
+        -- =========================================================================================
+        -- Header manager interface
+        --
+        -- Adheres to the MVB specification.
+        -- =========================================================================================
         HDRM_PCIE_HDR_DATA : in std_logic_vector(127 downto 0);
 
-        -- log. 0 means header is 3 DW long
-        -- log. 1 means header is 4 DW long
+        -- - log. 0 means header is 3 DW long
+        -- - log. 1 means header is 4 DW long
         HDRM_PCIE_HDR_TYPE    : in  std_logic;
         HDRM_PCIE_HDR_SRC_RDY : in  std_logic;
         HDRM_PCIE_HDR_DST_RDY : out std_logic;
@@ -82,9 +90,7 @@ entity RX_DMA_HDR_INSERTOR is
         HDRM_PKT_SENT_INC  : out std_logic;
         HDRM_PKT_DISC_INC  : out std_logic;
         HDRM_PKT_SIZE      : out std_logic_vector((log2(PKT_SIZE_MAX+1) - 1) downto 0)
-     --=========================================================================================================
         );
-
 end entity;
 
 architecture FULL of RX_DMA_HDR_INSERTOR is
@@ -122,7 +128,6 @@ begin
         report "RX_DMA_HDR_INSERTOR: The design is not prepared for such TX MFB configuration, the valid are: MFB#(1,1,8,32), MFB#(2,1,8,32)."
         severity FAILURE;
 
-
     --=============================================================================================================
     -- FSM state register
     --=============================================================================================================
@@ -144,9 +149,6 @@ begin
             end if;
         end if;
     end process;
-    --=============================================================================================================
-
-
 
     --=============================================================================================================
     -- FSM next state logic
@@ -166,7 +168,6 @@ begin
                     ) then
 
                     tprocess_nst <= TRANSACTION_SEND;
-
                 end if;
 
             when TRANSACTION_SEND =>
@@ -178,7 +179,6 @@ begin
                     else
                         tprocess_nst <= IDLE;
                     end if;
-
                 end if;
 
             when DMA_HDR_SEND =>
@@ -186,13 +186,8 @@ begin
                 if (HDRM_PCIE_HDR_SRC_RDY = '1') then
                     tprocess_nst <= IDLE;
                 end if;
-
         end case;
-
     end process;
-    --=============================================================================================================
-
-
 
     --=============================================================================================================
     -- FSM process which contols the input RX MFB and Header Manager signals
@@ -225,11 +220,8 @@ begin
                 -- wait for a valid packet to arrive. This packet should also be the one which will not be
                 -- dropped. (PCIE  headers on the input are always valid)
                 if (HDRM_PCIE_HDR_SRC_RDY = '1') then
-
-                    shift_sel_nst <= HDRM_PCIE_HDR_TYPE;
-
+                    shift_sel_nst         <= HDRM_PCIE_HDR_TYPE;
                     HDRM_PCIE_HDR_DST_RDY <= '0';
-
                 end if;
 
                 -- awaiting the arrival of valid DMA header with the information if packet should be dropped or not
@@ -248,9 +240,7 @@ begin
                             HDRM_DMA_HDR_DST_RDY <= '1';
                             pkt_drop             <= '1';
                         end if;
-
                     end if;
-
                 end if;
 
             when TRANSACTION_SEND =>
@@ -271,9 +261,7 @@ begin
                         if (RX_MFB_EOF = '0') then
                             RX_MFB_DST_RDY <= TX_MFB_DST_RDY;
                         end if;
-
                     end if;
-
                 else
 
                     -- 1) permit the next header because it will be needed by the write of the last word of the
@@ -282,7 +270,6 @@ begin
                     if (high_shift_val_pst = "010" or high_shift_val_pst = "011") then
                         HDRM_PCIE_HDR_DST_RDY <= TX_MFB_DST_RDY;
                     end if;
-
                 end if;
 
             when DMA_HDR_SEND =>
@@ -295,18 +282,13 @@ begin
                     HDRM_DMA_HDR_DST_RDY <= TX_MFB_DST_RDY;
                     RX_MFB_DST_RDY       <= TX_MFB_DST_RDY;
                     dma_hdr_last         <= '1';
-
                 else
-
                     HDRM_DMA_HDR_DST_RDY <= '0';
                     RX_MFB_DST_RDY       <= '0';
-
                 end if;
-
         end case;
     end process;
     --=============================================================================================================
-
 
     -- my attempt to make the set of constants which change according to the specified generic parameters
     shift_cntr_incr_g : if (TX_REGIONS = 1) generate
@@ -318,7 +300,6 @@ begin
         -- shifting by two is needed
         SHIFT_INC  <= "010";
     end generate;
-
 
     --=============================================================================================================
     -- FSM process which controls the output MFB signals and their logic
@@ -354,7 +335,6 @@ begin
                     TX_MFB_SRC_RDY <= '1';
 
                     high_shift_val_nst <= INIT_SHIFT;
-
                 end if;
 
             when TRANSACTION_SEND =>
@@ -392,12 +372,10 @@ begin
 
                             -- the value of "100" & "010"
                             TX_MFB_EOF_POS <= std_logic_vector(to_unsigned(34, TX_MFB_EOF_POS'length));
-
                         else
                             -- the value of "000" & "010"
                             TX_MFB_EOF_POS <= std_logic_vector(to_unsigned(2, TX_MFB_EOF_POS'length));
                         end if;
-
                     else
 
                         if (TX_REGIONS = 2 and RX_MFB_EOF = '1') then
@@ -410,7 +388,6 @@ begin
 
                             -- the value of "101" & "011"
                             TX_MFB_EOF_POS <= std_logic_vector(to_unsigned(43, TX_MFB_EOF_POS'length));
-
                         else
                             -- the value of "000" & "011"
                             TX_MFB_EOF_POS <= std_logic_vector(to_unsigned(3, TX_MFB_EOF_POS'length));
@@ -436,12 +413,10 @@ begin
                     TX_MFB_SOF     <= std_logic_vector(to_unsigned(1, TX_MFB_SOF'length));
                     TX_MFB_EOF     <= std_logic_vector(to_unsigned(1, TX_MFB_EOF'length));
                     TX_MFB_SRC_RDY <= '1';
-
                 end if;
         end case;
     end process;
     --=============================================================================================================
-
 
     --=============================================================================================================
     -- Shifter of the output data
@@ -462,8 +437,6 @@ begin
         "101" when '0',
         "100" when '1',
         "000" when others;
-    --=============================================================================================================
-
 
     --=============================================================================================================
     -- Edge detector for the information if the packet has already been sent
@@ -481,6 +454,5 @@ begin
     -- choose only the valid bits from the DMA header for the packet counters
     HDRM_PKT_SIZE      <= HDRM_DMA_HDR_DATA(log2(PKT_SIZE_MAX + 1) - 1 downto 0);
     HDRM_PKT_CNTR_CHAN <= HDRM_DMA_CHAN_NUM;
-    --=============================================================================================================
 
 end architecture;

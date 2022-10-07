@@ -1,7 +1,13 @@
-.. _hdr_manager:
+.. _rx_dma_hdr_manager:
 
-HEADER MANAGER
---------------
+Header Manager
+==============
 
 .. vhdl:autoentity:: RX_DMA_HDR_MANAGER
 
+.. toctree::
+    :maxdepth: 1
+    :caption: Subcomponents:
+
+    comp/readme
+    comp/comp/readme

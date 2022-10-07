@@ -14,6 +14,4 @@ lappend COMPONENTS [ list "ADDR_MANAGER"  "$ENTITY_BASE/comp"                   
 lappend COMPONENTS [ list "FIFOX"         "$OFM_PATH/comp/base/fifo/fifox"         "FULL" ]
 lappend COMPONENTS [ list "SH_FIFO"       "$OFM_PATH/comp/base/fifo/sh_fifo"       "FULL" ]
 
-lappend MOD "$ENTITY_BASE/rx_dma_hdr_manager_ent.vhd"
-lappend MOD "$ENTITY_BASE/rx_dma_hdr_manager_arch.vhd"
-
+lappend MOD "$ENTITY_BASE/rx_dma_hdr_manager.vhd"
