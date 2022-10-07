@@ -5,20 +5,13 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 # Set paths
-
-# Paths to components
-set PKG_BASE    "$OFM_PATH/comp/base/pkg"
-#set FIFOXM_BASE "$COMP_BASE/base/fifo/fifox_multi"
+set PKG_BASE "$OFM_PATH/comp/base/pkg"
 
 # Packages
-set PACKAGES "$PACKAGES $PKG_BASE/math_pack.vhd"
-set PACKAGES "$PACKAGES $PKG_BASE/type_pack.vhd"
-
-# Components
-#set COMPONENTS [concat $COMPONENTS [list \
-#   [ list "FIFOXM" $FIFOXM_BASE "FULL" ] \
-#]]
+lappend PACKAGES "$PKG_BASE/math_pack.vhd"
+lappend PACKAGES "$PKG_BASE/type_pack.vhd"
 
 # Source files for implemented component
-set MOD "$MOD $ENTITY_BASE/mvb_channel_router.vhd"
-set MOD "$MOD $ENTITY_BASE/mvb_channel_router_mi.vhd"
+lappend MOD "$ENTITY_BASE/mvb_channel_router.vhd"
+lappend MOD "$ENTITY_BASE/mvb_channel_router_mi.vhd"
+lappend MOD "$ENTITY_BASE/DevTree.tcl"
