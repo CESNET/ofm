@@ -115,7 +115,7 @@ module DUT (
     end else
         assign rc_mfb_sof_pos = RC_MFB.SOF_POS;
 
-    PCIE_TRANSACTION_CTRL #(
+    PCIE_TRANSACTION_CTRL_WRAPPER #(
         .DMA_PORTS            (DMA_PORTS)           ,
         .MVB_UP_ITEMS         (MVB_UP_ITEMS)        ,
         .DMA_MVB_UP_ITEMS     (DMA_MVB_UP_ITEMS)    ,

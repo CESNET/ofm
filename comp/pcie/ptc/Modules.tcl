@@ -48,3 +48,4 @@ set COMPONENTS [ list \
 # entity and architecture
 set MOD "$MOD $ENTITY_BASE/ptc_ent.vhd"
 set MOD "$MOD $ENTITY_BASE/ptc_full.vhd"
+set MOD "$MOD $ENTITY_BASE/ptc_wrapper.vhd"
