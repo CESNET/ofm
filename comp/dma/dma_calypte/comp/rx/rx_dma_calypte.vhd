@@ -199,55 +199,55 @@ architecture FULL of RX_DMA_CALYPTE is
     --==============================================================================================
     -- Debug signals for the RX DMA
     --==============================================================================================
-    attribute mark_debug : string;
+    -- attribute mark_debug : string;
 
-    attribute mark_debug of USER_RX_MFB_META_HDR_META : signal is "true";
-    attribute mark_debug of USER_RX_MFB_META_CHAN     : signal is "true";
-    attribute mark_debug of USER_RX_MFB_META_PKT_SIZE : signal is "true";
+    -- attribute mark_debug of USER_RX_MFB_META_HDR_META : signal is "true";
+    -- attribute mark_debug of USER_RX_MFB_META_CHAN     : signal is "true";
+    -- attribute mark_debug of USER_RX_MFB_META_PKT_SIZE : signal is "true";
 
-    attribute mark_debug of USER_RX_MFB_DATA    : signal is "true";
-    attribute mark_debug of USER_RX_MFB_SOF     : signal is "true";
-    attribute mark_debug of USER_RX_MFB_EOF     : signal is "true";
-    attribute mark_debug of USER_RX_MFB_SOF_POS : signal is "true";
-    attribute mark_debug of USER_RX_MFB_EOF_POS : signal is "true";
-    attribute mark_debug of USER_RX_MFB_SRC_RDY : signal is "true";
-    attribute mark_debug of hdr_log_dst_rdy     : signal is "true";
-    attribute mark_debug of data_path_dst_rdy   : signal is "true";
+    -- attribute mark_debug of USER_RX_MFB_DATA    : signal is "true";
+    -- attribute mark_debug of USER_RX_MFB_SOF     : signal is "true";
+    -- attribute mark_debug of USER_RX_MFB_EOF     : signal is "true";
+    -- attribute mark_debug of USER_RX_MFB_SOF_POS : signal is "true";
+    -- attribute mark_debug of USER_RX_MFB_EOF_POS : signal is "true";
+    -- attribute mark_debug of USER_RX_MFB_SRC_RDY : signal is "true";
+    -- attribute mark_debug of hdr_log_dst_rdy     : signal is "true";
+    -- attribute mark_debug of data_path_dst_rdy   : signal is "true";
 
-    attribute mark_debug of PCIE_UP_MFB_DATA    : signal is "true";
-    attribute mark_debug of PCIE_UP_MFB_SOF     : signal is "true";
-    attribute mark_debug of PCIE_UP_MFB_EOF     : signal is "true";
-    attribute mark_debug of PCIE_UP_MFB_SOF_POS : signal is "true";
-    attribute mark_debug of PCIE_UP_MFB_EOF_POS : signal is "true";
-    attribute mark_debug of PCIE_UP_MFB_SRC_RDY : signal is "true";
-    attribute mark_debug of PCIE_UP_MFB_DST_RDY : signal is "true";
+    -- attribute mark_debug of PCIE_UP_MFB_DATA    : signal is "true";
+    -- attribute mark_debug of PCIE_UP_MFB_SOF     : signal is "true";
+    -- attribute mark_debug of PCIE_UP_MFB_EOF     : signal is "true";
+    -- attribute mark_debug of PCIE_UP_MFB_SOF_POS : signal is "true";
+    -- attribute mark_debug of PCIE_UP_MFB_EOF_POS : signal is "true";
+    -- attribute mark_debug of PCIE_UP_MFB_SRC_RDY : signal is "true";
+    -- attribute mark_debug of PCIE_UP_MFB_DST_RDY : signal is "true";
 
-    attribute mark_debug of hdrm_pkt_sent_chan  : signal is "true";
-    attribute mark_debug of hdrm_pkt_sent_inc   : signal is "true";
-    attribute mark_debug of hdrm_pkt_disc_inc   : signal is "true";
-    attribute mark_debug of hdrm_pkt_sent_bytes : signal is "true";
+    -- attribute mark_debug of hdrm_pkt_sent_chan  : signal is "true";
+    -- attribute mark_debug of hdrm_pkt_sent_inc   : signal is "true";
+    -- attribute mark_debug of hdrm_pkt_disc_inc   : signal is "true";
+    -- attribute mark_debug of hdrm_pkt_sent_bytes : signal is "true";
 
-    attribute mark_debug of hdrm_pcie_hdr_type    : signal is "true";
-    attribute mark_debug of hdrm_pcie_hdr_data    : signal is "true";
-    attribute mark_debug of hdrm_pcie_hdr_src_rdy : signal is "true";
-    attribute mark_debug of hdrm_pcie_hdr_dst_rdy : signal is "true";
+    -- attribute mark_debug of hdrm_pcie_hdr_type    : signal is "true";
+    -- attribute mark_debug of hdrm_pcie_hdr_data    : signal is "true";
+    -- attribute mark_debug of hdrm_pcie_hdr_src_rdy : signal is "true";
+    -- attribute mark_debug of hdrm_pcie_hdr_dst_rdy : signal is "true";
 
-    attribute mark_debug of hdrm_pkt_drop        : signal is "true";
-    attribute mark_debug of hdrm_dma_hdr_data    : signal is "true";
-    attribute mark_debug of hdrm_dma_hdr_src_rdy : signal is "true";
-    attribute mark_debug of hdrm_dma_hdr_dst_rdy : signal is "true";
+    -- attribute mark_debug of hdrm_pkt_drop        : signal is "true";
+    -- attribute mark_debug of hdrm_dma_hdr_data    : signal is "true";
+    -- attribute mark_debug of hdrm_dma_hdr_src_rdy : signal is "true";
+    -- attribute mark_debug of hdrm_dma_hdr_dst_rdy : signal is "true";
 
-    attribute mark_debug of trbuf_fifo_tx_src_rdy   : signal is "true";
-    attribute mark_debug of trbuf_fifo_tx_dst_rdy   : signal is "true";
-    attribute mark_debug of mfb_src_rdy_inbuf2trbuf : signal is "true";
-    attribute mark_debug of mfb_dst_rdy_inbuf2trbuf : signal is "true";
+    -- attribute mark_debug of trbuf_fifo_tx_src_rdy   : signal is "true";
+    -- attribute mark_debug of trbuf_fifo_tx_dst_rdy   : signal is "true";
+    -- attribute mark_debug of mfb_src_rdy_inbuf2trbuf : signal is "true";
+    -- attribute mark_debug of mfb_dst_rdy_inbuf2trbuf : signal is "true";
 
-    attribute mark_debug of stop_req_chan  : signal is "true";
-    attribute mark_debug of stop_req_vld   : signal is "true";
-    attribute mark_debug of stop_req_done  : signal is "true";
-    attribute mark_debug of start_req_chan : signal is "true";
-    attribute mark_debug of start_req_vld  : signal is "true";
-    attribute mark_debug of start_req_done : signal is "true";
+    -- attribute mark_debug of stop_req_chan  : signal is "true";
+    -- attribute mark_debug of stop_req_vld   : signal is "true";
+    -- attribute mark_debug of stop_req_done  : signal is "true";
+    -- attribute mark_debug of start_req_chan : signal is "true";
+    -- attribute mark_debug of start_req_vld  : signal is "true";
+    -- attribute mark_debug of start_req_done : signal is "true";
     --==================================================================================================
 
 begin
