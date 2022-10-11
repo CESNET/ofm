@@ -148,8 +148,8 @@ architecture FULL of SUPERUNPACKETER is
     signal sphe_tx_sof_mask      : std_logic_vector(MFB_REGIONS-1 downto 0);
 
     -- Word counter
-    signal word_cnt_reg : unsigned                       (log2(PKT_MAX_WORDS)-1 downto 0) := (others => '0');
-    signal word_cnt     : u_array_t(MFB_REGIONS downto 0)(log2(PKT_MAX_WORDS)-1 downto 0);
+    signal word_cnt_reg : unsigned                         (log2(PKT_MAX_WORDS)-1 downto 0) := (others => '0');
+    signal word_cnt     : u_array_t(MFB_REGIONS-1 downto 0)(log2(PKT_MAX_WORDS)-1 downto 0);
 
     -- SOF offset
     signal sphe_tx_sof_masked       : std_logic_vector(MFB_REGIONS-1 downto 0);
@@ -173,7 +173,8 @@ architecture FULL of SUPERUNPACKETER is
     attribute preserve_for_debug : boolean;
     attribute preserve_for_debug of rx_supkt_pkt_cnt_reg0 : signal is true;
 
-    signal rx_supkt_offset_reg0_arr : u_array_t  (MFB_REGIONS-1 downto 0)(SOF_OFFSET_W-1 downto 0);
+    signal word_cnt_reg0            : u_array_t       (MFB_REGIONS-1 downto 0)(log2(PKT_MAX_WORDS)-1 downto 0);
+    signal rx_supkt_offset_reg0_arr : u_array_t       (MFB_REGIONS-1 downto 0)(SOF_OFFSET_W-1 downto 0);
     signal sphe_tx_sof_mask_reg0    : std_logic_vector(MFB_REGIONS-1 downto 0);
 
     signal rx_supkt_data_reg0_arr    : slv_array_t(MFB_REGIONS-1 downto 0)(MFB_REGION_WIDTH-1 downto 0);
@@ -305,6 +306,27 @@ begin
         rx_supkt_len_arr(r) <= rx_supkt_data_arr(to_integer(rx_supkt_sof_pos_word(r)))(LENGTH_WIDTH-1 downto 0);
     end generate;
 
+        -- --------------
+        --  Word counter
+        -- --------------
+    
+        word_cnt_reg_p : process (CLK)
+        begin
+            if (rising_edge(CLK)) then
+                if (RX_MFB_SRC_RDY = '1') and (RX_MFB_DST_RDY = '1') then
+                    word_cnt_reg <= word_cnt(MFB_REGIONS-1) + 1;
+                end if;
+                if (RESET = '1') then
+                    word_cnt_reg <= (others => '0');
+                end if;
+            end if;
+        end process;
+    
+        word_cnt(0) <= word_cnt_reg when (RX_MFB_SOF(0) = '0') else (others => '0');
+        word_cnt_g: for r in 1 to MFB_REGIONS-1 generate
+            word_cnt(r) <= word_cnt(r-1) when (RX_MFB_SOF(r) = '0') else (others => '0');
+        end generate;
+
     -- -------------------------------
     --  Precalculate SuPkt SOF offset
     -- -------------------------------
@@ -341,8 +363,8 @@ begin
 
     eof_propg(0) <= '1' when (RX_MFB_EOF(0) = '1') else eof_propg_reg;
     eof_propg_g : for r in 1 to MFB_REGIONS-1 generate
-        eof_propg(r) <= '0'            when (RX_MFB_SOF(r-1) = '1') else
-                        '1'            when (RX_MFB_EOF(r  ) = '1') else
+        eof_propg(r) <= '1'            when (RX_MFB_EOF(r  ) = '1') else
+                        '0'            when (RX_MFB_SOF(r-1) = '1') else
                         eof_propg(r-1);
     end generate;
     eof_propg(MFB_REGIONS) <= '0' when (RX_MFB_SOF(MFB_REGIONS-1) = '1') else eof_propg(MFB_REGIONS-1);
@@ -365,9 +387,9 @@ begin
                 rx_supkt_sof_reg0     <= RX_MFB_SOF and RX_MFB_SRC_RDY; -- TODO: RX_MFB_SOF
                 rx_supkt_eof_reg0     <= RX_MFB_EOF and RX_MFB_SRC_RDY; -- TODO: RX_MFB_EOF
                 
+                word_cnt_reg0            <= word_cnt;
                 rx_supkt_offset_reg0_arr <= rx_supkt_offset_arr;
-
-                sphe_tx_sof_mask_reg0 <= sphe_tx_sof_mask;
+                sphe_tx_sof_mask_reg0    <= sphe_tx_sof_mask;
                 
                 rx_supkt_src_rdy_reg0 <= RX_MFB_SRC_RDY;
             end if;
@@ -403,33 +425,12 @@ begin
     end process;
 
     dbg_cnt_g : for r in 0 to MFB_REGIONS-1 generate
-        rx_supkt_pkt_cnt_reg0(r+1) <= rx_supkt_pkt_cnt_reg0(r) when (rx_supkt_eof_reg0(r) = '1') else rx_supkt_pkt_cnt_reg0(r) + 1;
+        rx_supkt_pkt_cnt_reg0(r+1) <= rx_supkt_pkt_cnt_reg0(r) + 1 when (rx_supkt_eof_reg0(r) = '1') else rx_supkt_pkt_cnt_reg0(r);
     end generate;
 
     -- ========================================================================
     -- Control logic for the SuperPacket Header Extractors (SPHEs)
     -- ========================================================================
-
-    -- --------------
-    --  Word counter
-    -- --------------
-
-    word_cnt_reg_p : process (CLK)
-    begin
-        if (rising_edge(CLK)) then
-            if (sphe_tx_src_rdy = '1') and (sphe_tx_dst_rdy = '1') then
-                word_cnt_reg <= word_cnt(MFB_REGIONS) + 1;
-            end if;
-            if (RESET = '1') then
-                word_cnt_reg <= (others => '0');
-            end if;
-        end if;
-    end process;
-
-    word_cnt(0) <= word_cnt_reg when (rx_supkt_sof_reg0(0) = '0') else (others => '0');
-    word_cnt_g: for r in 0 to MFB_REGIONS-1 generate
-        word_cnt(r+1) <= word_cnt(r) when (rx_supkt_sof_reg0(r) = '0') else (others => '0');
-    end generate;
 
     -- ------------------------
     --  SOF offset calculation
@@ -465,11 +466,9 @@ begin
 
     sphe_tx_dst_rdy <= sphe_tx_dst_rdy_reg1;
 
-    sphe_rx_data <= rx_supkt_data_reg0_arr;
-    sphe_rx_g: for r in 0 to MFB_REGIONS-1 generate
-        sphe_rx_sof_offset(r) <= std_logic_vector(sof_offset(r));
-        sphe_rx_word_cnt  (r) <= std_logic_vector(word_cnt  (r));
-    end generate;
+    sphe_rx_data       <= rx_supkt_data_reg0_arr;
+    sphe_rx_word_cnt   <= u_arr_to_slv_arr(word_cnt_reg0, MFB_REGIONS);
+    sphe_rx_sof_offset <= u_arr_to_slv_arr(sof_offset   , MFB_REGIONS);
 
     supkt_hdr_extractor_g : for r in 0 to MFB_REGIONS-1 generate
         supkt_hdr_extractor_i : entity work.SUPKT_HDR_EXTRACTOR
@@ -623,7 +622,7 @@ begin
     -- ========================================================================
 
         -- Delay MFB stream
-        mfb_pipe_i2 : entity work.MFB_PIPE
+        mfb_fifox_i2 : entity work.MFB_FIFOX
         generic map(
             REGIONS     => MFB_REGIONS    ,
             REGION_SIZE => MFB_REGION_SIZE,
@@ -631,14 +630,15 @@ begin
             ITEM_WIDTH  => MFB_ITEM_WIDTH ,
             META_WIDTH  => 0              ,
 
-            FAKE_PIPE   => false          ,
-            USE_DST_RDY => true           ,
-            PIPE_TYPE   => "SHREG"        ,
-            DEVICE      => DEVICE
+            FIFO_DEPTH          => 512    ,
+            RAM_TYPE            => "AUTO" ,
+            DEVICE              => DEVICE ,
+            ALMOST_FULL_OFFSET  => 0      ,
+            ALMOST_EMPTY_OFFSET => 0
         )
         port map(
-            CLK   => CLK,
-            RESET => RESET,
+            CLK => CLK,
+            RST => RESET,
 
             RX_DATA    => getit_indv_pkt_data   ,
             RX_META    => (others => '0')       ,
@@ -685,7 +685,7 @@ begin
             MFB_META_WIDTH       => 0              ,
 
             INSERT_MODE   => OUT_META_MODE         ,
-            MVB_FIFO_SIZE => 4                     ,
+            MVB_FIFO_SIZE => 32                    ,
             DEVICE        => DEVICE
         )
         port map(
@@ -801,7 +801,7 @@ begin
     TX_MFB_SOF     <= cut_sof;
     TX_MFB_EOF     <= cut_eof;
     TX_MFB_SRC_RDY <= cut_src_rdy;
-    cut_dst_rdy    <= TX_MFB_DST_RDY;
+    cut_dst_rdy <= TX_MFB_DST_RDY;
 
     TX_MVB_DATA    <= metains_indv_hdr_data;
     TX_MVB_VLD     <= metains_indv_hdr_vld;

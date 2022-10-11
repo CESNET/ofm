@@ -5,7 +5,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 class ex_test extends uvm_test;
-    `uvm_component_utils(test::ex_test);
+    typedef uvm_component_registry#(test::ex_test, "test::ex_test") type_id;
 
     // declare the Environment reference variable
     uvm_superunpacketer::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, OUT_META_WIDTH, HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, OUT_META_MODE) m_env;
@@ -18,58 +18,30 @@ class ex_test extends uvm_test;
         super.new(name, parent);
     endfunction
 
+    static function type_id get_type();
+        return type_id::get();
+    endfunction
+
+    function string get_type_name();
+        return get_type().get_type_name();
+    endfunction
+
+
     // Build phase function, e.g. the creation of test's internal objects
     function void build_phase(uvm_phase phase);
         // Initializing the reference to the environment
         m_env = uvm_superunpacketer::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, OUT_META_WIDTH, HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, OUT_META_MODE)::type_id::create("m_env", this);
     endfunction
 
-    virtual task tx_seq(uvm_phase phase);
-
-        // Declaring the sequence library reference and initializing it
-        uvm_mfb::sequence_lib_tx#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, OUT_META_WIDTH) mfb_seq;
-        mfb_seq = uvm_mfb::sequence_lib_tx#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, OUT_META_WIDTH)::type_id::create("mfb_tx_seq", this);
-
-        mfb_seq.init_sequence();
-        mfb_seq.min_random_count = 100;
-        mfb_seq.max_random_count = 200;
-
-        //RUN TX Sequencer
-        forever begin
-            mfb_seq.randomize();
-            mfb_seq.start(m_env.m_env_tx.m_sequencer);
-        end
-
-    endtask
-
-    virtual task tx_mvb_seq(uvm_phase phase);
-        uvm_mvb::sequence_lib_tx#(MFB_REGIONS, OUT_META_WIDTH) mvb_seq;
-        mvb_seq = uvm_mvb::sequence_lib_tx#(MFB_REGIONS, OUT_META_WIDTH)::type_id::create("mvb_seq", this);
-        mvb_seq.init_sequence();
-        mvb_seq.min_random_count = 100;
-        mvb_seq.max_random_count = 200;
-
-        forever begin
-            mvb_seq.randomize();
-            mvb_seq.start(m_env.m_env_tx_mvb.m_sequencer);
-        end
-    endtask
-
     // ------------------------------------------------------------------------
     // Create environment and Run sequences on their sequencers
     virtual task run_phase(uvm_phase phase);
-        virt_sequence #(MIN_SIZE, PKT_MTU) m_vseq;
+        virt_sequence #(MIN_SIZE, PKT_MTU, DATA_SIZE_MAX, MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, OUT_META_WIDTH) m_vseq;
 
         phase.raise_objection(this);
 
-        //RUN MFB and MVB TX SEQUENCE
-        fork
-            tx_seq(phase);
-            tx_mvb_seq(phase);
-        join_none
-
         //RUN MFB RX SEQUENCE
-        m_vseq = virt_sequence#(MIN_SIZE, PKT_MTU)::type_id::create("m_vseq");
+        m_vseq = virt_sequence#(MIN_SIZE, PKT_MTU, DATA_SIZE_MAX, MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, OUT_META_WIDTH)::type_id::create("m_vseq");
         m_vseq.randomize();
         m_vseq.start(m_env.vscr);
 

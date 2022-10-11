@@ -11,6 +11,10 @@ import test::*;
 
 module testbench;
 
+    //TESTS
+    typedef test::ex_test ex_test;
+    typedef test::speed speed;
+
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // Signals
     logic CLK = 0;

@@ -73,6 +73,11 @@ package type_pack is
   type b_array_2d_t is array (natural range <>) of b_array_t;
   type b_array_3d_t is array (natural range <>) of b_array_2d_t;
 
+  -- converts an array of std_logic_vector to an array of unsigned (1 dimension)
+  function slv_arr_to_u_arr(slv_array: slv_array_t; ITEMS_X: integer) return u_array_t;
+  -- converts an array of unsigned to an array of std_logic_vector (1 dimension)
+  function u_arr_to_slv_arr(u_array: u_array_t; ITEMS_X: integer) return slv_array_t;
+
   -- Sumation of different types of array
   function sum(v : slv_array_t) return std_logic_vector;
   function sum(v :   u_array_t) return unsigned;
@@ -321,6 +326,24 @@ package body type_pack is
    function slv_array_2d_deser(slv_array_2d: std_logic_vector; ITEMS_X: integer; ITEMS_Y: integer) return slv_array_2d_t is
    begin
       return slv_array_2d_downto_deser(slv_array_2d,ITEMS_X,ITEMS_Y);
+   end;
+
+   function slv_arr_to_u_arr(slv_array: slv_array_t; ITEMS_X: integer) return u_array_t is
+      variable u_array : u_array_t(ITEMS_X-1 downto 0)(slv_array(0)'high downto 0);
+   begin
+      for i in 0 to ITEMS_X-1 loop
+         u_array(i) := unsigned(slv_array(i));
+      end loop;
+      return u_array;
+   end;
+
+   function u_arr_to_slv_arr(u_array: u_array_t; ITEMS_X: integer) return slv_array_t is
+      variable slv_array : slv_array_t(ITEMS_X-1 downto 0)(u_array(0)'high downto 0);
+   begin
+      for i in 0 to ITEMS_X-1 loop
+         slv_array(i) := std_logic_vector(u_array(i));
+      end loop;
+      return slv_array;
    end;
 
 end type_pack;

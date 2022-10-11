@@ -8,17 +8,18 @@
 class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, OUT_META_WIDTH, HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, OUT_META_MODE) extends uvm_env;
     `uvm_component_param_utils(uvm_superunpacketer::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, OUT_META_WIDTH, HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, OUT_META_MODE));
 
-    uvm_logic_vector_array_mfb::env_rx #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, 8, 0)              m_env_rx;
-    uvm_logic_vector_array_mfb::env_tx #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, 8, OUT_META_WIDTH) m_env_tx;
-    uvm_logic_vector_mvb::env_tx       #(MFB_REGIONS, OUT_META_WIDTH)                                     m_env_tx_mvb;
+    uvm_logic_vector_array_mfb::env_rx #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, 0)              m_env_rx;
+    uvm_logic_vector_array_mfb::env_tx #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, OUT_META_WIDTH) m_env_tx;
+    uvm_logic_vector_mvb::env_tx       #(MFB_REGIONS, OUT_META_WIDTH)                                                  m_env_tx_mvb;
 
     driver#(OUT_META_WIDTH, HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE) m_driver;
 
-    uvm_superunpacketer::virt_sequencer vscr;
-    uvm_reset::agent                    m_reset;
-    uvm_superpacket_header::agent       m_info_agent;
-    uvm_superpacket_size::agent         m_size_agent;
-    uvm_logic_vector_array::agent#(8)   m_byte_array_agent;
+    uvm_superunpacketer::virt_sequencer #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, OUT_META_WIDTH) vscr;
+
+    uvm_reset::agent                               m_reset;
+    uvm_superpacket_header::agent                  m_info_agent;
+    uvm_superpacket_size::agent                    m_size_agent;
+    uvm_logic_vector_array::agent#(MFB_ITEM_WIDTH) m_byte_array_agent;
 
     scoreboard #(HEADER_SIZE, VERBOSITY, OUT_META_WIDTH) sc;
 
@@ -51,7 +52,7 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, OUT_ME
         m_byte_array_agent_cfg        = new();
         m_byte_array_agent_cfg.active = UVM_ACTIVE;
         uvm_config_db #(uvm_logic_vector_array::config_item)::set(this, "m_byte_array_agent", "m_config", m_byte_array_agent_cfg);
-        m_byte_array_agent   = uvm_logic_vector_array::agent#(8)::type_id::create("m_byte_array_agent", this);
+        m_byte_array_agent   = uvm_logic_vector_array::agent#(MFB_ITEM_WIDTH)::type_id::create("m_byte_array_agent", this);
 
         m_config_reset                = new;
         m_config_reset.active         = UVM_ACTIVE;
@@ -67,7 +68,7 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, OUT_ME
         m_config_rx.meta_behav     = (OUT_META_MODE == 0) ? uvm_logic_vector_array_mfb::config_item::META_SOF : uvm_logic_vector_array_mfb::config_item::META_EOF;
 
         uvm_config_db #(uvm_logic_vector_array_mfb::config_item)::set(this, "m_env_rx", "m_config", m_config_rx);
-        m_env_rx = uvm_logic_vector_array_mfb::env_rx#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, 8, 0)::type_id::create("m_env_rx", this);
+        m_env_rx = uvm_logic_vector_array_mfb::env_rx#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, 0)::type_id::create("m_env_rx", this);
 
         m_config_tx                = new;
         m_config_tx.active         = UVM_ACTIVE;
@@ -76,7 +77,7 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, OUT_ME
 
 
         uvm_config_db #(uvm_logic_vector_array_mfb::config_item)::set(this, "m_env_tx", "m_config", m_config_tx);
-        m_env_tx = uvm_logic_vector_array_mfb::env_tx#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, 8, OUT_META_WIDTH)::type_id::create("m_env_tx", this);
+        m_env_tx = uvm_logic_vector_array_mfb::env_tx#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, OUT_META_WIDTH)::type_id::create("m_env_tx", this);
 
         m_config_mvb_tx                = new;
         m_config_mvb_tx.active         = UVM_ACTIVE;
@@ -87,7 +88,7 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, OUT_ME
 
         sc       = scoreboard#(HEADER_SIZE, VERBOSITY, OUT_META_WIDTH)::type_id::create("sc", this);
         m_driver = driver #(OUT_META_WIDTH, HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE)::type_id::create("m_driver", this);
-        vscr     = uvm_superunpacketer::virt_sequencer::type_id::create("vscr",this);
+        vscr     = uvm_superunpacketer::virt_sequencer#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, OUT_META_WIDTH)::type_id::create("vscr",this);
 
     endfunction
 
@@ -104,10 +105,12 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, OUT_ME
         m_reset.sync_connect(m_env_rx.reset_sync);
         m_reset.sync_connect(m_env_tx.reset_sync);
 
-        vscr.m_reset = m_reset.m_sequencer;
+        vscr.m_reset          = m_reset.m_sequencer;
+        vscr.m_mfb            = m_env_tx.m_sequencer;
+        vscr.m_mvb            = m_env_tx_mvb.m_sequencer;
         vscr.m_byte_array_scr = m_byte_array_agent.m_sequencer;
-        vscr.m_info = m_info_agent.m_sequencer;
-        vscr.m_size = m_size_agent.m_sequencer;
+        vscr.m_info           = m_info_agent.m_sequencer;
+        vscr.m_size           = m_size_agent.m_sequencer;
 
         m_driver.seq_item_port_header.connect(m_info_agent.m_sequencer.seq_item_export);
         m_driver.seq_item_port_sp_size.connect(m_size_agent.m_sequencer.seq_item_export);
