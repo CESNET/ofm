@@ -11,25 +11,36 @@ use IEEE.std_logic_1164.all;
 --                        Ethernet Header Package
 -- -----------------------------------------------------------------------------
 
--- Items description:
+-- **RX Ethernet HDR items description:**
 --
--- ============= ==============================================================
--- LENGTH        Lenght of frame in bytes
--- PORT          Source (RX) or destination (TX) Ethernet port of frame
--- ERROR         Global error of frame, masked OR of all error bits
--- ERRORFRAME    Frame with frame error
--- ERRORMINTU    Frame with length below MINTU
--- ERRORMAXTU    Frame with length over MAXTU
--- ERRORCRC      Frame with CRC error
--- ERRORMAC      Frame with MAC error
--- BROADCAST     Frame with Broadcast MAC
--- MULTICAST     Frame with Multicast MAC
--- HITMACVLD     Valid bit of hit CAM memory address
--- HITMAC        Hit CAM memory address of frame MAC
--- TIMESTAMPVLD  Valid bit of timestamp
--- TIMESTAMP     Timestamp of frame
--- DISCARD       Discard frame before transmit
--- ============= ==============================================================
+-- ============== ============ =================================================
+-- Item bit range Item name    Item description
+-- ============== ============ =================================================
+-- 0  to 15       LENGTH       Length of Ethernet frame in bytes
+-- 16 to 23       PORT         Source port/channel number in global format for the entire card; Examples: card with 2 ports each with 4 channels; third channel of the second port = 6; second channel of the first port = 1)
+-- 24 to 24       ERROR        Flag of global error, masked OR of all error bits
+-- 25 to 25       ERRORFRAME   Flag of frame error
+-- 26 to 26       ERRORMINTU   Flag of length below MINTU
+-- 27 to 27       ERRORMAXTU   Flag of length over MAXTU
+-- 28 to 28       ERRORCRC     Flag of CRC error
+-- 29 to 29       ERRORMAC     Flag of MAC error
+-- 30 to 30       BROADCAST    Flag of Broadcast MAC
+-- 31 to 31       MULTICAST    Flag of Multicast MAC
+-- 32 to 32       HITMACVLD    Flag of hit MAC address in TCAM memory
+-- 33 to 36       HITMAC       Index of hit MAC address in TCAM memory
+-- 37 to 37       TIMESTAMPVLD Flag of valid timestamp
+-- 38 to 101      TIMESTAMP    Timestamp of frame (see TSU module docs for format description)
+-- ============== ============ =================================================
+--
+-- **TX Ethernet HDR items description:**
+--
+-- ============== ========== ===================================================
+-- Item bit range Item name  Item description
+-- ============== ========== ===================================================
+-- 0  to 15       LENGTH     Length of Ethernet frame in bytes
+-- 16 to 23       PORT       Destination port/channel number in global format for the entire card; Examples: card with 2 ports each with 4 channels; third channel of the second port = 6; second channel of the first port = 1)
+-- 24 to 24       DISCARD    DRAFT ONLY: Discard frame before transmit to network
+-- ============== ========== ===================================================
 package eth_hdr_pack is
 
     constant ETH_RX_HDR_LENGTH_W       : natural := 16;
