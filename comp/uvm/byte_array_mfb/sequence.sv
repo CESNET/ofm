@@ -191,7 +191,7 @@ class sequence_simple_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends
 
                 if (state_packet == state_packet_new) begin
                     // Check SOF and EOF position if we can insert packet into this region
-                    if (gen.sof[it] == 1 || (gen.eof[it] == 1'b1 && (REGION_SIZE*BLOCK_SIZE) > (index*BLOCK_SIZE + data.data.size()))) begin
+                    if (gen.sof[it] == 1 || (gen.eof[it] == 1'b1 && (REGION_SIZE*BLOCK_SIZE) >= (index*BLOCK_SIZE + data.data.size()))) begin
                         break;
                     end
 
@@ -312,7 +312,7 @@ class sequence_burst_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends 
 
                     if (state_packet == state_packet_new) begin
                         // Check SOF and EOF position if we can insert packet into this region
-                        if (gen.sof[it] == 1 || (gen.eof[it] == 1'b1 && (REGION_SIZE*BLOCK_SIZE) > (index*BLOCK_SIZE + data.data.size()))) begin
+                        if (gen.sof[it] == 1 || (gen.eof[it] == 1'b1 && (REGION_SIZE*BLOCK_SIZE) >= (index*BLOCK_SIZE + data.data.size()))) begin
                             break;
                         end
 
@@ -435,7 +435,7 @@ class sequence_position_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) exten
 
                 if (state_packet == state_packet_new) begin
                     // Check SOF and EOF position if we can insert packet into this region
-                    if (gen.sof[it] == 1 || (gen.eof[it] == 1'b1 && (REGION_SIZE*BLOCK_SIZE) > (index*BLOCK_SIZE + data.data.size()))) begin
+                    if (gen.sof[it] == 1 || (gen.eof[it] == 1'b1 && (REGION_SIZE*BLOCK_SIZE) >= (index*BLOCK_SIZE + data.data.size()))) begin
                         break;
                     end
 
@@ -521,7 +521,7 @@ class sequence_full_speed_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) ext
 
                 if (state_packet == state_packet_new) begin
                     // Check SOF and EOF position if we can insert packet into this region
-                    if (gen.sof[it] == 1 || (gen.eof[it] == 1'b1 && (REGION_SIZE*BLOCK_SIZE) > (index*BLOCK_SIZE + data.data.size()))) begin
+                    if (gen.sof[it] == 1 || (gen.eof[it] == 1'b1 && (REGION_SIZE*BLOCK_SIZE) >= (index*BLOCK_SIZE + data.data.size()))) begin
                         break;
                     end
 
@@ -606,7 +606,7 @@ class seqv_no_inframe_gap_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) ext
 
                 if (state_packet == state_packet_new) begin
                     // Check SOF and EOF position if we can insert packet into this region
-                    if (gen.sof[it] == 1 || (gen.eof[it] == 1'b1 && (REGION_SIZE*BLOCK_SIZE) > (index*BLOCK_SIZE + data.data.size()))) begin
+                    if (gen.sof[it] == 1 || (gen.eof[it] == 1'b1 && (REGION_SIZE*BLOCK_SIZE) >= (index*BLOCK_SIZE + data.data.size()))) begin
                         break;
                     end
 
