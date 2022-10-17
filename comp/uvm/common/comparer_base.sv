@@ -110,13 +110,22 @@ virtual class comparer_base_disordered#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) 
         time   time_act = $time();
 
         time_act = $time();
-        if (model_items.size() > 0 && (time_act - model_items[0].start) > delay_max) begin
+        if (model_items.size() > 0 && (time_act - model_items[0].time_last()) > delay_max) begin
             string msg = "";
             int unsigned it = 0;
             time_errors++;
 
-            while (it < model_items.size() && (time_act - model_items[it].start) > delay_max) begin
-                $swrite(msg, "%s\n\tPacket received in %0dns is probubly stuck in design actual delay is %0dns\n%s", msg, model_items[it].start/1ns, (time_act - model_items[it].start)/1ns, model_items[it].item.convert2string());
+            while (it < model_items.size() && (time_act - model_items[it].time_last()) > delay_max) begin
+                time   time_conv[string];
+                string msg = "";
+
+                $swrite(msg, "%s\n\tPacket received in %0dns is probubly stuck in design. [INPUT_TIME DELAY]", msg, time_act/1ns);
+                time_conv = model_items[it].start;
+                foreach (time_conv[jt]) begin
+                    $swrite(msg, "%s\n\t\t%s [%0dns %0dns]", msg, it, time_conv[jt]/1ns, (time_act - time_conv[jt])/1ns);
+                end
+
+                $swrite(msg, "%s\n\tDATA : \n%s", msg, model_items[it].item.convert2string());
                 it++;
             end
 
@@ -130,13 +139,20 @@ virtual class comparer_base_disordered#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) 
         end
 
         if (index >= model_items.size()) begin
-            int unsigned it_end;
-            string msg;
+            string msg = "";
             errors++;
-            $swrite(msg, "\n\tTransaction compared %0d erros %0d\n\tDUT transactin doesnt compare any of model %0d transactions in fifo\n%s", compared, errors, model_items.size(), tr.convert2string());
-            it_end = 10 < model_items.size() ? 10 : model_items.size();
-            for (int unsigned it = 0; it < it_end; it++) begin
-                $swrite(msg, "%s\n\n\tModel Transaction %0d input in %0dns%s", msg, it, model_items[it].start/1ns, message(model_items[it].item, tr));
+
+
+            $swrite(msg, "\n\tTransaction compared %0d erros %0d\n\tDUT transactin doesnt compare any of model %0d transactions in fifo. receive time %0dns\n%s", compared, errors, model_items.size(), time_act, tr.convert2string());
+            for (int unsigned it = 0; it < model_items.size(); it++) begin
+                time   time_conv[string];
+
+                time_conv = model_items[it].start;
+                $swrite(msg, "%s\n\n\t\tModel Transaction[%0d]. interface name [INPUT DELAY]", it, msg);
+                foreach (time_conv[jt]) begin
+                    $swrite(msg, "%s\n\t\t%s [%0dns %0dns]", msg, it, time_conv[jt]/1ns, (time_act - time_conv[jt])/1ns);
+                end
+                $swrite(msg, "%s\n\tDATA : %s", msg, this.message(model_items[it].item, tr));
             end
             `uvm_error(this.get_full_name(), msg);
         end else begin
