@@ -79,10 +79,10 @@ class scoreboard extends uvm_scoreboard;
             dut_fifo_error.get(tr_dut_error);
 
             compared++;
-            if (($time() - tr_model_packet.start) >= 10us) begin
+            if (($time() - tr_model_packet.time_last()) >= 10us) begin
                 string msg;
-                $sformat(msg, "\n\tDelay %0dns is too long\n\tinput time %0dns output time %0dns\n%s", ($time() - tr_model_packet.start)/1ns, tr_model_packet.start/1ns, $time()/1ns, tr_model_packet.item.convert2string());
-                `uvm_error(this.get_full_name(), msg); 
+                $sformat(msg, "\n\tDelay %0dns is too long\n\tinput time %0dns output time %0dns\n%s", ($time() - tr_model_packet.time_last())/1ns, tr_model_packet.time_last()/1ns, $time()/1ns, tr_model_packet.item.convert2string());
+                `uvm_error(this.get_full_name(), msg);
             end
 
             if (tr_model_packet.item.compare(tr_dut_packet) == 0 || tr_model_error.compare(tr_dut_error) == 0) begin
@@ -90,7 +90,7 @@ class scoreboard extends uvm_scoreboard;
                 string str = "";
                 errors++;
                 $swrite(str, "\n\tError num %0d Packet num %0d", errors, compared);
-                $swrite(str, "%s\n\tInput time %0dns", str, tr_model_packet.start/1ns);
+                $swrite(str, "%s\n\tInput time %0dns", str, tr_model_packet.time_last()/1ns);
                 $swrite(str, "%s\n\tPACKET FROM DUT\n\t%s\n\tEXPECTED PACKET\n\t%s",str, tr_dut_packet.convert2string(), tr_model_packet.item.convert2string());
                 $swrite(str, "%s\n\tERROR FROM DUT\n\t%b\n\tEXPECTED ERROR\n\t%b",str, tr_dut_error.data, tr_model_error.data);
                `uvm_error(this.get_full_name(), str);
