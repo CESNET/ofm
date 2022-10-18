@@ -16,10 +16,10 @@ class monitor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_monitor;
     virtual mi_if #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH).monitor vif;
     // variables
     sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH) request;
-    sequence_item_respons #(DATA_WIDTH)                         respons;
+    sequence_item_response #(DATA_WIDTH)                         response;
     // analysis_ports
     uvm_analysis_port #(sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)) analysis_port_rq;
-    uvm_analysis_port #(sequence_item_respons #(DATA_WIDTH))                         analysis_port_rs;
+    uvm_analysis_port #(sequence_item_response #(DATA_WIDTH))                         analysis_port_rs;
 
     // Creates new instance of this class.
     function new (string name, uvm_component parent);
@@ -34,7 +34,7 @@ class monitor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_monitor;
     task run_phase(uvm_phase phase);
         forever begin
             request = sequence_item_request#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)::type_id::create("monitor_rq");
-            respons = sequence_item_respons#(DATA_WIDTH)::type_id::create("monitor_rs");
+            response = sequence_item_response#(DATA_WIDTH)::type_id::create("monitor_rs");
 
             @(vif.monitor_cb);
             //send request
@@ -48,10 +48,10 @@ class monitor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_monitor;
             analysis_port_rq.write(request);
 
             //send response
-            respons.drd  = vif.monitor_cb.DRD;
-            respons.ardy = vif.monitor_cb.ARDY;
-            respons.drdy = vif.monitor_cb.DRDY;
-            analysis_port_rs.write(respons);
+            response.drd  = vif.monitor_cb.DRD;
+            response.ardy = vif.monitor_cb.ARDY;
+            response.drdy = vif.monitor_cb.DRDY;
+            analysis_port_rs.write(response);
         end
     endtask
 

@@ -40,7 +40,7 @@ class reg2bus_monitor#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_monit
     // Reference to the virtual interface, initialized during the connect phase by parent agent.
     typedef reg2bus_monitor#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH) this_type;
     uvm_analysis_imp_rq#(sequence_item_request#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH), this_type)  analysis_imp_rq;
-    uvm_analysis_imp_rs#(sequence_item_respons#(DATA_WIDTH), this_type)                          analysis_imp_rs;
+    uvm_analysis_imp_rs#(sequence_item_response#(DATA_WIDTH), this_type)                          analysis_imp_rs;
 
     uvm_analysis_port #(reg2bus_class) analysis_port;
 
@@ -76,7 +76,7 @@ class reg2bus_monitor#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_monit
     endfunction
 
 
-    function void write_rs(sequence_item_respons#(DATA_WIDTH) tr);
+    function void write_rs(sequence_item_response#(DATA_WIDTH) tr);
         if (tr.drdy == 1 && rq_que.size() > 0) begin
             reg2bus_class item = rq_que.pop_front();
 
