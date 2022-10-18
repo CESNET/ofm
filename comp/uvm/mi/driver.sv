@@ -35,7 +35,6 @@ class driver_slave #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_driver 
                 vif.cb_slave.DWR   <= req.dwr;
                 vif.cb_slave.META   <= req.meta;
                 vif.cb_slave.RD    <= req.rd;
-                //seq_item_port.item_done();
             end else begin
                 vif.cb_slave.ADDR  <= 'x;
                 vif.cb_slave.BE    <= 'x;
@@ -50,22 +49,22 @@ class driver_slave #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_driver 
             if (req != null) begin
                 req.ardy = vif.cb_slave.ARDY;
                 seq_item_port.item_done();
-                if (req.rd == 1'b1) begin
+                if (req.rd == 1'b1 && req.ardy == 1'b1) begin
                     sequence_item_respons #(DATA_WIDTH) res;
-                    rsp = sequence_item_respons #(DATA_WIDTH)::type_id::create();
-                    rsp.set_id_info(req);
-                    res_que.push_back(rsp);
+                    res = sequence_item_respons #(DATA_WIDTH)::type_id::create();
+                    res.set_id_info(req);
+                    res_que.push_back(res);
                 end
             end
 
             if (vif.cb_slave.DRDY === 1'b1 && res_que.size() != 0) begin
                 sequence_item_respons #(DATA_WIDTH) res;
 
-                rsp = res_que.pop_front();
-                rsp.drdy = vif.cb_slave.DRDY;
-                rsp.ardy = vif.cb_slave.ARDY;
-                rsp.drd  = vif.cb_slave.DRD;
-                seq_item_port.put(rsp);
+                res = res_que.pop_front();
+                res.drdy = vif.cb_slave.DRDY;
+                res.ardy = vif.cb_slave.ARDY;
+                res.drd  = vif.cb_slave.DRD;
+                seq_item_port.put(res);
            end
         end
     endtask

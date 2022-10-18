@@ -15,9 +15,9 @@ class monitor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_monitor;
     // Reference to the virtual interface, initialized during the connect phase by parent agent.
     virtual mi_if #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH).monitor vif;
     // variables
-    sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH) request; 
-    sequence_item_respons #(DATA_WIDTH)                         respons; 
-    // analysis_ports 
+    sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH) request;
+    sequence_item_respons #(DATA_WIDTH)                         respons;
+    // analysis_ports
     uvm_analysis_port #(sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)) analysis_port_rq;
     uvm_analysis_port #(sequence_item_respons #(DATA_WIDTH))                         analysis_port_rs;
 
@@ -46,7 +46,7 @@ class monitor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_monitor;
             request.rd   = vif.monitor_cb.RD;
             request.ardy = vif.monitor_cb.ARDY;
             analysis_port_rq.write(request);
-            
+
             //send response
             respons.drd  = vif.monitor_cb.DRD;
             respons.ardy = vif.monitor_cb.ARDY;
