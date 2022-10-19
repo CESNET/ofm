@@ -32,7 +32,9 @@ generic(
     -- The ID of the analyzer.
     REGION_NUMBER     : natural := 0;
 
-    -- The width of the Length field (in Items).
+    -- Width of the SP header (in Items).
+    HDR_WIDTH         : natural := 16;
+    -- The width of the Length field (in bits).
     LENGTH_WIDTH      : natural := 15;
     -- Maximum amount of words one (individual) packet can strech over.
     MAX_WORDS         : natural
@@ -72,7 +74,7 @@ end entity;
 architecture FULL of SUPKT_HDR_EXTRACTOR is
 
     -- Extracted header width is:       Length       + Next
-    constant EXT_HDR_WIDTH : natural := LENGTH_WIDTH + 1;
+    constant EXT_HDR_WIDTH : natural := LENGTH_WIDTH + 1; 
     -- SOF offset width.
     constant SOF_OFFSET_W  : natural := log2(MAX_WORDS*REGIONS*REGION_SIZE*BLOCK_SIZE);
 
@@ -167,7 +169,7 @@ begin
     ext_hdr        <= ext_block(EXT_HDR_WIDTH-1 downto 0);
     ext_next       <= ext_hdr(ext_hdr'high);
     ext_length     <= ext_hdr(ext_hdr'high-1 downto 0);
-    ext_length_res <= resize(unsigned(ext_length) + EXT_HDR_WIDTH, log2(MAX_WORDS*REGIONS*REGION_SIZE*BLOCK_SIZE));
+    ext_length_res <= resize(unsigned(ext_length) + HDR_WIDTH, log2(MAX_WORDS*REGIONS*REGION_SIZE*BLOCK_SIZE));
 
     -- --------------------------------
     -- Word and region evaluation - EOF

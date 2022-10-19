@@ -479,6 +479,8 @@ begin
             ITEM_WIDTH  => MFB_ITEM_WIDTH   ,
 
             REGION_NUMBER   => r            ,
+
+            HDR_WIDTH       => HDR_ITEMS    ,
             LENGTH_WIDTH    => LENGTH_WIDTH ,
             MAX_WORDS       => PKT_MAX_WORDS
         )
