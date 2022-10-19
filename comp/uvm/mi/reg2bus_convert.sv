@@ -47,7 +47,7 @@ class reg2bus_frontdoor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_re
 
         data = new[repetition];
         for (int unsigned it = 0; it < repetition; it++) begin
-            uvm_mi::sequence_item_respons #(DATA_WIDTH) rsp;
+            uvm_mi::sequence_item_response #(DATA_WIDTH) rsp;
             uvm_sequence_item                       rsp_get;
 
             get_response(rsp_get);

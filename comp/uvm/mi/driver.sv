@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
 */
 
-class driver_slave #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_driver #(sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH), sequence_item_respons #(DATA_WIDTH));
+class driver_slave #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_driver #(sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH), sequence_item_response #(DATA_WIDTH));
 
     // Register component to database.
     `uvm_component_param_utils(uvm_mi::driver_slave #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
@@ -16,7 +16,7 @@ class driver_slave #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_driver 
     // Virtual interface of driver
     virtual mi_if #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH).tb_slave vif;
     //requests
-    sequence_item_respons #(DATA_WIDTH) res_que[$];
+    sequence_item_response #(DATA_WIDTH) res_que[$];
 
     // Contructor of driver which contains name and parent component.
     function new(string name, uvm_component parent);
@@ -35,7 +35,6 @@ class driver_slave #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_driver 
                 vif.cb_slave.DWR   <= req.dwr;
                 vif.cb_slave.META   <= req.meta;
                 vif.cb_slave.RD    <= req.rd;
-                //seq_item_port.item_done();
             end else begin
                 vif.cb_slave.ADDR  <= 'x;
                 vif.cb_slave.BE    <= 'x;
@@ -50,28 +49,28 @@ class driver_slave #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_driver 
             if (req != null) begin
                 req.ardy = vif.cb_slave.ARDY;
                 seq_item_port.item_done();
-                if (req.rd == 1'b1) begin
-                    sequence_item_respons #(DATA_WIDTH) res;
-                    rsp = sequence_item_respons #(DATA_WIDTH)::type_id::create();
-                    rsp.set_id_info(req);
-                    res_que.push_back(rsp);
+                if (req.rd == 1'b1 && req.ardy == 1'b1) begin
+                    sequence_item_response #(DATA_WIDTH) res;
+                    res = sequence_item_response #(DATA_WIDTH)::type_id::create();
+                    res.set_id_info(req);
+                    res_que.push_back(res);
                 end
             end
 
             if (vif.cb_slave.DRDY === 1'b1 && res_que.size() != 0) begin
-                sequence_item_respons #(DATA_WIDTH) res;
+                sequence_item_response #(DATA_WIDTH) res;
 
-                rsp = res_que.pop_front();
-                rsp.drdy = vif.cb_slave.DRDY;
-                rsp.ardy = vif.cb_slave.ARDY;
-                rsp.drd  = vif.cb_slave.DRD;
-                seq_item_port.put(rsp);
+                res = res_que.pop_front();
+                res.drdy = vif.cb_slave.DRDY;
+                res.ardy = vif.cb_slave.ARDY;
+                res.drd  = vif.cb_slave.DRD;
+                seq_item_port.put(res);
            end
         end
     endtask
 endclass
 
-class driver_master #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_driver #(sequence_item_respons #(DATA_WIDTH), sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH));
+class driver_master #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_driver #(sequence_item_response #(DATA_WIDTH), sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH));
     // Register component to database.
     `uvm_component_param_utils(uvm_mi::driver_master#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
 

@@ -1,7 +1,7 @@
 /*
  * file       : enviroment with reg model.sv
  * Copyright (C) 2021 CESNET z. s. p. o.
- * description: mi package. configuration of designs 
+ * description: mi package. configuration of designs
  * date       : 2021
  * author     : Radek Iša <isa@cesnet.cz>
  *
@@ -20,10 +20,10 @@ class reg2bus#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_env;
     function new(string name = "regmodel", uvm_component parent);
         super.new(name, parent);
     endfunction
-    
+
    function void build_phase(uvm_phase phase);
         predictor = new("predictor", this);
-        adapter   = reg2bus_adapter#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)::type_id::create("reg2mi", ,this.get_full_name());; 
+        adapter   = reg2bus_adapter#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)::type_id::create("reg2mi", ,this.get_full_name());
         frontdoor = reg2bus_frontdoor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)::type_id::create("frontdoor", this);
         monitor   = reg2bus_monitor#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)::type_id::create("monitor", this);
     endfunction
@@ -38,7 +38,7 @@ endclass
 class regmodel_config;
 
     config_item    agent;
-    uvm_reg_addr_t addr_base; 
+    uvm_reg_addr_t addr_base;
 
     function new();
         agent = new();
@@ -48,12 +48,12 @@ endclass
 
 class regmodel#(type REG_TYPE, int unsigned DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_env;
     `uvm_component_param_utils(uvm_mi::regmodel#(REG_TYPE, DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
-    
-    regmodel_config                                   m_config; 
+
+    regmodel_config                                   m_config;
     agent_slave #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH) m_agent;
     reg2bus#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)      reg2mi;
     REG_TYPE                                          m_regmodel;
-  
+
     function new(string name, uvm_component parent);
         super.new(name, parent);
     endfunction
@@ -81,7 +81,7 @@ class regmodel#(type REG_TYPE, int unsigned DATA_WIDTH, ADDR_WIDTH, META_WIDTH =
     function void connect_phase(uvm_phase phase);
         // REGISTER MODEL
         if (m_regmodel.get_parent() == null) begin
-            
+
             m_regmodel.set_frontdoor(reg2mi.frontdoor);
             m_regmodel.default_map.set_sequencer(m_agent.m_sequencer, reg2mi.adapter);
             m_regmodel.default_map.set_auto_predict(0);
