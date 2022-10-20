@@ -61,7 +61,7 @@ class reg2bus_monitor#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_monit
                 item.op.byte_en = tr.be;
                 item.op.data    = tr.dwr;
                 item.op.addr    = tr.addr;
-                item.op.status = UVM_IS_OK;
+                item.op.status  = UVM_IS_OK;
                 analysis_port.write(item);
             end
 
