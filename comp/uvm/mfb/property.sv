@@ -4,6 +4,9 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
+`ifndef MFB_PROPERTY
+`define MFB_PROPERTY
+
 
 `include "uvm_macros.svh"
 import uvm_pkg::*;
@@ -138,3 +141,6 @@ module mfb_property #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)
         end
 
 endmodule
+
+`endif
+
