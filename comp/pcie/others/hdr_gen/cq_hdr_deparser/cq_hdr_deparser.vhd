@@ -69,6 +69,10 @@ entity PCIE_CQ_HDR_DEPARSER is
         IN_AXI_TUSER     : in std_logic_vector(CQUSER_WIDTH-1 downto 0) := (others => '0');
         -- PCIE CQ header
         IN_HEADER        : in std_logic_vector(128-1 downto 0);
+        -- First Byte Enable
+        IN_FBE           : in std_logic_vector(4-1 downto 0);
+        -- Last Byte Enable
+        IN_LBE           : in std_logic_vector(4-1 downto 0);
         --                                |16 downto 11|10 downto 8|7 downto 0 |
         -- PCIE CQ header META, contains: |BAR_APERTURE|BAR_ID     |TARGET_FUNC|
         IN_INTEL_META    : in std_logic_vector(17-1 downto 0) := (others => '0')
@@ -102,13 +106,8 @@ begin
         OUT_BAR_APERTURE <= IN_HEADER(120 downto 115);
         OUT_TC           <= IN_HEADER(123 downto 121);
         OUT_ATTRIBUTES   <= IN_HEADER(126 downto 124);
-        cq_hdr_xilinx_g: if (CQUSER_WIDTH = 88 or CQUSER_WIDTH = 85) generate
-            OUT_FBE      <= IN_AXI_TUSER(3 downto 0);
-            OUT_LBE      <= IN_AXI_TUSER(7 downto 4);
-        else generate
-            OUT_FBE      <= IN_AXI_TUSER(3 downto 0);
-            OUT_LBE      <= IN_AXI_TUSER(11 downto 8);
-        end generate;
+        OUT_FBE          <= IN_FBE;
+        OUT_LBE          <= IN_LBE;
 
         OUT_REQ_TYPE(0) <= '1' when (unsigned(IN_HEADER(78 downto 75)) = 0) else '0';
         OUT_REQ_TYPE(1) <= '1' when (unsigned(IN_HEADER(78 downto 75)) = 1) else '0';

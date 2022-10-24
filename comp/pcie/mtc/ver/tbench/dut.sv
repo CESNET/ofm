@@ -119,6 +119,26 @@ module DUT (
             .TX_AVST_ERROR     (PCIE_C.AVALON.CC.error),
             .TX_AVST_VALID     (PCIE_C.AVALON.CC.valid),
             .TX_AVST_READY     (PCIE_C.AVALON.CC.ready),
+            // DOWN stream credits - R-TILE only
+            .CRDT_DOWN_INIT_DONE(),
+            .CRDT_DOWN_UPDATE(),
+            .CRDT_DOWN_CNT_PH(),
+            .CRDT_DOWN_CNT_NPH(),
+            .CRDT_DOWN_CNT_CPLH(),
+            .CRDT_DOWN_CNT_PD(),
+            .CRDT_DOWN_CNT_NPD(),
+            .CRDT_DOWN_CNT_CPLD(),
+
+            // UP stream credits - R-TILE only
+            .CRDT_UP_INIT_DONE(),
+            .CRDT_UP_UPDATE(),
+            .CRDT_UP_CNT_PH(),
+            .CRDT_UP_CNT_NPH(),
+            .CRDT_UP_CNT_CPLH(),
+            .CRDT_UP_CNT_PD(),
+            .CRDT_UP_CNT_NPD(),
+            .CRDT_UP_CNT_CPLD(),
+
 
             //-- =====================================================================
             //-- TO/FROM PCIE TRANSACTION CONTROLER (PTC)
@@ -172,7 +192,7 @@ module DUT (
 	logic cq_np_req;
 	logic mi_function[8];
 
-    MTC #(
+    MTC_WRAPPER #(
     	.AXI_DATA_WIDTH         (PCIE_DATA_WIDTH),
     	.AXI_CQUSER_WIDTH       (AXI_CQ_TUSER_WIDTH),
     	.AXI_CCUSER_WIDTH       (AXI_CC_TUSER_WIDTH),
