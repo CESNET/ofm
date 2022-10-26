@@ -1167,6 +1167,17 @@ begin
         OUT_HEADER      => cc_hdr
     );
 
+    cc_hdr_xilinx_g: if IS_XILINX_DEV generate
+        cc_xilinx_error <=
+            "00000000"               & -- RESERVED
+            reg1_cq_meta_tph_st_tag  & -- tph_st_tag
+            "00000"                  & -- RESERVED
+            reg1_cq_meta_tph_type    & -- tph_type
+            reg1_cq_meta_tph_present & -- tph_present
+            reg1_cq_hdr_last_be      & -- last_be
+            reg1_cq_hdr_first_be;      -- first_be
+    end generate;
+
     -- -------------------------------------------------------------------------
     --  CC FSM LOGIC
     -- -------------------------------------------------------------------------
