@@ -9,6 +9,7 @@ use IEEE.numeric_std.all;
 
 use work.math_pack.all;
 use work.type_pack.all;
+use work.pcie_meta_pack.all;
 
 entity MTC_WRAPPER is
     generic(
@@ -114,7 +115,7 @@ entity MTC_WRAPPER is
         CC_MFB_DATA       : out std_logic_vector(MFB_REGIONS*MFB_REGION_WIDTH-1 downto 0);
         -- CC_MFB: meta word with metadata for each frame. In each region
         -- from LSB: 128b PCIe Header, 32b PCIe Prefix.
-        CC_MFB_META       : out std_logic_vector(MFB_REGIONS*MFB_CC_META_WIDTH-1 downto 0);
+        CC_MFB_META       : out std_logic_vector(MFB_REGIONS*MFB_CC_META_WIDTH-1 downto 0) := (others => '0');
         -- CC_MFB: Start Of Frame (SOF) flag for each MFB region
         CC_MFB_SOF        : out std_logic_vector(MFB_REGIONS-1 downto 0);
         -- CC_MFB: End Of Frame (EOF) flag for each MFB region
@@ -225,6 +226,10 @@ architecture full of MTC_WRAPPER is
     
     signal cc_mfb_dst_rdy_out     : std_logic;
 
+    signal cq_mfb_meta_arr        : slv_array_t(MFB_REGIONS-1 downto 0)(MFB_CQ_META_WIDTH-1 downto 0);
+    signal cq_mfb_meta_new_arr    : slv_array_t(MFB_REGIONS-1 downto 0)(PCIE_CQ_META_WIDTH-1 downto 0);
+    signal cc_mfb_meta_new        : std_logic_vector(MFB_REGIONS*PCIE_CC_META_WIDTH-1 downto 0);
+
 begin
 
     ---------------------------------------------------------------------------
@@ -252,8 +257,8 @@ begin
             CQ_AXI_VALID   => CQ_AXI_VALID,
             CQ_AXI_READY   => CQ_AXI_READY,
 
-            -- CQ_MFB_META    => cq_mfb_meta_out,
             CQ_MFB_DATA    => cq_mfb_data_out,
+            --CQ_MFB_META    => cq_mfb_meta_out,
             CQ_MFB_SOF     => cq_mfb_sof_out,
             CQ_MFB_EOF     => cq_mfb_eof_out,
             CQ_MFB_SOF_POS => cq_mfb_sof_pos_out,
@@ -280,7 +285,6 @@ begin
         )
         port map(
 
-            -- CQ_MFB_META    => cq_mfb_meta_out,
             CC_MFB_DATA    => CC_MFB_DATA,
             CC_MFB_SOF     => CC_MFB_SOF,
             CC_MFB_EOF     => CC_MFB_EOF,
@@ -314,17 +318,25 @@ begin
         cq_user_lbe         <= (others => '0');
     end generate;
 
+    cq_mfb_meta_arr <= slv_array_deser(CQ_MFB_META,MFB_REGIONS); 
+
+    cq_mfb_meta_g: for i in 0 to MFB_REGIONS-1 generate
+        cq_mfb_meta_new_arr(i)(PCIE_CQ_META_HEADER)        <= cq_mfb_meta_arr(i)(127 downto 0);
+        cq_mfb_meta_new_arr(i)(PCIE_CQ_META_PREFIX)        <= cq_mfb_meta_arr(i)(159 downto 128);
+        cq_mfb_meta_new_arr(i)(PCIE_CQ_META_BAR)           <= cq_mfb_meta_arr(i)(162 downto 160);
+        cq_mfb_meta_new_arr(i)(PCIE_CQ_META_FBE)           <= cq_user_fbe((i+1)*PCIE_META_FBE_W-1 downto i*PCIE_META_FBE_W);
+        cq_mfb_meta_new_arr(i)(PCIE_CQ_META_LBE)           <= cq_user_lbe((i+1)*PCIE_META_LBE_W-1 downto i*PCIE_META_LBE_W);
+        cq_mfb_meta_new_arr(i)(PCIE_CQ_META_TPH_PRESENT_O) <= cq_user_tph_present(i);
+        cq_mfb_meta_new_arr(i)(PCIE_CQ_META_TPH_TYPE)      <= cq_user_tph_type((i+1)*PCIE_META_TPH_TYPE_W-1 downto i*PCIE_META_TPH_TYPE_W);
+        cq_mfb_meta_new_arr(i)(PCIE_CQ_META_TPH_ST_TAG)    <= cq_user_tph_st_tag((i+1)*PCIE_META_TPH_ST_TAG_W-1 downto i*PCIE_META_TPH_ST_TAG_W);
+    end generate;
+
     mtc_i : entity work.MTC
     generic map(
-        AXI_DATA_WIDTH    => AXI_DATA_WIDTH,
-        AXI_CQUSER_WIDTH  => AXI_CQUSER_WIDTH,
-        AXI_CCUSER_WIDTH  => AXI_CCUSER_WIDTH,
         MFB_REGIONS       => MFB_REGIONS,
         MFB_REGION_SIZE   => MFB_REGION_SIZE,
         MFB_BLOCK_SIZE    => MFB_BLOCK_SIZE,
         MFB_ITEM_WIDTH    => MFB_ITEM_WIDTH,
-        MFB_CQ_META_WIDTH => MFB_CQ_META_WIDTH,
-        MFB_CC_META_WIDTH => MFB_CC_META_WIDTH,
         MFB_REGION_WIDTH  => MFB_REGION_WIDTH,
         BAR0_BASE_ADDR    => BAR0_BASE_ADDR,
         BAR1_BASE_ADDR    => BAR1_BASE_ADDR,
@@ -348,12 +360,7 @@ begin
         CTL_MAX_PAYLOAD_SIZE => CTL_MAX_PAYLOAD_SIZE,
         CTL_BAR_APERTURE     => CTL_BAR_APERTURE,
         CQ_MFB_DATA          => cq_mfb_data_out,
-        CQ_MFB_META          => CQ_MFB_META,
-        CQ_TPH_PRESENT       => cq_user_tph_present,
-        CQ_TPH_ST_TAG        => cq_user_tph_st_tag,
-        CQ_TPH_TYPE          => cq_user_tph_type,
-        CQ_FBE               => cq_user_fbe,
-        CQ_LBE               => cq_user_lbe,
+        CQ_MFB_META          => slv_array_ser(cq_mfb_meta_new_arr),
         CQ_MFB_SOF           => cq_mfb_sof_out,
         CQ_MFB_EOF           => cq_mfb_eof_out,
         CQ_MFB_SOF_POS       => cq_mfb_sof_pos_out,
@@ -362,7 +369,7 @@ begin
         CQ_MFB_DST_RDY       => cq_mfb_dst_rdy_out,
 
         CC_MFB_DATA          => CC_MFB_DATA,
-        CC_MFB_META          => CC_MFB_META,
+        CC_MFB_META          => cc_mfb_meta_new,
         CC_MFB_SOF           => CC_MFB_SOF,
         CC_MFB_EOF           => CC_MFB_EOF,
         CC_MFB_SOF_POS       => CC_MFB_SOF_POS,
@@ -380,5 +387,7 @@ begin
         MI_DRD               => MI_DRD,
         MI_DRDY              => MI_DRDY
     );
+
+    CC_MFB_META(95 downto 0) <= cc_mfb_meta_new(95 downto 0);
 
 end architecture;
