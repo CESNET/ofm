@@ -124,7 +124,7 @@ class reg2bus_frontdoor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_re
         /////////////////////////////
         // OPERATION
         // PICK OPERATION
-        if (rw_info.kind == UVM_WRITE || rw_info.kind == UVM_BURST_WRITE ) begin
+        if (rw_info.kind == UVM_WRITE || rw_info.kind == UVM_BURST_WRITE) begin
             int unsigned item_index_low;
             int unsigned item_index_high;
             logic [ADDR_WIDTH-1:0] addr_local = addr;
@@ -148,8 +148,6 @@ class reg2bus_frontdoor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_re
                     end
                 end
             end
-            //write last addres
-            items[items.size()-1].addr = addr_local;
 
             //Send frames
             for(int unsigned it = 0; it < items.size(); it++) begin
