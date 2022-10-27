@@ -148,9 +148,9 @@ virtual class comparer_base_disordered#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) 
                 time   time_conv[string];
 
                 time_conv = model_items[it].start;
-                $swrite(msg, "%s\n\n\t\tModel Transaction[%0d]. interface name [INPUT DELAY]", it, msg);
+                $swrite(msg, "%s\n\n\tModel Transaction[%0d].\n\t\tinterface name [INPUT DELAY]", msg, it);
                 foreach (time_conv[jt]) begin
-                    $swrite(msg, "%s\n\t\t%s [%0dns %0dns]", msg, it, time_conv[jt]/1ns, (time_act - time_conv[jt])/1ns);
+                    $swrite(msg, "%s\n\t\t%s [%0dns %0dns]", msg, jt, time_conv[jt]/1ns, (time_act - time_conv[jt])/1ns);
                 end
                 $swrite(msg, "%s\n\tDATA : %s", msg, this.message(model_items[it].item, tr));
             end
