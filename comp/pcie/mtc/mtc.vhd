@@ -229,15 +229,11 @@ architecture FULL of MTC is
     signal cq_valid                  : std_logic;
     signal cq_ready                  : std_logic;
 
-    signal cq_addr_mask              : unsigned(64-1 downto 0);
-    signal bar_base_addr             : std_logic_vector(32-1 downto 0);
-    signal cq_addr_translated        : unsigned(64-1 downto 0);
-    signal cq_first_ib               : unsigned(2-1 downto 0);
-    signal cq_last_ib                : unsigned(2-1 downto 0);
+    signal cq_addr_translated        : std_logic_vector(64-1 downto 0);
+    signal cq_first_ib               : std_logic_vector(2-1 downto 0);
     signal cq_laddr_init_low         : unsigned(2-1 downto 0);
     signal cq_laddr_init             : unsigned(7-1 downto 0);
-    signal cq_byte_count_raw         : unsigned(13-1 downto 0);
-    signal cq_byte_count             : unsigned(13-1 downto 0);
+    signal cq_byte_count             : std_logic_vector(13-1 downto 0);
 
     signal reg1_cq_hdr_tag           : std_logic_vector(10-1 downto 0);
     signal reg1_cq_hdr_addr_type     : std_logic_vector(2-1 downto 0);
@@ -556,127 +552,39 @@ begin
     --  SECOND STAGE - PREPARE METADATA FROM CQ REQUEST
     -- =========================================================================
 
-    -- computation of address mask
-    process (cq_meta_bar_aperture)
-        variable mask_var : unsigned(63 downto 0);
-    begin
-        mask_var := (others => '0');
-        for i in 0 to 63 loop
-            if (i < unsigned(cq_meta_bar_aperture)) then
-                mask_var(i) := '1';
-            end if; 
-        end loop;
-        cq_addr_mask <= mask_var;
-    end process;
-
-    -- selection of correct BAR base address
-    process (all)
-    begin
-        case cq_meta_bar_id is
-            when "000"  => bar_base_addr <= BAR0_BASE_ADDR;
-            when "001"  => bar_base_addr <= BAR1_BASE_ADDR;
-            when "010"  => bar_base_addr <= BAR2_BASE_ADDR;
-            when "011"  => bar_base_addr <= BAR3_BASE_ADDR;
-            when "100"  => bar_base_addr <= BAR4_BASE_ADDR;
-            when "101"  => bar_base_addr <= BAR5_BASE_ADDR;
-            when "110"  => bar_base_addr <= EXP_ROM_BASE_ADDR;
-            when others => bar_base_addr <= (others => '0');
-        end case;
-    end process;
-
     -- CQ address translation
-    cq_addr_translated <= (unsigned(cq_hdr_addr) AND cq_addr_mask) + unsigned(bar_base_addr);
+    addr_trans_i : entity work.PCIE_BAR_ADDR_TRANSLATOR
+    generic map(
+        BAR0_BASE_ADDR    => BAR0_BASE_ADDR,
+        BAR1_BASE_ADDR    => BAR1_BASE_ADDR,
+        BAR2_BASE_ADDR    => BAR2_BASE_ADDR,
+        BAR3_BASE_ADDR    => BAR3_BASE_ADDR,
+        BAR4_BASE_ADDR    => BAR4_BASE_ADDR,
+        BAR5_BASE_ADDR    => BAR5_BASE_ADDR,
+        EXP_ROM_BASE_ADDR => EXP_ROM_BASE_ADDR
+    )
+    port map(
+        CLK             => CLK,
+        RESET           => RESET,
+        IN_BAR_APERTURE => cq_meta_bar_aperture,
+        IN_BAR_ID       => cq_meta_bar_id,
+        IN_ADDR         => cq_hdr_addr,
+        OUT_ADDR        => cq_addr_translated
+    );
 
-    -- computation of invalid bytes
-    process (cq_hdr_first_be, cq_hdr_last_be)
-    begin
-        if (std_match(cq_hdr_first_be,"1--1") AND std_match(cq_hdr_last_be,"0000")) then
-            cq_first_ib <= to_unsigned(0,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(0,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"01-1") AND std_match(cq_hdr_last_be,"0000")) then
-            cq_first_ib <= to_unsigned(1,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(0,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"1-10") AND std_match(cq_hdr_last_be,"0000")) then
-            cq_first_ib <= to_unsigned(1,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(0,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"0011") AND std_match(cq_hdr_last_be,"0000")) then
-            cq_first_ib <= to_unsigned(2,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(0,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"0110") AND std_match(cq_hdr_last_be,"0000")) then
-            cq_first_ib <= to_unsigned(2,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(0,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"1100") AND std_match(cq_hdr_last_be,"0000")) then
-            cq_first_ib <= to_unsigned(2,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(0,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"0001") AND std_match(cq_hdr_last_be,"0000")) then
-            cq_first_ib <= to_unsigned(3,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(0,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"0010") AND std_match(cq_hdr_last_be,"0000")) then
-            cq_first_ib <= to_unsigned(3,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(0,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"0100") AND std_match(cq_hdr_last_be,"0000")) then
-            cq_first_ib <= to_unsigned(3,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(0,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"1000") AND std_match(cq_hdr_last_be,"0000")) then
-            cq_first_ib <= to_unsigned(3,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(0,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"0000") AND std_match(cq_hdr_last_be,"0000")) then
-            cq_first_ib <= to_unsigned(3,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(0,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"---1") AND std_match(cq_hdr_last_be,"1---")) then
-            cq_first_ib <= to_unsigned(0,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(0,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"---1") AND std_match(cq_hdr_last_be,"01--")) then
-            cq_first_ib <= to_unsigned(0,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(1,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"---1") AND std_match(cq_hdr_last_be,"001-")) then
-            cq_first_ib <= to_unsigned(0,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(2,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"---1") AND std_match(cq_hdr_last_be,"0001")) then
-            cq_first_ib <= to_unsigned(0,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(3,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"--10") AND std_match(cq_hdr_last_be,"1---")) then
-            cq_first_ib <= to_unsigned(1,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(0,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"--10") AND std_match(cq_hdr_last_be,"01--")) then
-            cq_first_ib <= to_unsigned(1,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(1,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"--10") AND std_match(cq_hdr_last_be,"001-")) then
-            cq_first_ib <= to_unsigned(1,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(2,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"--10") AND std_match(cq_hdr_last_be,"0001")) then
-            cq_first_ib <= to_unsigned(1,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(3,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"-100") AND std_match(cq_hdr_last_be,"1---")) then
-            cq_first_ib <= to_unsigned(2,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(0,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"-100") AND std_match(cq_hdr_last_be,"01--")) then
-            cq_first_ib <= to_unsigned(2,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(1,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"-100") AND std_match(cq_hdr_last_be,"001-")) then
-            cq_first_ib <= to_unsigned(2,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(2,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"-100") AND std_match(cq_hdr_last_be,"0001")) then
-            cq_first_ib <= to_unsigned(2,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(3,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"1000") AND std_match(cq_hdr_last_be,"1---")) then
-            cq_first_ib <= to_unsigned(3,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(0,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"1000") AND std_match(cq_hdr_last_be,"01--")) then
-            cq_first_ib <= to_unsigned(3,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(1,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"1000") AND std_match(cq_hdr_last_be,"001-")) then
-            cq_first_ib <= to_unsigned(3,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(2,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"1000") AND std_match(cq_hdr_last_be,"0001")) then
-            cq_first_ib <= to_unsigned(3,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(3,cq_last_ib'length);
-        else
-            cq_first_ib <= to_unsigned(0,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(0,cq_last_ib'length);
-        end if;
-    end process;
-
+    -- computation of invalid bytes and byte count
+    byte_count_i : entity work.PCIE_BYTE_COUNT
+    port map(
+        CLK            => CLK,
+        RESET          => RESET,
+        IN_DW_COUNT    => std_logic_vector(cq_hdr_dword_count),
+        IN_FIRST_BE    => cq_hdr_first_be,
+        IN_LAST_BE     => cq_hdr_last_be,
+        OUT_FIRST_IB   => cq_first_ib,
+        OUT_LAST_IB    => open,
+        OUT_BYTE_COUNT => cq_byte_count
+    );
+    
     -- computation of two LSB bits of lower address
     process (cq_hdr_first_be)
     begin
@@ -692,10 +600,6 @@ begin
     -- initial address of the first completion data
     cq_laddr_init <= unsigned(cq_hdr_addr(6 downto 2)) & cq_laddr_init_low;
 
-    -- computation of request byte count
-    cq_byte_count_raw <= cq_hdr_dword_count & "00";
-    cq_byte_count     <= cq_byte_count_raw - cq_first_ib - cq_last_ib;
-
     -- second stage registers without reset
     process (CLK)
     begin
@@ -705,7 +609,7 @@ begin
                     reg1_cq_hdr_tag           <= cq_hdr_tag;
                     reg1_cq_hdr_addr_type     <= cq_hdr_addr_type;
                     reg1_cq_hdr_first_be      <= cq_hdr_first_be;
-                    reg1_cq_first_ib          <= cq_first_ib;
+                    reg1_cq_first_ib          <= unsigned(cq_first_ib);
                     reg1_cq_hdr_last_be       <= cq_hdr_last_be;
                     reg1_cq_hdr_request_id    <= cq_hdr_request_id;
                     reg1_cq_hdr_tc            <= cq_hdr_tc;
@@ -713,9 +617,9 @@ begin
                     reg1_cq_hdr_attr          <= cq_hdr_attr;
                     reg1_cq_meta_function_id  <= cq_meta_function_id;
                     reg1_cq_data_index_begin  <= cq_data_index_begin;
-                    reg1_cq_addr_translated   <= cq_addr_translated;
+                    reg1_cq_addr_translated   <= unsigned(cq_addr_translated);
                     reg1_cq_laddr_init        <= cq_laddr_init;
-                    reg1_cq_byte_count        <= cq_byte_count;
+                    reg1_cq_byte_count        <= unsigned(cq_byte_count);
                     reg1_cq_rd_req            <= cq_rd_req;
                     reg1_cq_wr_req            <= cq_wr_req;
                     reg1_cq_meta_tph_present  <= cq_meta_tph_present;
