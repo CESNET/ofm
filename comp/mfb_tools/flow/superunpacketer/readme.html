@@ -16,6 +16,7 @@
         <script src="../../../../_static/underscore.js"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/sphinx_highlight.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
@@ -134,32 +135,32 @@ gaps between them.</p>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even" id="vhdl-genconstant-superunpacketer-mfb_regions"><td><p>MFB_REGIONS</p></td>
+<tr class="row-even" id="vhdl-gengeneric-superunpacketer-mfb_regions"><td><p>MFB_REGIONS</p></td>
 <td><p>natural</p></td>
-<td><p>1</p></td>
+<td><p>4</p></td>
 <td><p>Number of Regions within a data word, must be power of 2.</p></td>
 </tr>
-<tr class="row-odd" id="vhdl-genconstant-superunpacketer-mfb_region_size"><td><p>MFB_REGION_SIZE</p></td>
+<tr class="row-odd" id="vhdl-gengeneric-superunpacketer-mfb_region_size"><td><p>MFB_REGION_SIZE</p></td>
 <td><p>natural</p></td>
-<td><p>2</p></td>
+<td><p>8</p></td>
 <td><p>Region size (in Blocks).</p></td>
 </tr>
-<tr class="row-even" id="vhdl-genconstant-superunpacketer-mfb_block_size"><td><p>MFB_BLOCK_SIZE</p></td>
+<tr class="row-even" id="vhdl-gengeneric-superunpacketer-mfb_block_size"><td><p>MFB_BLOCK_SIZE</p></td>
 <td><p>natural</p></td>
 <td><p>8</p></td>
 <td><p>Block size (in Items), must be 8.</p></td>
 </tr>
-<tr class="row-odd" id="vhdl-genconstant-superunpacketer-mfb_item_width"><td><p>MFB_ITEM_WIDTH</p></td>
+<tr class="row-odd" id="vhdl-gengeneric-superunpacketer-mfb_item_width"><td><p>MFB_ITEM_WIDTH</p></td>
 <td><p>natural</p></td>
 <td><p>8</p></td>
 <td><p>Item width (in bits), must be 8.</p></td>
 </tr>
-<tr class="row-even" id="vhdl-genconstant-superunpacketer-out_meta_width"><td><p>OUT_META_WIDTH</p></td>
+<tr class="row-even" id="vhdl-gengeneric-superunpacketer-out_meta_width"><td><p>OUT_META_WIDTH</p></td>
 <td><p>natural</p></td>
 <td><p>2*8*8-1</p></td>
 <td><p>Output metadata width (in bits), header (16B) - the Next bit.</p></td>
 </tr>
-<tr class="row-odd" id="vhdl-genconstant-superunpacketer-out_meta_mode"><td><p>OUT_META_MODE</p></td>
+<tr class="row-odd" id="vhdl-gengeneric-superunpacketer-out_meta_mode"><td><p>OUT_META_MODE</p></td>
 <td><p>natural</p></td>
 <td><p>0</p></td>
 <td><dl class="simple">
@@ -172,12 +173,12 @@ gaps between them.</p>
 </dl>
 </td>
 </tr>
-<tr class="row-even" id="vhdl-genconstant-superunpacketer-pkt_mtu"><td><p>PKT_MTU</p></td>
+<tr class="row-even" id="vhdl-gengeneric-superunpacketer-pkt_mtu"><td><p>PKT_MTU</p></td>
 <td><p>natural</p></td>
-<td><p>2**15</p></td>
+<td><p>2**12</p></td>
 <td><p>Maximum size of a packet (in Items).</p></td>
 </tr>
-<tr class="row-odd" id="vhdl-genconstant-superunpacketer-device"><td><p>DEVICE</p></td>
+<tr class="row-odd" id="vhdl-gengeneric-superunpacketer-device"><td><p>DEVICE</p></td>
 <td><p>string</p></td>
 <td><p>“STRATIX10”</p></td>
 <td><p>FPGA device name: ULTRASCALE, STRATIX10, AGILEX, …</p></td>
@@ -193,15 +194,25 @@ gaps between them.</p>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even" id="vhdl-portsignal-superunpacketer-clk"><td><p>CLK</p></td>
+<tr class="row-even"><td><p>=====</p></td>
+<td><p>Clock and Reset</p></td>
+<td><p>=====</p></td>
+<td><p>=====</p></td>
+</tr>
+<tr class="row-odd" id="vhdl-portsignal-superunpacketer-clk"><td><p>CLK</p></td>
 <td><p>std_logic</p></td>
 <td><p>in</p></td>
 <td></td>
 </tr>
-<tr class="row-odd" id="vhdl-portsignal-superunpacketer-reset"><td><p>RESET</p></td>
+<tr class="row-even" id="vhdl-portsignal-superunpacketer-reset"><td><p>RESET</p></td>
 <td><p>std_logic</p></td>
 <td><p>in</p></td>
 <td></td>
+</tr>
+<tr class="row-odd"><td><p>=====</p></td>
+<td><p>RX MFB STREAM (SuperPackets)</p></td>
+<td><p>=====</p></td>
+<td><p>=====</p></td>
 </tr>
 <tr class="row-even" id="vhdl-portsignal-superunpacketer-rx_mfb_data"><td><p>RX_MFB_DATA</p></td>
 <td><p>std_logic_vector(MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH-1 downto 0)</p></td>
@@ -238,45 +249,55 @@ gaps between them.</p>
 <td><p>out</p></td>
 <td></td>
 </tr>
-<tr class="row-odd" id="vhdl-portsignal-superunpacketer-tx_mfb_data"><td><p>TX_MFB_DATA</p></td>
+<tr class="row-odd"><td><p>=====</p></td>
+<td><p>TX MFB STREAM (individual packets)</p></td>
+<td><p>=====</p></td>
+<td><p>=====</p></td>
+</tr>
+<tr class="row-even" id="vhdl-portsignal-superunpacketer-tx_mfb_data"><td><p>TX_MFB_DATA</p></td>
 <td><p>std_logic_vector(MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH-1 downto 0)</p></td>
 <td><p>out</p></td>
 <td></td>
 </tr>
-<tr class="row-even" id="vhdl-portsignal-superunpacketer-tx_mfb_meta"><td><p>TX_MFB_META</p></td>
+<tr class="row-odd" id="vhdl-portsignal-superunpacketer-tx_mfb_meta"><td><p>TX_MFB_META</p></td>
 <td><p>std_logic_vector(MFB_REGIONS*OUT_META_WIDTH-1 downto 0)</p></td>
 <td><p>out</p></td>
 <td></td>
 </tr>
-<tr class="row-odd" id="vhdl-portsignal-superunpacketer-tx_mfb_sof_pos"><td><p>TX_MFB_SOF_POS</p></td>
+<tr class="row-even" id="vhdl-portsignal-superunpacketer-tx_mfb_sof_pos"><td><p>TX_MFB_SOF_POS</p></td>
 <td><p>std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE))-1 downto 0)</p></td>
 <td><p>out</p></td>
 <td></td>
 </tr>
-<tr class="row-even" id="vhdl-portsignal-superunpacketer-tx_mfb_eof_pos"><td><p>TX_MFB_EOF_POS</p></td>
+<tr class="row-odd" id="vhdl-portsignal-superunpacketer-tx_mfb_eof_pos"><td><p>TX_MFB_EOF_POS</p></td>
 <td><p>std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE))-1 downto 0)</p></td>
 <td><p>out</p></td>
 <td></td>
 </tr>
-<tr class="row-odd" id="vhdl-portsignal-superunpacketer-tx_mfb_sof"><td><p>TX_MFB_SOF</p></td>
+<tr class="row-even" id="vhdl-portsignal-superunpacketer-tx_mfb_sof"><td><p>TX_MFB_SOF</p></td>
 <td><p>std_logic_vector(MFB_REGIONS-1 downto 0)</p></td>
 <td><p>out</p></td>
 <td></td>
 </tr>
-<tr class="row-even" id="vhdl-portsignal-superunpacketer-tx_mfb_eof"><td><p>TX_MFB_EOF</p></td>
+<tr class="row-odd" id="vhdl-portsignal-superunpacketer-tx_mfb_eof"><td><p>TX_MFB_EOF</p></td>
 <td><p>std_logic_vector(MFB_REGIONS-1 downto 0)</p></td>
 <td><p>out</p></td>
 <td></td>
 </tr>
-<tr class="row-odd" id="vhdl-portsignal-superunpacketer-tx_mfb_src_rdy"><td><p>TX_MFB_SRC_RDY</p></td>
+<tr class="row-even" id="vhdl-portsignal-superunpacketer-tx_mfb_src_rdy"><td><p>TX_MFB_SRC_RDY</p></td>
 <td><p>std_logic</p></td>
 <td><p>out</p></td>
 <td></td>
 </tr>
-<tr class="row-even" id="vhdl-portsignal-superunpacketer-tx_mfb_dst_rdy"><td><p>TX_MFB_DST_RDY</p></td>
+<tr class="row-odd" id="vhdl-portsignal-superunpacketer-tx_mfb_dst_rdy"><td><p>TX_MFB_DST_RDY</p></td>
 <td><p>std_logic</p></td>
 <td><p>in</p></td>
 <td></td>
+</tr>
+<tr class="row-even"><td><p>=====</p></td>
+<td><p>TX MVB Headers</p></td>
+<td><p>=====</p></td>
+<td><p>=====</p></td>
 </tr>
 <tr class="row-odd" id="vhdl-portsignal-superunpacketer-tx_mvb_data"><td><p>TX_MVB_DATA</p></td>
 <td><p>std_logic_vector(MFB_REGIONS*OUT_META_WIDTH-1 downto 0)</p></td>

@@ -16,6 +16,7 @@
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -208,42 +209,42 @@
 <section id="copy-paste-code-blocks">
 <h2>Copy-paste code blocks<a class="headerlink" href="#copy-paste-code-blocks" title="Permalink to this heading"></a></h2>
 <p><strong>Entity</strong></p>
-<div class="highlight-vhdl notranslate"><div class="highlight"><pre><span></span><span class="c1">-- Frame Link Unaligned input interface</span>
-<span class="n">RX_DATA</span>    <span class="o">:</span> <span class="k">in</span>  <span class="kt">std_logic_vector</span><span class="p">(</span><span class="n">DATA_WIDTH</span><span class="o">-</span><span class="mi">1</span> <span class="k">downto</span> <span class="mi">0</span><span class="p">);</span>
-<span class="n">RX_SOP_POS</span> <span class="o">:</span> <span class="k">in</span>  <span class="kt">std_logic_vector</span><span class="p">(</span><span class="n">SOP_POS_WIDTH</span><span class="o">-</span><span class="mi">1</span> <span class="k">downto</span> <span class="mi">0</span><span class="p">);</span>
-<span class="n">RX_EOP_POS</span> <span class="o">:</span> <span class="k">in</span>  <span class="kt">std_logic_vector</span><span class="p">(</span><span class="n">log2</span><span class="p">(</span><span class="n">DATA_WIDTH</span><span class="o">/</span><span class="mi">8</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span> <span class="k">downto</span> <span class="mi">0</span><span class="p">);</span>
-<span class="n">RX_SOP</span>     <span class="o">:</span> <span class="k">in</span>  <span class="kt">std_logic</span><span class="p">;</span>
-<span class="n">RX_EOP</span>     <span class="o">:</span> <span class="k">in</span>  <span class="kt">std_logic</span><span class="p">;</span>
-<span class="n">RX_SRC_RDY</span> <span class="o">:</span> <span class="k">in</span>  <span class="kt">std_logic</span><span class="p">;</span>
-<span class="n">RX_DST_RDY</span> <span class="o">:</span> <span class="k">out</span> <span class="kt">std_logic</span><span class="p">;</span>
-<span class="c1">-- Frame Link Unaligned output interface</span>
-<span class="n">TX_DATA</span>    <span class="o">:</span> <span class="k">out</span> <span class="kt">std_logic_vector</span><span class="p">(</span><span class="n">DATA_WIDTH</span><span class="o">-</span><span class="mi">1</span> <span class="k">downto</span> <span class="mi">0</span><span class="p">);</span>
-<span class="n">TX_SOP_POS</span> <span class="o">:</span> <span class="k">out</span> <span class="kt">std_logic_vector</span><span class="p">(</span><span class="n">SOP_POS_WIDTH</span><span class="o">-</span><span class="mi">1</span> <span class="k">downto</span> <span class="mi">0</span><span class="p">);</span>
-<span class="n">TX_EOP_POS</span> <span class="o">:</span> <span class="k">out</span> <span class="kt">std_logic_vector</span><span class="p">(</span><span class="n">log2</span><span class="p">(</span><span class="n">DATA_WIDTH</span><span class="o">/</span><span class="mi">8</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span> <span class="k">downto</span> <span class="mi">0</span><span class="p">);</span>
-<span class="n">TX_SOP</span>     <span class="o">:</span> <span class="k">out</span> <span class="kt">std_logic</span><span class="p">;</span>
-<span class="n">TX_EOP</span>     <span class="o">:</span> <span class="k">out</span> <span class="kt">std_logic</span><span class="p">;</span>
-<span class="n">TX_SRC_RDY</span> <span class="o">:</span> <span class="k">out</span> <span class="kt">std_logic</span><span class="p">;</span>
-<span class="n">TX_DST_RDY</span> <span class="o">:</span> <span class="k">in</span>  <span class="kt">std_logic</span><span class="p">;</span>
+<div class="highlight-vhdl notranslate"><div class="highlight"><pre><span></span><span class="c1">-- Frame Link Unaligned input interface</span><span class="w"></span>
+<span class="n">RX_DATA</span><span class="w">    </span><span class="o">:</span><span class="w"> </span><span class="k">in</span><span class="w">  </span><span class="kt">std_logic_vector</span><span class="p">(</span><span class="n">DATA_WIDTH</span><span class="o">-</span><span class="mi">1</span><span class="w"> </span><span class="k">downto</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+<span class="n">RX_SOP_POS</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">in</span><span class="w">  </span><span class="kt">std_logic_vector</span><span class="p">(</span><span class="n">SOP_POS_WIDTH</span><span class="o">-</span><span class="mi">1</span><span class="w"> </span><span class="k">downto</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+<span class="n">RX_EOP_POS</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">in</span><span class="w">  </span><span class="kt">std_logic_vector</span><span class="p">(</span><span class="n">log2</span><span class="p">(</span><span class="n">DATA_WIDTH</span><span class="o">/</span><span class="mi">8</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="w"> </span><span class="k">downto</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+<span class="n">RX_SOP</span><span class="w">     </span><span class="o">:</span><span class="w"> </span><span class="k">in</span><span class="w">  </span><span class="kt">std_logic</span><span class="p">;</span><span class="w"></span>
+<span class="n">RX_EOP</span><span class="w">     </span><span class="o">:</span><span class="w"> </span><span class="k">in</span><span class="w">  </span><span class="kt">std_logic</span><span class="p">;</span><span class="w"></span>
+<span class="n">RX_SRC_RDY</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">in</span><span class="w">  </span><span class="kt">std_logic</span><span class="p">;</span><span class="w"></span>
+<span class="n">RX_DST_RDY</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">out</span><span class="w"> </span><span class="kt">std_logic</span><span class="p">;</span><span class="w"></span>
+<span class="c1">-- Frame Link Unaligned output interface</span><span class="w"></span>
+<span class="n">TX_DATA</span><span class="w">    </span><span class="o">:</span><span class="w"> </span><span class="k">out</span><span class="w"> </span><span class="kt">std_logic_vector</span><span class="p">(</span><span class="n">DATA_WIDTH</span><span class="o">-</span><span class="mi">1</span><span class="w"> </span><span class="k">downto</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+<span class="n">TX_SOP_POS</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">out</span><span class="w"> </span><span class="kt">std_logic_vector</span><span class="p">(</span><span class="n">SOP_POS_WIDTH</span><span class="o">-</span><span class="mi">1</span><span class="w"> </span><span class="k">downto</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+<span class="n">TX_EOP_POS</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">out</span><span class="w"> </span><span class="kt">std_logic_vector</span><span class="p">(</span><span class="n">log2</span><span class="p">(</span><span class="n">DATA_WIDTH</span><span class="o">/</span><span class="mi">8</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="w"> </span><span class="k">downto</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+<span class="n">TX_SOP</span><span class="w">     </span><span class="o">:</span><span class="w"> </span><span class="k">out</span><span class="w"> </span><span class="kt">std_logic</span><span class="p">;</span><span class="w"></span>
+<span class="n">TX_EOP</span><span class="w">     </span><span class="o">:</span><span class="w"> </span><span class="k">out</span><span class="w"> </span><span class="kt">std_logic</span><span class="p">;</span><span class="w"></span>
+<span class="n">TX_SRC_RDY</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">out</span><span class="w"> </span><span class="kt">std_logic</span><span class="p">;</span><span class="w"></span>
+<span class="n">TX_DST_RDY</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">in</span><span class="w">  </span><span class="kt">std_logic</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 <p><strong>Connection</strong></p>
-<div class="highlight-vhdl notranslate"><div class="highlight"><pre><span></span><span class="n">RX_DATA</span>    <span class="o">=&gt;</span> <span class="n">_data</span><span class="p">,</span>
-<span class="n">RX_SOP_POS</span> <span class="o">=&gt;</span> <span class="n">_sop_pos</span><span class="p">,</span>
-<span class="n">RX_EOP_POS</span> <span class="o">=&gt;</span> <span class="n">_eop_pos</span><span class="p">,</span>
-<span class="n">RX_SOP</span>     <span class="o">=&gt;</span> <span class="n">_sop</span><span class="p">,</span>
-<span class="n">RX_EOP</span>     <span class="o">=&gt;</span> <span class="n">_eop</span><span class="p">,</span>
-<span class="n">RX_SRC_RDY</span> <span class="o">=&gt;</span> <span class="n">_src_rdy</span><span class="p">,</span>
-<span class="n">RX_DST_RDY</span> <span class="o">=&gt;</span> <span class="n">_dst_rdy</span><span class="p">,</span>
+<div class="highlight-vhdl notranslate"><div class="highlight"><pre><span></span><span class="n">RX_DATA</span><span class="w">    </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">_data</span><span class="p">,</span><span class="w"></span>
+<span class="n">RX_SOP_POS</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">_sop_pos</span><span class="p">,</span><span class="w"></span>
+<span class="n">RX_EOP_POS</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">_eop_pos</span><span class="p">,</span><span class="w"></span>
+<span class="n">RX_SOP</span><span class="w">     </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">_sop</span><span class="p">,</span><span class="w"></span>
+<span class="n">RX_EOP</span><span class="w">     </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">_eop</span><span class="p">,</span><span class="w"></span>
+<span class="n">RX_SRC_RDY</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">_src_rdy</span><span class="p">,</span><span class="w"></span>
+<span class="n">RX_DST_RDY</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">_dst_rdy</span><span class="p">,</span><span class="w"></span>
 </pre></div>
 </div>
 <p><strong>Signals declarations</strong></p>
-<div class="highlight-vhdl notranslate"><div class="highlight"><pre><span></span><span class="k">signal</span> <span class="n">_data</span>    <span class="o">:</span> <span class="kt">std_logic_vector</span><span class="p">(</span><span class="n">DATA_WIDTH</span><span class="o">-</span><span class="mi">1</span> <span class="k">downto</span> <span class="mi">0</span><span class="p">);</span>
-<span class="k">signal</span> <span class="n">_sop_pos</span> <span class="o">:</span> <span class="kt">std_logic_vector</span><span class="p">(</span><span class="n">SOP_POS_WIDTH</span><span class="o">-</span><span class="mi">1</span> <span class="k">downto</span> <span class="mi">0</span><span class="p">);</span>
-<span class="k">signal</span> <span class="n">_eop_pos</span> <span class="o">:</span> <span class="kt">std_logic_vector</span><span class="p">(</span><span class="n">log2</span><span class="p">(</span><span class="n">DATA_WIDTH</span><span class="o">/</span><span class="mi">8</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span> <span class="k">downto</span> <span class="mi">0</span><span class="p">);</span>
-<span class="k">signal</span> <span class="n">_sop</span>     <span class="o">:</span> <span class="kt">std_logic</span><span class="p">;</span>
-<span class="k">signal</span> <span class="n">_eop</span>     <span class="o">:</span> <span class="kt">std_logic</span><span class="p">;</span>
-<span class="k">signal</span> <span class="n">_src_rdy</span> <span class="o">:</span> <span class="kt">std_logic</span><span class="p">;</span>
-<span class="k">signal</span> <span class="n">_dst_rdy</span> <span class="o">:</span> <span class="kt">std_logic</span><span class="p">;</span>
+<div class="highlight-vhdl notranslate"><div class="highlight"><pre><span></span><span class="k">signal</span><span class="w"> </span><span class="n">_data</span><span class="w">    </span><span class="o">:</span><span class="w"> </span><span class="kt">std_logic_vector</span><span class="p">(</span><span class="n">DATA_WIDTH</span><span class="o">-</span><span class="mi">1</span><span class="w"> </span><span class="k">downto</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+<span class="k">signal</span><span class="w"> </span><span class="n">_sop_pos</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kt">std_logic_vector</span><span class="p">(</span><span class="n">SOP_POS_WIDTH</span><span class="o">-</span><span class="mi">1</span><span class="w"> </span><span class="k">downto</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+<span class="k">signal</span><span class="w"> </span><span class="n">_eop_pos</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kt">std_logic_vector</span><span class="p">(</span><span class="n">log2</span><span class="p">(</span><span class="n">DATA_WIDTH</span><span class="o">/</span><span class="mi">8</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="w"> </span><span class="k">downto</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w"></span>
+<span class="k">signal</span><span class="w"> </span><span class="n">_sop</span><span class="w">     </span><span class="o">:</span><span class="w"> </span><span class="kt">std_logic</span><span class="p">;</span><span class="w"></span>
+<span class="k">signal</span><span class="w"> </span><span class="n">_eop</span><span class="w">     </span><span class="o">:</span><span class="w"> </span><span class="kt">std_logic</span><span class="p">;</span><span class="w"></span>
+<span class="k">signal</span><span class="w"> </span><span class="n">_src_rdy</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kt">std_logic</span><span class="p">;</span><span class="w"></span>
+<span class="k">signal</span><span class="w"> </span><span class="n">_dst_rdy</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kt">std_logic</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
