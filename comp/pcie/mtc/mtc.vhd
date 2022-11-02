@@ -1,4 +1,4 @@
--- mtc.vhd: MI transaction controler
+-- mtc.vhd: MI Transaction Controller
 -- Copyright (C) 2020 CESNET z. s. p. o.
 -- Author(s): Jakub Cabal <cabal@cesnet.cz>
 
@@ -11,12 +11,12 @@ use work.math_pack.all;
 use work.type_pack.all;
 use work.pcie_meta_pack.all;
 
--- The MI Transaction Controler (MTC) component serves as the MI master endpoint.
--- It provides the conversion of PCIe read and write requests to MI requests. It
--- processes the responses to MI requests and sends them to the host PC as PCIe
--- completion transactions. If the MI slave does not respond to an MI read
--- request, the MTC module will be stuck, the PCIe communication will be broken
--- and the guest PC may get into an unexpected state.
+-- The MI Transaction Controller (MTC) component serves as the MI master
+-- endpoint. It provides the conversion of PCIe read and write requests to MI
+-- requests. It processes the responses to MI requests and sends them to
+-- the host PC as PCIe completion transactions. If the MI slave does not respond
+-- to an MI read request, the MTC module will be stuck, the PCIe communication
+-- will be broken and the guest PC may get into an unexpected state.
 --
 -- **Simple block diagram including wiring:**
 --
@@ -24,13 +24,6 @@ use work.pcie_meta_pack.all;
 --       :align: center
 --       :width: 100 %
 --
--- MTC supports various FPGA models from different vendors. For Xilinx
--- UltraScale+ FPGAs, the AXI bus (CQ+CC) is used to connect to PCIe Hard IP.
--- For Intel FPGAs (Stratix 10 and Agilex), :ref:`the MFB bus <mfb_bus>` (CQ+CC)
--- is used, which is connected to the PCIe Hard IP through a connection block.
--- Each supported PCIe Hard IP has different requirements and you need to be
--- familiar with their documentation, Intel R-Tile PCIe Hard IP, for example,
--- requires additional logic to ensure PCIe credits are handled.
 entity MTC is
     generic(
         -- MFB bus: number of regions in word
@@ -69,15 +62,15 @@ entity MTC is
         MI_ADDR_WIDTH     : natural := 32;
         -- Select correct FPGA device: "ULTRASCALE", "STRATIX10", "AGILEX"
         DEVICE            : string := "ULTRASCALE";
-        -- Intel PCIe endpoint type (Intel only): "H_TILE", "P_TILE", "R_TILE"
-        ENDPOINT_TYPE     : string := "H_TILE"
+        -- Intel PCIe endpoint type:
+        ENDPOINT_TYPE     : string := "USP"
     );
     port (
         -- Clock signal for the whole MTC module.
         -- Must be used clock from PCIe Hard IP!
-        CLK               : in  std_logic;
+        CLK                  : in  std_logic;
         -- Reset synchronized with CLK.
-        RESET             : in  std_logic;
+        RESET                : in  std_logic;
 
         -- =====================================================================
         -- Configuration Status Interface
@@ -90,51 +83,50 @@ entity MTC is
         CTL_BAR_APERTURE     : in  std_logic_vector(5 downto 0);
 
         -- =====================================================================
-        -- MFB Completer Request Interface (CQ)
+        -- MFB Completer Request (CQ) Interface
         -- =====================================================================
-        CQ_MFB_DATA       : in  std_logic_vector(MFB_REGIONS*MFB_REGION_WIDTH-1 downto 0);
-        CQ_MFB_META       : in  std_logic_vector(MFB_REGIONS*PCIE_CQ_META_WIDTH-1 downto 0);
-        CQ_MFB_SOF        : in  std_logic_vector(MFB_REGIONS-1 downto 0);
-        CQ_MFB_EOF        : in  std_logic_vector(MFB_REGIONS-1 downto 0);
-        CQ_MFB_SOF_POS    : in  std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE))-1 downto 0);
-        CQ_MFB_EOF_POS    : in  std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE))-1 downto 0);
-        CQ_MFB_SRC_RDY    : in  std_logic;
-        CQ_MFB_DST_RDY    : out std_logic;
+        CQ_MFB_DATA          : in  std_logic_vector(MFB_REGIONS*MFB_REGION_WIDTH-1 downto 0);
+        CQ_MFB_META          : in  std_logic_vector(MFB_REGIONS*PCIE_CQ_META_WIDTH-1 downto 0);
+        CQ_MFB_SOF           : in  std_logic_vector(MFB_REGIONS-1 downto 0);
+        CQ_MFB_EOF           : in  std_logic_vector(MFB_REGIONS-1 downto 0);
+        CQ_MFB_SOF_POS       : in  std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE))-1 downto 0);
+        CQ_MFB_EOF_POS       : in  std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE))-1 downto 0);
+        CQ_MFB_SRC_RDY       : in  std_logic;
+        CQ_MFB_DST_RDY       : out std_logic;
 
         -- =====================================================================
-        -- MFB Completer Completion Interface (CC)
+        -- MFB Completer Completion (CC) Interface
         -- =====================================================================
-        CC_MFB_DATA       : out std_logic_vector(MFB_REGIONS*MFB_REGION_WIDTH-1 downto 0);
-        CC_MFB_META       : out std_logic_vector(MFB_REGIONS*PCIE_CC_META_WIDTH-1 downto 0);
-        CC_MFB_SOF        : out std_logic_vector(MFB_REGIONS-1 downto 0);
-        CC_MFB_EOF        : out std_logic_vector(MFB_REGIONS-1 downto 0);
-        CC_MFB_SOF_POS    : out std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE))-1 downto 0);
-        CC_MFB_EOF_POS    : out std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE))-1 downto 0);
-        CC_MFB_SRC_RDY    : out std_logic;
-        CC_MFB_DST_RDY    : in  std_logic;
+        CC_MFB_DATA          : out std_logic_vector(MFB_REGIONS*MFB_REGION_WIDTH-1 downto 0);
+        CC_MFB_META          : out std_logic_vector(MFB_REGIONS*PCIE_CC_META_WIDTH-1 downto 0);
+        CC_MFB_SOF           : out std_logic_vector(MFB_REGIONS-1 downto 0);
+        CC_MFB_EOF           : out std_logic_vector(MFB_REGIONS-1 downto 0);
+        CC_MFB_SOF_POS       : out std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE))-1 downto 0);
+        CC_MFB_EOF_POS       : out std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE))-1 downto 0);
+        CC_MFB_SRC_RDY       : out std_logic;
+        CC_MFB_DST_RDY       : in  std_logic;
 
         -- =====================================================================
         -- MI32 interface (master)
         -- =====================================================================
-
         -- MI bus: PCIe function number that generated the current MI request
-        MI_FUNCTION       : out std_logic_vector(7 downto 0);
+        MI_FUNCTION          : out std_logic_vector(7 downto 0);
         -- MI bus: data from master to slave (write data)
-        MI_DWR            : out std_logic_vector(31 downto 0);
+        MI_DWR               : out std_logic_vector(31 downto 0);
         -- MI bus: slave address
-        MI_ADDR           : out std_logic_vector(31 downto 0);    
+        MI_ADDR              : out std_logic_vector(31 downto 0);
         -- MI bus: byte enable
-        MI_BE             : out std_logic_vector(3 downto 0);
+        MI_BE                : out std_logic_vector(3 downto 0);
         -- MI bus: read request
-        MI_RD             : out std_logic;
+        MI_RD                : out std_logic;
         -- MI bus: write request
-        MI_WR             : out std_logic;
+        MI_WR                : out std_logic;
         -- MI bus: ready of slave module
-        MI_ARDY           : in  std_logic;
+        MI_ARDY              : in  std_logic;
         -- MI bus: data from slave to master (read data)
-        MI_DRD            : in  std_logic_vector(31 downto 0);
+        MI_DRD               : in  std_logic_vector(31 downto 0);
         -- MI bus: valid of MI_DRD data signal
-        MI_DRDY           : in  std_logic
+        MI_DRDY              : in  std_logic
     );
 end entity;
 
