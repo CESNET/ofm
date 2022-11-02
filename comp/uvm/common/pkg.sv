@@ -28,6 +28,7 @@ package uvm_common;
     `include "comparer_base.sv"
     `include "comparer.sv"
     `include "stats.sv"
+    `include "prog.sv"
 endpackage
 
 

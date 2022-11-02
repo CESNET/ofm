@@ -5,4 +5,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 lappend MOD "$ENTITY_BASE/pkg.sv"
+lappend SV_LIB "$ENTITY_BASE/prog"
 
