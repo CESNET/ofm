@@ -31,7 +31,10 @@ use IEEE.STD_LOGIC_ARITH.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 entity flashctrl is
-   generic ( CLK_PERIOD : natural := 8 ); -- Period of the CLK (truncated when non-integer)
+   generic (
+      CLK_PERIOD : natural := 8; -- Period of the CLK (truncated when non-integer)
+      ADDR_WIDTH : integer := 27
+   );
    port (
       RESET     : in std_logic; -- sync reset
       CLK       : in std_logic; -- clock
@@ -40,7 +43,7 @@ entity flashctrl is
       DWR_WR    : in  std_logic; -- command strobe
       DRD       : out std_logic_vector(63 downto 0); -- Read data (data & status from flash)
       -- FLASH interface --
-      AD        : out std_logic_vector(26 downto 0 ); -- Flash address
+      AD        : out std_logic_vector(ADDR_WIDTH-1 downto 0 ); -- Flash address
       D_I       : in  std_logic_vector(15 downto 0 ); -- Data from flash
       D_O       : out std_logic_vector(15 downto 0 ); -- Data to flash
       D_OE      : out std_logic;  -- D output enable (HI-Z on data disable). Active high
