@@ -1,4 +1,4 @@
--- mtc.vhd: MI transaction controler
+-- mtc.vhd: MI Transaction Controller
 -- Copyright (C) 2020 CESNET z. s. p. o.
 -- Author(s): Jakub Cabal <cabal@cesnet.cz>
 
@@ -9,13 +9,14 @@ use IEEE.numeric_std.all;
 
 use work.math_pack.all;
 use work.type_pack.all;
+use work.pcie_meta_pack.all;
 
--- The MI Transaction Controler (MTC) component serves as the MI master endpoint.
--- It provides the conversion of PCIe read and write requests to MI requests. It
--- processes the responses to MI requests and sends them to the host PC as PCIe
--- completion transactions. If the MI slave does not respond to an MI read
--- request, the MTC module will be stuck, the PCIe communication will be broken
--- and the guest PC may get into an unexpected state.
+-- The MI Transaction Controller (MTC) component serves as the MI master
+-- endpoint. It provides the conversion of PCIe read and write requests to MI
+-- requests. It processes the responses to MI requests and sends them to
+-- the host PC as PCIe completion transactions. If the MI slave does not respond
+-- to an MI read request, the MTC module will be stuck, the PCIe communication
+-- will be broken and the guest PC may get into an unexpected state.
 --
 -- **Simple block diagram including wiring:**
 --
@@ -23,21 +24,8 @@ use work.type_pack.all;
 --       :align: center
 --       :width: 100 %
 --
--- MTC supports various FPGA models from different vendors. For Xilinx
--- UltraScale+ FPGAs, the AXI bus (CQ+CC) is used to connect to PCIe Hard IP.
--- For Intel FPGAs (Stratix 10 and Agilex), :ref:`the MFB bus <mfb_bus>` (CQ+CC)
--- is used, which is connected to the PCIe Hard IP through a connection block.
--- Each supported PCIe Hard IP has different requirements and you need to be
--- familiar with their documentation, Intel R-Tile PCIe Hard IP, for example,
--- requires additional logic to ensure PCIe credits are handled.
 entity MTC is
     generic(
-        -- AXI bus: width of data word in bits
-        AXI_DATA_WIDTH    : natural := 512;
-        -- AXI bus: width of CQ user word in bits
-        AXI_CQUSER_WIDTH  : natural := 183;
-        -- AXI bus: width of CC user word in bits
-        AXI_CCUSER_WIDTH  : natural := 81;
         -- MFB bus: number of regions in word
         MFB_REGIONS       : natural := 2;
         -- MFB bus: number of blocks in region, must be 1
@@ -46,11 +34,6 @@ entity MTC is
         MFB_BLOCK_SIZE    : natural := 8;
         -- MFB bus: width of one item in bits, must be 32 (dword)
         MFB_ITEM_WIDTH    : natural := 32;
-        -- MFB bus: width of CQ meta item in bits (BAR index + PCIe Prefix + PCIe Header)
-        MFB_CQ_META_WIDTH : natural := 3+32+128;
-        MFB_CQ_USER_META_WIDTH : natural := 3+32+128+4+4+1+2+8;
-        -- MFB bus: width of CQ meta item in bits (PCIe Prefix + PCIe Header)
-        MFB_CC_META_WIDTH : natural := 32+128;
         -- MFB bus: width of single data region in bits, auxiliary parameter, do not change value!
         MFB_REGION_WIDTH  : natural := MFB_REGION_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH;
         -- BAR0 base address for PCIE->MI32 transalation
@@ -79,20 +62,19 @@ entity MTC is
         MI_ADDR_WIDTH     : natural := 32;
         -- Select correct FPGA device: "ULTRASCALE", "STRATIX10", "AGILEX"
         DEVICE            : string := "ULTRASCALE";
-        -- Intel PCIe endpoint type (Intel only): "H_TILE", "P_TILE", "R_TILE"
-        ENDPOINT_TYPE     : string := "H_TILE"
+        -- Intel PCIe endpoint type:
+        ENDPOINT_TYPE     : string := "USP"
     );
     port (
         -- Clock signal for the whole MTC module.
         -- Must be used clock from PCIe Hard IP!
-        CLK               : in  std_logic;
+        CLK                  : in  std_logic;
         -- Reset synchronized with CLK.
-        RESET             : in  std_logic;
+        RESET                : in  std_logic;
 
         -- =====================================================================
         -- Configuration Status Interface
         -- =====================================================================
-
         -- Maximum allowed size of completion payload: 000b = 128 bytes;
         -- 001b = 256 bytes; 010b = 512 bytes; 011b = 1024 bytes
         CTL_MAX_PAYLOAD_SIZE : in  std_logic_vector(2 downto 0);
@@ -101,81 +83,50 @@ entity MTC is
         CTL_BAR_APERTURE     : in  std_logic_vector(5 downto 0);
 
         -- =====================================================================
-        -- MFB Completer Request Interface (CQ) - Intel FPGA Only
+        -- MFB Completer Request (CQ) Interface
         -- =====================================================================
-
-        -- CQ_MFB: data word with frames (packets)
-        CQ_MFB_DATA       : in  std_logic_vector(MFB_REGIONS*MFB_REGION_WIDTH-1 downto 0);
-        -- CQ_MFB: meta word with metadata for each frame. In each region
-        -- from LSB: 128b PCIe Header, 32b PCIe Prefix, 3b BAR index.
-        CQ_MFB_META       : in  std_logic_vector(MFB_REGIONS*MFB_CQ_META_WIDTH-1 downto 0);
-        -- This bit indicates presence of Transaction Processing Hint (TPH)
-        CQ_TPH_PRESENT    : in std_logic_vector(MFB_REGIONS-1 downto 0);
-        -- These two bits provide the value of the PH field associated with the hint
-        CQ_TPH_TYPE       : in std_logic_vector(MFB_REGIONS*2-1 downto 0);
-        -- This output provides the 8-bit Steering Tag associated with the hint
-        CQ_TPH_ST_TAG     : in std_logic_vector(MFB_REGIONS*8-1 downto 0);
-        -- Byte enables for the first DWORD
-        CQ_FBE            : in std_logic_vector(MFB_REGIONS*4-1 downto 0);
-        -- Byte enables for the last DWORD
-        CQ_LBE            : in std_logic_vector(MFB_REGIONS*4-1 downto 0);
-        -- CQ_MFB: Start Of Frame (SOF) flag for each MFB region
-        CQ_MFB_SOF        : in  std_logic_vector(MFB_REGIONS-1 downto 0);
-        -- CQ_MFB: End Of Frame (EOF) flag for each MFB region
-        CQ_MFB_EOF        : in  std_logic_vector(MFB_REGIONS-1 downto 0);
-        -- CQ_MFB: SOF position for each MFB region in MFB blocks
-        CQ_MFB_SOF_POS    : in  std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE))-1 downto 0);
-        -- CQ_MFB: EOF position for each MFB region in MFB items
-        CQ_MFB_EOF_POS    : in  std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE))-1 downto 0);
-        -- CQ_MFB: source ready of each MFB bus
-        CQ_MFB_SRC_RDY    : in  std_logic;
-        -- CQ_MFB: destination ready of each MFB bus
-        CQ_MFB_DST_RDY    : out std_logic;
+        CQ_MFB_DATA          : in  std_logic_vector(MFB_REGIONS*MFB_REGION_WIDTH-1 downto 0);
+        CQ_MFB_META          : in  std_logic_vector(MFB_REGIONS*PCIE_CQ_META_WIDTH-1 downto 0);
+        CQ_MFB_SOF           : in  std_logic_vector(MFB_REGIONS-1 downto 0);
+        CQ_MFB_EOF           : in  std_logic_vector(MFB_REGIONS-1 downto 0);
+        CQ_MFB_SOF_POS       : in  std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE))-1 downto 0);
+        CQ_MFB_EOF_POS       : in  std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE))-1 downto 0);
+        CQ_MFB_SRC_RDY       : in  std_logic;
+        CQ_MFB_DST_RDY       : out std_logic;
 
         -- =====================================================================
-        -- MFB Completer Completion Interface (CC) - Intel FPGA Only
+        -- MFB Completer Completion (CC) Interface
         -- =====================================================================
-
-        -- CC_MFB: data word with frames (packets)
-        CC_MFB_DATA       : out std_logic_vector(MFB_REGIONS*MFB_REGION_WIDTH-1 downto 0);
-        -- CC_MFB: meta word with metadata for each frame. In each region
-        -- from LSB: 128b PCIe Header, 32b PCIe Prefix.
-        CC_MFB_META       : out std_logic_vector(MFB_REGIONS*MFB_CC_META_WIDTH-1 downto 0);
-        -- CC_MFB: Start Of Frame (SOF) flag for each MFB region
-        CC_MFB_SOF        : out std_logic_vector(MFB_REGIONS-1 downto 0);
-        -- CC_MFB: End Of Frame (EOF) flag for each MFB region
-        CC_MFB_EOF        : out std_logic_vector(MFB_REGIONS-1 downto 0);
-        -- CC_MFB: SOF position for each MFB region in MFB blocks
-        CC_MFB_SOF_POS    : out std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE))-1 downto 0);
-        -- CC_MFB: EOF position for each MFB region in MFB items
-        CC_MFB_EOF_POS    : out std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE))-1 downto 0);
-        -- CC_MFB: source ready of each MFB bus
-        CC_MFB_SRC_RDY    : out std_logic;
-        -- CC_MFB: destination ready of each MFB bus
-        CC_MFB_DST_RDY    : in  std_logic;
+        CC_MFB_DATA          : out std_logic_vector(MFB_REGIONS*MFB_REGION_WIDTH-1 downto 0);
+        CC_MFB_META          : out std_logic_vector(MFB_REGIONS*PCIE_CC_META_WIDTH-1 downto 0);
+        CC_MFB_SOF           : out std_logic_vector(MFB_REGIONS-1 downto 0);
+        CC_MFB_EOF           : out std_logic_vector(MFB_REGIONS-1 downto 0);
+        CC_MFB_SOF_POS       : out std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE))-1 downto 0);
+        CC_MFB_EOF_POS       : out std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE))-1 downto 0);
+        CC_MFB_SRC_RDY       : out std_logic;
+        CC_MFB_DST_RDY       : in  std_logic;
 
         -- =====================================================================
         -- MI32 interface (master)
         -- =====================================================================
-
         -- MI bus: PCIe function number that generated the current MI request
-        MI_FUNCTION       : out std_logic_vector(7 downto 0);
+        MI_FUNCTION          : out std_logic_vector(7 downto 0);
         -- MI bus: data from master to slave (write data)
-        MI_DWR            : out std_logic_vector(31 downto 0);
+        MI_DWR               : out std_logic_vector(31 downto 0);
         -- MI bus: slave address
-        MI_ADDR           : out std_logic_vector(31 downto 0);    
+        MI_ADDR              : out std_logic_vector(31 downto 0);
         -- MI bus: byte enable
-        MI_BE             : out std_logic_vector(3 downto 0);
+        MI_BE                : out std_logic_vector(3 downto 0);
         -- MI bus: read request
-        MI_RD             : out std_logic;
+        MI_RD                : out std_logic;
         -- MI bus: write request
-        MI_WR             : out std_logic;
+        MI_WR                : out std_logic;
         -- MI bus: ready of slave module
-        MI_ARDY           : in  std_logic;
+        MI_ARDY              : in  std_logic;
         -- MI bus: data from slave to master (read data)
-        MI_DRD            : in  std_logic_vector(31 downto 0);
+        MI_DRD               : in  std_logic_vector(31 downto 0);
         -- MI bus: valid of MI_DRD data signal
-        MI_DRDY           : in  std_logic
+        MI_DRDY              : in  std_logic
     );
 end entity;
 
@@ -187,14 +138,13 @@ architecture FULL of MTC is
     constant RD_INDEX_BEGIN  : natural := tsel(IS_MFB_META_DEV,0,3);
     constant MFB_DATA_W      : natural := MFB_REGIONS*MFB_REGION_WIDTH;
     constant CQ_DATA_WIDTH   : natural := MFB_REGION_WIDTH;
-    constant CC_DATA_WIDTH   : natural := tsel(IS_INTEL_DEV,MFB_DATA_W,AXI_DATA_WIDTH);
+    constant CC_DATA_WIDTH   : natural := MFB_DATA_W;
     constant MI_PER_CQ_WORD  : natural := CQ_DATA_WIDTH/MI_DATA_WIDTH;
     constant MI_PER_CC_WORD  : natural := CC_DATA_WIDTH/MI_DATA_WIDTH;
     constant DW_PER_CC_WORD  : natural := CC_DATA_WIDTH/32;
     constant CC_MAX_SIZE     : natural := 2**log2(4096+12); -- maximum MPS + HDR size
     constant CC_MAX_MI_WORDS : natural := CC_MAX_SIZE/(MI_DATA_WIDTH/8);
     constant CC_MEM_ITEMS    : natural := CC_MAX_SIZE/(CC_DATA_WIDTH/8);
-    constant AXI_PIPE_WIDTH  : natural := AXI_DATA_WIDTH + AXI_DATA_WIDTH/32 + 1;
 
     type mi_fsm_t is (st_idle, st_write, st_wait_for_data, st_read, st_wait_for_drdy, st_cc_done_mtu, st_error, st_ignore, st_cc_done_last);
     type cc_fsm_t is (st_idle, st_start_read, st_read, st_error, st_cc_done);
@@ -203,25 +153,8 @@ architecture FULL of MTC is
     signal reg_mps_mi                : unsigned(13-log2(MI_DATA_WIDTH/8)-1 downto 0);
     signal reg_mps_mask              : unsigned(12 downto 0);
 
-    signal cq_axi_pipe_din           : std_logic_vector(AXI_DATA_WIDTH+AXI_CQUSER_WIDTH+1-1 downto 0);
-    signal cq_axi_pipe_dout          : std_logic_vector(AXI_DATA_WIDTH+AXI_CQUSER_WIDTH+1-1 downto 0);
-
-    signal cq_mfb_meta_with_be       : std_logic_vector(MFB_REGIONS*MFB_CQ_USER_META_WIDTH-1 downto 0);
-    signal cq_axi_data_in            : std_logic_vector(AXI_DATA_WIDTH-1 downto 0);
-    signal cq_axi_user_in            : std_logic_vector(AXI_CQUSER_WIDTH-1 downto 0);
-    signal cq_axi_last_in            : std_logic;
-    signal cq_axi_vld_in             : std_logic;
-
-    signal cq_axi_user_sop           : std_logic; 
-    signal cq_axi_user_tph_present   : std_logic;
-    signal cq_axi_user_tph_type      : std_logic_vector(1 downto 0);
-    signal cq_axi_user_tph_st_tag    : std_logic_vector(7 downto 0);
-
-    signal cq_axi_rd_req             : std_logic;
-    signal cq_axi_wr_req             : std_logic;
-
     signal pi_cq_mfb_data            : std_logic_vector(MFB_REGIONS*MFB_REGION_WIDTH-1 downto 0);
-    signal pi_cq_mfb_meta            : std_logic_vector(MFB_REGIONS*MFB_CQ_USER_META_WIDTH-1 downto 0);
+    signal pi_cq_mfb_meta            : std_logic_vector(MFB_REGIONS*PCIE_CQ_META_WIDTH-1 downto 0);
     signal pi_cq_mfb_sof             : std_logic_vector(MFB_REGIONS-1 downto 0);
     signal pi_cq_mfb_eof             : std_logic_vector(MFB_REGIONS-1 downto 0);
     signal pi_cq_mfb_sof_pos         : std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE))-1 downto 0);
@@ -230,8 +163,9 @@ architecture FULL of MTC is
     signal pi_cq_mfb_dst_rdy         : std_logic;
 
     signal tr_cq_mfb_data            : std_logic_vector(CQ_DATA_WIDTH-1 downto 0);
-    signal tr_cq_mfb_meta            : std_logic_vector(MFB_CQ_META_WIDTH-1 downto 0);
-    signal tr_cq_mfb_meta_with_be    : std_logic_vector(MFB_CQ_USER_META_WIDTH-1 downto 0);
+    signal tr_cq_mfb_meta            : std_logic_vector(PCIE_CQ_META_WIDTH-1 downto 0);
+    signal tr_cq_mfb_hdr             : std_logic_vector(128-1 downto 0);
+    signal tr_cq_mfb_bar             : std_logic_vector(3-1 downto 0);
     signal tr_cq_mfb_fbe             : std_logic_vector(4-1 downto 0);
     signal tr_cq_mfb_lbe             : std_logic_vector(4-1 downto 0);
     signal tr_cq_mfb_tph_present     : std_logic;
@@ -242,11 +176,6 @@ architecture FULL of MTC is
     signal tr_cq_mfb_src_rdy         : std_logic;
     signal tr_cq_mfb_dst_rdy         : std_logic;
 
-    signal tr_cq_mfb_meta_bar_range  : std_logic_vector(3-1 downto 0);
-    signal tr_cq_mfb_meta_prefix     : std_logic_vector(32-1 downto 0);
-    signal tr_cq_mfb_meta_hdr        : std_logic_vector(128-1 downto 0);
-    signal tr_cq_mfb_hdr             : std_logic_vector(128-1 downto 0);
-    signal tr_cq_mfb_req_type        : std_logic_vector(1 downto 0);
     signal tr_cq_mfb_req_msg         : std_logic;
     signal tr_cq_mfb_wr              : std_logic;
     signal tr_cq_mfb_rd              : std_logic;
@@ -292,15 +221,11 @@ architecture FULL of MTC is
     signal cq_valid                  : std_logic;
     signal cq_ready                  : std_logic;
 
-    signal cq_addr_mask              : unsigned(64-1 downto 0);
-    signal bar_base_addr             : std_logic_vector(32-1 downto 0);
-    signal cq_addr_translated        : unsigned(64-1 downto 0);
-    signal cq_first_ib               : unsigned(2-1 downto 0);
-    signal cq_last_ib                : unsigned(2-1 downto 0);
+    signal cq_addr_translated        : std_logic_vector(64-1 downto 0);
+    signal cq_first_ib               : std_logic_vector(2-1 downto 0);
     signal cq_laddr_init_low         : unsigned(2-1 downto 0);
     signal cq_laddr_init             : unsigned(7-1 downto 0);
-    signal cq_byte_count_raw         : unsigned(13-1 downto 0);
-    signal cq_byte_count             : unsigned(13-1 downto 0);
+    signal cq_byte_count             : std_logic_vector(13-1 downto 0);
 
     signal reg1_cq_hdr_tag           : std_logic_vector(10-1 downto 0);
     signal reg1_cq_hdr_addr_type     : std_logic_vector(2-1 downto 0);
@@ -399,15 +324,12 @@ architecture FULL of MTC is
     signal cc_sot                    : std_logic;
     signal cc_eot                    : std_logic;
     signal cc_eot_pos                : unsigned(log2(DW_PER_CC_WORD)-1 downto 0);
-    signal cc_keep                   : std_logic_vector(CC_DATA_WIDTH/32-1 downto 0);
     signal cc_status                 : std_logic_vector(3-1 downto 0);
 
-    signal axi_pipe_din              : std_logic_vector(AXI_PIPE_WIDTH-1 downto 0);
-    signal axi_pipe_dout             : std_logic_vector(AXI_PIPE_WIDTH-1 downto 0);
     signal mfb_sof                   : std_logic_vector(MFB_REGIONS-1 downto 0);
     signal mfb_eof                   : std_logic_vector(MFB_REGIONS-1 downto 0);
     signal mfb_eof_pos_arr           : slv_array_t(MFB_REGIONS-1 downto 0)(log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE)-1 downto 0);
-    signal mfb_meta                  : std_logic_vector(MFB_REGIONS*MFB_CC_META_WIDTH-1 downto 0) := (others => '0');
+    signal mfb_meta_arr              : slv_array_t(MFB_REGIONS-1 downto 0)(PCIE_CC_META_WIDTH-1 downto 0) := (others => (others => '0'));
 
 begin
 
@@ -416,10 +338,6 @@ begin
 
     assert (ENDPOINT_TYPE = "H_TILE" OR ENDPOINT_TYPE = "P_TILE" OR ENDPOINT_TYPE = "R_TILE" OR IS_INTEL_DEV = False)
         report "MTC: unsupported ENDPOINT_TYPE (Intel FPGA only)!" severity failure;
-
-    assert (AXI_CQUSER_WIDTH = 85 or AXI_CQUSER_WIDTH = 88 or AXI_CQUSER_WIDTH = 183)
-        report "MTC: doesn't supports specified CQUSER_WIDTH"
-        severity failure;
 
     -- =========================================================================
     --  CONFIGURATION LOGIC AND REGISTERS
@@ -454,12 +372,6 @@ begin
     -- conversion to mi words
     reg_mps_mi <= enlarge_right(reg_mps,-log2(MI_DATA_WIDTH/8));
 
-    cq_meta_g : for i in 0 to MFB_REGIONS-1 generate
-        cq_mfb_meta_with_be((i+1)*MFB_CQ_USER_META_WIDTH-1 downto i*MFB_CQ_USER_META_WIDTH) <= CQ_MFB_META((i+1)*MFB_CQ_META_WIDTH-1 downto i*MFB_CQ_META_WIDTH)   &
-                                                                                               CQ_TPH_ST_TAG((i+1)*8-1 downto i*8) & CQ_TPH_TYPE((i+1)*2-1 downto i*2) &
-                                                                                               CQ_TPH_PRESENT(i) & CQ_LBE((i+1)*4-1 downto i*4) & CQ_FBE((i+1)*4-1 downto i*4);
-    end generate;
-
     --  CQ MFB parser logic
     cq_mfb_pipe_i : entity work.MFB_PIPE
     generic map(
@@ -467,7 +379,7 @@ begin
         REGION_SIZE => MFB_REGION_SIZE,
         BLOCK_SIZE  => MFB_BLOCK_SIZE,
         ITEM_WIDTH  => MFB_ITEM_WIDTH,
-        META_WIDTH  => MFB_CQ_USER_META_WIDTH,
+        META_WIDTH  => PCIE_CQ_META_WIDTH,
         FAKE_PIPE   => not CQ_PIPE,
         USE_DST_RDY => true,
         DEVICE      => DEVICE
@@ -477,7 +389,7 @@ begin
         RESET      => RESET,
 
         RX_DATA    => CQ_MFB_DATA,
-        RX_META    => cq_mfb_meta_with_be,
+        RX_META    => CQ_MFB_META,
         RX_SOF_POS => CQ_MFB_SOF_POS,
         RX_EOF_POS => CQ_MFB_EOF_POS,
         RX_SOF     => CQ_MFB_SOF,
@@ -502,7 +414,7 @@ begin
         REGION_SIZE => MFB_REGION_SIZE,
         BLOCK_SIZE  => MFB_BLOCK_SIZE,
         ITEM_WIDTH  => MFB_ITEM_WIDTH,
-        META_WIDTH  => MFB_CQ_USER_META_WIDTH
+        META_WIDTH  => PCIE_CQ_META_WIDTH
     )
     port map(
         CLK         => CLK,
@@ -518,7 +430,7 @@ begin
         RX_DST_RDY  => pi_cq_mfb_dst_rdy,
 
         TX_DATA     => tr_cq_mfb_data,
-        TX_META     => tr_cq_mfb_meta_with_be,
+        TX_META     => tr_cq_mfb_meta,
         TX_SOP(0)   => tr_cq_mfb_sof,
         TX_EOP(0)   => tr_cq_mfb_eof,
         TX_SOP_POS  => open,
@@ -529,21 +441,22 @@ begin
 
     tr_cq_mfb_dst_rdy <= cq_ready;
 
-    (tr_cq_mfb_meta, tr_cq_mfb_tph_st_tag, tr_cq_mfb_tph_type, tr_cq_mfb_tph_present, tr_cq_mfb_lbe, tr_cq_mfb_fbe) <= tr_cq_mfb_meta_with_be;
-
-    tr_cq_mfb_meta_bar_range <= tr_cq_mfb_meta(MFB_CQ_META_WIDTH-1 downto 128+32);
-    tr_cq_mfb_meta_prefix    <= tr_cq_mfb_meta(128+32-1 downto 128);
-    tr_cq_mfb_meta_hdr       <= tr_cq_mfb_meta(128-1 downto 0);
+    tr_cq_mfb_bar         <= tr_cq_mfb_meta(PCIE_CQ_META_BAR);
+    tr_cq_mfb_fbe         <= tr_cq_mfb_meta(PCIE_CQ_META_FBE);
+    tr_cq_mfb_lbe         <= tr_cq_mfb_meta(PCIE_CQ_META_LBE);
+    tr_cq_mfb_tph_present <= tr_cq_mfb_meta(PCIE_CQ_META_TPH_PRESENT_O);
+    tr_cq_mfb_tph_type    <= tr_cq_mfb_meta(PCIE_CQ_META_TPH_TYPE);
+    tr_cq_mfb_tph_st_tag  <= tr_cq_mfb_meta(PCIE_CQ_META_TPH_ST_TAG);
     
     tr_cq_mfb_hdr_g : if IS_MFB_META_DEV generate
-        tr_cq_mfb_hdr <= tr_cq_mfb_meta_hdr;
+        tr_cq_mfb_hdr <= tr_cq_mfb_meta(PCIE_CQ_META_HEADER);
     else generate
         tr_cq_mfb_hdr <= tr_cq_mfb_data(128-1 downto 0);
     end generate;
 
     pcie_cq_hdr_gen_i : entity work.PCIE_CQ_HDR_DEPARSER
     generic map(
-        DEVICE       => DEVICE
+        DEVICE => DEVICE
     )
     port map(
         OUT_DW_CNT        => cq_hdr_gen_dword_count,
@@ -564,7 +477,7 @@ begin
         IN_HEADER        => tr_cq_mfb_hdr,
         IN_FBE           => tr_cq_mfb_fbe,
         IN_LBE           => tr_cq_mfb_lbe,
-        IN_INTEL_META    => CTL_BAR_APERTURE & tr_cq_mfb_meta_bar_range & "00000000"
+        IN_INTEL_META    => CTL_BAR_APERTURE & tr_cq_mfb_bar & "00000000"
     );
 
     tr_cq_mfb_rd      <= cq_hdr_gen_req_type(0);
@@ -590,7 +503,7 @@ begin
             if (cq_ready = '1' and tr_cq_mfb_src_rdy = '1') then
                 if (tr_cq_mfb_sof = '1') then 
                     cq_hdr_tag           <= cq_hdr_gen_tag;
-                    cq_hdr_addr_type     <= cq_hdr_gen_addr_type; -- unused
+                    cq_hdr_addr_type     <= cq_hdr_gen_addr_type;
                     cq_hdr_addr          <= cq_hdr_gen_addr;
                     cq_hdr_first_be      <= cq_hdr_gen_fbe;
                     cq_hdr_last_be       <= cq_hdr_gen_lbe;
@@ -598,11 +511,10 @@ begin
                     cq_hdr_tc            <= cq_hdr_gen_tc;
                     cq_hdr_dword_count   <= unsigned(cq_hdr_gen_dword_count);
                     cq_hdr_attr          <= cq_hdr_gen_attr;
-                    cq_meta_function_id  <= cq_hdr_gen_target_func; -- todo
+                    cq_meta_function_id  <= cq_hdr_gen_target_func;
                     cq_meta_bar_id       <= cq_hdr_gen_bar_id;
                     cq_meta_bar_aperture <= cq_hdr_gen_bar_aperture;
                     cq_data_index_begin  <= tr_cq_index_begin;
-
                     cq_meta_tph_present  <= tr_cq_mfb_tph_present;
                     cq_meta_tph_type     <= tr_cq_mfb_tph_type;
                     cq_meta_tph_st_tag   <= tr_cq_mfb_tph_st_tag;
@@ -632,127 +544,39 @@ begin
     --  SECOND STAGE - PREPARE METADATA FROM CQ REQUEST
     -- =========================================================================
 
-    -- computation of address mask
-    process (cq_meta_bar_aperture)
-        variable mask_var : unsigned(63 downto 0);
-    begin
-        mask_var := (others => '0');
-        for i in 0 to 63 loop
-            if (i < unsigned(cq_meta_bar_aperture)) then
-                mask_var(i) := '1';
-            end if; 
-        end loop;
-        cq_addr_mask <= mask_var;
-    end process;
-
-    -- selection of correct BAR base address
-    process (all)
-    begin
-        case cq_meta_bar_id is
-            when "000"  => bar_base_addr <= BAR0_BASE_ADDR;
-            when "001"  => bar_base_addr <= BAR1_BASE_ADDR;
-            when "010"  => bar_base_addr <= BAR2_BASE_ADDR;
-            when "011"  => bar_base_addr <= BAR3_BASE_ADDR;
-            when "100"  => bar_base_addr <= BAR4_BASE_ADDR;
-            when "101"  => bar_base_addr <= BAR5_BASE_ADDR;
-            when "110"  => bar_base_addr <= EXP_ROM_BASE_ADDR;
-            when others => bar_base_addr <= (others => '0');
-        end case;
-    end process;
-
     -- CQ address translation
-    cq_addr_translated <= (unsigned(cq_hdr_addr) AND cq_addr_mask) + unsigned(bar_base_addr);
+    addr_trans_i : entity work.PCIE_BAR_ADDR_TRANSLATOR
+    generic map(
+        BAR0_BASE_ADDR    => BAR0_BASE_ADDR,
+        BAR1_BASE_ADDR    => BAR1_BASE_ADDR,
+        BAR2_BASE_ADDR    => BAR2_BASE_ADDR,
+        BAR3_BASE_ADDR    => BAR3_BASE_ADDR,
+        BAR4_BASE_ADDR    => BAR4_BASE_ADDR,
+        BAR5_BASE_ADDR    => BAR5_BASE_ADDR,
+        EXP_ROM_BASE_ADDR => EXP_ROM_BASE_ADDR
+    )
+    port map(
+        CLK             => CLK,
+        RESET           => RESET,
+        IN_BAR_APERTURE => cq_meta_bar_aperture,
+        IN_BAR_ID       => cq_meta_bar_id,
+        IN_ADDR         => cq_hdr_addr,
+        OUT_ADDR        => cq_addr_translated
+    );
 
-    -- computation of invalid bytes
-    process (cq_hdr_first_be, cq_hdr_last_be)
-    begin
-        if (std_match(cq_hdr_first_be,"1--1") AND std_match(cq_hdr_last_be,"0000")) then
-            cq_first_ib <= to_unsigned(0,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(0,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"01-1") AND std_match(cq_hdr_last_be,"0000")) then
-            cq_first_ib <= to_unsigned(1,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(0,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"1-10") AND std_match(cq_hdr_last_be,"0000")) then
-            cq_first_ib <= to_unsigned(1,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(0,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"0011") AND std_match(cq_hdr_last_be,"0000")) then
-            cq_first_ib <= to_unsigned(2,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(0,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"0110") AND std_match(cq_hdr_last_be,"0000")) then
-            cq_first_ib <= to_unsigned(2,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(0,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"1100") AND std_match(cq_hdr_last_be,"0000")) then
-            cq_first_ib <= to_unsigned(2,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(0,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"0001") AND std_match(cq_hdr_last_be,"0000")) then
-            cq_first_ib <= to_unsigned(3,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(0,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"0010") AND std_match(cq_hdr_last_be,"0000")) then
-            cq_first_ib <= to_unsigned(3,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(0,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"0100") AND std_match(cq_hdr_last_be,"0000")) then
-            cq_first_ib <= to_unsigned(3,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(0,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"1000") AND std_match(cq_hdr_last_be,"0000")) then
-            cq_first_ib <= to_unsigned(3,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(0,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"0000") AND std_match(cq_hdr_last_be,"0000")) then
-            cq_first_ib <= to_unsigned(3,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(0,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"---1") AND std_match(cq_hdr_last_be,"1---")) then
-            cq_first_ib <= to_unsigned(0,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(0,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"---1") AND std_match(cq_hdr_last_be,"01--")) then
-            cq_first_ib <= to_unsigned(0,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(1,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"---1") AND std_match(cq_hdr_last_be,"001-")) then
-            cq_first_ib <= to_unsigned(0,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(2,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"---1") AND std_match(cq_hdr_last_be,"0001")) then
-            cq_first_ib <= to_unsigned(0,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(3,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"--10") AND std_match(cq_hdr_last_be,"1---")) then
-            cq_first_ib <= to_unsigned(1,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(0,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"--10") AND std_match(cq_hdr_last_be,"01--")) then
-            cq_first_ib <= to_unsigned(1,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(1,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"--10") AND std_match(cq_hdr_last_be,"001-")) then
-            cq_first_ib <= to_unsigned(1,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(2,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"--10") AND std_match(cq_hdr_last_be,"0001")) then
-            cq_first_ib <= to_unsigned(1,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(3,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"-100") AND std_match(cq_hdr_last_be,"1---")) then
-            cq_first_ib <= to_unsigned(2,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(0,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"-100") AND std_match(cq_hdr_last_be,"01--")) then
-            cq_first_ib <= to_unsigned(2,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(1,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"-100") AND std_match(cq_hdr_last_be,"001-")) then
-            cq_first_ib <= to_unsigned(2,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(2,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"-100") AND std_match(cq_hdr_last_be,"0001")) then
-            cq_first_ib <= to_unsigned(2,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(3,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"1000") AND std_match(cq_hdr_last_be,"1---")) then
-            cq_first_ib <= to_unsigned(3,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(0,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"1000") AND std_match(cq_hdr_last_be,"01--")) then
-            cq_first_ib <= to_unsigned(3,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(1,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"1000") AND std_match(cq_hdr_last_be,"001-")) then
-            cq_first_ib <= to_unsigned(3,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(2,cq_last_ib'length);
-        elsif (std_match(cq_hdr_first_be,"1000") AND std_match(cq_hdr_last_be,"0001")) then
-            cq_first_ib <= to_unsigned(3,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(3,cq_last_ib'length);
-        else
-            cq_first_ib <= to_unsigned(0,cq_first_ib'length);
-            cq_last_ib  <= to_unsigned(0,cq_last_ib'length);
-        end if;
-    end process;
-
+    -- computation of invalid bytes and byte count
+    byte_count_i : entity work.PCIE_BYTE_COUNT
+    port map(
+        CLK            => CLK,
+        RESET          => RESET,
+        IN_DW_COUNT    => std_logic_vector(cq_hdr_dword_count),
+        IN_FIRST_BE    => cq_hdr_first_be,
+        IN_LAST_BE     => cq_hdr_last_be,
+        OUT_FIRST_IB   => cq_first_ib,
+        OUT_LAST_IB    => open,
+        OUT_BYTE_COUNT => cq_byte_count
+    );
+    
     -- computation of two LSB bits of lower address
     process (cq_hdr_first_be)
     begin
@@ -768,10 +592,6 @@ begin
     -- initial address of the first completion data
     cq_laddr_init <= unsigned(cq_hdr_addr(6 downto 2)) & cq_laddr_init_low;
 
-    -- computation of request byte count
-    cq_byte_count_raw <= cq_hdr_dword_count & "00";
-    cq_byte_count     <= cq_byte_count_raw - cq_first_ib - cq_last_ib;
-
     -- second stage registers without reset
     process (CLK)
     begin
@@ -781,7 +601,7 @@ begin
                     reg1_cq_hdr_tag           <= cq_hdr_tag;
                     reg1_cq_hdr_addr_type     <= cq_hdr_addr_type;
                     reg1_cq_hdr_first_be      <= cq_hdr_first_be;
-                    reg1_cq_first_ib          <= cq_first_ib;
+                    reg1_cq_first_ib          <= unsigned(cq_first_ib);
                     reg1_cq_hdr_last_be       <= cq_hdr_last_be;
                     reg1_cq_hdr_request_id    <= cq_hdr_request_id;
                     reg1_cq_hdr_tc            <= cq_hdr_tc;
@@ -789,9 +609,9 @@ begin
                     reg1_cq_hdr_attr          <= cq_hdr_attr;
                     reg1_cq_meta_function_id  <= cq_meta_function_id;
                     reg1_cq_data_index_begin  <= cq_data_index_begin;
-                    reg1_cq_addr_translated   <= cq_addr_translated;
+                    reg1_cq_addr_translated   <= unsigned(cq_addr_translated);
                     reg1_cq_laddr_init        <= cq_laddr_init;
-                    reg1_cq_byte_count        <= cq_byte_count;
+                    reg1_cq_byte_count        <= unsigned(cq_byte_count);
                     reg1_cq_rd_req            <= cq_rd_req;
                     reg1_cq_wr_req            <= cq_wr_req;
                     reg1_cq_meta_tph_present  <= cq_meta_tph_present;
@@ -1148,7 +968,7 @@ begin
 
     pcie_cc_hdr_gen_i : entity work.PCIE_CC_HDR_GEN
     generic map(
-        DEVICE       => DEVICE
+        DEVICE => DEVICE
     )
     port map(
 
@@ -1288,7 +1108,7 @@ begin
         mfb_eof_pos_arr(i) <= std_logic_vector(cc_eot_pos(log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE)-1 downto 0));
     end generate;
 
-    mfb_meta(96-1 downto 0) <= cc_hdr;
+    mfb_meta_arr(0)(PCIE_CC_META_HEADER) <= cc_hdr;
 
     cc_mfb_pipe_i : entity work.MFB_PIPE
     generic map(
@@ -1296,7 +1116,7 @@ begin
         REGION_SIZE => MFB_REGION_SIZE,
         BLOCK_SIZE  => MFB_BLOCK_SIZE,
         ITEM_WIDTH  => MFB_ITEM_WIDTH,
-        META_WIDTH  => MFB_CC_META_WIDTH,
+        META_WIDTH  => PCIE_CC_META_WIDTH,
         FAKE_PIPE   => not CC_PIPE,
         USE_DST_RDY => true,
         DEVICE      => DEVICE
@@ -1306,9 +1126,9 @@ begin
         RESET      => RESET,
         
         RX_DATA    => cc_data,
-        RX_META    => mfb_meta,
+        RX_META    => slv_array_ser(mfb_meta_arr),
         RX_SOF_POS => (others => '0'),
-        RX_EOF_POS => slv_array_ser(mfb_eof_pos_arr,MFB_REGIONS,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE)),
+        RX_EOF_POS => slv_array_ser(mfb_eof_pos_arr),
         RX_SOF     => mfb_sof,
         RX_EOF     => mfb_eof,
         RX_SRC_RDY => cc_valid,
