@@ -482,7 +482,7 @@ begin
 
     tr_cq_mfb_rd      <= cq_hdr_gen_req_type(0);
     tr_cq_mfb_wr      <= cq_hdr_gen_req_type(1);
-    tr_cq_mfb_req_msg <= cq_hdr_gen_req_type(2);
+    tr_cq_mfb_req_msg <= cq_hdr_gen_req_type(2) or cq_hdr_gen_req_type(3);
 
     tr_cq_index_begin_p : process (all)
     begin
