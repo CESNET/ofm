@@ -133,13 +133,16 @@ begin
         OUT_BAR_APERTURE <= IN_INTEL_META(16 downto 11);
 
         with IN_HEADER(31 downto 24) select
-        OUT_REQ_TYPE <= "0001" when "00000000", -- 32b mem rd
-                        "0010" when "01000000", -- 32b mem wr
-                        "0001" when "00100000", -- 64b mem rd
-                        "0010" when "01100000", -- 64b mem wr
-                        "0100" when "00110---", -- Msg
-                        "1000" when "01110---", -- MsgD
-                        "0000" when others;
+        OUT_REQ_TYPE(1 downto 0) <= "01" when "00000000", -- 32b mem rd
+                                    "10" when "01000000", -- 32b mem wr
+                                    "01" when "00100000", -- 64b mem rd
+                                    "10" when "01100000", -- 64b mem wr
+                                    "00" when others;
+
+        with IN_HEADER(31 downto 27) select
+        OUT_REQ_TYPE(3 downto 2) <= "01" when "00110", -- Msg
+                                    "10" when "01110", -- MsgD
+                                    "00" when others;
 
         OUT_ADDR_LEN <= IN_HEADER(29);
     end generate;
