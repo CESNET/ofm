@@ -71,6 +71,17 @@ virtual class comparer_base#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) extends uvm
         end
     endtask
 
+    function void check_phase(uvm_phase phase);
+        if (model_items.size() != 0) begin
+            string msg;
+
+            $swrite(msg, "\n\t%0d transaction left in DUT.\n", model_items.size());
+            for (int unsigned it = 0; it < model_items.size(); it++) begin
+                $swrite(msg, "%s\n%s", msg, model_items[it].convert2string());
+            end
+            `uvm_error(this.get_full_name(), msg);
+        end
+    endfunction
 endclass
 
 /////////////////////////////////////////////
