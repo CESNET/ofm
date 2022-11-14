@@ -15,10 +15,14 @@ class mi_sequence extends controler;
 
     protected uvm_mem mem;
     protected string  dev_tree;
-    protected string  inf_name = "nic";
+    protected string  inf_name;
 
     function new (string name = "controler");
+        int pid;
         super.new(name);
+
+        pid = getpid();
+        inf_name =  $sformatf("nic_%0d", pid);
     endfunction
 
     function void component_set(uvm_mem comp, string dev_tree);

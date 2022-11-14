@@ -22,6 +22,8 @@ package nfb_driver;
     import "DPI-C" function int     nfb_sv_cmd_send(chandle id, int unsigned cmd, byte unsigned data[]);
     import "DPI-C" function void    nfb_sv_close(chandle id, string path);
 
+    import "DPI-C" function int      getpid();
+
     `include "controler.sv"
     `include "mi_sequence.sv"
 
