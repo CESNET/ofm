@@ -14,7 +14,6 @@
 #include <string.h>
 #include <stdio.h>
 
-
 static void * run_program(void *arg) {
     char * cmd = arg;
 
@@ -73,3 +72,8 @@ int dpi_program_wait(void * prg)
     }
     return ret;
 }
+
+
+#undef _GNU_SOURCE
+
+

@@ -7,5 +7,5 @@
 include ../../../build/paths.mk
 
 libprog.so: prog.c
-	gcc -std=gnu11 -I$(MODELSIM_PATH)/include -fPIC prog.c -o prog.o -c
+	gcc -std=c11 -fPIC -I$(MODELSIM_PATH)/include prog.c -o prog.o -c
 	ld -shared -o libprog.so prog.o -lpthread
