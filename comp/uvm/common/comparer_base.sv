@@ -71,6 +71,17 @@ virtual class comparer_base#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) extends uvm
         end
     endtask
 
+    function void check_phase(uvm_phase phase);
+        if (model_items.size() != 0) begin
+            string msg;
+
+            $swrite(msg, "\n\t%0d transaction left in DUT.\n", model_items.size());
+            for (int unsigned it = 0; it < model_items.size(); it++) begin
+                $swrite(msg, "%s\n%s", msg, model_items[it].convert2string());
+            end
+            `uvm_error(this.get_full_name(), msg);
+        end
+    endfunction
 endclass
 
 /////////////////////////////////////////////
@@ -90,7 +101,7 @@ virtual class comparer_base_ordered#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) ext
         if (!this.compare(tr_model, tr)) begin
             string msg;
             errors++;
-            $swrite(msg, "\n\tTransaction compared %0d erros %0d\n\tDUT transactin doesnt compare model transaction\n%s", compared, errors, this.message(tr_model, tr));
+            $swrite(msg, "\n\tTransaction compared %0d errors %0d\n\tDUT transaction doesn't compare model transaction\n%s", compared, errors, this.message(tr_model, tr));
             `uvm_error(this.get_full_name(), msg);
         end
     endfunction
@@ -143,7 +154,7 @@ virtual class comparer_base_disordered#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) 
             errors++;
 
 
-            $swrite(msg, "\n\tTransaction compared %0d erros %0d\n\tDUT transactin doesnt compare any of model %0d transactions in fifo. receive time %0dns\n%s", compared, errors, model_items.size(), time_act, tr.convert2string());
+            $swrite(msg, "\n\tTransaction compared %0d errors %0d\n\tDUT transaction doesn't compare any of model %0d transactions in fifo. receive time %0dns\n%s", compared, errors, model_items.size(), time_act/1ns, tr.convert2string());
             for (int unsigned it = 0; it < model_items.size(); it++) begin
                 time   time_conv[string];
 

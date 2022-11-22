@@ -102,7 +102,7 @@ class reg2bus_frontdoor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_re
 
             target_width = target.get_n_bits();
             item_num     = (target_width*rw_info.value.size() + DATA_WIDTH -1)/DATA_WIDTH;
-            addr         = target.get_address() + rw_info.offset;
+            addr         = target.get_address() + rw_info.offset*target.get_n_bytes();
             items        = new[item_num];
         end else if (rw_info.element_kind == UVM_REG) begin
             uvm_reg target;
