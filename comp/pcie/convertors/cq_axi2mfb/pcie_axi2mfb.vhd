@@ -271,9 +271,10 @@ begin
 
         conv_pr : process (all)
             variable eof_pos : unsigned(3-1 downto 0) := (others => '0');
-            variable eof       : std_logic_vector(1 downto 0);
+            variable eof     : std_logic_vector(1 downto 0);
         begin
             eof_pos := (others => '0');
+            eof     := (others => '0');
             CQ_TPH_PRESENT <= (others => '0');
             CQ_TPH_TYPE    <= (others => '0');
             CQ_TPH_ST_TAG  <= (others => '0');
