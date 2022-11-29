@@ -222,6 +222,9 @@ architecture FULL of GEN_LOOP_SWITCH is
     constant BLOCK_WIDTH  : natural := BLOCK_SIZE*ITEM_WIDTH;
     constant REGION_WIDTH : natural := REGION_SIZE*BLOCK_WIDTH;
 
+    constant mi_split_addr_base : slv_array_t(4-1 downto 0)(32-1 downto 0) := 
+        (X"000000C0", X"00000080", X"00000040", X"00000000");
+
     signal mi_sync_dwr      : std_logic_vector(32-1 downto 0);
     signal mi_sync_addr     : std_logic_vector(32-1 downto 0);
     signal mi_sync_be       : std_logic_vector(4-1 downto 0);
@@ -520,7 +523,7 @@ not_fake_switch_gen : if (not FAKE_SWITCH) generate
         PORTS      => 4 , -- local registers + speed meter + RX Generator + TX Generator
         --ADDR_MASK  => X"000000C0",
         --             TX gen      RX gen      speed meter local MUXes 
-        ADDR_BASE  => (X"000000C0",X"00000080",X"00000040",X"00000000"),
+        ADDR_BASE  => mi_split_addr_base,
         PIPE_OUT   => (4-1 downto 0 => MI_PIPE_EN),
         DEVICE     => DEVICE
     )
