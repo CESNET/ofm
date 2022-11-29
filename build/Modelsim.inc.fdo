@@ -47,6 +47,9 @@ proc CompileMod {FNAME OPT} {
 
     # Generate netlists for utilized Vivado IP cores
     if {$opt(TYPE) == "VIVADO_IP_XACT"} {
+      if {![info exists SIM_FLAGS(FPGA)]} {
+          puts "WARNING: SIM_FLAGS(FPGA) doesn't exists, skipping generating netlist for Vivado IP core $FNAME"
+      } else {
         set IP_GEN_PATH "$SIM_FLAGS(SIM_MODULE)-${SIM_FLAGS(FPGA)}.vivado_ip_tmp/"
         file mkdir $IP_GEN_PATH
 
@@ -72,6 +75,7 @@ proc CompileMod {FNAME OPT} {
 
         # Generate netlist using Vivado
         exec vivado -mode tcl -journal ${IP_GEN_PATH}${IP_NAME}_vivado.jou -log ${IP_GEN_PATH}${IP_NAME}_vivado.log -source $IP_GEN_SCRIPT >&@stdout
+      }
     }
 
     # Skip unknown file types
