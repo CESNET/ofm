@@ -70,7 +70,7 @@ def sm_reset(path,offset,type=0):
     else:
         nfb_bus(path,offset+0xC, 0x1)
 
-def run_test(mode,min_fr_size,max_fr_size,fr_size_step,gls_clk_freq,log_en,port_list,dma_streams,port_dma_channels):
+def run_test(mode,min_fr_size,max_fr_size,fr_size_step,gls_clk_freq,log_en,demo_en,port_list,dma_streams,port_dma_channels):
 
     os.system("killall ndp-generate -9 2> /dev/null; killall ndp-read -9 2> /dev/null")
 
@@ -119,7 +119,10 @@ def run_test(mode,min_fr_size,max_fr_size,fr_size_step,gls_clk_freq,log_en,port_
     channel_min = min(channel_list)
     channel_max = max(channel_list)
     chan_range = (65536*channel_max)+channel_min
-    print("Selected DMA channels: %s\n" % channel_list_str)
+    print("INFO: Selected queues: %s\n" % channel_list_str)
+    #print(channel_min)
+    #print(channel_max)
+    #print(chan_range)
 
     # Enable MACs
     os.system('nfb-eth -e 1')
@@ -181,7 +184,7 @@ def run_test(mode,min_fr_size,max_fr_size,fr_size_step,gls_clk_freq,log_en,port_
                 # channel reverse
                 #nfb_bus(dt_path_gen2dma[p], 0x8, 0x10101)
                 # channel 0 only
-                #nfb_bus(dt_path_gen2dma[p], 0x8, 0x10000)
+                nfb_bus(dt_path_gen2dma[p], 0x8, 0x10001)
                 # Start RX generator
                 nfb_bus(dt_path_gen2dma[p], 0x0, 0x1)
 
@@ -222,11 +225,12 @@ def run_test(mode,min_fr_size,max_fr_size,fr_size_step,gls_clk_freq,log_en,port_
         print("Total Speed RX:           % 7.2f [Gbps]" % rx_total_speed)
         print("========================================")
 
-        demo_gui = open("/tmp/demo_gui.txt", "w")
-        demo_gui.write(str(length-4) + '\n')
-        demo_gui.write(str(tx_total_speed) + '\n')
-        demo_gui.write(str(rx_total_speed))
-        demo_gui.close()
+        if demo_en:
+            demo_gui = open("/tmp/demo_gui.txt", "w")
+            demo_gui.write(str(length-4) + '\n')
+            demo_gui.write(str(tx_total_speed) + '\n')
+            demo_gui.write(str(rx_total_speed))
+            demo_gui.close()
     
         # Stop TX generator
         if (mode=="tx" or mode=="rxtx" or mode=="dma_tx" or mode=="dma_rxtx" or mode=="dma_loop"):
@@ -251,7 +255,8 @@ def run_test(mode,min_fr_size,max_fr_size,fr_size_step,gls_clk_freq,log_en,port_
 
     if log_en:
         f.close()
-    os.remove("/tmp/demo_gui.txt")
+    if demo_en:
+        os.remove("/tmp/demo_gui.txt")
 
     # Set muxes back to default
     for p in dma_streams:
@@ -318,7 +323,7 @@ if __name__ == '__main__':
         port_list = list(args[1].split(","))
 
     # ==========================================================================
-    # GLS TEST CONFIGURATION
+    # TEST CONFIGURATION
     # ==========================================================================
 
     # Speed meter clock frequency in HZ
@@ -326,22 +331,42 @@ if __name__ == '__main__':
 
     # Define min and max frame sizes (in bytes)
     min_fr_size = 64
-    max_fr_size = 1526
+    max_fr_size = 1518
     fr_size_step = 32
 
     log_en = False
+    demo_en = False
     single_cycle = True
 
-    # Total number of Ethernet ports on card
-    eth_ports = 2 #int(subprocess.Popen("nfb-info -q port",shell=True,stdout=subprocess.PIPE).stdout.read().strip())
-
-    # ==========================================================================
-    # GLS TEST AUTO-CONFIGURATION
-    # ==========================================================================
-
+    print("INFO: Finding information about NDK firmware...")
     card_name = subprocess.Popen("nfb-info -q card",shell=True,stdout=subprocess.PIPE).stdout.read().strip().decode("utf-8")
+    # Total number of Ethernet ports on card
+    #eth_ports = int(subprocess.Popen("nfb-info -q port",shell=True,stdout=subprocess.PIPE).stdout.read().strip())
+    eth_ports = int(subprocess.Popen("nfb-bus -l | grep -iw app_core | wc -l",shell=True,stdout=subprocess.PIPE).stdout.read().strip())    
+    print("INFO: Card name:      %s" % card_name)
+    print("INFO: APP streams:    %d" % eth_ports)
+    # Get total number of DMA channels
+    dma_chan_rx = int(subprocess.Popen("nfb-info -q rx",shell=True,stdout=subprocess.PIPE).stdout.read().strip())
+    dma_chan_tx = int(subprocess.Popen("nfb-info -q tx",shell=True,stdout=subprocess.PIPE).stdout.read().strip())
+    print("INFO: DMA RX queues:  %d" % dma_chan_rx)
+    print("INFO: DMA TX queues:  %d" % dma_chan_tx)
+    if (dma_chan_rx != dma_chan_tx):
+        print("ERROR: Unsupported NDK firmware, the number of RX and TX DMA queues must be the same!")
+        exit()
+    gls_count = int(subprocess.Popen("nfb-bus -l | grep gen_loop_switch | wc -l",shell=True,stdout=subprocess.PIPE).stdout.read().strip())
+    print("INFO: GLS modules:    %d" % gls_count)
+    if (gls_count == 0):
+        print("ERROR: Unsupported NDK firmware, no GLS modules found!")
+        exit()
+    if (gls_count > eth_ports) or (gls_count < eth_ports and gls_count != 1):
+        print("ERROR: Unsupported NDK firmware, unsupported configuration of GLS modules or ETH ports!")
+        exit()
+
+    dma_channels = dma_chan_rx
+
     force_single_dma_stream = False
-    if (card_name == "FB4CGG3" or card_name == "FB2CGG3" or card_name == "FB2CGHH"):
+    #if (card_name == "FB4CGG3" or card_name == "FB2CGG3" or card_name == "FB2CGHH"):
+    if (gls_count == 1 and gls_count < eth_ports):
         force_single_dma_stream = True
 
     # List of used DMA streams (for FB4CGG3/FB2CGG3 and FB2CGHH must be [0] for
@@ -349,8 +374,6 @@ if __name__ == '__main__':
     dma_streams = port_list
     if force_single_dma_stream:
         dma_streams = [0]
-    # Get total number of DMA channels
-    dma_channels = int(subprocess.Popen("nfb-info -q rx",shell=True,stdout=subprocess.PIPE).stdout.read().strip())
     port_dma_channels = int(dma_channels/eth_ports)
 
     # ==========================================================================
@@ -360,8 +383,8 @@ if __name__ == '__main__':
     x = 1
     flag = GracefulExiter()
     while True:
-        print("Test #",x,"started...")
-        run_test(mode,min_fr_size,max_fr_size,fr_size_step,gls_clk_freq,log_en,port_list,dma_streams,port_dma_channels)
+        print("\nINFO: Test #",x,"started...")
+        run_test(mode,min_fr_size,max_fr_size,fr_size_step,gls_clk_freq,log_en,demo_en,port_list,dma_streams,port_dma_channels)
         x+=1
         #print MAC stats
         os.system('nfb-eth -S')
