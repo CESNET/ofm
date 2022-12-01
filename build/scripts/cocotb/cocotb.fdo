@@ -5,11 +5,13 @@
 set NC_FLAGS [list SIMULATION]
 set OFM_PATH $env(OFM_PATH)
 
+# Workaround
+if {[info exists env(FIRMWARE_BASE)]} {
+    set FIRMWARE_BASE $env(FIRMWARE_BASE)
+}
+
 source $OFM_PATH/build/Shared.tcl
 source_with_args $env(SYNTHFILES) "-tnone"
-
-#INFO: SYSMON simulation files
-#exec cp $CORE_PATH/ver/misc ./ -r
 
 set PACKAGES $HIERARCHY(PACKAGES)
 set COMPONENTS $HIERARCHY(COMPONENTS)
@@ -27,18 +29,14 @@ lappend SIM_FLAGS(EXTRA_VFLAGS) -voptargs=+acc
 if {[info exists USER_VFLAGS]} {
 	lappend SIM_FLAGS(EXTRA_VFLAGS) {*}USER_VFLAGS
 }
-set SIM_MODULE fpga
+
+set SIM_MODULE $SYNTH_FLAGS(MODULE)
 
 # Cocotb environment variables
 set env(MODULE) $env(COCOTB_MODULE)
 set env(TOPLEVEL) work.$SYNTH_FLAGS(MODULE)
 set env(TOPLEVEL_LANG) vhdl
 set env(COCOTB_RESOLVE_X) "ZEROS"
-
-if {![info exists COCOTB_CORE_PYTHONPATH]} {
-    set COCOTB_CORE_PYTHONPATH $CARD_COMMON_BASE/cocotb
-}
-append env(PYTHONPATH) ":$COCOTB_CORE_PYTHONPATH"
 
 proc sim_pre_run {} {
     global env
