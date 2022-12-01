@@ -56,11 +56,15 @@ comp: export CLK_PORTS:=$(CLK_PORTS)
 comp: export CLK_PERIOD:=$(CLK_PERIOD)
 comp: export DEVICE:=$(DEVICE)
 comp: export SYNTHFILES:=$(OFM_PATH)/build/targets/comp_vivado.tcl
+ifneq ($(TARGET),)
+comp: $(TARGET)
+else
 comp: $(TOP_LEVEL_ENT).edf
+endif
 
 # Main target for building design - for non-constant OUTPUT_NAME (variable is assigned in target) must be executed recursively
 build:
-	@$(MAKE_REC) $(OUTPUT_NAME).nfw
+	@if [ -z "$(TARGET)" ] ; then $(MAKE_REC) $(OUTPUT_NAME).nfw; else $(MAKE_REC) $(TARGET); fi
 
 # These targets will be only available at second recursive run, because they needed variables from generated Makefile $(MOD)
 ifneq ($(GEN_MK_TARGET),)
