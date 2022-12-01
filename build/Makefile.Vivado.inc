@@ -33,8 +33,7 @@ NETCOPE_ENV ?= \
 
 NETCOPE_ENV+=NETCOPE_TEMP=$(NETCOPE_TEMP)
 
-GEN_MK_TARGETS = $(TOP_LEVEL_ENT).edf $(MODULE).dcp $(OUTPUT_NAME).nfw vhdocl simulation
-simulation: GEN_MK_ENV=SIM_SCRIPT=$(SIM_SCRIPT) SIM_FLAGS=$(SIM_FLAGS)
+GEN_MK_TARGETS = $(TOP_LEVEL_ENT).edf $(MODULE).dcp $(OUTPUT_NAME).nfw
 include $(dir $(lastword $(MAKEFILE_LIST)))common.mk
 
 # Additional targets for make clean
@@ -45,7 +44,7 @@ CLEANALL_DEPENDS ?=
 
 .PRECIOUS: %.edf %.bit %.nfw %DevTree.vhd
 
-.PHONY: comp build clean_build clean cleanall warn warn_synth vhdocl
+.PHONY: comp build clean_build clean cleanall warn warn_synth
 
 ttarget_%:
 	$(NETCOPE_ENV) $(TCLSH) $(SYNTHFILES) -t $*
@@ -77,15 +76,6 @@ $(MODULE).dcp: $(MOD) $(SYNTHFILES)
 $(OUTPUT_NAME).nfw: $(MOD) $(SYNTHFILES)
 	$(call print_label,Implement $@ (VHDL -> NFW))
 	$(NETCOPE_ENV) $(SYNTH) $(SYNTHFLAGS) $(SYNTHFILES)
-
-simulation: $(MOD)
-	$(NETCOPE_ENV) vsim -64 -do $(SIM_SCRIPT) $(SIM_FLAGS)
-
-# Automated documentation script
-vhdocl:
-	echo "outputdir=vhdocl.doc" > vhdocl.conf
-	for m in $(MOD); do echo $$m | grep .vhd | sed 's/^/input\ /' >> vhdocl.conf; done
-	vhdocl -f vhdocl.conf
 
 endif
 
