@@ -50,6 +50,7 @@ entity MI_SPLITTER_PLUS_GEN is
         ADDR_BASES    : integer := PORTS;
         -- Bases of address spaces (base 0 is 0x00000000).
         -- Default: Random Bases.
+        -- CAUTION: ModelSim doesn't likes directly specified value for slv_array_t generics. Assign predefined constant to this generic.
         ADDR_BASE     : slv_array_t(ADDR_BASES-1 downto 0)(ADDR_WIDTH-1 downto 0) := init_addr_base_downto(ADDR_BASES, ADDR_WIDTH);
         -- Bits of address that are needed to determine output port.
         -- The chain of '1's must be continuous -> no '0's in-between!

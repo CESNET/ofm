@@ -8,6 +8,11 @@
 RM ?= rm -f
 TCLSH ?= tclsh
 
+.PHONY: simulation vhdocl cocotb
+
+GEN_MK_TARGETS += simulation vhdocl cocotb
+simulation: GEN_MK_ENV=SIM_SCRIPT=$(SIM_SCRIPT) SIM_FLAGS=$(SIM_FLAGS)
+
 MAKE_REC = $(MAKE) -f $(firstword $(MAKEFILE_LIST)) --no-print-directory $(NETCOPE_ENV)
 
 define print_label
@@ -42,6 +47,22 @@ GEN_MK_NAME ?= $(OUTPUT_NAME).$(SYNTH).mk
 #   - user must specify all those targets in the $(GEN_MK_TARGETS) variable within main Makefile
 ifneq ($(GEN_MK_TARGET),)
 include $(GEN_MK_NAME)
+
+simulation: $(MOD)
+	$(NETCOPE_ENV) vsim -64 -do "$(SIM_SCRIPT)" $(SIM_FLAGS)
+
+.PHONY: cocotb
+COCOTB_SIM_SCRIPT ?= $(OFM_PATH)/build/scripts/cocotb/cocotb.fdo
+COCOTB_MODULE ?= cocotb_test
+cocotb: $(MOD)
+	$(NETCOPE_ENV) SYNTHFILES=$(SYNTHFILES) COCOTB_MODULE=$(COCOTB_MODULE) vsim -64 $(SIM_FLAGS) -do $(COCOTB_SIM_SCRIPT)
+
+# Automated documentation script
+vhdocl:
+	echo "outputdir=vhdocl.doc" > vhdocl.conf
+	for m in $(MOD); do echo $$m | grep .vhd | sed 's/^/input\ /' >> vhdocl.conf; done
+	vhdocl -f vhdocl.conf
+
 else
 .PHONY: $(GEN_MK_NAME)
 $(GEN_MK_NAME):
@@ -51,9 +72,3 @@ $(GEN_MK_NAME):
 $(GEN_MK_TARGETS): $(GEN_MK_NAME)
 	@$(MAKE_REC) $(GEN_MK_ENV) GEN_MK_TARGET=1 $@
 endif
-
-.PHONY: cocotb
-COCOTB_SIM_SCRIPT ?= $(OFM_PATH)/build/scripts/cocotb/cocotb.fdo
-COCOTB_MODULE ?= cocotb_test
-cocotb:
-	$(NETCOPE_ENV) SYNTHFILES=$(SYNTHFILES) COCOTB_MODULE=$(COCOTB_MODULE) vsim -64 -do $(COCOTB_SIM_SCRIPT)

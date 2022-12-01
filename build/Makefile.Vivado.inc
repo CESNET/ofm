@@ -33,8 +33,7 @@ NETCOPE_ENV ?= \
 
 NETCOPE_ENV+=NETCOPE_TEMP=$(NETCOPE_TEMP)
 
-GEN_MK_TARGETS = $(TOP_LEVEL_ENT).edf $(MODULE).dcp $(OUTPUT_NAME).nfw vhdocl simulation
-simulation: GEN_MK_ENV=SIM_SCRIPT=$(SIM_SCRIPT) SIM_FLAGS=$(SIM_FLAGS)
+GEN_MK_TARGETS = $(TOP_LEVEL_ENT).edf $(MODULE).dcp $(OUTPUT_NAME).nfw
 include $(dir $(lastword $(MAKEFILE_LIST)))common.mk
 
 # Additional targets for make clean
@@ -45,7 +44,7 @@ CLEANALL_DEPENDS ?=
 
 .PRECIOUS: %.edf %.bit %.nfw %DevTree.vhd
 
-.PHONY: comp build clean_build clean cleanall warn warn_synth vhdocl
+.PHONY: comp build clean_build clean cleanall warn warn_synth
 
 ttarget_%:
 	$(NETCOPE_ENV) $(TCLSH) $(SYNTHFILES) -t $*
@@ -57,11 +56,15 @@ comp: export CLK_PORTS:=$(CLK_PORTS)
 comp: export CLK_PERIOD:=$(CLK_PERIOD)
 comp: export DEVICE:=$(DEVICE)
 comp: export SYNTHFILES:=$(OFM_PATH)/build/targets/comp_vivado.tcl
+ifneq ($(TARGET),)
+comp: $(TARGET)
+else
 comp: $(TOP_LEVEL_ENT).edf
+endif
 
 # Main target for building design - for non-constant OUTPUT_NAME (variable is assigned in target) must be executed recursively
 build:
-	@$(MAKE_REC) $(OUTPUT_NAME).nfw
+	@if [ -z "$(TARGET)" ] ; then $(MAKE_REC) $(OUTPUT_NAME).nfw; else $(MAKE_REC) $(TARGET); fi
 
 # These targets will be only available at second recursive run, because they needed variables from generated Makefile $(MOD)
 ifneq ($(GEN_MK_TARGET),)
@@ -77,15 +80,6 @@ $(MODULE).dcp: $(MOD) $(SYNTHFILES)
 $(OUTPUT_NAME).nfw: $(MOD) $(SYNTHFILES)
 	$(call print_label,Implement $@ (VHDL -> NFW))
 	$(NETCOPE_ENV) $(SYNTH) $(SYNTHFLAGS) $(SYNTHFILES)
-
-simulation: $(MOD)
-	$(NETCOPE_ENV) vsim -64 -do $(SIM_SCRIPT) $(SIM_FLAGS)
-
-# Automated documentation script
-vhdocl:
-	echo "outputdir=vhdocl.doc" > vhdocl.conf
-	for m in $(MOD); do echo $$m | grep .vhd | sed 's/^/input\ /' >> vhdocl.conf; done
-	vhdocl -f vhdocl.conf
 
 endif
 

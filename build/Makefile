@@ -10,6 +10,10 @@ MAKEFILE_BASE ?= $(dir $(lastword $(MAKEFILE_LIST)))
 FIRMWARE_BASE ?= $(MAKEFILE_BASE)../
 OFM_PATH ?= $(MAKEFILE_BASE)../
 
+# Override target; needs to be supported in original target
+# This is useful when the user needs to use target-specific variables with other target
+TARGET ?=
+
 # Select main Makefile with SYNTH tool variable
 ifeq ($(SYNTH),vivado)
 	SYNTH_MAKEFILE := build/Makefile.Vivado.inc
