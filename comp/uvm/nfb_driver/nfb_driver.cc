@@ -164,8 +164,9 @@ public:
 
             *cmd = 3;
             prop = (fdt32_t*) fdt_getprop(fdt, request.fdt_offset(), "reg", &proplen);
+
             if (proplen == sizeof(*prop) * 2) {
-                offset_tmp = prop[0]*0x100;
+                offset_tmp = fdt32_to_cpu(prop[0]);
             }
 
             *data_size = request.nbyte();
@@ -238,8 +239,9 @@ public:
 
            *cmd = 2;
             prop = (fdt32_t*) fdt_getprop(fdt, request.fdt_offset(), "reg", &proplen);
+
             if (proplen == sizeof(*prop) * 2) {
-                offset_tmp = prop[0]*0x100;
+                offset_tmp = fdt32_to_cpu(prop[0]);
             }
 
             *data_size = request.nbyte();
@@ -315,6 +317,15 @@ class nfb_server
               }
 
               if (cq != NULL) {
+                  void * tag;
+                  bool ok;
+                  grpc::CompletionQueue::NextStatus st_ret;
+                  gpr_timespec deadline;
+
+                  deadline.clock_type = GPR_TIMESPAN;
+                  deadline.tv_sec = 0;
+                  deadline.tv_nsec = 0; // NOWAIT
+                  while ((st_ret = cq->AsyncNext<gpr_timespec>(&tag, &ok, deadline)) == grpc::CompletionQueue::NextStatus::GOT_EVENT) { }
                   cq->Shutdown();
               }
         }
