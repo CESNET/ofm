@@ -21,8 +21,7 @@ class mi_sequence extends controler;
         int pid;
         super.new(name);
 
-        pid = getpid();
-        inf_name =  $sformatf("nic_%0d", pid);
+        inf_name = "nic";
     endfunction
 
     function void component_set(uvm_mem comp, string dev_tree);
@@ -37,19 +36,18 @@ class mi_sequence extends controler;
     virtual task run_program();
     endtask
 
-    virtual task run_backhand();
-        this.serve();
-    endtask
+    //virtual task run_backhand();
+    //    this.serve();
+    //endtask
 
     task body();
         //Create interface
         this.open(inf_name);
         fork
-            this.run_program();
-            this.run_backhand();
-        join
+            this.serve();
+        join_none
 
-        this.close();
+        this.run_program();
     endtask
 
 

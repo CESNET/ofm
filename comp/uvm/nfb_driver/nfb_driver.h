@@ -8,23 +8,23 @@
  * SPDX-License-Identifier: BSD-3-Clause
 */
 
-typedef struct {
-	unsigned int buff_size;
-	void * buff;
-	mqd_t req;
-	mqd_t res;
-} nfb_sv_struct_t;
 
-typedef enum {SEND_NULL, GET_FDT, SEND_DATA, READ_DATA} msg_type_t;
-typedef struct {
-	msg_type_t   type;
-	uint32_t size;
-	uint64_t offset;
-} msg_t;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-void * nfb_sv_create(const char * path, unsigned int msg_size);
-void   nfb_sv_close(void * mq_id, const char * path);
-int    nfb_sv_cmd_get(void * id, unsigned int* cmd, unsigned int* data_size, svLogicVecVal* offset);
-void   nfb_sv_data_get(void * id, const svOpenArrayHandle out);
-void   nfb_sv_cmd_send(void * id, unsigned int cmd, const svOpenArrayHandle out);
+#include "svdpi.h"
+
+
+void * nfb_sv_create(char * addr, int * port);
+void   nfb_sv_close(void * mq_id);
+
+int    nfb_sv_set_fdt(void * mq_id, const svOpenArrayHandle out);
+void * nfb_sv_cmd_get(void * id, unsigned int* cmd, unsigned int* data_size, svLogicVecVal* offset);
+void   nfb_sv_process(void * id, const svOpenArrayHandle out);
+
+
+#ifdef __cplusplus
+}
+#endif
 
