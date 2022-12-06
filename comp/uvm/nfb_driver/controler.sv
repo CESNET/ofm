@@ -63,9 +63,10 @@ class controler extends uvm_sequence;
             logic [64-1:0] addr;
             byte unsigned data[];
 
-            while((cmd_ptr = nfb_sv_cmd_get(mq_id, cmd, size, addr)) == null) begin
+            while((cmd_ptr = nfb_sv_cmd_get(mq_id, cmd, size, addr)) == null && stop == 0) begin
                 #(wait_time);
             end
+            cmd = stop ? 0 : cmd;
             case (cmd)
                 0 : ; //program logout
                 1 : nfb_sv_process(cmd_ptr, dtb);

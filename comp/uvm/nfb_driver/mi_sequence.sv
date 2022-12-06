@@ -48,6 +48,7 @@ class mi_sequence extends controler;
         join_none
 
         this.run_program();
+        this.close();
     endtask
 
 
@@ -73,7 +74,7 @@ class mi_sequence extends controler;
                 index_jt = 0;
             end
         end
-       mem.burst_write(status, offset, value);
+        mem.burst_write(status, offset, value);
     endtask
 
     virtual task read(logic [64-1:0] addr, inout byte unsigned data[]);
