@@ -18,59 +18,75 @@ class controler extends uvm_sequence;
     `uvm_object_utils(nfb_driver::controler)
 
     protected chandle       mq_id;
+    protected int  unsigned port;
     protected string        dev_name;
     protected byte unsigned dtb[];
+    protected bit           stop; 
 
     function new (string name = "controler");
         super.new(name);
+        mq_id = null;
+        port  = 0;
     endfunction
 
     function void open(string dev_name);
-        this.dev_name = dev_name;
-        mq_id   = nfb_sv_create({"/", dev_name});
+        const string ip_addr = "0.0.0.0:";
+        string dev_tree_name;
+        stop    = 0;
+        mq_id   = nfb_sv_create(ip_addr, port);
+        $fflush();
         if (mq_id == null) begin
-            `uvm_fatal("nfb_driver", {"\n\tCannot create ", {"/", dev_name}})
+            `uvm_fatal("nfb_driver", {"\n\tCannot create grpc server ",  ip_addr, "\n\t\texample of address: \"0.0.0.0:\""})
         end
 
-        if (this.tree_compile(dev_name) == 0) begin
-            `uvm_fatal("nfb_driver", "\n\tCannot create device tree")
+        dev_tree_name = $sformatf("%s_%0d", dev_name, port);
+        if (this.tree_compile(dev_tree_name) == 0) begin
+            `uvm_fatal("nfb_driver", {"\n\tCannot create device tree : ", dev_tree_name})
         end
+        nfb_sv_set_fdt(mq_id, dtb);
     endfunction
 
     function void close();
-        nfb_sv_close(mq_id, {"/", dev_name});
-        mq_id = null;
+        stop = 1;
     endfunction
 
     task serve(time wait_time = 100ns);
         int unsigned cmd;
+        chandle      cmd_ptr; 
+
+        if (mq_id == null) begin
+            `uvm_fatal("nfb_driver", "\n\tBefore you call server function you have to create grpc server");
+        end
 
         do begin
             int unsigned size;
             logic [64-1:0] addr;
             byte unsigned data[];
 
-            while(nfb_sv_cmd_get(mq_id, cmd, size, addr) == 0) begin
+            while((cmd_ptr = nfb_sv_cmd_get(mq_id, cmd, size, addr)) == null) begin
                 #(wait_time);
             end
             case (cmd)
                 0 : ; //program logout
-                1 : nfb_sv_cmd_send(mq_id, 0, dtb);
+                1 : nfb_sv_process(cmd_ptr, dtb);
                 2 : begin
                     data = new[size];
-                    nfb_sv_data_get(mq_id, data);
+                    nfb_sv_process(cmd_ptr, data);
                     this.write(addr, data);
                 end
                 3 : begin
                     data = new[size];
                     this.read(addr, data);
-                    nfb_sv_cmd_send(mq_id, 0, data);
+                    nfb_sv_process(cmd_ptr, data);
                 end
                 default : begin
                     `uvm_error(/*this.get_full_name()*/ "NULL", $sformatf("\n\tUnknown mi command type %0d", cmd));
                 end
             endcase
-        end while (cmd != 0);
+        end while (!stop);
+
+        nfb_sv_close(mq_id);
+        mq_id = null;
     endtask
 
     function bit tree_compile(string name, string author = "anonymous", string revision = "0", string card_name = "NFB-VERIFICATION");
