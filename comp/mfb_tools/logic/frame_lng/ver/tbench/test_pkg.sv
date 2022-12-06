@@ -18,15 +18,16 @@ package test_pkg;
     import math_pkg::*;
     `include "scoreboard.sv"
 
-    parameter REGIONS      = 4;
-    parameter REGION_SIZE  = 8;
+    parameter REGIONS      = 1;
+    parameter REGION_SIZE  = 4;
     parameter BLOCK_SIZE   = 8;
     parameter ITEM_WIDTH   = 8;
-    parameter LNG_WIDTH    = 14;
+    parameter LNG_WIDTH    = 9;
+    parameter SATURATION   = 0;
 
     parameter FRAME_SIZE_MAX = 512;
     parameter FRAME_SIZE_MIN = 60;
-    parameter TRANSACTION_COUNT = 10000;
+    parameter TRANSACTION_COUNT = 2000;
 
     parameter CLK_PERIOD = 10ns;
     parameter RESET_TIME = 10*CLK_PERIOD;
