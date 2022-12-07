@@ -6,7 +6,7 @@
 
 # Set paths
 
-set SV_CRC_BASE      "$COMP_BASE/base/ff/crc32"
+set SV_CRC_BASE      "$FIRMWARE_BASE/ndk/modules/internal/base/ff/crc32"
 set SV_MFB_BASE      "$OFM_PATH/comp/mfb_tools/ver"
 set SV_MVB_BASE      "$OFM_PATH/comp/mvb_tools/ver"
 set SV_MI32_BASE     "$OFM_PATH/comp/mi_tools/ver"
