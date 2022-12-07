@@ -224,19 +224,19 @@ architecture FULL of RX_DMA_HDR_MANAGER is
     signal dma_hdr_r1_size       : std_logic_vector(log2(PKT_MTU+1) -1 downto 0);
     signal dma_hdr_r1_vld        : std_logic;
 
-    attribute mark_debug : string;
+    -- attribute mark_debug : string;
 
-    attribute mark_debug of channel_stop_size   : signal is "true";
-    attribute mark_debug of channel_stop_vld    : signal is "true";
-    attribute mark_debug of dma_hdr_fifo_status : signal is "true";
-    attribute mark_debug of dma_hdr_r0_vld      : signal is "true";
-    attribute mark_debug of dma_hdr_r1_vld      : signal is "true";
-    attribute mark_debug of dma_hdr_fifo_rd     : signal is "true";
+    -- attribute mark_debug of channel_stop_size   : signal is "true";
+    -- attribute mark_debug of channel_stop_vld    : signal is "true";
+    -- attribute mark_debug of dma_hdr_fifo_status : signal is "true";
+    -- attribute mark_debug of dma_hdr_r0_vld      : signal is "true";
+    -- attribute mark_debug of dma_hdr_r1_vld      : signal is "true";
+    -- attribute mark_debug of dma_hdr_fifo_rd     : signal is "true";
 
-    attribute mark_debug of channel_status_reg : signal is "true";
-    attribute mark_debug of data_hdr_rdy       : signal is "true";
-    attribute mark_debug of data_hdr_first     : signal is "true";
-    attribute mark_debug of dma_hdr_rdy        : signal is "true";
+    -- attribute mark_debug of channel_status_reg : signal is "true";
+    -- attribute mark_debug of data_hdr_rdy       : signal is "true";
+    -- attribute mark_debug of data_hdr_first     : signal is "true";
+    -- attribute mark_debug of dma_hdr_rdy        : signal is "true";
 begin
 
     --=====================================================================
