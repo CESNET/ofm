@@ -210,7 +210,8 @@ architecture FULL of RX_MAC_LITE is
     constant RX_SOF_POS_W             : natural := RX_REGIONS*max(1,log2(RX_REGION_SIZE));
     constant RX_EOF_POS_W             : natural := RX_REGIONS*max(1,log2(RX_REGION_SIZE*RX_BLOCK_SIZE));
     -- Others constants
-    constant DFIFO_ITEMS              : natural := 2**log2(div_roundup((PKT_MTU_BYTES+1),(BF_DATA_W/8)));
+    constant DFIFO_ITEMS_MIN          : natural := 2**log2(div_roundup((PKT_MTU_BYTES+1),(BF_DATA_W/8)));
+    constant DFIFO_ITEMS              : natural := max(DFIFO_ITEMS_MIN,512);
     constant MFIFO_ITEMS              : natural := (DFIFO_ITEMS*BF_DATA_W)/512;
     constant LEN_WIDTH                : natural := 16;
     constant MAC_STATUS_WIDTH         : natural := log2(MAC_COUNT)+3;
