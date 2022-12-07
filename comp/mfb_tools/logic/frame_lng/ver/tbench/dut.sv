@@ -31,7 +31,8 @@ MFB_FRAME_LNG #(
     .REGION_SIZE   (REGION_SIZE),
     .BLOCK_SIZE    (BLOCK_SIZE),
     .ITEM_WIDTH    (ITEM_WIDTH),
-    .LNG_WIDTH     (LNG_WIDTH)
+    .LNG_WIDTH     (LNG_WIDTH),
+    .SATURATION    (SATURATION)
 ) VHDL_DUT_U (
     .CLK           (CLK),
     .RESET         (RESET),

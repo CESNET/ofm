@@ -17,7 +17,7 @@ import sv_mfb_pkg::*;
 import sv_mvb_pkg::*;
 
 
-class ScoreboardDriverCbs #(int ITEM_WIDTH, int LNG_WIDTH) extends DriverCbs;
+class ScoreboardDriverCbs #(int ITEM_WIDTH, int LNG_WIDTH, bit SATURATION) extends DriverCbs;
     TransactionTable #(TR_TABLE_FIRST_ONLY) sc_table;
 
     function new (TransactionTable #(TR_TABLE_FIRST_ONLY) st);
@@ -28,18 +28,23 @@ class ScoreboardDriverCbs #(int ITEM_WIDTH, int LNG_WIDTH) extends DriverCbs;
     endtask
 
     virtual task post_tx(Transaction transaction, string inst);
-       MfbTransaction #(ITEM_WIDTH) tr;
-       MvbTransaction #(LNG_WIDTH)  lng_tr = new();
-       $cast(tr, transaction);
+        MfbTransaction #(ITEM_WIDTH) tr;
+        MvbTransaction #(LNG_WIDTH)  lng_tr = new();
+        $cast(tr, transaction);
 
-       //$write("tr: \n");
-       //tr.display();
-       //$write("lng_tr: \n");
-       //lng_tr.display();
+        //$write("tr: \n");
+        //tr.display();
+        //$write("lng_tr: \n");
+        //lng_tr.display();
 
-       lng_tr.data = tr.data.size;
+        lng_tr.data = tr.data.size;
+        if (SATURATION) begin
+            if (tr.data.size >= 2**LNG_WIDTH) begin
+                lng_tr.data = '1;
+            end;
+        end;
 
-       sc_table.add(lng_tr);
+        sc_table.add(lng_tr);
     endtask
 
 endclass
@@ -68,10 +73,10 @@ class ScoreboardMonitorCbs extends MonitorCbs;
 endclass
 
 
-class Scoreboard #(int ITEM_WIDTH, int LNG_WIDTH);
+class Scoreboard #(int ITEM_WIDTH, int LNG_WIDTH, bit SATURATION);
     TransactionTable     #(TR_TABLE_FIRST_ONLY)  scoreTable;
     ScoreboardMonitorCbs                         monitorCbs;
-    ScoreboardDriverCbs  #(ITEM_WIDTH,LNG_WIDTH) driverCbs;
+    ScoreboardDriverCbs  #(ITEM_WIDTH,LNG_WIDTH,SATURATION) driverCbs;
 
     function new ();
       scoreTable = new;

@@ -31,7 +31,7 @@ program TEST (
     MfbDriver    #(REGIONS,REGION_SIZE,BLOCK_SIZE,ITEM_WIDTH) driver;
     MvbResponder #(REGIONS,LNG_WIDTH) responder;
     MvbMonitor   #(REGIONS,LNG_WIDTH) monitor;
-    Scoreboard   #(ITEM_WIDTH,LNG_WIDTH) scoreboard;
+    Scoreboard   #(ITEM_WIDTH,LNG_WIDTH,SATURATION) scoreboard;
 
     task createGeneratorEnvironment(int packet_size_max, int packet_size_min);
         generator = new("Generator", 0);

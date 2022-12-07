@@ -22,18 +22,27 @@ entity MFB_FRAME_LNG is
       BLOCK_SIZE     : natural := 8;
       ITEM_WIDTH     : natural := 8;
       META_WIDTH     : natural := 8;
+
       -- =======================================================================
       -- FRAME LENGHT CONFIGURATION: 
       -- =======================================================================
+      -- Minimum value of LNG_WIDTH is: log2(REGIONS*REGION_SIZE*BLOCK_SIZE+1)
       LNG_WIDTH      : natural := 14;
       REG_BITMAP     : std_logic_vector(2 downto 0) := "111";
-      IMPLEMENTATION : string  := "parallel" -- "serial", "parallel"
+      SATURATION     : boolean := False;
+      -- "serial", "parallel"
+      IMPLEMENTATION : string  := "parallel"
    );
       port(
+      -- =======================================================================
       -- CLOCK AND RESET
+      -- =======================================================================
       CLK         : in  std_logic;
       RESET       : in  std_logic;
+
+      -- =======================================================================
       -- RX MFB INTERFACE
+      -- =======================================================================
       RX_DATA     : in  std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
       RX_META     : in  std_logic_vector(REGIONS*META_WIDTH-1 downto 0) := (others => '0');
       RX_SOF_POS  : in  std_logic_vector(REGIONS*max(1,log2(REGION_SIZE))-1 downto 0);
@@ -42,16 +51,24 @@ entity MFB_FRAME_LNG is
       RX_EOF      : in  std_logic_vector(REGIONS-1 downto 0);
       RX_SRC_RDY  : in  std_logic;
       RX_DST_RDY  : out std_logic;
+
+      -- =======================================================================
       -- TX MFB INTERFACE
+      -- =======================================================================
       TX_DATA      : out std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
       TX_META      : out std_logic_vector(REGIONS*META_WIDTH-1 downto 0);
       TX_SOF_POS   : out std_logic_vector(REGIONS*max(1,log2(REGION_SIZE))-1 downto 0);
       TX_EOF_POS   : out std_logic_vector(REGIONS*max(1,log2(REGION_SIZE*BLOCK_SIZE))-1 downto 0);
       TX_SOF       : out std_logic_vector(REGIONS-1 downto 0);
       TX_EOF       : out std_logic_vector(REGIONS-1 downto 0);
-      TX_COF       : out std_logic_vector(REGIONS-1 downto 0); -- Continue of frame from previous regions
-      TX_TEMP_LNG  : out std_logic_vector(REGIONS*LNG_WIDTH-1 downto 0); -- Frame length in items calculated to end of current region, valid when is SRC_RDY and not EOF
-      TX_FRAME_LNG : out std_logic_vector(REGIONS*LNG_WIDTH-1 downto 0); -- Frame length in items, valid when is SRC_RDY and EOF
+      -- Continue of frame from previous regions
+      TX_COF       : out std_logic_vector(REGIONS-1 downto 0);
+      -- TEMP frame length in items calculated to end of current region, valid when is SRC_RDY and not EOF
+      TX_TEMP_LNG  : out std_logic_vector(REGIONS*LNG_WIDTH-1 downto 0);
+      -- Frame length in items, valid when is SRC_RDY and EOF
+      TX_FRAME_LNG : out std_logic_vector(REGIONS*LNG_WIDTH-1 downto 0);
+      -- Frame length overflow flag, valid when is SRC_RDY and EOF, only in SATURATION mode
+      TX_FRAME_OVF : out std_logic_vector(REGIONS-1 downto 0);
       TX_SRC_RDY   : out std_logic;
       TX_DST_RDY   : in  std_logic
    );
@@ -64,6 +81,7 @@ architecture FULL of MFB_FRAME_LNG is
    constant SOF_POS_SIZE       : natural := max(1,log2(REGION_SIZE));
    constant EOF_POS_SIZE       : natural := max(1,log2(REGION_SIZE*BLOCK_SIZE));
    constant WORD_LNG_WIDTH     : natural := log2(REGIONS*REGION_COUNT_ITEMS+1);
+   constant LNG_WIDTH_INT      : natural := tsel(SATURATION,(LNG_WIDTH+1),LNG_WIDTH);
    constant DOWN_ZEROS         : unsigned(max(1,log2(BLOCK_SIZE))-1 downto 0) := (others=>'0');
    constant UP_ZEROS           : std_logic_vector(LNG_WIDTH-1 downto EOF_POS_SIZE) := (others=>'0');
 
@@ -97,12 +115,15 @@ architecture FULL of MFB_FRAME_LNG is
    signal s_reg1_eof_lng     : uns_array_t(REGIONS-1 downto 0)(EOF_POS_SIZE+1-1 downto 0);
    signal s_reg1_inc_frame   : std_logic_vector(REGIONS-1 downto 0);
 
-   signal s_last_lng_cnt_reg : unsigned(LNG_WIDTH-1 downto 0);
-   signal s_cnt_no_sof_add   : uns_array_t(REGIONS-1 downto 0)(LNG_WIDTH-1 downto 0);
-   signal s_lng_cnt          : uns_array_t(REGIONS-1 downto 0)(LNG_WIDTH-1 downto 0);
+   signal s_last_lng_cnt_reg : unsigned(LNG_WIDTH_INT-1 downto 0);
+   signal s_cnt_no_sof_add   : uns_array_t(REGIONS-1 downto 0)(LNG_WIDTH_INT-1 downto 0);
+   signal s_lng_cnt          : uns_array_t(REGIONS-1 downto 0)(LNG_WIDTH_INT-1 downto 0);
+   signal s_lng_cnt_sat      : uns_array_t(REGIONS-1 downto 0)(LNG_WIDTH-1 downto 0);
    signal s_lng_cnt_sel      : std_logic_vector(REGIONS-1 downto 0);
-   signal s_frame_lng_eof    : uns_array_t(REGIONS-1 downto 0)(LNG_WIDTH-1 downto 0);
-   signal s_frame_lng        : uns_array_t(REGIONS-1 downto 0)(LNG_WIDTH-1 downto 0);
+   signal s_frame_lng_eof    : uns_array_t(REGIONS-1 downto 0)(LNG_WIDTH_INT-1 downto 0);
+   signal s_frame_lng        : uns_array_t(REGIONS-1 downto 0)(LNG_WIDTH_INT-1 downto 0);
+   signal s_frame_lng_sat    : uns_array_t(REGIONS-1 downto 0)(LNG_WIDTH-1 downto 0);
+   signal s_frame_lng_ovf    : std_logic_vector(REGIONS-1 downto 0);
    
    signal s_reg2_data        : std_logic_vector(DATA_WIDTH-1 downto 0);
    signal s_reg2_meta        : std_logic_vector(REGIONS*META_WIDTH-1 downto 0);
@@ -114,8 +135,13 @@ architecture FULL of MFB_FRAME_LNG is
    signal s_reg2_src_rdy     : std_logic;
    signal s_reg2_frame_lng   : uns_array_t(REGIONS-1 downto 0)(LNG_WIDTH-1 downto 0);
    signal s_reg2_temp_lng    : uns_array_t(REGIONS-1 downto 0)(LNG_WIDTH-1 downto 0);
+   signal s_reg2_frame_ovf   : std_logic_vector(REGIONS-1 downto 0);
 
 begin
+
+   assert (LNG_WIDTH >= WORD_LNG_WIDTH) 
+      report "MFB_FRAME_LNG: Minimum value of LNG_WIDTH is: log2(REGIONS*REGION_SIZE*BLOCK_SIZE+1)!"
+      severity failure;
 
    -- ==========================================================================
    -- 0. REGISTERS STAGE
@@ -190,7 +216,7 @@ begin
 
    inc_frame_g : for r in 0 to REGIONS-1 generate
       s_inc_frame(r+1) <= (s_reg0_sof(r) and not s_reg0_eof(r) and not s_inc_frame(r)) or
-                           (s_reg0_sof(r) and s_reg0_eof(r) and s_inc_frame(r)) or
+                          (s_reg0_sof(r) and s_reg0_eof(r) and s_inc_frame(r)) or
                           (not s_reg0_sof(r) and not s_reg0_eof(r) and s_inc_frame(r));
    end generate;
 
@@ -265,7 +291,7 @@ begin
          if (RESET = '1') then
             s_last_lng_cnt_reg <= (others => '0');
          elsif (s_reg1_src_rdy = '1' and TX_DST_RDY = '1') then
-            s_last_lng_cnt_reg <= s_lng_cnt(REGIONS-1);
+            s_last_lng_cnt_reg <= resize(s_lng_cnt_sat(REGIONS-1),LNG_WIDTH_INT);
          end if;
       end if;
    end process;
@@ -278,7 +304,7 @@ begin
       end generate;
 
       lng_cnt_g : for r in 0 to REGIONS-1 generate
-         s_lng_cnt(r) <= resize(s_reg1_cnt_add_sof(r),LNG_WIDTH) when (s_reg1_sof(r) = '1') else s_cnt_no_sof_add(r);
+         s_lng_cnt(r) <= resize(s_reg1_cnt_add_sof(r),LNG_WIDTH_INT) when (s_reg1_sof(r) = '1') else s_cnt_no_sof_add(r);
       end generate;
    end generate;
 
@@ -299,7 +325,7 @@ begin
                end if;
             end loop;
             if (s_lng_cnt_sel(r) = '1') then
-               s_lng_cnt(r) <= resize(v_lng_cnt,LNG_WIDTH);
+               s_lng_cnt(r) <= resize(v_lng_cnt,LNG_WIDTH_INT);
             else
                s_lng_cnt(r) <= s_last_lng_cnt_reg + v_lng_cnt;
             end if;
@@ -316,7 +342,22 @@ begin
    -- Output frame lenght valid when is SRC_RDY and EOF
    frame_lng_g : for r in 0 to REGIONS-1 generate
       s_frame_lng(r) <= s_frame_lng_eof(r) when (s_reg1_inc_frame(r) = '1') else
-                        resize(s_reg1_cnt_add_wf(r),LNG_WIDTH);
+                        resize(s_reg1_cnt_add_wf(r),LNG_WIDTH_INT);
+   end generate;
+
+   -- simple saturation logic
+   sat_on_g: if SATURATION generate
+      sat_g : for r in 0 to REGIONS-1 generate
+         s_lng_cnt_sat(r)   <= (others => '1') when (s_lng_cnt(r)(LNG_WIDTH) = '1')   else s_lng_cnt(r)(LNG_WIDTH-1 downto 0);
+         s_frame_lng_sat(r) <= (others => '1') when (s_frame_lng(r)(LNG_WIDTH) = '1') else s_frame_lng(r)(LNG_WIDTH-1 downto 0);
+         s_frame_lng_ovf(r) <= s_frame_lng(r)(LNG_WIDTH);
+      end generate;
+   end generate;
+
+   sat_off_g: if not SATURATION generate
+      s_lng_cnt_sat   <= s_lng_cnt;
+      s_frame_lng_sat <= s_frame_lng;
+      s_frame_lng_ovf <= (others => '0');
    end generate;
 
    -- ==========================================================================
@@ -335,8 +376,9 @@ begin
                s_reg2_sof         <= s_reg1_sof;
                s_reg2_eof         <= s_reg1_eof;
                s_reg2_inc_frame   <= s_reg1_inc_frame;
-               s_reg2_frame_lng   <= s_frame_lng;
-               s_reg2_temp_lng    <= s_lng_cnt;
+               s_reg2_frame_lng   <= s_frame_lng_sat;
+               s_reg2_temp_lng    <= s_lng_cnt_sat;
+               s_reg2_frame_ovf   <= s_frame_lng_ovf;
             end if;
          end if;
       end process;
@@ -361,8 +403,9 @@ begin
       s_reg2_sof         <= s_reg1_sof;
       s_reg2_eof         <= s_reg1_eof;
       s_reg2_inc_frame   <= s_reg1_inc_frame;
-      s_reg2_frame_lng   <= s_frame_lng;
-      s_reg2_temp_lng    <= s_lng_cnt;
+      s_reg2_frame_lng   <= s_frame_lng_sat;
+      s_reg2_temp_lng    <= s_lng_cnt_sat;
+      s_reg2_frame_ovf   <= s_frame_lng_ovf;
       s_reg2_src_rdy     <= s_reg1_src_rdy;
    end generate;
 
@@ -385,5 +428,7 @@ begin
       TX_TEMP_LNG((r+1)*LNG_WIDTH-1 downto r*LNG_WIDTH)  <= std_logic_vector(s_reg2_temp_lng(r));
       TX_FRAME_LNG((r+1)*LNG_WIDTH-1 downto r*LNG_WIDTH) <= std_logic_vector(s_reg2_frame_lng(r));
    end generate;
+
+   TX_FRAME_OVF <= s_reg2_frame_ovf;
 
 end architecture;
