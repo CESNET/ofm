@@ -38,9 +38,12 @@
 -- 0x18000 -- PMA specific control
 -- 0x18004 -- PMA specific status 
 -- 0x18008 -- RS-FEC RX & TX enable 
--- 0x18010 -- PMA TX swing (TX differential driver swing)
--- 0x18014 -- PMA TX preemphasis control - precursor 
--- 0x18018 -- PMA TX preemphasis control - postcursor
+-- 0x18020 -- PMA TX swing (TX differential driver swing)
+-- 0x18024 -- PMA TX preemphasis control - precursor 
+-- 0x18028 -- PMA TX preemphasis control - postcursor
+-- 0x18010: DRP data
+-- 0x18014: DRP address
+-- 0x18018: DRP select + operation type (R/W). Write to this register starts the DPR operation
 -- PCS:
 --   TODO
 
@@ -64,6 +67,8 @@ entity mgmt is
       PMA_PRECURSOR_INIT  : std_logic_vector(31 downto 0) := (others => '0');  
       PMA_POSTCURSOR_INIT : std_logic_vector(31 downto 0) := (others => '0'); 
       PMA_DRIVE_INIT      : std_logic_vector(31 downto 0) := (others => '0');
+		DRP_DWIDTH          : natural := 16;
+		DRP_AWIDTH          : natural := 16;
       -- Select correct FPGA device.
       -- "AGILEX", "STRATIX10", "ULTRASCALE", ...
       DEVICE : string  := "ULTRASCALE"
@@ -136,12 +141,13 @@ entity mgmt is
       FEC_TX_ALGN_STAT  :  in  std_logic_vector(20-1 downto 0) := (others => '0');    -- 1.282-283: RS-FEC PCS alignment status 3 through 4
       -- DRP interface for transceivers etc.
       DRPCLK            : in  std_logic := '0';
-      DRPDO             : in  std_logic_vector(15 downto 0) := (others => '0');
+      DRPDO             : in  std_logic_vector(DRP_DWIDTH-1 downto 0) := (others => '0');
       DRPRDY            : in  std_logic := '0';
       DRPEN             : out std_logic;
       DRPWE             : out std_logic;
-      DRPADDR           : out std_logic_vector(15 downto 0);
-      DRPDI             : out std_logic_vector(15 downto 0);
+      DRPADDR           : out std_logic_vector(DRP_AWIDTH-1 downto 0);
+      DRPARDY           : in  std_logic := '1';
+      DRPDI             : out std_logic_vector(DRP_DWIDTH-1 downto 0);
       DRPSEL            : out std_logic_vector(3 downto 0)
    );
 end mgmt;
@@ -595,7 +601,7 @@ port map (
    MI_S_WR   => drp_wr,
    MI_S_BE   => open,
    MI_S_DRD  => DRPDO,
-   MI_S_ARDY => '1',
+   MI_S_ARDY => DRPARDY,
    MI_S_DRDY => DRPRDY
 );
 

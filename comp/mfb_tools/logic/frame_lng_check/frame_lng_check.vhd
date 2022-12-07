@@ -59,6 +59,8 @@ port(
     TX_LNG_MAX_ERR : out std_logic_vector(REGIONS-1 downto 0);
     -- Error flag of minimum length, it is valid when TX_SRC_RDY=1 and TX_EOF=1.
     TX_LNG_MIN_ERR : out std_logic_vector(REGIONS-1 downto 0);
+    -- Error flag of length overflow, it is valid when TX_SRC_RDY=1 and TX_EOF=1.
+    TX_LNG_OVF_ERR : out std_logic_vector(REGIONS-1 downto 0);
     -- Frame length in MFB items is valid when is TX_SRC_RDY=1, value description:
         -- TX_EOF=1: Total length of ending frame..
         -- TX_EOF=0: Length of current frame calculated to end of current region.
@@ -95,6 +97,7 @@ architecture FULL of MFB_FRAME_LNG_CHECK is
 
    signal s_lng_below_min        : std_logic_vector(REGIONS-1 downto 0);
    signal s_lng_min_err          : std_logic_vector(REGIONS-1 downto 0);
+   signal s_lng_ovf_err          : std_logic_vector(REGIONS-1 downto 0);
 
    signal s_frame_lng            : slv_array_t(REGIONS-1 downto 0)(LNG_WIDTH-1 downto 0);
 
@@ -109,6 +112,7 @@ architecture FULL of MFB_FRAME_LNG_CHECK is
    signal s_reg1_adapter_err     : std_logic_vector(REGIONS-1 downto 0);
    signal s_reg1_lng_max_err     : std_logic_vector(REGIONS-1 downto 0);
    signal s_reg1_lng_min_err     : std_logic_vector(REGIONS-1 downto 0);
+   signal s_reg1_lng_ovf_err     : std_logic_vector(REGIONS-1 downto 0);
    signal s_reg1_frame_len       : slv_array_t(REGIONS-1 downto 0)(LNG_WIDTH-1 downto 0);
 
 begin
@@ -126,6 +130,7 @@ begin
         META_WIDTH     => META_WIDTH,
         LNG_WIDTH      => LNG_WIDTH,
         REG_BITMAP     => REG_BITMAP(3-1 downto 0),
+        SATURATION     => True,
         IMPLEMENTATION => "parallel" -- "serial", "parallel"
     )
     port map(
@@ -151,6 +156,7 @@ begin
         TX_COF       => s_fl_cof,
         TX_TEMP_LNG  => s_fl_temp_lng, -- Frame length in items calculated to end of current region, valid when is SRC_RDY and not EOF
         TX_FRAME_LNG => s_fl_frame_lng, -- Frame length in items, valid when is SRC_RDY and EOF
+        TX_FRAME_OVF => s_lng_ovf_err,
         TX_SRC_RDY   => s_fl_src_rdy,
         TX_DST_RDY   => TX_DST_RDY
     );
@@ -225,6 +231,7 @@ begin
                     s_reg1_eof         <= s_fl_eof;
                     s_reg1_lng_max_err <= s_lng_max_err;
                     s_reg1_lng_min_err <= s_lng_min_err;
+                    s_reg1_lng_ovf_err <= s_lng_ovf_err;
                     s_reg1_frame_len   <= s_frame_lng;
                 end if;
             end if;
@@ -251,6 +258,7 @@ begin
         s_reg1_eof         <= s_fl_eof;
         s_reg1_lng_max_err <= s_lng_max_err;
         s_reg1_lng_min_err <= s_lng_min_err;
+        s_reg1_lng_ovf_err <= s_lng_ovf_err;
         s_reg1_frame_len   <= s_frame_lng;
         s_reg1_src_rdy     <= s_fl_src_rdy;
     end generate;
@@ -269,6 +277,7 @@ begin
 
     TX_LNG_MAX_ERR <= s_reg1_lng_max_err;
     TX_LNG_MIN_ERR <= s_reg1_lng_min_err;
+    TX_LNG_OVF_ERR <= s_reg1_lng_ovf_err;
     TX_FRAME_LNG   <= slv_array_ser(s_reg1_frame_len,REGIONS,LNG_WIDTH);
 
 end architecture;

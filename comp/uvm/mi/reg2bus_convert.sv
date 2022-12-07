@@ -12,8 +12,15 @@ class reg2bus_frontdoor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_re
     `uvm_object_param_utils(uvm_mi::reg2bus_frontdoor#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
     `uvm_declare_p_sequencer(uvm_mi::sequencer_slave#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
 
+    localparam DATA_BYTES_WIDTH = (DATA_WIDTH+8-1)/8;
+
+    typedef struct {
+        logic [ADDR_WIDTH-1:0]   addr;
+        logic [DATA_WIDTH-1:0]   data;
+        logic [DATA_BYTES_WIDTH-1:0] be;
+    } item_t;
+
     semaphore sem;
-    uvm_reg   target;
 
     function new(string name = "reg2bus_frontdoor");
         super.new(name);
@@ -22,7 +29,7 @@ class reg2bus_frontdoor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_re
     function void configure(uvm_reg_map map);
     endfunction
 
-    task read_frame(logic [ADDR_WIDTH-1:0] addr);
+    task read_frame(logic [ADDR_WIDTH-1:0] addr, logic [DATA_BYTES_WIDTH-1:0] be);
         uvm_mi::sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)  request;
         request = uvm_mi::sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)::type_id::create("request");
 
@@ -32,7 +39,7 @@ class reg2bus_frontdoor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_re
             request.randomize();
 
             request.addr = addr;
-            request.be   = '1;
+            request.be   = be;
             request.dwr  = 'x;
             request.wr   = 0;
             request.rd   = 1'b1;
@@ -41,30 +48,16 @@ class reg2bus_frontdoor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_re
         sem.put();
     endtask
 
-    task get_responses(int unsigned repetition, output bit [`UVM_REG_DATA_WIDTH-1:0] out[]);
-        logic [DATA_WIDTH-1:0] data[];
-        byte unsigned data_arr[];
+    task get_responses(output logic [DATA_WIDTH-1:0] out);
+        uvm_mi::sequence_item_response #(DATA_WIDTH) rsp;
+        uvm_sequence_item                            rsp_get;
 
-        data = new[repetition];
-        for (int unsigned it = 0; it < repetition; it++) begin
-            uvm_mi::sequence_item_respons #(DATA_WIDTH) rsp;
-            uvm_sequence_item                       rsp_get;
-
-            get_response(rsp_get);
-            $cast(rsp, rsp_get);
-            data[it] = rsp.drd;
-        end
-
-        data_arr = {<<DATA_WIDTH{ {<<byte{data}}}};
-
-        out = new[(data_arr.size()+`UVM_REG_DATA_WIDTH -1)/`UVM_REG_DATA_WIDTH];
-        for (int unsigned it = 0; it < data_arr.size(); it++) begin
-            out[it/(`UVM_REG_DATA_WIDTH/8)][(it%(`UVM_REG_DATA_WIDTH/8) + 1)*8-1 -: 8] = data_arr[it];
-        end
+        get_response(rsp_get);
+        $cast(rsp, rsp_get);
+        out = rsp.drd;
     endtask
 
-
-    task send_frame(logic [DATA_WIDTH-1:0] data, logic [ADDR_WIDTH-1:0] addr);
+    task send_frame(logic [DATA_WIDTH-1:0] data, logic [DATA_BYTES_WIDTH-1:0] be, logic [ADDR_WIDTH-1:0] addr);
         uvm_mi::sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)  request;
         request = uvm_mi::sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)::type_id::create("request");
 
@@ -73,7 +66,7 @@ class reg2bus_frontdoor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_re
             start_item(request);
             request.randomize();
             request.addr = addr;
-            request.be   = '1;
+            request.be   = be;
             request.dwr  = data;
             request.wr   = 1'b1;
             request.rd   = 1'b0;
@@ -83,8 +76,12 @@ class reg2bus_frontdoor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_re
     endtask
 
     task body();
-        int unsigned repetition;
+        item_t items[];
+        int unsigned target_width;
         logic [ADDR_WIDTH-1:0] addr;
+
+        //set status to OK
+        rw_info.status = UVM_IS_OK;
 
         ////////////
         // get semaphore
@@ -93,31 +90,104 @@ class reg2bus_frontdoor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_re
             uvm_config_db#(semaphore)::set(sequencer, "", "sem", sem);
         end
 
-        ////////////
-        // send request
-        if (rw_info.element_kind != UVM_REG) begin
-             `uvm_fatal(p_sequencer.get_full_name(), "\n\tThis sequence support only access to UVM_REG");
+        ///////////////////
+        // GET ELEMENT INFO
+        if (rw_info.element_kind == UVM_MEM) begin
+            uvm_mem target;
+            int unsigned item_num; // required words in interface
+
+            if (!$cast(target, rw_info.element)) begin
+                `uvm_fatal(p_sequencer.get_full_name(), "\n\tCannot get memmory");
+            end
+
+            target_width = target.get_n_bits();
+            item_num     = (target_width*rw_info.value.size() + DATA_WIDTH -1)/DATA_WIDTH;
+            addr         = target.get_address() + rw_info.offset*target.get_n_bytes();
+            items        = new[item_num];
+        end else if (rw_info.element_kind == UVM_REG) begin
+            uvm_reg target;
+            int unsigned item_num; // required words in interface
+
+            if (!$cast(target, rw_info.element)) begin
+                `uvm_fatal(p_sequencer.get_full_name(), "\n\tCannot get register");
+            end
+
+            target_width = target.get_n_bits();
+            item_num     = (target_width + DATA_WIDTH -1)/DATA_WIDTH;
+            addr         = target.get_address();
+            items        = new[item_num];
+        end else begin
+             `uvm_fatal(p_sequencer.get_full_name(), "\n\tThis sequence support only access to UVM_REG and UVM_MEM");
         end
 
-        if (!$cast(target, rw_info.element)) begin
-            `uvm_fatal(p_sequencer.get_full_name(), "\n\tCannot get register");
-        end
 
-        repetition = (target.get_n_bits()+DATA_WIDTH-1) /DATA_WIDTH;
-        addr = target.get_address();
-        //WRITE DATA
-        if (rw_info.kind == UVM_WRITE) begin
-            logic [DATA_WIDTH-1:0] data_array[];
-            data_array = {<<DATA_WIDTH{rw_info.value}};
-            for(int unsigned it = 0; it < repetition; it++) begin
-                send_frame(data_array[it], addr + (DATA_WIDTH/8)*it);
+        /////////////////////////////
+        // OPERATION
+        // PICK OPERATION
+        if (rw_info.kind == UVM_WRITE || rw_info.kind == UVM_BURST_WRITE) begin
+            int unsigned item_index_low;
+            int unsigned item_index_high;
+            logic [ADDR_WIDTH-1:0] addr_local = addr;
+
+            item_index_low  = 0;
+            item_index_high = 0;
+            for (int unsigned it = 0; it < rw_info.value.size(); it++) begin
+                for (int unsigned jt = 0; jt < target_width; jt += 8) begin
+                    if (item_index_low == 0) begin
+                        items[item_index_high].addr = addr_local;
+                        addr_local                 += DATA_BYTES_WIDTH;
+                    end
+
+                    items[item_index_high].data[(item_index_low+1)*8-1 -: 8] = rw_info.value[it][(jt+8)-1 -: 8];
+                    items[item_index_high].be[item_index_low]        = 1'b1;
+
+                    item_index_low += 1;
+                    if (item_index_low >= DATA_BYTES_WIDTH) begin
+                        item_index_low = 0;
+                        item_index_high++;
+                    end
+                end
             end
-        //READ DATA
-        end else if (rw_info.kind == UVM_READ) begin
-            for(int unsigned it = 0; it < repetition; it++) begin
-                read_frame(addr + (DATA_WIDTH/8)*it);
+
+            //Send frames
+            for(int unsigned it = 0; it < items.size(); it++) begin
+                send_frame(items[it].data,  items[it].be, items[it].addr);
             end
-            get_responses(repetition, rw_info.value);
+        end else if (rw_info.kind == UVM_READ  || rw_info.kind == UVM_BURST_READ) begin
+            logic [ADDR_WIDTH-1:0] addr_local = addr;
+            int unsigned item_index_low;
+            int unsigned item_index_high;
+            //prepare address
+            for(int unsigned it = 0; it < items.size(); it++) begin
+                items[it].addr = addr_local;
+                addr_local    += DATA_BYTES_WIDTH;
+                items[it].be   = '1;
+            end
+
+            // send and receive frames
+            fork
+                for(int unsigned it = 0; it < items.size(); it++) begin
+                    read_frame(items[it].addr, items[it].be);
+                end
+                for(int unsigned it = 0; it < items.size(); it++) begin
+                    get_responses(items[it].data);
+                end
+            join
+
+            // Format change
+            item_index_low  = 0;
+            item_index_high = 0;
+            for (int unsigned it = 0; it < rw_info.value.size(); it++) begin
+                for (int unsigned jt = 0; jt < target_width; jt += 8) begin
+                    rw_info.value[it][(jt+8)-1 -: 8] = items[item_index_high].data[(item_index_low +1)*8-1 -: 8];
+
+                    item_index_low += 1;
+                    if (item_index_low >= DATA_BYTES_WIDTH) begin
+                        item_index_low = 0;
+                        item_index_high++;
+                    end
+                end
+            end
         end
     endtask
 endclass
@@ -133,6 +203,7 @@ class reg2bus_adapter#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_reg_a
 
     virtual function uvm_sequence_item reg2bus(const ref uvm_reg_bus_op rw);
         `uvm_fatal("mi::reg2bus_adapter::reg2bus", "\n\tThis adapter use frontend sequence");
+         return null;
     endfunction
 
 

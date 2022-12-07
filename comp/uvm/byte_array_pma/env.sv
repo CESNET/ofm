@@ -12,18 +12,18 @@
 `ifndef RX_ENV_SV
 `define RX_ENV_SV
 
-class env_base #(DATA_WIDTH) extends uvm_env;
+class env #(DATA_WIDTH) extends uvm_env;
 
-    `uvm_component_param_utils(byte_array_pma_env::env_base #(DATA_WIDTH));
+    `uvm_component_param_utils(uvm_byte_array_pma::env #(DATA_WIDTH));
 
     // Definition of agents, high level agents are used on both sides.
-    byte_array::agent m_byte_array_agent;
-    byte_array::config_item m_byte_array_config;
+    uvm_byte_array::agent m_byte_array_agent;
+    uvm_byte_array::config_item m_byte_array_config;
 
     // Definition of agents, PMA agents are used on both sides.
-    pma::agent #(DATA_WIDTH) m_pma_agent;
-    pma::config_item m_pma_config;
-    byte_array_pma_env::sequencer m_sequencer;
+    uvm_pma::agent #(DATA_WIDTH) m_pma_agent;
+    uvm_pma::config_item m_pma_config;
+    uvm_byte_array_pma::sequencer m_sequencer;
 
     config_item m_config;
 
@@ -47,17 +47,17 @@ class env_base #(DATA_WIDTH) extends uvm_env;
         m_pma_config.active         = m_config.active;
         m_pma_config.interface_name = m_config.interface_name;
 
-        uvm_config_db #(byte_array::config_item)::set(this, "m_byte_array_agent", "m_config", m_byte_array_config);
-        uvm_config_db #(pma::config_item)::set(this, "m_pma_agent", "m_config", m_pma_config);
+        uvm_config_db #(uvm_byte_array::config_item)::set(this, "m_byte_array_agent", "m_config", m_byte_array_config);
+        uvm_config_db #(uvm_pma::config_item)::set(this, "m_pma_agent", "m_config", m_pma_config);
 
-        byte_array::monitor::type_id::set_inst_override(monitor #(DATA_WIDTH)::get_type(), {this.get_full_name(), ".m_byte_array_agent.*"});
+        uvm_byte_array::monitor::type_id::set_inst_override(monitor #(DATA_WIDTH)::get_type(), {this.get_full_name(), ".m_byte_array_agent.*"});
 
         if (m_config.active == UVM_ACTIVE) begin
-            m_sequencer  = byte_array_pma_env::sequencer::type_id::create("m_sequencer", this);
+            m_sequencer  = uvm_byte_array_pma::sequencer::type_id::create("m_sequencer", this);
         end
 
-        m_byte_array_agent = byte_array::agent::type_id::create("m_byte_array_agent", this);
-        m_pma_agent        = pma::agent #(DATA_WIDTH)::type_id::create("m_pma_agent", this);
+        m_byte_array_agent = uvm_byte_array::agent::type_id::create("m_byte_array_agent", this);
+        m_pma_agent        = uvm_pma::agent #(DATA_WIDTH)::type_id::create("m_pma_agent", this);
 
     endfunction
 
@@ -65,7 +65,7 @@ class env_base #(DATA_WIDTH) extends uvm_env;
     function void connect_phase(uvm_phase phase);
         monitor #(DATA_WIDTH) env_monitor;
 
-        uvm_config_db#(byte_array_pma_env::sequencer)::set(this, "m_pma_agent.m_sequencer" , "hi_sqr", m_sequencer);
+        uvm_config_db#(uvm_byte_array_pma::sequencer)::set(this, "m_pma_agent.m_sequencer" , "hi_sqr", m_sequencer);
 
         $cast(env_monitor, m_byte_array_agent.m_monitor);
         m_pma_agent.analysis_port.connect(env_monitor.analysis_export);
@@ -78,7 +78,7 @@ class env_base #(DATA_WIDTH) extends uvm_env;
     virtual task run_phase(uvm_phase phase);
 
         if (m_config.active == UVM_ACTIVE) begin
-            sequence_lib #(DATA_WIDTH) seq_lib = byte_array_pma_env::sequence_lib #(DATA_WIDTH)::type_id::create("sequence_lib");
+            sequence_lib #(DATA_WIDTH) seq_lib = uvm_byte_array_pma::sequence_lib #(DATA_WIDTH)::type_id::create("sequence_lib");
             seq_lib.min_random_count = 1;
             seq_lib.max_random_count = 50;
             seq_lib.init_sequence_rx_pcs();

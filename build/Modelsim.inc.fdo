@@ -45,6 +45,39 @@ proc CompileMod {FNAME OPT} {
         lappend SIM_FLAGS(SIM_MODULE) {*}$opt(SIM_MODULE)
     }
 
+    # Generate netlists for utilized Vivado IP cores
+    if {$opt(TYPE) == "VIVADO_IP_XACT"} {
+      if {![info exists SIM_FLAGS(FPGA)]} {
+          puts "WARNING: SIM_FLAGS(FPGA) doesn't exists, skipping generating netlist for Vivado IP core $FNAME"
+      } else {
+        set IP_GEN_PATH "$SIM_FLAGS(SIM_MODULE)-${SIM_FLAGS(FPGA)}.vivado_ip_tmp/"
+        file mkdir $IP_GEN_PATH
+
+        # Initialization
+        set IP_NAME [file rootname [file tail $FNAME]]
+        set IP_GEN_SCRIPT ${IP_GEN_PATH}${IP_NAME}_netlist_gen.tcl
+        if {[file exists $IP_GEN_SCRIPT]} {
+            puts "$IP_GEN_SCRIPT exists, assume IP core's netlist has already been generated"
+            return
+        }
+        PrintLabel "IP Netlist Generation ($IP_NAME)"
+
+        # Prepare netlist generation Tcl script for Vivado
+        exec echo "
+            create_project -in_memory -part $SIM_FLAGS(FPGA)
+            set_property target_language VHDL \[current_project\]
+            read_ip $FNAME
+            upgrade_ip \[get_ips $IP_NAME\]
+            set_property GENERATE_SYNTH_CHECKPOINT TRUE \[get_files $FNAME\]
+            synth_ip \[get_ips $IP_NAME\]
+            quit
+        " > $IP_GEN_SCRIPT
+
+        # Generate netlist using Vivado
+        exec vivado -mode tcl -journal ${IP_GEN_PATH}${IP_NAME}_vivado.jou -log ${IP_GEN_PATH}${IP_NAME}_vivado.log -source $IP_GEN_SCRIPT >&@stdout
+      }
+    }
+
     # Skip unknown file types
     if {$opt(TYPE) != ""} {
         return

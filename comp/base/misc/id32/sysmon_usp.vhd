@@ -76,7 +76,7 @@ begin
       INIT_55 => X"5111",
       INIT_56 => X"caaa",
       INIT_57 => X"ae4e",
-      SIM_MONITOR_FILE => "misc/sysmon.txt"
+      SIM_MONITOR_FILE => "/dev/null"
     ) port map (
       RESET             => RESET,
       CONVST            => '0',

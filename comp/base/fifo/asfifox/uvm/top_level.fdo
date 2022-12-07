@@ -12,14 +12,13 @@ set DUT_UVM_BASE          "."
 set TB_FILE               "./tbench/testbench.sv"
 set SIG_FILE              "./signals_sig.fdo"
 
-set COMPONENTS [list \
+lappend COMPONENTS \
     [list "DUT"      $DUT_BASE       "FULL"]\
     [list "DUT_UVM"  $DUT_UVM_BASE   "FULL"]\
-]
 
 # Disable Code Coverage
-set SIM_FLAGS(CODE_COVERAGE) "true"
-set SIM_FLAGS(EXTRA_VFLAGS) "+UVM_TESTNAME=test::ex_test -uvmcontrol=all +UVM_MAX_QUIT_COUNT=1"
+set SIM_FLAGS(CODE_COVERAGE) false
+set SIM_FLAGS(EXTRA_VFLAGS) "+UVM_TESTNAME=test::ex_test +UVM_VERBOSITY=UVM_NONE -uvmcontrol=all +UVM_MAX_QUIT_COUNT=1"
 
 # Global include file for compilation
 source "$FIRMWARE_BASE/build/Modelsim.inc.fdo"
@@ -27,14 +26,12 @@ source "$FIRMWARE_BASE/build/Modelsim.inc.fdo"
 # Suppress warnings from arithm library
 puts "Std Arith Warnings - Disabled"
 set StdArithNoWarnings 1
-restart -f
-run -all
-#coverage save -assert -directive -cvg -code bcefst -verbose actual.ucdb
-quit
+nb_sim_run
 
-# Reports
-# Uncomment lines below to generate html coce coverage report
-# coverage save -assert -directive -cvg -code bcefst -verbose actual.ucdb
-# vcover merge final.ucdb final.ucdb actual.ucdb
-# vcover report -html -htmldir cov_html -instance /testbench/DUT_U -source -details -assert -directive -cvg -code bcefst -verbose -threshL 50 -threshH 90 final.ucdb
+#coverage save -assert -directive -cvg -code bcefst -verbose actual.ucdb
+if {$SIM_FLAGS(CODE_COVERAGE)} {
+    coverage save  -assert -directive -cvg -code bcefst -verbose actual.ucdb
+}
+
+quit
 

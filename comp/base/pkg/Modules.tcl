@@ -24,3 +24,7 @@ if {$ARCHGRP == "SV_DMA_PKG"} {
 if { $ARCHGRP == "ETH_HDR_PKG"} {
    set MOD "$MOD $ENTITY_BASE/eth_hdr_pack.vhd"
 }
+
+if { $ARCHGRP == "PCIE_META_PKG"} {
+   set MOD "$MOD $ENTITY_BASE/pcie_meta_pack.vhd"
+}

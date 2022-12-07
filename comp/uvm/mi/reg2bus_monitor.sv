@@ -1,7 +1,7 @@
 /*
- * file       : convertor to  
+ * file       : convertor to
  * Copyright (C) 2021 CESNET z. s. p. o.
- * description: convertor from uvm_mi::monitor to reg2bus predictor 
+ * description: convertor from uvm_mi::monitor to reg2bus predictor
  * date       : 2021
  * author     : Radek Iša <isa@cesnet.cz>
  *
@@ -32,18 +32,18 @@ class reg2bus_class  extends uvm_sequence_item;
     endfunction
 endclass
 
-// Monitor convert bus transaction to reg transaction 
+// Monitor convert bus transaction to reg transaction
 class reg2bus_monitor#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_monitor;
     `uvm_component_param_utils(uvm_mi::reg2bus_monitor#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
-    
+
     reg2bus_class rq_que[$];
     // Reference to the virtual interface, initialized during the connect phase by parent agent.
-    typedef reg2bus_monitor#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH) this_type; 
+    typedef reg2bus_monitor#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH) this_type;
     uvm_analysis_imp_rq#(sequence_item_request#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH), this_type)  analysis_imp_rq;
-    uvm_analysis_imp_rs#(sequence_item_respons#(DATA_WIDTH), this_type)                          analysis_imp_rs;
+    uvm_analysis_imp_rs#(sequence_item_response#(DATA_WIDTH), this_type)                          analysis_imp_rs;
 
     uvm_analysis_port #(reg2bus_class) analysis_port;
-   
+
 
     function new (string name, uvm_component parent);
         super.new(name, parent);
@@ -61,7 +61,7 @@ class reg2bus_monitor#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_monit
                 item.op.byte_en = tr.be;
                 item.op.data    = tr.dwr;
                 item.op.addr    = tr.addr;
-                item.op.status = UVM_IS_OK;
+                item.op.status  = UVM_IS_OK;
                 analysis_port.write(item);
             end
 
@@ -76,7 +76,7 @@ class reg2bus_monitor#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_monit
     endfunction
 
 
-    function void write_rs(sequence_item_respons#(DATA_WIDTH) tr);
+    function void write_rs(sequence_item_response#(DATA_WIDTH) tr);
         if (tr.drdy == 1 && rq_que.size() > 0) begin
             reg2bus_class item = rq_que.pop_front();
 

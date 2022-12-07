@@ -1,7 +1,8 @@
-# 1. base - base address on MI bus
-proc dts_tsugen {base} {
+# 1. 			base - base address on MI bus
+# 2. (optional) name - name of the unit
+proc dts_tsugen {base {name "tsu"}} {
 	set    ret ""
-	append ret "tsu {"
+	append ret "$name {"
 	append ret "compatible = \"netcope,tsu\";"
 	append ret "reg = <$base 0x00001000>;"
 	# in past type [1,2] (1 was used by ComboV2 - no longer supported)

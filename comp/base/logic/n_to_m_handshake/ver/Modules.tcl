@@ -5,9 +5,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 # Set paths
-global FIRMWARE_BASE
-set COMP_BASE     "$FIRMWARE_BASE/comp"
-
 set PKG_BASE      "$OFM_PATH/comp/base/pkg"
 set VER_PKG_BASE  "$OFM_PATH/comp/ver/vhdl_ver_tools/basics"
 
@@ -15,9 +12,9 @@ set COMPONENTS [list \
     [ list "DUT"          ".."             "FULL"] \
 ]
 
-set PACKAGES "$PACKAGES $PKG_BASE/math_pack.vhd"
-set PACKAGES "$PACKAGES $PKG_BASE/type_pack.vhd"
-set PACKAGES "$PACKAGES $PKG_BASE/dma_bus_pack.vhd"
-set PACKAGES "$PACKAGES $VER_PKG_BASE/basics_test_pkg.vhd"
+lappend PACKAGES "$PKG_BASE/math_pack.vhd"
+lappend PACKAGES "$PKG_BASE/type_pack.vhd"
+lappend PACKAGES "$PKG_BASE/dma_bus_pack.vhd"
+lappend PACKAGES "$VER_PKG_BASE/basics_test_pkg.vhd"
 
-set MOD "$MOD $ENTITY_BASE/testbench.vhd"
+lappend MOD "$ENTITY_BASE/testbench.vhd"

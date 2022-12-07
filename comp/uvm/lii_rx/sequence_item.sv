@@ -14,7 +14,7 @@
 class sequence_item #(DATA_WIDTH, META_WIDTH) extends uvm_sequence_item;
 
     // registration of object tools
-    `uvm_object_param_utils(lii_rx::sequence_item #(DATA_WIDTH, META_WIDTH))
+    `uvm_object_param_utils(uvm_lii_rx::sequence_item #(DATA_WIDTH, META_WIDTH))
 
     localparam BYTES_VLD_LENGTH = $clog2(DATA_WIDTH/8)+1;
 

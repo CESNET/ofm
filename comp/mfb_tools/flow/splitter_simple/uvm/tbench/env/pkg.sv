@@ -8,9 +8,11 @@
 `define SPLITTER_SIMPLE_GEN_ENV_SV
 
 package uvm_splitter_simple;
-    
+
     `include "uvm_macros.svh"
     import uvm_pkg::*;
+
+    `uvm_analysis_imp_decl(_reset)
 
     //`include "sequencer.sv"
     `include "model.sv"

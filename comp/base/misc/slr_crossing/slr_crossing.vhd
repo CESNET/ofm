@@ -14,7 +14,8 @@ entity SLR_CROSSING is
   generic(
     DATA_WIDTH      : integer := 64;
     USE_OUTREG      : boolean := true;
-    FAKE_CROSSING   : boolean := false  -- wires only (to disable crossing easily)
+    FAKE_CROSSING   : boolean := false;  -- wires only (to disable crossing easily)
+    DEVICE          : string := "7SERIES"
   );
   port(
     CLK            : in std_logic;
@@ -57,7 +58,8 @@ begin
     destination_endpoint : entity work.SLR_CROSSING_DST
       generic map (
         DATA_WIDTH => DATA_WIDTH,
-        USE_OUTREG => USE_OUTREG
+        USE_OUTREG => USE_OUTREG,
+        DEVICE     => DEVICE
       ) port map (
         CLK              => CLK,
         RESET            => OUT_RESET,

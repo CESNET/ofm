@@ -83,7 +83,6 @@ class sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) 
     // Visualize the sequence item to string
     function string convert2string();
         string output_string = "";
-        string data = "";
 
         $sformat(output_string, {"\n\tSRC_RDY: %b\n\tDST_RDY: %b\n"},
             src_rdy,

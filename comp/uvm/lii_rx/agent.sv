@@ -15,7 +15,7 @@
 class agent #(DATA_WIDTH, FAST_SOF, META_WIDTH) extends uvm_agent;
 
     // Registration of agent to databaze.
-    `uvm_component_param_utils(lii_rx::agent #(DATA_WIDTH, FAST_SOF, META_WIDTH))
+    `uvm_component_param_utils(uvm_lii_rx::agent #(DATA_WIDTH, FAST_SOF, META_WIDTH))
 
     // -----------------------
     // Variables.

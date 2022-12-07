@@ -22,7 +22,7 @@ class sequence_simple_rx #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(uvm_mvb::se
     constraint tr_cnt_cons {transaction_count inside {[transaction_count_min:transaction_count_max]};}
     // ------------------------------------------------------------------------
     // Constructor
-    function new(string name = "Simple sequence rx");
+    function new(string name = "Simple_sequence_rx");
         super.new(name);
     endfunction
 
@@ -39,10 +39,13 @@ class sequence_simple_rx #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(uvm_mvb::se
                 `uvm_fatal("sequence:", "Faile to randomize sequence.")
             end
             finish_item(req);
+            get_response(rsp);
 
-            while (req.src_rdy && !req.dst_rdy) begin
+            while (rsp.src_rdy && !rsp.dst_rdy) begin
                 start_item(req);
                 finish_item(req);
+
+                get_response(rsp);
             end
 
         end
@@ -55,7 +58,7 @@ class sequence_lib_rx#(ITEMS, ITEM_WIDTH) extends uvm_sequence_library#(uvm_mvb:
   `uvm_object_param_utils(uvm_mvb::sequence_lib_rx#(ITEMS, ITEM_WIDTH))
   `uvm_sequence_library_utils(uvm_mvb::sequence_lib_rx#(ITEMS, ITEM_WIDTH))
 
-    function new(string name = "");
+    function new(string name = "sequence_lib_rx");
         super.new(name);
         init_sequence_library();
     endfunction
@@ -68,7 +71,7 @@ class sequence_lib_rx#(ITEMS, ITEM_WIDTH) extends uvm_sequence_library#(uvm_mvb:
 endclass
 
 // This low level sequence define how can data looks like
-class sequence_simple_tx #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(uvm_mvb::sequence_item #(ITEMS, ITEM_WIDTH));
+class sequence_simple_tx #(ITEMS, ITEM_WIDTH) extends uvm_common::sequence_base#(config_sequence, uvm_mvb::sequence_item #(ITEMS, ITEM_WIDTH));
 
     // ------------------------------------------------------------------------
     // Registration of agent to databaze
@@ -87,7 +90,7 @@ class sequence_simple_tx #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(uvm_mvb::se
 
     // ------------------------------------------------------------------------
     // Constructor
-    function new(string name = "Simple sequence tx");
+    function new(string name = "Simple_sequence_tx");
         super.new(name);
         rdy = uvm_common::rand_rdy_rand::new();
     endfunction
@@ -103,13 +106,19 @@ class sequence_simple_tx #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(uvm_mvb::se
             void'(rdy.randomize());
             void'(req.randomize() with {dst_rdy == rdy.m_value;});
             finish_item(req);
+            get_response(rsp);
         end
     endtask
+
+    virtual function void config_set(CONFIG_TYPE cfg);
+        super.config_set(cfg);
+        rdy.bound_set(cfg.rdy_probability_min, cfg.rdy_probability_max);
+    endfunction
 endclass
 
 
 // This low level sequence that have every tact dst rdy at tx side
-class sequence_full_speed_tx #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(uvm_mvb::sequence_item #(ITEMS, ITEM_WIDTH));
+class sequence_full_speed_tx #(ITEMS, ITEM_WIDTH) extends uvm_common::sequence_base#(config_sequence, uvm_mvb::sequence_item #(ITEMS, ITEM_WIDTH));
     `uvm_object_param_utils(uvm_mvb::sequence_full_speed_tx #(ITEMS, ITEM_WIDTH))
 
     // ------------------------------------------------------------------------
@@ -123,7 +132,7 @@ class sequence_full_speed_tx #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(uvm_mvb
 
     // ------------------------------------------------------------------------
     // Constructor
-    function new(string name = "Simple sequence tx");
+    function new(string name = "sequence_full_speed_tx");
         super.new(name);
     endfunction
 
@@ -137,12 +146,13 @@ class sequence_full_speed_tx #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(uvm_mvb
             start_item(req);
             void'(req.randomize() with {dst_rdy == 1'b1;});
             finish_item(req);
+            get_response(rsp);
         end
     endtask
 
 endclass
 
-class sequence_stop_tx #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(uvm_mvb::sequence_item #(ITEMS, ITEM_WIDTH));
+class sequence_stop_tx #(ITEMS, ITEM_WIDTH) extends uvm_common::sequence_base#(config_sequence, uvm_mvb::sequence_item #(ITEMS, ITEM_WIDTH));
     `uvm_object_param_utils(uvm_mvb::sequence_stop_tx #(ITEMS, ITEM_WIDTH))
 
     // ------------------------------------------------------------------------
@@ -156,7 +166,7 @@ class sequence_stop_tx #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(uvm_mvb::sequ
 
     // ------------------------------------------------------------------------
     // Constructor
-    function new(string name = "Simple sequence tx");
+    function new(string name = "sequence_stop_tx");
         super.new(name);
     endfunction
 
@@ -170,6 +180,7 @@ class sequence_stop_tx #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(uvm_mvb::sequ
             start_item(req);
             void'(req.randomize() with {dst_rdy == 1'b0;});
             finish_item(req);
+            get_response(rsp);
         end
     endtask
 
@@ -179,18 +190,19 @@ endclass
 
 //////////////////////////////////////
 // TX LIBRARY
-class sequence_lib_tx#(ITEMS, ITEM_WIDTH) extends uvm_sequence_library#(sequence_item#(ITEMS, ITEM_WIDTH));
+class sequence_lib_tx#(ITEMS, ITEM_WIDTH) extends uvm_common::sequence_library#(config_sequence, sequence_item#(ITEMS, ITEM_WIDTH));
   `uvm_object_param_utils(uvm_mvb::sequence_lib_tx#(ITEMS, ITEM_WIDTH))
   `uvm_sequence_library_utils(uvm_mvb::sequence_lib_tx#(ITEMS, ITEM_WIDTH))
 
-    function new(string name = "");
+    function new(string name = "sequence_lib_tx");
         super.new(name);
         init_sequence_library();
     endfunction
 
     // subclass can redefine and change run sequences
     // can be useful in specific tests
-    virtual function void init_sequence();
+    virtual function void init_sequence(config_sequence param_cfg = null);
+        super.init_sequence(param_cfg);
         this.add_sequence(sequence_simple_tx#(ITEMS, ITEM_WIDTH)::get_type());
         this.add_sequence(sequence_full_speed_tx#(ITEMS, ITEM_WIDTH)::get_type());
         this.add_sequence(sequence_stop_tx#(ITEMS, ITEM_WIDTH)::get_type());

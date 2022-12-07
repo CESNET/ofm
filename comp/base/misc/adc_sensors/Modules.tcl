@@ -4,6 +4,8 @@
 #
 #  SPDX-License-Identifier: BSD-3-Clause
 
+set MOD "$MOD $ENTITY_BASE/sensor_interface.vhd"
+
 if { $ARCHGRP == "FULL" } {
     set MOD "$MOD $ENTITY_BASE/temp.ip"
     set MOD "$MOD $ENTITY_BASE/volt.ip"
@@ -13,5 +15,3 @@ if { $ARCHGRP == "FULL" } {
 } else {
     set MOD "$MOD $ENTITY_BASE/sensor_interface_empty.vhd"
 }
-
-set MOD "$MOD $ENTITY_BASE/sensor_interface.vhd"

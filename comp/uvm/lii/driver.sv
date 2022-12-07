@@ -15,7 +15,7 @@
 class driver_rx #(DATA_WIDTH, FAST_SOF, META_WIDTH) extends uvm_driver #(sequence_item #(DATA_WIDTH, META_WIDTH));
 
     // Register component to database.
-    `uvm_component_param_utils(lii::driver_rx #(DATA_WIDTH, FAST_SOF, META_WIDTH))
+    `uvm_component_param_utils(uvm_lii::driver_rx #(DATA_WIDTH, FAST_SOF, META_WIDTH))
 
     // Virtual interface of driver
     virtual lii_if #(DATA_WIDTH, FAST_SOF, META_WIDTH).driver_rx_cb vif;
@@ -76,7 +76,7 @@ class driver_tx #(DATA_WIDTH, FAST_SOF, META_WIDTH) extends uvm_driver #(sequenc
 
     // ------------------------------------------------------------------------
     // Register component to database
-    `uvm_component_param_utils(lii::driver_tx #(DATA_WIDTH, FAST_SOF, META_WIDTH))
+    `uvm_component_param_utils(uvm_lii::driver_tx #(DATA_WIDTH, FAST_SOF, META_WIDTH))
 
 
     // ------------------------------------------------------------------------
@@ -124,7 +124,7 @@ endclass
 class driver_rx_eth_phy #(DATA_WIDTH, FAST_SOF, META_WIDTH, MEAS) extends uvm_driver #(sequence_item #(DATA_WIDTH, META_WIDTH));
 
     // Register component to database.
-    `uvm_component_param_utils(lii::driver_rx_eth_phy #(DATA_WIDTH, FAST_SOF, META_WIDTH, MEAS))
+    `uvm_component_param_utils(uvm_lii::driver_rx_eth_phy #(DATA_WIDTH, FAST_SOF, META_WIDTH, MEAS))
 
     // Virtual interface of driver
     virtual lii_if #(DATA_WIDTH, FAST_SOF, META_WIDTH).driver_rx_eth_phy_cb vif;

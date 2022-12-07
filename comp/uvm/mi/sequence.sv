@@ -11,7 +11,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 // SLAVE SEQUENCE
 //////////////////////////////////////////////////////////////////////////////////
-class sequence_slave#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_sequence#(sequence_item_request#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH), sequence_item_respons #(DATA_WIDTH));
+class sequence_slave#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_sequence#(sequence_item_request#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH), sequence_item_response #(DATA_WIDTH));
     `uvm_object_param_utils(uvm_mi::sequence_slave #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
     `uvm_declare_p_sequencer(sequencer_slave #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH ));
 
@@ -177,7 +177,7 @@ class sequence_slave_burst#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends sequ
 endclass
 
 
-class sequence_slave_library#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_sequence_library#(sequence_item_request#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH), sequence_item_respons #(DATA_WIDTH));
+class sequence_slave_library#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_sequence_library#(sequence_item_request#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH), sequence_item_response #(DATA_WIDTH));
     `uvm_object_param_utils(uvm_mi::sequence_slave_library#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
     `uvm_sequence_library_utils(uvm_mi::sequence_slave_library#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
 
@@ -200,7 +200,7 @@ endclass
 ////////////////////////////////////////////////////////////////////////////////////
 // Master SEQUENCE
 ////////////////////////////////////////////////////////////////////////////////////
-class sequence_master#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_sequence#(sequence_item_respons #(DATA_WIDTH), sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH));
+class sequence_master#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_sequence#(sequence_item_response #(DATA_WIDTH), sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH));
     `uvm_object_param_utils(uvm_mi::sequence_master #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
     `uvm_declare_p_sequencer(sequencer_master #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH ));
 
@@ -234,7 +234,7 @@ class sequence_master#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_seque
     endtask
 
     task body;
-        req = sequence_item_respons #(DATA_WIDTH)::type_id::create("req");
+        req = sequence_item_response #(DATA_WIDTH)::type_id::create("req");
         repeat(transactions) begin
             start_item(req);
             if(req.randomize() with {(p_sequencer.tr_rd.size() == 0) -> drdy == 0;} == 0) begin
@@ -259,7 +259,7 @@ class sequence_master_burst#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends seq
     endfunction
 
     task body;
-        req = sequence_item_respons #(DATA_WIDTH)::type_id::create("req");
+        req = sequence_item_response #(DATA_WIDTH)::type_id::create("req");
         repeat(transactions) begin
             int unsigned rand_req;
             start_item(req);
@@ -290,7 +290,7 @@ class sequence_master_max#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends seque
     endfunction
 
     task body;
-        req = sequence_item_respons #(DATA_WIDTH)::type_id::create("req");
+        req = sequence_item_response #(DATA_WIDTH)::type_id::create("req");
         repeat(transactions) begin
             int unsigned rand_req;
             start_item(req);
@@ -311,7 +311,7 @@ class sequence_master_max#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends seque
 endclass
 
 
-class sequence_master_library#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_sequence_library#(sequence_item_request#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH), sequence_item_respons #(DATA_WIDTH));
+class sequence_master_library#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_sequence_library#(sequence_item_request#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH), sequence_item_response #(DATA_WIDTH));
     `uvm_object_param_utils(uvm_mi::sequence_master_library#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
     `uvm_sequence_library_utils(uvm_mi::sequence_master_library#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
 

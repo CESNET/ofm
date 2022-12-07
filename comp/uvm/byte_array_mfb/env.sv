@@ -86,22 +86,24 @@ class env_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends uvm_env;
         reset_sync.push_back(m_logic_vector_monitor.reset_sync);
 
         if (m_config.active == UVM_ACTIVE) begin
-            m_sequencer.m_data = m_byte_array_agent.m_sequencer;
-            m_sequencer.m_meta = m_logic_vector_agent.m_sequencer;
+            m_sequencer.m_data     = m_byte_array_agent.m_sequencer;
+            m_sequencer.m_meta     = m_logic_vector_agent.m_sequencer;
             m_sequencer.meta_behav = m_config.meta_behav;
             reset_sync.push_back(m_mfb_agent.m_sequencer.reset_sync);
+            reset_sync.push_back(m_sequencer.m_data.reset_sync);
+            //reset_sync.push_back(m_sequencer.m_meta.reset_sync);
             uvm_config_db #(sequencer_rx #(META_WIDTH))::set(this, "m_mfb_agent.m_sequencer", "hl_sqr", m_sequencer);
         end
     endfunction
 
     virtual task run_phase(uvm_phase phase);
         if (m_config.active == UVM_ACTIVE) begin
-            sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) mfb_seq;
+            uvm_byte_array_mfb::sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) mfb_seq;
 
-            mfb_seq = sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH)::type_id::create("mfb_seq", this);
+            mfb_seq = uvm_byte_array_mfb::sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH)::type_id::create("mfb_seq", this);
             mfb_seq.min_random_count = 20;
             mfb_seq.max_random_count = 100;
-            mfb_seq.init_sequence();
+            mfb_seq.init_sequence(m_config.seq_cfg);
 
             forever begin
                 //mfb_seq.set_starting_phase(phase);

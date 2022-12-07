@@ -14,7 +14,7 @@ class agent_slave#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_agent;
 
 
     uvm_analysis_port #(sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)) analysis_port_rq;
-    uvm_analysis_port #(sequence_item_respons #(DATA_WIDTH))                         analysis_port_rs;
+    uvm_analysis_port #(sequence_item_response #(DATA_WIDTH))                         analysis_port_rs;
 
     sequencer_slave #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH) m_sequencer;
     driver_slave    #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH) m_driver;
@@ -68,7 +68,7 @@ class agent_master #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_agent;
 
     //analysis ports
     uvm_analysis_port #(sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)) analysis_port_rq;
-    uvm_analysis_port #(sequence_item_respons #(DATA_WIDTH))                         analysis_port_rs;
+    uvm_analysis_port #(sequence_item_response #(DATA_WIDTH))                         analysis_port_rs;
 
     // Agent base components sequencer, driver, monitor.
     sequencer_master #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH) m_sequencer;

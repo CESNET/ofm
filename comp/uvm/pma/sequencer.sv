@@ -13,7 +13,7 @@
 
 class sequencer #(DATA_WIDTH) extends uvm_sequencer #(sequence_item #(DATA_WIDTH));
 
-    `uvm_component_param_utils(pma::sequencer #(DATA_WIDTH))
+    `uvm_component_param_utils(uvm_pma::sequencer #(DATA_WIDTH))
 
     function new(string name = "sequencer", uvm_component parent = null);
         super.new(name, parent);

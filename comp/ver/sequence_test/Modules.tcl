@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 # Set paths
-set SV_COMMON   "$FIRMWARE_BASE/comp/ver"
+set SV_COMMON   "$OFM_PATH/comp/ver"
 set SV_MVB	"$OFM_PATH/comp/mvb_tools/ver"  
 set COMPONENTS [list \
       [ list "SV_COMMON"   $SV_COMMON  "FULL"] \

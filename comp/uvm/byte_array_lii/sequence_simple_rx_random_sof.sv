@@ -19,7 +19,7 @@ import crc32_ethernet_pkg::*;
 // In the end of the packet is generate CRC and last chunk of data
 class sequence_simple_rx_random_sof #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH) extends sequence_simple #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH);
 
-    `uvm_object_param_utils(byte_array_lii_env::sequence_simple_rx_random_sof #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH))
+    `uvm_object_param_utils(uvm_byte_array_lii::sequence_simple_rx_random_sof #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH))
 
     // -----------------------
     // Parameters.
@@ -27,7 +27,8 @@ class sequence_simple_rx_random_sof #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WI
 
     localparam BYTE_NUM = DATA_WIDTH/8;
 
-    common::rand_length number_of_idles;
+    //common::rand_length number_of_idles;
+    rand int unsigned            number_of_idles;
 
     localparam BYTES_VLD_LENGTH        = $clog2(DATA_WIDTH/8)+1;
     logic [BYTES_VLD_LENGTH : 0] bytes = '0;
@@ -37,7 +38,7 @@ class sequence_simple_rx_random_sof #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WI
     // Constructor - creates new instance of this class
     function new(string name = "sequence");
         super.new("sequence_simple_rx_random_sof");
-        number_of_idles = common::rand_length_rand::new;
+        //number_of_idles = common::rand_length_rand::new;
     endfunction
 
     // Method which define how the transaction will look.
@@ -53,8 +54,9 @@ class sequence_simple_rx_random_sof #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WI
             // First chunk has SOF = 1
             if (i == 0) begin
                 // Gaps generator logic
-                while (number_of_idles.m_value != 0) begin
-                    number_of_idles.m_value--;
+                void'(std::randomize(number_of_idles) with{number_of_idles inside {[20 : 50]}; (number_of_idles % 2 == 0);});
+                while (number_of_idles != 0) begin
+                    number_of_idles--;
                     finish_item(req);
                     send_same();
                     start_item(req);
@@ -79,7 +81,7 @@ class sequence_simple_rx_random_sof #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WI
                 end
             end
 
-            if (number_of_idles.m_value == 0) begin
+            if (number_of_idles == 0) begin
 
                 if ((frame.data.size() % BYTE_NUM) == 0) begin
                     bytes = BYTE_NUM;

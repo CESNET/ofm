@@ -9,16 +9,26 @@
 */
 
 
-`ifndef RESET_PKG
-`define RESET_PKG
+`ifndef COMMON_PKG
+`define COMMON_PKG
 
 package uvm_common;
 
     `include "uvm_macros.svh"
     import uvm_pkg::*;
 
+    `uvm_analysis_imp_decl(_model)
+    `uvm_analysis_imp_decl(_dut)
+
     `include "rand_rdy.sv"
     `include "rand_length.sv"
+    `include "sequence.sv"
+    `include "sequence_library.sv"
+    `include "model_item.sv"
+    `include "comparer_base.sv"
+    `include "comparer.sv"
+    `include "stats.sv"
+    `include "prog.sv"
 endpackage
 
 

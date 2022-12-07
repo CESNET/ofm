@@ -11,25 +11,25 @@
 //MAC
 
 // Sequence which generate random rdy
-class sequence_simple_tx_random_rdy #(DATA_WIDTH, META_WIDTH) extends uvm_sequence #(lii::sequence_item #(DATA_WIDTH, META_WIDTH));
+class sequence_simple_tx_random_rdy #(DATA_WIDTH, META_WIDTH) extends uvm_sequence #(uvm_lii::sequence_item #(DATA_WIDTH, META_WIDTH));
 
     // ------------------------------------------------------------------------
     // Registration of agent to databaze
-    `uvm_object_param_utils(byte_array_lii_env::sequence_simple_tx_random_rdy #(DATA_WIDTH, META_WIDTH))
-    common::rand_rdy                 rdy;
+    `uvm_object_param_utils(uvm_byte_array_lii::sequence_simple_tx_random_rdy #(DATA_WIDTH, META_WIDTH))
+    uvm_common::rand_rdy rdy;
 
     // ------------------------------------------------------------------------
     // Constructor
-    function new(string name = "Simple sequence tx");
+    function new(string name = "sequence_simple_tx_random_rdy");
         super.new(name);
-        rdy = common::rand_rdy_rand::new();
+        rdy = uvm_common::rand_rdy_rand::new();
     endfunction
 
     // ------------------------------------------------------------------------
     // Generates transactions
     task body;
         // Create a request for sequence item
-        req = lii::sequence_item #(DATA_WIDTH, META_WIDTH)::type_id::create("req");
+        req = uvm_lii::sequence_item #(DATA_WIDTH, META_WIDTH)::type_id::create("req");
         forever begin
             start_item(req);
             if(!req.randomize()) `uvm_fatal(this.get_full_name(), "failed to radnomize");

@@ -11,7 +11,7 @@
 `ifndef LII_PKG
 `define LII_PKG
 
-package lii;
+package uvm_lii;
 
     `include "uvm_macros.svh"
     import uvm_pkg::*;

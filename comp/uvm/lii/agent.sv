@@ -15,7 +15,7 @@
 class agent_rx #(DATA_WIDTH, FAST_SOF, META_WIDTH) extends uvm_agent;
 
     // Registration of agent to databaze.
-    `uvm_component_param_utils(lii::agent_rx #(DATA_WIDTH, FAST_SOF, META_WIDTH))
+    `uvm_component_param_utils(uvm_lii::agent_rx #(DATA_WIDTH, FAST_SOF, META_WIDTH))
 
     // -----------------------
     // Variables.
@@ -82,7 +82,7 @@ endclass
 class agent_tx #(DATA_WIDTH, FAST_SOF, META_WIDTH) extends uvm_agent;
 
     // Registration of agent to databaze.
-    `uvm_component_param_utils(lii::agent_tx #(DATA_WIDTH, FAST_SOF, META_WIDTH))
+    `uvm_component_param_utils(uvm_lii::agent_tx #(DATA_WIDTH, FAST_SOF, META_WIDTH))
 
     // -----------------------
     // Variables.
@@ -149,7 +149,7 @@ endclass
 class agent_rx_eth_phy #(DATA_WIDTH, FAST_SOF, META_WIDTH, MEAS) extends uvm_agent;
 
     // Registration of agent to databaze.
-    `uvm_component_param_utils(lii::agent_rx_eth_phy #(DATA_WIDTH, FAST_SOF, META_WIDTH, MEAS))
+    `uvm_component_param_utils(uvm_lii::agent_rx_eth_phy #(DATA_WIDTH, FAST_SOF, META_WIDTH, MEAS))
 
     // -----------------------
     // Variables.

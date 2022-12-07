@@ -18,7 +18,8 @@ generic(
     MVB_ITEM_WIDTH  : integer := 128;
 
     USE_OUTREG      : boolean:= true;
-    FAKE_CROSSING   : boolean:= false
+    FAKE_CROSSING   : boolean:= false;
+    DEVICE          : string := "ULTRASCALE"
 );
 port(
     CLK        : in std_logic;
@@ -59,7 +60,8 @@ begin
     generic map(
         DATA_WIDTH      => CROSSING_WIDTH,
         USE_OUTREG      => USE_OUTREG,
-        FAKE_CROSSING   => FAKE_CROSSING
+        FAKE_CROSSING   => FAKE_CROSSING,
+        DEVICE          => DEVICE
     ) port map(
         CLK         => CLK,
         IN_RESET     => RX_RESET,

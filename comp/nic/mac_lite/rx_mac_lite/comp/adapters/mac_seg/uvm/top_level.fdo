@@ -16,9 +16,8 @@ set COMPONENTS [list \
 
 
 # Enable Code Coverage
-set SIM_FLAGS(CODE_COVERAGE) "true"
-
-set SIM_FLAGS(EXTRA_VFLAGS) "+UVM_TESTNAME=test::base -uvmcontrol=all +UVM_MAX_QUIT_COUNT=1"
+set SIM_FLAGS(CODE_COVERAGE) false
+set SIM_FLAGS(EXTRA_VFLAGS) "+UVM_TESTNAME=test::base +UVM_VERBOSITY=UVM_NONE -uvmcontrol=all +UVM_MAX_QUIT_COUNT=1"
 
 # Global include file for compilation
 source "$FIRMWARE_BASE/build/Modelsim.inc.fdo"
@@ -30,9 +29,11 @@ set NumericStdNoWarnings 1
 
 #run verification
 nb_sim_run
-#restart -f
-#run -all
 
 # Reports
-# Uncomment lines below to generate html coce coverage report
-#coverage report -html -output cov_html -instance=/testbench/DUT_U -source -details -assert -directive -cvg -code bcefst -verbose -threshL 50 -threshH 90
+if {$SIM_FLAGS(CODE_COVERAGE)} {
+    coverage save -instance /testbench/DUT -assert -directive -cvg -code bcefst -verbose actual.ucdb
+    #vcover report -html -output cov_html -details -threshL 50 -threshH 90 actual.ucdb
+}
+
+quit

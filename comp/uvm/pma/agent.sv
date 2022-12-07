@@ -15,7 +15,7 @@
 class agent #(DATA_WIDTH) extends uvm_agent;
 
     // Registration of agent to databaze.
-    `uvm_component_param_utils(pma::agent #(DATA_WIDTH))
+    `uvm_component_param_utils(uvm_pma::agent #(DATA_WIDTH))
 
     // -----------------------
     // Variables.

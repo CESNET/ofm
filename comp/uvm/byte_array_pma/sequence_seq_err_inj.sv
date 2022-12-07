@@ -10,10 +10,10 @@
 */
 
 // This low level sequence define how can data looks like.
-class sequence_seq_err_inj #(DATA_WIDTH) extends uvm_sequence #(pma::sequence_item #(DATA_WIDTH));
+class sequence_seq_err_inj #(DATA_WIDTH) extends uvm_sequence #(uvm_pma::sequence_item #(DATA_WIDTH));
 
-    `uvm_object_param_utils(byte_array_pma_env::sequence_seq_err_inj #(DATA_WIDTH))
-    `uvm_declare_p_sequencer(pma::sequencer #(DATA_WIDTH))
+    `uvm_object_param_utils(uvm_byte_array_pma::sequence_seq_err_inj #(DATA_WIDTH))
+    `uvm_declare_p_sequencer(uvm_pma::sequencer #(DATA_WIDTH))
 
     // -----------------------
     // Parameters.
@@ -24,8 +24,7 @@ class sequence_seq_err_inj #(DATA_WIDTH) extends uvm_sequence #(pma::sequence_it
 
     logic [DATA_WIDTH-1 : 0]     data = 0;
     logic [(DATA_WIDTH-8)-1 : 0] start_data = 0;
-    //logic [57 : 0]               scramble_reg = 58'h0;
-    logic [8-1 : 0]              state = pma::BT_C_C;
+    logic [8-1 : 0]              state = uvm_pma::BT_C_C;
     logic [8-1 : 0]              terminate;
     logic [8-1 : 0]              start_seq;
     bit                          done = 0;
@@ -33,11 +32,11 @@ class sequence_seq_err_inj #(DATA_WIDTH) extends uvm_sequence #(pma::sequence_it
     int                          bytes_vld = 0;
     rand int unsigned            number_of_idles;
 
-    byte_array_pma_env::data_reg simple_reg;
+    uvm_byte_array_pma::data_reg simple_reg;
     // High level transaction
-    byte_array::sequence_item frame;
+    uvm_byte_array::sequence_item frame;
     // High level sequencer
-    byte_array_pma_env::sequencer hi_sqr;
+    uvm_byte_array_pma::sequencer hi_sqr;
 
     //////////////////////////////////
     // RANDOMIZATION
@@ -67,43 +66,43 @@ class sequence_seq_err_inj #(DATA_WIDTH) extends uvm_sequence #(pma::sequence_it
     // Generates transactions
     task body;
 
-        if(!uvm_config_db #(byte_array_pma_env::sequencer)::get(p_sequencer, "", "hi_sqr", hi_sqr)) begin
+        if(!uvm_config_db #(uvm_byte_array_pma::sequencer)::get(p_sequencer, "", "hi_sqr", hi_sqr)) begin
             `uvm_fatal(get_type_name(), "Unable to get configuration object")
         end
 
-        if(!uvm_config_db #(byte_array_pma_env::data_reg)::get(p_sequencer, "", "simple_reg", simple_reg)) begin
+        if(!uvm_config_db #(uvm_byte_array_pma::data_reg)::get(p_sequencer, "", "simple_reg", simple_reg)) begin
             simple_reg = new();
-            uvm_config_db #(byte_array_pma_env::data_reg)::set(p_sequencer, "", "simple_reg", simple_reg);
+            uvm_config_db #(uvm_byte_array_pma::data_reg)::set(p_sequencer, "", "simple_reg", simple_reg);
         end
         `uvm_info(get_full_name(), "sequence_seq_err_inj is running", UVM_LOW)
         // Create a request for sequence item
-        req = pma::sequence_item #(DATA_WIDTH)::type_id::create("req");
+        req = uvm_pma::sequence_item #(DATA_WIDTH)::type_id::create("req");
         while (hl_transactions > 0 || frame != null) begin
             try_get();
-            void'(std::randomize(number_of_idles) with{number_of_idles inside {[6 : 30]}; (number_of_idles % 2 == 0);});
+            void'(std::randomize(number_of_idles) with{number_of_idles inside {[20 : 50]}; (number_of_idles % 2 == 0);});
 
             if (frame != null) begin
                 if (frame.data.size() != 0) begin
                     while (high_level_tr_done == 1'b0) begin
                         case (state)
-                            pma::BT_C_C :
+                            uvm_pma::BT_C_C :
                                 for (int i=0; i < number_of_idles; i++) begin
                                     send_idle();
                                     if(i == (number_of_idles - 1)) begin
-                                        state = pma::BT_S_D;
+                                        state = uvm_pma::BT_S_D;
                                         done  = 0;
                                     end
                                 end
-                            pma::BT_S_D : send_start(frame);
+                            uvm_pma::BT_S_D : send_start(frame);
                             8'b10000000 : send_data(frame);
-                            pma::BT_T_C : send_terminate(frame);
+                            uvm_pma::BT_T_C : send_terminate(frame);
                         endcase
                     end
-                    void'(std::randomize(number_of_idles) with{number_of_idles inside {[6 : 30]}; (number_of_idles % 2 == 0);});
+                    void'(std::randomize(number_of_idles) with{number_of_idles inside {[20 : 50]}; (number_of_idles % 2 == 0);});
                     for (int i=0; i < number_of_idles; i++) begin
                         send_idle();
                         if(i == (number_of_idles - 1)) begin
-                            state = pma::BT_C_C;
+                            state = uvm_pma::BT_C_C;
                             done  = 0;
                         end
                     end
@@ -123,35 +122,30 @@ class sequence_seq_err_inj #(DATA_WIDTH) extends uvm_sequence #(pma::sequence_it
     task send_idle();
         start_item(req);
         req.block_lock = 1'b1;
-        while (!simple_reg.data_vld) begin
-            req.data_vld = 1'b1;
-            simple_reg.data_vld = req.data_vld;
-            finish_item(req);
-            start_item(req);
-        end
+        send_same();
         
         if (done == 1'b0) begin
-            req.hdr     = pma::C_HDR;
+            req.hdr     = uvm_pma::C_HDR;
             req.hdr_vld = 1'b1;
-            req.data    = {IDLE_C, IDLE_C, IDLE_C, 3'b000, pma::BT_C_C};
+            req.data    = {IDLE_C, IDLE_C, IDLE_C, 3'b000, uvm_pma::BT_C_C};
             done        = 1'b1;
         end else begin
             req.hdr_vld = 1'b0;
             req.data    = {IDLE_C, IDLE_C, IDLE_C, IDLE_C, 4'b0000};
-            state       = pma::BT_S_D;
+            state       = uvm_pma::BT_S_D;
             done        = 1'b0;
         end
         scramble(req);
         finish_item(req);
 
         // Send error data once per 8 transactions.
-        if(((simple_reg.it % 8) == 0) && req.hdr_vld == 1'b0) begin
+        if((((simple_reg.it % 8) == 0) && simple_reg.it != 0) && req.hdr_vld == 1'b0) begin
            send_error_data();
         end
-        if (((simple_reg.it % 16) == 0) && req.hdr_vld == 1'b0) begin
+        if ((((simple_reg.it % 16) == 0) && simple_reg.it != 0) && req.hdr_vld == 1'b0) begin
             send_error_terminate();
         end
-        if(((simple_reg.it % 18) == 0) && req.hdr_vld == 1'b0) begin
+        if((((simple_reg.it % 18) == 0) && simple_reg.it != 0) && req.hdr_vld == 1'b0) begin
             send_error_seq();
             return;
         end
@@ -160,28 +154,18 @@ class sequence_seq_err_inj #(DATA_WIDTH) extends uvm_sequence #(pma::sequence_it
 // Tests for error SEQERR injection
     task send_error_idle();
         start_item(req);
-        while (!simple_reg.data_vld) begin
-            req.data_vld = 1'b1;
-            simple_reg.data_vld = req.data_vld;
-            finish_item(req);
-            start_item(req);
-        end
+        send_same();
 
-        req.hdr     = pma::C_HDR;
+        req.hdr     = uvm_pma::C_HDR;
         req.hdr_vld = 1'b1;
-        req.data    = {IDLE_C, IDLE_C, IDLE_C, 3'b000, pma::BT_C_C};
+        req.data    = {IDLE_C, IDLE_C, IDLE_C, 3'b000, uvm_pma::BT_C_C};
 
         scramble(req);
         finish_item(req);
 
         start_item(req);
 
-        while (!simple_reg.data_vld) begin
-            req.data_vld = 1'b1;
-            simple_reg.data_vld = req.data_vld;
-            finish_item(req);
-            start_item(req);
-        end
+        send_same();
 
         req.hdr_vld = 1'b0;
         req.data    = {IDLE_C, IDLE_C, IDLE_C, IDLE_C, 4'b0000};
@@ -191,17 +175,12 @@ class sequence_seq_err_inj #(DATA_WIDTH) extends uvm_sequence #(pma::sequence_it
     endtask
 
     task send_error_data();
-        state     = pma::BT_C_C;
+        state     = uvm_pma::BT_C_C;
 
         start_item(req);
-        while (!simple_reg.data_vld) begin
-            req.data_vld = 1'b1;
-            simple_reg.data_vld = req.data_vld;
-            finish_item(req);
-            start_item(req);
-        end
+        send_same();
 
-        req.hdr     = pma::D_HDR;
+        req.hdr     = uvm_pma::D_HDR;
         req.hdr_vld = 1'b1;
         void'(std::randomize(req.data));
 
@@ -209,12 +188,7 @@ class sequence_seq_err_inj #(DATA_WIDTH) extends uvm_sequence #(pma::sequence_it
         finish_item(req);
 
         start_item(req);
-        while (!simple_reg.data_vld) begin
-            req.data_vld = 1'b1;
-            simple_reg.data_vld = req.data_vld;
-            finish_item(req);
-            start_item(req);
-        end
+        send_same();
 
         req.hdr_vld = 1'b0;
         void'(std::randomize(req.data));
@@ -226,37 +200,30 @@ class sequence_seq_err_inj #(DATA_WIDTH) extends uvm_sequence #(pma::sequence_it
 
 
     task send_error_terminate();
-        state     = pma::BT_C_C;
-        void'(std::randomize(terminate) with {terminate inside {pma::BT_T_C,  pma::BT_D1_C,
-                                                          pma::BT_D2_C, pma::BT_D3_C,
-                                                          pma::BT_D4_C, pma::BT_D5_C,
-                                                          pma::BT_D6_C, pma::BT_D7_T};});
+        state     = uvm_pma::BT_C_C;
+        void'(std::randomize(terminate) with {terminate inside {uvm_pma::BT_T_C,  uvm_pma::BT_D1_C,
+                                                          uvm_pma::BT_D2_C, uvm_pma::BT_D3_C,
+                                                          uvm_pma::BT_D4_C, uvm_pma::BT_D5_C,
+                                                          uvm_pma::BT_D6_C, uvm_pma::BT_D7_T};});
 
         start_item(req);
-        while (!simple_reg.data_vld) begin
-            req.data_vld = 1'b1;
-            simple_reg.data_vld = req.data_vld;
-            finish_item(req);
-            start_item(req);
-        end
+        send_same();
 
-        req.hdr     = pma::C_HDR;
+        req.hdr     = uvm_pma::C_HDR;
         req.hdr_vld = 1'b1;
 
         // Data are divided to 8 bytes long chunks, which are sended to driver.
         void'(std::randomize(start_data));
-        req.data= {start_data, terminate};
+        req.data = {start_data, terminate};
+
+        req.data[31 : 8] = start_data;
+        req.data[7 : 0]  = terminate;
 
         scramble(req);
         finish_item(req);
 
         start_item(req);
-        while (!simple_reg.data_vld) begin
-            req.data_vld = 1'b1;
-            simple_reg.data_vld = req.data_vld;
-            finish_item(req);
-            start_item(req);
-        end
+        send_same();
 
         req.hdr_vld = 1'b0;
         void'(std::randomize(req.data));
@@ -268,17 +235,12 @@ class sequence_seq_err_inj #(DATA_WIDTH) extends uvm_sequence #(pma::sequence_it
 
     task send_error_start();
 
-        void'(std::randomize(start_seq) with {start_seq inside {pma::BT_C_S, pma::BT_S_D, pma::BT_O_S};});
+        void'(std::randomize(start_seq) with {start_seq inside {uvm_pma::BT_C_S, uvm_pma::BT_S_D, uvm_pma::BT_O_S};});
 
         start_item(req);
-        while (!simple_reg.data_vld) begin
-            req.data_vld = 1'b1;
-            simple_reg.data_vld = req.data_vld;
-            finish_item(req);
-            start_item(req);
-        end
+        send_same();
 
-        req.hdr     = pma::C_HDR;
+        req.hdr     = uvm_pma::C_HDR;
         req.hdr_vld = 1'b1;
 
         // Data are divided to 8 bytes long chunks, which are sended to driver.
@@ -289,12 +251,7 @@ class sequence_seq_err_inj #(DATA_WIDTH) extends uvm_sequence #(pma::sequence_it
         finish_item(req);
 
         start_item(req);
-        while (!simple_reg.data_vld) begin
-            req.data_vld = 1'b1;
-            simple_reg.data_vld = req.data_vld;
-            finish_item(req);
-            start_item(req);
-        end
+        send_same();
 
         req.hdr_vld = 1'b0;
         void'(std::randomize(req.data));
@@ -306,17 +263,12 @@ class sequence_seq_err_inj #(DATA_WIDTH) extends uvm_sequence #(pma::sequence_it
     task send_error_seq();
 
         //void'(std::randomize(start_seq));
-        start_seq = pma::UNKNOWN;
+        start_seq = uvm_pma::UNKNOWN;
 
         start_item(req);
-        while (!simple_reg.data_vld) begin
-            req.data_vld = 1'b1;
-            simple_reg.data_vld = req.data_vld;
-            finish_item(req);
-            start_item(req);
-        end
+        send_same();
 
-        req.hdr     = pma::C_HDR;
+        req.hdr     = uvm_pma::C_HDR;
         req.hdr_vld = 1'b1;
 
         // Data are divided to 8 bytes long chunks, which are sended to driver.
@@ -327,12 +279,7 @@ class sequence_seq_err_inj #(DATA_WIDTH) extends uvm_sequence #(pma::sequence_it
         finish_item(req);
 
         start_item(req);
-        while (!simple_reg.data_vld) begin
-            req.data_vld = 1'b1;
-            simple_reg.data_vld = req.data_vld;
-            finish_item(req);
-            start_item(req);
-        end
+        send_same();
 
         req.hdr_vld = 1'b0;
         void'(std::randomize(req.data));
@@ -343,28 +290,23 @@ class sequence_seq_err_inj #(DATA_WIDTH) extends uvm_sequence #(pma::sequence_it
 
 
     // Method for generation of start sequence.
-    task send_start(byte_array::sequence_item frame);
-        void'(std::randomize(start_seq) with {start_seq inside {pma::BT_C_S, pma::BT_S_D, pma::BT_O_S};});
+    task send_start(uvm_byte_array::sequence_item frame);
+        void'(std::randomize(start_seq) with {start_seq inside {uvm_pma::BT_C_S, uvm_pma::BT_S_D, uvm_pma::BT_O_S};});
 
         start_item(req);
-        while (!simple_reg.data_vld) begin
-            req.data_vld = 1'b1;
-            simple_reg.data_vld = req.data_vld;
-            finish_item(req);
-            start_item(req);
-        end
+        send_same();
 
         if (done == 1'b0) begin
-            req.hdr     = pma::C_HDR;
+            req.hdr     = uvm_pma::C_HDR;
             req.hdr_vld = 1'b1;
-            if (start_seq == pma::BT_S_D) begin
+            if (start_seq == uvm_pma::BT_S_D) begin
                 start_data  = {<< byte{frame.data[0 +: 3]}};
                 req.data    = {start_data, start_seq};
             end
-            else if (start_seq == pma::BT_C_S) begin
+            else if (start_seq == uvm_pma::BT_C_S) begin
                 req.data    = {24'b000000000000000000000000, start_seq};
             end
-            else if (start_seq == pma::BT_O_S) begin
+            else if (start_seq == uvm_pma::BT_O_S) begin
                 void'(std::randomize(start_data));
                 req.data    = {start_data, start_seq};
             end
@@ -385,15 +327,10 @@ class sequence_seq_err_inj #(DATA_WIDTH) extends uvm_sequence #(pma::sequence_it
             for (int i = ((BYTE_NUM-1)+BYTE_NUM); i < length; i = i + BYTE_NUM) begin
                 // Together with finish_item initiate operation of sequence item (handshake with driver).
                 start_item(req);
-                while (!simple_reg.data_vld) begin
-                    req.data_vld = 1'b1;
-                    simple_reg.data_vld = req.data_vld;
-                    finish_item(req);
-                    start_item(req);
-                end
+                send_same();
 
                 if(i % 8 == 7) begin
-                    req.hdr     = pma::D_HDR;
+                    req.hdr     = uvm_pma::D_HDR;
                     req.hdr_vld = 1'b1;
                 end else begin
                     req.hdr_vld = 1'b0;
@@ -405,222 +342,190 @@ class sequence_seq_err_inj #(DATA_WIDTH) extends uvm_sequence #(pma::sequence_it
                 scramble(req);
                 finish_item(req);
 
-                if(((simple_reg.it % 12) == 0) && req.hdr_vld == 1'b0) begin
+                if((((simple_reg.it % 12) == 0) && simple_reg.it != 0) && req.hdr_vld == 1'b0) begin
                     send_error_idle();
+                    state = uvm_pma::BT_C_C;
+                    high_level_tr_done = 1'b1;
                     return;
                 end
-                if(((simple_reg.it % 20) == 0) && req.hdr_vld == 1'b0) begin
+                if((((simple_reg.it % 20) == 0) && simple_reg.it != 0) && req.hdr_vld == 1'b0) begin
                     send_error_start();
+                    state = uvm_pma::BT_C_C;
+                    high_level_tr_done = 1'b1;
                     return;
                 end
 
-                if(((simple_reg.it % 16) == 0) && req.hdr_vld == 1'b0) begin
+                if((((simple_reg.it % 16) == 0) && simple_reg.it != 0) && req.hdr_vld == 1'b0) begin
                     send_error_seq();
+                    state = uvm_pma::BT_C_C;
+                    high_level_tr_done = 1'b1;
                     return;
                 end
             end
     endtask
 
     // Method which define how the transaction will look.
-    task send_data(byte_array::sequence_item frame);
+    task send_data(uvm_byte_array::sequence_item frame);
 
         if ((bytes_vld % 8) == 0) begin
             insert_data(frame.data.size());
             bytes_vld = 0;
-            state     = pma::BT_T_C;
+            state     = uvm_pma::BT_T_C;
         end else begin
+            state = uvm_pma::BT_T_C;
             insert_data(frame.data.size() - bytes_vld);
-            state = pma::BT_T_C;
         end
     endtask
 
-    task send_terminate(byte_array::sequence_item frame);
+    task send_terminate(uvm_byte_array::sequence_item frame);
         int i = frame.data.size() - bytes_vld;
         int j = frame.data.size() - bytes_vld + (BYTE_NUM-1);
         start_item(req);
-        while (!simple_reg.data_vld) begin
-            req.data_vld = 1'b1;
-            simple_reg.data_vld = req.data_vld;
-            finish_item(req);
-            start_item(req);
-        end
+        send_same();
 
         if (bytes_vld == 0) begin
             if (done == 1'b0) begin
-                req.hdr           = pma::C_HDR;
+                req.hdr           = uvm_pma::C_HDR;
                 req.hdr_vld       = 1'b1;
-                req.data[7 : 0] = pma::BT_T_C;
+                req.data[7 : 0] = uvm_pma::BT_T_C;
                 req.data[31 : 8]  = 24'b000000000000000000000000;
                 done              = 1'b1;
-                //$write("DATA TERM 0 part 1: %h\n", req.data);
-                //`uvm_info(this.get_full_name(),frame.convert2string() ,UVM_LOW)
             end else begin
                 req.data           = {IDLE_C, IDLE_C, IDLE_C, IDLE_C, 4'b0000};
                 req.hdr_vld        = 1'b0;
                 high_level_tr_done = 1'b1;
                 done               = 1'b0;
-                state              = pma::BT_C_C;
-                //$write("DATA TERM 0 part 2: %h\n", req.data);
+                state              = uvm_pma::BT_C_C;
             end
         end
 
         if (bytes_vld == 1) begin
             if (done == 1'b0) begin
-                req.hdr           = pma::C_HDR;
+                req.hdr           = uvm_pma::C_HDR;
                 req.hdr_vld       = 1'b1;
                 data              = {<< byte{frame.data[i +: 1]}};
                 req.data[15 : 8] = data[31 : 24];
                 req.data[31 : 16]  = 16'b0000000000000000;
-                req.data[7 : 0] = pma::BT_D1_C;
+                req.data[7 : 0] = uvm_pma::BT_D1_C;
                 done              = 1'b1;
-                //$write("DATA TERM 1 part 1: %h\n", req.data);
-                //`uvm_info(this.get_full_name(),frame.convert2string() ,UVM_LOW)
             end else begin
                 req.data           = {IDLE_C, IDLE_C, IDLE_C, IDLE_C, 4'b0000};
                 req.hdr_vld        = 1'b0;
                 high_level_tr_done = 1'b1;
                 done               = 1'b0;
-                state              = pma::BT_C_C;
-                //$write("DATA TERM 1 part 2: %h\n", req.data);
+                state              = uvm_pma::BT_C_C;
             end
         end
         if (bytes_vld == 2) begin
             if (done == 1'b0) begin
-                req.hdr           = pma::C_HDR;
+                req.hdr           = uvm_pma::C_HDR;
                 req.hdr_vld       = 1'b1;
                 data              = {<< byte{frame.data[i +: 2]}};
                 req.data[23 : 8] = data[31 : 16];
-                req.data[7 : 0]  = pma::BT_D2_C;
+                req.data[7 : 0]  = uvm_pma::BT_D2_C;
                 req.data[31 : 24]   = 8'b00000000;
                 done              = 1'b1;
-                //$write("DATA TERM 2 part 1: %h\n", req.data);
-                //`uvm_info(this.get_full_name(),frame.convert2string() ,UVM_LOW)
             end else begin
                 req.data           = {IDLE_C, IDLE_C, IDLE_C, IDLE_C, 4'b0000};
                 req.hdr_vld        = 1'b0;
                 high_level_tr_done = 1'b1;
                 done               = 1'b0;
-                state              = pma::BT_C_C;
-                //$write("DATA TERM 2 part 2: %h\n", req.data);
+                state              = uvm_pma::BT_C_C;
             end
         end
         if (bytes_vld == 3) begin
             if (done == 1'b0) begin
-                req.hdr          = pma::C_HDR;
+                req.hdr          = uvm_pma::C_HDR;
                 req.hdr_vld      = 1'b1;
                 data             = {<< byte{frame.data[i +: 3]}};
                 req.data[31 : 8] = data[31 : 8];
-                req.data[7 : 0]  = pma::BT_D3_C;
+                req.data[7 : 0]  = uvm_pma::BT_D3_C;
                 done             = 1'b1;
-                //$write("DATA TERM 3 part 1: %h\n", req.data);
-                //`uvm_info(this.get_full_name(),frame.convert2string() ,UVM_LOW)
             end else begin
                 req.data           = {IDLE_C, IDLE_C, IDLE_C, IDLE_C, 4'b0000};
                 req.hdr_vld        = 1'b0;
                 high_level_tr_done = 1'b1;
                 done               = 1'b0;
-                state              = pma::BT_C_C;
-                //$write("DATA TERM 3 part 2: %h\n", req.data);
+                state              = uvm_pma::BT_C_C;
             end
         end
         if (bytes_vld == 4) begin
             if (done == 1'b0) begin
-                req.hdr     = pma::C_HDR;
+                req.hdr     = uvm_pma::C_HDR;
                 req.hdr_vld = 1'b1;
                 data             = {<< byte{frame.data[i +: 3]}};
                 req.data[31 : 8] = data[31 : 8];
-                req.data[7 : 0]  = pma::BT_D4_C;
+                req.data[7 : 0]  = uvm_pma::BT_D4_C;
                 done        = 1'b1;
-                //$write("DATA TERM 4 part 1: %h\n", req.data);
-                //`uvm_info(this.get_full_name(),frame.convert2string() ,UVM_LOW)
             end else begin
                 req.hdr_vld        = 1'b0;
-                //$write("DATA TERM 4 part 2 %h J Value: %d\n", req.data, j);
-                //$write("DATA TERM 4 part 2 size: %d\n", frame.data.size());
                 data               = {<< byte{frame.data[j +: 1]}};
-                //req.data[31 : 24]  = data[31 : 24];
                 req.data[7 : 0]  = data[31 : 24];
-                //req.data[23 : 0]   = 24'b0000000000000000;
                 req.data[31 : 8]   = 24'b0000000000000000;
                 high_level_tr_done = 1'b1;
                 done               = 1'b0;
-                state              = pma::BT_C_C;
-                //$write("DATA TERM 4 part 2: %h\n", req.data);
+                state              = uvm_pma::BT_C_C;
             end
         end
         if (bytes_vld == 5) begin
             if (done == 1'b0) begin
-                req.hdr     = pma::C_HDR;
+                req.hdr     = uvm_pma::C_HDR;
                 req.hdr_vld = 1'b1;
                 data             = {<< byte{frame.data[i +: 3]}};
                 req.data[31 : 8] = data[31 : 8];
-                req.data[7 : 0]  = pma::BT_D5_C;
+                req.data[7 : 0]  = uvm_pma::BT_D5_C;
                 done        = 1'b1;
-                //$write("DATA TERM 5 part 1: %h\n", req.data);
-                //`uvm_info(this.get_full_name(),frame.convert2string() ,UVM_LOW)
             end else begin
                 req.hdr_vld        = 1'b0;
                 data               = {<< byte{frame.data[j +: 2]}};
-                //req.data[31 : 16]  = data[31 : 16];
                 req.data[15 : 0]  = data[31 : 16];
-                //req.data[15 : 0]   = 16'b0000000000000000;
                 req.data[31 : 16]   = 16'b0000000000000000;
                 high_level_tr_done = 1'b1;
                 done               = 1'b0;
-                state              = pma::BT_C_C;
-                //$write("DATA TERM 5 part 2: %h\n", req.data);
+                state              = uvm_pma::BT_C_C;
             end
         end
         if (bytes_vld == 6) begin
             if (done == 1'b0) begin
-                req.hdr     = pma::C_HDR;
+                req.hdr     = uvm_pma::C_HDR;
                 req.hdr_vld = 1'b1;
                 data             = {<< byte{frame.data[i +: 3]}};
                 req.data[31 : 8] = data[31 : 8];
-                req.data[7 : 0]  = pma::BT_D6_C;
+                req.data[7 : 0]  = uvm_pma::BT_D6_C;
                 done        = 1'b1;
-                //$write("DATA TERM 6 part 1: %h\n", req.data);
-                //`uvm_info(this.get_full_name(),frame.convert2string() ,UVM_LOW)
             end else begin
                 data = 0;
                 req.hdr_vld        = 1'b0;
-                //$write("DATA TERM 6 part 2 %h J Value: %d\n", req.data, j);
-                //$write("DATA TERM 6 part 2 size: %d\n", frame.data.size());
                 data               = {<< byte{frame.data[j +: 3]}};
                 req.data[23 : 0]  = data[31 : 8];
-                //req.data[31 : 8]  = data[31 : 8];
                 req.data[31 : 24]    = 8'b00000000;
                 high_level_tr_done = 1'b1;
                 done               = 1'b0;
-                state              = pma::BT_C_C;
-                //$write("DATA TERM 6 part 2: %h\n", req.data);
+                state              = uvm_pma::BT_C_C;
             end
         end
         if (bytes_vld == 7) begin
             if (done == 1'b0) begin
-                req.hdr     = pma::C_HDR;
+                req.hdr     = uvm_pma::C_HDR;
                 req.hdr_vld = 1'b1;
                 data             = {<< byte{frame.data[i +: 3]}};
                 req.data[31 : 8] = data[31 : 8];
-                req.data[7 : 0]  = pma::BT_D7_T;
+                req.data[7 : 0]  = uvm_pma::BT_D7_T;
                 done        = 1'b1;
-                //$write("DATA TERM 7 part 1: %h\n", req.data);
-                //`uvm_info(this.get_full_name(),frame.convert2string() ,UVM_LOW)
             end else begin
                 req.hdr_vld        = 1'b0;
                 data               = {<< byte{frame.data[j +: 4]}};
                 req.data[31 : 0]   = data[31 : 0];
                 high_level_tr_done = 1'b1;
                 done               = 1'b0;
-                state              = pma::BT_C_C;
-                //$write("DATA TERM 7 part 2: %h\n", req.data);
+                state              = uvm_pma::BT_C_C;
             end
         end
         scramble(req);
         finish_item(req);
     endtask
 
-    task scramble(pma::sequence_item #(DATA_WIDTH) req);
+    task scramble(uvm_pma::sequence_item #(DATA_WIDTH) req);
         logic [DATA_WIDTH-1 : 0] scrambled_data;
 
         for (int i=0; i<DATA_WIDTH; i++) begin
@@ -646,6 +551,22 @@ class sequence_seq_err_inj #(DATA_WIDTH) extends uvm_sequence #(pma::sequence_it
             req.data_vld = 1'b1;
         end
         simple_reg.data_vld = req.data_vld;
+        simple_reg.hdr_vld = req.hdr_vld;
+        simple_reg.data = req.data;
+        simple_reg.hdr = req.hdr;
+    endtask
+
+    task send_same();
+        while (!simple_reg.data_vld) begin
+            req.data_vld = 1'b1;
+            simple_reg.data_vld = req.data_vld;
+
+            req.hdr_vld = simple_reg.hdr_vld;
+            req.data = simple_reg.data;
+            req.hdr = simple_reg.hdr;
+            finish_item(req);
+            start_item(req);
+        end
     endtask
 
 endclass

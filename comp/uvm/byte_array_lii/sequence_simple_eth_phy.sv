@@ -17,7 +17,7 @@
 // There is also logic vector sequence item for generation of error signals
 class sequence_simple_eth_phy #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH) extends sequence_simple #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH);
 
-    `uvm_object_param_utils(byte_array_lii_env::sequence_simple_eth_phy #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH))
+    `uvm_object_param_utils(uvm_byte_array_lii::sequence_simple_eth_phy #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH))
 
     // -----------------------
     // Parameters.
@@ -25,7 +25,7 @@ class sequence_simple_eth_phy #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH) e
 
     localparam BYTE_NUM = DATA_WIDTH/8;
 
-    common::rand_length number_of_idles;
+    uvm_common::rand_length number_of_idles;
 
     //logic_vector::sequence_item #(LOGIC_WIDTH) meta;
 
@@ -36,7 +36,7 @@ class sequence_simple_eth_phy #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH) e
     // Constructor - creates new instance of this class
     function new(string name = "sequence");
         super.new("sequence_simple_eth_phy");
-        number_of_idles    = common::rand_length_rand::new();
+        number_of_idles    = uvm_common::rand_length_rand::new();
     endfunction
 
     // Method which define how the transaction will look.

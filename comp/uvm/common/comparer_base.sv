@@ -1,0 +1,173 @@
+/*
+ * file       : comparer_base.sv
+ * Copyright (C) 2022 CESNET z. s. p. o.
+ * description: this component compare two output out of order. IF componet stays
+ *              too long in fifo then erros is goint to occure.
+ * date       : 2022
+ * author     : Radek Iša <isa@cesnet.cz>
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+*/
+
+virtual class comparer_base#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) extends uvm_component;
+
+    localparam COMPARED_PRINT_WAIT = 5ms;
+
+    typedef comparer_base#(MODEL_ITEM, DUT_ITEM) this_type;
+    uvm_analysis_imp_model#(model_item#(MODEL_ITEM), this_type) analysis_imp_model;
+    uvm_analysis_imp_dut  #(DUT_ITEM, this_type)                analysis_imp_dut;
+
+    time                    delay_max;
+    model_item#(MODEL_ITEM) model_items[$];
+
+    int unsigned compared;
+    int unsigned errors;
+    int unsigned time_errors;
+
+    function new(string name, uvm_component parent = null);
+        super.new(name, parent);
+        compared = 0;
+        errors = 0;
+        time_errors = 0;
+        delay_max = 10s;
+        analysis_imp_model = new("analysis_imp_model", this);
+        analysis_imp_dut   = new("analysis_imp_dut"  , this);
+    endfunction
+
+    function void delay_max_set(time max);
+        delay_max = max;
+    endfunction
+
+    function int unsigned suceess();
+        return (errors == 0) && (time_errors == 0);
+    endfunction
+
+    function void flush();
+        model_items.delete();
+    endfunction
+
+    function int unsigned used();
+        return (model_items.size() != 0);
+    endfunction
+
+    function void write_model(model_item#(MODEL_ITEM) tr);
+        model_items.push_back(tr);
+    endfunction
+
+    virtual function void write_dut(DUT_ITEM tr);
+        `uvm_fatal(this.get_full_name(), "\n\tThis function is virtual and have to be reimplemented");
+    endfunction
+
+    pure virtual function int unsigned compare(MODEL_ITEM tr_model, DUT_ITEM tr_dut);
+    pure virtual function string message(MODEL_ITEM tr_model, DUT_ITEM tr_dut);
+
+    task run_phase(uvm_phase phase);
+        forever begin
+            string  msg = "";
+
+            #(COMPARED_PRINT_WAIT)
+            $swrite(msg, "\n\tCompared %0d transactions in time %0dns", compared, $time()/1ns);
+            `uvm_info(this.get_full_name(), msg, UVM_NONE);
+        end
+    endtask
+
+    function void check_phase(uvm_phase phase);
+        if (model_items.size() != 0) begin
+            string msg;
+
+            $swrite(msg, "\n\t%0d transaction left in DUT.\n", model_items.size());
+            for (int unsigned it = 0; it < model_items.size(); it++) begin
+                $swrite(msg, "%s\n%s", msg, model_items[it].convert2string());
+            end
+            `uvm_error(this.get_full_name(), msg);
+        end
+    endfunction
+endclass
+
+/////////////////////////////////////////////
+// Ordered checker. All data is compared chronologicaly.
+virtual class comparer_base_ordered#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) extends comparer_base#(MODEL_ITEM, DUT_ITEM);
+
+    function new(string name, uvm_component parent = null);
+        super.new(name, parent);
+    endfunction
+
+    //virtual function void process(DUT_ITEM tr);
+    function void write_dut(DUT_ITEM tr);
+        model_item#(MODEL_ITEM) tr_model;
+
+        compared++;
+        tr_model = model_items.pop_front();
+        if (!this.compare(tr_model, tr)) begin
+            string msg;
+            errors++;
+            $swrite(msg, "\n\tTransaction compared %0d errors %0d\n\tDUT transaction doesn't compare model transaction\n%s", compared, errors, this.message(tr_model, tr));
+            `uvm_error(this.get_full_name(), msg);
+        end
+    endfunction
+endclass
+
+/////////////////////////////////////////////
+// Disordered checker. Data is not check chronologicaly 
+virtual class comparer_base_disordered#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) extends comparer_base#(MODEL_ITEM, DUT_ITEM);
+
+    function new(string name, uvm_component parent = null);
+        super.new(name, parent);
+    endfunction
+
+    //virtual function void process(DUT_ITEM tr);
+    function void write_dut(DUT_ITEM tr);
+        int unsigned index = 0;
+        time   time_act = $time();
+
+        time_act = $time();
+        if (model_items.size() > 0 && (time_act - model_items[0].time_last()) > delay_max) begin
+            string msg = "";
+            int unsigned it = 0;
+            time_errors++;
+
+            while (it < model_items.size() && (time_act - model_items[it].time_last()) > delay_max) begin
+                time   time_conv[string];
+                string msg = "";
+
+                $swrite(msg, "%s\n\tPacket received in %0dns is probubly stuck in design. [INPUT_TIME DELAY]", msg, time_act/1ns);
+                time_conv = model_items[it].start;
+                foreach (time_conv[jt]) begin
+                    $swrite(msg, "%s\n\t\t%s [%0dns %0dns]", msg, it, time_conv[jt]/1ns, (time_act - time_conv[jt])/1ns);
+                end
+
+                $swrite(msg, "%s\n\tDATA : \n%s", msg, model_items[it].item.convert2string());
+                it++;
+            end
+
+            $swrite(msg, "%s\nActual transactions is\n%s", msg, tr.convert2string());
+           `uvm_error(this.get_full_name(), msg);
+        end
+
+        compared++;
+        while (index < model_items.size() && compare(model_items[index].item, tr) == 0)begin
+           index++;
+        end
+
+        if (index >= model_items.size()) begin
+            string msg = "";
+            errors++;
+
+
+            $swrite(msg, "\n\tTransaction compared %0d errors %0d\n\tDUT transaction doesn't compare any of model %0d transactions in fifo. receive time %0dns\n%s", compared, errors, model_items.size(), time_act/1ns, tr.convert2string());
+            for (int unsigned it = 0; it < model_items.size(); it++) begin
+                time   time_conv[string];
+
+                time_conv = model_items[it].start;
+                $swrite(msg, "%s\n\n\tModel Transaction[%0d].\n\t\tinterface name [INPUT DELAY]", msg, it);
+                foreach (time_conv[jt]) begin
+                    $swrite(msg, "%s\n\t\t%s [%0dns %0dns]", msg, jt, time_conv[jt]/1ns, (time_act - time_conv[jt])/1ns);
+                end
+                $swrite(msg, "%s\n\tDATA : %s", msg, this.message(model_items[it].item, tr));
+            end
+            `uvm_error(this.get_full_name(), msg);
+        end else begin
+            model_items.delete(index);
+        end
+    endfunction
+endclass

@@ -104,10 +104,10 @@ endclass
 ////////////////////////////////////////////////////////////////////////
 // MI RESPONSE
 ////////////////////////////////////////////////////////////////////////
-class sequence_item_respons #(DATA_WIDTH) extends uvm_sequence_item;
+class sequence_item_response #(DATA_WIDTH) extends uvm_sequence_item;
 
     // registration of object tools
-    `uvm_object_param_utils(uvm_mi::sequence_item_respons#(DATA_WIDTH))
+    `uvm_object_param_utils(uvm_mi::sequence_item_response#(DATA_WIDTH))
 
     //variables
     //logic [DATA_WIDTH/8-1:0] be; // for comaring data
@@ -115,15 +115,15 @@ class sequence_item_respons #(DATA_WIDTH) extends uvm_sequence_item;
     rand logic ardy;
     rand logic drdy;
 
-    function new(string name = "sequence_item_respons");
+    function new(string name = "sequence_item_response");
         super.new(name);
     endfunction
 
     function void do_copy(uvm_object rhs);
-        sequence_item_respons #(DATA_WIDTH) rhs_;
+        sequence_item_response #(DATA_WIDTH) rhs_;
 
         if(!$cast(rhs_, rhs)) begin
-            `uvm_fatal( "mi::sequence_item_respons::do_copy ", "Failed to cast transaction object.")
+            `uvm_fatal( "mi::sequence_item_response::do_copy ", "Failed to cast transaction object.")
             return;
         end
         // Now copy all attributes.
@@ -135,11 +135,11 @@ class sequence_item_respons #(DATA_WIDTH) extends uvm_sequence_item;
 
     // Properly compare all transaction attributes representing output pins.
     function bit do_compare(uvm_object rhs, uvm_comparer comparer);
-        sequence_item_respons #(DATA_WIDTH) rhs_;
+        sequence_item_response #(DATA_WIDTH) rhs_;
         bit ret;
 
         if(!$cast(rhs_, rhs)) begin
-            `uvm_fatal("mi::sequence_item_respons::do_compare", "Failed to cast transaction object.")
+            `uvm_fatal("mi::sequence_item_response::do_compare", "Failed to cast transaction object.")
             return 0;
         end
 

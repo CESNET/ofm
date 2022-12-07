@@ -9,6 +9,7 @@ SETTINGS = {
         "BLOCK_SIZE"         : "8",
         "ITEM_WIDTH"         : "8",
         "LNG_WIDTH"          : "14",
+        "SATURATION"         : "0",
         "FRAME_SIZE_MAX"     : "512",
         "FRAME_SIZE_MIN"     : "60",
         "TRANSACTION_COUNT"  : "2000",
@@ -44,8 +45,8 @@ SETTINGS = {
         "ITEM_WIDTH"         : "8",
     },
     "region_comb_5" : {
-        "REGIONS"            : "1",
-        "REGION_SIZE"        : "2",
+        "REGIONS"            : "16",
+        "REGION_SIZE"        : "1",
         "BLOCK_SIZE"         : "8",
         "ITEM_WIDTH"         : "8",
     },
@@ -59,7 +60,13 @@ SETTINGS = {
         "LNG_WIDTH"          : "28",
     },
     "lng_width_comb_3" : {
-        "LNG_WIDTH"          : "8",
+        "LNG_WIDTH"          : "9",
+    },
+    "saturation" : {
+        "LNG_WIDTH"          : "9",
+        "SATURATION"         : "1",
+        "FRAME_SIZE_MAX"     : "1024",
+        "FRAME_SIZE_MIN"     : "60",
     },
     "_combinations_" : (  
     (), # Works the same as '("default",),' as the "default" is applied in every combination
@@ -75,6 +82,7 @@ SETTINGS = {
 
     ("pcie", "lng_width_comb_2",),
     ("pcie", "lng_width_comb_3",),
+    ("pcie", "saturation",),
 
     ("region_comb_1", "lng_width_comb_2",),
     ("region_comb_1", "lng_width_comb_3",),
@@ -88,7 +96,7 @@ SETTINGS = {
     ("region_comb_4", "lng_width_comb_3",),
 
     ("region_comb_5", "lng_width_comb_2",),
-    ("region_comb_5", "lng_width_comb_3",),
+    ("region_comb_5", "saturation",),
 
     ("region_comb_6", "lng_width_comb_2",),
     ("region_comb_6", "lng_width_comb_3",),

@@ -159,25 +159,6 @@ architecture full of PCIE_TRANSACTION_CTRL is
     signal up_mvb_c_checker_out_src_rdy      : std_logic := '0';
     signal up_mvb_c_checker_out_dst_rdy      : std_logic := '0';
 
-    -- MFB hdr data merge output / MFB2PCIe-AXI input
-    signal up_mfb_hdr_merge_out_data    : std_logic_vector(MFB_UP_REGIONS*MFB_UP_REG_SIZE*MFB_UP_BLOCK_SIZE*MFB_UP_ITEM_WIDTH-1 downto 0);
-    signal up_mfb_hdr_merge_out_sof_pos : std_logic_vector(MFB_UP_REGIONS*max(1,log2(MFB_UP_REG_SIZE))-1 downto 0);
-    signal up_mfb_hdr_merge_out_eof_pos : std_logic_vector(MFB_UP_REGIONS*max(1,log2(MFB_UP_REG_SIZE*MFB_UP_BLOCK_SIZE))-1 downto 0);
-    signal up_mfb_hdr_merge_out_sof     : std_logic_vector(MFB_UP_REGIONS-1 downto 0);
-    signal up_mfb_hdr_merge_out_eof     : std_logic_vector(MFB_UP_REGIONS-1 downto 0);
-    signal up_mfb_hdr_merge_out_src_rdy : std_logic := '0';
-    signal up_mfb_hdr_merge_out_dst_rdy : std_logic := '0';
-    signal up_mfb_hdr_merge_out_be      : std_logic_vector(MFB_UP_REGIONS*8-1 downto 0);
-
-    -- PCIe-AXI2MFB output / get items input
-    signal down_mfb_get_items_in_data    : std_logic_vector(MFB_DOWN_REGIONS*MFB_DOWN_REG_SIZE*MFB_DOWN_BLOCK_SIZE*MFB_DOWN_ITEM_WIDTH-1 downto 0);
-    signal down_mfb_get_items_in_sof_pos : std_logic_vector(MFB_DOWN_REGIONS*max(1,log2(MFB_DOWN_REG_SIZE))-1 downto 0);
-    signal down_mfb_get_items_in_eof_pos : std_logic_vector(MFB_DOWN_REGIONS*max(1,log2(MFB_DOWN_REG_SIZE*MFB_DOWN_BLOCK_SIZE))-1 downto 0);
-    signal down_mfb_get_items_in_sof     : std_logic_vector(MFB_DOWN_REGIONS-1 downto 0);
-    signal down_mfb_get_items_in_eof     : std_logic_vector(MFB_DOWN_REGIONS-1 downto 0);
-    signal down_mfb_get_items_in_src_rdy : std_logic := '0';
-    signal down_mfb_get_items_in_dst_rdy : std_logic := '0';
-
     -- MFB get items output / MFB cutter input
     signal down_mfb_cutter_in_data    : std_logic_vector(MFB_DOWN_REGIONS*MFB_DOWN_REG_SIZE*MFB_DOWN_BLOCK_SIZE*MFB_DOWN_ITEM_WIDTH-1 downto 0);
     signal down_mfb_cutter_in_sof_pos : std_logic_vector(MFB_DOWN_REGIONS*max(1,log2(MFB_DOWN_REG_SIZE))-1 downto 0);
@@ -733,78 +714,20 @@ begin
         TX_MVB_DATA         => RQ_MVB_HDR_DATA,
         TX_MVB_VLD          => RQ_MVB_VLD     ,
 
-        TX_MFB_DATA         => up_mfb_hdr_merge_out_data   ,
-        TX_MFB_SOF          => up_mfb_hdr_merge_out_sof    ,
-        TX_MFB_EOF          => up_mfb_hdr_merge_out_eof    ,
-        TX_MFB_SOF_POS      => up_mfb_hdr_merge_out_sof_pos,
-        TX_MFB_EOF_POS      => up_mfb_hdr_merge_out_eof_pos,
-        TX_MFB_SRC_RDY      => up_mfb_hdr_merge_out_src_rdy,
-        TX_MFB_DST_RDY      => up_mfb_hdr_merge_out_dst_rdy,
+        TX_MFB_DATA         => RQ_MFB_DATA   ,
+        TX_MFB_SOF          => RQ_MFB_SOF    ,
+        TX_MFB_EOF          => RQ_MFB_EOF    ,
+        TX_MFB_SOF_POS      => RQ_MFB_SOF_POS,
+        TX_MFB_EOF_POS      => RQ_MFB_EOF_POS,
+        TX_MFB_SRC_RDY      => RQ_MFB_SRC_RDY,
+        TX_MFB_DST_RDY      => RQ_MFB_DST_RDY,
 
-        TX_MFB_BE           => up_mfb_hdr_merge_out_be
+        TX_MFB_BE           => RQ_MFB_BE
     );
 
     RQ_MVB_PREFIX_DATA <= (others => '0');
 
     ---------------------------------------------------------------------------
-
-    xilinx_rq_interface_gen : if (not INTEL_DEV) generate
-
-        ---------------------------------------------------------------------------
-        -- MFB to PCIe-AXI interface convertor
-        ---------------------------------------------------------------------------
-
-        mfb2pcie_axi_i : entity work.PTC_MFB2PCIE_AXI
-        generic map(
-            DEVICE           => DEVICE           ,
-
-            MFB_REGIONS      => MFB_UP_REGIONS   ,
-            MFB_REGION_SIZE  => MFB_UP_REG_SIZE  ,
-            MFB_BLOCK_SIZE   => MFB_UP_BLOCK_SIZE,
-            MFB_ITEM_WIDTH   => MFB_UP_ITEM_WIDTH,
-
-            AXI_DATA_WIDTH   => MFB_UP_WIDTH     ,
-            AXI_RQUSER_WIDTH => RQ_TUSER_WIDTH
-        )
-        port map(
-            CLK     => CLK  ,
-            RESET   => RESET,
-
-            RX_MFB_DATA    => up_mfb_hdr_merge_out_data   ,
-            RX_MFB_SOF     => up_mfb_hdr_merge_out_sof    ,
-            RX_MFB_EOF     => up_mfb_hdr_merge_out_eof    ,
-            RX_MFB_SOF_POS => up_mfb_hdr_merge_out_sof_pos,
-            RX_MFB_EOF_POS => up_mfb_hdr_merge_out_eof_pos,
-            RX_MFB_SRC_RDY => up_mfb_hdr_merge_out_src_rdy,
-            RX_MFB_DST_RDY => up_mfb_hdr_merge_out_dst_rdy,
-
-            RX_MFB_BE      => up_mfb_hdr_merge_out_be     ,
-
-            RQ_DATA        => RQ_TDATA ,
-            RQ_USER        => RQ_TUSER ,
-            RQ_LAST        => RQ_TLAST ,
-            RQ_KEEP        => RQ_TKEEP ,
-            RQ_READY       => RQ_TREADY,
-            RQ_VALID       => RQ_TVALID
-        );
-
-        ---------------------------------------------------------------------------
-
-    end generate;
-
-    intel_rq_interface_gen : if (INTEL_DEV) generate
-
-        RQ_MFB_DATA    <= up_mfb_hdr_merge_out_data;
-        RQ_MFB_SOF     <= up_mfb_hdr_merge_out_sof;
-        RQ_MFB_EOF     <= up_mfb_hdr_merge_out_eof;
-        RQ_MFB_SOF_POS <= up_mfb_hdr_merge_out_sof_pos;
-        RQ_MFB_EOF_POS <= up_mfb_hdr_merge_out_eof_pos;
-        RQ_MFB_SRC_RDY <= up_mfb_hdr_merge_out_src_rdy;
-        up_mfb_hdr_merge_out_dst_rdy <= RQ_MFB_DST_RDY;
-
-    end generate;
-
-    -- ========================================================================
 
     -- ========================================================================
     -- Tag Manager
@@ -879,58 +802,6 @@ begin
     -- DOWNSTREAM
     -- ========================================================================
 
-    xilinx_rc_interface_gen : if (not INTEL_DEV) generate
-
-        ---------------------------------------------------------------------------
-        -- PCIE-AXI to MFB interface convertor
-        ---------------------------------------------------------------------------
-
-        pcie_axi2mfb_i : entity work.PTC_PCIE_AXI2MFB
-        generic map(
-            DEVICE            => DEVICE             ,
-
-            MFB_REGIONS       => MFB_DOWN_REGIONS   ,
-            MFB_REG_SIZE      => MFB_DOWN_REG_SIZE  ,
-            MFB_BLOCK_SIZE    => MFB_DOWN_BLOCK_SIZE,
-            MFB_ITEM_WIDTH    => MFB_DOWN_ITEM_WIDTH,
-
-            AXI_DATA_WIDTH    => MFB_DOWN_WIDTH     ,
-            AXI_RCUSER_WIDTH  => RC_TUSER_WIDTH
-        )
-        port map(
-            CLK            => CLK  ,
-            RESET          => RESET,
-
-            RX_AXI_TDATA   => RC_TDATA ,
-            RX_AXI_TUSER   => RC_TUSER ,
-            RX_AXI_TVALID  => RC_TVALID,
-            RX_AXI_TREADY  => RC_TREADY,
-
-            TX_MFB_DATA    => down_mfb_get_items_in_data   ,
-            TX_MFB_SOF     => down_mfb_get_items_in_sof    ,
-            TX_MFB_EOF     => down_mfb_get_items_in_eof    ,
-            TX_MFB_SOF_POS => down_mfb_get_items_in_sof_pos,
-            TX_MFB_EOF_POS => down_mfb_get_items_in_eof_pos,
-            TX_MFB_SRC_RDY => down_mfb_get_items_in_src_rdy,
-            TX_MFB_DST_RDY => down_mfb_get_items_in_dst_rdy
-        );
-
-        ---------------------------------------------------------------------------
-
-    end generate;
-
-    intel_rc_interface_gen : if (INTEL_DEV) generate
-
-        down_mfb_get_items_in_data    <= RC_MFB_DATA;
-        down_mfb_get_items_in_sof     <= RC_MFB_SOF;
-        down_mfb_get_items_in_eof     <= RC_MFB_EOF;
-        down_mfb_get_items_in_sof_pos <= RC_MFB_SOF_POS;
-        down_mfb_get_items_in_eof_pos <= RC_MFB_EOF_POS;
-        down_mfb_get_items_in_src_rdy <= RC_MFB_SRC_RDY;
-        RC_MFB_DST_RDY <= down_mfb_get_items_in_dst_rdy;
-
-    end generate;
-
     non_p_tile_get_items_cutter_gen : if (not CUT_HDR_BYPASS_DEV) generate
 
         ---------------------------------------------------------------------------
@@ -954,13 +825,13 @@ begin
             CLK        => CLK  ,
             RESET      => RESET,
 
-            RX_DATA    => down_mfb_get_items_in_data   ,
-            RX_SOF     => down_mfb_get_items_in_sof    ,
-            RX_EOF     => down_mfb_get_items_in_eof    ,
-            RX_SOF_POS => down_mfb_get_items_in_sof_pos,
-            RX_EOF_POS => down_mfb_get_items_in_eof_pos,
-            RX_SRC_RDY => down_mfb_get_items_in_src_rdy,
-            RX_DST_RDY => down_mfb_get_items_in_dst_rdy,
+            RX_DATA    => RC_MFB_DATA   ,
+            RX_SOF     => RC_MFB_SOF    ,
+            RX_EOF     => RC_MFB_EOF    ,
+            RX_SOF_POS => RC_MFB_SOF_POS,
+            RX_EOF_POS => RC_MFB_EOF_POS,
+            RX_SRC_RDY => RC_MFB_SRC_RDY,
+            RX_DST_RDY => RC_MFB_DST_RDY,
 
             TX_DATA    => down_mfb_cutter_in_data   ,
             TX_SOF     => down_mfb_cutter_in_sof    ,
@@ -1025,15 +896,15 @@ begin
         down_mvb_stfifo_in_data    <= RC_MVB_HDR_DATA;
         down_mvb_stfifo_in_vld     <= RC_MVB_VLD;
 
-        down_mvb_stfifo_in_src_rdy <= down_mfb_get_items_in_src_rdy;
+        down_mvb_stfifo_in_src_rdy <= RC_MFB_SRC_RDY;
 
-        down_mfb_stfifo_in_data    <= down_mfb_get_items_in_data;
-        down_mfb_stfifo_in_sof     <= down_mfb_get_items_in_sof;
-        down_mfb_stfifo_in_eof     <= down_mfb_get_items_in_eof;
-        down_mfb_stfifo_in_sof_pos <= down_mfb_get_items_in_sof_pos;
-        down_mfb_stfifo_in_eof_pos <= down_mfb_get_items_in_eof_pos;
-        down_mfb_stfifo_in_src_rdy <= down_mfb_get_items_in_src_rdy;
-        down_mfb_get_items_in_dst_rdy <= down_mfb_stfifo_in_dst_rdy;
+        down_mfb_stfifo_in_data    <= RC_MFB_DATA;
+        down_mfb_stfifo_in_sof     <= RC_MFB_SOF;
+        down_mfb_stfifo_in_eof     <= RC_MFB_EOF;
+        down_mfb_stfifo_in_sof_pos <= RC_MFB_SOF_POS;
+        down_mfb_stfifo_in_eof_pos <= RC_MFB_EOF_POS;
+        down_mfb_stfifo_in_src_rdy <= RC_MFB_SRC_RDY;
+        RC_MFB_DST_RDY <= down_mfb_stfifo_in_dst_rdy;
 
     end generate;
 
@@ -1247,7 +1118,7 @@ begin
             REGION_SIZE         => MFB_DOWN_REG_SIZE          ,
             BLOCK_SIZE          => MFB_DOWN_BLOCK_SIZE        ,
             ITEM_WIDTH          => MFB_DOWN_ITEM_WIDTH        ,
-            FIFO_DEPTH          => 2*(MRRS*4*8)/MFB_DOWN_WIDTH, -- Must fit at least 1 MRRS transaction + possible gap
+            FIFO_DEPTH          => 4*(MRRS*4*8)/MFB_DOWN_WIDTH, -- Must fit at least 1 MRRS transaction + possible gap
             RAM_TYPE            => "AUTO"                     ,
             DEVICE              => DEVICE                     ,
             ALMOST_FULL_OFFSET  => 0                          ,

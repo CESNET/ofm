@@ -200,31 +200,31 @@ with open(of_name,"w") as of:
 
         # Vivado values parsing
         # synthesis
-        tmp = popen("grep \"LUT as Logic  \" "+d+vivado_syn_util+" | sed \"s/\s\s*/ /g\" | cut -d\" \" -f6")
+        tmp = popen("grep \"LUT as Logic  \" "+d+vivado_syn_util+" | awk '{print $6 \" (\" $12 \"%)\"}'")
         v_syn_llut = tmp.readline().strip().replace(",","")
         tmp.close()
 
-        tmp = popen("grep \"LUT as Memory \" "+d+vivado_syn_util+" | sed \"s/\s\s*/ /g\" | cut -d\" \" -f6")
+        tmp = popen("grep \"LUT as Memory \" "+d+vivado_syn_util+" | awk '{print $6 \" (\" $12 \"%)\"}'")
         v_syn_mlut = tmp.readline().strip().replace(",","")
         tmp.close()
 
-        tmp = popen("grep \"CLB Registers \" "+d+vivado_syn_util+" | sed \"s/\s\s*/ /g\" | cut -d\" \" -f5")
+        tmp = popen("grep \"CLB Registers \" "+d+vivado_syn_util+" | awk '{print $5 \" (\" $11 \"%)\"}'")
         v_syn_reg = tmp.readline().strip().replace(",","")
         tmp.close()
 
-        tmp = popen("grep \"CARRY8        \" "+d+vivado_syn_util+" | sed \"s/\s\s*/ /g\" | cut -d\" \" -f4")
+        tmp = popen("grep \"CARRY8        \" "+d+vivado_syn_util+" | awk '{print $4 \" (\" $10 \"%)\"}'")
         v_syn_carry = tmp.readline().strip().replace(",","")
         tmp.close()
 
-        tmp = popen("grep \"Block RAM Tile\" "+d+vivado_syn_util+" | sed \"s/\s\s*/ /g\" | cut -d\" \" -f6")
+        tmp = popen("grep \"Block RAM Tile\" "+d+vivado_syn_util+" | awk '{print $6 \" (\" $12 \"%)\"}'")
         v_syn_bram = tmp.readline().strip().replace(",","")
         tmp.close()
 
-        tmp = popen("grep \"URAM          \" "+d+vivado_syn_util+" | sed \"s/\s\s*/ /g\" | cut -d\" \" -f4")
+        tmp = popen("grep \"URAM          \" "+d+vivado_syn_util+" | awk '{print $4 \" (\" $10 \"%)\"}'")
         v_syn_uram = tmp.readline().strip().replace(",","")
         tmp.close()
 
-        tmp = popen("grep \"DSPs          \" "+d+vivado_syn_util+" | sed \"s/\s\s*/ /g\" | cut -d\" \" -f4")
+        tmp = popen("grep \"DSPs          \" "+d+vivado_syn_util+" | awk '{print $4 \" (\" $10 \"%)\"}'")
         v_syn_dsp = tmp.readline().strip().replace(",","")
         tmp.close()
 

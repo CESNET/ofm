@@ -9,6 +9,6 @@ set COMPONENTS [ list \
     [list "AVST_VER" "$FIRMWARE_BASE/comp/avst_tools/ver_uvm"  "FULL"]\
 ]
 
-set MOD "$MOD $ENTITY_BASE/tbench/dut.sv"
-set MOD "$MOD $ENTITY_BASE/tbench/env/pkg.sv"
-set MOD "$MOD $ENTITY_BASE/tbench/test/pkg.sv"
+lappend MOD "$ENTITY_BASE/tbench/dut.sv"
+lappend MOD "$ENTITY_BASE/tbench/env/pkg.sv"
+lappend MOD "$ENTITY_BASE/tbench/test/pkg.sv"

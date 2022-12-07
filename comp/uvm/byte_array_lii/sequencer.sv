@@ -13,10 +13,10 @@
 
 class sequencer #(LOGIC_WIDTH) extends uvm_sequencer;
 
-    byte_array::sequencer                m_packet;
-    logic_vector::sequencer#(LOGIC_WIDTH) m_meta;
+    `uvm_component_param_utils(uvm_byte_array_lii::sequencer #(LOGIC_WIDTH))
 
-    `uvm_component_param_utils(byte_array_lii_env::sequencer #(LOGIC_WIDTH))
+    uvm_byte_array::sequencer             m_packet;
+    uvm_logic_vector::sequencer#(LOGIC_WIDTH) m_meta;
 
     function new(string name = "sequencer", uvm_component parent = null);
         super.new(name, parent);

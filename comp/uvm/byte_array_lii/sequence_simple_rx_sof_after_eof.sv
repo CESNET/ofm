@@ -17,7 +17,7 @@ import crc32_ethernet_pkg::*;
 // This sequence can be used in RX MAC
 class sequence_simple_rx_sof_after_eof #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH) extends sequence_simple #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH);
 
-    `uvm_object_param_utils(byte_array_lii_env::sequence_simple_rx_sof_after_eof #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH))
+    `uvm_object_param_utils(uvm_byte_array_lii::sequence_simple_rx_sof_after_eof #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH))
 
     // -----------------------
     // Parameters.

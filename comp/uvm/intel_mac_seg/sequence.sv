@@ -23,7 +23,7 @@ class sequence_simple_rx #(SEGMENTS) extends uvm_sequence #(sequence_item #(SEGM
     constraint c1 {transaction_count inside {[min_transaction_count: max_transaction_count]};}
     // ------------------------------------------------------------------------
     // Constructor
-    function new(string name = "Simple sequence rx");
+    function new(string name = "sequence_simple_rx");
         super.new(name);
     endfunction
 
@@ -72,7 +72,7 @@ class sequence_simple_tx #(SEGMENTS) extends uvm_sequence #(sequence_item #(SEGM
     constraint c1 {transaction_count inside {[min_transaction_count: max_transaction_count]};}
     // ------------------------------------------------------------------------
     // Constructor
-    function new(string name = "Simple sequence rx");
+    function new(string name = "sequence_simple_tx");
         super.new(name);
         rdy = uvm_common::rand_rdy_rand::new();
     endfunction

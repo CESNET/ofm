@@ -11,45 +11,71 @@ use work.math_pack.all;
 use work.type_pack.all;
 use work.ab_init_pack.all;
 
+
+-- =========================================================================
+--  Description
+-- =========================================================================
+
+-- This is another splitter for the MI bus. MI transactions are routed out
+-- of a certain port, depending on how the splitter is set and on the
+-- transaction's address.
+--
+-- The most significant advantage of this splitter is the possibility for
+-- the user to choose the number of output ports, and for each output port
+-- a range (or ranges) of addresses that are routed to (and out of)
+-- this port. These address ranges are specified by Address Bases (ABs),
+-- which are contained in generic ADDR_BASE.
+--
+-- There can be more ABs than there is output ports, which means that more
+-- than one AB can be assigned to a single output port. It doesn't work the
+-- other way around though.
 entity MI_SPLITTER_PLUS_GEN is
     generic(
-        -- Width of MI address
+        -- Width of MI address.
         ADDR_WIDTH    : integer := 32;
-        -- Width of MI data
+        -- Width of MI data.
         DATA_WIDTH    : integer := 32;
-        -- Width of MI meta
+        -- Width of MI meta.
         META_WIDTH    : integer := 2;
-        -- Number of output ports
+        -- Number of output ports.
         PORTS         : integer := 8;
-        -- Output pipeline
+        -- Output pipeline.
         PIPE_OUT      : b_array_t(PORTS-1 downto 0) := (others => true);
-        -- Output pipelines type (see entity of PIPE)
+        -- Output pipelines type (see entity of PIPE).
         PIPE_TYPE     : string := "SHREG";
-        -- Output pipelines output register enable
+        -- Output pipelines output register enable.
         -- Only for PIPE_TYPE = "SHREG"!
         PIPE_OUTREG   : boolean := false;
-        -- Number of considered address bases (might be higher or equal to PORTS)
+        -- Number of considered address bases (might be higher or equal to PORTS).
         ADDR_BASES    : integer := PORTS;
-        -- Bases of address spaces (base 0 is 0x00000000)
-        -- Default: Random Bases
+        -- Bases of address spaces (base 0 is 0x00000000).
+        -- Default: Random Bases.
+        -- CAUTION: ModelSim doesn't likes directly specified value for slv_array_t generics. Assign predefined constant to this generic.
         ADDR_BASE     : slv_array_t(ADDR_BASES-1 downto 0)(ADDR_WIDTH-1 downto 0) := init_addr_base_downto(ADDR_BASES, ADDR_WIDTH);
-        -- Bits of address that are needed to determine output port
+        -- Bits of address that are needed to determine output port.
         -- The chain of '1's must be continuous -> no '0's in-between!
-        -- Default: OR combination of all Address Bases with any '0's between the '1's replaced by '1's
+        -- Default: OR combination of all Address Bases with any '0's between the '1's replaced by '1's.
         ADDR_MASK     : std_logic_vector(ADDR_WIDTH-1 downto 0) := init_addr_mask_downto(ADDR_BASE, ADDR_WIDTH);
-        -- How Address Bases are mapped to ports
-        -- Constains target port index for each Address Base
-        -- Multiple Address Bases might target the same port
-        -- Default: Each Address Base is mapped to the Port on the same index (expects ADDR_BASES = PORTS)
+        -- How Address Bases are mapped to ports.
+        -- Constains target port index for each Address Base.
+        -- Multiple Address Bases might target the same port.
+        -- Default: Each Address Base is mapped to the Port on the same index (expects ADDR_BASES = PORTS).
         PORT_MAPPING  : i_array_t(ADDR_BASES-1 downto 0) := init_port_mapping_downto(ADDR_BASES, PORTS);
-        -- Target FPGA
+        -- Target FPGA.
         DEVICE        : string  := "STRATIX10"
     );
     port(
-        -- Common interface
+        -- =====================================================================
+        -- Clock and Reset
+        -- =====================================================================
+
         CLK     : in std_logic;
         RESET   : in std_logic;
+
+        -- =====================================================================
         -- Input MI interface
+        -- =====================================================================
+
         RX_DWR  : in  std_logic_vector(DATA_WIDTH-1 downto 0);
         RX_MWR  : in  std_logic_vector(META_WIDTH-1 downto 0) := (others => '0');
         RX_ADDR : in  std_logic_vector(ADDR_WIDTH-1 downto 0);
@@ -59,15 +85,19 @@ entity MI_SPLITTER_PLUS_GEN is
         RX_ARDY : out std_logic;
         RX_DRD  : out std_logic_vector(DATA_WIDTH-1 downto 0);
         RX_DRDY : out std_logic;
+
+        -- =====================================================================
         -- Output MI interfaces
-        TX_DWR  : out slv_array_t(PORTS-1 downto 0)(DATA_WIDTH-1 downto 0);
-        TX_MWR  : out slv_array_t(PORTS-1 downto 0)(META_WIDTH-1 downto 0);
-        TX_ADDR : out slv_array_t(PORTS-1 downto 0)(ADDR_WIDTH-1 downto 0);
-        TX_BE   : out slv_array_t(PORTS-1 downto 0)(DATA_WIDTH/8-1 downto 0);
+        -- =====================================================================
+
+        TX_DWR  : out slv_array_t     (PORTS-1 downto 0)(DATA_WIDTH-1 downto 0);
+        TX_MWR  : out slv_array_t     (PORTS-1 downto 0)(META_WIDTH-1 downto 0);
+        TX_ADDR : out slv_array_t     (PORTS-1 downto 0)(ADDR_WIDTH-1 downto 0);
+        TX_BE   : out slv_array_t     (PORTS-1 downto 0)(DATA_WIDTH/8-1 downto 0);
         TX_RD   : out std_logic_vector(PORTS-1 downto 0);
         TX_WR   : out std_logic_vector(PORTS-1 downto 0);
         TX_ARDY : in  std_logic_vector(PORTS-1 downto 0);
-        TX_DRD  : in  slv_array_t(PORTS-1 downto 0)(DATA_WIDTH-1 downto 0);
+        TX_DRD  : in  slv_array_t     (PORTS-1 downto 0)(DATA_WIDTH-1 downto 0);
         TX_DRDY : in  std_logic_vector(PORTS-1 downto 0)
     );
 end entity;

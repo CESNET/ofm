@@ -12,27 +12,46 @@ library work;
 use work.type_pack.all;
 use work.math_pack.all;
 
+
+-- =========================================================================
+--  Description
+-- =========================================================================
+
+-- This component merges two MFB streams into a single one.
+-- It starts merging from Input 0.
+-- After :vhdl:genconstant:`CNT_MAX <mfb_merger_simple.cnt_max>` clock cycles,
+-- it tries to switch to the other input.
+-- If there are no valid data on the other input, it stays on the current one
+-- and waits for the same number of clock cycles before checking again.
 entity MFB_MERGER_SIMPLE is
     Generic (
-        -- number of regions in a data word
+        -- Number of Regions in a data word.
         REGIONS         : natural := 2;
-        -- number of blocks in a region
+        -- Number of Blocks in a Region.
         REGION_SIZE     : natural := 8;
-        -- number of items in a block
+        -- Number of Items in a Block.
         BLOCK_SIZE      : natural := 8;
-        -- number of bits in an item
+        -- Number of bits in an Item.
         ITEM_WIDTH      : natural := 8;
-        -- number of bits for metadata in a single region
+        -- Number of bits for metadata in a single Region.
         META_WIDTH      : natural := 8;
-        -- enable masking SOF and EOF due to switch to the other input
+        -- Enable masking SOF and EOF due to switch to the other input.
         MASKING_EN      : boolean := True;
-        -- maximum amount of clock periods with destination ready before it tries to switch to the other input
+        -- Maximum amount of clock periods with destination ready before it tries to switch to the other input.
         CNT_MAX         : integer := 64
     );
     Port (
+        -- =====================================================================
+        -- Clock and Reset
+        -- =====================================================================
+
         CLK             : in  std_logic;
         RST             : in  std_logic;
-        -- rx interface 0
+
+        -- =====================================================================
+        -- RX interface 0
+        -- =====================================================================
+
         RX_MFB0_DATA    : in  std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
         RX_MFB0_META    : in  std_logic_vector(REGIONS*META_WIDTH-1 downto 0);
         RX_MFB0_SOF     : in  std_logic_vector(REGIONS-1 downto 0);
@@ -41,7 +60,11 @@ entity MFB_MERGER_SIMPLE is
         RX_MFB0_EOF_POS : in  std_logic_vector(REGIONS*log2(REGION_SIZE*BLOCK_SIZE)-1 downto 0);
         RX_MFB0_SRC_RDY : in  std_logic;
         RX_MFB0_DST_RDY : out std_logic;
-        -- rx interface 1
+
+        -- =====================================================================
+        -- RX interface 1
+        -- =====================================================================
+
         RX_MFB1_DATA    : in  std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
         RX_MFB1_META    : in  std_logic_vector(REGIONS*META_WIDTH-1 downto 0);
         RX_MFB1_SOF     : in  std_logic_vector(REGIONS-1 downto 0);
@@ -50,7 +73,11 @@ entity MFB_MERGER_SIMPLE is
         RX_MFB1_EOF_POS : in  std_logic_vector(REGIONS*log2(REGION_SIZE*BLOCK_SIZE)-1 downto 0);
         RX_MFB1_SRC_RDY : in  std_logic;
         RX_MFB1_DST_RDY : out std_logic;
-        -- tx interface
+
+        -- =====================================================================
+        -- TX interface
+        -- =====================================================================
+
         TX_MFB_DATA     : out std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
         TX_MFB_META     : out std_logic_vector(REGIONS*META_WIDTH-1 downto 0);
         TX_MFB_SOF      : out std_logic_vector(REGIONS-1 downto 0);

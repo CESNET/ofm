@@ -6,9 +6,6 @@
 #
 #
 
-#Source paths
-set TSU_GEN_BASE  "$FIRMWARE_BASE/comp/tsu/tsu_gen"
-
 # Paths
 set TSU_GEN_PATH  "/testbench/uut"
 
@@ -26,7 +23,7 @@ add wave -noupdate -label MI32_RESET /testbench/mi32_reset
 add wave -noupdate -label MI32_CLK /testbench/mi32_clk
 add wave -noupdate -label PPS_N /testbench/pps_n
 
-blk_TSU_GEN "IFC"
+blk_TSU_GEN $TSU_GEN_PATH
 
 restart -f
 run 40 us

@@ -46,42 +46,52 @@ end entity;
 
 architecture FULL of RX_MAC_LITE_ADAPTER_LBUS is
 
-    constant BYTES : natural := (SEGMENTS*128)/8;
+    constant BYTES : natural := 128/8;
 
+    signal in_lbus_data_rot : slv_array_t(SEGMENTS-1 downto 0)(128-1 downto 0);
     signal in_lbus_data_ser : std_logic_vector(SEGMENTS*128-1 downto 0);
-    signal in_lbus_data_rot : std_logic_vector(SEGMENTS*128-1 downto 0);
     signal in_lbus_sop_vld  : std_logic_vector(SEGMENTS-1 downto 0);
     signal in_lbus_eop_vld  : std_logic_vector(SEGMENTS-1 downto 0);
+    signal in_lbus_sop_pos  : std_logic_vector(log2(SEGMENTS)-1 downto 0);
+    signal in_lbus_eop_pos  : slv_array_t(SEGMENTS-1 downto 0)(4-1 downto 0);
     signal mfb_sof_pos_comp : std_logic_vector(REGIONS*max(1,log2(REGION_SIZE))-1 downto 0);
     signal mfb_eof_pos_comp : std_logic_vector(REGIONS*log2(REGION_SIZE*8)-1 downto 0);
 
 begin
 
-    in_lbus_data_ser <= slv_array_ser(IN_LBUS_DATA);
-
-    rx_data_rotate_g : for i in 0 to BYTES-1 generate
-        in_lbus_data_rot((i+1)*8-1 downto i*8) <= in_lbus_data_ser((BYTES-1-i+1)*8-1 downto (BYTES-1-i)*8);
+    rx_data_rotate_g : for s in 0 to SEGMENTS-1 generate
+        rx_data_rotate_g2 : for i in 0 to BYTES-1 generate
+            in_lbus_data_rot(s)((i+1)*8-1 downto i*8) <= IN_LBUS_DATA(s)((BYTES-1-i+1)*8-1 downto (BYTES-1-i)*8);
+        end generate;
     end generate;
+    
+    in_lbus_data_ser <= slv_array_ser(in_lbus_data_rot);
 
     in_lbus_sop_vld <= IN_LBUS_SOP and IN_LBUS_ENA;
     in_lbus_eop_vld <= IN_LBUS_EOP and IN_LBUS_ENA;
 
     process (all)
     begin
-        mfb_sof_pos_comp <= (others => '0');
+        in_lbus_sop_pos <= (others => '0');
         for i in 0 to SEGMENTS-1 loop
             if (IN_LBUS_SOP(i) = '1') then
-                mfb_sof_pos_comp <= std_logic_vector(to_unsigned(i,mfb_sof_pos_comp'length));
+                in_lbus_sop_pos <= std_logic_vector(to_unsigned(i,in_lbus_sop_pos'length));
             end if;
         end loop;
     end process;
+
+    mfb_sof_pos_comp <= in_lbus_sop_pos & '0';
+
+    lbus_eop_pos_g : for s in 0 to SEGMENTS-1 generate
+        in_lbus_eop_pos(s) <= std_logic_vector(15-unsigned(IN_LBUS_MTY(s)));
+    end generate;
 
     process (all)
     begin
         mfb_eof_pos_comp <= (others => '0');
         for i in 0 to SEGMENTS-1 loop
             if (IN_LBUS_EOP(i) = '1') then
-                mfb_eof_pos_comp <= std_logic_vector(((i+1)*16)-1-resize(unsigned(IN_LBUS_MTY(i)),mfb_eof_pos_comp'length));
+                mfb_eof_pos_comp <= std_logic_vector(to_unsigned(i,log2(SEGMENTS))) & in_lbus_eop_pos(i);
             end if;
         end loop;
     end process;
@@ -89,7 +99,7 @@ begin
     process (CLK)
     begin
         if (rising_edge(CLK)) then
-            OUT_MFB_DATA     <= in_lbus_data_rot;
+            OUT_MFB_DATA     <= in_lbus_data_ser;
             OUT_MFB_SOF(0)   <= or in_lbus_sop_vld;
             OUT_MFB_SOF_POS  <= mfb_sof_pos_comp;
             OUT_MFB_EOF(0)   <= or in_lbus_eop_vld;

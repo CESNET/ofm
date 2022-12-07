@@ -8,10 +8,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
 */
 
-`ifndef BYTE_ARRAY_LII_ENV_PKG
-`define BYTE_ARRAY_LII_ENV_PKG
+`ifndef BYTE_ARRAY_LII_RX_PKG
+`define BYTE_ARRAY_LII_RX_PKG
 
-package byte_array_lii_rx_env;
+package uvm_byte_array_lii_rx;
 
     `include "uvm_macros.svh"
     import uvm_pkg::*;

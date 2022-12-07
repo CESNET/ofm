@@ -19,7 +19,7 @@ import crc32_ethernet_pkg::*;
 // In the end of the packet is generate CRC and last chunk of data
 class sequence_simple_rx_random_link_status #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH) extends sequence_simple #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH);
 
-    `uvm_object_param_utils(byte_array_lii_env::sequence_simple_rx_random_link_status #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH))
+    `uvm_object_param_utils(uvm_byte_array_lii::sequence_simple_rx_random_link_status #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH))
 
     // -----------------------
     // Parameters.
@@ -27,8 +27,8 @@ class sequence_simple_rx_random_link_status #(DATA_WIDTH, FAST_SOF, META_WIDTH, 
 
     localparam BYTE_NUM = DATA_WIDTH/8;
 
-    common::rand_rdy link_status;
-    common::rand_length number_of_idles;
+    uvm_common::rand_rdy link_status;
+    uvm_common::rand_length number_of_idles;
 
 
     localparam BYTES_VLD_LENGTH        = $clog2(DATA_WIDTH/8)+1;
@@ -39,8 +39,8 @@ class sequence_simple_rx_random_link_status #(DATA_WIDTH, FAST_SOF, META_WIDTH, 
     // Constructor - creates new instance of this class
     function new(string name = "sequence");
         super.new("sequence_simple_rx_random_link_status");
-        link_status     = common::rand_rdy_swap::new(3000, 1);
-        number_of_idles = common::rand_length_rand::new;
+        link_status     = uvm_common::rand_rdy_swap::new(500, 1);
+        number_of_idles = uvm_common::rand_length_rand::new;
     endfunction
 
     // Method which define how the transaction will look.
@@ -166,9 +166,6 @@ class sequence_simple_rx_random_link_status #(DATA_WIDTH, FAST_SOF, META_WIDTH, 
                 if (req.link_status == 1'b0) begin
                     set_meta();
                     link_down    = 1'b1;
-                    if (meta.data[0] == 1'b1) begin
-                        $write("LINK STATUS: %b DATA: %h\n", meta.data, req.data);
-                    end
                     finish_item(req);
                     send_same();
                     return;

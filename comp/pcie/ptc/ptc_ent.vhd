@@ -144,25 +144,6 @@ port(
     UP_MFB_DST_RDY : out std_logic_vector(DMA_PORTS-1 downto 0);
 
     ---------------------------------------------------------------------------
-    -- Output to PCIe Endpoint (Requester request interface (RQ))
-    -- Used in Xilinx DEVICEs
-    ---------------------------------------------------------------------------
-
-    -- Data bus
-    RQ_TDATA     : out std_logic_vector(MFB_UP_REGIONS*MFB_UP_REG_SIZE*MFB_UP_BLOCK_SIZE*MFB_UP_ITEM_WIDTH-1 downto 0);
-    -- Set of signals with sideband information about transferred transaction
-    RQ_TUSER     : out std_logic_vector(RQ_TUSER_WIDTH-1 downto 0);
-    -- Indication of the last word of a transaction
-    RQ_TLAST     : out std_logic;
-    -- Indication of valid data
-    -- each bit determines validity of different Dword (1 Dword = 4 Bytes)
-    RQ_TKEEP     : out std_logic_vector(MFB_UP_REGIONS*MFB_UP_REG_SIZE*MFB_UP_BLOCK_SIZE*MFB_UP_ITEM_WIDTH/32-1 downto 0);
-    -- PCIe core is ready to receive a transaction
-    RQ_TREADY    : in  std_logic := '0';
-    -- User application sends valid data
-    RQ_TVALID    : out std_logic;
-
-    ---------------------------------------------------------------------------
     -- Header output to PCIe Endpoint (Requester request interface (RQ))
     -- Used in Intel DEVICEs with P_TILE Endpoint type
     ---------------------------------------------------------------------------
@@ -184,6 +165,7 @@ port(
     RQ_MFB_SOF_POS : out std_logic_vector(MFB_UP_REGIONS*max(1,log2(MFB_UP_REG_SIZE))-1 downto 0);
     RQ_MFB_EOF_POS : out std_logic_vector(MFB_UP_REGIONS*max(1,log2(MFB_UP_REG_SIZE*MFB_UP_BLOCK_SIZE))-1 downto 0);
     RQ_MFB_SRC_RDY : out std_logic;
+    RQ_MFB_BE      : out std_logic_vector(MFB_UP_REGIONS*8-1 downto 0);
     RQ_MFB_DST_RDY : in  std_logic := '0';
 
     -- ========================================================================
@@ -213,25 +195,6 @@ port(
     RC_MFB_EOF_POS : in  std_logic_vector(MFB_DOWN_REGIONS*max(1,log2(MFB_DOWN_REG_SIZE*MFB_DOWN_BLOCK_SIZE))-1 downto 0)        := (others => '0');
     RC_MFB_SRC_RDY : in  std_logic                                                                                               := '0';
     RC_MFB_DST_RDY : out std_logic;
-
-    ---------------------------------------------------------------------------
-    -- Input from PCIe Endpoint (Requester Completion Interface (RC))
-    -- Used in Xilinx DEVICEs
-    ---------------------------------------------------------------------------
-
-    -- Data bus
-    RC_TDATA     : in  std_logic_vector(MFB_DOWN_REGIONS*MFB_DOWN_REG_SIZE*MFB_DOWN_BLOCK_SIZE*MFB_DOWN_ITEM_WIDTH-1 downto 0)    := (others => '0');
-    -- Set of signals with sideband information about trasferred transaction
-    RC_TUSER     : in  std_logic_vector(RC_TUSER_WIDTH-1 downto 0)                                                                := (others => '0');
-    -- Indication of the last word of a transaction
-    RC_TLAST     : in  std_logic                                                                                                  := '0';
-    -- Indication of valid data
-    -- each bit determines validity of different Dword (1 Dword = 4 Bytes)
-    RC_TKEEP     : in  std_logic_vector(MFB_DOWN_REGIONS*MFB_DOWN_REG_SIZE*MFB_DOWN_BLOCK_SIZE*MFB_DOWN_ITEM_WIDTH/32-1 downto 0) := (others => '0');
-    -- PCIe core sends valid transaction data
-    RC_TVALID    : in  std_logic                                                                                                  := '0';
-    -- User application is ready to receive a transaction
-    RC_TREADY    : out std_logic;
 
     ---------------------------------------------------------------------------
     -- Output to DMA Module (MVB+MFB bus) (runs on CLK_DMA)

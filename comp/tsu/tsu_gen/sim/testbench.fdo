@@ -7,24 +7,24 @@
 #
 
 # For whole design testing
-set FIRMWARE_BASE    "../../../.."
-set TSU_GEN_BASE     "$FIRMWARE_BASE/comp/tsu/tsu_gen"
+set OFM_PATH    	"../../../.."
+set TSU_GEN_BASE    ".."
 
-set TB_FILE          "$TSU_GEN_BASE/sim/testbench.vhd"
-set SIG_FILE         "$TSU_GEN_BASE/sim/comp_sig.fdo"
+set TB_FILE          "./testbench.vhd"
+set SIG_FILE         "./comp_sig.fdo"
 
 set MOD ""
 
 # Modules definition
 set COMPONENTS [list \
 	[list "TSU_GEN"   $TSU_GEN_BASE      "FULL"] \
-	[list "MI32_SIM"  $OFM_PATH/comp/mi_tools/sim_old	"FULL"] \
+	[list "MI32_SIM"  "$OFM_PATH/comp/mi_tools/sim_old"	"FULL"] \
 ]
 
-set PACKAGES "$FIRMWARE_BASE/comp/mi_tools/pkg/mi32_pkg.vhd"
+set PACKAGES "$OFM_PATH/comp/mi_tools/pkg/mi32_pkg.vhd"
 
 # Global include file for compilation
-source "$FIRMWARE_BASE/build/Modelsim.inc.fdo"
+source "$OFM_PATH/build/Modelsim.inc.fdo"
 
 # Suppress warnings from arithm library
 puts "Std Arith Warnings - Disabled"

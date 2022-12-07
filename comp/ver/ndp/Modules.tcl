@@ -4,8 +4,6 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-
-global FIRMWARE_BASE
 set SV_COMMON_BASE "$OFM_PATH/comp/ver"
 set SV_FLU_BASE    "$OFM_PATH/comp/flu_tools/ver"
 set SV_AXI_BASE    "$OFM_PATH/comp/ver/axi"
@@ -18,4 +16,4 @@ set COMPONENTS [list \
     [list "SV_MI"     $SV_MI_BASE     "FULL"] \
 ]
 
-set MOD "$MOD $ENTITY_BASE/sv_ndp_software_pkg.sv"
+lappend MOD "$ENTITY_BASE/sv_ndp_software_pkg.sv"

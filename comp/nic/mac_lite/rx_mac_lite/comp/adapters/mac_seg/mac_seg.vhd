@@ -50,7 +50,8 @@ end entity;
 
 architecture FULL of RX_MAC_LITE_ADAPTER_MAC_SEG is
 
-    constant MAX_FRAME_LENGTH : natural := 16383;
+    constant WORD_LNG_WIDTH : natural := log2(REGIONS*REGION_SIZE*8+1);
+    constant LNG_WIDTH      : natural := max(WORD_LNG_WIDTH,8);
 
     signal in_mac_boundary           : std_logic_vector(SEGMENTS-1 downto 0);
     signal in_mac_sop                : std_logic_vector(SEGMENTS-1 downto 0);
@@ -78,9 +79,9 @@ architecture FULL of RX_MAC_LITE_ADAPTER_MAC_SEG is
 
     signal tx_mfb_lng_mid_pkt_gap    : std_logic;
     signal tx_mfb_lng_cof            : std_logic_vector(SEGMENTS-1 downto 0);
-    signal tx_mfb_lng_lenth          : std_logic_vector(SEGMENTS*            log2(MAX_FRAME_LENGTH)-1 downto 0);
-    signal tx_mfb_lng_lenth_arr      : slv_array_t     (SEGMENTS-1 downto 0)(log2(MAX_FRAME_LENGTH)-1 downto 0);
-    signal tx_mfb_lng_bytes_count    : u_array_t       (SEGMENTS-1 downto 0)(log2(MAX_FRAME_LENGTH)-1 downto 0);
+    signal tx_mfb_lng_lenth          : std_logic_vector(SEGMENTS*            LNG_WIDTH-1 downto 0);
+    signal tx_mfb_lng_lenth_arr      : slv_array_t     (SEGMENTS-1 downto 0)(LNG_WIDTH-1 downto 0);
+    signal tx_mfb_lng_bytes_count    : u_array_t       (SEGMENTS-1 downto 0)(LNG_WIDTH-1 downto 0);
     signal tx_mfb_lng_undersized     : std_logic_vector(SEGMENTS-1 downto 0);
 
     signal reg2_mac_data             : std_logic_vector(SEGMENTS*64-1 downto 0);
@@ -178,13 +179,14 @@ begin
 
     mfb_frame_lng_i : entity work.MFB_FRAME_LNG
     generic map (
-        REGIONS        => SEGMENTS              ,
-        REGION_SIZE    => 1                     ,
-        BLOCK_SIZE     => 8                     ,
-        ITEM_WIDTH     => 8                     ,
-        META_WIDTH     => 1                     ,
-        LNG_WIDTH      => log2(MAX_FRAME_LENGTH),
-        REG_BITMAP     => "111"                 ,
+        REGIONS        => SEGMENTS,
+        REGION_SIZE    => 1,
+        BLOCK_SIZE     => 8,
+        ITEM_WIDTH     => 8,
+        META_WIDTH     => 1,
+        LNG_WIDTH      => LNG_WIDTH,
+        REG_BITMAP     => "111",
+        SATURATION     => True,
         IMPLEMENTATION => "parallel"
     )
     port map (

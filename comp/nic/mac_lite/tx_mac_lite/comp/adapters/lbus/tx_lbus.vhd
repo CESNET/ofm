@@ -47,7 +47,7 @@ end entity;
 
 architecture FULL of TX_MAC_LITE_ADAPTER_LBUS is
 
-    constant BYTES : natural := (SEGMENTS*128)/8;
+    constant BYTES : natural := 128/8;
 
     signal reconf_mfb_data     : std_logic_vector(REGIONS*SEGMENTS*128-1 downto 0);
     signal reconf_mfb_sof      : std_logic_vector(REGIONS-1 downto 0);
@@ -75,8 +75,8 @@ architecture FULL of TX_MAC_LITE_ADAPTER_LBUS is
     signal align_mfb_block_vld : std_logic_vector(REGIONS*SEGMENTS-1 downto 0);
 
     signal lbus_rdy_reg        : std_logic;
-    signal mfb_data_rot        : std_logic_vector(SEGMENTS*128-1 downto 0);
     signal lbus_data_comb      : slv_array_t(SEGMENTS-1 downto 0)(128-1 downto 0);
+    signal lbus_data_rot       : slv_array_t(SEGMENTS-1 downto 0)(128-1 downto 0);
     signal lbus_sop_comb       : std_logic_vector(SEGMENTS-1 downto 0);
     signal lbus_eop_comb       : std_logic_vector(SEGMENTS-1 downto 0);
     signal lbus_mty_common     : unsigned(4-1 downto 0);
@@ -89,45 +89,26 @@ begin
     --  FRAMES REALIGN TO 128b SEGMENTS
     -- -------------------------------------------------------------------------
 
-    -- TODO:
-    -- Replace the MFB_RECONFIGURATOR with a more efficient module.
-
-    mfb_reconf_i : entity work.MFB_RECONFIGURATOR
-    generic map(
-        RX_REGIONS            => REGIONS,
-        RX_REGION_SIZE        => REGION_SIZE,
-        RX_BLOCK_SIZE         => 8,
-        RX_ITEM_WIDTH         => 8,
-        TX_REGIONS            => REGIONS,
-        TX_REGION_SIZE        => SEGMENTS,
-        TX_BLOCK_SIZE         => 16,
-        TX_ITEM_WIDTH         => 8,
-        META_WIDTH            => 0,
-        META_MODE             => 0,
-        FIFO_SIZE             => 32,
-        FRAMES_OVER_TX_BLOCK  => 0,
-        FRAMES_OVER_TX_REGION => 0,
-        DEVICE                => DEVICE
-    )
+    mfb_to_lbus_reconf_i : entity work.MFB_TO_LBUS_RECONF
     port map(
         CLK        => CLK,
-        RESET      => RESET,
+        RST        => RESET,
 
-        RX_DATA    => IN_MFB_DATA,
-        RX_SOF     => IN_MFB_SOF,
-        RX_EOF     => IN_MFB_EOF,
-        RX_SOF_POS => IN_MFB_SOF_POS,
-        RX_EOF_POS => IN_MFB_EOF_POS,
-        RX_SRC_RDY => IN_MFB_SRC_RDY,
-        RX_DST_RDY => IN_MFB_DST_RDY,
+        RX_MFB_DATA    => IN_MFB_DATA,
+        RX_MFB_SOF     => IN_MFB_SOF(0),
+        RX_MFB_EOF     => IN_MFB_EOF(0),
+        RX_MFB_SOF_POS => IN_MFB_SOF_POS,
+        RX_MFB_EOF_POS => IN_MFB_EOF_POS,
+        RX_MFB_SRC_RDY => IN_MFB_SRC_RDY,
+        RX_MFB_DST_RDY => IN_MFB_DST_RDY,
 
-        TX_DATA    => reconf_mfb_data,
-        TX_SOF     => reconf_mfb_sof,
-        TX_EOF     => reconf_mfb_eof,
-        TX_SOF_POS => reconf_mfb_sof_pos,
-        TX_EOF_POS => reconf_mfb_eof_pos,
-        TX_SRC_RDY => reconf_mfb_src_rdy,
-        TX_DST_RDY => reconf_mfb_dst_rdy
+        TX_MFB_DATA    => reconf_mfb_data,
+        TX_MFB_SOF     => reconf_mfb_sof(0),
+        TX_MFB_EOF     => reconf_mfb_eof(0),
+        TX_MFB_SOF_POS => reconf_mfb_sof_pos,
+        TX_MFB_EOF_POS => reconf_mfb_eof_pos,
+        TX_MFB_SRC_RDY => reconf_mfb_src_rdy,
+        TX_MFB_DST_RDY => reconf_mfb_dst_rdy
     );
 
     process (CLK)
@@ -203,11 +184,13 @@ begin
         end if;
     end process;
 
-    in_data_rot_g : for i in 0 to BYTES-1 generate
-        mfb_data_rot((BYTES-1-i+1)*8-1 downto (BYTES-1-i)*8) <= align_mfb_data((i+1)*8-1 downto i*8);
-    end generate;
+    lbus_data_comb <= slv_array_deser(align_mfb_data,SEGMENTS,128);
 
-    lbus_data_comb <= slv_array_deser(mfb_data_rot,SEGMENTS,128);
+    data_rot_g : for s in 0 to SEGMENTS-1 generate
+        data_rot_g2 : for i in 0 to BYTES-1 generate
+            lbus_data_rot(s)((BYTES-1-i+1)*8-1 downto (BYTES-1-i)*8) <= lbus_data_comb(s)((i+1)*8-1 downto i*8);
+        end generate;
+    end generate;
 
     process (all)
     begin
@@ -238,8 +221,11 @@ begin
     process (CLK)
     begin
         if (rising_edge(CLK)) then
+            -- Up to four valid (OUT_LBUS_ENA) cycles might be safely performed
+            -- after OUT_LBUS_RDY is negated, then OUT_LBUS_ENA must be in low.
+            OUT_LBUS_ENA <= (others => '0');
             if (lbus_rdy_reg = '1') then
-                OUT_LBUS_DATA <= lbus_data_comb;
+                OUT_LBUS_DATA <= lbus_data_rot;
                 OUT_LBUS_MTY  <= lbus_mty_comb;
                 OUT_LBUS_ENA  <= lbus_ena_comb;
                 OUT_LBUS_SOP  <= lbus_sop_comb;

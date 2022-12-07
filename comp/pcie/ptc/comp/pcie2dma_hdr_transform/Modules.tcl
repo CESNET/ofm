@@ -6,14 +6,13 @@
 
 set PKG_BASE            "$OFM_PATH/comp/base/pkg"
 
-set PACKAGES "$PACKAGES $PKG_BASE/math_pack.vhd"
-set PACKAGES "$PACKAGES $PKG_BASE/type_pack.vhd"
-set PACKAGES "$PACKAGES $PKG_BASE/dma_bus_pack.vhd"
+lappend PACKAGES "$PKG_BASE/math_pack.vhd"
+lappend PACKAGES "$PKG_BASE/type_pack.vhd"
+lappend PACKAGES "$PKG_BASE/dma_bus_pack.vhd"
 
 # list of sub-components
-set COMPONENTS [ list \
-]
+lappend COMPONENTS [ list "PCIE_HDR_GEN"         "$OFM_PATH/comp/pcie/others/hdr_gen"            "FULL" ]
 
 # entity and architecture
-set MOD "$MOD $ENTITY_BASE/ptc_pcie2dma_hdr_transform_ent.vhd"
-set MOD "$MOD $ENTITY_BASE/ptc_pcie2dma_hdr_transform_full.vhd"
+lappend MOD "$ENTITY_BASE/ptc_pcie2dma_hdr_transform_ent.vhd"
+lappend MOD "$ENTITY_BASE/ptc_pcie2dma_hdr_transform_full.vhd"

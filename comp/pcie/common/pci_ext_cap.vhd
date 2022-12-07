@@ -20,11 +20,14 @@ generic (
     ENDPOINT_ID             : integer := 0;
     ENDPOINT_ID_ENABLE      : boolean := false;
     DEVICE_TREE_ENABLE      : boolean := true;
+    CARD_ID_WIDTH           : integer := 0;
     CFG_EXT_READ_DV_HOTFIX  : boolean := true
 );
 -- Interface description
 port (
     CLK                     : in  std_logic;
+    CARD_ID                 : in  std_logic_vector(CARD_ID_WIDTH-1 downto 0) := (others => '0');
+
     CFG_EXT_READ            : in  std_logic;
     CFG_EXT_WRITE           : in  std_logic;
     CFG_EXT_REGISTER        : in  std_logic_vector(9 downto 0);
@@ -71,33 +74,45 @@ architecture behavioral of PCI_EXT_CAP is
     attribute ramstyle  of dtb_vf0  : signal is "M20K"; -- M20K, MLAB
 
     signal reg_dv           : std_logic := '0';
+    signal reg_dtb_ext_addr : std_logic_vector(1 downto 0) := (others => '0');
     signal reg_dtb_pf0_addr : std_logic_vector(log2(dtb_words(DTB_PF0_DATA))-1 downto 0);
     signal reg_dtb_vf0_addr : std_logic_vector(log2(dtb_words(DTB_VF0_DATA))-1 downto 0);
     signal reg_dtb_pf0_data : std_logic_vector(31 downto 0) := (others => '0');
     signal reg_dtb_vf0_data : std_logic_vector(31 downto 0) := (others => '0');
     signal reg_cfg_ext_read_data : std_logic_vector(31 downto 0);
+    signal reg_dtb_ext_data : std_logic_vector(31 downto 0);
 
     signal cfg_register     : integer;
     signal cfg_function     : integer;
 
+    signal card_id_128 : std_logic_vector(127 downto 0) := (others => '0');
+
 begin
 
-   -- Address space:
-   -- 0x00: PCI-SIG spec: Vendor-Specific Extended Capability Header
-   --       Next capability Offset & Capability Version & PCI Express Extended Capability ID
-   --       0x000 & 0x1 & 0x000B
-   -- 0x04: PCI-SIG spec: Vendor-Specific Header: DTB capability
-   --       VSEC Length & VSEC Rev & VSEC ID
-   --       0x020 & 0x1 & 0x0D7B
-   -- 0x08: Endpoint ID flag (1b) & Reserved (27b) & Endpoint ID (4b)
-   -- 0x0C: DTB real length
-   -- 0x10: DTB address register
-   -- 0x14: DTB data register (RO)
-   -- 0x18: Reserved
-   -- 0x1C: Reserved
+    -- Address space (registers are read-only unless specified otherwise)
+    --
+    -- base_address (reg_nr): description
+    -- ----------------------------------
+    -- 0x00 (0): PCI-SIG spec: Vendor-Specific Extended Capability Header
+    --           Next capability Offset & Capability Version & PCI Express Extended Capability ID
+    --           0x000 & 0x1 & 0x000B
+    -- 0x04 (1): PCI-SIG spec: Vendor-Specific Header: DTB capability
+    --           VSEC Length & VSEC Rev & VSEC ID
+    --           0x020 & 0x1 & 0x0D7B
+    -- 0x08 (2): Endpoint ID flag (1b) & Card ID flag (1b) & Reserved (26b) & Endpoint ID (4b)
+    -- 0x0C (3): DTB real length - in bytes
+    -- 0x10 (4): DTB address register - index of dword (RW)
+    -- 0x14 (5): DTB data register
+    -- 0x18 (6): Extra address register (RW)
+    -- 0x1C (7): Extra data register (various)
+
+    -- Extra address space (reg 7 is indirectly addresed by reg 6):
+    -- 0x00 - 0x0F (0-3): Card ID; up to 128b
 
     cfg_register    <= to_integer(unsigned(CFG_EXT_REGISTER));
     cfg_function    <= to_integer(unsigned(CFG_EXT_FUNCTION));
+
+    card_id_128(CARD_ID_WIDTH-1 downto 0) <= CARD_ID;
 
     addr_dec: process(all)
     begin
@@ -109,13 +124,14 @@ begin
             elsif (cfg_register = VSEC_BASE_REG + 2) then
                 if (ENDPOINT_ID_ENABLE) then
                     CFG_EXT_READ_DATA <= X"8000000" & std_logic_vector(to_unsigned(ENDPOINT_ID, 4));
+                    CFG_EXT_READ_DATA(30) <= '1' when CARD_ID_WIDTH /= 0 else '0';
                 else
                     CFG_EXT_READ_DATA <= (others => '0');
                 end if;
             elsif (cfg_register = VSEC_BASE_REG + 3) then
                 if (DEVICE_TREE_ENABLE) then
-                    CFG_EXT_READ_DATA <= std_logic_vector(to_unsigned(DTB_PF0_DATA'length, 32)) when cfg_function = 0 else
-                                         std_logic_vector(to_unsigned(DTB_VF0_DATA'length, 32));
+                    CFG_EXT_READ_DATA <= std_logic_vector(to_unsigned(DTB_PF0_DATA'length / 8, 32)) when cfg_function = 0 else
+                                         std_logic_vector(to_unsigned(DTB_VF0_DATA'length / 8, 32));
                 else
                     CFG_EXT_READ_DATA <= (others => '0');
                 end if;
@@ -133,9 +149,9 @@ begin
                     CFG_EXT_READ_DATA <= (others => '0');
                 end if;
             elsif (cfg_register = VSEC_BASE_REG + 6) then
-                CFG_EXT_READ_DATA <= (others => '0');
+                CFG_EXT_READ_DATA <= (31 downto reg_dtb_ext_addr'length => '0') & reg_dtb_ext_addr;
             elsif (cfg_register = VSEC_BASE_REG + 7) then
-                CFG_EXT_READ_DATA <= (others => '0');
+                CFG_EXT_READ_DATA <= reg_dtb_ext_data;
             else
                 CFG_EXT_READ_DATA <= (others => '0');
             end if;
@@ -157,6 +173,14 @@ begin
                     reg_dtb_vf0_data <= (others => '0');
                 end if;
             end if;
+
+            -- Read from Extra data register
+            reg_dtb_ext_data <= card_id_128( 31 downto  0) when reg_dtb_ext_addr = "00" else
+                                card_id_128( 63 downto 32) when reg_dtb_ext_addr = "01" else
+                                card_id_128( 95 downto 64) when reg_dtb_ext_addr = "10" else
+                                card_id_128(127 downto 96) when reg_dtb_ext_addr = "11" else
+                                (others => '0');
+
             reg_cfg_ext_read_data <= CFG_EXT_READ_DATA;
 
             if (CFG_EXT_READ = '1' and reg_dv = '0' and (CFG_EXT_READ_DV_HOTFIX or (cfg_register >= VSEC_BASE_REG and cfg_register < VSEC_BASE_REG + 8))) then
@@ -167,11 +191,16 @@ begin
                 reg_dv <= '0';
             end if;
 
-            if (CFG_EXT_WRITE = '1' and cfg_register = VSEC_BASE_REG + 4) then
-                if (cfg_function = 0) then
-                    reg_dtb_pf0_addr    <= CFG_EXT_WRITE_DATA(log2(dtb_words(DTB_PF0_DATA))-1 downto 0);
-                else
-                    reg_dtb_vf0_addr    <= CFG_EXT_WRITE_DATA(log2(dtb_words(DTB_VF0_DATA))-1 downto 0);
+            -- Address registers for indirect access
+            if (CFG_EXT_WRITE = '1') then
+                if (cfg_register = VSEC_BASE_REG + 4) then
+                    if (cfg_function = 0) then
+                        reg_dtb_pf0_addr    <= CFG_EXT_WRITE_DATA(log2(dtb_words(DTB_PF0_DATA))-1 downto 0);
+                    else
+                        reg_dtb_vf0_addr    <= CFG_EXT_WRITE_DATA(log2(dtb_words(DTB_VF0_DATA))-1 downto 0);
+                    end if;
+                elsif (cfg_register = VSEC_BASE_REG + 6) then
+                    reg_dtb_ext_addr <= CFG_EXT_WRITE_DATA(reg_dtb_ext_addr'length-1 downto 0);
                 end if;
             end if;
         end if;

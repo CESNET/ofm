@@ -34,12 +34,16 @@ module DUT (
         .WR_DATA     (mvb_wr.DATA),
         .WR_EN       (FIFO_VLD_AND_SRC_RDY),
         .WR_FULL     (FIFO_FULL),
+        .WR_AFULL    (),
+        .WR_STATUS   (),
 
         .RD_CLK      (TX_CLK),
         .RD_RST      (TX_RST),
         .RD_DATA     (mvb_rd.DATA),
         .RD_EMPTY    (FIFO_EMPTY),
-        .RD_EN       (mvb_rd.DST_RDY)
+        .RD_EN       (mvb_rd.DST_RDY),
+        .RD_AEMPTY   (),
+        .RD_STATUS   ()
     );
 
 

@@ -9,8 +9,8 @@ set SV_CRC_BASE      "$FIRMWARE_BASE/ndk/modules/internal/base/ff/crc32"
 set SV_COMMON_BASE   "$OFM_PATH/comp/ver"
 
 set COMPONENTS [list \
-   [ list "SV_CRC"    $SV_CRC_BASE    "ETHERNET"] \
-   [ list "SV_COMMON" $SV_COMMON_BASE "FULL"] \
+    [ list "SV_CRC"    $SV_CRC_BASE    "ETHERNET"] \
+    [ list "SV_COMMON" $SV_COMMON_BASE "FULL"] \
 ]
 
-set MOD "$MOD $ENTITY_BASE/sv_mii_pkg.sv"
+lappend MOD "$ENTITY_BASE/sv_mii_pkg.sv"
