@@ -41,6 +41,7 @@ def COMPONENTS_MULTIVER = [\
     ['ASFIFOX'           , 'comp/mvb_tools/storage/asfifox/ver'               , 'top_level.fdo'      , 'tbench/test_pkg.sv'  , 'ver_settings.py'       ],\
     ['FIFOX'             , 'comp/mvb_tools/storage/fifox/ver'                 , 'top_level.fdo'      , 'tbench/test_pkg.sv'  , 'ver_settings.py'       ],\
     ['LAST_VLD'          , 'comp/mvb_tools/aggregate/last_vld/ver'            , 'top_level.fdo'      , 'tbench/test_pkg.sv'  , 'ver_settings.py'       ],\
+    ['UVM_MVB_LUT'       , 'comp/mvb_tools/storage/lookup_table/uvm'          , 'top_level.fdo'      , 'tbench/tests/pkg.sv' , 'ver_settings.py'       ],\
 ]
 // /////////////////////////////////////////////////////////////////////////////
 
