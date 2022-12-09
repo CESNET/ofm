@@ -10,5 +10,5 @@
 
 set MOD "$MOD $ENTITY_BASE/dsp_pipe_3x48.vhd"
 set MOD "$MOD $ENTITY_BASE/dsp_pipe_3x.vhd"
-set MOD "$MOD $ENTITY_BASE/pipe_ent.vhd"
-set MOD "$MOD $ENTITY_BASE/pipe_arch.vhd"
+set MOD "$MOD $ENTITY_BASE/pipe_dsp_ent.vhd"
+set MOD "$MOD $ENTITY_BASE/pipe_dsp.vhd"

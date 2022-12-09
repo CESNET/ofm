@@ -12,4 +12,4 @@ set COMPONENTS [list \
     [list "PIPE"    $PIPE_BASE     "FULL"] \
 ]
 
-set MOD "$MOD $ENTITY_BASE/pipe.vhd"
+set MOD "$MOD $ENTITY_BASE/mvb_pipe.vhd"

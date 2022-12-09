@@ -20,4 +20,4 @@ set COMPONENTS [list \
 ]
 
 # Source files for implemented component
-set MOD "$MOD $ENTITY_BASE/stat_unit.vhd"
+set MOD "$MOD $ENTITY_BASE/tx_stat_unit.vhd"
