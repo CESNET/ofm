@@ -5,25 +5,25 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 
-class virt_sequence#(ITEMS, LUT_WIDTH, REG_DEPTH, ADDR_WIDTH) extends uvm_sequence;
-    `uvm_object_param_utils(test::virt_sequence#(ITEMS, LUT_WIDTH, REG_DEPTH, ADDR_WIDTH))
-    `uvm_declare_p_sequencer(uvm_pipe::virt_sequencer#(ITEMS, LUT_WIDTH, REG_DEPTH))
+class virt_sequence#(ITEMS, LUT_WIDTH, REG_DEPTH, ADDR_WIDTH, SLICE_WIDTH, SW_WIDTH) extends uvm_sequence;
+    `uvm_object_param_utils(test::virt_sequence#(ITEMS, LUT_WIDTH, REG_DEPTH, ADDR_WIDTH, SLICE_WIDTH, SW_WIDTH))
+    `uvm_declare_p_sequencer(uvm_pipe::virt_sequencer#(ITEMS, LUT_WIDTH, REG_DEPTH, SLICE_WIDTH, SW_WIDTH))
 
     function new (string name = "virt_sequence");
         super.new(name);
     endfunction
 
     uvm_reset::sequence_start                       m_reset;
-    uvm_logic_vector::sequence_simple#(REG_DEPTH)  m_logic_vector_sq;
-    uvm_pipe::reg_sequence#(REG_DEPTH, ADDR_WIDTH)             m_reg;
+    uvm_logic_vector::sequence_simple#(REG_DEPTH-SLICE_WIDTH)  m_logic_vector_sq;
+    uvm_pipe::reg_sequence#(REG_DEPTH, ADDR_WIDTH, LUT_DEPTH, SW_WIDTH)  m_reg;
     uvm_mvb::sequence_lib_tx#(MVB_ITEMS, LUT_WIDTH) h_seq_tx;
     uvm_phase phase;
 
-    virtual function void init(uvm_pipe::regmodel#(REG_DEPTH) m_regmodel, uvm_phase phase);
+    virtual function void init(uvm_pipe::regmodel#(REG_DEPTH, SW_WIDTH) m_regmodel, uvm_phase phase);
 
         m_reset           = uvm_reset::sequence_start::type_id::create("m_reset");
-        m_logic_vector_sq = uvm_logic_vector::sequence_simple#(REG_DEPTH)::type_id::create("m_logic_vector_sq");
-        m_reg            = uvm_pipe::reg_sequence#(REG_DEPTH, ADDR_WIDTH)::type_id::create("m_reg");
+        m_logic_vector_sq = uvm_logic_vector::sequence_simple#(REG_DEPTH-SLICE_WIDTH)::type_id::create("m_logic_vector_sq");
+        m_reg            = uvm_pipe::reg_sequence#(REG_DEPTH, ADDR_WIDTH, LUT_DEPTH, SW_WIDTH)::type_id::create("m_reg");
         m_reg.m_regmodel = m_regmodel;
 
         h_seq_tx = uvm_mvb::sequence_lib_tx #(MVB_ITEMS, LUT_WIDTH)::type_id::create("h_seq_tx");

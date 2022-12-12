@@ -26,6 +26,7 @@ source "$FIRMWARE_BASE/build/Modelsim.inc.fdo"
 # Suppress warnings from arithm library
 puts "Std Arith Warnings - Disabled"
 set StdArithNoWarnings 1
+set NumericStdNoWarnings 1
 nb_sim_run
 
 if {$SIM_FLAGS(CODE_COVERAGE)} {

@@ -4,10 +4,10 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
-class reg_sequence#(REG_DEPTH, ADDR_WIDTH) extends uvm_sequence;
-    `uvm_object_param_utils(uvm_pipe::reg_sequence#(REG_DEPTH, ADDR_WIDTH))
+class reg_sequence#(REG_DEPTH, ADDR_WIDTH, LUT_DEPTH, SW_WIDTH) extends uvm_sequence;
+    `uvm_object_param_utils(uvm_pipe::reg_sequence#(REG_DEPTH, ADDR_WIDTH, LUT_DEPTH, SW_WIDTH))
 
-    regmodel#(REG_DEPTH) m_regmodel;
+    regmodel#(REG_DEPTH, SW_WIDTH) m_regmodel;
 
     function new (string name = "run_channel");
         super.new(name);
@@ -18,10 +18,16 @@ class reg_sequence#(REG_DEPTH, ADDR_WIDTH) extends uvm_sequence;
         uvm_reg_data_t data;
         uvm_reg_data_t value [ADDR_WIDTH];
 
-        foreach (value[i])
+        foreach (value[i]) begin 
             std::randomize(value[i]);
+            if (LUT_DEPTH == 1) begin 
+                m_regmodel.lut.write(status, i*2, value[i]);
+            end
+        end
 
-        m_regmodel.lut.burst_write(status, 0, value);
 
+        if (LUT_DEPTH > 1) begin 
+            m_regmodel.lut.burst_write(status, 0, value);
+        end
     endtask
 endclass

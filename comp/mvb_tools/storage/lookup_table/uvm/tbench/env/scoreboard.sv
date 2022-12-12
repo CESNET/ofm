@@ -4,18 +4,18 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause
 
-class scoreboard #(LUT_WIDTH, REG_DEPTH) extends uvm_scoreboard;
+class scoreboard #(LUT_WIDTH, REG_DEPTH, SLICE_WIDTH, SW_WIDTH, LUT_DEPTH) extends uvm_scoreboard;
 
-    `uvm_component_utils(uvm_pipe::scoreboard #(LUT_WIDTH, REG_DEPTH))
+    `uvm_component_utils(uvm_pipe::scoreboard #(LUT_WIDTH, REG_DEPTH, SLICE_WIDTH, SW_WIDTH, LUT_DEPTH))
     // Analysis components.
-    uvm_analysis_export #(uvm_logic_vector::sequence_item#(REG_DEPTH)) analysis_imp_mvb_rx;
+    uvm_analysis_export #(uvm_logic_vector::sequence_item#(REG_DEPTH-SLICE_WIDTH)) analysis_imp_mvb_rx;
     uvm_analysis_export #(uvm_logic_vector::sequence_item#(LUT_WIDTH)) analysis_imp_mvb_tx;
 
     uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(LUT_WIDTH)) dut_out_fifo;
     uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(LUT_WIDTH)) model_out_fifo;
 
-    model#(LUT_WIDTH, REG_DEPTH) m_model;
-    local regmodel#(REG_DEPTH) m_regmodel;
+    model#(LUT_WIDTH, REG_DEPTH, SLICE_WIDTH, SW_WIDTH, LUT_DEPTH) m_model;
+    local regmodel#(REG_DEPTH, SW_WIDTH) m_regmodel;
 
     local int unsigned compared = 0;
     local int unsigned errors   = 0;
@@ -36,13 +36,13 @@ class scoreboard #(LUT_WIDTH, REG_DEPTH) extends uvm_scoreboard;
         return ret;
     endfunction
 
-    function void regmodel_set(regmodel#(REG_DEPTH) m_regmodel);
+    function void regmodel_set(regmodel#(REG_DEPTH, SW_WIDTH) m_regmodel);
         this.m_regmodel = m_regmodel;
         m_model.regmodel_set(m_regmodel);
     endfunction
 
         function void build_phase(uvm_phase phase);
-        m_model = model #(LUT_WIDTH, REG_DEPTH)::type_id::create("m_model", this);
+        m_model = model #(LUT_WIDTH, REG_DEPTH, SLICE_WIDTH, SW_WIDTH, LUT_DEPTH)::type_id::create("m_model", this);
     endfunction
 
     function void connect_phase(uvm_phase phase);

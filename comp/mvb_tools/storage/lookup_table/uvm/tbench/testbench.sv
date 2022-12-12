@@ -18,9 +18,9 @@ module testbench;
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // Interfaces
     reset_if  reset(CLK);
-    mvb_if #(MVB_ITEMS, REG_DEPTH) mvb_rx(CLK);
+    mvb_if #(MVB_ITEMS, REG_DEPTH-SLICE_WIDTH) mvb_rx(CLK);
     mvb_if #(MVB_ITEMS, LUT_WIDTH) mvb_tx(CLK);
-    mi_if #(LUT_WIDTH, REG_DEPTH) mi_config(CLK);
+    mi_if #(SW_WIDTH, REG_DEPTH) mi_config(CLK);
 
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // Define clock period
@@ -41,9 +41,9 @@ module testbench;
         uvm_root m_root;
         // Configuration of database
         uvm_config_db#(virtual reset_if)::set(null, "", "vif_reset", reset);
-        uvm_config_db#(virtual mvb_if #(MVB_ITEMS, REG_DEPTH))::set(null, "", "vif_rx", mvb_rx);
+        uvm_config_db#(virtual mvb_if #(MVB_ITEMS, REG_DEPTH-SLICE_WIDTH))::set(null, "", "vif_rx", mvb_rx);
         uvm_config_db#(virtual mvb_if #(MVB_ITEMS, LUT_WIDTH))::set(null, "", "vif_tx", mvb_tx);
-        uvm_config_db#(virtual mi_if #(LUT_WIDTH, REG_DEPTH))::set(null, "", "vif_mi", mi_config);
+        uvm_config_db#(virtual mi_if #(SW_WIDTH, REG_DEPTH))::set(null, "", "vif_mi", mi_config);
 
         m_root = uvm_root::get();
         m_root.finish_on_completion = 0;
