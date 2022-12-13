@@ -41,7 +41,7 @@ entity DUT_WRAPPER is
         TX_MVB_DST_RDY  : in  std_logic;
     
         MI_ADDR         : in  std_logic_vector(max(log2(LUT_DEPTH),1)+2-1 downto 0);
-        MI_SLICE        : in  std_logic_vector(log2(LUT_WIDTH/SW_WIDTH)-1 downto 0);
+        MI_SLICE        : in  std_logic_vector(max(log2(LUT_WIDTH/SW_WIDTH),1)-1 downto 0);
         MI_DIN          : in  std_logic_vector(SW_WIDTH-1 downto 0);
         MI_BE           : in  std_logic_vector(SW_WIDTH/8-1 downto 0);
         MI_WRITE        : in  std_logic;
