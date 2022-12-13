@@ -161,6 +161,7 @@ begin
             LUT_DEPTH  => LUT_DEPTH,
             LUT_WIDTH  => LUT_WIDTH,
             SW_WIDTH   => SW_WIDTH,
+            META_WIDTH => META_WIDTH,
             OUTPUT_REG => OUTPUT_REG,
             DEVICE     => DEVICE
         )
@@ -169,12 +170,14 @@ begin
             RESET           => RESET,
     
             RX_MVB_LUT_ADDR => RX_MVB_LUT_ADDR,
+            RX_MVB_METADATA => RX_MVB_METADATA,
             RX_MVB_VLD      => RX_MVB_VLD,
             RX_MVB_SRC_RDY  => RX_MVB_SRC_RDY,
             RX_MVB_DST_RDY  => RX_MVB_DST_RDY,
 
             TX_MVB_LUT_DATA => TX_MVB_LUT_DATA,
             TX_MVB_LUT_ADDR => TX_MVB_LUT_ADDR,
+            TX_MVB_METADATA => TX_MVB_METADATA,
             TX_MVB_VLD      => TX_MVB_VLD,
             TX_MVB_SRC_RDY  => TX_MVB_SRC_RDY,
             TX_MVB_DST_RDY  => TX_MVB_DST_RDY,
@@ -197,6 +200,7 @@ begin
             LUT_DEPTH  => LUT_DEPTH,
             LUT_WIDTH  => LUT_WIDTH,
             SW_WIDTH   => SW_WIDTH,
+            META_WIDTH => META_WIDTH,
             OUTPUT_REG => OUTPUT_REG,
             DEVICE     => DEVICE
         )
@@ -205,12 +209,14 @@ begin
             RESET           => RESET,
     
             RX_MVB_LUT_ADDR => RX_MVB_LUT_ADDR,
+            RX_MVB_METADATA => RX_MVB_METADATA,
             RX_MVB_VLD      => RX_MVB_VLD,
             RX_MVB_SRC_RDY  => RX_MVB_SRC_RDY,
             RX_MVB_DST_RDY  => RX_MVB_DST_RDY,
 
             TX_MVB_LUT_DATA => TX_MVB_LUT_DATA,
             TX_MVB_LUT_ADDR => TX_MVB_LUT_ADDR,
+            TX_MVB_METADATA => TX_MVB_METADATA,
             TX_MVB_VLD      => TX_MVB_VLD,
             TX_MVB_SRC_RDY  => TX_MVB_SRC_RDY,
             TX_MVB_DST_RDY  => TX_MVB_DST_RDY,
