@@ -31,6 +31,12 @@ SETTINGS = {
     "not_use_out_reg" : {
         "OUTPUT_REG"       : "0",
     },
+    "two_slices" : {
+        "LUT_WIDTH"        : "64",
+    },
+    "four_slices" : {
+        "LUT_WIDTH"        : "128",
+    },
     "_combinations_" : (  
     (), # Works the same as '("default",),' as the "default" is applied in every combination
 
@@ -40,15 +46,33 @@ SETTINGS = {
     ("items_comb_1",),
     ("items_comb_2",),
     ("not_use_out_reg",),
+    ("two_slices",),
+    ("four_slices",),
 
     ("lut_variant","items_comb_1",),
     ("lut_variant","items_comb_2",),
+    ("lut_variant","items_comb_1", "two_slices",),
+    ("lut_variant","items_comb_2", "two_slices",),
+    ("lut_variant","items_comb_1", "four_slices",),
+    ("lut_variant","items_comb_2", "four_slices",),
     ("lut_variant","items_comb_1","not_use_out_reg",),
+    ("lut_variant","items_comb_1","not_use_out_reg", "two_slices",),
+    ("lut_variant","items_comb_1","not_use_out_reg", "four_slices",),
     ("lut_variant","items_comb_2","not_use_out_reg",),
+    ("lut_variant","items_comb_2","not_use_out_reg", "two_slices",),
+    ("lut_variant","items_comb_2","not_use_out_reg", "four_slices",),
 
     ("bram_variant","items_comb_1",),
+    ("bram_variant","items_comb_1", "two_slices",),
+    ("bram_variant","items_comb_1", "four_slices",),
     ("bram_variant","items_comb_2",),
+    ("bram_variant","items_comb_2", "two_slices",),
+    ("bram_variant","items_comb_2", "four_slices",),
     ("bram_variant","items_comb_1","not_use_out_reg",),
+    ("bram_variant","items_comb_1","not_use_out_reg", "two_slices",),
+    ("bram_variant","items_comb_1","not_use_out_reg", "four_slices",),
     ("bram_variant","items_comb_2","not_use_out_reg",),
+    ("bram_variant","items_comb_2","not_use_out_reg", "two_slices",),
+    ("bram_variant","items_comb_2","not_use_out_reg", "four_slices",),
     ),
 }

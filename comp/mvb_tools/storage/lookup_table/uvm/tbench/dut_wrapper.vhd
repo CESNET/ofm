@@ -27,21 +27,21 @@ entity DUT_WRAPPER is
         CLK             : in  std_logic;
         RESET           : in  std_logic;
     
-        RX_MVB_LUT_ADDR : in  slv_array_t(MVB_ITEMS-1 downto 0)(max(log2(LUT_DEPTH),1)*2-1 downto 0);
+        RX_MVB_LUT_ADDR : in  slv_array_t(MVB_ITEMS-1 downto 0)(max(log2(LUT_DEPTH),1)+2-1 downto 0);
         RX_MVB_METADATA : in  slv_array_t(MVB_ITEMS-1 downto 0)(META_WIDTH-1 downto 0) := (others => (others => '0'));
         RX_MVB_VLD      : in  std_logic_vector(MVB_ITEMS-1 downto 0);
         RX_MVB_SRC_RDY  : in  std_logic;
         RX_MVB_DST_RDY  : out std_logic;
     
         TX_MVB_LUT_DATA : out slv_array_t(MVB_ITEMS-1 downto 0)(LUT_WIDTH-1 downto 0);
-        TX_MVB_LUT_ADDR : out slv_array_t(MVB_ITEMS-1 downto 0)(max(log2(LUT_DEPTH*4),1)-1 downto 0);
+        TX_MVB_LUT_ADDR : out slv_array_t(MVB_ITEMS-1 downto 0)(max(log2(LUT_DEPTH),1)+2-1 downto 0);
         TX_MVB_METADATA : out slv_array_t(MVB_ITEMS-1 downto 0)(META_WIDTH-1 downto 0);
         TX_MVB_VLD      : out std_logic_vector(MVB_ITEMS-1 downto 0);
         TX_MVB_SRC_RDY  : out std_logic;
         TX_MVB_DST_RDY  : in  std_logic;
     
-        MI_ADDR         : in  std_logic_vector(max(log2(LUT_DEPTH),1)*2-1 downto 0);
-        MI_SLICE        : in  std_logic_vector(log2(LUT_WIDTH/SW_WIDTH)-1 downto 0);
+        MI_ADDR         : in  std_logic_vector(max(log2(LUT_DEPTH),1)+2-1 downto 0);
+        MI_SLICE        : in  std_logic_vector(max(log2(LUT_WIDTH/SW_WIDTH),1)-1 downto 0);
         MI_DIN          : in  std_logic_vector(SW_WIDTH-1 downto 0);
         MI_BE           : in  std_logic_vector(SW_WIDTH/8-1 downto 0);
         MI_WRITE        : in  std_logic;
@@ -60,18 +60,18 @@ begin
 
     lut_depth_reg_g : if LUT_DEPTH = 1 generate
         lut_addr_g : for i in 0 to MVB_ITEMS-1 generate
-            rx_mvb_lut_addr_sig(i)(0) <= RX_MVB_LUT_ADDR(i)(0);
-            tx_mvb_lut_addr_sig(i)(0) <= TX_MVB_LUT_ADDR(i)(0);
+            rx_mvb_lut_addr_sig(i)(0) <= '0';
+            tx_mvb_lut_addr_sig(i)(0) <= '0';
         end generate;
 
-        sw_addr_sig(0) <= MI_ADDR(0);
+        sw_addr_sig(0) <= '0';
     else generate
         lut_addr_g : for i in 0 to MVB_ITEMS-1 generate
-            rx_mvb_lut_addr_sig(i) <= RX_MVB_LUT_ADDR(i)(max(log2(LUT_DEPTH*4), 1)-1 downto 2);
-            tx_mvb_lut_addr_sig(i) <= TX_MVB_LUT_ADDR(i)(max(log2(LUT_DEPTH*4), 1)-1 downto 2);
+            rx_mvb_lut_addr_sig(i) <= RX_MVB_LUT_ADDR(i)(max(log2(LUT_DEPTH), 1)+2-1 downto 2);
+            tx_mvb_lut_addr_sig(i) <= TX_MVB_LUT_ADDR(i)(max(log2(LUT_DEPTH), 1)+2-1 downto 2);
         end generate;
 
-        sw_addr_sig <= MI_ADDR(max(log2(LUT_DEPTH*4), 1)-1 downto 2);
+        sw_addr_sig <= MI_ADDR(max(log2(LUT_DEPTH), 1)+2-1 downto 2);
     end generate;
 
     dut_i : entity work.MVB_LOOKUP_TABLE

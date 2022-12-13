@@ -6,26 +6,26 @@
 
 // Environment for functional verification of encode.
 // This environment containts two mii agents.
-class env #(ITEMS, LUT_WIDTH, REG_DEPTH) extends uvm_env;
+class env #(ITEMS, LUT_WIDTH, REG_DEPTH, SW_WIDTH, SLICE_WIDTH, LUT_DEPTH) extends uvm_env;
 
-    `uvm_component_param_utils(uvm_pipe::env #(ITEMS, LUT_WIDTH, REG_DEPTH));
+    `uvm_component_param_utils(uvm_pipe::env #(ITEMS, LUT_WIDTH, REG_DEPTH, SW_WIDTH, SLICE_WIDTH, LUT_DEPTH));
 
-    uvm_logic_vector_mvb::env_rx #(ITEMS, REG_DEPTH) rx_env;
+    uvm_logic_vector_mvb::env_rx #(ITEMS, REG_DEPTH-SLICE_WIDTH) rx_env;
     uvm_logic_vector_mvb::config_item                 cfg_rx;
     uvm_logic_vector_mvb::env_tx #(ITEMS, LUT_WIDTH) tx_env;
     uvm_logic_vector_mvb::config_item                 cfg_tx;
 
-    uvm_pipe::virt_sequencer#(ITEMS, LUT_WIDTH, REG_DEPTH) vscr;
+    uvm_pipe::virt_sequencer#(ITEMS, LUT_WIDTH, REG_DEPTH, SLICE_WIDTH, SW_WIDTH) vscr;
     uvm_reset::agent         m_reset;
     uvm_reset::config_item   m_config_reset;
     uvm_mi::regmodel_config  m_mi_config;
 
-    scoreboard #(LUT_WIDTH, REG_DEPTH) m_scoreboard;
+    scoreboard #(LUT_WIDTH, REG_DEPTH, SLICE_WIDTH, SW_WIDTH, LUT_DEPTH) m_scoreboard;
 
-    uvm_mvb::coverage #(ITEMS, REG_DEPTH) m_cover_rx;
+    uvm_mvb::coverage #(ITEMS, REG_DEPTH-SLICE_WIDTH) m_cover_rx;
     uvm_mvb::coverage #(ITEMS, LUT_WIDTH) m_cover_tx;
 
-    uvm_mi::regmodel#(regmodel#(REG_DEPTH), LUT_WIDTH, REG_DEPTH) m_regmodel;
+    uvm_mi::regmodel#(regmodel#(REG_DEPTH, SW_WIDTH), SW_WIDTH, REG_DEPTH) m_regmodel;
 
     // Constructor of environment.
     function new(string name, uvm_component parent);
@@ -58,7 +58,7 @@ class env #(ITEMS, LUT_WIDTH, REG_DEPTH) extends uvm_env;
         m_mi_config.agent.active         = UVM_ACTIVE;
         m_mi_config.agent.interface_name = "vif_mi";
         uvm_config_db#(uvm_mi::regmodel_config)::set(this, "m_regmodel", "m_config", m_mi_config);
-        m_regmodel = uvm_mi::regmodel#(regmodel#(REG_DEPTH), LUT_WIDTH, REG_DEPTH)::type_id::create("m_regmodel", this);
+        m_regmodel = uvm_mi::regmodel#(regmodel#(REG_DEPTH, SW_WIDTH), SW_WIDTH, REG_DEPTH)::type_id::create("m_regmodel", this);
 
         uvm_config_db #(uvm_reset::config_item)::set(this, "m_reset", "m_config", m_config_reset);
         m_reset = uvm_reset::agent::type_id::create("m_reset", this);
@@ -67,10 +67,10 @@ class env #(ITEMS, LUT_WIDTH, REG_DEPTH) extends uvm_env;
         uvm_config_db #(uvm_logic_vector_mvb::config_item)::set(this, "rx_env", "m_config", cfg_rx);
 
         tx_env    = uvm_logic_vector_mvb::env_tx #(ITEMS, LUT_WIDTH)::type_id::create("tx_env", this);
-        rx_env    = uvm_logic_vector_mvb::env_rx #(ITEMS, REG_DEPTH)::type_id::create("rx_env", this);
+        rx_env    = uvm_logic_vector_mvb::env_rx #(ITEMS, REG_DEPTH-SLICE_WIDTH)::type_id::create("rx_env", this);
 
-        m_scoreboard  = scoreboard #(LUT_WIDTH, REG_DEPTH)::type_id::create("m_scoreboard", this);
-        vscr   = uvm_pipe::virt_sequencer#(ITEMS, LUT_WIDTH, REG_DEPTH)::type_id::create("vscr",this);
+        m_scoreboard  = scoreboard #(LUT_WIDTH, REG_DEPTH, SLICE_WIDTH, SW_WIDTH, LUT_DEPTH)::type_id::create("m_scoreboard", this);
+        vscr   = uvm_pipe::virt_sequencer#(ITEMS, LUT_WIDTH, REG_DEPTH, SLICE_WIDTH, SW_WIDTH)::type_id::create("vscr",this);
     endfunction
 
     // Connect agent's ports with ports from scoreboard.

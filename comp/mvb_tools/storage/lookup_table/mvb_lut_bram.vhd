@@ -39,7 +39,7 @@ port (
     TX_MVB_DST_RDY  : in  std_logic;
 
     SW_ADDR         : in  std_logic_vector(log2(LUT_DEPTH)-1 downto 0);
-    SW_SLICE        : in  std_logic_vector(log2(LUT_WIDTH/SW_WIDTH)-1 downto 0);
+    SW_SLICE        : in  std_logic_vector(max(log2(LUT_WIDTH/SW_WIDTH),1)-1 downto 0);
     SW_DIN          : in  std_logic_vector(SW_WIDTH-1 downto 0);
     SW_BE           : in  std_logic_vector(SW_WIDTH/8-1 downto 0);
     SW_WRITE        : in  std_logic;
@@ -65,6 +65,8 @@ architecture FULL of MVB_LOOKUP_TABLE_BRAM is
     signal ram_mvb_metadata      : slv_array_t(MVB_ITEMS-1 downto 0)(META_WIDTH-1 downto 0);
     signal ram_mvb_vld           : std_logic_vector(MVB_ITEMS-1 downto 0);
     signal ram_mvb_src_rdy       : std_logic;
+
+    signal sw_slice_reg          : std_logic_vector(max(log2(LUT_WIDTH/SW_WIDTH),1)-1 downto 0);
 
 begin
 
@@ -183,12 +185,19 @@ begin
     ram_copy_dout_nsw <= std_logic_vector(resize(unsigned(ram_copy_dout),(SW_WORDS_PER_LUT*SW_WIDTH)));
     ram_copy_dout_nsw_arr <= slv_array_deser(ram_copy_dout_nsw,SW_WORDS_PER_LUT);
 
+    process (CLK)
+    begin
+        if (rising_edge(CLK)) then
+            sw_slice_reg <= SW_SLICE;
+        end if;
+    end process;
+
     process (all)
     begin
         if (SW_WORDS_PER_LUT > 1) then
             SW_DOUT <= (others => '0');
             for i in 0 to SW_WORDS_PER_LUT-1 loop
-                if (unsigned(SW_SLICE) = i) then
+                if (unsigned(sw_slice_reg) = i) then
                     SW_DOUT <= ram_copy_dout_nsw_arr(i);
                 end if;
             end loop;

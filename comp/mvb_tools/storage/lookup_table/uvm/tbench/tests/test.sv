@@ -9,7 +9,7 @@ class ex_test extends uvm_test;
     `uvm_component_utils(test::ex_test);
 
     bit timeout;
-    uvm_pipe::env #(MVB_ITEMS, LUT_WIDTH, REG_DEPTH) m_env;
+    uvm_pipe::env #(MVB_ITEMS, LUT_WIDTH, REG_DEPTH, SW_WIDTH, SLICE_WIDTH, LUT_DEPTH) m_env;
 
     // ------------------------------------------------------------------------
     // Functions
@@ -18,7 +18,7 @@ class ex_test extends uvm_test;
     endfunction
 
     function void build_phase(uvm_phase phase);
-        m_env = uvm_pipe::env #(MVB_ITEMS, LUT_WIDTH, REG_DEPTH)::type_id::create("m_env", this);
+        m_env = uvm_pipe::env #(MVB_ITEMS, LUT_WIDTH, REG_DEPTH, SW_WIDTH, SLICE_WIDTH, LUT_DEPTH)::type_id::create("m_env", this);
     endfunction
 
     task test_wait_timeout(int unsigned time_length);
@@ -35,18 +35,18 @@ class ex_test extends uvm_test;
     // ------------------------------------------------------------------------
     // Create environment and Run sequences o their sequencers
     task run_seq_rx(uvm_phase phase);
-        virt_sequence#(MVB_ITEMS, LUT_WIDTH, REG_DEPTH, ADDR_WIDTH) m_vseq;
+        virt_sequence#(MVB_ITEMS, LUT_WIDTH, REG_DEPTH, ADDR_WIDTH, SLICE_WIDTH, SW_WIDTH) m_vseq;
 
         phase.raise_objection(this, "Start of rx sequence");
 
-        m_vseq = virt_sequence#(MVB_ITEMS, LUT_WIDTH, REG_DEPTH, ADDR_WIDTH)::type_id::create("m_vseq");
+        m_vseq = virt_sequence#(MVB_ITEMS, LUT_WIDTH, REG_DEPTH, ADDR_WIDTH, SLICE_WIDTH, SW_WIDTH)::type_id::create("m_vseq");
         m_vseq.init(m_env.m_regmodel.m_regmodel, phase);
         assert(m_vseq.randomize());
         m_vseq.start(m_env.vscr);
 
         timeout = 1;
         fork
-            test_wait_timeout(200);
+            test_wait_timeout(2000);
             test_wait_result();
         join_any;
 

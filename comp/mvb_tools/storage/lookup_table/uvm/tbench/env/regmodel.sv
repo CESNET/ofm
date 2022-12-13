@@ -4,8 +4,8 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
-class regmodel#(REG_DEPTH) extends uvm_reg_block;
-    `uvm_object_param_utils(uvm_pipe::regmodel#(REG_DEPTH))
+class regmodel#(REG_DEPTH, SW_WIDTH) extends uvm_reg_block;
+    `uvm_object_param_utils(uvm_pipe::regmodel#(REG_DEPTH, SW_WIDTH))
 
     uvm_mem lut;
 
@@ -22,7 +22,7 @@ class regmodel#(REG_DEPTH) extends uvm_reg_block;
     function void build(uvm_reg_addr_t base, int unsigned bus_width);
 
         // Create MEM
-        lut = new("lut", 2**REG_DEPTH, 32);
+        lut = new("lut", 2**REG_DEPTH, SW_WIDTH);
         lut.configure(this);
 
         // create map
