@@ -55,7 +55,7 @@ simulation: $(MOD)
 COCOTB_SIM_SCRIPT ?= $(OFM_PATH)/build/scripts/cocotb/cocotb.fdo
 COCOTB_MODULE ?= cocotb_test
 cocotb: $(MOD)
-	$(NETCOPE_ENV) SYNTHFILES=$(SYNTHFILES) COCOTB_MODULE=$(COCOTB_MODULE) vsim -64 $(SIM_FLAGS) -do $(COCOTB_SIM_SCRIPT)
+	$(NETCOPE_ENV) SYNTHFILES=$(SYNTHFILES) COCOTB_MODULE=$(COCOTB_MODULE) vsim -64 -do $(COCOTB_SIM_SCRIPT) $(SIM_FLAGS)
 
 # Automated documentation script
 vhdocl:
