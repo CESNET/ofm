@@ -75,7 +75,7 @@ virtual class comparer_base#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) extends uvm
         if (model_items.size() != 0) begin
             string msg;
 
-            $swrite(msg, "\n\t%0d transaction left in DUT.\n", model_items.size());
+            $swrite(msg, "\n\t%0d transaction left in DUT. Errors/Compared %0d/%0d\n", model_items.size(), errors, compared);
             for (int unsigned it = 0; it < model_items.size(); it++) begin
                 $swrite(msg, "%s\n%s", msg, model_items[it].convert2string());
             end
@@ -98,10 +98,10 @@ virtual class comparer_base_ordered#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) ext
 
         compared++;
         tr_model = model_items.pop_front();
-        if (!this.compare(tr_model, tr)) begin
+        if (!this.compare(tr_model.item, tr)) begin
             string msg;
             errors++;
-            $swrite(msg, "\n\tTransaction compared %0d errors %0d\n\tDUT transaction doesn't compare model transaction\n%s", compared, errors, this.message(tr_model, tr));
+            $swrite(msg, "\n\tTransaction compared %0d errors %0d\n\tDUT transaction doesn't compare model transaction\n%s", compared, errors, this.message(tr_model.item, tr));
             `uvm_error(this.get_full_name(), msg);
         end
     endfunction
