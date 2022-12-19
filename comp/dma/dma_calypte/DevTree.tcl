@@ -15,14 +15,15 @@ proc dts_dma_calypte_ctrl {dir id base pcie} {
 }
 
 # generates Device Tree entries for data buffers in DMA Calypte
-# 1. id         - channel ID
-# 2. base       - base address for the first buffer
-# 3. size       - size of the buffer
-# 4. pcie       - index(es) of PCIe endpoint(s) which DMA controller uses.
-proc dts_dma_calypte_tx_buffer {id base size pcie} {
+# 1. type       - content of the buffer (header or data)
+# 2. id         - channel ID
+# 3. base       - base address for the first buffer
+# 4. size       - size of the buffer
+# 5. pcie       - index(es) of PCIe endpoint(s) which DMA controller uses.
+proc dts_dma_calypte_tx_buffer {type id base size pcie} {
     set ret ""
-    append ret "dma_calypte_tx_buff$id {"
-    append ret "compatible = \"cesnet,dma_calypte_tx_buff\";"
+    append ret "dma_calypte_tx_${type}_buff${id} {"
+    append ret "compatible = \"cesnet,dma_calypte_tx_${type}_buff\";"
     append ret "reg = <$base $size>;"
     append ret "pcie = <$pcie>;"
     append ret "};"
