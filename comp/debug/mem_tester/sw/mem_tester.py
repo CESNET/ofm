@@ -58,7 +58,7 @@ def test_seq():
             print("Burst count = {0}".format(burst))
 
             err_msg = " (tester {0}, burst {1}) ".format(i, burst)
-            testParams = MemTestParams(burst=burst)
+            testParams = MemTestParams(index=i, burst=burst)
             testRes = MemTesterParser.get_test_res(testParams)
 
             assert testRes["err_cnt"] == 0, \
