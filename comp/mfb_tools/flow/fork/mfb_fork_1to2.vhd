@@ -13,18 +13,33 @@ use work.math_pack.all;
 
 entity MFB_FORK_1TO2 is
   generic(
+    -- =============================
+    -- BUS characteristics
+    --
     -- Frame size restrictions: none
-    REGIONS        : integer := 4; -- any possitive value
-    REGION_SIZE    : integer := 8; -- any possitive value
-    BLOCK_SIZE     : integer := 8; -- any possitive value
-    ITEM_WIDTH     : integer := 8; -- any possitive value
-    META_WIDTH     : integer := 0; -- any possitive value
+    -- =============================
+
+    -- any possitive value
+    REGIONS        : integer := 4;
+    -- any possitive value
+    REGION_SIZE    : integer := 8;
+    -- any possitive value
+    BLOCK_SIZE     : integer := 8;
+    -- any possitive value
+    ITEM_WIDTH     : integer := 8;
+    -- any possitive value
+    META_WIDTH     : integer := 0;
+
+    -- =============================
+    -- Others
+    -- =============================
+
     USE_DST_RDY    : boolean := true;
+    -- Do not care when USE_DST_RDY is false.
+    -- "logic"    - Fork waits with each word for all TX ports to set DST_RDY in the same cycle. Pure logic implementation.
+    -- "register" - Fork can send each word independently to each TX port as soon as they are ready. Registers are used to store some flags, but logic functions are simpler for larger forks.
+    -- "simple"   - Same behaviour as "logic", but using simpler logic on SRC_RDY and DST_RDY with a potencial of logic loop creation. USE WITH CARE!
     VERSION        : string := "logic"
-      -- Do not care when USE_DST_RDY is false.
-      -- "logic"    - Fork waits with each word for all TX ports to set DST_RDY in the same cycle. Pure logic implementation.
-      -- "register" - Fork can send each word independently to each TX port as soon as they are ready. Registers are used to store some flags, but logic functions are simpler for larger forks.
-      -- "simple"   - Same behaviour as "logic", but using simpler logic on SRC_RDY and DST_RDY with a potencial of logic loop creation. USE WITH CARE!
   );
   port(
     CLK            : in std_logic;

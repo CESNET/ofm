@@ -27,22 +27,43 @@ end entity TESTBENCH;
 -- ============================================================================
 architecture BEHAVIORAL of TESTBENCH is
 
+    -- =============
     -- DUT settings
-    constant INPUT_REGS_EN    : boolean := false;    -- set to true to enable input registers and increase the latency of the comparator to 2 clock cycles
-    constant DATA_WIDTH       : natural := 25;       -- max is now unlimited for mode ><=, others max 25 bits
-    constant DSP_ENABLE       : boolean := true;     -- set to true to use DSP blocks on Stratix 10
-    constant MODE             : string  := "<= ";    -- options: "><=", ">= ", "<= " - NOTE: the space after ">=" or "<=" is necessary
-    constant DEVICE           : string  := "AGILEX"; -- AGILEX/STRATIX10
+    -- =============
+
+    -- set to true to enable input registers and increase the latency of the comparator to 2 clock cycles
+    constant INPUT_REGS_EN    : boolean := false;
+    -- max is now unlimited for mode ><=, others max 25 bits
+    constant DATA_WIDTH       : natural := 25;
+    -- set to true to use DSP blocks on Stratix 10
+    constant DSP_ENABLE       : boolean := true;
+    -- options: "><=", ">= ", "<= " - NOTE: the space after ">=" or "<=" is necessary
+    constant MODE             : string  := "<= ";
+    -- AGILEX/STRATIX10
+    constant DEVICE           : string  := "AGILEX";
+
+    -- ======================
     -- verification settings
-    constant TALKATIVE        : boolean := false;    -- set to true for more detailed reports in the Transcript window
-    constant REPORT_EVERY_NTH : natural := 10000;    -- writes a report about the number of correct results to the Transcript window every Nth iteration
-    constant LENGHT_OF_SIM    : natural := 100000;   -- number of clock cycles the simulation should run for
+    -- ======================
+
+    -- set to true for more detailed reports in the Transcript window
+    constant TALKATIVE        : boolean := false;
+    -- writes a report about the number of correct results to the Transcript window every Nth iteration
+    constant REPORT_EVERY_NTH : natural := 10000;
+    -- number of clock cycles the simulation should run for
+    constant LENGHT_OF_SIM    : natural := 100000;
     constant CLK_PERIOD       : time    := 10 ns;
 
+    -- ==================================================================================
     -- constants used to calculate the number of used DSP blocks according to DATA_WIDTH
-    constant NUM_OF_FULL_COMPARATORS  : natural := DATA_WIDTH / 25; -- number of comparators that will have maximum width which is limited by the DSP block (max 25 bits wide)
-    constant LEFTOVER_BITS            : natural := DATA_WIDTH mod 25; -- the rest of the bits that do not fill up the whole width of the DSP block
-    constant TOTAL_NUM_OF_COMPARATORS : natural := tsel(LEFTOVER_BITS = 0, NUM_OF_FULL_COMPARATORS, NUM_OF_FULL_COMPARATORS+1); -- munber of all used DSP blocks (fully or partially)
+    -- ==================================================================================
+
+    -- number of comparators that will have maximum width which is limited by the DSP block (max 25 bits wide)
+    constant NUM_OF_FULL_COMPARATORS  : natural := DATA_WIDTH / 25;
+    -- the rest of the bits that do not fill up the whole width of the DSP block
+    constant LEFTOVER_BITS            : natural := DATA_WIDTH mod 25;
+    -- munber of all used DSP blocks (fully or partially)
+    constant TOTAL_NUM_OF_COMPARATORS : natural := tsel(LEFTOVER_BITS = 0, NUM_OF_FULL_COMPARATORS, NUM_OF_FULL_COMPARATORS+1);
 
     -- setting signals
     signal clk                     : std_logic;

@@ -38,7 +38,8 @@ generic (
     BUF_A_COLS      : integer := 512;
     -- Buffer B size
     BUF_B_COLS      : integer := 512;
-    BUF_B_ROWS      : integer := 4; -- max(BUF_B_TRUE_ROWS)
+    -- max(BUF_B_TRUE_ROWS)
+    BUF_B_ROWS      : integer := 4;
 
     -- Number of non-overlapping Sections of Buffer B
     -- (All Instructions must overflow inside space
@@ -51,16 +52,24 @@ generic (
     ITEM_WIDTH      : integer := 8;
 
     -- Target Device
-    DEVICE          : string := "STRATIX10" -- "ULTRASCALE", "7SERIES", ...
+    -- "ULTRASCALE", "7SERIES", ...
+    DEVICE          : string := "STRATIX10"
 );
 port (
+    -- ====================
     -- Clock and Reset
+    -- ====================
+
     CLK                : in  std_logic;
     RESET              : in  std_logic;
 
+    -- ====================
     -- Input uInstructions
+    -- ====================
+
     RX_UINSTR_A_COL    : in  std_logic_vector(log2(BUF_A_COLS)-1 downto 0);
-    RX_UINSTR_A_ITEM   : in  std_logic_vector(log2(ROW_ITEMS)-1 downto 0); -- item within one row
+    -- item within one row
+    RX_UINSTR_A_ITEM   : in  std_logic_vector(log2(ROW_ITEMS)-1 downto 0);
     RX_UINSTR_B_COL    : in  std_logic_vector(log2(BUF_B_COLS)-1 downto 0);
     RX_UINSTR_B_ITEM   : in  std_logic_vector(log2(BUF_B_ROWS*ROW_ITEMS)-1 downto 0);
     RX_UINSTR_LEN      : in  std_logic_vector(log2(ROW_ITEMS+1)-1 downto 0);
@@ -68,12 +77,17 @@ port (
     RX_UINSTR_SRC_RDY  : in  std_logic;
     RX_UINSTR_DST_RDY  : out std_logic;
 
+    -- ====================
     -- Output uInstructions
+    -- ====================
+
     TX_UINSTR_A_COL    : out std_logic_vector(log2(BUF_A_COLS)-1 downto 0);
     TX_UINSTR_B_COL    : out std_logic_vector(log2(BUF_B_COLS)-1 downto 0);
     TX_UINSTR_B_ROW    : out std_logic_vector(log2(BUF_B_ROWS)-1 downto 0);
-    TX_UINSTR_ROW_ROT  : out std_logic_vector(log2(ROW_ITEMS)-1 downto 0); -- row rotation
-    TX_UINSTR_IE       : out std_logic_vector(ROW_ITEMS-1 downto 0); -- item enable
+    -- row rotation
+    TX_UINSTR_ROW_ROT  : out std_logic_vector(log2(ROW_ITEMS)-1 downto 0);
+    -- item enable
+    TX_UINSTR_IE       : out std_logic_vector(ROW_ITEMS-1 downto 0);
     TX_UINSTR_COLOR    : out std_logic;
     TX_UINSTR_SRC_RDY  : out std_logic;
     TX_UINSTR_DST_RDY  : in  std_logic

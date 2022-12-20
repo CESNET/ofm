@@ -29,8 +29,13 @@ entity MFB_SPLITTER_SIMPLE is
     Port (
         CLK             : in  std_logic;
         RST             : in  std_logic;
+
+        -- ==============
         -- rx interface
-        RX_MFB_SEL      : in  std_logic_vector(REGIONS-1 downto 0); -- is only valid with asserted sof signal
+        -- ==============
+
+        -- is only valid with asserted sof signal
+        RX_MFB_SEL      : in  std_logic_vector(REGIONS-1 downto 0);
         RX_MFB_DATA     : in  std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
         RX_MFB_META     : in  std_logic_vector(REGIONS*META_WIDTH-1 downto 0);
         RX_MFB_SOF      : in  std_logic_vector(REGIONS-1 downto 0);
@@ -39,7 +44,11 @@ entity MFB_SPLITTER_SIMPLE is
         RX_MFB_EOF_POS  : in  std_logic_vector(REGIONS*log2(REGION_SIZE*BLOCK_SIZE)-1 downto 0);
         RX_MFB_SRC_RDY  : in  std_logic;
         RX_MFB_DST_RDY  : out std_logic;
+
+        -- ==============
         -- tx interface 0
+        -- ==============
+
         TX0_MFB_DATA    : out std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
         TX0_MFB_META    : out std_logic_vector(REGIONS*META_WIDTH-1 downto 0);
         TX0_MFB_SOF     : out std_logic_vector(REGIONS-1 downto 0);
@@ -48,7 +57,11 @@ entity MFB_SPLITTER_SIMPLE is
         TX0_MFB_EOF_POS : out std_logic_vector(REGIONS*log2(REGION_SIZE*BLOCK_SIZE)-1 downto 0);
         TX0_MFB_SRC_RDY : out std_logic;
         TX0_MFB_DST_RDY : in  std_logic;
+
+        -- ==============
         -- tx interface 1
+        -- ==============
+
         TX1_MFB_DATA    : out std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
         TX1_MFB_META    : out std_logic_vector(REGIONS*META_WIDTH-1 downto 0);
         TX1_MFB_SOF     : out std_logic_vector(REGIONS-1 downto 0);

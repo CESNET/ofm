@@ -16,6 +16,7 @@ entity TX_MAC_LITE_CMAC is
         -- =====================================================================
         -- MFB CONFIGURATION (read only values):
         -- =====================================================================
+
         MFB_REGIONS     : natural := 1; -- must be 1
         MFB_REGION_SIZE : natural := 8; -- must be 8
         MFB_BLOCK_SIZE  : natural := 8; -- must be 8
@@ -23,6 +24,7 @@ entity TX_MAC_LITE_CMAC is
         -- =====================================================================
         -- OTHERS CONFIGURATION: 
         -- =====================================================================
+
         -- Maximum allowed size of packet in bytes.
         PKT_MTU_BYTES   : natural := 16384;
         -- Set true when input (RX MFB) packets contain CRC field.
@@ -30,7 +32,8 @@ entity TX_MAC_LITE_CMAC is
         -- Set true when you need use counters implemented in DSP.
         USE_DSP_CNT     : boolean := False;
         -- Select correct FPGA device.
-        DEVICE          : string := "ULTRASCALE" -- only ULTRASCALE is supported
+        -- only ULTRASCALE is supported
+        DEVICE          : string := "ULTRASCALE"
     );
     port(
         -- =====================================================================

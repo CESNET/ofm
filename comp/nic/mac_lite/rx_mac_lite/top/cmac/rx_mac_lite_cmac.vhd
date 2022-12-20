@@ -17,10 +17,14 @@ entity RX_MAC_LITE_CMAC is
         -- =====================================================================
         -- MFB CONFIGURATION (read only values):
         -- =====================================================================
-        REGIONS         : natural := 1; -- must be 1
-        REGION_SIZE     : natural := 8; -- must be 8
-        BLOCK_SIZE      : natural := 8; -- must be 8
-        ITEM_WIDTH      : natural := 8; -- must be 8
+        -- must be 1
+        REGIONS         : natural := 1;
+        -- must be 8
+        REGION_SIZE     : natural := 8;
+        -- must be 8
+        BLOCK_SIZE      : natural := 8;
+        -- must be 8
+        ITEM_WIDTH      : natural := 8;
 
         -- =====================================================================
         -- OTHERS CONFIGURATION: 
@@ -40,7 +44,8 @@ entity RX_MAC_LITE_CMAC is
         -- Enable of timestamping frames.
         TIMESTAMP_EN    : boolean := true;
         -- Select correct FPGA device.
-        DEVICE          : string := "ULTRASCALE" -- only ULTRASCALE is supported
+        -- only ULTRASCALE is supported
+        DEVICE          : string := "ULTRASCALE"
     );
     port(
         -- =====================================================================
@@ -62,7 +67,8 @@ entity RX_MAC_LITE_CMAC is
         RX_MFB_EOF_POS  : in  std_logic_vector(6-1 downto 0);
         RX_MFB_SOF      : in  std_logic;
         RX_MFB_EOF      : in  std_logic;
-        RX_MFB_ERR      : in  std_logic; -- valid with EOF
+        -- valid with EOF
+        RX_MFB_ERR      : in  std_logic;
         RX_MFB_SRC_RDY  : in  std_logic;
 
         -- =====================================================================

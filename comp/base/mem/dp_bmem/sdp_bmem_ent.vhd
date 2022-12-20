@@ -42,20 +42,38 @@ entity SDP_BMEM is
    );
 
    port(
+      -- ========================
       -- Interface A - Write only
-      CLKA   : in    std_logic; -- Clock A
-      RSTA   : in    std_logic := '0'; -- CLKA sync reset
-      WEA    : in    std_logic; -- Write Enable
-      ADDRA  : in    std_logic_vector(LOG2(ITEMS)-1 downto 0); -- Address A
-      DIA    : in    std_logic_vector(DATA_WIDTH-1 downto 0); -- Data A In
+      -- ========================
 
+      -- Clock A
+      CLKA   : in    std_logic;
+      -- CLKA sync reset
+      RSTA   : in    std_logic := '0';
+      -- Write Enable
+      WEA    : in    std_logic;
+      -- Address A
+      ADDRA  : in    std_logic_vector(LOG2(ITEMS)-1 downto 0);
+      -- Data A In
+      DIA    : in    std_logic_vector(DATA_WIDTH-1 downto 0);
+
+      -- ========================
       -- Interface B - Read only
-      CLKB   : in    std_logic; -- Clock B
-      RSTB   : in    std_logic := '0'; -- CLKB sync reset
-      PIPE_ENB : in  std_logic; -- Pipe Enable
-      REB    : in    std_logic; -- Read Enable
-      ADDRB  : in    std_logic_vector(LOG2(ITEMS)-1 downto 0); -- Address B
-      DOB_DV : out   std_logic; -- Data B Valid
-      DOB    : out   std_logic_vector(DATA_WIDTH-1 downto 0) -- Data B Out
+      -- ========================
+
+      -- Clock B
+      CLKB   : in    std_logic;
+      -- CLKB sync reset
+      RSTB   : in    std_logic := '0';
+      -- Pipe Enable
+      PIPE_ENB : in  std_logic;
+      -- Read Enable
+      REB    : in    std_logic;
+      -- Address B
+      ADDRB  : in    std_logic_vector(LOG2(ITEMS)-1 downto 0);
+      -- Data B Valid
+      DOB_DV : out   std_logic;
+      -- Data B Out
+      DOB    : out   std_logic_vector(DATA_WIDTH-1 downto 0)
    );
 end entity SDP_BMEM;

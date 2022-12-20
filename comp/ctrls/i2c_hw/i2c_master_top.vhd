@@ -83,22 +83,44 @@ entity i2c_master_top is
 	   PRER_INIT : unsigned(15 downto 0) := (others => '1')
 	);
 	port (
-		CLK       : in  std_logic;                    -- master clock input, up to 250MHz
-		RST_SYNC  : in  std_logic;                    -- synchronous active high reset
-		RST_ASYNC : in  std_logic;                    -- asynchronous reset, active HIGH
+		-- master clock input, up to 250MHz
+		CLK       : in  std_logic;
+		-- synchronous active high reset
+		RST_SYNC  : in  std_logic;
+		-- asynchronous reset, active HIGH
+		RST_ASYNC : in  std_logic;
+
+		-- ===========
 		-- generic bus
-		BE        : in  std_logic_vector( 7 downto 0); --  Byte enables for Write operation
-		DWR       : in  std_logic_vector(63 downto 0); -- Databus input
-		DRD       : out std_logic_vector(63 downto 0); -- Databus output
-		WEN       : in  std_logic;	              -- Write enable input
-		INT       : out std_logic;                    -- interrupt output signal
+		-- ===========
+
+		--  Byte enables for Write operation
+		BE        : in  std_logic_vector( 7 downto 0);
+		-- Databus input
+		DWR       : in  std_logic_vector(63 downto 0);
+		-- Databus output
+		DRD       : out std_logic_vector(63 downto 0);
+		-- Write enable input
+		WEN       : in  std_logic;
+		-- interrupt output signal
+		INT       : out std_logic;
+
+		-- ===========
 		-- i2c lines
-		SCL_PAD_I     : in  std_logic;                -- i2c clock line input
-		SCL_PAD_O     : out std_logic;                -- i2c clock line output
-		SCL_PADOEN_O  : out std_logic;                -- i2c clock line output enable, active low
-		SDA_PAD_I     : in  std_logic;                -- i2c data line input
-		SDA_PAD_O     : out std_logic;                -- i2c data line output
-		SDA_PADOEN_O  : out std_logic                 -- i2c data line output enable, active low
+		-- ===========
+
+		-- i2c clock line input
+		SCL_PAD_I     : in  std_logic;
+		-- i2c clock line output
+		SCL_PAD_O     : out std_logic;
+		-- i2c clock line output enable, active low
+		SCL_PADOEN_O  : out std_logic;
+		-- i2c data line input
+		SDA_PAD_I     : in  std_logic;
+		-- i2c data line output
+		SDA_PAD_O     : out std_logic;
+		-- i2c data line output enable, active low
+		SDA_PADOEN_O  : out std_logic
 	);
 end entity i2c_master_top;
 

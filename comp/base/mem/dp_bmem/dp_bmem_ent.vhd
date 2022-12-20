@@ -42,32 +42,57 @@ entity DP_BMEM is
       WRITE_MODE_B   : string := "WRITE_FIRST";
       -- Output directly from BlockRams or throw register
       OUTPUT_REG     : boolean := true;
-      RESET_DATA_PATH: boolean := true; -- Allow the output data register to be reset
+      -- Allow the output data register to be reset
+      RESET_DATA_PATH: boolean := true;
       -- debug prints
       DEBUG          : boolean := false
    );
 
    port(
+      -- ===========
       -- Interface A
-      RSTA   : in    std_logic := '0'; -- CLKA sync reset
-      CLKA   : in    std_logic; -- Clock A
-      PIPE_ENA : in  std_logic; -- Pipe Enable
-      REA    : in    std_logic; -- Read Enable
-      WEA    : in    std_logic; -- Write Enable
-      ADDRA  : in    std_logic_vector(LOG2(ITEMS)-1 downto 0); -- Address A
-      DIA    : in    std_logic_vector(DATA_WIDTH-1 downto 0); -- Data A In
-      DOA_DV : out   std_logic; -- Data A Valid
-      DOA    : out   std_logic_vector(DATA_WIDTH-1 downto 0); -- Data A Out
+      -- ===========
 
+      -- CLKA sync reset
+      RSTA   : in    std_logic := '0';
+      -- Clock A
+      CLKA   : in    std_logic;
+      -- Pipe Enable
+      PIPE_ENA : in  std_logic;
+      -- Read Enable
+      REA    : in    std_logic;
+      -- Write Enable
+      WEA    : in    std_logic;
+      -- Address A
+      ADDRA  : in    std_logic_vector(LOG2(ITEMS)-1 downto 0);
+      -- Data A In
+      DIA    : in    std_logic_vector(DATA_WIDTH-1 downto 0);
+      -- Data A Valid
+      DOA_DV : out   std_logic;
+      -- Data A Out
+      DOA    : out   std_logic_vector(DATA_WIDTH-1 downto 0);
+
+      -- ===========
       -- Interface B
-      RSTB   : in    std_logic := '0'; -- CLKB sync reset
-      CLKB   : in    std_logic; -- Clock B
-      PIPE_ENB : in  std_logic; -- Pipe Enable
-      REB    : in    std_logic; -- Read Enable
-      WEB    : in    std_logic; -- Write Enable
-      ADDRB  : in    std_logic_vector(LOG2(ITEMS)-1 downto 0); -- Address B
-      DIB    : in    std_logic_vector(DATA_WIDTH-1 downto 0); -- Data B In
-      DOB_DV : out   std_logic; -- Data B Valid
-      DOB    : out   std_logic_vector(DATA_WIDTH-1 downto 0) -- Data B Out
+      -- ===========
+
+      -- CLKB sync reset
+      RSTB   : in    std_logic := '0';
+      -- Clock B
+      CLKB   : in    std_logic;
+      -- Pipe Enable
+      PIPE_ENB : in  std_logic;
+      -- Read Enable
+      REB    : in    std_logic;
+      -- Write Enable
+      WEB    : in    std_logic;
+      -- Address B
+      ADDRB  : in    std_logic_vector(LOG2(ITEMS)-1 downto 0);
+      -- Data B In
+      DIB    : in    std_logic_vector(DATA_WIDTH-1 downto 0);
+      -- Data B Valid
+      DOB_DV : out   std_logic;
+      -- Data B Out
+      DOB    : out   std_logic_vector(DATA_WIDTH-1 downto 0)
    );
 end entity DP_BMEM;

@@ -65,14 +65,20 @@ use work.type_pack.all;
 
 entity MEM_TESTER_MI is
 generic (
-    -- Buses --
+    -- ================
+    -- Buses
+    -- ================
+
     MI_DATA_WIDTH           : integer := 32;
     MI_ADDR_WIDTH           : integer := 32;
     AMM_ADDR_WIDTH          : integer := 26;
     AMM_BURST_COUNT_WIDTH   : integer := 7;
     REFR_PERIOD_WIDTH       : integer := 32;
 
-    -- Others --
+    -- ================
+    -- Others
+    -- ================
+
     AMM_GEN_BASE            : std_logic_vector(MI_ADDR_WIDTH - 1 downto 0);
     AMM_PROBE_BASE          : std_logic_vector(MI_ADDR_WIDTH - 1 downto 0);
     DEFAULT_BURST_CNT       : integer := 4;
@@ -81,9 +87,10 @@ generic (
     DEVICE                  : string
 );
 port(    
-    -----------------------------
-    -- MI bus master interface --
-    -----------------------------
+    -- ==========================
+    -- MI bus master interface
+    -- ==========================
+
     MI_CLK                  : in std_logic;
     MI_RST                  : in std_logic;
 
@@ -96,16 +103,19 @@ port(
     MI_DRD                  : out std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
     MI_DRDY                 : out std_logic;
 
-    -----------------------
-    -- Slave clk and rst --
-    -----------------------
+    -- ==========================
+    -- Slave clk and rst
+    -- ==========================
+
     CLK                     : in std_logic;
     RST                     : in std_logic;
 
-    -----------------------------
-    -- Signals to / from slave --
-    -----------------------------
+    -- ==========================
+    -- Signals to / from slave
+    --
     -- Master => slave
+    -- ==========================
+
     RST_REQ                 : out std_logic;
     RST_EMIF_REQ            : out std_logic;
     RUN_TEST                : out std_logic;
@@ -117,7 +127,12 @@ port(
     ADDR_LIMIT              : out std_logic_vector(AMM_ADDR_WIDTH - 1 downto 0);
     REFR_PERIOD             : out std_logic_vector(REFR_PERIOD_WIDTH - 1 downto 0);
 
+    -- ==========================
+    -- Signals to / from slave
+    --
     -- Slave => master
+    -- ==========================
+
     TEST_DONE               : in  std_logic;
     TEST_SUCCESS            : in  std_logic;
     ECC_ERROR               : in  std_logic;
@@ -126,7 +141,10 @@ port(
     AMM_READY               : in  std_logic;
     ERR_CNT                 : in  std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
 
+    -- ==========================
     -- AMM GEN MI bus
+    -- ==========================
+
     AMM_GEN_DWR             : out std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
     AMM_GEN_ADDR            : out std_logic_vector(MI_ADDR_WIDTH - 1 downto 0);
     AMM_GEN_BE              : out std_logic_vector(MI_DATA_WIDTH / 8 - 1 downto 0);
@@ -136,7 +154,10 @@ port(
     AMM_GEN_DRD             : in  std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
     AMM_GEN_DRDY            : in  std_logic;
 
+    -- ==========================
     -- AMM PROBE MI bus
+    -- ==========================
+
     AMM_PROBE_DWR           : out std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
     AMM_PROBE_ADDR          : out std_logic_vector(MI_ADDR_WIDTH - 1 downto 0);
     AMM_PROBE_BE            : out std_logic_vector(MI_DATA_WIDTH / 8 - 1 downto 0);
@@ -169,13 +190,20 @@ architecture FULL of MEM_TESTER_MI is
     constant MI_ADDR_LIMIT      : integer := 7;
 
     -- MI registers addresses --
-    constant CTRL_IN_REG        : std_logic_vector(MI_ADDR_LIMIT downto MI_ADDR_CUTOFF) := "000000"; -- 0x00
-    constant CTRL_OUT_REG       : std_logic_vector(MI_ADDR_LIMIT downto MI_ADDR_CUTOFF) := "000001"; -- 0x04
-    constant ERR_CNT_REG        : std_logic_vector(MI_ADDR_LIMIT downto MI_ADDR_CUTOFF) := "000010"; -- 0x08
-    constant BURST_CNT_REG      : std_logic_vector(MI_ADDR_LIMIT downto MI_ADDR_CUTOFF) := "000011"; -- 0x0C
-    constant ADDR_LIM_REG       : std_logic_vector(MI_ADDR_LIMIT downto MI_ADDR_CUTOFF) := "000100"; -- 0x10
-    constant REFRESH_TICKS_REG  : std_logic_vector(MI_ADDR_LIMIT downto MI_ADDR_CUTOFF) := "000101"; -- 0x14
-    constant DEF_REFR_REG       : std_logic_vector(MI_ADDR_LIMIT downto MI_ADDR_CUTOFF) := "000110"; -- 0x18
+    -- 0x00
+    constant CTRL_IN_REG        : std_logic_vector(MI_ADDR_LIMIT downto MI_ADDR_CUTOFF) := "000000";
+    -- 0x04
+    constant CTRL_OUT_REG       : std_logic_vector(MI_ADDR_LIMIT downto MI_ADDR_CUTOFF) := "000001";
+    -- 0x08
+    constant ERR_CNT_REG        : std_logic_vector(MI_ADDR_LIMIT downto MI_ADDR_CUTOFF) := "000010";
+    -- 0x0C
+    constant BURST_CNT_REG      : std_logic_vector(MI_ADDR_LIMIT downto MI_ADDR_CUTOFF) := "000011";
+    -- 0x10
+    constant ADDR_LIM_REG       : std_logic_vector(MI_ADDR_LIMIT downto MI_ADDR_CUTOFF) := "000100";
+    -- 0x14
+    constant REFRESH_TICKS_REG  : std_logic_vector(MI_ADDR_LIMIT downto MI_ADDR_CUTOFF) := "000101";
+    -- 0x18
+    constant DEF_REFR_REG       : std_logic_vector(MI_ADDR_LIMIT downto MI_ADDR_CUTOFF) := "000110";
                                 
     -- Bits in registers        
     -- CTRL IN REG              

@@ -56,7 +56,8 @@ architecture full of PCIE_TRANSACTION_CTRL is
 
     -- This constant can be used to disable Down Storage FIFO unit
     -- on some devices.
-    constant DISABLE_STFIFO           : boolean := false; -- (DEVICE="ULTRASCALE")
+    -- (DEVICE="ULTRASCALE")
+    constant DISABLE_STFIFO           : boolean := false;
     constant CUT_HDR_BYPASS_DEV       : boolean := (DEVICE="STRATIX10" and ENDPOINT_TYPE/="H_TILE") or (DEVICE="AGILEX");
     constant INTEL_DEV                : boolean := (DEVICE="STRATIX10" or DEVICE="AGILEX");
 

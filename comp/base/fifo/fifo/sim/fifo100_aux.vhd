@@ -31,26 +31,50 @@ entity FIFO100_AUX is
       block_size     : integer := 4
       );
    port(
+      -- =================
       -- FIFO reset
-      RESET     : in std_logic;   -- FIFO reset signal
+      -- =================
 
+      -- FIFO reset signal
+      RESET     : in std_logic;
+
+      -- ================
       -- FIFO input part
-      DATA_IN   : in std_logic_vector((data_width-1) downto 0); -- Data input
-      WRITE_REQ : in std_logic;   -- Write request
+      -- ================
+      -- Data input
+      DATA_IN   : in std_logic_vector((data_width-1) downto 0);
+      -- Write request
+      WRITE_REQ : in std_logic;
 
+      -- =================
       -- FIFO output part
-      DATA_OUT  : out std_logic_vector((data_width-1) downto 0); -- Data output
-      READ_REQ  : in std_logic;   -- Read request
+      -- =================
 
+      -- Data output
+      DATA_OUT  : out std_logic_vector((data_width-1) downto 0);
+      -- Read request
+      READ_REQ  : in std_logic;
+
+      -- ============================
       -- FIFO full and empty signals
-      EMPTY     : out std_logic;  -- FIFO is empty
-      FULL      : out std_logic;  -- FIFO is full
+      -- ============================
+
+      -- FIFO is empty
+      EMPTY     : out std_logic;
+      -- FIFO is full
+      FULL      : out std_logic;
       LSTBLK    : out std_logic;
 
+      -- =======================
       -- CLK inputs and outputs
-      CLK_50    : in std_logic;   -- CLK_GEN 50MHz input
-      CLK_LOCK  : out std_logic;  -- CLK_GEN 100MHz locked signal
-      CLK_100   : out std_logic   -- CLK_GEN 100MHz clock signal
+      -- =======================
+
+      -- CLK_GEN 50MHz input
+      CLK_50    : in std_logic;
+      -- CLK_GEN 100MHz locked signal
+      CLK_LOCK  : out std_logic;
+      -- CLK_GEN 100MHz clock signal
+      CLK_100   : out std_logic
 
    );
 end entity FIFO100_AUX;

@@ -21,9 +21,9 @@ entity PCIE_RC_HDR_DEPARSER is
         DEVICE : string  := "STRATIX10"
     );
     port(
-        ---------------------------------------------------------------------------
+        -- ===================================
         -- RC interface
-        ---------------------------------------------------------------------------
+        -- ===================================
 
         -- Lower address
         OUT_LOW_ADDR   : out std_logic_vector(12-1 downto 0);
@@ -31,7 +31,7 @@ entity PCIE_RC_HDR_DEPARSER is
         OUT_COMPLETE   : out std_logic;
         -- Length in DWORDS
         OUT_DW_CNT     : out std_logic_vector(11-1 downto 0);
-        -- Tag (in case of INTEL contains TAG_8|TAG_9|TAG, others there is "00"|TAG)
+        -- Tag (in case of INTEL contains TAG_8, TAG_9, TAG, others there is "00", TAG)
         OUT_TAG        : out std_logic_vector(10-1 downto 0);
         -- Length in bytes (For Intel, only 12 bits are valid)
         OUT_BYTE_CNT   : out std_logic_vector(13-1 downto 0);
@@ -39,9 +39,9 @@ entity PCIE_RC_HDR_DEPARSER is
         OUT_ATTRIBUTES : out std_logic_vector(3-1 downto 0);
         -- Completition Status
         OUT_COMP_ST    : out std_logic_vector(3-1 downto 0);
-        ---------------------------------------------------------------------------
+        -- ===================================
         -- Completer HEADER Input interface
-        ---------------------------------------------------------------------------
+        -- ===================================
 
         -- PCIE RC header
         IN_HEADER      : in std_logic_vector(96-1 downto 0)

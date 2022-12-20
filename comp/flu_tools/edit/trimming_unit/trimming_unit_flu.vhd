@@ -19,7 +19,8 @@ use work.math_pack.all;
 --  Architecture: TRIMMING_UNIT_FLU
 -- ----------------------------------------------------------------------------
 architecture TRIMMING_UNIT_ARCH of TRIMMING_UNIT_FLU is
-   constant EOP_POS_WIDTH      : integer := log2(DATA_WIDTH/8);   -- number of REM bits
+   -- number of REM bits
+   constant EOP_POS_WIDTH      : integer := log2(DATA_WIDTH/8);
    constant BLOCKS             : integer := 2**SOP_POS_WIDTH;
    constant BLOCK_SIZE         : integer := DATA_WIDTH/BLOCKS;
    type block_array_t is array (integer range <>) of std_logic_vector(BLOCK_SIZE-1 downto 0);

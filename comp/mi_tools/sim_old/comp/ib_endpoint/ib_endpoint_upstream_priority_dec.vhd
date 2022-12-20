@@ -19,17 +19,28 @@ use IEEE.std_logic_unsigned.all;
 -- ----------------------------------------------------------------------------
 entity IB_ENDPOINT_UPSTREAM_PRIORITY_DEC is
    port(
+      -- ========================
       -- FPGA control
-      CLK                   : in  std_logic;  -- 100  MHz FPGA clock
-      RESET                 : in  std_logic;  -- Reset
+      -- ========================
 
+      -- 100  MHz FPGA clock
+      CLK                   : in  std_logic;
+      -- Reset
+      RESET                 : in  std_logic;
+
+      -- ========================
       -- Input Interface
+      -- ========================
+
       IN_RD_RQ              : in  std_logic;
       IN_BM_RQ              : in  std_logic;
       IN_RD_ACK             : out std_logic;
       IN_BM_ACK             : out std_logic;
 
+      -- ========================
       -- Output Interface
+      -- ========================
+
       OUT_RD_RQ             : out std_logic;
       OUT_BM_RQ             : out std_logic;
       OUT_RD_ACK            : in  std_logic;

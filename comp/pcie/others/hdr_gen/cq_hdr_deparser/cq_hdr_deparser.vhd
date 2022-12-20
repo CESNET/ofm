@@ -21,11 +21,11 @@ entity PCIE_CQ_HDR_DEPARSER is
         CQUSER_WIDTH : natural := 183
     );
     port(
-        ---------------------------------------------------------------------------
+        -- ========================================================================
         -- CQ interface (same for both)
-        ---------------------------------------------------------------------------
+        -- ========================================================================
 
-        -- Tag (in case of INTEL contains TAG_8|TAG_9|TAG, others there is "00"|TAG)
+        -- Tag (in case of INTEL contains TAG_8, TAG_9, TAG, others there is "00", TAG)
         OUT_TAG          : out std_logic_vector(10-1 downto 0);
         -- Global address in bytes (address is aligned to DWORD)
         OUT_ADDRESS      : out std_logic_vector(64-1 downto 0);
@@ -61,9 +61,9 @@ entity PCIE_CQ_HDR_DEPARSER is
         -- 1000 - msgd
         OUT_REQ_TYPE     : out std_logic_vector(4-1 downto 0);
 
-        ---------------------------------------------------------------------------
+        -- ========================================================================
         -- Completer HEADER Input interface
-        ---------------------------------------------------------------------------
+        -- ========================================================================
 
         -- PCIE AXI TUSER signal
         IN_AXI_TUSER     : in std_logic_vector(CQUSER_WIDTH-1 downto 0) := (others => '0');
@@ -73,8 +73,7 @@ entity PCIE_CQ_HDR_DEPARSER is
         IN_FBE           : in std_logic_vector(4-1 downto 0);
         -- Last Byte Enable
         IN_LBE           : in std_logic_vector(4-1 downto 0);
-        --                                |16 downto 11|10 downto 8|7 downto 0 |
-        -- PCIE CQ header META, contains: |BAR_APERTURE|BAR_ID     |TARGET_FUNC|
+        -- PCIE CQ header META, contains: BAR_APERTURE, BAR_ID, TARGET_FUNC
         IN_INTEL_META    : in std_logic_vector(17-1 downto 0) := (others => '0')
     );
 end entity;

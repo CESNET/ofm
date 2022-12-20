@@ -32,7 +32,8 @@ entity PTC_DMA2PCIE_HDR_TRANSFORM is
       TRANS_SIZE_WIDTH : natural := 8;
 
       -- Target device
-      DEVICE           : string  := "ULTRASCALE" -- "VIRTEX6", "7SERIES", "ULTRASCALE"
+      -- "VIRTEX6", "7SERIES", "ULTRASCALE"
+      DEVICE           : string  := "ULTRASCALE"
    );
    port(
       ---------------------------------------------------------------------------

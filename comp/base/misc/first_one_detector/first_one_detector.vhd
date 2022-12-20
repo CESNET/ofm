@@ -32,13 +32,22 @@ entity first_one_detector is
       DATA_WIDTH  : integer := 2
    );
    port (
+      -- ======
       -- Input
+      -- ======
+
       MASK     : in std_logic_vector(DATA_WIDTH-1 downto 0);
 
+      -- ======
       -- Output
-      FIRST_ONE_ONEHOT  : out std_logic_vector(DATA_WIDTH-1 downto 0);         -- Position of the first 'one' in ONEHOT coding
-      FIRST_ONE_BINARY  : out std_logic_vector(max(log2(DATA_WIDTH)-1, 0) downto 0);   -- Position of the first 'one' in BINARY coding
-      FIRST_ONE_PRESENT : out std_logic                                        -- Deasserted if no 'one' is present in input MASK
+      -- ======
+
+      -- Position of the first 'one' in ONEHOT coding
+      FIRST_ONE_ONEHOT  : out std_logic_vector(DATA_WIDTH-1 downto 0);
+      -- Position of the first 'one' in BINARY coding
+      FIRST_ONE_BINARY  : out std_logic_vector(max(log2(DATA_WIDTH)-1, 0) downto 0);
+      -- Deasserted if no 'one' is present in input MASK
+      FIRST_ONE_PRESENT : out std_logic
    );
 end first_one_detector;
 

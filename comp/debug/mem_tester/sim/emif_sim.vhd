@@ -20,7 +20,8 @@ generic (
     AMM_BURST_COUNT_WIDTH   : integer := 7;
 
     CLK_PERIOD              : time;
-    MEM_SIZE                : integer   -- to reduce simulation memory usage
+    -- to reduce simulation memory usage
+    MEM_SIZE                : integer
 );
 port(
     CLK                     : in    std_logic;
@@ -35,16 +36,24 @@ port(
     AMM_BURST_COUNT         : in    std_logic_vector(AMM_BURST_COUNT_WIDTH - 1    downto 0);    
     AMM_READ_DATA_VALID     : out   std_logic;
 
-    -- Other EMIF IP signals --
+    -- =====================
+    -- Other EMIF IP signals
+    --
     -- TODO: simulate there signals
+    -- =====================
+
     EMIF_RST_REQ            : in    std_logic;
     EMIF_RST_DONE           : out   std_logic;    
     EMIF_ECC_ISR            : out   std_logic;
     EMIF_CAL_SUCCESS        : out   std_logic;
     EMIF_CAL_FAIL           : out   std_logic;
 
-    -- Debug signals --
-    RANDOM_AMM_READY        : in   std_logic    := '1'   -- On off random AMM_READY generation
+    -- =============
+    -- Debug signals
+    -- =============
+
+    -- On off random AMM_READY generation
+    RANDOM_AMM_READY        : in   std_logic    := '1'
 );
 end entity;
 

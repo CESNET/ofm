@@ -29,11 +29,19 @@ use work.dma_bus_pack.all; -- contains definitions for MVB header fields
 
 entity MFB2DMA is
    generic (
+      -- =======================
       -- RX MVB characteristics
-      MVB_ITEMS       : integer := 4;   -- number of headers
+      -- =======================
+
+      -- number of headers
+      MVB_ITEMS       : integer := 4;
+      -- =======================
       -- RX MFB characteristics
+      -- =======================
+
       MFB_REGIONS     : integer := 4;
-      MFB_REG_WIDTH   : integer := 256; -- Width of one region (in bits)
+      -- Width of one region (in bits)
+      MFB_REG_WIDTH   : integer := 256;
 
       -- Width of MVB and DMA headers is defined in dma_bus_pack
       -- Width of MFB data and DMA data is MFB_REGIONS * MFB_REG_WIDTH
@@ -49,28 +57,30 @@ entity MFB2DMA is
       DEVICE          : string  := "ULTRASCALE"
    );
    port(
-      ---------------------------------------------------------------------------
+      -- ========================================================================
       -- Common interface
-      ---------------------------------------------------------------------------
+      -- ========================================================================
 
       CLK             : in  std_logic;
       RESET           : in  std_logic;
 
-      ---------------------------------------------------------------------------
+      -- ========================================================================
       -- RX MVB interface
-      ---------------------------------------------------------------------------
+      --
       -- Only when USE_MVB=true
+      -- ========================================================================
 
       RX_MVB_DOWN_HDR      : in  std_logic_vector(MVB_ITEMS*DMA_DOWNHDR_WIDTH-1 downto 0) := (others => '0');
       RX_MVB_DOWN_VLD      : in  std_logic_vector(MVB_ITEMS                  -1 downto 0) := (others => '0');
       RX_MVB_DOWN_SRC_RDY  : in  std_logic := '0';
       RX_MVB_DOWN_DST_RDY  : out std_logic;
 
-      ---------------------------------------------------------------------------
+      -- ========================================================================
       -- RX MFB interface
-      ---------------------------------------------------------------------------
+      -- ========================================================================
 
-      RX_MFB_DOWN_HDR     : in  std_logic_vector(MFB_REGIONS*DMA_DOWNHDR_WIDTH-1 downto 0) := (others => '0'); -- Only when USE_MVB=false; valid on SOF
+      -- Only when USE_MVB=false; valid on SOF
+      RX_MFB_DOWN_HDR     : in  std_logic_vector(MFB_REGIONS*DMA_DOWNHDR_WIDTH-1 downto 0) := (others => '0');
       RX_MFB_DOWN_DATA    : in  std_logic_vector(MFB_REGIONS*MFB_REG_WIDTH-1 downto 0);
       RX_MFB_DOWN_SOF     : in  std_logic_vector(MFB_REGIONS-1 downto 0);
       RX_MFB_DOWN_EOF     : in  std_logic_vector(MFB_REGIONS-1 downto 0);
@@ -82,9 +92,9 @@ entity MFB2DMA is
       --RX_MFB_DOWN_SOF_POS : in  std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE))-1 downto 0);
       --RX_MFB_DOWN_EOF_POS : in  std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE))-1 downto 0);
 
-      ---------------------------------------------------------------------------
+      -- ========================================================================
       -- TX DMA interface
-      ---------------------------------------------------------------------------
+      -- ========================================================================
 
       TX_DMA_DOWN_HDR     : out std_logic_vector(DMA_DOWNHDR_WIDTH-1 downto 0);
       TX_DMA_DOWN_DATA    : out std_logic_vector(MFB_REGIONS*MFB_REG_WIDTH-1 downto 0);
@@ -101,9 +111,9 @@ end entity MFB2DMA;
 
 architecture full of MFB2DMA is
 
-   ---------------------------------------------------------------------------
+   -- ========================================================================
    -- Constants
-   ---------------------------------------------------------------------------
+   -- ========================================================================
 
    constant INPUT_FIFOXM_SIZE : integer := max(MVB_ITEMS,MFB_REGIONS)*INPUT_FIFO_SIZE;
    constant DMA_LEN_WIDTH : integer := DMA_COMPLETION_LENGTH'high-DMA_COMPLETION_LENGTH'low+1;

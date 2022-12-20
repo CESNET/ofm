@@ -46,32 +46,48 @@ generic (
     DATA_ROTATION_OUTPUT_REG_EN : boolean := true;
 
     -- Target Device
-    DEVICE          : string := "STRATIX10" -- "ULTRASCALE", "7SERIES", ...
+    -- "ULTRASCALE", "7SERIES", ...
+    DEVICE          : string := "STRATIX10"
 );
 port (
+    -- =================================
     -- Clock and reset
+    -- =================================
+
     CLK             : in  std_logic;
     CLK2            : in  std_logic;
     RESET           : in  std_logic;
 
+    -- =================================
     -- Input uInstructions
+    -- =================================
+
     -- per src row
     RX_UINSTR_SRC_COL : in  slv_array_2d_t(2-1 downto 0)(SRC_BUF_ROWS-1 downto 0)(log2(SRC_BUF_COLS)-1 downto 0);
     -- per dst row
     RX_UINSTR_SRC_ROW : in  slv_array_2d_t(2-1 downto 0)(DST_BUF_ROWS-1 downto 0)(log2(SRC_BUF_ROWS)-1 downto 0);
     RX_UINSTR_DST_COL : in  slv_array_2d_t(2-1 downto 0)(DST_BUF_ROWS-1 downto 0)(log2(DST_BUF_COLS)-1 downto 0);
-    RX_UINSTR_ROW_ROT : in  slv_array_2d_t(2-1 downto 0)(DST_BUF_ROWS-1 downto 0)(log2(ROW_ITEMS)-1 downto 0); -- row rotation
-    RX_UINSTR_IE      : in  slv_array_2d_t(2-1 downto 0)(DST_BUF_ROWS-1 downto 0)(ROW_ITEMS-1 downto 0); -- item enable
+    -- row rotation
+    RX_UINSTR_ROW_ROT : in  slv_array_2d_t(2-1 downto 0)(DST_BUF_ROWS-1 downto 0)(log2(ROW_ITEMS)-1 downto 0);
+    -- item enable
+    RX_UINSTR_IE      : in  slv_array_2d_t(2-1 downto 0)(DST_BUF_ROWS-1 downto 0)(ROW_ITEMS-1 downto 0);
     RX_UINSTR_SRC_RDY : in  slv_array_t   (2-1 downto 0)(DST_BUF_ROWS-1 downto 0);
 
+    -- =================================
     -- Source buffer read interface
+    -- =================================
+
     SRC_BUF_RD_ADDR : out slv_array_t(SRC_BUF_ROWS-1 downto 0)(log2(SRC_BUF_COLS)-1 downto 0);
     SRC_BUF_RD_DATA : in  slv_array_t(SRC_BUF_ROWS-1 downto 0)(ROW_ITEMS*ITEM_WIDTH-1 downto 0);
 
+    -- =================================
     -- Destination buffer read interface
+    -- =================================
+
     DST_BUF_WR_ADDR : out slv_array_t(DST_BUF_ROWS-1 downto 0)(log2(DST_BUF_COLS)-1 downto 0);
     DST_BUF_WR_DATA : out slv_array_t(DST_BUF_ROWS-1 downto 0)(ROW_ITEMS*ITEM_WIDTH-1 downto 0);
-    DST_BUF_WR_IE   : out slv_array_t(DST_BUF_ROWS-1 downto 0)(ROW_ITEMS-1 downto 0); -- item enable
+    -- item enable
+    DST_BUF_WR_IE   : out slv_array_t(DST_BUF_ROWS-1 downto 0)(ROW_ITEMS-1 downto 0);
     DST_BUF_WR_EN   : out std_logic_vector(DST_BUF_ROWS-1 downto 0)
 );
 end entity;

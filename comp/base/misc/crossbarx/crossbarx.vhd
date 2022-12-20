@@ -53,7 +53,8 @@ generic(
     -- Buffer A size
     BUF_A_COLS          : integer := 512;
     BUF_A_STREAM_ROWS   : integer := 4;
-    BUF_A_ROWS          : integer := BUF_A_STREAM_ROWS*TRANS_STREAMS; -- constant alias, DO NOT CHANGE!
+    -- constant alias, DO NOT CHANGE!
+    BUF_A_ROWS          : integer := BUF_A_STREAM_ROWS*TRANS_STREAMS;
 
     -- Buffer B size
     BUF_B_COLS          : integer := 512;
@@ -118,19 +119,27 @@ generic(
     DATA_ROT_OUTREG_EN  : boolean := true;
 
     -- Target Device
-    DEVICE              : string := "ULTRASCALE" -- "ULTRASCALE", "7SERIES", "STRATIX10" ...
+    -- "ULTRASCALE", "7SERIES", "STRATIX10" ...
+    DEVICE              : string := "ULTRASCALE"
 );
 port(
+    -- ===================================
     -- Clock and reset
+    -- ===================================
+
     CLK                : in  std_logic;
-    CLK2               : in  std_logic := '0'; -- Only used when USE_CLK2==True and USE_CLK_ARB==False
+    -- Only used when USE_CLK2==True and USE_CLK_ARB==False
+    CLK2               : in  std_logic := '0';
     RESET              : in  std_logic;
 
     -- Only used when USE_CLK_ARB==True
     CLK_ARB            : in  std_logic := '0';
     RESET_ARB          : in  std_logic := '0';
 
+    -- ===================================
     -- Input Transactions
+    -- ===================================
+
     TRANS_A_COL        : in  slv_array_t     (TRANS_STREAMS-1 downto 0)(log2(BUF_A_COLS)-1 downto 0);
     TRANS_A_ITEM       : in  slv_array_2d_t  (TRANS_STREAMS-1 downto 0)(TRANSS-1 downto 0)(log2(BUF_A_STREAM_ROWS*ROW_ITEMS)-1 downto 0);
     TRANS_B_COL        : in  slv_array_2d_t  (TRANS_STREAMS-1 downto 0)(TRANSS-1 downto 0)(log2(BUF_B_COLS)-1 downto 0);
@@ -141,22 +150,33 @@ port(
     TRANS_SRC_RDY      : in  std_logic_vector(TRANS_STREAMS-1 downto 0);
     TRANS_DST_RDY      : out std_logic_vector(TRANS_STREAMS-1 downto 0);
 
+    -- ===================================
     -- Source Buffer read interface
+    -- ===================================
+
     SRC_BUF_RD_ADDR    : out slv_array_t(tsel(DATA_DIR,BUF_A_ROWS,BUF_B_ROWS)-1 downto 0)(log2(tsel(DATA_DIR,BUF_A_COLS,BUF_B_COLS))-1 downto 0);
     SRC_BUF_RD_DATA    : in  slv_array_t(tsel(DATA_DIR,BUF_A_ROWS,BUF_B_ROWS)-1 downto 0)((ROW_ITEMS*ITEM_WIDTH)-1 downto 0);
 
+    -- ===================================
     -- Destination Buffer write interface
+    -- ===================================
+
     DST_BUF_WR_ADDR    : out slv_array_t     (tsel(DATA_DIR,BUF_B_ROWS,BUF_A_ROWS)-1 downto 0)(log2(tsel(DATA_DIR,BUF_B_COLS,BUF_A_COLS))-1 downto 0);
     DST_BUF_WR_DATA    : out slv_array_t     (tsel(DATA_DIR,BUF_B_ROWS,BUF_A_ROWS)-1 downto 0)((ROW_ITEMS*ITEM_WIDTH)-1 downto 0);
-    DST_BUF_WR_IE      : out slv_array_t     (tsel(DATA_DIR,BUF_B_ROWS,BUF_A_ROWS)-1 downto 0)(ROW_ITEMS-1 downto 0); -- Item enable
+    -- Item enable
+    DST_BUF_WR_IE      : out slv_array_t     (tsel(DATA_DIR,BUF_B_ROWS,BUF_A_ROWS)-1 downto 0)(ROW_ITEMS-1 downto 0);
     DST_BUF_WR_EN      : out std_logic_vector(tsel(DATA_DIR,BUF_B_ROWS,BUF_A_ROWS)-1 downto 0);
 
+    -- ===================================
     -- Transactions Completed confirmation
+    -- ===================================
+
     -- Each index only contains confirmations from the respective Transaction Stream, but there is more of them
     -- to allow burst confirmations
     TRANS_COMP_META    : out slv_array_2d_t  (TRANS_STREAMS-1 downto 0)(TRANSS-1 downto 0)(METADATA_WIDTH-1 downto 0);
     TRANS_COMP_SRC_RDY : out slv_array_t     (TRANS_STREAMS-1 downto 0)(TRANSS-1 downto 0);
-    TRANS_COMP_DST_RDY : in  slv_array_t     (TRANS_STREAMS-1 downto 0)(TRANSS-1 downto 0) -- Read for FIFOX Multi!
+    -- Read for FIFOX Multi!
+    TRANS_COMP_DST_RDY : in  slv_array_t     (TRANS_STREAMS-1 downto 0)(TRANSS-1 downto 0)
 );
 end entity;
 

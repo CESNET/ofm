@@ -30,17 +30,25 @@ entity FLU_PIPE_PLUS is
       --    "REG"   - two-stage pipe created from two registers + 1 MUX, better
       --              on wide buses and on Intel/Altera devices
       PIPE_TYPE      : string  := "SHREG";
-      USE_OUTREG     : boolean:= false; -- Only for PIPE_TYPE = "SHREG"!
+      -- Only for PIPE_TYPE = "SHREG"!
+      USE_OUTREG     : boolean:= false;
       FAKE_PIPE      : boolean:= false;
-      RESET_BY_INIT  : boolean:= false; -- Only for PIPE_TYPE = "SHREG"!
+      -- Only for PIPE_TYPE = "SHREG"!
+      RESET_BY_INIT  : boolean:= false;
       CHANNEL_WIDTH  : integer:= 3
    );   
    port(
+      -- ================
       -- Common interface 
+      -- ================
+
       CLK            : in std_logic;
       RESET          : in std_logic;
       
+      -- ================
       -- Input interface
+      -- ================
+
       RX_CHANNEL    : in std_logic_vector(CHANNEL_WIDTH-1 downto 0);
       RX_DATA       : in std_logic_vector(DATA_WIDTH-1 downto 0);
       RX_SOP_POS    : in std_logic_vector(SOP_POS_WIDTH-1 downto 0);
@@ -50,7 +58,10 @@ entity FLU_PIPE_PLUS is
       RX_SRC_RDY    : in std_logic;
       RX_DST_RDY    : out std_logic; 
  
+      -- ================
       -- Output interface
+      -- ================
+
       TX_CHANNEL    : out std_logic_vector(CHANNEL_WIDTH-1 downto 0);
       TX_DATA       : out std_logic_vector(DATA_WIDTH-1 downto 0);
       TX_SOP_POS    : out std_logic_vector(SOP_POS_WIDTH-1 downto 0);
@@ -60,13 +71,22 @@ entity FLU_PIPE_PLUS is
       TX_SRC_RDY    : out std_logic;
       TX_DST_RDY    : in std_logic;
       
-      -- Debuging interface ---------------------------------------------------
-      DEBUG_BLOCK        : in  std_logic := '0';              -- blocks data words on pipe's input interface
-      DEBUG_DROP         : in  std_logic := '0';              -- drops data words on pipe's input interface (higher priority than BLOCK)
-      DEBUG_SRC_RDY      : out std_logic;                     -- source ready on pipe's input interface
-      DEBUG_DST_RDY      : out std_logic;                     -- destination ready on pipe's input interface
-      DEBUG_SOP          : out std_logic;                     -- start of transaction on pipe's input interface
-      DEBUG_EOP          : out std_logic                      -- end of transaction on pipe's input interface
+      -- ==================
+      -- Debuging interface
+      -- ==================
+
+      -- blocks data words on pipe's input interface
+      DEBUG_BLOCK        : in  std_logic := '0';
+      -- drops data words on pipe's input interface (higher priority than BLOCK)
+      DEBUG_DROP         : in  std_logic := '0';
+      -- source ready on pipe's input interface
+      DEBUG_SRC_RDY      : out std_logic;
+      -- destination ready on pipe's input interface
+      DEBUG_DST_RDY      : out std_logic;
+      -- start of transaction on pipe's input interface
+      DEBUG_SOP          : out std_logic;
+      -- end of transaction on pipe's input interface
+      DEBUG_EOP          : out std_logic
    );
 end entity FLU_PIPE_PLUS;
 

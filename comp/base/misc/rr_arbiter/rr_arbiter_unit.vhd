@@ -19,16 +19,25 @@ use IEEE.std_logic_unsigned.all;
 -- ----------------------------------------------------------------------------
 entity RR_ARBITER_UNIT is
    generic(
-      PORTS                 : integer := 2 --minimum is 2
+      -- minimum is 2
+      PORTS                 : integer := 2
    );      
    port(
+      -- =============
       -- port requerst
-      RQ                    : in std_logic_vector(PORTS-1 downto 0); -- request from port
-      CHNG                  : in std_logic; -- change the writer (next writer in round)
-      GARANT                : in std_logic; -- this unit is responsible for choosing next writer
+      -- =============
 
-      ACK                   : out std_logic_vector(PORTS-1 downto 0); -- acknowledgement vector
-      ACK_W                 : out std_logic  -- write the ack. vector
+      -- request from port
+      RQ                    : in std_logic_vector(PORTS-1 downto 0);
+      -- change the writer (next writer in round)
+      CHNG                  : in std_logic;
+      -- this unit is responsible for choosing next writer
+      GARANT                : in std_logic;
+
+      -- acknowledgement vector
+      ACK                   : out std_logic;
+      -- write the ack. vector_vector(PORTS-1 downto 0);
+      ACK_W                 : out std_logic
       
       );
 end entity RR_ARBITER_UNIT;

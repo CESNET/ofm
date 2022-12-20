@@ -24,10 +24,17 @@ use work.type_pack.all;
 
 entity METADATA_INSERTOR is
 generic(
+    -- =============================
     -- MVB characteristics
+    -- =============================
+
     MVB_ITEMS       : integer := 2;
     MVB_ITEM_WIDTH  : integer := 128;
+
+    -- =============================
     -- MFB characteristics
+    -- =============================
+
     MFB_REGIONS     : integer := 2;
     MFB_REGION_SIZE : integer := 1;
     MFB_BLOCK_SIZE  : integer := 8;
@@ -35,6 +42,10 @@ generic(
 
     -- Width of default MFB metadata
     MFB_META_WIDTH  : integer := 0;
+
+    -- =============================
+    -- Others
+    -- =============================
 
     -- Metadata insertion mode
     -- options:
@@ -51,35 +62,33 @@ generic(
     MVB_FIFO_SIZE   : natural := 0;
 
     -- Target device
-    DEVICE          : string  := "ULTRASCALE" -- "ULTRASCALE", "7SERIES"
+    -- "ULTRASCALE", "7SERIES"
+    DEVICE          : string  := "ULTRASCALE"
 );
 port(
-    ---------------------------------------------------------------------------
+    -- =============================
     -- Clock and Reset
-    ---------------------------------------------------------------------------
+    -- =============================
 
     CLK             : in  std_logic;
     RESET           : in  std_logic;
 
-    ---------------------------------------------------------------------------
-
-    ---------------------------------------------------------------------------
+    -- =============================
     -- RX MVB
-    ---------------------------------------------------------------------------
+    -- =============================
 
     RX_MVB_DATA     : in  std_logic_vector(MVB_ITEMS*MVB_ITEM_WIDTH-1 downto 0);
     RX_MVB_VLD      : in  std_logic_vector(MVB_ITEMS               -1 downto 0);
     RX_MVB_SRC_RDY  : in  std_logic;
     RX_MVB_DST_RDY  : out std_logic;
 
-    ---------------------------------------------------------------------------
-
-    ---------------------------------------------------------------------------
+    -- =============================
     -- RX MFB
-    ---------------------------------------------------------------------------
+    -- =============================
 
     RX_MFB_DATA     : in  std_logic_vector(MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH-1 downto 0);
-    RX_MFB_META     : in  std_logic_vector(MFB_REGIONS*MFB_META_WIDTH-1 downto 0) := (others => '0'); -- Gets propagated to TX MFB without change
+    -- Gets propagated to TX MFB without change
+    RX_MFB_META     : in  std_logic_vector(MFB_REGIONS*MFB_META_WIDTH-1 downto 0) := (others => '0');
     RX_MFB_SOF      : in  std_logic_vector(MFB_REGIONS-1 downto 0);
     RX_MFB_EOF      : in  std_logic_vector(MFB_REGIONS-1 downto 0);
     RX_MFB_SOF_POS  : in  std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE))-1 downto 0);
@@ -87,15 +96,15 @@ port(
     RX_MFB_SRC_RDY  : in  std_logic;
     RX_MFB_DST_RDY  : out std_logic;
 
-    ---------------------------------------------------------------------------
-
-    ---------------------------------------------------------------------------
+    -- =============================
     -- TX MFB
-    ---------------------------------------------------------------------------
+    -- =============================
 
     TX_MFB_DATA     : out std_logic_vector(MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH-1 downto 0);
-    TX_MFB_META     : out std_logic_vector(MFB_REGIONS*MFB_META_WIDTH-1 downto 0); -- Original Metadata from RX MFB
-    TX_MFB_META_NEW : out std_logic_vector(MFB_REGIONS*MVB_ITEM_WIDTH-1 downto 0); -- Inserted metadata from RX MVB
+    -- Original Metadata from RX MFB
+    TX_MFB_META     : out std_logic_vector(MFB_REGIONS*MFB_META_WIDTH-1 downto 0);
+    -- Inserted metadata from RX MVB
+    TX_MFB_META_NEW : out std_logic_vector(MFB_REGIONS*MVB_ITEM_WIDTH-1 downto 0);
     TX_MFB_SOF      : out std_logic_vector(MFB_REGIONS-1 downto 0);
     TX_MFB_EOF      : out std_logic_vector(MFB_REGIONS-1 downto 0);
     TX_MFB_SOF_POS  : out std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE))-1 downto 0);
@@ -103,7 +112,6 @@ port(
     TX_MFB_SRC_RDY  : out std_logic;
     TX_MFB_DST_RDY  : in  std_logic
 
-    ---------------------------------------------------------------------------
 );
 end entity;
 

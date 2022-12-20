@@ -22,9 +22,14 @@ end entity testbench;
 --                      Architecture declaration
 -- ----------------------------------------------------------------------------
 architecture behavioral of testbench is
+   -- ============================
    -- Global Constant Declaration
-   constant in_period    : time := 5 ns; -- 125MHz
-   constant out_period   : time := 6.25 ns; -- 160MHz
+   -- ============================
+
+   -- 125MHz
+   constant in_period    : time := 5 ns;
+   -- 160MHz
+   constant out_period   : time := 6.25 ns;
    constant delay        : time := 5.5 ns;
    constant reset_delay  : time := 100 ns;
 

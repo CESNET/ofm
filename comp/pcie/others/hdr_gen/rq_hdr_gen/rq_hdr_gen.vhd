@@ -19,15 +19,15 @@ entity PCIE_RQ_HDR_GEN is
         DEVICE        : string  := "STRATIX10"
     );
     port(
-        ---------------------------------------------------------------------------
+        -- ===================================
         -- RQ interface
-        ---------------------------------------------------------------------------
+        -- ===================================
 
         -- Global address in bytes (address is aligned in DWORD)
         IN_ADDRESS       : in std_logic_vector(62-1 downto 0);
         -- Virtual Function ID
         IN_VFID          : in std_logic_vector(8-1 downto 0);
-        -- Tag (in case of INTEL contains TAG_8|TAG_9|TAG, others there is "00"|TAG)
+        -- Tag (in case of INTEL contains: TAG_8, TAG_9, TAG, others there is "00", TAG)
         IN_TAG           : in std_logic_vector(10-1 downto 0);
         -- Length in DWORDS
         IN_DW_CNT        : in std_logic_vector(11-1 downto 0);
@@ -46,9 +46,9 @@ entity PCIE_RQ_HDR_GEN is
         -- 0 - read
         IN_REQ_TYPE      : in std_logic;
 
-        ---------------------------------------------------------------------------
+        -- ===================================
         -- Requester HEADER Output interface
-        ---------------------------------------------------------------------------
+        -- ===================================
 
         -- PCIE RQ header
         OUT_HEADER   : out std_logic_vector(128-1 downto 0)

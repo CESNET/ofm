@@ -52,14 +52,21 @@ generic(
     SHREG_LATENCY   : integer := 16;
 
     -- Target Device
-    DEVICE          : string := "STRATIX10" -- "ULTRASCALE", "7SERIES", ...
+    -- "ULTRASCALE", "7SERIES", ...
+    DEVICE          : string := "STRATIX10"
 );
 port(
+    -- ====================
     -- Clock and Reset
+    -- ====================
+
     CLK              : in  std_logic;
     RESET            : in  std_logic;
 
+    -- ====================
     -- Input Transactions
+    -- ====================
+
     RX_TRANS_A_COL   : in  std_logic_vector(log2(BUF_A_COLS)-1 downto 0);
     RX_TRANS_A_ITEM  : in  slv_array_t     (TRANSS-1 downto 0)(log2(BUF_A_ROWS*ROW_ITEMS)-1 downto 0);
     RX_TRANS_B_COL   : in  slv_array_t     (TRANSS-1 downto 0)(log2(BUF_B_COLS)-1 downto 0);
@@ -70,7 +77,10 @@ port(
     RX_TRANS_SRC_RDY : in  std_logic;
     RX_TRANS_DST_RDY : out std_logic;
 
+    -- ====================
     -- Output Transactions
+    -- ====================
+
     TX_TRANS_A_COL   : out std_logic_vector(log2(BUF_A_COLS)-1 downto 0);
     TX_TRANS_A_ITEM  : out slv_array_t     (TRANSS-1 downto 0)(log2(BUF_A_ROWS*ROW_ITEMS)-1 downto 0);
     TX_TRANS_B_COL   : out slv_array_t     (TRANSS-1 downto 0)(log2(BUF_B_COLS)-1 downto 0);
@@ -78,9 +88,11 @@ port(
     TX_TRANS_LEN     : out slv_array_t     (TRANSS-1 downto 0)(log2(TRANS_MTU+1)-1 downto 0);
     TX_TRANS_META    : out slv_array_t     (TRANSS-1 downto 0)(METADATA_WIDTH-1 downto 0);
     TX_TRANS_VLD     : out std_logic_vector(TRANSS-1 downto 0);
-    TX_TRANS_COLOR   : out std_logic; -- Color is the same for all Transactions in one word
+    -- Color is the same for all Transactions in one word
+    TX_TRANS_COLOR   : out std_logic;
     TX_TRANS_SRC_RDY : out std_logic;
-    TX_TRANS_DST_RDY : in  std_logic; -- Serves as this unit's 'Enable'
+    -- Serves as this unit's 'Enable'
+    TX_TRANS_DST_RDY : in  std_logic;
 
     -- Color Confirmation Timeout cancel signal
     NEW_RX_TRANS     : out std_logic;

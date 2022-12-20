@@ -33,11 +33,18 @@ entity FLU_PIPE_DEEPER is
       RESET_BY_INIT  : boolean:= false
    );   
    port(
-      -- Common interface 
+      -- ================
+      -- Common interface
+      -- ================
+
       CLK            : in std_logic;
-      RESET          : in std_logic; -- NOTE: also starts debug counters
+      -- NOTE: also starts debug counters
+      RESET          : in std_logic;
       
+      -- ================
       -- Input interface
+      -- ================
+
       RX_DATA       : in std_logic_vector(DATA_WIDTH-1 downto 0);
       RX_SOP_POS    : in std_logic_vector(SOP_POS_WIDTH-1 downto 0);
       RX_EOP_POS    : in std_logic_vector(log2(DATA_WIDTH/8)-1 downto 0);
@@ -46,7 +53,10 @@ entity FLU_PIPE_DEEPER is
       RX_SRC_RDY    : in std_logic;
       RX_DST_RDY    : out std_logic; 
  
+      -- ================
       -- Output interface
+      -- ================
+
       TX_DATA       : out std_logic_vector(DATA_WIDTH-1 downto 0);
       TX_SOP_POS    : out std_logic_vector(SOP_POS_WIDTH-1 downto 0);
       TX_EOP_POS    : out std_logic_vector(log2(DATA_WIDTH/8)-1 downto 0);
@@ -55,13 +65,22 @@ entity FLU_PIPE_DEEPER is
       TX_SRC_RDY    : out std_logic;
       TX_DST_RDY    : in std_logic;
             
-      -- Debuging interface ---------------------------------------------------
-      DEBUG_BLOCK        : in  std_logic := '0';              -- blocks data words on pipe's input interface
-      DEBUG_DROP         : in  std_logic := '0';              -- drops data words on pipe's input interface (higher priority than BLOCK)
-      DEBUG_SRC_RDY      : out std_logic;                     -- source ready on pipe's input interface
-      DEBUG_DST_RDY      : out std_logic;                     -- destination ready on pipe's input interface
-      DEBUG_SOP          : out std_logic;                     -- start of transaction on pipe's input interface
-      DEBUG_EOP          : out std_logic                      -- end of transaction on pipe's input interface
+      -- ==================
+      -- Debuging interface
+      -- ==================
+
+      -- blocks data words on pipe's input interface
+      DEBUG_BLOCK        : in  std_logic := '0';
+      -- drops data words on pipe's input interface (higher priority than BLOCK)
+      DEBUG_DROP         : in  std_logic := '0';
+      -- source ready on pipe's input interface
+      DEBUG_SRC_RDY      : out std_logic;
+      -- destination ready on pipe's input interface
+      DEBUG_DST_RDY      : out std_logic;
+      -- start of transaction on pipe's input interface
+      DEBUG_SOP          : out std_logic;
+      -- end of transaction on pipe's input interface
+      DEBUG_EOP          : out std_logic
    );
 end entity;
 

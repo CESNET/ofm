@@ -26,7 +26,8 @@ entity DSP_COMPARATOR is
         -- "><=" is the default mode which outputs results as specified above the RESULT port
         -- ">= " outputs result in form of '11' if the 1st number is larger or equal than the 2nd number, else '00'  - in this mode, only one DSP block is used (when enabled)
         -- "<= " outputs result in form of '11' if the 1st number is smaller or equal than the 2nd number, else '00' - in this mode, only one DSP block is used (when enabled)
-        MODE             : string  := ">= "; -- options: "><=", ">= ", "<= " - the space after ">=" or "<=" is necessary !!
+        -- options: "><=", ">= ", "<= " - the space after ">=" or "<=" is necessary !!
+        MODE             : string  := ">= ";
         -- Set True to use DSP(s) for the comparator
         DSP_ENABLE       : boolean := true;
         -- Target FPGA

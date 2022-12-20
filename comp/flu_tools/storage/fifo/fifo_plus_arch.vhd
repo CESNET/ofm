@@ -17,10 +17,12 @@ use work.math_pack.all;
 
 architecture full of FLU_FIFO_PLUS is
 -- Constants declaration
-constant JUICE_WIDTH   : integer := 2; -- SOP+EOP
+
+-- SOP+EOP
+constant JUICE_WIDTH   : integer := 2;
 constant EOP_POS_WIDTH : integer := log2(DATA_WIDTH/8);
+--                              DATA       EOP_POS       SOP_POS       CHANNEL       FLU_JUICE
 constant MEM_WIDTH : integer := DATA_WIDTH+EOP_POS_WIDTH+SOP_POS_WIDTH+CHANNEL_WIDTH+JUICE_WIDTH;
-                           --   DATA       EOP_POS       SOP_POS       CHANNEL       FLU_JUICE
 
 -- Signals declaration
 signal sig_full      : std_logic;   -- FIFO is full

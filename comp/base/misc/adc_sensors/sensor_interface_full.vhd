@@ -18,6 +18,7 @@ architecture ARCH of SENSOR_INTERFACE is
     -- =======================================================================
     -- CONTROL SIGNALS
     -- =======================================================================
+
     -- Bitmask showing the channels that should be measured for T and V.
     -- Bits 31 downto 16 are for volts, bits 8 downto 0 are for temps.
     signal conf_reg    : std_logic_vector(31 downto 0);
@@ -44,23 +45,41 @@ architecture ARCH of SENSOR_INTERFACE is
 
     -- =======================================================================
     -- SENSOR INTERFACE SIGNALS
-    -- =======================================================================
+    --
     -- TEMP INPUT
+    -- =======================================================================
+
     signal temp_cmd_ready    : std_logic;
     signal temp_cmd_valid    : std_logic;
     signal temp_cmd_data : std_logic_vector(8 downto 0);
+    -- =======================================================================
+    -- SENSOR INTERFACE SIGNALS
+    --
     -- TEMP OUTPUT
+    -- =======================================================================
+
     signal temp_rsp_valid    : std_logic;
     signal temp_rsp_channel  : std_logic_vector(3 downto 0);
     signal temp_rsp_data     : std_logic_vector(31 downto 0);
     signal temp_rsp_sop      : std_logic;
     signal temp_rsp_eop      : std_logic;
 
+    -- =======================================================================
+    -- SENSOR INTERFACE SIGNALS
+    --
     -- VOLT INPUT
+    -- =======================================================================
+
     signal volt_cmd_ready    : std_logic;
     signal volt_cmd_valid    : std_logic;
     signal volt_cmd_data : std_logic_vector(15 downto 0);
+
+    -- =======================================================================
+    -- SENSOR INTERFACE SIGNALS
+    --
     -- VOLT OUTPUT
+    -- =======================================================================
+
     signal volt_rsp_valid    : std_logic;
     signal volt_rsp_channel  : std_logic_vector(3 downto 0);
     signal volt_rsp_data     : std_logic_vector(31 downto 0);
@@ -69,8 +88,10 @@ architecture ARCH of SENSOR_INTERFACE is
 
     -- =======================================================================
     -- MEMORY SIGNALS
-    -- =======================================================================
+    --
     -- Temp memory signals
+    -- =======================================================================
+
     signal temp0_reg  : std_logic_vector(31 downto 0);
     signal temp1_reg  : std_logic_vector(31 downto 0);
     signal temp2_reg  : std_logic_vector(31 downto 0);
@@ -81,7 +102,12 @@ architecture ARCH of SENSOR_INTERFACE is
     signal temp7_reg  : std_logic_vector(31 downto 0);
     signal temp8_reg  : std_logic_vector(31 downto 0);
 
+    -- =======================================================================
+    -- MEMORY SIGNALS
+    --
     -- Volt memory signals
+    -- =======================================================================
+
     signal volt0_reg  : std_logic_vector(31 downto 0);
     signal volt1_reg  : std_logic_vector(31 downto 0);
     signal volt2_reg  : std_logic_vector(31 downto 0);
@@ -137,11 +163,16 @@ architecture ARCH of SENSOR_INTERFACE is
 
     -- =======================================================================
     -- write32_f FUNCTION
-    -- =======================================================================
+    --
     -- Used to write to a 32-bit register with byte enables
-    function write32_f(reg : in std_logic_vector(31 downto 0); -- current value of the register
-                       val : in std_logic_vector(31 downto 0); -- new value of the register
-                       be  : in std_logic_vector( 3 downto 0)) -- byte enables
+    -- =======================================================================
+
+                       -- current value of the register
+    function write32_f(reg : in std_logic_vector(31 downto 0);
+                       -- new value of the register
+                       val : in std_logic_vector(31 downto 0);
+                       -- byte enables
+                       be  : in std_logic_vector( 3 downto 0))
     return std_logic_vector is
     variable result : std_logic_vector(31 downto 0) := reg;
     begin

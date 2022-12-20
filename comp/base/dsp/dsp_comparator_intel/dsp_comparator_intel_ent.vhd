@@ -22,8 +22,10 @@ entity DSP_COMPARATOR_INTEL is
         -- "><=" is the default mode which outputs results as specified above the RESULT port
         -- ">= " outputs result in form of '11' if the 1st number is larger or equal than the 2nd number, else '00'  - in this mode, only one DSP block is used (when enabled)
         -- "<= " outputs result in form of '11' if the 1st number is smaller or equal than the 2nd number, else '00' - in this mode, only one DSP block is used (when enabled)
-        MODE             : string  := "><="; -- options: "><=", ">= ", "<= " - NOTE: the space after ">=" or "<=" is necessary !!
-        DEVICE           : string  := "AGILEX" -- "AGILEX" or "STRATIX10"
+        -- options: "><=", ">= ", "<= " - NOTE: the space after ">=" or "<=" is necessary !!
+        MODE             : string  := "><=";
+        -- "AGILEX" or "STRATIX10"
+        DEVICE           : string  := "AGILEX"
         );
     Port (
         CLK     :  in std_logic;

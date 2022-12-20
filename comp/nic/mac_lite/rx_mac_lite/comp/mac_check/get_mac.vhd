@@ -13,22 +13,38 @@ use work.type_pack.all;
 
 entity RX_MAC_LITE_GET_MAC is
     generic(
-        REGION_SIZE : natural := 8; -- must be power of 2
-        BLOCK_SIZE  : natural := 8; -- must be power of 2, BLOCK_SIZE*ITEM_WIDTH >= 48!
-        ITEM_WIDTH  : natural := 8  -- must be power of 2, BLOCK_SIZE*ITEM_WIDTH >= 48!
+        -- must be power of 2
+        REGION_SIZE : natural := 8;
+        -- must be power of 2, BLOCK_SIZE*ITEM_WIDTH >= 48!
+        BLOCK_SIZE  : natural := 8;
+        -- must be power of 2, BLOCK_SIZE*ITEM_WIDTH >= 48!
+        ITEM_WIDTH  : natural := 8 
     );
     port(
+        -- ===============
         -- CLOCK AND RESET
+        -- ===============
+
         CLK         : in  std_logic;
         RESET       : in  std_logic;
+
+        -- ====================
         -- INPUT DATA INTERFACE
+        -- ====================
+
         RX_DATA     : in  std_logic_vector(REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
         RX_SOF_POS  : in  std_logic_vector(max(1,log2(REGION_SIZE))-1 downto 0);
         RX_SOF      : in  std_logic;
         RX_SRC_RDY  : in  std_logic;
+
+        -- ====================
         -- OUTPUT MAC INTERFACE
-        MAC_DST     : out std_logic_vector(48-1 downto 0); -- destination MAC address
-        MAC_DST_VLD : out std_logic -- valid of extracted MAC address, latency is 1 cycle 
+        -- ====================
+
+        -- destination MAC address
+        MAC_DST     : out std_logic_vector(48-1 downto 0);
+        -- valid of extracted MAC address, latency is 1 cycle 
+        MAC_DST_VLD : out std_logic
     );
 end entity;
 

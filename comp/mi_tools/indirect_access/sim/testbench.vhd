@@ -24,19 +24,34 @@ architecture FULL of TESTBENCH is
 
     constant OUTPUT_INTERFACES : natural := 3;
 
+    -- =======================
     -- Addresses of registers
-    constant INF_REG_ADDR             : std_logic_vector(7 downto 2) := "000000"; -- 0x00
-    constant ADDR_REG_ADDR            : std_logic_vector(7 downto 2) := "000001"; -- 0x04
-    constant DWR_REG_ADDR             : std_logic_vector(7 downto 2) := "000010"; -- 0x08
-    constant DRD_REG_ADDR             : std_logic_vector(7 downto 2) := "000011"; -- 0x0C
-    constant COMMAND_REG_ADDR         : std_logic_vector(7 downto 2) := "000100"; -- 0x10
-    constant STATUS_REG_ADDR          : std_logic_vector(7 downto 2) := "000101"; -- 0x14
+    -- =======================
 
+    -- 0x00
+    constant INF_REG_ADDR             : std_logic_vector(7 downto 2) := "000000";
+    -- 0x04
+    constant ADDR_REG_ADDR            : std_logic_vector(7 downto 2) := "000001";
+    -- 0x08
+    constant DWR_REG_ADDR             : std_logic_vector(7 downto 2) := "000010";
+    -- 0x0C
+    constant DRD_REG_ADDR             : std_logic_vector(7 downto 2) := "000011";
+    -- 0x10
+    constant COMMAND_REG_ADDR         : std_logic_vector(7 downto 2) := "000100";
+    -- 0x14
+    constant STATUS_REG_ADDR          : std_logic_vector(7 downto 2) := "000101";
+
+    -- =======================
     -- Common interface
+    -- =======================
+
     signal clk       : std_logic := '0';
     signal reset     : std_logic := '1';
 
+    -- =======================
     -- Master interface
+    -- =======================
+
     signal rx_mi_addr   : std_logic_vector(ADDR_WIDTH-1 downto 0);
     signal rx_mi_dwr    : std_logic_vector(DATA_WIDTH-1 downto 0);
     signal rx_mi_wr     : std_logic := '0';
@@ -45,7 +60,10 @@ architecture FULL of TESTBENCH is
     signal rx_mi_ardy   : std_logic;
     signal rx_mi_drdy   : std_logic;
 
-     -- Slave interfaces
+    -- =======================
+    -- Slave interfaces
+    -- =======================
+
     signal tx_mi_addr   : slv_array_t     (OUTPUT_INTERFACES-1 downto 0)(ADDR_WIDTH-1 downto 0);
     signal tx_mi_dwr    : slv_array_t     (OUTPUT_INTERFACES-1 downto 0)(DATA_WIDTH-1 downto 0);
     signal tx_mi_wr     : std_logic_vector(OUTPUT_INTERFACES-1 downto 0);
@@ -54,7 +72,10 @@ architecture FULL of TESTBENCH is
     signal tx_mi_ardy   : std_logic_vector(OUTPUT_INTERFACES-1 downto 0) := (others => '0');
     signal tx_mi_drdy   : std_logic_vector(OUTPUT_INTERFACES-1 downto 0) := (others => '0');
 
+    -- =======================
     -- other signals
+    -- =======================
+
     signal inf          : natural;
     signal verdict      : std_logic := '1';
 

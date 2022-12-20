@@ -27,8 +27,10 @@ entity RX_MAC_LITE_UMII is
         -- By default the RX parameters are calculated automatically from MII_DW.
         -- Useful for enlargement data width from 128b (MII) to 512b (TX).
         TX_REGIONS       : natural := max(MII_DW/512,1);
-        TX_BLOCK_SIZE    : natural := 8; -- SOF must be aligned by 8 bytes
-        TX_ITEM_WIDTH    : natural := 8; -- one item = one byte
+        -- SOF must be aligned by 8 bytes
+        TX_BLOCK_SIZE    : natural := 8;
+        -- one item = one byte
+        TX_ITEM_WIDTH    : natural := 8;
         TX_REGION_SIZE   : natural := (MII_DW/TX_REGIONS)/(TX_BLOCK_SIZE*TX_ITEM_WIDTH);
         -- If true, the MFB bus doubles data width (number of regions) before
         -- the packet buffer (on RX_CLK). RESIZE_BUFFER feature is allowed only
@@ -52,7 +54,8 @@ entity RX_MAC_LITE_UMII is
         -- Enable of timestamping frames.
         TIMESTAMP_EN    : boolean := true;
         -- Select correct FPGA device.
-        DEVICE          : string := "STRATIX10" -- ULTRASCALE,...
+        -- ULTRASCALE,...
+        DEVICE          : string := "STRATIX10"
     );
     port(
         -- =====================================================================

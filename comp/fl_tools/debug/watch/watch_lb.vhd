@@ -24,17 +24,25 @@ use work.math_pack.all;
 -- ----------------------------------------------------------------------------
 entity FL_WATCH_LB is
    generic(
-      INTERFACES     : integer := 1;  -- At least 1
+      -- At least 1
+      INTERFACES     : integer := 1;
       CNTR_WIDTH     : integer := 32;
-      PIPELINE_LEN   : integer := 1;   -- At least 1
+      -- At least 1
+      PIPELINE_LEN   : integer := 1;
       GUARD          : boolean := true;
       HEADER         : boolean := true;
       FOOTER         : boolean := true;
 
+      -- =========
       -- Local bus
-      BASE_ADDR      : integer;   -- base address 
-      ADDR_WIDTH     : integer;   -- address width
-      FREQUENCY      : integer := 100 -- frequency
+      -- =========
+
+      -- base address 
+      BASE_ADDR      : integer;
+      -- address width
+      ADDR_WIDTH     : integer;
+      -- frequency
+      FREQUENCY      : integer := 100
    );
    port(
       CLK            : in  std_logic;
@@ -47,14 +55,22 @@ entity FL_WATCH_LB is
       DST_RDY_N      : in std_logic_vector(INTERFACES-1 downto 0);
       SRC_RDY_N      : in std_logic_vector(INTERFACES-1 downto 0);
 
+      -- =================
       -- Local bus signals
-      LBCLK       : in    std_logic; 
-      LBFRAME     : in    std_logic; -- Frame
-      LBHOLDA     : out   std_logic; -- Hold Ack (HOLDA), active LOW
-      LBAD        : inout std_logic_vector(15 downto 0); -- Address/Data
-      LBAS        : in    std_logic; -- Adress strobe
+      -- =================
+
+      LBCLK       : in    std_logic;
+      -- Frame 
+      LBFRAME     : in    std_logic;
+      -- Hold Ack (HOLDA), active LOW
+      LBHOLDA     : out   std_logic;
+      -- Address/Data
+      LBAD        : inout std_logic_vector(15 downto 0);
+      -- Adress strobe
+      LBAS        : in    std_logic;
       LBRW        : in    std_logic;
-      LBRDY       : out   std_logic; -- Ready, active LOW
+      -- Ready, active LOW
+      LBRDY       : out   std_logic;
       LBLAST      : in    std_logic
    );
 end entity FL_WATCH_LB;

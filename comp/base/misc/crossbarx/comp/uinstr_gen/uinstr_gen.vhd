@@ -21,10 +21,12 @@ generic(
     INSTRS          : integer := 4;
     -- Buffer A size
     BUF_A_COLS      : integer := 512;
-    BUF_A_ROWS      : integer := 4; -- max(BUF_A_TRUE_ROWS)
+    -- max(BUF_A_TRUE_ROWS)
+    BUF_A_ROWS      : integer := 4;
     -- Buffer B size
     BUF_B_COLS      : integer := 512;
-    BUF_B_ROWS      : integer := 4; -- max(BUF_B_TRUE_ROWS)
+    -- max(BUF_B_TRUE_ROWS)
+    BUF_B_ROWS      : integer := 4;
     -- Number of non-overlapping Sections of Buffer B
     -- (All Instructions must overflow inside space
     --  of one Buffer B Section.)
@@ -35,14 +37,21 @@ generic(
     ITEM_WIDTH      : integer := 8;
 
     -- Target Device
-    DEVICE          : string := "STRATIX10" -- "ULTRASCALE", "7SERIES", ...
+    -- "ULTRASCALE", "7SERIES", ...
+    DEVICE          : string := "STRATIX10"
 );
 port(
+    -- ====================
     -- Clock and Reset
+    -- ====================
+
     CLK             : in  std_logic;
     RESET           : in  std_logic;
 
+    -- ====================
     -- Input Instructions
+    -- ====================
+
     INSTR_A_COL     : in  std_logic_vector(log2(BUF_A_COLS)-1 downto 0);
     INSTR_A_ITEM    : in  slv_array_t     (INSTRS-1 downto 0)(log2(BUF_A_ROWS*ROW_ITEMS)-1 downto 0);
     INSTR_B_COL     : in  slv_array_t     (INSTRS-1 downto 0)(log2(BUF_B_COLS)-1 downto 0);
@@ -52,9 +61,13 @@ port(
     INSTR_VLD       : in  std_logic_vector(INSTRS-1 downto 0);
     INSTR_SRC_RDY   : in  std_logic;
 
+    -- ====================
     -- Output uInstructions
+    -- ====================
+
     UINSTR_A_COL    : out slv_array_t     (BUF_A_ROWS-1 downto 0)(log2(BUF_A_COLS)-1 downto 0);
-    UINSTR_A_ITEM   : out slv_array_t     (BUF_A_ROWS-1 downto 0)(log2(ROW_ITEMS)-1 downto 0); -- item within one row
+    -- item within one row
+    UINSTR_A_ITEM   : out slv_array_t     (BUF_A_ROWS-1 downto 0)(log2(ROW_ITEMS)-1 downto 0);
     UINSTR_B_COL    : out slv_array_t     (BUF_A_ROWS-1 downto 0)(log2(BUF_B_COLS)-1 downto 0);
     UINSTR_B_ITEM   : out slv_array_t     (BUF_A_ROWS-1 downto 0)(log2(BUF_B_ROWS*ROW_ITEMS)-1 downto 0);
     UINSTR_LEN      : out slv_array_t     (BUF_A_ROWS-1 downto 0)(log2(ROW_ITEMS+1)-1 downto 0);

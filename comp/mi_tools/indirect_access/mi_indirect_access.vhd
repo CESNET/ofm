@@ -33,12 +33,16 @@ entity MI_INDIRECT_ACCESS is
         OUTPUT_INTERFACES : natural := 3
     );
     port(
-        -- Common interface ----------------------------------------------
+        -- =================
+        -- Common interface
+        -- =================
 
         CLK         : in std_logic;
         RESET       : in std_logic;
     
-        -- Input MI interface ---------------------------------------------
+        -- ==================
+        -- Input MI interface
+        -- ==================
 
         RX_ADDR     : in  std_logic_vector(ADDR_WIDTH-1 downto 0);
         RX_DWR      : in  std_logic_vector(DATA_WIDTH-1 downto 0);
@@ -48,7 +52,9 @@ entity MI_INDIRECT_ACCESS is
         RX_DRD      : out std_logic_vector(DATA_WIDTH-1 downto 0);
         RX_DRDY     : out std_logic;
     
-        -- Output MI interface -------------------------------------------
+        -- ===================
+        -- Output MI interface
+        -- ===================
 
         TX_ADDR     : out slv_array_t     (OUTPUT_INTERFACES-1 downto 0)(DATA_WIDTH-1 downto 0);
         TX_DWR      : out slv_array_t     (OUTPUT_INTERFACES-1 downto 0)(DATA_WIDTH-1 downto 0);
@@ -65,24 +71,37 @@ architecture FULL of MI_INDIRECT_ACCESS is
     -- ====================================================================
     --                              CONSTANTS
     -- ====================================================================
-    constant UNNECESSARY_BITS : natural := log2(DATA_WIDTH/8); -- 2 for MI32
 
-    constant COMMANDS         : natural := 2; -- Write, Read;  can be expanded if necessary
-    constant STATUSES         : natural := 1; -- Busy; can be expanded if necessary
+    -- 2 for MI32
+    constant UNNECESSARY_BITS : natural := log2(DATA_WIDTH/8);
 
-    -- Addresses ----------------------------------------------------------
+    -- Write, Read;  can be expanded if necessary
+    constant COMMANDS         : natural := 2;
+    -- Busy; can be expanded if necessary
+    constant STATUSES         : natural := 1;
+
+    -- ==========
+    -- Addresses
+    -- ==========
+
     -- Interface register - set this register to choose output interface
-    constant INF_REG_ADDR             : std_logic_vector(7 downto UNNECESSARY_BITS) := "000000"; -- 0x00
+    -- 0x00
+    constant INF_REG_ADDR             : std_logic_vector(7 downto UNNECESSARY_BITS) := "000000";
     -- Address register - this register stores the address of the request that will be sent to desired output interface 
-    constant ADDR_REG_ADDR            : std_logic_vector(7 downto UNNECESSARY_BITS) := "000001"; -- 0x04
+    -- 0x04
+    constant ADDR_REG_ADDR            : std_logic_vector(7 downto UNNECESSARY_BITS) := "000001";
     -- Write data register - this register stores the data of Write request that will come from desired output interface
-    constant DWR_REG_ADDR             : std_logic_vector(7 downto UNNECESSARY_BITS) := "000010"; -- 0x08
+    -- 0x08
+    constant DWR_REG_ADDR             : std_logic_vector(7 downto UNNECESSARY_BITS) := "000010";
     -- Read data register - this register stores the data of Read request that will come from desired output interface
-    constant DRD_REG_ADDR             : std_logic_vector(7 downto UNNECESSARY_BITS) := "000011"; -- 0x0C
+    -- 0x0C
+    constant DRD_REG_ADDR             : std_logic_vector(7 downto UNNECESSARY_BITS) := "000011";
     -- Command register (cmd_reg(0) = Write, cmd_reg(1) = Read) - after asserting WR or RD, the request will be sent
-    constant COMMAND_REG_ADDR         : std_logic_vector(7 downto UNNECESSARY_BITS) := "000100"; -- 0x10
+    -- 0x10
+    constant COMMAND_REG_ADDR         : std_logic_vector(7 downto UNNECESSARY_BITS) := "000100";
     -- Status register (stat_reg(0) = Busy)
-    constant STATUS_REG_ADDR          : std_logic_vector(7 downto UNNECESSARY_BITS) := "000101"; -- 0x14
+    -- 0x14
+    constant STATUS_REG_ADDR          : std_logic_vector(7 downto UNNECESSARY_BITS) := "000101";
 
     -- ====================================================================
     --                               SIGNALS

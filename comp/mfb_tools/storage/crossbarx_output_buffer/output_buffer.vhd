@@ -22,23 +22,41 @@ use work.type_pack.all;
 
 entity MFB_CROSSBARX_OUTPUT_BUFFER is
 generic(
+    -- =====================
+    -- Others
+    -- =====================
+
     -- Target Device
-    DEVICE            : string  := "STRATIX10"; -- STRATIX10, ULTRASCALE, ..
+    -- STRATIX10, ULTRASCALE, ..
+    DEVICE            : string  := "STRATIX10";
     -- Width of Header Metadata signal
     HDR_META_WIDTH    : natural := 12;
 
+    -- =====================
     -- Output MVB info
+    -- =====================
+
     MVB_ITEMS         : natural := 8;
+    -- =====================
     -- Output MFB info
+    -- =====================
+
     MFB_REGIONS       : natural := 4;
     MFB_REGION_SIZE   : natural := 2;
     MFB_BLOCK_SIZE    : natural := 8;
     MFB_ITEM_WIDTH    : natural := 16;
+    -- =====================
     -- MFB metadata info
-    MFB_META_WITH_SOF : boolean := true; -- metadata is valid with SOF when True, or with EOF when False
+    -- =====================
+
+    -- metadata is valid with SOF when True, or with EOF when False
+    MFB_META_WITH_SOF : boolean := true;
     MFB_META_WIDTH    : natural := 1;
 
+    -- ========================
     -- Buffer data information
+    -- ========================
+
     BUF_BLOCKS        : natural := 16;
     DATA_BLOCK_SIZE   : natural := 8;
     DATA_ITEM_WIDTH   : natural := 8;
@@ -52,17 +70,25 @@ generic(
     -- Maximum size of Packet (in number of Data Items)
     PKT_SIZE_MAX      : natural := 2**12;
 
+    -- =====================
     -- Clock signal relations
-    META_EQ_OUTPUT    : boolean := false; -- CLK_META is the same as CLK_OUT
-    INPUT_EQ_OUTPUT   : boolean := false; -- CLK_IN is the same as CLK_OUT
+    -- =====================
+    
+    -- CLK_META is the same as CLK_OUT
+    META_EQ_OUTPUT    : boolean := false;
+    -- CLK_IN is the same as CLK_OUT
+    INPUT_EQ_OUTPUT   : boolean := false;
 
+    -- =====================
     -- Derived aliases
+    -- =====================
+    
     DATA_BLOCK_WIDTH  : natural := DATA_BLOCK_SIZE*DATA_ITEM_WIDTH;
     BUF_BYTES         : natural := BUF_WORDS*BUF_BLOCKS*DATA_BLOCK_SIZE
 );
 port (
     -- =====================================================================
-    --  Clock and Reset
+    -- Clock and Reset
     -- =====================================================================
 
     -- Clock and Reset for Metadata interfaces
@@ -78,9 +104,10 @@ port (
     -- =====================================================================
 
     -- =====================================================================
-    --  Buffer data interface
-    -- =====================================================================
+    -- Buffer data interface
+    --
     -- Runs on CLK_IN
+    -- =====================================================================
 
     WR_ADDR          : in  slv_array_t     (BUF_BLOCKS-1 downto 0)(log2(BUF_WORDS)-1 downto 0);
     WR_DATA          : in  slv_array_t     (BUF_BLOCKS-1 downto 0)(DATA_BLOCK_WIDTH-1 downto 0);
@@ -90,9 +117,10 @@ port (
     -- =====================================================================
 
     -- =====================================================================
-    --  Other components input interfaces
-    -- =====================================================================
+    -- Other components input interfaces
+    --
     -- Runs on CLK_OUT  
+    -- =====================================================================
 
     RX_HDR_META      : in  slv_array_t     (MFB_REGIONS-1 downto 0)(HDR_META_WIDTH-1 downto 0);
     RX_HDR_MFB_META  : in  slv_array_t     (MFB_REGIONS-1 downto 0)(MFB_META_WIDTH-1 downto 0) := (others => (others => '0'));
@@ -106,9 +134,10 @@ port (
     -- =====================================================================
 
     -- =====================================================================
-    --  Other components output interfaces
-    -- =====================================================================
+    -- Other components output interfaces
+    --
     -- Runs on CLK_META
+    -- =====================================================================
 
     -- Current read pointer to Buffer
     RD_PTR           : out std_logic_vector(log2(BUF_BYTES)-1 downto 0);
@@ -122,9 +151,10 @@ port (
     -- =====================================================================
 
     -- =====================================================================
-    --  Output data interface
-    -- =====================================================================
+    -- Output data interface
+    --
     -- Runs on CLK_OUT
+    -- =====================================================================
 
     -- TX_MVB_DATA ==========================
     TX_MVB_LEN          : out std_logic_vector(MVB_ITEMS*log2(PKT_SIZE_MAX+1)-1 downto 0);

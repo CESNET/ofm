@@ -15,11 +15,11 @@ use work.eth_hdr_pack.all;
 entity RX_MAC_LITE is
     generic(
         -- =====================================================================
-        -- MFB CONFIGURATION: 
-        -- =====================================================================
+        -- MFB CONFIGURATION:
+        --
         -- RX MFB configuration, allows you to set the required data width
         -- according to the selected Ethernet standard.
-        -- ---------------------------------------------------------------------
+        -- =====================================================================
 
         -- RX MFB: number of regions in word, must be power of 2
         RX_REGIONS      : natural := 4;
@@ -30,9 +30,11 @@ entity RX_MAC_LITE is
         -- RX MFB: width of one item in bits, must be 8
         RX_ITEM_WIDTH   : natural := 8;
 
+        -- =====================================================================
         -- TX MFB configuration, by default the same as RX. Useful, for example,
+        --
         -- for enlargement data width from 128b (RX) to 512b (TX).
-        -- ---------------------------------------------------------------------
+        -- =====================================================================
 
         -- TX MFB: number of regions in word, by default same as RX
         TX_REGIONS      : natural := RX_REGIONS;
@@ -71,7 +73,8 @@ entity RX_MAC_LITE is
         -- Enable of timestamping frames.
         TIMESTAMP_EN    : boolean := true;
         -- Select correct FPGA device.
-        DEVICE          : string := "STRATIX10" -- ULTRASCALE
+        -- ULTRASCALE
+        DEVICE          : string := "STRATIX10"
     );
     port(
         -- =====================================================================
@@ -89,6 +92,7 @@ entity RX_MAC_LITE is
 
         -- =====================================================================
         -- RX MAC LITE ADAPTER INTERFACES
+        --
         -- =====================================================================
 
         -- RX MFB DATA INTERFACE (Don't support gaps inside frame!)
@@ -109,8 +113,9 @@ entity RX_MAC_LITE is
         -- RX MFB: source ready of each MFB bus, don't support gaps inside frame!
         RX_MFB_SRC_RDY  : in  std_logic;
 
+        -- =====================================================================
         -- RX STATUS INTERFACE
-        -- ---------------------------------------------------------------------
+        -- =====================================================================
 
         -- Link Up flag input, active when link is up
         ADAPTER_LINK_UP : in  std_logic;
@@ -146,11 +151,12 @@ entity RX_MAC_LITE is
         -- TX MFB: destination ready of each MFB bus
         TX_MFB_DST_RDY  : in  std_logic;
 
+        -- =====================================================================
         -- TX MVB METADATA INTERFACE
-        -- ---------------------------------------------------------------------
+        --
         -- Metadata MVB bus is valid for each transmitted frame (EOF) from this
         -- module. Description of DATA bits are in eth_hdr_pack package.
-        -- ---------------------------------------------------------------------
+        -- =====================================================================
 
         -- TX MVB: data word with MVB items. Description of DATA bits are in eth_hdr_pack package.
         TX_MVB_DATA     : out std_logic_vector(TX_REGIONS*ETH_RX_HDR_WIDTH-1 downto 0);
@@ -199,17 +205,28 @@ end entity;
 
 architecture FULL of RX_MAC_LITE is
 
+    -- =====================================================================
     -- MFB configuration for packet buffer and next modules
+    -- =====================================================================
+
     constant BF_REGIONS               : natural := tsel(RESIZE_BUFFER,2*RX_REGIONS,RX_REGIONS);
     constant BF_REGION_SIZE           : natural := RX_REGION_SIZE;
     constant BF_BLOCK_SIZE            : natural := RX_BLOCK_SIZE;
     constant BF_ITEM_WIDTH            : natural := RX_ITEM_WIDTH;
+
+    -- =====================================================================
     -- Helper MFB constants
+    -- =====================================================================
+
     constant BF_DATA_W                : natural := BF_REGIONS*BF_REGION_SIZE*BF_BLOCK_SIZE*BF_ITEM_WIDTH;
     constant RX_DATA_W                : natural := RX_REGIONS*RX_REGION_SIZE*RX_BLOCK_SIZE*RX_ITEM_WIDTH;
     constant RX_SOF_POS_W             : natural := RX_REGIONS*max(1,log2(RX_REGION_SIZE));
     constant RX_EOF_POS_W             : natural := RX_REGIONS*max(1,log2(RX_REGION_SIZE*RX_BLOCK_SIZE));
+
+    -- =====================================================================
     -- Others constants
+    -- =====================================================================
+
     constant DFIFO_ITEMS_MIN          : natural := 2**log2(div_roundup((PKT_MTU_BYTES+1),(BF_DATA_W/8)));
     constant DFIFO_ITEMS              : natural := max(DFIFO_ITEMS_MIN,512);
     constant MFIFO_ITEMS              : natural := (DFIFO_ITEMS*BF_DATA_W)/512;

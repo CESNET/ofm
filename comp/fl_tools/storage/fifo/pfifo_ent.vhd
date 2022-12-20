@@ -38,7 +38,10 @@ entity FL_PFIFO is
       CLK            : in  std_logic;
       RESET          : in  std_logic;
 
+      -- ====================
       -- write interface
+      -- ====================
+
       RX_DATA        : in  std_logic_vector(DATA_WIDTH-1 downto 0);
       RX_REM         : in  std_logic_vector(log2(DATA_WIDTH/8) - 1 downto 0);
       RX_SRC_RDY_N   : in  std_logic;
@@ -48,7 +51,10 @@ entity FL_PFIFO is
       RX_SOF_N       : in  std_logic;
       RX_EOF_N       : in  std_logic;
       
+      -- ====================
       -- read interface
+      -- ====================
+
       TX_DATA        : out std_logic_vector(DATA_WIDTH-1 downto 0);
       TX_REM         : out std_logic_vector(log2(DATA_WIDTH/8) - 1 downto 0);
       TX_SRC_RDY_N   : out std_logic;
@@ -58,8 +64,12 @@ entity FL_PFIFO is
       TX_SOF_N       : out std_logic;
       TX_EOF_N       : out std_logic;
 
+      -- ====================
       -- FIFO control signals
-      DISCARD        : in  std_logic;  -- drop current frame
+      -- ====================
+
+      -- drop current frame
+      DISCARD        : in  std_logic;
       LSTBLK         : out std_logic;
       FULL           : out std_logic;
       EMPTY          : out std_logic;

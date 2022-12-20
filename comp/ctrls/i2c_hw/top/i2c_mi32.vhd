@@ -27,29 +27,58 @@ use unisim.vcomponents.ALL;
 -- ----------------------------------------------------------------------------
 entity I2C_HW_MI32 is
    generic (
-      IFC_CNT   : integer := 4;                     -- Number od controllers, max 8
-      PRER_INIT : unsigned(15 downto 0) := X"00F9"; -- 125MHz CLK ~ 100KHz SCL
-      SCL_TRISTATE : boolean := false                -- Tristate SCK (enable clock stretching)
+      -- Number od controllers, max 8
+      IFC_CNT   : integer := 4;
+      -- 125MHz CLK ~ 100KHz SCL
+      PRER_INIT : unsigned(15 downto 0) := X"00F9";
+      -- Tristate SCK (enable clock stretching)
+      SCL_TRISTATE : boolean := false
    );
    port(
+      -- ==============
+      -- CLK and RST
+      -- ==============
+
       CLK       : in  std_logic;
       RESET     : in  std_logic;
+
+      -- ==============
       -- I2C interfaces
-      SCL_I     : in  std_logic_vector(IFC_CNT-1 downto 0); -- I2C clock input
-      SDA_I     : in  std_logic_vector(IFC_CNT-1 downto 0); -- I2C data input
-      SCL_O     : out std_logic_vector(IFC_CNT-1 downto 0); -- I2C clock output
-      SDA_O     : out std_logic_vector(IFC_CNT-1 downto 0); -- I2C data output
-      SCL_OEN   : out std_logic_vector(IFC_CNT-1 downto 0); -- I2C clock output enable, active low
-      SDA_OEN   : out std_logic_vector(IFC_CNT-1 downto 0); -- I2C data output enable, active low
+      -- ==============
+
+      -- I2C clock input
+      SCL_I     : in  std_logic_vector(IFC_CNT-1 downto 0);
+      -- I2C data input
+      SDA_I     : in  std_logic_vector(IFC_CNT-1 downto 0);
+      -- I2C clock output
+      SCL_O     : out std_logic_vector(IFC_CNT-1 downto 0);
+      -- I2C data output
+      SDA_O     : out std_logic_vector(IFC_CNT-1 downto 0);
+      -- I2C clock output enable, active low
+      SCL_OEN   : out std_logic_vector(IFC_CNT-1 downto 0);
+      -- I2C data output enable, active low
+      SDA_OEN   : out std_logic_vector(IFC_CNT-1 downto 0);
+
+      -- ==============
       -- MI32 interface
-      MI32_DWR  :  in std_logic_vector(31 downto 0); -- Input Data
-      MI32_ADDR :  in std_logic_vector(31 downto 0); -- Address
-      MI32_RD   :  in std_logic;                     -- Read Request
-      MI32_WR   :  in std_logic;                     -- Write Request
-      MI32_BE   :  in std_logic_vector(3  downto 0); -- Byte Enable
-      MI32_DRD  : out std_logic_vector(31 downto 0); -- Output Data
-      MI32_ARDY : out std_logic;                     -- Address Ready
-      MI32_DRDY : out std_logic                      -- Data Ready   
+      -- ==============
+
+      -- Input Data
+      MI32_DWR  :  in std_logic_vector(31 downto 0);
+      -- Address
+      MI32_ADDR :  in std_logic_vector(31 downto 0);
+      -- Read Request
+      MI32_RD   :  in std_logic;
+      -- Write Request
+      MI32_WR   :  in std_logic;
+      -- Byte Enable
+      MI32_BE   :  in std_logic_vector(3  downto 0);
+      -- Output Data
+      MI32_DRD  : out std_logic_vector(31 downto 0);
+      -- Address Ready
+      MI32_ARDY : out std_logic;
+      -- Data Ready
+      MI32_DRDY : out std_logic
    );
 end entity I2C_HW_MI32;
 

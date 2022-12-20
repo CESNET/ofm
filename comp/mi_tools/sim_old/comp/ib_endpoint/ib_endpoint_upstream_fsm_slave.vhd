@@ -21,29 +21,59 @@ use work.ib_pkg.all; -- Internal Bus package
 -- ----------------------------------------------------------------------------
 entity IB_ENDPOINT_UPSTREAM_FSM_SLAVE is
    port (
+   -- ========================
    -- Common Interface
-   CLK                : in std_logic;  -- Clk
-   RESET              : in std_logic;  -- Reset
+   -- ========================
+
+   -- Clk
+   CLK                : in std_logic;
+   -- Reset
+   RESET              : in std_logic;
+
+   -- ========================
    -- HDR_GEN Interface
+   -- ========================
+
    RD_COMPL_REQ       : in  std_logic;
    RD_COMPL_ACK       : out std_logic;
 
-   -- Control            
-   GET_SECOND_HDR     : out std_logic; -- Get second header
+   -- ========================
+   -- Control
+   -- ========================
+
+   -- Get second header
+   GET_SECOND_HDR     : out std_logic;
    
+   -- ========================
    -- Align buffer Interface
-   RD_SRC_RDY         : in  std_logic;  -- Align buffer src_rdy
-   RD_DST_RDY         : out std_logic;  -- Align buffer dst_rdy
-   RD_EOF             : in  std_logic;  -- Align buffer eof 
+   -- ========================
 
+   -- Align buffer src_rdy
+   RD_SRC_RDY         : in  std_logic;
+   -- Align buffer dst_rdy
+   RD_DST_RDY         : out std_logic;
+   -- Align buffer eof
+   RD_EOF             : in  std_logic;
+
+   -- ========================
    -- Multipexor Interface
-   MUX_SEL            : out std_logic; -- Select HEADER/DATA
+   -- ========================
 
+   -- Select HEADER/DATA
+   MUX_SEL            : out std_logic;
+
+   -- ========================
    -- Upstream Interface
-   SOP                : out std_logic; -- Start of Packet (Start of transaction)
-   EOP                : out std_logic; -- Ent of Packet (End of Transaction)
-   SRC_RDY            : out std_logic; -- Source Ready
-   DST_RDY            : in  std_logic  -- Destination Ready
+   -- ========================
+
+   -- Start of Packet (Start of transaction)
+   SOP                : out std_logic;
+   -- Ent of Packet (End of Transaction)
+   EOP                : out std_logic;
+   -- Source Ready
+   SRC_RDY            : out std_logic;
+   -- Destination Ready
+   DST_RDY            : in  std_logic
    );
 end entity IB_ENDPOINT_UPSTREAM_FSM_SLAVE;
 

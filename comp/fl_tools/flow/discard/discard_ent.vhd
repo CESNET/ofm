@@ -30,7 +30,8 @@ entity fl_discard is
       CHANNELS    : integer := 2;
       -- Width of the STATUS signal for each channel, up to 16 bits
       -- Target buffer size is considered to be 2^(STATUS_WIDTH-1) words.
-      STATUS_WIDTH  : integer := 10; -- For 4 KiB buffers
+      -- For 4 KiB buffers
+      STATUS_WIDTH  : integer := 10;
       -- Generate output register on output FrameLink signals
       -- (It's possible because on output FrameLink is not used dst_rdy_n signal)
       OUTPUT_REG    : boolean := true
@@ -39,9 +40,12 @@ entity fl_discard is
       CLK         : in std_logic;
       RESET       : in std_logic;
 
+      -- ===================
       -- Write interface
-        -- RX_DATA must carry frame length in the lowest 16 bits of the
-        -- first frame word.
+      -- ===================
+
+      -- RX_DATA must carry frame length in the lowest 16 bits of the
+      -- first frame word.
       RX_DATA     : in  std_logic_vector(DATA_WIDTH-1 downto 0);
       RX_DREM     : in  std_logic_vector(log2(DATA_WIDTH/8) - 1 downto 0);
       RX_SRC_RDY_N: in  std_logic;
@@ -54,7 +58,10 @@ entity fl_discard is
       -- Must be valid with SOF
       RX_CHAN     : in  std_logic_vector(log2(CHANNELS) - 1 downto 0);
 
+      -- ===================
       -- Read interfaces
+      -- ===================
+
       TX_DATA     : out std_logic_vector(DATA_WIDTH-1 downto 0);
       TX_DREM     : out std_logic_vector(log2(DATA_WIDTH/8)-1 downto 0);
       TX_SRC_RDY_N: out std_logic;
@@ -70,9 +77,14 @@ entity fl_discard is
       -- STATUS interface displays number of non-free WORDS
       STATUS      : in  std_logic_vector(CHANNELS*STATUS_WIDTH - 1 downto 0);
 
+      -- ===================
       -- Statistic interface
-      STAT_PASS   : out std_logic; -- Frame passed (1-cycle pulse)
-      STAT_DROP   : out std_logic; -- Frame dropped (1-cycle pulse
+      -- ===================
+
+      -- Frame passed (1-cycle pulse)
+      STAT_PASS   : out std_logic;
+      -- Frame dropped (1-cycle pulse
+      STAT_DROP   : out std_logic;
          -- Channel number (active with PASS od DROP)
       STAT_CHAN   : out std_logic_vector(log2(CHANNELS) - 1 downto 0); 
          -- Frame length (active with PASS od DROP)

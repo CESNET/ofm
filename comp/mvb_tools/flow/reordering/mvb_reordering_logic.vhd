@@ -16,12 +16,22 @@ entity MVB_REORDERING_LOGIC is
       ITEMS : natural := 4
    );
    port(
+      -- ====================
       -- INPUT CONTROL SIGNAL
-      REORDER_KEY : in  std_logic_vector(ITEMS*log2(ITEMS)-1 downto 0); -- keys for reodering
-      RX_VLD      : in  std_logic_vector(ITEMS-1 downto 0); -- rx valids
+      -- ====================
+
+      -- keys for reodering
+      REORDER_KEY : in  std_logic_vector(ITEMS*log2(ITEMS)-1 downto 0);
+      -- rx valids
+      RX_VLD      : in  std_logic_vector(ITEMS-1 downto 0);
+      -- =====================
       -- OUTPUT CONTROL SIGNAL
-      MUX_SEL     : out std_logic_vector(ITEMS*log2(ITEMS)-1 downto 0); -- multiplexors select
-      TX_VLD      : out std_logic_vector(ITEMS-1 downto 0) -- valid of reorder items
+      -- =====================
+
+      -- multiplexors select
+      MUX_SEL     : out std_logic_vector(ITEMS*log2(ITEMS)-1 downto 0);
+      -- valid of reorder items
+      TX_VLD      : out std_logic_vector(ITEMS-1 downto 0)
    );
 end MVB_REORDERING_LOGIC;
 

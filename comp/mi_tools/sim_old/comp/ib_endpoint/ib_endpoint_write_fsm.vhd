@@ -21,35 +21,71 @@ entity IB_ENDPOINT_WRITE_FSM is
      STRICT_EN     : boolean:= false
    );
    port(
+   -- ========================
    -- Common Interface
-   CLK             : in std_logic;   -- Clk
-   RESET           : in std_logic;   -- Reset
-   IDLE            : out std_logic;  -- FSM is Idle (For Strict Version)
-   READ_FSM_IDLE   : in  std_logic;  -- Read FSM is Idle (For Strict Version)
+   -- ========================
+
+   -- Clk
+   CLK             : in std_logic;
+   -- Reset
+   RESET           : in std_logic;
+   -- FSM is Idle (For Strict Version)
+   IDLE            : out std_logic;
+   -- Read FSM is Idle (For Strict Version)
+   READ_FSM_IDLE   : in  std_logic;
    BM_FSM_IDLE     : in  std_logic;
+
+   -- ========================
    -- SHR_IN Interface
-   DATA_VLD        : in  std_logic;  -- Data in Shift Reg is valid
-   SOP             : in  std_logic;  -- Start of Packet
-   EOP             : in  std_logic;  -- End of Packet
-   SHR_RE          : out std_logic;  -- Read Data from shift reg
+   -- ========================
 
+   -- Data in Shift Reg is valid
+   DATA_VLD        : in  std_logic;
+   -- Start of Packet
+   SOP             : in  std_logic;
+   -- End of Packet
+   EOP             : in  std_logic;
+   -- Read Data from shift reg
+   SHR_RE          : out std_logic;
+
+   -- ========================
    -- Address Decoder Interface
-   WRITE_TRANS     : in  std_logic;  -- Processing write transaction
-   READ_BACK       : in  std_logic;  -- read back
-   
-   -- Control Interface
-   DST_ADDR_WE     : out std_logic;  -- Store Addr into addr_cnt and addr_align
-   DST_ADDR_CNT_CE : out std_logic;  -- Increment address
-   SRC_ADDR_WE     : out std_logic;  -- Store Source Address
-   LENGTH_WE       : out std_logic;  -- Store Length
-   TAG_WE          : out std_logic;  -- Store TAG register
-   INIT_BE         : out std_logic;  -- Init BE circuit
+   -- ========================
 
+   -- Processing write transaction
+   WRITE_TRANS     : in  std_logic;
+   -- read back
+   READ_BACK       : in  std_logic;
+   
+   -- ========================
+   -- Control Interface
+   -- ========================
+
+   -- Store Addr into addr_cnt and addr_align
+   DST_ADDR_WE     : out std_logic;
+   -- Increment address
+   DST_ADDR_CNT_CE : out std_logic;
+   -- Store Source Address
+   SRC_ADDR_WE     : out std_logic;
+   -- Store Length
+   LENGTH_WE       : out std_logic;
+   -- Store TAG register
+   TAG_WE          : out std_logic;
+   -- Init BE circuit
+   INIT_BE         : out std_logic;
+
+   -- ========================
    -- User Component Interface
-   WR_SOF          : out std_logic;  -- Start of frame (Start of transaction)
-   WR_EOF          : out std_logic;  -- Ent of frame (End of Transaction)
-   WR_RDY          : in  std_logic;  -- User component is ready
-   WR_REQ          : out std_logic;  -- Write to user component
+   -- ========================
+
+   -- Start of frame (Start of transaction)
+   WR_SOF          : out std_logic;
+   -- Ent of frame (End of Transaction)
+   WR_EOF          : out std_logic;
+   -- User component is ready
+   WR_RDY          : in  std_logic;
+   -- Write to user component
+   WR_REQ          : out std_logic;
    RD_BACK         : out std_logic
    );
 end entity IB_ENDPOINT_WRITE_FSM;

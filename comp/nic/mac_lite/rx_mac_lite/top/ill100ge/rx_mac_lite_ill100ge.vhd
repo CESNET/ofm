@@ -17,10 +17,14 @@ entity RX_MAC_LITE_ILL100GE is
         -- =====================================================================
         -- MFB CONFIGURATION (read only values):
         -- =====================================================================
-        REGIONS         : natural := 1; -- must be 1
-        REGION_SIZE     : natural := 8; -- must be 8
-        BLOCK_SIZE      : natural := 8; -- must be 8
-        ITEM_WIDTH      : natural := 8; -- must be 8
+        -- must be 1
+        REGIONS         : natural := 1;
+        -- must be 8
+        REGION_SIZE     : natural := 8;
+        -- must be 8
+        BLOCK_SIZE      : natural := 8;
+        -- must be 8
+        ITEM_WIDTH      : natural := 8;
 
         -- =====================================================================
         -- OTHERS CONFIGURATION: 
@@ -43,7 +47,8 @@ entity RX_MAC_LITE_ILL100GE is
         -- Enable of timestamping frames.
         TIMESTAMP_EN    : boolean := true;
         -- Select correct FPGA device.
-        DEVICE          : string := "STRATIX10" -- ULTRASCALE
+        -- ULTRASCALE
+        DEVICE          : string := "STRATIX10"
     );
     port(
         -- =====================================================================

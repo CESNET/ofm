@@ -33,7 +33,10 @@ entity fl_monitor is
       -- Default data the component is checking for
    );
    port (
+      -- ==============
       -- Common signals
+      -- ==============
+
       RESET     : in std_logic;
       CLK       : in std_logic;
 
@@ -51,12 +54,20 @@ entity fl_monitor is
       DATA      : in std_logic_vector(FL_WIDTH - 1 downto 0);
       DREM      : in std_logic_vector(log2(FL_WIDTH/8) - 1 downto 0);
 
+      -- ================
       -- Memory interface
-      ADC_RD         : in    std_logic;                    -- Read Request
-      ADC_WR         : in    std_logic;                    -- Write Request
-      ADC_ADDR       : in    std_logic_vector( 7 downto 0);-- Address
-      ADC_DI         : in    std_logic_vector(31 downto 0);-- Input Data
-      ADC_DO         : out   std_logic_vector(31 downto 0);-- Output Data
+      -- ================
+
+      -- Read Request
+      ADC_RD         : in    std_logic;
+      -- Write Request
+      ADC_WR         : in    std_logic;
+      -- Address
+      ADC_ADDR       : in    std_logic_vector( 7 downto 0);
+      -- Input Data
+      ADC_DI         : in    std_logic_vector(31 downto 0);
+      -- Output Data
+      ADC_DO         : out   std_logic_vector(31 downto 0);
       ADC_ARDY       : out   std_logic;
       ADC_DRDY       : out   std_logic
    );

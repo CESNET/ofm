@@ -25,7 +25,8 @@ generic(
     PCIE_DOWNHDR_WIDTH : integer := 3*4*8;
 
     -- Width of 'lower address' field in PCIE completion header
-    PCIE_LOW_ADDR_WIDTH : integer := 12; -- 7 for Stratix10
+    -- 7 for Stratix10
+    PCIE_LOW_ADDR_WIDTH : integer := 12;
 
     -- Width of DMA Tag field in MVB header (maximum defined by range in dma_bus_pack)
     DMA_TAG_WIDTH      : integer := DMA_REQUEST_TAG'high - DMA_REQUEST_TAG'low + 1;
@@ -36,7 +37,8 @@ generic(
     PCIE_TAG_WIDTH     : integer := 5;
 
     -- Target device
-    DEVICE             : string  := "ULTRASCALE" -- "VIRTEX6", "7SERIES", "ULTRASCALE"
+    -- "VIRTEX6", "7SERIES", "ULTRASCALE"
+    DEVICE             : string  := "ULTRASCALE"
 );
 port(
     ---------------------------------------------------------------------------

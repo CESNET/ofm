@@ -14,13 +14,29 @@ use work.math_pack.all;
 
 entity MFB_ASFIFO_BRAM_XILINX is
   generic(
+    -- =============================
+    -- MFB specification
+    --
     -- Frame size restrictions: none
-    DEVICE                  : string := "7SERIES"; -- "VIRTEX6", "7SERIES", "ULTRASCALE"
-    REGIONS                 : integer := 4; -- any possitive value
-    REGION_SIZE             : integer := 8; -- any possitive value
-    BLOCK_SIZE              : integer := 8; -- any possitive value
-    ITEM_WIDTH              : integer := 8; -- any possitive value
-    ITEMS                   : integer := 512; -- 512, 1024, 2048, 4096, 8192 (less effective)
+    -- =============================
+
+    -- "VIRTEX6", "7SERIES", "ULTRASCALE"
+    DEVICE                  : string := "7SERIES";
+    -- any possitive value
+    REGIONS                 : integer := 4;
+    -- any possitive value
+    REGION_SIZE             : integer := 8;
+    -- any possitive value
+    BLOCK_SIZE              : integer := 8;
+    -- any possitive value
+    ITEM_WIDTH              : integer := 8;
+    -- 512, 1024, 2048, 4096, 8192 (less effective)
+    ITEMS                   : integer := 512;
+
+    -- ==================
+    -- FIFO PARAMETERS
+    -- ==================
+
     -- Almost Full/Empty offsets
     ALMOST_FULL_OFFSET      : integer := 128;
     ALMOST_EMPTY_OFFSET     : integer := 128;
@@ -44,7 +60,8 @@ entity MFB_ASFIFO_BRAM_XILINX is
     RX_SOF        : in std_logic_vector(REGIONS-1 downto 0);
     RX_EOF        : in std_logic_vector(REGIONS-1 downto 0);
     RX_SRC_RDY    : in std_logic;
-    RX_DST_RDY    : out std_logic; -- NOTE: assertion delay of few cycles after valid TX cycle (UG473) (same as: read from FULL fifo will deassert FULL only after few cycles)
+    -- NOTE: assertion delay of few cycles after valid TX cycle (UG473) (same as: read from FULL fifo will deassert FULL only after few cycles)
+    RX_DST_RDY    : out std_logic;
     AFULL         : out std_logic;
 
     TX_CLK        : in  std_logic;
@@ -54,7 +71,8 @@ entity MFB_ASFIFO_BRAM_XILINX is
     TX_EOF_POS    : out std_logic_vector(REGIONS*max(1,log2(REGION_SIZE*BLOCK_SIZE))-1 downto 0);
     TX_SOF        : out std_logic_vector(REGIONS-1 downto 0);
     TX_EOF        : out std_logic_vector(REGIONS-1 downto 0);
-    TX_SRC_RDY    : out std_logic; -- NOTE: assertion delay of few cycles after valid RX cycle (UG473) (same as: write into EMPTY fifo will deassert EMPTY only after few cycles)
+    -- NOTE: assertion delay of few cycles after valid RX cycle (UG473) (same as: write into EMPTY fifo will deassert EMPTY only after few cycles)
+    TX_SRC_RDY    : out std_logic;
     TX_DST_RDY    : in std_logic;
     AEMPTY        : out std_logic
   );

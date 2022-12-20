@@ -58,29 +58,34 @@ generic (
    OPERATIONS     : integer := 5;
 
    -- Target device
-   DEVICE         : string  := "7SERIES" -- "7SERIES", "ULTRASCALE"
+   -- "7SERIES", "ULTRASCALE"
+   DEVICE         : string  := "7SERIES"
 );
 port (
 
-   -------------------------------------
+   -- =====================================================
    -- clock & reset
-   -------------------------------------
+   -- =====================================================
    CLK            : in  std_logic;
-   CLK2           : in  std_logic; -- Clock with the same source as the CLK and double frequency
-   RESET          : in  std_logic; -- !! MUST BE SYNCHRONISED ON rising_edge(CLK) !!
+   -- Clock with the same source as the CLK and double frequency
+   CLK2           : in  std_logic;
+   -- !! MUST BE SYNCHRONISED ON rising_edge(CLK) !!
+   RESET          : in  std_logic;
 
-   -------------------------------------
+   -- =====================================================
    -- Interface for operations ordering per operator
-   -------------------------------------
+   -- =====================================================
 
    -- desired item address for each operator unit
    OP_ITEM_SEL    : in  slv_array_t(OPERATORS-1 downto 0)(log2(ITEMS)-1 downto 0);
    -- desired operations for each operator unit (can be used for operation metadata informations)
    OP_OPERATIONS  : in  slv_array_t(OPERATORS-1 downto 0)(OPERATIONS-1 downto 0);
 
-   -------------------------------------
-   -- Input interface for user operator units (1 CLK latency from )
-   -------------------------------------
+   -- =====================================================
+   -- Input interface for user operator units
+   --
+   -- (1 CLK latency from )
+   -- =====================================================
 
    -- chosen item's address
    OP_IN_SEL      : out slv_array_t(OPERATORS-1 downto 0)(log2(ITEMS)-1 downto 0);
@@ -93,16 +98,18 @@ port (
    -- selected input data for operation
    OP_IN_DATA     : out slv_array_t(OPERATORS-1 downto 0)(DATA_WIDTH-1 downto 0);
 
-   -------------------------------------
-   -- Output interface for user operator units (0 latency, operators must be combination logic only) 
-   -------------------------------------
+   -- =====================================================
+   -- Output interface for user operator units
+   -- 
+   -- (0 latency, operators must be combination logic only) 
+   -- =====================================================
 
    -- data after operations execution
    OP_OUT_DATA    : in  slv_array_t(OPERATORS-1 downto 0)(DATA_WIDTH-1 downto 0);
 
-   -------------------------------------
+   -- =====================================================
    -- Interface for independent data reading
-   -------------------------------------
+   -- =====================================================
 
    -- item select
    READ_ADDR      : in  slv_array_t(READ_PORTS-1 downto 0)(log2(ITEMS)-1 downto 0);

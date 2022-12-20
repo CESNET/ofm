@@ -55,9 +55,10 @@ generic (
     DEVICE                  : string
 );
 port(
-    -----------------------------------
-    -- Avalon interface from EMIF IP --
-    -----------------------------------
+    -- ================================
+    -- Avalon interface from EMIF IP
+    -- ================================
+
     AMM_CLK                 : in std_logic;
     AMM_RST                 : in std_logic;
 
@@ -80,17 +81,26 @@ port(
     REFR_REQ                : out std_logic;
     REFR_ACK                : in  std_logic := '1';
 
-    -- Other EMIF IP signals --
-    EMIF_RST_REQ            : out  std_logic;   -- Force reset and calibration, must be at least 2 clk at '1'
-    EMIF_RST_DONE           : in   std_logic;
-    EMIF_ECC_ISR            : in   std_logic;   -- Interrupt to indicate whenever bit error occurred
-    EMIF_CAL_SUCCESS        : in   std_logic;   -- Calibration successful
-    EMIF_CAL_FAIL           : in   std_logic;   -- Calibration failed
-    EMIF_AUTO_PRECHARGE     : out  std_logic;   -- Auto precharge request
+    -- ==========================
+    -- Other EMIF IP signals
+    -- ==========================
 
-    ----------------------
-    -- MI bus interface --
-    ----------------------
+    -- Force reset and calibration, must be at least 2 clk at '1'
+    EMIF_RST_REQ            : out  std_logic;
+    EMIF_RST_DONE           : in   std_logic;
+    -- Interrupt to indicate whenever bit error occurred
+    EMIF_ECC_ISR            : in   std_logic; 
+    -- Calibration successful
+    EMIF_CAL_SUCCESS        : in   std_logic; 
+    -- Calibration failed
+    EMIF_CAL_FAIL           : in   std_logic; 
+    -- Auto precharge request
+    EMIF_AUTO_PRECHARGE     : out  std_logic; 
+
+    -- ==========================
+    -- MI bus interface
+    -- ==========================
+
     MI_CLK                  : in std_logic;
     MI_RST                  : in std_logic;
 
@@ -129,7 +139,8 @@ architecture FULL of MEM_TESTER is
     -- AMM MUX --
     -- Indexes depend on mux_sel signal connection!
     constant MUX_SLOT_MAIN          : integer := 0;
-    constant MUX_SLOT_RANDOM        : integer := 1; -- Same as MUX_SLOT_MAIN but random addr
+    -- Same as MUX_SLOT_MAIN but random addr
+    constant MUX_SLOT_RANDOM        : integer := 1;
     constant MUX_SLOT_AMM_GEN       : integer := 2;
     constant MUX_WIDTH              : integer := 3;
 
@@ -145,7 +156,8 @@ architecture FULL of MEM_TESTER is
     constant RST_REQ_LIMIT          : std_logic_vector(log2(RST_REQ_TICKS) - 1 downto 0)
         := std_logic_vector(to_unsigned(RST_REQ_TICKS - 1, log2(RST_REQ_TICKS)));
 
-    constant MI_ADDR_USED_BITS      : integer := 7; -- TODO: remove
+    -- TODO: remove
+    constant MI_ADDR_USED_BITS      : integer := 7;
     -- Max address: 0XFF
     constant MI_ADDR_USAGE          : integer := 8;
     constant AMM_GEN_BASE           : std_logic_vector(MI_ADDR_USAGE - 1 downto 0) := X"40";

@@ -27,50 +27,91 @@ end entity TESTBENCH;
 -- ============================================================================
 architecture BEHAVIORAL of TESTBENCH is
 
+    -- =============
     -- DUT settings
-    constant INPUT_REGS_EN    : boolean := true;    -- set to true to enable input registers, latency of the comparator will be 2 clock cycles
-    constant DATA_WIDTH       : natural := 128;       -- max is now unlimited for mode ><=, others max 25 bits
-    constant DSP_ENABLE       : boolean := false;     -- set to true to use DSP blocks on Stratix 10
-    constant MODE             : string  := "><=";    -- options: "><=", ">= ", "<= " - NOTE: the space after ">=" or "<=" is necessary
-    constant DEVICE           : string  := "ULTRASCALE"; -- AGILEX/STRATIX10/ULTRASCALE/...
+    -- =============
+
+    -- set to true to enable input registers, latency of the comparator will be 2 clock cycles
+    constant INPUT_REGS_EN    : boolean := true;
+    -- max is now unlimited for mode ><=, others max 25 bits
+    constant DATA_WIDTH       : natural := 128;
+    -- set to true to use DSP blocks on Stratix 10
+    constant DSP_ENABLE       : boolean := false;
+    -- options: "><=", ">= ", "<= " - NOTE: the space after ">=" or "<=" is necessary
+    constant MODE             : string  := "><=";
+    -- AGILEX/STRATIX10/ULTRASCALE/...
+    constant DEVICE           : string  := "ULTRASCALE";
+
+    -- ======================
     -- verification settings
-    constant TALKATIVE        : boolean := false;    -- set to true for more detailed reports in the Transcript window
-    constant REPORT_EVERY_NTH : natural := 10000;    -- writes a report about the number of correct results to the Transcript window every Nth iteration
-    constant LENGHT_OF_SIM    : natural := 100000;   -- number of clock cycles the simulation should run for
+    -- ======================
+
+    -- set to true for more detailed reports in the Transcript window
+    constant TALKATIVE        : boolean := false;
+    -- writes a report about the number of correct results to the Transcript window every Nth iteration
+    constant REPORT_EVERY_NTH : natural := 10000;
+    -- number of clock cycles the simulation should run for
+    constant LENGHT_OF_SIM    : natural := 100000;
     constant CLK_PERIOD       : time    := 10 ns;
 
+    -- ==================================================================================
     -- constants used to calculate the number of used DSP blocks according to DATA_WIDTH
-    constant NUM_OF_FULL_COMPARATORS  : natural := DATA_WIDTH / 25; -- number of comparators that will have maximum width which is limited by the DSP block (max 25 bits wide)
-    constant LEFTOVER_BITS            : natural := DATA_WIDTH mod 25; -- the rest of the bits that do not fill up the whole width of the DSP block
-    constant TOTAL_NUM_OF_COMPARATORS : natural := tsel(LEFTOVER_BITS = 0, NUM_OF_FULL_COMPARATORS, NUM_OF_FULL_COMPARATORS+1); -- munber of all used DSP blocks (fully or partially)
+    -- ==================================================================================
 
+    -- number of comparators that will have maximum width which is limited by the DSP block (max 25 bits wide)
+    constant NUM_OF_FULL_COMPARATORS  : natural := DATA_WIDTH / 25;
+    -- the rest of the bits that do not fill up the whole width of the DSP block
+    constant LEFTOVER_BITS            : natural := DATA_WIDTH mod 25;
+    -- munber of all used DSP blocks (fully or partially)
+    constant TOTAL_NUM_OF_COMPARATORS : natural := tsel(LEFTOVER_BITS = 0, NUM_OF_FULL_COMPARATORS, NUM_OF_FULL_COMPARATORS+1);
+
+    -- ================
     -- setting signals
+    -- ================
     signal clk                     : std_logic;
     signal clk_ena                 : std_logic;
     signal rst                     : std_logic;
     signal valid                   : std_logic;
     signal valid_behind_input_regs : std_logic;
-    signal valid_behind_all_regs   : std_logic; -- valid signals are used to ignore the different results from the testbench and the comparator when reset is asserted
+    -- valid signals are used to ignore the different results from the testbench and the comparator when reset is asserted
+    signal valid_behind_all_regs   : std_logic;
     signal input1                  : std_logic_vector(DATA_WIDTH-1 downto 0);
     signal input2                  : std_logic_vector(DATA_WIDTH-1 downto 0);
 
+    -- ============================================
     -- signals for verification of a succesful run
-    signal stop_at_the_end         : std_logic := '0'; -- is '1' at the end of the simulation, allows for the verdict of the simulation run to be written out
-    signal clk_cycle_count         : natural := 0; -- +1 each rising edge, counts up until the LENGHT_OF_SIM is reached
+    -- ============================================
+
+    -- is '1' at the end of the simulation, allows for the verdict of the simulation run to be written out
+    signal stop_at_the_end         : std_logic := '0';
+    -- +1 each rising edge, counts up until the LENGHT_OF_SIM is reached
+    signal clk_cycle_count         : natural := 0;
 
     -- result of the comparator: "00" when input values are equal, "01" when the 1st is larger than the 2nd, "10" when the 2nd is larger than the 1st
     -- in modes ">=" or "<=" the result is in form of: '11' when the 1st number is larger or equal to (or smaller or equal to, respectively) the 2nd number, else '00'
     signal cmp_result              : std_logic_vector(1 downto 0);
 
+    -- =====================================
     -- signals for the simulated comparator
-    signal input1_behind_regs_uns  : unsigned(DATA_WIDTH-1 downto 0); -- input 1 for the simulated comparator in unsigned so it can be compared with input 2
-    signal input2_behind_regs_uns  : unsigned(DATA_WIDTH-1 downto 0); -- input 2 for the simulated comparator in unsigned so it can be compared with input 1
-    signal sim_result              : std_logic_vector(1 downto 0); -- result from the simulated comparator
+    -- =====================================
 
+    -- input 1 for the simulated comparator in unsigned so it can be compared with input 2
+    signal input1_behind_regs_uns  : unsigned(DATA_WIDTH-1 downto 0);
+    -- input 2 for the simulated comparator in unsigned so it can be compared with input 1
+    signal input2_behind_regs_uns  : unsigned(DATA_WIDTH-1 downto 0);
+    -- result from the simulated comparator
+    signal sim_result              : std_logic_vector(1 downto 0);
+
+    -- ===========================================
     -- signals for verification of the comparator
-    signal result_ok               : std_logic; -- is '1' when results from the testbench and from the comparator are equal -> the result from the comparator is correct
-    signal correct_results         : natural := 1; -- counts the number of iterations when results from the testbench and from the comparator were equal; initialized to 1 to finish at the total number of iterations
-    signal incorrect_results       : natural := 1; -- counts the number of iterations when results from the testbench and from the comparator were not equal; initialized to 1 to finish at the total number of iterations
+    -- ===========================================
+
+    -- is '1' when results from the testbench and from the comparator are equal -> the result from the comparator is correct
+    signal result_ok               : std_logic;
+    -- counts the number of iterations when results from the testbench and from the comparator were equal; initialized to 1 to finish at the total number of iterations
+    signal correct_results         : natural := 1;
+    -- counts the number of iterations when results from the testbench and from the comparator were not equal; initialized to 1 to finish at the total number of iterations
+    signal incorrect_results       : natural := 1;
 
     shared variable l : line;
 
@@ -96,6 +137,7 @@ begin
     -- ========================================================================
     -- Setting control signals
     -- ========================================================================
+
     -- generating clock signal
     clock_p : process
     begin

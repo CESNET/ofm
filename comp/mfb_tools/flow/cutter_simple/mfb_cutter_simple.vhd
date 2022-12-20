@@ -16,23 +16,31 @@ entity MFB_CUTTER_SIMPLE is
     generic(
         -- =======================================================================
         -- MFB DATA BUS CONFIGURATION:
-        -- =======================================================================
+        --
         -- Frame size restrictions:
         -- For REGION_SIZE =  1: MIN = (CUTTED_ITEMS+1)*ITEM_WIDTH bits
         -- For REGION_SIZE >= 2: MIN = (REGION_SIZE*BLOCK_SIZE+CUTTED_ITEMS)*ITEM_WIDTH bits
-        REGIONS        : natural := 2; -- any positive
-        REGION_SIZE    : natural := 8; -- any power of two
-        BLOCK_SIZE     : natural := 8; -- any power of two except 1
-        ITEM_WIDTH     : natural := 8; -- any positive
+        -- =======================================================================
+
+        -- any positive
+        REGIONS        : natural := 2;
+        -- any power of two
+        REGION_SIZE    : natural := 8;
+        -- any power of two except 1
+        BLOCK_SIZE     : natural := 8;
+        -- any positive
+        ITEM_WIDTH     : natural := 8;
         -- Width of MFB Metadata
         META_WIDTH     : natural := 0;
         -- Metadata is valid either with:
         --   - SOF (MODE 0) or
         --   - EOF (MODE 1)
         META_ALIGNMENT : natural := 0;
+
         -- =======================================================================
         -- OTHER CONFIGURATION:
         -- =======================================================================
+
         -- Count of cutted items from SOF. Maximum value is REGION_SIZE*BLOCK_SIZE.
         CUTTED_ITEMS   : natural := 4
     );
@@ -40,12 +48,14 @@ entity MFB_CUTTER_SIMPLE is
         -- =======================================================================
         -- CLOCK AND RESET
         -- =======================================================================
+
         CLK        : in  std_logic;
         RESET      : in  std_logic;
 
         -- =======================================================================
         -- INPUT MFB INTERFACE WITH CUT ENABLE FLAGS
         -- =======================================================================
+
         RX_DATA    : in  std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
         RX_META    : in  std_logic_vector(REGIONS*META_WIDTH-1 downto 0) := (others => '0');
         RX_SOF     : in  std_logic_vector(REGIONS-1 downto 0);
@@ -60,8 +70,10 @@ entity MFB_CUTTER_SIMPLE is
         -- =======================================================================
         -- OUTPUT MFB INTERFACE
         -- =======================================================================
+
         TX_DATA    : out std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
-        TX_META    : out std_logic_vector(REGIONS*META_WIDTH-1 downto 0); -- valid on SOF
+        -- valid on SOF
+        TX_META    : out std_logic_vector(REGIONS*META_WIDTH-1 downto 0);
         TX_SOF     : out std_logic_vector(REGIONS-1 downto 0);
         TX_EOF     : out std_logic_vector(REGIONS-1 downto 0);
         TX_SOF_POS : out std_logic_vector(REGIONS*max(1,log2(REGION_SIZE))-1 downto 0);

@@ -16,21 +16,32 @@ use work.math_pack.all;
 
 entity MFB_FIFO_BRAM_XILINX is
   generic(
+    -- =========================================================================
+    -- BUS GENERIC
+    --
     -- Frame size restrictions: none
-    DEVICE                  : string := "7SERIES"; -- "VIRTEX6", "7SERIES", "ULTRASCALE"
-    REGIONS                 : integer := 4; -- any possitive value
-    REGION_SIZE             : integer := 8; -- any possitive value
-    BLOCK_SIZE              : integer := 8; -- any possitive value
-    ITEM_WIDTH              : integer := 8; -- any possitive value
-    ITEMS                   : integer := 512; -- 512, 1024, 2048, 4096, 8192 (less effective)
+    -- =========================================================================
+
+    -- "VIRTEX6", "7SERIES", "ULTRASCALE"
+    DEVICE                  : string := "7SERIES";
+    -- any possitive value
+    REGIONS                 : integer := 4;
+    -- any possitive value
+    REGION_SIZE             : integer := 8;
+    -- any possitive value
+    BLOCK_SIZE              : integer := 8;
+    -- any possitive value
+    ITEM_WIDTH              : integer := 8;
+    -- 512, 1024, 2048, 4096, 8192 (less effective)
+    ITEMS                   : integer := 512;
     -- Precision of FULL signal (write interface) assertion.
     --    true = full FIFO's depth can be used, but timing on WR and FULL is worse for high DATA_WIDTH
-    --   false = FIFO is 4 items shallower (take this into accont when setting a value of ALMOST_FULL_OFFSET!), but timing on WR and FULL is better
+    --    false = FIFO is 4 items shallower (take this into accont when setting a value of ALMOST_FULL_OFFSET!), but timing on WR and FULL is better
     -- NOTE: disabling makes a difference only when FIRST_WORD_FALL_THROUGH is true, DEVICE is VIRTEX6 or 7SERIES and FIFO size (DATA_WIDTH*ITEMS) is more than 36Kb
     PRECISE_FULL            : boolean := true;
     -- Timing speed of EMPTY signal (read interface) assertion.
     --   false = standard ORing of flags (just a few LUTs), but timing on RD anf EMPTY is worse for high DATA_WIDTH
-    --    true = more extra resources (mainly registers), but timing on RD and EMPTY is better
+    --   true = more extra resources (mainly registers), but timing on RD and EMPTY is better
     -- NOTE: enabling makes a difference only when FIRST_WORD_FALL_THROUGH is true, DEVICE is VIRTEX6 or 7SERIES and FIFO size (DATA_WIDTH*ITEMS) is more than 36Kb
     FAST_EMPTY              : boolean := false
   );
@@ -44,14 +55,16 @@ entity MFB_FIFO_BRAM_XILINX is
     RX_SOF        : in std_logic_vector(REGIONS-1 downto 0);
     RX_EOF        : in std_logic_vector(REGIONS-1 downto 0);
     RX_SRC_RDY    : in std_logic;
-    RX_DST_RDY    : out std_logic; -- NOTE: assertion delay of few cycles after valid TX cycle (UG473) (same as: read from FULL fifo will deassert FULL only after few cycles)
+    -- NOTE: assertion delay of few cycles after valid TX cycle (UG473) (same as: read from FULL fifo will deassert FULL only after few cycles)
+    RX_DST_RDY    : out std_logic;
 
     TX_DATA       : out std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
     TX_SOF_POS    : out std_logic_vector(REGIONS*max(1,log2(REGION_SIZE))-1 downto 0);
     TX_EOF_POS    : out std_logic_vector(REGIONS*max(1,log2(REGION_SIZE*BLOCK_SIZE))-1 downto 0);
     TX_SOF        : out std_logic_vector(REGIONS-1 downto 0);
     TX_EOF        : out std_logic_vector(REGIONS-1 downto 0);
-    TX_SRC_RDY    : out std_logic; -- NOTE: assertion delay of few cycles after valid RX cycle (UG473) (same as: write into EMPTY fifo will deassert EMPTY only after few cycles)
+    -- NOTE: assertion delay of few cycles after valid RX cycle (UG473) (same as: write into EMPTY fifo will deassert EMPTY only after few cycles)
+    TX_SRC_RDY    : out std_logic;
     TX_DST_RDY    : in std_logic
   );
 end entity;

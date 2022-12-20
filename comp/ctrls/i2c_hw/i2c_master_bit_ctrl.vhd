@@ -142,25 +142,39 @@ entity i2c_master_bit_ctrl is
 		clk    : in std_logic;
 		rst    : in std_logic;
 		nReset : in std_logic;
-		ena    : in std_logic;				-- core enable signal
+		-- core enable signal
+		ena    : in std_logic;
 
-		clk_cnt : in unsigned(15 downto 0);		-- clock prescale value
+		-- clock prescale value
+		clk_cnt : in unsigned(15 downto 0);
 
 		cmd     : in std_logic_vector(3 downto 0);
-		cmd_ack : out std_logic; -- command completed
-		busy    : out std_logic; -- i2c bus busy
-		al      : out std_logic; -- arbitration lost
+		-- command completed
+		cmd_ack : out std_logic;
+		-- i2c bus busy
+		busy    : out std_logic;
+		-- arbitration lost
+		al      : out std_logic;
 
 		din  : in std_logic;
 		dout : out std_logic;
 
+		-- =========
 		-- i2c lines
-		scl_i   : in std_logic;  -- i2c clock line input
-		scl_o   : out std_logic; -- i2c clock line output
-		scl_oen : out std_logic; -- i2c clock line output enable, active low
-		sda_i   : in std_logic;  -- i2c data line input
-		sda_o   : out std_logic; -- i2c data line output
-		sda_oen : out std_logic  -- i2c data line output enable, active low
+		-- =========
+
+		-- i2c clock line input
+		scl_i   : in std_logic;
+		-- i2c clock line output
+		scl_o   : out std_logic;
+		-- i2c clock line output enable, active low
+		scl_oen : out std_logic
+		-- i2c data line input;
+		sda_i   : in std_logic;
+		-- i2c data line output
+		sda_o   : out std_logic;
+		-- i2c data line output enable, active low;
+		sda_oen : out std_logic
 	);
 end entity i2c_master_bit_ctrl;
 

@@ -78,14 +78,21 @@ generic(
     ALMOST_FULL_OFFSET      : natural := 0;
 
     -- Target Device
-    DEVICE                  : string := "STRATIX10" -- "ULTRASCALE", "7SERIES", ...
+    -- "ULTRASCALE", "7SERIES", ...
+    DEVICE                  : string := "STRATIX10"
 );
 port(
+    -- ===================
     -- Clock and Reset
+    -- ===================
+
     CLK              : in  std_logic;
     RESET            : in  std_logic;
 
+    -- ===================
     -- Input Transactions
+    -- ===================
+
     -- WARNING:
     --     When inserting an RX Transaction, any Transaction with the same ID which
     --     is currently present in the component will become unconfirmed with the next
@@ -96,20 +103,28 @@ port(
     RX_TRANS_ID      : in  slv_array_t     (RX_TRANSS-1 downto 0)(ID_WIDTH-1 downto 0);
     RX_TRANS_META    : in  slv_array_t     (RX_TRANSS-1 downto 0)(METADATA_WIDTH-1 downto 0);
     RX_TRANS_SRC_RDY : in  std_logic_vector(RX_TRANSS-1 downto 0);
-    RX_TRANS_DST_RDY : out std_logic; -- Only falls when internal FIFO is full.
+    -- Only falls when internal FIFO is full.
+    RX_TRANS_DST_RDY : out std_logic;
 
     -- Inner Transaction FIFO Almost Full
     TRANS_FIFO_AFULL : out std_logic;
 
+    -- ======================
     -- Input ID Confirmations
+    -- ======================
+
     RX_CONF_ID       : in  slv_array_t     (ID_CONFS-1 downto 0)(ID_WIDTH-1 downto 0);
     RX_CONF_VLD      : in  std_logic_vector(ID_CONFS-1 downto 0);
 
+    -- ===================
     -- Output Transactions
+    -- ===================
+
     TX_TRANS_ID      : out slv_array_t     (TX_TRANSS-1 downto 0)(ID_WIDTH-1 downto 0);
     TX_TRANS_META    : out slv_array_t     (TX_TRANSS-1 downto 0)(METADATA_WIDTH-1 downto 0);
     TX_TRANS_SRC_RDY : out std_logic_vector(TX_TRANSS-1 downto 0);
-    TX_TRANS_DST_RDY : in  std_logic -- All Transactions must be read all at once
+    -- All Transactions must be read all at once
+    TX_TRANS_DST_RDY : in  std_logic
 );
 end entity;
 

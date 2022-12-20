@@ -23,14 +23,17 @@ entity async is
     IN_CLK     : in std_logic;
     IN_RESET   : in std_logic;
     -- data write request
-    RQST       : in std_logic; -- request
+    -- request
+    RQST       : in std_logic;
     -- address ready signal - when we are ready for another transaction
-    RDY        : out std_logic; -- data are ready
+    -- data are ready
+    RDY        : out std_logic;
 
     -- output clk and write enable
     OUT_CLK    : in std_logic;
     OUT_RESET  : in std_logic;
-    OUT_RQST   : out std_logic  -- output write enable
+    -- output write enable
+    OUT_RQST   : out std_logic
   );
 end async;
 
