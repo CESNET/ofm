@@ -12,23 +12,35 @@ use work.math_pack.all;
 
 entity MFB_FIFO_BRAM is
    generic(
+      -- =========================================================================
+      -- BUS GENERIC
+      --
       -- Frame size restrictions: none
-      REGIONS     : natural := 4;  -- any possitive value
-      REGION_SIZE : natural := 8;  -- any possitive value
-      BLOCK_SIZE  : natural := 8;  -- any possitive value
-      ITEM_WIDTH  : natural := 8;  -- any possitive value
-      FIFO_DEPTH  : natural := 512 -- 512, 1024, 2048, 4096,...
+      -- =========================================================================
+
+      -- any possitive value
+      REGIONS     : natural := 4;
+      -- any possitive value
+      REGION_SIZE : natural := 8;
+      -- any possitive value
+      BLOCK_SIZE  : natural := 8;
+      -- any possitive value
+      ITEM_WIDTH  : natural := 8;
+      -- 512, 1024, 2048, 4096,...
+      FIFO_DEPTH  : natural := 512
    );
    port(
-      --------------------------------------------------------------------------
+      -- =========================================================================
       -- CLOCK AND RESET
-      --------------------------------------------------------------------------
+      -- =========================================================================
+
       CLK         : in  std_logic;
       RST         : in  std_logic;
 
-      --------------------------------------------------------------------------
+      -- =========================================================================
       -- RX MFB INTERFACE
-      --------------------------------------------------------------------------
+      -- =========================================================================
+
       RX_DATA     : in  std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
       RX_SOF_POS  : in  std_logic_vector(REGIONS*max(1,log2(REGION_SIZE))-1 downto 0);
       RX_EOF_POS  : in  std_logic_vector(REGIONS*max(1,log2(REGION_SIZE*BLOCK_SIZE))-1 downto 0);
@@ -37,9 +49,10 @@ entity MFB_FIFO_BRAM is
       RX_SRC_RDY  : in  std_logic;
       RX_DST_RDY  : out std_logic;
 
-      --------------------------------------------------------------------------
+      -- =========================================================================
       -- TX MFB INTERFACE
-      --------------------------------------------------------------------------
+      -- =========================================================================
+
       TX_DATA     : out std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
       TX_SOF_POS  : out std_logic_vector(REGIONS*max(1,log2(REGION_SIZE))-1 downto 0);
       TX_EOF_POS  : out std_logic_vector(REGIONS*max(1,log2(REGION_SIZE*BLOCK_SIZE))-1 downto 0);
@@ -48,9 +61,10 @@ entity MFB_FIFO_BRAM is
       TX_SRC_RDY  : out std_logic;
       TX_DST_RDY  : in  std_logic;
 
-      --------------------------------------------------------------------------
+      -- =========================================================================
       -- FIFO STATUS SIGNAL
-      --------------------------------------------------------------------------
+      -- =========================================================================
+
       FIFO_STATUS : out std_logic_vector(log2(FIFO_DEPTH) downto 0)
    );
 end MFB_FIFO_BRAM;

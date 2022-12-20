@@ -18,14 +18,31 @@ use work.dma_bus_pack.all; -- contains definitions for MVB header fields
 
 entity PTC_STORAGE_FIFO is
    generic (
+      -- ===================
       -- MVB characteristics
-      MVB_ITEMS       : integer := 4;     -- number of MVB items
-      MVB_ITEM_WIDTH  : integer := 3*4*8; -- number of MVB items
+      -- ===================
+
+      -- number of MVB items
+      MVB_ITEMS       : integer := 4;
+      -- number of MVB items
+      MVB_ITEM_WIDTH  : integer := 3*4*8;
+
+      -- ===================
       -- MFB characteristics
-      MFB_REGIONS     : integer := 4;  -- number of regions in word
-      MFB_REG_SIZE    : integer := 1;  -- number of blocks in region
-      MFB_BLOCK_SIZE  : integer := 4;  -- number of items in block
-      MFB_ITEM_WIDTH  : integer := 32; -- width  of one item (in bits)
+      -- ===================
+
+      -- number of regions in word
+      MFB_REGIONS     : integer := 4;
+      -- number of blocks in region
+      MFB_REG_SIZE    : integer := 1;
+      -- number of items in block
+      MFB_BLOCK_SIZE  : integer := 4;
+      -- width  of one item (in bits)
+      MFB_ITEM_WIDTH  : integer := 32;
+
+      -- ===================
+      -- Others
+      -- ===================
 
       -- Number of MVB/MFB words space in main MVB/MFB storage FIFOX
       MAIN_FIFO_ITEMS        : integer := 512;
@@ -34,7 +51,8 @@ entity PTC_STORAGE_FIFO is
       INPUT_MFB_FIFOXM_ITEMS : integer := 8;
 
       -- Target device
-      DEVICE            : string  := "ULTRASCALE" -- "VIRTEX6", "7SERIES", "ULTRASCALE"
+      -- "VIRTEX6", "7SERIES", "ULTRASCALE"
+      DEVICE            : string  := "ULTRASCALE"
    );
    port(
       ---------------------------------------------------------------------------

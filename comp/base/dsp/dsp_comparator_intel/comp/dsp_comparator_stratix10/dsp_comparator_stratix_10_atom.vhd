@@ -30,7 +30,8 @@ entity DSP_COMPARATOR_STRATIX_10_ATOM is
         -- "><=" is the default mode which outputs results as specified above the RESULT port
         -- ">=" outputs result in form of '11' if the 1st number is larger or equal than the 2nd number, else '00'  - 25 is the maximum input data width !! NOTE: only one DSP block is used in this mode
         -- "<=" outputs result in form of '11' if the 1st number is smaller or equal than the 2nd number, else '00' - 25 is the maximum input data width !! NOTE: only one DSP block is used in this mode
-        MODE             : string  := "><=" -- options: "><=", ">= ", "<= " - NOTE: the space after ">= " or "<= " is necessary !!
+        -- options: "><=", ">= ", "<= " - NOTE: the space after ">= " or "<= " is necessary !!
+        MODE             : string  := "><="
         );
     Port (
         CLK0       :  in std_logic;
@@ -56,15 +57,20 @@ architecture FULL of DSP_COMPARATOR_STRATIX_10_ATOM is
     function en_input_regs (REG_0_EN : boolean) return string is
     begin
         if (REG_0_EN = false) then
-            return "none"; -- "none" means the register does not run on any clock -> it is disabled
+            -- "none" means the register does not run on any clock -> it is disabled
+            return "none";
         else
-            return "0"; -- "0" means the register is enabled and runs on "clock 0"
+            -- "0" means the register is enabled and runs on "clock 0"
+            return "0";
         end if;
     end function;
 
-    constant NUM_OF_FULL_COMPARATORS  : natural := INPUT_DATA_WIDTH / 25;   -- number of comparators that will have maximum width of 25 bits - limited by the DSP block
-    constant LEFTOVER_BITS            : natural := INPUT_DATA_WIDTH mod 25; -- the rest of the bits that do not fill up the whole width of the DSP block -> less than 25 bits wide
-    constant TOTAL_NUM_OF_COMPARATORS : natural := tsel(LEFTOVER_BITS = 0, NUM_OF_FULL_COMPARATORS, NUM_OF_FULL_COMPARATORS+1); -- number of used DSP blocks (fully or partially)
+    -- number of comparators that will have maximum width of 25 bits - limited by the DSP block
+    constant NUM_OF_FULL_COMPARATORS  : natural := INPUT_DATA_WIDTH / 25;
+    -- the rest of the bits that do not fill up the whole width of the DSP block -> less than 25 bits wide
+    constant LEFTOVER_BITS            : natural := INPUT_DATA_WIDTH mod 25;
+    -- number of used DSP blocks (fully or partially)
+    constant TOTAL_NUM_OF_COMPARATORS : natural := tsel(LEFTOVER_BITS = 0, NUM_OF_FULL_COMPARATORS, NUM_OF_FULL_COMPARATORS+1);
 
     signal clr0                 : std_logic; -- this is the reset signal for input registers, is '0' when they are disabled
     signal input_1_sig          : std_logic_vector(INPUT_DATA_WIDTH downto 0); -- INPUT1 concatenated with '0' at MSB position to represent a positive number (conversion to the signed type occurs in the DSP block)

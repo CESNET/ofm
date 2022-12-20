@@ -31,15 +31,24 @@ end entity testbench;
 --                      Architecture declaration
 -- ----------------------------------------------------------------------------
 architecture behavioral of testbench is
+   -- ============================
    -- Global Constant Declaration
-   constant mi32_period         : time := 8 ns;    -- 125MHz
-   constant clk_period          : time := 5 ns;    -- 200MHz
-   constant pps_period 	        : time := 1 us;    -- 1Hz
+   -- ============================
+
+   -- 125MHz
+   constant mi32_period         : time := 8 ns;
+   -- 200MHz
+   constant clk_period          : time := 5 ns;
+   -- 1Hz
+   constant pps_period 	        : time := 1 us;
    constant reset_delay	        : time := 100 ns;
    constant PPS_SEL_WIDTH       : integer := 8;
    constant CLK_SEL_WIDTH       : integer := 8;
 
-   -- Address offsets							  
+   -- ===============
+   -- Address offsets
+   -- ===============
+
    constant MICOM_LOW  	        : std_logic_vector(31 downto 0) := X"00000000";
    constant MICOM_MIDDLE        : std_logic_vector(31 downto 0) := X"00000004";
    constant MICOM_HIGH 	        : std_logic_vector(31 downto 0) := X"00000008";

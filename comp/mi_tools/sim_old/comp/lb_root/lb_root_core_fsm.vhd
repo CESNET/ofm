@@ -23,32 +23,72 @@ entity LB_ROOT_CORE_FSM is
       ABORT_CNT_WIDTH     : integer := 4
    );
    port(
+   -- ==========================
    -- Common Interface
-   CLK                    : in std_logic;  -- Clk
-   RESET                  : in std_logic;  -- Reset
+   -- ==========================
+
+   -- Clk
+   CLK                    : in std_logic;
+   -- Reset
+   RESET                  : in std_logic;
+
+   -- ==========================
    -- Buffer Interface
-   BUFFER_SOF             : in  std_logic; -- Start of Frame
-   BUFFER_EOF             : in  std_logic; -- End Of Frame
-   BUFFER_RD              : in  std_logic; -- Read
-   BUFFER_WR              : in  std_logic; -- Write
-   BUFFER_VLD             : in  std_logic; -- Item VLD
-   BUFFER_NEXT            : out std_logic; -- Next 64 bits Item
+   -- ==========================
+
+   -- Start of Frame
+   BUFFER_SOF             : in  std_logic;
+   -- End Of Frame
+   BUFFER_EOF             : in  std_logic;
+   -- Read
+   BUFFER_RD              : in  std_logic;
+   -- Write
+   BUFFER_WR              : in  std_logic;
+   -- Item VLD
+   BUFFER_VLD             : in  std_logic;
+   -- Next 64 bits Item
+   BUFFER_NEXT            : out std_logic;
+
+   -- ==========================
    -- Core Control Interface
-   INIT_COUNTERS          : out std_logic; -- Clear all counters
-   ADDR_DATA_MUX_SEL      : out std_logic_vector(1 downto 0); -- Select LB_DWR
-   DATA_OUT_CNT_CE        : out std_logic; -- Increment data out counter (select 16 bit item from 64 bit word)
-   READING_FLAG           : out std_logic; -- Set when reading operation
+   -- ==========================
+
+   -- Clear all counters
+   INIT_COUNTERS          : out std_logic;
+   -- Select LB_DWR
+   ADDR_DATA_MUX_SEL      : out std_logic_vector(1 downto 0);
+   -- Increment data out counter (select 16 bit item from 64 bit word)
+   DATA_OUT_CNT_CE        : out std_logic;
+   -- Set when reading operation
+   READING_FLAG           : out std_logic;
+
+   -- ==========================
    -- Core Status Interface
-   GEN_ABORT_FLAG         : in  std_logic; -- Generate Abort Flag
-   WAIT_FOR_ALL_RDY       : out std_logic; -- Waiting for all rdy signals
-   DATA_OUT_CNT           : in  std_logic_vector(1 downto 0); -- Realize data_mux select
-   PENDING_CNT            : in  std_logic_vector(3 downto 0); -- Pending Items Counter
-   LAST_REQ               : in  std_logic; -- Is set when BE = 00 (end of transaction)
+   -- ==========================
+
+   -- Generate Abort Flag
+   GEN_ABORT_FLAG         : in  std_logic;
+   -- Waiting for all rdy signals
+   WAIT_FOR_ALL_RDY       : out std_logic;
+   -- Realize data_mux select
+   DATA_OUT_CNT           : in  std_logic_vector(1 downto 0);
+   -- Pending Items Counter
+   PENDING_CNT            : in  std_logic_vector(3 downto 0);
+   -- Is set when BE = 00 (end of transaction)
+   LAST_REQ               : in  std_logic;
+
+   -- ==========================
    -- Local Bus Output Interface
-   LB_ADS                 : out std_logic; -- Address Select
-   LB_RD                  : out std_logic; -- Read
-   LB_WR                  : out std_logic; -- Write
-   LB_ABORT               : out std_logic  -- Abort Generation
+   -- ==========================
+
+   -- Address Select
+   LB_ADS                 : out std_logic;
+   -- Read
+   LB_RD                  : out std_logic;
+   -- Write
+   LB_WR                  : out std_logic;
+   -- Abort Generation
+   LB_ABORT               : out std_logic
    );
 end entity LB_ROOT_CORE_FSM;
 

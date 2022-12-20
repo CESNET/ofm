@@ -32,26 +32,52 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 entity flashctrl is
    generic (
-      CLK_PERIOD : natural := 8; -- Period of the CLK (truncated when non-integer)
+      -- Period of the CLK (truncated when non-integer)
+      CLK_PERIOD : natural := 8;
       ADDR_WIDTH : integer := 27
    );
    port (
-      RESET     : in std_logic; -- sync reset
-      CLK       : in std_logic; -- clock
+      -- sync reset
+      RESET     : in std_logic;
+      -- clock
+      CLK       : in std_logic;
+
+      -- =================
       -- Command interface
-      DWR       : in  std_logic_vector(63 downto 0); -- Write data (cmd & data to be written to flash)
-      DWR_WR    : in  std_logic; -- command strobe
-      DRD       : out std_logic_vector(63 downto 0); -- Read data (data & status from flash)
-      -- FLASH interface --
-      AD        : out std_logic_vector(ADDR_WIDTH-1 downto 0 ); -- Flash address
-      D_I       : in  std_logic_vector(15 downto 0 ); -- Data from flash
-      D_O       : out std_logic_vector(15 downto 0 ); -- Data to flash
-      D_OE      : out std_logic;  -- D output enable (HI-Z on data disable). Active high
-      CS_N      : out std_logic;  -- Chip select
-      OE_N      : out std_logic;  -- Output drivers enable
-      RST_N     : out std_logic;  -- Flash reset
-      WE_N      : out std_logic;  -- Write anable
+      -- =================
+
+      -- Write data (cmd & data to be written to flash)
+      DWR       : in  std_logic_vector(63 downto 0);
+      -- command strobe
+      DWR_WR    : in  std_logic;
+      -- Read data (data & status from flash)
+      DRD       : out std_logic_vector(63 downto 0);
+
+      -- =================
+      -- FLASH interface
+      -- =================
+
+      -- Flash address
+      AD        : out std_logic_vector(ADDR_WIDTH-1 downto 0 );
+      -- Data from flash
+      D_I       : in  std_logic_vector(15 downto 0 );
+      -- Data to flash
+      D_O       : out std_logic_vector(15 downto 0 );
+      -- D output enable (HI-Z on data disable). Active high
+      D_OE      : out std_logic;
+      -- Chip select
+      CS_N      : out std_logic;
+      -- Output drivers enable
+      OE_N      : out std_logic;
+      -- Flash reset
+      RST_N     : out std_logic;
+      -- Write anable
+      WE_N      : out std_logic;
+
+      -- =====================
       --  Others FLASH signals
+      -- =====================
+
       -- WAIT      : in  std_logic;  -- Synchronous mode only      
       -- ADV_N     : out std_logic;  -- Synchronous mode only. Tie LOW 
       -- WP_N      : out std_logic;  -- Write protect - tie HIGH
@@ -63,11 +89,18 @@ end flashctrl;
 
 architecture structural of flashctrl is
   
+  -- ===================
   -- Flash Memory Timing
-  constant T_ACC  : integer := (105/CLK_PERIOD) + 1; -- Access time
-  constant T_PACC : integer := (25/CLK_PERIOD) + 1;  -- Page access time
-  constant T_WP   : integer := (50/CLK_PERIOD) + 1;  -- Write pulse low time
-  constant T_WPH  : integer := (20/CLK_PERIOD) + 1;  -- Write pulse high time;
+  -- ===================
+
+  -- Access time
+  constant T_ACC  : integer := (105/CLK_PERIOD) + 1;
+  -- Page access time
+  constant T_PACC : integer := (25/CLK_PERIOD) + 1;
+  -- Write pulse low time
+  constant T_WP   : integer := (50/CLK_PERIOD) + 1;
+  -- Write pulse high time;
+  constant T_WPH  : integer := (20/CLK_PERIOD) + 1;
   
   --
   type TYPE_CONFIG_FSM_STATE is ( STATE_IDLE,

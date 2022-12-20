@@ -21,25 +21,41 @@ use work.ib_pkg.all;
 -- ----------------------------------------------------------------------------
 entity IB_ENDPOINT_HDR_GEN_MASTER is
    port (
+      -- ========================
       -- Slave Interface
+      -- ========================
+
       RD_COMPL_DST_ADDR     : in  std_logic_vector(31 downto 0);
       RD_COMPL_SRC_ADDR     : in  std_logic_vector(31 downto 0);
       RD_COMPL_TAG          : in  std_logic_vector(15 downto 0);
       RD_COMPL_LENGTH       : in  std_logic_vector(11 downto 0);
               
+      -- ========================
       -- Master Interface
+      -- ========================
+
       MASTER_GLOBAL_ADDR    : in  std_logic_vector(63 downto 0);
       MASTER_LOCAL_ADDR     : in  std_logic_vector(31 downto 0);
       MASTER_TAG            : in  std_logic_vector(15 downto 0);
       MASTER_LENGTH         : in  std_logic_vector(11 downto 0);
 
+      -- ========================
       -- Control Interface
-      GET_SLAVE_MASTER      : in  std_logic; -- 0-Slave/1-Master
-      GET_SECOND_HDR        : in  std_logic; -- Get 0-First/1-Second header
-      GET_TRANS_TYPE        : in  std_logic_vector(1 downto 0); -- Transaction Type
+      -- ========================
 
+      -- 0-Slave/1-Master
+      GET_SLAVE_MASTER      : in  std_logic;
+      -- Get 0-First/1-Second header
+      GET_SECOND_HDR        : in  std_logic;
+      -- Transaction Type
+      GET_TRANS_TYPE        : in  std_logic_vector(1 downto 0);
+
+      -- ========================
       -- Output Interface
-      HEADER_DATA           : out std_logic_vector(63 downto 0) -- Header data
+      -- ========================
+
+      -- Header data
+      HEADER_DATA           : out std_logic_vector(63 downto 0)
       );
 end entity IB_ENDPOINT_HDR_GEN_MASTER;
 

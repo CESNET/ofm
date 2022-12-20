@@ -1,7 +1,7 @@
 .. _hdr_gen:
 
 PCIE HEADER PROCESSING
-============================
+======================
 
 .. vhdl:autoentity:: PCIE_RQ_HDR_GEN
 

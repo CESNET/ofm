@@ -29,13 +29,24 @@ use work.dma_bus_pack.all; -- contains definitions for MVB header fields
 
 entity DMA2MFB is
    generic (
+      -- =======================
       -- TX MVB characteristics
-      MVB_ITEMS       : integer := 2;   -- number of headers
+      -- =======================
+
+      -- number of headers
+      MVB_ITEMS       : integer := 2;
+      -- =======================
       -- TX MFB characteristics
-      MFB_REGIONS     : integer := 2;   -- number of regions in word
-      MFB_REG_SIZE    : integer := 1;   -- number of blocks in region
-      MFB_BLOCK_SIZE  : integer := 8;   -- number of items in block
-      MFB_ITEM_WIDTH  : integer := 32;  -- Width of one item (in bits)
+      -- =======================
+
+      -- number of regions in word
+      MFB_REGIONS     : integer := 2;
+      -- number of blocks in region
+      MFB_REG_SIZE    : integer := 1;
+      -- number of items in block
+      MFB_BLOCK_SIZE  : integer := 8;
+      -- Width of one item (in bits)
+      MFB_ITEM_WIDTH  : integer := 32;
 
       -- Width of MVB and DMA headers is defined in dma_bus_pack
       -- Width of MFB data and DMA data is MFB_REGIONS * MFB_REG_SIZE * MFB_BLOCK_SIZE * MFB_ITEM_WIDTH
@@ -52,16 +63,16 @@ entity DMA2MFB is
       DEVICE      : string  := "NONE"
    );
    port(
-      ---------------------------------------------------------------------------
+      -- ========================================================================
       -- Common interface
-      ---------------------------------------------------------------------------
+      -- ========================================================================
 
       CLK             : in  std_logic;
       RESET           : in  std_logic;
 
-      ---------------------------------------------------------------------------
+      -- ========================================================================
       -- RX DMA interface
-      ---------------------------------------------------------------------------
+      -- ========================================================================
 
       RX_DMA_UP_HDR     : in  std_logic_vector(DMA_UPHDR_WIDTH-1 downto 0);
       RX_DMA_UP_DATA    : in  std_logic_vector(MFB_REGIONS*MFB_REG_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH-1 downto 0);
@@ -70,18 +81,18 @@ entity DMA2MFB is
       RX_DMA_UP_SRC_RDY : in  std_logic;
       RX_DMA_UP_DST_RDY : out std_logic;
 
-      ---------------------------------------------------------------------------
+      -- ========================================================================
       -- TX MVB interface
-      ---------------------------------------------------------------------------
+      -- ========================================================================
 
       TX_MVB_UP_HDR      : out std_logic_vector(MVB_ITEMS*DMA_UPHDR_WIDTH-1 downto 0);
       TX_MVB_UP_VLD      : out std_logic_vector(MVB_ITEMS                -1 downto 0);
       TX_MVB_UP_SRC_RDY  : out std_logic;
       TX_MVB_UP_DST_RDY  : in  std_logic;
 
-      ---------------------------------------------------------------------------
+      -- ========================================================================
       -- TX MFB interface
-      ---------------------------------------------------------------------------
+      -- ========================================================================
 
       TX_MFB_UP_HDR     : out std_logic_vector(MFB_REGIONS*DMA_UPHDR_WIDTH-1 downto 0);
       TX_MFB_UP_DATA    : out std_logic_vector(MFB_REGIONS*MFB_REG_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH-1 downto 0);
@@ -100,9 +111,9 @@ end entity DMA2MFB;
 
 architecture full of DMA2MFB is
 
-   ---------------------------------------------------------------------------
+   -- ========================================================================
    -- Constants
-   ---------------------------------------------------------------------------
+   -- ========================================================================
 
    constant EOF_POS_WIDTH : integer := max(1,log2(MFB_REG_SIZE*MFB_BLOCK_SIZE));
 

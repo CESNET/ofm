@@ -16,9 +16,19 @@ entity i2c_op is
         CLK_CNT : ieee.numeric_std.unsigned(15 downto 0) := X"007D"
     );
     port (
-    RESET   : in   std_logic; -- sync reset
-    CLK     : in   std_logic; -- clock
+    -- =============
+    -- CLK and RST
+    -- =============
+
+    -- sync reset
+    RESET   : in   std_logic;
+    -- clock
+    CLK     : in   std_logic;
+
+    -- =============
     -- I2C interface 
+    -- =============
+
     SCL_I    : in  std_logic;
     SCL_O    : out std_logic;
     SCL_OEN  : out std_logic;
@@ -26,17 +36,26 @@ entity i2c_op is
     SDA_O    : out std_logic;
     SDA_OEN  : out std_logic;
     --
-    START   : in  std_logic; -- Start the read operation
-    WR      : in  std_logic; -- '0' = read, '1' = write
-    DEV     : in  std_logic_vector( 6 downto 0);   -- I2C bus device address
-    REG     : in  std_logic_vector( 7 downto 0);   -- I2C register address
-    DRD16   : in  std_logic := '0';                -- Do a 16 bit read
-    DRD     : out std_logic_vector(15 downto 0);   -- I2C read data (Slave -> master)
-    DWD     : in  std_logic_vector( 7 downto 0);   -- I2C write data (master -> slave)
-    ACK     : out std_logic; -- Operation acknowledge
-    ERROR   : out std_logic; -- Error during I2C operation (arbitration lost, destination not available)
-    BUSY    : out std_logic; -- 
-    DONE    : out std_logic  -- 
+    -- Start the read operation
+    START   : in  std_logic;
+    -- '0' = read, '1' = write
+    WR      : in  std_logic;
+    -- I2C bus device address
+    DEV     : in  std_logic_vector( 6 downto 0);
+    -- I2C register address
+    REG     : in  std_logic_vector( 7 downto 0);
+    -- Do a 16 bit read
+    DRD16   : in  std_logic := '0';
+    -- I2C read data (Slave -> master)
+    DRD     : out std_logic_vector(15 downto 0);
+    -- I2C write data (master -> slave)
+    DWD     : in  std_logic_vector( 7 downto 0);
+    -- Operation acknowledge
+    ACK     : out std_logic;
+    -- Error during I2C operation (arbitration lost, destination not available)
+    ERROR   : out std_logic;
+    BUSY    : out std_logic; 
+    DONE    : out std_logic 
     );
 end i2c_op;
 

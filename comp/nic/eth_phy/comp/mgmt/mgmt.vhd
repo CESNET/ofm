@@ -54,16 +54,26 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 entity mgmt is
    generic (
-      NUM_LANES : natural range 0 to 20 := 4; -- Max 20
-      PMA_LANES : natural range 0 to 10 := 4; -- Max 10
-      SPEED     : natural := 0;                             -- Surrent PMA/PCS speed. Replaces SPEEDxx when not zero
-      SPEED_CAP : std_logic_vector(15 downto 0) := X"0000"; -- Speed capabilities, see 802.3 table 45-6. Replaces GBASExx_ABLE when not zero.   
-      SPEED100G     : std_logic := '0';       -- Speed is 100G when '1'
-      SPEED10G      : std_logic := '0';       -- Speed is 10G  when '1'
-      GBASE40_ABLE  : std_logic := '1';       -- 40GE capable
-      GBASE100_ABLE : std_logic := '0';        -- 100GE capable
-      RSFEC_ABLE    : std_logic := '0';        -- Clause 91 RS-FEC capable
-      PMA_CONTROL_INIT    : std_logic_vector(31 downto 0) := (others => '0'); -- PMA_CONTROL power-up and reset defaults
+      -- Max 20
+      NUM_LANES : natural range 0 to 20 := 4;
+      -- Max 10
+      PMA_LANES : natural range 0 to 10 := 4;
+      -- Surrent PMA/PCS speed. Replaces SPEEDxx when not zero
+      SPEED     : natural := 0;
+      -- Speed capabilities, see 802.3 table 45-6. Replaces GBASExx_ABLE when not zero.   
+      SPEED_CAP : std_logic_vector(15 downto 0) := X"0000";
+      -- Speed is 100G when '1'
+      SPEED100G     : std_logic := '0';
+      -- Speed is 10G  when '1'
+      SPEED10G      : std_logic := '0';
+      -- 40GE capable
+      GBASE40_ABLE  : std_logic := '1';
+      -- 100GE capable
+      GBASE100_ABLE : std_logic := '0';
+      -- Clause 91 RS-FEC capable
+      RSFEC_ABLE    : std_logic := '0';
+      -- PMA_CONTROL power-up and reset defaults
+      PMA_CONTROL_INIT    : std_logic_vector(31 downto 0) := (others => '0');
       PMA_PRECURSOR_INIT  : std_logic_vector(31 downto 0) := (others => '0');  
       PMA_POSTCURSOR_INIT : std_logic_vector(31 downto 0) := (others => '0'); 
       PMA_DRIVE_INIT      : std_logic_vector(31 downto 0) := (others => '0');
@@ -75,7 +85,10 @@ entity mgmt is
    );
    port (
       RESET       : in  std_logic; 
+      -- =====================================================================
       -- MI32 interface
+      -- =====================================================================
+
       MI_CLK      : in  std_logic;
       MI_DWR      : in  std_logic_vector(31 downto 0);
       MI_ADDR     : in  std_logic_vector(31 downto 0);
@@ -85,61 +98,120 @@ entity mgmt is
       MI_DRD      : out std_logic_vector(31 downto 0);
       MI_ARDY     : out std_logic;
       MI_DRDY     : out std_logic;
+
+      -- =====================================================================
+      -- PCS and PMA CLK
+      --
       -- Following clock are unused - left for interface compatibility only
-      PCSCLK      : in  std_logic := '0'; -- PCS clock (156.25MHz)
-      PMACLK      : in  std_logic := '0'; -- PMA clock (159.xxMHz)
+      -- =====================================================================
+
+      -- PCS clock (156.25MHz)
+      PCSCLK      : in  std_logic := '0';
+      -- PMA clock (159.xxMHz)
+      PMACLK      : in  std_logic := '0';
+
+      -- =====================================================================
       -- PCS control/status
-      HI_BER        : in std_logic; -- BER monitor HI BER
-      BLK_LOCK      : in std_logic_vector(NUM_LANES-1 downto 0); -- Block sync lock for each lane
-      LINKSTATUS    : in std_logic; -- RX link status (=aligned and !hi_ber)
-      BER_COUNT     : in std_logic_vector(21 downto 0);  -- BER monitor number of errored blocks for each lane
-      BER_COUNT_CLR : out std_logic;                     -- Clear block count in the block sync
-      BLK_ERR_CNTR  : in  std_logic_vector(21 downto 0); -- Block decode error counter
-      BLK_ERR_CLR   : out std_logic;                     -- Clear errored block counter in the decoder
-      SCR_BYPASS    : out std_logic_vector(1 downto 0);  -- Bypass the RX scrambler (bit 0) and TX scrambler (bit 1) - MI_CLK domain
-      PCS_RESET     : out std_logic;                     -- Reset the PCS block
-      PCS_LPBCK     : out std_logic;                     -- PCS loopback enable 
+      -- =====================================================================
+
+      -- BER monitor HI BER
+      HI_BER        : in std_logic;
+      -- Block sync lock for each lane
+      BLK_LOCK      : in std_logic_vector(NUM_LANES-1 downto 0);
+      -- RX link status (=aligned and !hi_ber)
+      LINKSTATUS    : in std_logic;
+      -- BER monitor number of errored blocks for each lane
+      BER_COUNT     : in std_logic_vector(21 downto 0);
+      -- Clear block count in the block sync
+      BER_COUNT_CLR : out std_logic;
+      -- Block decode error counter
+      BLK_ERR_CNTR  : in  std_logic_vector(21 downto 0);
+      -- Clear errored block counter in the decoder
+      BLK_ERR_CLR   : out std_logic;
+      -- Bypass the RX scrambler (bit 0) and TX scrambler (bit 1) - MI_CLK domain
+      SCR_BYPASS    : out std_logic_vector(1 downto 0);
+      -- Reset the PCS block
+      PCS_RESET     : out std_logic;
+      -- PCS loopback enable 
+      PCS_LPBCK     : out std_logic;
       -- Lane align
       ALGN_LOCKED   : in  std_logic;
-      BIP_ERR_CNTRS : in  std_logic_vector(NUM_LANES*16-1 downto 0); -- BIP error counters
-      BIP_ERR_CLR   : out std_logic_vector(NUM_LANES-1 downto 0);    -- Clear BIP error counter for individual lane
-      LANE_MAP      : in  std_logic_vector(NUM_LANES*5-1 downto 0);  -- PCS lane mapping
-      LANE_ALIGN    : in  std_logic_vector(NUM_LANES-1 downto 0);    -- PCS lane align for individual lanes
+      -- BIP error counters
+      BIP_ERR_CNTRS : in  std_logic_vector(NUM_LANES*16-1 downto 0);
+      -- Clear BIP error counter for individual lane
+      BIP_ERR_CLR   : out std_logic_vector(NUM_LANES-1 downto 0);
+      -- PCS lane mapping
+      LANE_MAP      : in  std_logic_vector(NUM_LANES*5-1 downto 0);
+      -- PCS lane align for individual lanes
+      LANE_ALIGN    : in  std_logic_vector(NUM_LANES-1 downto 0);
+
+      -- =====================================================================
       -- PMA control
-      PMA_LOPWR     : out std_logic; -- Turn the PMA into lo-power state
+      -- =====================================================================
+
+      -- Turn the PMA into lo-power state
+      PMA_LOPWR     : out std_logic;
       PMA_LPBCK     : out std_logic;
       PMA_REM_LPBCK : out std_logic;
       PMA_RESET     : out std_logic;
       PMA_RETUNE    : out std_logic;
-      PMA_CONTROL   : out std_logic_vector(31 downto 0); -- Vendor specific PMA control
-      PMA_STATUS    : in  std_logic_vector(31 downto 0) := (others => '0'); -- Vendor specific PMA status: startup FSM states
-      PMA_PTRN_EN   : out std_logic := '0'; -- Pattern generator enable
-      PMA_TX_DIS    : out std_logic_vector(PMA_LANES-1 downto 0); -- PMA transmitt disable for individual lanes
-      PMA_RX_OK     : in  std_logic_vector(PMA_LANES-1 downto 0); -- PMA RX link ok
-      PMD_SIG_DET   : in  std_logic_vector(PMA_LANES-1 downto 0); --
-      PMA_PRECURSOR : out std_logic_vector(31 downto 0); -- TX driver precursor for preemphasis control
-      PMA_POSTCURSOR: out std_logic_vector(31 downto 0); -- TX driver postcursor for preemphasis control
-      PMA_DRIVE     : out std_logic_vector(31 downto 0); -- TX driver swing control
+      -- Vendor specific PMA control
+      PMA_CONTROL   : out std_logic_vector(31 downto 0);
+      -- Vendor specific PMA status: startup FSM states
+      PMA_STATUS    : in  std_logic_vector(31 downto 0) := (others => '0');
+      -- Pattern generator enable
+      PMA_PTRN_EN   : out std_logic := '0';
+      -- PMA transmitt disable for individual lanes
+      PMA_TX_DIS    : out std_logic_vector(PMA_LANES-1 downto 0);
+      -- PMA RX link ok
+      PMA_RX_OK     : in  std_logic_vector(PMA_LANES-1 downto 0);
+      PMD_SIG_DET   : in  std_logic_vector(PMA_LANES-1 downto 0);
+      -- TX driver precursor for preemphasis control
+      PMA_PRECURSOR : out std_logic_vector(31 downto 0);
+      -- TX driver postcursor for preemphasis control
+      PMA_POSTCURSOR: out std_logic_vector(31 downto 0);
+      -- TX driver swing control
+      PMA_DRIVE     : out std_logic_vector(31 downto 0);
+
+      -- =====================================================================
       -- Clause 91 RS-FEC control/status
+      -- =====================================================================
+
       FEC_TX_EN     :  out std_logic;
       FEC_RX_EN     :  out std_logic;
-      FEC_COR_EN    :  out std_logic; -- FEC correction enable
-      FEC_IND_EN    :  out std_logic; -- FEC error indication enable
-      FEC_AM_LOCK   :  in  std_logic_vector(4-1 downto 0) := (others => '0');  --
-      FEC_HI_SER    :  in  std_logic := '0';  --
-      FEC_ALGN_STAT :  in  std_logic := '0';  --
-      FEC_LANE_MAP  :  in  std_logic_vector(7 downto 0) := (others => '0');      -- 1.206:     RS-FEC lane mapping 
-      FEC_SYM_ERR       :  in  std_logic_vector(4*32-1 downto 0) := (others => '0'); -- 1.210-207: Symbol error conters for lane 0-3
-      FEC_SYM_ERR_CLR   :  out std_logic_vector(3 downto 0); -- Clear the counters
-      FEC_COR_ERR       :  in  std_logic_vector(32-1 downto 0) := (others => '0');    -- 1.202,203: RS-FEC corrected codewords counter
-      FEC_COR_ERR_CLR   :  out std_logic; -- Clear the counter
-      FEC_UNCOR_ERR     :  in  std_logic_vector(32-1 downto 0) := (others => '0');    -- 1.204,205: RS-FEC uncorrected codewords counter
-      FEC_UNCOR_ERR_CLR :  out std_logic; -- Clear the counter
-      FEC_TX_BIP        :  in  std_logic_vector(16*20-1 downto 0) := (others => '0'); -- 1.230-249: RS-FEC BIP error counters, lane 0 to 19 
-      FEC_TX_LANE_MAP   :  in  std_logic_vector(16*20-1 downto 0) := (others => '0'); -- 1.250-269: RS-FEC PCS lane mapping, lane 0 to 19
-      FEC_TX_BLK_LOCK   :  in  std_logic_vector(20-1 downto 0) := (others => '0');    -- 1.280-281: RS-FEC PCS alignment status 1 through 4 
-      FEC_TX_ALGN_STAT  :  in  std_logic_vector(20-1 downto 0) := (others => '0');    -- 1.282-283: RS-FEC PCS alignment status 3 through 4
+      -- FEC correction enable
+      FEC_COR_EN    :  out std_logic;
+      -- FEC error indication enable
+      FEC_IND_EN    :  out std_logic;
+      FEC_AM_LOCK   :  in  std_logic_vector(4-1 downto 0) := (others => '0');
+      FEC_HI_SER    :  in  std_logic := '0';
+      FEC_ALGN_STAT :  in  std_logic := '0';
+      -- 1.206:     RS-FEC lane mapping 
+      FEC_LANE_MAP  :  in  std_logic_vector(7 downto 0) := (others => '0');
+      -- 1.210-207: Symbol error conters for lane 0-3
+      FEC_SYM_ERR       :  in  std_logic_vector(4*32-1 downto 0) := (others => '0');
+      -- Clear the counters
+      FEC_SYM_ERR_CLR   :  out std_logic_vector(3 downto 0);
+      -- 1.202,203: RS-FEC corrected codewords counter
+      FEC_COR_ERR       :  in  std_logic_vector(32-1 downto 0) := (others => '0');
+      -- Clear the counter
+      FEC_COR_ERR_CLR   :  out std_logic;
+      -- 1.204,205: RS-FEC uncorrected codewords counter
+      FEC_UNCOR_ERR     :  in  std_logic_vector(32-1 downto 0) := (others => '0');
+      -- Clear the counter
+      FEC_UNCOR_ERR_CLR :  out std_logic;
+      -- 1.230-249: RS-FEC BIP error counters, lane 0 to 19 
+      FEC_TX_BIP        :  in  std_logic_vector(16*20-1 downto 0) := (others => '0');
+      -- 1.250-269: RS-FEC PCS lane mapping, lane 0 to 19
+      FEC_TX_LANE_MAP   :  in  std_logic_vector(16*20-1 downto 0) := (others => '0');
+      -- 1.280-281: RS-FEC PCS alignment status 1 through 4 
+      FEC_TX_BLK_LOCK   :  in  std_logic_vector(20-1 downto 0) := (others => '0');
+      -- 1.282-283: RS-FEC PCS alignment status 3 through 4
+      FEC_TX_ALGN_STAT  :  in  std_logic_vector(20-1 downto 0) := (others => '0');
+
+      -- =====================================================================
       -- DRP interface for transceivers etc.
+      -- =====================================================================
       DRPCLK            : in  std_logic := '0';
       DRPDO             : in  std_logic_vector(DRP_DWIDTH-1 downto 0) := (others => '0');
       DRPRDY            : in  std_logic := '0';

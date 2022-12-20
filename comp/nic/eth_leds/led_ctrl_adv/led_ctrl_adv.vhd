@@ -23,27 +23,39 @@ use IEEE.std_logic_arith.all;
 entity LED_CTRL_ADV is
    generic (
       -- Length of the internal counter, determines period of blinks
-      CLK_PERIOD        : natural   := 8;   -- CLK Period in ns
-      ON_VAL            : std_logic := '0'  -- LED On value ('0' or '1')
+      -- CLK Period in ns
+      CLK_PERIOD        : natural   := 8;
+      -- LED On value ('0' or '1')
+      ON_VAL            : std_logic := '0'
    );
    port (
       -- Clock signal
       CLK                  : in std_logic;
 
-      PRESENT              : in std_logic; -- interface present (MAC, PMA and PCS implemented, at least one of RX or TX directions)
-      ENABLED              : in std_logic; -- interface enabled by software, async
-      LINE_UP              : in std_logic; -- '1' when coresponding PCS line is up, '0' otherwise, async 
-      RX_ACTIVITY          : in std_logic; -- RX acitivity, CLK synchronous pulse !!!
-      TX_ACTIVITY          : in std_logic; -- TX acitivity, CLK synchronous pulse !!!
-      MOD_ABS              : in std_logic; -- optical module absent, async
-      MOD_RX_LOS           : in std_logic; -- optical module RX signal loss, async
-      --
-      INTENSITY_R          : in std_logic_vector(3 downto 0) := "1111"; -- red LED intesity (PWM): "0000" = almost off, "1111" = full
-      INTENSITY_G          : in std_logic_vector(3 downto 0) := "1111"; -- green LED intesity (PWM): "0000" = almost off, "1111" = full      
+      -- interface present (MAC, PMA and PCS implemented, at least one of RX or TX directions)
+      PRESENT              : in std_logic;
+      -- interface enabled by software, async
+      ENABLED              : in std_logic;
+      -- '1' when coresponding PCS line is up, '0' otherwise, async 
+      LINE_UP              : in std_logic;
+      -- RX acitivity, CLK synchronous pulse !!!
+      RX_ACTIVITY          : in std_logic;
+      -- TX acitivity, CLK synchronous pulse !!!
+      TX_ACTIVITY          : in std_logic;
+      -- optical module absent, async
+      MOD_ABS              : in std_logic;
+      -- optical module RX signal loss, async
+      MOD_RX_LOS           : in std_logic;
+
+      -- red LED intesity (PWM): "0000" = almost off, "1111" = full
+      INTENSITY_R          : in std_logic_vector(3 downto 0) := "1111";
+      -- green LED intesity (PWM): "0000" = almost off, "1111" = full      
+      INTENSITY_G          : in std_logic_vector(3 downto 0) := "1111";
       --
       LED_RED              : out std_logic;
       LED_GREEN            : out std_logic;
-      SYNC                 : out std_logic -- One-cycle pulse synchronization
+      -- One-cycle pulse synchronization
+      SYNC                 : out std_logic
    );
 
 end entity;

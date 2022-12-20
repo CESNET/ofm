@@ -14,11 +14,23 @@ use work.math_pack.all;
 
 entity MFB_ASFIFOX is
     generic(
+        -- ==================
         -- MFB specification
-        MFB_REGIONS                 : integer := 4; -- any possitive value
-        MFB_REG_SIZE             : integer := 8; -- any possitive value
-        MFB_BLOCK_SIZE              : integer := 8; -- any possitive value
-        MFB_ITEM_WIDTH              : integer := 8; -- any possitive value
+        -- ==================
+
+        -- any possitive value
+        MFB_REGIONS                 : integer := 4;
+        -- any possitive value
+        MFB_REG_SIZE                : integer := 8;
+        -- any possitive value
+        MFB_BLOCK_SIZE              : integer := 8;
+        -- any possitive value
+        MFB_ITEM_WIDTH              : integer := 8;
+
+        -- ==================
+        -- FIFO PARAMETERS
+        -- ==================
+
         -- FIFO depth in number of data words, must be power of two!
         -- Minimum value is 2.
         FIFO_ITEMS               : natural := 512;

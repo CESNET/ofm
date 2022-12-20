@@ -32,12 +32,14 @@ end entity TESTBENCH;
 -- ============================================================================
 architecture BEHAVIORAL of TESTBENCH is
 
-    constant DEVICE        : string  := "AGILEX"; -- target device: STRATIX10 (Intel), AGILEX (Intel), 7SERIES (Xilinx), ULTRASCALE (Xilinx)
+    -- target device: STRATIX10 (Intel), AGILEX (Intel), 7SERIES (Xilinx), ULTRASCALE (Xilinx)
+    constant DEVICE        : string  := "AGILEX";
     constant INPUT_REGS    : boolean := true;
     constant INPUT_WIDTH   : natural := 27;
     constant OUTPUT_WIDTH  : natural := 64;
     constant DSP_ENABLE    : boolean := true;
-    constant LENGHT_OF_SIM : natural := 100000; -- number of clock cycles the simulation should run for - this must concur with the length of sumulation defined in sim_sig.fdo ("run ... us")
+    -- number of clock cycles the simulation should run for - this must concur with the length of sumulation defined in sim_sig.fdo ("run ... us")
+    constant LENGHT_OF_SIM : natural := 100000;
     constant CLK_PERIOD : time := 10 ns;
 
     -- setting signals

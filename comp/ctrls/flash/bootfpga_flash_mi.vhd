@@ -34,18 +34,30 @@ port(
    MI_ARDY     : out std_logic;
    MI_DRDY     : out std_logic;
    --
-   AD        : out std_logic_vector(26 downto 0 ); -- Flash address
-   D_I       : in  std_logic_vector(15 downto 0 ); -- Data from flash
-   D_O       : out std_logic_vector(15 downto 0 ); -- Data to flash
-   D_OE      : out std_logic;  -- D output enable (HI-Z on data disable). Active high
-   CS_N      : out std_logic;  -- Chip select
-   OE_N      : out std_logic;  -- Output drivers enable
-   RST_N     : out std_logic;  -- Flash reset
-   WE_N      : out std_logic;   -- Write anable
-   FWAIT      : in  std_logic;  -- Synchronous mode only      
-   ADV_N     : out std_logic;  -- Synchronous mode only. Tie LOW 
-   WP_N      : out std_logic;  -- Write protect - tie HIGH
-   FCLK      : out std_logic  -- synchronous mode flash clock - tie LOW or HIGH
+   -- Flash address
+   AD        : out std_logic_vector(26 downto 0 );
+   -- Data from flash
+   D_I       : in  std_logic_vector(15 downto 0 );
+   -- Data to flash
+   D_O       : out std_logic_vector(15 downto 0 );
+   -- D output enable (HI-Z on data disable). Active high
+   D_OE      : out std_logic;
+   -- Chip select
+   CS_N      : out std_logic;
+   -- Output drivers enable
+   OE_N      : out std_logic;
+   -- Flash reset
+   RST_N     : out std_logic;
+   -- Write anable
+   WE_N      : out std_logic;
+   -- Synchronous mode only      
+   FWAIT      : in  std_logic;
+   -- Synchronous mode only. Tie LOW 
+   ADV_N     : out std_logic;
+   -- Write protect - tie HIGH
+   WP_N      : out std_logic;
+   -- synchronous mode flash clock - tie LOW or HIGH
+   FCLK      : out std_logic
    
 );
 end bootfpga_flash_mi;

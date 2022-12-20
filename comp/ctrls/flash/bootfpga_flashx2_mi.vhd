@@ -27,7 +27,11 @@ generic (
 port(
    CLK         : in  std_logic;
    RESET       : in  std_logic;
-   -- 
+
+   -- ============
+   -- MI interface
+   -- ============
+
    MI_DWR      : in  std_logic_vector(31 downto 0);
    MI_ADDR     : in  std_logic_vector(31 downto 0);
    MI_RD       : in  std_logic;
@@ -36,29 +40,62 @@ port(
    MI_DRD      : out std_logic_vector(31 downto 0);
    MI_ARDY     : out std_logic;
    MI_DRDY     : out std_logic;
-   -- FLASH common - address + data
-   AD        : out std_logic_vector(26 downto 0 ); -- Flash address
-   D_I       : in  std_logic_vector(31 downto 0 ); -- Data from flash
-   D_O       : out std_logic_vector(31 downto 0 ); -- Data to flash
-   FCLK      : out std_logic;  -- synchronous mode flash clock 
+   -- ==============
+   -- FLASH common
+   --
+   -- address + data
+   -- ==============
+
+   -- Flash address
+   AD        : out std_logic_vector(26 downto 0 );
+   -- Data from flash
+   D_I       : in  std_logic_vector(31 downto 0 );
+   -- Data to flash
+   D_O       : out std_logic_vector(31 downto 0 );
+   -- synchronous mode flash clock 
+   FCLK      : out std_logic;
+
+   -- ==============
    -- FLASH1 control
-   D_OE_1    : out std_logic;  -- D output enable (HI-Z on data disable). Active high
-   CS_N_1    : out std_logic;  -- Chip select
-   OE_N_1    : out std_logic;  -- Output drivers enable
-   RST_N_1   : out std_logic;  -- Flash reset
-   WE_N_1    : out std_logic;  -- Write anable
-   FWAIT_1   : in  std_logic;  -- Synchronous mode only      
-   ADV_N_1   : out std_logic;  -- Synchronous mode only
-   WP_N_1    : out std_logic;  -- Write protect
+   -- ==============
+
+   -- D output enable (HI-Z on data disable). Active high
+   D_OE_1    : out std_logic;
+   -- Chip select
+   CS_N_1    : out std_logic;
+   -- Output drivers enable
+   OE_N_1    : out std_logic;
+   -- Flash reset
+   RST_N_1   : out std_logic;
+   -- Write anable
+   WE_N_1    : out std_logic;
+   -- Synchronous mode only      
+   FWAIT_1   : in  std_logic;
+   -- Synchronous mode only
+   ADV_N_1   : out std_logic;
+   -- Write protect
+   WP_N_1    : out std_logic;
+
+   -- ==============
    -- FLASH2 control
-   D_OE_2    : out std_logic;  -- D output enable (HI-Z on data disable). Active high
-   CS_N_2    : out std_logic;  -- Chip select
-   OE_N_2    : out std_logic;  -- Output drivers enable
-   RST_N_2   : out std_logic;  -- Flash reset
-   WE_N_2    : out std_logic;   -- Write anable
-   FWAIT_2   : in  std_logic;  -- Synchronous mode only      
-   ADV_N_2   : out std_logic;  -- Synchronous mode only
-   WP_N_2    : out std_logic   -- Write protect
+   -- ==============
+
+   -- D output enable (HI-Z on data disable). Active high
+   D_OE_2    : out std_logic;
+   -- Chip select
+   CS_N_2    : out std_logic;
+   -- Output drivers enable
+   OE_N_2    : out std_logic;
+   -- Flash reset
+   RST_N_2   : out std_logic;
+    -- Write anable
+   WE_N_2    : out std_logic;
+   -- Synchronous mode only      
+   FWAIT_2   : in  std_logic;
+   -- Synchronous mode only
+   ADV_N_2   : out std_logic;
+   -- Write protect
+   WP_N_2    : out std_logic
 );
 end bootfpga_flashx2_mi;
 

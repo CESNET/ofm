@@ -22,13 +22,26 @@ entity RR_ARBITER is
       PORTS                 : integer := 2
    );
    port(
+      -- ============
       -- FPGA control
-      CLK                   : in  std_logic;  -- 100  MHz FPGA clock
-      RESET                 : in  std_logic;  -- Reset
-      ENABLE                : in  std_logic;  -- Enable
+      -- ============
+
+      -- 100  MHz FPGA clock
+      CLK                   : in  std_logic;
+      -- Reset
+      RESET                 : in  std_logic;
+      -- Enable
+      ENABLE                : in  std_logic;
+
+      -- ===============
       -- Input Interface
+      -- ===============
+
       RQ                    : in  std_logic_vector(PORTS-1 downto 0);
+      -- ================
       -- Output Interface
+      -- ================
+
       ACK                   : out std_logic_vector(PORTS-1 downto 0)
    );
 end entity RR_ARBITER;

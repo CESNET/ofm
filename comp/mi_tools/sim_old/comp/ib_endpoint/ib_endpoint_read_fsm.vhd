@@ -23,41 +23,82 @@ entity IB_ENDPOINT_READ_FSM is
      STRICT_EN     : boolean:= false
    );
    port(
+   -- ========================
    -- Common Interface
-   CLK              : in std_logic;  -- Clk
-   RESET            : in std_logic;  -- Reset
-   IDLE             : out std_logic; -- FSM is Idle (For Strict Version)
-   WRITE_FSM_IDLE   : in  std_logic; -- Write FSM is Idle (For Strict Version)
+   -- ========================
 
+   -- Clk
+   CLK              : in std_logic;
+   -- Reset
+   RESET            : in std_logic;
+   -- FSM is Idle (For Strict Version)
+   IDLE             : out std_logic;
+   -- Write FSM is Idle (For Strict Version)
+   WRITE_FSM_IDLE   : in  std_logic;
+
+   -- ========================
    -- SHR_IN Interface
-   DATA_VLD         : in  std_logic; -- Data from Shift Reg is valid
-   SOP              : in  std_logic; -- Start of Packet
-   SHR_RE           : out std_logic; -- Read Data from shift reg
+   -- ========================
 
+   -- Data from Shift Reg is valid
+   DATA_VLD         : in  std_logic;
+   -- Start of Packet
+   SOP              : in  std_logic;
+   -- Read Data from shift reg
+   SHR_RE           : out std_logic;
+
+   -- =========================
    -- Address Decoder Interface
-   READ_TRANS       : in  std_logic; -- Processing read transaction
+   -- =========================
+
+   -- Processing read transaction
+   READ_TRANS       : in  std_logic;
    
+   -- ==========================
    -- Component status interface
-   LAST_READ_REQ    : in std_logic;   -- Last Read Req
+   -- ==========================
 
+   -- Last Read Req
+   LAST_READ_REQ    : in std_logic;
+
+   -- ========================
    -- Register control interface
-   ADDR_WE          : out std_logic;  -- Store Addr into addr_cnt and addr_align
-   TAG_WE           : out std_logic;  -- Store Tag into tag register
-   LENGHT_WE        : out std_logic;  -- Store lenght for Align circuit
-   DST_ADDR_WE      : out std_logic;  -- Store dst_addr into register
+   -- ========================
 
+   -- Store Addr into addr_cnt and addr_align
+   ADDR_WE          : out std_logic;
+   -- Store Tag into tag register
+   TAG_WE           : out std_logic;
+   -- Store lenght for Align circuit
+   LENGHT_WE        : out std_logic;
+   -- Store dst_addr into register
+   DST_ADDR_WE      : out std_logic;
+
+   -- ========================
    -- Component Init interface
-   INIT_BE          : out std_logic;  -- Init BE circuit
+   -- ========================
+
+   -- Init BE circuit
+   INIT_BE          : out std_logic;
    READ_ALIGN_INIT  : out std_logic;
-   RD_COMPL_REQ     : out std_logic;  -- RD Completition Req
-   RD_COMPL_ACK     : in  std_logic;  -- RD Completition Ack
+   -- RD Completition Req
+   RD_COMPL_REQ     : out std_logic;
+   -- RD Completition Ack
+   RD_COMPL_ACK     : in  std_logic;
 
 
+   -- ========================
    -- Read Interface
-   RD_SOF_IN        : out std_logic;  -- Start of frame (Start of transaction)
-   RD_EOF_IN        : out std_logic;  -- Ent of frame (End of Transaction)
-   RD_REQ           : out std_logic;  -- Read from User Component
-   RD_ARDY          : in  std_logic   -- Adress RDY
+   -- ========================
+
+   -- Start of frame (Start of transaction)
+   RD_SOF_IN        : out std_logic;
+   -- Ent of frame (End of Transaction)
+   RD_EOF_IN        : out std_logic;
+   -- Read from User Component
+   RD_REQ           : out std_logic;
+   -- Adress RDY
+   RD_ARDY          : in  std_logic
    );
 end entity IB_ENDPOINT_READ_FSM;
 

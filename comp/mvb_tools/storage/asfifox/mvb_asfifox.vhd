@@ -17,7 +17,8 @@ entity MVB_ASFIFOX is
         -- Number of ITEMS in one Word
         MVB_ITEMS                   : integer := 4;
         -- Width of one MVB item
-        MVB_ITEM_WIDTH              : integer := 8; -- any possitive value
+        -- any possitive value
+        MVB_ITEM_WIDTH              : integer := 8;
         -- FIFO depth in number of data words, must be power of two!
         -- Minimum value is 2.
         FIFO_ITEMS               : natural := 512;

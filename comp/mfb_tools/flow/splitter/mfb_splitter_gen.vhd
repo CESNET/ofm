@@ -15,15 +15,34 @@ use work.type_pack.all;
 
 entity MFB_SPLITTER_GEN is
     generic(
-        SPLITTER_OUTPUTS : integer := 2;  -- number of splitter outputs
+        -- number of splitter outputs
+        SPLITTER_OUTPUTS : integer := 2;
+
+        -- ===================
         -- MVB characteristics
-        MVB_ITEMS        : integer := 2;  -- number of headers
-        MVB_ITEM_WIDTH   : integer := 32; -- width of header
+        -- ===================
+
+        -- number of headers
+        MVB_ITEMS        : integer := 2;
+        -- width of header
+        MVB_ITEM_WIDTH   : integer := 32;
+
+        -- ===================
         -- MFB characteristics
-        MFB_REGIONS      : integer := 2;  -- number of regions in word
-        MFB_REG_SIZE     : integer := 1;  -- number of blocks in region
-        MFB_BLOCK_SIZE   : integer := 8;  -- number of items in block
-        MFB_ITEM_WIDTH   : integer := 32; -- width  of one item (in bits)
+        -- ===================
+
+        -- number of regions in word
+        MFB_REGIONS      : integer := 2;
+        -- number of blocks in region
+        MFB_REG_SIZE     : integer := 1;
+        -- number of items in block
+        MFB_BLOCK_SIZE   : integer := 8;
+        -- width  of one item (in bits)
+        MFB_ITEM_WIDTH   : integer := 32;
+
+        -- ===================
+        -- Others
+        -- ===================
 
         -- Size of output MVB FIFOs (in words)
         -- Minimum value is 2!
@@ -32,23 +51,26 @@ entity MFB_SPLITTER_GEN is
         -- Output PIPE enable for all 2:1 splitters
         OUT_PIPE_EN     : boolean := true;
 
-        DEVICE          : string  := "ULTRASCALE" -- "ULTRASCALE", "STRATIX10",...
+        -- "ULTRASCALE", "STRATIX10",...
+        DEVICE          : string  := "ULTRASCALE"
     );
     port(
-        ---------------------------------------------------------------------------
+        -- ===================
         -- Common interface
-        ---------------------------------------------------------------------------
+        -- ===================
 
         CLK            : in  std_logic;
         RESET          : in  std_logic;
 
-        ---------------------------------------------------------------------------
+        -- ===================
         -- RX interfaces
-        ---------------------------------------------------------------------------
+        -- ===================
 
         RX_MVB_DATA    : in  std_logic_vector(MVB_ITEMS*MVB_ITEM_WIDTH-1 downto 0);
-        RX_MVB_SWITCH  : in  std_logic_vector(MVB_ITEMS*log2(SPLITTER_OUTPUTS)-1 downto 0); -- output select for each header
-        RX_MVB_PAYLOAD : in  std_logic_vector(MVB_ITEMS-1 downto 0); -- the header is associated with a payload frame on MFB
+        -- output select for each header
+        RX_MVB_SWITCH  : in  std_logic_vector(MVB_ITEMS*log2(SPLITTER_OUTPUTS)-1 downto 0);
+        -- the header is associated with a payload frame on MFB
+        RX_MVB_PAYLOAD : in  std_logic_vector(MVB_ITEMS-1 downto 0);
         RX_MVB_VLD     : in  std_logic_vector(MVB_ITEMS-1 downto 0);
         RX_MVB_SRC_RDY : in  std_logic;
         RX_MVB_DST_RDY : out std_logic;
@@ -61,12 +83,13 @@ entity MFB_SPLITTER_GEN is
         RX_MFB_SRC_RDY : in  std_logic;
         RX_MFB_DST_RDY : out std_logic;
 
-        ---------------------------------------------------------------------------
+        -- ===================
         -- TX interface
-        ---------------------------------------------------------------------------
+        -- ===================
 
         TX_MVB_DATA    : out slv_array_t     (SPLITTER_OUTPUTS-1 downto 0)(MVB_ITEMS*MVB_ITEM_WIDTH-1 downto 0);
-        TX_MVB_PAYLOAD : out slv_array_t     (SPLITTER_OUTPUTS-1 downto 0)(MVB_ITEMS-1 downto 0); -- the header is associated with a payload frame on MFB
+        -- the header is associated with a payload frame on MFB
+        TX_MVB_PAYLOAD : out slv_array_t     (SPLITTER_OUTPUTS-1 downto 0)(MVB_ITEMS-1 downto 0);
         TX_MVB_VLD     : out slv_array_t     (SPLITTER_OUTPUTS-1 downto 0)(MVB_ITEMS-1 downto 0);
         TX_MVB_SRC_RDY : out std_logic_vector(SPLITTER_OUTPUTS-1 downto 0);
         TX_MVB_DST_RDY : in  std_logic_vector(SPLITTER_OUTPUTS-1 downto 0);

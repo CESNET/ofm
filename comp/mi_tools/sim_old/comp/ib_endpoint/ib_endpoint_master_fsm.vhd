@@ -23,34 +23,67 @@ entity IB_ENDPOINT_MASTER_FSM is
       STRICT_EN  : boolean
    );
    port (
+   -- ========================
    -- Common Interface
-   CLK              : in std_logic;  -- Clk
-   RESET            : in std_logic;  -- Reset
+   -- ========================
+
+   -- Clk
+   CLK              : in std_logic;
+   -- Reset
+   RESET            : in std_logic;
    IDLE             : out std_logic;
    WRITE_FSM_IDLE   : in  std_logic;
 
+   -- ========================
    -- BusMaster Interface
-   BM_REQ           : in  std_logic; -- Busmaster Request (Request for BM operation)
-   BM_ACK           : in  std_logic; -- Acknowledge from upstream FSM (transaction was sended)
-   BM_READ_ACK      : in  std_logic; -- Busmaster FSM can read data (Upstream FSM RDY)
-   BM_TRANS_TYPE    : in  std_logic_vector(1 downto 0); -- Type
+   -- ========================
 
+   -- Busmaster Request (Request for BM operation)
+   BM_REQ           : in  std_logic;
+   -- Acknowledge from upstream FSM (transaction was sended)
+   BM_ACK           : in  std_logic;
+   -- Busmaster FSM can read data (Upstream FSM RDY)
+   BM_READ_ACK      : in  std_logic;
+   -- Type
+   BM_TRANS_TYPE    : in  std_logic_vector(1 downto 0);
+
+   -- ==========================
    -- Component status interface
-   LAST_READ_REQ    : in std_logic;   -- Last Read Req
+   -- ==========================
+
+   -- Last Read Req
+   LAST_READ_REQ    : in std_logic;
    
+   -- ==========================
    -- Register control interface
-   ADDR_WE          : out std_logic;  -- Store Addr into addr_cnt and addr_align
-   LENGHT_WE        : out std_logic;  -- Store lenght for Align circuit
+   -- ==========================
 
+   -- Store Addr into addr_cnt and addr_align
+   ADDR_WE          : out std_logic;
+   -- Store lenght for Align circuit
+   LENGHT_WE        : out std_logic;
+
+   -- ==========================
    -- Component Init interface
-   INIT_BE          : out std_logic;  -- Init BE circuit
-   READ_ALIGN_INIT  : out std_logic;  -- Init Read Align circuit
+   -- ==========================
 
+   -- Init BE circuit
+   INIT_BE          : out std_logic;
+   -- Init Read Align circuit
+   READ_ALIGN_INIT  : out std_logic;
+
+   -- ==========================
    -- Read Interface
-   RD_SOF_IN        : out std_logic;  -- Start of frame (Start of transaction)
-   RD_EOF_IN        : out std_logic;  -- Ent of frame (End of Transaction)
-   RD_REQ           : out std_logic;  -- Read from User Component
-   RD_ARDY          : in  std_logic   -- Adress RDY
+   -- ==========================
+
+   -- Start of frame (Start of transaction)
+   RD_SOF_IN        : out std_logic;
+   -- Ent of frame (End of Transaction)
+   RD_EOF_IN        : out std_logic;
+   -- Read from User Component
+   RD_REQ           : out std_logic;
+   -- Adress RDY
+   RD_ARDY          : in  std_logic
    );
 end entity IB_ENDPOINT_MASTER_FSM;
 

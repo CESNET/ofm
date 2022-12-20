@@ -12,25 +12,40 @@ use IEEE.std_logic_unsigned.all;
 
 entity STREAMING_DEBUG_PROBE_N is 
   port(
+    -- ===============
     -- Input interface
+    -- ===============
+
     RX_SRC_RDY_N   : in  std_logic;
     RX_DST_RDY_N   : out std_logic;
     RX_SOP_N       : in  std_logic := '1';
     RX_EOP_N       : in  std_logic := '1';
  
+    -- ================
     -- Output interface
+    -- ================
+
     TX_SRC_RDY_N   : out std_logic;
     TX_DST_RDY_N   : in  std_logic;
     TX_SOP_N       : out std_logic := '1';
     TX_EOP_N       : out std_logic := '1';
          
-    -- Debuging interface ---------------------------------------------------
-    DEBUG_BLOCK        : in  std_logic := '0';              -- blocks data words on pipe's input interface
-    DEBUG_DROP         : in  std_logic := '0';              -- drops data words on pipe's input interface (higher priority than BLOCK)
-    DEBUG_SRC_RDY      : out std_logic;                     -- source ready on pipe's input interface
-    DEBUG_DST_RDY      : out std_logic;                     -- destination ready on pipe's input interface
-    DEBUG_SOP          : out std_logic := '0';              -- start of transaction on pipe's input interface
-    DEBUG_EOP          : out std_logic := '0'               -- end of transaction on pipe's input interface
+    -- ==================
+    -- Debuging interface
+    -- ==================
+
+    -- blocks data words on pipe's input interface
+    DEBUG_BLOCK        : in  std_logic := '0';
+    -- drops data words on pipe's input interface (higher priority than BLOCK)
+    DEBUG_DROP         : in  std_logic := '0';
+    -- source ready on pipe's input interface
+    DEBUG_SRC_RDY      : out std_logic;
+    -- destination ready on pipe's input interface
+    DEBUG_DST_RDY      : out std_logic;
+    -- start of transaction on pipe's input interface
+    DEBUG_SOP          : out std_logic := '0';
+    -- end of transaction on pipe's input interface
+    DEBUG_EOP          : out std_logic := '0'
   );
 end entity;
 

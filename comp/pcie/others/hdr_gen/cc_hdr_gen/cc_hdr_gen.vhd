@@ -19,9 +19,9 @@ entity PCIE_CC_HDR_GEN is
         DEVICE         : string  := "STRATIX10"
     );
     port(
-        ---------------------------------------------------------------------------
+        -- ===================================
         -- CC interface (same fo both)
-        ---------------------------------------------------------------------------
+        -- ===================================
 
         -- Lower address
         IN_LOWER_ADDR   : in std_logic_vector(7-1 downto 0);
@@ -33,7 +33,7 @@ entity PCIE_CC_HDR_GEN is
         IN_COMP_ST      : in std_logic_vector(3-1 downto 0);
         -- Request ID
         IN_REQ_ID       : in std_logic_vector(16-1 downto 0);
-        -- Tag (in case of INTEL contains TAG_8|TAG_9|TAG, others there is "00"|TAG)
+        -- Tag (in case of INTEL contains TAG_8, TAG_9, TAG, others there is "00", TAG)
         IN_TAG          : in std_logic_vector(10-1 downto 0);
         -- Transaction Class
         IN_TC           : in std_logic_vector(3-1 downto 0);
@@ -50,9 +50,9 @@ entity PCIE_CC_HDR_GEN is
         -- 0 - completition without data
         COMP_WITH_DATA  : in std_logic;
 
-        ---------------------------------------------------------------------------
+        -- ===================================
         -- Completer HEADER Output interface
-        ---------------------------------------------------------------------------
+        -- ===================================
 
         -- PCIE CC header
         OUT_HEADER      : out std_logic_vector(96-1 downto 0)

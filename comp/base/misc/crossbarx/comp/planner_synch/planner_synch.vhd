@@ -27,7 +27,8 @@ generic(
     COLOR_CONF_DELAY    : integer := 16;
 
     -- Target Device
-    DEVICE              : string := "STRATIX10" -- "ULTRASCALE", "7SERIES", ...
+    -- "ULTRASCALE", "7SERIES", ...
+    DEVICE              : string := "STRATIX10"
 );
 port(
     -- Clock and Reset
@@ -36,9 +37,9 @@ port(
     CLK_OTHER           : in  std_logic;
     RESET_OTHER         : in  std_logic;
 
-    -- -----------------------------------------------------------------
+    -- ========================
     -- Planner-side interface
-    -- -----------------------------------------------------------------
+    -- ========================
 
     -- Color Conformation Timeout cancel signal
     P_NEW_RX_TRANS      : out std_logic_vector(TRANS_STREAMS-1 downto 0);
@@ -48,11 +49,9 @@ port(
     P_CONF_VLD          : in  std_logic_vector(TRANS_STREAMS-1 downto 0);
     P_CONF_PROPAGATED   : out std_logic_vector(TRANS_STREAMS-1 downto 0);
 
-    -- -----------------------------------------------------------------
-
-    -- -----------------------------------------------------------------
+    -- ========================
     -- Other-CLK-side interface
-    -- -----------------------------------------------------------------
+    -- ========================
 
     -- Color Conformation Timeout cancel signal
     O_NEW_RX_TRANS      : in  std_logic_vector(TRANS_STREAMS-1 downto 0);

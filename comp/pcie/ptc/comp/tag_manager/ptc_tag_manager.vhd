@@ -67,7 +67,8 @@ generic(
     PCIE_IN_FIFO_AFULL_OFFSET : integer := 8;
 
     -- Target device
-    DEVICE              : string  := "ULTRASCALE" -- "VIRTEX6", "7SERIES", "ULTRASCALE"
+    -- "VIRTEX6", "7SERIES", "ULTRASCALE"
+    DEVICE              : string  := "ULTRASCALE"
 );
 port(
     ---------------------------------------------------------------------------
@@ -409,12 +410,18 @@ architecture full of PTC_TAG_MANAGER is
     -----------------------
     -- Tag mapping logic
     -----------------------
-
+    -- =======================================================
     -- tag managing N_LOOP_OP unit (contains multiport memory)
-    constant TAG_MAP_READ_PORTS  : integer := MVB_DOWN_ITEMS; -- DOWN mapping
-    constant TAG_MAP_OPERATORS   : integer := MVB_UP_ITEMS;   -- UP for assigning
-    constant TAG_MAP_OPERATIONS  : integer := 1; -- assign
-    constant TAG_MAP_DATA_WIDTH  : integer := DMA_TAG_WIDTH+DMA_ID_WIDTH; -- Tag+ID
+    -- =======================================================
+
+    -- DOWN mapping
+    constant TAG_MAP_READ_PORTS  : integer := MVB_DOWN_ITEMS;
+    -- UP for assigning
+    constant TAG_MAP_OPERATORS   : integer := MVB_UP_ITEMS;
+    -- assign
+    constant TAG_MAP_OPERATIONS  : integer := 1;
+    -- Tag+ID
+    constant TAG_MAP_DATA_WIDTH  : integer := DMA_TAG_WIDTH+DMA_ID_WIDTH;
     signal tag_map_item_sel   : slv_array_t(TAG_MAP_OPERATORS-1 downto 0)(INTERNAL_PCIE_TAG_WIDTH-1 downto 0);
     signal tag_map_ops        : slv_array_t(TAG_MAP_OPERATORS-1 downto 0)(TAG_MAP_OPERATIONS-1 downto 0);
     signal tag_map_in_sel     : slv_array_t(TAG_MAP_OPERATORS-1 downto 0)(INTERNAL_PCIE_TAG_WIDTH-1 downto 0);

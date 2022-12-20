@@ -16,15 +16,31 @@ use work.math_pack.all;
 
 entity MFB_PIPE is
   generic(
+    -- =============================
+    -- Bus parameters
+    --
     -- Frame size restrictions: none
-    REGIONS        : integer := 4; -- any possitive value
-    REGION_SIZE    : integer := 8; -- any possitive value
-    BLOCK_SIZE     : integer := 8; -- any possitive value
-    ITEM_WIDTH     : integer := 8; -- any possitive value
-    META_WIDTH     : integer := 0; -- any possitive value
+    -- =============================
+
+    -- any possitive value
+    REGIONS        : integer := 4;
+    -- any possitive value
+    REGION_SIZE    : integer := 8;
+    -- any possitive value
+    BLOCK_SIZE     : integer := 8;
+    -- any possitive value
+    ITEM_WIDTH     : integer := 8;
+    -- any possitive value
+    META_WIDTH     : integer := 0;
+
+    -- =============================
+    -- Others
+    -- =============================
+
     FAKE_PIPE      : boolean := false;
     USE_DST_RDY    : boolean := true;
-    PIPE_TYPE      : string  := "SHREG"; -- "SHREG" or "REG"
+    -- "SHREG" or "REG"
+    PIPE_TYPE      : string  := "SHREG";
     DEVICE         : string  := "7SERIES"
   );
   port(

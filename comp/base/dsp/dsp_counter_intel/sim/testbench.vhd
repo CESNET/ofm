@@ -23,17 +23,30 @@ end entity TESTBENCH;
 --! ----------------------------------------------------------------------------
 architecture BEHAVIORAL of TESTBENCH is
 
+    -- =====================
     -- DUT settings
+    -- =====================
+
     constant AUTO_RESET       : boolean := false;
     constant INPUT_REGS       : boolean := false;
-    constant COUNT_BY_WIDTH   : natural := 27; -- max 27
-    constant RESULT_WIDTH     : natural := 64; -- max 64
+    -- max 27
+    constant COUNT_BY_WIDTH   : natural := 27;
+    -- max 64
+    constant RESULT_WIDTH     : natural := 64;
     constant DSP_ENABLE       : boolean := false;
-    constant COUNT_DOWN       : boolean := true; -- the counter counts down when set to true
-    constant DEVICE           : string  := "AGILEX"; -- "AGILEX" or "STRATIX10"
+    -- the counter counts down when set to true
+    constant COUNT_DOWN       : boolean := true;
+    -- "AGILEX" or "STRATIX10"
+    constant DEVICE           : string  := "AGILEX";
+
+    -- =====================
     -- verification settings
-    constant REPORT_EVERY_NTH : natural := 1000; -- write report in the Transcript window about the number correct results every N-th transaction
-    constant LENGHT_OF_SIM    : natural := 50000; -- number of clock cycles the simulation should run for - this must concur with the length of simulation defined in sim_sig.fdo ("run ... us")
+    -- =====================
+
+    -- write report in the Transcript window about the number correct results every N-th transaction
+    constant REPORT_EVERY_NTH : natural := 1000;
+    -- number of clock cycles the simulation should run for - this must concur with the length of simulation defined in sim_sig.fdo ("run ... us")
+    constant LENGHT_OF_SIM    : natural := 50000;
     constant CLK_PERIOD       : time    := 10 ns;
 
     -- used to set the value of max signal that will be used in the simulation, at this time, only 2 values of max are possible

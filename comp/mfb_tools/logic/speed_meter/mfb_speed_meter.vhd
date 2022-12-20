@@ -14,14 +14,19 @@ use work.type_pack.all;
 
 entity MFB_SPEED_METER is
    generic(
+      -- =================
       -- MFB CONFIGURATION
       -- =================
+
       REGIONS         : natural := 2;
       REGION_SIZE     : natural := 8;
       BLOCK_SIZE      : natural := 8;
       ITEM_WIDTH      : natural := 8;
+
+      -- =========================
       -- SPEED METER CONFIGURATION
       -- =========================
+
       -- Set time of speed test (time = (2^CNT_TICKS_WIDTH)-1 in clock ticks).
       CNT_TICKS_WIDTH : natural := 24;
       -- Set width of valid bytes counter. Optimum and MINIMUM value is:
@@ -29,21 +34,36 @@ entity MFB_SPEED_METER is
       CNT_BYTES_WIDTH : natural := 32
    );
    port(
+      -- =================
       -- CLOCK AND RESET
+      -- =================
+
       CLK           : in  std_logic;
       RST           : in  std_logic;
+
+      -- =========================
       -- RX MFB CONTROL INTERFACE
+      -- =========================
+
       RX_SOF_POS    : in  std_logic_vector(REGIONS*max(1,log2(REGION_SIZE))-1 downto 0);
       RX_EOF_POS    : in  std_logic_vector(REGIONS*max(1,log2(REGION_SIZE*BLOCK_SIZE))-1 downto 0);
       RX_SOF        : in  std_logic_vector(REGIONS-1 downto 0);
       RX_EOF        : in  std_logic_vector(REGIONS-1 downto 0);
       RX_SRC_RDY    : in  std_logic;
       RX_DST_RDY    : in  std_logic;
+
+      -- =========================
       -- SPEED METER COUNTERS
-      CNT_TICKS     : out std_logic_vector(CNT_TICKS_WIDTH-1 downto 0); -- counter of clock ticks
-      CNT_TICKS_MAX : out std_logic; -- maximum value flag of clock ticks counter, when CNT_TICKS_MAX=1 speed test is done
-      CNT_BYTES     : out std_logic_vector(CNT_BYTES_WIDTH-1 downto 0); -- counter of valid bytes
-      CNT_CLEAR     : in  std_logic -- reset all counters
+      -- =========================
+
+      -- counter of clock ticks
+      CNT_TICKS     : out std_logic_vector(CNT_TICKS_WIDTH-1 downto 0);
+      -- maximum value flag of clock ticks counter, when CNT_TICKS_MAX=1 speed test is done
+      CNT_TICKS_MAX : out std_logic;
+      -- counter of valid bytes
+      CNT_BYTES     : out std_logic_vector(CNT_BYTES_WIDTH-1 downto 0);
+      -- reset all counters
+      CNT_CLEAR     : in  std_logic
    );
 end MFB_SPEED_METER;
 

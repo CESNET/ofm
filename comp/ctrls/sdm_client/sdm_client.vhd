@@ -18,22 +18,37 @@ entity SDM_CLIENT is
         -- Address word width in bits
         ADDR_WIDTH : natural := 32;
         -- Target device (Intel only)
-        DEVICE     : string  := "AGILEX" -- (not used yet)
+        -- (not used yet)
+        DEVICE     : string  := "AGILEX"
     );
     port(
+        -- ===============
         -- Clock and Reset
+        -- ===============
+
         CLK   : in  std_logic;
         RESET : in  std_logic;
 
+        -- ===============
         -- MI interface
-        MI_DWR   : in  std_logic_vector(DATA_WIDTH-1 downto 0);     -- Input Data
-        MI_ADDR  : in  std_logic_vector(ADDR_WIDTH-1 downto 0);     -- Address
-        MI_RD    : in  std_logic;                                   -- Read Request
-        MI_WR    : in  std_logic;                                   -- Write Request
-        MI_BE    : in  std_logic_vector((DATA_WIDTH/8)-1 downto 0); -- Byte Enable
-        MI_DRD   : out std_logic_vector(DATA_WIDTH-1 downto 0);     -- Output Data
-        MI_ARDY  : out std_logic;                                   -- Address Ready
-        MI_DRDY  : out std_logic                                    -- Data Ready
+        -- ===============
+
+        -- Input Data
+        MI_DWR   : in  std_logic_vector(DATA_WIDTH-1 downto 0);
+        -- Address
+        MI_ADDR  : in  std_logic_vector(ADDR_WIDTH-1 downto 0);
+        -- Read Request
+        MI_RD    : in  std_logic;
+        -- Write Request
+        MI_WR    : in  std_logic;
+        -- Byte Enable
+        MI_BE    : in  std_logic_vector((DATA_WIDTH/8)-1 downto 0);
+        -- Output Data
+        MI_DRD   : out std_logic_vector(DATA_WIDTH-1 downto 0);
+        -- Address Ready
+        MI_ARDY  : out std_logic;
+        -- Data Ready
+        MI_DRDY  : out std_logic
     );
 end entity;
 

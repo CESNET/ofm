@@ -21,15 +21,28 @@ use work.ib_pkg.all;
 -- ----------------------------------------------------------------------------
 entity IB_ENDPOINT_HDR_GEN_SLAVE is
    port (
+      -- ========================
       -- Header Data
+      -- ========================
+
       RD_COMPL_DST_ADDR     : in  std_logic_vector(31 downto 0);
       RD_COMPL_SRC_ADDR     : in  std_logic_vector(31 downto 0);
       RD_COMPL_TAG          : in  std_logic_vector(15 downto 0);
       RD_COMPL_LENGTH       : in  std_logic_vector(11 downto 0);
+
+      -- ========================
       -- Control            
-      GET_SECOND_HDR        : in  std_logic;                    -- Get second header
+      -- ========================
+
+      -- Get second header
+      GET_SECOND_HDR        : in  std_logic;
+
+      -- ========================
       -- Output Interface
-      HEADER_DATA           : out std_logic_vector(63 downto 0) -- Header data
+      -- ========================
+
+      -- Header data
+      HEADER_DATA           : out std_logic_vector(63 downto 0)
       );
 end entity IB_ENDPOINT_HDR_GEN_SLAVE;
 

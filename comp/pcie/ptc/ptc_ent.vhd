@@ -26,27 +26,53 @@ generic(
     -- Number of DMA ports per one PTC, possible values: 1, 2.
     DMA_PORTS           : integer := 1;
 
+    -- ==================
     -- MVB UP definition
-    MVB_UP_ITEMS        : integer := 2;   -- Number of items (headers) in PTC word
-    DMA_MVB_UP_ITEMS    : integer := MVB_UP_ITEMS; -- Number of items (headers) in DMA word, allowed values: MVB_UP_ITEMS, 2*MVB_UP_ITEMS
+    -- ==================
+
+    -- Number of items (headers) in PTC word
+    MVB_UP_ITEMS        : integer := 2;
+    -- Number of items (headers) in DMA word, allowed values: MVB_UP_ITEMS, 2*MVB_UP_ITEMS
+    DMA_MVB_UP_ITEMS    : integer := MVB_UP_ITEMS;
+
+    -- ==================
     -- MFB UP definition
-    MFB_UP_REGIONS      : integer := 2;   -- Number of regions in word
-    MFB_UP_REG_SIZE     : integer := 1;   -- Number of blocks in region
-    MFB_UP_BLOCK_SIZE   : integer := 8;   -- Number of items in block
-    MFB_UP_ITEM_WIDTH   : integer := 32;  -- Width of one item (in bits)
+    -- ==================
+
+    -- Number of regions in word
+    MFB_UP_REGIONS      : integer := 2;
+    -- Number of blocks in region
+    MFB_UP_REG_SIZE     : integer := 1;
+    -- Number of items in block
+    MFB_UP_BLOCK_SIZE   : integer := 8;
+    -- Width of one item (in bits)
+    MFB_UP_ITEM_WIDTH   : integer := 32;
     -- Number of regions in DMA UP word (DMA MFB word is converted from 512b to 256b in UP MFB asfifo)
     -- for Ultrascale equals MFB_UP_REGIONS
     -- for Virtex7 equals 2*MFB_UP_REGIONS
     DMA_MFB_UP_REGIONS  : integer := MFB_UP_REGIONS;
 
+    -- ===================
     -- MVB DOWN definition
-    MVB_DOWN_ITEMS      : integer := 4;   -- Number of items (headers) in PTC word
-    DMA_MVB_DOWN_ITEMS  : integer := MVB_DOWN_ITEMS; -- Number of items (headers) in DMA word, allowed values: MVB_DOWN_ITEMS, 2*MVB_DOWN_ITEMS
+    -- ===================
+
+    -- Number of items (headers) in PTC word
+    MVB_DOWN_ITEMS      : integer := 4;
+    -- Number of items (headers) in DMA word, allowed values: MVB_DOWN_ITEMS, 2*MVB_DOWN_ITEMS
+    DMA_MVB_DOWN_ITEMS  : integer := MVB_DOWN_ITEMS;
+
+    -- ====================
     -- MFB DOWN definition
-    MFB_DOWN_REGIONS    : integer := 4;   -- Number of regions in word
-    MFB_DOWN_REG_SIZE   : integer := 1;   -- Number of blocks in region
-    MFB_DOWN_BLOCK_SIZE : integer := 4;   -- Number of items in block
-    MFB_DOWN_ITEM_WIDTH : integer := 32;  -- Width of one item (in bits)
+    -- ====================
+
+    -- Number of regions in word
+    MFB_DOWN_REGIONS    : integer := 4;
+    -- Number of blocks in region
+    MFB_DOWN_REG_SIZE   : integer := 1;
+    -- Number of items in block
+    MFB_DOWN_BLOCK_SIZE : integer := 4;
+    -- Width of one item (in bits)
+    MFB_DOWN_ITEM_WIDTH : integer := 32;
     -- Number of regions in DMA UP word (DMA MFB word is converted from 256b to 512b in DOWN MFB asfifo)
     -- for Ultrascale equals MFB_DOWN_REGIONS
     -- for Virtex7 equals 2*MFB_DOWN_REGIONS
@@ -82,7 +108,8 @@ generic(
     -- UPSTREAM input ASFIFO size
     UP_ASFIFO_ITEMS   : integer := 512;
     -- DOWNSTREAM output ASFIFO size
-    DOWN_ASFIFO_ITEMS : integer := 512; -- minimum for wide BRAM FIFO
+    -- minimum for wide BRAM FIFO
+    DOWN_ASFIFO_ITEMS : integer := 512;
 
     -- DOWNSTREAM completion storage FIFO size
     DOWN_FIFO_ITEMS   : integer := 512;
@@ -107,57 +134,67 @@ generic(
     AUTO_ASSIGN_TAGS    : boolean := true;
 
     -- Target device
-    DEVICE              : string  := "ULTRASCALE"; -- "VIRTEX6", "7SERIES", "ULTRASCALE", "STRATIX10"
+    -- "VIRTEX6", "7SERIES", "ULTRASCALE", "STRATIX10"
+    DEVICE              : string  := "ULTRASCALE";
     -- Connected PCIe endpoint type ("H_TILE" or "P_TILE" or "R_TILE") (only relevant on Intel FPGAs)
     ENDPOINT_TYPE       : string  := "H_TILE"
 );
 port(
-    ---------------------------------------------------------------------------
+    -- ========================================================================
     -- Common interface
-    ---------------------------------------------------------------------------
+    -- ========================================================================
 
     CLK            : in  std_logic;
     RESET          : in  std_logic;
 
-    CLK_DMA        : in  std_logic; -- UP input and DOWN output interface CLK
+    -- UP input and DOWN output interface CLK
+    CLK_DMA        : in  std_logic;
     RESET_DMA      : in  std_logic;
 
     -- ========================================================================
     -- UPSTREAM interfaces
+    --
+    -- Input from DMA Module (MVB+MFB bus) (runs on CLK_DMA)
     -- ========================================================================
 
-    ---------------------------------------------------------------------------
-    -- Input from DMA Module (MVB+MFB bus) (runs on CLK_DMA)
-    ---------------------------------------------------------------------------
-
-    UP_MVB_DATA    : in  slv_array_t(DMA_PORTS-1 downto 0)(DMA_MVB_UP_ITEMS*DMA_UPHDR_WIDTH-1 downto 0); -- MVB items
-    UP_MVB_VLD     : in  slv_array_t(DMA_PORTS-1 downto 0)(DMA_MVB_UP_ITEMS                -1 downto 0); -- MVB item valid
+    -- MVB items
+    UP_MVB_DATA    : in  slv_array_t(DMA_PORTS-1 downto 0)(DMA_MVB_UP_ITEMS*DMA_UPHDR_WIDTH-1 downto 0);
+    -- MVB item valid
+    UP_MVB_VLD     : in  slv_array_t(DMA_PORTS-1 downto 0)(DMA_MVB_UP_ITEMS                -1 downto 0);
     UP_MVB_SRC_RDY : in  std_logic_vector(DMA_PORTS-1 downto 0);
     UP_MVB_DST_RDY : out std_logic_vector(DMA_PORTS-1 downto 0);
 
-    UP_MFB_DATA    : in  slv_array_t(DMA_PORTS-1 downto 0)(DMA_MFB_UP_REGIONS*MFB_UP_REG_SIZE*MFB_UP_BLOCK_SIZE*MFB_UP_ITEM_WIDTH-1 downto 0); -- MFB data word
-    UP_MFB_SOF     : in  slv_array_t(DMA_PORTS-1 downto 0)(DMA_MFB_UP_REGIONS-1 downto 0);                                                     -- MFB region contains start of frame
-    UP_MFB_EOF     : in  slv_array_t(DMA_PORTS-1 downto 0)(DMA_MFB_UP_REGIONS-1 downto 0);                                                     -- MFB region contains end of frame
-    UP_MFB_SOF_POS : in  slv_array_t(DMA_PORTS-1 downto 0)(DMA_MFB_UP_REGIONS*max(1,log2(MFB_UP_REG_SIZE))-1 downto 0);                        -- address of block of region's SOF
-    UP_MFB_EOF_POS : in  slv_array_t(DMA_PORTS-1 downto 0)(DMA_MFB_UP_REGIONS*max(1,log2(MFB_UP_REG_SIZE*MFB_UP_BLOCK_SIZE))-1 downto 0);      -- address of item of region's EOF
+    -- MFB data word
+    UP_MFB_DATA    : in  slv_array_t(DMA_PORTS-1 downto 0)(DMA_MFB_UP_REGIONS*MFB_UP_REG_SIZE*MFB_UP_BLOCK_SIZE*MFB_UP_ITEM_WIDTH-1 downto 0);
+    -- MFB region contains start of frame
+    UP_MFB_SOF     : in  slv_array_t(DMA_PORTS-1 downto 0)(DMA_MFB_UP_REGIONS-1 downto 0);
+    -- MFB region contains end of frame
+    UP_MFB_EOF     : in  slv_array_t(DMA_PORTS-1 downto 0)(DMA_MFB_UP_REGIONS-1 downto 0);
+    -- address of block of region's SOF
+    UP_MFB_SOF_POS : in  slv_array_t(DMA_PORTS-1 downto 0)(DMA_MFB_UP_REGIONS*max(1,log2(MFB_UP_REG_SIZE))-1 downto 0);
+    -- address of item of region's EOF
+    UP_MFB_EOF_POS : in  slv_array_t(DMA_PORTS-1 downto 0)(DMA_MFB_UP_REGIONS*max(1,log2(MFB_UP_REG_SIZE*MFB_UP_BLOCK_SIZE))-1 downto 0);
     UP_MFB_SRC_RDY : in  std_logic_vector(DMA_PORTS-1 downto 0);
     UP_MFB_DST_RDY : out std_logic_vector(DMA_PORTS-1 downto 0);
 
-    ---------------------------------------------------------------------------
+    -- ========================================================================
     -- Header output to PCIe Endpoint (Requester request interface (RQ))
+    --
     -- Used in Intel DEVICEs with P_TILE Endpoint type
-    ---------------------------------------------------------------------------
+    -- ========================================================================
 
     RQ_MVB_HDR_DATA    : out std_logic_vector(MFB_UP_REGIONS*PCIE_UPHDR_WIDTH-1 downto 0);
-    RQ_MVB_PREFIX_DATA : out std_logic_vector(MFB_UP_REGIONS*PCIE_PREFIX_WIDTH-1 downto 0); -- valid together with HDR_DATA
+    -- valid together with HDR_DATA
+    RQ_MVB_PREFIX_DATA : out std_logic_vector(MFB_UP_REGIONS*PCIE_PREFIX_WIDTH-1 downto 0);
     RQ_MVB_VLD         : out std_logic_vector(MFB_UP_REGIONS-1 downto 0);
  --RQ_MVB_SRC_RDY     : out std_logic; -- only RQ_MFB_SRC_RDY is used
  --RQ_MVB_DST_RDY     : in  std_logic; -- only RQ_MFB_DST_RDY is used
 
-    ---------------------------------------------------------------------------
+    -- ========================================================================
     -- Output to PCIe Endpoint (Requester request interface (RQ))
+    --
     -- Used in Intel DEVICEs
-    ---------------------------------------------------------------------------
+    -- ========================================================================
 
     RQ_MFB_DATA    : out std_logic_vector(MFB_UP_REGIONS*MFB_UP_REG_SIZE*MFB_UP_BLOCK_SIZE*MFB_UP_ITEM_WIDTH-1 downto 0);
     RQ_MFB_SOF     : out std_logic_vector(MFB_UP_REGIONS-1 downto 0);
@@ -170,23 +207,22 @@ port(
 
     -- ========================================================================
     -- DOWNSTREAM interfaces
-    -- ========================================================================
-
-    ---------------------------------------------------------------------------
+    --
     -- Header input from PCIe Endpoint (Requester Completion interface (RC))
     -- Used in Intel DEVICEs with P_TILE Endpoint type
-    ---------------------------------------------------------------------------
+    -- ========================================================================
 
     RC_MVB_HDR_DATA    : in  std_logic_vector(MFB_DOWN_REGIONS*PCIE_DOWNHDR_WIDTH-1 downto 0) := (others => '0');
-    RC_MVB_PREFIX_DATA : in  std_logic_vector(MFB_DOWN_REGIONS*PCIE_PREFIX_WIDTH-1 downto 0)  := (others => '0'); -- valid together with HDR_DATA
+    -- valid together with HDR_DATA
+    RC_MVB_PREFIX_DATA : in  std_logic_vector(MFB_DOWN_REGIONS*PCIE_PREFIX_WIDTH-1 downto 0)  := (others => '0');
     RC_MVB_VLD         : in  std_logic_vector(MFB_DOWN_REGIONS-1 downto 0) := (others => '0');
  --RC_MVB_SRC_RDY     : in  std_logic; -- only RC_MFB_SRC_RDY is used
  --RC_MVB_DST_RDY     : out std_logic; -- only RC_MFB_DST_RDY is used
 
-    ---------------------------------------------------------------------------
+    -- ========================================================================
     -- Input from PCIe Endpoint (Requester Completion Interface (RC))
     -- Used in Intel DEVICEs
-    ---------------------------------------------------------------------------
+    -- ========================================================================
 
     RC_MFB_DATA    : in  std_logic_vector(MFB_DOWN_REGIONS*MFB_DOWN_REG_SIZE*MFB_DOWN_BLOCK_SIZE*MFB_DOWN_ITEM_WIDTH-1 downto 0) := (others => '0');
     RC_MFB_SOF     : in  std_logic_vector(MFB_DOWN_REGIONS-1 downto 0)                                                           := (others => '0');
@@ -196,28 +232,35 @@ port(
     RC_MFB_SRC_RDY : in  std_logic                                                                                               := '0';
     RC_MFB_DST_RDY : out std_logic;
 
-    ---------------------------------------------------------------------------
+    -- ========================================================================
     -- Output to DMA Module (MVB+MFB bus) (runs on CLK_DMA)
-    ---------------------------------------------------------------------------
+    -- ========================================================================
 
-    DOWN_MVB_DATA    : out slv_array_t(DMA_PORTS-1 downto 0)(DMA_MVB_DOWN_ITEMS*DMA_DOWNHDR_WIDTH-1 downto 0); -- MVB items
-    DOWN_MVB_VLD     : out slv_array_t(DMA_PORTS-1 downto 0)(DMA_MVB_DOWN_ITEMS                  -1 downto 0); -- MVB item valid
+    -- MVB items
+    DOWN_MVB_DATA    : out slv_array_t(DMA_PORTS-1 downto 0)(DMA_MVB_DOWN_ITEMS*DMA_DOWNHDR_WIDTH-1 downto 0);
+    -- MVB item valid
+    DOWN_MVB_VLD     : out slv_array_t(DMA_PORTS-1 downto 0)(DMA_MVB_DOWN_ITEMS                  -1 downto 0);
     DOWN_MVB_SRC_RDY : out std_logic_vector(DMA_PORTS-1 downto 0);
     DOWN_MVB_DST_RDY : in  std_logic_vector(DMA_PORTS-1 downto 0);
 
-    DOWN_MFB_DATA    : out slv_array_t(DMA_PORTS-1 downto 0)(DMA_MFB_DOWN_REGIONS*MFB_DOWN_REG_SIZE*MFB_DOWN_BLOCK_SIZE*MFB_DOWN_ITEM_WIDTH-1 downto 0); -- MFB data word
-    DOWN_MFB_SOF     : out slv_array_t(DMA_PORTS-1 downto 0)(DMA_MFB_DOWN_REGIONS-1 downto 0);                                                           -- MFB region contains start of frame
-    DOWN_MFB_EOF     : out slv_array_t(DMA_PORTS-1 downto 0)(DMA_MFB_DOWN_REGIONS-1 downto 0);                                                           -- MFB region contains end of frame
-    DOWN_MFB_SOF_POS : out slv_array_t(DMA_PORTS-1 downto 0)(DMA_MFB_DOWN_REGIONS*max(1,log2(MFB_DOWN_REG_SIZE))-1 downto 0);                            -- address of block of region's SOF
-    DOWN_MFB_EOF_POS : out slv_array_t(DMA_PORTS-1 downto 0)(DMA_MFB_DOWN_REGIONS*max(1,log2(MFB_DOWN_REG_SIZE*MFB_DOWN_BLOCK_SIZE))-1 downto 0);        -- address of item of region's EOF
+    -- MFB data word
+    DOWN_MFB_DATA    : out slv_array_t(DMA_PORTS-1 downto 0)(DMA_MFB_DOWN_REGIONS*MFB_DOWN_REG_SIZE*MFB_DOWN_BLOCK_SIZE*MFB_DOWN_ITEM_WIDTH-1 downto 0);
+    -- MFB region contains start of frame
+    DOWN_MFB_SOF     : out slv_array_t(DMA_PORTS-1 downto 0)(DMA_MFB_DOWN_REGIONS-1 downto 0);
+    -- MFB region contains end of frame
+    DOWN_MFB_EOF     : out slv_array_t(DMA_PORTS-1 downto 0)(DMA_MFB_DOWN_REGIONS-1 downto 0);
+    -- address of block of region's SOF
+    DOWN_MFB_SOF_POS : out slv_array_t(DMA_PORTS-1 downto 0)(DMA_MFB_DOWN_REGIONS*max(1,log2(MFB_DOWN_REG_SIZE))-1 downto 0);
+    -- address of item of region's EOF
+    DOWN_MFB_EOF_POS : out slv_array_t(DMA_PORTS-1 downto 0)(DMA_MFB_DOWN_REGIONS*max(1,log2(MFB_DOWN_REG_SIZE*MFB_DOWN_BLOCK_SIZE))-1 downto 0);
     DOWN_MFB_SRC_RDY : out std_logic_vector(DMA_PORTS-1 downto 0);
     DOWN_MFB_DST_RDY : in  std_logic_vector(DMA_PORTS-1 downto 0);
 
-    ---------------------------------------------------------------------------
+    -- ========================================================================
     -- Tag assigning interface to PCIe endpoint
-    ---------------------------------------------------------------------------
+    -- ========================================================================
 
-    -- Configuration Status Interface ---------------------------------------
+    -- Configuration Status Interface
     -- Read completion boundary status ('0' = RCB is 64B, '1' = RCB is 128B)
     RCB_SIZE       : in  std_logic;
 

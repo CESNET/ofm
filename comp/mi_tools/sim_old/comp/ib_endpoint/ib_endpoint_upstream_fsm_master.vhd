@@ -21,31 +21,72 @@ use work.ib_pkg.all; -- Internal Bus package
 -- ----------------------------------------------------------------------------
 entity IB_ENDPOINT_UPSTREAM_FSM_MASTER is
    port (
+      -- ========================
       -- Common Interface
-      CLK                : in std_logic;  -- Clk
-      RESET              : in std_logic;  -- Reset
+      -- ========================
+
+      -- Clk
+      CLK                : in std_logic;
+      -- Reset
+      RESET              : in std_logic;
+
+      -- ========================
       -- HDR_GEN Interface
-      RD_COMPL_REQ       : in  std_logic; -- Request from READ_FSM
-      RD_COMPL_ACK       : out std_logic; -- Ack for READ_FSM, After ACK Read FSM starts read
-      BM_REQ             : in  std_logic; -- Request for any BM operation
-      BM_READ_ACK        : out std_logic; -- Ack for BM_FSM, after ack BM_FSM start reading data
-      BM_ACK             : out std_logic; -- Ack after any BM operation is done
-      BM_TRANS_TYPE      : in  std_logic_vector(1 downto 0); -- Type of transaction
+      -- ========================
+
+      -- Request from READ_FSM
+      RD_COMPL_REQ       : in  std_logic;
+      -- Ack for READ_FSM, After ACK Read FSM starts read
+      RD_COMPL_ACK       : out std_logic;
+      -- Request for any BM operation
+      BM_REQ             : in  std_logic;
+      -- Ack for BM_FSM, after ack BM_FSM start reading data
+      BM_READ_ACK        : out std_logic;
+      -- Ack after any BM operation is done
+      BM_ACK             : out std_logic;
+      -- Type of transaction
+      BM_TRANS_TYPE      : in  std_logic_vector(1 downto 0);
+
+      -- ========================
       -- Control Interface
-      GET_SLAVE_MASTER   : out std_logic; -- 0-Slave/1-Master
-      GET_SECOND_HDR     : out std_logic; -- Get second header
+      -- ========================
+
+      -- 0-Slave/1-Master
+      GET_SLAVE_MASTER   : out std_logic;
+      -- Get second header
+      GET_SECOND_HDR     : out std_logic;
       GET_TRANS_TYPE     : out std_logic_vector(1 downto 0);
+
+      -- ========================
       -- Align buffer Interface
-      RD_SRC_RDY         : in  std_logic;  -- Align buffer src_rdy
-      RD_DST_RDY         : out std_logic; -- Align buffer dst_rdy
-      RD_EOF             : in  std_logic;  -- Align buffer eof
+      -- ========================
+
+      -- Align buffer src_rdy
+      RD_SRC_RDY         : in  std_logic;
+      -- Align buffer dst_rdy
+      RD_DST_RDY         : out std_logic;
+      -- Align buffer eof
+      RD_EOF             : in  std_logic;
+
+      -- ========================
       -- Multipexor Interface
-      MUX_SEL            : out std_logic; -- Select HEADER/DATA
+      -- ========================
+
+      -- Select HEADER/DATA
+      MUX_SEL            : out std_logic;
+
+      -- ========================
       -- Upstream Interface
-      SOP                : out std_logic; -- Start of Packet (Start of transaction)
-      EOP                : out std_logic; -- Ent of Packet (End of Transaction)
-      SRC_RDY            : out std_logic; -- Source Ready
-      DST_RDY            : in  std_logic  -- Destination Ready
+      -- ========================
+
+      -- Start of Packet (Start of transaction)
+      SOP                : out std_logic;
+      -- Ent of Packet (End of Transaction)
+      EOP                : out std_logic;
+      -- Source Ready
+      SRC_RDY            : out std_logic;
+      -- Destination Ready
+      DST_RDY            : in  std_logic
    );
 end entity IB_ENDPOINT_UPSTREAM_FSM_MASTER;
 

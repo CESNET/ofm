@@ -15,16 +15,36 @@ use work.type_pack.all;
 
 entity MFB_MERGER_GEN is
     generic(
-        MERGER_INPUTS   : integer := 2;  -- number of merger inputs
+        -- number of merger inputs
+        MERGER_INPUTS   : integer := 2;
+
+        -- =============================
         -- MVB characteristics
-        MVB_ITEMS       : integer := 2;  -- number of headers
-        MVB_ITEM_WIDTH  : integer := 32; -- width of header
+        -- =============================
+
+        -- number of headers
+        MVB_ITEMS       : integer := 2;
+        -- width of header
+        MVB_ITEM_WIDTH  : integer := 32;
+
+        -- =============================
         -- MFB characteristics
-        MFB_REGIONS     : integer := 2;  -- number of regions in word
-        MFB_REG_SIZE    : integer := 1;  -- number of blocks in region
-        MFB_BLOCK_SIZE  : integer := 8;  -- number of items in block
-        MFB_ITEM_WIDTH  : integer := 32; -- width  of one item (in bits)
-        MFB_META_WIDTH  : integer := 1;  -- width of MFB metadata
+        -- =============================
+
+        -- number of regions in word
+        MFB_REGIONS     : integer := 2;
+        -- number of blocks in region
+        MFB_REG_SIZE    : integer := 1;
+        -- number of items in block
+        MFB_BLOCK_SIZE  : integer := 8;
+        -- width  of one item (in bits)
+        MFB_ITEM_WIDTH  : integer := 32;
+        -- width of MFB metadata
+        MFB_META_WIDTH  : integer := 1;
+
+        -- =============================
+        -- Others
+        -- =============================
 
         -- Size of input MVB and MFB FIFOs (in words)
         -- Minimum value is 2!
@@ -42,28 +62,31 @@ entity MFB_MERGER_GEN is
         -- Output register is created when this is set to false.
         OUT_PIPE_EN     : boolean := true;
 
-        DEVICE          : string  := "ULTRASCALE" -- "ULTRASCALE", "STRATIX10",...
+        -- "ULTRASCALE", "STRATIX10",...
+        DEVICE          : string  := "ULTRASCALE"
     );
     port(
-        ---------------------------------------------------------------------------
+        -- =============================
         -- Common interface
-        ---------------------------------------------------------------------------
+        -- =============================
 
         CLK            : in  std_logic;
         RESET          : in  std_logic;
 
-        ---------------------------------------------------------------------------
+        -- =============================
         -- RX interfaces
-        ---------------------------------------------------------------------------
+        -- =============================
 
         RX_MVB_DATA    : in  slv_array_t     (MERGER_INPUTS-1 downto 0)(MVB_ITEMS*MVB_ITEM_WIDTH-1 downto 0);
-        RX_MVB_PAYLOAD : in  slv_array_t     (MERGER_INPUTS-1 downto 0)(MVB_ITEMS-1 downto 0); -- the header is associated with a payload frame on MFB
+        -- the header is associated with a payload frame on MFB
+        RX_MVB_PAYLOAD : in  slv_array_t     (MERGER_INPUTS-1 downto 0)(MVB_ITEMS-1 downto 0);
         RX_MVB_VLD     : in  slv_array_t     (MERGER_INPUTS-1 downto 0)(MVB_ITEMS-1 downto 0);
         RX_MVB_SRC_RDY : in  std_logic_vector(MERGER_INPUTS-1 downto 0);
         RX_MVB_DST_RDY : out std_logic_vector(MERGER_INPUTS-1 downto 0);
 
         RX_MFB_DATA    : in  slv_array_t     (MERGER_INPUTS-1 downto 0)(MFB_REGIONS*MFB_REG_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH-1 downto 0);
-        RX_MFB_META    : in  slv_array_t     (MERGER_INPUTS-1 downto 0)(MFB_REGIONS*MFB_META_WIDTH-1 downto 0) := (others => (others => '0')); -- Allways valid, metadata merged by words
+        -- Allways valid, metadata merged by words
+        RX_MFB_META    : in  slv_array_t     (MERGER_INPUTS-1 downto 0)(MFB_REGIONS*MFB_META_WIDTH-1 downto 0) := (others => (others => '0'));
         RX_MFB_SOF     : in  slv_array_t     (MERGER_INPUTS-1 downto 0)(MFB_REGIONS-1 downto 0);
         RX_MFB_EOF     : in  slv_array_t     (MERGER_INPUTS-1 downto 0)(MFB_REGIONS-1 downto 0);
         RX_MFB_SOF_POS : in  slv_array_t     (MERGER_INPUTS-1 downto 0)(MFB_REGIONS*max(1,log2(MFB_REG_SIZE))-1 downto 0);
@@ -71,18 +94,20 @@ entity MFB_MERGER_GEN is
         RX_MFB_SRC_RDY : in  std_logic_vector(MERGER_INPUTS-1 downto 0);
         RX_MFB_DST_RDY : out std_logic_vector(MERGER_INPUTS-1 downto 0);
 
-        ---------------------------------------------------------------------------
+        -- =============================
         -- TX interface
-        ---------------------------------------------------------------------------
+        -- =============================
 
         TX_MVB_DATA    : out std_logic_vector(MVB_ITEMS*MVB_ITEM_WIDTH-1 downto 0);
-        TX_MVB_PAYLOAD : out std_logic_vector(MVB_ITEMS-1 downto 0); -- the header is associated with a payload frame on MFB
+        -- the header is associated with a payload frame on MFB
+        TX_MVB_PAYLOAD : out std_logic_vector(MVB_ITEMS-1 downto 0);
         TX_MVB_VLD     : out std_logic_vector(MVB_ITEMS-1 downto 0);
         TX_MVB_SRC_RDY : out std_logic;
         TX_MVB_DST_RDY : in  std_logic;
 
         TX_MFB_DATA    : out std_logic_vector(MFB_REGIONS*MFB_REG_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH-1 downto 0);
-        TX_MFB_META    : out std_logic_vector(MFB_REGIONS*MFB_META_WIDTH-1 downto 0); -- Allways valid, metadata merged by words
+        -- Allways valid, metadata merged by words
+        TX_MFB_META    : out std_logic_vector(MFB_REGIONS*MFB_META_WIDTH-1 downto 0);
         TX_MFB_SOF     : out std_logic_vector(MFB_REGIONS-1 downto 0);
         TX_MFB_EOF     : out std_logic_vector(MFB_REGIONS-1 downto 0);
         TX_MFB_SOF_POS : out std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REG_SIZE))-1 downto 0);

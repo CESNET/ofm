@@ -42,18 +42,33 @@ entity SP_BMEM is
    );
 
    port(
+      -- ================
       -- Common interface
-      RESET  : in    std_logic; -- Reset only if output_reg
+      -- ================
 
+      -- Reset only if output_reg
+      RESET  : in    std_logic;
+
+      -- ================
       -- Interface A
-      CLK   : in    std_logic; -- Clock A
-      PIPE_EN : in  std_logic; -- Pipe Enable
-      RE    : in    std_logic; -- Read Enable
-      WE    : in    std_logic; -- Write Enable
-      ADDR  : in    std_logic_vector(LOG2(ITEMS)-1 downto 0); -- Address A
-      DI    : in    std_logic_vector(DATA_WIDTH-1 downto 0); -- Data A In
-      DO_DV : out   std_logic; -- Data A Valid
-      DO    : out   std_logic_vector(DATA_WIDTH-1 downto 0) -- Data A Out
+      -- ================
+
+      -- Clock A
+      CLK   : in    std_logic;
+      -- Pipe Enable
+      PIPE_EN : in  std_logic;
+      -- Read Enable
+      RE    : in    std_logic;
+      -- Write Enable
+      WE    : in    std_logic;
+      -- Address A
+      ADDR  : in    std_logic_vector(LOG2(ITEMS)-1 downto 0);
+      -- Data A In
+      DI    : in    std_logic_vector(DATA_WIDTH-1 downto 0);
+      -- Data A Valid
+      DO_DV : out   std_logic;
+      -- Data A Out
+      DO    : out   std_logic_vector(DATA_WIDTH-1 downto 0)
    );
 end entity SP_BMEM;
 

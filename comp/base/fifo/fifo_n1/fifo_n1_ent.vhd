@@ -46,19 +46,35 @@ entity FIFO_N1 is
       DEVICE : string := "7SERIES"
    );
    port(
-      CLK      : in  std_logic;  -- Global clock signal
-      RESET    : in  std_logic;  -- Global reset signal
+      -- Global clock signal
+      CLK      : in  std_logic;
+      -- Global reset signal
+      RESET    : in  std_logic;
 
+      -- ===============
       -- Write interface
-      DATA_IN  : in  slv_array_t(0 to WRITE_PORTS-1)(DATA_WIDTH-1 downto 0); -- Data input
-      WE       : in  std_logic_vector(WRITE_PORTS-1 downto 0);  -- Write request
-      FULL     : out std_logic; -- FIFO is full
-      AFULL    : out std_logic; -- FIFO is almost full (see ALMOST_FULL_OFFSET)
+      -- ===============
 
+      -- Data input
+      DATA_IN  : in  slv_array_t(0 to WRITE_PORTS-1)(DATA_WIDTH-1 downto 0);
+      -- Write request
+      WE       : in  std_logic_vector(WRITE_PORTS-1 downto 0); 
+      -- FIFO is full
+      FULL     : out std_logic;
+      -- FIFO is almost full (see ALMOST_FULL_OFFSET)
+      AFULL    : out std_logic;
+
+      -- ===============
       -- Read interface
-      DATA_OUT       : out std_logic_vector(DATA_WIDTH-1 downto 0); -- Data output
-      RE             : in  std_logic;  -- Read request
-      EMPTY          : out std_logic;  -- FIFO is empty
-      AEMPTY         : out std_logic  -- FIFO is almost empty (see ALMOST_EMPTY_OFFSET)
+      -- ===============
+
+      -- Data output
+      DATA_OUT       : out std_logic_vector(DATA_WIDTH-1 downto 0);
+      -- Read request
+      RE             : in  std_logic;
+      -- FIFO is empty
+      EMPTY          : out std_logic;
+      -- FIFO is almost empty (see ALMOST_EMPTY_OFFSET)
+      AEMPTY         : out std_logic
    );
 end entity;

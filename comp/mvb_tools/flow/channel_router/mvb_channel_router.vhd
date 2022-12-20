@@ -35,7 +35,8 @@ entity MVB_CHANNEL_ROUTER is
         -- MVB parameters: width of item in bits
         ITEM_WIDTH    : natural := 32;
         -- Total number of source channels, max value = DST_CHANNELS
-        SRC_CHANNELS  : natural := 4;  -- max value = DST_CHANNELS
+        -- max value = DST_CHANNELS
+        SRC_CHANNELS  : natural := 4;
         -- Total number of destination channels, max value = 256
         DST_CHANNELS  : natural := 16;
         -- Optimized mode for better timing (best for high ITEMS) with limited

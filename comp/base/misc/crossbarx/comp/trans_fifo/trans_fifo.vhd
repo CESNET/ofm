@@ -39,7 +39,8 @@ generic(
 
     -- Buffer A size
     BUF_A_COLS         : integer := 512;
-    BUF_A_ROWS         : integer := 4; -- max(BUF_A_TRUE_ROWS)
+    -- max(BUF_A_TRUE_ROWS)
+    BUF_A_ROWS         : integer := 4;
 
     -- Buffer B size
     BUF_B_COLS         : integer := 512;
@@ -57,14 +58,21 @@ generic(
     B_LEN_SUM_WIDTH    : integer := 8;
 
     -- Target Device
-    DEVICE             : string := "ULTRASCALE" -- "ULTRASCALE", "7SERIES", "STRATIX10" ...
+    -- "ULTRASCALE", "7SERIES", "STRATIX10" ...
+    DEVICE             : string := "ULTRASCALE"
 );
 port(
+    -- ====================
     -- Clock and Reset
+    -- ====================
+
     CLK                : in  std_logic;
     RESET              : in  std_logic;
 
+    -- ====================
     -- Input Transactions
+    -- ====================
+
     RX_TRANS_B_COL     : in  slv_array_2d_t  (TRANS_STREAMS-1 downto 0)(TRANSS-1 downto 0)(log2(BUF_B_COLS)-1 downto 0);
     RX_TRANS_B_ITEM    : in  slv_array_2d_t  (TRANS_STREAMS-1 downto 0)(TRANSS-1 downto 0)(log2(BUF_B_ROWS*ROW_ITEMS)-1 downto 0);
     RX_TRANS_LEN       : in  slv_array_2d_t  (TRANS_STREAMS-1 downto 0)(TRANSS-1 downto 0)(log2(TRANS_MTU+1)-1 downto 0);
@@ -85,7 +93,10 @@ port(
     -- Buffer A pointer
     BUF_A_PTR          : in  slv_array_t(TRANS_STREAMS-1 downto 0)(log2(BUF_A_COLS*BUF_A_ROWS*ROW_ITEMS)-1 downto 0);
 
+    -- ====================
     -- Input Transactions
+    -- ====================
+
     TX_TRANS_B_COL     : out slv_array_t     (TRANS_STREAMS*TRANSS-1 downto 0)(log2(BUF_B_COLS)-1 downto 0);
     TX_TRANS_B_ITEM    : out slv_array_t     (TRANS_STREAMS*TRANSS-1 downto 0)(log2(BUF_B_ROWS*ROW_ITEMS)-1 downto 0);
     TX_TRANS_LEN       : out slv_array_t     (TRANS_STREAMS*TRANSS-1 downto 0)(log2(TRANS_MTU+1)-1 downto 0);

@@ -47,10 +47,15 @@ entity RX_MAC_LITE_CTRL_UNIT is
         -- =====================================================================
         -- SPEED METER INTERFACE
         -- =====================================================================
-        SM_CNT_TICKS           : in  std_logic_vector(SM_CNT_TICKS_WIDTH-1 downto 0); -- counter of clock ticks
-        SM_CNT_TICKS_MAX       : in  std_logic; -- maximum value flag of clock ticks counter, when CNT_TICKS_MAX=1 speed test is done
-        SM_CNT_BYTES           : in  std_logic_vector(SM_CNT_BYTES_WIDTH-1 downto 0); -- counter of valid bytes
-        SM_CNT_CLEAR           : out std_logic; -- reset all speed meter counters
+
+        -- counter of clock ticks
+        SM_CNT_TICKS           : in  std_logic_vector(SM_CNT_TICKS_WIDTH-1 downto 0);
+        -- maximum value flag of clock ticks counter, when CNT_TICKS_MAX=1 speed test is done
+        SM_CNT_TICKS_MAX       : in  std_logic;
+        -- counter of valid bytes
+        SM_CNT_BYTES           : in  std_logic_vector(SM_CNT_BYTES_WIDTH-1 downto 0);
+        -- reset all speed meter counters
+        SM_CNT_CLEAR           : out std_logic;
         -- =====================================================================
         -- OUTPUT CAM WRITE INTERFACE
         -- =====================================================================
@@ -122,7 +127,10 @@ architecture FULL of RX_MAC_LITE_CTRL_UNIT is
 
     constant ADAPTER_SPEED           : std_logic_vector(2 downto 0) := "101";
 
+    -- =====================================================================
     -- base addresses
+    -- =====================================================================
+
     constant TRFC_L_ADDR             : std_logic_vector(7 downto 2) := "000000"; -- 0x00
     constant CFC_L_ADDR              : std_logic_vector(7 downto 2) := "000001"; -- 0x04
     constant DFC_L_ADDR              : std_logic_vector(7 downto 2) := "000010"; -- 0x08
@@ -144,7 +152,10 @@ architecture FULL of RX_MAC_LITE_CTRL_UNIT is
     constant SM_CNT_BYTES_ADDR       : std_logic_vector(7 downto 2) := "010010"; -- 0x48
     constant CAM_BASE_ADDR           : std_logic_vector(7 downto 2) := "100000"; -- 0x80
     
+    -- =====================================================================
     -- RFC2819 counter addresses
+    -- =====================================================================
+
     constant CRC_ERR_L_ADDR          : std_logic_vector(7 downto 2) := "000000";
     constant OVER_MTU_L_ADDR         : std_logic_vector(7 downto 2) := "000001";
     constant BELOW_MIN_L_ADDR        : std_logic_vector(7 downto 2) := "000010";
@@ -179,7 +190,10 @@ architecture FULL of RX_MAC_LITE_CTRL_UNIT is
     constant FRAMES_OVER_1518_H_ADDR : std_logic_vector(7 downto 2) := "011101";
     constant FRAMES_UNDERSIZE_H_ADDR : std_logic_vector(7 downto 2) := "011111";
     
+    -- =====================================================================
     -- Command constants
+    -- =====================================================================
+
     constant CMD_SAMPLE              : std_logic_vector(2 downto 0) := "001"; -- 0x01
     constant CMD_RESET               : std_logic_vector(2 downto 0) := "010"; -- 0x02
     constant CMD_SW_BASE_REG         : std_logic_vector(2 downto 0) := "011"; -- 0x03

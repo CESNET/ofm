@@ -60,70 +60,112 @@ package ib_sim_oper is
 
 -- function declaration ---------------------------------------
    -- Send Local Read Transaction
-   function ib_local_read(src_addr    : in std_logic_vector(31 downto 0); -- Address from where are data readed
-                          dst_addr    : in std_logic_vector(31 downto 0); -- Destination address of completition transaction
-                          length      : in integer;                       -- Number of bytes to be readed
-                          tag         : in integer;                       -- Transaction Tag
-                          read_wait   : in boolean:=false)                -- Wait for completition transaction
+                          -- Address from where are data readed
+   function ib_local_read(src_addr    : in std_logic_vector(31 downto 0);
+                          -- Destination address of completition transaction
+                          dst_addr    : in std_logic_vector(31 downto 0);
+                          -- Number of bytes to be readed
+                          length      : in integer;
+                          -- Transaction Tag
+                          tag         : in integer;
+                          -- Wait for completition transaction
+                          read_wait   : in boolean:=false)
                      return t_ib_ctrl;
  
    -- Send Local Read Transaction (Readed data is saved to file)
-   function ib_local_read_file(src_addr    : in std_logic_vector(31 downto 0); -- Address from where are data readed
-                               dst_addr    : in std_logic_vector(31 downto 0); -- Destination address of completition transaction
-                               length      : in integer;                       -- Number of bytes to be readed
-                               tag         : in integer;                       -- Transaction Tag
-                               file_name   : in string)                        -- Filename where are readed data saved (64 bit hexa values)
+                               -- Address from where are data readed
+   function ib_local_read_file(src_addr    : in std_logic_vector(31 downto 0);
+                               -- Destination address of completition transaction
+                               dst_addr    : in std_logic_vector(31 downto 0);
+                               -- Number of bytes to be readed
+                               length      : in integer;
+                               -- Transaction Tag
+                               tag         : in integer;
+                               -- Filename where are readed data saved (64 bit hexa values)
+                               file_name   : in string)
                      return t_ib_ctrl;
 
    -- Send Local Write Transaction (up to 64 bits of data)
-   function ib_local_write(dst_addr   : in std_logic_vector(31 downto 0);  -- Destination addres of write transaction
-                           src_addr   : in std_logic_vector(31 downto 0);  -- From where are write transaction generated
-                           length     : in integer;                        -- Length of writen data
-                           tag        : in integer;                        -- Transaction Tag
-                           trans_flag : in std_logic;                      -- 0 - No ACK/ 1 - Write completition ACK
-                           data       : in std_logic_vector(63 downto 0))  -- Data to be writen
+                           -- Destination addres of write transaction
+   function ib_local_write(dst_addr   : in std_logic_vector(31 downto 0);
+                           -- From where are write transaction generated
+                           src_addr   : in std_logic_vector(31 downto 0);
+                           -- Length of writen data
+                           length     : in integer;
+                           -- Transaction Tag
+                           tag        : in integer;
+                           -- 0 - No ACK/ 1 - Write completition ACK
+                           trans_flag : in std_logic;
+                           -- Data to be writen
+                           data       : in std_logic_vector(63 downto 0))
                      return t_ib_ctrl;
    
    -- Send Local Write Transaction (Write data from file)
-   function ib_local_write_file(dst_addr   : in std_logic_vector(31 downto 0); -- Destination address of write transaction
-                                src_addr   : in std_logic_vector(31 downto 0); -- From where are write transaction generated
-                                length     : in integer;                       -- Length of writen data (when 0 all data from file is writen)
-                                tag        : in integer;                       -- Transaction Tag
-                                trans_flag : in std_logic;                     -- 0 - No ACK/ 1 - Write completition ACK
-                                file_name  : in string)                        -- Filename from where are data writen (64 bit hexa values)
+                                -- Destination address of write transaction
+   function ib_local_write_file(dst_addr   : in std_logic_vector(31 downto 0);
+                                -- From where are write transaction generated
+                                src_addr   : in std_logic_vector(31 downto 0);
+                                -- Length of writen data (when 0 all data from file is writen)
+                                length     : in integer;
+                                -- Transaction Tag
+                                tag        : in integer;
+                                -- 0 - No ACK/ 1 - Write completition ACK
+                                trans_flag : in std_logic;
+                                -- Filename from where are data writen (64 bit hexa values)
+                                file_name  : in string)
                      return t_ib_ctrl;
  
    -- Send Local Write Transaction (Write 32 bit data from file)
-   function ib_local_write_file32(dst_addr   : in std_logic_vector(31 downto 0); -- Destination address of write transaction
-                                  src_addr   : in std_logic_vector(31 downto 0); -- From where are write transaction generated
-                                  length     : in integer;                       -- Length of writen data (when 0 all data from file is writen)
-                                  tag        : in integer;                       -- Transaction Tag
-                                  trans_flag : in std_logic;                     -- 0 - No ACK/ 1 - Write completition ACK
-                                  file_name  : in string)                        -- Filename from where are data writen (64 bit hexa values)
+                                  -- Destination address of write transaction
+   function ib_local_write_file32(dst_addr   : in std_logic_vector(31 downto 0);
+                                  -- From where are write transaction generated
+                                  src_addr   : in std_logic_vector(31 downto 0);
+                                  -- Length of writen data (when 0 all data from file is writen)
+                                  length     : in integer;
+                                  -- Transaction Tag
+                                  tag        : in integer;
+                                  -- 0 - No ACK/ 1 - Write completition ACK
+                                  trans_flag : in std_logic;
+                                  -- Filename from where are data writen (64 bit hexa values)
+                                  file_name  : in string)
                      return t_ib_ctrl;
 
 
    -- Send Read Completition Transaction without Last Fragment Flag (Write data from file)
-   function ib_read_completition_nolast(dst_addr    : in std_logic_vector(31 downto 0); -- Destination address of read completition
-                                 src_addr    : in std_logic_vector(31 downto 0); -- Src address of completition transaction
-                                 length      : in integer;                       -- Transaction Length (when 0 all data from file is writen)
-                                 tag         : in integer;                       -- Transaction Tag
-                                 file_name   : in string)                        -- Filename from where are data writen
+                                 -- Destination address of read completition
+   function ib_read_completition_nolast(dst_addr    : in std_logic_vector(31 downto 0);
+                                 -- Src address of completition transaction
+                                 src_addr    : in std_logic_vector(31 downto 0);
+                                 -- Transaction Length (when 0 all data from file is writen)
+                                 length      : in integer;
+                                 -- Transaction Tag
+                                 tag         : in integer;
+                                 -- Filename from where are data writen
+                                 file_name   : in string)
                      return t_ib_ctrl;
  
    -- Send Read Completition Transaction with Last Frament Flag (Write data from file)
-   function ib_read_completition(dst_addr    : in std_logic_vector(31 downto 0); -- Destination address of read completition
-                                 src_addr    : in std_logic_vector(31 downto 0); -- Src address of completition transaction
-                                 length      : in integer;                       -- Transaction Length (when 0 all data from file is writen)
-                                 tag         : in integer;                       -- Transaction Tag
-                                 file_name   : in string)                        -- Filename from where are data writen
+                                 -- Destination address of read completition
+   function ib_read_completition(dst_addr    : in std_logic_vector(31 downto 0);
+                                 -- Src address of completition transaction
+                                 src_addr    : in std_logic_vector(31 downto 0);
+                                 -- Transaction Length (when 0 all data from file is writen)
+                                 length      : in integer;
+                                 -- Transaction Tag
+                                 tag         : in integer;
+                                 -- Filename from where are data writen
+                                 file_name   : in string)
                      return t_ib_ctrl;
  
    -- Send Write Completition Transaction
-   function ib_write_completition(dst_addr    : in std_logic_vector(31 downto 0); -- Destination address of write completition
-                                  src_addr    : in std_logic_vector(31 downto 0); -- Src address of completition transaction
-                                  length      : in integer;                       -- Transaction Length
-                                  tag         : in integer)                       -- Transaction Tag
+                                  -- Destination address of write completition
+   function ib_write_completition(dst_addr    : in std_logic_vector(31 downto 0);
+                                  -- Src address of completition transaction
+                                  src_addr    : in std_logic_vector(31 downto 0);
+                                  -- Transaction Length
+                                  length      : in integer;
+                                  -- Transaction Tag
+                                  tag         : in integer)
                      return t_ib_ctrl;
 
 -- AUX Functions ----------------------------------------------------------------------------------------
@@ -189,11 +231,16 @@ end;
 
 -- --------------------------------------------------------------------------- 
    -- Send Local Read Transaction
-   function ib_local_read(src_addr    : in std_logic_vector(31 downto 0); -- Address from where are data readed
-                          dst_addr    : in std_logic_vector(31 downto 0); -- Destination address of completition transaction
-                          length      : in integer;                       -- Number of bytes to be readed
-                          tag         : in integer;                       -- Transaction Tag
-                          read_wait   : in boolean:=false)                -- Wait for completition transaction
+                          -- Address from where are data readed
+   function ib_local_read(src_addr    : in std_logic_vector(31 downto 0);
+                          -- Destination address of completition transaction
+                          dst_addr    : in std_logic_vector(31 downto 0);
+                          -- Number of bytes to be readed
+                          length      : in integer;
+                          -- Transaction Tag
+                          tag         : in integer;
+                          -- Wait for completition transaction
+                          read_wait   : in boolean:=false)
                      return t_ib_ctrl is
 
     variable result: t_ib_ctrl;
@@ -210,11 +257,16 @@ end;
 
 -- ---------------------------------------------------------------------------    
    -- Send Local Read Transaction (Readed data is saved to file)
-   function ib_local_read_file(src_addr    : in std_logic_vector(31 downto 0); -- Address from where are data readed
-                               dst_addr    : in std_logic_vector(31 downto 0); -- Destination address of completition transaction
-                               length      : in integer;                       -- Number of bytes to be readed
-                               tag         : in integer;                       -- Transaction Tag
-                               file_name   : in string)                        -- Filename where are readed data saved (64 bit hexa values)
+                               -- Address from where are data readed
+   function ib_local_read_file(src_addr    : in std_logic_vector(31 downto 0);
+                               -- Destination address of completition transaction
+                               dst_addr    : in std_logic_vector(31 downto 0);
+                               -- Number of bytes to be readed
+                               length      : in integer;
+                               -- Transaction Tag
+                               tag         : in integer;
+                               -- Filename where are readed data saved (64 bit hexa values)
+                               file_name   : in string)
                      return t_ib_ctrl is
    variable result: t_ib_ctrl;
       begin
@@ -231,12 +283,18 @@ end;
 
    -- ---------------------------------------------------------------------------
    -- Send Local Write Transaction (up to 64 bits of data)
-   function ib_local_write(dst_addr   : in std_logic_vector(31 downto 0);  -- Destination addres of write transaction
-                           src_addr   : in std_logic_vector(31 downto 0);  -- From where are write transaction generated
-                           length     : in integer;                        -- Length of writen data
-                           tag        : in integer;                        -- Transaction Tag
-                           trans_flag : in std_logic;                      -- 0 - No ACK/ 1 - Write completition ACK
-                           data       : in std_logic_vector(63 downto 0))  -- Data to be writen
+                           -- Destination addres of write transaction
+   function ib_local_write(dst_addr   : in std_logic_vector(31 downto 0);
+                           -- From where are write transaction generated
+                           src_addr   : in std_logic_vector(31 downto 0);
+                           -- Length of writen data
+                           length     : in integer;
+                           -- Transaction Tag
+                           tag        : in integer;
+                           -- 0 - No ACK/ 1 - Write completition ACK
+                           trans_flag : in std_logic;
+                           -- Data to be writen
+                           data       : in std_logic_vector(63 downto 0))
                      return t_ib_ctrl is
    variable result: t_ib_ctrl;
       begin
@@ -252,12 +310,18 @@ end;
 
 -- ---------------------------------------------------------------------------
    -- Send Local Write Transaction (Write data from file)
-   function ib_local_write_file(dst_addr   : in std_logic_vector(31 downto 0); -- Destination address of write transaction
-                                src_addr   : in std_logic_vector(31 downto 0); -- From where are write transaction generated
-                                length     : in integer;                       -- Length of writen data
-                                tag        : in integer;                       -- Transaction Tag
-                                trans_flag : in std_logic;                     -- 0 - No ACK/ 1 - Write completition ACK
-                                file_name  : in string)                        -- Filename from where are data writen (64 bit hexa values)
+                                -- Destination address of write transaction
+   function ib_local_write_file(dst_addr   : in std_logic_vector(31 downto 0);
+                                -- From where are write transaction generated
+                                src_addr   : in std_logic_vector(31 downto 0);
+                                -- Length of writen data
+                                length     : in integer;
+                                -- Transaction Tag
+                                tag        : in integer;
+                                -- 0 - No ACK/ 1 - Write completition ACK
+                                trans_flag : in std_logic;
+                                -- Filename from where are data writen (64 bit hexa values)
+                                file_name  : in string)
                      return t_ib_ctrl is
    variable result: t_ib_ctrl;
       begin
@@ -273,12 +337,18 @@ end;
 
 
 -- Send Local Write Transaction (Write 32 bit data from file)
-   function ib_local_write_file32(dst_addr   : in std_logic_vector(31 downto 0); -- Destination address of write transaction
-                                  src_addr   : in std_logic_vector(31 downto 0); -- From where are write transaction generated
-                                  length     : in integer;                       -- Length of writen data (when 0 all data from file is writen)                      
-                                  tag        : in integer;                       -- Transaction Tag
-                                  trans_flag : in std_logic;                     -- 0 - No ACK/ 1 - Write completition ACK
-                                  file_name  : in string)                        -- Filename from where are data writen (64 bit hexa values)
+                                  -- Destination address of write transaction
+   function ib_local_write_file32(dst_addr   : in std_logic_vector(31 downto 0);
+                                  -- From where are write transaction generated
+                                  src_addr   : in std_logic_vector(31 downto 0);
+                                  -- Length of writen data (when 0 all data from file is writen)                      
+                                  length     : in integer;
+                                  -- Transaction Tag
+                                  tag        : in integer;
+                                  -- 0 - No ACK/ 1 - Write completition ACK
+                                  trans_flag : in std_logic;
+                                  -- Filename from where are data writen (64 bit hexa values)
+                                  file_name  : in string)
                      return t_ib_ctrl is
    variable result: t_ib_ctrl;
       begin
@@ -295,11 +365,16 @@ end;
 
 -- ---------------------------------------------------------------------------
    -- Send Read Completition Transaction with Last Fragment Flag (Write data from file)
-   function ib_read_completition(dst_addr    : in std_logic_vector(31 downto 0); -- Destination address of read completition
-                                 src_addr    : in std_logic_vector(31 downto 0); -- Src address of completition transaction
-                                 length      : in integer;                       -- Transaction Length
-                                 tag         : in integer;                       -- Transaction Tag
-                                 file_name   : in string)                        -- Filename from where are data writen
+                                 -- Destination address of read completition
+   function ib_read_completition(dst_addr    : in std_logic_vector(31 downto 0);
+                                 -- Src address of completition transaction
+                                 src_addr    : in std_logic_vector(31 downto 0);
+                                 -- Transaction Length
+                                 length      : in integer;
+                                 -- Transaction Tag
+                                 tag         : in integer;
+                                 -- Filename from where are data writen
+                                 file_name   : in string)
                      return t_ib_ctrl is
    variable result: t_ib_ctrl;
       begin
@@ -308,18 +383,24 @@ end;
       result.PARAMS.DST_ADDR   :=dst_addr;
       result.PARAMS.LENGTH     :=length;
       result.PARAMS.TAG        :=tag;
-      result.PARAMS.TRANS_FLAG :='1';  -- Used to pass the Last Fragment Flag value
+      -- Used to pass the Last Fragment Flag value
+      result.PARAMS.TRANS_FLAG :='1';
       result.PARAMS.FILE_NAME  :=conv_file_name(file_name);
       return result;
    end; 
 
 -- ---------------------------------------------------------------------------
    -- Send Read Completition Transaction without Last Fragment Flag (Write data from file)
-   function ib_read_completition_nolast(dst_addr    : in std_logic_vector(31 downto 0); -- Destination address of read completition
-                                 src_addr    : in std_logic_vector(31 downto 0); -- Src address of completition transaction
-                                 length      : in integer;                       -- Transaction Length
-                                 tag         : in integer;                       -- Transaction Tag
-                                 file_name   : in string)                        -- Filename from where are data writen
+                                 -- Destination address of read completition
+   function ib_read_completition_nolast(dst_addr    : in std_logic_vector(31 downto 0);
+                                 -- Src address of completition transaction
+                                 src_addr    : in std_logic_vector(31 downto 0);
+                                 -- Transaction Length
+                                 length      : in integer;
+                                 -- Transaction Tag
+                                 tag         : in integer;
+                                 -- Filename from where are data writen
+                                 file_name   : in string)
                      return t_ib_ctrl is
    variable result: t_ib_ctrl;
       begin
@@ -336,10 +417,14 @@ end;
                  
 -- --------------------------------------------------------------------------- 
    -- Send Write Completition Transaction
-   function ib_write_completition(dst_addr    : in std_logic_vector(31 downto 0); -- Destination address of write completition
-                                  src_addr    : in std_logic_vector(31 downto 0); -- Src address of completition transaction
-                                  length      : in integer;                       -- Transaction Length
-                                  tag         : in integer)                       -- Transaction Tag
+                                  -- Destination address of write completition
+   function ib_write_completition(dst_addr    : in std_logic_vector(31 downto 0);
+                                  -- Src address of completition transaction
+                                  src_addr    : in std_logic_vector(31 downto 0);
+                                  -- Transaction Length
+                                  length      : in integer;
+                                  -- Transaction Tag
+                                  tag         : in integer)
                      return t_ib_ctrl is
    variable result: t_ib_ctrl;
       begin

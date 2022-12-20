@@ -28,10 +28,12 @@ generic(
     TRANSS          : integer := 4;
     -- Buffer A size
     BUF_A_COLS      : integer := 512;
-    BUF_A_ROWS      : integer := 4; -- max(BUF_A_TRUE_ROWS)
+    -- max(BUF_A_TRUE_ROWS)
+    BUF_A_ROWS      : integer := 4;
     -- Buffer B size
     BUF_B_COLS      : integer := 512;
-    BUF_B_ROWS      : integer := 4; -- max(BUF_B_TRUE_ROWS)
+    -- max(BUF_B_TRUE_ROWS)
+    BUF_B_ROWS      : integer := 4;
 
     -- Number of non-overlapping Sections of Buffer A
     -- (All Instructions must overflow inside space
@@ -52,31 +54,43 @@ generic(
     TRANS_MTU       : integer := 512;
 
     -- Target Device
-    DEVICE          : string := "STRATIX10" -- "ULTRASCALE", "7SERIES", ...
+    -- "ULTRASCALE", "7SERIES", ...
+    DEVICE          : string := "STRATIX10"
 );
 port(
+    -- ====================
     -- Clock and Reset
+    -- ====================
+
     CLK             : in  std_logic;
     RESET           : in  std_logic;
 
+    -- ====================
     -- Input Transactions
+    -- ====================
+
     TRANS_A_COL     : in  std_logic_vector(log2(BUF_A_COLS)-1 downto 0);
     TRANS_A_ITEM    : in  slv_array_t     (TRANSS-1 downto 0)(log2(BUF_A_ROWS*ROW_ITEMS)-1 downto 0);
     TRANS_B_COL     : in  slv_array_t     (TRANSS-1 downto 0)(log2(BUF_B_COLS)-1 downto 0);
     TRANS_B_ITEM    : in  slv_array_t     (TRANSS-1 downto 0)(log2(BUF_B_ROWS*ROW_ITEMS)-1 downto 0);
     TRANS_LEN       : in  slv_array_t     (TRANSS-1 downto 0)(log2(TRANS_MTU+1)-1 downto 0);
     TRANS_VLD       : in  std_logic_vector(TRANSS-1 downto 0);
-    TRANS_COLOR     : in  std_logic; -- Color is the same for all Transactions in one word
+    -- Color is the same for all Transactions in one word
+    TRANS_COLOR     : in  std_logic;
     TRANS_SRC_RDY   : in  std_logic;
     TRANS_DST_RDY   : out std_logic;
 
+    -- ====================
     -- Output Instructions
+    -- ====================
+
     INSTR_A_COL     : out std_logic_vector(log2(BUF_A_COLS)-1 downto 0);
     INSTR_A_ITEM    : out slv_array_t     (TRANSS+1-1 downto 0)(log2(BUF_A_ROWS*ROW_ITEMS)-1 downto 0);
     INSTR_B_COL     : out slv_array_t     (TRANSS+1-1 downto 0)(log2(BUF_B_COLS)-1 downto 0);
     INSTR_B_ITEM    : out slv_array_t     (TRANSS+1-1 downto 0)(log2(BUF_B_ROWS*ROW_ITEMS)-1 downto 0);
     INSTR_LEN       : out slv_array_t     (TRANSS+1-1 downto 0)(log2(BUF_A_ROWS*ROW_ITEMS+1)-1 downto 0);
-    INSTR_COLOR     : out std_logic_vector(TRANSS+1-1 downto 0); -- Color might be different for index 0
+    -- Color might be different for index 0
+    INSTR_COLOR     : out std_logic_vector(TRANSS+1-1 downto 0);
     INSTR_VLD       : out std_logic_vector(TRANSS+1-1 downto 0);
     INSTR_SRC_RDY   : out std_logic;
     INSTR_DST_RDY   : in  std_logic

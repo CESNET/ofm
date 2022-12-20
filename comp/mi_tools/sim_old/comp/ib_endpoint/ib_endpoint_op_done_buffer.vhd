@@ -21,19 +21,36 @@ use work.ib_pkg.all;
 -- ----------------------------------------------------------------------------
 entity IB_ENDPOINT_OP_DONE_BUFFER is
    port(
+      -- ========================
       -- Common Interface
+      -- ========================
+
       CLK              : in  std_logic;
       RESET            : in  std_logic;
-      -- IB_Endpoint Input Interface (Listening for completition transactions)
+
+      -- =======================================
+      -- IB_Endpoint Input Interface 
+      --
+      -- Listening for completition transactions
+      -- =======================================
+
       RD_COMPL_TAG     : in  std_logic_vector(15 downto 0);
-      RD_COMPL_START   : in  std_logic; -- Read completition transaction goes for processing
-      RD_COMPL_DONE    : in  std_logic; -- Write/completition transaction is done
+      -- Read completition transaction goes for processing
+      RD_COMPL_START   : in  std_logic;
+      -- Write/completition transaction is done
+      RD_COMPL_DONE    : in  std_logic;
       -- BM Tag
       BM_TAG           : in  std_logic_vector(15 downto 0);
       BM_DONE          : in  std_logic;
+
+      -- ========================
       -- OP Done Interface
-      OP_TAG           : out std_logic_vector(15 downto 0); -- Busmaster Tag
-      OP_DONE          : out std_logic  -- BM completition transaction recived
+      -- ========================
+
+      -- Busmaster Tag
+      OP_TAG           : out std_logic_vector(15 downto 0);
+      -- BM completition transaction recived
+      OP_DONE          : out std_logic
       );
 end entity IB_ENDPOINT_OP_DONE_BUFFER;
 

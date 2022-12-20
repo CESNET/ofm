@@ -36,11 +36,19 @@ entity uh_completer is
       CLK      : in std_logic;
       RESET    : in std_logic;
 
+      -- ==============
       -- Data interface
-      DI       : inout t_fl32;   -- HFE output
-      DO       : inout t_fl16;   -- UH header
+      -- ==============
 
+      -- HFE output
+      DI       : inout t_fl32;
+      -- UH header
+      DO       : inout t_fl16;
+
+      -- ===================
       -- SW memory interface
+      -- ===================
+
       MI       : inout t_mi32
    );
 end entity uh_completer;

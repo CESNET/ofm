@@ -41,19 +41,35 @@ entity FIFO is
       DO_REG         : boolean := false
    );
    port(
-      RESET    : in std_logic;  -- Global reset signal
-      CLK      : in std_logic;  -- Global clock signal
+      -- Global reset signal
+      RESET    : in std_logic;
+      -- Global clock signal
+      CLK      : in std_logic;
 
+      -- ================
       -- Write interface
-      DATA_IN  : in std_logic_vector((DATA_WIDTH-1) downto 0); -- Data input
-      WRITE_REQ: in std_logic;  -- Write request
-      FULL     : out std_logic; -- FIFO is full
-      LSTBLK   : out std_logic; -- Last block identifier
-      STATUS   : out std_logic_vector(log2(ITEMS) downto 0); -- Free items (only when STATUS_ENABLED is true)
+      -- ================
 
+      -- Data input
+      DATA_IN  : in std_logic_vector((DATA_WIDTH-1) downto 0);
+      -- Write request
+      WRITE_REQ: in std_logic;
+      -- FIFO is full
+      FULL     : out std_logic;
+      -- Last block identifier
+      LSTBLK   : out std_logic;
+      -- Free items (only when STATUS_ENABLED is true)
+      STATUS   : out std_logic_vector(log2(ITEMS) downto 0);
+
+      -- ===============
       -- Read interface
-      DATA_OUT : out std_logic_vector((DATA_WIDTH-1) downto 0); -- Data output
-      READ_REQ : in std_logic;  -- Read request
-      EMPTY    : out std_logic  -- FIFO is empty
+      -- ===============
+
+      -- Data output
+      DATA_OUT : out std_logic_vector((DATA_WIDTH-1) downto 0);
+      -- Read request
+      READ_REQ : in std_logic;
+      -- FIFO is empty
+      EMPTY    : out std_logic
    );
 end entity;

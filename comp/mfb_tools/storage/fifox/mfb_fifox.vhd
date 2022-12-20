@@ -12,19 +12,26 @@ use work.math_pack.all;
 
 entity MFB_FIFOX is
    generic(
-   ----------------------------------------------------------------------------
-   --                              BUS GENERIC
-   ----------------------------------------------------------------------------
-      -- Frame size restrictions: none
-      REGIONS             : natural := 4;  -- any possitive value
-      REGION_SIZE         : natural := 8;  -- any possitive value
-      BLOCK_SIZE          : natural := 8;  -- any possitive value
+   -- =========================================================================
+   -- BUS GENERIC
+   --
+   -- Frame size restrictions: none
+   -- =========================================================================
+
+      -- any possitive value
+      REGIONS             : natural := 4;
+      -- any possitive value
+      REGION_SIZE         : natural := 8;
+      -- any possitive value
+      BLOCK_SIZE          : natural := 8;
       ITEM_WIDTH          : natural := 8;
       -- Metadata width
       META_WIDTH          : natural := 0;
-   ----------------------------------------------------------------------------
-   --                              FIFO GENERIC
-   ----------------------------------------------------------------------------
+
+      -- =========================================================================
+      -- FIFO GENERIC
+      -- =========================================================================
+
       -- FIFO depth, number of data words
       FIFO_DEPTH          : natural := 512;
       -- Select memory implementation. Options:
@@ -50,15 +57,17 @@ entity MFB_FIFOX is
 
    );
    port(
-      --------------------------------------------------------------------------
+      -- =========================================================================
       -- CLOCK AND RESET
-      --------------------------------------------------------------------------
+      -- =========================================================================
+
       CLK         : in  std_logic;
       RST         : in  std_logic;
 
-      --------------------------------------------------------------------------
+      -- =========================================================================
       -- RX MFB INTERFACE
-      --------------------------------------------------------------------------
+      -- =========================================================================
+
       RX_DATA     : in  std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
       RX_META     : in  std_logic_vector(REGIONS*META_WIDTH-1 downto 0) := (others => '0');
       RX_SOF_POS  : in  std_logic_vector(REGIONS*max(1,log2(REGION_SIZE))-1 downto 0);
@@ -68,9 +77,10 @@ entity MFB_FIFOX is
       RX_SRC_RDY  : in  std_logic;
       RX_DST_RDY  : out std_logic;
 
-      --------------------------------------------------------------------------
+      -- =========================================================================
       -- TX MFB INTERFACE
-      --------------------------------------------------------------------------
+      -- =========================================================================
+
       TX_DATA     : out std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
       TX_META     : out std_logic_vector(REGIONS*META_WIDTH-1 downto 0);
       TX_SOF_POS  : out std_logic_vector(REGIONS*max(1,log2(REGION_SIZE))-1 downto 0);
@@ -80,9 +90,10 @@ entity MFB_FIFOX is
       TX_SRC_RDY  : out std_logic;
       TX_DST_RDY  : in  std_logic;
 
-      --------------------------------------------------------------------------
+      -- =========================================================================
       -- FIFO STATUS SIGNAL
-      --------------------------------------------------------------------------
+      -- =========================================================================
+
       FIFO_STATUS : out std_logic_vector(log2(FIFO_DEPTH) downto 0);
       FIFO_AFULL  : out std_logic;
       FIFO_AEMPTY : out std_logic

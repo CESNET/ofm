@@ -14,7 +14,8 @@ entity i2c_io_exp is
         -- I2C clock divider
         IIC_CLK_CNT : unsigned(15 downto 0) := X"007D";
         -- IO expander device I2C address
-        IIC_DEV_ADDR  : std_logic_vector( 6 downto 0) := "0100000"; -- 0x20
+        -- 0x20
+        IIC_DEV_ADDR  : std_logic_vector( 6 downto 0) := "0100000";
         -- Configure the IO ports direction upon releasing reset
         PWR_UP_CONFIG : boolean := true;
         -- Address of port direction register. Predefined for the tca5455 chip
@@ -29,23 +30,52 @@ entity i2c_io_exp is
         REFRESH_CYCLES: natural := 16#010000#
     );
     port (
-        --
+        -- =====================
+        -- CLK and RST
+        -- =====================
+
         RESET      : in  std_logic;
         CLK        : in  std_logic;
+
+        -- =====================
         -- Remote I/O interface
-        DIR        : in  std_logic_vector(7 downto 0); -- '1' = Input, '0' = output
-        I          : out std_logic_vector(7 downto 0); -- Remote input
-        O          : in  std_logic_vector(7 downto 0); -- Remote output 
+        -- =====================
+
+        -- '1' = Input, '0' = output
+        DIR        : in  std_logic_vector(7 downto 0);
+        -- Remote input
+        I          : out std_logic_vector(7 downto 0);
+        -- Remote output 
+        O          : in  std_logic_vector(7 downto 0);
+
+        -- =====================
         -- Control
-        REFRESH    : in  std_logic := '0'; -- Force manual refresh of the I port
-        CONFIG     : in  std_logic := '0'; -- Force manual settings of DIR and O ports
-        ERROR      : out std_logic; -- operation failed (i2c error)
+        -- =====================
+
+        -- Force manual refresh of the I port
+        REFRESH    : in  std_logic := '0';
+        -- Force manual settings of DIR and O ports
+        CONFIG     : in  std_logic := '0';
+        -- operation failed (i2c error)
+        ERROR      : out std_logic;
+
+        -- =====================
         -- I2C bus arbitration
-        I2C_REQ    : out std_logic;        -- IIC bus request
-        I2C_GNT    : in  std_logic := '1'; -- IIC bus grant
-        I2C_BUSY   : out std_logic;        -- IIC bus busy
-        I2C_DONE   : out std_logic;        -- IIC bus operation done
+        -- =====================
+
+        -- IIC bus request
+        I2C_REQ    : out std_logic;
+        -- IIC bus grant
+        I2C_GNT    : in  std_logic := '1';
+        -- IIC bus busy
+        I2C_BUSY   : out std_logic;
+        -- IIC bus operation done
+        I2C_DONE   : out std_logic;
+
+        -- =====================
         -- I2C interface 
+        -- =====================
+
         SCL_I      : in  std_logic;
         SCL_O      : out std_logic;
         SCL_OEN    : out std_logic;

@@ -19,10 +19,17 @@ entity RX_MAC_LITE_ADAPTER_MAC_SEG is
         SEGMENTS    : natural := REGIONS*REGION_SIZE
     );
     port(
+        -- =====================================================================
         -- CLOCK AND RESET
+        -- =====================================================================
+
         CLK              : in  std_logic;
         RESET            : in  std_logic;
+
+        -- =====================================================================
         -- INPUT MAC SEGMENTED INTERFACE (Intel F-Tile IP)
+        -- =====================================================================
+
         IN_MAC_DATA      : in  std_logic_vector(SEGMENTS*64-1 downto 0);
         IN_MAC_INFRAME   : in  std_logic_vector(SEGMENTS-1 downto 0);
         IN_MAC_EOP_EMPTY : in  std_logic_vector(SEGMENTS*3-1 downto 0);
@@ -32,8 +39,13 @@ entity RX_MAC_LITE_ADAPTER_MAC_SEG is
         -- Ignored
         IN_MAC_STATUS    : in  std_logic_vector(SEGMENTS*3-1 downto 0);
         IN_MAC_VALID     : in  std_logic;
+
+        -- =====================================================================
         -- OUTPUT MFB INTERFACE
+        --
         -- (RX MAC LITE, allowed MFB configurations: REGIONS,REGION_SIZE,8,8
+        -- =====================================================================
+
         OUT_MFB_DATA     : out std_logic_vector(REGIONS*REGION_SIZE*64-1 downto 0);
         OUT_MFB_SOF      : out std_logic_vector(REGIONS-1 downto 0);
         OUT_MFB_SOF_POS  : out std_logic_vector(REGIONS*max(1,log2(REGION_SIZE))-1 downto 0);
@@ -42,9 +54,15 @@ entity RX_MAC_LITE_ADAPTER_MAC_SEG is
         OUT_MFB_ERROR    : out std_logic_vector(REGIONS-1 downto 0);
         OUT_MFB_SRC_RDY  : out std_logic;
         OUT_LINK_UP      : out std_logic;
+
+        -- =======================================================================================
         -- OUTPUT STATISTICS INTERFACE (about 2 clock cycles earlier than the word reaches output)
-        OUT_DISCARDED_PKTS  : out std_logic_vector(log2(SEGMENTS/2)-1 downto 0); -- number of discarded packets in the current word
-        OUT_DISCARDED_BYTES : out std_logic_vector(max(6, log2(2*SEGMENTS*8))-1 downto 0) -- 2*SEGMENTS*8 = bytes of 2 words
+        -- =======================================================================================
+
+        -- number of discarded packets in the current word
+        OUT_DISCARDED_PKTS  : out std_logic_vector(log2(SEGMENTS/2)-1 downto 0);
+        -- 2*SEGMENTS*8 = bytes of 2 words
+        OUT_DISCARDED_BYTES : out std_logic_vector(max(6, log2(2*SEGMENTS*8))-1 downto 0)
     );
 end entity;
 

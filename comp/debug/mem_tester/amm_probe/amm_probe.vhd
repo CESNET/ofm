@@ -80,28 +80,44 @@ use work.hist_types.all;
 
 entity AMM_PROBE is
 generic (    
-    -- MI bus --
+    -- ================
+    -- MI bus
+    -- ================
+
     MI_DATA_WIDTH           : integer := 32;
     MI_ADDR_WIDTH           : integer := 32;
 
-    -- Avalon bus --
+    -- ================
+    -- Avalon bus
+    -- ================
+
     AMM_DATA_WIDTH          : integer := 512;
     AMM_ADDR_WIDTH          : integer := 26;
     AMM_BURST_COUNT_WIDTH   : integer := 7;
     AMM_FREQ_KHZ            : integer := 266660;
 
-    -- Others --
+    -- ================
+    -- Others
+    -- ================
+
     AMM_PIPE_REGS           : integer := 1; 
     MI_ADDR_BASE            : std_logic_vector(MI_ADDR_WIDTH - 1 downto 0) := (others => '0');
-    MI_ADDR_USED_BITS       : integer := MI_ADDR_WIDTH;     -- Number of used MI addr LSB bits
+    -- Number of used MI addr LSB bits
+    MI_ADDR_USED_BITS       : integer := MI_ADDR_WIDTH;
     DEVICE                  : string
 );
 port(    
-    -- Main --
+    -- ================
+    -- Main
+    -- ================
+
     CLK                     : in std_logic;
     RST                     : in std_logic;
 
-    -- MI bus interface --
+    -- ================
+    -- MI bus interface
+    -- ================
+
     MI_DWR                  : in  std_logic_vector(MI_DATA_WIDTH - 1 downto 0);  
     MI_ADDR                 : in  std_logic_vector(MI_ADDR_WIDTH - 1 downto 0);
     MI_BE                   : in  std_logic_vector(MI_DATA_WIDTH / 8 - 1 downto 0);
@@ -111,7 +127,10 @@ port(
     MI_DRD                  : out std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
     MI_DRDY                 : out std_logic;
 
-    -- Avalon interface --
+    -- ================
+    -- Avalon interface
+    -- ================
+
     AMM_READY               : in  std_logic;                                             
     AMM_READ                : in  std_logic;
     AMM_WRITE               : in  std_logic;
@@ -184,11 +203,13 @@ architecture FULL of AMM_PROBE is
     -- Max latency ticks = 4095 => with freq = 333.33 Mhz => max. latency = 12us 
     constant LATENCY_TICKS_WIDTH        : integer := 12;
     constant LATENCY_SUM_WIDTH          : integer := MI_DATA_WIDTH * 2;
-    constant LATENCY_COUNTERS_CNT       : integer := 128;   -- TODO
+    -- TODO
+    constant LATENCY_COUNTERS_CNT       : integer := 128;
 
     constant HIST_VARIANT               : HIST_T  := LINEAR;
     -- When LOG hist used => set to LATENCY_TICKS_WIDTH
-    constant HIST_CNTER_CNT             : integer := 512;   -- TODO
+    -- TODO
+    constant HIST_CNTER_CNT             : integer := 512;
     constant HIST_CNT_WIDTH             : integer := MI_DATA_WIDTH;
 
     -- ----------------------------------------------------------------------- --

@@ -12,22 +12,37 @@ use work.math_pack.all;
 
 entity MFB_FRAME_CNT_MVB_ONLY is
    generic(
+      -- =================
       -- MFB configuration
+      -- =================
+
       REGIONS         : natural := 1;
       REGION_SIZE     : natural := 8;
       BLOCK_SIZE      : natural := 8;
       ITEM_WIDTH      : natural := 8;
       OUTPUT_REG      : boolean := true;
+
+      -- =====================
       -- Counter configuration
+      -- =====================
+
       CNT_WIDTH       : natural := 64;
       AUTO_RESET      : boolean := true;
-      IMPLEMENTATION  : string  := "serial" -- "serial", "parallel"
+      -- "serial", "parallel"
+      IMPLEMENTATION  : string  := "serial"
    );
       port(
+      -- =================
       -- CLOCK AND RESET
+      -- =================
+
       CLK           : in  std_logic;
       RST           : in  std_logic;
+
+      -- =================
       -- RX MFB INTERFACE
+      -- =================
+
       RX_DATA       : in  std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
       RX_SOF_POS    : in  std_logic_vector(REGIONS*max(1,log2(REGION_SIZE))-1 downto 0);
       RX_EOF_POS    : in  std_logic_vector(REGIONS*max(1,log2(REGION_SIZE*BLOCK_SIZE))-1 downto 0);
@@ -35,12 +50,21 @@ entity MFB_FRAME_CNT_MVB_ONLY is
       RX_EOF        : in  std_logic_vector(REGIONS-1 downto 0);
       RX_SRC_RDY    : in  std_logic;
       RX_DST_RDY    : out std_logic;
+
+      -- =================
       -- TX MFB INTERFACE
-      TX_DATA       : out std_logic_vector(REGIONS*CNT_WIDTH-1 downto 0); -- alligned with original SOF, one cycle delayed when OUTPUT_REG is true
+      -- =================
+
+      -- alligned with original SOF, one cycle delayed when OUTPUT_REG is true
+      TX_DATA       : out std_logic_vector(REGIONS*CNT_WIDTH-1 downto 0);
       TX_VLD        : out std_logic_vector(REGIONS-1 downto 0);
       TX_SRC_RDY    : out std_logic;
       TX_DST_RDY    : in  std_logic;
+
+      -- =================
       -- TOTAL FRAME COUNTER
+      -- =================
+
       FRAME_CNT     : out std_logic_vector(CNT_WIDTH-1 downto 0);
       FRAME_CNT_RST : in  std_logic
    );

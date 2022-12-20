@@ -22,12 +22,20 @@ use std.textio.all;
 -- ----------------------------------------------------------------------------
 package ib_pkg is
    
+   -- ========================
    -- Address 
+   -- ========================
+
    constant C_IB_TRANS_TYPE_WIDTH : integer := 3;
    constant C_IB_FLAG_WIDTH       : integer := 1;
    constant C_IB_LENGTH_WIDTH     : integer := 12;
    
-   -- IB Transaction Type ('NORMAL/COMPL' 'LOCAL/GLOBAL' 'WRITE/READ')
+   -- =============================================
+   -- IB Transaction Type
+   --
+   -- ('NORMAL/COMPL' 'LOCAL/GLOBAL' 'WRITE/READ')
+   -- =============================================
+
    constant C_IB_L2LW_TRANSACTION          : std_logic_vector(2 downto 0) := "000";
    constant C_IB_L2LR_TRANSACTION          : std_logic_vector(2 downto 0) := "001";
    constant C_IB_L2GW_TRANSACTION          : std_logic_vector(2 downto 0) := "010";
@@ -56,89 +64,154 @@ package ib_pkg is
 
    -- Internal Bus Write Interface
    type t_ibmi_write64 is record
-      ADDR      : std_logic_vector(31 downto 0);       -- Address
-      DATA      : std_logic_vector(63 downto 0);       -- Data
-      BE        : std_logic_vector(7 downto 0);        -- Byte Enable
-      REQ       : std_logic;                           -- Write Request
-      RDY       : std_logic;                           -- Ready
-      LENGTH    : std_logic_vector(11 downto 0);       -- Length
-      SOF       : std_logic;                           -- Start of Frame
-      EOF       : std_logic;                           -- End of Frame
+      -- Address
+      ADDR      : std_logic_vector(31 downto 0);
+      -- Data
+      DATA      : std_logic_vector(63 downto 0);
+      -- Byte Enable
+      BE        : std_logic_vector(7 downto 0);
+      -- Write Request
+      REQ       : std_logic;
+      -- Ready
+      RDY       : std_logic;
+      -- Length
+      LENGTH    : std_logic_vector(11 downto 0);
+      -- Start of Frame
+      SOF       : std_logic;
+      -- End of Frame
+      EOF       : std_logic;
    end record;
 
    -- Internal Bus Read Interface (Simple)
    type t_ibmi_read64s is record
       -- Input interface
-      ADDR      : std_logic_vector(31 downto 0);       -- Address
-      BE        : std_logic_vector(7 downto 0);        -- Byte Enable
---       LENGTH    : std_logic_vector(11 downto 0);       -- Length
-      REQ       : std_logic;                           -- Read Request
-      ARDY      : std_logic;                           -- Address Ready
-      SOF_IN    : std_logic;                           -- Start of Frame (Input)
-      EOF_IN    : std_logic;                           -- End of Frame (Intput)
+
+      -- Address
+      ADDR      : std_logic_vector(31 downto 0);
+      -- Byte Enable
+      BE        : std_logic_vector(7 downto 0);
+      -- Length
+--       LENGTH    : std_logic_vector(11 downto 0);
+      -- Read Request
+      REQ       : std_logic;
+      -- Address Ready
+      ARDY      : std_logic;
+      -- Start of Frame (Input)
+      SOF_IN    : std_logic;
+      -- End of Frame (Intput)
+      EOF_IN    : std_logic;
       -- Output interface
-      DATA      : std_logic_vector(63 downto 0);       -- Read Data
-      SRC_RDY   : std_logic;                           -- Data Ready
-      DST_RDY   : std_logic;                           -- Endpoint Ready
+
+      -- Read Data
+      DATA      : std_logic_vector(63 downto 0);
+      -- Data Ready
+      SRC_RDY   : std_logic;
+      -- Endpoint Ready
+      DST_RDY   : std_logic;
    end record;
 
 
    -- Internal Bus Read Interface (Combined without Tags)
    type t_ibmi_read64c is record
       -- Input interface
-      ADDR      : std_logic_vector(31 downto 0);       -- Address
-      BE        : std_logic_vector(7 downto 0);        -- Byte Enable
-      LENGTH    : std_logic_vector(11 downto 0);       -- Length
-      REQ       : std_logic;                           -- Read Request
-      ARDY      : std_logic;                           -- Address Ready
-      ACCEPT    : std_logic;                           -- Accept
-      SOF_IN    : std_logic;                           -- Start of Frame (Input)
-      EOF_IN    : std_logic;                           -- End of Frame (Intput)
+
+      -- Address
+      ADDR      : std_logic_vector(31 downto 0);
+      -- Byte Enable
+      BE        : std_logic_vector(7 downto 0);
+      -- Length
+      LENGTH    : std_logic_vector(11 downto 0);
+      -- Read Request
+      REQ       : std_logic;
+      -- Address Ready
+      ARDY      : std_logic;
+      -- Accept
+      ACCEPT    : std_logic;
+      -- Start of Frame (Input)
+      SOF_IN    : std_logic;
+      -- End of Frame (Intput)
+      EOF_IN    : std_logic;
+
       -- Output interface
-      DATA      : std_logic_vector(63 downto 0);       -- Read Data
-      SRC_RDY   : std_logic;                           -- Data Ready
-      DST_RDY   : std_logic;                           -- Endpoint Ready
-      SOF_OUT   : std_logic;                           -- Start of Frame (Output)
-      EOF_OUT   : std_logic;                           -- End of Frame (Output)
+
+      -- Read Data
+      DATA      : std_logic_vector(63 downto 0);
+      -- Data Ready
+      SRC_RDY   : std_logic;
+      -- Endpoint Ready
+      DST_RDY   : std_logic;
+      -- Start of Frame (Output)
+      SOF_OUT   : std_logic;
+      -- End of Frame (Output)
+      EOF_OUT   : std_logic;
    end record;
 
 
    -- Internal Bus Read Interface (Combined with Tags)
    type t_ibmi_read64ct is record
       -- Input interface
-      ADDR      : std_logic_vector(31 downto 0);       -- Address
-      BE        : std_logic_vector(7 downto 0);        -- Byte Enable
-      LENGTH    : std_logic_vector(11 downto 0);       -- Length
-      TAG_IN    : std_logic_vector(7 downto 0);        -- Read Transaction Tag (Input)
-      REQ       : std_logic;                           -- Read Request
-      ARDY      : std_logic;                           -- Address Ready
-      ACCEPT    : std_logic;                           -- Accept
-      SOF_IN    : std_logic;                           -- Start of Frame (Input)
-      EOF_IN    : std_logic;                           -- End of Frame (Intput)
+
+      -- Address
+      ADDR      : std_logic_vector(31 downto 0);
+      -- Byte Enable
+      BE        : std_logic_vector(7 downto 0);
+      -- Length
+      LENGTH    : std_logic_vector(11 downto 0);
+      -- Read Transaction Tag (Input)
+      TAG_IN    : std_logic_vector(7 downto 0);
+      -- Read Request
+      REQ       : std_logic;
+      -- Address Ready
+      ARDY      : std_logic;
+      -- Accept
+      ACCEPT    : std_logic;
+      -- Start of Frame (Input)
+      SOF_IN    : std_logic;
+      -- End of Frame (Intput)
+      EOF_IN    : std_logic;
+
       -- Output interface
-      TAG_OUT   : std_logic_vector(15 downto 0);       -- Read Transaction Tag (Output)
-      DATA      : std_logic_vector(63 downto 0);       -- Read Data
-      SRC_RDY   : std_logic;                           -- Data Ready
-      DST_RDY   : std_logic;                           -- Endpoint Ready
-      SOF_OUT   : std_logic;                           -- Start of Frame (Output)
-      EOF_OUT   : std_logic;                           -- End of Frame (Output)
+
+      -- Read Transaction Tag (Output)
+      TAG_OUT   : std_logic_vector(15 downto 0);
+      -- Read Data
+      DATA      : std_logic_vector(63 downto 0);
+      -- Data Ready
+      SRC_RDY   : std_logic;
+      -- Endpoint Ready
+      DST_RDY   : std_logic;
+      -- Start of Frame (Output)
+      SOF_OUT   : std_logic;
+      -- End of Frame (Output)
+      EOF_OUT   : std_logic;
    end record;
 
 
    -- Internal Bus BM Interface
    type t_ibbm_64 is record
       -- Master Interface Input
-      GLOBAL_ADDR   : std_logic_vector(63 downto 0);   -- Global Address 
-      LOCAL_ADDR    : std_logic_vector(31 downto 0);   -- Local Address
-      LENGTH        : std_logic_vector(11 downto 0);   -- Length
-      TAG           : std_logic_vector(15 downto 0);   -- Operation TAG
-      TRANS_TYPE    : std_logic_vector(1 downto 0);    -- Type of transaction
-      REQ           : std_logic;                       -- Request
+
+      -- Global Address 
+      GLOBAL_ADDR   : std_logic_vector(63 downto 0);
+      -- Local Address
+      LOCAL_ADDR    : std_logic_vector(31 downto 0);
+      -- Length
+      LENGTH        : std_logic_vector(11 downto 0);
+      -- Operation TAG
+      TAG           : std_logic_vector(15 downto 0);
+      -- Type of transaction
+      TRANS_TYPE    : std_logic_vector(1 downto 0);
+      -- Request
+      REQ           : std_logic;
                  
       -- Master Output interface
-      ACK           : std_logic;                       -- Ack
-      OP_TAG        : std_logic_vector(15 downto 0);   -- Operation TAG
-      OP_DONE       : std_logic;                       -- Acknowledge
+
+      -- Ack
+      ACK           : std_logic;
+      -- Operation TAG
+      OP_TAG        : std_logic_vector(15 downto 0);
+      -- Acknowledge
+      OP_DONE       : std_logic;
    end record;
 
 

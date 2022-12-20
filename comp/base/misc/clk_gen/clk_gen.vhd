@@ -21,18 +21,34 @@ use IEEE.std_logic_unsigned.all;
 -- ----------------------------------------------------------------------
 entity CLK_GEN is
    Port (
+      -- =======
       -- Input
-      CLK50_IN    : in  std_logic;     -- Input clock freqvency (50MHz)
-      RESET       : in  std_logic;     -- Global reset signal
+      -- =======
+
+      -- Input clock freqvency (50MHz)
+      CLK50_IN    : in  std_logic;
+      -- Global reset signal
+      RESET       : in  std_logic;
+      -- =======
       -- Output
-      CLK25       : out std_logic;  -- 25MHz  output clock
-      CLK25_PH90  : out std_logic;  -- 25MHz  output clock (90' phase shift)
-      CLK50_OUT   : out std_logic;  -- 50MHz  output clock
-      CLK50_PH90  : out std_logic;  -- 50MHz  output clock (90' phase shift)
-      CLK50_PH180 : out std_logic;  -- 50MHz  output clock (180' phase shift)
-      CLK100      : out std_logic;  -- 100MHz output clock
-      CLK100_PH180: out std_logic;  -- 100MHz output clock (180' phase shift)
-      CLK200      : out std_logic;  -- 200MHz output clock
+      -- =======
+
+      -- 25MHz  output clock
+      CLK25       : out std_logic;
+      -- 25MHz  output clock (90' phase shift)
+      CLK25_PH90  : out std_logic;
+      -- 50MHz  output clock
+      CLK50_OUT   : out std_logic;
+      -- 50MHz  output clock (90' phase shift)
+      CLK50_PH90  : out std_logic;
+      -- 50MHz  output clock (180' phase shift)
+      CLK50_PH180 : out std_logic;
+      -- 100MHz output clock
+      CLK100      : out std_logic;
+      -- 100MHz output clock (180' phase shift)
+      CLK100_PH180: out std_logic;
+      -- 200MHz output clock
+      CLK200      : out std_logic;
       LOCK        : out std_logic
    );
 end clk_gen;

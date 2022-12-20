@@ -18,13 +18,17 @@ entity TSU_CV2_CORE is
       REGISTER_TS_OUTPUT : boolean := false;
       DEVICE             : string  := "ULTRASCALE"
    );
-   --! PORTS
    port (
-      --! Clock and reset signals for MI_32 interface
+      -- =============================================
+      -- Clock and reset signals for MI_32 interface
+      -- =============================================
+
       MI32_CLK       : in  std_logic;
       MI32_RESET     : in  std_logic;
 
-      --! In / Out SW interface via MI_32
+      -- ================================
+      -- In / Out SW interface via MI_32
+      -- ================================
       DWR            : in  std_logic_vector(31 downto 0);
       ADDR           : in  std_logic_vector(31 downto 0);
       RD             : in  std_logic;
@@ -34,16 +38,23 @@ entity TSU_CV2_CORE is
       ARDY           : out std_logic;
       DRDY           : out std_logic;
 
-      --! Input PPS_N signal
+      -- Input PPS_N signal
       PPS_N          : in  std_logic;
 
-      --! TSU core clock
+      -- ===============
+      -- TSU core clock
+      -- ===============
+
       TSU_CORE_CLK   : in  std_logic;
       TSU_CORE_RESET : in  std_logic;
 
-      --! Output pacodag interface
+      -- =========================
+      -- Output pacodag interface
+      -- =========================
+
       TS             : out std_logic_vector(63 downto 0);
-      TS_DV          : out std_logic  --! timestamp is valid (one cycle), depends on INTA reg
+      -- timestamp is valid (one cycle), depends on INTA reg
+      TS_DV          : out std_logic
    );
 end TSU_CV2_CORE;
 

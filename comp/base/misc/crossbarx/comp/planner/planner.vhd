@@ -30,10 +30,12 @@ generic (
 
     -- Buffer A size
     BUF_A_COLS          : integer := 512;
-    BUF_A_ROWS          : integer := 8*4; -- max(BUF_A_TRUE_ROWS)
+    -- max(BUF_A_TRUE_ROWS)
+    BUF_A_ROWS          : integer := 8*4;
     -- Buffer B size
     BUF_B_COLS          : integer := 2048;
-    BUF_B_ROWS          : integer := 8*4; -- max(BUF_B_TRUE_ROWS)
+    -- max(BUF_B_TRUE_ROWS)
+    BUF_B_ROWS          : integer := 8*4;
     -- Number of items in one bufer row
     ROW_ITEMS           : integer := 1;
     -- Width of one item
@@ -49,31 +51,45 @@ generic (
     COLOR_TIMEOUT_WIDTH : integer := 6;
 
     -- Target Device
-    DEVICE              : string := "STRATIX10" -- "ULTRASCALE", "7SERIES", ...
+    -- "ULTRASCALE", "7SERIES", ...
+    DEVICE              : string := "STRATIX10"
 );
 port (
+    -- ========================
     -- Clock and Reset
+    -- ========================
+
     CLK                : in  std_logic;
     RESET              : in  std_logic;
 
+    -- ========================
     -- Input uInstructions
+    -- ========================
+
     RX_UINSTR_A_COL    : in  slv_array_t     (BUF_A_ROWS-1 downto 0)(log2(BUF_A_COLS)-1 downto 0);
     RX_UINSTR_B_COL    : in  slv_array_t     (BUF_A_ROWS-1 downto 0)(log2(BUF_B_COLS)-1 downto 0);
     RX_UINSTR_B_ROW    : in  slv_array_t     (BUF_A_ROWS-1 downto 0)(log2(BUF_B_ROWS)-1 downto 0);
-    RX_UINSTR_ROW_ROT  : in  slv_array_t     (BUF_A_ROWS-1 downto 0)(log2(ROW_ITEMS)-1 downto 0); -- row rotation
-    RX_UINSTR_IE       : in  slv_array_t     (BUF_A_ROWS-1 downto 0)(ROW_ITEMS-1 downto 0); -- item enable
+    -- row rotation
+    RX_UINSTR_ROW_ROT  : in  slv_array_t     (BUF_A_ROWS-1 downto 0)(log2(ROW_ITEMS)-1 downto 0);
+    -- item enable
+    RX_UINSTR_IE       : in  slv_array_t     (BUF_A_ROWS-1 downto 0)(ROW_ITEMS-1 downto 0);
     RX_UINSTR_COLOR    : in  std_logic_vector(BUF_A_ROWS-1 downto 0);
     RX_UINSTR_SRC_RDY  : in  std_logic_vector(BUF_A_ROWS-1 downto 0);
     RX_UINSTR_DST_RDY  : out std_logic_vector(BUF_A_ROWS-1 downto 0);
 
+    -- ========================
     -- Output uInstructions
+    -- ========================
+
     -- per src row
     TX_UINSTR_SRC_COL  : out slv_array_2d_t(2-1 downto 0)(tsel(DATA_DIR,BUF_A_ROWS,BUF_B_ROWS)-1 downto 0)(tsel(DATA_DIR,log2(BUF_A_COLS),log2(BUF_B_COLS))-1 downto 0);
     -- per dst row
     TX_UINSTR_SRC_ROW  : out slv_array_2d_t(2-1 downto 0)(tsel(DATA_DIR,BUF_B_ROWS,BUF_A_ROWS)-1 downto 0)(tsel(DATA_DIR,log2(BUF_A_ROWS),log2(BUF_B_ROWS))-1 downto 0);
     TX_UINSTR_DST_COL  : out slv_array_2d_t(2-1 downto 0)(tsel(DATA_DIR,BUF_B_ROWS,BUF_A_ROWS)-1 downto 0)(tsel(DATA_DIR,log2(BUF_B_COLS),log2(BUF_A_COLS))-1 downto 0);
-    TX_UINSTR_ROW_ROT  : out slv_array_2d_t(2-1 downto 0)(tsel(DATA_DIR,BUF_B_ROWS,BUF_A_ROWS)-1 downto 0)(log2(ROW_ITEMS)-1 downto 0); -- row rotation
-    TX_UINSTR_IE       : out slv_array_2d_t(2-1 downto 0)(tsel(DATA_DIR,BUF_B_ROWS,BUF_A_ROWS)-1 downto 0)(ROW_ITEMS-1 downto 0); -- item enable
+    -- row rotation
+    TX_UINSTR_ROW_ROT  : out slv_array_2d_t(2-1 downto 0)(tsel(DATA_DIR,BUF_B_ROWS,BUF_A_ROWS)-1 downto 0)(log2(ROW_ITEMS)-1 downto 0);
+    -- item enable
+    TX_UINSTR_IE       : out slv_array_2d_t(2-1 downto 0)(tsel(DATA_DIR,BUF_B_ROWS,BUF_A_ROWS)-1 downto 0)(ROW_ITEMS-1 downto 0);
     TX_UINSTR_SRC_RDY  : out slv_array_t   (2-1 downto 0)(tsel(DATA_DIR,BUF_B_ROWS,BUF_A_ROWS)-1 downto 0);
 
     -- Color Conformation Timeout cancel signal

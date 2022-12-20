@@ -24,17 +24,35 @@ use work.dma_bus_pack.all; -- contains definitions for MVB header fields
 
 entity MFB_SPLITTER is
    generic (
+      -- ======================
       -- TX MVB characteristics
-      MVB_ITEMS       : integer := 2;  -- number of headers
-      MVB_META_WIDTH  : integer := 2;  -- width of each MVB meta item
+      -- ======================
+
+      -- number of headers
+      MVB_ITEMS       : integer := 2;
+      -- width of each MVB meta item
+      MVB_META_WIDTH  : integer := 2;
+
+      -- ======================
       -- TX MFB characteristics
-      MFB_REGIONS     : integer := 2;  -- number of regions in word
-      MFB_REG_SIZE    : integer := 1;  -- number of blocks in region
-      MFB_BLOCK_SIZE  : integer := 8;  -- number of items in block
-      MFB_ITEM_WIDTH  : integer := 32; -- width  of one item (in bits)
+      -- ======================
+
+      -- number of regions in word
+      MFB_REGIONS     : integer := 2;
+      -- number of blocks in region
+      MFB_REG_SIZE    : integer := 1;
+      -- number of items in block
+      MFB_BLOCK_SIZE  : integer := 8;
+      -- width  of one item (in bits)
+      MFB_ITEM_WIDTH  : integer := 32;
+
+      -- ===================
+      -- Others
+      -- ===================
 
       -- Width of each MVB item
-      HDR_WIDTH       : integer := DMA_DOWNHDR_WIDTH; -- DMA_DOWNHDR_WIDTH, DMA_UPHDR_WIDTH
+      -- DMA_DOWNHDR_WIDTH, DMA_UPHDR_WIDTH
+      HDR_WIDTH       : integer := DMA_DOWNHDR_WIDTH;
 
       -- Size of mvb output FIFOXs (in words)
       -- The minimum value is 2
@@ -43,24 +61,27 @@ entity MFB_SPLITTER is
       -- Create output register PIPEs
       USE_OUTREG      : boolean := true;
 
-      DEVICE          : string  := "ULTRASCALE" -- "ULTRASCALE", "7SERIES"
+      -- "ULTRASCALE", "7SERIES"
+      DEVICE          : string  := "ULTRASCALE"
    );
    port(
-      ---------------------------------------------------------------------------
+      -- ======================
       -- Common interface
-      ---------------------------------------------------------------------------
+      -- ======================
 
       CLK             : in  std_logic;
       RESET           : in  std_logic;
 
-      ---------------------------------------------------------------------------
+      -- ======================
       -- RX interface
-      ---------------------------------------------------------------------------
+      -- ======================
 
       RX_MVB_HDR      : in  std_logic_vector(MVB_ITEMS*HDR_WIDTH     -1 downto 0);
       RX_MVB_META     : in  std_logic_vector(MVB_ITEMS*MVB_META_WIDTH-1 downto 0) := (others => '0');
-      RX_MVB_SWITCH   : in  std_logic_vector(MVB_ITEMS               -1 downto 0); -- output select for each header
-      RX_MVB_PAYLOAD  : in  std_logic_vector(MVB_ITEMS               -1 downto 0); -- header contains payload in MFB
+      -- output select for each header
+      RX_MVB_SWITCH   : in  std_logic_vector(MVB_ITEMS               -1 downto 0);
+      -- header contains payload in MFB
+      RX_MVB_PAYLOAD  : in  std_logic_vector(MVB_ITEMS               -1 downto 0);
       RX_MVB_VLD      : in  std_logic_vector(MVB_ITEMS               -1 downto 0);
       RX_MVB_SRC_RDY  : in  std_logic;
       RX_MVB_DST_RDY  : out std_logic;
@@ -73,9 +94,9 @@ entity MFB_SPLITTER is
       RX_MFB_SRC_RDY  : in  std_logic;
       RX_MFB_DST_RDY  : out std_logic;
 
-      ---------------------------------------------------------------------------
+      -- ======================
       -- TX interface 0
-      ---------------------------------------------------------------------------
+      -- ======================
 
       TX0_MVB_HDR     : out std_logic_vector(MVB_ITEMS*HDR_WIDTH-1 downto 0);
       TX0_MVB_META    : out std_logic_vector(MVB_ITEMS*MVB_META_WIDTH-1 downto 0);
@@ -92,9 +113,9 @@ entity MFB_SPLITTER is
       TX0_MFB_SRC_RDY : out std_logic;
       TX0_MFB_DST_RDY : in  std_logic;
 
-      ---------------------------------------------------------------------------
+      -- ======================
       -- TX interface 1
-      ---------------------------------------------------------------------------
+      -- ======================
 
       TX1_MVB_HDR     : out std_logic_vector(MVB_ITEMS*HDR_WIDTH-1 downto 0);
       TX1_MVB_META    : out std_logic_vector(MVB_ITEMS*MVB_META_WIDTH-1 downto 0);
