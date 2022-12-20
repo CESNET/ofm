@@ -12,29 +12,29 @@ use IEEE.numeric_std.all;
 use work.math_pack.all;
 use work.type_pack.all;
 
+-- This component cuts the specified number of items from each incoming packet. The data which are
+-- not cut out, are shifted to the original SOF position and the EOF is lowered by the number of
+-- items which have been cut out.
 entity MFB_CUTTER_SIMPLE is
     generic(
         -- =======================================================================
         -- MFB DATA BUS CONFIGURATION:
         --
         -- Frame size restrictions:
-        -- For REGION_SIZE =  1: MIN = (CUTTED_ITEMS+1)*ITEM_WIDTH bits
-        -- For REGION_SIZE >= 2: MIN = (REGION_SIZE*BLOCK_SIZE+CUTTED_ITEMS)*ITEM_WIDTH bits
+        --
+        -- * For REGION_SIZE =  1: MIN = (CUTTED_ITEMS+1)*ITEM_WIDTH bits
+        -- * For REGION_SIZE >= 2: MIN = (REGION_SIZE*BLOCK_SIZE+CUTTED_ITEMS)*ITEM_WIDTH bits
         -- =======================================================================
-
-        -- any positive
-        REGIONS        : natural := 2;
-        -- any power of two
-        REGION_SIZE    : natural := 8;
-        -- any power of two except 1
-        BLOCK_SIZE     : natural := 8;
-        -- any positive
-        ITEM_WIDTH     : natural := 8;
+        REGIONS        : natural := 2; -- any positive
+        REGION_SIZE    : natural := 8; -- any power of two
+        BLOCK_SIZE     : natural := 8; -- any power of two except 1
+        ITEM_WIDTH     : natural := 8; -- any positive
         -- Width of MFB Metadata
         META_WIDTH     : natural := 0;
         -- Metadata is valid either with:
-        --   - SOF (MODE 0) or
-        --   - EOF (MODE 1)
+        --
+        -- * SOF (MODE 0)
+        -- * EOF (MODE 1)
         META_ALIGNMENT : natural := 0;
 
         -- =======================================================================

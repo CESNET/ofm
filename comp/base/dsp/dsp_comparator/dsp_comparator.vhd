@@ -13,25 +13,36 @@ library work;
 use work.type_pack.all;
 use work.math_pack.all;
 
--- NOTE: default and recommended latency for comparator using DSPs is 2 clock cycles,
---       latency of 1 clock cycle is achieved when input registers are disabled.
-
+-- This is a  comparator that can use DSP bloks on different Devices but can also be implemented in
+-- common logic.
+--
+-- .. NOTE::
+--      Default and recommended latency for comparator using DSPs is 2 clock cycles,
+--      latency of 1 clock cycle is achieved when input registers are disabled.
 entity DSP_COMPARATOR is
     Generic (
-        -- The width of inputs; maximum width of 25 bits applies only in modes ">= " or "<= " when using DSP blocks, "unlimited" in other cases
+        -- The width of inputs; maximum width of 25 bits applies only in modes ">= " or "<= " when
+        -- using DSP blocks, "unlimited" in other cases
         INPUT_DATA_WIDTH : natural := 25;
         -- Enable input registers
         INPUT_REGS_EN    : boolean := true;
-        -- This option allows user to choose the function of the comparator
-        -- "><=" is the default mode which outputs results as specified above the RESULT port
-        -- ">= " outputs result in form of '11' if the 1st number is larger or equal than the 2nd number, else '00'  - in this mode, only one DSP block is used (when enabled)
-        -- "<= " outputs result in form of '11' if the 1st number is smaller or equal than the 2nd number, else '00' - in this mode, only one DSP block is used (when enabled)
-        -- options: "><=", ">= ", "<= " - the space after ">=" or "<=" is necessary !!
+        -- This option allows user to choose the function of the comparator (the space after ">="
+        -- or "<=" is necessary!):
+        --
+        -- * "><=" is the default mode which outputs results as specified above the RESULT port
+        -- * ">= " outputs result in form of '11' if the 1st number is larger or equal than the 2nd
+        --   number, else '00'  - in this mode, only one DSP block is used (when enabled)
+        -- * "<= " outputs result in form of '11' if the 1st number is smaller or equal than the
+        --   2nd number, else '00' - in this mode, only one DSP block is used (when enabled)
         MODE             : string  := ">= ";
         -- Set True to use DSP(s) for the comparator
         DSP_ENABLE       : boolean := true;
-        -- Target FPGA
-        -- Options: "STRATIX10", "AGILEX", "ULTRASCALE", "7SERIES"
+        -- Target FPGA, the allowed options are:
+        --
+        -- * "STRATIX10"
+        -- * "AGILEX"
+        -- * "ULTRASCALE"
+        -- * "7SERIES"
         DEVICE           : string  := "AGILEX"
         );
     Port (
@@ -42,10 +53,11 @@ entity DSP_COMPARATOR is
         INPUT_1 :  in std_logic_vector(INPUT_DATA_WIDTH-1 downto 0);
         -- The 2nd number for comparison
         INPUT_2 :  in std_logic_vector(INPUT_DATA_WIDTH-1 downto 0);
-        -- The final value of the comparator
-        -- RESULT will be: "01" (1 in dec) when the 1st number (INPUT_1) > 2nd number (INPUT_2) - applies only for mode "><="
-        --                 "10" (2 in dec) when the 2nd number (INPUT_2) > 1st number (INPUT_1) - applies only for mode "><="
-        --                 "00" when both numbers are equal                                     - applies only for mode "><="
+        -- The final value of the comparator, the RESULT will be:
+        --
+        -- * "01" (1 in dec) when the 1st number (INPUT_1) > 2nd number (INPUT_2) - applies only for mode "><="
+        -- * "10" (2 in dec) when the 2nd number (INPUT_2) > 1st number (INPUT_1) - applies only for mode "><="
+        -- * "00" when both numbers are equal                                     - applies only for mode "><="
         RESULT  : out std_logic_vector(1 downto 0)
     );
 end entity;

@@ -12,14 +12,11 @@ library work;
 use work.type_pack.all;
 use work.math_pack.all;
 
--- =========================================================================
---  Description
--- =========================================================================
--- This is a generic implementation of the MFB Merger when the number of input interfaces is
--- generically setable
+-- This is a generic implementation of the MFB Merger when the number of input interfaces can
+-- be set to arbitrary large number.
 entity MFB_MERGER_SIMPLE_GEN is
     generic (
-        -- number of independent input MFB interfaces
+        -- number of independent input MFB interfaces, should be the power of two
         MERGER_INPUTS : natural := 2;
 
         -- MFB parameters
