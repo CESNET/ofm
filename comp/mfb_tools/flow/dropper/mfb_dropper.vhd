@@ -12,6 +12,8 @@ use IEEE.numeric_std.all;
 use work.math_pack.all;
 use work.type_pack.all;
 
+-- This component is able to drop the incoming packet when `RX_DROP` input is set to one. This input
+-- allows to specify the dropping for each MFB region separately.
 entity MFB_DROPPER is
    generic(
       REGIONS     : natural := 4; -- any positive

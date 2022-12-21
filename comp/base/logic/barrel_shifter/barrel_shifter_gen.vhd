@@ -19,18 +19,14 @@ use ieee.numeric_std.all;
 use work.math_pack.all;
 use work.type_pack.all;
 
--- ----------------------------------------------------------------------------
---                  ENTITY DECLARATION -- Barrel shifter                     -- 
--- ----------------------------------------------------------------------------
-
-entity BARREL_SHIFTER_GEN is 
+-- Generically adjustable barrel shifter where single bits as well as whole blocks can be shifted.
+-- The direction can also be set.
+entity BARREL_SHIFTER_GEN is
    generic (
       -- input/output data width in BLOCKs
       BLOCKS      : integer := 256;
       -- size of one block in bits
       BLOCK_SIZE  : integer := 64;
-      -- NOTE: data_width = blocks*block_size
-      
       -- set true to shift left, false to shift right
       SHIFT_LEFT  : boolean := false 
    );

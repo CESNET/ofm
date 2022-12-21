@@ -12,6 +12,7 @@ use ieee.numeric_std.all;
 use work.math_pack.all;
 use work.type_pack.all;
 
+-- Generic N-port distributed LUT memory
 entity NP_LUTRAM is
   generic(
     DATA_WIDTH  : integer := 1;

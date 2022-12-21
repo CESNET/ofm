@@ -11,12 +11,7 @@ use ieee.numeric_std.all;
 use work.math_pack.all;
 use work.type_pack.all;
 
--- =========================================================================
---                                 Description
--- =========================================================================
 -- Implements statistics counters for multiple Channels using MEMX.
--- =========================================================================
-
 entity CNT_MULTI_MEMX is
 generic(
     -- Traget device
@@ -39,16 +34,12 @@ port(
     -- =====================================================================
     --  Clock and Reset
     -- =====================================================================
-
     CLK          : in  std_logic;
     RESET        : in  std_logic;
 
     -- =====================================================================
-
-    -- =====================================================================
     --  Other interfaces
     -- =====================================================================
-
     -- Counter Increment
     INC_CH       : in  std_logic_vector(log2(CHANNELS)-1 downto 0);
     INC_VAL      : in  std_logic_vector(INC_WIDTH-1 downto 0);
@@ -59,14 +50,11 @@ port(
     RST_CH       : in  std_logic_vector(log2(CHANNELS)-1 downto 0);
     RST_VLD      : in  std_logic;
 
-    -- Read order
-    -- When RD_VLD='1' and RST_VLD='1' and RD_CH=RST_CH the old value
-    -- (before reset) will appear on RD_VAL
+    -- Read order: When RD_VLD='1' and RST_VLD='1' and RD_CH=RST_CH the old value (before reset)
+    -- will appear on RD_VAL
     RD_CH        : in  std_logic_vector(log2(CHANNELS)-1 downto 0);
     RD_VLD       : in  std_logic;
     RD_VAL       : out std_logic_vector(CNT_WIDTH-1 downto 0) -- 1 CLK latency
-
-    -- =====================================================================
 );
 end entity;
 

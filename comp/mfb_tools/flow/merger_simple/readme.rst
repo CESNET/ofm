@@ -4,9 +4,9 @@
 ..
 .. SPDX-License-Identifier: BSD-3-Clause
 
-.. _mfb_smerger_simple:
+.. _mfb_merger_simple_gen:
 
 MFB Merger Simple
 -----------------
 
-.. vhdl:autoentity:: MFB_MERGER_SIMPLE
+.. vhdl:autoentity:: MFB_MERGER_SIMPLE_GEN

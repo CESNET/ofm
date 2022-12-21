@@ -11,6 +11,9 @@ use IEEE.numeric_std.all;
 use work.math_pack.all;
 use work.type_pack.all;
 
+-- This component calculates the correct number of bytes contained in the payload of the incoming
+-- PCIe transaction. The size is calculated using `DW_COUNT`, `FIRST_BE` and `LAST_BE` signals
+-- provided by each transaction.
 entity PCIE_BYTE_COUNT is
     generic (
         -- Optional output register

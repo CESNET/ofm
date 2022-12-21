@@ -1,10 +1,12 @@
 PCIe Tools
 ==========
 
-This chapter describes the components that are used for communication via the PCIe interface.
-A description of DMA controllers is also included.
-The PCIe components are typically located in the ``comp/pcie/`` directory in the OFM repository.
-The DMA controllers are typically located in the ``comp/dma/`` directory in the OFM repository.
+This chapter describes the components that are used for communication via the
+PCIe interface. A description of DMA controllers is also included. The PCIe
+components are typically located in the ``comp/pcie/`` directory in the OFM
+repository. The DMA Medusa IP is located in the
+``ndk/modules/ndk-mod-dma-medusa/`` directory (submodule) in the NDK-APP-MINIMAL
+repository. Other DMA controller is located inthe ``comp/dma/`` directory.
 
 .. toctree::
    :maxdepth: 1
@@ -14,8 +16,10 @@ The DMA controllers are typically located in the ``comp/dma/`` directory in the 
    comp/pcie/ptc/readme
    comp/pcie/ptc/comp/tag_manager/readme
    comp/pcie/common/readme
+   comp/pcie/logic/byte_count/readme
    comp/pcie/others/hdr_gen/readme
    comp/pcie/convertors/readme
+   ndk_mod/ndk-mod-dma-medusa/readme
    comp/dma/dma_calypte/readme
 
 .. Add more references here...
