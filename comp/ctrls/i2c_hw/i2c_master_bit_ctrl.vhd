@@ -168,7 +168,7 @@ entity i2c_master_bit_ctrl is
 		-- i2c clock line output
 		scl_o   : out std_logic;
 		-- i2c clock line output enable, active low
-		scl_oen : out std_logic
+		scl_oen : out std_logic;
 		-- i2c data line input;
 		sda_i   : in std_logic;
 		-- i2c data line output
