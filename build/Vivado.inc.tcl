@@ -69,7 +69,13 @@ proc EvalFile {FNAME OPT} {
     } elseif {$opt(TYPE) == "VIVADO_IP_XACT"} {
         add_files -norecurse $FNAME
         puts "IP added: $FNAME"
+    } elseif {$opt(TYPE) == "VIVADO_BD"} {
+        add_files -norecurse $FNAME
+        puts "BD added: $FNAME"
+        generate_target all [get_files $FNAME] -force
+        upgrade_ip [get_ips *] -quiet
     }
+
 
     foreach {param_name param_value} $OPT {
         if {$param_name == "VIVADO_SET_PROPERTY"} {
