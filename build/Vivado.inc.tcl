@@ -129,6 +129,8 @@ proc SetupDesign {synth_flags} {
     foreach i $SYNTH_FLAGS(SETUP_FLAGS) {
         if { $i == "USE_XPM_LIBRARIES" } {
             set_property XPM_LIBRARIES {XPM_CDC XPM_MEMORY XPM_FIFO} [current_project]
+        } elseif { $i == "COMPILE_ORDER_AUTO" } {
+            set_property source_mgmt_mode All [current_project]
         }
         # TODO: Implement when needed
     }
