@@ -128,7 +128,7 @@ proc SetupDesign {synth_flags} {
     # Apply user settings
     foreach i $SYNTH_FLAGS(SETUP_FLAGS) {
         if { $i == "USE_XPM_LIBRARIES" } {
-            set_property XPM_LIBRARIES {XPM_CDC XPM_MEMORY} [current_project]
+            set_property XPM_LIBRARIES {XPM_CDC XPM_MEMORY XPM_FIFO} [current_project]
         }
         # TODO: Implement when needed
     }
