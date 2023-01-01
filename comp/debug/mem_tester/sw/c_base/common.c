@@ -8,9 +8,9 @@ SPDX-License-Identifier: BSD-3-Clause
 
 #include "common.h"
 
-const unsigned AMM_GEN_BASE     = 0x00040;
-const unsigned AMM_PROBE_BASE   = 0x00060;
-const unsigned MMR_BASE         = 0x000B0;
+#define AMM_GEN_BASE     0x00040
+#define AMM_PROBE_BASE   0x00060
+#define MMR_BASE         0x000B0
 
 const unsigned RegAddr[] = {
     [CTRL_IN]               = 0x000000,

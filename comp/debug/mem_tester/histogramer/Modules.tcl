@@ -8,6 +8,7 @@
 set LAST_ONE_BASE           "$OFM_PATH/comp/base/logic/last_one"
 set OR_BASE                 "$OFM_PATH/comp/base/logic/or"
 set DEC1F_BASE              "$OFM_PATH/comp/base/logic/dec1fn"
+set DP_BRAM_BASE            "$OFM_PATH/comp/base/mem/dp_bram"
 
 # Packages
 set PACKAGES "$PACKAGES $OFM_PATH/comp/base/pkg/math_pack.vhd"
@@ -17,6 +18,7 @@ set COMPONENTS [concat $COMPONENTS [list \
     [ list "LAST_ONE"   $LAST_ONE_BASE  "FULL" ] \
     [ list "OR"         $OR_BASE        "FULL" ] \
     [ list "DEC1FN"     $DEC1F_BASE     "FULL" ] \
+    [ list "DP_BRAM"    $DP_BRAM_BASE   "FULL" ] \
 ]]
 
 # Source files for implemented component
