@@ -41,6 +41,11 @@ generic (
     -- does not work in ModelSim, the default assigned value must be the same width.
     RANDOM_ADDR_SEED        : std_logic_vector(RAND_GEN_ADDR_WIDTH - 1 downto 0) := std_logic_vector(to_unsigned(66844679,RAND_GEN_ADDR_WIDTH));
 
+    -- Manual refresh control
+    REFR_REQ_BEFORE_TEST    : boolean := false;
+    REFR_PERIOD_WIDTH       : integer := MI_DATA_WIDTH;
+    DEF_REFR_PERIOD         : std_logic_vector(REFR_PERIOD_WIDTH - 1 downto 0) := (others => '0');
+
     -- Others --
     -- Burst = number of words transmited in 1 r/w operation
     DEFAULT_BURST_CNT       : integer := 4;
@@ -49,9 +54,7 @@ generic (
     DEFAULT_ADDR_LIMIT      : integer := 2**AMM_ADDR_WIDTH - 2 ** AMM_BURST_COUNT_WIDTH;
     -- Force random address generator to generate in range 0 to DEFAULT_ADDR_LIMIT (for simulation)
     DEBUG_RAND_ADDR         : boolean := false;
-    REFR_REQ_BEFORE_TEST    : boolean := false;
-    REFR_PERIOD_WIDTH       : integer := MI_DATA_WIDTH;
-    DEF_REFR_PERIOD         : std_logic_vector(REFR_PERIOD_WIDTH - 1 downto 0) := (others => '0');
+    HISTOGRAM_BOXES         : integer := 256;       --512
     DEVICE                  : string
 );
 port(
@@ -546,6 +549,7 @@ begin
 
         MI_ADDR_BASE            => AMM_PROBE_BASE,
         MI_ADDR_USED_BITS       => MI_ADDR_USED_BITS,
+        HISTOGRAM_BOXES         => HISTOGRAM_BOXES,
         DEVICE                  => DEVICE
     )
     port map (

@@ -104,6 +104,7 @@ generic (
     MI_ADDR_BASE            : std_logic_vector(MI_ADDR_WIDTH - 1 downto 0) := (others => '0');
     -- Number of used MI addr LSB bits
     MI_ADDR_USED_BITS       : integer := MI_ADDR_WIDTH;
+    HISTOGRAM_BOXES         : integer := 512;
     DEVICE                  : string
 );
 port(    
@@ -209,7 +210,7 @@ architecture FULL of AMM_PROBE is
     constant HIST_VARIANT               : HIST_T  := LINEAR;
     -- When LOG hist used => set to LATENCY_TICKS_WIDTH
     -- TODO
-    constant HIST_CNTER_CNT             : integer := 512;
+    constant HIST_CNTER_CNT             : integer := HISTOGRAM_BOXES;
     constant HIST_CNT_WIDTH             : integer := MI_DATA_WIDTH;
 
     -- ----------------------------------------------------------------------- --
