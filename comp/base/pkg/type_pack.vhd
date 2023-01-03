@@ -289,7 +289,7 @@ package body type_pack is
          assert ((ITEMS_X*ITEMS_Y*DATA_WIDTH)=slv_array_2d'length)
             report "ERROR : TYPE_PACK : slv_array_2d_downto_deser : The width of the given std_logic_vector is not divisible by the number of items it is supposed to be deserialized to!"
             severity failure;
-         return slv_array_2d_downto_deser(slv_array_2d,ITEMS_X,DATA_WIDTH,DATA_WIDTH);
+         return slv_array_2d_downto_deser(slv_array_2d,ITEMS_X,ITEMS_Y,DATA_WIDTH);
       end if;
    end;
 
