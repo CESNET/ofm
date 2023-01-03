@@ -14,15 +14,15 @@ add_wave "-noupdate -color yellow -label RESET"   /testbench/DUT_U/VHDL_DUT_U/RE
 # Set the number of channels for waveform generation
 set CHANNELS 2
 
-top_input /testbench/DUT_U/VHDL_DUT_U
-top_outputs /testbench/DUT_U/VHDL_DUT_U $CHANNELS
-internals /testbench/DUT_U/VHDL_DUT_U $CHANNELS
-channel_cores /testbench/DUT_U/VHDL_DUT_U $CHANNELS
-data_aligners /testbench/DUT_U/VHDL_DUT_U $CHANNELS
-channel_splitter /testbench/DUT_U/VHDL_DUT_U/channel_splitter_i $CHANNELS
-sw_mgr /testbench/DUT_U/VHDL_DUT_U/software_manager_i
-conf_regs /testbench/DUT_U/VHDL_DUT_U/software_manager_i
-pkt_cntrs /testbench/DUT_U/VHDL_DUT_U/software_manager_i
-gen_signals "MFB_MERGER" /testbench/DUT_U/VHDL_DUT_U/chan_arb_g/mfb_merger_simple_gen_i
+#top_input /testbench/DUT_U/VHDL_DUT_U
+#top_outputs /testbench/DUT_U/VHDL_DUT_U $CHANNELS
+#internals /testbench/DUT_U/VHDL_DUT_U $CHANNELS
+#channel_cores /testbench/DUT_U/VHDL_DUT_U $CHANNELS
+#data_aligners /testbench/DUT_U/VHDL_DUT_U $CHANNELS
+#channel_splitter /testbench/DUT_U/VHDL_DUT_U/channel_splitter_i $CHANNELS
+#sw_mgr /testbench/DUT_U/VHDL_DUT_U/software_manager_i
+#conf_regs /testbench/DUT_U/VHDL_DUT_U/software_manager_i
+#pkt_cntrs /testbench/DUT_U/VHDL_DUT_U/software_manager_i
+#gen_signals "MFB_MERGER" /testbench/DUT_U/VHDL_DUT_U/chan_arb_g/mfb_merger_simple_gen_i
 
 config wave -signalnamewidth 1

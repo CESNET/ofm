@@ -285,14 +285,14 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, DEVICE, USR_ITEM_WIDTH, USER_META_WID
 
 
                 $swrite(msg, "%s================================================================================= \n", msg);
-                $swrite(msg, "%s\nsMODEL COUNTERS STATISTICS\n", msg                                                       );
+                $swrite(msg, "%s\nMODEL COUNTERS STATISTICS\n", msg                                                       );
                 $swrite(msg, "%s================================================================================= \n", msg);
                 $swrite(msg, "%sDMA_CNT            %d\n", msg, m_model.cnt_reg[chan].dma_cnt                        );
                 $swrite(msg, "%sBYTE_CNT           %d\n", msg, m_model.cnt_reg[chan].byte_cnt                       );
                 $swrite(msg, "%sDISCARD_DMA_CNT    %d\n", msg, m_model.cnt_reg[chan].discard_dma_cnt                );
                 $swrite(msg, "%sDISCARD_BYTE_CNT   %d\n", msg, m_model.cnt_reg[chan].discard_byte_cnt               );
                 $swrite(msg, "%s================================================================================= \n", msg);
-                $swrite(msg, "%s\nsDUT COUNTERS STATISTICS\n", msg                                                         );
+                $swrite(msg, "%s\nDUT COUNTERS STATISTICS\n", msg                                                         );
                 $swrite(msg, "%s================================================================================= \n", msg);
                 $swrite(msg, "%sDMA_CNT            %d\n", msg, dma_cnt[chan]                                        );
                 $swrite(msg, "%sBYTE_CNT           %d\n", msg, byte_cnt[chan]                                       );

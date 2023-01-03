@@ -62,13 +62,13 @@ class run_channel extends uvm_sequence;
     time update_time = 20ns;
 
     time update_time_min = 300ns;
-    time update_time_max = 2us;
+    time update_time_max = 1us;
 
     time run_time_min = 30us;
     time run_time_max = 1ms;
 
     time stop_time_min = 30us;
-    time stop_time_max = 1ms;
+    time stop_time_max = 500us;
 
     reg_channel m_regmodel;
 
@@ -93,6 +93,7 @@ class run_channel extends uvm_sequence;
             seq_start.start(null);
             start_time = $time();
             assert(std::randomize(run_time) with {run_time inside {[run_time_min:run_time_max]};});
+
             while ($time() < (start_time + run_time)) begin
                 assert(std::randomize(update_time) with {update_time inside {[update_time_min:update_time_max]};});
                 #(update_time);
