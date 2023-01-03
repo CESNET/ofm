@@ -18,10 +18,10 @@ set COMPONENTS [list \
 ]
 
 # Disable Code Coverage
-set SIM_FLAGS(CODE_COVERAGE) "false"
+set SIM_FLAGS(CODE_COVERAGE) "true"
 
-set SIM_FLAGS(EXTRA_VFLAGS) "+UVM_TESTNAME=test::base +UVM_VERBOSITY=UVM_NONE -uvmcontrol=all +UVM_MAX_QUIT_COUNT=1"
-#set SIM_FLAGS(EXTRA_VFLAGS) "+UVM_TESTNAME=test::speed +UVM_VERBOSITY=UVM_LOW -uvmcontrol=all +UVM_MAX_QUIT_COUNT=1"
+set SIM_FLAGS(EXTRA_VFLAGS) "+UVM_TESTNAME=test::base +UVM_VERBOSITY=UVM_NONE -uvmcontrol=all +UVM_MAX_QUIT_COUNT=1 -sv_seed random"
+#set SIM_FLAGS(EXTRA_VFLAGS) "+UVM_TESTNAME=test::speed +UVM_VERBOSITY=UVM_LOW -uvmcontrol=all +UVM_MAX_QUIT_COUNT=1 -sv_seed random"
 
 # Global include file for compilation
 source "$FIRMWARE_BASE/build/Modelsim.inc.fdo"
@@ -33,8 +33,12 @@ nb_sim_run
 
 # Reports
 if {$SIM_FLAGS(CODE_COVERAGE)} {
-    coverage save -instance /testbench/DUT -assert -directive -cvg -code bcefst -verbose actual.ucdb
-    vcover report -html -output cov_html -details -threshL 50 -threshH 90 actual.ucdb
+    file delete actual.ucdb final.ucdb
+    file delete -force -- cov_html/
+
+    coverage save -instance /testbench/DUT_U -assert -directive -cvg -code bcefst -verbose actual.ucdb
+    vcover merge final.ucdb final.ucdb actual.ucdb
+    vcover report -html -output cov_html -details -threshL 50 -threshH 90 final.ucdb
 }
 
 quit

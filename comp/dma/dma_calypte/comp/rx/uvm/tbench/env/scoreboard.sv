@@ -53,10 +53,11 @@ class stats;
     endfunction
 endclass
 
-class scoreboard #(CHANNELS, PKT_SIZE_MAX, DEVICE) extends uvm_scoreboard;
-    `uvm_component_param_utils(uvm_dma_ll::scoreboard #(CHANNELS, PKT_SIZE_MAX, DEVICE))
+class scoreboard #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_scoreboard;
+    `uvm_component_param_utils(uvm_dma_ll::scoreboard #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE))
 
-    localparam LOGIC_WIDTH = 24 + $clog2(PKT_SIZE_MAX+1) + $clog2(CHANNELS);
+    localparam LOGIC_WIDTH  = 24 + $clog2(PKT_SIZE_MAX+1) + $clog2(CHANNELS);
+    localparam IS_INTEL_DEV = (DEVICE == "STRATIX10" || DEVICE == "AGILEX");
 
     //INPUT TO DUT
     uvm_analysis_export #(uvm_byte_array::sequence_item)                  analysis_export_rx_packet;
@@ -66,12 +67,15 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, DEVICE) extends uvm_scoreboard;
     uvm_analysis_export #(uvm_mvb::sequence_item#(1, $clog2(CHANNELS) + 1)) analysis_export_dma;
 
     //DUT OUTPUT
-    uvm_analysis_export #(uvm_byte_array::sequence_item)                  analysis_export_tx_packet;
+    uvm_analysis_export #(uvm_logic_vector_array::sequence_item#(32))           analysis_export_tx_packet;
+    uvm_analysis_export #(uvm_logic_vector::sequence_item#(META_WIDTH))         analysis_export_tx_meta;
     //OUTPUT TO SCOREBOARD
-    local uvm_tlm_analysis_fifo #(uvm_byte_array::sequence_item)                dut_output;
-    local uvm_tlm_analysis_fifo #(uvm_byte_array::sequence_item)                model_output;
+    local uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item#(32))   dut_data_output;
+    local uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(META_WIDTH)) dut_meta_output;
+    local uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item#(32))   model_output;
+    local uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(META_WIDTH)) model_meta_output;
 
-    local model #(CHANNELS, PKT_SIZE_MAX, DEVICE) m_model;
+    local model #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) m_model;
     local regmodel#(CHANNELS) m_regmodel;
 
     local stats        m_input_speed;
@@ -81,7 +85,8 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, DEVICE) extends uvm_scoreboard;
     local int unsigned compared = 0;
     local int unsigned errors   = 0;
     typedef struct{
-        uvm_byte_array::sequence_item item;
+        uvm_logic_vector_array::sequence_item#(32)   item;
+        uvm_logic_vector::sequence_item#(META_WIDTH) meta;
         time output_time;
     } output_type;
     local output_type out_data[$];
@@ -95,7 +100,12 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, DEVICE) extends uvm_scoreboard;
         analysis_export_dma       = new("analysis_export_dma",       this);
         analysis_export_tx_packet = new("analysis_export_tx_packet", this);
         model_output              = new("model_output",              this);
-        dut_output                = new("dut_output",                this);
+        dut_data_output           = new("dut_data_output",           this);
+        if (IS_INTEL_DEV) begin
+            dut_meta_output         = new("dut_meta_output",           this);
+            analysis_export_tx_meta = new("analysis_export_tx_meta",   this);
+            model_meta_output       = new("model_meta_output",         this);
+        end
 
         //LOCAL VARIABLES
         rx_speed_meter = new("rx_speed_meter", this);
@@ -111,7 +121,7 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, DEVICE) extends uvm_scoreboard;
 
     //build phase
     function void build_phase(uvm_phase phase);
-        m_model = model #(CHANNELS, PKT_SIZE_MAX, DEVICE)::type_id::create("m_model", this);
+        m_model = model #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE)::type_id::create("m_model", this);
     endfunction
 
     function void connect_phase(uvm_phase phase);
@@ -119,17 +129,22 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, DEVICE) extends uvm_scoreboard;
         analysis_export_rx_packet.connect(rx_speed_meter.analysis_export);
         analysis_export_rx_meta.connect(m_model.analysis_imp_rx_meta.analysis_export);
         analysis_export_dma.connect(m_model.analysis_dma.analysis_export);
-        analysis_export_tx_packet.connect(dut_output.analysis_export);
+        analysis_export_tx_packet.connect(dut_data_output.analysis_export);
+
+        if (IS_INTEL_DEV) begin 
+            analysis_export_tx_meta.connect(dut_meta_output.analysis_export);
+            m_model.analysis_port_tx_meta.connect(model_meta_output.analysis_export);
+        end
 
         m_model.analysis_port_tx.connect(model_output.analysis_export);
     endfunction
 
-    function bit pcie_compare(uvm_byte_array::sequence_item tr_dut, model_packet packet_model);
+    function bit pcie_compare(uvm_logic_vector_array::sequence_item#(32) tr_dut, uvm_logic_vector::sequence_item#(META_WIDTH) tr_meta_dut, model_packet packet_model, uvm_logic_vector::sequence_item#(META_WIDTH) tr_meta_model);
         bit ret = 1;
-        uvm_byte_array::sequence_item tr_model;
+        uvm_logic_vector_array::sequence_item#(32) tr_model;
 
         if (packet_model.data_packet == 1 && packet_model.part == packet_model.part_num) begin
-            if (tr_dut.data.size() != (128 + 16)) begin
+            if (tr_dut.data.size() != (32 + 4)) begin
                 ret = 0;
             end else begin
                 ret = 1;
@@ -140,9 +155,13 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, DEVICE) extends uvm_scoreboard;
                 end
             end
         end else begin
-            tr_model = uvm_byte_array::sequence_item::type_id::create("tr_model"); 
+            tr_model      = uvm_logic_vector_array::sequence_item#(32)::type_id::create("tr_model"); 
             tr_model.data = packet_model.data;
-            ret = tr_dut.compare(tr_model); 
+            ret           = tr_dut.compare(tr_model);
+        end
+
+        if (IS_INTEL_DEV) begin
+            ret = tr_meta_dut.compare(tr_meta_model);
         end
 
         return ret;
@@ -151,7 +170,6 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, DEVICE) extends uvm_scoreboard;
     task run_input();
         int unsigned speed_packet_size = 0;
         time         speed_start_time  = 0ns;
-
 
         forever begin
             uvm_byte_array::sequence_item tr;
@@ -174,16 +192,21 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, DEVICE) extends uvm_scoreboard;
     endtask
 
     task run_output();
-        uvm_byte_array::sequence_item tr_dut;
+        uvm_logic_vector_array::sequence_item#(32)   tr_dut;
+        uvm_logic_vector::sequence_item#(META_WIDTH) tr_meta;
         output_type data;
         int unsigned speed_packet_size = 0;
         time         speed_start_time  = 0ns;
 
-
         forever begin
             time time_act;
             time speed_metet_duration;
-            dut_output.get(tr_dut);
+            if (IS_INTEL_DEV) begin
+                dut_meta_output.get(tr_meta);
+                data.meta = tr_meta;
+            end
+
+            dut_data_output.get(tr_dut);
             time_act = $time();
 
             data.item        = tr_dut;
@@ -207,7 +230,8 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, DEVICE) extends uvm_scoreboard;
         string msg = "";
         //int f;
         model_packet              packet_model;
-        uvm_byte_array::sequence_item tr_model;
+        uvm_logic_vector_array::sequence_item#(32)   tr_model;
+        uvm_logic_vector::sequence_item#(META_WIDTH) tr_meta_model;
         output_type tr_dut;
 
         fork 
@@ -223,6 +247,10 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, DEVICE) extends uvm_scoreboard;
             wait (out_data.size() != 0);
             tr_dut = out_data.pop_front();
             // Get transaction from model
+            tr_meta_model = uvm_logic_vector::sequence_item#(META_WIDTH)::type_id::create("tr_meta_model");
+            tr_meta_model.data = '0;
+            if (IS_INTEL_DEV)
+                model_meta_output.get(tr_meta_model);
             model_output.get(tr_model);
 
             $cast(packet_model, tr_model);
@@ -235,7 +263,7 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, DEVICE) extends uvm_scoreboard;
                 `uvm_error(this.get_full_name(), msg);
             end
 
-            if (pcie_compare(tr_dut.item, packet_model) == 0) begin
+            if (pcie_compare(tr_dut.item, tr_dut.meta, packet_model, tr_meta_model) == 0) begin
                 errors++;
 
                 $swrite(msg, "%s\nExpected transaction is:\n\t\tPart is : %s\n\t\tChannel : %0d\n\t\tPart %0d/%0d\n\t\tInput time : %dns", msg, packet_model.data_packet == 1 ? "DATA" : "HEADER",  packet_model.channel, packet_model.part, packet_model.part_num, packet_model.start_time/1ns);
@@ -253,7 +281,6 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, DEVICE) extends uvm_scoreboard;
                 m_delay.next_val((tr_dut.output_time - packet_model.start_time)/1ns);
             end
         end
-        //$fclose(f);
     endtask
 
 

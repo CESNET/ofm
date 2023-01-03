@@ -23,14 +23,14 @@ module DMA_LL_DUT #(DEVICE, USER_REGIONS, USER_REGION_SIZE, USER_BLOCK_SIZE, USE
     assign channel[$clog2(CHANNELS)-1 -: $clog2(CHANNELS)]                 = mfb_rx.META[24 + $clog2(CHANNELS)-1                          -: $clog2(CHANNELS)];
     assign meta[24-1 -: 24]                                                = mfb_rx.META[24 -1                                            -: 24];
 
-    logic [((PCIE_UP_REGION_SIZE != 1) ? $clog2(PCIE_UP_REGION_SIZE) : 1)-1:0] sof_pos;
+    logic [((PCIE_UP_REGION_SIZE != 1) ? PCIE_UP_REGIONS*$clog2(PCIE_UP_REGION_SIZE) : PCIE_UP_REGIONS*1)-1:0] sof_pos;
     generate
     if (PCIE_UP_REGION_SIZE != 1) begin
         assign  mfb_tx.SOF_POS = sof_pos;
     end
     endgenerate
 
-    assign mfb_tx.EOF_POS[$clog2(PCIE_UP_ITEM_WIDTH/8)-1:0] = '1;
+    // assign mfb_tx.EOF_POS[$clog2(PCIE_UP_ITEM_WIDTH)-1:0] = '1;
 
     RX_DMA_CALYPTE #(
         .DEVICE           (DEVICE),
@@ -77,7 +77,7 @@ module DMA_LL_DUT #(DEVICE, USER_REGIONS, USER_REGION_SIZE, USER_BLOCK_SIZE, USE
 
         .PCIE_UP_MFB_DATA     (mfb_tx.DATA),
         .PCIE_UP_MFB_SOF_POS  (sof_pos),
-        .PCIE_UP_MFB_EOF_POS  (mfb_tx.EOF_POS[$clog2(PCIE_UP_REGION_SIZE * PCIE_UP_BLOCK_SIZE * PCIE_UP_ITEM_WIDTH/8)-1:$clog2(PCIE_UP_ITEM_WIDTH/8)]),
+        .PCIE_UP_MFB_EOF_POS  (mfb_tx.EOF_POS),
         .PCIE_UP_MFB_SOF      (mfb_tx.SOF),
         .PCIE_UP_MFB_EOF      (mfb_tx.EOF),
         .PCIE_UP_MFB_SRC_RDY  (mfb_tx.SRC_RDY),
