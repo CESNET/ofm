@@ -1,0 +1,42 @@
+# signal_sig.fdo : Include file with signals 
+# Copyright (C) 2022 CESNET z. s. p. o.
+# Author(s): Daniel Kříž <xkrizd01@vutbr.cz>
+
+# SPDX-License-Identifier: BSD-3-Clause 
+
+source "./signals.fdo"
+view wave
+delete wave *
+
+add wave -divider "CLK & RESET"
+add_wave "-noupdate -color yellow"   /testbench/DUT_U/RST
+add_wave "-noupdate -color yellow"   /testbench/DUT_U/CLK
+
+#add wave -divider "RX and TX interfaces"
+#mfb_rx MFB_RX /testbench/DUT_U/VHDL_DUT_U
+#mfb_tx MVB_TX /testbench/DUT_U/VHDL_DUT_U
+
+all CHECKSUM_CALCULATOR /testbench/DUT_U/VHDL_DUT_U
+
+all CHSUM_DATA_EXT      /testbench/DUT_U/VHDL_DUT_U/chsum_data_ext_i
+
+all L3_SOF_POS_ITEM_VLD /testbench/DUT_U/VHDL_DUT_U/chsum_data_ext_i/l3_sof_to_item_vld_conv_i
+all L3_EOF_POS_ITEM_VLD /testbench/DUT_U/VHDL_DUT_U/chsum_data_ext_i/l3_eof_to_item_vld_conv_i
+
+add wave -divider "L3 dedicated components"
+all L3_CHSUM_REGIONAL0  /testbench/DUT_U/VHDL_DUT_U/l3_chsum_regional_g(0)/l3_chsum_regional_i
+all L3_CHSUM_REGIONAL1  /testbench/DUT_U/VHDL_DUT_U/l3_chsum_regional_g(1)/l3_chsum_regional_i
+all L3_CHSUM_REGIONAL2  /testbench/DUT_U/VHDL_DUT_U/l3_chsum_regional_g(2)/l3_chsum_regional_i
+all L3_CHSUM_REGIONAL3  /testbench/DUT_U/VHDL_DUT_U/l3_chsum_regional_g(3)/l3_chsum_regional_i
+all L3_CHSUM_FINALIZER  /testbench/DUT_U/VHDL_DUT_U/l3_chsum_finalizer_i
+all L3_FIFOX_MULTI      /testbench/DUT_U/VHDL_DUT_U/l3_fifoxm_i
+
+add wave -divider "L4 dedicated components"
+all L4_CHSUM_REGIONAL0  /testbench/DUT_U/VHDL_DUT_U/l4_chsum_regional_g(0)/l4_chsum_regional_i
+all L4_CHSUM_REGIONAL1  /testbench/DUT_U/VHDL_DUT_U/l4_chsum_regional_g(1)/l4_chsum_regional_i
+all L4_CHSUM_REGIONAL2  /testbench/DUT_U/VHDL_DUT_U/l4_chsum_regional_g(2)/l4_chsum_regional_i
+all L4_CHSUM_REGIONAL3  /testbench/DUT_U/VHDL_DUT_U/l4_chsum_regional_g(3)/l4_chsum_regional_i
+all L4_CHSUM_FINALIZER  /testbench/DUT_U/VHDL_DUT_U/l4_chsum_finalizer_i
+all L4_FIFOX_MULTI      /testbench/DUT_U/VHDL_DUT_U/l4_fifoxm_i
+
+config wave -signalnamewidth 1
