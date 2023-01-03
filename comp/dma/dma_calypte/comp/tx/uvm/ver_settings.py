@@ -33,9 +33,9 @@ SETTINGS = {
         "PCIE_LEN_MIN"            : "1",
         "PCIE_LEN_MAX"            : "256",
     },
-    # "4_channels" : {
-    #     "CHANNELS"                : "4",
-    # },
+    "4_channels" : {
+        "CHANNELS"                : "4",
+    },
     "8_channels" : {
         "CHANNELS"                : "8",
     },
@@ -45,32 +45,32 @@ SETTINGS = {
     "fifo_depth_comb_small" : {
         "FIFO_DEPTH"              : "64",
     },
-    # "fifo_depth_comb_large" : {
-    #     "FIFO_DEPTH"              : "512",
-    # },
-    # "small_dma_frames" : {
-    #     "PKT_SIZE_MAX"            : "2**11",
-    # },
-    # "large_dma_frames" : {
-    #     "PKT_SIZE_MAX"            : "2**11",
-    # },
+    "fifo_depth_comb_large" : {
+        "FIFO_DEPTH"              : "512",
+    },
+    "small_dma_frames" : {
+        "PKT_SIZE_MAX"            : "2**11",
+    },
+    "large_dma_frames" : {
+        "PKT_SIZE_MAX"            : "2**11",
+    },
     "min_pcie_frames" : {
         "PCIE_LEN_MIN"            : "1",
         "PCIE_LEN_MAX"            : "2",
     },
-    # "medium_pcie_frames" : {
-    #     "PCIE_LEN_MIN"            : "2",
-    #     "PCIE_LEN_MAX"            : "128",
-    # },
-    # "large_pcie_frames" : {
-    #     "PCIE_LEN_MIN"            : "128",
-    #     "PCIE_LEN_MAX"            : "256",
-    # },
+    "medium_pcie_frames" : {
+        "PCIE_LEN_MIN"            : "2",
+        "PCIE_LEN_MAX"            : "128",
+    },
+    "large_pcie_frames" : {
+        "PCIE_LEN_MIN"            : "128",
+        "PCIE_LEN_MAX"            : "256",
+    },
     "_combinations_" : (
     # (                                                                  ), # default
     # (             "4_channels",                                        ),
     (             "8_channels",                                        ),
-    # (                           "channel_arb_en",                      ),
+    (                           "channel_arb_en",                      ),
     # (             "4_channels", "channel_arb_en",                      ),
     # (             "8_channels", "channel_arb_en",                      ),
     # (                                             "min_pcie_frames"   ,),
@@ -85,7 +85,7 @@ SETTINGS = {
     # (             "4_channels", "channel_arb_en", "min_pcie_frames"   ,),
     # (             "4_channels", "channel_arb_en", "medium_pcie_frames",),
     # (             "4_channels", "channel_arb_en", "large_pcie_frames" ,),
-    (             "8_channels", "channel_arb_en", "min_pcie_frames"   ,),
+    # (             "8_channels", "channel_arb_en", "min_pcie_frames"   ,),
     # (             "8_channels", "channel_arb_en", "medium_pcie_frames",),
     # (             "8_channels", "channel_arb_en", "large_pcie_frames" ,),
     # (                           "channel_arb_en", "min_pcie_frames"   ,),
@@ -97,8 +97,10 @@ SETTINGS = {
     # (             "8_channels", "channel_arb_en", "large_pcie_frames" ,),
     # (             "8_channels", "channel_arb_en", "medium_pcie_frames",),
     # (                                                                 "fifo_depth_comb_small",),
-    (             "8_channels",                   "min_pcie_frames",  "fifo_depth_comb_small",),
-    (             "8_channels",                                       "fifo_depth_comb_small",),
+    (             "4_channels",                                       "fifo_depth_comb_small",),
+    # (                                             "min_pcie_frames",  "fifo_depth_comb_small",),
+    # (             "8_channels",                   "min_pcie_frames",  "fifo_depth_comb_small",),
+    # (             "8_channels",                                       "fifo_depth_comb_small",),
     # (             "8_channels", "channel_arb_en",                     "fifo_depth_comb_small",),
     # (             "8_channels", "channel_arb_en", "min_pcie_frames",  "fifo_depth_comb_small",),
     ),

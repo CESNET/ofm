@@ -34,7 +34,7 @@ class virt_seq#(USR_REGIONS, USR_REGION_SIZE, USR_BLOCK_SIZE, USR_ITEM_WIDTH, CQ
         m_packet.cfg = new();
         m_packet.cfg.array_size_set(PCIE_LEN_MIN, PCIE_LEN_MAX);
         m_packet.min_random_count = 300;
-        m_packet.max_random_count = 1000;
+        m_packet.max_random_count = 800;
         // m_packet.min_random_count = 2000;
         // m_packet.max_random_count = 3000;
 
