@@ -75,8 +75,8 @@ package type_pack is
 
   -- Conversion functions
   -- std_logic_vector -> unsigned
-  function slv_arr_to_u_arr_2d(slv_array_2d: slv_array_2d_t; ITEMS_X: integer) return u_array_2d_t;
   function slv_arr_to_u_arr   (slv_array   : slv_array_t) return u_array_t;
+  function slv_arr_to_u_arr_2d(slv_array_2d: slv_array_2d_t) return u_array_2d_t;
   -- unsigned -> std_logic_vector
   function u_arr_to_slv_arr   (u_array   : u_array_t) return slv_array_t;
   function u_arr_to_slv_arr_2d(u_array_2d: u_array_2d_t) return slv_array_2d_t;
@@ -340,11 +340,11 @@ package body type_pack is
       return u_array;
    end;
 
-   function slv_arr_to_u_arr_2d(slv_array_2d: slv_array_2d_t; ITEMS_X: integer) return u_array_2d_t is
-      variable u_array_2d : u_array_2d_t(ITEMS_X-1 downto 0)(slv_array_2d(0)'high downto 0)(slv_array_2d(0)(0)'high downto 0);
+   function slv_arr_to_u_arr_2d(slv_array_2d: slv_array_2d_t) return u_array_2d_t is
+      variable u_array_2d : u_array_2d_t(slv_array_2d'high downto 0)(slv_array_2d(0)'high downto 0)(slv_array_2d(0)(0)'high downto 0);
    begin
-      for i in 0 to ITEMS_X-1 loop
-         u_array_2d(i) := slv_arr_to_u_arr(slv_array_2d(i), slv_array_2d(0)'length);
+      for i in 0 to slv_array_2d'high loop
+         u_array_2d(i) := slv_arr_to_u_arr(slv_array_2d(i));
       end loop;
       return u_array_2d;
    end;
