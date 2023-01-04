@@ -73,10 +73,13 @@ package type_pack is
   type b_array_2d_t is array (natural range <>) of b_array_t;
   type b_array_3d_t is array (natural range <>) of b_array_2d_t;
 
-  -- converts an array of std_logic_vector to an array of unsigned (1 dimension)
-  function slv_arr_to_u_arr(slv_array: slv_array_t; ITEMS_X: integer) return u_array_t;
-  -- converts an array of unsigned to an array of std_logic_vector (1 dimension)
-  function u_arr_to_slv_arr(u_array: u_array_t; ITEMS_X: integer) return slv_array_t;
+  -- Conversion functions
+  -- std_logic_vector -> unsigned
+  function slv_arr_to_u_arr   (slv_array   : slv_array_t) return u_array_t;
+  function slv_arr_to_u_arr_2d(slv_array_2d: slv_array_2d_t) return u_array_2d_t;
+  -- unsigned -> std_logic_vector
+  function u_arr_to_slv_arr   (u_array   : u_array_t) return slv_array_t;
+  function u_arr_to_slv_arr_2d(u_array_2d: u_array_2d_t) return slv_array_2d_t;
 
   -- Sumation of different types of array
   function sum(v : slv_array_t) return std_logic_vector;
@@ -289,7 +292,7 @@ package body type_pack is
          assert ((ITEMS_X*ITEMS_Y*DATA_WIDTH)=slv_array_2d'length)
             report "ERROR : TYPE_PACK : slv_array_2d_downto_deser : The width of the given std_logic_vector is not divisible by the number of items it is supposed to be deserialized to!"
             severity failure;
-         return slv_array_2d_downto_deser(slv_array_2d,ITEMS_X,DATA_WIDTH,DATA_WIDTH);
+         return slv_array_2d_downto_deser(slv_array_2d,ITEMS_X,ITEMS_Y,DATA_WIDTH);
       end if;
    end;
 
@@ -328,22 +331,40 @@ package body type_pack is
       return slv_array_2d_downto_deser(slv_array_2d,ITEMS_X,ITEMS_Y);
    end;
 
-   function slv_arr_to_u_arr(slv_array: slv_array_t; ITEMS_X: integer) return u_array_t is
-      variable u_array : u_array_t(ITEMS_X-1 downto 0)(slv_array(0)'high downto 0);
+   function slv_arr_to_u_arr(slv_array: slv_array_t) return u_array_t is
+      variable u_array : u_array_t(slv_array'high downto 0)(slv_array(0)'high downto 0);
    begin
-      for i in 0 to ITEMS_X-1 loop
+      for i in 0 to slv_array'high loop
          u_array(i) := unsigned(slv_array(i));
       end loop;
       return u_array;
    end;
 
-   function u_arr_to_slv_arr(u_array: u_array_t; ITEMS_X: integer) return slv_array_t is
-      variable slv_array : slv_array_t(ITEMS_X-1 downto 0)(u_array(0)'high downto 0);
+   function slv_arr_to_u_arr_2d(slv_array_2d: slv_array_2d_t) return u_array_2d_t is
+      variable u_array_2d : u_array_2d_t(slv_array_2d'high downto 0)(slv_array_2d(0)'high downto 0)(slv_array_2d(0)(0)'high downto 0);
    begin
-      for i in 0 to ITEMS_X-1 loop
+      for i in 0 to slv_array_2d'high loop
+         u_array_2d(i) := slv_arr_to_u_arr(slv_array_2d(i));
+      end loop;
+      return u_array_2d;
+   end;
+
+   function u_arr_to_slv_arr(u_array: u_array_t) return slv_array_t is
+      variable slv_array : slv_array_t(u_array'high downto 0)(u_array(0)'high downto 0);
+   begin
+      for i in 0 to u_array'high loop
          slv_array(i) := std_logic_vector(u_array(i));
       end loop;
       return slv_array;
+   end;
+
+   function u_arr_to_slv_arr_2d(u_array_2d: u_array_2d_t) return slv_array_2d_t is
+      variable slv_array_2d : slv_array_2d_t(u_array_2d'high downto 0)(u_array_2d(0)'high downto 0)(u_array_2d(0)(0)'high downto 0);
+   begin
+      for i in 0 to u_array_2d'high loop
+         slv_array_2d(i) := u_arr_to_slv_arr(u_array_2d(i));
+      end loop;
+      return slv_array_2d;
    end;
 
 end type_pack;
