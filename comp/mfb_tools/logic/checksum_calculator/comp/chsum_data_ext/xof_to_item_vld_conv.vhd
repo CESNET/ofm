@@ -193,8 +193,8 @@ begin
     -- Input logic
     -- ========================================================================
 
-    rx_sof_pos_arr <= slv_arr_to_u_arr(slv_array_deser(RX_SOF_POS   , MFB_REGIONS), MFB_REGIONS);
-    rx_offset_arr  <= slv_arr_to_u_arr(slv_array_deser(RX_SOF_OFFSET, MFB_REGIONS), MFB_REGIONS);
+    rx_sof_pos_arr <= slv_arr_to_u_arr(slv_array_deser(RX_SOF_POS   , MFB_REGIONS));
+    rx_offset_arr  <= slv_arr_to_u_arr(slv_array_deser(RX_SOF_OFFSET, MFB_REGIONS));
 
     -- Input logic for the FSM
     l3_sof_pos_g : for r in 0 to MFB_REGIONS-1 generate

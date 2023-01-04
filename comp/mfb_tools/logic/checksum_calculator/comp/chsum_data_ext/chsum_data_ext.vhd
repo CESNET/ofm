@@ -255,8 +255,8 @@ begin
 
     RX_MFB_DST_RDY <= l4_dst_rdy and l3_dst_rdy;
 
-    rx_l2_hdr_length_arr <= slv_arr_to_u_arr(slv_array_deser(RX_L2_HDR_LENGTH, MFB_REGIONS), MFB_REGIONS);
-    rx_l3_hdr_length_arr <= slv_arr_to_u_arr(slv_array_deser(RX_L3_HDR_LENGTH, MFB_REGIONS), MFB_REGIONS);
+    rx_l2_hdr_length_arr <= slv_arr_to_u_arr(slv_array_deser(RX_L2_HDR_LENGTH, MFB_REGIONS));
+    rx_l3_hdr_length_arr <= slv_arr_to_u_arr(slv_array_deser(RX_L3_HDR_LENGTH, MFB_REGIONS));
 
     -- --------------------------------
     -- Input register
