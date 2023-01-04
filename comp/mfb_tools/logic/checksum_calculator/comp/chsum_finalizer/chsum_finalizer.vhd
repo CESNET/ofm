@@ -190,7 +190,7 @@ begin
     -- Output assignment
     -- ========================================================================
 
-    TX_CHECKSUM <= not slv_array_2d_ser(u_arr_to_slv_arr_2d(chsum_16, REGIONS));
+    TX_CHECKSUM <= not slv_array_2d_ser(u_arr_to_slv_arr_2d(chsum_16));
     TX_VALID    <= slv_array_ser(chsum_vld_reg);
     TX_SRC_RDY  <= src_rdy_reg;
 
