@@ -337,7 +337,7 @@ begin
     -- The output signal l4_sof_pos_multihot is used for:
     -- 1) indicating the end   of the L3 checksum data and
     -- 2) indicating the start of the L4 checksum data
-    l4_sof_pos_offset <= slv_array_ser(u_arr_to_slv_arr(l4_sof_pos_offset_arr, MFB_REGIONS));
+    l4_sof_pos_offset <= slv_array_ser(u_arr_to_slv_arr(l4_sof_pos_offset_arr));
 
     l3_eof_to_item_vld_conv_i : entity work.XOF_TO_ITEM_VLD_CONV
     generic map(

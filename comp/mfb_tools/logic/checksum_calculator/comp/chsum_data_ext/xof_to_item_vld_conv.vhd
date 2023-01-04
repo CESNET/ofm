@@ -693,7 +693,7 @@ begin
 
     -- 1) from the Input register
     l3_sof_pos_addr_en <= l3_sof_pos_word_vld;
-    l3_sof_pos_addr    <= u_arr_to_slv_arr(l3_sof_pos_word_reg0, MFB_REGIONS);
+    l3_sof_pos_addr    <= u_arr_to_slv_arr(l3_sof_pos_word_reg0);
 
     l3_sof_pos_bin2hot_g : for r in 0 to MFB_REGIONS-1 generate
 

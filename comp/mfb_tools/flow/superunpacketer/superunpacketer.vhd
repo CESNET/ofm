@@ -467,8 +467,8 @@ begin
     sphe_tx_dst_rdy <= sphe_tx_dst_rdy_reg1;
 
     sphe_rx_data       <= rx_supkt_data_reg0_arr;
-    sphe_rx_word_cnt   <= u_arr_to_slv_arr(word_cnt_reg0, MFB_REGIONS);
-    sphe_rx_sof_offset <= u_arr_to_slv_arr(sof_offset   , MFB_REGIONS);
+    sphe_rx_word_cnt   <= u_arr_to_slv_arr(word_cnt_reg0);
+    sphe_rx_sof_offset <= u_arr_to_slv_arr(sof_offset);
 
     supkt_hdr_extractor_g : for r in 0 to MFB_REGIONS-1 generate
         supkt_hdr_extractor_i : entity work.SUPKT_HDR_EXTRACTOR
