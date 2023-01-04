@@ -16,7 +16,13 @@ use work.type_pack.all;
 --  Description
 -- ============================================================================
 
--- 
+-- This component calculates checksum for the IPv4, TCP, and UDP protocols.
+-- Along with the frame data (from which the checksums are calculated), it
+-- expects additional information (valid with SOF) as input. This includes the
+-- length of the L2 header (i.e., the offset of the L3 header), length of the
+-- L3 header (i.e., the offset of the L4 header), and flags (see
+-- :vhdl:portsignal:`RX_FLAGS <checksum_calculator.rx_flags>` port).
+--
 entity CHECKSUM_CALCULATOR is
 generic(
     -- Number of Regions within a data word, must be power of 2.
@@ -55,8 +61,17 @@ port(
     RX_MFB_SRC_RDY   : in  std_logic;
     RX_MFB_DST_RDY   : out std_logic;
 
+    -- L3 header offset.
     RX_L2_HDR_LENGTH : in  std_logic_vector(MFB_REGIONS*7-1 downto 0);
+    -- L4 header offset.
     RX_L3_HDR_LENGTH : in  std_logic_vector(MFB_REGIONS*9-1 downto 0);
+    -- Flag items:
+    --
+    -- - RX_FLAGS[3]: L4 protocol, 1 = TCP, 0 = UDP
+    -- - RX_FLAGS[2]: L3 protocol, 1 = IPv4, 0 = IPv6
+    -- - RX_FLAGS[1]: TCP/UDP checksum enable
+    -- - RX_FLAGS[0]: IPv4 checksum enable
+    --
     RX_FLAGS         : in  std_logic_vector(MFB_REGIONS*4-1 downto 0);
 
     -- ========================================================================
@@ -67,7 +82,7 @@ port(
 
     -- The calculated checksum.
     TX_L3_MVB_DATA     : out std_logic_vector(MFB_REGIONS*16-1 downto 0);
-    -- Bypass checksum insertion, TBD
+    -- Bypass checksum insertion (=> checksum caluculation is not desired).
     TX_L3_CHSUM_BYPASS : out std_logic_vector(MFB_REGIONS-1 downto 0);
     TX_L3_MVB_VLD      : out std_logic_vector(MFB_REGIONS-1 downto 0);
     TX_L3_MVB_SRC_RDY  : out std_logic := '0';
@@ -75,7 +90,7 @@ port(
 
     -- The calculated checksum.
     TX_L4_MVB_DATA     : out std_logic_vector(MFB_REGIONS*16-1 downto 0);
-    -- Bypass checksum insertion, TBD
+    -- Bypass checksum insertion (=> checksum caluculation is not desired).
     TX_L4_CHSUM_BYPASS : out std_logic_vector(MFB_REGIONS-1 downto 0);
     TX_L4_MVB_VLD      : out std_logic_vector(MFB_REGIONS-1 downto 0);
     TX_L4_MVB_SRC_RDY  : out std_logic := '0';
