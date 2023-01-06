@@ -4,8 +4,8 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause
 
-`ifndef FIFOX_TEST_SV
-`define FIFOX_TEST_SV
+`ifndef LOOKUP_TABLE_TEST_SV
+`define LOOKUP_TABLE_TEST_SV
 
 package test;
 

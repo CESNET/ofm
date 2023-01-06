@@ -6,7 +6,7 @@
 
 
 class model #(LUT_WIDTH, REG_DEPTH, SLICE_WIDTH, SW_WIDTH, LUT_DEPTH) extends uvm_component;
-    `uvm_component_param_utils(uvm_pipe::model#(LUT_WIDTH, REG_DEPTH, SLICE_WIDTH, SW_WIDTH, LUT_DEPTH))
+    `uvm_component_param_utils(uvm_lookup_table::model#(LUT_WIDTH, REG_DEPTH, SLICE_WIDTH, SW_WIDTH, LUT_DEPTH))
 
     // Model inputs
     uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(REG_DEPTH-SLICE_WIDTH)) model_mvb_in;

@@ -6,7 +6,7 @@
 
 class scoreboard #(LUT_WIDTH, REG_DEPTH, SLICE_WIDTH, SW_WIDTH, LUT_DEPTH) extends uvm_scoreboard;
 
-    `uvm_component_utils(uvm_pipe::scoreboard #(LUT_WIDTH, REG_DEPTH, SLICE_WIDTH, SW_WIDTH, LUT_DEPTH))
+    `uvm_component_utils(uvm_lookup_table::scoreboard #(LUT_WIDTH, REG_DEPTH, SLICE_WIDTH, SW_WIDTH, LUT_DEPTH))
     // Analysis components.
     uvm_analysis_export #(uvm_logic_vector::sequence_item#(REG_DEPTH-SLICE_WIDTH)) analysis_imp_mvb_rx;
     uvm_analysis_export #(uvm_logic_vector::sequence_item#(LUT_WIDTH)) analysis_imp_mvb_tx;

@@ -4,10 +4,10 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause
 
-`ifndef FIFOX_ENV_SV
-`define FIFOX_ENV_SV
+`ifndef LOOKUP_TABLE_ENV_SV
+`define LOOKUP_TABLE_ENV_SV
 
-package uvm_pipe;
+package uvm_lookup_table;
     
     `include "uvm_macros.svh"
     import uvm_pkg::*;

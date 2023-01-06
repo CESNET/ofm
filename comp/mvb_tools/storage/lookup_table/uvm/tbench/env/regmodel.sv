@@ -5,7 +5,7 @@
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
 class regmodel#(REG_DEPTH, SW_WIDTH) extends uvm_reg_block;
-    `uvm_object_param_utils(uvm_pipe::regmodel#(REG_DEPTH, SW_WIDTH))
+    `uvm_object_param_utils(uvm_lookup_table::regmodel#(REG_DEPTH, SW_WIDTH))
 
     uvm_mem lut;
 
