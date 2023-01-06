@@ -176,6 +176,56 @@ class sequence_slave_burst#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends sequ
     endtask
 endclass
 
+class sequence_slave_sim#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends sequence_slave#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH);
+    `uvm_object_param_utils(uvm_mi::sequence_slave_sim #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
+
+    function new (string name = "sequence_slave_sim");
+        super.new(name);
+    endfunction
+
+    // Task that allow you to create your own MI write transaction
+    task mi_write(logic wr, logic [DATA_WIDTH-1:0] dwr,logic [ADDR_WIDTH-1:0] addr, logic [DATA_WIDTH/8-1:0] be);
+
+        start_item(req);
+        req.wr   = wr;
+        req.rd   = 1'b0;
+        req.dwr  = dwr;
+        req.addr = addr;
+        req.be   = be;
+        finish_item(req);
+
+    endtask
+
+    // Task that allow you to create your own MI read transaction
+    task mi_read(logic rd, logic [ADDR_WIDTH-1:0] addr, logic [DATA_WIDTH/8-1:0] be);
+
+        start_item(req);
+        req.wr   = 1'b0;
+        req.rd   = rd;
+        req.dwr  = 'x;
+        req.addr = addr;
+        req.be   = be;
+        finish_item(req);
+
+        rd_count++;
+
+    endtask
+
+    virtual task create_sequence_item();
+    endtask
+
+    // In body you have to define how the MI transaction will look like
+    task body;
+        req = uvm_mi::sequence_item_request#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH)::type_id::create("req");
+        use_response_handler(1);
+
+        create_sequence_item();
+
+        wait (rd_count == rsp_count);
+    endtask
+
+endclass
+
 
 class sequence_slave_library#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_sequence_library#(sequence_item_request#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH), sequence_item_response #(DATA_WIDTH));
     `uvm_object_param_utils(uvm_mi::sequence_slave_library#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
