@@ -39,8 +39,11 @@ endclass
 class subscriber#(type SEQ_ITEM) extends subscriber_base#(SEQ_ITEM, SEQ_ITEM);
    `uvm_component_param_utils(uvm_common::subscriber#(SEQ_ITEM))
 
+   int unsigned received;
+
     function new(string name, uvm_component parent = null);
         super.new(name, parent);
+        received = 0;
     endfunction
 
     virtual function void write(SEQ_ITEM t);
@@ -48,6 +51,10 @@ class subscriber#(type SEQ_ITEM) extends subscriber_base#(SEQ_ITEM, SEQ_ITEM);
         item = model_item#(SEQ_ITEM)::type_id::create("item", this);
         item.item  = t;
         item.start[inf_name] = $time();
+
+        received++;
+        `uvm_info(this.get_full_name(), $sformatf("\n\tReceived transactions %0d\n%s", received, this.get_report_verbosity_level() >= UVM_FULL ? item.convert2string() : ""), UVM_HIGH);
+
         port.write(item);
     endfunction
 endclass
