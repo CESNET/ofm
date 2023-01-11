@@ -305,24 +305,24 @@ begin
 	        if (rst_i = '0') then
 	          al       <= '0';
 	          rxack    <= '0';
-	          tip      <= '0';
 	          irq_flag <= '0';
 	        elsif (CLK'event and CLK = '1') then
 	          if (RST_SYNC = '1') then
 	            al       <= '0';
 	            rxack    <= '0';
-	            tip      <= '0';
 	            irq_flag <= '0';
 	          else
 	            al       <= i2c_al or (al and not sta);
 	            rxack    <= irxack;
-	            tip      <= (rd or wr);
 
 	            -- interrupt request flag is always generated
 	            irq_flag <= (done or i2c_al or irq_flag) and not iack;
 	          end if;
 	        end if;
 	    end process gen_sr_bits;
+
+	    -- Generate TIP flag (no flip-flop to be as fast as possible)
+	    tip      <= (rd or wr);
 
 	    -- generate interrupt request signals
 	    gen_irq: process (CLK, rst_i)
