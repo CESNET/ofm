@@ -145,12 +145,11 @@ proc DevTreeBuild { PATH } {
         source $i
     }
 
-    # Temporary solution if compiler not exists
+    # Check presence of the Device Tree Compiler binary
     if { [catch {exec which dtc} msg] } {
-        puts stderr "Device Tree Compiler (dtc binary) not found. Temporarily using empty DevTree.vhd"
-        global FIRMWARE_BASE
-        exec cp $OFM_PATH/comp/base/pkg/DevTree_empty.vhd $PATH
-        return
+        puts stderr "ERROR: Device Tree Compiler (dtc binary) not found!!!"
+        puts stderr "       Please install dtc/libfdt package or build from source https://github.com/dgibson/dtc"
+        exit 1
     }
 
     puts "Building Device Tree string!"
