@@ -13,15 +13,11 @@ use work.type_pack.all;
 use work.dma_bus_pack.all; -- contains definitions for MVB header fields
 
 -- ----------------------------------------------------------------------------
---                           Description
+--                           Entity Declaration
 -- ----------------------------------------------------------------------------
+
 -- Splits RX MFB+MVB interface to two intefaces.
 -- Switches packets based on one bit SWITCH for each MVB header.
-
--- ----------------------------------------------------------------------------
---                             Entity
--- ----------------------------------------------------------------------------
-
 entity MFB_SPLITTER is
    generic (
       -- ======================
