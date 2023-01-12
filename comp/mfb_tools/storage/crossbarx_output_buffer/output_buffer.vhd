@@ -11,15 +11,15 @@ use ieee.numeric_std.all;
 use work.math_pack.all;
 use work.type_pack.all;
 
--- =========================================================================
---                                 Description
--- =========================================================================
+-- -------------------------------------------------------------------------
+--                             Description
+-- -------------------------------------------------------------------------
+
 -- This component receives data through a buffer write interface.
 -- It also receives informations about Packets contained in that data and
 -- based on these informations automaticly sends the written data to output
 -- MFB interface (the Packet info is sent on separated MVB interface).
--- =========================================================================
-
+--
 entity MFB_CROSSBARX_OUTPUT_BUFFER is
 generic(
     -- =====================
@@ -102,8 +102,6 @@ port (
     RESET_OUT        : in  std_logic;
 
     -- =====================================================================
-
-    -- =====================================================================
     -- Buffer data interface
     --
     -- Runs on CLK_IN
@@ -113,8 +111,6 @@ port (
     WR_DATA          : in  slv_array_t     (BUF_BLOCKS-1 downto 0)(DATA_BLOCK_WIDTH-1 downto 0);
     WR_IE            : in  slv_array_t     (BUF_BLOCKS-1 downto 0)(DATA_BLOCK_SIZE-1 downto 0);
     WR_EN            : in  std_logic_vector(BUF_BLOCKS-1 downto 0);
-
-    -- =====================================================================
 
     -- =====================================================================
     -- Other components input interfaces
@@ -132,8 +128,6 @@ port (
     RX_HDR_DST_RDY   : out std_logic;
 
     -- =====================================================================
-
-    -- =====================================================================
     -- Other components output interfaces
     --
     -- Runs on CLK_META
@@ -149,21 +143,28 @@ port (
     PKT_SENT_DST_RDY : in  std_logic;
 
     -- =====================================================================
-
-    -- =====================================================================
-    -- Output data interface
+    -- Output MVB interface
     --
     -- Runs on CLK_OUT
+    --
+    -- MVB DATA contains three parts:
+    --   - length (TX_MVB_LEN),
+    --   - header metadata (TX_MVB_HDR_META),
+    --   - channel (TX_MVB_CHANNEL)
     -- =====================================================================
 
-    -- TX_MVB_DATA ==========================
     TX_MVB_LEN          : out std_logic_vector(MVB_ITEMS*log2(PKT_SIZE_MAX+1)-1 downto 0);
     TX_MVB_HDR_META     : out std_logic_vector(MVB_ITEMS*HDR_META_WIDTH      -1 downto 0);
     TX_MVB_CHANNEL      : out std_logic_vector(MVB_ITEMS*log2(CHANNELS)      -1 downto 0);
-    -- =======================================
     TX_MVB_VLD          : out std_logic_vector(MVB_ITEMS                     -1 downto 0);
     TX_MVB_SRC_RDY      : out std_logic;
     TX_MVB_DST_RDY      : in  std_logic;
+
+    -- =====================================================================
+    -- Output MFB interface
+    --
+    -- Runs on CLK_OUT
+    -- =====================================================================
 
     TX_MFB_DATA         : out std_logic_vector(MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH-1 downto 0);
     TX_MFB_META         : out std_logic_vector(MFB_REGIONS*MFB_META_WIDTH                               -1 downto 0);
@@ -175,11 +176,7 @@ port (
     TX_MFB_DST_RDY      : in  std_logic
 
     -- =====================================================================
-
-    -- =====================================================================
     --  Debug signals
-    -- =====================================================================
-
     -- =====================================================================
 );
 end entity;
