@@ -12,8 +12,12 @@ use IEEE.std_logic_unsigned.all;
 
 use work.math_pack.all;
 
+-- ----------------------------------------------------------------------------
+--                            Entity declaration
+-- ----------------------------------------------------------------------------
 
-
+-- Component for pipelining MFB data paths with source and destination ready signals.
+-- Compatible with Xilinx and Intel FPGAs.
 entity MFB_PIPE is
   generic(
     -- =============================
@@ -44,9 +48,17 @@ entity MFB_PIPE is
     DEVICE         : string  := "7SERIES"
   );
   port(
+      -- =============================
+      -- Clock and Reset
+      -- =============================
+
       CLK            : in std_logic;
       RESET          : in std_logic;
-      
+
+      -- =============================
+      -- MFB input interface
+      -- =============================
+        
       RX_DATA       : in std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
       RX_META       : in std_logic_vector(REGIONS*META_WIDTH-1 downto 0) := (others => '0');
       RX_SOF_POS    : in std_logic_vector(REGIONS*max(1,log2(REGION_SIZE))-1 downto 0);
@@ -55,7 +67,11 @@ entity MFB_PIPE is
       RX_EOF        : in std_logic_vector(REGIONS-1 downto 0);
       RX_SRC_RDY    : in std_logic;
       RX_DST_RDY    : out std_logic; 
- 
+
+      -- =============================
+      -- MFB output interface
+      -- =============================
+
       TX_DATA       : out std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
       TX_META       : out std_logic_vector(REGIONS*META_WIDTH-1 downto 0);
       TX_SOF_POS    : out std_logic_vector(REGIONS*max(1,log2(REGION_SIZE))-1 downto 0);
