@@ -12,10 +12,17 @@ use IEEE.std_logic_unsigned.all;
 use IEEE.std_logic_misc.all;
 use work.math_pack.all;
 
+-- -------------------------------------------------------------------------
+--                             Description
+-- -------------------------------------------------------------------------
+
+-- This component provides the transition between the clock domains of the two MFB interfaces through the ASFIFOX component.
+-- For more information about ASFIFOX see the :ref:`documentation<asfifox>`
+--
 entity MFB_ASFIFOX is
     generic(
         -- ==================
-        -- MFB specification
+        -- MFB parameters
         -- ==================
 
         -- any possitive value
@@ -56,6 +63,12 @@ entity MFB_ASFIFOX is
         ALMOST_EMPTY_OFFSET : natural := FIFO_ITEMS/2
     );
     port(
+        -- ==================
+        -- RX MFB interface
+        --
+        -- Runs on RX_CLK
+        -- ==================
+
         RX_CLK        : in  std_logic;
         RX_RESET      : in  std_logic;
         
@@ -69,6 +82,12 @@ entity MFB_ASFIFOX is
         RX_DST_RDY    : out std_logic;
         RX_AFULL      : out std_logic;
         RX_STATUS     : out std_logic_vector(log2(FIFO_ITEMS) downto 0);
+
+        -- ==================
+        -- TX MFB interface
+        --
+        -- Runs on TX_CLK
+        -- ==================
 
         TX_CLK        : in  std_logic;
         TX_RESET      : in  std_logic;
