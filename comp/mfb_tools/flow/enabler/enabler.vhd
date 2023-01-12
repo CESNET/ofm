@@ -12,27 +12,45 @@ use IEEE.numeric_std.all;
 use work.math_pack.all;
 use work.type_pack.all;
 
+-- =========================================================================
+--  Description
+-- =========================================================================
+
+-- This component enables sending of MFB frames to the output.
+-- For this purpose, it uses the :vhdl:portsignal:`TX_ENABLE <enabler.tx_enable>` port.
+-- Enabling starts from the first SOF.
+-- Disabling starts from the last EOF in the current word.
+-- If this happens in the middle of a frame then all following words are sent until the EOF is found.
+-- If in this word is/are other complete frame/s then it/they are sent as well.
+-- If this happens when outside of a frame then at least the next frame (can be more) in the first following valid word is still sent to the output.
+-- The following packets are discarded.
+-- For indication of the region in which discarded frame ends, there is a flag :vhdl:portsignal:`STAT_DISCARDED <enabler.stat_discarded>`.
+--
 entity MFB_ENABLER is
    generic(
       -- =======================================================================
       -- MFB CONFIGURATION: 
       -- =======================================================================
-      REGIONS     : natural := 4; -- any possitive value
-      REGION_SIZE : natural := 8; -- any possitive value
-      BLOCK_SIZE  : natural := 8; -- any possitive value
-      ITEM_WIDTH  : natural := 8; -- any possitive value
-      META_WIDTH  : natural := 8; -- any possitive value
+
+      REGIONS     : natural := 4;   -- any possitive value
+      REGION_SIZE : natural := 8;   -- any possitive value
+      BLOCK_SIZE  : natural := 8;   -- any possitive value
+      ITEM_WIDTH  : natural := 8;   -- any possitive value
+      META_WIDTH  : natural := 8;   -- any possitive value
       OUTPUT_REG  : boolean := true -- only for TX MFB interface, not for STAT
    );
    port(
       -- =======================================================================
       -- CLOCK AND RESET
       -- =======================================================================
+
       CLK            : in  std_logic;
       RESET          : in  std_logic;
+
       -- =======================================================================
       -- INPUT INTERFACE OF MFB PLUS
       -- =======================================================================
+
       RX_DATA        : in  std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
       RX_META        : in  std_logic_vector(REGIONS*META_WIDTH-1 downto 0);
       RX_SOF_POS     : in  std_logic_vector(REGIONS*max(1,log2(REGION_SIZE))-1 downto 0);
@@ -40,9 +58,11 @@ entity MFB_ENABLER is
       RX_SOF         : in  std_logic_vector(REGIONS-1 downto 0);
       RX_EOF         : in  std_logic_vector(REGIONS-1 downto 0);
       RX_SRC_RDY     : in  std_logic;
+
       -- =======================================================================
       -- TX MFB PLUS INTERFACE WITH ENABLE
       -- =======================================================================
+
       TX_DATA        : out std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
       TX_META        : out std_logic_vector(REGIONS*META_WIDTH-1 downto 0);
       TX_SOF_POS     : out std_logic_vector(REGIONS*max(1,log2(REGION_SIZE))-1 downto 0);
@@ -50,11 +70,16 @@ entity MFB_ENABLER is
       TX_SOF         : out std_logic_vector(REGIONS-1 downto 0);
       TX_EOF         : out std_logic_vector(REGIONS-1 downto 0);
       TX_SRC_RDY     : out std_logic;
-      TX_ENABLE      : in  std_logic; -- Enable of MFB stream with next frame.
+      -- Enable the MFB stream starting with the next frame.
+      -- Disable the MFB stream after the last complete frame.
+      TX_ENABLE      : in  std_logic;
+
       -- =======================================================================
       -- OUTPUT INTERFACE OF STATISTICS
       -- =======================================================================
+
       -- Flag of discarded frame for each region.
+      -- Valid with EOF.
       STAT_DISCARDED : out std_logic_vector(REGIONS-1 downto 0)
    );
 end MFB_ENABLER;
