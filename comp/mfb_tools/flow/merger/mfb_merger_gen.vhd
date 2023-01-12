@@ -13,6 +13,11 @@ library work;
 use work.math_pack.all;
 use work.type_pack.all;
 
+-- ----------------------------------------------------------------------------
+--                            Entity declaration
+-- ----------------------------------------------------------------------------
+
+-- MFB+MVB bus merger with generic number of inputs
 entity MFB_MERGER_GEN is
     generic(
         -- number of merger inputs
