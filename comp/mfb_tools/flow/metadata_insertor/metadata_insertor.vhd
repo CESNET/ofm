@@ -15,13 +15,10 @@ use work.type_pack.all;
 -- ----------------------------------------------------------------------------
 --                           Description
 -- ----------------------------------------------------------------------------
+
 -- Takes items from input MVB stream and inserts them to MFB stream as metadata
 -- without affecting the MFB flow in any other way.
-
--- ----------------------------------------------------------------------------
---                             Entity
--- ----------------------------------------------------------------------------
-
+--
 entity METADATA_INSERTOR is
 generic(
     -- =============================
@@ -47,22 +44,19 @@ generic(
     -- Others
     -- =============================
 
-    -- Metadata insertion mode
-    -- options:
-    --     0 - Insert in SOF Region
-    --     1 - Insert in EOF Region
-    --     2 - Insert for valid all regions of the frame.
-    --         Leads to a slight increase of logic paths.
-    --         When two frames are present in one region,
-    --         Metadata will be inserted for the one with SOP.
+    -- Metadata insertion mode options:
+    --   - 0 - Insert in SOF Region
+    --   - 1 - Insert in EOF Region
+    --   - 2 - Insert for valid all regions of the frame. Leads to a slight increase of logic paths. When two frames are present in one region, Metadata will be inserted for the one with SOP.
     INSERT_MODE     : integer := 0;
 
-    -- Input MVB FIFO size
+    -- Input MVB FIFO size.
     -- Set to 0 for no FIFO at all
     MVB_FIFO_SIZE   : natural := 0;
 
-    -- Target device
-    -- "ULTRASCALE", "7SERIES"
+    -- Target device:
+    --   - "ULTRASCALE",
+    --   - "7SERIES"
     DEVICE          : string  := "ULTRASCALE"
 );
 port(
