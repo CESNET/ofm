@@ -12,8 +12,18 @@ use work.math_pack.all;
 -- ----------------------------------------------------------------------------
 --                            Entity declaration
 -- ----------------------------------------------------------------------------
+
+-- This component performs changing MFB word size by increasing or decreasing the number of Regions on RX to TX.
+--
+-- There are two possible solutions:
+--   - RX_REGIONS > TX_REGIONS - **Multiple Regions** in **one word** on the RX side are sent in **multiple words** with **fewer Regions** from the TX side.
+--   - RX_REGIONS < TX_REGIONS - **Multiple words** on the RX side are put together to form **one word** with **multiple Regions** on the TX side.
 entity MFB_TRANSFORMER is
     generic (
+        -- =============================
+        -- MFB Configuration
+        -- =============================
+
         RX_REGIONS  : integer := 2;
         TX_REGIONS  : integer := 1;
         REGION_SIZE : integer := 1;
@@ -22,10 +32,17 @@ entity MFB_TRANSFORMER is
         META_WIDTH  : integer := 0
     );
     port (
+        -- =============================
+        -- Clock and Reset
+        -- =============================
+
         CLK   : in std_logic;
         RESET : in std_logic;
 
+        -- =============================
         -- MFB input interface
+        -- =============================
+
         RX_DATA    : in  std_logic_vector(RX_REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
         RX_META    : in  std_logic_vector(RX_REGIONS*META_WIDTH-1 downto 0) := (others => '0');
         RX_SOP     : in  std_logic_vector(RX_REGIONS-1 downto 0);
@@ -35,7 +52,10 @@ entity MFB_TRANSFORMER is
         RX_SRC_RDY : in  std_logic;
         RX_DST_RDY : out std_logic;
 
+        -- =============================
         -- MFB output interface
+        -- =============================
+
         TX_DATA    : out std_logic_vector(TX_REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
         TX_META    : out std_logic_vector(TX_REGIONS*META_WIDTH-1 downto 0);
         TX_SOP     : out std_logic_vector(TX_REGIONS-1 downto 0);
