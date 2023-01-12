@@ -16,11 +16,15 @@ use work.type_pack.all;
 
 entity MFB_BLOCK_RECONFIGURATOR is
 generic(
-    -- INEFFICIENCY WARNING (for FRAME_ALIGN == 0):
-    --     When RX_REGION_SIZE > TX_REGION_SIZE all TX Frames are generated
-    --     with SOF aligned to Region. Might decrease throughput due to unnessesary gaps.
-
+    -- =========================================================
     -- MFB Configuration
+    --
+    -- INEFFICIENCY WARNING (for FRAME_ALIGN == 0):
+    -- When RX_REGION_SIZE > TX_REGION_SIZE all TX Frames are generated
+    -- with SOF aligned to Region.
+    -- Might decrease throughput due to unnessesary gaps.
+    -- =========================================================
+
     REGIONS        : integer := 2;
     RX_REGION_SIZE : integer := 1;
     TX_REGION_SIZE : integer := 2;
@@ -28,19 +32,22 @@ generic(
     ITEM_WIDTH     : integer := 32;
     META_WIDTH     : integer := 0;
 
+    -- =============================
+    -- Others
+    -- =============================
+
     -- Metadata validity mode
-    -- 0 -> with SOF
-    -- 1 -> with EOF
+    --   - 0 -> with SOF
+    --   - 1 -> with EOF
     META_MODE      : integer := 0;
 
     -- Input FIFO size (in number of MFB words)
     -- Only applies when RX_REGION_SIZE > TX_REGION_SIZE
     FIFO_SIZE      : integer := 32;
 
-    -- Frame alignment mode
-    -- 0 - align to start of Region
-    -- 1 - align to start of Block (ONLY SUPPORTED WHEN ALL FRAMES ARE BIGGER THAN TX MFB BLOCK)
-    -- Only applies when RX_REGION_SIZE > TX_REGION_SIZE
+    -- Frame alignment mode (Only applies when RX_REGION_SIZE > TX_REGION_SIZE)
+    --   - 0 - align to start of Region
+    --   - 1 - align to start of Block (ONLY SUPPORTED WHEN ALL FRAMES ARE BIGGER THAN TX MFB BLOCK)
     FRAME_ALIGN    : integer := 0;
 
     -- Target device
@@ -54,7 +61,10 @@ port(
     CLK   : in std_logic;
     RESET : in std_logic;
 
+    -- =============================
     -- MFB input interface
+    -- =============================
+
     RX_DATA    : in  std_logic_vector(REGIONS*RX_REGION_SIZE*RX_BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
     RX_META    : in  std_logic_vector(REGIONS*META_WIDTH-1 downto 0) := (others => '0');
     RX_SOF     : in  std_logic_vector(REGIONS-1 downto 0);
@@ -64,7 +74,10 @@ port(
     RX_SRC_RDY : in  std_logic;
     RX_DST_RDY : out std_logic;
 
+    -- =============================
     -- MFB output interface
+    -- =============================
+
     TX_DATA    : out std_logic_vector(REGIONS*TX_REGION_SIZE*TX_BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
     TX_META    : out std_logic_vector(REGIONS*META_WIDTH-1 downto 0);
     TX_SOF     : out std_logic_vector(REGIONS-1 downto 0);

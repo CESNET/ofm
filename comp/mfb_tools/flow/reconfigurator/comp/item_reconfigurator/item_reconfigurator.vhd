@@ -16,13 +16,20 @@ use work.type_pack.all;
 
 entity MFB_ITEM_RECONFIGURATOR is
 generic(
+    -- =============================
     -- MFB Configuration
+    -- =============================
+
     REGIONS        : integer := 2;
     REGION_SIZE    : integer := 1;
     RX_BLOCK_SIZE  : integer := 8;
     TX_BLOCK_SIZE  : integer := 8;
     RX_ITEM_WIDTH  : integer := 32;
     META_WIDTH     : integer := 0;
+
+    -- =============================
+    -- Others
+    -- =============================
 
     -- Target device
     DEVICE         : string := "ULTRASCALE";
@@ -35,7 +42,10 @@ port(
     CLK   : in std_logic;
     RESET : in std_logic;
 
+    -- =============================
     -- MFB input interface
+    -- =============================
+
     RX_DATA    : in  std_logic_vector(REGIONS*REGION_SIZE*RX_BLOCK_SIZE*RX_ITEM_WIDTH-1 downto 0);
     RX_META    : in  std_logic_vector(REGIONS*META_WIDTH-1 downto 0) := (others => '0');
     RX_SOF     : in  std_logic_vector(REGIONS-1 downto 0);
@@ -45,7 +55,10 @@ port(
     RX_SRC_RDY : in  std_logic;
     RX_DST_RDY : out std_logic;
 
+    -- =============================
     -- MFB output interface
+    -- =============================
+
     TX_DATA    : out std_logic_vector(REGIONS*REGION_SIZE*TX_BLOCK_SIZE*TX_ITEM_WIDTH-1 downto 0);
     TX_META    : out std_logic_vector(REGIONS*META_WIDTH-1 downto 0);
     TX_SOF     : out std_logic_vector(REGIONS-1 downto 0);
