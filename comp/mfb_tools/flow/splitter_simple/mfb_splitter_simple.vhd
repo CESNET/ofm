@@ -12,7 +12,13 @@ library work;
 use work.type_pack.all;
 use work.math_pack.all;
 
+
+-- ----------------------------------------------------------------------------
+--                            Entity declaration
+-- ----------------------------------------------------------------------------
 -- TODO? : RESETS and OUTPUT REGISTERS
+
+-- This component transmits received packets on one interface to one out of the two outputs according to the select bit.
 entity MFB_SPLITTER_SIMPLE is
     Generic (
         -- number of regions in a data word
