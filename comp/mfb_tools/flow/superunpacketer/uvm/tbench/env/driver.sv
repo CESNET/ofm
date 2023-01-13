@@ -28,6 +28,7 @@ class driver#(META_WIDTH, HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_S
     int act_size      = 0;
     int sp_cnt        = 0;
     int end_of_packet = 0;
+    int sup_align     = 0;
     logic done        = 1'b0;
     logic [HEADER_SIZE-1 : 0] header;
     local logic [8-1 : 0] data_fifo[$];
@@ -67,6 +68,13 @@ class driver#(META_WIDTH, HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_S
 
             act_size++;
         end
+
+        // if (header[15] == 1'b0 && (end_of_packet % MFB_BLOCK_SIZE)) begin
+        //     align = MFB_BLOCK_SIZE - (end_of_packet % MFB_BLOCK_SIZE);
+        //     for (int i = 0; i < align; i++) begin
+        //         data_fifo.push_back('0);
+        //     end
+        // end
 
         if (act_size == size_of_sp.sp_size && VERBOSITY >= 2) begin
             $write("SIZE OF FIFO %d\n", data_fifo.size());
@@ -111,6 +119,8 @@ class driver#(META_WIDTH, HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_S
                 if (header[15] == 1'b0) begin
                     done                = 1'b1;
                     byte_array_out.data = data_fifo;
+                    // sup_align = MFB_BLOCK_SIZE - (size_of_sp.sp_size % MFB_BLOCK_SIZE);
+                    // if (byte_array_out.size() > size_of_sp.sp_size + sup_align) begin
                     if (byte_array_out.size() > size_of_sp.sp_size) begin
                         `uvm_fatal(this.get_full_name(), "Data length is too long.");
                     end
