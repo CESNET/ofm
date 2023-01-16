@@ -19,8 +19,8 @@ module testbench;
     // Interfaces
     reset_if  reset(CLK);
     mvb_if #(MVB_ITEMS, REG_DEPTH-SLICE_WIDTH) mvb_rx(CLK);
-    mvb_if #(MVB_ITEMS, LUT_WIDTH)             mvb_tx(CLK);
-    mi_if #(SW_WIDTH, REG_DEPTH)               mi_config(CLK);
+    mvb_if #(MVB_ITEMS, LUT_WIDTH) mvb_tx(CLK);
+    mi_if #(SW_WIDTH, REG_DEPTH) mi_config(CLK);
 
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // Define clock period
@@ -59,11 +59,11 @@ module testbench;
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // DUT
     DUT DUT_U (
-        .CLK       (CLK),
-        .RST       (reset.RESET),
-        .mvb_rx    (mvb_rx),
-        .mvb_tx    (mvb_tx),
-        .config_mi (mi_config)
+        .CLK    (CLK),
+        .RST    (reset.RESET),
+        .mvb_rx (mvb_rx),
+        .mvb_tx (mvb_tx),
+        .config_mi  (mi_config)
     );
 
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------

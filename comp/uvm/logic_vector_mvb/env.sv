@@ -79,10 +79,9 @@ class env_rx #(ITEMS, ITEM_WIDTH) extends uvm_env;
         if (m_config.active == UVM_ACTIVE) begin
             sequence_lib_rx#(ITEMS, ITEM_WIDTH) mvb_seq = sequence_lib_rx#(ITEMS, ITEM_WIDTH)::type_id::create("mvb_seq", this);
 
-            mvb_seq.cfg = m_config.seq_cfg;
             mvb_seq.min_random_count = 10;
             mvb_seq.max_random_count = 200;
-            mvb_seq.init_sequence();
+            mvb_seq.init_sequence(m_config.seq_cfg);
 
             forever begin
                 if(!mvb_seq.randomize()) `uvm_fatal(this.get_full_name(), "\n\tCannot randomize logic_vector_mvb rx_seq");

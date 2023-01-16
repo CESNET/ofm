@@ -5,7 +5,7 @@
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
 class reg_sequence#(REG_DEPTH, ADDR_WIDTH, LUT_DEPTH, SW_WIDTH) extends uvm_sequence;
-    `uvm_object_param_utils(uvm_pipe::reg_sequence#(REG_DEPTH, ADDR_WIDTH, LUT_DEPTH, SW_WIDTH))
+    `uvm_object_param_utils(uvm_lookup_table::reg_sequence#(REG_DEPTH, ADDR_WIDTH, LUT_DEPTH, SW_WIDTH))
 
     regmodel#(REG_DEPTH, SW_WIDTH) m_regmodel;
 
@@ -19,12 +19,11 @@ class reg_sequence#(REG_DEPTH, ADDR_WIDTH, LUT_DEPTH, SW_WIDTH) extends uvm_sequ
         uvm_reg_data_t value [ADDR_WIDTH];
 
         foreach (value[i]) begin 
-            std::randomize(value[i]);
+            void'(std::randomize(value[i]));
             if (LUT_DEPTH == 1) begin 
                 m_regmodel.lut.write(status, i*2, value[i]);
             end
         end
-
 
         if (LUT_DEPTH > 1) begin 
             m_regmodel.lut.burst_write(status, 0, value);

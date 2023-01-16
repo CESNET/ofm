@@ -18,9 +18,8 @@ module testbench;
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // Interfaces
     reset_if  reset(CLK);
-    mvb_if #(MVB_ITEMS, REG_DEPTH-SLICE_WIDTH) mvb_rx(CLK);
-    mvb_if #(MVB_ITEMS, LUT_WIDTH)             mvb_tx(CLK);
-    mi_if #(SW_WIDTH, REG_DEPTH)               mi_config(CLK);
+    mfb_if #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, EXTENDED_META_WIDTH) mfb_rx(CLK);
+    mfb_if #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)          mfb_tx(CLK);
 
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // Define clock period
@@ -41,9 +40,8 @@ module testbench;
         uvm_root m_root;
         // Configuration of database
         uvm_config_db#(virtual reset_if)::set(null, "", "vif_reset", reset);
-        uvm_config_db#(virtual mvb_if #(MVB_ITEMS, REG_DEPTH-SLICE_WIDTH))::set(null, "", "vif_rx", mvb_rx);
-        uvm_config_db#(virtual mvb_if #(MVB_ITEMS, LUT_WIDTH))::set(null, "", "vif_tx", mvb_tx);
-        uvm_config_db#(virtual mi_if #(SW_WIDTH, REG_DEPTH))::set(null, "", "vif_mi", mi_config);
+        uvm_config_db#(virtual mfb_if #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, EXTENDED_META_WIDTH))::set(null, "", "vif_rx", mfb_rx);
+        uvm_config_db#(virtual mfb_if #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH))::set(null, "", "vif_tx", mfb_tx);
 
         m_root = uvm_root::get();
         m_root.finish_on_completion = 0;
@@ -61,9 +59,8 @@ module testbench;
     DUT DUT_U (
         .CLK       (CLK),
         .RST       (reset.RESET),
-        .mvb_rx    (mvb_rx),
-        .mvb_tx    (mvb_tx),
-        .config_mi (mi_config)
+        .mfb_rx    (mfb_rx),
+        .mfb_tx    (mfb_tx)
     );
 
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------

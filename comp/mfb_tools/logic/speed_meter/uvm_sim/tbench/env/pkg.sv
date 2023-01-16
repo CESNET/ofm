@@ -4,20 +4,16 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause
 
-`ifndef LOOKUP_TABLE_ENV_SV
-`define LOOKUP_TABLE_ENV_SV
+`ifndef SPEED_METER_ENV_SV
+`define SPEED_METER_ENV_SV
 
-package uvm_lookup_table;
-    
+package uvm_speed_meter;
+
     `include "uvm_macros.svh"
     import uvm_pkg::*;
 
-    `include "regmodel.sv"
-    `include "reg_sequence.sv"
-
+    `include "sequence_tb.sv"
     `include "sequencer.sv"
-    `include "model.sv"
-    `include "scoreboard.sv"
     `include "env.sv"
 
 endpackage

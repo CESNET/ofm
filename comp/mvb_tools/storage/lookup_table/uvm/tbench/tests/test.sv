@@ -9,7 +9,7 @@ class ex_test extends uvm_test;
     `uvm_component_utils(test::ex_test);
 
     bit timeout;
-    uvm_pipe::env #(MVB_ITEMS, LUT_WIDTH, REG_DEPTH, SW_WIDTH, SLICE_WIDTH, LUT_DEPTH) m_env;
+    uvm_lookup_table::env #(MVB_ITEMS, LUT_WIDTH, REG_DEPTH, SW_WIDTH, SLICE_WIDTH, LUT_DEPTH) m_env;
 
     // ------------------------------------------------------------------------
     // Functions
@@ -18,7 +18,7 @@ class ex_test extends uvm_test;
     endfunction
 
     function void build_phase(uvm_phase phase);
-        m_env = uvm_pipe::env #(MVB_ITEMS, LUT_WIDTH, REG_DEPTH, SW_WIDTH, SLICE_WIDTH, LUT_DEPTH)::type_id::create("m_env", this);
+        m_env = uvm_lookup_table::env #(MVB_ITEMS, LUT_WIDTH, REG_DEPTH, SW_WIDTH, SLICE_WIDTH, LUT_DEPTH)::type_id::create("m_env", this);
     endfunction
 
     task test_wait_timeout(int unsigned time_length);

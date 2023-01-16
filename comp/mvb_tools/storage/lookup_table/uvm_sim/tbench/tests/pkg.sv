@@ -4,8 +4,8 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause
 
-`ifndef LOOKUP_TABLE_TEST_SV
-`define LOOKUP_TABLE_TEST_SV
+`ifndef FIFOX_TEST_SV
+`define FIFOX_TEST_SV
 
 package test;
 
@@ -16,7 +16,7 @@ package test;
     parameter LUT_DEPTH       = 128;
     parameter LUT_WIDTH       = 64;
     // LUT, BRAM, AUTO
-    parameter LUT_ARCH        = "BRAM";
+    parameter LUT_ARCH        = "LUT";
     parameter SW_WIDTH        = 32;
     parameter META_WIDTH      = 32;
     parameter OUTPUT_REG      = 0;
@@ -30,6 +30,10 @@ package test;
 
     parameter REG_DEPTH       = TRUE_LUT_DEPTH+2+SLICE_WIDTH;
     parameter ADDR_WIDTH      = LUT_DEPTH*(LUT_WIDTH/SW_WIDTH);
+
+    // Space range between ITEMS
+    parameter SPACE_SIZE_MIN  = 1;
+    parameter SPACE_SIZE_MAX  = 1;
 
     parameter REPEAT          = 20;
     parameter CLK_PERIOD      = 4ns;
