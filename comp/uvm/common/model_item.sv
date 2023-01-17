@@ -60,7 +60,7 @@ class model_item#(type SEQ_ITEM) extends uvm_object;
         string msg = "";
         $swrite(msg, "%s\n\tINPUT TIMES :", msg);
         foreach (start[it]) begin
-            $swrite(msg, "\n\t\t%s : %0dns", it, start[it]/1ns);
+            $swrite(msg, "%s\n\t\t%s : %0dns", msg, it, start[it]/1ns);
         end
 
         return msg;
