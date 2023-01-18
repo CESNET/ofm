@@ -10,10 +10,17 @@ use IEEE.std_logic_1164.all;
 
 use work.math_pack.all;
 
+-- -------------------------------------------------------------------------
+--                             Description
+-- -------------------------------------------------------------------------
+
+-- This component implements the FIFO memory for the MFB interface using the FIFOX component. 
+-- For more information about the FIFOX component, see the :ref:`documentation<fifox>`
+--
 entity MFB_FIFOX is
    generic(
    -- =========================================================================
-   -- BUS GENERIC
+   -- MFB parameters
    --
    -- Frame size restrictions: none
    -- =========================================================================
@@ -29,24 +36,23 @@ entity MFB_FIFOX is
       META_WIDTH          : natural := 0;
 
       -- =========================================================================
-      -- FIFO GENERIC
+      -- FIFO parameters
       -- =========================================================================
 
       -- FIFO depth, number of data words
       FIFO_DEPTH          : natural := 512;
       -- Select memory implementation. Options:
-      -- "LUT"   - effective when ITEMS <= 64 (on Intel FPGA <= 32), 
-      -- "BRAM"  - effective when ITEMS  > 64 (on Intel FPGA  > 32), 
-      -- "URAM"  - effective when ITEMS*FIFO_WIDTH >= 288000 
-      --           and FIFO_WIDTH >= 72 (URAM is only for Xilinx Ultrascale(+)),
-      -- "SHIFT" - effective when ITEMS <= 16,
-      -- "AUTO"  - effective implementation dependent on ITEMS and DEVICE.
+      --   - "LUT"   - effective when ITEMS <= 64 (on Intel FPGA <= 32), 
+      --   - "BRAM"  - effective when ITEMS  > 64 (on Intel FPGA  > 32), 
+      --   - "URAM"  - effective when ITEMS*FIFO_WIDTH >= 288000 and FIFO_WIDTH >= 72 (URAM is only for Xilinx Ultrascale(+)),
+      --   - "SHIFT" - effective when ITEMS <= 16,
+      --   - "AUTO"  - effective implementation dependent on ITEMS and DEVICE.
       RAM_TYPE            : string  := "AUTO";
       -- Defines what architecture is FIFO implemented on Options:
-      -- "ULTRASCALE" (Xilinx) 
-      -- "7SERIES"    (Xilinx)
-      -- "ARRIA10"    (Intel)
-      -- "STRATIX10"  (Intel)
+      --   - "ULTRASCALE" (Xilinx) 
+      --   - "7SERIES"    (Xilinx)
+      --   - "ARRIA10"    (Intel)
+      --   - "STRATIX10"  (Intel)
       DEVICE              : string  := "ULTRASCALE";
       -- Determins how many data words left free when almost_full is triggered.
       -- (ITEMS - ALMOST_FULL_OFFSET) 

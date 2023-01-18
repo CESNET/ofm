@@ -13,6 +13,11 @@ library work;
 use work.math_pack.all;
 use work.type_pack.all;
 
+-- ----------------------------------------------------------------------------
+--                           Entity Declaration
+-- ----------------------------------------------------------------------------
+
+-- MFB+MVB bus splitter with generic number of outputs
 entity MFB_SPLITTER_GEN is
     generic(
         -- number of splitter outputs

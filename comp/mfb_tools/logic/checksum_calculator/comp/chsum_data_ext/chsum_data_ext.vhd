@@ -138,8 +138,8 @@ architecture FULL of CHSUM_DATA_EXT is
 
     constant L4_TARGET_WORD_W  : natural := L4_SOF_POS_LONG_W - SOF_POS_WORD_ITEMS_W;
 
-    --
-    constant AGGREGATE_IMPL : string := "prefixsum"; -- "serial", "parallel", "prefixsum"
+    -- "serial", "parallel", "prefixsum"
+    constant AGGREGATE_IMPL : string := "prefixsum";
 
     -- ========================================================================
     --                                FUNCTIONS

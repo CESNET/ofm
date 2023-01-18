@@ -14,15 +14,11 @@ use work.type_pack.all;
 use work.dma_bus_pack.all; -- contains definitions for MVB header fields
 
 -- ----------------------------------------------------------------------------
---                           Description
+--                           Entity declaration
 -- ----------------------------------------------------------------------------
+
 -- Merges two input MVB+MFB interfaces in one output interface
 -- Contains input FIFOs and output PIPEs.
-
--- ----------------------------------------------------------------------------
---                             Entity
--- ----------------------------------------------------------------------------
-
 entity MFB_MERGER is
 generic(
     -- =============================
