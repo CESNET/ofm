@@ -84,6 +84,11 @@ class env_rx #(ITEMS, ITEM_WIDTH) extends uvm_env;
             mvb_seq.init_sequence(m_config.seq_cfg);
 
             forever begin
+                int verbosity;
+
+                verbosity = this.get_report_verbosity_level(UVM_INFO, "mvb_seq");
+                m_mvb_agent.m_sequencer.set_report_verbosity_level(verbosity >= 300 ? verbosity - 300 : 0);
+
                 if(!mvb_seq.randomize()) `uvm_fatal(this.get_full_name(), "\n\tCannot randomize logic_vector_mvb rx_seq");
                 mvb_seq.start(m_mvb_agent.m_sequencer);
             end

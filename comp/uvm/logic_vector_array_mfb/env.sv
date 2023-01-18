@@ -104,8 +104,13 @@ class env_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extends
             mfb_seq.max_random_count = 100;
             mfb_seq.init_sequence(m_config.seq_cfg);
 
+
             forever begin
-                //mfb_seq.set_starting_phase(phase);
+                int verbosity;
+
+                verbosity = this.get_report_verbosity_level(UVM_INFO, "mfb_seq");
+                m_mfb_agent.m_sequencer.set_report_verbosity_level(verbosity >= 300 ? verbosity - 300 : 0);
+
                 if(!mfb_seq.randomize()) `uvm_fatal(this.get_full_name(), "\n\tCannot randomize logic_vector_array_mfb rx_seq");
                 mfb_seq.start(m_mfb_agent.m_sequencer);
             end

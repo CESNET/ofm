@@ -17,57 +17,117 @@ virtual class comparer_base#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) extends uvm
     uvm_analysis_imp_model#(model_item#(MODEL_ITEM), this_type) analysis_imp_model;
     uvm_analysis_imp_dut  #(DUT_ITEM, this_type)                analysis_imp_dut;
 
-    time                    delay_max;
+    typedef struct {
+        time     in_time;
+        DUT_ITEM in_item;
+    } dut_item_t;
+
+    time                    dut_tr_timeout;
+    time                    model_tr_timeout;
     model_item#(MODEL_ITEM) model_items[$];
+    dut_item_t              dut_items[$];
 
     int unsigned compared;
     int unsigned errors;
-    int unsigned time_errors;
 
     function new(string name, uvm_component parent = null);
         super.new(name, parent);
         compared = 0;
         errors = 0;
-        time_errors = 0;
-        delay_max = 10s;
+        dut_tr_timeout  = 10s;
+        model_tr_timeout = 0ns;
         analysis_imp_model = new("analysis_imp_model", this);
         analysis_imp_dut   = new("analysis_imp_dut"  , this);
     endfunction
 
-    function void delay_max_set(time max);
-        delay_max = max;
+    function void dut_tr_timeout_set(time timeout);
+        dut_tr_timeout = timeout;
+    endfunction
+
+    function void model_tr_timeout_set(time timeout);
+        model_tr_timeout = timeout;
     endfunction
 
     function int unsigned suceess();
-        return (errors == 0) && (time_errors == 0);
+        return (errors == 0);
     endfunction
 
     function void flush();
         model_items.delete();
     endfunction
 
-    function int unsigned used();
-        return (model_items.size() != 0);
+    virtual function int unsigned used();
+        return (model_items.size() != 0 || dut_items.size() != 0);
     endfunction
 
-    function void write_model(model_item#(MODEL_ITEM) tr);
-        model_items.push_back(tr);
+    virtual function void write_model(model_item#(MODEL_ITEM) tr);
+        `uvm_fatal(this.get_full_name(), "WRITE MODEL FUNCTION IS NOT IMPLEMENTED");
     endfunction
 
     virtual function void write_dut(DUT_ITEM tr);
-        `uvm_fatal(this.get_full_name(), "\n\tThis function is virtual and have to be reimplemented");
+        `uvm_fatal(this.get_full_name(), "WRITE DUT FUNCTION IS NOT IMPLEMENTED");
     endfunction
 
     pure virtual function int unsigned compare(MODEL_ITEM tr_model, DUT_ITEM tr_dut);
     pure virtual function string message(MODEL_ITEM tr_model, DUT_ITEM tr_dut);
 
+    function string dut_tr_get(MODEL_ITEM tr, time tr_time);
+        string msg = "";
+        for (int unsigned it = 0; it < dut_items.size(); it++) begin
+            $swrite(msg, "%s\n\nOutput time %0dns (%0dns) \n%s", msg, dut_items[it].in_time/1ns, dut_items[it].in_time - tr_time, this.message(tr, dut_items[it].in_item));
+        end
+        return msg;
+    endfunction
+
+    function string model_tr_get(DUT_ITEM tr);
+        string msg = "";
+        for (int unsigned it = 0; it < model_items.size(); it++) begin
+            $swrite(msg, "%s\n\n%s\n%s", msg, model_items[it].convert2string_time(), this.message(model_items[it].item, tr));
+        end
+        return msg;
+    endfunction
+
+    task run_wait_delay_check();
+        time delay;
+        forever begin
+            wait(model_items.size() > 0);
+            delay = $time() - model_items[0].time_last();
+            if (delay >= dut_tr_timeout) begin
+                errors++;
+               `uvm_error(this.get_full_name(), $sformatf("\n\tTransaction from DUT is delayd %0dns. Probubly stack.\n%s\n\nDUT transactions:\n%s", delay/1ns, model_items[0].convert2string(), this.dut_tr_get(model_items[0].item, model_items[0].time_last())));
+                model_items.delete(0);
+            end else begin
+                #(dut_tr_timeout - delay);
+            end
+        end
+    endtask
+
+    task run_dut_delay_check();
+        time delay;
+        forever begin
+            wait(dut_items.size() > 0);
+            delay = $time() - dut_items[0].in_time;
+            if (delay >= model_tr_timeout) begin
+                errors++;
+                `uvm_error(this.get_full_name(), $sformatf("\n\tTransaction from DUT is unexpected. Output time %0dns. Delay %0dns. Probubly unexpected transaction.\n%s\n\n%s", dut_items[0].in_time, delay/1ns, dut_items[0].in_item.convert2string(), this.model_tr_get(dut_items[0].in_item)));
+                dut_items.delete(0);
+            end else begin
+                #(model_tr_timeout - delay);
+            end
+        end
+    endtask
+
     task run_phase(uvm_phase phase);
+        fork
+            run_wait_delay_check();
+            run_dut_delay_check();
+        join_none;
+
         forever begin
             string  msg = "";
 
             #(COMPARED_PRINT_WAIT)
-            $swrite(msg, "\n\tCompared %0d transactions in time %0dns", compared, $time()/1ns);
-            `uvm_info(this.get_full_name(), msg, UVM_NONE);
+            `uvm_info(this.get_full_name(), $sformatf("\n\tCompared %0d transactions in time %0dns", compared, $time()/1ns), UVM_LOW);
         end
     endtask
 
@@ -92,17 +152,35 @@ virtual class comparer_base_ordered#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) ext
         super.new(name, parent);
     endfunction
 
-    //virtual function void process(DUT_ITEM tr);
-    function void write_dut(DUT_ITEM tr);
-        model_item#(MODEL_ITEM) tr_model;
+    virtual function void write_model(model_item#(MODEL_ITEM) tr);
+        if (dut_items.size() != 0) begin
+            dut_item_t item;
 
-        compared++;
-        tr_model = model_items.pop_front();
-        if (!this.compare(tr_model.item, tr)) begin
-            string msg;
-            errors++;
-            $swrite(msg, "\n\tTransaction compared %0d errors %0d\n\tDUT transaction doesn't compare model transaction\n%s", compared, errors, this.message(tr_model.item, tr));
-            `uvm_error(this.get_full_name(), msg);
+            item = dut_items.pop_front();
+            if (this.compare(tr.item, item.in_item) == 0) begin
+                errors++;
+                `uvm_error(this.get_full_name(), $sformatf("\n\tTransaction doesn't match.\n\t\tInput times %s\n\t\toutput time %0dns\n%s\n", tr.convert2string_time(), item.in_time/1ns, this.message(item.in_item, tr.item)));
+            end else begin
+                compared++;
+            end
+        end else begin
+            model_items.push_back(tr);
+        end
+    endfunction
+
+    virtual function void write_dut(DUT_ITEM tr);
+        if (model_items.size() != 0) begin
+            model_item#(MODEL_ITEM) item;
+
+            item = model_items.pop_front();
+            if (this.compare(item.item, tr) == 0) begin
+                errors++;
+                `uvm_error(this.get_full_name(), $sformatf("\n\tTransaction doesn't match.\n\t\tInput times %s\n\t\toutput time %0dns\n%s\n", item.convert2string_time(), $time()/1ns, this.message(tr, item.item)));
+            end else begin
+                compared++;
+            end
+        end else begin
+            dut_items.push_back({$time(), tr});
         end
     endfunction
 endclass
@@ -115,59 +193,42 @@ virtual class comparer_base_disordered#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) 
         super.new(name, parent);
     endfunction
 
-    //virtual function void process(DUT_ITEM tr);
-    function void write_dut(DUT_ITEM tr);
-        int unsigned index = 0;
-        time   time_act = $time();
 
-        time_act = $time();
-        if (model_items.size() > 0 && (time_act - model_items[0].time_last()) > delay_max) begin
-            string msg = "";
-            int unsigned it = 0;
-            time_errors++;
-
-            while (it < model_items.size() && (time_act - model_items[it].time_last()) > delay_max) begin
-                time   time_conv[string];
-                string msg = "";
-
-                $swrite(msg, "%s\n\tPacket received in %0dns is probubly stuck in design. [INPUT_TIME DELAY]", msg, time_act/1ns);
-                time_conv = model_items[it].start;
-                foreach (time_conv[jt]) begin
-                    $swrite(msg, "%s\n\t\t%s [%0dns %0dns]", msg, it, time_conv[jt]/1ns, (time_act - time_conv[jt])/1ns);
-                end
-
-                $swrite(msg, "%s\n\tDATA : \n%s", msg, model_items[it].item.convert2string());
+    virtual function void write_model(model_item#(MODEL_ITEM) tr);
+        int unsigned w_end = 0;
+        int unsigned it    = 0;
+        //try get item from DUT
+        while (it < dut_items.size() && w_end == 0) begin
+            w_end = compare(tr.item, dut_items[it].in_item);
+            if (w_end == 0) begin
                 it++;
+            end else begin
+                compared++;
+                dut_items.delete(it);
             end
-
-            $swrite(msg, "%s\nActual transactions is\n%s", msg, tr.convert2string());
-           `uvm_error(this.get_full_name(), msg);
         end
 
-        compared++;
-        while (index < model_items.size() && compare(model_items[index].item, tr) == 0)begin
-           index++;
+        if (w_end == 0) begin
+            model_items.push_back(tr);
+        end
+    endfunction
+
+    virtual function void write_dut(DUT_ITEM tr);
+        int unsigned w_end = 0;
+        int unsigned it    = 0;
+        //try get item from DUT
+        while (it < model_items.size() && w_end == 0) begin
+            w_end = compare(model_items[it].item, tr);
+            if (w_end == 0) begin
+                it++;
+            end else begin
+                compared++;
+                model_items.delete(it);
+            end
         end
 
-        if (index >= model_items.size()) begin
-            string msg = "";
-            errors++;
-
-
-            $swrite(msg, "\n\tTransaction compared %0d errors %0d\n\tDUT transaction doesn't compare any of model %0d transactions in fifo. receive time %0dns\n%s", compared, errors, model_items.size(), time_act/1ns, tr.convert2string());
-            for (int unsigned it = 0; it < model_items.size(); it++) begin
-                time   time_conv[string];
-
-                time_conv = model_items[it].start;
-                $swrite(msg, "%s\n\n\tModel Transaction[%0d].\n\t\tinterface name [INPUT DELAY]", msg, it);
-                foreach (time_conv[jt]) begin
-                    $swrite(msg, "%s\n\t\t%s [%0dns %0dns]", msg, jt, time_conv[jt]/1ns, (time_act - time_conv[jt])/1ns);
-                end
-                $swrite(msg, "%s\n\tDATA : %s", msg, this.message(model_items[it].item, tr));
-            end
-            `uvm_error(this.get_full_name(), msg);
-        end else begin
-            model_items.delete(index);
+        if (w_end == 0) begin
+            dut_items.push_back('{$time(), tr});
         end
     endfunction
 endclass
