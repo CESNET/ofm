@@ -29,8 +29,10 @@ class virt_seq#(PCIE_UP_REGIONS, PCIE_UP_REGION_SIZE, PCIE_UP_BLOCK_SIZE, PCIE_U
         m_packet.init_sequence();
         //m_packet.min_random_count = 1;
         //m_packet.max_random_count = 2;
-        m_packet.min_random_count = 150;
-        m_packet.max_random_count = 200;
+        //m_packet.cfg = new();
+        //m_packet.cfg.array_size_set(64, 1024);
+        m_packet.min_random_count = 80;
+        m_packet.max_random_count = 100;
 
         m_info   = uvm_dma_ll_info::sequence_lib#(CHANNELS)::type_id::create("m_info");
         m_info.init_sequence();
