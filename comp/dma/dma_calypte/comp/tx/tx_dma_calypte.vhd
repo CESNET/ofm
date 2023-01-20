@@ -250,6 +250,28 @@ architecture FULL of TX_DMA_CALYPTE is
     signal chan_core_mfb_src_rdy       : std_logic_vector(CHANNELS -1 downto 0);
     signal chan_core_mfb_dst_rdy       : std_logic_vector(CHANNELS -1 downto 0);
 
+    -- attribute mark_debug : string;
+
+    -- attribute mark_debug of USR_TX_MFB_META_PKT_SIZE : signal is "true";
+    -- attribute mark_debug of USR_TX_MFB_META_CHAN     : signal is "true";
+    -- attribute mark_debug of USR_TX_MFB_META_HDR_META : signal is "true";
+
+    -- attribute mark_debug of USR_TX_MFB_DATA    : signal is "true";
+    -- attribute mark_debug of USR_TX_MFB_SOF     : signal is "true";
+    -- attribute mark_debug of USR_TX_MFB_EOF     : signal is "true";
+    -- attribute mark_debug of USR_TX_MFB_SOF_POS : signal is "true";
+    -- attribute mark_debug of USR_TX_MFB_EOF_POS : signal is "true";
+    -- attribute mark_debug of USR_TX_MFB_SRC_RDY : signal is "true";
+    -- attribute mark_debug of USR_TX_MFB_DST_RDY : signal is "true";
+
+    -- attribute mark_debug of PCIE_CQ_MFB_DATA    : signal is "true";
+    -- attribute mark_debug of PCIE_CQ_MFB_SOF     : signal is "true";
+    -- attribute mark_debug of PCIE_CQ_MFB_EOF     : signal is "true";
+    -- attribute mark_debug of PCIE_CQ_MFB_SOF_POS : signal is "true";
+    -- attribute mark_debug of PCIE_CQ_MFB_EOF_POS : signal is "true";
+    -- attribute mark_debug of PCIE_CQ_MFB_SRC_RDY : signal is "true";
+    -- attribute mark_debug of PCIE_CQ_MFB_DST_RDY : signal is "true";
+
 begin
 
     assert (USR_TX_MFB_REGIONS = 1 and USR_TX_MFB_REGION_SIZE = 4 and USR_TX_MFB_BLOCK_SIZE = 8 and USR_TX_MFB_ITEM_WIDTH = 8)

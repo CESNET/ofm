@@ -187,9 +187,9 @@ begin
 
             if (CQ_AXI_LAST = '1') then
 
-                for i in 0 to ((AXI_DATA_WIDTH/32)/2-1) loop
-                    eof_pos := eof_pos + 1;
+                for i in 0 to ((AXI_DATA_WIDTH/32)-1) loop
                     exit when (CQ_AXI_KEEP(i) = '0');
+                    eof_pos := eof_pos + 1;
                 end loop;
 
                 CQ_MFB_EOF_POS(EOP_POS_WIDTH-1 downto 0) <= std_logic_vector((eof_pos-1));
