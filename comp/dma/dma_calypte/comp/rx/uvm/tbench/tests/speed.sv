@@ -29,7 +29,11 @@ class mfb_rx_speed#(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends uvm_by
     endfunction
 
     virtual function void init_sequence(uvm_byte_array_mfb::config_sequence param_cfg = null);
-        super.init_sequence(param_cfg);
+        if (param_cfg == null) begin
+            this.cfg = new();
+        end else begin
+            this.cfg = param_cfg;
+        end
         this.add_sequence(uvm_byte_array_mfb::sequence_full_speed_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH)::get_type());
         //this.add_sequence(byte_array_mfb_env::sequence_stop_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::get_type());
     endfunction
