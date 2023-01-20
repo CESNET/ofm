@@ -10,7 +10,7 @@ module DUT (
     input logic     CLK,
     input logic     RST,
     mfb_if.dut_rx   mfb_rx,
-    mfb_if.dut_rx   mfb_tx
+    mfb_if.dut_tx   mfb_tx
     );
 
     logic [REGIONS*META_WIDTH-1 : 0] meta;
