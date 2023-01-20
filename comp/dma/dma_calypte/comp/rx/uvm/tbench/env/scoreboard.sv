@@ -205,6 +205,7 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, DEVICE) extends uvm_scoreboard;
 
     task run_phase(uvm_phase phase);
         string msg = "";
+        //int f;
         model_packet              packet_model;
         uvm_byte_array::sequence_item tr_model;
         output_type tr_dut;
@@ -213,6 +214,8 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, DEVICE) extends uvm_scoreboard;
             run_output();
             run_input();
         join_none
+
+        //f = $fopen("output.csv","w");
 
         forever begin
             msg = "";
@@ -246,10 +249,11 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, DEVICE) extends uvm_scoreboard;
             //if (packet_model.part == packet_model.part_num && packet_model.data_packet == 1) begin
             //Count delay if you get first data packet.
             if (packet_model.part == 1 && packet_model.data_packet == 1) begin
-
+                //$fwrite(f,"%d\n",((tr_dut.output_time - packet_model.start_time)/1ns));
                 m_delay.next_val((tr_dut.output_time - packet_model.start_time)/1ns);
             end
         end
+        //$fclose(f);
     endtask
 
 
