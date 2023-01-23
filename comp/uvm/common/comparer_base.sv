@@ -74,7 +74,7 @@ virtual class comparer_base#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) extends uvm
     function string dut_tr_get(MODEL_ITEM tr, time tr_time);
         string msg = "";
         for (int unsigned it = 0; it < dut_items.size(); it++) begin
-            $swrite(msg, "%s\n\nOutput time %0dns (%0dns) \n%s", msg, dut_items[it].in_time/1ns, dut_items[it].in_time - tr_time, this.message(tr, dut_items[it].in_item));
+            $swrite(msg, "%s\n\nOutput time %0dns (%0dns) \n%s", msg, dut_items[it].in_time/1ns, (dut_items[it].in_time - tr_time)/1ns, this.message(tr, dut_items[it].in_item));
         end
         return msg;
     endfunction
@@ -94,7 +94,9 @@ virtual class comparer_base#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) extends uvm
             delay = $time() - model_items[0].time_last();
             if (delay >= dut_tr_timeout) begin
                 errors++;
-               `uvm_error(this.get_full_name(), $sformatf("\n\tTransaction from DUT is delayd %0dns. Probubly stack.\n%s\n\nDUT transactions:\n%s", delay/1ns, model_items[0].convert2string(), this.dut_tr_get(model_items[0].item, model_items[0].time_last())));
+               `uvm_error(this.get_full_name(), $sformatf("\n\tTransaction from DUT is delayed %0dns. Probably stuck.\n\tErrors/Compared %0d/%0d\n%s\n\nDUT transactions:\n%s",
+                                                         errors, compared, delay/1ns, model_items[0].convert2string(),
+                                                         this.dut_tr_get(model_items[0].item, model_items[0].time_last())));
                 model_items.delete(0);
             end else begin
                 #(dut_tr_timeout - delay);
@@ -109,7 +111,9 @@ virtual class comparer_base#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) extends uvm
             delay = $time() - dut_items[0].in_time;
             if (delay >= model_tr_timeout) begin
                 errors++;
-                `uvm_error(this.get_full_name(), $sformatf("\n\tTransaction from DUT is unexpected. Output time %0dns. Delay %0dns. Probubly unexpected transaction.\n%s\n\n%s", dut_items[0].in_time, delay/1ns, dut_items[0].in_item.convert2string(), this.model_tr_get(dut_items[0].in_item)));
+                `uvm_error(this.get_full_name(), $sformatf("\n\tTransaction from DUT is unexpected.\n\tErrors/Compared %0d/%0d Output time %0dns. Delay %0dns. Probably unexpected transaction.\n%s\n\n%s",
+                                                           errors, compared, dut_items[0].in_time/1ns, delay/1ns,
+                                                           dut_items[0].in_item.convert2string(), this.model_tr_get(dut_items[0].in_item)));
                 dut_items.delete(0);
             end else begin
                 #(model_tr_timeout - delay);
