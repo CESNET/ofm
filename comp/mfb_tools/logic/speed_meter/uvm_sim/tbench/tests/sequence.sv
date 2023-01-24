@@ -13,51 +13,49 @@ class virt_sequence#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, MI_DATA_WIDTH
         super.new(name);
     endfunction
 
-    uvm_reset::sequence_start                                                  m_reset;
-    uvm_speed_meter::sequence_mfb_data#(ITEM_WIDTH)                            m_logic_vector_arr_sq;
-    // uvm_logic_vector_array::sequence_lib#(ITEM_WIDTH)                       m_logic_vector_arr_sq;
+    uvm_reset::sequence_start                                                  m_reset_sq;
+    uvm_speed_meter::sequence_mfb_data#(ITEM_WIDTH)                            m_mfb_data_sq;
+    // uvm_logic_vector_array::sequence_lib#(ITEM_WIDTH)                       m_mfb_data_sq;
     uvm_speed_meter::sequence_mi#(MI_DATA_WIDTH, MI_ADDRESS_WIDTH, CLK_PERIOD) m_mi_sq;
-    uvm_mfb::sequence_lib_tx#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, 0) h_seq_tx;
+    uvm_mfb::sequence_lib_tx#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, 0) m_mfb_rdy_sq;
     uvm_phase phase;
 
     virtual function void init(uvm_phase phase);
 
-        m_reset               = uvm_reset::sequence_start::type_id::create("m_reset");
-        m_logic_vector_arr_sq = uvm_speed_meter::sequence_mfb_data#(ITEM_WIDTH)::type_id::create("m_logic_vector_arr_sq");
-        // m_logic_vector_arr_sq = uvm_logic_vector_array::sequence_lib#(ITEM_WIDTH)::type_id::create("m_logic_vector_arr_sq");
-        m_mi_sq               = uvm_speed_meter::sequence_mi#(MI_DATA_WIDTH, MI_ADDRESS_WIDTH, CLK_PERIOD)::type_id::create("m_mi_sq");
-        h_seq_tx              = uvm_mfb::sequence_lib_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, 0)::type_id::create("h_seq_tx");
+        m_reset_sq    = uvm_reset::sequence_start::type_id::create("m_reset_sq");
+        m_mfb_data_sq = uvm_speed_meter::sequence_mfb_data#(ITEM_WIDTH)::type_id::create("m_mfb_data_sq");
+        // m_mfb_data_sq = uvm_logic_vector_array::sequence_lib#(ITEM_WIDTH)::type_id::create("m_mfb_data_sq");
+        m_mi_sq       = uvm_speed_meter::sequence_mi#(MI_DATA_WIDTH, MI_ADDRESS_WIDTH, CLK_PERIOD)::type_id::create("m_mi_sq");
+        m_mfb_rdy_sq  = uvm_mfb::sequence_lib_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, 0)::type_id::create("m_mfb_rdy_sq");
 
-        // m_logic_vector_arr_sq.init_sequence();
-        // m_logic_vector_arr_sq.min_random_count = 50;
-        // m_logic_vector_arr_sq.max_random_count = 70;
+        // m_mfb_data_sq.init_sequence();
+        // m_mfb_data_sq.min_random_count = 50;
+        // m_mfb_data_sq.max_random_count = 70;
 
-        h_seq_tx.init_sequence();
-        h_seq_tx.cfg = new();
-        h_seq_tx.cfg.probability_set(60, 100);
-        h_seq_tx.min_random_count = 200;
-        h_seq_tx.max_random_count = 500;
+        m_mfb_rdy_sq.init_sequence();
+        m_mfb_rdy_sq.cfg = new();
+        m_mfb_rdy_sq.cfg.probability_set(60, 100);
+        m_mfb_rdy_sq.min_random_count = 200;
+        m_mfb_rdy_sq.max_random_count = 500;
         this.phase = phase;
 
     endfunction
 
     task run_seq_tx(uvm_phase phase);
         forever begin
-            h_seq_tx.randomize();
-            h_seq_tx.start(p_sequencer.m_tx_sqr);
+            m_mfb_rdy_sq.randomize();
+            m_mfb_rdy_sq.start(p_sequencer.m_mfb_rdy_sqr);
         end
     endtask
 
     virtual task run_reset();
 
-        m_reset.randomize();
-        m_reset.start(p_sequencer.m_reset);
+        m_reset_sq.randomize();
+        m_reset_sq.start(p_sequencer.m_reset_sqr);
 
     endtask
 
     task body();
-
-        // init();
 
         fork
             run_reset();
@@ -79,8 +77,8 @@ class virt_sequence#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, MI_DATA_WIDTH
     endtask
 
     virtual task run_mfb();
-        m_logic_vector_arr_sq.randomize();
-        m_logic_vector_arr_sq.start(p_sequencer.m_logic_vector_array_scr);
+        m_mfb_data_sq.randomize();
+        m_mfb_data_sq.start(p_sequencer.m_mfb_data_sqr);
     endtask
 
 endclass
