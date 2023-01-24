@@ -15,23 +15,35 @@ class sequence_mi#(DATA_WIDTH, ADDR_WIDTH, CLK_PERIOD, META_WIDTH = 0) extends u
     // In this task you have to define how the MI transactions will look like
     virtual task create_sequence_item();
 
-        // Write request
-        //       WR    DATA          ADDR     BE
-        mi_write(1'b1, 32'hda7a5407, 10'd0,   '1);
-        mi_write(1'b1, 32'hda7a5411, 10'd512, '1);
-        mi_write(1'b1, 32'heb7ab8cc, 10'd4,   '1);
-        mi_write(1'b1, 32'hda7a54cc, 10'd516, '1);
-        mi_write(1'b1, 32'h6fbaaa52, 10'd8,   '1);
-        mi_write(1'b1, 32'h2474b6ac, 10'd12,  '1);
-        mi_write(1'b1, 32'hc4d1ce40, 10'd16,  '1);
+        // Write request (Default value of BE = '1)
+        //       ADDR     DATA
+        write(10'd0,   32'hda7a5407);
+        write(10'd512, 32'hda7a5411);
+        write(10'd4,   32'heb7ab8cc);
+        write(10'd516, 32'hda7a54cc);
+        write(10'd8,   32'h6fbaaa52);
+        write(10'd12,  32'h2474b6ac);
+        write(10'd16,  32'hc4d1ce40);
         #(50*CLK_PERIOD)
-        // Read request
-        //      RD    ADDR    BE
-        mi_read(1'b1, 10'd0,  '1);
-        mi_read(1'b1, 10'd4,  '1);
-        mi_read(1'b1, 10'd8,  '1);
-        mi_read(1'b1, 10'd12, '1);
-        mi_read(1'b1, 10'd16, '1);
+        // Read request (Default value of BE = '1)
+        //      ADDR
+        read(10'd0);
+        read(10'd4);
+        read(10'd8);
+        read(10'd12);
+        read(10'd16);
+
+        // Print last five read responses
+        get_rsp(rsp);
+        `uvm_info(this.get_full_name(), rsp.convert2string() ,UVM_MEDIUM);
+        get_rsp(rsp);
+        `uvm_info(this.get_full_name(), rsp.convert2string() ,UVM_MEDIUM);
+        get_rsp(rsp);
+        `uvm_info(this.get_full_name(), rsp.convert2string() ,UVM_MEDIUM);
+        get_rsp(rsp);
+        `uvm_info(this.get_full_name(), rsp.convert2string() ,UVM_MEDIUM);
+        get_rsp(rsp);
+        `uvm_info(this.get_full_name(), rsp.convert2string() ,UVM_MEDIUM);
 
     endtask
 endclass
