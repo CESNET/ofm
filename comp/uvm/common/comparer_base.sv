@@ -18,6 +18,7 @@ virtual class comparer_base#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) extends uvm
     uvm_analysis_imp_dut  #(DUT_ITEM, this_type)                analysis_imp_dut;
 
     typedef struct {
+        int unsigned id;
         time     in_time;
         DUT_ITEM in_item;
     } dut_item_t;
@@ -111,8 +112,8 @@ virtual class comparer_base#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) extends uvm
             delay = $time() - dut_items[0].in_time;
             if (delay >= model_tr_timeout) begin
                 errors++;
-                `uvm_error(this.get_full_name(), $sformatf("\n\tTransaction from DUT is unexpected.\n\tErrors/Compared %0d/%0d Output time %0dns. Delay %0dns. Probably unexpected transaction.\n%s\n\n%s",
-                                                           errors, compared, dut_items[0].in_time/1ns, delay/1ns,
+                `uvm_error(this.get_full_name(), $sformatf("\n\tTransaction %0d from DUT is unexpected.\n\tErrors/Compared %0d/%0d Output time %0dns. Delay %0dns. Probably unexpected transaction.\n%s\n\n%s",
+                                                           dut_items[0].id, errors, compared, dut_items[0].in_time/1ns, delay/1ns,
                                                            dut_items[0].in_item.convert2string(), this.model_tr_get(dut_items[0].in_item)));
                 dut_items.delete(0);
             end else begin
@@ -152,8 +153,11 @@ endclass
 // Ordered checker. All data is compared chronologicaly.
 virtual class comparer_base_ordered#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) extends comparer_base#(MODEL_ITEM, DUT_ITEM);
 
+    int unsigned dut_sends;
+
     function new(string name, uvm_component parent = null);
         super.new(name, parent);
+        dut_sends = 0;
     endfunction
 
     virtual function void write_model(model_item#(MODEL_ITEM) tr);
@@ -163,7 +167,7 @@ virtual class comparer_base_ordered#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) ext
             item = dut_items.pop_front();
             if (this.compare(tr.item, item.in_item) == 0) begin
                 errors++;
-                `uvm_error(this.get_full_name(), $sformatf("\n\tTransaction doesn't match.\n\t\tInput times %s\n\t\toutput time %0dns\n%s\n", tr.convert2string_time(), item.in_time/1ns, this.message(item.in_item, tr.item)));
+                `uvm_error(this.get_full_name(), $sformatf("\n\tTransaction %0d doesn't match.\n\t\tInput times %s\n\t\toutput time %0dns\n%s\n", item.id, tr.convert2string_time(), item.in_time/1ns, this.message(item.in_item, tr.item)));
             end else begin
                 compared++;
             end
@@ -173,18 +177,19 @@ virtual class comparer_base_ordered#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) ext
     endfunction
 
     virtual function void write_dut(DUT_ITEM tr);
-        if (model_items.size() != 0) begin
+       dut_sends += 1;
+       if (model_items.size() != 0) begin
             model_item#(MODEL_ITEM) item;
 
             item = model_items.pop_front();
             if (this.compare(item.item, tr) == 0) begin
                 errors++;
-                `uvm_error(this.get_full_name(), $sformatf("\n\tTransaction doesn't match.\n\t\tInput times %s\n\t\toutput time %0dns\n%s\n", item.convert2string_time(), $time()/1ns, this.message(tr, item.item)));
+                `uvm_error(this.get_full_name(), $sformatf("\n\tTransaction %0d doesn't match.\n\t\tInput times %s\n\t\toutput time %0dns\n%s\n", dut_sends, item.convert2string_time(), $time()/1ns, this.message(tr, item.item)));
             end else begin
                 compared++;
             end
         end else begin
-            dut_items.push_back({$time(), tr});
+            dut_items.push_back({dut_sends, $time(), tr});
         end
     endfunction
 endclass
@@ -193,8 +198,11 @@ endclass
 // Disordered checker. Data is not check chronologicaly 
 virtual class comparer_base_disordered#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) extends comparer_base#(MODEL_ITEM, DUT_ITEM);
 
+    int unsigned dut_sends;
+
     function new(string name, uvm_component parent = null);
         super.new(name, parent);
+        dut_sends = 0;
     endfunction
 
 
@@ -220,6 +228,8 @@ virtual class comparer_base_disordered#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) 
     virtual function void write_dut(DUT_ITEM tr);
         int unsigned w_end = 0;
         int unsigned it    = 0;
+
+        dut_sends += 1;
         //try get item from DUT
         while (it < model_items.size() && w_end == 0) begin
             w_end = compare(model_items[it].item, tr);
@@ -232,7 +242,7 @@ virtual class comparer_base_disordered#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) 
         end
 
         if (w_end == 0) begin
-            dut_items.push_back('{$time(), tr});
+            dut_items.push_back('{dut_sends, $time(), tr});
         end
     endfunction
 endclass
