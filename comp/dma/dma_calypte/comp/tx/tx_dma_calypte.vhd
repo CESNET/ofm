@@ -272,6 +272,16 @@ architecture FULL of TX_DMA_CALYPTE is
     -- attribute mark_debug of PCIE_CQ_MFB_SRC_RDY : signal is "true";
     -- attribute mark_debug of PCIE_CQ_MFB_DST_RDY : signal is "true";
 
+    -- attribute mark_debug of start_req_chan    : signal is "true";
+    -- attribute mark_debug of start_req_vld     : signal is "true";
+    -- attribute mark_debug of start_req_ack_mux : signal is "true";
+    -- attribute mark_debug of stop_req_chan     : signal is "true";
+    -- attribute mark_debug of stop_req_vld      : signal is "true";
+    -- attribute mark_debug of stop_req_ack_mux  : signal is "true";
+
+    -- attribute mark_debug of data_fifo_status : signal is "true";
+    -- attribute mark_debug of hdr_fifo_status  : signal is "true";
+    -- attribute mark_debug of upd_en           : signal is "true";
 begin
 
     assert (USR_TX_MFB_REGIONS = 1 and USR_TX_MFB_REGION_SIZE = 4 and USR_TX_MFB_BLOCK_SIZE = 8 and USR_TX_MFB_ITEM_WIDTH = 8)

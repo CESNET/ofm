@@ -130,6 +130,16 @@ architecture FULL of MFB_DATA_ALIGNER is
 
     signal shift_sel         : unsigned(log2(REGION_SIZE) downto 0);
     signal bshifter_data_out : std_logic_vector((2*TX_MFB_DATA'length) - 1 downto 0);
+
+    -- attribute mark_debug : string;
+
+    -- attribute mark_debug of sb_rx_data    : signal is "true";
+    -- attribute mark_debug of sb_rx_meta    : signal is "true";
+    -- attribute mark_debug of sb_rx_sof     : signal is "true";
+    -- attribute mark_debug of sb_rx_eof     : signal is "true";
+    -- attribute mark_debug of sb_rx_sof_pos : signal is "true";
+    -- attribute mark_debug of sb_rx_eof_pos : signal is "true";
+    -- attribute mark_debug of sb_rx_src_rdy : signal is "true";
 begin
 
     --=============================================================================================================
