@@ -12,3 +12,4 @@ set PACKAGES "$PACKAGES $OFM_PATH/comp/base/pkg/type_pack.vhd"
 # Source files for implemented component
 set MOD "$MOD $ENTITY_BASE/mfb_speed_meter.vhd"
 set MOD "$MOD $ENTITY_BASE/mfb_speed_meter_mi.vhd"
+set MOD "$MOD $ENTITY_BASE/DevTree.tcl"
