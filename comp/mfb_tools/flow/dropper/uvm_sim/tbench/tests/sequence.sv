@@ -13,39 +13,39 @@ class virt_sequence#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH, E
         super.new(name);
     endfunction
 
-    uvm_reset::sequence_start                                                           m_reset;
-    uvm_dropper::sequence_mfb_data#(ITEM_WIDTH)                                         m_logic_vector_arr_sq;
-    uvm_dropper::sequence_meta#(META_WIDTH, EXTENDED_META_WIDTH)                                    m_meta_sq;
-    uvm_mfb::sequence_lib_tx#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) h_seq_tx;
+    uvm_reset::sequence_start                                                           m_reset_sq;
+    uvm_dropper::sequence_mfb_data#(ITEM_WIDTH)                                         m_mfb_data_sq;
+    uvm_dropper::sequence_meta#(META_WIDTH, EXTENDED_META_WIDTH)                        m_mfb_meta_sq;
+    uvm_mfb::sequence_lib_tx#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) m_mfb_rdy_sq;
     uvm_phase phase;
 
     virtual function void init(uvm_phase phase);
 
-        m_reset               = uvm_reset::sequence_start::type_id::create("m_reset");
-        m_logic_vector_arr_sq = uvm_dropper::sequence_mfb_data#(ITEM_WIDTH)::type_id::create("m_logic_vector_arr_sq");
-        m_meta_sq             = uvm_dropper::sequence_meta#(META_WIDTH, EXTENDED_META_WIDTH)::type_id::create("m_meta_sq");
-        h_seq_tx              = uvm_mfb::sequence_lib_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::type_id::create("h_seq_tx");
+        m_reset_sq    = uvm_reset::sequence_start::type_id::create("m_reset_sq");
+        m_mfb_data_sq = uvm_dropper::sequence_mfb_data#(ITEM_WIDTH)::type_id::create("m_mfb_data_sq");
+        m_mfb_meta_sq = uvm_dropper::sequence_meta#(META_WIDTH, EXTENDED_META_WIDTH)::type_id::create("m_mfb_meta_sq");
+        m_mfb_rdy_sq  = uvm_mfb::sequence_lib_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::type_id::create("m_mfb_rdy_sq");
 
-        h_seq_tx.init_sequence();
-        h_seq_tx.cfg = new();
-        h_seq_tx.cfg.probability_set(60, 100);
-        h_seq_tx.min_random_count = 200;
-        h_seq_tx.max_random_count = 500;
+        m_mfb_rdy_sq.init_sequence();
+        m_mfb_rdy_sq.cfg = new();
+        m_mfb_rdy_sq.cfg.probability_set(60, 100);
+        m_mfb_rdy_sq.min_random_count = 200;
+        m_mfb_rdy_sq.max_random_count = 500;
         this.phase = phase;
 
     endfunction
 
     task run_seq_tx(uvm_phase phase);
         forever begin
-            h_seq_tx.randomize();
-            h_seq_tx.start(p_sequencer.m_tx_sqr);
+            m_mfb_rdy_sq.randomize();
+            m_mfb_rdy_sq.start(p_sequencer.m_mfb_rdy_sqr);
         end
     endtask
 
     virtual task run_reset();
 
-        m_reset.randomize();
-        m_reset.start(p_sequencer.m_reset);
+        m_reset_sq.randomize();
+        m_reset_sq.start(p_sequencer.m_reset_sqr);
 
     endtask
 
@@ -63,16 +63,16 @@ class virt_sequence#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH, E
 
         fork
             run_mfb();
-            m_meta_sq.randomize();
-            m_meta_sq.start(p_sequencer.m_meta_sqr);
+            m_mfb_meta_sq.randomize();
+            m_mfb_meta_sq.start(p_sequencer.m_mfb_meta_sqr);
         join
         #(200ns);
 
     endtask
 
     virtual task run_mfb();
-        m_logic_vector_arr_sq.randomize();
-        m_logic_vector_arr_sq.start(p_sequencer.m_logic_vector_array_scr);
+        m_mfb_data_sq.randomize();
+        m_mfb_data_sq.start(p_sequencer.m_mfb_data_sqr);
     endtask
 
 endclass

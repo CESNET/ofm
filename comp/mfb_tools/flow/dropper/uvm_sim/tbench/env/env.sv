@@ -10,15 +10,15 @@ class env #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH, EXTENDED_M
 
     `uvm_component_param_utils(uvm_dropper::env #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH, EXTENDED_META_WIDTH, SPACE_SIZE_MIN_RX, SPACE_SIZE_MAX_RX, SPACE_SIZE_MIN_TX, SPACE_SIZE_MAX_TX));
 
-    uvm_logic_vector_array_mfb::env_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, EXTENDED_META_WIDTH) rx_env;
-    uvm_logic_vector_array_mfb::env_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)          tx_env;
-    uvm_logic_vector_array_mfb::config_item                                                                 cfg_rx;
-    uvm_logic_vector_array_mfb::config_item                                                                 cfg_tx;
+    uvm_logic_vector_array_mfb::env_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, EXTENDED_META_WIDTH) m_mfb_rx_env;
+    uvm_logic_vector_array_mfb::env_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)          m_mfb_tx_env;
+    uvm_logic_vector_array_mfb::config_item                                                                 m_mfb_rx_config;
+    uvm_logic_vector_array_mfb::config_item                                                                 m_mfb_tx_config;
 
     uvm_dropper::virt_sequencer#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH, EXTENDED_META_WIDTH) vscr;
 
-    uvm_reset::agent         m_reset;
-    uvm_reset::config_item   m_config_reset;
+    uvm_reset::agent       m_reset;
+    uvm_reset::config_item m_reset_config;
 
     // Constructor of environment.
     function new(string name, uvm_component parent);
@@ -28,32 +28,32 @@ class env #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH, EXTENDED_M
     // Create base components of environment.
     function void build_phase(uvm_phase phase);
 
-        cfg_rx                = new;
-        cfg_rx.active         = UVM_ACTIVE;
-        cfg_rx.interface_name = "vif_rx";
-        cfg_rx.meta_behav     = uvm_logic_vector_array_mfb::config_item::META_SOF;
-        cfg_rx.seq_cfg        = new();
-        cfg_rx.seq_cfg.space_size_set(SPACE_SIZE_MIN_RX, SPACE_SIZE_MAX_RX);
+        m_mfb_rx_config                = new;
+        m_mfb_rx_config.active         = UVM_ACTIVE;
+        m_mfb_rx_config.interface_name = "vif_rx";
+        m_mfb_rx_config.meta_behav     = uvm_logic_vector_array_mfb::config_item::META_SOF;
+        m_mfb_rx_config.seq_cfg        = new();
+        m_mfb_rx_config.seq_cfg.space_size_set(SPACE_SIZE_MIN_RX, SPACE_SIZE_MAX_RX);
 
-        cfg_tx                = new;
-        cfg_tx.active         = UVM_ACTIVE;
-        cfg_tx.interface_name = "vif_tx";
-        cfg_tx.meta_behav     = uvm_logic_vector_array_mfb::config_item::META_SOF;
-        cfg_tx.seq_cfg        = new();
-        cfg_tx.seq_cfg.space_size_set(SPACE_SIZE_MIN_TX, SPACE_SIZE_MAX_TX);
+        m_mfb_tx_config                = new;
+        m_mfb_tx_config.active         = UVM_ACTIVE;
+        m_mfb_tx_config.interface_name = "vif_tx";
+        m_mfb_tx_config.meta_behav     = uvm_logic_vector_array_mfb::config_item::META_SOF;
+        m_mfb_tx_config.seq_cfg        = new();
+        m_mfb_tx_config.seq_cfg.space_size_set(SPACE_SIZE_MIN_TX, SPACE_SIZE_MAX_TX);
 
-        m_config_reset                = new;
-        m_config_reset.active         = UVM_ACTIVE;
-        m_config_reset.interface_name = "vif_reset";
+        m_reset_config                = new;
+        m_reset_config.active         = UVM_ACTIVE;
+        m_reset_config.interface_name = "vif_reset";
 
-        uvm_config_db#(uvm_reset::config_item)::set(this, "m_reset", "m_config", m_config_reset);
+        uvm_config_db#(uvm_reset::config_item)::set(this, "m_reset", "m_config", m_reset_config);
         m_reset = uvm_reset::agent::type_id::create("m_reset", this);
 
-        uvm_config_db#(uvm_logic_vector_array_mfb::config_item)::set(this, "rx_env", "m_config", cfg_rx);
-        uvm_config_db#(uvm_logic_vector_array_mfb::config_item)::set(this, "tx_env", "m_config", cfg_tx);
+        uvm_config_db#(uvm_logic_vector_array_mfb::config_item)::set(this, "m_mfb_rx_env", "m_config", m_mfb_rx_config);
+        uvm_config_db#(uvm_logic_vector_array_mfb::config_item)::set(this, "m_mfb_tx_env", "m_config", m_mfb_tx_config);
 
-        rx_env = uvm_logic_vector_array_mfb::env_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, EXTENDED_META_WIDTH)::type_id::create("rx_env", this);
-        tx_env = uvm_logic_vector_array_mfb::env_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::type_id::create("tx_env", this);
+        m_mfb_rx_env = uvm_logic_vector_array_mfb::env_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, EXTENDED_META_WIDTH)::type_id::create("m_mfb_rx_env", this);
+        m_mfb_tx_env = uvm_logic_vector_array_mfb::env_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::type_id::create("m_mfb_tx_env", this);
 
         vscr   = uvm_dropper::virt_sequencer#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH, EXTENDED_META_WIDTH)::type_id::create("vscr",this);
     endfunction
@@ -61,11 +61,11 @@ class env #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH, EXTENDED_M
     // Connect agent's ports with ports from scoreboard.
     function void connect_phase(uvm_phase phase);
 
-        vscr.m_reset                  = m_reset.m_sequencer;
-        vscr.m_logic_vector_array_scr = rx_env.m_sequencer.m_data;
-        vscr.m_meta_sqr               = rx_env.m_sequencer.m_meta;
-        vscr.m_tx_sqr                 = tx_env.m_sequencer;
-        m_reset.sync_connect(rx_env.reset_sync);
+        vscr.m_reset_sqr    = m_reset.m_sequencer;
+        vscr.m_mfb_data_sqr = m_mfb_rx_env.m_sequencer.m_data;
+        vscr.m_mfb_meta_sqr = m_mfb_rx_env.m_sequencer.m_meta;
+        vscr.m_mfb_rdy_sqr  = m_mfb_tx_env.m_sequencer;
+        m_reset.sync_connect(m_mfb_rx_env.reset_sync);
 
     endfunction
 endclass

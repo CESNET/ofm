@@ -8,10 +8,10 @@
 class virt_sequencer#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, MI_DATA_WIDTH, MI_ADDRESS_WIDTH) extends uvm_sequencer;
     `uvm_component_param_utils(uvm_speed_meter::virt_sequencer#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, MI_DATA_WIDTH, MI_ADDRESS_WIDTH))
 
-    uvm_reset::sequencer                                                  m_reset;
-    uvm_logic_vector_array::sequencer#(ITEM_WIDTH)                        m_logic_vector_array_scr;
+    uvm_reset::sequencer                                                  m_reset_sqr;
+    uvm_logic_vector_array::sequencer#(ITEM_WIDTH)                        m_mfb_data_sqr;
     uvm_mi::sequencer_slave#(MI_DATA_WIDTH, MI_ADDRESS_WIDTH)             m_mi_sqr;
-    uvm_mfb::sequencer #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, 0) m_tx_sqr;
+    uvm_mfb::sequencer #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, 0) m_mfb_rdy_sqr;
 
     function new(string name = "virt_sequencer", uvm_component parent);
         super.new(name, parent);

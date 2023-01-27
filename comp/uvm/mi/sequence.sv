@@ -179,15 +179,30 @@ endclass
 class sequence_slave_sim#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends sequence_slave#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH);
     `uvm_object_param_utils(uvm_mi::sequence_slave_sim #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
 
+    uvm_mi::sequence_item_response #(DATA_WIDTH) mi_tr_fifo [$];
+
     function new (string name = "sequence_slave_sim");
         super.new(name);
     endfunction
 
+    function void response_handler(uvm_sequence_item response);
+        uvm_mi::sequence_item_response #(DATA_WIDTH) rsp;
+        super.response_handler(response);
+
+        $cast(rsp, response);
+        mi_tr_fifo.push_back(rsp);
+    endfunction
+
+    task get_rsp(output uvm_mi::sequence_item_response #(DATA_WIDTH) rsp);
+        wait(mi_tr_fifo.size() != 0);
+        rsp = mi_tr_fifo.pop_front();
+    endtask
+
     // Task that allow you to create your own MI write transaction
-    task mi_write(logic wr, logic [DATA_WIDTH-1:0] dwr,logic [ADDR_WIDTH-1:0] addr, logic [DATA_WIDTH/8-1:0] be);
+    task write(logic [ADDR_WIDTH-1:0] addr, logic [DATA_WIDTH-1:0] dwr, logic [DATA_WIDTH/8-1:0] be = '1);
 
         start_item(req);
-        req.wr   = wr;
+        req.wr   = 1'b1;
         req.rd   = 1'b0;
         req.dwr  = dwr;
         req.addr = addr;
@@ -197,11 +212,11 @@ class sequence_slave_sim#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends sequen
     endtask
 
     // Task that allow you to create your own MI read transaction
-    task mi_read(logic rd, logic [ADDR_WIDTH-1:0] addr, logic [DATA_WIDTH/8-1:0] be);
+    task read(logic [ADDR_WIDTH-1:0] addr, logic [DATA_WIDTH/8-1:0] be = '1);
 
         start_item(req);
         req.wr   = 1'b0;
-        req.rd   = rd;
+        req.rd   = 1'b1;
         req.dwr  = 'x;
         req.addr = addr;
         req.be   = be;

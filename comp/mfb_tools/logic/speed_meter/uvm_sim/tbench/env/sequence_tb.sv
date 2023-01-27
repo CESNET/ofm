@@ -14,30 +14,48 @@ class sequence_mi#(DATA_WIDTH, ADDR_WIDTH, CLK_PERIOD, META_WIDTH = 0) extends u
 
     // In this task you have to define how the MI transactions will look like
     virtual task create_sequence_item();
+        uvm_mi::sequence_item_response #(DATA_WIDTH) rsp;
+        rsp = uvm_mi::sequence_item_response #(DATA_WIDTH)::type_id::create("rsp");
 
         #(50*CLK_PERIOD)
         // Read ticks counter
-        // Read request
-        //       RD    ADDR   BE
-        mi_read(1'b1, 10'h0, '1);
+        // Read request (Default value of BE = '1)
+        //      ADDR
+        read(10'h0);
         // Read max ticks counter
-        mi_read(1'b1, 10'h4, '1);
+        read(10'h4);
         // Read bytes counter
-        mi_read(1'b1, 10'h8, '1);
+        read(10'h8);
+
+        // Print last three read responses
+        get_rsp(rsp);
+        `uvm_info(this.get_full_name(), rsp.convert2string() ,UVM_MEDIUM);
+        get_rsp(rsp);
+        `uvm_info(this.get_full_name(), rsp.convert2string() ,UVM_MEDIUM);
+        get_rsp(rsp);
+        `uvm_info(this.get_full_name(), rsp.convert2string() ,UVM_MEDIUM);
 
         #(50*CLK_PERIOD)
         // Read ticks counter
-        // Read request
-        //       RD    ADDR   BE
-        mi_read(1'b1, 10'h0, '1);
+        // Read request (Default value of BE = '1)
+        //      ADDR
+        read(10'h0);
         // Read max ticks counter
-        mi_read(1'b1, 10'h4, '1);
+        read(10'h4);
         // Read bytes counter
-        mi_read(1'b1, 10'h8, '1);
+        read(10'h8);
         // Clear counter
-        // Write request
-        //       WR    DATA   ADDR   BE
-        mi_write(1'b1, 32'h1, 10'hc, '1);
+        // Write request (Default value of BE = '1)
+        //       ADDR   DATA
+        write(10'hc, 32'h1);
+
+        // Print last three read responses
+        get_rsp(rsp);
+        `uvm_info(this.get_full_name(), rsp.convert2string() ,UVM_MEDIUM);
+        get_rsp(rsp);
+        `uvm_info(this.get_full_name(), rsp.convert2string() ,UVM_MEDIUM);
+        get_rsp(rsp);
+        `uvm_info(this.get_full_name(), rsp.convert2string() ,UVM_MEDIUM);
 
     endtask
 

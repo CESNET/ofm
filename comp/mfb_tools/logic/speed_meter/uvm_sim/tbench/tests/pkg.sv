@@ -27,9 +27,8 @@ package test;
     parameter SPACE_SIZE_MIN_TX = 1;
     parameter SPACE_SIZE_MAX_TX = 1;
 
-    parameter REPEAT          = 20;
-    parameter CLK_PERIOD      = 4ns;
-    parameter RESET_CLKS      = 10;
+    parameter CLK_PERIOD        = 4ns;
+    parameter RESET_CLKS        = 10;
 
     `include "sequence.sv"
     `include "test.sv"
