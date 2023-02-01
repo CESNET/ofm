@@ -120,11 +120,6 @@ architecture full of PCIE_TRANSACTION_CTRL is
     signal up_mfb_merge_out_dst_rdy : std_logic;
 
     -- codapa inc / MFB hdr data merge input
-    signal s_codapa_inc_vld        : std_logic_vector(DMA_PORTS-1 downto 0);
-    signal s_codapa_inc            : slv_array_t(DMA_PORTS-1 downto 0)(log2(DMA_PORTS*DMA_MFB_UP_REGIONS+1)-1 downto 0);
-    signal s_codapa_inc_vld_total  : std_logic;
-    signal s_codapa_inc_total      : std_logic_vector(log2(DMA_PORTS*DMA_MFB_UP_REGIONS+1)-1 downto 0);
-    signal s_codapa_inc_cdc_full   : std_logic;
     signal s_codapa_inc_sync       : std_logic_vector(log2(MFB_UP_REGIONS+1)-1 downto 0);
     signal s_codapa_inc_sync_vld   : std_logic;
     signal s_codapa_inc_sync_reg   : std_logic_vector(log2(MFB_UP_REGIONS+1)-1 downto 0);
@@ -185,12 +180,11 @@ architecture full of PCIE_TRANSACTION_CTRL is
     signal down_mfb_stfifo_in_dst_rdy : std_logic := '0';
 
     -- MVB storage FIFO output / PCIe2DMA hdr transform input
-    signal down_mvb_pcie2dma_in_data         : std_logic_vector(MVB_DOWN_ITEMS*PCIE_DOWNHDR_WIDTH-1 downto 0);
-    signal down_mvb_pcie2dma_in_vld          : std_logic_vector(MVB_DOWN_ITEMS                   -1 downto 0);
-    signal down_mvb_pcie2dma_in_src_rdy      : std_logic;
-    signal down_mvb_pcie2dma_in_dst_rdy      : std_logic;
-    signal down_mvb_pcie2dma_in_src_rdy_orig : std_logic;
-    signal down_mvb_pcie2dma_in_dst_rdy_orig : std_logic;
+    signal down_mvb_pcie2dma_in_data          : std_logic_vector(MVB_DOWN_ITEMS*PCIE_DOWNHDR_WIDTH-1 downto 0);
+    signal down_mvb_pcie2dma_in_vld           : std_logic_vector(MVB_DOWN_ITEMS                   -1 downto 0);
+    signal down_mvb_pcie2dma_in_src_rdy       : std_logic;
+    signal down_mvb_pcie2dma_in_dst_rdy       : std_logic;
+    signal down_mvb_pcie2dma_in_src_rdy_force : std_logic;
 
     -- tag manager tag releasing interface (between PCIe2DMA and Tag manager)
     signal tagm_tag                : std_logic_vector(MVB_DOWN_ITEMS*PCIE_TAG_WIDTH-1 downto 0);
@@ -201,12 +195,23 @@ architecture full of PCIE_TRANSACTION_CTRL is
     signal tagm_dma_down_tag       : std_logic_vector(MVB_DOWN_ITEMS*DMA_TAG_WIDTH -1 downto 0);
     signal tagm_dma_down_id        : std_logic_vector(MVB_DOWN_ITEMS*DMA_ID_WIDTH  -1 downto 0);
 
+    signal down_mvb_tfifo_in_data    : std_logic_vector(MVB_DOWN_ITEMS*DMA_DOWNHDR_WIDTH-1 downto 0);
+    signal down_mvb_tfifo_in_vld     : std_logic_vector(MVB_DOWN_ITEMS-1 downto 0);
+    signal down_mvb_tfifo_in_src_rdy : std_logic;
+    signal down_mvb_tfifo_in_dst_rdy : std_logic;
+    signal down_mvb_tfifo_afull      : std_logic;
+    signal down_mvb_tfifo_afull_reg  : std_logic;
+    signal down_mvb_tfifo_in_err_reg : std_logic;
+
     -- PCIe2DMA hdr transform output / DOWN Splitter MVB input
-    signal down_mvb_split_in_data    : std_logic_vector(MVB_DOWN_ITEMS*DMA_DOWNHDR_WIDTH-1 downto 0);
-    signal down_mvb_split_in_vld     : std_logic_vector(MVB_DOWN_ITEMS                  -1 downto 0);
-    signal down_mvb_split_in_switch  : std_logic_vector(MVB_DOWN_ITEMS                  -1 downto 0);
-    signal down_mvb_split_in_src_rdy : std_logic;
-    signal down_mvb_split_in_dst_rdy : std_logic;
+    signal down_mvb_split_in_data       : std_logic_vector(MVB_DOWN_ITEMS*DMA_DOWNHDR_WIDTH-1 downto 0);
+    signal down_mvb_split_in_data_arr   : slv_array_t(MVB_DOWN_ITEMS-1 downto 0)(DMA_DOWNHDR_WIDTH-1 downto 0);
+    signal down_mvb_split_in_tag_arr    : slv_array_t(MVB_DOWN_ITEMS-1 downto 0)(DMA_COMPLETION_TAG_W-1 downto 0);
+    signal down_mvb_split_in_switch_arr : slv_array_t(MVB_DOWN_ITEMS-1 downto 0)(log2(DMA_PORTS)-1 downto 0);
+    signal down_mvb_split_in_switch     : std_logic_vector(MVB_DOWN_ITEMS*log2(DMA_PORTS)-1 downto 0);
+    signal down_mvb_split_in_vld        : std_logic_vector(MVB_DOWN_ITEMS-1 downto 0);
+    signal down_mvb_split_in_src_rdy    : std_logic;
+    signal down_mvb_split_in_dst_rdy    : std_logic;
 
     -- MFB storage FIFO output / DOWN Splitter MFB FIFO input
     signal down_mfb_splfi_in_data         : std_logic_vector(MFB_DOWN_REGIONS*MFB_DOWN_REG_SIZE*MFB_DOWN_BLOCK_SIZE*MFB_DOWN_ITEM_WIDTH-1 downto 0);
@@ -216,8 +221,6 @@ architecture full of PCIE_TRANSACTION_CTRL is
     signal down_mfb_splfi_in_eof          : std_logic_vector(MFB_DOWN_REGIONS-1 downto 0);
     signal down_mfb_splfi_in_src_rdy      : std_logic;
     signal down_mfb_splfi_in_dst_rdy      : std_logic;
-    signal down_mfb_splfi_in_src_rdy_orig : std_logic;
-    signal down_mfb_splfi_in_dst_rdy_orig : std_logic;
 
     -- DOWN Splitter MFB FIFO output / DOWN Splitter MFB input
     signal down_mfb_split_in_data         : std_logic_vector(MFB_DOWN_REGIONS*MFB_DOWN_REG_SIZE*MFB_DOWN_BLOCK_SIZE*MFB_DOWN_ITEM_WIDTH-1 downto 0);
@@ -269,6 +272,11 @@ architecture full of PCIE_TRANSACTION_CTRL is
     signal down_storage_fifo_err_reg    : std_logic;
     signal down_mvb_asynch_fifo_err_reg : std_logic_vector(DMA_PORTS-1 downto 0);
     signal down_mfb_asynch_fifo_err_reg : std_logic_vector(DMA_PORTS-1 downto 0);
+
+    signal dbg_rc_cnt               : unsigned(63 downto 0);
+    signal dbg_rq_cnt               : unsigned(63 downto 0);
+    signal dbg_di_mvb_cnt           : unsigned(63 downto 0);
+    signal dbg_di_mfb_cnt           : unsigned(63 downto 0);
 
 begin
 
@@ -458,64 +466,53 @@ begin
         up_mfb_trans_out_dst_rdy(0) <= up_mfb_merge_out_dst_rdy;
     end generate;
 
-    dma_up_ports_double_merge_g : if DMA_PORTS = 2 generate
-        dma_up_merger_i : entity work.MFB_MERGER
+    dma_up_ports_merge_g : if DMA_PORTS > 1 generate
+        dma_up_merger_i : entity work.MFB_MERGER_GEN
         generic map(
-            MVB_ITEMS       => MVB_UP_ITEMS     ,
-            MFB_REGIONS     => MFB_UP_REGIONS   ,
-            MFB_REG_SIZE    => MFB_UP_REG_SIZE  ,
+            MERGER_INPUTS   => DMA_PORTS,
+            MVB_ITEMS       => MVB_UP_ITEMS,
+            MVB_ITEM_WIDTH  => DMA_UPHDR_WIDTH,
+            MFB_REGIONS     => MFB_UP_REGIONS,
+            MFB_REG_SIZE    => MFB_UP_REG_SIZE,
             MFB_BLOCK_SIZE  => MFB_UP_BLOCK_SIZE,
             MFB_ITEM_WIDTH  => MFB_UP_ITEM_WIDTH,
-            HDR_WIDTH       => DMA_UPHDR_WIDTH  ,
-            INPUT_FIFO_SIZE => 16               ,
-            IN_PIPE_EN      => false            ,
-            OUT_PIPE_EN     => true             ,
+            INPUT_FIFO_SIZE => 16,
+            RX_PAYLOAD_EN   => (others => true),
+            IN_PIPE_EN      => false,
+            OUT_PIPE_EN     => true,
             DEVICE          => DEVICE
         )
         port map(
-            CLK   => CLK  ,
-            RESET => RESET,
+            CLK            => CLK,
+            RESET          => RESET,
 
-            RX0_MVB_HDR     => up_mvb_trans_out_data   (0),
-            RX0_MVB_PAYLOAD => up_mvb_trans_out_payload(0),
-            RX0_MVB_VLD     => up_mvb_trans_out_vld    (0),
-            RX0_MVB_SRC_RDY => up_mvb_trans_out_src_rdy(0),
-            RX0_MVB_DST_RDY => up_mvb_trans_out_dst_rdy(0),
+            RX_MVB_DATA    => up_mvb_trans_out_data,
+            RX_MVB_PAYLOAD => up_mvb_trans_out_payload,
+            RX_MVB_VLD     => up_mvb_trans_out_vld,
+            RX_MVB_SRC_RDY => up_mvb_trans_out_src_rdy,
+            RX_MVB_DST_RDY => up_mvb_trans_out_dst_rdy,
 
-            RX0_MFB_DATA    => up_mfb_trans_out_data   (0),
-            RX0_MFB_SOF     => up_mfb_trans_out_sof    (0),
-            RX0_MFB_EOF     => up_mfb_trans_out_eof    (0),
-            RX0_MFB_SOF_POS => up_mfb_trans_out_sof_pos(0),
-            RX0_MFB_EOF_POS => up_mfb_trans_out_eof_pos(0),
-            RX0_MFB_SRC_RDY => up_mfb_trans_out_src_rdy(0),
-            RX0_MFB_DST_RDY => up_mfb_trans_out_dst_rdy(0),
+            RX_MFB_DATA    => up_mfb_trans_out_data,
+            RX_MFB_SOF     => up_mfb_trans_out_sof,
+            RX_MFB_EOF     => up_mfb_trans_out_eof,
+            RX_MFB_SOF_POS => up_mfb_trans_out_sof_pos,
+            RX_MFB_EOF_POS => up_mfb_trans_out_eof_pos,
+            RX_MFB_SRC_RDY => up_mfb_trans_out_src_rdy,
+            RX_MFB_DST_RDY => up_mfb_trans_out_dst_rdy,
 
-            RX1_MVB_HDR     => up_mvb_trans_out_data   (1),
-            RX1_MVB_PAYLOAD => up_mvb_trans_out_payload(1),
-            RX1_MVB_VLD     => up_mvb_trans_out_vld    (1),
-            RX1_MVB_SRC_RDY => up_mvb_trans_out_src_rdy(1),
-            RX1_MVB_DST_RDY => up_mvb_trans_out_dst_rdy(1),
+            TX_MVB_DATA    => up_mvb_merge_out_data,
+            TX_MVB_PAYLOAD => open,
+            TX_MVB_VLD     => up_mvb_merge_out_vld,
+            TX_MVB_SRC_RDY => up_mvb_merge_out_src_rdy,
+            TX_MVB_DST_RDY => up_mvb_merge_out_dst_rdy,
 
-            RX1_MFB_DATA    => up_mfb_trans_out_data   (1),
-            RX1_MFB_SOF     => up_mfb_trans_out_sof    (1),
-            RX1_MFB_EOF     => up_mfb_trans_out_eof    (1),
-            RX1_MFB_SOF_POS => up_mfb_trans_out_sof_pos(1),
-            RX1_MFB_EOF_POS => up_mfb_trans_out_eof_pos(1),
-            RX1_MFB_SRC_RDY => up_mfb_trans_out_src_rdy(1),
-            RX1_MFB_DST_RDY => up_mfb_trans_out_dst_rdy(1),
-
-            TX_MVB_HDR      => up_mvb_merge_out_data,
-            TX_MVB_VLD      => up_mvb_merge_out_vld,
-            TX_MVB_SRC_RDY  => up_mvb_merge_out_src_rdy,
-            TX_MVB_DST_RDY  => up_mvb_merge_out_dst_rdy,
-
-            TX_MFB_DATA     => up_mfb_merge_out_data,
-            TX_MFB_SOF      => up_mfb_merge_out_sof,
-            TX_MFB_EOF      => up_mfb_merge_out_eof,
-            TX_MFB_SOF_POS  => up_mfb_merge_out_sof_pos,
-            TX_MFB_EOF_POS  => up_mfb_merge_out_eof_pos,
-            TX_MFB_SRC_RDY  => up_mfb_merge_out_src_rdy,
-            TX_MFB_DST_RDY  => up_mfb_merge_out_dst_rdy
+            TX_MFB_DATA    => up_mfb_merge_out_data,
+            TX_MFB_SOF     => up_mfb_merge_out_sof,
+            TX_MFB_EOF     => up_mfb_merge_out_eof,
+            TX_MFB_SOF_POS => up_mfb_merge_out_sof_pos,
+            TX_MFB_EOF_POS => up_mfb_merge_out_eof_pos,
+            TX_MFB_SRC_RDY => up_mfb_merge_out_src_rdy,
+            TX_MFB_DST_RDY => up_mfb_merge_out_dst_rdy
         );
 
         dma_up_merger_fifo_i : entity work.MVB_FIFOX
@@ -946,7 +943,7 @@ begin
 
             TX_MVB_DATA     => down_mvb_pcie2dma_in_data        ,
             TX_MVB_VLD      => down_mvb_pcie2dma_in_vld         ,
-            TX_MVB_SRC_RDY  => down_mvb_pcie2dma_in_src_rdy_orig,
+            TX_MVB_SRC_RDY  => down_mvb_pcie2dma_in_src_rdy,
             TX_MVB_DST_RDY  => down_mvb_pcie2dma_in_dst_rdy     ,
 
             TX_MFB_DATA     => down_mfb_splfi_in_data        ,
@@ -954,7 +951,7 @@ begin
             TX_MFB_EOF      => down_mfb_splfi_in_eof         ,
             TX_MFB_SOF_POS  => down_mfb_splfi_in_sof_pos     ,
             TX_MFB_EOF_POS  => down_mfb_splfi_in_eof_pos     ,
-            TX_MFB_SRC_RDY  => down_mfb_splfi_in_src_rdy_orig,
+            TX_MFB_SRC_RDY  => down_mfb_splfi_in_src_rdy,
             TX_MFB_DST_RDY  => down_mfb_splfi_in_dst_rdy
         );
 
@@ -996,7 +993,7 @@ begin
 
             TX_DATA    => down_mvb_pcie2dma_in_data        ,
             TX_VLD     => down_mvb_pcie2dma_in_vld         ,
-            TX_SRC_RDY => down_mvb_pcie2dma_in_src_rdy_orig,
+            TX_SRC_RDY => down_mvb_pcie2dma_in_src_rdy,
             TX_DST_RDY => down_mvb_pcie2dma_in_dst_rdy
         );
 
@@ -1029,24 +1026,20 @@ begin
            TX_EOF     => down_mfb_splfi_in_eof         ,
            TX_SOF_POS => down_mfb_splfi_in_sof_pos     ,
            TX_EOF_POS => down_mfb_splfi_in_eof_pos     ,
-           TX_SRC_RDY => down_mfb_splfi_in_src_rdy_orig,
+           TX_SRC_RDY => down_mfb_splfi_in_src_rdy,
            TX_DST_RDY => down_mfb_splfi_in_dst_rdy
         );
 
     end generate;
-
-    down_mvb_pcie2dma_in_dst_rdy_orig <= '1';
-    down_mvb_pcie2dma_in_src_rdy <= down_mvb_pcie2dma_in_src_rdy_orig and not down_afull_flag;
-    down_mvb_pcie2dma_in_dst_rdy <= down_mvb_pcie2dma_in_dst_rdy_orig and not down_afull_flag;
-
-    down_mfb_splfi_in_dst_rdy <= down_mfb_splfi_in_dst_rdy_orig and not down_afull_flag;
-    down_mfb_splfi_in_src_rdy <= down_mfb_splfi_in_src_rdy_orig and not down_afull_flag;
 
     ---------------------------------------------------------------------------
 
     ---------------------------------------------------------------------------
     -- PCIe to DMA Header transform
     ---------------------------------------------------------------------------
+
+    down_mvb_pcie2dma_in_dst_rdy <= not down_mvb_tfifo_afull_reg;
+    down_mvb_pcie2dma_in_src_rdy_force <= down_mvb_pcie2dma_in_src_rdy and not down_mvb_tfifo_afull_reg;
 
     pcie2dma_hdr_transform_i : entity work.PTC_PCIE2DMA_HDR_TRANSFORM
     generic map(
@@ -1068,8 +1061,7 @@ begin
 
         RX_MVB_DATA        => down_mvb_pcie2dma_in_data   ,
         RX_MVB_VLD         => down_mvb_pcie2dma_in_vld    ,
-        RX_MVB_SRC_RDY     => down_mvb_pcie2dma_in_src_rdy,
---    RX_MVB_DST_RDY     => down_mvb_pcie2dma_in_dst_rdy_orig,
+        RX_MVB_SRC_RDY     => down_mvb_pcie2dma_in_src_rdy_force,
 
         TAG                => tagm_tag               ,
         TAG_COMPL_LOW_ADDR => tagm_tag_compl_low_addr,
@@ -1080,11 +1072,62 @@ begin
         DMA_DOWN_HDR_TAG   => tagm_dma_down_tag,
         DMA_DOWN_HDR_ID    => tagm_dma_down_id ,
 
-        TX_MVB_DATA        => down_mvb_split_in_data   ,
-        TX_MVB_VLD         => down_mvb_split_in_vld    ,
-        TX_MVB_SRC_RDY     => down_mvb_split_in_src_rdy
---    TX_MVB_DST_RDY     => down_mvb_split_in_dst_rdy,
+        TX_MVB_DATA        => down_mvb_tfifo_in_data   ,
+        TX_MVB_VLD         => down_mvb_tfifo_in_vld    ,
+        TX_MVB_SRC_RDY     => down_mvb_tfifo_in_src_rdy
     );
+
+    down_mvb_tfifo_i : entity work.MVB_FIFOX
+    generic map(
+        ITEMS               => MVB_DOWN_ITEMS,
+        ITEM_WIDTH          => DMA_DOWNHDR_WIDTH,
+        FIFO_DEPTH          => 16,
+        RAM_TYPE            => "AUTO",
+        DEVICE              => DEVICE,
+        ALMOST_FULL_OFFSET  => 8,
+        ALMOST_EMPTY_OFFSET => 0
+    )
+    port map(
+        CLK   => CLK,
+        RESET => RESET,
+
+        RX_DATA    => down_mvb_tfifo_in_data,
+        RX_VLD     => down_mvb_tfifo_in_vld,
+        RX_SRC_RDY => down_mvb_tfifo_in_src_rdy,
+        RX_DST_RDY => down_mvb_tfifo_in_dst_rdy,
+
+        TX_DATA    => down_mvb_split_in_data,
+        TX_VLD     => down_mvb_split_in_vld,
+        TX_SRC_RDY => down_mvb_split_in_src_rdy,
+        TX_DST_RDY => down_mvb_split_in_dst_rdy,
+
+        STATUS     => open,
+        AFULL      => down_mvb_tfifo_afull,
+        AEMPTY     => open
+    );
+
+    process (CLK)
+    begin
+        if (rising_edge(CLK)) then
+            down_mvb_tfifo_afull_reg <= down_mvb_tfifo_afull;
+        end if;
+    end process;
+
+    process (CLK)
+    begin
+        if (rising_edge(CLK)) then
+            if (down_mvb_tfifo_in_dst_rdy = '0' and down_mvb_tfifo_in_src_rdy = '1') then
+                down_mvb_tfifo_in_err_reg <= '1';
+            end if;
+            if (RESET = '1') then
+                down_mvb_tfifo_in_err_reg <= '0';
+            end if;
+        end if;
+    end process;
+ 
+    assert (down_mvb_tfifo_in_err_reg /= '1') 
+       report "PTC: No dst_rdy error! Writing in full DOWN MVB TFIFO!"
+       severity failure;
 
     ---------------------------------------------------------------------------
 
@@ -1092,9 +1135,12 @@ begin
     -- DOWN Splitter to DMA DOWN ports
     ---------------------------------------------------------------------------
 
+    down_mvb_split_in_data_arr <= slv_array_deser(down_mvb_split_in_data,MVB_DOWN_ITEMS);
     down_mvb_split_in_switch_g : for i in 0 to MVB_DOWN_ITEMS-1 generate
-        down_mvb_split_in_switch(i) <= down_mvb_split_in_data(i*DMA_DOWNHDR_WIDTH+DMA_COMPLETION_TAG'high);
+        down_mvb_split_in_tag_arr(i) <= down_mvb_split_in_data_arr(i)(DMA_COMPLETION_TAG);
+        down_mvb_split_in_switch_arr(i) <= down_mvb_split_in_tag_arr(i)(DMA_COMPLETION_TAG_W-1 downto DMA_COMPLETION_TAG_W-log2(DMA_PORTS));
     end generate;
+    down_mvb_split_in_switch <= slv_array_ser(down_mvb_split_in_switch_arr);
 
     dma_down_ports_nosplit_g : if DMA_PORTS = 1 generate
         down_mvb_trans_in_data   (0)   <= down_mvb_split_in_data;
@@ -1108,10 +1154,10 @@ begin
         down_mfb_trans_in_sof_pos(0)   <= down_mfb_splfi_in_sof_pos;
         down_mfb_trans_in_eof_pos(0)   <= down_mfb_splfi_in_eof_pos;
         down_mfb_trans_in_src_rdy(0)   <= down_mfb_splfi_in_src_rdy;
-        down_mfb_splfi_in_dst_rdy_orig <= down_mfb_trans_in_dst_rdy(0);
+        down_mfb_splfi_in_dst_rdy      <= down_mfb_trans_in_dst_rdy(0);
     end generate;
 
-    dma_down_ports_double_split_g : if DMA_PORTS = 2 generate
+    dma_down_ports_split_g : if DMA_PORTS > 1 generate
         -- FIFO for transactions freed from Storage FIFO, but not yet accepted by the Splitter
         dma_down_splitter_fifo_i : entity work.MFB_FIFOX
         generic map(
@@ -1135,7 +1181,7 @@ begin
             RX_SOF_POS  => down_mfb_splfi_in_sof_pos,
             RX_EOF_POS  => down_mfb_splfi_in_eof_pos,
             RX_SRC_RDY  => down_mfb_splfi_in_src_rdy,
-            RX_DST_RDY  => down_mfb_splfi_in_dst_rdy_orig,
+            RX_DST_RDY  => down_mfb_splfi_in_dst_rdy,
 
             TX_DATA     => down_mfb_split_in_data   ,
             TX_SOF      => down_mfb_split_in_sof    ,
@@ -1150,62 +1196,50 @@ begin
             FIFO_AEMPTY => open
         );
 
-        dma_down_splitter_i : entity work.MFB_SPLITTER
+        dma_down_splitter_i : entity work.MFB_SPLITTER_GEN
         generic map(
-            MVB_ITEMS            => MVB_DOWN_ITEMS     ,
-            MFB_REGIONS          => MFB_DOWN_REGIONS   ,
-            MFB_REG_SIZE         => MFB_DOWN_REG_SIZE  ,
-            MFB_BLOCK_SIZE       => MFB_DOWN_BLOCK_SIZE,
-            MFB_ITEM_WIDTH       => MFB_DOWN_ITEM_WIDTH,
-            HDR_WIDTH            => DMA_DOWNHDR_WIDTH  ,
-            MVB_OUTPUT_FIFO_SIZE => 16                 ,
-            USE_OUTREG           => true               ,
-            DEVICE               => DEVICE
+            SPLITTER_OUTPUTS => DMA_PORTS,
+            MVB_ITEMS        => MVB_DOWN_ITEMS,
+            MVB_ITEM_WIDTH   => DMA_DOWNHDR_WIDTH,
+            MFB_REGIONS      => MFB_DOWN_REGIONS,
+            MFB_REG_SIZE     => MFB_DOWN_REG_SIZE,
+            MFB_BLOCK_SIZE   => MFB_DOWN_BLOCK_SIZE,
+            MFB_ITEM_WIDTH   => MFB_DOWN_ITEM_WIDTH,
+            OUTPUT_FIFO_SIZE => 16,
+            OUT_PIPE_EN      => true,
+            DEVICE           => DEVICE
         )
         port map(
-            CLK   => CLK  ,
-            RESET => RESET,
+            CLK            => CLK,
+            RESET          => RESET,
 
-            RX_MVB_HDR      => down_mvb_split_in_data   ,
-            RX_MVB_SWITCH   => down_mvb_split_in_switch ,
-            RX_MVB_PAYLOAD  => (others => '1'), -- all DOWN transactions from Software have data
-            RX_MVB_VLD      => down_mvb_split_in_vld    ,
-            RX_MVB_SRC_RDY  => down_mvb_split_in_src_rdy,
-            RX_MVB_DST_RDY  => down_mvb_split_in_dst_rdy,
+            RX_MVB_DATA    => down_mvb_split_in_data,
+            RX_MVB_SWITCH  => down_mvb_split_in_switch,
+            RX_MVB_PAYLOAD => (others => '1'), -- all DOWN transactions from Software have data
+            RX_MVB_VLD     => down_mvb_split_in_vld,
+            RX_MVB_SRC_RDY => down_mvb_split_in_src_rdy,
+            RX_MVB_DST_RDY => down_mvb_split_in_dst_rdy,
 
-            RX_MFB_DATA     => down_mfb_split_in_data   ,
-            RX_MFB_SOF      => down_mfb_split_in_sof    ,
-            RX_MFB_EOF      => down_mfb_split_in_eof    ,
-            RX_MFB_SOF_POS  => down_mfb_split_in_sof_pos,
-            RX_MFB_EOF_POS  => down_mfb_split_in_eof_pos,
-            RX_MFB_SRC_RDY  => down_mfb_split_in_src_rdy,
-            RX_MFB_DST_RDY  => down_mfb_split_in_dst_rdy,
+            RX_MFB_DATA    => down_mfb_split_in_data,
+            RX_MFB_SOF     => down_mfb_split_in_sof,
+            RX_MFB_EOF     => down_mfb_split_in_eof,
+            RX_MFB_SOF_POS => down_mfb_split_in_sof_pos,
+            RX_MFB_EOF_POS => down_mfb_split_in_eof_pos,
+            RX_MFB_SRC_RDY => down_mfb_split_in_src_rdy,
+            RX_MFB_DST_RDY => down_mfb_split_in_dst_rdy,
 
-            TX0_MVB_HDR     => down_mvb_trans_in_data   (0),
-            TX0_MVB_VLD     => down_mvb_trans_in_vld    (0),
-            TX0_MVB_SRC_RDY => down_mvb_trans_in_src_rdy(0),
-            TX0_MVB_DST_RDY => '1',
+            TX_MVB_DATA    => down_mvb_trans_in_data,
+            TX_MVB_VLD     => down_mvb_trans_in_vld,
+            TX_MVB_SRC_RDY => down_mvb_trans_in_src_rdy,
+            TX_MVB_DST_RDY => down_mvb_trans_in_dst_rdy,
 
-            TX0_MFB_DATA    => down_mfb_trans_in_data   (0),
-            TX0_MFB_SOF     => down_mfb_trans_in_sof    (0),
-            TX0_MFB_EOF     => down_mfb_trans_in_eof    (0),
-            TX0_MFB_SOF_POS => down_mfb_trans_in_sof_pos(0),
-            TX0_MFB_EOF_POS => down_mfb_trans_in_eof_pos(0),
-            TX0_MFB_SRC_RDY => down_mfb_trans_in_src_rdy(0),
-            TX0_MFB_DST_RDY => '1',
-
-            TX1_MVB_HDR     => down_mvb_trans_in_data   (1),
-            TX1_MVB_VLD     => down_mvb_trans_in_vld    (1),
-            TX1_MVB_SRC_RDY => down_mvb_trans_in_src_rdy(1),
-            TX1_MVB_DST_RDY => '1',
-
-            TX1_MFB_DATA    => down_mfb_trans_in_data   (1),
-            TX1_MFB_SOF     => down_mfb_trans_in_sof    (1),
-            TX1_MFB_EOF     => down_mfb_trans_in_eof    (1),
-            TX1_MFB_SOF_POS => down_mfb_trans_in_sof_pos(1),
-            TX1_MFB_EOF_POS => down_mfb_trans_in_eof_pos(1),
-            TX1_MFB_SRC_RDY => down_mfb_trans_in_src_rdy(1),
-            TX1_MFB_DST_RDY => '1'
+            TX_MFB_DATA    => down_mfb_trans_in_data,
+            TX_MFB_SOF     => down_mfb_trans_in_sof,
+            TX_MFB_EOF     => down_mfb_trans_in_eof,
+            TX_MFB_SOF_POS => down_mfb_trans_in_sof_pos,
+            TX_MFB_EOF_POS => down_mfb_trans_in_eof_pos,
+            TX_MFB_SRC_RDY => down_mfb_trans_in_src_rdy,
+            TX_MFB_DST_RDY => down_mfb_trans_in_dst_rdy
         );
     end generate;
 
@@ -1216,6 +1250,31 @@ begin
         ---------------------------------------------------------------------------
         -- DOWN MVB Resize
         ---------------------------------------------------------------------------
+
+        down_mvb_resize_down_g: if (MVB_DOWN_ITEMS > DMA_MVB_DOWN_ITEMS) generate
+            down_mvb_shake_i : entity work.MVB_SHAKEDOWN
+            generic map(
+                RX_ITEMS    => MVB_DOWN_ITEMS,
+                TX_ITEMS    => DMA_MVB_DOWN_ITEMS,
+                ITEM_WIDTH  => DMA_DOWNHDR_WIDTH,
+                SHAKE_PORTS => 1
+            )
+            port map(
+                CLK        => CLK,
+                RESET      => RESET,
+        
+                RX_DATA    => down_mvb_trans_in_data(i),
+                RX_VLD     => down_mvb_trans_in_vld(i),
+                RX_SRC_RDY => down_mvb_trans_in_src_rdy(i),
+                RX_DST_RDY => down_mvb_trans_in_dst_rdy(i),
+        
+                TX_DATA    => down_mvb_asfifo_in_data(i),
+                TX_VLD     => down_mvb_asfifo_in_vld(i) ,
+                TX_NEXT    => (others => down_mvb_asfifo_in_dst_rdy(i))
+            );
+
+            down_mvb_asfifo_in_src_rdy(i) <= or down_mvb_asfifo_in_vld(i);
+        end generate;
 
         down_mvb_resize_up_g: if (MVB_DOWN_ITEMS < DMA_MVB_DOWN_ITEMS) generate
             down_mvb_asfifo_in_data(i)(MVB_DOWN_ITEMS*DMA_DOWNHDR_WIDTH-1 downto 0) <= down_mvb_trans_in_data(i);
@@ -1256,7 +1315,7 @@ begin
             RX_VLD       => down_mvb_asfifo_in_vld(i)    ,
             RX_SRC_RDY   => down_mvb_asfifo_in_src_rdy(i),
             RX_DST_RDY   => down_mvb_asfifo_in_dst_rdy(i),
-            RX_AFULL     => down_mvb_asfifo_afull(i)     ,
+            RX_AFULL     => open,
 
             TX_CLK       => CLK_DMA  ,
             TX_RESET     => RESET_DMA,
@@ -1266,29 +1325,6 @@ begin
             TX_SRC_RDY   => DOWN_MVB_SRC_RDY(i),
             TX_DST_RDY   => DOWN_MVB_DST_RDY(i)
         );
-
-        process (CLK)
-        begin
-            if (rising_edge(CLK)) then
-                if (down_mvb_asfifo_in_dst_rdy(i) = '0' and down_mvb_asfifo_in_src_rdy(i) = '1') then
-                    down_mvb_asynch_fifo_err_reg(i) <= '1';
-                end if;
-                if (RESET = '1') then
-                    down_mvb_asynch_fifo_err_reg(i) <= '0';
-                end if;
-            end if;
-        end process;
-     
-        assert (down_mvb_asynch_fifo_err_reg(i) /= '1') 
-           report "PTC: No dst_rdy part error! Writing in full DOWN MVB AFIFO!"
-           severity failure;
-
-        down_mvb_afull_reg_pr : process (CLK)
-        begin
-            if (rising_edge(CLK)) then
-                down_mvb_asfifo_afull_reg(i) <= down_mvb_asfifo_afull(i);
-            end if;
-        end process;
 
         ---------------------------------------------------------------------------
 
@@ -1353,7 +1389,7 @@ begin
             RX_EOF       => down_mfb_asfifo_in_eof(i),
             RX_SRC_RDY   => down_mfb_asfifo_in_src_rdy(i),
             RX_DST_RDY   => down_mfb_asfifo_in_dst_rdy(i),
-            RX_AFULL     => down_mfb_asfifo_afull(i),
+            RX_AFULL     => open,
 
             TX_CLK       => CLK_DMA  ,
             TX_RESET     => RESET_DMA,
@@ -1367,35 +1403,76 @@ begin
             TX_DST_RDY   => DOWN_MFB_DST_RDY(i)
         );
 
-        process (CLK)
-        begin
-            if (rising_edge(CLK)) then
-                if (down_mfb_asfifo_in_dst_rdy(i) = '0' and down_mfb_asfifo_in_src_rdy(i) = '1') then
-                    down_mfb_asynch_fifo_err_reg(i) <= '1';
-                end if;
-                if (RESET = '1') then
-                    down_mfb_asynch_fifo_err_reg(i) <= '0';
-                end if;
-            end if;
-        end process;
-     
-        assert (down_mfb_asynch_fifo_err_reg(i) /= '1') 
-           report "PTC: No dst_rdy part error! Writing in full DOWN MFB AFIFO!"
-           severity failure;
-
-        down_mfb_afull_reg_pr : process (CLK)
-        begin
-            if (rising_edge(CLK)) then
-                down_mfb_asfifo_afull_reg(i) <= down_mfb_asfifo_afull(i);
-            end if;
-        end process;
-
         ---------------------------------------------------------------------------
 
     end generate;
 
-    down_afull_flag <= (or down_mfb_asfifo_afull_reg) or (or down_mvb_asfifo_afull_reg);
-
     -- ========================================================================
+
+    --pragma synthesis_off
+    process (CLK)
+        variable dbg_rq_cnt_v : unsigned(63 downto 0);
+    begin
+        dbg_rq_cnt_v := (others => '0');
+        if (rising_edge(CLK)) then
+            if (RESET = '1') then
+                dbg_rq_cnt <= (others => '0');
+            elsif (RQ_MFB_SRC_RDY = '1' and RQ_MFB_DST_RDY = '1') then
+                for i in 0 to MFB_UP_REGIONS-1 loop
+                    dbg_rq_cnt_v := dbg_rq_cnt_v + RQ_MVB_VLD(i);
+                end loop;
+                    dbg_rq_cnt <= dbg_rq_cnt + dbg_rq_cnt_v;
+            end if;
+        end if;
+    end process;
+
+    process (CLK)
+        variable dbg_rc_cnt_v : unsigned(63 downto 0);
+    begin
+        dbg_rc_cnt_v := (others => '0');
+        if (rising_edge(CLK)) then
+            if (RESET = '1') then
+                dbg_rc_cnt <= (others => '0');
+            elsif (RC_MFB_SRC_RDY = '1' and RC_MFB_DST_RDY = '1') then
+                for i in 0 to MFB_DOWN_REGIONS-1 loop
+                    dbg_rc_cnt_v := dbg_rc_cnt_v + RC_MVB_VLD(i);
+                end loop;
+                    dbg_rc_cnt <= dbg_rc_cnt + dbg_rc_cnt_v;
+            end if;
+        end if;
+    end process;
+
+    process (CLK)
+        variable dbg_di_cnt_v : unsigned(63 downto 0);
+    begin
+        dbg_di_cnt_v := (others => '0');
+        if (rising_edge(CLK)) then
+            if (RESET = '1') then
+                dbg_di_mvb_cnt <= (others => '0');
+            elsif (down_mvb_split_in_src_rdy = '1' and down_mvb_split_in_dst_rdy = '1') then
+                for i in 0 to MFB_DOWN_REGIONS-1 loop
+                    dbg_di_cnt_v := dbg_di_cnt_v + down_mvb_split_in_vld(i);
+                end loop;
+                    dbg_di_mvb_cnt <= dbg_di_mvb_cnt + dbg_di_cnt_v;
+            end if;
+        end if;
+    end process;
+
+    process (CLK)
+        variable dbg_di_cnt_v : unsigned(63 downto 0);
+    begin
+        dbg_di_cnt_v := (others => '0');
+        if (rising_edge(CLK)) then
+            if (RESET = '1') then
+                dbg_di_mfb_cnt <= (others => '0');
+            elsif (down_mfb_split_in_src_rdy = '1' and down_mfb_split_in_dst_rdy = '1') then
+                for i in 0 to MFB_DOWN_REGIONS-1 loop
+                    dbg_di_cnt_v := dbg_di_cnt_v + down_mfb_split_in_eof(i);
+                end loop;
+                    dbg_di_mfb_cnt <= dbg_di_mfb_cnt + dbg_di_cnt_v;
+            end if;
+        end if;
+    end process;
+    --pragma synthesis_on
 
 end architecture;
