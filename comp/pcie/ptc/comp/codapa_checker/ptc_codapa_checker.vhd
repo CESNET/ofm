@@ -85,7 +85,7 @@ end entity;
 architecture FULL of PTC_CODAPA_CHECKER is
 
     constant MVB_FIFO_ITEMS    : natural := 32;
-    constant CODAPA_INC_DELAY  : natural := 1;
+    constant CODAPA_INC_DELAY  : natural := 10;
     constant PIPE_W : natural := MVB_ITEMS*(MVB_ITEM_WIDTH+TRANS_SIZE_WIDTH+8+1+1+1);
 
     signal s_pipe_din                : std_logic_vector(PIPE_W-1 downto 0);
