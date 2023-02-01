@@ -214,7 +214,7 @@ begin
    data_fifoxm_i : entity work.FIFOX_MULTI
    generic map(
       DATA_WIDTH          => MFB_REGION_WIDTH+2,
-      ITEMS               => MFB_FIFO_DEPTH,
+      ITEMS               => MFB_REGIONS*MFB_FIFO_DEPTH,
       WRITE_PORTS         => MFB_REGIONS,
       READ_PORTS          => MFB_REGIONS,
       RAM_TYPE            => "AUTO",
