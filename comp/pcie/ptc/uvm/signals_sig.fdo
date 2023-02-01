@@ -15,14 +15,16 @@ delete wave *
 add_wave "-noupdate -color yellow -label RST"   /testbench/RST
 add_wave "-noupdate -color yellow -label CLK"   /testbench/CLK
 
-all PTC /testbench/DUT_U/VHDL_DUT_U
-#all DMA2PCIE /testbench/DUT_U/VHDL_DUT_U/dma2pcie_hdr_trans_i
-#all MFB_HDR_DATA_MERGE /testbench/DUT_U/VHDL_DUT_U/mfb_hdr_data_merge
-#all DATA_INSERT /testbench/DUT_U/VHDL_DUT_U/mfb_hdr_data_merge/data_insert_i
-#all PLAN_AND_INSERT /testbench/DUT_U/VHDL_DUT_U/mfb_hdr_data_merge/hdr_plan_and_insert_i
-#all HDRPLAN /testbench/DUT_U/VHDL_DUT_U/mfb_hdr_data_merge/hdr_plan_and_insert_i
-#all PTC_PCIE2DMA_HDR_TRANSFORM /testbench/DUT_U/VHDL_DUT_U/pcie2dma_hdr_transform_i
-#all MFB_ASFIFOX /testbench/DUT_U/VHDL_DUT_U/dma_up_ports_g(0)/up_mfb_asynch_fifo_i
-#all MVB_ASFIFOX /testbench/DUT_U/VHDL_DUT_U/dma_up_ports_g(0)/up_mvb_asynch_fifo_i
+all PTC /testbench/DUT_U/VHDL_DUT_U/ptc_i
+#all DOWN_SPLITTER /testbench/DUT_U/VHDL_DUT_U/ptc_i/dma_down_ports_split_g/dma_down_splitter_i
+#all DMA2PCIE /testbench/DUT_U/VHDL_DUT_U/ptc_i/dma2pcie_hdr_trans_i
+#all CODAPA_CHECKER /testbench/DUT_U/VHDL_DUT_U/ptc_i/codapa_checker
+#all MFB_HDR_DATA_MERGE /testbench/DUT_U/VHDL_DUT_U/ptc_i/mfb_hdr_data_merge
+#all PLAN_AND_INSERT /testbench/DUT_U/VHDL_DUT_U/ptc_i/mfb_hdr_data_merge/hdr_plan_and_insert_i
+#all DATA_INSERT /testbench/DUT_U/VHDL_DUT_U/ptc_i/mfb_hdr_data_merge/data_insert_i
+#all HDRPLAN /testbench/DUT_U/VHDL_DUT_U/ptc_i/mfb_hdr_data_merge/hdr_plan_and_insert_i
+#all PCIE2DMA /testbench/DUT_U/VHDL_DUT_U/ptc_i/pcie2dma_hdr_transform_i
+#all MFB_ASFIFOX /testbench/DUT_U/VHDL_DUT_U/ptc_i/dma_up_ports_g(0)/up_mfb_asynch_fifo_i
+#all MVB_ASFIFOX /testbench/DUT_U/VHDL_DUT_U/ptc_i/dma_up_ports_g(0)/up_mvb_asynch_fifo_i
 
 config wave -signalnamewidth 1

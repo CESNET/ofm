@@ -45,7 +45,7 @@ class env #(DMA_MFB_UP_REGIONS, MFB_UP_REGIONS, MFB_UP_REG_SIZE,
         //uvm_reset::config_item     m_config_reset;
         //uvm_reset::config_item     m_config_reset_1;
         // UPSTREAM
-        uvm_dma_up::config_item                 m_config_up[DMA_PORTS];
+        uvm_dma_up::config_item #(DMA_PORTS)    m_config_up[DMA_PORTS];
         uvm_logic_vector_array_mfb::config_item m_config_rq_mfb;
         uvm_logic_vector_mvb::config_item       m_config_rq_mvb;
         uvm_logic_vector_mvb::config_item       m_config_rq_prefix_mvb;
@@ -150,7 +150,7 @@ class env #(DMA_MFB_UP_REGIONS, MFB_UP_REGIONS, MFB_UP_REG_SIZE,
 
             uvm_config_db #(uvm_logic_vector_array_mfb::config_item)::set(this, {"m_env_down_mfb_", i_string}, "m_config", m_config_down_mfb[i]);
             uvm_config_db #(uvm_logic_vector_mvb::config_item)::set(this, {"m_env_down_mvb_", i_string}, "m_config", m_config_down_mvb[i]);
-            uvm_config_db #(uvm_dma_up::config_item)::set(this, {"m_env_up_", i_string}, "m_config", m_config_up[i]);
+            uvm_config_db #(uvm_dma_up::config_item #(DMA_PORTS))::set(this, {"m_env_up_", i_string}, "m_config", m_config_up[i]);
 
             m_env_down_mfb[i] = uvm_logic_vector_array_mfb::env_tx #(DMA_MFB_DOWN_REGIONS, MFB_DOWN_REG_SIZE, MFB_DOWN_BLOCK_SIZE, MFB_DOWN_ITEM_WIDTH, 0)::type_id::create({"m_env_down_mfb_", i_string}, this);
             m_env_down_mvb[i] = uvm_logic_vector_mvb::env_tx       #(DMA_MVB_DOWN_ITEMS, sv_dma_bus_pack::DMA_DOWNHDR_WIDTH)::type_id::create({"m_env_down_mvb_", i_string}, this);

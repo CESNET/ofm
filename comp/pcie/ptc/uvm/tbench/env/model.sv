@@ -229,6 +229,8 @@ endclass
 
 class down_model #(DMA_PORTS, PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH, DEVICE) extends uvm_component;
     `uvm_component_param_utils(uvm_ptc::down_model#(DMA_PORTS, PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH, DEVICE))
+
+    localparam PORTS_W_FIX = (DMA_PORTS > 1) ? $clog2(DMA_PORTS) : 1;
     
     // Model inputs
     uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item #(32))           model_rc_mfb_in;
@@ -276,8 +278,13 @@ class down_model #(DMA_PORTS, PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH, DEVICE) ext
                 model_rc_meta_in.get(tr_rc_meta_in);
                 tr_down_mfb_out = tr_rc_mfb_in;
                 tr_down_mvb_out.data = {8'b00000000, tr_rc_meta_in.data[90-1 : 82], 1'b1, tr_rc_meta_in.data[10-1 :0]};
-                model_down_mfb_out[tr_rc_meta_in.data[(PCIE_DOWNHDR_WIDTH-16)]].write(tr_down_mfb_out);
-                model_down_mvb_out[tr_rc_meta_in.data[(PCIE_DOWNHDR_WIDTH-16)]].write(tr_down_mvb_out);
+                if (DMA_PORTS > 1) begin
+                    model_down_mfb_out[tr_rc_meta_in.data[(PCIE_DOWNHDR_WIDTH-16)+PORTS_W_FIX-1 : (PCIE_DOWNHDR_WIDTH-16)]].write(tr_down_mfb_out);
+                    model_down_mvb_out[tr_rc_meta_in.data[(PCIE_DOWNHDR_WIDTH-16)+PORTS_W_FIX-1 : (PCIE_DOWNHDR_WIDTH-16)]].write(tr_down_mvb_out);
+                end else begin
+                    model_down_mfb_out[0].write(tr_down_mfb_out);
+                    model_down_mvb_out[0].write(tr_down_mvb_out);
+                end
             end else begin
                 tr_rc_meta_in   = uvm_logic_vector::sequence_item #(PCIE_DOWNHDR_WIDTH)::type_id::create("tr_rc_meta_in");
 
@@ -295,16 +302,25 @@ class down_model #(DMA_PORTS, PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH, DEVICE) ext
 
                 tr_down_mvb_out.data = {8'b00000000, tr_rc_meta_in.data[72-1 : 64], tr_rc_meta_in.data[75], tr_rc_meta_in.data[43-1 : 32]};
 
-                $swrite(debug_msg, "%s\n\t PORT:           %d\n", debug_msg, tr_rc_meta_in.data[48]);
-                $swrite(debug_msg, "%s\n\t DOWN MODEL MFB IN:   %s\n", debug_msg, tr_rc_mfb_in.convert2string());
-                $swrite(debug_msg, "%s\n\t DOWN MODEL META IN:  %s\n", debug_msg, tr_rc_meta_in.convert2string());
-                $swrite(debug_msg, "%s\n\t DOWN MODEL MFB OUT:  %s\n", debug_msg, tr_down_mfb_out.convert2string());
-                $swrite(debug_msg, "%s\n\t DOWN MODEL META OUT: %s\n", debug_msg, tr_down_mvb_out.convert2string());
-                `uvm_info(this.get_full_name(), debug_msg ,UVM_MEDIUM);
+                if (DMA_PORTS > 1) begin
+                    model_down_mfb_out[tr_rc_meta_in.data[48+PORTS_W_FIX-1 : 48]].write(tr_down_mfb_out);
+                    model_down_mvb_out[tr_rc_meta_in.data[48+PORTS_W_FIX-1 : 48]].write(tr_down_mvb_out);
+                end else begin
+                    model_down_mfb_out[0].write(tr_down_mfb_out);
+                    model_down_mvb_out[0].write(tr_down_mvb_out);
+                end
 
-                model_down_mfb_out[tr_rc_meta_in.data[48]].write(tr_down_mfb_out);
-                model_down_mvb_out[tr_rc_meta_in.data[48]].write(tr_down_mvb_out);
             end
+
+            $swrite(debug_msg, "%s\n\t ================ DOWN MODEL =============== \n", debug_msg);
+            if (DMA_PORTS > 1) begin
+                $swrite(debug_msg, "%s\t PORT:                %0d\n", debug_msg, tr_rc_meta_in.data[48+PORTS_W_FIX-1 : 48]);
+            end
+            $swrite(debug_msg, "%s\t DOWN MODEL MFB IN:   %s\n", debug_msg, tr_rc_mfb_in.convert2string());
+            $swrite(debug_msg, "%s\t DOWN MODEL META IN:  %s\n", debug_msg, tr_rc_meta_in.convert2string());
+            $swrite(debug_msg, "%s\t DOWN MODEL MFB OUT:  %s\n", debug_msg, tr_down_mfb_out.convert2string());
+            $swrite(debug_msg, "%s\t DOWN MODEL META OUT: %s\n", debug_msg, tr_down_mvb_out.convert2string());
+            `uvm_info(this.get_full_name(), debug_msg ,UVM_MEDIUM);
 
         end
     endtask

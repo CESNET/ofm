@@ -72,6 +72,24 @@ SETTINGS = {
         "DEVICE"               : "\\\"AGILEX\\\""    ,
         "CLK_PERIOD"           : "2ns"               ,
     },
+    "agilex_4p_gen5x16" : {
+        "DMA_PORTS"            : "4"                 ,
+        "MVB_UP_ITEMS"         : "4"                 ,
+        "MFB_UP_REGIONS"       : "4"                 ,
+        "MFB_UP_REG_SIZE"      : "1"                 ,
+        "MFB_UP_BLOCK_SIZE"    : "8"                 ,
+        "MFB_UP_ITEM_WIDTH"    : "32"                ,
+        "DMA_MFB_UP_REGIONS"   : "2"                 ,
+        "MVB_DOWN_ITEMS"       : "4"                 ,
+        "MFB_DOWN_REGIONS"     : "4"                 ,
+        "MFB_DOWN_REG_SIZE"    : "1"                 ,
+        "MFB_DOWN_BLOCK_SIZE"  : "8"                 ,
+        "MFB_DOWN_ITEM_WIDTH"  : "32"                ,
+        "DMA_MFB_DOWN_REGIONS" : "2"                 ,
+        "ENDPOINT_TYPE"        : "\\\"R_TILE\\\""    ,
+        "DEVICE"               : "\\\"AGILEX\\\""    ,
+        "CLK_PERIOD"           : "2ns"               ,
+    },
     "ultrascale_1_port" : { # Ultrascale+ default settings
         "CLK_PERIOD"           : "4ns"               ,
         "CLK_DMA_PERIOD"       : "3ns"               ,
@@ -119,6 +137,7 @@ SETTINGS = {
     "_combinations_" : (  
     (), # Works the same as '("default",),' as the "default" is applied in every combination
     ("s10_256_port"        ,           ),
+    ("agilex_4p_gen5x16"   ,           ),
     ("agilex_1_port_300mhz",           ),
     ("agilex_1_port_500mhz",           ),
     ("agilex_1_port_300mhz", "2_ports",),

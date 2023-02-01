@@ -109,18 +109,19 @@ class byte_array_sequence#(PCIE_UPHDR_WIDTH, PCIE_DOWNHDR_WIDTH, RQ_TUSER_WIDTH,
                 end
             end
             mfb_cnt++;
-            $swrite(debug_msg, "%s\n\t LOW ADDR %b \n",            debug_msg, header.data[11 : 0]);
-            $swrite(debug_msg, "%s\n\t ERROR CODE %b \n",          debug_msg, header.data[15 : 12]);
-            $swrite(debug_msg, "%s\n\t BYTE CNT %b \n",            debug_msg, header.data[28 : 16]);
-            $swrite(debug_msg, "%s\n\t REQUEST COMPLETED %b \n",   debug_msg, header.data[30]);
-            $swrite(debug_msg, "%s\n\t DWORD COUNT %b \n",         debug_msg, header.data[42 : 32]);
-            $swrite(debug_msg, "%s\n\t COMPLETITION STATUS %b \n", debug_msg, header.data[45 : 43]);
-            $swrite(debug_msg, "%s\n\t REQUESTER ID %b \n",        debug_msg, header.data[63 : 48]);
-            $swrite(debug_msg, "%s\n\t TAG %d \n",                 debug_msg, header.data[71 : 64]);
-            $swrite(debug_msg, "%s\n\t COMPLETER ID %d \n",        debug_msg, header.data[87 : 72]);
-            $swrite(debug_msg, "%s\n\t TR CLASS %d \n",            debug_msg, header.data[91 : 89]);
-            $swrite(debug_msg, "%s\n\t ATTRIBUTES %d \n",          debug_msg, header.data[94 : 92]);
-            $swrite(debug_msg, "%s\n\t RC SEQ MFB NUMBER %d: \n",  debug_msg, mfb_cnt, req.convert2string());
+            $swrite(debug_msg, "%s\n\t ============= RC PCIE MFB ================== \n", debug_msg);
+            $swrite(debug_msg, "%s\t LOW ADDR            0x%h \n", debug_msg, header.data[11 : 0]);
+            $swrite(debug_msg, "%s\t ERROR CODE          0x%h \n", debug_msg, header.data[15 : 12]);
+            $swrite(debug_msg, "%s\t BYTE CNT            0x%h \n", debug_msg, header.data[28 : 16]);
+            $swrite(debug_msg, "%s\t REQUEST COMPLETED   0x%h \n", debug_msg, header.data[30]);
+            $swrite(debug_msg, "%s\t DWORD COUNT         0x%h \n", debug_msg, header.data[42 : 32]);
+            $swrite(debug_msg, "%s\t COMPLETITION STATUS 0x%h \n", debug_msg, header.data[45 : 43]);
+            $swrite(debug_msg, "%s\t REQUESTER ID        0x%h \n", debug_msg, header.data[63 : 48]);
+            $swrite(debug_msg, "%s\t TAG                 %0d \n", debug_msg, header.data[71 : 64]);
+            $swrite(debug_msg, "%s\t COMPLETER ID        %0d \n", debug_msg, header.data[87 : 72]);
+            $swrite(debug_msg, "%s\t TR CLASS            %0d \n", debug_msg, header.data[91 : 89]);
+            $swrite(debug_msg, "%s\t ATTRIBUTES          %0d \n", debug_msg, header.data[94 : 92]);
+            $swrite(debug_msg, "%s\t RC SEQ MFB NUMBER   %0d : %s \n", debug_msg, mfb_cnt, req.convert2string());
             `uvm_info(this.get_full_name(), debug_msg ,UVM_MEDIUM)
             finish_item(req);
         end
@@ -195,28 +196,29 @@ class logic_vector_sequence #(PCIE_DOWNHDR_WIDTH, PCIE_UPHDR_WIDTH, RQ_TUSER_WID
                 start_item(req);
                 mvb_cnt++;
 
+                $swrite(debug_msg, "%s\n\t ============= RC PCIE MVB ================== \n", debug_msg);
                 $swrite(debug_msg, "%s\n\t Generated RC request MVB number %d: %s\n", debug_msg, mvb_cnt, req.convert2string());
                 $swrite(debug_msg, "%s\n\t Deparsed RC MVB TR: \n", debug_msg);
 
-                $swrite(debug_msg, "%s\n\t PACKET SIZE:      %d", debug_msg, pcie_tr.len);
-                $swrite(debug_msg, "%s\n\t ATRIBUTES:        %h", debug_msg, pcie_tr.at);
-                $swrite(debug_msg, "%s\n\t SNOOP:            %h", debug_msg, pcie_tr.snoop);
-                $swrite(debug_msg, "%s\n\t RELAXED:          %h", debug_msg, pcie_tr.relaxed);
-                $swrite(debug_msg, "%s\n\t ERROR POISON:     %h", debug_msg, pcie_tr.ep);
-                $swrite(debug_msg, "%s\n\t TD:               %h", debug_msg, pcie_tr.td);
-                $swrite(debug_msg, "%s\n\t PADD0:            %h", debug_msg, pcie_tr.padd_0);
-                $swrite(debug_msg, "%s\n\t TAG_8:            %h", debug_msg, pcie_tr.tag_8);
-                $swrite(debug_msg, "%s\n\t TRAFFIC CLASS:    %h", debug_msg, pcie_tr.tc);
-                $swrite(debug_msg, "%s\n\t TAG_9:            %h", debug_msg, pcie_tr.tag_9);
-                $swrite(debug_msg, "%s\n\t CONST:            %h", debug_msg, 8'b01001010);
-                $swrite(debug_msg, "%s\n\t BYTE CNT:         %h", debug_msg, byte_cnt);
-                $swrite(debug_msg, "%s\n\t BCM:              %h", debug_msg, bcm);
-                $swrite(debug_msg, "%s\n\t COMPLETE STATUS:  %h", debug_msg, complete_st);
-                $swrite(debug_msg, "%s\n\t COMPLETER ID:     %h", debug_msg, completer_id);
-                $swrite(debug_msg, "%s\n\t LOW ADDRESS:      %h", debug_msg, low_addr);
-                $swrite(debug_msg, "%s\n\t CONST:            %h", debug_msg, 1'b0);
-                $swrite(debug_msg, "%s\n\t TAG:              %h", debug_msg, pcie_tr.tag);
-                $swrite(debug_msg, "%s\n\t REQUEST ID:       %h", debug_msg, pcie_tr.req_id);
+                $swrite(debug_msg, "%s\n\t PACKET SIZE:      %0d", debug_msg, pcie_tr.len);
+                $swrite(debug_msg, "%s\n\t ATRIBUTES:        0x%h", debug_msg, pcie_tr.at);
+                $swrite(debug_msg, "%s\n\t SNOOP:            0x%h", debug_msg, pcie_tr.snoop);
+                $swrite(debug_msg, "%s\n\t RELAXED:          0x%h", debug_msg, pcie_tr.relaxed);
+                $swrite(debug_msg, "%s\n\t ERROR POISON:     0x%h", debug_msg, pcie_tr.ep);
+                $swrite(debug_msg, "%s\n\t TD:               0x%h", debug_msg, pcie_tr.td);
+                $swrite(debug_msg, "%s\n\t PADD0:            0x%h", debug_msg, pcie_tr.padd_0);
+                $swrite(debug_msg, "%s\n\t TAG_8:            0x%h", debug_msg, pcie_tr.tag_8);
+                $swrite(debug_msg, "%s\n\t TRAFFIC CLASS:    0x%h", debug_msg, pcie_tr.tc);
+                $swrite(debug_msg, "%s\n\t TAG_9:            0x%h", debug_msg, pcie_tr.tag_9);
+                $swrite(debug_msg, "%s\n\t CONST:            0x%h", debug_msg, 8'b01001010);
+                $swrite(debug_msg, "%s\n\t BYTE CNT:         0x%h", debug_msg, byte_cnt);
+                $swrite(debug_msg, "%s\n\t BCM:              0x%h", debug_msg, bcm);
+                $swrite(debug_msg, "%s\n\t COMPLETE STATUS:  0x%h", debug_msg, complete_st);
+                $swrite(debug_msg, "%s\n\t COMPLETER ID:     0x%h", debug_msg, completer_id);
+                $swrite(debug_msg, "%s\n\t LOW ADDRESS:      0x%h", debug_msg, low_addr);
+                $swrite(debug_msg, "%s\n\t CONST:            0x%h", debug_msg, 1'b0);
+                $swrite(debug_msg, "%s\n\t TAG:              0x%h", debug_msg, pcie_tr.tag);
+                $swrite(debug_msg, "%s\n\t REQUEST ID:       0x%h", debug_msg, pcie_tr.req_id);
 
                 `uvm_info(this.get_full_name(), debug_msg ,UVM_MEDIUM);
 

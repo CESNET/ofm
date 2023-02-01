@@ -24,7 +24,7 @@ class env #(DMA_MVB_UP_ITEMS, DMA_MFB_UP_REGIONS, MFB_UP_REG_SIZE, MFB_UP_BLOCK_
     // Implement later
     uvm_reset::sync_cbs reset_sync;
     // Configuration
-    config_item m_config;
+    config_item #(DMA_PORTS) m_config;
 
     // Constructor of environment.
     function new(string name, uvm_component parent);
@@ -38,7 +38,7 @@ class env #(DMA_MVB_UP_ITEMS, DMA_MFB_UP_REGIONS, MFB_UP_REG_SIZE, MFB_UP_BLOCK_
         uvm_logic_vector_array_mfb::config_item m_env_up_mfb_cfg;
         uvm_logic_vector_mvb::config_item       m_env_up_mvb_cfg;
 
-        if(!uvm_config_db #(config_item)::get(this, "", "m_config", m_config)) begin
+        if(!uvm_config_db #(config_item #(DMA_PORTS))::get(this, "", "m_config", m_config)) begin
             `uvm_fatal(get_type_name(), "Unable to get configuration object")
         end
 

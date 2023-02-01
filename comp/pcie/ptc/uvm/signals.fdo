@@ -5,6 +5,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 proc all {NAME PATH} {
-    add wave -divider "$NAME"
-    add_wave "-noupdate  -hex"       $PATH/*
+    add_wave "-noupdate -group $NAME -hex"       $PATH/*
 }

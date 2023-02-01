@@ -14,20 +14,20 @@ package test;
 
 // Number of DMA ports per one PTC, possible values: 1, 2.
     parameter DMA_PORTS             = 2;
-    parameter MVB_UP_ITEMS          = 2;
-    parameter DMA_MVB_UP_ITEMS      = MVB_UP_ITEMS;
-    parameter MFB_UP_REGIONS        = 2;
+    parameter MVB_UP_ITEMS          = 1;
+    parameter DMA_MVB_UP_ITEMS      = 2;
+    parameter MFB_UP_REGIONS        = 1;
     parameter MFB_UP_REG_SIZE       = 1;
     parameter MFB_UP_BLOCK_SIZE     = 8;
     parameter MFB_UP_ITEM_WIDTH     = 32;
-    parameter DMA_MFB_UP_REGIONS    = MFB_UP_REGIONS;
+    parameter DMA_MFB_UP_REGIONS    = MFB_UP_REGIONS*2;
     parameter MVB_DOWN_ITEMS        = 2;
-    parameter DMA_MVB_DOWN_ITEMS    = MVB_DOWN_ITEMS;
+    parameter DMA_MVB_DOWN_ITEMS    = 2;
     parameter MFB_DOWN_REGIONS      = 2;
     parameter MFB_DOWN_REG_SIZE     = 1;
-    parameter MFB_DOWN_BLOCK_SIZE   = 8;
+    parameter MFB_DOWN_BLOCK_SIZE   = 4;
     parameter MFB_DOWN_ITEM_WIDTH   = 32;
-    parameter DMA_MFB_DOWN_REGIONS  = MFB_DOWN_REGIONS;
+    parameter DMA_MFB_DOWN_REGIONS  = MFB_DOWN_REGIONS*2;
     parameter PCIE_UPHDR_WIDTH      = 128;
     parameter PCIE_DOWNHDR_WIDTH    = 3*4*8;
     parameter PCIE_PREFIX_WIDTH     = 32;
@@ -43,9 +43,9 @@ package test;
     parameter DOWN_ASFIFO_ITEMS     = 512;
     parameter DOWN_FIFO_ITEMS       = 512;
     // UltraScale+ -> 137; Virtex7 -> 60;
-    parameter RQ_TUSER_WIDTH        = 137;
+    parameter RQ_TUSER_WIDTH        = 60;
     // UltraScale+ -> 161; Virtex7 -> 75;
-    parameter RC_TUSER_WIDTH        = 161;
+    parameter RC_TUSER_WIDTH        = 75;
     // CPL credits checking:
     // Each credit represents one available 64B or 128B word in receiving buffer.
     // The goal is to calculate, whether UP read request's response fits in available words in receiving buffer.
@@ -59,9 +59,9 @@ package test;
     //          (Can only be used on Xilinx FPGAs)
     // This option must correspond with the PCIe settings.
     parameter AUTO_ASSIGN_TAGS      = 1;
-    parameter DEVICE                = "STRATIX10"; // "VIRTEX6", "7SERIES", "ULTRASCALE", "STRATIX10"
+    parameter DEVICE                = "7SERIES"; // "VIRTEX6", "7SERIES", "ULTRASCALE", "STRATIX10"
     // Connected PCIe endpoint type ("H_TILE" or "P_TILE" or "R_TILE") (only relevant on Intel FPGAs)
-    parameter ENDPOINT_TYPE         = "P_TILE";
+    parameter ENDPOINT_TYPE         = "DUMMY";
     // PCIE header is in MVB data only if ENDPOINT is P_TILE and DEVICE is STRATIX10 or DEVICE is Agilex
 
     // VERIFICATION PARAMETERS

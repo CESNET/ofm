@@ -4,13 +4,13 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause
 
-class config_item extends uvm_object;
+class config_item#(DMA_PORTS) extends uvm_object;
 
     // ------------------------------------------------------------------------ 
     // configuration variables
     uvm_active_passive_enum active;
     string interface_name;
-    logic port;
+    logic [$clog2(DMA_PORTS)-1 : 0] port;
 
     // ------------------------------------------------------------------------ 
     // functions
