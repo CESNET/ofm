@@ -332,36 +332,42 @@ package body type_pack is
    end;
 
    function slv_arr_to_u_arr(slv_array: slv_array_t) return u_array_t is
-      variable u_array : u_array_t(slv_array'high downto 0)(slv_array(0)'high downto 0);
+      variable u_array : u_array_t(slv_array               'high downto slv_array               'low)
+                                  (slv_array(slv_array'low)'high downto slv_array(slv_array'low)'low);
    begin
-      for i in 0 to slv_array'high loop
+      for i in slv_array'low to slv_array'high loop
          u_array(i) := unsigned(slv_array(i));
       end loop;
       return u_array;
    end;
 
    function slv_arr_to_u_arr_2d(slv_array_2d: slv_array_2d_t) return u_array_2d_t is
-      variable u_array_2d : u_array_2d_t(slv_array_2d'high downto 0)(slv_array_2d(0)'high downto 0)(slv_array_2d(0)(0)'high downto 0);
+      variable u_array_2d : u_array_2d_t(slv_array_2d                                                      'high downto slv_array_2d                                                      'low)
+                                        (slv_array_2d(slv_array_2d'low)                                    'high downto slv_array_2d(slv_array_2d'low)                                    'low)
+                                        (slv_array_2d(slv_array_2d'low)(slv_array_2d(slv_array_2d'low)'low)'high downto slv_array_2d(slv_array_2d'low)(slv_array_2d(slv_array_2d'low)'low)'low);
    begin
-      for i in 0 to slv_array_2d'high loop
+      for i in slv_array_2d'low to slv_array_2d'high loop
          u_array_2d(i) := slv_arr_to_u_arr(slv_array_2d(i));
       end loop;
       return u_array_2d;
    end;
 
    function u_arr_to_slv_arr(u_array: u_array_t) return slv_array_t is
-      variable slv_array : slv_array_t(u_array'high downto 0)(u_array(0)'high downto 0);
+      variable slv_array : slv_array_t(u_array             'high downto u_array             'low)
+                                      (u_array(u_array'low)'high downto u_array(u_array'low)'low);
    begin
-      for i in 0 to u_array'high loop
+      for i in u_array'low to u_array'high loop
          slv_array(i) := std_logic_vector(u_array(i));
       end loop;
       return slv_array;
    end;
 
    function u_arr_to_slv_arr_2d(u_array_2d: u_array_2d_t) return slv_array_2d_t is
-      variable slv_array_2d : slv_array_2d_t(u_array_2d'high downto 0)(u_array_2d(0)'high downto 0)(u_array_2d(0)(0)'high downto 0);
+      variable slv_array_2d : slv_array_2d_t(u_array_2d                                                'high downto u_array_2d                                                'low)
+                                            (u_array_2d(u_array_2d'low)                                'high downto u_array_2d(u_array_2d'low)                                'low)
+                                            (u_array_2d(u_array_2d'low)(u_array_2d(u_array_2d'low)'low)'high downto u_array_2d(u_array_2d'low)(u_array_2d(u_array_2d'low)'low)'low);
    begin
-      for i in 0 to u_array_2d'high loop
+      for i in u_array_2d'low to u_array_2d'high loop
          slv_array_2d(i) := u_arr_to_slv_arr(u_array_2d(i));
       end loop;
       return slv_array_2d;
