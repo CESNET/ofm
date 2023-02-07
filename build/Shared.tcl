@@ -259,6 +259,19 @@ proc ofm_replace_modules_path {ENTITY_BASE} {
 
 # ------------------------ ApplyToComponent -----------------------------
 
+proc DeduceType {FNAME {TYPE ""}} {
+    # Backward compatibility
+    set type $TYPE
+    if {[file tail $FNAME] == "DevTree.tcl" && $TYPE == ""} {
+        set type "DEVTREE"
+    } elseif {[regexp ".xci$" $FNAME] && $TYPE == ""} {
+        set type "VIVADO_IP_XACT"
+    } elseif {[regexp ".bd$" $FNAME] && $TYPE == ""} {
+        set type "VIVADO_BD"
+    } 
+    return $type
+}
+
 # Apply Command To Module List
 proc ApplyToMods {MODULE COMMAND FILES {TYPE ""}} {
     upvar 1 $FILES FILES_VAR
@@ -276,13 +289,7 @@ proc ApplyToMods {MODULE COMMAND FILES {TYPE ""}} {
         set fname [SimplPath $fname]
 
         # Backward compatibility
-        set type $TYPE
-        if {[file tail $fname] == "DevTree.tcl" && $TYPE == ""} {
-            set type "DEVTREE"
-        } elseif {[regexp ".xci$" $fname] && $TYPE == ""} {
-            set type "VIVADO_IP_XACT"
-        }
-
+        set type [DeduceType $fname $TYPE]
         lappend params "TYPE" $type
 
         set f [concat $fname $params]

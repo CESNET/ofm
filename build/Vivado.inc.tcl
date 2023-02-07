@@ -69,7 +69,13 @@ proc EvalFile {FNAME OPT} {
     } elseif {$opt(TYPE) == "VIVADO_IP_XACT"} {
         add_files -norecurse $FNAME
         puts "IP added: $FNAME"
+    } elseif {$opt(TYPE) == "VIVADO_BD"} {
+        add_files -norecurse $FNAME
+        puts "BD added: $FNAME"
+        generate_target all [get_files $FNAME] -force
+        upgrade_ip [get_ips *] -quiet
     }
+
 
     foreach {param_name param_value} $OPT {
         if {$param_name == "VIVADO_SET_PROPERTY"} {
@@ -122,7 +128,9 @@ proc SetupDesign {synth_flags} {
     # Apply user settings
     foreach i $SYNTH_FLAGS(SETUP_FLAGS) {
         if { $i == "USE_XPM_LIBRARIES" } {
-            set_property XPM_LIBRARIES {XPM_CDC XPM_MEMORY} [current_project]
+            set_property XPM_LIBRARIES {XPM_CDC XPM_MEMORY XPM_FIFO} [current_project]
+        } elseif { $i == "COMPILE_ORDER_AUTO" } {
+            set_property source_mgmt_mode All [current_project]
         }
         # TODO: Implement when needed
     }
