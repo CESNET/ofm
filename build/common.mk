@@ -10,7 +10,7 @@ TCLSH ?= tclsh
 
 .PHONY: simulation vhdocl cocotb
 
-GEN_MK_TARGETS += simulation vhdocl cocotb
+GEN_MK_TARGETS += simulation vhdocl cocotb ghdl-sim
 simulation: GEN_MK_ENV=SIM_SCRIPT=$(SIM_SCRIPT) SIM_FLAGS=$(SIM_FLAGS)
 
 MAKE_REC = $(MAKE) -f $(firstword $(MAKEFILE_LIST)) --no-print-directory $(NETCOPE_ENV)
@@ -55,13 +55,22 @@ simulation: $(MOD)
 COCOTB_SIM_SCRIPT ?= $(OFM_PATH)/build/scripts/cocotb/cocotb.fdo
 COCOTB_MODULE ?= cocotb_test
 cocotb: $(MOD)
-	$(NETCOPE_ENV) SYNTHFILES=$(SYNTHFILES) COCOTB_MODULE=$(COCOTB_MODULE) vsim -64 $(SIM_FLAGS) -do $(COCOTB_SIM_SCRIPT)
+	$(NETCOPE_ENV) SYNTHFILES=$(SYNTHFILES) COCOTB_MODULE=$(COCOTB_MODULE) vsim -64 -do $(COCOTB_SIM_SCRIPT) $(SIM_FLAGS)
 
 # Automated documentation script
 vhdocl:
 	echo "outputdir=vhdocl.doc" > vhdocl.conf
 	for m in $(MOD); do echo $$m | grep .vhd | sed 's/^/input\ /' >> vhdocl.conf; done
 	vhdocl -f vhdocl.conf
+
+GHDL_WORK_DIR?=work_ghdl
+ghdl-sim: $(MOD)
+	@mkdir -p $(GHDL_WORK_DIR)
+	$(eval TOP_LEVEL_ENT_LC:=$(shell echo $(TOP_LEVEL_ENT) | tr '[:upper:]' '[:lower:]'))
+	ghdl -i --workdir=$(GHDL_WORK_DIR) $(addprefix -P,$(GHDL_LIBS)) --std=08 -frelaxed --ieee=synopsys $(filter %.vhd,$(MOD))
+	ghdl -m --workdir=$(GHDL_WORK_DIR) $(addprefix -P,$(GHDL_LIBS)) --std=08 -frelaxed --ieee=synopsys --warn-no-hide $(TOP_LEVEL_ENT_LC)
+	MODULE=$(COCOTB_MODULE) TOPLEVEL=$(TOP_LEVEL_ENT_LC) TOPLEVEL_LANG=vhdl $(NETCOPE_ENV) COCOTB_RESOLVE_X=ZEROS \
+	ghdl -r -v --workdir=$(GHDL_WORK_DIR) -P$(GHDL_WORK_DIR) $(addprefix -P,$(GHDL_LIBS)) $(TOP_LEVEL_ENT_LC) --vpi=$(shell cocotb-config --lib-name-path vpi ghdl) --asserts=disable --vcd=$(OUTPUT_NAME).vcd
 
 else
 .PHONY: $(GEN_MK_NAME)

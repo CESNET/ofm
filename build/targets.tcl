@@ -109,7 +109,7 @@ proc target_makefile {filename} {
 
     lappend skip_types "COMPONENT"
     append content "MOD := \\\n"
-    foreach FILE $NB_FILELIST {
+    foreach FILE [lreverse $NB_FILELIST] {
         array set opt [lassign $FILE FNAME]
         if {$opt(TYPE) ni $skip_types} {
             append content "    $FNAME \\\n"
