@@ -304,7 +304,14 @@ proc SaveDesign {synth_flags} {
     project_close
 
     # Convert programming image to RBF format
-    nb_convert_to_rbf SYNTH_FLAGS
+    if { [info exist SYNTH_FLAGS(BITSTREAM)] && $SYNTH_FLAGS(BITSTREAM) == "RBF"} {
+        nb_convert_to_rbf SYNTH_FLAGS
+    }
+
+    # Convert programming image to RDP format
+    if { [info exist SYNTH_FLAGS(BITSTREAM)] && $SYNTH_FLAGS(BITSTREAM) == "RPD_ASX4"} {
+        nb_convert_to_rpd SYNTH_FLAGS
+    }
 
     # Create .nfw archive
     nb_nfw_archive_create SYNTH_FLAGS
@@ -316,6 +323,16 @@ proc nb_convert_to_rbf {synth_flags} {
 
     # Run quartus_pfg utility
     if {[catch {exec quartus_pfg -c $SYNTH_FLAGS(OUTPUT).sof $SYNTH_FLAGS(OUTPUT).rbf} msg]} {
+        puts stderr "Converting the firmware file failed:\n$msg"
+    }
+}
+
+proc nb_convert_to_rpd {synth_flags} {
+    global env
+    upvar 1 $synth_flags SYNTH_FLAGS
+
+    # Run quartus_pfg utility
+    if {[catch {exec quartus_pfg -c $SYNTH_FLAGS(OUTPUT).sof $SYNTH_FLAGS(OUTPUT).rpd -o mode=ASX4 -o bitswap=OFF} msg]} {
         puts stderr "Converting the firmware file failed:\n$msg"
     }
 }
@@ -333,6 +350,8 @@ proc nb_nfw_archive_create {synth_flags} {
     # Add output bitstream to .nfw archive
     if { [info exist SYNTH_FLAGS(BITSTREAM)] && $SYNTH_FLAGS(BITSTREAM) == "RBF"} {
         lappend SYNTH_FLAGS(NFW_FILES) [list $SYNTH_FLAGS(OUTPUT).rbf $SYNTH_FLAGS(FPGA).rbf]
+    } elseif { [info exist SYNTH_FLAGS(BITSTREAM)] && $SYNTH_FLAGS(BITSTREAM) == "RPD_ASX4"} {
+        lappend SYNTH_FLAGS(NFW_FILES) [list $SYNTH_FLAGS(OUTPUT).rpd $SYNTH_FLAGS(FPGA).rpd]
     } else {
         lappend SYNTH_FLAGS(NFW_FILES) [list $SYNTH_FLAGS(OUTPUT).sof $SYNTH_FLAGS(FPGA).sof]
     }
