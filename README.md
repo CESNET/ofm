@@ -1,12 +1,12 @@
 # OFM repository
 
-This repository contains open-source FPGA modules and build system implemented within the development and research activities of CESNET z.s.p.o. in the field of monitoring, security and network infrastructure configuration.
+This repository contains open-source FPGA modules (OFM) and build system implemented within the development and research activities of [CESNET z.s.p.o.](https://www.cesnet.cz/) in the field of monitoring, security and network infrastructure configuration, see also the [Liberouter website](https://www.liberouter.org/).
 
-This repository is primarily used within the Network Development Kit (NDK). But it can also be used in other projects.
+The OFM repository is primarily used within the Network Development Kit (NDK), see the [NDK-APP-Minimal application](https://github.com/CESNET/ndk-app-minimal/). The NDK-APP-Minimal is a reference application based on the NDK. The OFM repository you can also use in other projects.
 
 ## Documentation
 
-We use a documentation system based on the [Sphinx tool](https://www.sphinx-doc.org), which compiles complete documentation from source files in the [reStructuredText](https://docutils.sourceforge.io/rst.html) format. The documentation automatically build with each contribution to the devel branch and is available online here:
+We use a documentation system based on the [Sphinx tool](https://www.sphinx-doc.org), which compiles complete documentation from source files in the [reStructuredText](https://docutils.sourceforge.io/rst.html) format. We also use the [Sphinx-vhdl](https://github.com/CESNET/sphinx-vhdl) for generating documentation from the VHDL code. The documentation automatically build with each contribution to the devel branch and is available online here:
 - [**OFM documentation (public GitHub Pages - built from main branch)**](https://cesnet.github.io/ofm/).
 - [**OFM documentation (private GitLab Pages - built from devel branch)**](https://ndk.gitlab.liberouter.org:5051/ofm/).
 
