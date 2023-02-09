@@ -167,7 +167,7 @@ virtual class comparer_base_ordered#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) ext
             item = dut_items.pop_front();
             if (this.compare(tr.item, item.in_item) == 0) begin
                 errors++;
-                `uvm_error(this.get_full_name(), $sformatf("\n\tTransaction %0d doesn't match.\n\t\tInput times %s\n\t\toutput time %0dns\n%s\n", item.id, tr.convert2string_time(), item.in_time/1ns, this.message(item.in_item, tr.item)));
+                `uvm_error(this.get_full_name(), $sformatf("\n\tTransaction %0d doesn't match.\n\t\tInput times %s\n\t\toutput time %0dns\n%s\n", item.id, tr.convert2string_time(), item.in_time/1ns, this.message(tr.item, item.in_item)));
             end else begin
                 compared++;
             end
@@ -184,7 +184,7 @@ virtual class comparer_base_ordered#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) ext
             item = model_items.pop_front();
             if (this.compare(item.item, tr) == 0) begin
                 errors++;
-                `uvm_error(this.get_full_name(), $sformatf("\n\tTransaction %0d doesn't match.\n\t\tInput times %s\n\t\toutput time %0dns\n%s\n", dut_sends, item.convert2string_time(), $time()/1ns, this.message(tr, item.item)));
+                `uvm_error(this.get_full_name(), $sformatf("\n\tTransaction %0d doesn't match.\n\t\tInput times %s\n\t\toutput time %0dns\n%s\n", dut_sends, item.convert2string_time(), $time()/1ns, this.message(item.item, tr)));
             end else begin
                 compared++;
             end
