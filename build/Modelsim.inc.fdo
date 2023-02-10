@@ -121,6 +121,15 @@ proc nb_sim_run {} {
         if {[info exists SIG_FILE]} {
             source $SIG_FILE
         }
+    } else {
+        puts "Running in Jenkins, verbosity decreased"
+
+        puts "Numeric Std Warnings - Disabled"
+        puts "Std Arith Warnings - Disabled"
+        global NumericStdNoWarnings
+        global StdArithNoWarnings
+        set NumericStdNoWarnings 1
+        set StdArithNoWarnings 1
     }
     restart -f
     run -all
