@@ -11,7 +11,7 @@
 // ----------------------------------------------------------------------------
 package sv_dma_bus_pack;
 
-    import math_pkg::*;//log2, max
+    // import math_pkg::*;//log2, max
 
     /* For item description see dma_bus_pack.vhd */
     /* Synchronize with dma_bus_pack.vhd! */
