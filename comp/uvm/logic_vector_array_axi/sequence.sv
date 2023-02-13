@@ -6,8 +6,8 @@
 
 
 // This low level sequence define bus functionality
-class sequence_simple_rx_base #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends uvm_common::sequence_base#(config_sequence, uvm_axi::sequence_item #(DATA_WIDTH, TUSER_WIDTH, REGIONS));
-    `uvm_object_param_utils(uvm_logic_vector_array_axi::sequence_simple_rx_base#(DATA_WIDTH, TUSER_WIDTH, REGIONS))
+class sequence_simple_rx_base #(DATA_WIDTH, TUSER_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING) extends uvm_common::sequence_base#(config_sequence, uvm_axi::sequence_item #(DATA_WIDTH, TUSER_WIDTH, REGIONS));
+    `uvm_object_param_utils(uvm_logic_vector_array_axi::sequence_simple_rx_base#(DATA_WIDTH, TUSER_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING))
     `uvm_declare_p_sequencer(uvm_axi::sequencer#(DATA_WIDTH, TUSER_WIDTH, REGIONS));
 
     localparam ITEM_WIDTH   = 32;
@@ -130,8 +130,8 @@ class sequence_simple_rx_base #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends uvm_co
     endtask
 endclass
 
-class sequence_simple_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends sequence_simple_rx_base #(DATA_WIDTH, TUSER_WIDTH, REGIONS);
-    `uvm_object_param_utils(uvm_logic_vector_array_axi::sequence_simple_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS))
+class sequence_simple_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING) extends sequence_simple_rx_base #(DATA_WIDTH, TUSER_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING);
+    `uvm_object_param_utils(uvm_logic_vector_array_axi::sequence_simple_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING))
     uvm_common::rand_length   rdy_length;
     uvm_common::rand_rdy      rdy_rdy;
     logic[3 : 0] is_sop              = '0;
@@ -149,12 +149,19 @@ class sequence_simple_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends sequence_si
 
     function logic[1 : 0] sof_pos_count (int index);
         logic[1 : 0] ret = 0;
-        case (index)
-            0 : ret = 2'b00;
-            1 : ret = 2'b01;
-            2 : ret = 2'b10;
-            3 : ret = 2'b11;
-        endcase
+        if (TUSER_WIDTH == 183) begin
+            case (index)
+                0 : ret = 2'b00;
+                1 : ret = 2'b10;
+            endcase
+        end else begin
+            case (index)
+                0 : ret = 2'b00;
+                1 : ret = 2'b01;
+                2 : ret = 2'b10;
+                3 : ret = 2'b11;
+            endcase
+        end
         return ret;
     endfunction
 
@@ -171,23 +178,39 @@ class sequence_simple_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends sequence_si
         gen.tvalid         = 0;
         // SOF
         is_sop = '0;
+        // Requester side
         if (TUSER_WIDTH == 161) begin
             gen.tuser[67 : 64] = '0;
             gen.tuser[79 : 76] = '0;
             // TODO
             gen.tuser[63 : 0]  = '0;
-        end else begin
+        end else if (TUSER_WIDTH == 75) begin
             gen.tuser[33 : 32] = '0;
             gen.tuser[34]      = 1'b0;
             gen.tuser[38]      = 1'b0;
             // TODO
             gen.tuser[31 : 0]  = '0;
+        // Completition side
+        end else if(TUSER_WIDTH == 88 || TUSER_WIDTH == 85) begin
+            gen.tuser[40]      = 1'b0;
+            // TODO
+            gen.tuser[3 : 0]   = '1;
+            gen.tuser[7 : 4]   = '1;
+            gen.tuser[39 : 8]  = '0;
+        end else if(TUSER_WIDTH == 183) begin
+            gen.tuser[81 : 80] = '0;
+            gen.tuser[87 : 86] = '0;
+            // TODO
+            gen.tuser[7 : 0]   = '1;
+            gen.tuser[15 : 8]  = '1;
+            gen.tuser[79 : 16] = '0;
         end
         // EOF
         is_eop = '0;
         sop_cnt = 0;
         eop_cnt = 0;
         gen.tlast = 1'b0;
+        gen.tkeep = '1;
 
         for (int unsigned it = 0; it < REGIONS; it++) begin
             int unsigned index = 0;
@@ -217,12 +240,15 @@ class sequence_simple_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends sequence_si
                         break;
                     end
 
-                    if (index != 0) begin
+                    if (index != 0 || (it != 0 && STRADDLING == 0))
                         break;
-                    end
 
                     is_sop[sop_cnt]     = 1'b1;
                     is_sop_ptr[sop_cnt] = sof_pos_count(it);
+
+                    if(TUSER_WIDTH == 88 || TUSER_WIDTH == 85)
+                        gen.tuser[40]   = 1'b1;
+
                     sop_cnt++;
                     state_packet = state_packet_data;
                 end
@@ -237,10 +263,10 @@ class sequence_simple_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends sequence_si
                     // End of packet
                     if (data.data.size() <= data_index) begin
                         is_eop[eop_cnt]     = 1'b1;
-                        is_eop_ptr[eop_cnt] = it*4 + index;
+                        is_eop_ptr[eop_cnt] = it*BLOCK_SIZE + index;
                         gen.tlast           = 1'b1;
                         gen.tkeep           = '0;
-                        for (int unsigned jt = 0; jt < (it*4 + index); jt++) begin
+                        for (int unsigned jt = 0; jt < (it*BLOCK_SIZE + index+1); jt++) begin
                             gen.tkeep[jt] = 1'b1;
                         end
                         eop_cnt++;
@@ -253,14 +279,21 @@ class sequence_simple_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends sequence_si
             end
         end
 
+        // Requester side
         if (TUSER_WIDTH == 161) begin
             // SOF fill
             gen.tuser[67 : 64] = is_sop;
             // EOF fill
             gen.tuser[79 : 76] = is_eop;
-        end else begin
+        end else if (TUSER_WIDTH == 75) begin
             // SOF fill
             gen.tuser[33 : 32] = is_sop;
+        // Completition side
+        end else if(TUSER_WIDTH == 183) begin
+            // SOF fill
+            gen.tuser[81 : 80] = is_sop;
+            // EOF fill
+            gen.tuser[87 : 86] = is_eop;
         end
 
         for (int unsigned it = 0; it < REGIONS; it++) begin
@@ -271,12 +304,19 @@ class sequence_simple_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends sequence_si
                 if (is_eop[it]) begin
                     gen.tuser[(it*4 + 83) -: 4] = is_eop_ptr[it];
                 end
-            end else begin
+            end else if (TUSER_WIDTH == 75) begin
                 if (is_eop[it]) begin
                     gen.tuser[(it*4 + 37) -: 3] = is_eop_ptr[it];
                 end
                 // EOF fill
                 gen.tuser[((it*4) + 34)] = is_eop[it];
+            end else if(TUSER_WIDTH == 183) begin
+                if (is_sop[it]) begin
+                    gen.tuser[(it*2 + 83) -: 2] = is_sop_ptr[it];
+                end
+                if (is_eop[it]) begin
+                    gen.tuser[(it*4 + 91) -: 4] = is_eop_ptr[it];
+                end
             end
         end
         if (|is_eop) begin
@@ -294,8 +334,8 @@ class sequence_simple_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends sequence_si
 endclass
 
 
-class sequence_full_speed_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends sequence_simple_rx_base #(DATA_WIDTH, TUSER_WIDTH, REGIONS);
-    `uvm_object_param_utils(uvm_logic_vector_array_axi::sequence_full_speed_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS))
+class sequence_full_speed_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING) extends sequence_simple_rx_base #(DATA_WIDTH, TUSER_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING);
+    `uvm_object_param_utils(uvm_logic_vector_array_axi::sequence_full_speed_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING))
     uvm_common::rand_length   rdy_length;
     uvm_common::rand_rdy      rdy_rdy;
     logic[3 : 0] is_sop              = '0;
@@ -313,12 +353,19 @@ class sequence_full_speed_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends sequenc
 
     function logic[1 : 0] sof_pos_count (int index);
         logic[1 : 0] ret = 0;
-        case (index)
-            0 : ret = 2'b00;
-            1 : ret = 2'b01;
-            2 : ret = 2'b10;
-            3 : ret = 2'b11;
-        endcase
+        if (TUSER_WIDTH == 183) begin
+            case (index)
+                0 : ret = 2'b00;
+                1 : ret = 2'b10;
+            endcase
+        end else begin
+            case (index)
+                0 : ret = 2'b00;
+                1 : ret = 2'b01;
+                2 : ret = 2'b10;
+                3 : ret = 2'b11;
+            endcase
+        end
         return ret;
     endfunction
 
@@ -335,19 +382,39 @@ class sequence_full_speed_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends sequenc
         gen.tvalid         = 0;
         // SOF
         is_sop = '0;
+        // Requester side
         if (TUSER_WIDTH == 161) begin
             gen.tuser[67 : 64] = '0;
             gen.tuser[79 : 76] = '0;
-        end else begin
+            // TODO
+            gen.tuser[63 : 0]  = '0;
+        end else if (TUSER_WIDTH == 75) begin
             gen.tuser[33 : 32] = '0;
             gen.tuser[34]      = 1'b0;
             gen.tuser[38]      = 1'b0;
+            // TODO
+            gen.tuser[31 : 0]  = '0;
+        // Completition side
+        end else if(TUSER_WIDTH == 88 || TUSER_WIDTH == 85) begin
+            gen.tuser[40]      = 1'b0;
+            // TODO
+            gen.tuser[3 : 0]   = '1;
+            gen.tuser[7 : 4]   = '1;
+            gen.tuser[39 : 8]  = '0;
+        end else if(TUSER_WIDTH == 183) begin
+            gen.tuser[81 : 80] = '0;
+            gen.tuser[87 : 86] = '0;
+            // TODO
+            gen.tuser[7 : 0]   = '1;
+            gen.tuser[15 : 8]  = '1;
+            gen.tuser[79 : 16] = '0;
         end
         // EOF
         is_eop    = '0;
         sop_cnt   = 0;
         eop_cnt   = 0;
         gen.tlast = 1'b0;
+        gen.tkeep = '1;
 
         for (int unsigned it = 0; it < REGIONS; it++) begin
             int unsigned index = 0;
@@ -375,12 +442,15 @@ class sequence_full_speed_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends sequenc
                         break;
                     end
 
-                    if (index != 0) begin
+                    if (index != 0 || (it != 0 && STRADDLING == 0))
                         break;
-                    end
 
                     is_sop[sop_cnt]     = 1'b1;
                     is_sop_ptr[sop_cnt] = sof_pos_count(it);
+
+                    if(TUSER_WIDTH == 88 || TUSER_WIDTH == 85)
+                        gen.tuser[40]   = 1'b1;
+
                     sop_cnt++;
                     state_packet = state_packet_data;
                 end
@@ -395,9 +465,10 @@ class sequence_full_speed_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends sequenc
                     // End of packet
                     if (data.data.size() <= data_index) begin
                         is_eop[eop_cnt]     = 1'b1;
-                        is_eop_ptr[eop_cnt] = it*4 + index;
+                        is_eop_ptr[eop_cnt] = it*BLOCK_SIZE + index;
                         gen.tkeep           = '0;
-                        for (int unsigned jt = 0; jt < (it*4 + index); jt++) begin
+                        gen.tlast           = 1'b1;
+                        for (int unsigned jt = 0; jt < (it*BLOCK_SIZE + index+1); jt++) begin
                             gen.tkeep[jt] = 1'b1;
                         end
                         eop_cnt++;
@@ -410,14 +481,21 @@ class sequence_full_speed_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends sequenc
             end
         end
 
+        // Requester side
         if (TUSER_WIDTH == 161) begin
             // SOF fill
             gen.tuser[67 : 64] = is_sop;
             // EOF fill
             gen.tuser[79 : 76] = is_eop;
-        end else begin
+        end else if (TUSER_WIDTH == 75) begin
             // SOF fill
             gen.tuser[33 : 32] = is_sop;
+        // Completition side
+        end else if(TUSER_WIDTH == 183) begin
+            // SOF fill
+            gen.tuser[81 : 80] = is_sop;
+            // EOF fill
+            gen.tuser[87 : 86] = is_eop;
         end
 
         for (int unsigned it = 0; it < REGIONS; it++) begin
@@ -428,12 +506,19 @@ class sequence_full_speed_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends sequenc
                 if (is_eop[it]) begin
                     gen.tuser[(it*4 + 83) -: 4] = is_eop_ptr[it];
                 end
-            end else begin
+            end else if (TUSER_WIDTH == 75) begin
                 if (is_eop[it]) begin
                     gen.tuser[(it*4 + 37) -: 3] = is_eop_ptr[it];
                 end
                 // EOF fill
                 gen.tuser[((it*4) + 34)] = is_eop[it];
+            end else if(TUSER_WIDTH == 183) begin
+                if (is_sop[it]) begin
+                    gen.tuser[(it*2 + 83) -: 2] = is_sop_ptr[it];
+                end
+                if (is_eop[it]) begin
+                    gen.tuser[(it*4 + 91) -: 4] = is_eop_ptr[it];
+                end
             end
         end
         if (|is_eop) begin
@@ -442,8 +527,8 @@ class sequence_full_speed_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends sequenc
     endtask
 endclass
 
-class sequence_stop_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends sequence_simple_rx_base #(DATA_WIDTH, TUSER_WIDTH, REGIONS);
-    `uvm_object_param_utils(uvm_logic_vector_array_axi::sequence_stop_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS))
+class sequence_stop_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING) extends sequence_simple_rx_base #(DATA_WIDTH, TUSER_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING);
+    `uvm_object_param_utils(uvm_logic_vector_array_axi::sequence_stop_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING))
 
     constraint c_hl_transations_stop {
         hl_transactions dist {[hl_transactions_min:hl_transactions_min + 100] :/ 50, [hl_transactions_max-100:hl_transactions_max] :/ 50, [hl_transactions_min:hl_transactions_max] :/100};
@@ -461,13 +546,27 @@ class sequence_stop_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends sequence_simp
 
         gen.tvalid         = 0;
 
+        // Requester side
         if (TUSER_WIDTH == 161) begin
             gen.tuser[67 : 64] = '0;
             gen.tuser[79 : 76] = '0;
-        end else begin
+        end else if (TUSER_WIDTH == 75) begin
             gen.tuser[33 : 32] = '0;
             gen.tuser[34]      = 1'b0;
             gen.tuser[38]      = 1'b0;
+        // Completition side
+        end else if(TUSER_WIDTH == 88 || TUSER_WIDTH == 85) begin
+            gen.tuser[40]      = 1'b0;
+            gen.tuser[3 : 0]   = '1;
+            gen.tuser[7 : 4]   = '1;
+            gen.tuser[39 : 8]  = '0;
+            gen.tlast          = 1'b0;
+        end else if(TUSER_WIDTH == 183) begin
+            gen.tuser[7 : 0]   = '1;
+            gen.tuser[15 : 8]  = '1;
+            gen.tuser[79 : 16] = '0;
+            gen.tuser[81 : 80] = '0;
+            gen.tuser[87 : 86] = '0;
         end
 
         if (hl_transactions != 0) begin
@@ -479,9 +578,9 @@ endclass
 // /////////////////////////////////////////////////////////////////////////
 // // SEQUENCE LIBRARY RX
 
-class sequence_lib_rx#(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends uvm_common::sequence_library#(config_sequence, uvm_axi::sequence_item #(DATA_WIDTH, TUSER_WIDTH, REGIONS));
-  `uvm_object_param_utils(uvm_logic_vector_array_axi::sequence_lib_rx#(DATA_WIDTH, TUSER_WIDTH, REGIONS))
-  `uvm_sequence_library_utils(uvm_logic_vector_array_axi::sequence_lib_rx#(DATA_WIDTH, TUSER_WIDTH, REGIONS))
+class sequence_lib_rx#(DATA_WIDTH, TUSER_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING) extends uvm_common::sequence_library#(config_sequence, uvm_axi::sequence_item #(DATA_WIDTH, TUSER_WIDTH, REGIONS));
+  `uvm_object_param_utils(uvm_logic_vector_array_axi::sequence_lib_rx#(DATA_WIDTH, TUSER_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING))
+  `uvm_sequence_library_utils(uvm_logic_vector_array_axi::sequence_lib_rx#(DATA_WIDTH, TUSER_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING))
 
   function new(string name = "sequence_lib_rx");
     super.new(name);
@@ -492,9 +591,8 @@ class sequence_lib_rx#(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends uvm_common::seq
     // can be useful in specific tests
     virtual function void init_sequence(config_sequence param_cfg = null);
         super.init_sequence(param_cfg);
-        this.add_sequence(uvm_logic_vector_array_axi::sequence_simple_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS)::get_type());
-        this.add_sequence(uvm_logic_vector_array_axi::sequence_full_speed_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS)::get_type());
-        this.add_sequence(uvm_logic_vector_array_axi::sequence_stop_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS)::get_type());
+        this.add_sequence(uvm_logic_vector_array_axi::sequence_simple_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING)::get_type());
+        this.add_sequence(uvm_logic_vector_array_axi::sequence_full_speed_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING)::get_type());
+        this.add_sequence(uvm_logic_vector_array_axi::sequence_stop_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING)::get_type());
     endfunction
 endclass
-
