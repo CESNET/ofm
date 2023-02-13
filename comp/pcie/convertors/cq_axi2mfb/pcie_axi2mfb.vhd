@@ -139,7 +139,7 @@ architecture full of PCIE_CQ_AXI2MFB is
     
     -- RX AXI TUSER division
     signal cq_axi_user_sop         : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal cq_axi_user_sop_ptr     : std_logic_vector(MFB_REGIONS*2-1 downto 0);
+    signal cq_axi_user_sop_ptr     : slv_array_t(MFB_REGIONS-1 downto 0)(2-1 downto 0);
     signal cq_axi_user_eop         : std_logic_vector(MFB_REGIONS-1 downto 0);
     signal cq_axi_user_eop_ptr     : slv_array_t(MFB_REGIONS-1 downto 0)(4-1 downto 0);
     signal cq_axi_user_tph_present : std_logic_vector(MFB_REGIONS-1 downto 0);
@@ -204,13 +204,12 @@ begin
 
     -- =========================================================================
     -- Conversion AXI to MFB for ULTRASCALE 512b variant with straddling
-    --
-    -- Has not been tested
     -- =========================================================================
 
     axi_512b_g: if (AXI_CQUSER_WIDTH = 183 and STRADDLING) generate
         cq_axi_user_sop         <= CQ_AXI_USER(82-1 downto 80);
-        cq_axi_user_sop_ptr     <= CQ_AXI_USER(86-1 downto 82);
+        cq_axi_user_sop_ptr(0)  <= CQ_AXI_USER(84-1 downto 82);
+        cq_axi_user_sop_ptr(1)  <= CQ_AXI_USER(86-1 downto 84);
         cq_axi_user_eop         <= CQ_AXI_USER(88-1 downto 86);
         cq_axi_user_eop         <= CQ_AXI_USER(88-1 downto 86);
         cq_axi_user_eop_ptr(0)  <= CQ_AXI_USER(92-1 downto 88);
@@ -232,22 +231,28 @@ begin
             -- for each input region
             for i in 0 to MFB_REGIONS-1 loop
 
+                case cq_axi_user_sop_ptr(i) is
+                    when "00"   => ptr_sop := 0;
+                    when "10"   => ptr_sop := 1;
+                    when others => ptr_sop := 0;
+                end case;
+
                 if (cq_axi_user_sop(i) = '1') then
                     CQ_MFB_SOF(ptr_sop)                 <= '1';
-                    CQ_MFB_SOF_POS(i)                   <= or cq_axi_user_sop_ptr(i*2-1 downto i*2);
+                    CQ_MFB_SOF_POS(i)                   <= or cq_axi_user_sop_ptr(i);
                     CQ_TPH_PRESENT(i)                   <= CQ_AXI_USER(97+i);
                     CQ_TPH_TYPE((i+1)*2-1 downto i*2)   <= CQ_AXI_USER((i)*2+101-1 downto i*2+99);
                     CQ_TPH_ST_TAG((i+1)*8-1 downto i*8) <= CQ_AXI_USER((i)*8+111-1 downto i*8+103);
                 end if;
-                ptr_sop := ptr_sop + 1;
 
                 if (cq_axi_user_eop(i) = '1') then
                     if cq_axi_user_eop_ptr(i)(EOP_POS_WIDTH) = '1' then
                         CQ_MFB_EOF(1) <= '1';
+                        CQ_MFB_EOF_POS(2*EOP_POS_WIDTH-1 downto EOP_POS_WIDTH) <= cq_axi_user_eop_ptr(i)(EOP_POS_WIDTH-1 downto 0);
                     else
                         CQ_MFB_EOF(0) <= '1';
+                        CQ_MFB_EOF_POS(EOP_POS_WIDTH-1 downto 0) <= cq_axi_user_eop_ptr(i)(EOP_POS_WIDTH-1 downto 0);
                     end if;
-                    CQ_MFB_EOF_POS((i+1)*EOP_POS_WIDTH-1 downto i*EOP_POS_WIDTH) <= cq_axi_user_eop_ptr(i)(EOP_POS_WIDTH-1 downto 0);
                 end if;
             end loop;
             ptr_sop := 0;
@@ -289,10 +294,7 @@ begin
             if (CQ_AXI_LAST = '1') then
 
                 for i in 0 to ((AXI_DATA_WIDTH/32)/2-1) loop
-                    eof_pos := eof_pos + 1;
-                    eof(0) := '0';
-
-                    if CQ_AXI_KEEP(i) = '1' and not (CQ_AXI_KEEP(i+1) = '0') then
+                    if (CQ_AXI_KEEP(i) = '1' and not (CQ_AXI_KEEP(i+1) = '0')) or (CQ_AXI_KEEP(i) = '1' and unsigned(CQ_AXI_KEEP) = 1) then
                         eof(0) := '1';
                     end if;
                     if (CQ_AXI_KEEP(i+1) = '1' and i = ((AXI_DATA_WIDTH/32)/2-1)) then
@@ -300,6 +302,7 @@ begin
                         eof(1) := '1';
                     end if;
                     exit when (CQ_AXI_KEEP(i) = '0');
+                    eof_pos := eof_pos + 1;
                 end loop;
 
                 CQ_MFB_EOF_POS(EOP_POS_WIDTH-1 downto 0) <= std_logic_vector((eof_pos-1));
@@ -307,8 +310,8 @@ begin
 
                 -- Check keep in second region
                 for i in (AXI_DATA_WIDTH/32)/2 to ((AXI_DATA_WIDTH/32)-1) loop
-                    eof_pos := eof_pos + 1;
                     exit when (CQ_AXI_KEEP(i) = '0');
+                    eof_pos := eof_pos + 1;
                 end loop;
 
                 CQ_MFB_EOF_POS(2*EOP_POS_WIDTH-1 downto EOP_POS_WIDTH) <= std_logic_vector((eof_pos-1));
