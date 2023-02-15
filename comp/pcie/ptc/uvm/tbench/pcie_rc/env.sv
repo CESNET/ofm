@@ -20,8 +20,8 @@ class env #(MFB_DOWN_REGIONS, MFB_DOWN_REG_SIZE, MFB_DOWN_BLOCK_SIZE, MFB_DOWN_I
     uvm_ptc_info_rc::agent                     m_info_rc_agent;
     // Low level
     uvm_logic_vector_array_mfb::env_rx #(MFB_DOWN_REGIONS, MFB_DOWN_REG_SIZE, MFB_DOWN_BLOCK_SIZE, MFB_DOWN_ITEM_WIDTH, PCIE_DOWNHDR_WIDTH) m_env_rc_mfb;
-    uvm_logic_vector_mvb::env_rx #(MFB_DOWN_REGIONS, PCIE_PREFIX_WIDTH)                                                    m_env_rc_prefix_mvb;
-    uvm_logic_vector_array_axi::env_rx #(RC_TDATA_WIDTH, RC_TUSER_WIDTH, MFB_DOWN_ITEM_WIDTH, MFB_DOWN_REGIONS)            m_env_rc_axi;
+    uvm_logic_vector_mvb::env_rx #(MFB_DOWN_REGIONS, PCIE_PREFIX_WIDTH)                                                                 m_env_rc_prefix_mvb;
+    uvm_logic_vector_array_axi::env_rx #(RC_TDATA_WIDTH, RC_TUSER_WIDTH, MFB_DOWN_ITEM_WIDTH, MFB_DOWN_REGIONS, MFB_DOWN_BLOCK_SIZE, 1) m_env_rc_axi;
 
     uvm_pcie_rc::tr_planner #(HDR_USER_WIDTH) tr_plan;
     // Implement later
@@ -83,7 +83,7 @@ class env #(MFB_DOWN_REGIONS, MFB_DOWN_REG_SIZE, MFB_DOWN_BLOCK_SIZE, MFB_DOWN_I
         uvm_config_db #(uvm_logic_vector_array_axi::config_item)::set(this, "m_env_rc_axi", "m_config", m_env_rc_axi_cfg);
         m_env_rc_mfb        = uvm_logic_vector_array_mfb::env_rx #(MFB_DOWN_REGIONS, MFB_DOWN_REG_SIZE, MFB_DOWN_BLOCK_SIZE, MFB_DOWN_ITEM_WIDTH, PCIE_DOWNHDR_WIDTH)::type_id::create("m_env_rc_mfb", this);
         m_env_rc_prefix_mvb = uvm_logic_vector_mvb::env_rx #(MFB_DOWN_REGIONS, PCIE_PREFIX_WIDTH)::type_id::create("m_env_rc_prefix_mvb", this);
-        m_env_rc_axi = uvm_logic_vector_array_axi::env_rx #(RC_TDATA_WIDTH, RC_TUSER_WIDTH, MFB_DOWN_ITEM_WIDTH, MFB_DOWN_REGIONS)::type_id::create("m_env_rc_axi", this);
+        m_env_rc_axi = uvm_logic_vector_array_axi::env_rx #(RC_TDATA_WIDTH, RC_TUSER_WIDTH, MFB_DOWN_ITEM_WIDTH, MFB_DOWN_REGIONS, MFB_DOWN_BLOCK_SIZE, 1)::type_id::create("m_env_rc_axi", this);
 
         m_monitor = monitor #((HDR_USER_WIDTH), DEVICE)::type_id::create("m_monitor", this);
 
