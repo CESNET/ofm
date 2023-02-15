@@ -37,11 +37,12 @@ class ex_test extends uvm_test;
     // Create environment and Run sequences on their sequencers
     virtual task run_phase(uvm_phase phase);
         virt_sequence #(MIN_SIZE, PKT_MTU, DATA_SIZE_MAX, MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, OUT_META_WIDTH) m_vseq;
+        m_vseq = virt_sequence#(MIN_SIZE, PKT_MTU, DATA_SIZE_MAX, MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, OUT_META_WIDTH)::type_id::create("m_vseq");
 
         phase.raise_objection(this);
+        m_vseq.init(phase);
 
         //RUN MFB RX SEQUENCE
-        m_vseq = virt_sequence#(MIN_SIZE, PKT_MTU, DATA_SIZE_MAX, MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, OUT_META_WIDTH)::type_id::create("m_vseq");
         m_vseq.randomize();
         m_vseq.start(m_env.vscr);
 

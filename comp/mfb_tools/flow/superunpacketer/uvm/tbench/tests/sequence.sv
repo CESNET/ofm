@@ -13,21 +13,24 @@ class virt_sequence #(MIN_SIZE, PKT_MTU, DATA_SIZE_MAX, MFB_REGIONS, MFB_REGION_
         super.new(name);
     endfunction
 
-    uvm_reset::sequence_start                                                                               m_reset;
-    uvm_logic_vector_array::sequence_lib #(MFB_ITEM_WIDTH)                                                  m_byte_array_sq_lib;
-    uvm_superpacket_header::sequence_simple                                                                 m_info;
-    uvm_superpacket_size::sequence_lib#(MIN_SIZE, PKT_MTU)                                                  m_size_sq_lib;
-    uvm_mfb::sequence_lib_tx#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, OUT_META_WIDTH) m_mfb_seq;
-    uvm_mvb::sequence_lib_tx#(MFB_REGIONS, OUT_META_WIDTH)                                                  m_mvb_seq;
+    uvm_reset::sequence_start                                                                                            m_reset;
+    uvm_sequence#(uvm_mfb::sequence_item#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, OUT_META_WIDTH)) m_mfb_seq;
+    uvm_sequence#(uvm_mvb::sequence_item#(MFB_REGIONS, OUT_META_WIDTH))                                                  m_mvb_seq;
+    uvm_logic_vector_array::sequence_lib #(MFB_ITEM_WIDTH)                                                               m_byte_array_sq_lib;
+    uvm_superpacket_header::sequence_simple                                                                              m_info;
+    uvm_superpacket_size::sequence_lib#(MIN_SIZE, PKT_MTU)                                                               m_size_sq_lib;
+    uvm_mfb::sequence_lib_tx#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, OUT_META_WIDTH)              m_mfb_seq_lib;
+    uvm_mvb::sequence_lib_tx#(MFB_REGIONS, OUT_META_WIDTH)                                                               m_mvb_seq_lib;
+    uvm_phase phase;
 
-    virtual function void init();
+    virtual function void init(uvm_phase phase);
 
         m_reset             = uvm_reset::sequence_start::type_id::create("m_reset_seq");
         m_byte_array_sq_lib = uvm_logic_vector_array::sequence_lib #(MFB_ITEM_WIDTH)::type_id::create("m_byte_array_seq_lib");
         m_info              = uvm_superpacket_header::sequence_simple::type_id::create("m_info");
         m_size_sq_lib       = uvm_superpacket_size::sequence_lib#(MIN_SIZE, PKT_MTU)::type_id::create("m_size_seq_lib");
-        m_mvb_seq           = uvm_mvb::sequence_lib_tx#(MFB_REGIONS, OUT_META_WIDTH)::type_id::create("m_mvb_seq");
-        m_mfb_seq           = uvm_mfb::sequence_lib_tx#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, OUT_META_WIDTH)::type_id::create("m_mfb_seq");
+        m_mvb_seq_lib           = uvm_mvb::sequence_lib_tx#(MFB_REGIONS, OUT_META_WIDTH)::type_id::create("m_mvb_seq_lib");
+        m_mfb_seq_lib       = uvm_mfb::sequence_lib_tx#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, OUT_META_WIDTH)::type_id::create("m_mfb_seq_lib");
 
         m_byte_array_sq_lib.init_sequence();
         m_byte_array_sq_lib.cfg = new();
@@ -41,13 +44,17 @@ class virt_sequence #(MIN_SIZE, PKT_MTU, DATA_SIZE_MAX, MFB_REGIONS, MFB_REGION_
         m_size_sq_lib.max_random_count = 200;
         m_size_sq_lib.randomize();
 
-        m_mvb_seq.init_sequence();
-        m_mvb_seq.min_random_count = 100;
-        m_mvb_seq.max_random_count = 200;
+        m_mvb_seq_lib.init_sequence();
+        m_mvb_seq_lib.min_random_count = 100;
+        m_mvb_seq_lib.max_random_count = 200;
+        m_mvb_seq = m_mvb_seq_lib;
 
-        m_mfb_seq.init_sequence();
-        m_mfb_seq.min_random_count = 100;
-        m_mfb_seq.max_random_count = 200;
+        m_mfb_seq_lib.init_sequence();
+        m_mfb_seq_lib.min_random_count = 100;
+        m_mfb_seq_lib.max_random_count = 200;
+        m_mfb_seq = m_mfb_seq_lib;
+
+        this.phase = phase;
 
     endfunction
 
@@ -73,8 +80,6 @@ class virt_sequence #(MIN_SIZE, PKT_MTU, DATA_SIZE_MAX, MFB_REGIONS, MFB_REGION_
     endtask
 
     task body();
-
-        init();
 
         fork
             run_reset();
