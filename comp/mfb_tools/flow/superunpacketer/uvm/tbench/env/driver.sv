@@ -4,8 +4,8 @@
 
 // SPDX-License-Identifier: BSD-3-Clause
 
-class driver#(META_WIDTH, HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE) extends uvm_component;
-    `uvm_component_param_utils(uvm_superunpacketer::driver#(META_WIDTH, HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE))
+class driver#(META_WIDTH, HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, OFF_PIPE_STAGES) extends uvm_component;
+    `uvm_component_param_utils(uvm_superunpacketer::driver#(META_WIDTH, HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, OFF_PIPE_STAGES))
 
     uvm_seq_item_pull_port #(uvm_logic_vector_array::sequence_item #(8), uvm_logic_vector_array::sequence_item #(8)) seq_item_port_byte_array;
     uvm_seq_item_pull_port #(uvm_superpacket_header::sequence_item, uvm_superpacket_header::sequence_item)           seq_item_port_header;
@@ -24,9 +24,11 @@ class driver#(META_WIDTH, HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_S
     uvm_logic_vector_array::sequence_item #(8) byte_array_new;
     uvm_logic_vector_array::sequence_item #(8) byte_array_out;
 
+    int pkt_cnt_stat[OFF_PIPE_STAGES] = '{default:'0};
     int state         = 0;
     int act_size      = 0;
     int sp_cnt        = 0;
+    int pkt_cnt       = 0;
     int end_of_packet = 0;
     int sup_align     = 0;
     logic done        = 1'b0;
@@ -43,6 +45,9 @@ class driver#(META_WIDTH, HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_S
 
         if ((act_size + HEADER_SIZE/8 + info.length) >= size_of_sp.sp_size) begin
             info.length = (size_of_sp.sp_size - (act_size + HEADER_SIZE/8));
+            info.next = 1'b0;
+        end
+        if (pkt_cnt == OFF_PIPE_STAGES) begin
             info.next = 1'b0;
         end
         end_of_packet = info.length + HEADER_SIZE/8;
@@ -76,7 +81,7 @@ class driver#(META_WIDTH, HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_S
         //     end
         // end
 
-        if (act_size == size_of_sp.sp_size && VERBOSITY >= 2) begin
+        if (act_size == size_of_sp.sp_size && VERBOSITY >= 3) begin
             $write("SIZE OF FIFO %d\n", data_fifo.size());
             $write("SIZE OF SP %d\n", size_of_sp.sp_size);
         end
@@ -104,6 +109,7 @@ class driver#(META_WIDTH, HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_S
             while (done != 1'b1) begin
 
                 seq_item_port_byte_array.get_next_item(byte_array_req);
+                pkt_cnt++;
                 seq_item_port_header.get_next_item(info_req);
 
                 $cast(byte_array_new, byte_array_req.clone());
@@ -118,6 +124,8 @@ class driver#(META_WIDTH, HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_S
                 fill_tr(byte_array_new, header);
                 if (header[15] == 1'b0) begin
                     done                = 1'b1;
+                    pkt_cnt_stat[pkt_cnt] += 1;
+                    pkt_cnt             = 1'b0;
                     byte_array_out.data = data_fifo;
                     // sup_align = MFB_BLOCK_SIZE - (size_of_sp.sp_size % MFB_BLOCK_SIZE);
                     // if (byte_array_out.size() > size_of_sp.sp_size + sup_align) begin
@@ -140,5 +148,13 @@ class driver#(META_WIDTH, HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_S
 
         end
     endtask
+
+    function void report_phase(uvm_phase phase);
+        $write("Number of packets in SP statistic:\n");
+        for (int unsigned it = 0; it < OFF_PIPE_STAGES; it++) begin
+            $write("Counter number %d: %d\n", it, pkt_cnt_stat[it]);
+        end
+    endfunction
+
 
 endclass
