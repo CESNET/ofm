@@ -16,6 +16,8 @@ package uvm_logic_vector_array_mfb;
     `include "monitor.sv"
     `include "sequencer.sv"
     `include "sequence.sv"
+    `include "sequence_pcie.sv"
+    `include "sequence_lib.sv"
     `include "env.sv"
 
 endpackage

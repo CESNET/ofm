@@ -15,10 +15,16 @@ class config_sequence extends uvm_object;
     // configuration of probability of rdy signal in percentige
     int unsigned rdy_probability_min = 0;   // inside [0:100:ta]
     int unsigned rdy_probability_max = 100; // inside [0:100]
+    // Straddling is used only with seq_type == "PCIE"
+    logic straddling                 = 0;
 
     function void probability_set(int unsigned min, int unsigned max);
         rdy_probability_min = min;
         rdy_probability_max = max;
+    endfunction
+
+    function void straddling_set(logic value);
+        straddling = value;
     endfunction
 
     function void space_size_set(int unsigned min, int unsigned max);
@@ -35,6 +41,9 @@ class config_item extends uvm_object;
     // configuration variables
     uvm_active_passive_enum active;
     string interface_name;
+    // Type of sequence library
+    // Valid is only MFB or PCIE
+    string seq_type      = "MFB";
     meta_type meta_behav = META_NONE;  // Metadata behaviour -----------------------------
                                 // META_SOF means that metadata are paired with SOF position
                                 // META_EOF means that metadata are paired with EOF position
