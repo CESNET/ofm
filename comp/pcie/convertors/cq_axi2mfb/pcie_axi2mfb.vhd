@@ -326,7 +326,7 @@ begin
     -- It's defined for STRADDLING and non STRADDLING operation
     -- =========================================================================
 
-    axi_straddling_g: if STRADDLING generate
+    axi_straddling_g: if MFB_REGIONS > 1 generate
         fbe_lbe_str_pr : process (all)
         begin
             CQ_FBE <= (others => '0');
