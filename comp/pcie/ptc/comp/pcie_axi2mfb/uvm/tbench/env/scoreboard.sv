@@ -7,96 +7,57 @@
 class scoreboard#(ITEM_WIDTH) extends uvm_scoreboard;
     `uvm_component_param_utils(uvm_ptc_pcie_axi2mfb::scoreboard#(ITEM_WIDTH))
 
-    int unsigned print_regions = 2;
-    int unsigned print_region_width = 8;
-
-    int unsigned compared;
-    int unsigned errors;
-
-    uvm_analysis_export #(uvm_logic_vector_array::sequence_item #(ITEM_WIDTH))    input_data;
+    uvm_common::subscriber #(uvm_logic_vector_array::sequence_item #(ITEM_WIDTH)) input_data;
     uvm_analysis_export #(uvm_logic_vector_array::sequence_item #(ITEM_WIDTH))    out_data;
 
-    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item #(ITEM_WIDTH))  dut_data;
-    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item #(ITEM_WIDTH))  model_data;
+    uvm_common::comparer_ordered #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)) data_cmp;
 
-    model#(ITEM_WIDTH) m_model;
+    uvm_pcie_mfb2avst::model#(ITEM_WIDTH, 0) m_model;
 
     // Contructor of scoreboard.
     function new(string name, uvm_component parent);
         super.new(name, parent);
 
-        input_data = new("input_data", this);
         out_data   = new("out_data", this);
-        dut_data   = new("dut_data", this);
-        model_data = new("model_data", this);
-        compared   = 0;
-        errors   = 0;
-
     endfunction
 
     function int unsigned used();
         int unsigned ret = 0;
-        ret |= (dut_data.used() != 0);
-        ret |= (model_data.used() != 0);
+        ret |= data_cmp.used();
+        ret |= data_cmp.errors != 0;
         return ret;
     endfunction
 
     function void build_phase(uvm_phase phase);
-        m_model = model#(ITEM_WIDTH)::type_id::create("m_model", this);
+        m_model = uvm_pcie_mfb2avst::model#(ITEM_WIDTH, 0)::type_id::create("m_model", this);
+
+        input_data = uvm_common::subscriber #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))::type_id::create("input_data", this);
+
+        data_cmp   = uvm_common::comparer_ordered #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))::type_id::create("data_cmp", this);
     endfunction
 
     function void connect_phase(uvm_phase phase);
 
         // connects input data to the input of the model
-        input_data.connect(m_model.input_data.analysis_export);
+        input_data.port.connect(m_model.data_in.analysis_export);
 
         // processed data from the output of the model connected to the analysis fifo
-        m_model.out_data.connect(model_data.analysis_export);
+        m_model.data_out.connect(data_cmp.analysis_imp_model);
         // connects the data from the DUT to the analysis fifo
-        out_data.connect(dut_data.analysis_export);
+        out_data.connect(data_cmp.analysis_imp_dut);
 
     endfunction
 
-    task run_phase(uvm_phase phase);
+    virtual function void report_phase(uvm_phase phase);
+        string msg = "\n";
+        $swrite(msg, "%s\tCompared/errors: %0d/%0d\n", msg, data_cmp.compared, data_cmp.errors);
 
-        uvm_logic_vector_array::sequence_item #(ITEM_WIDTH) tr_dut;
-        uvm_logic_vector_array::sequence_item #(ITEM_WIDTH) tr_model;
-
-        forever begin
-            string debug_msg = "";
-
-            model_data.get(tr_model);
-            dut_data.get(tr_dut);
-
-            $swrite(debug_msg, "%s\n\t Model TR: %s\n", debug_msg, tr_model.convert2block(print_regions, print_region_width));
-            $swrite(debug_msg, "%s\n\t DUT TR: %s\n", debug_msg, tr_dut.convert2block(print_regions, print_region_width));
-            `uvm_info(this.get_full_name(), debug_msg ,UVM_FULL);
-
-            compared++;
-
-            if (tr_model.compare(tr_dut) == 0) begin
-                string msg;
-
-                $swrite(msg, "\n\tPacket comparison failed! \n\tModel packet:\n%s\n\tDUT packet:\n%s", tr_model.convert2block(print_regions, print_region_width), tr_dut.convert2block(print_regions, print_region_width));
-                `uvm_error(this.get_full_name(), msg);
-                errors++;
-            end
+        if (this.used() == 0) begin
+            `uvm_info(get_type_name(), $sformatf("%s\n\n\t---------------------------------------\n\t----     VERIFICATION SUCCESS      ----\n\t---------------------------------------", msg), UVM_NONE)
+        end else begin
+            `uvm_info(get_type_name(), $sformatf("%s\n\n\t---------------------------------------\n\t----     VERIFICATION FAIL      ----\n\t---------------------------------------", msg), UVM_NONE)
         end
 
-    endtask
-
-    function void report_phase(uvm_phase phase);
-
-        string msg = "";
-
-        $swrite(msg, "%s\n\t Transaction compared %0d, errors %0d", msg, compared, errors);
-        $swrite(msg, "%s\n\t DUT USED: [%0d] Model USED: [%0d]", msg, dut_data.used(), model_data.used());
-
-       if (errors == 0 && this.used() == 0) begin
-           `uvm_info(get_type_name(), {msg, "\n\n\t---------------------------------------\n\t----     VERIFICATION SUCCESS      ----\n\t---------------------------------------"}, UVM_NONE)
-       end else begin
-           `uvm_info(get_type_name(), {msg, "\n\n\t---------------------------------------\n\t----     VERIFICATION FAIL      ----\n\t---------------------------------------"}, UVM_NONE)
-       end
     endfunction
 
 endclass

@@ -14,7 +14,6 @@ package uvm_ptc_pcie_axi2mfb;
     import uvm_pkg::*;
 
     `include "sequencer.sv"
-    `include "model.sv"
     `include "scoreboard.sv"
     `include "env.sv"
 
