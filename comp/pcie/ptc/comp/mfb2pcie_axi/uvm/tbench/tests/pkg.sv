@@ -33,6 +33,9 @@ package test;
     // DATA=256, RQ=60  for Gen3x16 PCIe (Virtex 7 Series) - with straddling!
     parameter DATA_WIDTH      = 512;
     parameter TUSER_WIDTH     = 137;
+    // MFB(2,1,8,32) means straddling on
+    // MFB(1,1,8,32) means straddling off
+    parameter STRADDLING      = REGIONS > 1 ? 1 : 0;
 
     parameter DRAIN_TIME         = 20ns;
     parameter TRANSACTION_COUNT  = 1000000;

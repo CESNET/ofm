@@ -23,16 +23,12 @@ module DUT (
         assign sof_pos = mfb_rx.SOF_POS;
 
     PTC_MFB2PCIE_AXI #(
-        .DEVICE           (DEVICE),
         .MFB_REGIONS      (REGIONS),
         .MFB_REGION_SIZE  (REGION_SIZE),
         .MFB_BLOCK_SIZE   (BLOCK_SIZE),
         .MFB_ITEM_WIDTH   (ITEM_WIDTH),
-        .AXI_DATA_WIDTH   (DATA_WIDTH),
         .AXI_RQUSER_WIDTH (TUSER_WIDTH)
     ) VHDL_DUT_U (
-        .CLK            (CLK),
-        .RESET          (RST),
 
         .RX_MFB_DATA    (mfb_rx.DATA),
         .RX_MFB_SOF_POS (sof_pos),

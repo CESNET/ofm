@@ -8,7 +8,7 @@ class ex_test extends uvm_test;
     `uvm_component_utils(test::ex_test);
 
     // declare the Environment reference variable
-    uvm_ptc_mfb2pcie_axi::env #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, DATA_WIDTH, TUSER_WIDTH) m_env;
+    uvm_ptc_mfb2pcie_axi::env #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, DATA_WIDTH, TUSER_WIDTH, STRADDLING) m_env;
     int unsigned timeout;
 
     // ------------------------------------------------------------------------
@@ -21,7 +21,7 @@ class ex_test extends uvm_test;
     // Build phase function, e.g. the creation of test's internal objects
     function void build_phase(uvm_phase phase);
         // Initializing the reference to the environment
-        m_env = uvm_ptc_mfb2pcie_axi::env #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, DATA_WIDTH, TUSER_WIDTH)::type_id::create("m_env", this);
+        m_env = uvm_ptc_mfb2pcie_axi::env #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, DATA_WIDTH, TUSER_WIDTH, STRADDLING)::type_id::create("m_env", this);
     endfunction
 
     virtual task tx_seq(uvm_phase phase);
