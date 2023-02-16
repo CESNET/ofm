@@ -267,8 +267,8 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, DEVICE, USR_ITEM_WIDTH, USER_META_WID
                 $swrite(msg, "%sDUT_META.USED   %d\n", msg, tr_compare[chan].dut_meta.used()                              );
                 $swrite(msg, "%s================================================================================= \n", msg);
 
-                if (discard_byte_cnt[chan] != m_model.cnt_reg[chan].discard_byte_cnt &&
-                    discard_dma_cnt[chan]  != m_model.cnt_reg[chan].discard_dma_cnt) begin
+                if (byte_cnt[chan] != m_model.cnt_reg[chan].byte_cnt &&
+                    dma_cnt[chan]  != m_model.cnt_reg[chan].dma_cnt) begin
                     string msg_1;
                     $swrite(msg_1, "%sMODEL BYTE COUNT %d and DUT BYTE COUNT %d\n", msg_1, byte_cnt[chan], m_model.cnt_reg[chan].byte_cnt);
                     $swrite(msg_1, "%sMODEL BYTE COUNT %d and DUT BYTE COUNT %d\n", msg_1, dma_cnt[chan], m_model.cnt_reg[chan].dma_cnt);
