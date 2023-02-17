@@ -54,11 +54,11 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 entity mgmt is
    generic (
-      -- Max 20
+      -- Number of PCS lanes. Max 20
       NUM_LANES : natural range 0 to 20 := 4;
       -- Max 10
       PMA_LANES : natural range 0 to 10 := 4;
-      -- Surrent PMA/PCS speed. Replaces SPEEDxx when not zero
+      -- Current PMA/PCS speed. Replaces SPEEDxx when not zero
       SPEED     : natural := 0;
       -- Speed capabilities, see 802.3 table 45-6. Replaces GBASExx_ABLE when not zero.   
       SPEED_CAP : std_logic_vector(15 downto 0) := X"0000";
@@ -70,15 +70,21 @@ entity mgmt is
       GBASE40_ABLE  : std_logic := '1';
       -- 100GE capable
       GBASE100_ABLE : std_logic := '0';
-      -- Clause 91 RS-FEC capable
+      -- RS-FEC capable
       RSFEC_ABLE    : std_logic := '0';
+      -- Auto-negotiation capable
+      AN_ABLE       : std_logic := '0';
+      -- Default value of FEC_EN (must be set '1' when the RSFEC is enabled at poweron or reset)
+      RSFEC_EN_INIT : std_logic := '0';
       -- PMA_CONTROL power-up and reset defaults
       PMA_CONTROL_INIT    : std_logic_vector(31 downto 0) := (others => '0');
       PMA_PRECURSOR_INIT  : std_logic_vector(31 downto 0) := (others => '0');  
       PMA_POSTCURSOR_INIT : std_logic_vector(31 downto 0) := (others => '0'); 
       PMA_DRIVE_INIT      : std_logic_vector(31 downto 0) := (others => '0');
-		DRP_DWIDTH          : natural := 16;
-		DRP_AWIDTH          : natural := 16;
+      -- Width of the DRP data
+      DRP_DWIDTH          : natural := 16;
+      -- Width of the DRP address
+      DRP_AWIDTH          : natural := 16;
       -- Select correct FPGA device.
       -- "AGILEX", "STRATIX10", "ULTRASCALE", ...
       DEVICE : string  := "ULTRASCALE"
@@ -304,7 +310,7 @@ signal pma_drive_r                 : std_logic_vector(PMA_CONTROL'range) := PMA_
 -- RS-FEC control/status
 signal fec_tx_en_r                 : std_logic := '1'; -- TX FEC enable
 signal fec_rx_en_r                 : std_logic := '1'; -- RX FEC enable 
-signal fec_en_r                    : std_logic; -- RX FEC enable
+signal fec_en_r                    : std_logic := RSFEC_EN_INIT; -- RX FEC enable
 signal fec_ind_bypass_r            : std_logic; -- FEC bypass indication 
 signal fec_cor_bypass_r            : std_logic; -- FEC bypass correction
 signal FEC_AM_LOCK_sync            : std_logic_vector(FEC_AM_LOCK'range); 
@@ -748,19 +754,42 @@ begin
                 when 400 =>
                    mi_drd_i(16+6 downto 16+3) <= "1011"; -- r1.7.6:3
                    mi_drd_i(16+2 downto 16+0) <= pma_mode; -- r1.7.2:0
-                when 200 =>
-                   mi_drd_i(16+6 downto 16+1) <= "101010"; -- r1.7.6:1
-                   mi_drd_i(16+0) <= pma_mode(0); -- FR4 or -LR4
-                when 100 =>
-                   mi_drd_i(16+5 downto 16+3) <= "101"; -- r1.7.5:3
-                   if (PMA_LANES = 10) then
-                      mi_drd_i(16+2) <= '0';  -- r1.7.2             
-                      mi_drd_i(16+1) <= '0';  -- r1.7.1
+                   if pma_mode = "111" or pma_mode = "011" then
+                       mi_drd_i(16+2 downto 16+0) <= pma_mode; -- 400GBASE-SR8 or -FR8
                    else
-                      mi_drd_i(16+2) <= RSFEC_ABLE and fec_en_r;  -- r1.7.2             
-                      mi_drd_i(16+1) <= '1';  -- r1.7.1: -SR4/-CR4/-LR4, no -KP4/-KR4 support                   
-                   end if;      
-                   mi_drd_i(16+0) <= pma_mode(0); --
+                       mi_drd_i(16+2 downto 16+0) <= "100";    -- 400GBASE-LR8
+                   end if;
+                when 200 =>
+                   mi_drd_i(16+6 downto 16+3) <= "1010"; -- r1.7.6:3
+                   if pma_mode = "010" or pma_mode = "011" or pma_mode = "100" then
+                       mi_drd_i(16+2 downto 16+0) <= pma_mode; -- 200GBASE-SR4, -DR4, -FR4
+                   else
+                       mi_drd_i(16+2 downto 16+0) <= "101";    -- 200GBASE-LR4
+                   end if;
+                when 100 =>
+                   if (PMA_LANES = 10) then
+                      mi_drd_i(16+5 downto 16+1) <= "1010";                        -- r1.7.5:0 -xR10
+                      mi_drd_i(16+0)             <= pma_mode(0) or (not AN_ABLE);  -- r1.7.0   0 = CR10, AN must be supported; 1 = SR10, always supported
+                   elsif (PMA_LANES = 2) then
+                      mi_drd_i(16+6 downto 16+2) <= "10010";                        -- r1.7.6:2 -xR2
+                      if pma_mode(1 downto 0) = "01" and AN_ABLE = '1' then -- -CR2 mode requested
+                          mi_drd_i(16+1 downto 16+0)  <= "01";  -- r1.7.1:0   01 = CR2, supported on with AN
+                      else
+                          mi_drd_i(16+1 downto 16+0)  <= "10";  -- r1.7.1:0   10 = SR2, allways supported
+                      end if;
+                   elsif (PMA_LANES = 1) then
+                      mi_drd_i(16+6 downto 16+3) <= "1001";
+                      if pma_mode = "101" or pma_mode = "100" then
+                          mi_drd_i(16+2 downto 16+0) <= pma_mode; -- 100GBASE-LR1 pr 100GBASE-FR1
+                      else
+                          mi_drd_i(16+2 downto 16+0) <= "011";    -- 100GBASE-DR
+                      end if;
+                   else -- PMA_LANES = 4
+                      mi_drd_i(16+5 downto 16+3) <= "101"; -- r1.7.5:3
+                      mi_drd_i(16+2)             <= RSFEC_ABLE and fec_en_r;  -- r1.7.2
+                      mi_drd_i(16+1)             <= '1';  -- r1.7.1: -SR4/-CR4/-LR4, no -KP4/-KR4 support
+                      mi_drd_i(16+0)             <= pma_mode(0); --
+                   end if;
                when  50 =>
                    mi_drd_i(16+6 downto 16+3) <= "1000"; -- r1.7.6:3
                    mi_drd_i(16+2 downto 16+0) <= pma_mode; -- r1.7.1:0
@@ -773,8 +802,8 @@ begin
                    mi_drd_i(16+5 downto 16+3) <= "111"; -- r1.7.5:3
                    mi_drd_i(16+2) <= '0';  -- r1.7.2              
                    mi_drd_i(16+1) <= RSFEC_ABLE and pma_mode(1); -- SR 
-                   mi_drd_i(16+0) <= '0'; -- KR modes not supported                 
-                when  others =>
+                   mi_drd_i(16+0) <= '0'; -- KR modes not supported
+                when  others => -- 10
                    mi_drd_i(16+5 downto 16+3) <= "000"; -- r1.7.5:3
                    mi_drd_i(16+2) <= '1';  -- r1.7.2              
                    mi_drd_i(16+1) <= '1';  -- r1.7.1 - LR and SR supported
@@ -806,32 +835,38 @@ begin
                 mi_drd_i(16+12) <= '1';
              end if;             
           when "0000110" => -- 10G-EPON PMA/PMD P2MP ability register  & 40G/100G PMA/PMD extended ability register
-             mi_drd_i(15 downto 0)  <= X"0000";  -- 10G-EPON PMA/PMD P2MP ability register r1.12
-             mi_drd_i(16+6 downto 16) <= '0' & SPEED_CAP_40G & '0' & SPEED_CAP_40G & SPEED_CAP_40G & '0' & '0'; -- 40G/100G PMA/PMD extended ability register r1.13
+             --- TBD:
+             mi_drd_i(15 downto  0)  <= X"0000";  -- 10G-EPON PMA/PMD P2MP ability register r1.12
+             mi_drd_i(31 downto 16)  <= X"0000";  -- 40G/100G PMA/PMD extended ability register r1.13
+             mi_drd_i(16+6 downto 16) <= '0' & SPEED_CAP_40G & '0' & SPEED_CAP_40G & SPEED_CAP_40G & (SPEED_CAP_40G and AN_ABLE) & '0'; -- 40G/100G PMA/PMD extended ability register r1.13
+             mi_drd_i(16+15) <= '1';                 -- PMA Remote loopback
              if (PMA_LANES = 10) then
                 mi_drd_i(16+7)               <= '0'; -- 100GBASE-SR4
                 mi_drd_i(16+9 downto 16+8)   <= SPEED_CAP_100G & SPEED_CAP_100G; -- 100GBASE-SR10 & 100GBASE-CR10
                 mi_drd_i(16+11 downto 16+10) <= "00"; -- 100GBASE-ER4 & 100GBASE-LR4
                 mi_drd_i(16+13 downto 16+12) <= "00"; -- 100GBASE-KR4 & 100GBASE-KP4
-                mi_drd_i(16+14)              <= '0';  -- 100GBASE-CR4                 
+                mi_drd_i(16+14)              <= '0';  -- 100GBASE-CR4
              elsif (PMA_LANES = 4) then
+                mi_drd_i(16+14)              <= SPEED_CAP_100G and RSFEC_ABLE; -- 100GBASE-CR4
                 mi_drd_i(16+7)               <= (SPEED_CAP_100G and RSFEC_ABLE);
                 mi_drd_i(16+9 downto 16+8)   <= "00"; -- 100GBASE-SR10 & 100GBASE-CR10
                 mi_drd_i(16+11 downto 16+10) <= SPEED_CAP_100G & SPEED_CAP_100G; -- 100GBASE-ER4 & 100GBASE-LR4
                 mi_drd_i(16+13 downto 16+12) <= "00"; -- 100GBASE-KR4 & 100GBASE-KP4
-                mi_drd_i(16+14)              <= (SPEED_CAP_100G and RSFEC_ABLE); -- 100GBASE-CR4                   
+                mi_drd_i(16+14)              <= (SPEED_CAP_100G and RSFEC_ABLE); -- 100GBASE-CR4
              end if;
-             mi_drd_i(16+15) <= '1'; -- PMA remote loopback
           when "0000111" => -- PMA/PMD package identifier
              mi_drd_i(15 downto 0)  <= X"0000"; -- r1.14
              mi_drd_i(31 downto 16) <= X"0000"; -- r1.15
           when "0001001" => -- r 1.18, r1.19 - PMA/PMD extended ability register
              mi_drd_i(15 downto 0)  <= X"0000"; -- r1.18
              mi_drd_i(31 downto 16) <= X"0000"; -- r1.19 -- PMA/PMD extended ability register
+             mi_drd_i(16+7) <= SPEED_CAP_25G and RSFEC_ABLE; -- 25GBASE-ER
+             mi_drd_i(16+6) <= SPEED_CAP_25G and RSFEC_ABLE; -- 25GBASE-LR
+             mi_drd_i(16+5) <= '0';                          -- 25GBASE-T
              mi_drd_i(16+4) <= SPEED_CAP_25G and RSFEC_ABLE; -- 25GBASE-SR
-             mi_drd_i(16+3) <= SPEED_CAP_25G and RSFEC_ABLE; -- 25GBASE-CR
-             mi_drd_i(16+2) <= SPEED_CAP_25G;  -- 25GBASE-CR-S
-             mi_drd_i(16+1) <= '0';            -- 25GBASE-KR-S
+             mi_drd_i(16+3) <= SPEED_CAP_25G and RSFEC_ABLE and AN_ABLE; -- 25GBASE-CR
+             mi_drd_i(16+2) <= SPEED_CAP_25G;  -- 25GBASE-CR-S NOTE: Not IEEE compliant as CR medium should include AN
+             mi_drd_i(16+1) <= '0';            -- 25GBASE-KR
              mi_drd_i(16+0) <= '0';            -- 25GBASE-KR-S
           when "0001010" => -- r 1.20, r1.21 - PMA/PMD extended ability register
              mi_drd_i(15 downto 0)  <= X"0000"; -- r1.20 -- 50G PMA/PMD extended ability register
@@ -839,25 +874,48 @@ begin
              mi_drd_i(4) <= SPEED_CAP_50G; -- 50GBASE-LR
              mi_drd_i(3) <= SPEED_CAP_50G; -- 50GBASE-FR
              mi_drd_i(2) <= SPEED_CAP_50G; -- 50GBASE-SR
-             mi_drd_i(1) <= SPEED_CAP_50G; -- 50GBASE-CR
-             mi_drd_i(0) <= '0';           -- 50GBASE-KR
+             mi_drd_i(1) <= SPEED_CAP_50G and AN_ABLE;  -- 50GBASE-CR
+             mi_drd_i(0) <= '0';                        -- 50GBASE-KR
              mi_drd_i(31 downto 16) <= X"0000"; -- r1.21 -- 2.5G/5G PMA/PMD extended ability register
           when "0001011" => -- r 1.22, r1.23 - PMA/PMD extended ability register
              mi_drd_i(15 downto 0)  <= X"0000"; -- r1.22 -- BASE-H PMA/PMD extended ability register
              mi_drd_i(31 downto 16) <= X"0000"; -- r1.23 -- 200G PMA/PMD extended ability register
              mi_drd_i(16+15) <= '1'; -- 200G PMA remote loopback ability
+             mi_drd_i(16+6) <= SPEED_CAP_200G; -- 200GBASE-ER4
              mi_drd_i(16+5) <= SPEED_CAP_200G; -- 200GBASE-LR4
              mi_drd_i(16+4) <= SPEED_CAP_200G; -- 200GBASE-FR4
              mi_drd_i(16+3) <= SPEED_CAP_200G; -- 200GBASE-DR4
+             mi_drd_i(16+2) <= SPEED_CAP_200G; -- 200GBASE-SR4
+             mi_drd_i(16+1) <= SPEED_CAP_200G and AN_ABLE;   -- 200GBASE-CR4
+             mi_drd_i(16+0) <= '0';                          -- 200GBASE-KR4
           when "0001100" => -- r 1.24, r1.25 - PMA/PMD extended ability register
              mi_drd_i(15 downto 0)  <= X"0000"; -- r1.24 -- 400G PMA/PMD extended ability register
              mi_drd_i(15) <= '1'; -- 400G PMA remote loopback ability
-             mi_drd_i(5) <= SPEED_CAP_400G; -- 400GBASE-LR8
-             mi_drd_i(4) <= SPEED_CAP_400G; -- 400GBASE-FR8
-             mi_drd_i(3) <= SPEED_CAP_400G; -- 400GBASE-DR8
+             mi_drd_i(10) <= SPEED_CAP_400G; -- 400GBASE-ER8
+             mi_drd_i(9)  <= SPEED_CAP_400G; -- 400GBASE-LR4-6
+             mi_drd_i(8)  <= SPEED_CAP_400G; -- 400GBASE-FR4
+             mi_drd_i(7)  <= SPEED_CAP_400G; -- 400GBASE-SR4-2
+             mi_drd_i(6)  <= SPEED_CAP_400G; -- 400GBASE-SR8
+             mi_drd_i(5)  <= SPEED_CAP_400G; -- 400GBASE-LR8
+             mi_drd_i(4)  <= SPEED_CAP_400G; -- 400GBASE-FR8
+             mi_drd_i(3)  <= SPEED_CAP_400G; -- 400GBASE-DR8
+             mi_drd_i(2)  <= '0';            -- 400GBASE-SR16
              mi_drd_i(31 downto 16) <= X"0000"; -- r1.25 -- PMA/PMD extended ability 2 register
              mi_drd_i(16+0) <= SPEED_CAP_50G; -- enable 50G extended abilities (r1.20)
-             
+          when "0001101" => -- r 1.26, r1.27 - 40/100 PMA/PMD extended ability 2
+             mi_drd_i(15 downto 0)  <= X"0000"; -- r1.26 -- 40/100G PMA/PMD extended ability register 2
+             if PMA_LANES = 2 then
+                 mi_drd_i(9)  <= SPEED_CAP_100G;             -- 100GBASE-SR2
+                 mi_drd_i(8)  <= SPEED_CAP_100G and AN_ABLE; -- 100GBASE-CR2
+                 mi_drd_i(7)  <= '0';                        -- 100GBASE-KR2
+             elsif PMA_LANES = 1 then
+                 mi_drd_i(6)  <= '0';            -- 100GBASE-ZR
+                 mi_drd_i(5)  <= SPEED_CAP_100G; -- 100GBASE-LR1
+                 mi_drd_i(4)  <= SPEED_CAP_100G; -- 100GBASE-FR1
+                 mi_drd_i(3)  <= SPEED_CAP_100G; -- 100GBASE-DR
+             end if;
+             mi_drd_i(31 downto 16) <= X"0000"; -- r1.27 -- PMD transmitt disable extension
+
           -- RS-FEC ---------------------------------------------------------------------------
           when "1100100" => -- 0x190 
              mi_drd_i(15 downto 0)  <= X"000" & "0" & fec_en_r & fec_ind_bypass_r & fec_cor_bypass_r; -- 1.200 RS-FEC control reg
@@ -1146,12 +1204,28 @@ begin
       drpwe_r    <= '0';
       if async_rst_mi = '1' then 
          case speed_int is -- default PMA modes
-            when 400 => --400GBASE-LR8
-               pma_mode <= "100";
-            when 200 => --200GBASE-LR4
-               pma_mode <= "101";
-            when  50 => -- 50GBASE-LR
-               pma_mode <= "100";
+            when 400 => -- 400GBASE-SR8
+               pma_mode <= "111";
+            when 200 => -- 200GBASE-SR4
+               pma_mode <= "010";
+            when  50 => -- 50GBASE-SR
+               pma_mode <= "010";
+            when  100 => -- 100GBASE
+               if PMA_LANES = 10 then
+                   pma_mode <= "101"; -- 100GBASE-SR10
+               elsif PMA_LANES = 4 then
+                   if RSFEC_ABLE = '1' and RSFEC_EN_INIT = '1' then
+                       pma_mode <= "111"; -- 100GBASE-SR4 (RSFEC on)
+                   else
+                       pma_mode <= "010"; -- 100GBASE-LR4
+                   end if;
+               elsif PMA_LANES = 2 then
+                   pma_mode <= "010"; -- 100GBASE-SR2
+               else
+                   pma_mode <= "011"; -- 100GBASE-DR
+               end if;
+            when  25 =>
+               pma_mode <= "000"; -- 25GBASE-CR
             when  others => -- TBD
                pma_mode <= "000";
          end case;
