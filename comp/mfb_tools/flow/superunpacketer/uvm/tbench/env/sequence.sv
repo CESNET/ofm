@@ -5,10 +5,10 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 // This low level sequence define bus functionality
-class byte_array_sequence extends uvm_sequence#(uvm_logic_vector_array::sequence_item #(8));
-    `uvm_object_utils(uvm_superunpacketer::byte_array_sequence)
+class logic_vector_array_sequence #(MFB_ITEM_WIDTH) extends uvm_sequence#(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH));
+    `uvm_object_param_utils(uvm_superunpacketer::logic_vector_array_sequence #(MFB_ITEM_WIDTH))
 
-    mailbox#(uvm_logic_vector_array::sequence_item #(8)) tr_export;
+    mailbox#(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) tr_export;
 
     function new(string name = "superpacket_sequence");
         super.new(name);
