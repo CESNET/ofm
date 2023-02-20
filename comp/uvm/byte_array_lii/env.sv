@@ -1,7 +1,7 @@
 /*
  * file       : env.sv
  * Copyright (C) 2021 CESNET z. s. p. o.
- * description: byte_array to uvm_lii enviroment
+ * description: uvm_byte_array to uvm_lii enviroment
  * date       : 2021
  * author     : Daniel Kriz <xkrizd01@vutbr.cz>
  *
@@ -11,9 +11,9 @@
 `ifndef RX_ENV_SV
 `define RX_ENV_SV
 
-class env_rx #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH) extends uvm_env;
+class env_rx #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH) extends uvm_env;
 
-    `uvm_component_param_utils(uvm_byte_array_lii::env_rx #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH));
+    `uvm_component_param_utils(uvm_byte_array_lii::env_rx #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH));
 
     uvm_analysis_port #(uvm_byte_array::sequence_item) analysis_port_packet;
     uvm_analysis_port #(uvm_logic_vector::sequence_item#(LOGIC_WIDTH)) analysis_port_meta;
@@ -27,7 +27,7 @@ class env_rx #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH)
     uvm_logic_vector::config_item logic_vector_agent_cfg;
 
     // Definition of agents, LII agents are used on both sides.
-    uvm_lii::agent_rx #(DATA_WIDTH, FAST_SOF, META_WIDTH) m_lii_agent_rx;
+    uvm_lii::agent_rx #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH) m_lii_agent_rx;
     uvm_lii::config_item lii_cfg_rx;
 
     config_item m_config;
@@ -62,21 +62,21 @@ class env_rx #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH)
         uvm_config_db #(uvm_lii::config_item)::set(this, "m_lii_agent_rx", "m_config", lii_cfg_rx);
         uvm_config_db #(uvm_logic_vector::config_item)::set(this, "m_logic_vector_agent", "m_config", logic_vector_agent_cfg);
 
-        uvm_byte_array::monitor::type_id::set_inst_override(monitor_byte_array #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH)::get_type(),{this.get_full_name(), ".m_byte_array_agent_rx.*"});
-        uvm_logic_vector::monitor #(LOGIC_WIDTH)::type_id::set_inst_override(monitor_logic_vector #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH)::get_type(), {this.get_full_name(), ".m_logic_vector_agent.*"});
+        uvm_byte_array::monitor::type_id::set_inst_override(monitor_byte_array #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH, SOF_WIDTH)::get_type(),{this.get_full_name(), ".m_byte_array_agent_rx.*"});
+        uvm_logic_vector::monitor #(LOGIC_WIDTH)::type_id::set_inst_override(monitor_logic_vector #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH)::get_type(), {this.get_full_name(), ".m_logic_vector_agent.*"});
         if (m_config.active == UVM_ACTIVE) begin
             m_sequencer  = uvm_byte_array_lii::sequencer#(LOGIC_WIDTH)::type_id::create("m_sequencer", this);
         end
         m_byte_array_agent_rx = uvm_byte_array::agent::type_id::create("m_byte_array_agent_rx", this);
-        m_lii_agent_rx        = uvm_lii::agent_rx #(DATA_WIDTH, FAST_SOF, META_WIDTH)::type_id::create("m_lii_agent_rx", this);
+        m_lii_agent_rx        = uvm_lii::agent_rx #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH)::type_id::create("m_lii_agent_rx", this);
         m_logic_vector_agent  = uvm_logic_vector::agent#(LOGIC_WIDTH)::type_id::create("m_logic_vector_agent", this);
 
     endfunction
 
     // Connect agent's ports with ports from scoreboard.
     function void connect_phase(uvm_phase phase);
-        monitor_byte_array #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH) m_byte_array_monitor;
-        monitor_logic_vector #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH) m_logic_vector_monitor;
+        monitor_byte_array #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH, SOF_WIDTH) m_byte_array_monitor;
+        monitor_logic_vector #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH) m_logic_vector_monitor;
 
         uvm_config_db#(uvm_byte_array_lii::sequencer #(LOGIC_WIDTH))::set(this, "m_lii_agent_rx.m_sequencer" , "hi_sqr", m_sequencer);
 
@@ -100,7 +100,7 @@ class env_rx #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH)
     virtual task run_phase(uvm_phase phase);
 
         if (m_config.active == UVM_ACTIVE) begin
-            sequence_lib #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH) seq_lib = uvm_byte_array_lii::sequence_lib #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH)::type_id::create("sequence_lib");
+            sequence_lib #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH) seq_lib = uvm_byte_array_lii::sequence_lib #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH)::type_id::create("sequence_lib");
 
             if (m_config.type_of_sequence == config_item::RX_MAC) begin
                 seq_lib.init_sequence_rx_mac();
@@ -129,9 +129,9 @@ class env_rx #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH)
 
 endclass
 
-class env_tx #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH) extends uvm_env;
+class env_tx #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH) extends uvm_env;
 
-    `uvm_component_param_utils(uvm_byte_array_lii::env_tx #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH));
+    `uvm_component_param_utils(uvm_byte_array_lii::env_tx #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH));
 
     uvm_analysis_port #(uvm_byte_array::sequence_item) analysis_port_packet;
     uvm_analysis_port #(uvm_logic_vector::sequence_item#(LOGIC_WIDTH)) analysis_port_meta;
@@ -145,12 +145,12 @@ class env_tx #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH)
     uvm_logic_vector::config_item logic_vector_agent_cfg;
 
     // Definition of agents, lII agents are used on both sides.
-    uvm_lii::agent_tx #(DATA_WIDTH, FAST_SOF, META_WIDTH) m_lii_agent_tx;
+    uvm_lii::agent_tx #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH) m_lii_agent_tx;
     uvm_lii::config_item lii_cfg_tx;
 
     config_item m_config;
 
-    //uvm_lii::coverage #(DATA_WIDTH, META_WIDTH) m_cover_tx;
+    //uvm_lii::coverage #(DATA_WIDTH, META_WIDTH, SOF_WIDTH) m_cover_tx;
 
     // Constructor of environment.
     function new(string name, uvm_component parent);
@@ -180,22 +180,22 @@ class env_tx #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH)
         uvm_config_db #(uvm_lii::config_item)::set(this, "m_lii_agent_tx", "m_config", lii_cfg_tx);
         uvm_config_db #(uvm_logic_vector::config_item)::set(this, "m_logic_vector_agent", "m_config", logic_vector_agent_cfg);
 
-        uvm_byte_array::monitor::type_id::set_inst_override(monitor_byte_array #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH)::get_type(), {this.get_full_name(), ".m_byte_array_agent_tx.*"});
-        uvm_logic_vector::monitor#(LOGIC_WIDTH)::type_id::set_inst_override(monitor_logic_vector #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH)::get_type(), {this.get_full_name(), ".m_logic_vector_agent.*"});
+        uvm_byte_array::monitor::type_id::set_inst_override(monitor_byte_array #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH, SOF_WIDTH)::get_type(), {this.get_full_name(), ".m_byte_array_agent_tx.*"});
+        uvm_logic_vector::monitor#(LOGIC_WIDTH)::type_id::set_inst_override(monitor_logic_vector #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH)::get_type(), {this.get_full_name(), ".m_logic_vector_agent.*"});
 
         if (m_config.active == UVM_ACTIVE) begin
             m_sequencer  = uvm_byte_array_lii::sequencer#(LOGIC_WIDTH)::type_id::create("m_sequencer", this);
         end
         m_byte_array_agent_tx    = uvm_byte_array::agent::type_id::create("m_byte_array_agent_tx", this);
-        m_lii_agent_tx        = uvm_lii::agent_tx #(DATA_WIDTH, FAST_SOF, META_WIDTH)::type_id::create("m_lii_agent_tx", this);
+        m_lii_agent_tx        = uvm_lii::agent_tx #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH)::type_id::create("m_lii_agent_tx", this);
         m_logic_vector_agent = uvm_logic_vector::agent#(LOGIC_WIDTH)::type_id::create("m_logic_vector_agent", this);
 
     endfunction
 
     // Connect agent's ports with ports from scoreboard.
     function void connect_phase(uvm_phase phase);
-        monitor_byte_array #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH) m_byte_array_monitor;
-        monitor_logic_vector #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH) m_logic_vector_monitor;
+        monitor_byte_array #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH, SOF_WIDTH) m_byte_array_monitor;
+        monitor_logic_vector #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH) m_logic_vector_monitor;
 
         uvm_config_db#(uvm_byte_array_lii::sequencer #(LOGIC_WIDTH))::set(this, "m_lii_agent_tx.m_sequencer" , "hi_sqr", m_sequencer);
 
@@ -218,7 +218,7 @@ class env_tx #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH)
     virtual task run_phase(uvm_phase phase);
 
         if (m_config.active == UVM_ACTIVE) begin
-            sequence_lib #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH) seq_lib = uvm_byte_array_lii::sequence_lib #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH)::type_id::create("sequence_lib");
+            sequence_lib #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH) seq_lib = uvm_byte_array_lii::sequence_lib #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH)::type_id::create("sequence_lib");
 
             if (m_config.type_of_sequence == config_item::RX_MAC || m_config.type_of_sequence == config_item::TX_MAC) begin
                 seq_lib.init_sequence_mac_rdy();
@@ -239,9 +239,9 @@ class env_tx #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH)
 
 endclass
 
-class env_eth_phy_rx #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH, MEAS) extends uvm_env;
+class env_eth_phy_rx #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH, MEAS, SOF_WIDTH) extends uvm_env;
 
-    `uvm_component_param_utils(uvm_byte_array_lii::env_eth_phy_rx #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH, MEAS));
+    `uvm_component_param_utils(uvm_byte_array_lii::env_eth_phy_rx #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH, MEAS, SOF_WIDTH));
 
     uvm_analysis_port #(uvm_byte_array::sequence_item) analysis_port_packet;
     uvm_analysis_port #(uvm_logic_vector::sequence_item#(LOGIC_WIDTH)) analysis_port_meta;
@@ -255,7 +255,7 @@ class env_eth_phy_rx #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGI
     uvm_logic_vector::config_item logic_vector_agent_cfg;
 
     // Definition of agents, LII agents are used on both sides.
-    uvm_lii::agent_rx_eth_phy #(DATA_WIDTH, FAST_SOF, META_WIDTH, MEAS) m_lii_agent_rx;
+    uvm_lii::agent_rx_eth_phy #(DATA_WIDTH, FAST_SOF, META_WIDTH, MEAS, SOF_WIDTH) m_lii_agent_rx;
     uvm_lii::config_item lii_cfg_rx;
 
     config_item m_config;
@@ -290,21 +290,21 @@ class env_eth_phy_rx #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGI
         uvm_config_db #(uvm_lii::config_item)::set(this, "m_lii_agent_rx", "m_config", lii_cfg_rx);
         uvm_config_db #(uvm_logic_vector::config_item)::set(this, "m_logic_vector_agent", "m_config", logic_vector_agent_cfg);
 
-        uvm_byte_array::monitor::type_id::set_inst_override(monitor_byte_array #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH)::get_type(),{this.get_full_name(), ".m_byte_array_agent_rx.*"});
-        uvm_logic_vector::monitor #(LOGIC_WIDTH)::type_id::set_inst_override(monitor_logic_vector #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH)::get_type(), {this.get_full_name(), ".m_logic_vector_agent.*"});
+        uvm_byte_array::monitor::type_id::set_inst_override(monitor_byte_array #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH, SOF_WIDTH)::get_type(),{this.get_full_name(), ".m_byte_array_agent_rx.*"});
+        uvm_logic_vector::monitor #(LOGIC_WIDTH)::type_id::set_inst_override(monitor_logic_vector #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH)::get_type(), {this.get_full_name(), ".m_logic_vector_agent.*"});
         if (m_config.active == UVM_ACTIVE) begin
             m_sequencer  = uvm_byte_array_lii::sequencer#(LOGIC_WIDTH)::type_id::create("m_sequencer", this);
         end
         m_byte_array_agent_rx = uvm_byte_array::agent::type_id::create("m_byte_array_agent_rx", this);
-        m_lii_agent_rx        = uvm_lii::agent_rx_eth_phy #(DATA_WIDTH, FAST_SOF, META_WIDTH, MEAS)::type_id::create("m_lii_agent_rx", this);
+        m_lii_agent_rx        = uvm_lii::agent_rx_eth_phy #(DATA_WIDTH, FAST_SOF, META_WIDTH, MEAS, SOF_WIDTH)::type_id::create("m_lii_agent_rx", this);
         m_logic_vector_agent  = uvm_logic_vector::agent#(LOGIC_WIDTH)::type_id::create("m_logic_vector_agent", this);
 
     endfunction
 
     // Connect agent's ports with ports from scoreboard.
     function void connect_phase(uvm_phase phase);
-        monitor_byte_array #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH) m_byte_array_monitor;
-        monitor_logic_vector #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH) m_logic_vector_monitor;
+        monitor_byte_array #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH, SOF_WIDTH) m_byte_array_monitor;
+        monitor_logic_vector #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH) m_logic_vector_monitor;
 
         uvm_config_db#(uvm_byte_array_lii::sequencer #(LOGIC_WIDTH))::set(this, "m_lii_agent_rx.m_sequencer" , "hi_sqr", m_sequencer);
 
@@ -328,7 +328,7 @@ class env_eth_phy_rx #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGI
     virtual task run_phase(uvm_phase phase);
 
         if (m_config.active == UVM_ACTIVE) begin
-            sequence_lib #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH) seq_lib = uvm_byte_array_lii::sequence_lib #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH)::type_id::create("sequence_lib");
+            sequence_lib #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH) seq_lib = uvm_byte_array_lii::sequence_lib #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH)::type_id::create("sequence_lib");
 
             if (m_config.type_of_sequence == config_item::RX_MAC) begin
                 seq_lib.init_sequence_rx_mac();

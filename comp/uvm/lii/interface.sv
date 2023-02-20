@@ -10,7 +10,7 @@
 */
 
 // Definition of LII interface.
-interface lii_if #(DATA_WIDTH, FAST_SOF, META_WIDTH) (input logic CLK, RESET);
+interface lii_if #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH) (input logic CLK, RESET);
 
     // Variables
     localparam BYTES_VLD_LENGTH = $clog2(DATA_WIDTH/8)+1;
@@ -19,7 +19,7 @@ interface lii_if #(DATA_WIDTH, FAST_SOF, META_WIDTH) (input logic CLK, RESET);
     wire logic [DATA_WIDTH-1 : 0]       DATA; // Data
     wire logic [BYTES_VLD_LENGTH-1 : 0] BYTES_VLD; // Byte valid
     wire logic [BYTES_VLD_LENGTH-1 : 0] EDB; // Byte valid, valid on EEOF cycle only.
-    wire logic                          SOF; // Start of frame
+    wire logic [SOF_WIDTH-1 : 0]        SOF;
     wire logic                          EOF; // End of frame
     wire logic                          RDY; // Clock enable
     wire logic                          EEOF; // Early EOF, when EEOF = 1 then next cycle EOF must be 1;

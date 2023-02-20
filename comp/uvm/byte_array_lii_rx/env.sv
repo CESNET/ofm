@@ -1,7 +1,7 @@
 /*
  * file       : env.sv
  * Copyright (C) 2021 CESNET z. s. p. o.
- * description: byte_array to lii_rx enviroment
+ * description: uvm_byte_array to lii_rx enviroment
  * date       : 2021
  * author     : Daniel Kriz <xkrizd01@vutbr.cz>
  *
@@ -11,9 +11,9 @@
 `ifndef RX_ENV_SV
 `define RX_ENV_SV
 
-class env #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH) extends uvm_env;
+class env #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH) extends uvm_env;
 
-    `uvm_component_param_utils(uvm_byte_array_lii_rx::env #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH));
+    `uvm_component_param_utils(uvm_byte_array_lii_rx::env #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH));
 
     uvm_analysis_port #(uvm_byte_array::sequence_item) analysis_port_packet;
     uvm_analysis_port #(uvm_logic_vector::sequence_item#(LOGIC_WIDTH)) analysis_port_meta;
@@ -26,12 +26,12 @@ class env #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH) ex
     uvm_logic_vector::config_item logic_vector_agent_cfg;
 
     // Definition of agents, lII agents are used on both sides.
-    uvm_lii_rx::agent #(DATA_WIDTH, FAST_SOF, META_WIDTH) m_lii_agent;
+    uvm_lii_rx::agent #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH) m_lii_agent;
     uvm_lii_rx::config_item lii_cfg_tx;
 
     config_item m_config;
 
-    //uvm_lii_rx::coverage_rx #(DATA_WIDTH, META_WIDTH) m_cover_tx;
+    //uvm_lii_rx::coverage_rx #(DATA_WIDTH, META_WIDTH, SOF_WIDTH) m_cover_tx;
 
     // Constructor of environment.
     function new(string name, uvm_component parent);
@@ -61,19 +61,19 @@ class env #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH) ex
         uvm_config_db #(uvm_lii_rx::config_item)::set(this, "m_lii_agent", "m_config", lii_cfg_tx);
         uvm_config_db #(uvm_logic_vector::config_item)::set(this, "m_logic_vector_agent", "m_config", logic_vector_agent_cfg);
 
-        uvm_byte_array::monitor::type_id::set_inst_override(monitor_byte_array #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH)::get_type(), {this.get_full_name(), ".m_byte_array_agent.*"});
-        uvm_logic_vector::monitor#(LOGIC_WIDTH)::type_id::set_inst_override(monitor_logic_vector #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH)::get_type(), {this.get_full_name(), ".m_logic_vector_agent.*"});
+        uvm_byte_array::monitor::type_id::set_inst_override(monitor_byte_array #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH, SOF_WIDTH)::get_type(), {this.get_full_name(), ".m_byte_array_agent.*"});
+        uvm_logic_vector::monitor#(LOGIC_WIDTH)::type_id::set_inst_override(monitor_logic_vector #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH)::get_type(), {this.get_full_name(), ".m_logic_vector_agent.*"});
 
         m_byte_array_agent    = uvm_byte_array::agent::type_id::create("m_byte_array_agent", this);
-        m_lii_agent        = uvm_lii_rx::agent #(DATA_WIDTH, FAST_SOF, META_WIDTH)::type_id::create("m_lii_agent", this);
+        m_lii_agent        = uvm_lii_rx::agent #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH)::type_id::create("m_lii_agent", this);
         m_logic_vector_agent = uvm_logic_vector::agent#(LOGIC_WIDTH)::type_id::create("m_logic_vector_agent", this);
 
     endfunction
 
     // Connect agent's ports with ports from scoreboard.
     function void connect_phase(uvm_phase phase);
-        monitor_byte_array #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH) m_byte_array_monitor;
-        monitor_logic_vector #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH) m_logic_vector_monitor;
+        monitor_byte_array #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH, SOF_WIDTH) m_byte_array_monitor;
+        monitor_logic_vector #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH) m_logic_vector_monitor;
 
         $cast(m_byte_array_monitor, m_byte_array_agent.m_monitor);
         m_lii_agent.analysis_port.connect(m_byte_array_monitor.analysis_export);

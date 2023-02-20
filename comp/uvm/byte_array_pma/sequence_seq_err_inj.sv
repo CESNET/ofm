@@ -24,6 +24,7 @@ class sequence_seq_err_inj #(DATA_WIDTH) extends uvm_sequence #(uvm_pma::sequenc
 
     logic [DATA_WIDTH-1 : 0]     data = 0;
     logic [(DATA_WIDTH-8)-1 : 0] start_data = 0;
+    //logic [57 : 0]               scramble_reg = 58'h0;
     logic [8-1 : 0]              state = uvm_pma::BT_C_C;
     logic [8-1 : 0]              terminate;
     logic [8-1 : 0]              start_seq;
@@ -262,7 +263,6 @@ class sequence_seq_err_inj #(DATA_WIDTH) extends uvm_sequence #(uvm_pma::sequenc
 
     task send_error_seq();
 
-        //void'(std::randomize(start_seq));
         start_seq = uvm_pma::UNKNOWN;
 
         start_item(req);

@@ -12,21 +12,21 @@
 `define LII_AGENT_SV
 
 // This is LII agent, which declares basic components.
-class agent_rx #(DATA_WIDTH, FAST_SOF, META_WIDTH) extends uvm_agent;
+class agent_rx #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH) extends uvm_agent;
 
     // Registration of agent to databaze.
-    `uvm_component_param_utils(uvm_lii::agent_rx #(DATA_WIDTH, FAST_SOF, META_WIDTH))
+    `uvm_component_param_utils(uvm_lii::agent_rx #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH))
 
     // -----------------------
     // Variables.
     // -----------------------
 
-    uvm_analysis_port #(sequence_item #(DATA_WIDTH, META_WIDTH)) analysis_port;
+    uvm_analysis_port #(sequence_item #(DATA_WIDTH, META_WIDTH, SOF_WIDTH)) analysis_port;
 
     // Agent base components sequencer, driver, monitor.
-    sequencer #(DATA_WIDTH, META_WIDTH) m_sequencer;
-    driver_rx #(DATA_WIDTH, FAST_SOF, META_WIDTH) m_driver;
-    monitor #(DATA_WIDTH, FAST_SOF, META_WIDTH) m_monitor;
+    sequencer #(DATA_WIDTH, META_WIDTH, SOF_WIDTH) m_sequencer;
+    driver_rx #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH) m_driver;
+    monitor #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH) m_monitor;
     config_item m_config;
 
     // Constructor.
@@ -46,10 +46,10 @@ class agent_rx #(DATA_WIDTH, FAST_SOF, META_WIDTH) extends uvm_agent;
         end
 
         if(get_is_active() == UVM_ACTIVE) begin
-            m_sequencer = sequencer #(DATA_WIDTH, META_WIDTH)::type_id::create("m_sequencer", this);
-            m_driver    = driver_rx #(DATA_WIDTH, FAST_SOF, META_WIDTH)::type_id::create("m_driver", this);
+            m_sequencer = sequencer #(DATA_WIDTH, META_WIDTH, SOF_WIDTH)::type_id::create("m_sequencer", this);
+            m_driver    = driver_rx #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH)::type_id::create("m_driver", this);
         end
-        m_monitor   = monitor #(DATA_WIDTH, FAST_SOF, META_WIDTH)::type_id::create("m_monitor", this);
+        m_monitor   = monitor #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH)::type_id::create("m_monitor", this);
     endfunction
 
     virtual function uvm_active_passive_enum get_is_active();
@@ -58,10 +58,10 @@ class agent_rx #(DATA_WIDTH, FAST_SOF, META_WIDTH) extends uvm_agent;
 
     function void connect_phase(uvm_phase phase);
 
-        virtual lii_if #(DATA_WIDTH, FAST_SOF, META_WIDTH) vif;
+        virtual lii_if #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH) vif;
         super.connect_phase(phase);
 
-        if(!uvm_config_db #(virtual lii_if #(DATA_WIDTH, FAST_SOF, META_WIDTH))::get(null, "", m_config.interface_name, vif)) begin
+        if(!uvm_config_db #(virtual lii_if #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH))::get(null, "", m_config.interface_name, vif)) begin
             `uvm_fatal(this.get_full_name(), "Cannot find 'lii_interface' inside uvm_config_db, probably not set!")
         end
 
@@ -79,21 +79,21 @@ endclass
 
 
 // This is LII agent, which declares basic components.
-class agent_tx #(DATA_WIDTH, FAST_SOF, META_WIDTH) extends uvm_agent;
+class agent_tx #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH) extends uvm_agent;
 
     // Registration of agent to databaze.
-    `uvm_component_param_utils(uvm_lii::agent_tx #(DATA_WIDTH, FAST_SOF, META_WIDTH))
+    `uvm_component_param_utils(uvm_lii::agent_tx #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH))
 
     // -----------------------
     // Variables.
     // -----------------------
 
-    uvm_analysis_port #(sequence_item #(DATA_WIDTH, META_WIDTH)) analysis_port;
+    uvm_analysis_port #(sequence_item #(DATA_WIDTH, META_WIDTH, SOF_WIDTH)) analysis_port;
 
     // Agent base components sequencer, driver, monitor.
-    sequencer #(DATA_WIDTH, META_WIDTH) m_sequencer;
-    driver_tx #(DATA_WIDTH, FAST_SOF, META_WIDTH) m_driver;
-    monitor #(DATA_WIDTH, FAST_SOF, META_WIDTH) m_monitor;
+    sequencer #(DATA_WIDTH, META_WIDTH, SOF_WIDTH) m_sequencer;
+    driver_tx #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH) m_driver;
+    monitor #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH) m_monitor;
     config_item m_config;
 
     // Constructor.
@@ -113,10 +113,10 @@ class agent_tx #(DATA_WIDTH, FAST_SOF, META_WIDTH) extends uvm_agent;
         end
 
         if(get_is_active() == UVM_ACTIVE) begin
-            m_sequencer = sequencer #(DATA_WIDTH, META_WIDTH)::type_id::create("m_sequencer", this);
-            m_driver    = driver_tx #(DATA_WIDTH, FAST_SOF, META_WIDTH)::type_id::create("m_driver", this);
+            m_sequencer = sequencer #(DATA_WIDTH, META_WIDTH, SOF_WIDTH)::type_id::create("m_sequencer", this);
+            m_driver    = driver_tx #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH)::type_id::create("m_driver", this);
         end
-        m_monitor   = monitor #(DATA_WIDTH, FAST_SOF, META_WIDTH)::type_id::create("m_monitor", this);
+        m_monitor   = monitor #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH)::type_id::create("m_monitor", this);
     endfunction
 
     virtual function uvm_active_passive_enum get_is_active();
@@ -125,10 +125,10 @@ class agent_tx #(DATA_WIDTH, FAST_SOF, META_WIDTH) extends uvm_agent;
 
     function void connect_phase(uvm_phase phase);
 
-        virtual lii_if #(DATA_WIDTH, FAST_SOF, META_WIDTH) vif;
+        virtual lii_if #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH) vif;
         super.connect_phase(phase);
 
-        if(!uvm_config_db #(virtual lii_if #(DATA_WIDTH, FAST_SOF, META_WIDTH))::get(null, "", m_config.interface_name, vif)) begin
+        if(!uvm_config_db #(virtual lii_if #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH))::get(null, "", m_config.interface_name, vif)) begin
             $write("Interface name %s interface %p\n", m_config.interface_name, vif);
             `uvm_fatal("configuration", "Cannot find 'lii_interface' inside uvm_config_db, probably not set!")
         end
@@ -146,21 +146,18 @@ class agent_tx #(DATA_WIDTH, FAST_SOF, META_WIDTH) extends uvm_agent;
 endclass
 
 // This is ETH PHY agent, which declares basic components.
-class agent_rx_eth_phy #(DATA_WIDTH, FAST_SOF, META_WIDTH, MEAS) extends uvm_agent;
+class agent_rx_eth_phy #(DATA_WIDTH, FAST_SOF, META_WIDTH, MEAS, SOF_WIDTH) extends uvm_agent;
 
     // Registration of agent to databaze.
-    `uvm_component_param_utils(uvm_lii::agent_rx_eth_phy #(DATA_WIDTH, FAST_SOF, META_WIDTH, MEAS))
-
-    // -----------------------
+    `uvm_component_param_utils(uvm_lii::agent_rx_eth_phy #(DATA_WIDTH, FAST_SOF, META_WIDTH, MEAS, SOF_WIDTH))
     // Variables.
-    // -----------------------
 
-    uvm_analysis_port #(sequence_item #(DATA_WIDTH, META_WIDTH)) analysis_port;
+    uvm_analysis_port #(sequence_item #(DATA_WIDTH, META_WIDTH, SOF_WIDTH)) analysis_port;
 
     // Agent base components sequencer, driver, monitor.
-    sequencer #(DATA_WIDTH, META_WIDTH) m_sequencer;
-    driver_rx_eth_phy #(DATA_WIDTH, FAST_SOF, META_WIDTH, MEAS) m_driver;
-    monitor #(DATA_WIDTH, FAST_SOF, META_WIDTH) m_monitor;
+    sequencer #(DATA_WIDTH, META_WIDTH, SOF_WIDTH) m_sequencer;
+    driver_rx_eth_phy #(DATA_WIDTH, FAST_SOF, META_WIDTH, MEAS, SOF_WIDTH) m_driver;
+    monitor #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH) m_monitor;
     config_item m_config;
 
     // Constructor.
@@ -180,10 +177,10 @@ class agent_rx_eth_phy #(DATA_WIDTH, FAST_SOF, META_WIDTH, MEAS) extends uvm_age
         end
 
         if(get_is_active() == UVM_ACTIVE) begin
-            m_sequencer = sequencer #(DATA_WIDTH, META_WIDTH)::type_id::create("m_sequencer", this);
-            m_driver    = driver_rx_eth_phy #(DATA_WIDTH, FAST_SOF, META_WIDTH, MEAS)::type_id::create("m_driver", this);
+            m_sequencer = sequencer #(DATA_WIDTH, META_WIDTH, SOF_WIDTH)::type_id::create("m_sequencer", this);
+            m_driver    = driver_rx_eth_phy #(DATA_WIDTH, FAST_SOF, META_WIDTH, MEAS, SOF_WIDTH)::type_id::create("m_driver", this);
         end
-        m_monitor   = monitor #(DATA_WIDTH, FAST_SOF, META_WIDTH)::type_id::create("m_monitor", this);
+        m_monitor   = monitor #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH)::type_id::create("m_monitor", this);
     endfunction
 
     virtual function uvm_active_passive_enum get_is_active();
@@ -192,10 +189,10 @@ class agent_rx_eth_phy #(DATA_WIDTH, FAST_SOF, META_WIDTH, MEAS) extends uvm_age
 
     function void connect_phase(uvm_phase phase);
 
-        virtual lii_if #(DATA_WIDTH, FAST_SOF, META_WIDTH) vif;
+        virtual lii_if #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH) vif;
         super.connect_phase(phase);
 
-        if(!uvm_config_db #(virtual lii_if #(DATA_WIDTH, FAST_SOF, META_WIDTH))::get(null, "", m_config.interface_name, vif)) begin
+        if(!uvm_config_db #(virtual lii_if #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH))::get(null, "", m_config.interface_name, vif)) begin
             $write("Interface name %s interface %p\n", m_config.interface_name, vif);
             `uvm_fatal("configuration", "Cannot find 'lii_interface' inside uvm_config_db, probably not set!")
         end

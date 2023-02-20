@@ -12,15 +12,15 @@
 `define LII_MONITOR_SV
 
 // Definition of LII monitor
-class monitor #(DATA_WIDTH, FAST_SOF, META_WIDTH) extends uvm_monitor;
+class monitor #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH) extends uvm_monitor;
 
-    `uvm_component_param_utils(uvm_lii_rx::monitor #(DATA_WIDTH, FAST_SOF, META_WIDTH))
+    `uvm_component_param_utils(uvm_lii_rx::monitor #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH))
 
-    sequence_item #(DATA_WIDTH, META_WIDTH) tr;
+    sequence_item #(DATA_WIDTH, META_WIDTH, SOF_WIDTH) tr;
     // Reference to the virtual interface, initialized during the connect phase by parent agent.
-    virtual lii_if_rx #(DATA_WIDTH, FAST_SOF, META_WIDTH).monitor_cb vif;
+    virtual lii_if_rx #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH).monitor_cb vif;
     // Used to send transactions to all connected components.
-    uvm_analysis_port #(sequence_item #(DATA_WIDTH, META_WIDTH)) analysis_port;
+    uvm_analysis_port #(sequence_item #(DATA_WIDTH, META_WIDTH, SOF_WIDTH)) analysis_port;
 
     // Creates new instance of this class.
     function new (string name, uvm_component parent);
@@ -29,7 +29,7 @@ class monitor #(DATA_WIDTH, FAST_SOF, META_WIDTH) extends uvm_monitor;
     // Instantiates child components.
     function void build_phase(uvm_phase phase);
         analysis_port = new("analysis port", this);
-        tr = sequence_item #(DATA_WIDTH, META_WIDTH)::type_id::create("tr");
+        tr = sequence_item #(DATA_WIDTH, META_WIDTH, SOF_WIDTH)::type_id::create("tr");
     endfunction
 
     task run_phase(uvm_phase phase);

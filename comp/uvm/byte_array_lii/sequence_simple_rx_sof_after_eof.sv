@@ -15,9 +15,9 @@ import crc32_ethernet_pkg::*;
 // There is also logic vector sequence item for error signals
 // Link status is always asserted to logic 1
 // This sequence can be used in RX MAC
-class sequence_simple_rx_sof_after_eof #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH) extends sequence_simple #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH);
+class sequence_simple_rx_sof_after_eof #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH) extends sequence_simple #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH);
 
-    `uvm_object_param_utils(uvm_byte_array_lii::sequence_simple_rx_sof_after_eof #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH))
+    `uvm_object_param_utils(uvm_byte_array_lii::sequence_simple_rx_sof_after_eof #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH))
 
     // -----------------------
     // Parameters.
