@@ -11,10 +11,10 @@
 `ifndef LII_SEQUENCE_ITEM_SV
 `define LII_SEQUENCE_ITEM_SV
 // This class represents transaction which contains values of output signals for eth phy
-class sequence_item #(DATA_WIDTH, META_WIDTH) extends uvm_sequence_item;
+class sequence_item #(DATA_WIDTH, META_WIDTH, SOF_WIDTH) extends uvm_sequence_item;
 
     // registration of object tools
-    `uvm_object_param_utils(uvm_lii::sequence_item #(DATA_WIDTH, META_WIDTH))
+    `uvm_object_param_utils(uvm_lii::sequence_item #(DATA_WIDTH, META_WIDTH, SOF_WIDTH))
 
     localparam BYTES_VLD_LENGTH = $clog2(DATA_WIDTH/8)+1;
 
@@ -22,7 +22,7 @@ class sequence_item #(DATA_WIDTH, META_WIDTH) extends uvm_sequence_item;
     // make input attributes random, except for clocks
     rand logic [DATA_WIDTH-1 : 0]       data;
     rand logic [BYTES_VLD_LENGTH-1 : 0] bytes_vld;
-    rand logic                          sof;
+    rand logic [SOF_WIDTH-1 : 0]        sof;
     rand logic                          eof;
     rand logic                          rdy;
     rand logic                          eeof;
@@ -44,7 +44,7 @@ class sequence_item #(DATA_WIDTH, META_WIDTH) extends uvm_sequence_item;
 
     // Properly copy all transaction attributes.
     function void do_copy(uvm_object rhs);
-        sequence_item #(DATA_WIDTH, META_WIDTH) rhs_;
+        sequence_item #(DATA_WIDTH, META_WIDTH, SOF_WIDTH) rhs_;
 
         if(!$cast(rhs_, rhs)) begin
             `uvm_fatal( "do_copy:", "Failed to cast transaction object." )
@@ -68,7 +68,7 @@ class sequence_item #(DATA_WIDTH, META_WIDTH) extends uvm_sequence_item;
 
     // Properly compare all transaction attributes representing output pins.
     function bit do_compare(uvm_object rhs, uvm_comparer comparer);
-        sequence_item #(DATA_WIDTH, META_WIDTH) rhs_;
+        sequence_item #(DATA_WIDTH, META_WIDTH, SOF_WIDTH) rhs_;
 
         if(!$cast(rhs_, rhs)) begin
             `uvm_fatal("do_compare:", "Failed to cast transaction object.")

@@ -4,9 +4,9 @@
 //--
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
-class coverage #(DATA_WIDTH, META_WIDTH) extends uvm_subscriber#(sequence_item #(DATA_WIDTH, META_WIDTH));
+class coverage #(DATA_WIDTH, META_WIDTH, SOF_WIDTH) extends uvm_subscriber#(sequence_item #(DATA_WIDTH, META_WIDTH, SOF_WIDTH));
 
-    sequence_item #(DATA_WIDTH, META_WIDTH) seq_item;
+    sequence_item #(DATA_WIDTH, META_WIDTH, SOF_WIDTH) seq_item;
 
     covergroup m_cov_rdy_sig;
         // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -35,7 +35,7 @@ class coverage #(DATA_WIDTH, META_WIDTH) extends uvm_subscriber#(sequence_item #
         m_cov_bytes_vld_sig = new();
     endfunction
 
-    virtual function void write(sequence_item #(DATA_WIDTH, META_WIDTH) t);
+    virtual function void write(sequence_item #(DATA_WIDTH, META_WIDTH, SOF_WIDTH) t);
         seq_item = t;
         m_cov_rdy_sig.sample();
         if (seq_item.eof == 1'b1) begin

@@ -12,13 +12,13 @@
 `define LII_DRIVER
 
 // Driver of LII interface
-class driver_rx #(DATA_WIDTH, FAST_SOF, META_WIDTH) extends uvm_driver #(sequence_item #(DATA_WIDTH, META_WIDTH));
+class driver_rx #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH) extends uvm_driver #(sequence_item #(DATA_WIDTH, META_WIDTH, SOF_WIDTH));
 
     // Register component to database.
-    `uvm_component_param_utils(uvm_lii::driver_rx #(DATA_WIDTH, FAST_SOF, META_WIDTH))
+    `uvm_component_param_utils(uvm_lii::driver_rx #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH))
 
     // Virtual interface of driver
-    virtual lii_if #(DATA_WIDTH, FAST_SOF, META_WIDTH).driver_rx_cb vif;
+    virtual lii_if #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH).driver_rx_cb vif;
     logic state = 1'b0;
     time time_of_fall;
 
@@ -45,7 +45,7 @@ class driver_rx #(DATA_WIDTH, FAST_SOF, META_WIDTH) extends uvm_driver #(sequenc
 
                     @(vif.driver_rx_cb);
 
-                    rsp = sequence_item #(DATA_WIDTH, META_WIDTH)::type_id::create("rsp");
+                    rsp = sequence_item #(DATA_WIDTH, META_WIDTH, SOF_WIDTH)::type_id::create("rsp");
                     rsp.rdy = vif.driver_rx_cb.RDY;
 
                     rsp.set_id_info(req);
@@ -72,16 +72,16 @@ endclass
 
 
 // Driver of LII TX interface
-class driver_tx #(DATA_WIDTH, FAST_SOF, META_WIDTH) extends uvm_driver #(sequence_item #(DATA_WIDTH, META_WIDTH));
+class driver_tx #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH) extends uvm_driver #(sequence_item #(DATA_WIDTH, META_WIDTH, SOF_WIDTH));
 
     // ------------------------------------------------------------------------
     // Register component to database
-    `uvm_component_param_utils(uvm_lii::driver_tx #(DATA_WIDTH, FAST_SOF, META_WIDTH))
+    `uvm_component_param_utils(uvm_lii::driver_tx #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH))
 
 
     // ------------------------------------------------------------------------
     // Virtual interface of driver
-    virtual lii_if #(DATA_WIDTH, FAST_SOF, META_WIDTH).driver_tx_cb vif;
+    virtual lii_if #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH).driver_tx_cb vif;
 
     // ------------------------------------------------------------------------
     // Constructor
@@ -121,13 +121,13 @@ class driver_tx #(DATA_WIDTH, FAST_SOF, META_WIDTH) extends uvm_driver #(sequenc
 endclass
 
 // Driver of LII ETH PHZ interface
-class driver_rx_eth_phy #(DATA_WIDTH, FAST_SOF, META_WIDTH, MEAS) extends uvm_driver #(sequence_item #(DATA_WIDTH, META_WIDTH));
+class driver_rx_eth_phy #(DATA_WIDTH, FAST_SOF, META_WIDTH, MEAS, SOF_WIDTH) extends uvm_driver #(sequence_item #(DATA_WIDTH, META_WIDTH, SOF_WIDTH));
 
     // Register component to database.
-    `uvm_component_param_utils(uvm_lii::driver_rx_eth_phy #(DATA_WIDTH, FAST_SOF, META_WIDTH, MEAS))
+    `uvm_component_param_utils(uvm_lii::driver_rx_eth_phy #(DATA_WIDTH, FAST_SOF, META_WIDTH, MEAS, SOF_WIDTH))
 
     // Virtual interface of driver
-    virtual lii_if #(DATA_WIDTH, FAST_SOF, META_WIDTH).driver_rx_eth_phy_cb vif;
+    virtual lii_if #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH).driver_rx_eth_phy_cb vif;
 
     // Contructor of driver which contains name and parent component.
     function new(string name, uvm_component parent);
@@ -153,7 +153,7 @@ class driver_rx_eth_phy #(DATA_WIDTH, FAST_SOF, META_WIDTH, MEAS) extends uvm_dr
 
                     @(vif.driver_rx_eth_phy_cb);
 
-                    rsp = sequence_item #(DATA_WIDTH, META_WIDTH)::type_id::create("rsp");
+                    rsp = sequence_item #(DATA_WIDTH, META_WIDTH, SOF_WIDTH)::type_id::create("rsp");
                     rsp.rdy = vif.driver_rx_eth_phy_cb.RDY;
 
                     rsp.set_id_info(req);

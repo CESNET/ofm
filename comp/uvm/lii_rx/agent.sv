@@ -12,19 +12,19 @@
 `define LII_AGENT_SV
 
 // This is LII agent, which declares basic components.
-class agent #(DATA_WIDTH, FAST_SOF, META_WIDTH) extends uvm_agent;
+class agent #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH) extends uvm_agent;
 
     // Registration of agent to databaze.
-    `uvm_component_param_utils(uvm_lii_rx::agent #(DATA_WIDTH, FAST_SOF, META_WIDTH))
+    `uvm_component_param_utils(uvm_lii_rx::agent #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH))
 
     // -----------------------
     // Variables.
     // -----------------------
 
-    uvm_analysis_port #(sequence_item #(DATA_WIDTH, META_WIDTH)) analysis_port;
+    uvm_analysis_port #(sequence_item #(DATA_WIDTH, META_WIDTH, SOF_WIDTH)) analysis_port;
 
     // Agent base components sequencer, driver, monitor.
-    monitor #(DATA_WIDTH, FAST_SOF, META_WIDTH) m_monitor;
+    monitor #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH) m_monitor;
     config_item m_config;
 
     // Constructor.
@@ -43,7 +43,7 @@ class agent #(DATA_WIDTH, FAST_SOF, META_WIDTH) extends uvm_agent;
             `uvm_fatal(get_type_name(), "Unable to get configuration object")
         end
 
-        m_monitor   = monitor #(DATA_WIDTH, FAST_SOF, META_WIDTH)::type_id::create("m_monitor", this);
+        m_monitor   = monitor #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH)::type_id::create("m_monitor", this);
     endfunction
 
     virtual function uvm_active_passive_enum get_is_active();
@@ -52,10 +52,10 @@ class agent #(DATA_WIDTH, FAST_SOF, META_WIDTH) extends uvm_agent;
 
     function void connect_phase(uvm_phase phase);
 
-        virtual lii_if_rx #(DATA_WIDTH, FAST_SOF, META_WIDTH) vif;
+        virtual lii_if_rx #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH) vif;
         super.connect_phase(phase);
 
-        if(!uvm_config_db #(virtual lii_if_rx #(DATA_WIDTH, FAST_SOF, META_WIDTH))::get(null, "", m_config.interface_name, vif)) begin
+        if(!uvm_config_db #(virtual lii_if_rx #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH))::get(null, "", m_config.interface_name, vif)) begin
             `uvm_fatal("configuration", "Cannot find 'lii_interface' inside uvm_config_db, probably not set!")
         end
 

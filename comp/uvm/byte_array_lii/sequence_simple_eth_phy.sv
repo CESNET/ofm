@@ -15,19 +15,17 @@
 // So it can be used in TX MAC as an input sequence
 // In this sequence is link status set to logic 1 all the time, beacause TX MAC does not has any link status
 // There is also logic vector sequence item for generation of error signals
-class sequence_simple_eth_phy #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH) extends sequence_simple #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH);
+class sequence_simple_eth_phy #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH) extends sequence_simple #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH);
 
-    `uvm_object_param_utils(uvm_byte_array_lii::sequence_simple_eth_phy #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH))
+    `uvm_object_param_utils(uvm_byte_array_lii::sequence_simple_eth_phy #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH))
 
     // -----------------------
     // Parameters.
     // -----------------------
 
-    localparam BYTE_NUM = DATA_WIDTH/8;
+    localparam BYTE_NUM  = DATA_WIDTH/8;
 
     uvm_common::rand_length number_of_idles;
-
-    //logic_vector::sequence_item #(LOGIC_WIDTH) meta;
 
     localparam BYTES_VLD_LENGTH        = $clog2(DATA_WIDTH/8)+1;
     logic [BYTES_VLD_LENGTH : 0] bytes = '0;
@@ -60,10 +58,10 @@ class sequence_simple_eth_phy #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH) e
                     start_item(req);
                 end
                 set_default();
-                req.sof  = 1'b1;
+                void'(std::randomize(req.sof) with {req.sof inside {1, 2, 4, 8};});
             end
 
-            // Data are divided to 32 bytes long chunks, which are sended to driver.
+            // Data are divided to n bytes long chunks, which are sended to driver.
             req.data = {<< byte{frame.data[i +: BYTE_NUM]}};
             bytes = (frame.data.size() % BYTE_NUM);
 

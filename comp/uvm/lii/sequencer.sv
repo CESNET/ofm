@@ -11,9 +11,9 @@
 `ifndef LII_SEQUENCER_SV
 `define LII_SEQUENCER_SV
 
-class sequencer #(DATA_WIDTH, META_WIDTH) extends uvm_sequencer #(sequence_item #(DATA_WIDTH, META_WIDTH));
+class sequencer #(DATA_WIDTH, META_WIDTH, SOF_WIDTH) extends uvm_sequencer #(sequence_item #(DATA_WIDTH, META_WIDTH, SOF_WIDTH));
 
-    `uvm_component_param_utils(uvm_lii::sequencer #(DATA_WIDTH, META_WIDTH))
+    `uvm_component_param_utils(uvm_lii::sequencer #(DATA_WIDTH, META_WIDTH, SOF_WIDTH))
 
     function new(string name = "sequencer", uvm_component parent = null);
         super.new(name, parent);

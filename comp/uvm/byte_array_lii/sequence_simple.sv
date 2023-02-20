@@ -8,10 +8,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
 */
 
-class sequence_simple #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH) extends uvm_sequence #(uvm_lii::sequence_item #(DATA_WIDTH, META_WIDTH));
+class sequence_simple #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH) extends uvm_sequence #(uvm_lii::sequence_item #(DATA_WIDTH, META_WIDTH, SOF_WIDTH));
 
-    `uvm_object_param_utils(uvm_byte_array_lii::sequence_simple #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH))
-    `uvm_declare_p_sequencer(uvm_lii::sequencer #(DATA_WIDTH, META_WIDTH))
+    `uvm_object_param_utils(uvm_byte_array_lii::sequence_simple #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH))
+    `uvm_declare_p_sequencer(uvm_lii::sequencer #(DATA_WIDTH, META_WIDTH, SOF_WIDTH))
 
     // -----------------------
     // Parameters.
@@ -59,7 +59,7 @@ class sequence_simple #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH) extends u
     endtask
 
     task set_default();
-        req.sof         = 1'b0;
+        req.sof         = '0;
         req.eof         = 1'b0;
         req.eeof        = 1'b0;
         req.link_status = 1'b1;
@@ -94,7 +94,7 @@ class sequence_simple #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH) extends u
             `uvm_fatal(get_type_name(), "Unable to get configuration object")
         end
         `uvm_info(get_full_name(), $sformatf("%s is running", name), UVM_DEBUG)
-        req = uvm_lii::sequence_item #(DATA_WIDTH, META_WIDTH)::type_id::create("req");
+        req = uvm_lii::sequence_item #(DATA_WIDTH, META_WIDTH, SOF_WIDTH)::type_id::create("req");
         while (hl_transactions > 0 || frame != null) begin
             try_get();
             // Send frame
@@ -122,9 +122,10 @@ class sequence_simple #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH) extends u
 
     virtual task send_empty();
         start_item(req);
-        void'(std::randomize(req.data));
+        //void'(std::randomize(req.data));
+        req.data        = '0;
         req.bytes_vld   = '0;
-        req.sof         = 1'b0;
+        req.sof         = '0;
         req.eof         = 1'b0;
         req.eeof        = 1'b0;
         req.edb         = '0;

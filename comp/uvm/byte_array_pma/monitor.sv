@@ -1,7 +1,7 @@
 /*
  * file       : monitor.sv
  * Copyright (C) 2021 CESNET z. s. p. o.
- * description: byte_array to pma monitor
+ * description: uvm_byte_array to uvm_pma monitor
  * date       : 2021
  * author     : Daniel Kriz <xkrizd01@vutbr.cz>
  *
@@ -31,7 +31,9 @@ class monitor #(DATA_WIDTH) extends uvm_byte_array::monitor;
     int timer_cnt            = 0;
     int state                = FIRST_WORD;
     int hdr_err              = 0;
+    int hdr_err_prev         = 0;
     bit timer_cnt_en         = 1'b0;
+    logic hi_ber             = 1'b0;
 
     function new (string name, uvm_component parent);
         super.new(name, parent);
@@ -58,6 +60,7 @@ class monitor #(DATA_WIDTH) extends uvm_byte_array::monitor;
             else if (hdr == uvm_pma::D_HDR) begin
                 return 2;
             end else begin
+                hdr_err_prev = hdr_err;
                 hdr_err++;
                 return 0;
             end
@@ -103,14 +106,18 @@ class monitor #(DATA_WIDTH) extends uvm_byte_array::monitor;
             timer_cnt++;
         end
         if (tr.data_vld == 1'b1) begin
-            if (hdr_err == 16) begin
+            if (hdr_err >= 16) begin
                 tr_data_fifo.delete();
                 state = LINK_DOWN;
+                hi_ber = 1'b1;
+            end else begin
+                hi_ber = 1'b0;
             end
             descramble(tr);
             case (state)
                 FIRST_WORD :
                     begin
+                        tr_data_fifo.delete();
                         check_header(tr.hdr_vld, tr.hdr);
                         if (tr.data == 32'h0000001e) begin
                             timer_cnt_en = 1'b1;
@@ -154,8 +161,10 @@ class monitor #(DATA_WIDTH) extends uvm_byte_array::monitor;
                             end else begin
                                 state = FIRST_WORD;
                             end
-                            if (hdr_err > 0) begin
+                            if (hi_ber == 1'b1) begin
                                 state = LINK_DOWN;
+                                $write("\nLINK DOWN!!!! %t HDR ERR %d HDR previous %d \n", $time, hdr_err, hdr_err_prev);
+                                hdr_err_prev = hdr_err;
                             end
                             hdr_err = 0;
                         end

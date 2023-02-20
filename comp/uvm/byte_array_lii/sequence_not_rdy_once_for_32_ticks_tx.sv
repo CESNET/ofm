@@ -11,11 +11,11 @@
 //PCS
 
 // Sequence which set rdy once per 32 ticks
-class sequence_not_rdy_once_for_32_ticks_tx #(DATA_WIDTH, META_WIDTH) extends uvm_sequence #(uvm_lii::sequence_item #(DATA_WIDTH, META_WIDTH));
+class sequence_not_rdy_once_for_32_ticks_tx #(DATA_WIDTH, META_WIDTH, SOF_WIDTH) extends uvm_sequence #(uvm_lii::sequence_item #(DATA_WIDTH, META_WIDTH, SOF_WIDTH));
 
     // ------------------------------------------------------------------------
     // Registration of agent to databaze
-    `uvm_object_param_utils(uvm_byte_array_lii::sequence_not_rdy_once_for_32_ticks_tx #(DATA_WIDTH, META_WIDTH))
+    `uvm_object_param_utils(uvm_byte_array_lii::sequence_not_rdy_once_for_32_ticks_tx #(DATA_WIDTH, META_WIDTH, SOF_WIDTH))
 
     // ------------------------------------------------------------------------
     // Variables
@@ -31,7 +31,7 @@ class sequence_not_rdy_once_for_32_ticks_tx #(DATA_WIDTH, META_WIDTH) extends uv
     // Generates transactions
     task body;
         // Create a request for sequence item
-        req = uvm_lii::sequence_item #(DATA_WIDTH, META_WIDTH)::type_id::create("req");
+        req = uvm_lii::sequence_item #(DATA_WIDTH, META_WIDTH, SOF_WIDTH)::type_id::create("req");
         forever begin
             start_item(req);
             if(!req.randomize()) `uvm_fatal(this.get_full_name(), "failed to radnomize");
