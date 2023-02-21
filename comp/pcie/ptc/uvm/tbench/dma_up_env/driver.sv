@@ -4,13 +4,14 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause
 
-class driver#(CHANNELS) extends uvm_component;
-    `uvm_component_param_utils(uvm_dma_up::driver #(CHANNELS))
+class driver#(DMA_PORTS) extends uvm_component;
+    `uvm_component_param_utils(uvm_dma_up::driver #(DMA_PORTS))
 
     localparam MFB_META_WIDTH = sv_dma_bus_pack::DMA_REQUEST_LENGTH_W   + sv_dma_bus_pack::DMA_REQUEST_TYPE_W + sv_dma_bus_pack::DMA_REQUEST_FIRSTIB_W + 
                                 sv_dma_bus_pack::DMA_REQUEST_LASTIB_W   + sv_dma_bus_pack::DMA_REQUEST_TAG_W + sv_dma_bus_pack::DMA_REQUEST_UNITID_W   + 
                                 sv_dma_bus_pack::DMA_REQUEST_GLOBAL_W   + sv_dma_bus_pack::DMA_REQUEST_VFID_W + sv_dma_bus_pack::DMA_REQUEST_PASID_W   + 
                                 sv_dma_bus_pack::DMA_REQUEST_PASIDVLD_W + sv_dma_bus_pack::DMA_REQUEST_RELAXED_W;
+    localparam PORTS_W_FIX = (DMA_PORTS > 1) ? $clog2(DMA_PORTS) : 1;
 
     uvm_seq_item_pull_port #(uvm_logic_vector_array::sequence_item #(32), uvm_logic_vector_array::sequence_item #(32)) seq_item_port_logic_vector_array;
     uvm_seq_item_pull_port #(uvm_ptc_info::sequence_item, uvm_ptc_info::sequence_item)     seq_item_port_info;
@@ -23,7 +24,7 @@ class driver#(CHANNELS) extends uvm_component;
 
     uvm_logic_vector_array::sequence_item #(32)       frame_new;
     uvm_logic_vector::sequence_item #(MFB_META_WIDTH) header_new;
-    logic port;
+    logic [PORTS_W_FIX-1 : 0] port;
     int write_cnt = 0;
     int read_cnt = 0;
     uvm_ptc_info::sync_tag tag_sync;
@@ -56,6 +57,8 @@ class driver#(CHANNELS) extends uvm_component;
 
         forever begin
             string debug_msg = "";
+            int unsigned tag_width = 0;
+            int unsigned tag_size = 0;
             // Get new sequence item to drive to interface
             seq_item_port_logic_vector_array.get_next_item(frame);
             seq_item_port_info.get_next_item(header_req);
@@ -67,13 +70,23 @@ class driver#(CHANNELS) extends uvm_component;
             firstib     = header_req.firstib;
             lastib      = header_req.lastib;
 
+            if (DMA_PORTS > 1) begin
+                header_req.tag[sv_dma_bus_pack::DMA_REQUEST_TAG_W-1 : sv_dma_bus_pack::DMA_REQUEST_TAG_W-PORTS_W_FIX] = port;
+            end
+
             if (type_ide == 1'b0) begin
-                if (tag_sync.list_of_tags.size() != 128) begin
-                    header_req.tag[7] = port; // top bit of tag is port
+                tag_width = int'((sv_dma_bus_pack::DMA_REQUEST_TAG_W-PORTS_W_FIX));
+                tag_size = 2**tag_width;
+                if (tag_sync.list_of_tags.size() != tag_size) begin
+                    if (DMA_PORTS > 1) begin
+                        header_req.tag[sv_dma_bus_pack::DMA_REQUEST_TAG_W-1 : sv_dma_bus_pack::DMA_REQUEST_TAG_W-PORTS_W_FIX] = port;
+                    end
                     if (tag_sync.list_of_tags.size() != 0) begin 
                         while ((tag_sync.list_of_tags.exists(header_req.tag))) begin
                             void'(std::randomize(header_req.tag));
-                            header_req.tag[7] = port;
+                            if (DMA_PORTS > 1) begin
+                                header_req.tag[sv_dma_bus_pack::DMA_REQUEST_TAG_W-1 : sv_dma_bus_pack::DMA_REQUEST_TAG_W-PORTS_W_FIX] = port;
+                            end
                         end
                     end
                     tag         = header_req.tag;
@@ -89,7 +102,11 @@ class driver#(CHANNELS) extends uvm_component;
             // unitid      = header_req.unitid;
             unitid      = 8'b10000000;
             global_id   = header_req.global_id;
-            vfid        = {header_req.vfid[8-1 : 1], port};
+            if (DMA_PORTS > 1) begin
+                vfid        = {header_req.vfid[8-1 : PORTS_W_FIX], port};
+            end else begin
+                vfid        = header_req.vfid;
+            end
             pasid       = header_req.pasid;
             pasidvld    = header_req.pasidvld;
             relaxed     = header_req.relaxed;
@@ -103,25 +120,27 @@ class driver#(CHANNELS) extends uvm_component;
 
             header_new.data = {relaxed, pasidvld, pasid, vfid, global_id, unitid, tag, lastib, firstib, type_ide, packet_size};
 
+            $swrite(debug_msg, "%s\n\t =============== UP DRIVER - PORT %d =============== \n", debug_msg, port);
             if (type_ide == 1'b0) begin
-                $swrite(debug_msg, "%s\n\t Generated RQ MVB read request number %d: %s\n", debug_msg, read_cnt, header_new.convert2string());
+                $swrite(debug_msg, "%s\t Generated RQ MVB read request number %d: %s\n", debug_msg, read_cnt, header_new.convert2string());
             end
             if (type_ide == 1'b1) begin
-                $swrite(debug_msg, "%s\n\t Generated RQ MVB write request number %d: %s\n", debug_msg, write_cnt, header_new.convert2string());
-                $swrite(debug_msg, "%s\n\t Generated RQ write MFB: %s\n", debug_msg, frame_new.convert2string());
+                $swrite(debug_msg, "%s\t Generated RQ MVB write request number %d: %s\n", debug_msg, write_cnt, header_new.convert2string());
+                $swrite(debug_msg, "%s\t Generated RQ write MFB: %s\n", debug_msg, frame_new.convert2string());
             end
 
-            $swrite(debug_msg, "%s\n\t Deparsed RQ MVB TR port %d:\n", debug_msg, port);
+            $swrite(debug_msg, "%s\t Deparsed RQ MVB TR port %d:\n", debug_msg, port);
 
-            $swrite(debug_msg, "%s\n\t PACKET SIZE:      %d", debug_msg, packet_size);
-            $swrite(debug_msg, "%s\n\t TYPE ID:          %h", debug_msg, type_ide);
-            $swrite(debug_msg, "%s\n\t RELAXED:          %h", debug_msg, relaxed);
-            $swrite(debug_msg, "%s\n\t PASIDVLD:         %h", debug_msg, pasidvld);
-            $swrite(debug_msg, "%s\n\t PASID:            %h", debug_msg, pasid);
-            $swrite(debug_msg, "%s\n\t VFID:             %h", debug_msg, vfid);
-            $swrite(debug_msg, "%s\n\t GLOBAL ID:        %h", debug_msg, global_id);
-            $swrite(debug_msg, "%s\n\t UNITID:           %h", debug_msg, unitid);
-            $swrite(debug_msg, "%s\n\t LASTIB:           %h\n", debug_msg, lastib);
+            $swrite(debug_msg, "%s\n\t PACKET SIZE:      %0d", debug_msg, packet_size);
+            $swrite(debug_msg, "%s\n\t TAG:              0x%h", debug_msg, tag);
+            $swrite(debug_msg, "%s\n\t TYPE ID:          0x%h", debug_msg, type_ide);
+            $swrite(debug_msg, "%s\n\t RELAXED:          0x%h", debug_msg, relaxed);
+            $swrite(debug_msg, "%s\n\t PASIDVLD:         0x%h", debug_msg, pasidvld);
+            $swrite(debug_msg, "%s\n\t PASID:            0x%h", debug_msg, pasid);
+            $swrite(debug_msg, "%s\n\t VFID:             0x%h", debug_msg, vfid);
+            $swrite(debug_msg, "%s\n\t GLOBAL ID:        0x%h", debug_msg, global_id);
+            $swrite(debug_msg, "%s\n\t UNITID:           0x%h", debug_msg, unitid);
+            $swrite(debug_msg, "%s\n\t LASTIB:           0x%h\n", debug_msg, lastib);
 
             `uvm_info(this.get_full_name(), debug_msg ,UVM_MEDIUM);
 
