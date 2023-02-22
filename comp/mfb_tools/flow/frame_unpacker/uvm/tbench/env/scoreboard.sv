@@ -5,23 +5,23 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 
-class scoreboard #(HEADER_SIZE, VERBOSITY, OUT_META_WIDTH) extends uvm_scoreboard;
-    `uvm_component_param_utils(uvm_superunpacketer::scoreboard #(HEADER_SIZE, VERBOSITY, OUT_META_WIDTH))
+class scoreboard #(HEADER_SIZE, MFB_ITEM_WIDTH, VERBOSITY) extends uvm_scoreboard;
+    `uvm_component_param_utils(uvm_superunpacketer::scoreboard #(HEADER_SIZE, MFB_ITEM_WIDTH, VERBOSITY))
 
     int unsigned compared;
     int unsigned errors;
 
-    uvm_analysis_export #(uvm_logic_vector_array::sequence_item #(8))        input_data;
-    uvm_analysis_export #(uvm_logic_vector_array::sequence_item #(8))        out_data;
-    uvm_analysis_export #(uvm_logic_vector::sequence_item #(OUT_META_WIDTH)) out_meta;
-    uvm_analysis_export #(uvm_logic_vector::sequence_item #(OUT_META_WIDTH)) out_mvb;
+    uvm_analysis_export #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) input_data;
+    uvm_analysis_export #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) out_data;
+    uvm_analysis_export #(uvm_logic_vector::sequence_item #(HEADER_SIZE))          out_meta;
+    uvm_analysis_export #(uvm_logic_vector::sequence_item #(HEADER_SIZE))          out_mvb;
 
-    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item #(8))        dut_data;
-    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item #(8))        model_data;
-    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(OUT_META_WIDTH)) dut_meta;
-    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(OUT_META_WIDTH)) model_meta;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) dut_data;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) model_data;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(HEADER_SIZE))          dut_meta;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(HEADER_SIZE))          model_meta;
 
-    model #(HEADER_SIZE, VERBOSITY, OUT_META_WIDTH) m_model;
+    model #(HEADER_SIZE, MFB_ITEM_WIDTH, VERBOSITY) m_model;
 
     // Contructor of scoreboard.
     function new(string name, uvm_component parent);
@@ -39,24 +39,18 @@ class scoreboard #(HEADER_SIZE, VERBOSITY, OUT_META_WIDTH) extends uvm_scoreboar
 
     endfunction
 
-    function int unsigned used(logic wr);
+    function int unsigned used();
         int unsigned ret = 0;
         ret |= (dut_data.used()   != 0);
         ret |= (model_data.used() != 0);
         ret |= (dut_meta.used()   != 0);
         ret |= (model_meta.used() != 0);
-        if (wr == 1'b1) begin
-            $write("dut_data USED [%0d]\n",   dut_data.used());
-            $write("model_data USED [%0d]\n", model_data.used());
-            $write("dut_meta USED [%0d]\n",   dut_meta.used());
-            $write("model_meta USED [%0d]\n", model_meta.used());
-        end
         return ret;
     endfunction
 
 
     function void build_phase(uvm_phase phase);
-        m_model = model#(HEADER_SIZE, VERBOSITY, OUT_META_WIDTH)::type_id::create("m_model", this);
+        m_model = model#(HEADER_SIZE, MFB_ITEM_WIDTH, VERBOSITY)::type_id::create("m_model", this);
     endfunction
 
     function void connect_phase(uvm_phase phase);
@@ -75,38 +69,47 @@ class scoreboard #(HEADER_SIZE, VERBOSITY, OUT_META_WIDTH) extends uvm_scoreboar
 
     task run_phase(uvm_phase phase);
 
-        uvm_logic_vector_array::sequence_item #(8)        tr_dut;
-        uvm_logic_vector_array::sequence_item #(8)        tr_model;
-        uvm_logic_vector::sequence_item #(OUT_META_WIDTH) tr_dut_meta;
-        uvm_logic_vector::sequence_item #(OUT_META_WIDTH) tr_model_meta;
+        uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)        tr_dut_data;
+        uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)        tr_model_data;
+        uvm_logic_vector::sequence_item #(HEADER_SIZE) tr_dut_meta;
+        uvm_logic_vector::sequence_item #(HEADER_SIZE) tr_model_meta;
+        string msg;
 
         forever begin
+            msg = "";
 
-            model_data.get(tr_model);
+            model_data.get(tr_model_data);
             model_meta.get(tr_model_meta);
-            dut_data.get(tr_dut);
+            dut_data.get(tr_dut_data);
             dut_meta.get(tr_dut_meta);
 
+            compared++;
+
             if (VERBOSITY >= 2) begin
-                `uvm_info(this.get_full_name(), tr_dut_meta.convert2string() ,UVM_LOW)
-                `uvm_info(this.get_full_name(), tr_model_meta.convert2string() ,UVM_LOW)
+                $swrite(msg, "%s\n ================ SCOREBOARD DEBUG =============== \n", msg);
+                $swrite(msg, "%sDUT TR number [%0d]\n", msg, compared);
+                $swrite(msg, "%s\tDATA %s\n", msg, tr_dut_data.convert2string());
+                $swrite(msg, "%s\tMETA %s\n", msg, tr_dut_meta.convert2string());
+                $swrite(msg, "%sMODEL TR number [%0d]\n", msg, compared);
+                $swrite(msg, "%s\tDATA %s\n", msg, tr_model_data.convert2string());
+                $swrite(msg, "%s\tMETA %s\n", msg, tr_model_meta.convert2string());
+                `uvm_info(this.get_full_name(), msg ,UVM_FULL)
             end
 
-            compared++;
             if ((compared % 1000) == 0) begin
                 $write("%d transactions were compared\n", compared);
             end
 
-            if (tr_model.compare(tr_dut) == 0) begin
-                string msg;
+            if (tr_model_data.compare(tr_dut_data) == 0) begin
+                msg = "";
                 errors++;
 
-                $swrite(msg, "\n\t Comparison failed at packet number %d! \n\tModel packet:\n%s\n\tDUT packet:\n%s", compared, tr_model.convert2string(), tr_dut.convert2string());
+                $swrite(msg, "\n\t Comparison failed at packet number %d! \n\tModel packet:\n%s\n\tDUT packet:\n%s", compared, tr_model_data.convert2string(), tr_dut_data.convert2string());
                 `uvm_error(this.get_full_name(), msg);
             end
 
             if (tr_model_meta.compare(tr_dut_meta) == 0) begin
-                string msg;
+                msg = "";
                 errors++;
 
                 $swrite(msg, "\n\t Comparison failed at meta number %d! \n\tModel meta:\n%s\n\tDUT meta:\n%s\n", compared, tr_model_meta.convert2string(), tr_dut_meta.convert2string());
@@ -117,15 +120,17 @@ class scoreboard #(HEADER_SIZE, VERBOSITY, OUT_META_WIDTH) extends uvm_scoreboar
     endtask
 
     function void report_phase(uvm_phase phase);
+        string msg = "";
 
-        if (errors == 0 && this.used(1'b1) == 0) begin 
-            string msg = "";
+        $swrite(msg, "%s\tdut_data USED [%0d]\n"  , msg, dut_data.used());
+        $swrite(msg, "%s\tmodel_data USED [%0d]\n", msg, model_data.used());
+        $swrite(msg, "%s\tdut_meta USED [%0d]\n"  , msg, dut_meta.used());
+        $swrite(msg, "%s\tmodel_meta USED [%0d]\n", msg, model_meta.used());
 
+        if (errors == 0 && this.used() == 0) begin 
             $swrite(msg, "%sCompared packets: %0d", msg, compared);
             `uvm_info(get_type_name(), {msg, "\n\n\t---------------------------------------\n\t----     VERIFICATION SUCCESS      ----\n\t---------------------------------------"}, UVM_NONE)
         end else begin
-            string msg = "";
-
             $swrite(msg, "%sCompared packets: %0d errors %0d", msg, compared, errors);
             `uvm_info(get_type_name(), {msg, "\n\n\t---------------------------------------\n\t----     VERIFICATION FAILED       ----\n\t---------------------------------------"}, UVM_NONE)
         end

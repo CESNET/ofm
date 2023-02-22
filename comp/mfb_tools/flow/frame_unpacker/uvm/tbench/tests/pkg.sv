@@ -21,27 +21,29 @@ package test;
     parameter MFB_BLOCK_SIZE     = 8;
     // Item width (in bits), must be 8.
     parameter MFB_ITEM_WIDTH     = 8;
-
-	// Output metadata width (in bits), must be according to the header (16B).
-    parameter OUT_META_WIDTH     = 2*8*8-1;
+    // Number of stages in the Offset pipeline.
+    // It is also the maximum number of individual frames inside a single SuperPacket.
+    // Must be greater than 0!
+    parameter UNPACKING_STAGES    = 1;
     // The extracted Header is output as:
     // Insert header to output metadata with SOF (MODE 0),
     // Insert header to output metadata with EOF (MODE 1),
     // Insert header on MVB (MODE 2)
-    parameter OUT_META_MODE      = 2;
+    parameter META_OUT_MODE      = 0;
     // Maximum size of a packet (in Items).
     parameter PKT_MTU            = 2**15;
     parameter DATA_SIZE_MAX      = 1500;
     // FPGA device name: ULTRASCALE, STRATIX10, AGILEX, ...
     parameter DEVICE             = "STRATIX10";
-    // Size of chunk header
+    // Size of chunk header in bits
     parameter HEADER_SIZE        = 128;
     // VERBOSITY MODE
     // 0 - None
     // 1 - Basic
-    // 2 - Addvanced (SP, partial packets and headers)
+    // 2 - Advanced (SP, partial packets and headers)
+    // 3 - Ver debug info
     parameter VERBOSITY          = 0;
-    parameter MIN_SIZE           = 60 + HEADER_SIZE/8;
+    parameter MIN_SIZE           = 60 + HEADER_SIZE/MFB_ITEM_WIDTH;
 
     parameter CLK_PERIOD         = 4ns;
 
