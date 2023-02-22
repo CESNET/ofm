@@ -116,7 +116,7 @@ begin
         generic map(
            DATA_WIDTH         => FIFO_DATA_WIDTH,
            ITEMS              => FIFO_DEPTH,
-           ALMOST_FULL_OFFSET => AVALON_RDY_LATENCY+1,
+           ALMOST_FULL_OFFSET => AVALON_RDY_LATENCY+1+1,
            DEVICE             => DEVICE,
            RAM_TYPE           => FIFO_RAM_TYPE
         )
