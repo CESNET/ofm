@@ -74,7 +74,7 @@ class tcam_model #(int DATA_WIDTH, int ITEMS);
 endclass
 
 
-class ScoreboardWriteDriverCbs #(int DATA_WIDTH, int ITEMS) extends DriverCbs;
+class ScoreboardWriteDriverCbs #(int DATA_WIDTH, int ITEMS, bit FRAGMENTED_MEM) extends DriverCbs;
     tcam_model #(DATA_WIDTH, ITEMS) tcam;
 
     function new(tcam_model #(DATA_WIDTH, ITEMS) tcam_i);
@@ -86,7 +86,7 @@ class ScoreboardWriteDriverCbs #(int DATA_WIDTH, int ITEMS) extends DriverCbs;
 
     virtual task post_tx(Transaction transaction, string inst);
         //$write("Write transaction\n");
-        WbTransaction #(DATA_WIDTH, log2(ITEMS)) tr;
+        WbTransaction #(DATA_WIDTH, log2(ITEMS), FRAGMENTED_MEM) tr;
         $cast(tr, transaction);
         if(FULL_PRINT == TRUE) begin
             $write("Write to TCAM model\n");
@@ -195,9 +195,9 @@ class ScoreboardMonitorCbs extends MonitorCbs;
 endclass
 
 
-class Scoreboard #(int DATA_WIDTH, int ITEMS);
+class Scoreboard #(int DATA_WIDTH, int ITEMS, bit FRAGMENTED_MEM);
 
-    ScoreboardWriteDriverCbs  #(DATA_WIDTH, ITEMS) writeDriverCbs;
+    ScoreboardWriteDriverCbs  #(DATA_WIDTH, ITEMS, FRAGMENTED_MEM) writeDriverCbs;
     ScoreboardReadDriverCbs   #(DATA_WIDTH, ITEMS) readDriverCbs;
     ScoreboardMatchDriverCbs  #(DATA_WIDTH, ITEMS) matchDriverCbs;
     ScoreboardMonitorCbs                           readMonitorCbs;

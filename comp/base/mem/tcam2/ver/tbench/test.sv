@@ -21,7 +21,7 @@ program TEST (
     iMvbTx.monitor MATCH_MONITOR
 );
 
-    WbTransaction  #(DATA_WIDTH, ADDR_WIDTH) write_bp;
+    WbTransaction  #(DATA_WIDTH, ADDR_WIDTH, USE_FRAGMENTED_MEM) write_bp;
     MvbTransaction #(ADDR_WIDTH)             read_bp;
     MvbTransaction #(DATA_WIDTH)             match_bp;
 
@@ -29,7 +29,7 @@ program TEST (
     Generator read_gen;
     Generator match_gen;
 
-    WbDriver  #(DATA_WIDTH, ADDR_WIDTH) write_driver;
+    WbDriver  #(DATA_WIDTH, ADDR_WIDTH, USE_FRAGMENTED_MEM) write_driver;
     MvbDriver #(1, ADDR_WIDTH)          read_driver;
     MvbDriver #(1, DATA_WIDTH)          match_driver;
 
@@ -38,7 +38,7 @@ program TEST (
     MvbMonitor   #(1, 2*DATA_WIDTH) read_monitor;
     MvbMonitor   #(1, ITEMS+1)      match_monitor;
 
-    Scoreboard #(DATA_WIDTH, ITEMS) scoreboard;
+    Scoreboard #(DATA_WIDTH, ITEMS, USE_FRAGMENTED_MEM) scoreboard;
 
     task createGeneratorEnvironment();
         write_gen = new("Write Generator", 0);

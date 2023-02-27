@@ -16,6 +16,7 @@ package test_pkg;
     parameter WRITE_BEFORE_MATCH = TRUE;
     parameter READ_FROM_TCAM     = TRUE;
     parameter OUTPUT_READ_REGS   = TRUE;
+    parameter USE_FRAGMENTED_MEM = FALSE;
     parameter DEVICE             = "ULTRASCALE";
 
     parameter WRITE_COUNT = 200;
