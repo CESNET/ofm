@@ -21,7 +21,7 @@ entity TCAM2 is
 
         -- TCAM2 storage capacity
         --     for XILINX (7SERIES, ULTRASCALE) optimal is a multiple of 1*(2^RS)
-        --     for INTEL (ARRIA10, STRATIX10) optimal is a multiple of 16*(2^RS)
+        --     for INTEL (ARRIA10, STRATIX10) optimal is a multiple of 16*(2^RS), if memory fragmentation is not enabled, otherwise a multiple of 32*(2^RS)
         ITEMS              : integer := 16;
 
         -- TCAM2 resources saving
@@ -47,6 +47,9 @@ entity TCAM2 is
         --    If the bit is 0, then it is don't care
         --    But if the bit is 1, then it is UNMATCHABLE!
         USE_UNMATCHABLE    : boolean := false;
+
+        -- set as true to use the entire Intel MLAB data width (20 instead of 16), but TCAM rows are addressed discontinuously (rows 21-32 are unused)
+        USE_FRAGMENTED_MEM : boolean := false;
 
         -- FPGA device
         --    available are "7SERIES", "ULTRASCALE", "ARRIA10", "STRATIX10", "AGILEX"
@@ -93,15 +96,18 @@ architecture FULL of TCAM2 is
     constant IS_INTEL            : boolean := (DEVICE = "ARRIA10" or DEVICE = "STRATIX10" or DEVICE = "AGILEX");
 
     -- Optimal parameters by FPGA device
+    constant INTEL_DATA_WIDTH    : integer := tsel(USE_FRAGMENTED_MEM, 20, 16);
     constant MEMORY_ADDR_WIDTH   : integer := tsel(IS_XILINX, 6, 5);
-    constant MEMORY_DATA_WIDTH   : integer := tsel(IS_XILINX, 1, 16);
+    constant MEMORY_DATA_WIDTH   : integer := tsel(IS_XILINX, 1, INTEL_DATA_WIDTH);
+    constant ALIGNED_DATA_WIDTH  : integer := 2**log2(MEMORY_DATA_WIDTH);
 
     -- Setting TCAM2 resources parameters
     constant CELL_WIDTH          : integer := MEMORY_ADDR_WIDTH - RESOURCES_SAVING;
     constant CELL_HEIGHT         : integer := MEMORY_DATA_WIDTH * (2**RESOURCES_SAVING);
+    constant ALIGNED_CELL_HEIGHT : integer := ALIGNED_DATA_WIDTH * (2**RESOURCES_SAVING);
     constant CELL_HEIGHT_RATIO   : integer := CELL_HEIGHT/MEMORY_DATA_WIDTH;
     constant COLUMNS             : integer := div_roundup(DATA_WIDTH, CELL_WIDTH);
-    constant ROWS                : integer := div_roundup(ITEMS, CELL_HEIGHT);
+    constant ROWS                : integer := div_roundup(ITEMS, ALIGNED_CELL_HEIGHT);
 
     -- --------------------------------------------------------------------------
     --  I/O data signals
@@ -117,7 +123,7 @@ architecture FULL of TCAM2 is
     signal input_m_data_reg_aug      : std_logic_vector(COLUMNS*CELL_WIDTH-1 downto 0);
     signal input_wr_data_reg_aug     : std_logic_vector(COLUMNS*CELL_WIDTH-1 downto 0);
     signal input_wr_mask_reg_aug     : std_logic_vector(COLUMNS*CELL_WIDTH-1 downto 0);
-    signal input_wr_addr_reg_aug     : std_logic_vector(log2(ROWS*CELL_HEIGHT)-1 downto 0);
+    signal input_wr_addr_reg_aug     : std_logic_vector(log2(ROWS*ALIGNED_CELL_HEIGHT)-1 downto 0);
 
     -- Input registers augmented arrays
     signal input_m_data_reg_aug_arr  : slv_array_t(COLUMNS-1 downto 0)(CELL_WIDTH-1 downto 0);
@@ -189,7 +195,7 @@ architecture FULL of TCAM2 is
     -- memory write signals
     signal mem_wr_addr   : std_logic_vector(MEMORY_ADDR_WIDTH-1 downto 0);
     signal mem_wr_data   : std_logic_vector(COLUMNS-1 downto 0);
-    signal mem_wr_bit_en : std_logic_vector(MEMORY_DATA_WIDTH-1 downto 0);
+    signal mem_wr_bit_en : std_logic_vector(ALIGNED_DATA_WIDTH-1 downto 0);
     signal mem_wr_en     : std_logic_vector(ROWS-1 downto 0);
 
     -- --------------------------------------------------------------------------
@@ -214,10 +220,10 @@ architecture FULL of TCAM2 is
     signal m_aug_reg_we      : std_logic_vector(CELL_HEIGHT_RATIO-1 downto 0);
 
     -- output match vector register
-    signal m_aug_reg         : slv_array_2d_t(ROWS-1 downto 0)(CELL_HEIGHT_RATIO-1 downto 0)(MEMORY_DATA_WIDTH-1 downto 0);
+    signal m_aug_reg         : slv_array_2d_t(ROWS-1 downto 0)(CELL_HEIGHT_RATIO-1 downto 0)(ALIGNED_DATA_WIDTH-1 downto 0);
 
     -- fit output match
-    signal m_aug             : std_logic_vector(ROWS*CELL_HEIGHT-1 downto 0);
+    signal m_aug             : std_logic_vector(ROWS*ALIGNED_CELL_HEIGHT-1 downto 0);
 
 begin
 
@@ -226,8 +232,8 @@ begin
         severity failure;
 
     -- MEMORY_DATA_WIDTH must be power of two
-    assert (2**(log2(MEMORY_DATA_WIDTH))) = MEMORY_DATA_WIDTH
-        report "MEMORY_DATA_WIDTH must be power of two!"
+    assert ((2**(log2(MEMORY_DATA_WIDTH))) = MEMORY_DATA_WIDTH or (IS_INTEL and USE_FRAGMENTED_MEM and MEMORY_DATA_WIDTH=20))
+        report "MEMORY_DATA_WIDTH must be power of two or equal to 20 for INTEL and USE_FRAGMENTED_MEM!"
         severity failure;
 
     -- tcam waits for match or write
@@ -278,7 +284,7 @@ begin
         if (rising_edge(CLK)) then
             mem_wr_addr_reg   <= mem_wr_addr;
             mem_wr_data_reg   <= mem_wr_data;
-            mem_wr_bit_en_reg <= mem_wr_bit_en;
+            mem_wr_bit_en_reg <= mem_wr_bit_en(mem_wr_bit_en_reg'range);
             mem_wr_en_reg     <= mem_wr_en;
         end if;
     end process;
@@ -463,7 +469,7 @@ begin
             ITEMS => ROWS
         )
         port map (
-            ADDR   => input_wr_addr_reg_aug(input_wr_addr_reg_aug'high downto log2(CELL_HEIGHT)),
+            ADDR   => input_wr_addr_reg_aug(input_wr_addr_reg_aug'high downto log2(ALIGNED_CELL_HEIGHT)),
             ENABLE => wr_cnt_en,
             DO     => mem_wr_en
         );
@@ -474,24 +480,24 @@ begin
 
     -- cell height address
     mem_sf_addr_g : if CELL_HEIGHT_RATIO > 1 generate
-        mem_sf_addr <= input_wr_addr_reg_aug(log2(CELL_HEIGHT)-1 downto log2(MEMORY_DATA_WIDTH));
+        mem_sf_addr <= input_wr_addr_reg_aug(log2(ALIGNED_CELL_HEIGHT)-1 downto log2(ALIGNED_DATA_WIDTH));
     end generate;
     fake_mem_sf_addr_g : if CELL_HEIGHT_RATIO = 1 generate
         mem_sf_addr(0) <= '0';
     end generate;
 
     -- memory element bit enable
-    bit_en_g : if MEMORY_DATA_WIDTH > 1 generate
+    bit_en_g : if ALIGNED_DATA_WIDTH > 1 generate
         bit_en_decoder_i : entity work.dec1fn
         generic map (
-            ITEMS => MEMORY_DATA_WIDTH
+            ITEMS => ALIGNED_DATA_WIDTH
         )
         port map (
-            ADDR => input_wr_addr_reg_aug(log2(MEMORY_DATA_WIDTH)-1 downto 0),
+            ADDR => input_wr_addr_reg_aug(log2(ALIGNED_DATA_WIDTH)-1 downto 0),
             DO   => mem_wr_bit_en
         );
     end generate;
-    fake_bit_en_g : if MEMORY_DATA_WIDTH = 1 generate
+    fake_bit_en_g : if ALIGNED_DATA_WIDTH = 1 generate
         mem_wr_bit_en(0) <= '1';
     end generate;
 
@@ -614,7 +620,7 @@ begin
             begin
                 if rising_edge(CLK) then
                     if (m_aug_reg_we(j) = '1') then
-                        m_aug_reg(i)(j) <= mem_match_out(i);
+                        m_aug_reg(i)(j) <= (mem_match_out(i)'range => mem_match_out(i), others=>'0');
                     end if;
                 end if;
             end process;
