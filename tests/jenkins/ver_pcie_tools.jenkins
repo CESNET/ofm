@@ -39,6 +39,7 @@ def COMPONENTS_MULTIVER = [\
     ['CQ_AXI2MFB'        , 'comp/pcie/convertors/cq_axi2mfb/uvm'                       , 'top_level.fdo'      , 'tbench/tests/pkg.sv' , 'ver_settings.py'       ],\
     ['CC_MFB2AXI'        , 'comp/pcie/convertors/cc_mfb2axi/uvm'                       , 'top_level.fdo'      , 'tbench/tests/pkg.sv' , 'ver_settings.py'       ],\
     ['MFB2AVST'          , 'comp/pcie/others/mfb2avst/uvm'                             , 'top_level.fdo'      , 'tbench/tests/pkg.sv' , 'ver_settings.py'       ],\
+    ['AVST2MFB'          , 'comp/pcie/others/avst2mfb/uvm'                             , 'top_level.fdo'      , 'tbench/tests/pkg.sv' , 'ver_settings.py'       ],\
 ]
 // /////////////////////////////////////////////////////////////////////////////
 
