@@ -52,6 +52,10 @@ proc EvalFile {FNAME OPT} {
             # VHDL file
             set_global_assignment -name VHDL_FILE $FNAME -hdl_version VHDL_2008 {*}$LIB_PARAM
             puts "INFO: Library $opt(LIBRARY): File added: $FNAME"
+        } elseif { $FEXT == ".v" } {
+            # Verilog file
+            set_global_assignment -name VERILOG_FILE $FNAME {*}$LIB_PARAM
+            puts "INFO: Library $opt(LIBRARY): File added: $FNAME"
         } elseif { $FEXT == ".sv" } {
             # System Verilog file
             set_global_assignment -name SYSTEMVERILOG_FILE $FNAME {*}$LIB_PARAM
@@ -247,7 +251,9 @@ proc SynthesizeDesignSetup {synth_flags} {
 proc SynthesizeDesignRun {synth_flags} {
     PrintLabel "Synthesize"
 
-    execute_module -tool syn
+    if {[catch {execute_module -tool syn}]} {
+        execute_module -tool map
+    }
 }
 
 # -----------------------------------------------------------------------------
