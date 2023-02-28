@@ -226,6 +226,14 @@ proc SynthesizeDesignSetup {synth_flags} {
         set_instance_assignment -name VIRTUAL_PIN ON -to *
     }
 
+    # Automatic clear old IP files before IP Generation
+    if { [info exist SYNTH_FLAGS(IP_FILES_CLEAN_ENABLE)] } {
+        PrintLabel "Clearing old IP files..."
+        execute_module -tool ipg -args "--clear_ip_generation_dirs"
+    } else {
+        puts "Automatic clearing of old IP files is DISABLED!"
+    }
+
     PrintLabel "IP Generation"
     execute_module -tool ipg
 
