@@ -245,8 +245,6 @@ architecture FULL of RX_DMA_CALYPTE is
     -- attribute mark_debug of start_req_chan : signal is "true";
     -- attribute mark_debug of start_req_vld  : signal is "true";
     -- attribute mark_debug of start_req_done : signal is "true";
-    --==================================================================================================
-
 begin
 
     assert (PKT_SIZE_MAX < 2**16)

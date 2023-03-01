@@ -6,7 +6,7 @@
 proc dts_dma_calypte_ctrl {dir id base pcie} {
     set    ret ""
     append ret "dma_ctrl_calypte" "_$dir$id {"
-    append ret "compatible = \"netcope,dma_ctrl_calypte" "_" $dir "\";"
+    append ret "compatible = \"cesnet,dma_ctrl_calypte" "_" $dir "\";"
     append ret "reg = <$base 0x80>;"
     append ret "version = <0x00010000>;"
     append ret "pcie = <$pcie>;"

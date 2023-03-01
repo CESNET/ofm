@@ -243,6 +243,83 @@ architecture FULL of TX_DMA_CHANNEL_CORE is
     -- Increment signal for the packet counter
     signal pkt_size_stored  : std_logic_vector(log2(PKT_SIZE_MAX+1) -1 downto 0);
     signal pkt_size_curr    : std_logic_vector(log2(PKT_SIZE_MAX+1) -1 downto 0);
+
+    -- attribute mark_debug : string;
+
+    -- attribute mark_debug of PCIE_MFB_META_SEG_SIZE   : signal is "true";
+    -- attribute mark_debug of PCIE_MFB_META_IS_DMA_HDR : signal is "true";
+
+    -- attribute mark_debug of PCIE_MFB_DATA    : signal is "true";
+    -- attribute mark_debug of PCIE_MFB_SOF     : signal is "true";
+    -- attribute mark_debug of PCIE_MFB_EOF     : signal is "true";
+    -- attribute mark_debug of PCIE_MFB_SOF_POS : signal is "true";
+    -- attribute mark_debug of PCIE_MFB_EOF_POS : signal is "true";
+    -- attribute mark_debug of PCIE_MFB_SRC_RDY : signal is "true";
+    -- attribute mark_debug of PCIE_MFB_DST_RDY : signal is "true";
+
+    -- attribute mark_debug of USR_MFB_META_PKT_SIZE : signal is "true";
+    -- attribute mark_debug of USR_MFB_META_HDR_META : signal is "true";
+
+    -- attribute mark_debug of USR_MFB_DATA    : signal is "true";
+    -- attribute mark_debug of USR_MFB_SOF     : signal is "true";
+    -- attribute mark_debug of USR_MFB_EOF     : signal is "true";
+    -- attribute mark_debug of USR_MFB_SOF_POS : signal is "true";
+    -- attribute mark_debug of USR_MFB_EOF_POS : signal is "true";
+    -- attribute mark_debug of USR_MFB_SRC_RDY : signal is "true";
+    -- attribute mark_debug of USR_MFB_DST_RDY : signal is "true";
+
+    -- attribute mark_debug of START_REQ_VLD : signal is "true";
+    -- attribute mark_debug of START_REQ_ACK : signal is "true";
+    -- attribute mark_debug of STOP_REQ_VLD  : signal is "true";
+    -- attribute mark_debug of STOP_REQ_ACK  : signal is "true";
+
+    -- attribute mark_debug of DATA_FIFO_STATUS : signal is "true";
+    -- attribute mark_debug of HDR_FIFO_STATUS  : signal is "true";
+
+    -- attribute mark_debug of channel_active_pst : signal is "true";
+    -- attribute mark_debug of pkt_acc_pst        : signal is "true";
+    -- attribute mark_debug of pkt_dispatch_pst   : signal is "true";
+    -- attribute mark_debug of pkt_build_pst      : signal is "true";
+    -- attribute mark_debug of align_ctl_pst      : signal is "true";
+    -- attribute mark_debug of align_block        : signal is "true";
+
+    -- attribute mark_debug of pkt_drop_en          : signal is "true";
+    -- attribute mark_debug of pkt_acc_mfb_data    : signal is "true";
+    -- attribute mark_debug of pkt_acc_mfb_meta    : signal is "true";
+    -- attribute mark_debug of pkt_acc_mfb_sof     : signal is "true";
+    -- attribute mark_debug of pkt_acc_mfb_eof     : signal is "true";
+    -- attribute mark_debug of pkt_acc_mfb_sof_pos : signal is "true";
+    -- attribute mark_debug of pkt_acc_mfb_eof_pos : signal is "true";
+    -- attribute mark_debug of pkt_acc_mfb_src_rdy : signal is "true";
+    -- attribute mark_debug of pkt_acc_mfb_dst_rdy : signal is "true";
+
+    -- attribute mark_debug of cutt_mfb_data    : signal is "true";
+    -- attribute mark_debug of cutt_mfb_meta    : signal is "true";
+    -- attribute mark_debug of cutt_mfb_sof     : signal is "true";
+    -- attribute mark_debug of cutt_mfb_eof     : signal is "true";
+    -- attribute mark_debug of cutt_mfb_sof_pos : signal is "true";
+    -- attribute mark_debug of cutt_mfb_eof_pos : signal is "true";
+    -- attribute mark_debug of cutt_mfb_src_rdy : signal is "true";
+    -- attribute mark_debug of cutt_mfb_dst_rdy : signal is "true";
+
+    -- attribute mark_debug of align_mfb_data    : signal is "true";
+    -- attribute mark_debug of align_mfb_meta    : signal is "true";
+    -- attribute mark_debug of align_mfb_sof     : signal is "true";
+    -- attribute mark_debug of align_mfb_eof     : signal is "true";
+    -- attribute mark_debug of align_mfb_sof_pos : signal is "true";
+    -- attribute mark_debug of align_mfb_eof_pos : signal is "true";
+    -- attribute mark_debug of align_mfb_src_rdy : signal is "true";
+    -- attribute mark_debug of align_mfb_dst_rdy : signal is "true";
+
+    -- attribute mark_debug of fifo_rx_mfb_data    : signal is "true";
+    -- attribute mark_debug of fifo_rx_mfb_sof_pos : signal is "true";
+    -- attribute mark_debug of fifo_rx_mfb_eof_pos : signal is "true";
+    -- attribute mark_debug of fifo_rx_mfb_sof     : signal is "true";
+    -- attribute mark_debug of fifo_rx_mfb_eof     : signal is "true";
+    -- attribute mark_debug of fifo_rx_mfb_src_rdy : signal is "true";
+    -- attribute mark_debug of fifo_rx_mfb_dst_rdy : signal is "true";
+
+    -- attribute mark_debug of fifo_rx_mvb_dst_rdy : signal is "true";
 begin
 
     -- =============================================================================================
