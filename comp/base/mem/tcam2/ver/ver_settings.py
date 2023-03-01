@@ -12,6 +12,7 @@ SETTINGS = {
         "WRITE_BEFORE_MATCH"     : "TRUE"               ,
         "READ_FROM_TCAM"         : "TRUE"               ,
         "OUTPUT_READ_REGS"       : "TRUE"               ,
+        "USE_FRAGMENTED_MEM"     : "FALSE"              ,
         "DEVICE"                 : "\\\"ULTRASCALE\\\"" ,
 
         "WRITE_COUNT"            : "200"                ,
@@ -48,6 +49,9 @@ SETTINGS = {
     "intel_tcam" : { #
         "DEVICE"                 : "\\\"STRATIX10\\\""  ,
     },
+    "intel_frag_mem" : { #
+        "USE_FRAGMENTED_MEM"     : "TRUE"  ,
+    },
 #    "" : { # 
 #    },
     "_combinations_" : (
@@ -73,14 +77,22 @@ SETTINGS = {
     # XILINX large storage with RS_2 without read
     #("32b_data", "256_storage", "RS_2", "no_read" ,),
 
+    # INTEL fragmented memory
+    ("intel_tcam", "intel_frag_mem"    ,),
+
     # INTEL larger storage
-    ("intel_tcam", "16b_data", "128_storage"                    ,),
+    ("intel_tcam", "16b_data", "128_storage"                                        ,),
+    ("intel_tcam", "16b_data", "128_storage", "intel_frag_mem"                      ,),
     # INTEL larger storage with RS_1
-    ("intel_tcam", "16b_data", "128_storage", "RS_1"            ,),
+    ("intel_tcam", "16b_data", "128_storage", "RS_1"                                ,),
+    ("intel_tcam", "16b_data", "128_storage", "RS_1", "intel_frag_mem"              ,),
     # INTEL large storage with RS_2
-    #("intel_tcam", "32b_data", "256_storage", "RS_2"            ,),
+    #("intel_tcam", "32b_data", "256_storage", "RS_2"                                ,),
+    #("intel_tcam", "32b_data", "256_storage", "RS_2", "intel_frag_mem"              ,),
     # INTEL large storage with RS_2 without read
-    #("intel_tcam", "32b_data", "256_storage", "RS_2", "no_read" ,),
+    #("intel_tcam", "32b_data", "256_storage", "RS_2", "no_read"                     ,),
+    #("intel_tcam", "32b_data", "256_storage", "RS_2", "no_read", "intel_frag_mem"   ,),
+
 
     #
     #(,)
