@@ -116,6 +116,10 @@ architecture FULL of RX_DMA_HDR_INSERTOR is
     -- varies its value according to the generic parameters
     signal SHIFT_INC  : unsigned(2 downto 0);
     signal INIT_SHIFT : unsigned(2 downto 0);
+
+    -- attribute mark_debug                       : string;
+    -- attribute mark_debug of tprocess_pst       : signal is "true";
+    -- attribute mark_debug of high_shift_val_pst : signal is "true";
 begin
 
     assert ((RX_REGION_SIZE = 1 and RX_BLOCK_SIZE = 128 and RX_ITEM_WIDTH = 8)
