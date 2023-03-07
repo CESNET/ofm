@@ -541,9 +541,11 @@ proc nb_sanitize_vars {synth_flags hierarchy} {
         set SYNTH_FLAGS(ASSERT_OFF) false
     }
 
-    # Generate qip file in target_makefile by default: add to extra list
-    lappend SYNTH_FLAGS(TARGET_MAKEFILE_EXTRA_INIT)      qip_init
-    lappend SYNTH_FLAGS(TARGET_MAKEFILE_EXTRA_EVAL_FILE) qip_EvalFile
+    if {[info exist SYNTH_FLAGS(QIP_ENABLE)]} {
+        # Generate qip file in target_makefile by default: add to extra list
+        lappend SYNTH_FLAGS(TARGET_MAKEFILE_EXTRA_INIT)      qip_init
+        lappend SYNTH_FLAGS(TARGET_MAKEFILE_EXTRA_EVAL_FILE) qip_EvalFile
+    }
     # INFO: This is only a temporary solution
     lappend SYNTH_FLAGS(TARGET_MAKEFILE_EXTRA_EVAL_COMP) EvalComp
 }
