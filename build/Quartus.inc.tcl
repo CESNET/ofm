@@ -333,6 +333,11 @@ proc SaveDesign {synth_flags} {
         nb_convert_to_rpd SYNTH_FLAGS
     }
 
+    # Convert programming image to OFS_PMCI format
+    if { [info exist SYNTH_FLAGS(BITSTREAM)] && $SYNTH_FLAGS(BITSTREAM) == "OFS_PMCI"} {
+        nb_run_ofs_pmci_script SYNTH_FLAGS
+    }
+
     # Create .nfw archive
     nb_nfw_archive_create SYNTH_FLAGS
 }
@@ -355,6 +360,16 @@ proc nb_convert_to_rpd {synth_flags} {
     if {[catch {exec quartus_pfg -c $SYNTH_FLAGS(OUTPUT).sof $SYNTH_FLAGS(OUTPUT).rpd -o mode=ASX4 -o bitswap=OFF} msg]} {
         puts stderr "Converting the firmware file failed:\n$msg"
     }
+}
+
+proc nb_run_ofs_pmci_script {synth_flags} {
+    global env
+    upvar 1 $synth_flags SYNTH_FLAGS
+
+    file copy -force $SYNTH_FLAGS(OUTPUT).sof fpga.sof
+    exec cp -rf $SYNTH_FLAGS(OFS_PMCI_SCRIPT_DIR) ./
+    puts "Run OFS PMCI script..."
+    exec -ignorestderr ./scripts/build_flash.sh
 }
 
 proc nb_nfw_archive_create {synth_flags} {
