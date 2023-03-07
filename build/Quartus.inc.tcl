@@ -52,6 +52,10 @@ proc EvalFile {FNAME OPT} {
             # VHDL file
             set_global_assignment -name VHDL_FILE $FNAME -hdl_version VHDL_2008 {*}$LIB_PARAM
             puts "INFO: Library $opt(LIBRARY): File added: $FNAME"
+        } elseif { $FEXT == ".v" } {
+            # Verilog file
+            set_global_assignment -name VERILOG_FILE $FNAME {*}$LIB_PARAM
+            puts "INFO: Library $opt(LIBRARY): File added: $FNAME"
         } elseif { $FEXT == ".sv" } {
             # System Verilog file
             set_global_assignment -name SYSTEMVERILOG_FILE $FNAME {*}$LIB_PARAM
@@ -64,6 +68,14 @@ proc EvalFile {FNAME OPT} {
             # IP file
             set_global_assignment -name IP_FILE $FNAME
             puts "INFO: IP file added: $FNAME"
+        } elseif { $FEXT == ".qsys" } {
+            # QSYS file
+            set_global_assignment -name QSYS_FILE $FNAME
+            puts "INFO: QSYS file added: $FNAME"
+        } elseif { $FEXT == ".hex" } {
+            # HEX file
+            set_global_assignment -name HEX_FILE $FNAME
+            puts "INFO: HEX file added: $FNAME"
         } elseif { $FEXT == ".qsf" } {
             # QSF file
             puts "INFO: Importing file to the project: $FNAME"
