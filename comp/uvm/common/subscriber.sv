@@ -53,7 +53,7 @@ class subscriber#(type SEQ_ITEM) extends subscriber_base#(SEQ_ITEM, SEQ_ITEM);
         item.start[inf_name] = $time();
 
         received++;
-        `uvm_info(this.get_full_name(), $sformatf("\n\tReceived transactions %0d\n%s", received, this.get_report_verbosity_level() >= UVM_FULL ? item.convert2string() : ""), UVM_HIGH);
+        `uvm_info(this.get_full_name(), $sformatf("\n\tReceived transactions %0d\n%s", received, this.get_report_verbosity_level() >= UVM_FULL ? item.convert2string() : ""), UVM_FULL);
 
         port.write(item);
     endfunction
