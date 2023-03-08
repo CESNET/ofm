@@ -1,0 +1,17 @@
+**/__pycache__/
+comp/**/uvm/Makefile
+comp/**/uvm/cdpi.so
+comp/**/uvm/certe_dump.xml
+comp/**/uvm/libprog.so
+comp/**/uvm/tr_db.log
+comp/**/uvm/transcript*
+comp/**/uvm/vish_stacktrace.vstf
+comp/**/uvm/vsim.wlf
+comp/**/uvm/work/
+comp/**/uvm/wlft*
+comp/**/ver/work/*
+comp/**/ver/vsim.wlf
+comp/**/ver/transcript
+comp/**/ver/Makefile
+comp/uvm/common/libprog.so
+comp/uvm/common/prog.o
