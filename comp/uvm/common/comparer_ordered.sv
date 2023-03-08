@@ -1,0 +1,130 @@
+/*
+ * file       : comparer_base_ordered.sv
+ * Copyright (C) 2023 CESNET z. s. p. o.
+ * description: this component compare two in order sequences. IF componet stays
+ *              too long in fifo then erros is goint to occure.
+ * date       : 2023
+ * author     : Radek Iša <isa@cesnet.cz>
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+*/
+
+/////////////////////////////////////////////
+// Ordered checker. All data is compared chronologicaly.
+virtual class comparer_base_ordered#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) extends comparer_base#(MODEL_ITEM, DUT_ITEM);
+
+    int unsigned dut_sends;
+    model_item#(MODEL_ITEM) model_items[$];
+    comparer_dut#(DUT_ITEM) dut_items[$];
+
+    int unsigned compared;
+    int unsigned errors;
+
+    function new(string name, uvm_component parent = null);
+        super.new(name, parent);
+        dut_sends = 0;
+    endfunction
+
+    virtual function int unsigned success();
+        return (errors != 0);
+    endfunction
+
+    virtual function void flush();
+        model_items.delete();
+        dut_items.delete();
+    endfunction
+
+    virtual function int unsigned used();
+        return (model_items.size() != 0) | (dut_items.size() != 0);
+    endfunction
+
+    virtual function void write_model(model_item#(MODEL_ITEM) tr);
+        if (dut_items.size() != 0) begin
+            comparer_dut#(DUT_ITEM) item;
+
+            item = dut_items.pop_front();
+            if (this.compare(tr.item, item.in_item) == 0) begin
+                errors++;
+                `uvm_error(this.get_full_name(), $sformatf("\n\tTransaction %0d doesn't match.\n\t\tInput times %s\n\t\toutput time %0dns\n%s\n", item.in_id, tr.convert2string_time(), item.in_time/1ns, this.message(tr.item, item.in_item)));
+            end else begin
+                compared++;
+            end
+        end else begin
+            model_items.push_back(tr);
+        end
+    endfunction
+
+    virtual function void write_dut(DUT_ITEM tr);
+       dut_sends += 1;
+       if (model_items.size() != 0) begin
+            model_item#(MODEL_ITEM) item;
+
+            item = model_items.pop_front();
+            if (this.compare(item.item, tr) == 0) begin
+                errors++;
+                `uvm_error(this.get_full_name(), $sformatf("\n\tTransaction %0d doesn't match.\n\t\tInput times %s\n\t\toutput time %0dns\n%s\n", dut_sends, item.convert2string_time(), $time()/1ns, this.message(item.item, tr)));
+            end else begin
+                compared++;
+            end
+        end else begin
+            comparer_dut#(DUT_ITEM) tmp_tr = new(dut_sends, $time(), tr);
+            dut_items.push_back(tmp_tr);
+        end
+    endfunction
+
+    function string dut_tr_get(MODEL_ITEM tr, time tr_time);
+        string msg = "";
+        for (int unsigned it = 0; it < dut_items.size(); it++) begin
+            $swrite(msg, "%s\n\nOutput time %0dns (%0dns) \n%s", msg, dut_items[it].in_time/1ns, (dut_items[it].in_time - tr_time)/1ns, this.message(tr, dut_items[it].in_item));
+        end
+        return msg;
+    endfunction
+
+    function string model_tr_get(DUT_ITEM tr);
+        string msg = "";
+        for (int unsigned it = 0; it < model_items.size(); it++) begin
+            $swrite(msg, "%s\n\n%s\n%s", msg, model_items[it].convert2string_time(), this.message(model_items[it].item, tr));
+        end
+        return msg;
+    endfunction
+
+    task run_model_delay_check();
+        time delay;
+        forever begin
+            wait(model_items.size() > 0);
+            delay = $time() - model_items[0].time_last();
+            if (delay >= dut_tr_timeout) begin
+                errors++;
+               `uvm_error(this.get_full_name(), $sformatf("\n\tTransaction from DUT is delayed %0dns. Probably stuck.\n\tErrors/Compared %0d/%0d\n%s\n\nDUT transactions:\n%s",
+                                                         errors, compared, delay/1ns, model_items[0].convert2string(),
+                                                         this.dut_tr_get(model_items[0].item, model_items[0].time_last())));
+                model_items.delete(0);
+            end else begin
+                #(dut_tr_timeout - delay);
+            end
+        end
+    endtask
+
+    task run_dut_delay_check();
+        time delay;
+        forever begin
+            wait(dut_items.size() > 0);
+            delay = $time() - dut_items[0].in_time;
+            if (delay >= model_tr_timeout) begin
+                errors++;
+                `uvm_error(this.get_full_name(), $sformatf("\n\tTransaction %0d from DUT is unexpected.\n\tErrors/Compared %0d/%0d Output time %0dns. Delay %0dns. Probably unexpected transaction.\n%s\n\n%s",
+                                                           dut_items[0].in_id, errors, compared, dut_items[0].in_time/1ns, delay/1ns,
+                                                           dut_items[0].in_item.convert2string(), this.model_tr_get(dut_items[0].in_item)));
+                dut_items.delete(0);
+            end else begin
+                #(model_tr_timeout - delay);
+            end
+        end
+    endtask
+
+    virtual function string info();
+        string msg ="";
+        msg = $sformatf("\n\tErrors %0d Compared %0d Wait for tramsaction DUT(%0d) MODEL(%0d)", errors, compared, dut_items.size(), model_items.size());
+        return msg;
+    endfunction
+endclass
