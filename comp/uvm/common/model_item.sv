@@ -15,10 +15,12 @@ class model_item#(type SEQ_ITEM) extends uvm_object;
    `uvm_object_param_utils(uvm_common::model_item#(SEQ_ITEM))
 
     time     start[string];
+    string   tag;
     SEQ_ITEM item;
 
     function new(string name = "");
         super.new(name);
+        tag = "";
     endfunction
 
     function void time_add(string name, time t);
@@ -52,6 +54,7 @@ class model_item#(type SEQ_ITEM) extends uvm_object;
 
         // Now copy all attributes
         super.do_copy(rhs);
+        tag   = rhs_.tag;
         start = rhs_.start;
         item  = rhs_.item;
     endfunction: do_copy
@@ -69,7 +72,7 @@ class model_item#(type SEQ_ITEM) extends uvm_object;
     function string convert2string();
         string msg = "";
 
-        $swrite(msg,"%s%s\n\tDATA : %s", msg, this.convert2string_time(), item.convert2string());
+        $swrite(msg,"%s%s\n\tTAG  : %s\n\tDATA :\n%s", msg, this.convert2string_time(), this.tag, item.convert2string());
         return msg;
     endfunction
 endclass
