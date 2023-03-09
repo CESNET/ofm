@@ -1,8 +1,8 @@
 /*
  * file       : comparer_base_ordered.sv
  * Copyright (C) 2023 CESNET z. s. p. o.
- * description: this component compare two in order sequences. IF componet stays
- *              too long in fifo then erros is goint to occure.
+ * description: this component compares two transactions out of order. IF component stays
+ *              too long in fifo then errors are going to occur.
  * date       : 2023
  * author     : Radek Iša <isa@cesnet.cz>
  *

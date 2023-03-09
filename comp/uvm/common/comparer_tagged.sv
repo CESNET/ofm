@@ -1,8 +1,8 @@
 /*
  * file       : comparer_base_taged.sv
  * Copyright (C) 2023 CESNET z. s. p. o.
- * description: this component compare two output. Same tag compare in order. IF componet stays
- *              too long in fifo then erros is goint to occure.
+ * description: this component compares two output transactions with same tag ID in order. IF component stays
+ *              too long in fifo then errors are going to occur.
  * date       : 2023
  * author     : Radek Iša <isa@cesnet.cz>
  *

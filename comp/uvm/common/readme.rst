@@ -66,9 +66,9 @@ Folowing example show commonly used for generating space between packet and inte
 Comparer
 --------
 
-This components serves for comparing transactions from dut with transactions from model.
-There are three major class. All classes have one required parameter and one optional parameter
-First parameter is type of model transactions. Second parameter is type of dut transactions.
+These components compare transactions from the DUT with transactions from the model.
+There are three major classes. All classes have one required parameter and one optional parameter.
+The first parameter is the type of model's transactions. The second parameter is the type of DUT transactions.
 
 .. list-table:: comparer classes
    :widths: 400 400
@@ -77,16 +77,15 @@ First parameter is type of model transactions. Second parameter is type of dut t
    * - class
      - description
    * - uvm_common::comparer_base_ordered#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM)
-     - DUT output has to produce transaction in same ordering as model
+     - The DUT output has to produce transactions in the same order as the model
    * - uvm_common::comparer_base_disordered#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM)
-     - DUT output dosn't have to produce transaction in same ordering as model
+     - The DUT output doesn't have to produce transactions in the same order as the model
    * - uvm_common::comparer_base_tagged#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM)
-     - Dut output has to produce transaction in same order as model only if model
-       transaction have same tag.
+     - The Dut output has to produce transactions in the same order as the model only for each tag. In other words, if the transactions were split per tag into separate streams (one stream for each tag), they must be in order within each stream.
 
 
-If type of model and dut transactions are same then can be used predefined comparer component.
-This component have only one parameter which is transactions type.
+If the type of the model and DUT transactions are the same, then a predefined comparer component can be used.
+This component has only one parameter - the transaction type.
 
 .. list-table:: comparer classes
    :widths: 200 
@@ -97,9 +96,8 @@ This component have only one parameter which is transactions type.
    * - comparer_disordered #(type CLASS_TYPE)
    * - comparer_taged #(type CLASS_TYPE)
 
-Comparators containt watch dog. you can setup maximum waiting time for model and dut transaction.
-Maximum waiting time for model transaction can be required if dut can create result from partial
-input.
+All comparers contain a watchdog. You can set up the maximum waiting time for the model and DUT transactions.
+Maximum waiting time for the model transactions may be necessary if the DUT can create results from partial input.
 
 .. list-table:: comparer classes
    :widths: 200 400
@@ -108,21 +106,24 @@ input.
    * - function
      - description
    * - dut_tr_timeout_set(time timeout)
-     - How much can be dut transaction delayd against model. (DUT processing time)
+     - How much can the DUT transactions be delayed after the model's transactions (due to the DUT processing time)
    * - model_tr_timeout_set(time timeout)
-     - How much can be model transaction delayd against dut transaction (Partialy count)
+     - How much can the model's transactions be delayed after the DUT transactions (due to a partial calculation)
 
 
-Classes contains two analysis port. On port ``analysis_imp_model`` is connectet model output.
-On port ``analysis_imp_dut`` is connected dut output. Anything else should be done by classes.
+The classes contain two analysis ports. The model's output is connected to the ``analysis_imp_model`` port.
+The DUT's output is connected to the ``analysis_imp_dut`` port.
+Anything else should be done by classes.
 
-Also there is possibylity to create own comparable algorithm and messages. By reimplementing
-pure virtual functions ``virtual function int unsigned compare(MODEL_TYPE tr_model, DUT_TYPE tr_dut);``
-``virtual function void message(MODEL_TYPE tr_model, DUT_TYPE tr_dut);`` . Code bellow show some example.
+Also, there is the possibility of creating your own comparable algorithm and messages.
+You can do this by reimplementing pure virtual functions:
+``virtual function int unsigned compare(MODEL_TYPE tr_model, DUT_TYPE tr_dut);`` and
+``virtual function void message(MODEL_TYPE tr_model, DUT_TYPE tr_dut);``.
+``virtual function void message(MODEL_TYPE tr_model, DUT_TYPE tr_dut);`` The code below provides an example.
 
 .. code-block:: SystemVerilog
 
-    // in extends is specified model and dut type of transaction.
+    // The class extends a specified model and dut type of transactions.
     class scoreboard_channel_header #(HDR_WIDTH, META_WIDTH, CHANNELS, PKT_MTU) extends uvm_common::comparer_base_tagged #(packet_header #(META_WIDTH, CHANNELS, PKT_MTU), uvm_logic_vector::sequence_item#(HDR_WIDTH));
         `uvm_component_param_utils(uvm_app_core::scoreboard_channel_header #(HDR_WIDTH, META_WIDTH, CHANNELS, PKT_MTU))
     
@@ -130,7 +131,7 @@ pure virtual functions ``virtual function int unsigned compare(MODEL_TYPE tr_mod
             super.new(name, parent);
         endfunction
     
-        //this method implementing comparsion of these two types
+        // This method implements a comparison of these two types.
         virtual function int unsigned compare(packet_header #(META_WIDTH, CHANNELS, PKT_MTU) tr_model, uvm_logic_vector::sequence_item#(HDR_WIDTH) tr_dut);
             int unsigned eq = 1;
             logic [META_WIDTH-1:0]meta = 'x;
@@ -154,7 +155,7 @@ pure virtual functions ``virtual function int unsigned compare(MODEL_TYPE tr_mod
             return eq;
         endfunction
     
-        //this method implementing printed message when some error ocure
+        // This method implements error message printing when an error occurs.
         virtual function string message(packet_header #(META_WIDTH, CHANNELS, PKT_MTU) tr_model, uvm_logic_vector::sequence_item#(HDR_WIDTH) tr_dut);
             string error_msg; //ETH [%0d] header
             logic [META_WIDTH-1:0]meta = 'x;
