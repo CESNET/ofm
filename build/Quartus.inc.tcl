@@ -52,6 +52,10 @@ proc EvalFile {FNAME OPT} {
             # VHDL file
             set_global_assignment -name VHDL_FILE $FNAME -hdl_version VHDL_2008 {*}$LIB_PARAM
             puts "INFO: Library $opt(LIBRARY): File added: $FNAME"
+        } elseif { $FEXT == ".v" } {
+            # Verilog file
+            set_global_assignment -name VERILOG_FILE $FNAME {*}$LIB_PARAM
+            puts "INFO: Library $opt(LIBRARY): File added: $FNAME"
         } elseif { $FEXT == ".sv" } {
             # System Verilog file
             set_global_assignment -name SYSTEMVERILOG_FILE $FNAME {*}$LIB_PARAM
@@ -64,6 +68,14 @@ proc EvalFile {FNAME OPT} {
             # IP file
             set_global_assignment -name IP_FILE $FNAME
             puts "INFO: IP file added: $FNAME"
+        } elseif { $FEXT == ".qsys" } {
+            # QSYS file
+            set_global_assignment -name QSYS_FILE $FNAME
+            puts "INFO: QSYS file added: $FNAME"
+        } elseif { $FEXT == ".hex" } {
+            # HEX file
+            set_global_assignment -name HEX_FILE $FNAME
+            puts "INFO: HEX file added: $FNAME"
         } elseif { $FEXT == ".qsf" } {
             # QSF file
             puts "INFO: Importing file to the project: $FNAME"
@@ -226,6 +238,14 @@ proc SynthesizeDesignSetup {synth_flags} {
         set_instance_assignment -name VIRTUAL_PIN ON -to *
     }
 
+    # Automatic clear old IP files before IP Generation
+    if { [info exist SYNTH_FLAGS(IP_FILES_CLEAN_ENABLE)] } {
+        PrintLabel "Clearing old IP files..."
+        execute_module -tool ipg -args "--clear_ip_generation_dirs"
+    } else {
+        puts "Automatic clearing of old IP files is DISABLED!"
+    }
+
     PrintLabel "IP Generation"
     execute_module -tool ipg
 
@@ -313,6 +333,11 @@ proc SaveDesign {synth_flags} {
         nb_convert_to_rpd SYNTH_FLAGS
     }
 
+    # Convert programming image to OFS_PMCI format
+    if { [info exist SYNTH_FLAGS(BITSTREAM)] && $SYNTH_FLAGS(BITSTREAM) == "OFS_PMCI"} {
+        nb_run_ofs_pmci_script SYNTH_FLAGS
+    }
+
     # Create .nfw archive
     nb_nfw_archive_create SYNTH_FLAGS
 }
@@ -335,6 +360,16 @@ proc nb_convert_to_rpd {synth_flags} {
     if {[catch {exec quartus_pfg -c $SYNTH_FLAGS(OUTPUT).sof $SYNTH_FLAGS(OUTPUT).rpd -o mode=ASX4 -o bitswap=OFF} msg]} {
         puts stderr "Converting the firmware file failed:\n$msg"
     }
+}
+
+proc nb_run_ofs_pmci_script {synth_flags} {
+    global env
+    upvar 1 $synth_flags SYNTH_FLAGS
+
+    file copy -force $SYNTH_FLAGS(OUTPUT).sof fpga.sof
+    exec cp -rf $SYNTH_FLAGS(OFS_PMCI_SCRIPT_DIR) ./
+    puts "Run OFS PMCI script..."
+    exec -ignorestderr ./scripts/build_flash.sh
 }
 
 proc nb_nfw_archive_create {synth_flags} {
@@ -521,9 +556,11 @@ proc nb_sanitize_vars {synth_flags hierarchy} {
         set SYNTH_FLAGS(ASSERT_OFF) false
     }
 
-    # Generate qip file in target_makefile by default: add to extra list
-    lappend SYNTH_FLAGS(TARGET_MAKEFILE_EXTRA_INIT)      qip_init
-    lappend SYNTH_FLAGS(TARGET_MAKEFILE_EXTRA_EVAL_FILE) qip_EvalFile
+    if {[info exist SYNTH_FLAGS(QIP_ENABLE)]} {
+        # Generate qip file in target_makefile by default: add to extra list
+        lappend SYNTH_FLAGS(TARGET_MAKEFILE_EXTRA_INIT)      qip_init
+        lappend SYNTH_FLAGS(TARGET_MAKEFILE_EXTRA_EVAL_FILE) qip_EvalFile
+    }
     # INFO: This is only a temporary solution
     lappend SYNTH_FLAGS(TARGET_MAKEFILE_EXTRA_EVAL_COMP) EvalComp
 }

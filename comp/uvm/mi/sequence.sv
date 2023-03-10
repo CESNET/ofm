@@ -224,6 +224,8 @@ class sequence_slave_sim#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends sequen
 
         rd_count++;
 
+        wait (rd_count == rsp_count);
+
     endtask
 
     virtual task create_sequence_item();
@@ -236,7 +238,6 @@ class sequence_slave_sim#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends sequen
 
         create_sequence_item();
 
-        wait (rd_count == rsp_count);
     endtask
 
 endclass
