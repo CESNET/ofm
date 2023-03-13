@@ -15,6 +15,7 @@ lappend COMPONENTS \
       [ list "SV_MI"               "$UVM_PATH/mi"                               "FULL"] \
 
 lappend MOD "$OFM_PATH/comp/base/pkg/pcie_meta_pack.sv"
+lappend MOD "$OFM_PATH/comp/base/pkg/dma_bus_pack.sv"
 
 lappend MOD "$ENTITY_BASE/tbench/info/pkg.sv"
 lappend MOD "$ENTITY_BASE/tbench/size/pkg.sv"

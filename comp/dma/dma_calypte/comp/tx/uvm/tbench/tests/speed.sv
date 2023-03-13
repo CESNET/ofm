@@ -63,6 +63,7 @@ class speed extends base;
     uvm_dma_ll::env #(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE, USER_TX_MFB_ITEM_WIDTH,
                       PCIE_CQ_MFB_REGIONS, PCIE_CQ_MFB_REGION_SIZE, PCIE_CQ_MFB_BLOCK_SIZE, PCIE_CQ_MFB_ITEM_WIDTH,
                       CHANNELS, PKT_SIZE_MAX, MI_WIDTH, DEVICE, FIFO_DEPTH, DEBUG, CHANNEL_ARBITER_EN) m_env;
+    bit            timeout;
     uvm_reg_data_t dma_cnt          [CHANNELS];
     uvm_reg_data_t byte_cnt         [CHANNELS];
     uvm_reg_data_t discard_dma_cnt  [CHANNELS];
@@ -115,7 +116,11 @@ class speed extends base;
         m_vseq.randomize();
         m_vseq.start(m_env.m_sequencer);
 
-        #(1000ns)
+        timeout = 1;
+        fork
+            test_wait_timeout(3000);
+            test_wait_result();
+        join_any;
 
         for (int unsigned chan = 0; chan < CHANNELS; chan++) begin
 
@@ -137,5 +142,25 @@ class speed extends base;
         end
 
         phase.drop_objection(this);
+
     endtask
+
+    task test_wait_timeout(int unsigned time_length);
+        #(time_length*1us);
+    endtask
+
+    task test_wait_result();
+        do begin
+            #(6000ns);
+        end while (m_env.sc.used() != 0);
+        timeout = 0;
+    endtask
+
+    function void report_phase(uvm_phase phase);
+        `uvm_info(this.get_full_name(), {"\n\tTEST : ", this.get_type_name(), " END\n"}, UVM_NONE);
+        if (timeout) begin
+            `uvm_error(this.get_full_name(), "\n\t===================================================\n\tTIMEOUT SOME PACKET STUCK IN DESIGN\n\t===================================================\n\n");
+        end
+    endfunction
+
 endclass

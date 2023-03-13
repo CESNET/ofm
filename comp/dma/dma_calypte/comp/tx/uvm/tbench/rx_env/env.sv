@@ -52,6 +52,7 @@ class env #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, CHANNELS, PKT_SIZE_MAX
         // LOW level agent
         m_env_rx_cfg                = new;
         m_env_rx_cfg.active         = m_config.active;
+        m_env_rx_cfg.seq_type       = "PCIE";
         m_env_rx_cfg.interface_name = m_config.interface_name;
         m_env_rx_cfg.meta_behav     = uvm_logic_vector_array_mfb::config_item::META_SOF;
 

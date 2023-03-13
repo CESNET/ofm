@@ -14,14 +14,12 @@ class env #(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE
                                                  CHANNELS, PKT_SIZE_MAX, MI_WIDTH, DEVICE, FIFO_DEPTH, DEBUG, CHANNEL_ARBITER_EN));
 
     localparam USER_META_WIDTH = 24 + $clog2(PKT_SIZE_MAX+1) + $clog2(CHANNELS);
-
-    localparam MFB_WIDTH   = PCIE_CQ_MFB_REGIONS*PCIE_CQ_MFB_REGION_SIZE*PCIE_CQ_MFB_BLOCK_SIZE*PCIE_CQ_MFB_ITEM_WIDTH;
-    localparam DATA_ADDR_W = $clog2(FIFO_DEPTH*(MFB_WIDTH/8));
-    localparam HDR_ADDR_W  = $clog2(FIFO_DEPTH);
+    localparam MFB_WIDTH       = PCIE_CQ_MFB_REGIONS*PCIE_CQ_MFB_REGION_SIZE*PCIE_CQ_MFB_BLOCK_SIZE*PCIE_CQ_MFB_ITEM_WIDTH;
+    localparam DATA_ADDR_W     = $clog2(FIFO_DEPTH*(MFB_WIDTH/8));
+    localparam HDR_ADDR_W      = $clog2(FIFO_DEPTH);
 
     sequencer#(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE, USER_TX_MFB_ITEM_WIDTH, PCIE_CQ_MFB_ITEM_WIDTH,
-              CHANNELS, PKT_SIZE_MAX)     m_sequencer;
-    uvm_dma_ll_info::sync_link#(CHANNELS) link_sync;
+              CHANNELS, PKT_SIZE_MAX) m_sequencer;
 
     uvm_reset::agent m_reset;
     uvm_dma_ll_rx::env #(PCIE_CQ_MFB_REGIONS, PCIE_CQ_MFB_REGION_SIZE, PCIE_CQ_MFB_BLOCK_SIZE, PCIE_CQ_MFB_ITEM_WIDTH, CHANNELS,
@@ -46,8 +44,6 @@ class env #(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE
         uvm_logic_vector_array_mfb::config_item m_config_tx[CHANNELS];
         uvm_logic_vector_mvb::config_item       m_dma_config[CHANNELS];
         uvm_mi::regmodel_config                 m_mi_config;
-
-        link_sync = uvm_dma_ll_info::sync_link#(CHANNELS)::type_id::create("link_sync", this);
 
         m_config_reset                = new;
         m_config_reset.active         = UVM_ACTIVE;
@@ -88,7 +84,6 @@ class env #(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE
             m_env_tx[chan] = uvm_logic_vector_array_mfb::env_tx #(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE, USER_TX_MFB_ITEM_WIDTH,
                                                                   USER_META_WIDTH)::type_id::create({"m_env_tx_", i_string}, this);
 
-
             m_dma_config[chan]                = new;
             m_dma_config[chan].active         = UVM_PASSIVE;
             m_dma_config[chan].interface_name = {"vif_dma_", i_string};
@@ -117,8 +112,4 @@ class env #(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE
         m_reset.sync_connect(m_env_rx.reset_sync);
     endfunction
 
-    virtual task run_phase(uvm_phase phase);
-        m_env_rx.m_driver.link_sync = link_sync;
-        sc.m_model.link_sync = link_sync;
-    endtask
 endclass
