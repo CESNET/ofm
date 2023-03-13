@@ -227,8 +227,9 @@ architecture FULL of TX_DMA_CALYPTE is
     -- =============================================================================================
     -- CHANNEL_SPLITTER outputs
     -- =============================================================================================
-    signal chan_split_mfb_meta_seg_size   : slv_array_t(CHANNELS -1 downto 0)(13 -1 downto 0);
     signal chan_split_mfb_meta_is_dma_hdr : std_logic_vector(CHANNELS -1 downto 0);
+    signal chan_split_mfb_meta_fbe        : slv_array_t(CHANNELS -1 downto 0)(4 -1 downto 0);
+    signal chan_split_mfb_meta_lbe        : slv_array_t(CHANNELS -1 downto 0)(4 -1 downto 0);
     signal chan_split_mfb_data            : slv_array_t(CHANNELS -1 downto 0)(PCIE_CQ_MFB_WIDTH -1 downto 0);
     signal chan_split_mfb_sof             : slv_array_t(CHANNELS -1 downto 0)(PCIE_CQ_MFB_REGIONS -1 downto 0);
     signal chan_split_mfb_eof             : slv_array_t(CHANNELS -1 downto 0)(PCIE_CQ_MFB_REGIONS -1 downto 0);
@@ -544,8 +545,9 @@ begin
             PCIE_MFB_SRC_RDY => PCIE_CQ_MFB_SRC_RDY,
             PCIE_MFB_DST_RDY => PCIE_CQ_MFB_DST_RDY,
 
-            USR_MFB_META_BYTE_COUNT => chan_split_mfb_meta_seg_size,
             USR_MFB_META_IS_DMA_HDR => chan_split_mfb_meta_is_dma_hdr,
+            USR_MFB_META_FBE        => chan_split_mfb_meta_fbe,
+            USR_MFB_META_LBE        => chan_split_mfb_meta_lbe,
 
             USR_MFB_DATA    => chan_split_mfb_data,
             USR_MFB_SOF     => chan_split_mfb_sof,
@@ -581,8 +583,9 @@ begin
                 CLK   => CLK,
                 RESET => RESET,
 
-                PCIE_MFB_META_SEG_SIZE   => chan_split_mfb_meta_seg_size(i),
                 PCIE_MFB_META_IS_DMA_HDR => chan_split_mfb_meta_is_dma_hdr(i),
+                PCIE_MFB_META_FBE        => chan_split_mfb_meta_fbe(i),
+                PCIE_MFB_META_LBE        => chan_split_mfb_meta_lbe(i),
 
                 PCIE_MFB_DATA    => chan_split_mfb_data(i),
                 PCIE_MFB_SOF     => chan_split_mfb_sof(i),

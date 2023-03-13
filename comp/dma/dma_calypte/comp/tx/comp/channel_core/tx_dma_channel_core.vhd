@@ -65,10 +65,11 @@ entity TX_DMA_CHANNEL_CORE is
         -- =========================================================================================
         -- Input PCIe MFB interface
         -- =========================================================================================
-        -- number of valid DWs in the current PCIe transaction, NOT a whole packet
-        PCIE_MFB_META_SEG_SIZE   : in std_logic_vector(13 -1 downto 0);
         -- One-bit information if current transaction contains the DMA header
         PCIE_MFB_META_IS_DMA_HDR : in std_logic;
+        -- Byte enable of the first and last DWord in the incoming transaction, valid with SOF
+        PCIE_MFB_META_FBE : in std_logic_vector(4 -1 downto 0);
+        PCIE_MFB_META_LBE : in std_logic_vector(4 -1 downto 0);
 
         PCIE_MFB_DATA    : in  std_logic_vector(PCIE_MFB_REGIONS*PCIE_MFB_REGION_SIZE*PCIE_MFB_BLOCK_SIZE*PCIE_MFB_ITEM_WIDTH-1 downto 0);
         PCIE_MFB_SOF     : in  std_logic_vector(PCIE_MFB_REGIONS -1 downto 0);
@@ -128,6 +129,24 @@ architecture FULL of TX_DMA_CHANNEL_CORE is
     constant PCIE_MFB_WIDTH : natural := PCIE_MFB_REGIONS*PCIE_MFB_REGION_SIZE*PCIE_MFB_BLOCK_SIZE*PCIE_MFB_ITEM_WIDTH;
     constant USR_MFB_WIDTH  : natural := USR_MFB_REGIONS*USR_MFB_REGION_SIZE*USR_MFB_BLOCK_SIZE*USR_MFB_ITEM_WIDTH;
 
+    -- =============================================================================================
+    -- Defining ranges for meta signal
+    -- =============================================================================================
+    constant PCIE_META_IS_DMA_HDR_W : natural := 1;
+    constant PCIE_META_FBE_W : natural := 4;
+    constant PCIE_META_LBE_W : natural := 4;
+
+    constant PCIE_META_IS_DMA_HDR_O : natural := 0;
+    constant PCIE_META_FBE_O : natural := PCIE_META_IS_DMA_HDR_O + PCIE_META_IS_DMA_HDR_W;
+    constant PCIE_META_LBE_O : natural := PCIE_META_FBE_O + PCIE_META_FBE_W;
+
+    subtype PCIE_META_IS_DMA_HDR is natural range PCIE_META_IS_DMA_HDR_O + PCIE_META_IS_DMA_HDR_W -1 downto PCIE_META_IS_DMA_HDR_O;
+    subtype PCIE_META_FBE is natural range PCIE_META_FBE_O + PCIE_META_FBE_W -1 downto PCIE_META_FBE_O;
+    subtype PCIE_META_LBE is natural range PCIE_META_LBE_O + PCIE_META_LBE_W -1 downto PCIE_META_LBE_O;
+
+    -- =============================================================================================
+    -- State machines' states
+    -- =============================================================================================
     type channel_active_state_t is (CHANNEL_RUNNING, CHANNEL_START, CHANNEL_STOP_PENDING, CHANNEL_STOPPED);
     signal channel_active_pst : channel_active_state_t := CHANNEL_STOPPED;
     signal channel_active_nst : channel_active_state_t := CHANNEL_STOPPED;
@@ -138,7 +157,7 @@ architecture FULL of TX_DMA_CHANNEL_CORE is
 
     signal pkt_drop_en         : std_logic_vector(PCIE_MFB_REGIONS -1 downto 0);
     signal pkt_acc_mfb_data    : std_logic_vector(PCIE_MFB_WIDTH -1 downto 0);
-    signal pkt_acc_mfb_meta    : std_logic_vector(13+1 -1 downto 0);
+    signal pkt_acc_mfb_meta    : std_logic_vector(4+4+1 -1 downto 0);
     signal pkt_acc_mfb_sof_pos : std_logic_vector(PCIE_MFB_REGIONS*max(1, log2(PCIE_MFB_REGION_SIZE)) -1 downto 0);
     signal pkt_acc_mfb_eof_pos : std_logic_vector(PCIE_MFB_REGIONS*max(1, log2(PCIE_MFB_REGION_SIZE*PCIE_MFB_BLOCK_SIZE)) -1 downto 0);
     signal pkt_acc_mfb_sof     : std_logic_vector(PCIE_MFB_REGIONS -1 downto 0);
@@ -147,7 +166,7 @@ architecture FULL of TX_DMA_CHANNEL_CORE is
     signal pkt_acc_mfb_dst_rdy : std_logic;
 
     signal cutt_mfb_data    : std_logic_vector(PCIE_MFB_WIDTH -1 downto 0);
-    signal cutt_mfb_meta    : std_logic_vector(13+1 -1 downto 0);
+    signal cutt_mfb_meta    : std_logic_vector(4+4+1 -1 downto 0);
     signal cutt_mfb_sof_pos : std_logic_vector(PCIE_MFB_REGIONS*max(1, log2(PCIE_MFB_REGION_SIZE)) -1 downto 0);
     signal cutt_mfb_eof_pos : std_logic_vector(PCIE_MFB_REGIONS*max(1, log2(PCIE_MFB_REGION_SIZE*PCIE_MFB_BLOCK_SIZE)) -1 downto 0);
     signal cutt_mfb_sof     : std_logic_vector(PCIE_MFB_REGIONS -1 downto 0);
@@ -155,13 +174,20 @@ architecture FULL of TX_DMA_CHANNEL_CORE is
     signal cutt_mfb_src_rdy : std_logic;
     signal cutt_mfb_dst_rdy : std_logic;
 
-    -- this FSM is a counter
+    -- this FSM is technically a counter
     signal align_ctl_pst : unsigned(max(1, log2(PCIE_MFB_BLOCK_SIZE)) -1 downto 0);
     signal align_ctl_nst : unsigned(max(1, log2(PCIE_MFB_BLOCK_SIZE)) -1 downto 0);
     signal align_block   : std_logic_vector(max(1, log2(PCIE_MFB_BLOCK_SIZE)) -1 downto 0);
+    -- storing registers for FBE and LBE values
+    signal cutt_pcie_fbe_pst : std_logic_vector(4 -1 downto 0);
+    signal cutt_pcie_lbe_pst : std_logic_vector(4 -1 downto 0);
+    signal cutt_pcie_fbe_nst : std_logic_vector(4 -1 downto 0);
+    signal cutt_pcie_lbe_nst : std_logic_vector(4 -1 downto 0);
+    -- determine the position of last valid byte in last DW of the transaction
+    signal cutt_mfb_byte_eof_pos : std_logic_vector(2 -1 downto 0);
 
     signal align_mfb_data    : std_logic_vector(USR_MFB_WIDTH -1 downto 0);
-    signal align_mfb_meta    : std_logic_vector(13+1 -1 downto 0);
+    signal align_mfb_meta    : std_logic_vector(4+4+1 -1 downto 0);
     -- special case because the items are rearranged an not the blocks
     signal align_mfb_sof_pos : std_logic_vector(USR_MFB_REGIONS*max(1, log2(PCIE_MFB_BLOCK_SIZE)) -1 downto 0);
     signal align_mfb_eof_pos : std_logic_vector(USR_MFB_REGIONS*max(1, log2(USR_MFB_REGION_SIZE*USR_MFB_BLOCK_SIZE)) -1 downto 0);
@@ -246,7 +272,6 @@ architecture FULL of TX_DMA_CHANNEL_CORE is
 
     -- attribute mark_debug : string;
 
-    -- attribute mark_debug of PCIE_MFB_META_SEG_SIZE   : signal is "true";
     -- attribute mark_debug of PCIE_MFB_META_IS_DMA_HDR : signal is "true";
 
     -- attribute mark_debug of PCIE_MFB_DATA    : signal is "true";
@@ -432,13 +457,13 @@ begin
             REGION_SIZE => PCIE_MFB_REGION_SIZE,
             BLOCK_SIZE  => PCIE_MFB_BLOCK_SIZE,
             ITEM_WIDTH  => PCIE_MFB_ITEM_WIDTH,
-            META_WIDTH  => 1 + 13)
+            META_WIDTH  => 1 + 4 + 4)
         port map (
             CLK   => CLK,
             RESET => RESET,
 
             RX_DATA    => PCIE_MFB_DATA,
-            RX_META    => PCIE_MFB_META_SEG_SIZE & PCIE_MFB_META_IS_DMA_HDR,
+            RX_META    => PCIE_MFB_META_LBE & PCIE_MFB_META_FBE & PCIE_MFB_META_IS_DMA_HDR,
             RX_SOF_POS => PCIE_MFB_SOF_POS,
             RX_EOF_POS => PCIE_MFB_EOF_POS,
             RX_SOF     => PCIE_MFB_SOF,
@@ -465,7 +490,7 @@ begin
             REGION_SIZE    => PCIE_MFB_REGION_SIZE,
             BLOCK_SIZE     => PCIE_MFB_BLOCK_SIZE,
             ITEM_WIDTH     => PCIE_MFB_ITEM_WIDTH,
-            META_WIDTH     => 1 + 13,
+            META_WIDTH     => 1 + 4 + 4,
             META_ALIGNMENT => 0,
             -- 16 because the PCIe header is 16 DW long
             CUTTED_ITEMS   => 4)
@@ -504,30 +529,100 @@ begin
         if (rising_edge(CLK)) then
             if (RESET = '1') then
                 align_ctl_pst <= (others => '0');
+                cutt_pcie_fbe_pst <= (others => '0');
+                cutt_pcie_lbe_pst <= (others => '0');
             elsif (cutt_mfb_dst_rdy = '1') then
                 align_ctl_pst <= align_ctl_nst;
+                cutt_pcie_fbe_pst <= cutt_pcie_fbe_nst;
+                cutt_pcie_lbe_pst <= cutt_pcie_lbe_nst;
             end if;
         end if;
     end process;
 
     align_ctl_logic_p : process (all) is
     begin
-
         align_ctl_nst <= align_ctl_pst;
+        cutt_pcie_fbe_nst <= cutt_pcie_fbe_pst;
+        cutt_pcie_lbe_nst <= cutt_pcie_lbe_pst;
 
         if (cutt_mfb_src_rdy = '1') then
 
-            -- if there is an EOF of a current segment, then the alignment of a next segment should
-            -- be set in a way when the next segment begins in a block following immediately behind
-            -- a in which a previous segment has ended
-            if (cutt_mfb_eof = "1") then
-                align_ctl_nst <= unsigned(cutt_mfb_eof_pos) + align_ctl_pst + 1;
+            if (cutt_mfb_sof = "0" and cutt_mfb_eof = "1") then
+                if (
+                    std_match(cutt_pcie_lbe_pst, "1---")
+                    or
+                    (std_match(cutt_pcie_fbe_pst, "1---") and std_match(cutt_pcie_lbe_pst, "0000"))
+                    ) then
+                    -- The alignment of a next transaction should be set so that it begins in a DW
+                    -- following immediately behind behind the DW in which a previous transaction has ended.
+                    align_ctl_nst <= unsigned(cutt_mfb_eof_pos) + align_ctl_pst + 1;
+                else
+                    -- Broken alignment when the FBE, LBE or both are not comprising of consistent rows
+                    -- of 1s. The transaction is shifted in a way, that the last DW of the previous
+                    -- transaction is covered with the first DW of the next transaction.
+                    align_ctl_nst <= unsigned(cutt_mfb_eof_pos) + align_ctl_pst;
+                end if;
+
+            -- Special case when PCIE transaction is so small that it fits to the current word. Then
+            -- byte enables can be taken from the outputs of header cutter and not from the registers.
+            elsif (cutt_mfb_sof = "1" and cutt_mfb_eof = "1") then
+                if (
+                    std_match(cutt_mfb_meta(PCIE_META_LBE), "1---")
+                    or
+                    (std_match(cutt_mfb_meta(PCIE_META_FBE), "1---") and std_match(cutt_mfb_meta(PCIE_META_LBE), "0000"))
+                    ) then
+                    align_ctl_nst <= unsigned(cutt_mfb_eof_pos) + align_ctl_pst + 1;
+                else
+                    align_ctl_nst <= unsigned(cutt_mfb_eof_pos) + align_ctl_pst;
+                end if;
+
+            -- when only the beginning of the transaction occurs, then take only values of byte
+            -- enable signals to the register
+            elsif (cutt_mfb_sof = "1" and cutt_mfb_eof = "0") then
+                cutt_pcie_fbe_nst <= cutt_mfb_meta(PCIE_META_FBE);
+                cutt_pcie_lbe_nst <= cutt_mfb_meta(PCIE_META_LBE);
             end if;
 
             -- if there is a DMA header, return the alignment for the beginning segment of the next
             -- packet to the 0th block
-            if (cutt_mfb_meta(0) = '1') then
+            if (cutt_mfb_sof = "1" and cutt_mfb_meta(PCIE_META_IS_DMA_HDR) = "1") then
                 align_ctl_nst <= (others => '0');
+            end if;
+        end if;
+    end process;
+
+    -- This process duplicates the LBE value with the EOF of the transaction. This value is used
+    -- furter when building the DMA frame.
+    lbe_duplicaton_p: process (all) is
+    begin
+        cutt_mfb_byte_eof_pos <= "11";
+
+        if (cutt_mfb_src_rdy = '1' and cutt_mfb_eof = "1") then
+
+            if (cutt_mfb_sof = "0") then
+                if (std_match(cutt_pcie_lbe_pst, "01--")) then
+                    cutt_mfb_byte_eof_pos <= "10";
+                elsif (std_match(cutt_pcie_lbe_pst, "001-")) then
+                    cutt_mfb_byte_eof_pos <= "01";
+                elsif (std_match(cutt_pcie_lbe_pst, "0001")) then
+                    cutt_mfb_byte_eof_pos <= "00";
+                end if;
+            else
+                if (cutt_mfb_meta(PCIE_META_LBE) = "0000") then
+                    if (std_match(cutt_mfb_meta(PCIE_META_FBE),"0001")) then
+                        cutt_mfb_byte_eof_pos <= "00";
+                    elsif (std_match(cutt_mfb_meta(PCIE_META_FBE),"001-")) then
+                        cutt_mfb_byte_eof_pos <= "01";
+                    elsif (std_match(cutt_mfb_meta(PCIE_META_FBE),"01--")) then
+                        cutt_mfb_byte_eof_pos <= "10";
+                    end if;
+                elsif (std_match(cutt_mfb_meta(PCIE_META_LBE), "0001")) then
+                    cutt_mfb_byte_eof_pos <= "00";
+                elsif (std_match(cutt_mfb_meta(PCIE_META_LBE), "001-")) then
+                    cutt_mfb_byte_eof_pos <= "01";
+                elsif (std_match(cutt_mfb_meta(PCIE_META_LBE), "01--")) then
+                    cutt_mfb_byte_eof_pos <= "10";
+                end if;
             end if;
         end if;
     end process;
@@ -536,7 +631,7 @@ begin
     -- overrrides the align_ctl_pst value specified by the align_ctl_logic_p
     check_if_dma_hdr_p : process (all) is
     begin
-        if (cutt_mfb_sof = "1" and cutt_mfb_src_rdy = '1' and cutt_mfb_meta(0) = '1') then
+        if (cutt_mfb_sof = "1" and cutt_mfb_src_rdy = '1' and cutt_mfb_meta(PCIE_META_IS_DMA_HDR) = "1") then
             align_block <= (others => '0');
         else
             align_block <= std_logic_vector(align_ctl_pst);
@@ -549,7 +644,7 @@ begin
             BLOCK_SIZE  => 4,
             ITEM_WIDTH  => 8,
 
-            META_WIDTH => 13 + 1)
+            META_WIDTH => 4+4+1)
         port map (
             CLK => CLK,
             RST => RESET,
@@ -562,7 +657,7 @@ begin
             RX_MFB_EOF     => cutt_mfb_eof(0),
             -- every incoming segment arrives with SOF_POS=0 anyways
             RX_MFB_SOF_POS => "00" & cutt_mfb_sof_pos,
-            RX_MFB_EOF_POS => cutt_mfb_eof_pos & "11",
+            RX_MFB_EOF_POS => cutt_mfb_eof_pos & cutt_mfb_byte_eof_pos,
             RX_MFB_SRC_RDY => cutt_mfb_src_rdy,
             RX_MFB_DST_RDY => cutt_mfb_dst_rdy,
 
@@ -581,7 +676,7 @@ begin
     -- BUILDING OF A PACKET
     --
     -- The packet is builded out of one or many PCIe transtactions wchich is handled by the
-    -- following FSM.
+    -- following FSM. Each packet is delimited by the DMA header which is sent at its end.
     -- =============================================================================================
     build_fsm_state_reg_p : process (CLK) is
     begin
@@ -613,7 +708,6 @@ begin
     end process;
 
     build_fsm_nst_logic_p : process (all) is
-        variable eof_blk_pos : unsigned(align_mfb_sof_pos'range);
     begin
 
         pkt_build_nst <= pkt_build_pst;
@@ -628,9 +722,7 @@ begin
                     -- when the initial segment comes and immediately ends in a current word, that
                     -- means, that this is a short segment
                     if (align_mfb_eof = "1") then
-                        eof_blk_pos := unsigned(align_mfb_eof_pos(align_mfb_eof_pos'high downto align_mfb_eof_pos'high - align_mfb_sof_pos'length + 1));
-
-                        if (eof_blk_pos < 7) then
+                        if (unsigned(align_mfb_eof_pos) < 31) then
                             pkt_build_nst <= SEGMENT_MERGE;
                         else
                             pkt_build_nst <= SEGMENT_MERGE_BREAK;
@@ -644,9 +736,7 @@ begin
                 if (align_mfb_src_rdy = '1') then
 
                     if (align_mfb_eof = "1") then
-                        eof_blk_pos := unsigned(align_mfb_eof_pos(align_mfb_eof_pos'high downto align_mfb_eof_pos'high - align_mfb_sof_pos'length + 1));
-
-                        if (eof_blk_pos < 7) then
+                        if (unsigned(align_mfb_eof_pos) < 31) then
                             pkt_build_nst <= SEGMENT_MERGE;
                         else
                             pkt_build_nst <= SEGMENT_MERGE_BREAK;
@@ -664,9 +754,8 @@ begin
                     if (align_mfb_meta(0) = '1') then
                         pkt_build_nst <= START_DETECT;
                     elsif (align_mfb_eof = "1") then
-                        eof_blk_pos := unsigned(align_mfb_eof_pos(align_mfb_eof_pos'high downto align_mfb_eof_pos'high - align_mfb_sof_pos'length + 1));
 
-                        if (eof_blk_pos < 7) then
+                        if (unsigned(align_mfb_eof_pos) < 31) then
                             pkt_build_nst <= SEGMENT_MERGE;
                         else
                             pkt_build_nst <= SEGMENT_MERGE_BREAK;
@@ -679,8 +768,6 @@ begin
     end process;
 
     build_fsm_out_logic_p : process (all) is
-        variable sof_pos_un  : unsigned(align_mfb_sof_pos'range);
-        variable eof_blk_pos : unsigned(align_mfb_sof_pos'range);
     begin
 
         build_fsm_mfb_data    <= align_mfb_data;
@@ -714,11 +801,10 @@ begin
                     if (align_mfb_eof = "1") then
                         build_fsm_mfb_src_rdy <= '0';
 
-                        eof_blk_pos := unsigned(align_mfb_eof_pos(align_mfb_eof_pos'high downto align_mfb_eof_pos'high - align_mfb_sof_pos'length + 1));
                         -- Put the current transaction into a side register because if another
                         -- segment of a packet arrives, then it needs to be connected in the current
                         -- word
-                        if (eof_blk_pos < 7) then
+                        if (unsigned(align_mfb_eof_pos) < 31) then
                             mfb_data_nst    <= align_mfb_data;
                             mfb_sof_nst     <= align_mfb_sof;
                             mfb_eof_nst     <= "0";
@@ -739,9 +825,7 @@ begin
                     if (align_mfb_eof = "1") then
                         build_fsm_mfb_src_rdy <= '0';
 
-                        eof_blk_pos := unsigned(align_mfb_eof_pos(align_mfb_eof_pos'high downto align_mfb_eof_pos'high - align_mfb_sof_pos'length + 1));
-
-                        if (eof_blk_pos < 7) then
+                        if (unsigned(align_mfb_eof_pos) < 31) then
                             mfb_data_nst    <= align_mfb_data;
                             mfb_sof_nst     <= (others => '0');
                             mfb_eof_nst     <= (others => '0');
@@ -754,7 +838,6 @@ begin
 
             -- merging of two packet segments in one word
             when SEGMENT_MERGE =>
-
                 if (align_mfb_src_rdy = '1') then
 
                     -- the DMA header arrived, put data stored in the side register to the FIFO with
@@ -773,28 +856,23 @@ begin
                     -- segment ends in a current input word so another merging to the current
                     -- output word will follow
                     elsif (align_mfb_eof = "1" ) then
-                        sof_pos_un := unsigned(align_mfb_sof_pos);
+                        if (unsigned(align_mfb_eof_pos) < 31) then
 
-                        eof_blk_pos := unsigned(align_mfb_eof_pos(align_mfb_eof_pos'high downto align_mfb_eof_pos'high - align_mfb_sof_pos'length + 1));
-
-                        if (eof_blk_pos < 7) then
-                            for i in 0 to 7 loop
-                                if (i < sof_pos_un) then
-                                    mfb_data_nst(i*32 + 31 downto i*32) <= mfb_data_pst(i*32 + 31 downto i*32);
+                            for i in 0 to 31 loop
+                                if (i <= unsigned(mfb_eof_pos_pst)) then
+                                    mfb_data_nst(i*8 + 7 downto i*8) <= mfb_data_pst(i*8 + 7 downto i*8);
                                 else
-                                    mfb_data_nst(i*32 + 31 downto i*32) <= align_mfb_data(i*32 + 31 downto i*32);
+                                    mfb_data_nst(i*8 + 7 downto i*8) <= align_mfb_data(i*8 + 7 downto i*8);
                                 end if;
                             end loop;
 
                             mfb_eof_pos_nst <= align_mfb_eof_pos;
                         else
-                            sof_pos_un := unsigned(align_mfb_sof_pos);
-
-                            for i in 0 to 7 loop
-                                if (i < sof_pos_un) then
-                                    build_fsm_mfb_data(i*32 + 31 downto i*32) <= mfb_data_pst(i*32 + 31 downto i*32);
+                            for i in 0 to 31 loop
+                                if (i <= unsigned(mfb_eof_pos_pst)) then
+                                    build_fsm_mfb_data(i*8 + 7 downto i*8) <= mfb_data_pst(i*8 + 7 downto i*8);
                                 else
-                                    build_fsm_mfb_data(i*32 + 31 downto i*32) <= align_mfb_data(i*32 + 31 downto i*32);
+                                    build_fsm_mfb_data(i*8 + 7 downto i*8) <= align_mfb_data(i*8 + 7 downto i*8);
                                 end if;
                             end loop;
 
@@ -805,13 +883,12 @@ begin
                     -- the curent segment does not end in a current input word so send this merged
                     -- word into the FIFO
                     else
-                        sof_pos_un := unsigned(align_mfb_sof_pos);
 
-                        for i in 0 to 7 loop
-                            if (i < sof_pos_un) then
-                                build_fsm_mfb_data(i*32 + 31 downto i*32) <= mfb_data_pst(i*32 + 31 downto i*32);
+                        for i in 0 to 31 loop
+                            if (i <= unsigned(mfb_eof_pos_pst)) then
+                                build_fsm_mfb_data(i*8 + 7 downto i*8) <= mfb_data_pst(i*8 + 7 downto i*8);
                             else
-                                build_fsm_mfb_data(i*32 + 31 downto i*32) <= align_mfb_data(i*32 + 31 downto i*32);
+                                build_fsm_mfb_data(i*8 + 7 downto i*8) <= align_mfb_data(i*8 + 7 downto i*8);
                             end if;
                         end loop;
 
@@ -845,15 +922,11 @@ begin
                     elsif (align_mfb_eof = "1") then
                         ovrd_mfb_src_rdy <= '1';
 
-                        eof_blk_pos := unsigned(align_mfb_eof_pos(align_mfb_eof_pos'high downto align_mfb_eof_pos'high - align_mfb_sof_pos'length + 1));
-
-                        if (eof_blk_pos < 7) then
+                        if (unsigned(align_mfb_eof_pos) < 31) then
                             mfb_data_nst    <= align_mfb_data;
                             mfb_eof_nst     <= align_mfb_eof;
                             mfb_eof_pos_nst <= align_mfb_eof_pos;
                             mfb_src_rdy_nst <= align_mfb_src_rdy;
-                        -- else
-                        --     build_fsm_mfb_src_rdy <= '1';
                         end if;
 
                     -- there are two words and both are valid, one stored in the seg_merge_break_reg
@@ -1010,7 +1083,6 @@ begin
     end process;
 
     pkt_dispatch_out_logic_p : process (all) is
-        variable eof_pos_uns  : unsigned(fifo_tx_mfb_eof_pos'range);
         variable pkt_size_uns : unsigned(log2(PKT_SIZE_MAX+1) -1 downto 0);
     begin
 
@@ -1030,8 +1102,6 @@ begin
         pkt_size_curr <= pkt_size_stored;
         PKT_SENT_SIZE <= pkt_size_stored;
 
-        eof_pos_uns := unsigned(fifo_tx_mfb_eof_pos);
-
         case pkt_dispatch_pst is
             when PKT_BEGIN =>
 
@@ -1046,15 +1116,6 @@ begin
                     if (fifo_tx_mfb_eof = "1") then
                         USR_MFB_EOF   <= "1";
                         PKT_SENT_SIZE <= fifo_tx_mvb_data(log2(PKT_SIZE_MAX+1) -1 downto 0);
-
-                        -- this calculation corrects the output EOF_POS because the alignment in the
-                        -- CHANNEL_CORE is happening with respect to DWs (so the EOF_POS is set to
-                        -- point to whole DWs only) but the size in DMA header can be specified to
-                        -- bytes
-                        pkt_size_uns    := unsigned(fifo_tx_mvb_data(log2(PKT_SIZE_MAX+1) -1 downto 0));
-                        if (pkt_size_uns mod 4 /= 0) then
-                            USR_MFB_EOF_POS <= std_logic_vector(resize(eof_pos_uns - (4 - (pkt_size_uns mod 4)), USR_MFB_EOF_POS'length));
-                        end if;
                     else
                         pkt_size_curr <= fifo_tx_mvb_data(log2(PKT_SIZE_MAX+1) -1 downto 0);
                     end if;
@@ -1067,11 +1128,6 @@ begin
 
                 if (fifo_tx_mfb_eof = "1") then
                     USR_MFB_EOF  <= "1";
-
-                    pkt_size_uns := unsigned(pkt_size_stored);
-                    if (pkt_size_uns mod 4 /= 0) then
-                        USR_MFB_EOF_POS <= std_logic_vector(resize(eof_pos_uns - (4 - (pkt_size_uns mod 4)), USR_MFB_EOF_POS'length));
-                    end if;
                 end if;
         end case;
     end process;

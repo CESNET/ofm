@@ -51,8 +51,9 @@ entity TX_DMA_CHANNEL_SPLITTER is
         -- =========================================================================================
         -- User MFB signals
         -- =========================================================================================
-        USR_MFB_META_BYTE_COUNT : out slv_array_t(CHANNELS -1 downto 0)(13 -1 downto 0);
         USR_MFB_META_IS_DMA_HDR : out std_logic_vector(CHANNELS -1 downto 0);
+        USR_MFB_META_FBE        : out slv_array_t(CHANNELS -1 downto 0)(4 -1 downto 0);
+        USR_MFB_META_LBE        : out slv_array_t(CHANNELS -1 downto 0)(4 -1 downto 0);
 
         USR_MFB_DATA    : out slv_array_t(CHANNELS -1 downto 0)(PCIE_MFB_REGIONS*PCIE_MFB_REGION_SIZE*PCIE_MFB_BLOCK_SIZE*PCIE_MFB_ITEM_WIDTH-1 downto 0) := (others => (others => '0'));
         USR_MFB_SOF     : out slv_array_t(CHANNELS -1 downto 0)(PCIE_MFB_REGIONS -1 downto 0)                                                             := (others => (others => '0'));
@@ -72,7 +73,6 @@ architecture FULL of TX_DMA_CHANNEL_SPLITTER is
 
     -- extracted fields from the PCIe header
     signal pcie_hdr_addr         : std_logic_vector(63 downto 0);
-    signal pcie_hdr_dw_cnt       : std_logic_vector(10 downto 0);
     signal pcie_hdr_bar_id       : std_logic_vector(2 downto 0);
     signal pcie_hdr_bar_aperture : std_logic_vector(5 downto 0);
     signal pcie_hdr_fbe          : std_logic_vector(3 downto 0);
@@ -80,16 +80,15 @@ architecture FULL of TX_DMA_CHANNEL_SPLITTER is
 
     signal pcie_addr_mask   : std_logic_vector(63 downto 0);
     signal pcie_addr_masked : std_logic_vector(63 downto 0);
-    signal pcie_byte_count  : std_logic_vector(12 downto 0);
 
     signal split_sel  : std_logic_vector(PCIE_MFB_REGIONS*max(1, log2(CHANNELS)) -1 downto 0);
     -- Determines if curently contained payload of the incoming PCIe transaction is a DMA header
     signal is_dma_hdr : std_logic;
-    -- contains size of a current PCIE transaction in bytes and one bit indication if DMA header is
-    -- included in a current transaction
-    signal pcie_mfb_meta_int : std_logic_vector(13+1 -1 downto 0);
-    signal usr_mfb_meta_int : slv_array_t(CHANNELS -1 downto 0)(13+1 -1 downto 0);
-
+    -- contains the last byte enable, first byte enable signals from the PCIE META input, the size
+    -- of a current PCIE transaction in bytes and one bit indication if DMA header is included in a
+    -- current transaction
+    signal pcie_mfb_meta_int : std_logic_vector(4+4+1 -1 downto 0);
+    signal usr_mfb_meta_int : slv_array_t(CHANNELS -1 downto 0)(4+4+1 -1 downto 0);
 begin
 
     pcie_hdr_deparser_i : entity work.PCIE_CQ_HDR_DEPARSER
@@ -100,7 +99,7 @@ begin
             OUT_ADDRESS      => pcie_hdr_addr,
             OUT_REQ_ID       => open,
             OUT_TC           => open,
-            OUT_DW_CNT       => pcie_hdr_dw_cnt,
+            OUT_DW_CNT       => open,
             OUT_ATTRIBUTES   => open,
             OUT_FBE          => pcie_hdr_fbe,
             OUT_LBE          => pcie_hdr_lbe,
@@ -135,20 +134,6 @@ begin
     pcie_addr_masked <= pcie_hdr_addr and pcie_addr_mask;
 
     -- =============================================================================================
-    -- calculate the real number of bytes in the transaction
-    -- =============================================================================================
-    byte_count_i : entity work.PCIE_BYTE_COUNT
-        port map (
-            CLK            => CLK,
-            RESET          => RESET,
-            IN_DW_COUNT    => pcie_hdr_dw_cnt,
-            IN_FIRST_BE    => pcie_hdr_fbe,
-            IN_LAST_BE     => pcie_hdr_lbe,
-            OUT_FIRST_IB   => open,
-            OUT_LAST_IB    => open,
-            OUT_BYTE_COUNT => pcie_byte_count);
-
-    -- =============================================================================================
     -- Controling split to different channels according to the current PCIe address
     -- =============================================================================================
     channel_select_p : process (all) is
@@ -167,7 +152,7 @@ begin
         end if;
     end process;
 
-    pcie_mfb_meta_int <= pcie_byte_count & is_dma_hdr;
+    pcie_mfb_meta_int <= pcie_hdr_lbe & pcie_hdr_fbe & is_dma_hdr;
 
     mfb_splitter_simple_gen_i : entity work.MFB_SPLITTER_SIMPLE_GEN
         generic map (
@@ -178,7 +163,7 @@ begin
             BLOCK_SIZE  => PCIE_MFB_BLOCK_SIZE,
             ITEM_WIDTH  => PCIE_MFB_ITEM_WIDTH,
 
-            META_WIDTH => 13+1,
+            META_WIDTH => 4+4+1,
             DEVICE     => DEVICE)
         port map (
             CLK   => CLK,
@@ -205,7 +190,8 @@ begin
             TX_MFB_DST_RDY => USR_MFB_DST_RDY);
 
     conn_out_meta_g: for i in 0 to (CHANNELS -1) generate
-        USR_MFB_META_BYTE_COUNT(i) <= usr_mfb_meta_int(i)(13 downto 1);
         USR_MFB_META_IS_DMA_HDR(i) <= usr_mfb_meta_int(i)(0);
+        USR_MFB_META_FBE(i)        <= usr_mfb_meta_int(i)(4 downto 1);
+        USR_MFB_META_LBE(i)        <= usr_mfb_meta_int(i)(8 downto 5);
     end generate;
 end architecture;
