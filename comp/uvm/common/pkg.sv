@@ -17,14 +17,18 @@ package uvm_common;
     `include "uvm_macros.svh"
     import uvm_pkg::*;
 
+    `uvm_analysis_imp_decl(_export)
     `uvm_analysis_imp_decl(_model)
     `uvm_analysis_imp_decl(_dut)
 
     `include "rand_rdy.sv"
     `include "rand_length.sv"
+
     `include "sequence.sv"
     `include "sequence_library.sv"
+
     `include "model_item.sv"
+    `include "fifo.sv"
     `include "subscriber.sv"
 
     `include "comparer_base.sv"
