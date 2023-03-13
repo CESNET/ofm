@@ -5,11 +5,11 @@
 // SPDX-License-Identifier: BSD-3-Clause 
 
 // Environment for the functional verification.
-class env #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, DATA_WIDTH, TUSER_WIDTH) extends uvm_env;
-    `uvm_component_param_utils(uvm_ptc_mfb2pcie_axi::env #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, DATA_WIDTH, TUSER_WIDTH));
+class env #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, DATA_WIDTH, TUSER_WIDTH, STRADDLING) extends uvm_env;
+    `uvm_component_param_utils(uvm_ptc_mfb2pcie_axi::env #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, DATA_WIDTH, TUSER_WIDTH, STRADDLING));
 
-    uvm_logic_vector_array_mfb::env_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, 0) m_env_rx;
-    uvm_logic_vector_array_axi::env_tx #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS) m_env_tx;
+    uvm_logic_vector_array_mfb::env_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, 0)                      m_env_rx;
+    uvm_logic_vector_array_axi::env_tx #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING) m_env_tx;
 
     uvm_ptc_mfb2pcie_axi::virt_sequencer#(ITEM_WIDTH) vscr;
     uvm_reset::agent m_reset;
@@ -48,11 +48,9 @@ class env #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, DATA_WIDTH, TUSER_WIDT
         m_config_tx.interface_name   = "vif_tx";
 
         uvm_config_db #(uvm_logic_vector_array_axi::config_item)::set(this, "m_env_tx", "m_config", m_config_tx);
-        m_env_tx = uvm_logic_vector_array_axi::env_tx#(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS)::type_id::create("m_env_tx", this);
+        m_env_tx = uvm_logic_vector_array_axi::env_tx#(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING)::type_id::create("m_env_tx", this);
 
         sc     = scoreboard#(ITEM_WIDTH)::type_id::create("sc", this);
-        sc.print_regions      = REGIONS;
-        sc.print_region_width = REGION_SIZE*BLOCK_SIZE;
 
         vscr   = uvm_ptc_mfb2pcie_axi::virt_sequencer#(ITEM_WIDTH)::type_id::create("vscr",this);
 
@@ -61,7 +59,7 @@ class env #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, DATA_WIDTH, TUSER_WIDT
     // Connect agent's ports with ports from the scoreboard.
     function void connect_phase(uvm_phase phase);
 
-        m_env_rx.analysis_port_data.connect(sc.input_data);
+        m_env_rx.analysis_port_data.connect(sc.input_data.analysis_export);
 
         m_env_tx.analysis_port_data.connect(sc.out_data);
 

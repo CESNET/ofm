@@ -135,14 +135,15 @@ begin
     end generate;
     
     valid_gen : for i in 0 to REGIONS-1 generate
-        next_pkt(i)      <= (not pkt_cont(i) and avst_sop(i) and not avst_eop(i)) or
-                            (pkt_cont(i) and not avst_sop(i) and not avst_eop(i)) or
-                            (pkt_cont(i) and avst_sop(i) and avst_eop(i));
-        TX_AVST_VALID(i) <= mfb_src_rdy and ((not pkt_cont(i) and avst_sop(i) and not avst_eop(i)) or
-                            (not pkt_cont(i) and avst_sop(i) and avst_eop(i)) or
-                            (pkt_cont(i) and not avst_sop(i) and not avst_eop(i)) or
-                            (pkt_cont(i) and not avst_sop(i) and avst_eop(i)) or
-                            (pkt_cont(i) and avst_sop(i) and avst_eop(i)));
+        next_pkt(i)      <= (not pkt_cont(i) and     avst_sop(i) and not avst_eop(i)) or
+                            (    pkt_cont(i) and not avst_sop(i) and not avst_eop(i)) or
+                            (    pkt_cont(i) and     avst_sop(i) and     avst_eop(i));
+        TX_AVST_VALID(i) <= mfb_src_rdy and (
+                            (not pkt_cont(i) and     avst_sop(i) and not avst_eop(i)) or
+                            (not pkt_cont(i) and     avst_sop(i) and     avst_eop(i)) or
+                            (    pkt_cont(i) and not avst_sop(i) and not avst_eop(i)) or
+                            (    pkt_cont(i) and not avst_sop(i) and     avst_eop(i)) or
+                            (    pkt_cont(i) and     avst_sop(i) and     avst_eop(i)));
     end generate;
 
     -- ===============================================

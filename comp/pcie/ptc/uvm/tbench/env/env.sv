@@ -26,7 +26,7 @@ class env #(DMA_MFB_UP_REGIONS, MFB_UP_REGIONS, MFB_UP_REG_SIZE,
     uvm_logic_vector_array_mfb::env_tx   #(MFB_UP_REGIONS, MFB_UP_REG_SIZE, MFB_UP_BLOCK_SIZE, 32, 0)                                      m_env_rq_mfb;
     uvm_logic_vector_mvb::env_tx #(MFB_UP_REGIONS, PCIE_UPHDR_WIDTH)                                                                       m_env_rq_mvb;
     uvm_logic_vector_mvb::env_tx #(MFB_UP_REGIONS, PCIE_PREFIX_WIDTH)                                                                      m_env_rq_prefix_mvb;
-    uvm_logic_vector_array_axi::env_tx #(RQ_TDATA_WIDTH, RQ_TUSER_WIDTH, 32, MFB_UP_REGIONS)                                               m_env_rq_axi;
+    uvm_logic_vector_array_axi::env_tx #(RQ_TDATA_WIDTH, RQ_TUSER_WIDTH, 32, MFB_UP_REGIONS, MFB_UP_BLOCK_SIZE, 1)                         m_env_rq_axi;
     // DOWNSTREAM
     uvm_logic_vector_array_mfb::env_tx   #(DMA_MFB_DOWN_REGIONS, MFB_DOWN_REG_SIZE, MFB_DOWN_BLOCK_SIZE, MFB_DOWN_ITEM_WIDTH, 0)           m_env_down_mfb[DMA_PORTS];
     uvm_logic_vector_mvb::env_tx #(DMA_MVB_DOWN_ITEMS, sv_dma_bus_pack::DMA_DOWNHDR_WIDTH)                                                 m_env_down_mvb[DMA_PORTS];
@@ -110,7 +110,7 @@ class env #(DMA_MFB_UP_REGIONS, MFB_UP_REGIONS, MFB_UP_REG_SIZE,
         m_env_rq_mfb        = uvm_logic_vector_array_mfb::env_tx   #(MFB_UP_REGIONS, MFB_UP_REG_SIZE, MFB_UP_BLOCK_SIZE, 32, 0)::type_id::create("m_env_rq_mfb", this);
         m_env_rq_mvb        = uvm_logic_vector_mvb::env_tx #(MFB_UP_REGIONS, PCIE_UPHDR_WIDTH)::type_id::create("m_env_rq_mvb", this);
         m_env_rq_prefix_mvb = uvm_logic_vector_mvb::env_tx #(MFB_UP_REGIONS, PCIE_PREFIX_WIDTH)::type_id::create("m_env_rq_prefix_mvb", this);
-        m_env_rq_axi        = uvm_logic_vector_array_axi::env_tx#(RQ_TDATA_WIDTH, RQ_TUSER_WIDTH, 32, MFB_UP_REGIONS)::type_id::create("m_env_rq_axi", this);
+        m_env_rq_axi        = uvm_logic_vector_array_axi::env_tx#(RQ_TDATA_WIDTH, RQ_TUSER_WIDTH, 32, MFB_UP_REGIONS, MFB_UP_BLOCK_SIZE, 1)::type_id::create("m_env_rq_axi", this);
 
         //m_config_reset = new;
         //for (int i = 0; i < (DMA_PORTS+1); i++)  begin

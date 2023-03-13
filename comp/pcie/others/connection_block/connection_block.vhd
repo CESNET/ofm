@@ -21,6 +21,8 @@ entity PCIE_CONNECTION_BLOCK is
         MFB_DOWN_META_WIDTH : natural := 3+32+128; -- must be 3+32+128
         -- Depth of FIFO instanced before MTC. For R-Tile only.
         MTC_FIFO_DEPTH      : natural := 512;
+        -- Maximum write request (payload) size (in DWORDs)
+        PCIE_MPS_DW         : natural := 512/4;
         DEVICE              : string  := "STRATIX10"; -- "STRATIX10" or "AGILEX"
         ENDPOINT_TYPE       : string  := "H_TILE" -- "H_TILE" or "P_TILE" or "R_TILE"
     );
@@ -765,7 +767,8 @@ begin
     crdt_up_mtc_i : entity work.CB_RTILE_CRDT_UP
     generic map(
         REGIONS     => MFB_REGIONS,
-        CRDT_ENABLE => False
+        CRDT_ENABLE => False,
+        PCIE_MPS_DW => PCIE_MPS_DW
     )
     port map(
         CLK            => CLK,
@@ -854,7 +857,8 @@ begin
     crdt_up_ptc_i : entity work.CB_RTILE_CRDT_UP
     generic map(
         REGIONS     => MFB_REGIONS,
-        CRDT_ENABLE => False
+        CRDT_ENABLE => False,
+        PCIE_MPS_DW => PCIE_MPS_DW
     )
     port map(
         CLK            => CLK,

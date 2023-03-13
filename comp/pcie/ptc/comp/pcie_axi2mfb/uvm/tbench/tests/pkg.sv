@@ -33,6 +33,8 @@ package test;
     // DATA=256, RC=70  for Gen3x16 PCIe (Virtex 7 Series) - with straddling!
     parameter DATA_WIDTH      = 512;
     parameter TUSER_WIDTH     = 161;
+    // Do not change
+    parameter STRADDLING      = 1;
 
     parameter DRAIN_TIME         = 20ns;
     parameter TRANSACTION_COUNT  = 1000000;

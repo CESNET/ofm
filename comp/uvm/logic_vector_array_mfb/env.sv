@@ -97,13 +97,17 @@ class env_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extends
 
     virtual task run_phase(uvm_phase phase);
         if (m_config.active == UVM_ACTIVE) begin
-            sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) mfb_seq;
+            uvm_common::sequence_library#(config_sequence, uvm_mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)) mfb_seq;
+            if (m_config.seq_type == "MFB")
+                mfb_seq = sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::type_id::create("mfb_seq", this);
+            else if (m_config.seq_type == "PCIE")
+                mfb_seq = sequence_lib_pcie_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::type_id::create("mfb_seq", this);
+            else
+                `uvm_fatal(this.get_full_name(), "\n\tUnexisted name of sequence library type");
 
-            mfb_seq = sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::type_id::create("mfb_seq", this);
             mfb_seq.min_random_count = 20;
             mfb_seq.max_random_count = 100;
             mfb_seq.init_sequence(m_config.seq_cfg);
-
 
             forever begin
                 int verbosity;

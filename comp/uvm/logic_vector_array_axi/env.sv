@@ -5,8 +5,8 @@
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
 // Definition of axi environment
-class env_rx #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS) extends uvm_env;
-    `uvm_component_param_utils(uvm_logic_vector_array_axi::env_rx #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS));
+class env_rx #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING) extends uvm_env;
+    `uvm_component_param_utils(uvm_logic_vector_array_axi::env_rx #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING));
 
     // ------------------------------------------------------------------------
     // Definition of agents
@@ -52,8 +52,8 @@ class env_rx #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS) extends uvm_env;
         uvm_config_db #(uvm_logic_vector::config_item)::set(this, "m_logic_vector_agent", "m_config", logic_vector_agent_cfg);
         uvm_config_db #(uvm_axi::config_item)::set(this, "m_axi_agent", "m_config", axi_agent_cfg);
 
-        uvm_logic_vector_array::monitor #(ITEM_WIDTH)::type_id::set_inst_override(monitor_logic_vector_array #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS)::get_type(), {this.get_full_name(), ".m_logic_vector_array_agent.*"});
-        uvm_logic_vector::monitor#(TUSER_WIDTH)::type_id::set_inst_override(monitor_logic_vector #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS)::get_type(), {this.get_full_name(), ".m_logic_vector_agent.*"});
+        uvm_logic_vector_array::monitor #(ITEM_WIDTH)::type_id::set_inst_override(monitor_logic_vector_array #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING)::get_type(), {this.get_full_name(), ".m_logic_vector_array_agent.*"});
+        uvm_logic_vector::monitor#(TUSER_WIDTH)::type_id::set_inst_override(monitor_logic_vector #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING)::get_type(), {this.get_full_name(), ".m_logic_vector_agent.*"});
 
         m_logic_vector_array_agent = uvm_logic_vector_array::agent#(ITEM_WIDTH)::type_id::create("m_logic_vector_array_agent", this);
         m_logic_vector_agent       = uvm_logic_vector::agent#(TUSER_WIDTH)::type_id::create("m_logic_vector_agent", this);
@@ -69,8 +69,8 @@ class env_rx #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS) extends uvm_env;
     // Connect agent's ports with ports from scoreboard.
     function void connect_phase(uvm_phase phase);
 
-        monitor_logic_vector_array #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS) m_logic_vector_arr_monitor;
-        monitor_logic_vector #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS)       m_logic_vector_monitor;
+        monitor_logic_vector_array #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING) m_logic_vector_arr_monitor;
+        monitor_logic_vector #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING)       m_logic_vector_monitor;
 
         $cast(m_logic_vector_arr_monitor, m_logic_vector_array_agent.m_monitor);
         m_axi_agent.analysis_port.connect(m_logic_vector_arr_monitor.analysis_export);
@@ -92,9 +92,9 @@ class env_rx #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS) extends uvm_env;
 
     virtual task run_phase(uvm_phase phase);
         if (m_config.active == UVM_ACTIVE) begin
-            sequence_lib_rx#(DATA_WIDTH, TUSER_WIDTH, REGIONS) axi_seq;
+            sequence_lib_rx#(DATA_WIDTH, TUSER_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING) axi_seq;
 
-            axi_seq                  = sequence_lib_rx#(DATA_WIDTH, TUSER_WIDTH, REGIONS)::type_id::create("axi_seq", this);
+            axi_seq                  = sequence_lib_rx#(DATA_WIDTH, TUSER_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING)::type_id::create("axi_seq", this);
             axi_seq.cfg              = m_config.seq_cfg;
             axi_seq.min_random_count = 20;
             axi_seq.max_random_count = 100;
@@ -110,8 +110,8 @@ class env_rx #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS) extends uvm_env;
 endclass
 
 
-class env_tx #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS) extends uvm_env;
-    `uvm_component_param_utils(uvm_logic_vector_array_axi::env_tx #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS));
+class env_tx #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING) extends uvm_env;
+    `uvm_component_param_utils(uvm_logic_vector_array_axi::env_tx #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING));
 
     //Access component
     uvm_axi::sequencer #(DATA_WIDTH, TUSER_WIDTH, REGIONS)                  m_sequencer;
@@ -158,8 +158,8 @@ class env_tx #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS) extends uvm_env;
         uvm_config_db #(uvm_logic_vector::config_item)::set(this, "m_logic_vector_agent", "m_config", logic_vector_agent_cfg);
         uvm_config_db #(uvm_axi::config_item)::set(this, "m_axi_agent", "m_config", axi_agent_cfg);
 
-        uvm_logic_vector_array::monitor#(ITEM_WIDTH)::type_id::set_inst_override(monitor_logic_vector_array #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS)::get_type(), {this.get_full_name(), ".m_logic_vector_array_agent.*"});
-        uvm_logic_vector::monitor#(TUSER_WIDTH)::type_id::set_inst_override(monitor_logic_vector #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS)::get_type(), {this.get_full_name(), ".m_logic_vector_agent.*"});
+        uvm_logic_vector_array::monitor#(ITEM_WIDTH)::type_id::set_inst_override(monitor_logic_vector_array #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING)::get_type(), {this.get_full_name(), ".m_logic_vector_array_agent.*"});
+        uvm_logic_vector::monitor#(TUSER_WIDTH)::type_id::set_inst_override(monitor_logic_vector #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING)::get_type(), {this.get_full_name(), ".m_logic_vector_agent.*"});
 
         m_logic_vector_array_agent = uvm_logic_vector_array::agent#(ITEM_WIDTH)::type_id::create("m_logic_vector_array_agent", this);
         m_logic_vector_agent       = uvm_logic_vector::agent#(TUSER_WIDTH)::type_id::create("m_logic_vector_agent", this);
@@ -171,8 +171,8 @@ class env_tx #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS) extends uvm_env;
     // Connect agent's ports with ports from scoreboard.
     function void connect_phase(uvm_phase phase);
 
-        monitor_logic_vector_array #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS) m_logic_vector_arr_monitor;
-        monitor_logic_vector #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS)       m_logic_vector_monitor;
+        monitor_logic_vector_array #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING) m_logic_vector_arr_monitor;
+        monitor_logic_vector #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING)       m_logic_vector_monitor;
 
         $cast(m_logic_vector_arr_monitor, m_logic_vector_array_agent.m_monitor);
         m_axi_agent.analysis_port.connect(m_logic_vector_arr_monitor.analysis_export);

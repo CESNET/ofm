@@ -14,8 +14,9 @@ module DUT (
     axi_if.dut_rx   axi_rx
     );
 
-    localparam SOF_POS_WIDTH = ((REGION_SIZE*REGIONS) < 2) ? 1 : (REGIONS*$clog2(REGION_SIZE));
-    logic [REGIONS -1:0] sof_pos;
+    localparam SOF_POS_WIDTH = ((REGION_SIZE*REGIONS) == REGIONS) ? REGIONS : (REGIONS*$clog2(REGION_SIZE));
+    logic [SOF_POS_WIDTH -1:0] sof_pos;
+    assign mfb_tx.SOF_POS = sof_pos;
 
     PTC_PCIE_AXI2MFB #(
         .DEVICE           (DEVICE),
