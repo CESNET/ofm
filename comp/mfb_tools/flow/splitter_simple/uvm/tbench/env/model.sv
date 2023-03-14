@@ -19,6 +19,10 @@ class model_data #(ITEM_WIDTH, META_WIDTH) extends uvm_object;
     function new(string name = "");
         super.new(name);
     endfunction
+
+    function string convert2string();
+        return $sformatf("\n\tMEATA %s\n\tDATA\n%s\n", meta.convert2string(), data.convert2string());
+    endfunction
 endclass
 
 
@@ -56,9 +60,15 @@ class model #(ITEM_WIDTH, META_WIDTH, CHANNELS) extends uvm_component;
         end
 
         forever begin
+            string msg;
             in.get(tr_input);
 
             channel = tr_input.item.meta.data[SEL_WIDTH + META_WIDTH-1 : META_WIDTH];
+            if (this.get_report_verbosity_level() >= UVM_FULL) begin
+                msg = tr_input.convert2string();
+            end else begin
+                msg = "";
+            end
 
             if (channel >= CHANNELS) begin
                 string msg;
@@ -74,6 +84,7 @@ class model #(ITEM_WIDTH, META_WIDTH, CHANNELS) extends uvm_component;
                 //create meta
                 tr_output.item.meta      = uvm_logic_vector::sequence_item #(META_WIDTH)::type_id::create("tr_output_meta");
                 tr_output.item.meta.data = tr_input.item.meta.data[META_WIDTH-1:0];
+                `uvm_info(this.get_full_name(), $sformatf("\nINPUT\n\t%s\nOUTPUT : \n%s\n\n", msg, tr_output.convert2string()), UVM_HIGH);
                 out[channel].write(tr_output);
             end
         end
