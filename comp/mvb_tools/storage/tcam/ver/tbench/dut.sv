@@ -1,6 +1,6 @@
 // dut.sv: Design under test
-// Copyright (C) 2020 CESNET z. s. p. o.
-// Author: Tomas Hak <xhakto01@stud.fit.vutbr.cz>
+// Copyright (C) 2023 CESNET z. s. p. o.
+// Author: Tomas Fukac <fukac@cesnet.cz>
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
@@ -17,7 +17,17 @@ module DUT (
     iMvbTx.dut MATCH_OUT
 );
 
-    TCAM2 #(
+    logic [MVB_ITEMS-1 : 0] hit;
+    logic [MVB_ITEMS*ITEMS-1 : 0] hit_addr;
+    genvar i;
+
+    generate for (i=0; i < ITEMS; i++) begin
+        assign MATCH_OUT.DATA[i*(ITEMS+1)+ITEMS-1 : i*(ITEMS+1)] = hit_addr[(i+1)*ITEMS-1 : i*ITEMS];
+        assign MATCH_OUT.DATA[i*(ITEMS+1)+ITEMS] = hit[i];
+    end endgenerate
+
+    MVB_TCAM #(
+        .MVB_ITEMS          (MVB_ITEMS),
         .DATA_WIDTH         (DATA_WIDTH),
         .ITEMS              (ITEMS),
         .RESOURCES_SAVING   (RESOURCES_SAVING),
@@ -31,7 +41,7 @@ module DUT (
 
         // clock and reset
         .CLK                (CLK),
-        .RST                (RESET),
+        .RESET              (RESET),
 
         // read interface
         .READ_ADDR          (READ.DATA),
@@ -51,15 +61,19 @@ module DUT (
 
         // match interface
         .MATCH_DATA         (MATCH.DATA),
-        .MATCH_EN           (MATCH.SRC_RDY),
-        .MATCH_RDY          (MATCH.DST_RDY),
+        .MATCH_VLD          (MATCH.VLD),
+        .MATCH_SRC_RDY      (MATCH.SRC_RDY),
+        .MATCH_DST_RDY      (MATCH.DST_RDY),
+
         // match out
-        .MATCH_OUT_HIT      (MATCH_OUT.DATA[ITEMS      ]),
-        .MATCH_OUT_ADDR     (MATCH_OUT.DATA[ITEMS-1 : 0]),
-        .MATCH_OUT_VLD      (MATCH_OUT.SRC_RDY)
+        //.MATCH_OUT_HIT      (MATCH_OUT.DATA[MVB_ITEMS*ITEMS+MVB_ITEMS-1 : MVB_ITEMS*ITEMS]),
+        //.MATCH_OUT_ADDR     (MATCH_OUT.DATA[MVB_ITEMS*ITEMS-1 : 0]),
+        .MATCH_OUT_HIT      (hit),
+        .MATCH_OUT_ADDR     (hit_addr),
+        .MATCH_OUT_VLD      (MATCH_OUT.VLD),
+        .MATCH_OUT_SRC_RDY  (MATCH_OUT.SRC_RDY)
     );
 
     assign READ_OUT.VLD   = 1'b1;
-    assign MATCH_OUT.VLD  = 1'b1;
 
 endmodule

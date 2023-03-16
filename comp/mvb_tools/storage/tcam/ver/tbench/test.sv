@@ -1,6 +1,6 @@
 // test.sv: Automatic test
-// Copyright (C) 2020 CESNET z. s. p. o.
-// Author: Tomas Hak <xhakto01@stud.fit.vutbr.cz>
+// Copyright (C) 2023 CESNET z. s. p. o.
+// Author: Tomas Fukac <fukac@cesnet.cz>
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
@@ -31,12 +31,12 @@ program TEST (
 
     WbDriver  #(DATA_WIDTH, ADDR_WIDTH, USE_FRAGMENTED_MEM) write_driver;
     MvbDriver #(1, ADDR_WIDTH)          read_driver;
-    MvbDriver #(1, DATA_WIDTH)          match_driver;
+    MvbDriver #(MVB_ITEMS, DATA_WIDTH)  match_driver;
 
     MvbResponder #(1, 2*DATA_WIDTH) read_responder;
-    MvbResponder #(1, ITEMS+1)      match_responder;
+    MvbResponder #(MVB_ITEMS, ITEMS+1) match_responder;
     MvbMonitor   #(1, 2*DATA_WIDTH) read_monitor;
-    MvbMonitor   #(1, ITEMS+1)      match_monitor;
+    MvbMonitor   #(MVB_ITEMS, ITEMS+1) match_monitor;
 
     Scoreboard #(DATA_WIDTH, ITEMS, USE_FRAGMENTED_MEM) scoreboard;
 

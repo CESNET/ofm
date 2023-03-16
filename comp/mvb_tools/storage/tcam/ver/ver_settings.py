@@ -1,11 +1,12 @@
 # ver_settings.py
-# Copyright (C) 2020 CESNET z. s. p. o.
-# Author: Tomas Hak <xhakto01@stud.fit.vutbr.cz>
+# Copyright (C) 2023 CESNET z. s. p. o.
+# Author: Tomas Fukac <fukac@cesnet.cz>
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
 SETTINGS = {
     "default" : { # The default setting of verification
+        "MVB_ITEMS"              : "4"                  ,
         "DATA_WIDTH"             : "8"                  ,
         "ITEMS"                  : "64"                 ,
         "RESOURCES_SAVING"       : "0"                  ,
@@ -18,6 +19,12 @@ SETTINGS = {
         "WRITE_COUNT"            : "200"                ,
         "MATCH_COUNT"            : "100000"             ,
         "READ_COUNT"             : "200"                ,
+    },
+    "mvb_items_1" : { #
+        "MVB_ITEMS"              : "1"                  ,
+    },
+    "mvb_items_2" : { #
+        "MVB_ITEMS"              : "2"                  ,
     },
     "16b_data" : { #
         "DATA_WIDTH"             : "16"                 ,
@@ -67,6 +74,8 @@ SETTINGS = {
     ("no_read"          ,),
     #("no_read_regs"     ,),
     ("intel_tcam"       ,),
+    ("mvb_items_1"      ,),
+    ("mvb_items_2"      ,),
 
     # XILINX larger storage
     ("16b_data", "128_storage"                    ,),

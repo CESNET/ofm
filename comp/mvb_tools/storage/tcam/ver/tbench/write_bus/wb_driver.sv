@@ -1,6 +1,6 @@
 // wb_driver.sv: Write Bus interface Driver
-// Copyright (C) 2020 CESNET z. s. p. o.
-// Author: Tomas Hak <xhakto01@stud.fit.vutbr.cz>
+// Copyright (C) 2023 CESNET z. s. p. o.
+// Author: Tomas Fukac <fukac@cesnet.cz>
 //
 // SPDX-License-Identifier: BSD-3-Clause
 

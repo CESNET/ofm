@@ -1,6 +1,6 @@
 // test_pkg.sv: Test package
-// Copyright (C) 2020 CESNET z. s. p. o.
-// Author: Tomas Hak <xhakto01@stud.fit.vutbr.cz>
+// Copyright (C) 2023 CESNET z. s. p. o.
+// Author: Tomas Fukac <fukac@cesnet.cz>
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
@@ -9,6 +9,7 @@ package test_pkg;
     import math_pkg::*;
     import sv_common_pkg::*; // SystemVerilog Boolean
 
+    parameter MVB_ITEMS          = 4;
     parameter DATA_WIDTH         = 8;
     parameter ITEMS              = 64;
     parameter ADDR_WIDTH         = log2(ITEMS);
