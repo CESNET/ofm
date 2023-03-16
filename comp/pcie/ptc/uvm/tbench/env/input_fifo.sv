@@ -102,6 +102,8 @@ endclass
 class model_down_input_fifo_intel#(PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH, DMA_PORTS) extends model_down_input_fifo#(PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH);
     `uvm_component_param_utils(uvm_ptc::model_down_input_fifo_intel#(PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH, DMA_PORTS))
 
+    localparam DMA_PORT_WIDTH = DMA_PORTS > 1 ? $clog2(DMA_PORTS) : 1;
+
     function new(string name, uvm_component parent = null);
         super.new(name, parent);
     endfunction
@@ -117,7 +119,7 @@ class model_down_input_fifo_intel#(PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH, DMA_PO
             meta_in.get(tr_meta);
 
             tr_out = dma_header_rc::type_id::create("tr_out", this);
-            tr_out.port = DMA_PORTS > 1 ? tr_meta.data[(PCIE_DOWNHDR_WIDTH-16)+$clog2(DMA_PORTS)-1 : (PCIE_DOWNHDR_WIDTH-16)] : 0;
+            tr_out.port = DMA_PORTS > 1 ? tr_meta.data[(PCIE_DOWNHDR_WIDTH-16)+DMA_PORT_WIDTH-1 : (PCIE_DOWNHDR_WIDTH-16)] : 0;
             tr_out.length    = tr_meta.data[10-1 :0];
             tr_out.completed = 1'b1;
             tr_out.tag       = tr_meta.data[90-1 : 82];
@@ -131,6 +133,8 @@ endclass
 
 class model_down_input_fifo_xilinx#(PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH, DMA_PORTS) extends model_down_input_fifo#(PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH);
     `uvm_component_param_utils(uvm_ptc::model_down_input_fifo_xilinx#(PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH, DMA_PORTS))
+
+    localparam DMA_PORT_WIDTH = DMA_PORTS > 1 ? $clog2(DMA_PORTS) : 1;
 
     function new(string name, uvm_component parent = null);
         super.new(name, parent);
@@ -150,7 +154,7 @@ class model_down_input_fifo_xilinx#(PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH, DMA_P
             end
 
             tr_out = dma_header_rc::type_id::create("tr_out", this);
-            tr_out.port = DMA_PORTS > 1 ? meta[48+$clog2(DMA_PORTS)-1 : 48] : 0;
+            tr_out.port = DMA_PORTS > 1 ? meta[48+DMA_PORT_WIDTH-1 : 48] : 0;
             tr_out.length    = meta[43-1 : 32];
             tr_out.completed = meta[75];
             tr_out.tag       = meta[72-1 : 64];
