@@ -12,6 +12,9 @@ package uvm_ptc;
     `include "uvm_macros.svh"
     import uvm_pkg::*;
 
+    `include "data.sv"
+    `include "input_fifo.sv"
+
     `include "sequencer.sv"
     `include "model.sv"
     `include "scoreboard.sv"
