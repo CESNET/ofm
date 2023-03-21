@@ -197,7 +197,6 @@ architecture FULL of RX_DMA_CALYPTE is
     -- Debug signals for the RX DMA
     --==============================================================================================
     -- attribute mark_debug : string;
-
     -- attribute mark_debug of USER_RX_MFB_META_HDR_META : signal is "true";
     -- attribute mark_debug of USER_RX_MFB_META_CHAN     : signal is "true";
     -- attribute mark_debug of USER_RX_MFB_META_PKT_SIZE : signal is "true";
@@ -234,11 +233,16 @@ architecture FULL of RX_DMA_CALYPTE is
     -- attribute mark_debug of hdrm_dma_hdr_src_rdy : signal is "true";
     -- attribute mark_debug of hdrm_dma_hdr_dst_rdy : signal is "true";
 
-    -- attribute mark_debug of trbuf_fifo_tx_src_rdy   : signal is "true";
-    -- attribute mark_debug of trbuf_fifo_tx_dst_rdy   : signal is "true";
+    -- attribute mark_debug of trbuf_fifo_tx_data    : signal is "true";
+    -- attribute mark_debug of trbuf_fifo_tx_sof     : signal is "true";
+    -- attribute mark_debug of trbuf_fifo_tx_eof     : signal is "true";
+    -- attribute mark_debug of trbuf_fifo_tx_sof_pos : signal is "true";
+    -- attribute mark_debug of trbuf_fifo_tx_eof_pos : signal is "true";
+    -- attribute mark_debug of trbuf_fifo_tx_src_rdy : signal is "true";
+    -- attribute mark_debug of trbuf_fifo_tx_dst_rdy : signal is "true";
+
     -- attribute mark_debug of mfb_src_rdy_inbuf2trbuf : signal is "true";
     -- attribute mark_debug of mfb_dst_rdy_inbuf2trbuf : signal is "true";
-
     -- attribute mark_debug of stop_req_chan  : signal is "true";
     -- attribute mark_debug of stop_req_vld   : signal is "true";
     -- attribute mark_debug of stop_req_done  : signal is "true";

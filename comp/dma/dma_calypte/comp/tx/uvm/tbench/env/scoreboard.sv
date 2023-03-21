@@ -71,6 +71,8 @@ class compare #(ITEM_WIDTH, USER_META_WIDTH, DEBUG, CHANNELS, CHANNEL_ARBITER_EN
         $swrite(msg, "%s\n\nDATA COMPARISON CHANNEL %d", msg, tr_model_meta.data[$clog2(CHANNELS)+24-1 : 24]);
         $swrite(msg, "%s\n=============================================================================================================================\n", msg);
         $swrite(msg, "%s\n\t Comparison failed at data number %d! \n\tModel data:\n%s\n\tDUT data:\n%s\n", msg, compared, tr_model_mfb.convert2string(), tr_dut_mfb.convert2string());
+        `uvm_info(this.get_full_name(), $sformatf("End of test, initial random seed value: %d (in order to successfuly reproduce the test set set this seed using -sv_seed parameter of vsim in top_level.fdo script)", $get_initial_random_seed()), UVM_NONE);
+
         $swrite(msg, "%s\n=============================================================================================================================\n", msg);
         `uvm_error(this.get_full_name(), msg);
     endtask
@@ -251,6 +253,8 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, DEVICE, USR_ITEM_WIDTH, USER_META_WID
             errors += tr_compare[chan].errors;
             compared += tr_compare[chan].compared;
         end
+
+        `uvm_info(this.get_full_name(), $sformatf("End of test, initial random seed value: %d (in order to successfuly reproduce the test set set this seed using -sv_seed parameter of vsim in top_level.fdo script)", $get_initial_random_seed()), UVM_NONE);
 
         if (errors == 0 && this.used() == 0) begin
             string msg = "";

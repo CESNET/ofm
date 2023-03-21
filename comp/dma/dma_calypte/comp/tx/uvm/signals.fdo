@@ -12,7 +12,7 @@ proc pcie_hdr_deparse {PATH GRP} {
     add_wave "-noupdate -group \"$GRP\" -group \"PCIE HDR FIELDS\" -label \"bar_aperture\" -unsigned" ${PATH}(120\ downto\ 115)
 }
 
-proc dma_hdr_deparse {PATH GRP {OFFSET 64}} {
+proc dma_hdr_deparse {PATH GRP {OFFSET 128}} {
     add_wave "-noupdate -group \"$GRP\" -group \"DMA HDR FIELDS\" -label \"frame_length\" -unsigned" ${PATH}([expr 15 + $OFFSET]\ downto\ $OFFSET)
     add_wave "-noupdate -group \"$GRP\" -group \"DMA HDR FIELDS\" -label \"user_metadata\" -hex" ${PATH}([expr 63 + $OFFSET]\ downto\ [expr 40 + $OFFSET])
 }
@@ -116,8 +116,9 @@ proc internals {PATH CHANNELS} {
     add wave -noupdate -group "INTERNALS" -divider "CHANNEL_SPLITTER_outputs"
 
     for {set i 0} {$i < $CHANNELS} {incr i} {
-        add_wave "-noupdate -group \"INTERNALS\" -group \"Channel_splitter_out ($i)\" -unsigned" $PATH/chan_split_mfb_meta_seg_size($i)
         add_wave "-noupdate -group \"INTERNALS\" -group \"Channel_splitter_out ($i)\" -bin" $PATH/chan_split_mfb_meta_is_dma_hdr($i)
+        add_wave "-noupdate -group \"INTERNALS\" -group \"Channel_splitter_out ($i)\" -bin" $PATH/chan_split_mfb_meta_fbe($i)
+        add_wave "-noupdate -group \"INTERNALS\" -group \"Channel_splitter_out ($i)\" -bin" $PATH/chan_split_mfb_meta_lbe($i)
         add_wave "-noupdate -group \"INTERNALS\" -group \"Channel_splitter_out ($i)\"" $PATH/chan_split_mfb_data($i)
         add_wave "-noupdate -group \"INTERNALS\" -group \"Channel_splitter_out ($i)\" -bin" $PATH/chan_split_mfb_sof($i)
         add_wave "-noupdate -group \"INTERNALS\" -group \"Channel_splitter_out ($i)\" -bin" $PATH/chan_split_mfb_eof($i)
@@ -134,7 +135,8 @@ proc top_input {PATH} {
 
     add wave -noupdate -divider "PCIE_CQ_INPUTS"
     add_wave "-noupdate" $PATH/PCIE_CQ_MFB_DATA
-    add_wave "-noupdate" $PATH/PCIE_CQ_MFB_META
+    add_wave "-noupdate -label \"PCIE_CQ_MFB_FBE\" -bin" $PATH/PCIE_CQ_MFB_META(166\ downto\ 163)
+    add_wave "-noupdate -label \"PCIE_CQ_MFB_LBE\" -bin" $PATH/PCIE_CQ_MFB_META(170\ downto\ 167)
     add_wave "-noupdate -bin" $PATH/PCIE_CQ_MFB_SOF
     add_wave "-noupdate -bin" $PATH/PCIE_CQ_MFB_EOF
     add_wave "-noupdate -bin" $PATH/PCIE_CQ_MFB_SOF_POS
@@ -168,8 +170,9 @@ proc channel_cores {PATH CHANNELS} {
         add wave -noupdate -group "CHANNEL_CORE ($i)" -divider "Inputs"
         pcie_hdr_deparse $PATH/channel_core_g($i)/channel_core_i/PCIE_MFB_DATA "CHANNEL_CORE ($i)"
         dma_hdr_deparse $PATH/channel_core_g($i)/channel_core_i/PCIE_MFB_DATA "CHANNEL_CORE ($i)"
-        add_wave "-noupdate -group \"CHANNEL_CORE ($i)\" -unsigned" $PATH/channel_core_g($i)/channel_core_i/PCIE_MFB_META_SEG_SIZE
         add_wave "-noupdate -group \"CHANNEL_CORE ($i)\" -bin" $PATH/channel_core_g($i)/channel_core_i/PCIE_MFB_META_IS_DMA_HDR
+        add_wave "-noupdate -group \"CHANNEL_CORE ($i)\" -bin" $PATH/channel_core_g($i)/channel_core_i/PCIE_MFB_META_FBE
+        add_wave "-noupdate -group \"CHANNEL_CORE ($i)\" -bin" $PATH/channel_core_g($i)/channel_core_i/PCIE_MFB_META_LBE
         add_wave "-noupdate -group \"CHANNEL_CORE ($i)\"" $PATH/channel_core_g($i)/channel_core_i/PCIE_MFB_DATA
         add_wave "-noupdate -group \"CHANNEL_CORE ($i)\" -bin" $PATH/channel_core_g($i)/channel_core_i/PCIE_MFB_SOF
         add_wave "-noupdate -group \"CHANNEL_CORE ($i)\" -bin" $PATH/channel_core_g($i)/channel_core_i/PCIE_MFB_EOF
@@ -218,7 +221,8 @@ proc channel_cores {PATH CHANNELS} {
         add wave -noupdate -group "CHANNEL_CORE ($i)" -divider "MFB_Dropper"
         add_wave "-noupdate -group \"CHANNEL_CORE ($i)\" -bin" $PATH/channel_core_g($i)/channel_core_i/pkt_drop_en
         add_wave "-noupdate -group \"CHANNEL_CORE ($i)\"" $PATH/channel_core_g($i)/channel_core_i/pkt_acc_mfb_data
-        add_wave "-noupdate -group \"CHANNEL_CORE ($i)\" -label \"pkt_acc_mfb_seg_size\" -unsigned" $PATH/channel_core_g($i)/channel_core_i/pkt_acc_mfb_meta(13\ downto\ 1)
+        add_wave "-noupdate -group \"CHANNEL_CORE ($i)\" -label \"pkt_acc_mfb_meta_pcie_fbe\" -bin" $PATH/channel_core_g($i)/channel_core_i/pkt_acc_mfb_meta(4\ downto\ 1)
+        add_wave "-noupdate -group \"CHANNEL_CORE ($i)\" -label \"pkt_acc_mfb_meta_pcie_lbe\" -bin" $PATH/channel_core_g($i)/channel_core_i/pkt_acc_mfb_meta(8\ downto\ 5)
         add_wave "-noupdate -group \"CHANNEL_CORE ($i)\" -label \"pkt_acc_mfb_is_dma_hdr\"" $PATH/channel_core_g($i)/channel_core_i/pkt_acc_mfb_meta(0)
         add_wave "-noupdate -group \"CHANNEL_CORE ($i)\" -bin" $PATH/channel_core_g($i)/channel_core_i/pkt_acc_mfb_sof
         add_wave "-noupdate -group \"CHANNEL_CORE ($i)\" -bin" $PATH/channel_core_g($i)/channel_core_i/pkt_acc_mfb_eof
@@ -229,7 +233,8 @@ proc channel_cores {PATH CHANNELS} {
 
         add wave -noupdate -group "CHANNEL_CORE ($i)" -divider "MFB_Cutter"
         add_wave "-noupdate -group \"CHANNEL_CORE ($i)\"" $PATH/channel_core_g($i)/channel_core_i/cutt_mfb_data
-        add_wave "-noupdate -group \"CHANNEL_CORE ($i)\" -label \"cutt_mfb_seg_size\" -unsigned" $PATH/channel_core_g($i)/channel_core_i/cutt_mfb_meta(13\ downto\ 1)
+        add_wave "-noupdate -group \"CHANNEL_CORE ($i)\" -label \"cutt_mfb_meta_pcie_fbe\" -bin" $PATH/channel_core_g($i)/channel_core_i/cutt_mfb_meta(4\ downto\ 1)
+        add_wave "-noupdate -group \"CHANNEL_CORE ($i)\" -label \"cutt_mfb_meta_pcie_lbe\" -bin" $PATH/channel_core_g($i)/channel_core_i/cutt_mfb_meta(8\ downto\ 5)
         add_wave "-noupdate -group \"CHANNEL_CORE ($i)\" -label \"cutt_mfb_is_dma_hdr\"" $PATH/channel_core_g($i)/channel_core_i/cutt_mfb_meta(0)
         add_wave "-noupdate -group \"CHANNEL_CORE ($i)\" -bin" $PATH/channel_core_g($i)/channel_core_i/cutt_mfb_sof
         add_wave "-noupdate -group \"CHANNEL_CORE ($i)\" -bin" $PATH/channel_core_g($i)/channel_core_i/cutt_mfb_eof
@@ -242,10 +247,16 @@ proc channel_cores {PATH CHANNELS} {
         add_wave "-noupdate -group \"CHANNEL_CORE ($i)\" -unsigned" $PATH/channel_core_g($i)/channel_core_i/align_ctl_pst
         add_wave "-noupdate -group \"CHANNEL_CORE ($i)\" -unsigned" $PATH/channel_core_g($i)/channel_core_i/align_ctl_nst
         add_wave "-noupdate -group \"CHANNEL_CORE ($i)\" -unsigned" $PATH/channel_core_g($i)/channel_core_i/align_block
+        add_wave "-noupdate -group \"CHANNEL_CORE ($i)\" -bin" $PATH/channel_core_g($i)/channel_core_i/cutt_pcie_fbe_pst
+        add_wave "-noupdate -group \"CHANNEL_CORE ($i)\" -bin" $PATH/channel_core_g($i)/channel_core_i/cutt_pcie_lbe_pst
+        add_wave "-noupdate -group \"CHANNEL_CORE ($i)\" -bin" $PATH/channel_core_g($i)/channel_core_i/cutt_pcie_fbe_nst
+        add_wave "-noupdate -group \"CHANNEL_CORE ($i)\" -bin" $PATH/channel_core_g($i)/channel_core_i/cutt_pcie_lbe_nst
+        add_wave "-noupdate -group \"CHANNEL_CORE ($i)\" -bin" $PATH/channel_core_g($i)/channel_core_i/cutt_mfb_byte_eof_pos
 
         add wave -noupdate -group "CHANNEL_CORE ($i)" -divider "MFB_Aligner_outputs"
         add_wave "-noupdate -group \"CHANNEL_CORE ($i)\"" $PATH/channel_core_g($i)/channel_core_i/align_mfb_data
-        add_wave "-noupdate -group \"CHANNEL_CORE ($i)\" -label \"align_mfb_seg_size\" -unsigned" $PATH/channel_core_g($i)/channel_core_i/align_mfb_meta(13\ downto\ 1)
+        add_wave "-noupdate -group \"CHANNEL_CORE ($i)\" -label \"align_mfb_meta_pcie_fbe\" -bin" $PATH/channel_core_g($i)/channel_core_i/align_mfb_meta(4\ downto\ 1)
+        add_wave "-noupdate -group \"CHANNEL_CORE ($i)\" -label \"align_mfb_meta_pcie_lbe\" -bin" $PATH/channel_core_g($i)/channel_core_i/align_mfb_meta(8\ downto\ 5)
         add_wave "-noupdate -group \"CHANNEL_CORE ($i)\" -label \"align_mfb_is_dma_hdr\"" $PATH/channel_core_g($i)/channel_core_i/align_mfb_meta(0)
         add_wave "-noupdate -group \"CHANNEL_CORE ($i)\" -bin" $PATH/channel_core_g($i)/channel_core_i/align_mfb_sof
         add_wave "-noupdate -group \"CHANNEL_CORE ($i)\" -bin" $PATH/channel_core_g($i)/channel_core_i/align_mfb_eof
@@ -335,8 +346,9 @@ proc channel_splitter {PATH CHANNELS} {
 
     add wave -noupdate -group "CHANNEL_SPLITTER" -divider "Outputs"
     for {set i 0} {$i < $CHANNELS} {incr i} {
-        add_wave "-noupdate -group \"CHANNEL_SPLITTER\" -group \"USR OUTPUT ($i)\" -unsigned" $PATH/USR_MFB_META_BYTE_COUNT($i)
         add_wave "-noupdate -group \"CHANNEL_SPLITTER\" -group \"USR OUTPUT ($i)\"" $PATH/USR_MFB_META_IS_DMA_HDR($i)
+        add_wave "-noupdate -group \"CHANNEL_SPLITTER\" -group \"USR OUTPUT ($i)\" -bin" $PATH/USR_MFB_META_FBE($i)
+        add_wave "-noupdate -group \"CHANNEL_SPLITTER\" -group \"USR OUTPUT ($i)\" -bin" $PATH/USR_MFB_META_LBE($i)
         add_wave "-noupdate -group \"CHANNEL_SPLITTER\" -group \"USR OUTPUT ($i)\"" $PATH/USR_MFB_DATA($i)
         add_wave "-noupdate -group \"CHANNEL_SPLITTER\" -group \"USR OUTPUT ($i)\" -bin" $PATH/USR_MFB_SOF($i)
         add_wave "-noupdate -group \"CHANNEL_SPLITTER\" -group \"USR OUTPUT ($i)\" -bin" $PATH/USR_MFB_EOF($i)
@@ -348,7 +360,6 @@ proc channel_splitter {PATH CHANNELS} {
 
     add wave -noupdate -group "CHANNEL_SPLITTER" -divider "PCIe_header_fields"
     add_wave "-noupdate -group \"CHANNEL_SPLITTER\"" $PATH/pcie_hdr_addr
-    add_wave "-noupdate -group \"CHANNEL_SPLITTER\" -unsigned" $PATH/pcie_hdr_dw_cnt
     add_wave "-noupdate -group \"CHANNEL_SPLITTER\" -bin" $PATH/pcie_hdr_bar_id
     add_wave "-noupdate -group \"CHANNEL_SPLITTER\" -unsigned" $PATH/pcie_hdr_bar_aperture
     add_wave "-noupdate -group \"CHANNEL_SPLITTER\" -bin" $PATH/pcie_hdr_fbe
@@ -357,7 +368,6 @@ proc channel_splitter {PATH CHANNELS} {
     add wave -noupdate -group "CHANNEL_SPLITTER" -divider "PCIe_header_reformat"
     add_wave "-noupdate -group \"CHANNEL_SPLITTER\" -bin" $PATH/pcie_addr_mask
     add_wave "-noupdate -group \"CHANNEL_SPLITTER\"" $PATH/pcie_addr_masked
-    add_wave "-noupdate -group \"CHANNEL_SPLITTER\" -unsigned" $PATH/pcie_byte_count
 
     add wave -noupdate -group "CHANNEL_SPLITTER" -divider "MFB_Splitter_control"
     add_wave "-noupdate -group \"CHANNEL_SPLITTER\" -bin" $PATH/split_sel

@@ -331,6 +331,8 @@ architecture FULL of MTC is
     signal mfb_eof_pos_arr           : slv_array_t(MFB_REGIONS-1 downto 0)(log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE)-1 downto 0);
     signal mfb_meta_arr              : slv_array_t(MFB_REGIONS-1 downto 0)(PCIE_CC_META_WIDTH-1 downto 0) := (others => (others => '0'));
 
+    -- attribute mark_debug               : string;
+    -- attribute mark_debug of cc_fsm_pst : signal is "true";
 begin
 
     assert (DEVICE = "STRATIX10" OR DEVICE = "AGILEX" OR DEVICE = "ULTRASCALE" OR DEVICE = "7SERIES")

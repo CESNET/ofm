@@ -10,6 +10,10 @@ proc dts_dma_calypte_ctrl {dir id base pcie} {
     append ret "reg = <$base 0x80>;"
     append ret "version = <0x00010000>;"
     append ret "pcie = <$pcie>;"
+    if { $dir == "tx" } {
+        append ret "data_buff = <&dma_calypte_tx_data_buff$id>;"
+        append ret "hdr_buff = <&dma_calypte_tx_hdr_buff$id>;"
+    }
     append ret "};"
     return $ret
 }
