@@ -33,8 +33,8 @@ nb_sim_run
 
 # Reports
 if {$SIM_FLAGS(CODE_COVERAGE)} {
-    coverage save -instance /testbench/DUT -assert -directive -cvg -code bcefst -verbose actual.ucdb
-    vcover report -html -output cov_html -details -threshL 50 -threshH 90 actual.ucdb
+    coverage save -instance /testbench/DUT_U -assert -directive -cvg -code bcefst -verbose actual.ucdb
+    vcover merge final.ucdb final.ucdb actual.ucdb
 }
 
 quit
