@@ -201,15 +201,15 @@ architecture FULL of RX_DMA_HDR_MANAGER is
     -- signals for generating pcie header for data
     --==============================================================================================
     -- determines if the PCIe header is the size of 3 or 4 DWs
-    signal pcie_hdr_data_size             : std_logic;
-    signal pcie_hdr_data_hdr              : std_logic_vector(128-1 downto 0);
+    signal pcie_hdr_len_data_trans        : std_logic;
+    signal pcie_hdr_data_trans            : std_logic_vector(128-1 downto 0);
     --==============================================================================================
 
     --==============================================================================================
     -- signals containing generated pcie header for dma
     --==============================================================================================
     -- determines if the PCIe header is the size of 3 or 4 DWs
-    signal pcie_hdr_dma_size             : std_logic;
+    signal pcie_hdr_len_dma_trans        : std_logic;
     signal pcie_hdr_dma_hdr              : std_logic_vector(128-1 downto 0);
     --==============================================================================================
 
@@ -433,22 +433,25 @@ begin
     -- PCIE HDR OUTPUT FIFO
     --=====================================================================
     --DMA
-    pcie_hdr_dma_gen_i : entity work.pcie_hdr_gen
+    pcie_hdr_gen_dma_i : entity work.PCIE_RQ_HDR_GEN
         generic map (
-            DEVICE => DEVICE
-        )
+            DEVICE => DEVICE)
         port map (
-            ADDR           => dma_hdr_addr,
-            DWORD_COUNT    => std_logic_vector(to_unsigned(8/4, 11)),
-            TAG            => X"00",
+            IN_ADDRESS    => dma_hdr_addr(63 downto 2),
+            IN_VFID       => (others => '0'),
+            IN_TAG        => (others => '0'),
+            IN_DW_CNT     => std_logic_vector(to_unsigned(8/4, 11)),
+            IN_ATTRIBUTES => "000",
+            IN_FBE        => "1111",
+            IN_LBE        => "1111",
+            IN_ADDR_LEN   => pcie_hdr_len_dma_trans,
+            IN_REQ_TYPE   => '1',       -- only memory writes
 
-            PCIE_HDR      => pcie_hdr_dma_hdr,
-            PCIE_HDR_SIZE => pcie_hdr_dma_size
-            );
+            OUT_HEADER    => pcie_hdr_dma_hdr);
 
-
-    pcie_hdr_dma_fifo_in              <= pcie_hdr_dma_size & pcie_hdr_dma_hdr;
-    pcie_hdr_dma_fifo_wr              <= dma_hdr_addr_vld;
+    pcie_hdr_len_dma_trans <= '1' when (DEVICE = "ULTRASCALE" or dma_hdr_addr(64-1 downto 32) /= (32-1 downto 0 => '0')) else '0';
+    pcie_hdr_dma_fifo_in <= pcie_hdr_len_dma_trans & pcie_hdr_dma_hdr;
+    pcie_hdr_dma_fifo_wr <= dma_hdr_addr_vld;
 
     pcie_hdr_dma_fifo_i : entity work.fifox
         generic map (
@@ -471,23 +474,26 @@ begin
             );
 
     -- DATA
-    pcie_hdr_data_gen_i : entity work.pcie_hdr_gen
+    pcie_hdr_gen_data_i : entity work.PCIE_RQ_HDR_GEN
         generic map (
-            DEVICE => DEVICE
-        )
+            DEVICE => DEVICE)
         port map (
-            ADDR           => data_hdr_addr,
-            DWORD_COUNT    => std_logic_vector(to_unsigned(128/4, 11)),
-            TAG            => X"00",
+            IN_ADDRESS    => data_hdr_addr(63 downto 2),
+            IN_VFID       => (others => '0'),
+            IN_TAG        => (others => '0'),
+            IN_DW_CNT     => std_logic_vector(to_unsigned(128/4, 11)),
+            IN_ATTRIBUTES => "000",
+            IN_FBE        => "1111",
+            IN_LBE        => "1111",
+            IN_ADDR_LEN   => pcie_hdr_len_data_trans,
+            IN_REQ_TYPE   => '1',       -- only memory writes
 
-            PCIE_HDR      => pcie_hdr_data_hdr,
-            PCIE_HDR_SIZE => pcie_hdr_data_size
-            );
+            OUT_HEADER    => pcie_hdr_data_trans);
 
-    pcie_hdr_data_fifo_in <= data_packet_end -- set if packet end with this header
-                             & pcie_hdr_data_size     -- pcie header size
-                             & pcie_hdr_data_hdr;     ---pcie header
-
+    pcie_hdr_len_data_trans <= '1' when (DEVICE = "ULTRASCALE" or data_hdr_addr(64-1 downto 32) /= (32-1 downto 0 => '0')) else '0';
+    pcie_hdr_data_fifo_in   <= data_packet_end -- set if packet end with this header
+                             & pcie_hdr_len_data_trans
+                             & pcie_hdr_data_trans;
     pcie_hdr_data_fifo_wr <= data_hdr_addr_vld;
 
 

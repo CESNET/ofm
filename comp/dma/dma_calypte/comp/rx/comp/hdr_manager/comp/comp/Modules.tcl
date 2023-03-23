@@ -7,4 +7,3 @@
 
 
 lappend MOD "$ENTITY_BASE/addr_manager.vhd"
-lappend MOD "$ENTITY_BASE/pcie_hdr_gen.vhd"
