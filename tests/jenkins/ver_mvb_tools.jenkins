@@ -43,6 +43,8 @@ def COMPONENTS_MULTIVER = [\
     ['LAST_VLD'          , 'comp/mvb_tools/aggregate/last_vld/ver'            , 'top_level.fdo'      , 'tbench/test_pkg.sv'  , 'ver_settings.py'       ],\
     ['UVM_MVB_LUT'       , 'comp/mvb_tools/storage/lookup_table/uvm'          , 'top_level.fdo'      , 'tbench/tests/pkg.sv' , 'ver_settings.py'       ],\
     ['TCAM'              , 'comp/mvb_tools/storage/tcam/ver'                  , 'top_level.fdo'      , 'tbench/test_pkg.sv'  , 'ver_settings.py'       ],\
+    ['GEN_DEMUX',        , 'comp/mvb_tools/flow/demux/uvm'                    , 'top_level.fdo'      , 'tbench/tests/pkg.sv' , 'ver_settings.py'       ],\
+    ['GEN_MUX',          , 'comp/mvb_tools/flow/mux/uvm'                      , 'top_level.fdo'      , 'tbench/tests/pkg.sv' , 'ver_settings.py'       ],\
 ]
 // /////////////////////////////////////////////////////////////////////////////
 
