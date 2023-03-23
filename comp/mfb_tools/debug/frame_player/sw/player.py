@@ -9,14 +9,14 @@ import pdb
 import sys
 import math
 import pickle
-
+import nfb
 
 # Implementation of dummy handlers for reading/writing of MI32 transactions.
 # These handlers are not required and are used for testing purposes only. 
 # The real implementation should call the csbus or appropriate tool. 
 # Notice that real handles has to match with the provided prototypes.
 memory = None
-mfb    = None
+mfb    = {"WORD": {},"VLD" : 0, "SOF_POS" : 0, "EOF_POS" : 0}
 
 def write32(addr,data):
     """
@@ -29,14 +29,16 @@ def write32(addr,data):
     """
     global memory
     global mfb
-    #print("Data write: 0x%05X ==> 0x%02X" % (addr,data)) 
+    print("Data write: 0x%05X ==> 0x%02X" % (addr,data)) 
     if addr >= PlayerConfigurator.DATA_OFFSET:
         # We are writting data, append them into the list of MI32 transactions
         mfb["WORD"][addr] = data
+        print("Write DATA")
     elif addr == PlayerConfigurator.VLD_OFFSET:
         # Writting of VLD signals --> in this case, check the LSB bit, append it into the memory
         # and reset the mfb dictionary
         mfb["VLD"] = data
+        print("Write VLD")
         if (data & 0x1):
             # Write data and reset the structure
             memory.append(mfb)
@@ -44,14 +46,16 @@ def write32(addr,data):
     elif addr == PlayerConfigurator.SOF_POS_OFFSET:
         # Writting of shared sof_pos
         mfb["SOF_POS"] = data
+        print("Write SOF_POS")
     elif addr == PlayerConfigurator.EOF_POS_OFFSET:
         # Writtig of shared eof_pos
         mfb["EOF_POS"] = data
+        print("Write EOF_POS")
     elif addr == PlayerConfigurator.CTRL_OFFSET:
         if data == PlayerConfigurator.CMD_STORE_DIS:
-            f = file("memory.pickle","w")
-            pickle.dump(memory,f)
-            f.close()
+            #f = open("memory.pickle","w")
+            #pickle.dump(str(memory),f)
+            #f.close()
             print("All data were written into memory")
         elif data == PlayerConfigurator.CMD_STORE_EN:
             # Output dictionary with mapping data (this contains the representation of 
@@ -129,9 +133,13 @@ class PlayerConfigurator(object):
             raise ValueError("Miminal allowed item_width is 8 bits and the size should be a multiple of 2!")
         # Compute the number of 32 bit transactions
         self.mi32_transactions = int(math.ceil(float(regions*region_size*block_size*item_width)/32.0))
+        #print("MI words per MFB word " + str(self.mi32_transactions))
         # Compute the width of one SOF element on shared bus
         self.sof_elem_width = int(math.ceil(max(1,math.log(region_size,2))))
         self.eof_elem_width = int(math.ceil(max(1,math.log(region_size*block_size,2))))
+        #print("SOF_POS width " + str(self.sof_elem_width))
+        #print("EOF_POS width " + str(self.eof_elem_width))
+        self.words_cnt = 0
    
     def configure(self,repeate_en=False):
         """
@@ -175,7 +183,7 @@ class PlayerConfigurator(object):
         # Helping variables
         fifo_ptr      = 0
         pkt_cnt       = 0
-        eop_generated = False
+        mfb_blk = 0
         while True:
             # Check if we have any packets to send
             if not len(packets):
@@ -186,31 +194,39 @@ class PlayerConfigurator(object):
             # Convert to packet to the serioes of numbers which are than splitted into chunks. The conversion
             # produces a list of numbers from 0-255
             packet = packets.pop()
-            print("Converting the packet number %d." % (pkt_cnt));
+            print("Converting the packet number %d." % (pkt_cnt))
             pkt_cnt += 1
-            content = map(ord,str(packet))
+            #content = map(ord,bytes(packet))
+            content = bytes(packet)
             # Now we need to split a frame into blocks. Therefore, we need to create an n-tuples where 
             # n is the number of items in one block
-            block_elements= self.block_size * self.item_width/8 
+            block_elements = self.block_size * self.item_width/8
+            # print(block_elements)
             block_list = self._split(content,block_elements)
             # Check if we have a place in the FIFO
             mfb_words_req = math.ceil(float(len(block_list))/self.region_size)
+            print("mfb_words_req: " + str(mfb_words_req))
             if fifo_ptr+mfb_words_req > self.fifo_depth:
+                print("fifo_ptr: " + str(fifo_ptr))
+                print("fifo_depth: " + str(self.fifo_depth))
                 # Finish frame sending (if it wasn't already finished)
                 self._send_mfb_word(mfb)
                 print("There isn't space for a next packet in the FIFO memory.")
                 break
             # Insert segments into the MFB word
+            segment = 0
+            # print(len(block_list))
             for block in block_list:
+                #print("PKT block " + str(segment))
+                #print("MFB block " + str(mfb_blk))
                 # First and last signalization
-                first = True if block == block_list[0] else False
-                last  = True if block == block_list[-1] else False
+                first = True if segment == 0 else False
+                last  = True if segment == (len(block_list)-1) else False
                 # Check if the MFB word is completed. The MFB is considered to be completed iff:
                 #   * 1) All regions and slots are filled 
                 #   * 2) All regions are filled and start of new frame is detected. In such situation we
                 #        need to fill the remaining place with zeros.
-                if ((reg+1) == self.regions and len(mfb["WORD"][-1]) == self.region_size) or \
-                   ((reg+1) == self.regions and (first and eop_generated)) :
+                if ((reg+1) == self.regions and len(mfb["WORD"][-1]) == self.region_size) or ((reg+1) == self.regions and (first and mfb["SOF"][reg])) :
                     # Fill the remaining place with zeros
                     self._fill_mfb_word(mfb,block_elements)
                     # Send prepared data and restart the MFB structures
@@ -220,27 +236,35 @@ class PlayerConfigurator(object):
                     # Restart the MFB stuff
                     mfb = self._reset_mfb_struct()
                     reg = 0
-                    eop_generated = False
+                    mfb_blk = 0
+                    # print("MFB word completed")
                 # Update the region counter because we need to fill the next
                 # region. The counter is update if the end of the reqion was
                 # detected or one beginning is already presented.
                 if len(mfb["WORD"][reg]) == self.region_size or (mfb["SOF"][reg] and first):
                     reg += 1
+                    mfb_blk = 0
+                    # print("MFB new region")
                 # Add blocks into the MFB region and also deal with the sop/eop signalization
                 if first:
                     # Remember the start block 
+                    #print("MFB block SOF")
                     mfb["SOF"][reg] = True
                     mfb["SOF_POS"][reg] = len(mfb["WORD"][reg])
                 if last:
                     # Remember the last item. The block element is built from 
                     # independet items.
+                    #print("MFB block EOF")
                     mfb["EOF"][reg] = True 
                     eop_pos = len(mfb["WORD"][reg])*self.block_size + len(block)-1
                     mfb["EOF_POS"][reg] = eop_pos
-                    eop_generated = True
                 # Append the data block extend the data before appending
                 self._fill_zeros(block,block_elements) 
                 mfb["WORD"][reg].append(block)
+                segment += 1
+                mfb_blk += 1
+                #print("MFB block done")
+            print(self.words_cnt)
 
     def _send_mfb_word(self,mfb):
         """
@@ -252,6 +276,7 @@ class PlayerConfigurator(object):
         # Take blocks and divede them into 32 bit transactions.
         # First of all, we serialize all the bits into one long vector because long integer
         # in Python has unlimited precission. All elements are appended in reversed order.
+        # print(mfb)
         mfb_bus = 0
         for region in mfb["WORD"][::-1]:
             # Inverse the block list
@@ -265,8 +290,8 @@ class PlayerConfigurator(object):
         for i in range(0,self.mi32_transactions):
             # Generate the write transaction
             data = mfb_bus & 0xFFFFFFFF
-            self.writeh(self.base+data_offset,long(data))
-            data_offset  += 0x4
+            self.writeh(self.base+data_offset,int(data))
+            # data_offset  += 0x4
             # Shift the data
             mfb_bus = mfb_bus >> 32
         # Write informations about {SOF,EOF}_POS to achieve it, find the start index
@@ -290,12 +315,13 @@ class PlayerConfigurator(object):
                 sof_pos = sof_pos << self.sof_elem_width
                 eof_pos = eof_pos << self.eof_elem_width
         # Write the SOF and EOF positions
-        self.writeh(self.base+self.SOF_POS_OFFSET, long(sof_pos))
-        self.writeh(self.base+self.EOF_POS_OFFSET, long(eof_pos))
+        self.writeh(self.base+self.SOF_POS_OFFSET, int(sof_pos))
+        self.writeh(self.base+self.EOF_POS_OFFSET, int(eof_pos))
 
         # Prepare the valid signals | SOF_VEC (REGIONS) | EOF_VEC (REGIONS | VLD (1b) |
         vld_sig = (sof << (self.regions+1)) | (eof << 1) | 0x1
-        self.writeh(self.base+self.VLD_OFFSET,long(vld_sig))
+        self.writeh(self.base+self.VLD_OFFSET,int(vld_sig))
+        self.words_cnt += 1
  
     def _split(self,data,n):
         """
@@ -306,7 +332,10 @@ class PlayerConfigurator(object):
             - data - data to split (it is typically a list)
             - n  - legth of the stride
         """
-        return [list(data[i:i+n]) for i in range(0,len(data),n)]
+        #print(len(list(data)))
+        #print(int(n))
+        data_list = list(data)
+        return [data_list[i:i+int(n)] for i in range(0,len(data_list),int(n))]
 
     def _fill_zeros(self,data,n):
         """
@@ -320,7 +349,7 @@ class PlayerConfigurator(object):
         """
         if len(data) < n:
             # We need to fill data
-            data.extend([0] * (n-len(data)))
+            data.extend([0] * (int(n)-len(data)))
     
     def _fill_mfb_word(self,mfb,n):
         """
@@ -337,16 +366,20 @@ class PlayerConfigurator(object):
                 self._fill_zeros(region[-1],n)
             if len(region) < self.region_size:
                 # We need to add more regions 
-                region.extend([[0] * n] * (self.region_size - len(region)))
+                region.extend([[0] * int(n)] * (self.region_size - len(region)))
 
 
 # Main starting function for a simulatino purposes
 def main():
     # TODO: Implement the parameter parsing using the optparse (https://docs.python.org/2/library/optparse.html)
     # Create the instance of player configurator and run the generator
+
+    dev = nfb.open()
+    comp = dev.comp_open("netcope,bus,mi", 0) # cesnet,ofm,gen_loop_switch
+
     try:
-        player_config = PlayerConfigurator(4,8,8,8,512,write32,read32,"../../tests/frame_sw_tests/test_pcaps/6frames64B.pcap",0x0)
-        player_config.configure()
+        player_config = PlayerConfigurator(4,8,8,8,2**15,comp.write32,comp.read32,"./pcaps/pkts512-1024.pcap",0x51c0)
+        player_config.configure(True)
         # Pickle the memory structure. It will be used in the second reader script. The stored data format
         # should match with the frame_reader format.
     except IOError as e:
