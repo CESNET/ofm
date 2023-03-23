@@ -59,6 +59,8 @@ architecture FULL of MFB_FRAME_PLAYER is
       src_rdy : std_logic;
    end record;
 
+   signal cnt : unsigned(log2(MI_DATA_ITEMS)-1 downto 0);
+
    signal s_mi2fifo                 : mfb_bus_t;
    signal s_fifo_in                 : mfb_bus_t;
    signal s_fifo_out                : mfb_bus_t;
@@ -81,8 +83,8 @@ architecture FULL of MFB_FRAME_PLAYER is
    signal s_mi2fifo_eof_pos_reg_we  : std_logic;
    signal s_mi2fifo_eof_pos_reg_sel : std_logic;
 
-   signal s_mi2fifo_data_reg_we     : std_logic_vector(MI_DATA_ITEMS-1 downto 0);
-   signal s_mi2fifo_data_reg_sel    : std_logic_vector(MI_DATA_ITEMS-1 downto 0);
+   signal s_mi2fifo_data_reg_we     : std_logic;
+   signal s_mi2fifo_data_reg_sel    : std_logic;
 
    signal s_sreg                    : std_logic_vector(31 downto 0);
 
@@ -107,10 +109,10 @@ begin
    MI_ARDY <= MI_RD or MI_WR;
 
    -- register select signals
-   s_creg_sel <= '1' when (MI_ADDR(9 downto 2) = X"01") else '0';
-   s_mi2fifo_vld_reg_sel     <= '1' when (MI_ADDR(9 downto 2) = X"02") else '0';
-   s_mi2fifo_sof_pos_reg_sel <= '1' when (MI_ADDR(9 downto 2) = X"03") else '0';
-   s_mi2fifo_eof_pos_reg_sel <= '1' when (MI_ADDR(9 downto 2) = X"04") else '0';
+   s_creg_sel <= '1' when (MI_ADDR(4 downto 0) = "00100") else '0';
+   s_mi2fifo_vld_reg_sel     <= '1' when (MI_ADDR(4 downto 0) = "01000") else '0';
+   s_mi2fifo_sof_pos_reg_sel <= '1' when (MI_ADDR(4 downto 0) = "01100") else '0';
+   s_mi2fifo_eof_pos_reg_sel <= '1' when (MI_ADDR(4 downto 0) = "10000") else '0';
 
    -- register write enable signals
    s_creg_we <= s_creg_sel and MI_WR;
@@ -119,21 +121,33 @@ begin
    s_mi2fifo_eof_pos_reg_we <= s_mi2fifo_eof_pos_reg_sel and MI_WR;
 
    -- mi2fifo data register select and write enable signals
-   s_mi2fifo_data_reg_sel_g : for i in 0 to MI_DATA_ITEMS-1 generate
-      s_mi2fifo_data_reg_sel(i) <= '1' when (unsigned(MI_ADDR(9 downto 2)) = to_unsigned((i+5),8)) else '0';
-      s_mi2fifo_data_reg_we(i) <= s_mi2fifo_data_reg_sel(i) and MI_WR;
-   end generate;
+   -- s_mi2fifo_data_reg_sel_g : for i in 0 to MI_DATA_ITEMS-1 generate
+      s_mi2fifo_data_reg_sel <= '1' when (MI_ADDR(4 downto 0) = "10100") else '0';
+      s_mi2fifo_data_reg_we <= s_mi2fifo_data_reg_sel and MI_WR;
+   -- end generate;
+
+      process (CLK)
+      begin
+         if (rising_edge(CLK)) then
+            if (s_mi2fifo_data_reg_we = '1') then
+               cnt <= cnt + 1;
+            end if;
+            if (RST = '1') or (s_mi2fifo_vld_reg_we = '1') then
+               cnt <= (others => '0');
+            end if;
+         end if;
+      end process;
 
    process (CLK)
    begin
       if (rising_edge(CLK)) then
-         case(MI_ADDR(9 downto 2)) is
-            when X"00" =>
+         case(MI_ADDR(4 downto 0)) is
+            when "00000" => --X"00"
                MI_DRD <= s_sreg;
-            when X"01" =>
+            when "00100" => --X"04"
                MI_DRD <= s_creg;         
             when others =>
-               MI_DRD <= (others=>'0');
+               MI_DRD <= X"DEAAAAAD";
          end case;
       end if;
    end process;
@@ -223,12 +237,12 @@ begin
       end if;
    end process;
 
-   -- mi2fifo_reg = 0x0014+
+   -- mi2fifo_reg = 0x0014
    mi2fifo_reg_g : for i in 0 to MI_DATA_ITEMS-1 generate
       mi2fifo_reg_p : process (CLK)
       begin
          if (rising_edge(CLK)) then
-            if (s_mi2fifo_data_reg_we(i) = '1') then
+            if (cnt = i) then
                s_mi2fifo.data((i+1)*32-1 downto i*32) <= MI_DWR;
             end if;
          end if;
