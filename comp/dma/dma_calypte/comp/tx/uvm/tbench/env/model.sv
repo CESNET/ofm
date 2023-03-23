@@ -55,7 +55,7 @@ class model #(CHANNELS, PKT_SIZE_MAX, DEVICE, USR_ITEM_WIDTH, USER_META_WIDTH, C
         int unsigned byte_cnt           = 0;
         int unsigned discard_dma_cnt    = 0;
         int unsigned discard_byte_cnt   = 0;
-        int unsigned read_delay_valid   = 0;
+        logic        read_valid         = 1'b1;
         int unsigned read_delay_discard = 0;
     } dma_cnt_reg;
     dma_cnt_reg cnt_reg [CHANNELS];
@@ -239,7 +239,7 @@ class model #(CHANNELS, PKT_SIZE_MAX, DEVICE, USR_ITEM_WIDTH, USER_META_WIDTH, C
                 if (info.hdr_identifier == 1'b1) begin
                     cnt_reg[int'(info.channel)].discard_dma_cnt++;
 
-                    if (cnt_reg[int'(info.channel)].read_delay_valid == 30) begin
+                    if (status[int'(info.channel)] == 1'b0 && cnt_reg[int'(info.channel)].read_valid == 1'b1) begin
                         m_regmodel.channel[int'(info.channel)].sent_packets.write(status_r, {32'h1, 32'h1});
                         m_regmodel.channel[int'(info.channel)].sent_packets.read(status_r, dma_cnt);
                         m_regmodel.channel[int'(info.channel)].sent_bytes.write(status_r, {32'h1, 32'h1});
@@ -264,14 +264,15 @@ class model #(CHANNELS, PKT_SIZE_MAX, DEVICE, USR_ITEM_WIDTH, USER_META_WIDTH, C
                         $swrite(debug_msg, "%sBYTE CNT REG %d\n",       debug_msg, byte_cnt);
                         `uvm_info(this.get_full_name(),                 debug_msg, UVM_MEDIUM)
 
+                        cnt_reg[int'(info.channel)].read_valid = 0;
+
                     end
-                    cnt_reg[int'(info.channel)].read_delay_valid++;
                     dma_frame[int'(info.channel)].delete();
                 end else
                     cnt_reg[int'(info.channel)].discard_byte_cnt += info.dword_cnt*4;
 
             end else begin
-                cnt_reg[int'(info.channel)].read_delay_valid = 0;
+                cnt_reg[int'(info.channel)].read_valid = 1;
 
                 if (cnt_reg[int'(info.channel)].read_delay_discard == 30) begin
                     m_regmodel.channel[int'(info.channel)].discarded_packets.write(status_r, {32'h1, 32'h1});

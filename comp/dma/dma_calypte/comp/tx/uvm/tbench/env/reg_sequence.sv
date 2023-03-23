@@ -65,10 +65,10 @@ class run_channel extends uvm_sequence;
     time update_time_max = 1us;
 
     time run_time_min = 30us;
-    time run_time_max = 1ms;
+    time run_time_max = 500us;
 
-    time stop_time_min = 30us;
-    time stop_time_max = 500us;
+    time stop_time_min = 6us;
+    time stop_time_max = 30us;
 
     reg_channel m_regmodel;
 
