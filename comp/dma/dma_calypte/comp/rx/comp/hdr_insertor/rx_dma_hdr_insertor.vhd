@@ -75,9 +75,10 @@ entity RX_DMA_HDR_INSERTOR is
 
         -- - log. 0 means header is 3 DW long
         -- - log. 1 means header is 4 DW long
-        HDRM_PCIE_HDR_TYPE    : in  std_logic;
-        HDRM_PCIE_HDR_SRC_RDY : in  std_logic;
-        HDRM_PCIE_HDR_DST_RDY : out std_logic;
+        HDRM_PCIE_HDR_TYPE              : in  std_logic;
+        HDRM_PCIE_HDR_SRC_RDY_DATA_TRAN : in  std_logic;
+        HDRM_PCIE_HDR_SRC_RDY_DMA_HDR   : in  std_logic;
+        HDRM_PCIE_HDR_DST_RDY           : out std_logic;
 
         HDRM_DMA_CHAN_NUM    : in  std_logic_vector((log2(CHANNELS)-1) downto 0);
         HDRM_PKT_DROP        : in  std_logic;
@@ -99,8 +100,8 @@ architecture FULL of RX_DMA_HDR_INSERTOR is
     signal low_shift_val      : std_logic_vector(2 downto 0);
     -- normally the lenght of these signals is set to address each group of 4 blocks on the bus but I made the
     -- signals one bit wider because I use them as a counter of output words in each transaction
-    signal high_shift_val_pst : unsigned(log2(32)-3 downto 0);
-    signal high_shift_val_nst : unsigned(log2(32)-3 downto 0);
+    signal high_shift_val_pst : unsigned(log2(32)-4 downto 0);
+    signal high_shift_val_nst : unsigned(log2(32)-4 downto 0);
     signal shift_sel_pst      : std_logic;
     signal shift_sel_nst      : std_logic;
 
@@ -114,8 +115,8 @@ architecture FULL of RX_DMA_HDR_INSERTOR is
     signal pkt_drop_reg     : std_logic;
 
     -- varies its value according to the generic parameters
-    signal SHIFT_INC  : unsigned(2 downto 0);
-    signal INIT_SHIFT : unsigned(2 downto 0);
+    signal SHIFT_INC  : unsigned(1 downto 0);
+    signal INIT_SHIFT : unsigned(1 downto 0);
 
     -- attribute mark_debug                       : string;
     -- attribute mark_debug of tprocess_pst       : signal is "true";
@@ -142,7 +143,7 @@ begin
 
                 tprocess_pst       <= IDLE;
                 shift_sel_pst      <= '0';
-                high_shift_val_pst <= "011";
+                high_shift_val_pst <= "11";
 
             elsif (TX_MFB_DST_RDY = '1') then
 
@@ -166,28 +167,49 @@ begin
             when IDLE =>
 
                 if (RX_MFB_SRC_RDY = '1'
-                    and HDRM_PCIE_HDR_SRC_RDY = '1'
+                    and HDRM_PCIE_HDR_SRC_RDY_DATA_TRAN = '1'
                     and HDRM_PKT_DROP = '0'
                     and HDRM_DMA_HDR_SRC_RDY = '1'
-                    ) then
+                    and
+                    (
+                        TX_REGIONS = 1
+                        or
+                        (
+                            TX_REGIONS = 2
+                            and
+                            HDRM_PCIE_HDR_SRC_RDY_DMA_HDR = '1'
+                            and
+                            RX_MFB_EOF = '1'
+                        )
+                        or
+                        (
+                            TX_REGIONS = 2 and RX_MFB_EOF = '0'
+                        )
+                    )
+                ) then
 
                     tprocess_nst <= TRANSACTION_SEND;
                 end if;
 
             when TRANSACTION_SEND =>
 
-                if (high_shift_val_pst = "011") then
+                if (high_shift_val_pst = "11") then
 
                     if (RX_MFB_EOF = '1' and TX_REGIONS = 1) then
                         tprocess_nst <= DMA_HDR_SEND;
-                    else
+                    elsif (
+                        (RX_MFB_EOF = '1' and TX_REGIONS = 2)
+                        or
+                        RX_MFB_EOF = '0'
+                        ) then
+
                         tprocess_nst <= IDLE;
                     end if;
                 end if;
 
             when DMA_HDR_SEND =>
 
-                if (HDRM_PCIE_HDR_SRC_RDY = '1') then
+                if (HDRM_PCIE_HDR_SRC_RDY_DMA_HDR = '1') then
                     tprocess_nst <= IDLE;
                 end if;
         end case;
@@ -223,7 +245,7 @@ begin
                 -- if PCIE header has been captured, then deassert the PCIE_HDR_DST_RDY singnal because we need to
                 -- wait for a valid packet to arrive. This packet should also be the one which will not be
                 -- dropped. (PCIE  headers on the input are always valid)
-                if (HDRM_PCIE_HDR_SRC_RDY = '1') then
+                if (HDRM_PCIE_HDR_SRC_RDY_DATA_TRAN = '1') then
                     shift_sel_nst         <= HDRM_PCIE_HDR_TYPE;
                     HDRM_PCIE_HDR_DST_RDY <= '0';
                 end if;
@@ -255,24 +277,38 @@ begin
 
                 if (TX_REGIONS = 1) then
 
-                    if (high_shift_val_pst = "011") then
+                    if (high_shift_val_pst = "11") then
                         -- switch the PCIE header on the input to the next one
                         HDRM_PCIE_HDR_DST_RDY <= TX_MFB_DST_RDY;
 
                         -- switch also the word on the input but only if a current packet does not contain an EOF
                         -- because the transmission needs to be paused and the special transaction with a DMA
                         -- header is sent
+                        -- NOTE: This is a possible bottleneck because the next word can be loaded
+                        -- on the input in the next clock cycle.
                         if (RX_MFB_EOF = '0') then
                             RX_MFB_DST_RDY <= TX_MFB_DST_RDY;
                         end if;
                     end if;
                 else
 
-                    -- 1) permit the next header because it will be needed by the write of the last word of the
+                    -- switch to the next header because it will be needed by the write of the last word of the
                     -- transaction when there is also a DMA header transaction to be written at once
-                    -- 2) switch the PCIE header on the input to the next one (for the next transaction)
-                    if (high_shift_val_pst = "010" or high_shift_val_pst = "011") then
+                    if (high_shift_val_pst = "01" and RX_MFB_EOF = '1') then
                         HDRM_PCIE_HDR_DST_RDY <= TX_MFB_DST_RDY;
+                    end if;
+
+                    if (high_shift_val_pst = "11") then
+
+                        RX_MFB_DST_RDY        <= TX_MFB_DST_RDY;
+                        -- switch the PCIE header on the input to the next one (for the next transaction)
+                        HDRM_PCIE_HDR_DST_RDY <= TX_MFB_DST_RDY;
+
+                        if (RX_MFB_EOF = '1') then
+                            HDRM_DMA_HDR_DST_RDY  <= TX_MFB_DST_RDY;
+                            dma_hdr_last          <= '1';
+                        end if;
+
                     end if;
                 end if;
 
@@ -281,10 +317,10 @@ begin
                 -- release the headers on the input and allow next packet to arrive
                 HDRM_PCIE_HDR_DST_RDY <= TX_MFB_DST_RDY;
 
-                if (HDRM_PCIE_HDR_SRC_RDY = '1') then
+                if (HDRM_PCIE_HDR_SRC_RDY_DMA_HDR = '1') then
 
-                    HDRM_DMA_HDR_DST_RDY <= TX_MFB_DST_RDY;
                     RX_MFB_DST_RDY       <= TX_MFB_DST_RDY;
+                    HDRM_DMA_HDR_DST_RDY <= TX_MFB_DST_RDY;
                     dma_hdr_last         <= '1';
                 else
                     HDRM_DMA_HDR_DST_RDY <= '0';
@@ -296,13 +332,13 @@ begin
 
     -- my attempt to make the set of constants which change according to the specified generic parameters
     shift_cntr_incr_g : if (TX_REGIONS = 1) generate
-        INIT_SHIFT <= "000";
-        SHIFT_INC  <= "001";
+        INIT_SHIFT <= "00";
+        SHIFT_INC  <= "01";
     else generate
-        INIT_SHIFT <= "010";
+        INIT_SHIFT <= "01";
         -- increment by two, the barrel shifter remains the same for both of the configurations so the
         -- shifting by two is needed
-        SHIFT_INC  <= "010";
+        SHIFT_INC  <= "10";
     end generate;
 
     --=============================================================================================================
@@ -324,9 +360,15 @@ begin
             when IDLE =>
 
                 if (RX_MFB_SRC_RDY = '1'
-                    and HDRM_PCIE_HDR_SRC_RDY = '1'
+                    and HDRM_PCIE_HDR_SRC_RDY_DATA_TRAN = '1'
                     and HDRM_PKT_DROP = '0'
                     and HDRM_DMA_HDR_SRC_RDY = '1'
+                    and (TX_REGIONS = 1
+                         or
+                         (TX_REGIONS = 2 and HDRM_PCIE_HDR_SRC_RDY_DMA_HDR = '1' and RX_MFB_EOF = '1')
+                         or
+                         (TX_REGIONS = 2 and RX_MFB_EOF = '0')
+                         )
                     ) then
 
                     if (HDRM_PCIE_HDR_TYPE = '0') then
@@ -345,7 +387,7 @@ begin
 
                 high_shift_val_nst <= high_shift_val_pst + SHIFT_INC;
 
-                if (high_shift_val_pst = "011") then
+                if (high_shift_val_pst = "11") then
 
                     -- because the design in this configuration contains two regions, the output word
                     -- is organized in the way that the first half is occupied by the rest of a current
@@ -403,7 +445,7 @@ begin
 
             when DMA_HDR_SEND =>
 
-                if (HDRM_PCIE_HDR_SRC_RDY = '1') then
+                if (HDRM_PCIE_HDR_SRC_RDY_DMA_HDR = '1') then
 
                     -- load the DMA header and some other non-important data
                     if (HDRM_PCIE_HDR_TYPE = '0') then
@@ -434,7 +476,7 @@ begin
         port map (
             DATA_IN  => RX_MFB_DATA,
             DATA_OUT => bshifter_data_out,
-            SEL      => std_logic_vector(high_shift_val_pst(1 downto 0)) & low_shift_val);
+            SEL      => std_logic_vector(high_shift_val_pst) & low_shift_val);
 
     with shift_sel_nst select
         low_shift_val <=

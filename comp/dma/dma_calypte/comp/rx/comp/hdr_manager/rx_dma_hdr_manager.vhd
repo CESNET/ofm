@@ -102,12 +102,13 @@ entity RX_DMA_HDR_MANAGER is
         --
         -- * 0 => PCIE_HDR(3*32-1 downto 0) bits are valid,
         -- * 1 => PCIE_HDR(4*32-1 downto 0) bits are valid
-        PCIE_HDR_SIZE    : out std_logic;
+        PCIE_HDR_SIZE              : out std_logic;
         -- PCIE header content, can be vendor specific
-        PCIE_HDR         : out std_logic_vector(4*32-1 downto 0);
-        PCIE_HDR_VLD     : out std_logic_vector(0 downto 0);
-        PCIE_HDR_SRC_RDY : out std_logic;
-        PCIE_HDR_DST_RDY : in  std_logic;
+        PCIE_HDR                   : out std_logic_vector(4*32-1 downto 0);
+        PCIE_HDR_VLD               : out std_logic_vector(0 downto 0);
+        PCIE_HDR_SRC_RDY_DATA_TRAN : out std_logic;
+        PCIE_HDR_SRC_RDY_DMA_HDR   : out std_logic;
+        PCIE_HDR_DST_RDY           : in  std_logic;
 
         -- =====================================================================
         -- PCIE HEADER (MVB OUTPUT)
@@ -515,9 +516,7 @@ begin
     begin
         if (rising_edge(CLK)) then
             if (RESET = '1') then
-
                 pcie_end_packet <= '0';
-
             elsif (
                 pcie_end_packet = '0'
                 and pcie_hdr_data_fifo_do(1 +1 +4*32 -1) = '1'  -- value of the signal data_packet_end
@@ -527,7 +526,6 @@ begin
                 pcie_end_packet <= '1';
 
             elsif (pcie_end_packet = '1' and pcie_hdr_dma_fifo_rd = '1') then
-
                 pcie_end_packet <= '0';
 
             end if;
@@ -539,7 +537,9 @@ begin
     -- header, otherwise choose the PCIe headers for the ordinary data
     (PCIE_HDR_SIZE, PCIE_HDR) <= pcie_hdr_data_fifo_do(1 +4*32 -1 downto 0) when pcie_end_packet = '0' else pcie_hdr_dma_fifo_do;
     PCIE_HDR_VLD              <= "1";
-    PCIE_HDR_SRC_RDY          <= (not pcie_hdr_data_fifo_empty)             when pcie_end_packet = '0' else (not pcie_hdr_dma_fifo_empty);
+    -- PCIE_HDR_SRC_RDY          <= (not pcie_hdr_data_fifo_empty)             when pcie_end_packet = '0' else (not pcie_hdr_dma_fifo_empty);
+    PCIE_HDR_SRC_RDY_DATA_TRAN <= (not pcie_hdr_data_fifo_empty);
+    PCIE_HDR_SRC_RDY_DMA_HDR   <= (not pcie_hdr_dma_fifo_empty);
 
     pcie_hdr_data_fifo_rd <= PCIE_HDR_DST_RDY and (not pcie_hdr_data_fifo_empty) when pcie_end_packet = '0' else '0';
     pcie_hdr_dma_fifo_rd  <= PCIE_HDR_DST_RDY and (not pcie_hdr_dma_fifo_empty)  when pcie_end_packet = '1' else '0';
