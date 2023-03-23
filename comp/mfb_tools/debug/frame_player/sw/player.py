@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # player.py : Basic script for generation of the MI32 configuration
 #             stream
 #
@@ -205,10 +206,10 @@ class PlayerConfigurator(object):
             block_list = self._split(content,block_elements)
             # Check if we have a place in the FIFO
             mfb_words_req = math.ceil(float(len(block_list))/self.region_size)
-            print("mfb_words_req: " + str(mfb_words_req))
+            # print("mfb_words_req: " + str(mfb_words_req))
             if fifo_ptr+mfb_words_req > self.fifo_depth:
-                print("fifo_ptr: " + str(fifo_ptr))
-                print("fifo_depth: " + str(self.fifo_depth))
+                # print("fifo_ptr: " + str(fifo_ptr))
+                # print("fifo_depth: " + str(self.fifo_depth))
                 # Finish frame sending (if it wasn't already finished)
                 self._send_mfb_word(mfb)
                 print("There isn't space for a next packet in the FIFO memory.")
@@ -264,7 +265,7 @@ class PlayerConfigurator(object):
                 segment += 1
                 mfb_blk += 1
                 #print("MFB block done")
-            print(self.words_cnt)
+            # print(self.words_cnt)
 
     def _send_mfb_word(self,mfb):
         """
