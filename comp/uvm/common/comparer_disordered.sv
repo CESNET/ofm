@@ -23,7 +23,7 @@ virtual class comparer_base_disordered#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) 
     endfunction
 
     virtual function int unsigned success();
-        return (errors != 0);
+        return (errors == 0);
     endfunction
 
     virtual function void flush();
