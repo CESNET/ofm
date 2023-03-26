@@ -336,7 +336,7 @@ begin
         EDGE                => mi_rst_req
     );
 
-    latency_meter_i : entity work.LATENCY_METER
+    latency_meter_old_i : entity work.LATENCY_METER_OLD
     generic map (
         TICKS_WIDTH         => LATENCY_TICKS_WIDTH,
         SUM_WIDTH           => LATENCY_SUM_WIDTH,

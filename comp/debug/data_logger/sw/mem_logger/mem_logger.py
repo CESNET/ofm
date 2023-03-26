@@ -47,6 +47,11 @@ class MemLogger(DataLogger):
                 res = res_tmp.copy()
 
         return res
+    
+    def latency_hist_step(self):
+        hist_max  = 2 ** self.config["VALUE_WIDTH"][0] 
+        hist_step = hist_max / self.config["HIST_BOX_CNT"][0]
+        return self.ticks_to_s(hist_step - 1) * 10**9
 
     def load_stats(self):
         stats = {}
@@ -83,15 +88,10 @@ class MemLogger(DataLogger):
         # Calculate latency
         stats["latency"]["min_ns"]  = self.ticks_to_s(stats["latency"]["min"]) * 10**9
         stats["latency"]["max_ns"]  = self.ticks_to_s(stats["latency"]["max"]) * 10**9
-        if stats["latency"]["cnt"] != 0:
-            avg                     = stats["latency"]["sum"] / stats["latency"]["cnt"]
-        else:
-            avg                     = 0
-        stats["latency"]["avg_ns"]  = self.ticks_to_s(avg) * 10**9
+        stats["latency"]["avg_ns"]  = self.ticks_to_s(stats["latency"]["avg"]) * 10**9
 
         # Calculate latency histogram
-        hist_max  = 2 ** self.config["VALUE_WIDTH"][0] 
-        hist_step = hist_max / self.config["HIST_BOX_CNT"][0]
+        hist_step = self.config["HIST_STEP"][0]
         stats["latency"]["hist_ns"] = {}
 
         for i, v in enumerate(stats["latency"]["hist"]):
@@ -147,11 +147,17 @@ class MemLogger(DataLogger):
         res += self.line_to_str("  zero burst count", stats['err_zero_burst'])
         res += self.line_to_str("  simultaneous r+w", stats['err_simult_rw'])
 
-        res += f"Paralel read:\n"
+        res += f"Paralel reads count:\n"
         res += self.line_to_str("  min",   stats['paralel_read']["min"], "")
         res += self.line_to_str("  max",   stats['paralel_read']["max"], "")
-        res += self.line_to_str("  sum",   stats['paralel_read']["sum"], "")
-        res += self.line_to_str("  hist",  stats['paralel_read']["hist"], "")
+        res += self.line_to_str("  avg",   stats['paralel_read']["avg"], "")
+
+        hist_step = self.config["HIST_STEP"][1]
+        prev = 0
+        for i, v in enumerate(stats["paralel_read"]["hist"]):
+            if v != 0:
+                res += self.line_to_str(f"    {prev:> 6.1f} -{hist_step * (i + 1):> 6.1f} ...", v)
+                prev = hist_step * (i + 1)
        
         return res
 

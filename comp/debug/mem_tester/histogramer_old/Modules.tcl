@@ -23,4 +23,4 @@ set COMPONENTS [concat $COMPONENTS [list \
 
 # Source files for implemented component
 set MOD "$MOD $ENTITY_BASE/histogramer_types.vhd"
-set MOD "$MOD $ENTITY_BASE/histogramer.vhd"
+set MOD "$MOD $ENTITY_BASE/histogramer_old.vhd"

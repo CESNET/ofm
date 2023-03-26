@@ -13,7 +13,7 @@ use work.math_pack.all;
 use work.type_pack.all;
 use work.hist_types.all;
 
-entity LATENCY_METER is
+entity LATENCY_METER_OLD is
 generic (
     -- Width of tick counters for measuring latency
     -- If latency is larger, TICKS_OVF will be asserted
@@ -54,7 +54,7 @@ port(
 );
 end entity;
 
-architecture FULL of LATENCY_METER is
+architecture FULL of LATENCY_METER_OLD is
 
     ---------------
     -- Constants --
@@ -139,7 +139,7 @@ begin
         DO              => TICKS_OVF
     );
 
-    histogramer_i : entity work.HISTOGRAMER
+    histogramer_i : entity work.HISTOGRAMER_OLD
     generic map (    
         VARIANT         => HIST_VARIANT,
         DATA_WIDTH      => TICKS_WIDTH,

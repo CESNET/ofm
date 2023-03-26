@@ -13,7 +13,7 @@ use work.math_pack.all;
 use work.type_pack.all;
 use work.hist_types.all;
 
-entity HISTOGRAMER is
+entity HISTOGRAMER_OLD is
 generic (    
     VARIANT                 : HIST_T := LINEAR;
     DATA_WIDTH              : integer;
@@ -38,7 +38,7 @@ end entity;
 
 -- =========================================================================
 
-architecture FULL of HISTOGRAMER is
+architecture FULL of HISTOGRAMER_OLD is
 
     constant CNTER_CNT_WIDTH: integer := log2(CNTER_CNT);
     constant CNT_LIMIT      : std_logic_vector(CNT_WIDTH - 1 downto 0) := (others => '1');

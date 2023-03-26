@@ -155,6 +155,7 @@ class DataLogger:
         config["SUM_EXTRA_WIDTH"]   = []
         config["HIST_BOX_CNT"]      = []
         config["HIST_BOX_WIDTH"]    = []
+        config["HIST_STEP"]         = []
 
         for i in range(0, config["VALUE_CNT"]):
             en_parsed = { }
@@ -169,6 +170,10 @@ class DataLogger:
             config["SUM_EXTRA_WIDTH"].append(self.stat_read(self.SUM_EXTRA_WIDTH_ID, i, en_slices=False))
             config["HIST_BOX_CNT"   ].append(self.stat_read(self.HIST_BOX_CNT_ID   , i, en_slices=False))
             config["HIST_BOX_WIDTH" ].append(self.stat_read(self.HIST_BOX_WIDTH_ID , i, en_slices=False))
+
+            hist_max  = 2 ** config["VALUE_WIDTH"][i] 
+            hist_step = hist_max / config["HIST_BOX_CNT"][i]
+            config["HIST_STEP"].append(hist_step)
 
         return config
     
@@ -200,13 +205,14 @@ class DataLogger:
     
     def load_value(self, index):
         val = {}
+        val["cnt"] = self.stat_read(self.CNTER_ID, index + self.config["CNTER_CNT"])
         if self.config["VALUE_EN"][index]["MIN"]:
             val["min"] = self.stat_read(self.VALUE_MIN_ID, index)
         if self.config["VALUE_EN"][index]["MAX"]:
             val["max"] = self.stat_read(self.VALUE_MAX_ID, index)
         if self.config["VALUE_EN"][index]["SUM"]:
             val["sum"] = self.stat_read(self.VALUE_SUM_ID, index)
-        val["cnt"]     = self.stat_read(self.CNTER_ID, index + self.config["CNTER_CNT"])
+            val["avg"] = val["sum"] / val["cnt"] if val["cnt"] !=0 else 0
         if self.config["VALUE_EN"][index]["HIST"]:
             val["hist"] = []
             for b in range(0, self.config["HIST_BOX_CNT"][index]):

@@ -647,7 +647,7 @@ begin
         -----------------------
         -- AMM probe results --
         -----------------------
-        probe_res_p(status(0), 0);
+        --probe_res_p(status(0), 0);
 
         -- Test histogrammer
         -- for i in 0 to 512 - 1 loop
@@ -694,7 +694,7 @@ begin
         -----------------------
         -- AMM probe results --
         -----------------------
-        probe_res_p(status(0), 0);
+        ---probe_res_p(status(0), 0);
 
         -- force reset via MI bus
         toggleBit_p(MI_CTRL_IN_ADDR, MI_RST_BIT, status(0), 0);
@@ -736,11 +736,11 @@ begin
         -----------------------
         -- AMM probe results --
         -----------------------
-        probe_res_p(status(0), 0);
+        -- probe_res_p(status(0), 0);
 
         -- force reset via MI bus
         toggleBit_p(MI_CTRL_IN_ADDR, MI_RST_BIT, status(0), 0);
-        wait for 5 * MI_CLK_PERIOD;
+        wait for 50 * MI_CLK_PERIOD;
 
         --------------------------------
         -- Manual avalon control test --
@@ -752,6 +752,7 @@ begin
         amm_gen_test_p(7, 7,  manual_test_fail, status(0), 0);
         amm_gen_test_p(2, 16,  manual_test_fail, status(0), 0);
         amm_gen_test_p(3, 1,  manual_test_fail, status(0), 0);
+        amm_gen_test_p(1, 50,  manual_test_fail, status(0), 0);
 
         -------------------------------
         -- Wrong address access test --
