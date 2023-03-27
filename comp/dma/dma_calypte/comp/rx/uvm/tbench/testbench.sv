@@ -12,11 +12,11 @@ module testbench;
 
     //TESTS
     typedef test::base#(test::USER_REGIONS, test::USER_REGION_SIZE, test::USER_BLOCK_SIZE, test::USER_ITEM_WIDTH,
-                           test::PCIE_UP_REGIONS, test::PCIE_UP_REGION_SIZE, test::PCIE_UP_BLOCK_SIZE, test::PCIE_UP_ITEM_WIDTH,
+                           test::PCIE_UP_REGIONS, test::PCIE_UP_REGION_SIZE, test::PCIE_UP_BLOCK_SIZE, test::PCIE_UP_ITEM_WIDTH, test::PCIE_UP_META_WIDTH,
                            test::CHANNELS, test::PKT_SIZE_MAX, test::MI_WIDTH, test::DEVICE) base;
 
     typedef test::speed#(test::USER_REGIONS, test::USER_REGION_SIZE, test::USER_BLOCK_SIZE, test::USER_ITEM_WIDTH,
-                            test::PCIE_UP_REGIONS, test::PCIE_UP_REGION_SIZE, test::PCIE_UP_BLOCK_SIZE, test::PCIE_UP_ITEM_WIDTH,
+                            test::PCIE_UP_REGIONS, test::PCIE_UP_REGION_SIZE, test::PCIE_UP_BLOCK_SIZE, test::PCIE_UP_ITEM_WIDTH, test::PCIE_UP_META_WIDTH,
                             test::CHANNELS, test::PKT_SIZE_MAX, test::MI_WIDTH, test::DEVICE) speed;
 
     localparam USER_META_WIDTH = 24 + $clog2(PKT_SIZE_MAX+1) + $clog2(CHANNELS);
@@ -28,10 +28,10 @@ module testbench;
 
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // Interfaces
-    reset_if                                                                                          reset(CLK);
-    mfb_if #(test::USER_REGIONS, USER_REGION_SIZE, USER_BLOCK_SIZE, USER_ITEM_WIDTH, USER_META_WIDTH) mfb_rx(CLK);
-    mfb_if #(PCIE_UP_REGIONS, PCIE_UP_REGION_SIZE, PCIE_UP_BLOCK_SIZE * PCIE_UP_ITEM_WIDTH/8, 8, 0)   mfb_tx(CLK);
-    mvb_if #(1, $clog2(test::CHANNELS) + 1)                                                           mvb_dma(CLK);
+    reset_if                                                                                                   reset(CLK);
+    mfb_if #(test::USER_REGIONS, USER_REGION_SIZE, USER_BLOCK_SIZE, USER_ITEM_WIDTH, USER_META_WIDTH)          mfb_rx(CLK);
+    mfb_if #(PCIE_UP_REGIONS, PCIE_UP_REGION_SIZE, PCIE_UP_BLOCK_SIZE, PCIE_UP_ITEM_WIDTH, PCIE_UP_META_WIDTH) mfb_tx(CLK);
+    mvb_if #(1, $clog2(test::CHANNELS) + 1)                                                                    mvb_dma(CLK);
     mi_if #(MI_WIDTH, MI_WIDTH) mi_config(CLK);
 
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -46,13 +46,18 @@ module testbench;
         // Configuration of database
         uvm_config_db#(virtual reset_if)::set(null, "", "vif_reset", reset);
         uvm_config_db#(virtual mfb_if #(test::USER_REGIONS, USER_REGION_SIZE, USER_BLOCK_SIZE, USER_ITEM_WIDTH, USER_META_WIDTH))::set(null, "", "vif_rx", mfb_rx);
-        uvm_config_db#(virtual mfb_if #(PCIE_UP_REGIONS, PCIE_UP_REGION_SIZE, PCIE_UP_BLOCK_SIZE * PCIE_UP_ITEM_WIDTH/8, 8, 0))::set(null, "", "vif_tx", mfb_tx);
+        uvm_config_db#(virtual mfb_if #(PCIE_UP_REGIONS, PCIE_UP_REGION_SIZE, PCIE_UP_BLOCK_SIZE, PCIE_UP_ITEM_WIDTH, PCIE_UP_META_WIDTH))::set(null, "", "vif_tx", mfb_tx);
         uvm_config_db#(virtual mvb_if #(1, $clog2(test::CHANNELS) + 1))::set(null, "", "vif_dma", mvb_dma);
         uvm_config_db#(virtual mi_if #(MI_WIDTH, MI_WIDTH))::set(null, "", "vif_mi", mi_config);
 
         m_root = uvm_root::get();
         m_root.finish_on_completion = 0;
         m_root.set_report_id_action_hier("ILLEGALNAME",UVM_NO_ACTION);
+
+        uvm_config_db#(int)            ::set(null, "", "recording_detail", 0);
+        uvm_config_db#(uvm_bitstream_t)::set(null, "", "recording_detail", 0);
+
+        $write($sformatf("Test run with seed: %d\n", $get_initial_random_seed()));
 
         run_test();
         $stop(2);

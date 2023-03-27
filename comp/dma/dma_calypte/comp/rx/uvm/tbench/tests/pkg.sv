@@ -15,14 +15,15 @@ package test;
     parameter MI_WIDTH         = 32;
 
     parameter USER_REGIONS     = 1;
-    parameter USER_REGION_SIZE = 4;
+    parameter USER_REGION_SIZE = 8;
     parameter USER_BLOCK_SIZE  = 8;
     parameter USER_ITEM_WIDTH  = 8;
 
-    parameter PCIE_UP_REGIONS     = 1;
+    parameter PCIE_UP_REGIONS     = 2;
     parameter PCIE_UP_REGION_SIZE = 1;
     parameter PCIE_UP_BLOCK_SIZE  = 8;
     parameter PCIE_UP_ITEM_WIDTH  = 32;
+    parameter PCIE_UP_META_WIDTH  = sv_pcie_meta_pack::PCIE_CQ_META_WIDTH;
 
     parameter CHANNELS       = 8;
     parameter POINTER_WIDTH  = 16;

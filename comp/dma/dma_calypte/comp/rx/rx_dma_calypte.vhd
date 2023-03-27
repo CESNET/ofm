@@ -147,10 +147,11 @@ architecture FULL of RX_DMA_CALYPTE is
     signal hdrm_hhp_update_data : std_logic_vector(POINTER_WIDTH-1 downto 0);
     signal hdrm_hhp_update_en   : std_logic;
 
-    signal hdrm_pcie_hdr_type    : std_logic;
-    signal hdrm_pcie_hdr_data    : std_logic_vector (127 downto 0);
-    signal hdrm_pcie_hdr_src_rdy : std_logic;
-    signal hdrm_pcie_hdr_dst_rdy : std_logic;
+    signal hdrm_pcie_hdr_type              : std_logic;
+    signal hdrm_pcie_hdr_data              : std_logic_vector (127 downto 0);
+    signal hdrm_pcie_hdr_src_rdy_data_tran : std_logic;
+    signal hdrm_pcie_hdr_src_rdy_dma_hdr   : std_logic;
+    signal hdrm_pcie_hdr_dst_rdy           : std_logic;
 
     signal hdrm_dma_hdr_chan_num : std_logic_vector((log2(CHANNELS)-1) downto 0);
     signal hdrm_pkt_drop         : std_logic;
@@ -377,11 +378,12 @@ begin
             INF_SRC_RDY  => USER_RX_MFB_SRC_RDY and data_path_dst_rdy and USER_RX_MFB_SOF(0),
             INF_DST_RDY  => hdr_log_dst_rdy,
 
-            PCIE_HDR_SIZE    => hdrm_pcie_hdr_type,
-            PCIE_HDR         => hdrm_pcie_hdr_data,
-            PCIE_HDR_VLD     => open,
-            PCIE_HDR_SRC_RDY => hdrm_pcie_hdr_src_rdy,
-            PCIE_HDR_DST_RDY => hdrm_pcie_hdr_dst_rdy,
+            PCIE_HDR_SIZE              => hdrm_pcie_hdr_type,
+            PCIE_HDR                   => hdrm_pcie_hdr_data,
+            PCIE_HDR_VLD               => open,
+            PCIE_HDR_SRC_RDY_DATA_TRAN => hdrm_pcie_hdr_src_rdy_data_tran,
+            PCIE_HDR_SRC_RDY_DMA_HDR   => hdrm_pcie_hdr_src_rdy_dma_hdr,
+            PCIE_HDR_DST_RDY           => hdrm_pcie_hdr_dst_rdy,
 
             DMA_CHANNEL     => hdrm_dma_hdr_chan_num,
             DMA_DISCARD     => hdrm_pkt_drop,
@@ -421,10 +423,11 @@ begin
             TX_MFB_SRC_RDY => PCIE_UP_MFB_SRC_RDY,
             TX_MFB_DST_RDY => PCIE_UP_MFB_DST_RDY,
 
-            HDRM_PCIE_HDR_DATA    => hdrm_pcie_hdr_data,
-            HDRM_PCIE_HDR_TYPE    => hdrm_pcie_hdr_type,
-            HDRM_PCIE_HDR_SRC_RDY => hdrm_pcie_hdr_src_rdy,
-            HDRM_PCIE_HDR_DST_RDY => hdrm_pcie_hdr_dst_rdy,
+            HDRM_PCIE_HDR_DATA              => hdrm_pcie_hdr_data,
+            HDRM_PCIE_HDR_TYPE              => hdrm_pcie_hdr_type,
+            HDRM_PCIE_HDR_SRC_RDY_DATA_TRAN => hdrm_pcie_hdr_src_rdy_data_tran,
+            HDRM_PCIE_HDR_SRC_RDY_DMA_HDR   => hdrm_pcie_hdr_src_rdy_dma_hdr,
+            HDRM_PCIE_HDR_DST_RDY           => hdrm_pcie_hdr_dst_rdy,
 
             HDRM_DMA_CHAN_NUM    => hdrm_dma_hdr_chan_num,
             HDRM_PKT_DROP        => hdrm_pkt_drop,

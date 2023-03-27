@@ -103,22 +103,3 @@ proc pkt_cntrs {PATH} {
         add_wave [list -noupdate -hex -group "PACKET COUNTERS" -unsigned -label "${n}"] $PATH/rx_dma_sw_manager_i/${i}/cnt_memx_i/logic_g/sdp_lutram_i/distmem
     }
 }
-
-proc mfb2axi_conv {PATH} {
-    add_wave [list -noupdate -hex -group "MFB_TO_AXI_CONV" -hex] $PATH/RX_MFB_DATA
-    add_wave [list -noupdate -hex -group "MFB_TO_AXI_CONV" -bin] $PATH/RX_MFB_SOF_POS
-    add_wave [list -noupdate -hex -group "MFB_TO_AXI_CONV" -bin] $PATH/RX_MFB_EOF_POS
-    add_wave [list -noupdate -hex -group "MFB_TO_AXI_CONV" -bin] $PATH/RX_MFB_SOF
-    add_wave [list -noupdate -hex -group "MFB_TO_AXI_CONV" -bin] $PATH/RX_MFB_EOF
-    add_wave [list -noupdate -hex -group "MFB_TO_AXI_CONV" -bin] $PATH/RX_MFB_SRC_RDY
-    add_wave [list -noupdate -hex -group "MFB_TO_AXI_CONV" -bin] $PATH/RX_MFB_DST_RDY
-    add_wave [list -noupdate -hex -group "MFB_TO_AXI_CONV" -bin] $PATH/RX_MFB_BE
-
-    add_wave [list -noupdate -hex -group "MFB_TO_AXI_CONV" -hex] $PATH/RQ_DATA
-    add_wave [list -noupdate -hex -group "MFB_TO_AXI_CONV" -hex] $PATH/RQ_USER
-    add_wave [list -noupdate -hex -group "MFB_TO_AXI_CONV" -bin] "$PATH/RQ_USER(7 downto 0)"
-    add_wave [list -noupdate -hex -group "MFB_TO_AXI_CONV" -bin] $PATH/RQ_LAST
-    add_wave [list -noupdate -hex -group "MFB_TO_AXI_CONV" -bin] $PATH/RQ_KEEP
-    add_wave [list -noupdate -hex -group "MFB_TO_AXI_CONV" -bin] $PATH/RQ_READY
-    add_wave [list -noupdate -hex -group "MFB_TO_AXI_CONV" -bin] $PATH/RQ_VALID
-}

@@ -20,7 +20,6 @@ def COMPONENTS_VER = [\
     //['MFB2DMA',                  'comp/pcie/others/mfb2dma/ver',                    'top_level.fdo'],\ 
     ['PTC - Frame Eraser',       'comp/pcie/ptc/comp/frame_eraser_upto96bits/ver',  'top_level.fdo'],\
     ['PTC - Header Data Merge',  'comp/pcie/ptc/comp/hdr_data_merge/ver',           'top_level.fdo'],\
-    ['RX DMA Calypte',           'comp/dma/dma_calypte/comp/rx/uvm',                'top_level.fdo'],\
 ]
 // /////////////////////////////////////////////////////////////////////////////
 
@@ -36,6 +35,7 @@ def COMPONENTS_MULTIVER = [\
     ['MTC_UVM'           , 'comp/pcie/mtc/uvm'                                         , 'top_level.fdo'      , 'tbench/tests/pkg.sv' , 'ver_settings.py'       ],\
     ['PTC_UVM'           , 'comp/pcie/ptc/uvm'                                         , 'top_level.fdo'      , 'tbench/tests/pkg.sv' , 'ver_settings.py'       ],\
     ['TX_DMA_CALYPTE'    , 'comp/dma/dma_calypte/comp/tx/uvm'                          , 'top_level.fdo'      , 'tbench/tests/pkg.sv' , 'ver_settings.py'       ],\
+    ['RX DMA CALYPTE'    , 'comp/dma/dma_calypte/comp/rx/uvm'                          , 'top_level.fdo'      , 'tbench/tests/pkg.sv' , 'ver_settings.py'       ],\
     ['CQ_AXI2MFB'        , 'comp/pcie/convertors/cq_axi2mfb/uvm'                       , 'top_level.fdo'      , 'tbench/tests/pkg.sv' , 'ver_settings.py'       ],\
     ['CC_MFB2AXI'        , 'comp/pcie/convertors/cc_mfb2axi/uvm'                       , 'top_level.fdo'      , 'tbench/tests/pkg.sv' , 'ver_settings.py'       ],\
     ['MFB2AVST'          , 'comp/pcie/others/mfb2avst/uvm'                             , 'top_level.fdo'      , 'tbench/tests/pkg.sv' , 'ver_settings.py'       ],\
