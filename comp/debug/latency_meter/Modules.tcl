@@ -7,15 +7,10 @@
 set FIFOX_BASE     "$OFM_PATH/comp/base/fifo/fifox"
 
 # Packages
-set PACKAGES "$PACKAGES $OFM_PATH/comp/base/pkg/math_pack.vhd"
-set PACKAGES "$PACKAGES $OFM_PATH/comp/base/pkg/type_pack.vhd"
+lappend PACKAGES "$OFM_PATH/comp/base/pkg/math_pack.vhd"
+lappend PACKAGES "$OFM_PATH/comp/base/pkg/type_pack.vhd"
 
+lappend COMPONENTS [ list "FIFOX"       $FIFOX_BASE      "FULL" ]
 
-set COMPONENTS [concat $COMPONENTS [list \
-    [ list "FIFOX"       $FIFOX_BASE      "FULL" ] \
-]]
-
-
-
-set MOD "$MOD $ENTITY_BASE/latency_meter.vhd"
+lappend MOD "$ENTITY_BASE/latency_meter.vhd"
     

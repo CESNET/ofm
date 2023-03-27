@@ -11,15 +11,13 @@ set LATENCY_METER_BASE  "$OFM_PATH/comp/debug/latency_meter"
 set FIFOX_BASE          "$OFM_PATH/comp/base/fifo/fifox"
 
 # Packages
-set PACKAGES "$PACKAGES $OFM_PATH/comp/base/pkg/math_pack.vhd"
-set PACKAGES "$PACKAGES $OFM_PATH/comp/base/pkg/type_pack.vhd"
+lappend PACKAGES "$OFM_PATH/comp/base/pkg/math_pack.vhd"
+lappend PACKAGES "$OFM_PATH/comp/base/pkg/type_pack.vhd"
 
-set COMPONENTS [concat $COMPONENTS [list \
-    [ list "DATA_LOGGER"        $DATA_LOGGER_BASE       "FULL" ] \
-    [ list "LATENCY_METER"      $LATENCY_METER_BASE     "FULL" ] \
-    [ list "FIFOX"              $FIFOX_BASE             "FULL" ] \
-]]
+lappend COMPONENTS [ list "DATA_LOGGER"        $DATA_LOGGER_BASE       "FULL" ]
+lappend COMPONENTS [ list "LATENCY_METER"      $LATENCY_METER_BASE     "FULL" ]
+lappend COMPONENTS [ list "FIFOX"              $FIFOX_BASE             "FULL" ]
 
 # Source files for implemented component
-set MOD "$MOD $ENTITY_BASE/mem_logger.vhd"
+lappend MOD "$ENTITY_BASE/mem_logger.vhd"
 

@@ -9,15 +9,13 @@
 set HISTOGRAMER_BASE    "$OFM_PATH/comp/debug/histogramer"
 
 # Packages
-set PACKAGES "$PACKAGES $OFM_PATH/comp/base/pkg/math_pack.vhd"
-set PACKAGES "$PACKAGES $OFM_PATH/comp/base/pkg/type_pack.vhd"
+lappend PACKAGES "$OFM_PATH/comp/base/pkg/math_pack.vhd"
+lappend PACKAGES "$OFM_PATH/comp/base/pkg/type_pack.vhd"
 
-set COMPONENTS [concat $COMPONENTS [list \
-    [ list "HISTOGRAMER"        $HISTOGRAMER_BASE       "FULL" ] \
-]]
+lappend COMPONENTS [ list "HISTOGRAMER"        $HISTOGRAMER_BASE       "FULL" ]
 
 # Source files for implemented component
-set MOD "$MOD $ENTITY_BASE/data_logger.vhd"
+lappend MOD "$ENTITY_BASE/data_logger.vhd"
 
 # Component DevTree
-set MOD "$MOD $ENTITY_BASE/DevTree.tcl"
+lappend MOD "$ENTITY_BASE/DevTree.tcl"

@@ -11,16 +11,14 @@ set DEC1F_BASE              "$OFM_PATH/comp/base/logic/dec1fn"
 set DP_BRAM_BASE            "$OFM_PATH/comp/base/mem/dp_bram"
 
 # Packages
-set PACKAGES "$PACKAGES $OFM_PATH/comp/base/pkg/math_pack.vhd"
-set PACKAGES "$PACKAGES $OFM_PATH/comp/base/pkg/type_pack.vhd"
+lappend PACKAGES "$OFM_PATH/comp/base/pkg/math_pack.vhd"
+lappend PACKAGES "$OFM_PATH/comp/base/pkg/type_pack.vhd"
 
-set COMPONENTS [concat $COMPONENTS [list \
-    [ list "LAST_ONE"   $LAST_ONE_BASE  "FULL" ] \
-    [ list "OR"         $OR_BASE        "FULL" ] \
-    [ list "DEC1FN"     $DEC1F_BASE     "FULL" ] \
-    [ list "DP_BRAM"    $DP_BRAM_BASE   "FULL" ] \
-]]
+lappend COMPONENTS [ list "LAST_ONE"   $LAST_ONE_BASE  "FULL" ]
+lappend COMPONENTS [ list "OR"         $OR_BASE        "FULL" ]
+lappend COMPONENTS [ list "DEC1FN"     $DEC1F_BASE     "FULL" ]
+lappend COMPONENTS [ list "DP_BRAM"    $DP_BRAM_BASE   "FULL" ]
 
 # Source files for implemented component
-set MOD "$MOD $ENTITY_BASE/histogramer_types.vhd"
-set MOD "$MOD $ENTITY_BASE/histogramer_old.vhd"
+lappend MOD "$ENTITY_BASE/histogramer_types.vhd"
+lappend MOD "$ENTITY_BASE/histogramer_old.vhd"

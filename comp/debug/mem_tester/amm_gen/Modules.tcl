@@ -10,13 +10,11 @@ set DP_BRAM_BASE        "$OFM_PATH/comp/base/mem/dp_bram"
 set EDGE_DETECT_BASE    "$OFM_PATH/comp/base/logic/edge_detect"
 
 # Packages
-set PACKAGES "$PACKAGES $OFM_PATH/comp/base/pkg/math_pack.vhd"
-set PACKAGES "$PACKAGES $OFM_PATH/comp/base/pkg/type_pack.vhd"
+lappend PACKAGES "$OFM_PATH/comp/base/pkg/math_pack.vhd"
+lappend PACKAGES "$OFM_PATH/comp/base/pkg/type_pack.vhd"
 
-set COMPONENTS [concat $COMPONENTS [list \
-    [ list "DP_BRAM"            $DP_BRAM_BASE           "FULL" ] \
-    [ list "EDGE_DETECT"        $EDGE_DETECT_BASE       "FULL" ] \
-]]
+lappend COMPONENTS [ list "DP_BRAM"            $DP_BRAM_BASE           "FULL" ]
+lappend COMPONENTS [ list "EDGE_DETECT"        $EDGE_DETECT_BASE       "FULL" ]
 
 # Source files for implemented component
-set MOD "$MOD $ENTITY_BASE/amm_gen.vhd"
+lappend MOD "$ENTITY_BASE/amm_gen.vhd"

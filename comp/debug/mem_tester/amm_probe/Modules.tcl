@@ -11,17 +11,15 @@ set OR_BASE             "$OFM_PATH/comp/base/logic/or"
 set HISTOGRAMER_OLD_BASE    "$OFM_PATH/comp/debug/mem_tester/histogramer_old"
 
 # Packages
-set PACKAGES "$PACKAGES $OFM_PATH/comp/base/pkg/math_pack.vhd"
-set PACKAGES "$PACKAGES $OFM_PATH/comp/base/pkg/type_pack.vhd"
+lappend PACKAGES "$OFM_PATH/comp/base/pkg/math_pack.vhd"
+lappend PACKAGES "$OFM_PATH/comp/base/pkg/type_pack.vhd"
 
-set COMPONENTS [concat $COMPONENTS [list \
-    [ list "DEC"                $DEC_BASE               "FULL" ] \
-    [ list "EDGE_DETECT"        $EDGE_DETECT_BASE       "FULL" ] \
-    [ list "OR"                 $OR_BASE                "FULL" ] \
-    [ list "HISTOGRAMER_OLD"        $HISTOGRAMER_OLD_BASE       "FULL" ] \
-]]
+lappend COMPONENTS [ list "DEC"                $DEC_BASE               "FULL" ]
+lappend COMPONENTS [ list "EDGE_DETECT"        $EDGE_DETECT_BASE       "FULL" ]
+lappend COMPONENTS [ list "OR"                 $OR_BASE                "FULL" ]
+lappend COMPONENTS [ list "HISTOGRAMER_OLD"        $HISTOGRAMER_OLD_BASE       "FULL" ]
 
 # Source files for implemented component
-set MOD "$MOD $ENTITY_BASE/latency_meter_old.vhd"
-set MOD "$MOD $ENTITY_BASE/amm_probe.vhd"
+lappend MOD "$ENTITY_BASE/latency_meter_old.vhd"
+lappend MOD "$ENTITY_BASE/amm_probe.vhd"
 
