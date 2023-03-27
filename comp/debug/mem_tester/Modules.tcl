@@ -21,27 +21,25 @@ set AMM_MUX_BASE        "$ENTITY_BASE/amm_mux"
 set EMIF_REFRESH_BASE   "$ENTITY_BASE/emif_refresh"
 
 # Packages
-set PACKAGES "$PACKAGES $OFM_PATH/comp/base/pkg/math_pack.vhd"
-set PACKAGES "$PACKAGES $OFM_PATH/comp/base/pkg/type_pack.vhd"
+lappend PACKAGES "$OFM_PATH/comp/base/pkg/math_pack.vhd"
+lappend PACKAGES "$OFM_PATH/comp/base/pkg/type_pack.vhd"
 
-set COMPONENTS [concat $COMPONENTS [list \
-    [ list "LFSR_RANDOM_GEN"    $LFSR_RND_GEN_BASE      "FULL" ] \
-    [ list "MI_ASYNC"           $MI_ASYNC_BASE          "FULL" ] \
-    [ list "MI_PIPE"            $MI_PIPE_BASE           "FULL" ] \
-    [ list "CMP"                $CMP_BASE               "FULL" ] \
-    [ list "MUX"                $MUX_BASE               "FULL" ] \
-    [ list "EDGE_DETECT"        $EDGE_DETECT_BASE       "FULL" ] \
-    [ list "CNT"                $CNT_BASE               "FULL" ] \
-    [ list "MI_SPLITTER"        $MI_SPLITER_BASE        "FULL" ] \
-    [ list "AMM_GEN"            $AMM_GEN_BASE           "FULL" ] \
-    [ list "AMM_PROBE"          $AMM_PROBE_BASE         "FULL" ] \
-    [ list "AMM_MUX"            $AMM_MUX_BASE           "FULL" ] \
-    [ list "EMIF_REFRESH"       $EMIF_REFRESH_BASE      "FULL" ] \
-]]
+lappend COMPONENTS [ list "LFSR_RANDOM_GEN"    $LFSR_RND_GEN_BASE      "FULL" ]
+lappend COMPONENTS [ list "MI_ASYNC"           $MI_ASYNC_BASE          "FULL" ]
+lappend COMPONENTS [ list "MI_PIPE"            $MI_PIPE_BASE           "FULL" ]
+lappend COMPONENTS [ list "CMP"                $CMP_BASE               "FULL" ]
+lappend COMPONENTS [ list "MUX"                $MUX_BASE               "FULL" ]
+lappend COMPONENTS [ list "EDGE_DETECT"        $EDGE_DETECT_BASE       "FULL" ]
+lappend COMPONENTS [ list "CNT"                $CNT_BASE               "FULL" ]
+lappend COMPONENTS [ list "MI_SPLITTER"        $MI_SPLITER_BASE        "FULL" ]
+lappend COMPONENTS [ list "AMM_GEN"            $AMM_GEN_BASE           "FULL" ]
+lappend COMPONENTS [ list "AMM_PROBE"          $AMM_PROBE_BASE         "FULL" ]
+lappend COMPONENTS [ list "AMM_MUX"            $AMM_MUX_BASE           "FULL" ]
+lappend COMPONENTS [ list "EMIF_REFRESH"       $EMIF_REFRESH_BASE      "FULL" ]
 
 # Source files for implemented component
-set MOD "$MOD $ENTITY_BASE/mem_tester_mi.vhd"
-set MOD "$MOD $ENTITY_BASE/mem_tester.vhd"
+lappend MOD "$ENTITY_BASE/mem_tester_mi.vhd"
+lappend MOD "$ENTITY_BASE/mem_tester.vhd"
 
 # Component DevTree
-set MOD "$MOD $ENTITY_BASE/DevTree.tcl"
+lappend MOD "$ENTITY_BASE/DevTree.tcl"

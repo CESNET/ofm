@@ -9,13 +9,11 @@ set EDGE_DETECT_BASE    "$OFM_PATH/comp/base/logic/edge_detect"
 set OR_BASE             "$OFM_PATH/comp/base/logic/or"
 
 # Packages
-set PACKAGES "$PACKAGES $OFM_PATH/comp/base/pkg/math_pack.vhd"
-set PACKAGES "$PACKAGES $OFM_PATH/comp/base/pkg/type_pack.vhd"
+lappend PACKAGES "$OFM_PATH/comp/base/pkg/math_pack.vhd"
+lappend PACKAGES "$OFM_PATH/comp/base/pkg/type_pack.vhd"
 
-set COMPONENTS [concat $COMPONENTS [list \
-    [ list "EDGE_DETECT"        $EDGE_DETECT_BASE       "FULL" ] \
-    [ list "OR"                 $OR_BASE                "FULL" ] \
-]]
+lappend COMPONENTS [ list "EDGE_DETECT"        $EDGE_DETECT_BASE       "FULL" ]
+lappend COMPONENTS [ list "OR"                 $OR_BASE                "FULL" ]
 
 # Source files for implemented component
-set MOD "$MOD $ENTITY_BASE/emif_refresh.vhd"
+lappend MOD "$ENTITY_BASE/emif_refresh.vhd"

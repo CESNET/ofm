@@ -10,13 +10,11 @@ set MI_PIPE_BASE        "$OFM_PATH/comp/mi_tools/pipe"
 set MUX_BASE            "$OFM_PATH/comp/base/logic/mux"
 
 # Packages
-set PACKAGES "$PACKAGES $OFM_PATH/comp/base/pkg/math_pack.vhd"
-set PACKAGES "$PACKAGES $OFM_PATH/comp/base/pkg/type_pack.vhd"
+lappend PACKAGES "$OFM_PATH/comp/base/pkg/math_pack.vhd"
+lappend PACKAGES "$OFM_PATH/comp/base/pkg/type_pack.vhd"
 
-set COMPONENTS [concat $COMPONENTS [list \
-    [ list "MI_PIPE"            $MI_PIPE_BASE           "FULL" ] \
-    [ list "MUX"                $MUX_BASE               "FULL" ] \
-]]
+lappend COMPONENTS [ list "MI_PIPE"            $MI_PIPE_BASE           "FULL" ]
+lappend COMPONENTS [ list "MUX"                $MUX_BASE               "FULL" ]
 
 # Source files for implemented component
-set MOD "$MOD $ENTITY_BASE/amm_mux.vhd"
+lappend MOD "$ENTITY_BASE/amm_mux.vhd"

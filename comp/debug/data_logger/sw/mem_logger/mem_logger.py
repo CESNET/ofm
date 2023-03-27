@@ -1,0 +1,190 @@
+#!/usr/bin/env python3
+# Copyright (C) 2022 CESNET z. s. p. o.
+# Author(s): Lukas Nevrkla <xnevrk03@stud.fit.vutbr.cz>
+
+import json
+from data_logger.data_logger import DataLogger
+
+class MemLogger(DataLogger):
+
+    LATENCY_TO_FIRST_BIT    = 0
+
+    def __init__(self, dev="/dev/nfb0", compatible="netcope,mem_logger", index=0):
+        super().__init__(dev, compatible, index)
+        mi_width = self.config["MI_DATA_WIDTH"]
+
+        ctrli = self.load_ctrl(False)
+        self.config["MEM_DATA_WIDTH"]   = self.get_bits(ctrli, mi_width, mi_width * 0)
+        self.config["MEM_ADDR_WIDTH"]   = self.get_bits(ctrli, mi_width, mi_width * 1)
+        self.config["MEM_BURST_WIDTH"]  = self.get_bits(ctrli, mi_width, mi_width * 2)
+        self.config["MEM_FREQ_KHZ"]     = self.get_bits(ctrli, mi_width, mi_width * 3)
+
+    def set_config(self, latency_to_first):
+        self.set_ctrlo(latency_to_first & 1)
+
+    def ticks_to_s(self, ticks):
+        return ticks / (self.config["MEM_FREQ_KHZ"] * 1000.0)
+    
+    def ticks_to_flow(self, words, ticks):
+        s = self.ticks_to_s(ticks)
+        if s == 0:
+            return 0
+        return (words * self.config["MEM_DATA_WIDTH"]) / s
+    
+    # Remove leading and trailing zeros
+    def trim_hist(self, data):
+        res = {}
+        res_tmp = {}
+
+        started = False
+        for k, v in data.items():
+            if v != 0 or started:
+                res_tmp[k] = v
+                started = True
+            elif v == 0 or not started:
+                res_tmp = {k: v}
+            if v != 0:
+                res = res_tmp.copy()
+
+        return res
+    
+    def latency_hist_step(self):
+        hist_max  = 2 ** self.config["VALUE_WIDTH"][0] 
+        hist_step = hist_max / self.config["HIST_BOX_CNT"][0]
+        return self.ticks_to_s(hist_step - 1) * 10**9
+
+    def load_stats(self):
+        stats = {}
+
+        ctrlo = self.load_ctrl(True)
+        stats["latency_to_first"] = (ctrlo >> self.LATENCY_TO_FIRST_BIT) & 1
+
+        # Cnters
+        stats["wr_ticks"]       = self.load_cnter(0)
+        stats["rd_ticks"]       = self.load_cnter(1)
+        stats["total_ticks"]    = self.load_cnter(2)
+        stats["wr_req_cnt"]     = self.load_cnter(3)
+        stats["wr_req_words"]   = self.load_cnter(4)
+        stats["rd_req_cnt"]     = self.load_cnter(5)
+        stats["rd_req_words"]   = self.load_cnter(6)
+        stats["rd_resp_words"]  = self.load_cnter(7)
+        stats["err_zero_burst"] = self.load_cnter(8)
+        stats["err_simult_rw"]  = self.load_cnter(9)
+
+        # Values
+        stats["latency"]        = self.load_value(0)
+        stats["paralel_read"]   = self.load_value(1)
+
+        # Calculate time and flow
+        stats["wr_time_ms"]     = self.ticks_to_s(stats['wr_ticks']) * 10**3
+        stats["wr_flow_gbs"]    = self.ticks_to_flow(stats['wr_req_words'], stats['wr_ticks']) / 10**9
+
+        stats["rd_time_ms"]     = self.ticks_to_s(stats['rd_ticks']) * 10**3
+        stats["rd_flow_gbs"]    = self.ticks_to_flow(stats['rd_resp_words'], stats['rd_ticks']) / 10**9
+
+        stats["total_time_ms"]  = self.ticks_to_s(stats['total_ticks']) * 10**3
+        stats["total_flow_gbs"] = self.ticks_to_flow(stats['wr_req_words'] + stats['rd_resp_words'], stats['total_ticks']) / 10**9
+
+        # Calculate latency
+        stats["latency"]["min_ns"]  = self.ticks_to_s(stats["latency"]["min"]) * 10**9
+        stats["latency"]["max_ns"]  = self.ticks_to_s(stats["latency"]["max"]) * 10**9
+        stats["latency"]["avg_ns"]  = self.ticks_to_s(stats["latency"]["avg"]) * 10**9
+
+        # Calculate latency histogram
+        hist_step = self.config["HIST_STEP"][0]
+        stats["latency"]["hist_ns"] = {}
+
+        for i, v in enumerate(stats["latency"]["hist"]):
+            end   = self.ticks_to_s((i + 1) * hist_step - 1) * 10**9
+            stats["latency"]["hist_ns"][end] = v
+        stats["latency"]["hist_ns"]= self.trim_hist(stats["latency"]["hist_ns"])
+
+        return stats
+
+    def stats_to_json(self, stats):
+        res = json.dumps(stats, indent=4)
+        print(res)
+
+    def line_to_str(self, txt, val, unit=""):
+        if isinstance(val, int):
+            val = f"{val:<15}"
+        elif isinstance(val, float):
+            val = f"{val:< .2f}"
+
+        if unit != "":
+            unit = f"[{unit}]"
+        return f"{txt:<20} {val} {unit}\n"
+
+    def stats_to_str(self, stats):
+        res = ""
+        res += "Mem_logger statistics:\n"
+        res += "----------------------\n"
+        res += self.line_to_str("write requests   ", stats['wr_req_cnt'])
+        res += self.line_to_str("  write words    ", stats['wr_req_words'])
+        res += self.line_to_str("read requests    ", stats['rd_req_cnt'])
+        res += self.line_to_str("  requested words", stats['rd_req_words'])
+        res += self.line_to_str("  received words ", stats['rd_resp_words'])
+        res += f"Flow:\n"
+        res += self.line_to_str("  write", stats['wr_flow_gbs'],      "Gb/s")
+        res += self.line_to_str("  read ", stats['rd_flow_gbs'],      "Gb/s")
+        res += self.line_to_str("  total", stats['total_flow_gbs'],   "Gb/s")
+        res += f"Time:\n"
+        res += self.line_to_str("  write", stats['wr_time_ms'],       "ms")
+        res += self.line_to_str("  read ", stats['rd_time_ms'],       "ms")
+        res += self.line_to_str("  total", stats['total_time_ms'],    "ms")
+        res += f"Latency:\n"
+        res += self.line_to_str("  min",   stats['latency']["min_ns"], "ns")
+        res += self.line_to_str("  max",   stats['latency']["max_ns"], "ns")
+        res += self.line_to_str("  avg",   stats['latency']["avg_ns"], "ns")
+        res += f"  histogram [ns]:\n"
+        if len(stats['latency']['hist_ns']) > 0:
+            prev = 0
+            for k, v in stats['latency']['hist_ns'].items():
+                if v != 0:
+                    res += self.line_to_str(f"    {prev:> 6.1f} -{k:> 6.1f} ...", v)
+                prev = k
+        res += f"Errors:\n"
+        res += self.line_to_str("  zero burst count", stats['err_zero_burst'])
+        res += self.line_to_str("  simultaneous r+w", stats['err_simult_rw'])
+
+        res += f"Paralel reads count:\n"
+        res += self.line_to_str("  min",   stats['paralel_read']["min"], "")
+        res += self.line_to_str("  max",   stats['paralel_read']["max"], "")
+        res += self.line_to_str("  avg",   stats['paralel_read']["avg"], "")
+
+        hist_step = self.config["HIST_STEP"][1]
+        prev = 0
+        for i, v in enumerate(stats["paralel_read"]["hist"]):
+            if v != 0:
+                res += self.line_to_str(f"    {prev:> 6.1f} -{hist_step * (i + 1):> 6.1f} ...", v)
+                prev = hist_step * (i + 1)
+       
+        return res
+
+    def config_to_str(self):
+        res = ""
+        res += f"Mem_logger config:\n"
+        res += f"------------------\n"
+        res += f"MEM_DATA_WIDTH:     {self.config['MEM_DATA_WIDTH']}\n"
+        res += f"MEM_ADDR_WIDTH:     {self.config['MEM_ADDR_WIDTH']}\n"
+        res += f"MEM_BURST_WIDTH     {self.config['MEM_BURST_WIDTH']}\n"
+        res += f"MEM_FREQ_KHZ:       {self.config['MEM_FREQ_KHZ']}\n"
+        res += f"LATENCY_WIDTH:      {self.config['VALUE_WIDTH'][0]}\n"
+        res += f"HIST_BOX_CNT:       {self.config['HIST_BOX_CNT'][0]}\n"
+        res += f"HIST_BOX_WIDTH:     {self.config['HIST_BOX_WIDTH'][0]}\n"
+        res += f"\n"
+        return res
+    
+    def print(self):
+        print(self.config_to_str())
+
+        stats = self.load_stats()
+        print(self.stats_to_str(stats))
+
+
+if __name__ == '__main__':
+    logger = MemLogger()
+    logger.print()
+
+    #logger.rst()
+    #logger.set_config(latency_to_first=True)

@@ -6,15 +6,16 @@
 
 
 # Paths to components
-set DP_BRAM_BASE        "$OFM_PATH/comp/base/mem/dp_bram"
-set EDGE_DETECT_BASE    "$OFM_PATH/comp/base/logic/edge_detect"
+set HISTOGRAMER_BASE    "$OFM_PATH/comp/debug/histogramer"
 
 # Packages
 lappend PACKAGES "$OFM_PATH/comp/base/pkg/math_pack.vhd"
 lappend PACKAGES "$OFM_PATH/comp/base/pkg/type_pack.vhd"
 
-lappend COMPONENTS [ list "DP_BRAM"            $DP_BRAM_BASE           "FULL" ]
-lappend COMPONENTS [ list "EDGE_DETECT"        $EDGE_DETECT_BASE       "FULL" ]
+lappend COMPONENTS [ list "HISTOGRAMER"        $HISTOGRAMER_BASE       "FULL" ]
 
 # Source files for implemented component
-lappend MOD "$ENTITY_BASE/amm_gen.vhd"
+lappend MOD "$ENTITY_BASE/data_logger.vhd"
+
+# Component DevTree
+lappend MOD "$ENTITY_BASE/DevTree.tcl"

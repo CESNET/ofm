@@ -11,56 +11,53 @@ use ieee.numeric_std.all;
 use work.math_pack.all;
 use work.type_pack.all;
 
+-- .. vhdl:autogenerics:: MEM_TESTER
 entity MEM_TESTER is
 generic (
-    -- Avalon bus --
+    -- Avalon Memory-Mapped (memory interface) data width
     AMM_DATA_WIDTH          : integer := 512;
     AMM_ADDR_WIDTH          : integer := 26;
     AMM_BURST_COUNT_WIDTH   : integer := 7;
+    -- Avalon Memory-Mapped (memory interface) frequency in kHz
     AMM_FREQ_KHZ            : integer := 266660;
 
-    -- Bus registers --
-    MUX_LATENCY             : integer := 1;
-    SLAVE_INPUT_REG         : boolean := false;
-    MASTER_OUTPUT_REG       : boolean := false;
-    MASTER_INPUT_LATENCY    : integer := 1;
-
-    -- MI bus --
+    -- MI bus data width
     MI_DATA_WIDTH           : integer := 32;
     MI_ADDR_WIDTH           : integer := 32;
 
-    -- Random generators --
+    -- Random data generators width
     -- Random data will be made by adding these generators in series
     -- For alowed values se LFSR_SIMPLE_RANDOM_GEN (4, 8, 16, 20, 24, 26, 32, 64)
     RAND_GEN_DATA_WIDTH     : integer := 64;
     -- Width of random generator for addresses (should be equal or larger then AMM_ADDR width)
     RAND_GEN_ADDR_WIDTH     : integer := 26;
 
+    -- Random data generator seed
     RANDOM_DATA_SEED        : slv_array_t(0 to AMM_DATA_WIDTH / RAND_GEN_DATA_WIDTH - 1)(RAND_GEN_DATA_WIDTH - 1 downto 0);
-    -- If RAND_GEN_ADDR_WIDTH changes, original default value (:= X"FEFE01" & "11";)
-    -- does not work in ModelSim, the default assigned value must be the same width.
     RANDOM_ADDR_SEED        : std_logic_vector(RAND_GEN_ADDR_WIDTH - 1 downto 0) := std_logic_vector(to_unsigned(66844679,RAND_GEN_ADDR_WIDTH));
 
-    -- Manual refresh control
+    -- Manual refresh enable
     REFR_REQ_BEFORE_TEST    : boolean := false;
     REFR_PERIOD_WIDTH       : integer := MI_DATA_WIDTH;
     DEF_REFR_PERIOD         : std_logic_vector(REFR_PERIOD_WIDTH - 1 downto 0) := (others => '0');
 
-    -- Others --
-    -- Burst = number of words transmited in 1 r/w operation
+    -- Enable AMM probe for measurement (depreciated)
+    AMM_PROBE_EN            : boolean := false;
+    -- Latency histogram precision for AMM probe (depreciated)
+    HISTOGRAM_BOXES         : integer := 256;
+    -- Default memory burst count
     DEFAULT_BURST_CNT       : integer := 4;
     -- Until which address should be test done (to reduce simulation resources)
     -- Shoud be power of 2
     DEFAULT_ADDR_LIMIT      : integer := 2**AMM_ADDR_WIDTH - 2 ** AMM_BURST_COUNT_WIDTH;
     -- Force random address generator to generate in range 0 to DEFAULT_ADDR_LIMIT (for simulation)
     DEBUG_RAND_ADDR         : boolean := false;
-    HISTOGRAM_BOXES         : integer := 256;       --512
     DEVICE                  : string
 );
 port(
-    -- ================================
-    -- Avalon interface from EMIF IP
-    -- ================================
+    -- =======================================================================
+    --  Avalon interface from EMIF IP
+    -- =======================================================================
 
     AMM_CLK                 : in std_logic;
     AMM_RST                 : in std_logic;
@@ -75,18 +72,18 @@ port(
     AMM_ADDRESS             : out  std_logic_vector(AMM_ADDR_WIDTH - 1 downto 0);
     AMM_READ_DATA           : in   std_logic_vector(AMM_DATA_WIDTH - 1 downto 0);
     AMM_WRITE_DATA          : out  std_logic_vector(AMM_DATA_WIDTH - 1 downto 0);
-    -- Number of AMM words in one r/w transaction (1 to 127)
+    -- Number of AMM words in one r/w transaction 
     AMM_BURST_COUNT         : out  std_logic_vector(AMM_BURST_COUNT_WIDTH - 1 downto 0);
     AMM_READ_DATA_VALID     : in   std_logic;
 
-    -- Manual memory refresh control
+    -- Manual memory refresh period
     REFR_PERIOD             : out std_logic_vector(REFR_PERIOD_WIDTH - 1 downto 0);
     REFR_REQ                : out std_logic;
     REFR_ACK                : in  std_logic := '1';
 
-    -- ==========================
-    -- Other EMIF IP signals
-    -- ==========================
+    -- =======================================================================
+    --  Other EMIF IP signals
+    -- =======================================================================
 
     -- Force reset and calibration, must be at least 2 clk at '1'
     EMIF_RST_REQ            : out  std_logic;
@@ -100,12 +97,12 @@ port(
     -- Auto precharge request
     EMIF_AUTO_PRECHARGE     : out  std_logic; 
 
-    -- ==========================
-    -- MI bus interface
-    -- ==========================
+    -- =======================================================================
+    --  MI bus interface
+    -- =======================================================================
 
-    MI_CLK                  : in std_logic;
-    MI_RST                  : in std_logic;
+    MI_CLK                  : in std_logic := '0';
+    MI_RST                  : in std_logic := '0';
 
     MI_DWR                  : in  std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
     MI_ADDR                 : in  std_logic_vector(MI_ADDR_WIDTH - 1 downto 0);
@@ -169,6 +166,12 @@ architecture FULL of MEM_TESTER is
     -- AMM_ADDR MUX
     constant SEL_ADDR_CNT           : integer := 2;
     constant SEL_ADDR_WIDTH         : integer := log2(SEL_ADDR_CNT);
+
+    -- AMM MUX config --
+    constant MUX_LATENCY            : integer := 1;
+    constant SLAVE_INPUT_REG        : boolean := false;
+    constant MASTER_OUTPUT_REG      : boolean := false;
+    constant MASTER_INPUT_LATENCY   : integer := 1;
 
     -------------
     -- Signals --
@@ -537,43 +540,50 @@ begin
         AMM_READ_DATA_VALID     => amm_muxed_read_data_valid(MUX_SLOT_AMM_GEN)
     );
 
-    amm_probe_i : entity work.AMM_PROBE
-    generic map (
-        MI_DATA_WIDTH           => MI_DATA_WIDTH,
-        MI_ADDR_WIDTH           => MI_ADDR_USAGE,
-
-        AMM_DATA_WIDTH          => AMM_DATA_WIDTH,
-        AMM_ADDR_WIDTH          => AMM_ADDR_WIDTH,
-        AMM_BURST_COUNT_WIDTH   => AMM_BURST_COUNT_WIDTH,
-        AMM_FREQ_KHZ            => AMM_FREQ_KHZ,
-
-        MI_ADDR_BASE            => AMM_PROBE_BASE,
-        MI_ADDR_USED_BITS       => MI_ADDR_USED_BITS,
-        HISTOGRAM_BOXES         => HISTOGRAM_BOXES,
-        DEVICE                  => DEVICE
-    )
-    port map (
-        CLK                     => AMM_CLK,
-        RST                     => total_rst,
-
-        MI_DWR                  => amm_probe_dwr ,
-        MI_ADDR                 => amm_probe_addr,
-        MI_BE                   => amm_probe_be  ,
-        MI_RD                   => amm_probe_rd  ,
-        MI_WR                   => amm_probe_wr  ,
-        MI_ARDY                 => amm_probe_ardy,
-        MI_DRD                  => amm_probe_drd ,
-        MI_DRDY                 => amm_probe_drdy,
-
-        AMM_READY               => AMM_READY          ,
-        AMM_READ                => AMM_READ           ,
-        AMM_WRITE               => AMM_WRITE          ,
-        AMM_ADDRESS             => AMM_ADDRESS        ,
-        AMM_READ_DATA           => AMM_READ_DATA      ,
-        AMM_WRITE_DATA          => AMM_WRITE_DATA     ,
-        AMM_BURST_COUNT         => AMM_BURST_COUNT    ,
-        AMM_READ_DATA_VALID     => AMM_READ_DATA_VALID
-    );
+    amm_probe_g : if (AMM_PROBE_EN) generate
+        amm_probe_i : entity work.AMM_PROBE
+        generic map (
+            MI_DATA_WIDTH           => MI_DATA_WIDTH,
+            MI_ADDR_WIDTH           => MI_ADDR_USAGE,
+        
+            AMM_DATA_WIDTH          => AMM_DATA_WIDTH,
+            AMM_ADDR_WIDTH          => AMM_ADDR_WIDTH,
+            AMM_BURST_COUNT_WIDTH   => AMM_BURST_COUNT_WIDTH,
+            AMM_FREQ_KHZ            => AMM_FREQ_KHZ,
+        
+            MI_ADDR_BASE            => AMM_PROBE_BASE,
+            MI_ADDR_USED_BITS       => MI_ADDR_USED_BITS,
+            HISTOGRAM_BOXES         => HISTOGRAM_BOXES,
+            DEVICE                  => DEVICE
+        )
+        port map (
+            CLK                     => AMM_CLK,
+            RST                     => total_rst,
+        
+            MI_DWR                  => amm_probe_dwr ,
+            MI_ADDR                 => amm_probe_addr,
+            MI_BE                   => amm_probe_be  ,
+            MI_RD                   => amm_probe_rd  ,
+            MI_WR                   => amm_probe_wr  ,
+            MI_ARDY                 => amm_probe_ardy,
+            MI_DRD                  => amm_probe_drd ,
+            MI_DRDY                 => amm_probe_drdy,
+        
+            AMM_READY               => AMM_READY          ,
+            AMM_READ                => AMM_READ           ,
+            AMM_WRITE               => AMM_WRITE          ,
+            AMM_ADDRESS             => AMM_ADDRESS        ,
+            AMM_READ_DATA           => AMM_READ_DATA      ,
+            AMM_WRITE_DATA          => AMM_WRITE_DATA     ,
+            AMM_BURST_COUNT         => AMM_BURST_COUNT    ,
+            AMM_READ_DATA_VALID     => AMM_READ_DATA_VALID
+        );
+    end generate;
+    no_amm_probe_g : if (AMM_PROBE_EN = false) generate
+        amm_probe_ardy      <= '1';
+        amm_probe_drd       <= X"DEAD_BEAF";
+        amm_probe_drdy      <= amm_probe_rd;
+    end generate;
 
     ------------------------
     -- Interconnect logic --

@@ -54,14 +54,6 @@ use work.type_pack.all;
 -- amm_probe
 -- AMM_PROBE_BASE
 -- ----------------------------------
--- amm_gen for MMR
--- MMR_BASE
--- ----------------------------------
--- amm_probe for MMR
--- MMR_PROBE_BASE
--- ----------------------------------
-
--- TODO: Make MI ctrl in and out one register
 
 entity MEM_TESTER_MI is
 generic (
