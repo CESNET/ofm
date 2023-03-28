@@ -43,7 +43,10 @@
 -- 0x18028 -- PMA TX preemphasis control - postcursor
 -- 0x18010: DRP data
 -- 0x18014: DRP address
--- 0x18018: DRP select + operation type (R/W). Write to this register starts the DPR operation
+-- 0x18018:   [0]: operation type (R/W). Bit is write only
+--          [7:4]: DRP page select. Write only
+--           [31]: '1' = DRP read operation in progress; '0' = DRP data ready. Read only
+--          Write to this register starts the DPR operation
 -- PCS:
 --   TODO
 
@@ -337,6 +340,7 @@ signal drp_drd_sync  : std_logic_vector(DRPDO'range);
 signal drp_drdy_sync : std_logic;
 signal drp_rd        : std_logic;
 signal drp_wr        : std_logic;
+signal drpbusy       : std_logic;
 signal speed_int     : natural;
 signal speed_cap_int : std_logic_vector(15 downto 0);
 
@@ -646,6 +650,12 @@ begin
       if (drp_drdy_sync = '1') then
          drpdo_r <= drp_drd_sync;
       end if;
+      -- DRP read ready/done flag
+      if (drpen_i = '1') and (drpwe_r = '0') then
+         drpbusy <= '1';
+      elsif (drp_drdy_sync = '1') then
+         drpbusy <= '0';
+      end if;
    end if;
 end process;
 
@@ -761,8 +771,8 @@ begin
                    end if;
                 when 200 =>
                    mi_drd_i(16+6 downto 16+3) <= "1010"; -- r1.7.6:3
-                   if pma_mode = "010" or pma_mode = "011" or pma_mode = "100" then
-                       mi_drd_i(16+2 downto 16+0) <= pma_mode; -- 200GBASE-SR4, -DR4, -FR4
+                   if pma_mode = "001" or pma_mode = "010" or pma_mode = "011" or pma_mode = "100" then
+                       mi_drd_i(16+2 downto 16+0) <= pma_mode; -- 200GBASE-CR4, -SR4, -DR4, -FR4
                    else
                        mi_drd_i(16+2 downto 16+0) <= "101";    -- 200GBASE-LR4
                    end if;
@@ -792,7 +802,11 @@ begin
                    end if;
                when  50 =>
                    mi_drd_i(16+6 downto 16+3) <= "1000"; -- r1.7.6:3
-                   mi_drd_i(16+2 downto 16+0) <= pma_mode; -- r1.7.1:0
+                   if pma_mode = "101" or pma_mode = "010" or pma_mode = "011" or pma_mode = "100" then
+                      mi_drd_i(16+2 downto 16+0) <= pma_mode;
+                   else
+                      mi_drd_i(16+2 downto 16+0) <= "001";
+                   end if;
                 when  40 =>
                    mi_drd_i(16+5 downto 16+3) <= "100"; -- r1.7.5:3
                    mi_drd_i(16+2) <= '0';  -- r1.7.2              
@@ -864,7 +878,7 @@ begin
              mi_drd_i(16+6) <= SPEED_CAP_25G and RSFEC_ABLE; -- 25GBASE-LR
              mi_drd_i(16+5) <= '0';                          -- 25GBASE-T
              mi_drd_i(16+4) <= SPEED_CAP_25G and RSFEC_ABLE; -- 25GBASE-SR
-             mi_drd_i(16+3) <= SPEED_CAP_25G and RSFEC_ABLE and AN_ABLE; -- 25GBASE-CR
+             mi_drd_i(16+3) <= SPEED_CAP_25G and RSFEC_ABLE; -- 25GBASE-CR;  NOTE: "AN_ABLE" should be TRUE to be ieee compliant
              mi_drd_i(16+2) <= SPEED_CAP_25G;  -- 25GBASE-CR-S NOTE: Not IEEE compliant as CR medium should include AN
              mi_drd_i(16+1) <= '0';            -- 25GBASE-KR
              mi_drd_i(16+0) <= '0';            -- 25GBASE-KR-S
@@ -874,8 +888,8 @@ begin
              mi_drd_i(4) <= SPEED_CAP_50G; -- 50GBASE-LR
              mi_drd_i(3) <= SPEED_CAP_50G; -- 50GBASE-FR
              mi_drd_i(2) <= SPEED_CAP_50G; -- 50GBASE-SR
-             mi_drd_i(1) <= SPEED_CAP_50G and AN_ABLE;  -- 50GBASE-CR
-             mi_drd_i(0) <= '0';                        -- 50GBASE-KR
+             mi_drd_i(1) <= SPEED_CAP_50G; -- 50GBASE-CR  NOTE: "AN_ABLE" should be TRUE to be ieee compliant
+             mi_drd_i(0) <= '0';           -- 50GBASE-KR
              mi_drd_i(31 downto 16) <= X"0000"; -- r1.21 -- 2.5G/5G PMA/PMD extended ability register
           when "0001011" => -- r 1.22, r1.23 - PMA/PMD extended ability register
              mi_drd_i(15 downto 0)  <= X"0000"; -- r1.22 -- BASE-H PMA/PMD extended ability register
@@ -886,8 +900,8 @@ begin
              mi_drd_i(16+4) <= SPEED_CAP_200G; -- 200GBASE-FR4
              mi_drd_i(16+3) <= SPEED_CAP_200G; -- 200GBASE-DR4
              mi_drd_i(16+2) <= SPEED_CAP_200G; -- 200GBASE-SR4
-             mi_drd_i(16+1) <= SPEED_CAP_200G and AN_ABLE;   -- 200GBASE-CR4
-             mi_drd_i(16+0) <= '0';                          -- 200GBASE-KR4
+             mi_drd_i(16+1) <= SPEED_CAP_200G; -- 200GBASE-CR4 NOTE: "AN_ABLE" should be TRUE to be ieee compliant
+             mi_drd_i(16+0) <= '0';            -- 200GBASE-KR4
           when "0001100" => -- r 1.24, r1.25 - PMA/PMD extended ability register
              mi_drd_i(15 downto 0)  <= X"0000"; -- r1.24 -- 400G PMA/PMD extended ability register
              mi_drd_i(15) <= '1'; -- 400G PMA remote loopback ability
@@ -906,7 +920,7 @@ begin
              mi_drd_i(15 downto 0)  <= X"0000"; -- r1.26 -- 40/100G PMA/PMD extended ability register 2
              if PMA_LANES = 2 then
                  mi_drd_i(9)  <= SPEED_CAP_100G;             -- 100GBASE-SR2
-                 mi_drd_i(8)  <= SPEED_CAP_100G and AN_ABLE; -- 100GBASE-CR2
+                 mi_drd_i(8)  <= SPEED_CAP_100G;             -- 100GBASE-CR2 NOTE: "AN_ABLE" should be TRUE to be ieee compliant
                  mi_drd_i(7)  <= '0';                        -- 100GBASE-KR2
              elsif PMA_LANES = 1 then
                  mi_drd_i(6)  <= '0';            -- 100GBASE-ZR
@@ -982,6 +996,8 @@ begin
             mi_drd_i(drpdo_r'range) <= drpdo_r;
          when "0101" => -- 0x8014: DRP address
             mi_drd_i(drpaddr_r'range) <= drpaddr_r;
+         when "0110" => -- 0x8018: DRP control
+            mi_drd_i(31) <= drpbusy;
          when "1000" => -- 0x8020
             mi_drd_i <= pma_drive_r;                     
          when "1001" => -- 0x8024
@@ -1204,12 +1220,12 @@ begin
       drpwe_r    <= '0';
       if async_rst_mi = '1' then 
          case speed_int is -- default PMA modes
-            when 400 => -- 400GBASE-SR8
+            when 400 => -- 400GBASE-SR8 TBD: -CR8 mode would be better, however it is not defined in ieee yet
                pma_mode <= "111";
-            when 200 => -- 200GBASE-SR4
-               pma_mode <= "010";
-            when  50 => -- 50GBASE-SR
-               pma_mode <= "010";
+            when 200 => -- 200GBASE-CR4
+               pma_mode <= "001";
+            when  50 => -- 50GBASE-CR
+               pma_mode <= "001";
             when  100 => -- 100GBASE
                if PMA_LANES = 10 then
                    pma_mode <= "101"; -- 100GBASE-SR10
@@ -1220,7 +1236,7 @@ begin
                        pma_mode <= "010"; -- 100GBASE-LR4
                    end if;
                elsif PMA_LANES = 2 then
-                   pma_mode <= "010"; -- 100GBASE-SR2
+                   pma_mode <= "001"; -- 100GBASE-CR2
                else
                    pma_mode <= "011"; -- 100GBASE-DR
                end if;
