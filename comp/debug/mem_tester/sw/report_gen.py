@@ -14,6 +14,7 @@ import argparse
 import json
 import numpy as np
 
+import nfb
 from mem_tester                 import MemTester
 from mem_logger.mem_logger      import MemLogger
 from logger_tools.logger_tools  import LoggerTools
@@ -22,23 +23,20 @@ from pdf_gen.pdf_gen            import PDFGen
 
 class ReportGen:
     def __init__(self, graph_gen,
-        dev         = "/dev/nfb0", 
-        tester_comp = "netcope,mem_tester", 
-        logger_comp = "netcope,mem_logger",
+        dev         = "/dev/nfb0"
     ):
         self.graph_gen      = graph_gen
         self.dev            = dev        
-        self.tester_comp    = tester_comp
-        self.logger_comp    = logger_comp
 
         self.iterCnt         = 0
         self.currIter        = 0
         self.prevIter        = 0
 
         self.tools      = LoggerTools()
-        self.mem_tester = MemTester()
-        self.tester_cnt = self.mem_tester.compatible_cnt(dev, tester_comp)
-        self.logger_cnt = self.mem_tester.compatible_cnt(dev, logger_comp)
+        self.tester_comp = MemTester.DT_COMPATIBLE
+        self.logger_comp = MemLogger.DT_COMPATIBLE
+        self.tester_cnt  = MemTester.compatible_cnt(dev=dev, comp=self.tester_comp)
+        self.logger_cnt  = MemTester.compatible_cnt(dev=dev, comp=self.logger_comp)
         assert self.tester_cnt <= self.logger_cnt
 
         self.logger_config = []
@@ -50,7 +48,7 @@ class ReportGen:
             'info': {
                 'dev':              self.dev,
                 'tester_comp':      self.tester_comp,
-                'tester_cnt':       self.tester_cnt,
+                'tester_cnt':       self.logger_comp,
                 'logger_comp':      self.logger_comp,
                 'logger_cnt':       self.logger_cnt,
                 'logger_config':    self.logger_config,
@@ -58,8 +56,8 @@ class ReportGen:
         }
 
     def open(self, index):
-        logger = MemLogger(self.dev, self.logger_comp, index)
-        self.mem_tester.open(self.dev, self.tester_comp, index, logger)
+        logger = MemLogger(dev=self.dev, index=index)
+        self.mem_tester = MemTester(logger, dev=self.dev, index=index)
 
     def test(self, key, descript, index, params, test_param=None, param_values=None):
         data = {
@@ -140,6 +138,8 @@ def print_progress(progress, txt='Complete', prefix = 'Progress', decimals = 1, 
 
 def parseParams():
     parser = argparse.ArgumentParser(description ="""Report generator for mem_tester component""")
+    parser.add_argument('-d', '--device', default=nfb.libnfb.Nfb.default_device, 
+                        metavar='device', help = """device with target FPGA card.""")
     parser.add_argument('format', nargs='?', default='pdf', choices=['md', 'pdf'], 
                         help = """Format of the output report)""")
     args = parser.parse_args()
@@ -174,7 +174,7 @@ if __name__ == '__main__':
 
     tools       = LoggerTools()
     graph_gen   = GraphGen(folder=img_path, ratio=(13,6), output=[".png"])
-    gen         = ReportGen(graph_gen)
+    gen         = ReportGen(graph_gen, dev=args.device)
     pdf         = PDFGen()
 
     burst_seq   = gen.get_burst_seq(0, 50, burst_scale=0.25)

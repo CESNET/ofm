@@ -10,90 +10,70 @@ import argparse
 
 from mem_logger.mem_logger import MemLogger
 
-class MemTester():
+class MemTester(nfb.BaseComp):
+
+    DT_COMPATIBLE = "netcope,mem_tester"
 
     # Mem_tester registers
-    CTRL_IN_REG             = 0x000000
-    CTRL_OUT_REG            = 0x000004
-    ERR_CNT_REG             = 0x000008
-    BURST_CNT_REG           = 0x00000C
-    ADDR_LIM_REG            = 0x000010
-    REFRESH_PERIOD_REG      = 0x000014
-    DEF_REFRESH_PERIOD_REG  = 0x000018
+    _REG_CTRL_IN             = 0x000000
+    _REG_CTRL_OUT            = 0x000004
+    _REG_ERR_CNT             = 0x000008
+    _REG_BURST_CNT           = 0x00000C
+    _REG_ADDR_LIM            = 0x000010
+    _REG_REFRESH_PERIOD      = 0x000014
+    _REG_DEF_REFRESH_PERIOD  = 0x000018
 
     # CTRL OUT BITS
-    TEST_DONE_BIT           = 0
-    TEST_SUCCESS_BIT        = 1
-    ECC_ERR_BIT             = 2
-    CALIB_SUCCESS_BIT       = 3
-    CALIB_FAIL_BIT          = 4
-    MAIN_AMM_READY_BIT      = 5
+    _BIT_TEST_DONE           = 0
+    _BIT_TEST_SUCCESS        = 1
+    _BIT_ECC_ERR             = 2
+    _BIT_CALIB_SUCCESS       = 3
+    _BIT_CALIB_FAIL          = 4
+    _BIT_MAIN_AMM_READY      = 5
 
     # CTRL IN BITS
-    RESET_BIT               = 0
-    RESET_EMIF_BIT          = 1
-    RUN_TEST_BIT            = 2
-    AMM_GEN_EN_BIT          = 3
-    RANDOM_ADDR_EN_BIT      = 4
-    ONLY_ONE_SIMULT_READ_BIT= 5
-    AUTO_PRECHARGE_REQ_BIT  = 6
+    _BIT_RESET               = 0
+    _BIT_RESET_EMIF          = 1
+    _BIT_RUN_TEST            = 2
+    _BIT_AMM_GEN_EN          = 3
+    _BIT_RANDOM_ADDR_EN      = 4
+    _BIT_ONLY_ONE_SIMULT_READ= 5
+    _BIT_AUTO_PRECHARGE_REQ  = 6
 
     # AMM_GEN registers
     AMM_GEN_BASE            = 0x00040
-    AMM_GEN_CTRL_REG        = AMM_GEN_BASE + 0x000000
-    AMM_GEN_ADDR_REG        = AMM_GEN_BASE + 0x000004
-    AMM_GEN_SLICE_REG       = AMM_GEN_BASE + 0x000008
-    AMM_GEN_DATA_REG        = AMM_GEN_BASE + 0x00000C
-    AMM_GEN_BURST_REG       = AMM_GEN_BASE + 0x000010
+    _REG_AMM_GEN_CTRL        = AMM_GEN_BASE + 0x000000
+    _REG_AMM_GEN_ADDR        = AMM_GEN_BASE + 0x000004
+    _REG_AMM_GEN_SLICE       = AMM_GEN_BASE + 0x000008
+    _REG_AMM_GEN_DATA        = AMM_GEN_BASE + 0x00000C
+    _REG_AMM_GEN_BURST       = AMM_GEN_BASE + 0x000010
 
     # AMM_GEN CTRL REG bits
-    MEM_WR_BIT              = 0
-    MEM_RD_BIT              = 1
-    BUFF_VLD_BIT            = 2
-    AMM_READY_BIT           = 3
+    _BIT_MEM_WR              = 0
+    _BIT_MEM_RD              = 1
+    _BIT_BUFF_VLD            = 2
+    _BIT_AMM_READY           = 3
 
-    def __init__(self):
-        self.dev = None
-
-    def compatible_cnt(self, dev="/dev/nfb0", compatible="netcope,mem_tester"):
-        if self.dev is None:
-            self.dev = nfb.open(dev)
-        nodes = self.dev.fdt_get_compatible(compatible)
-        return len(nodes)
-
-    def open(self, dev="/dev/nfb0", compatible="netcope,mem_tester", index=0, mem_logger=None):
-        if mem_logger is None:
-            mem_logger = MemLogger(index=index)
-
-        if self.dev is None:
-            self.dev = nfb.open(dev)
-        self.comp = self.dev.comp_open(compatible, index)
+    def __init__(self, mem_logger, **kwargs):
+        super().__init__(**kwargs)
 
         self.mem_logger = mem_logger
         self.last_test_config = None
 
-    def mi_read(self, addr):
-        return self.comp.read32(addr)
-    
-    def mi_write(self, addr, data):
-        return self.comp.write32(addr, data)
-    
-    def mi_set_bit(self, addr, bit):
-        old = self.mi_read(addr)
-        self.mi_write(addr, old | (1 << bit))
+    @staticmethod
+    def compatible_cnt(dev=nfb.libnfb.Nfb.default_device, comp=None):
+        dev = nfb.open(dev)
+        nodes = dev.fdt_get_compatible(comp if comp is not None else MemTester.DT_COMPATIBLE)
+        return len(nodes)
 
-    def mi_clear_bit(self, addr, bit):
-        old = self.mi_read(addr)
-        self.mi_write(addr, old & (~(1 << bit)))
-   
     def mi_toggle(self, addr, bit):
-        self.mi_set_bit(addr, bit)
-        self.mi_clear_bit(addr, bit)
+        self._comp.set_bit(addr, bit)
+        self._comp.clr_bit(addr, bit)
 
     def mi_wait_bit(self, addr, bit, timeout=5, delay=0.01):
         t = 0
         while t < timeout:
-            data = self.mi_read(addr)
+            data = self._comp.read32(addr)
             if (data >> bit) & 1:
                 return True
             else:
@@ -105,28 +85,28 @@ class MemTester():
     def load_status(self):
         status = { }
 
-        ctrlo = self.mi_read(self.CTRL_OUT_REG)
-        status["test_done"]             = (ctrlo >> self.TEST_DONE_BIT)       & 1
-        status["test_succ"]             = (ctrlo >> self.TEST_SUCCESS_BIT)    & 1
-        status["ecc_err_occ"]           = (ctrlo >> self.ECC_ERR_BIT)         & 1
-        status["calib_succ"]            = (ctrlo >> self.CALIB_SUCCESS_BIT)   & 1
-        status["calib_fail"]            = (ctrlo >> self.CALIB_FAIL_BIT)      & 1
-        status["amm_ready"]             = (ctrlo >> self.MAIN_AMM_READY_BIT)  & 1
+        ctrlo = self._comp.read32(self._REG_CTRL_OUT)
+        status["test_done"]             = (ctrlo >> self._BIT_TEST_DONE)       & 1
+        status["test_succ"]             = (ctrlo >> self._BIT_TEST_SUCCESS)    & 1
+        status["ecc_err_occ"]           = (ctrlo >> self._BIT_ECC_ERR)         & 1
+        status["calib_succ"]            = (ctrlo >> self._BIT_CALIB_SUCCESS)   & 1
+        status["calib_fail"]            = (ctrlo >> self._BIT_CALIB_FAIL)      & 1
+        status["amm_ready"]             = (ctrlo >> self._BIT_MAIN_AMM_READY)  & 1
 
-        ctrli = self.mi_read(self.CTRL_IN_REG)
-        status["rst"]                   = (ctrli >> self.RESET_BIT)                 & 1
-        status["rst_emif"]              = (ctrli >> self.RESET_EMIF_BIT)            & 1
-        status["run_test"]              = (ctrli >> self.RUN_TEST_BIT)              & 1
-        status["amm_gen_en"]            = (ctrli >> self.AMM_GEN_EN_BIT)            & 1
-        status["random_addr_en"]        = (ctrli >> self.RANDOM_ADDR_EN_BIT)        & 1
-        status["one_simult_read"]       = (ctrli >> self.ONLY_ONE_SIMULT_READ_BIT)  & 1
-        status["auto_precharge"]        = (ctrli >> self.AUTO_PRECHARGE_REQ_BIT)    & 1
+        ctrli = self._comp.read32(self._REG_CTRL_IN)
+        status["rst"]                   = (ctrli >> self._BIT_RESET)                 & 1
+        status["rst_emif"]              = (ctrli >> self._BIT_RESET_EMIF)            & 1
+        status["run_test"]              = (ctrli >> self._BIT_RUN_TEST)              & 1
+        status["amm_gen_en"]            = (ctrli >> self._BIT_AMM_GEN_EN)            & 1
+        status["random_addr_en"]        = (ctrli >> self._BIT_RANDOM_ADDR_EN)        & 1
+        status["one_simult_read"]       = (ctrli >> self._BIT_ONLY_ONE_SIMULT_READ)  & 1
+        status["auto_precharge"]        = (ctrli >> self._BIT_AUTO_PRECHARGE_REQ)    & 1
 
-        status["err_cnt"]               = self.mi_read(self.ERR_CNT_REG)
-        status["burst_cnt"]             = self.mi_read(self.BURST_CNT_REG)
-        status["addr_lim"]              = self.mi_read(self.ADDR_LIM_REG)
-        status["refr_period_ticks"]     = self.mi_read(self.REFRESH_PERIOD_REG)
-        status["def_refr_period_ticks"] = self.mi_read(self.DEF_REFRESH_PERIOD_REG)
+        status["err_cnt"]               = self._comp.read32(self._REG_ERR_CNT)
+        status["burst_cnt"]             = self._comp.read32(self._REG_BURST_CNT)
+        status["addr_lim"]              = self._comp.read32(self._REG_ADDR_LIM)
+        status["refr_period_ticks"]     = self._comp.read32(self._REG_REFRESH_PERIOD)
+        status["def_refr_period_ticks"] = self._comp.read32(self._REG_DEF_REFRESH_PERIOD)
         
         return status
     
@@ -158,18 +138,18 @@ class MemTester():
         return res
     
     def rst(self, emif=True):
-        self.mi_toggle(self.CTRL_IN_REG, self.RESET_BIT)
+        self.mi_toggle(self._REG_CTRL_IN, self._BIT_RESET)
         if emif:
-            self.mi_toggle(self.CTRL_IN_REG, self.RESET_EMIF_BIT)
+            self.mi_toggle(self._REG_CTRL_IN, self._BIT_RESET_EMIF)
 
-        if not self.mi_wait_bit(self.CTRL_OUT_REG, self.MAIN_AMM_READY_BIT):
+        if not self._comp.wait_for_bit(self._REG_CTRL_OUT, self._BIT_MAIN_AMM_READY):
             print("Reset failed (MEM_READY was not set)", file=sys.stderr)
             return False
         return True
 
     def execute_test(self):
-        self.mi_toggle(self.CTRL_IN_REG, self.RUN_TEST_BIT)
-        if not self.mi_wait_bit(self.CTRL_OUT_REG, self.TEST_DONE_BIT, timeout=60):
+        self.mi_toggle(self._REG_CTRL_IN, self._BIT_RUN_TEST)
+        if not self._comp.wait_for_bit(self._REG_CTRL_OUT, self._BIT_TEST_DONE, timeout=60):
             print("Test timeout (TEST_DONE was not set)", file=sys.stderr)
 
     def config_test(self, 
@@ -187,30 +167,30 @@ class MemTester():
 
         self.rst(False)
         self.mem_logger.rst()
-        self.mi_write(self.BURST_CNT_REG, burst_cnt)
+        self._comp.write32(self._REG_BURST_CNT, burst_cnt)
 
         ctrli = 0
         if rand_addr:
-            ctrli += (1 << self.RANDOM_ADDR_EN_BIT)
+            ctrli += (1 << self._BIT_RANDOM_ADDR_EN)
         if only_one_simult_read:
-            ctrli += (1 << self.ONLY_ONE_SIMULT_READ_BIT)
+            ctrli += (1 << self._BIT_ONLY_ONE_SIMULT_READ)
         if auto_precharge:
-            ctrli += (1 << self.AUTO_PRECHARGE_REQ_BIT)
-        self.mi_write(self.CTRL_IN_REG, ctrli)
+            ctrli += (1 << self._BIT_AUTO_PRECHARGE_REQ)
+        self._comp.write32(self._REG_CTRL_IN, ctrli)
 
         addr_lim = 0
         max_addr = 2 ** self.mem_logger.config["MEM_ADDR_WIDTH"] * addr_lim_scale
         if addr_lim_scale >= 1.0:
             max_addr -= 2 * burst_cnt
         addr_lim = int((max_addr // burst_cnt) * burst_cnt)
-        self.mi_write(self.ADDR_LIM_REG, addr_lim)
+        self._comp.write32(self._REG_ADDR_LIM, addr_lim)
 
         if latency_to_first:
             self.mem_logger.set_config(latency_to_first=True)
 
         if refresh_period is None:
             refresh_period = self.load_status()["def_refr_period_ticks"]
-        self.mi_write(self.REFRESH_PERIOD_REG, refresh_period)
+        self._comp.write32(self._REG_REFRESH_PERIOD, refresh_period)
 
         self.last_test_config = {
             "rand_addr":            rand_addr,
@@ -258,66 +238,66 @@ class MemTester():
         return res
 
     def amm_gen_set_buff(self, burst, data):
-        prev_addr = self.mi_read(self.AMM_GEN_ADDR_REG)
+        prev_addr = self._comp.read32(self._REG_AMM_GEN_ADDR)
         mi_width  = self.mem_logger.config["MI_DATA_WIDTH"]
         slices    = math.ceil(self.mem_logger.config["MEM_DATA_WIDTH"] / mi_width)
 
         for s in range(0, slices):
             slice = self.mem_logger.get_bits(data, mi_width, mi_width * s)
-            self.mi_write(self.AMM_GEN_ADDR_REG, burst)
-            self.mi_write(self.AMM_GEN_SLICE_REG, s)
-            self.mi_write(self.AMM_GEN_DATA_REG, slice)
+            self._comp.write32(self._REG_AMM_GEN_ADDR, burst)
+            self._comp.write32(self._REG_AMM_GEN_SLICE, s)
+            self._comp.write32(self._REG_AMM_GEN_DATA, slice)
         
-        self.mi_write(self.AMM_GEN_ADDR_REG, prev_addr)
+        self._comp.write32(self._REG_AMM_GEN_ADDR, prev_addr)
 
     def amm_gen_get_buff(self):
         mi_width  = self.mem_logger.config["MI_DATA_WIDTH"]
         slices    = math.ceil(self.mem_logger.config["MEM_DATA_WIDTH"] / mi_width)
-        prev_addr = self.mi_read(self.AMM_GEN_ADDR_REG)
-        burst     = self.mi_read(self.AMM_GEN_BURST_REG)
+        prev_addr = self._comp.read32(self._REG_AMM_GEN_ADDR)
+        burst     = self._comp.read32(self._REG_AMM_GEN_BURST)
 
         data = []
         for b in range(0, burst):
             val = 0
             for s in range(0, slices):
-                self.mi_write(self.AMM_GEN_ADDR_REG, b)
-                self.mi_write(self.AMM_GEN_SLICE_REG, s)
-                slice = self.mi_read(self.AMM_GEN_DATA_REG)
+                self._comp.write32(self._REG_AMM_GEN_ADDR, b)
+                self._comp.write32(self._REG_AMM_GEN_SLICE, s)
+                slice = self._comp.read32(self._REG_AMM_GEN_DATA)
                 val += slice << (s * mi_width)
             data.append(val)
         
-        self.mi_write(self.AMM_GEN_ADDR_REG, prev_addr)
+        self._comp.write32(self._REG_AMM_GEN_ADDR, prev_addr)
         return data
 
     def amm_gen_set_burst(self, burst):
-        self.mi_write(self.AMM_GEN_BURST_REG, burst)
+        self._comp.write32(self._REG_AMM_GEN_BURST, burst)
 
     def amm_gen_write(self, addr):
-        self.mi_write(self.AMM_GEN_ADDR_REG, addr)
-        self.mi_set_bit(self.CTRL_IN_REG, self.AMM_GEN_EN_BIT)
-        self.mi_toggle(self.AMM_GEN_CTRL_REG, self.MEM_WR_BIT)
-        self.mi_clear_bit(self.CTRL_IN_REG, self.AMM_GEN_EN_BIT)
+        self._comp.write32(self._REG_AMM_GEN_ADDR, addr)
+        self._comp.set_bit(self._REG_CTRL_IN, self._BIT_AMM_GEN_EN)
+        self.mi_toggle(self._REG_AMM_GEN_CTRL, self._BIT_MEM_WR)
+        self._comp.clr_bit(self._REG_CTRL_IN, self._BIT_AMM_GEN_EN)
 
     def amm_gen_read(self, addr):
-        self.mi_write(self.AMM_GEN_ADDR_REG, addr)
-        self.mi_set_bit(self.CTRL_IN_REG, self.AMM_GEN_EN_BIT)
-        self.mi_toggle(self.AMM_GEN_CTRL_REG, self.MEM_RD_BIT)
-        self.mi_clear_bit(self.CTRL_IN_REG, self.AMM_GEN_EN_BIT)
+        self._comp.write32(self._REG_AMM_GEN_ADDR, addr)
+        self._comp.set_bit(self._REG_CTRL_IN, self._BIT_AMM_GEN_EN)
+        self.mi_toggle(self._REG_AMM_GEN_CTRL, self._BIT_MEM_RD)
+        self._comp.clr_bit(self._REG_CTRL_IN, self._BIT_AMM_GEN_EN)
 
     def amm_gen_to_str(self):
-        ctrl  = self.mi_read(self.AMM_GEN_CTRL_REG)
-        addr  = self.mi_read(self.AMM_GEN_ADDR_REG)
-        slice = self.mi_read(self.AMM_GEN_SLICE_REG)
-        burst = self.mi_read(self.AMM_GEN_BURST_REG)
-        data  = self.mi_read(self.AMM_GEN_DATA_REG)
+        ctrl  = self._comp.read32(self._REG_AMM_GEN_CTRL)
+        addr  = self._comp.read32(self._REG_AMM_GEN_ADDR)
+        slice = self._comp.read32(self._REG_AMM_GEN_SLICE)
+        burst = self._comp.read32(self._REG_AMM_GEN_BURST)
+        data  = self._comp.read32(self._REG_AMM_GEN_DATA)
 
         res =  f"Amm_gen status:\n"
         res += f"--------------\n"
         res += f"control register:\n"
-        res += f"  memory write                 {(ctrl >> self.MEM_WR_BIT) & 1}\n"
-        res += f"  memory read                  {(ctrl >> self.MEM_RD_BIT) & 1}\n"
-        res += f"  buffer vld                   {(ctrl >> self.BUFF_VLD_BIT) & 1}\n"
-        res += f"  memory ready                 {(ctrl >> self.AMM_READY_BIT) & 1}\n"
+        res += f"  memory write                 {(ctrl >> self._BIT_MEM_WR) & 1}\n"
+        res += f"  memory read                  {(ctrl >> self._BIT_MEM_RD) & 1}\n"
+        res += f"  buffer vld                   {(ctrl >> self._BIT_BUFF_VLD) & 1}\n"
+        res += f"  memory ready                 {(ctrl >> self._BIT_AMM_READY) & 1}\n"
         res += f"address                        {addr}\n"
         res += f"slice                          {slice}\n"
         res += f"burst                          {burst}\n"
@@ -331,9 +311,8 @@ def parseParams():
     )
 
     access = parser.add_argument_group('card access arguments')
-    access.add_argument('-d', '--device', default='/dev/nfb0', metavar='device', help = """device with target FPGA card.""")
-    access.add_argument('-c', '--comp', metavar='compatible', default='netcope,mem_tester', help = """mem_tester compatible inside DevTree.""")
-    access.add_argument('-C', '--logger-comp', metavar='compatible', default='netcope,mem_logger', help = """mem_logger compatible inside DevTree.""")
+    access.add_argument('-d', '--device', default=nfb.libnfb.Nfb.default_device, 
+                        metavar='device', help = """device with target FPGA card.""")
     access.add_argument('-i', '--index',        type=int, metavar='index', default=0, help = """mem_tester index inside DevTree.""")
     access.add_argument('-I', '--logger-index', type=int, metavar='index', default=None, help = """mem_logger index inside DevTree.""")
 
@@ -370,9 +349,8 @@ if __name__ == '__main__':
     if args.logger_index is None:
         args.logger_index = args.index
 
-    logger = MemLogger(args.device, args.logger_comp, args.logger_index)
-    tester = MemTester()
-    tester.open(args.device, args.comp, args.index, logger)
+    logger = MemLogger(dev=args.device, index=args.logger_index)
+    tester = MemTester(logger, dev=args.device, index=args.index)
 
     if args.print:
         status = tester.load_status()
