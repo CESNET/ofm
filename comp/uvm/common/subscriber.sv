@@ -1,12 +1,16 @@
 /*
  * file       :  subscriber.sv
  * Copyright (C) 2021 CESNET z. s. p. o.
- * description: item to model add time;
+ * description: This is deprecated. Please use uvm_common::fifo_model_input in file fifo.sv instead.
  * date       : 2021
  * author     : Radek Iša <isa@cesnet.cz>
  *
  * SPDX-License-Identifier: BSD-3-Clause
 */
+
+////////////////////////////////////////////////
+// THIS IS OBSOLID !!!!!!!!!!
+////////////////////////////////////////////////
 
 
 ////////////////////////////////////////////////

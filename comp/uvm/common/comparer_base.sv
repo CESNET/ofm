@@ -30,8 +30,8 @@ virtual class comparer_base#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) extends uvm
     uvm_analysis_imp_model#(model_item#(MODEL_ITEM), this_type) analysis_imp_model;
     uvm_analysis_imp_dut  #(DUT_ITEM, this_type)                analysis_imp_dut;
 
-    time                    dut_tr_timeout;
-    time                    model_tr_timeout;
+    protected time dut_tr_timeout;
+    protected time model_tr_timeout;
 
     function new(string name, uvm_component parent = null);
         super.new(name, parent);

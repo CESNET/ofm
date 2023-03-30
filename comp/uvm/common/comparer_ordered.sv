@@ -26,7 +26,7 @@ virtual class comparer_base_ordered#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) ext
     endfunction
 
     virtual function int unsigned success();
-        return (errors != 0);
+        return (errors == 0);
     endfunction
 
     virtual function void flush();

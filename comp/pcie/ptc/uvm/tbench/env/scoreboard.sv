@@ -72,8 +72,7 @@ endclass
 class rc_compare extends uvm_component;
     `uvm_component_utils(uvm_ptc::rc_compare)
 
-    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item#(32))                           model_mfb;
-    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(sv_dma_bus_pack::DMA_DOWNHDR_WIDTH)) model_mvb;
+    uvm_tlm_analysis_fifo #(pcie_data#(sv_dma_bus_pack::DMA_DOWNHDR_WIDTH)) model;
 
     uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item#(32))                           dut_mfb;
     uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(sv_dma_bus_pack::DMA_DOWNHDR_WIDTH)) dut_mvb;
@@ -89,8 +88,9 @@ class rc_compare extends uvm_component;
 
     function new(string name, uvm_component parent);
         super.new(name, parent);
-        model_mfb = new("model_mfb", this);
-        model_mvb = new("model_mvb", this);
+        model = new("model", this);
+        //model_mfb = new("model_mfb", this);
+        //model_mvb = new("model_mvb", this);
         dut_mfb   = new("dut_mfb", this);
         dut_mvb   = new("dut_mvb", this);
         errors    = 0;
@@ -99,8 +99,7 @@ class rc_compare extends uvm_component;
     endfunction
 
     task run_phase(uvm_phase phase);
-        uvm_logic_vector_array::sequence_item#(32)                           tr_model_mfb;
-        uvm_logic_vector::sequence_item#(sv_dma_bus_pack::DMA_DOWNHDR_WIDTH) tr_model_mvb;
+        pcie_data#(sv_dma_bus_pack::DMA_DOWNHDR_WIDTH) tr_model;
 
         uvm_logic_vector_array::sequence_item#(32)                           tr_dut_mfb;
         uvm_logic_vector::sequence_item#(sv_dma_bus_pack::DMA_DOWNHDR_WIDTH) tr_dut_mvb;
@@ -110,15 +109,14 @@ class rc_compare extends uvm_component;
             string debug_msg = "";
             logic[32 : 0] header = '0;
 
-            model_mfb.get(tr_model_mfb);
-            model_mvb.get(tr_model_mvb);
+            model.get(tr_model);
             dut_mfb.get(tr_dut_mfb);
             dut_mvb.get(tr_dut_mvb);
 
             down_cnt++;
 
-            $swrite(debug_msg, "%s\n\t Model MFB DOWN TR NUMBER %d: %s\n", debug_msg, down_cnt, tr_model_mfb.convert2string());
-            $swrite(debug_msg, "%s\n\t Model MVB DOWN TR NUMBER %d: %s\n", debug_msg, down_cnt, tr_model_mvb.convert2string());
+            $swrite(debug_msg, "%s\n\t Model MFB DOWN TR NUMBER %d: %p\n", debug_msg, down_cnt, tr_model.data);
+            $swrite(debug_msg, "%s\n\t Model MVB DOWN TR NUMBER %d: %h\n", debug_msg, down_cnt, tr_model.meta);
             $swrite(debug_msg, "%s\n\t DUT MFB DOWN TR NUMBER   %d: %s\n", debug_msg, down_cnt, tr_dut_mfb.convert2string());
             $swrite(debug_msg, "%s\n\t DUT MVB DOWN TR NUMBER   %d: %s\n", debug_msg, down_cnt, tr_dut_mvb.convert2string());
             `uvm_info(this.get_full_name(), debug_msg ,UVM_FULL);
@@ -132,7 +130,11 @@ class rc_compare extends uvm_component;
             end
 
             if (dut_down_mfb_array.size() != 0) begin
-                comp(tr_dut_mvb, tr_dut_mfb, tr_model_mfb);
+                uvm_logic_vector_array::sequence_item#(32) model_mfb;
+
+                model_mfb = uvm_logic_vector_array::sequence_item#(32)::type_id::create("model_mfb", this);
+                model_mfb.data = tr_model.data;
+                comp(tr_dut_mvb, tr_dut_mfb, model_mfb);
             end
         end
     endtask
@@ -212,8 +214,7 @@ class compare #(PCIE_UPHDR_WIDTH, PCIE_PREFIX_WIDTH) extends uvm_component;
     int unsigned errors;
     int unsigned compared;
 
-    uvm_logic_vector_array::sequence_item #(32)         mfb_tr_table[$];
-    uvm_logic_vector::sequence_item #(PCIE_UPHDR_WIDTH) mvb_tr_table[$];
+    pcie_data#(PCIE_UPHDR_WIDTH)                        tr_table[$];
 
     uvm_logic_vector_array::sequence_item #(32)         rq_mfb_tr_table[$];
     uvm_logic_vector::sequence_item #(PCIE_UPHDR_WIDTH) rq_mvb_tr_table[$];
@@ -226,6 +227,7 @@ class compare #(PCIE_UPHDR_WIDTH, PCIE_PREFIX_WIDTH) extends uvm_component;
     endfunction
 
     task comp();
+        pcie_data#(PCIE_UPHDR_WIDTH) tr_model;
         uvm_logic_vector_array::sequence_item #(32)         tr_model_up_mfb;
         uvm_logic_vector::sequence_item #(PCIE_UPHDR_WIDTH) tr_model_up_mvb;
 
@@ -234,12 +236,15 @@ class compare #(PCIE_UPHDR_WIDTH, PCIE_PREFIX_WIDTH) extends uvm_component;
         uvm_logic_vector::sequence_item #(PCIE_PREFIX_WIDTH) tr_dut_rq_mvb_pref;
         string debug_msg = "";
 
-        if (mvb_tr_table.size() != 0 && rq_mvb_tr_table.size() != 0) begin
+        if (tr_table.size() != 0 && rq_mvb_tr_table.size() != 0) begin
 
-            tr_model_up_mvb = mvb_tr_table.pop_front();
             tr_dut_rq_mvb = rq_mvb_tr_table.pop_front();
-            tr_model_up_mfb = mfb_tr_table.pop_front();
             tr_dut_rq_mfb = rq_mfb_tr_table.pop_front();
+            tr_model = tr_table.pop_front();
+            tr_model_up_mfb = uvm_logic_vector_array::sequence_item #(32)::type_id::create();
+            tr_model_up_mfb.data = tr_model.data;
+            tr_model_up_mvb = uvm_logic_vector::sequence_item #(PCIE_UPHDR_WIDTH)::type_id::create();
+            tr_model_up_mvb.data = tr_model.meta;
 
             $swrite(debug_msg, "%s\n\t Model RQ DATA TR:   %s\n", debug_msg, tr_model_up_mfb.convert2string());
             $swrite(debug_msg, "%s\n\t Model RQ HEADER TR: %s\n", debug_msg, tr_model_up_mvb.convert2string());
@@ -259,6 +264,7 @@ class compare #(PCIE_UPHDR_WIDTH, PCIE_PREFIX_WIDTH) extends uvm_component;
         end
     endtask
 endclass
+
 
 
 class scoreboard #(META_WIDTH, MFB_DOWN_REGIONS, MFB_UP_REGIONS, DMA_MVB_UP_ITEMS, PCIE_PREFIX_WIDTH, PCIE_UPHDR_WIDTH, RQ_TUSER_WIDTH, DMA_MVB_DOWN_ITEMS, PCIE_DOWNHDR_WIDTH, DMA_PORTS, ENDPOINT_TYPE, DEVICE) extends uvm_scoreboard;
@@ -284,9 +290,7 @@ class scoreboard #(META_WIDTH, MFB_DOWN_REGIONS, MFB_UP_REGIONS, DMA_MVB_UP_ITEM
     uvm_analysis_export #(uvm_logic_vector::sequence_item #(sv_dma_bus_pack::DMA_DOWNHDR_WIDTH)) down_mvb_out[DMA_PORTS];
 
     // Model FIFO
-
-    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item #(32))                           model_up_mfb_out;
-    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(PCIE_UPHDR_WIDTH))                   model_up_mvb_out;
+    uvm_tlm_analysis_fifo#(pcie_data#(PCIE_UPHDR_WIDTH)) model_up;
     uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item #(32))                           model_down_mfb_out[DMA_PORTS];
     uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(sv_dma_bus_pack::DMA_DOWNHDR_WIDTH)) model_down_mvb_out[DMA_PORTS];
 
@@ -304,8 +308,8 @@ class scoreboard #(META_WIDTH, MFB_DOWN_REGIONS, MFB_UP_REGIONS, DMA_MVB_UP_ITEM
     uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(PCIE_PREFIX_WIDTH))  dut_rc_prefix_mvb_out;
 
     //uvm_ptc_info::sync_tag tag_sync[DMA_PORTS];
-    model #(META_WIDTH, MFB_DOWN_REGIONS, MFB_UP_REGIONS, DMA_PORTS, DMA_MVB_UP_ITEMS, PCIE_UPHDR_WIDTH, PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH, ENDPOINT_TYPE, DEVICE) m_model;
-    down_model #(DMA_PORTS, PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH, DEVICE) m_down_model;
+    model_rc #(DMA_PORTS, PCIE_UPHDR_WIDTH) m_model;
+    down_model #(DMA_PORTS) m_down_model;
     uvm_ptc::compare #(PCIE_UPHDR_WIDTH, PCIE_PREFIX_WIDTH) out_compare[DMA_PORTS];
     uvm_ptc::rc_compare answer_compare[DMA_PORTS];
     uvm_ptc::up_catch catch_up[DMA_PORTS];
@@ -336,8 +340,7 @@ class scoreboard #(META_WIDTH, MFB_DOWN_REGIONS, MFB_UP_REGIONS, DMA_MVB_UP_ITEM
         dut_rq_mvb_out        = new("dut_rq_mvb_out",        this);
         dut_rq_prefix_mvb_out = new("dut_rq_prefix_mvb_out", this);
 
-        model_up_mfb_out      = new("model_up_mfb_out",      this);
-        model_up_mvb_out      = new("model_up_mvb_out",      this);
+        model_up = new("model_up", this);
 
         for (int unsigned it = 0; it < DMA_PORTS; it++) begin
             string it_str;
@@ -364,8 +367,7 @@ class scoreboard #(META_WIDTH, MFB_DOWN_REGIONS, MFB_UP_REGIONS, DMA_MVB_UP_ITEM
         ret |= (dut_rq_mvb_out.used()      != 0);
         ret |= (dut_rc_mfb_out.used()      != 0);
         ret |= (dut_rc_meta_out.used()     != 0);
-        ret |= (model_up_mfb_out.used()    != 0);
-        ret |= (model_up_mvb_out.used()    != 0);
+        ret |= (model_up.used() != 0);
         ret |= (dut_rq_axi_meta_out.used() != 0);
 
         for (int it = 0; it < DMA_PORTS; it++) begin
@@ -376,13 +378,29 @@ class scoreboard #(META_WIDTH, MFB_DOWN_REGIONS, MFB_UP_REGIONS, DMA_MVB_UP_ITEM
     endfunction
 
     function void build_phase(uvm_phase phase);
-        m_model = model #(META_WIDTH, MFB_DOWN_REGIONS, MFB_UP_REGIONS, DMA_PORTS, DMA_MVB_UP_ITEMS, PCIE_UPHDR_WIDTH, PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH, ENDPOINT_TYPE, DEVICE)::type_id::create("m_model", this);
-        m_down_model = down_model #(DMA_PORTS, PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH, DEVICE)::type_id::create("m_down_model", this);
+        if (DEVICE == "STRATIX10" || DEVICE ==  "AGILEX") begin
+            m_model = model_rc_intel #(DMA_PORTS, PCIE_UPHDR_WIDTH, ENDPOINT_TYPE)::type_id::create("m_model", this);
+        end else if (DEVICE == "7SERIES" || DEVICE == "VIRTEX6" || DEVICE == "ULTRASCALE") begin
+            m_model = model_rc_xilinx #(DMA_PORTS, PCIE_UPHDR_WIDTH)::type_id::create("m_model", this);
+        end
+
+        m_down_model = down_model #(DMA_PORTS)::type_id::create("m_down_model", this);
+        if (DEVICE == "STRATIX10" || DEVICE == "AGILEX") begin
+            m_down_model.model_rc = model_down_input_fifo_intel#(PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH, DMA_PORTS)::type_id::create("model_rc", m_down_model);
+        end else if (DEVICE == "7SERIES" || DEVICE == "VIRTEX6" || DEVICE == "ULTRASCALE") begin
+            m_down_model.model_rc = model_down_input_fifo_xilinx#(PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH, DMA_PORTS)::type_id::create("model_rc", m_down_model);
+        end else begin
+            `uvm_fatal(this.get_full_name(), $sformatf("\n\tUnknow device %s", DEVICE));
+        end
+
 
         for (int it = 0; it < DMA_PORTS; it++) begin
             string it_string;
 
             it_string.itoa(it);
+            m_model.model_up[it] = model_rc_input_fifo#(sv_dma_bus_pack::DMA_UPHDR_WIDTH)::type_id::create({"model_up_", it_string}, this);
+
+
             out_compare[it]    = uvm_ptc::compare #(PCIE_UPHDR_WIDTH, PCIE_PREFIX_WIDTH)::type_id::create({"out_compare_", it_string}, this);
             answer_compare[it] = uvm_ptc::rc_compare::type_id::create({"answer_compare_", it_string}, this);
             catch_up[it]       = uvm_ptc::up_catch::type_id::create({"catch_up_", it_string}, this);
@@ -398,10 +416,13 @@ class scoreboard #(META_WIDTH, MFB_DOWN_REGIONS, MFB_UP_REGIONS, DMA_MVB_UP_ITEM
     endfunction
 
     function void connect_phase(uvm_phase phase);
+        model_down_input_fifo#(PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH) down_model_fifo;
+
         // Model inputs
-        rc_mfb_in.connect(m_down_model.model_rc_mfb_in.analysis_export);
-        rc_meta_in.connect(m_down_model.model_rc_meta_in.analysis_export);
-        rc_prefix_mvb_in.connect(m_down_model.model_rc_prefix_mvb_in.analysis_export);
+        $cast(down_model_fifo, m_down_model.model_rc);
+        rc_mfb_in.connect(down_model_fifo.mfb_in.analysis_export);
+        rc_meta_in.connect(down_model_fifo.meta_in.analysis_export);
+        rc_prefix_mvb_in.connect(down_model_fifo.prefix_in.analysis_export);
 
         // DUT outputs
         rq_mfb_out.connect(dut_rq_mfb_out.analysis_export);
@@ -411,14 +432,14 @@ class scoreboard #(META_WIDTH, MFB_DOWN_REGIONS, MFB_UP_REGIONS, DMA_MVB_UP_ITEM
 
         // Model outputs
         for (int it = 0; it < DMA_PORTS; it++) begin
-            string i_string;
+            model_rc_input_fifo#(sv_dma_bus_pack::DMA_UPHDR_WIDTH) fifo_model_up;
             // Model inputs
-            up_mfb_in[it].connect(m_model.model_up_mfb_in[it].analysis_export);
-            up_mvb_in[it].connect(m_model.model_up_mvb_in[it].analysis_export);
+            $cast(fifo_model_up, m_model.model_up[it]);
+            up_mfb_in[it].connect(fifo_model_up.mfb.analysis_export);
+            up_mvb_in[it].connect(fifo_model_up.mvb.analysis_export);
 
             // Model outputs
-            m_down_model.model_down_mfb_out[it].connect(answer_compare[it].model_mfb.analysis_export);
-            m_down_model.model_down_mvb_out[it].connect(answer_compare[it].model_mvb.analysis_export);
+            m_down_model.model_down[it].connect(answer_compare[it].model.analysis_export);
             down_mfb_out[it].connect(answer_compare[it].dut_mfb.analysis_export);
             down_mvb_out[it].connect(answer_compare[it].dut_mvb.analysis_export);
 
@@ -427,17 +448,15 @@ class scoreboard #(META_WIDTH, MFB_DOWN_REGIONS, MFB_UP_REGIONS, DMA_MVB_UP_ITEM
             answer_compare[it].catch_up = catch_up[it];
 
         end
-        m_model.model_up_mfb_out.connect(model_up_mfb_out.analysis_export);
-        m_model.model_up_mvb_out.connect(model_up_mvb_out.analysis_export);
+
+        m_model.model_down.connect(model_up.analysis_export);
     endfunction
 
     task run_phase(uvm_phase phase);
-        uvm_logic_vector_array::sequence_item #(32)          tr_model_up_mfb;
-        uvm_logic_vector::sequence_item #(PCIE_UPHDR_WIDTH)  tr_model_up_mvb;
+        pcie_data#(PCIE_UPHDR_WIDTH)  tr_model_up;
 
         uvm_logic_vector_array::sequence_item #(32)          tr_dut_rq_mfb;
         uvm_logic_vector::sequence_item #(PCIE_UPHDR_WIDTH)  tr_dut_rq_mvb;
-        uvm_logic_vector::sequence_item #(PCIE_PREFIX_WIDTH) tr_dut_rq_mvb_pref;
         uvm_logic_vector::sequence_item #(HDR_USER_WIDTH)    tr_dut_rq_mvb_user;
         uvm_logic_vector::sequence_item #(RQ_TUSER_WIDTH)    tr_dut_rq_axi_meta;
 
@@ -457,10 +476,8 @@ class scoreboard #(META_WIDTH, MFB_DOWN_REGIONS, MFB_UP_REGIONS, DMA_MVB_UP_ITEM
             int len_model = 0;
             int len_dut = 0;
             tr_dut_rq_mvb_user = uvm_logic_vector::sequence_item #(HDR_USER_WIDTH)::type_id::create("tr_dut_rq_mvb_user");
-            // tr_dut_rq_axi_meta = uvm_logic_vector::sequence_item #(RQ_TUSER_WIDTH)::type_id::create("tr_dut_rq_axi_meta");
 
-            model_up_mfb_out.get(tr_model_up_mfb);
-            model_up_mvb_out.get(tr_model_up_mvb);
+            model_up.get(tr_model_up);
             dut_rq_mfb_out.get(tr_dut_rq_mfb);
             dut_rq_mvb_out.get(tr_dut_rq_mvb);
             if (DEVICE == "STRATIX10" || DEVICE == "AGILEX") begin
@@ -474,41 +491,41 @@ class scoreboard #(META_WIDTH, MFB_DOWN_REGIONS, MFB_UP_REGIONS, DMA_MVB_UP_ITEM
             total_cnt++;
 
             $swrite(debug_msg, "\n\t =============== RQ SCOREBOARD DATA =============== \n");
-            $swrite(debug_msg, "%s\t Model AXI RQ TR: %s\n",    debug_msg, tr_model_up_mfb.convert2string());
-            $swrite(debug_msg, "%s\t Model RQ HEADER TR: %s\n", debug_msg, tr_model_up_mvb.convert2string());
+            $swrite(debug_msg, "%s\t Model AXI RQ TR: %p\n",    debug_msg, tr_model_up.data);
+            $swrite(debug_msg, "%s\t Model RQ HEADER TR: %h\n", debug_msg, tr_model_up.meta);
             $swrite(debug_msg, "%s\t DUT AXI RQ TR: %s\n",      debug_msg, tr_dut_rq_mfb.convert2string());
             $swrite(debug_msg, "%s\t DUT RQ HEADER TR: %s\n",   debug_msg, tr_dut_rq_mvb.convert2string());
             `uvm_info(this.get_full_name(), debug_msg ,UVM_MEDIUM);
 
             if (DEVICE == "STRATIX10" || DEVICE == "AGILEX") begin
                 if (DMA_PORTS > 1) begin
-                    port_model = int'(tr_model_up_mvb.data[48+PORTS_W_FIX-1 : 48]);
+                    port_model = int'(tr_model_up.meta[48+PORTS_W_FIX-1 : 48]);
                     port_dut   = int'(tr_dut_rq_mvb.data[48+PORTS_W_FIX-1 : 48]);
                 end else begin
                     port_model = 0;
                     port_dut   = 0;
                 end
 
-                type_n_model = tr_model_up_mvb.data[30];
+                type_n_model = tr_model_up.meta[30];
                 type_n_dut = tr_dut_rq_mvb.data[30];
-                tag_model = (tr_model_up_mvb.data[48-1 : 40]);
+                tag_model = (tr_model_up.meta[48-1 : 40]);
                 tag_dut = (tr_dut_rq_mvb.data[48-1 : 40]);
-                len_model = int'(tr_model_up_mvb.data[10-1 : 0]);
+                len_model = int'(tr_model_up.meta[10-1 : 0]);
                 len_dut = int'(tr_dut_rq_mvb.data[10-1 : 0]);
             end else begin
                 if (DMA_PORTS > 1) begin
-                    port_model = int'(tr_model_up_mvb.data[80+PORTS_W_FIX-1 : 80]);
+                    port_model = int'(tr_model_up.meta[80+PORTS_W_FIX-1 : 80]);
                     port_dut   = int'(tr_dut_rq_mvb.data[80+PORTS_W_FIX-1 : 80]);
                 end else begin
                     port_model = 0;
                     port_dut   = 0;
                 end
 
-                type_n_model = tr_model_up_mvb.data[75];
+                type_n_model = tr_model_up.meta[75];
                 type_n_dut = tr_dut_rq_mvb.data[75];
-                tag_model = (tr_model_up_mvb.data[103 : 96]);
+                tag_model = (tr_model_up.meta[103 : 96]);
                 tag_dut = (tr_dut_rq_mvb.data[103 : 96]);
-                len_model = int'(tr_model_up_mvb.data[75-1 : 64]);
+                len_model = int'(tr_model_up.meta[75-1 : 64]);
                 len_dut = int'(tr_dut_rq_mvb.data[75-1 : 64]);
             end
 
@@ -520,8 +537,7 @@ class scoreboard #(META_WIDTH, MFB_DOWN_REGIONS, MFB_UP_REGIONS, DMA_MVB_UP_ITEM
             `uvm_info(this.get_full_name(), debug_msg ,UVM_MEDIUM);
 
             if (type_n_model == 1'b1) begin
-                out_compare[port_model].mfb_tr_table.push_back(tr_model_up_mfb);
-                out_compare[port_model].mvb_tr_table.push_back(tr_model_up_mvb);
+                out_compare[port_model].tr_table.push_back(tr_model_up);
             end
             if (type_n_dut == 1'b1) begin
                 out_compare[port_dut].rq_mfb_tr_table.push_back(tr_dut_rq_mfb);
@@ -544,7 +560,7 @@ class scoreboard #(META_WIDTH, MFB_DOWN_REGIONS, MFB_UP_REGIONS, DMA_MVB_UP_ITEM
        for (int unsigned it = 0; it < DMA_PORTS; it++) begin
             $swrite(msg, "%s\n\t OUT OUTPUT [%0d] compared %0d errors %0d",                msg, it, out_compare[it].compared, out_compare[it].errors);
             $swrite(msg, "%s\n\t ANSWER OUTPUT [%0d] compared %0d errors %0d",             msg, it, answer_compare[it].compared, answer_compare[it].errors);
-            $swrite(msg, "%s\n\t RQ TR TABLE [%0d] size %0d UP TR TABLE [%0d] size %0d\n", msg, it, out_compare[it].rq_mvb_tr_table.size(), it,  out_compare[it].mvb_tr_table.size());
+            $swrite(msg, "%s\n\t RQ TR TABLE [%0d] size %0d UP TR TABLE [%0d] size %0d\n", msg, it, out_compare[it].rq_mvb_tr_table.size(), it,  out_compare[it].tr_table.size());
             $swrite(msg, "%s\n\t model_down_mfb_out[%0d] USED [%0d]",                      msg, it, model_down_mfb_out[it].used());
             $swrite(msg, "%s\n\t model_down_mvb_out[%0d] USED [%0d]\n",                    msg, it, model_down_mvb_out[it].used());
        end
@@ -552,8 +568,7 @@ class scoreboard #(META_WIDTH, MFB_DOWN_REGIONS, MFB_UP_REGIONS, DMA_MVB_UP_ITEM
             $swrite(msg, "%s\n\t dut_rq_mvb_out USED [%0d]",        msg, dut_rq_mvb_out.used());
             $swrite(msg, "%s\n\t dut_rc_mfb_out USED [%0d]",        msg, dut_rc_mfb_out.used());
             $swrite(msg, "%s\n\t dut_rc_meta_out USED [%0d]",       msg, dut_rc_meta_out.used());
-            $swrite(msg, "%s\n\t model_up_mfb_out USED [%0d]",      msg, model_up_mfb_out.used());
-            $swrite(msg, "%s\n\t model_up_mvb_out USED [%0d]\n",    msg, model_up_mvb_out.used());
+            $swrite(msg, "%s\n\t model_up USED [%0d]",      msg, model_up.used());
             $swrite(msg, "%s\n\t dut_rq_axi_meta_out USED [%0d]\n", msg, dut_rq_axi_meta_out.used());
             $swrite(msg, "%s\n\t Final USED [%0d]",                 msg, this.used());
 
