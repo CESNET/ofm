@@ -3,21 +3,25 @@
 # Author(s): Lukas Nevrkla <xnevrk03@stud.fit.vutbr.cz>
 
 import json
+import argparse
+import nfb
 from data_logger.data_logger import DataLogger
 
 class MemLogger(DataLogger):
 
-    LATENCY_TO_FIRST_BIT    = 0
+    DT_COMPATIBLE = "netcope,mem_logger"
 
-    def __init__(self, dev="/dev/nfb0", compatible="netcope,mem_logger", index=0):
-        super().__init__(dev, compatible, index)
-        mi_width = self.config["MI_DATA_WIDTH"]
+    _BIT_LATENCY_TO_FIRST    = 0
+
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
         ctrli = self.load_ctrl(False)
-        self.config["MEM_DATA_WIDTH"]   = self.get_bits(ctrli, mi_width, mi_width * 0)
-        self.config["MEM_ADDR_WIDTH"]   = self.get_bits(ctrli, mi_width, mi_width * 1)
-        self.config["MEM_BURST_WIDTH"]  = self.get_bits(ctrli, mi_width, mi_width * 2)
-        self.config["MEM_FREQ_KHZ"]     = self.get_bits(ctrli, mi_width, mi_width * 3)
+        self.config["MEM_DATA_WIDTH"]   = self.get_bits(ctrli, self.mi_width, self.mi_width * 0)
+        self.config["MEM_ADDR_WIDTH"]   = self.get_bits(ctrli, self.mi_width, self.mi_width * 1)
+        self.config["MEM_BURST_WIDTH"]  = self.get_bits(ctrli, self.mi_width, self.mi_width * 2)
+        self.config["MEM_FREQ_KHZ"]     = self.get_bits(ctrli, self.mi_width, self.mi_width * 3)
 
     def set_config(self, latency_to_first):
         self.set_ctrlo(latency_to_first & 1)
@@ -57,7 +61,7 @@ class MemLogger(DataLogger):
         stats = {}
 
         ctrlo = self.load_ctrl(True)
-        stats["latency_to_first"] = (ctrlo >> self.LATENCY_TO_FIRST_BIT) & 1
+        stats["latency_to_first"] = (ctrlo >> self._BIT_LATENCY_TO_FIRST) & 1
 
         # Cnters
         stats["wr_ticks"]       = self.load_cnter(0)
@@ -73,7 +77,8 @@ class MemLogger(DataLogger):
 
         # Values
         stats["latency"]        = self.load_value(0)
-        stats["paralel_read"]   = self.load_value(1)
+        if self.config["VALUE_CNT"] > 1:
+            stats["paralel_read"]   = self.load_value(1)
 
         # Calculate time and flow
         stats["wr_time_ms"]     = self.ticks_to_s(stats['wr_ticks']) * 10**3
@@ -147,17 +152,18 @@ class MemLogger(DataLogger):
         res += self.line_to_str("  zero burst count", stats['err_zero_burst'])
         res += self.line_to_str("  simultaneous r+w", stats['err_simult_rw'])
 
-        res += f"Paralel reads count:\n"
-        res += self.line_to_str("  min",   stats['paralel_read']["min"], "")
-        res += self.line_to_str("  max",   stats['paralel_read']["max"], "")
-        res += self.line_to_str("  avg",   stats['paralel_read']["avg"], "")
+        if self.config['VALUE_CNT'] > 1:
+            res += f"Paralel reads count:\n"
+            res += self.line_to_str("  min",   stats['paralel_read']["min"], "")
+            res += self.line_to_str("  max",   stats['paralel_read']["max"], "")
+            res += self.line_to_str("  avg",   stats['paralel_read']["avg"], "")
 
-        hist_step = self.config["HIST_STEP"][1]
-        prev = 0
-        for i, v in enumerate(stats["paralel_read"]["hist"]):
-            if v != 0:
-                res += self.line_to_str(f"    {prev:> 6.1f} -{hist_step * (i + 1):> 6.1f} ...", v)
-                prev = hist_step * (i + 1)
+            hist_step = self.config["HIST_STEP"][1]
+            prev = 0
+            for i, v in enumerate(stats["paralel_read"]["hist"]):
+                if v != 0:
+                    res += self.line_to_str(f"    {prev:> 6.1f} -{hist_step * (i + 1):> 6.1f} ...", v)
+                    prev = hist_step * (i + 1)
        
         return res
 
@@ -181,10 +187,31 @@ class MemLogger(DataLogger):
         stats = self.load_stats()
         print(self.stats_to_str(stats))
 
+def parseParams():
+    parser = argparse.ArgumentParser(description = 
+        """mem_logger control script""",
+    )
+
+    access = parser.add_argument_group('card access arguments')
+    access.add_argument('-d', '--device', default=nfb.libnfb.Nfb.default_device, 
+                        metavar='device', help = """device with target FPGA card""")
+    access.add_argument('-i', '--index',        type=int, metavar='index', default=0, help = """index inside DevTree""")
+
+    common = parser.add_argument_group('common arguments')
+    #common.add_argument('-p', '--print', action='store_true', help = """print registers""")
+    common.add_argument('--rst', action='store_true', help = """reset mem_tester and mem_logger""")
+    args = parser.parse_args()
+    return args
+
 
 if __name__ == '__main__':
-    logger = MemLogger()
+    args = parseParams()
+    logger = MemLogger(dev=args.device, index=args.index)
+
+    #if args.print:
     logger.print()
 
-    #logger.rst()
+    if args.rst:
+        logger.rst()
+
     #logger.set_config(latency_to_first=True)

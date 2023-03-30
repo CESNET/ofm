@@ -3,7 +3,7 @@
 # Author(s): Lukas Nevrkla <xnevrk03@stud.fit.vutbr.cz>
 
 from mem_tester import MemTester
-import pytest
+from mem_logger.mem_logger import MemLogger
 
 # python3 -m pytest -xs --tb=short test_mem_tester.py 
 # -s ... to show measured data
@@ -14,9 +14,8 @@ import pytest
 # TESTS #
 #########
 
-def comp_cnt(comp="netcope,mem_tester"):
-    tester = MemTester()
-    return tester.compatible_cnt(compatible=comp)
+def comp_cnt(comp=MemTester.DT_COMPATIBLE):
+    return MemTester.compatible_cnt(comp=comp)
 
 def test_comp_cnt():
     tester_cnt = comp_cnt()
@@ -28,8 +27,8 @@ def test_comp_cnt():
     assert logger_cnt == tester_cnt, "Number of mem_testers does not match number of mem_loggers"
 
 def open(index):
-    tester = MemTester()
-    tester.open(index=index)
+    logger = MemLogger(index=index)
+    tester = MemTester(logger, index=index)
     return tester
 
 def test_open():
