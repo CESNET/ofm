@@ -1,10 +1,10 @@
 # Makefile: Makefile to compile module
-# Copyright (C) 2022 CESNET z. s. p. o.
+# Copyright (C) 2023 CESNET z. s. p. o.
 # Author(s): Vladislav Valek <xvalek14@vutbr.cz>
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-TOP_LEVEL_ENT=RX_DMA_INPUT_BUFFER
+TOP_LEVEL_ENT=TX_DMA_CHAN_START_STOP_CTRL
 TOP_LEVEL_PATH=..
 
 SYNTH=vivado

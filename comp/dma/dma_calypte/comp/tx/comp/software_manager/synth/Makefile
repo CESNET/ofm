@@ -1,5 +1,5 @@
 # Makefile: Makefile to compile module
-# Copyright (C) 2022 CESNET z. s. p. o.
+# Copyright (C) 2023 CESNET z. s. p. o.
 # Author(s): Vladislav Valek <xvalek14@vutbr.cz>
 #
 # SPDX-License-Identifier: BSD-3-Clause
@@ -15,4 +15,4 @@ CLK_PERIOD=4.000
 .PHONY: all
 all: comp
 
-include ../../../../../../build/Makefile
+include ../../../../../../../../build/Makefile
