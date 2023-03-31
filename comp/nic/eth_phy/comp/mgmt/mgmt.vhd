@@ -778,7 +778,7 @@ begin
                    end if;
                 when 100 =>
                    if (PMA_LANES = 10) then
-                      mi_drd_i(16+5 downto 16+1) <= "1010";                        -- r1.7.5:0 -xR10
+                      mi_drd_i(16+6 downto 16+1) <= "010100";                      -- r1.7.5:0 -xR10
                       mi_drd_i(16+0)             <= pma_mode(0) or (not AN_ABLE);  -- r1.7.0   0 = CR10, AN must be supported; 1 = SR10, always supported
                    elsif (PMA_LANES = 2) then
                       mi_drd_i(16+6 downto 16+2) <= "10010";                        -- r1.7.6:2 -xR2
