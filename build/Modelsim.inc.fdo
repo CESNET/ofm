@@ -316,7 +316,7 @@ proc nb_sim_sanitize_vars {user_sim_flags sim_flags hierarchy VARS} {
 proc nb_vsim_set_flags {vsim_flags sim_flags} {
     upvar 1 $vsim_flags VSIM_FLAGS $sim_flags SIM_FLAGS
 
-    set VSIM_FLAGS "-t 1ps -lib work -permit_unmatched_virtual_intf"
+    set VSIM_FLAGS "-t 1ps -lib work"
     if {$SIM_FLAGS(CODE_COVERAGE)} {
         lappend VSIM_FLAGS "-coverage"
     }
