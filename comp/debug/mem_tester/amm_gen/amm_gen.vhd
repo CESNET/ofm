@@ -346,7 +346,7 @@ begin
             elsif (mi_addr_sliced = DATA_REG_ADDR)  then 
                 MI_DRD <= curr_slice_delayed;
             elsif (mi_addr_sliced = BURST_REG_ADDR) then 
-                MI_DRD <= (BURST_BITS - 1 downto 0 => target_burst_cnt, others => '0');
+                MI_DRD <= (MI_DATA_WIDTH - 1 downto BURST_BITS => '0') & target_burst_cnt;
             else
                 MI_DRD <= X"DEADBEEF";
             end if;

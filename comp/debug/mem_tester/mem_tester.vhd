@@ -735,7 +735,7 @@ begin
     begin
         if (rising_edge(AMM_CLK)) then
             if (total_rst = '1' or (burst_done = '1' and burst_en = '1')) then
-                curr_burst_cnt <= (0 => '1', others => '0');
+                curr_burst_cnt <= std_logic_vector(to_unsigned(1, AMM_BURST_COUNT_WIDTH));
             elsif (burst_en = '1') then
                 curr_burst_cnt <= std_logic_vector(unsigned(curr_burst_cnt) + 1);
             end if;
@@ -746,7 +746,7 @@ begin
     begin
         if (rising_edge(AMM_CLK)) then
             if (total_rst = '1' or (read_burst_done = '1' and read_burst_en = '1')) then
-                curr_read_burst_cnt <= (0 => '1', others => '0');
+                curr_read_burst_cnt <= std_logic_vector(to_unsigned(1, AMM_BURST_COUNT_WIDTH));
             elsif (read_burst_en = '1') then
                 curr_read_burst_cnt <= std_logic_vector(unsigned(curr_read_burst_cnt) + 1);
             end if;

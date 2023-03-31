@@ -196,10 +196,10 @@ architecture FULL of AMM_PROBE is
     -- PROBE --                          
     -- If larger ticks counters needed, one must break down data into multiple MI regs
     constant TICKS_WIDTH                : integer := MI_DATA_WIDTH;
-    constant TICKS_LIMIT                : std_logic_vector(TICKS_WIDTH - 1 downto 0) := (others => '1');
+    constant TICKS_LIMIT                : unsigned(TICKS_WIDTH - 1 downto 0) := (others => '1');
 
     constant WORDS_CNT_WIDTH            : integer := MI_DATA_WIDTH;
-    constant WORDS_CNT_LIMIT            : std_logic_vector(WORDS_CNT_WIDTH - 1 downto 0) := (others => '1');
+    constant WORDS_CNT_LIMIT            : unsigned(WORDS_CNT_WIDTH - 1 downto 0) := (others => '1');
 
     -- Max latency ticks = 4095 => with freq = 333.33 Mhz => max. latency = 12us 
     constant LATENCY_TICKS_WIDTH        : integer := 12;
@@ -265,40 +265,40 @@ architecture FULL of AMM_PROBE is
     signal amm_rd_resp                  : std_logic;
     -- Counters
     -- Burst counters start at 1 to match AMM_BURST_COUNT
-    signal wr_burst                     : std_logic_vector(AMM_BURST_COUNT_WIDTH - 1 downto 0);
+    signal wr_burst                     : unsigned(AMM_BURST_COUNT_WIDTH - 1 downto 0);
     signal wr_burst_done                : std_logic;
-    signal rd_burst                     : std_logic_vector(AMM_BURST_COUNT_WIDTH - 1 downto 0);
+    signal rd_burst                     : unsigned(AMM_BURST_COUNT_WIDTH - 1 downto 0);
     signal rd_burst_done                : std_logic;
     signal rd_burst_start               : std_logic;
 
     -- PROBE --
-    signal wr_ticks                     : std_logic_vector(TICKS_WIDTH - 1 downto 0);
+    signal wr_ticks                     : unsigned(TICKS_WIDTH - 1 downto 0);
     signal wr_ticks_full                : std_logic;
     signal wr_ticks_en                  : std_logic;
     signal wr_ticks_en_delayed          : std_logic;
     signal wr_ticks_ovf_occ             : std_logic;
 
-    signal rd_ticks                     : std_logic_vector(TICKS_WIDTH - 1 downto 0);
+    signal rd_ticks                     : unsigned(TICKS_WIDTH - 1 downto 0);
     signal rd_ticks_full                : std_logic;
     signal rd_ticks_en                  : std_logic;
     signal rd_ticks_en_delayed          : std_logic;
     signal rd_ticks_ovf_occ             : std_logic;
 
-    signal rw_ticks                     : std_logic_vector(TICKS_WIDTH - 1 downto 0);
+    signal rw_ticks                     : unsigned(TICKS_WIDTH - 1 downto 0);
     signal rw_ticks_full                : std_logic;
     signal rw_ticks_en                  : std_logic;
     signal rw_ticks_en_delayed          : std_logic;
     signal rw_ticks_ovf_occ             : std_logic;
 
-    signal wr_words                     : std_logic_vector(WORDS_CNT_WIDTH - 1 downto 0);       
+    signal wr_words                     : unsigned(WORDS_CNT_WIDTH - 1 downto 0);       
     signal wr_words_full                : std_logic;
     signal wr_words_ovf_occ             : std_logic;
 
-    signal rd_words                     : std_logic_vector(WORDS_CNT_WIDTH - 1 downto 0);       
+    signal rd_words                     : unsigned(WORDS_CNT_WIDTH - 1 downto 0);       
     signal rd_words_full                : std_logic;
     signal rd_words_ovf_occ             : std_logic;
 
-    signal req_cnt                      : std_logic_vector(WORDS_CNT_WIDTH - 1 downto 0);       
+    signal req_cnt                      : unsigned(WORDS_CNT_WIDTH - 1 downto 0);       
     signal req_cnt_full                 : std_logic;
     signal req_cnt_ovf_occ              : std_logic;
 
@@ -418,11 +418,11 @@ begin
     amm_rd_req                      <= amm_intern_read  and amm_intern_ready;
     amm_rd_resp                     <= amm_intern_read_data_valid;
     -- Counters done
-    wr_burst_done                   <= '1' when (AMM_BURST_COUNT = wr_burst and amm_wr_req = '1') else
+    wr_burst_done                   <= '1' when (unsigned(AMM_BURST_COUNT) = wr_burst and amm_wr_req = '1') else
                                        '0';
-    rd_burst_done                   <= '1' when (AMM_BURST_COUNT = rd_burst and amm_rd_resp = '1') else
+    rd_burst_done                   <= '1' when (unsigned(AMM_BURST_COUNT) = rd_burst and amm_rd_resp = '1') else
                                        '0';
-    rd_burst_start                  <= '1' when (to_integer(unsigned(rd_burst)) = 1 and amm_rd_resp = '1') else
+    rd_burst_start                  <= '1' when (rd_burst = 1 and amm_rd_resp = '1') else
                                        '0';
 
     -- PROBE --
@@ -471,23 +471,23 @@ begin
             elsif (mi_addr_sliced = id_to_addr_f(RW_TICKS_REG_ID)   ) then 
                 MI_DRD <= rw_ticks_reg;
             elsif (mi_addr_sliced = id_to_addr_f(WR_WORDS_REG_ID)   ) then 
-                MI_DRD <= wr_words;
+                MI_DRD <= std_logic_vector(wr_words);
             elsif (mi_addr_sliced = id_to_addr_f(RD_WORDS_REG_ID)   ) then 
-                MI_DRD <= rd_words;
+                MI_DRD <= std_logic_vector(rd_words);
             elsif (mi_addr_sliced = id_to_addr_f(REQ_CNT_REG_ID)    ) then 
-                MI_DRD <= req_cnt;
+                MI_DRD <= std_logic_vector(req_cnt);
             elsif (mi_addr_sliced = id_to_addr_f(LATENCY_SUM_REG_1_ID)) then 
                 MI_DRD <= latency_sum_ticks(MI_DATA_WIDTH - 1 downto 0);
             elsif (mi_addr_sliced = id_to_addr_f(LATENCY_SUM_REG_2_ID)) then 
                 MI_DRD <= latency_sum_ticks(MI_DATA_WIDTH * 2 - 1 downto MI_DATA_WIDTH);
             elsif (mi_addr_sliced = id_to_addr_f(LATENCY_MIN_REG_ID)) then 
-                MI_DRD <= (LATENCY_TICKS_WIDTH - 1 downto 0 => latency_min_ticks, others => '0');
+                MI_DRD <=  (MI_DATA_WIDTH downto LATENCY_TICKS_WIDTH => '0') & latency_min_ticks;
             elsif (mi_addr_sliced = id_to_addr_f(LATENCY_MAX_REG_ID)) then
-                MI_DRD <= (LATENCY_TICKS_WIDTH - 1 downto 0 => latency_max_ticks, others => '0');
+                MI_DRD <=  (MI_DATA_WIDTH downto LATENCY_TICKS_WIDTH => '0') & latency_max_ticks;
             elsif (mi_addr_sliced = id_to_addr_f(LATENCY_HIST_CNT_ID)) then
-                MI_DRD <= (HIST_CNT_WIDTH - 1 downto 0 => latency_hist_cnt, others => '0');
+                MI_DRD <= (MI_DATA_WIDTH downto HIST_CNT_WIDTH => '0') & latency_hist_cnt;
             elsif (mi_addr_sliced = id_to_addr_f(LATENCY_HIST_SEL_ID)) then
-                MI_DRD <= (latency_hist_sel_cnter'length - 1 downto 0 => latency_hist_sel_cnter, others => '0');
+                MI_DRD <= (MI_DATA_WIDTH downto log2(HIST_CNTER_CNT) - 1 => '0') & latency_hist_sel_cnter;
 
             -- Dev info registers
             elsif (mi_addr_sliced = id_to_addr_f(AMM_DATA_W_REG_ID) ) then
@@ -556,9 +556,9 @@ begin
     begin            
         if (rising_edge(CLK)) then
             if (total_rst = '1' or (wr_burst_done = '1' and amm_wr_req = '1')) then
-                wr_burst    <= (0 => '1', others => '0');
+                wr_burst    <= to_unsigned(1, AMM_BURST_COUNT_WIDTH);
             elsif (amm_wr_req = '1') then
-                wr_burst    <= std_logic_vector(unsigned(wr_burst) + 1);
+                wr_burst    <= wr_burst + 1;
             end if;
         end if;
     end process;
@@ -567,9 +567,9 @@ begin
     begin            
         if (rising_edge(CLK)) then
             if (total_rst = '1' or (rd_burst_done = '1' and amm_rd_resp = '1')) then
-                rd_burst    <= (0 => '1', others => '0');
+                rd_burst    <= to_unsigned(1, AMM_BURST_COUNT_WIDTH);
             elsif (amm_rd_resp = '1') then
-                rd_burst    <= std_logic_vector(unsigned(rd_burst) + 1);
+                rd_burst    <= rd_burst + 1;
             end if;
         end if;
     end process;
@@ -580,9 +580,9 @@ begin
     begin            
         if (rising_edge(CLK)) then
             if (total_rst = '1' or (wr_ticks_full = '1' and wr_ticks_en = '1')) then
-                wr_ticks    <= (0 => '1', others => '0');
+                wr_ticks    <= to_unsigned(1, TICKS_WIDTH);
             elsif (wr_ticks_en = '1') then
-                wr_ticks    <= std_logic_vector(unsigned(wr_ticks) + 1);
+                wr_ticks    <= wr_ticks + 1;
             end if;
         end if;
     end process;
@@ -591,9 +591,9 @@ begin
     begin            
         if (rising_edge(CLK)) then
             if (total_rst = '1' or (rd_ticks_full = '1' and rd_ticks_en = '1')) then
-                rd_ticks    <= (0 => '1', others => '0');
+                rd_ticks    <= to_unsigned(1, TICKS_WIDTH);
             elsif (rd_ticks_en = '1') then
-                rd_ticks    <= std_logic_vector(unsigned(rd_ticks) + 1);
+                rd_ticks    <= rd_ticks + 1;
             end if;
         end if;
     end process;
@@ -602,9 +602,9 @@ begin
     begin            
         if (rising_edge(CLK)) then
             if (total_rst = '1' or (rw_ticks_full = '1' and rw_ticks_en = '1')) then
-                rw_ticks    <= (0 => '1', others => '0');
+                rw_ticks    <= to_unsigned(1, TICKS_WIDTH);
             elsif (rw_ticks_en = '1') then
-                rw_ticks    <= std_logic_vector(unsigned(rw_ticks) + 1);
+                rw_ticks    <= rw_ticks + 1;
             end if;
         end if;
     end process;
@@ -686,7 +686,7 @@ begin
                 wr_ticks_reg                <= (others => '0');
                 ctrl_reg(WR_TICKS_OVF_BIT)  <= '0';
             elsif (amm_wr_req = '1') then
-                wr_ticks_reg                <= wr_ticks;
+                wr_ticks_reg                <= std_logic_vector(wr_ticks);
                 ctrl_reg(WR_TICKS_OVF_BIT)  <= wr_ticks_ovf_occ;
             end if;
         end if;
@@ -699,7 +699,7 @@ begin
                 rd_ticks_reg                <= (others => '0');
                 ctrl_reg(RD_TICKS_OVF_BIT)  <= '0';
             elsif (amm_rd_req = '1' or amm_rd_resp = '1') then
-                rd_ticks_reg                <= rd_ticks;
+                rd_ticks_reg                <= std_logic_vector(rd_ticks);
                 ctrl_reg(RD_TICKS_OVF_BIT)  <= rd_ticks_ovf_occ;
             end if;
         end if;
@@ -712,7 +712,7 @@ begin
                 rw_ticks_reg                <= (others => '0');
                 ctrl_reg(RW_TICKS_OVF_BIT)  <= '0';
             elsif (amm_wr_req = '1' or amm_rd_req = '1' or amm_rd_resp = '1') then
-                rw_ticks_reg                <= rw_ticks;
+                rw_ticks_reg                <= std_logic_vector(rw_ticks);
                 ctrl_reg(RW_TICKS_OVF_BIT)  <= rw_ticks_ovf_occ;
             end if;
         end if;
@@ -725,7 +725,7 @@ begin
             if (total_rst = '1' or wr_words_full = '1') then
                 wr_words    <= (others => '0');
             elsif (amm_wr_req = '1') then
-                wr_words    <= std_logic_vector(unsigned(wr_words) + 1);
+                wr_words    <= wr_words + 1;
             end if;
         end if;
     end process;
@@ -736,7 +736,7 @@ begin
             if (total_rst = '1' or rd_words_full = '1') then
                 rd_words    <= (others => '0');
             elsif (amm_rd_resp = '1') then
-                rd_words    <= std_logic_vector(unsigned(rd_words) + 1);
+                rd_words    <= rd_words + 1;
             end if;
         end if;
     end process;
@@ -769,7 +769,7 @@ begin
             if (total_rst = '1' or req_cnt_full = '1') then
                 req_cnt    <= (others => '0');
             elsif (amm_rd_req = '1') then
-                req_cnt    <= std_logic_vector(unsigned(req_cnt) + 1);
+                req_cnt    <= req_cnt + 1;
             end if;
         end if;
     end process;
