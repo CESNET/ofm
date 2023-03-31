@@ -156,13 +156,15 @@ begin
 
     -- WR driver
     wr_driver_gen_pr : process(wclk)
+        variable wr_addr_var : integer range 0 to ITEMS-1;
     begin
         if (rising_edge(wclk)) then
 
             -- default values
             wr_en   <= '0';
             wr_be   <= random_vector(wr_be'length,seed1);
-            wr_addr <= random_vector(wr_addr'length,seed1);
+            randint(seed1, seed2, 0, ITEMS-1, wr_addr_var);
+            wr_addr <= std_logic_vector(to_unsigned(wr_addr_var, wr_addr'length));
             wr_data <= random_vector(wr_data'length,seed1);
 
             randint(seed1,seed2,0,99,X);
@@ -181,12 +183,14 @@ begin
 
     -- RD driver
     rd_driver_gen_pr : process(rclk)
+        variable rd_addr_var : integer range 0 to ITEMS-1;
     begin
         if (rising_edge(rclk)) then
 
             -- default values
             rd_en   <= '0';
-            rd_addr <= random_vector(rd_addr'length,seed1);
+            randint(seed1, seed2, 0, ITEMS-1, rd_addr_var);
+            rd_addr <= std_logic_vector(to_unsigned(rd_addr_var, rd_addr'length));
 
             randint(seed1,seed2,0,99,X);
 
