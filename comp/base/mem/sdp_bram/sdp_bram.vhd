@@ -100,8 +100,6 @@ architecture FULL of SDP_BRAM is
     signal wr_be_internal      : std_logic_vector(DATA_WIDTH/BLOCK_WIDTH-1 downto 0);
     signal wr_addr_internal    : std_logic_vector(log2(ITEMS)-1 downto 0);
     signal wr_data_internal    : std_logic_vector(DATA_WIDTH-1 downto 0);
-    signal wr_data_arr_internal: slv_array_t(DATA_WIDTH/BLOCK_WIDTH-1 downto 0)(BLOCK_WIDTH-1 downto 0);
-    signal data_internal : slv_array_2d_t(ITEMS-1 downto 0)(DATA_WIDTH/BLOCK_WIDTH-1 downto 0)(BLOCK_WIDTH-1 downto 0);
 
 begin
 
@@ -197,49 +195,86 @@ begin
         wr_be_internal <= (others => '1');
     end generate;
 
-    wr_data_arr_internal <= slv_array_deser(wr_data_internal,DATA_WIDTH/BLOCK_WIDTH);
 
     ----------------------------------------------------------------------------
     -- SIM MODEL
     ----------------------------------------------------------------------------
 
     behav_g : if (DEVICE = "SIM") generate
-
-        wr_p : process (wr_clk_internal)
+        be_g : if BLOCK_ENABLE generate
+            signal wr_data_arr_internal: slv_array_t(DATA_WIDTH/BLOCK_WIDTH-1 downto 0)(BLOCK_WIDTH-1 downto 0);
+            signal data_internal : slv_array_2d_t(ITEMS-1 downto 0)(DATA_WIDTH/BLOCK_WIDTH-1 downto 0)(BLOCK_WIDTH-1 downto 0);
         begin
-            if (rising_edge(wr_clk_internal)) then
-                if (wr_en_internal='1') then
-                    for i in 0 to DATA_WIDTH/BLOCK_WIDTH-1 loop
-                        if (wr_be_internal(i)='1') then
-                            data_internal(to_integer(unsigned(wr_addr_internal)))(i) <= wr_data_arr_internal(i);
-                        end if;
-                    end loop;
-                end if;
-            end if;
-        end process;
+            wr_data_arr_internal <= slv_array_deser(wr_data_internal,DATA_WIDTH/BLOCK_WIDTH);
 
-        rd_p : process (rd_clk_internal)
-        begin
-            if (rising_edge(rd_clk_internal)) then
-                if (rd_pipe_en_internal = '1') then
-					rd_data_internal <= slv_array_ser(data_internal(to_integer(unsigned(rd_addr_internal))));
-                end if;
-            end if;
-        end process;
-
-        rd_out_reg_on_g : if (OUTPUT_REG = True) generate
-            process (rd_clk_internal)
+            wr_p : process (wr_clk_internal)
             begin
-                if (rising_edge(rd_clk_internal)) then
-                    if (rd_pipe_en_internal = '1') then
-                        RD_DATA <= rd_data_internal;
+                if (rising_edge(wr_clk_internal)) then
+                    if (wr_en_internal='1') then
+                        for i in 0 to DATA_WIDTH/BLOCK_WIDTH-1 loop
+                            if (wr_be_internal(i)='1') then
+                                data_internal(to_integer(unsigned(wr_addr_internal)))(i) <= wr_data_arr_internal(i);
+                            end if;
+                        end loop;
                     end if;
                 end if;
             end process;
-        else generate
-            RD_DATA <= rd_data_internal;
-        end generate;
 
+            rd_p : process (rd_clk_internal)
+            begin
+                if (rising_edge(rd_clk_internal)) then
+                    if (rd_pipe_en_internal = '1') then
+                        rd_data_internal <= slv_array_ser(data_internal(to_integer(unsigned(rd_addr_internal))));
+                    end if;
+                end if;
+            end process;
+
+            rd_out_reg_on_g : if (OUTPUT_REG = True) generate
+                process (rd_clk_internal)
+                begin
+                    if (rising_edge(rd_clk_internal)) then
+                        if (rd_pipe_en_internal = '1') then
+                            RD_DATA <= rd_data_internal;
+                        end if;
+                    end if;
+                end process;
+            else generate
+                RD_DATA <= rd_data_internal;
+            end generate;
+        else generate
+            signal data_internal : slv_array_t(ITEMS-1 downto 0)(DATA_WIDTH-1 downto 0);
+        begin
+            wr_p : process (wr_clk_internal)
+            begin
+                if (rising_edge(wr_clk_internal)) then
+                    if (wr_en_internal='1') then
+                        data_internal(to_integer(unsigned(wr_addr_internal))) <= wr_data_internal;
+                    end if;
+                end if;
+            end process;
+
+            rd_p : process (rd_clk_internal)
+            begin
+                if (rising_edge(rd_clk_internal)) then
+                    if (rd_pipe_en_internal = '1') then
+                        rd_data_internal <= data_internal(to_integer(unsigned(rd_addr_internal)));
+                    end if;
+                end if;
+            end process;
+
+            rd_out_reg_on_g : if (OUTPUT_REG = True) generate
+                process (rd_clk_internal)
+                begin
+                    if (rising_edge(rd_clk_internal)) then
+                        if (rd_pipe_en_internal = '1') then
+                            RD_DATA <= rd_data_internal;
+                        end if;
+                    end if;
+                end process;
+            else generate
+                RD_DATA <= rd_data_internal;
+            end generate;
+        end generate;
     end generate;
 
     ----------------------------------------------------------------------------
