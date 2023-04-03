@@ -29,8 +29,8 @@ use work.math_pack.all;
 --
 --                         +--------+  +---\
 --                         | RX Gen +--+ 1  \             +---\
---   ETH_RX                +--------+  | MUX +------------+ 0  \   +------+ DMA_RX
---   >--------------------------+------+ 0  /             | MUX +--+ FIFO +------>
+--   ETH_RX                +--------+  |MUX_C+------------+ 0  \   +------+ DMA_RX
+--   >--------------------------+------+ 0  /             |MUX_A+--+ FIFO +------>
 --                              |      +---/          +---+ 1  /   +------+
 --                              |                     |   +---/
 --                              |                     |
@@ -38,19 +38,19 @@ use work.math_pack.all;
 --                              |                     |
 --                      /---+   |                     |
 --          +------+   /  1 +---+          /---+      |
---   <------+ FIFO +--+ MUX |             /  0 +------+--------------------------<
---   ETH_TX +------+   \  0 +------------+ MUX |  +--------+                DMA_TX
---                      \---+             \  1 +--+ TX Gen |
---                                         \---+  +--------+
+--   <------+ FIFO +--+MUX_B|             /  0 +------+--------------------------<
+--   ETH_TX +------+   \  0 +------------+MUX_D|  +-----------------+       DMA_TX
+--                      \---+             \  1 +--+ TX Gen / Player |
+--                                         \---+  +-----------------+
 --
 -- **MI address offsets:**
 --
 -- .. code-block::
 --
---   0x000      -- RX loopback MUX  (0 -> RX stream, 1 -> TX stream loopback)
---   0x004      -- TX loopback MUX  (0 -> TX stream, 1 -> RX stream loopback)
---   0x008      -- RX generator MUX (0 -> RX stream, 1 -> RX generator)
---   0x00C      -- TX generator MUX (0 -> TX stream, 1 -> TX generator, 2 -> TX Frame Player)
+--   0x000      -- RX loopback MUX_A  (0 -> RX stream, 1 -> TX stream loopback)
+--   0x004      -- TX loopback MUX_B  (0 -> TX stream, 1 -> RX stream loopback)
+--   0x008      -- RX generator MUX_C (0 -> RX stream, 1 -> RX generator)
+--   0x00C      -- TX generator MUX_D (0 -> TX stream, 1 -> TX generator, 2 -> TX Frame Player)
 --   0x040-0x04C -- DMA RX MFB speed meter (0x0 - tics, 0x4 - status, 0x8 - items, 0xC - clear)
 --   0x050-0x05C -- DMA TX MFB speed meter (0x0 - tics, 0x4 - status, 0x8 - items, 0xC - clear)
 --   0x060-0x06C -- ETH RX MFB speed meter (0x0 - tics, 0x4 - status, 0x8 - items, 0xC - clear)
