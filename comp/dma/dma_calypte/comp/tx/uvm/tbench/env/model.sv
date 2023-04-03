@@ -29,11 +29,11 @@ class model #(CHANNELS, PKT_SIZE_MAX, DEVICE, USR_ITEM_WIDTH, USER_META_WIDTH, C
     `uvm_component_param_utils(uvm_dma_ll::model #(CHANNELS, PKT_SIZE_MAX, DEVICE, USR_ITEM_WIDTH, USER_META_WIDTH,
                                                    CQ_ITEM_WIDTH, DATA_ADDR_W, DEBUG, CHANNEL_ARBITER_EN))
 
-    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item#(CQ_ITEM_WIDTH))                   analysis_imp_rx;
-    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(sv_pcie_meta_pack::PCIE_CQ_META_WIDTH)) analysis_imp_rx_meta;
-    uvm_analysis_port     #(uvm_logic_vector_array::sequence_item#(USR_ITEM_WIDTH))                  analysis_port_tx[CHANNELS];
-    uvm_analysis_port     #(uvm_logic_vector::sequence_item#(USER_META_WIDTH))                       analysis_port_meta_tx[CHANNELS];
-    local regmodel#(CHANNELS)                                                                        m_regmodel;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item#(CQ_ITEM_WIDTH))                            analysis_imp_rx;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(sv_pcie_meta_pack::PCIE_CQ_META_WIDTH))          analysis_imp_rx_meta;
+    uvm_analysis_port     #(uvm_common::model_item #(uvm_logic_vector_array::sequence_item#(USR_ITEM_WIDTH))) analysis_port_tx[CHANNELS];
+    uvm_analysis_port     #(uvm_logic_vector::sequence_item#(USER_META_WIDTH))                                analysis_port_meta_tx[CHANNELS];
+    local regmodel#(CHANNELS)                                                                                 m_regmodel;
 
     uvm_dma_ll::discard#(CHANNELS) discard_comp[CHANNELS];
 
@@ -97,12 +97,12 @@ class model #(CHANNELS, PKT_SIZE_MAX, DEVICE, USR_ITEM_WIDTH, USER_META_WIDTH, C
 
     task run_phase(uvm_phase phase);
 
-        uvm_logic_vector_array::sequence_item#(CQ_ITEM_WIDTH)                   in_data_tr;
-        uvm_logic_vector_array::sequence_item#(CQ_ITEM_WIDTH)                   data_tr[CHANNELS];
-        uvm_logic_vector_array::sequence_item#(USR_ITEM_WIDTH)                  pcie_data_tr[CHANNELS];
-        uvm_logic_vector_array::sequence_item#(USR_ITEM_WIDTH)                  out_data_tr;
-        uvm_logic_vector::sequence_item#(sv_pcie_meta_pack::PCIE_CQ_META_WIDTH) meta_tr;
-        uvm_logic_vector::sequence_item#(USER_META_WIDTH)                       out_meta_tr;
+        uvm_logic_vector_array::sequence_item#(CQ_ITEM_WIDTH)                            in_data_tr;
+        uvm_logic_vector_array::sequence_item#(CQ_ITEM_WIDTH)                            data_tr[CHANNELS];
+        uvm_logic_vector_array::sequence_item#(USR_ITEM_WIDTH)                           pcie_data_tr[CHANNELS];
+        uvm_common::model_item #(uvm_logic_vector_array::sequence_item#(USR_ITEM_WIDTH)) out_data_tr;
+        uvm_logic_vector::sequence_item#(sv_pcie_meta_pack::PCIE_CQ_META_WIDTH)          meta_tr;
+        uvm_logic_vector::sequence_item#(USER_META_WIDTH)                                out_meta_tr;
 
         logic [USR_ITEM_WIDTH-1 : 0] dma_frame[CHANNELS][$];
         logic [USR_ITEM_WIDTH-1 : 0] data_tmp[CHANNELS][4];
@@ -128,10 +128,12 @@ class model #(CHANNELS, PKT_SIZE_MAX, DEVICE, USR_ITEM_WIDTH, USER_META_WIDTH, C
                 data_tr[chan]      = uvm_logic_vector_array::sequence_item #(CQ_ITEM_WIDTH)::type_id::create({"data_tr_", i_string});
             end
 
-            out_data_tr = uvm_logic_vector_array::sequence_item #(USR_ITEM_WIDTH)::type_id::create("out_data_tr");
-            out_meta_tr = uvm_logic_vector::sequence_item #(USER_META_WIDTH)::type_id::create("out_meta_tr");
+            out_data_tr      = uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(USR_ITEM_WIDTH))::type_id::create("out_data_tr");
+            out_data_tr.item = uvm_logic_vector_array::sequence_item #(USR_ITEM_WIDTH)::type_id::create("out_data_tr_item");
+            out_meta_tr      = uvm_logic_vector::sequence_item #(USER_META_WIDTH)::type_id::create("out_meta_tr");
 
             analysis_imp_rx.get(in_data_tr);
+            out_data_tr.start["model mfb out"] = $time();
             analysis_imp_rx_meta.get(meta_tr);
 
             info.dword_cnt               = in_data_tr.data[2][11-1 : 0];
@@ -207,7 +209,7 @@ class model #(CHANNELS, PKT_SIZE_MAX, DEVICE, USR_ITEM_WIDTH, USER_META_WIDTH, C
                     dma_meta = in_data_tr.data[5][31 : 8];
                     out_meta_tr.data = {dma_size, info.channel, dma_meta};
 
-                    out_data_tr.data = dma_frame[int'(info.channel)];
+                    out_data_tr.item.data = dma_frame[int'(info.channel)];
 
                     if (info.run[1] == 0 || (info.run[1] == 1 && discard_comp[int'(info.channel)].drop == 0)) begin
                         cnt_reg[int'(info.channel)].dma_cnt++;

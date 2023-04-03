@@ -14,29 +14,28 @@ class virt_seq#(USR_REGIONS, USR_REGION_SIZE, USR_BLOCK_SIZE, USR_ITEM_WIDTH, CQ
 
     localparam USER_META_WIDTH = 24 + $clog2(PKT_SIZE_MAX+1) + $clog2(CHANNELS);
 
-    uvm_reset::sequence_start              m_reset;
+    uvm_reset::sequence_start                            m_reset;
+    uvm_logic_vector_array::sequence_lib#(CQ_ITEM_WIDTH) m_packet_lib;
+    uvm_dma_ll_info::sequence_lib#(CHANNELS)             m_info;
 
-    uvm_logic_vector_array::sequence_lib#(CQ_ITEM_WIDTH) m_packet;
-    uvm_dma_ll_info::sequence_lib#(CHANNELS)  m_info;
-
-    uvm_dma_ll::reg_sequence#(CHANNELS)     m_reg;
+    uvm_dma_ll::reg_sequence#(CHANNELS)                                                                                    m_reg;
     uvm_sequence#(uvm_mfb::sequence_item #(USR_REGIONS, USR_REGION_SIZE, USR_BLOCK_SIZE, USR_ITEM_WIDTH, USER_META_WIDTH)) m_pcie[CHANNELS];
-    uvm_mfb::sequence_lib_tx#(USR_REGIONS, USR_REGION_SIZE, USR_BLOCK_SIZE, USR_ITEM_WIDTH, USER_META_WIDTH) m_pcie_lib[CHANNELS];
-    uvm_dma_size::sequence_lib #(1, PKT_SIZE_MAX/4) m_size_lib[CHANNELS];
+    uvm_mfb::sequence_lib_tx#(USR_REGIONS, USR_REGION_SIZE, USR_BLOCK_SIZE, USR_ITEM_WIDTH, USER_META_WIDTH)               m_pcie_lib[CHANNELS];
+    uvm_dma_size::sequence_lib #(1, PKT_SIZE_MAX/4)                                                                        m_size_lib[CHANNELS];
     uvm_phase phase;
 
     virtual function void init(uvm_dma_ll::regmodel#(CHANNELS) m_regmodel, uvm_phase phase);
 
         m_reset = uvm_reset::sequence_start::type_id::create("rst_seq");
 
-        m_packet = uvm_logic_vector_array::sequence_lib#(CQ_ITEM_WIDTH)::type_id::create("m_packet");
-        m_packet.init_sequence();
-        m_packet.cfg = new();
-        m_packet.cfg.array_size_set(PCIE_LEN_MIN, PCIE_LEN_MAX);
-        m_packet.min_random_count = 150;
-        m_packet.max_random_count = 300;
-        // m_packet.min_random_count = 2000;
-        // m_packet.max_random_count = 3000;
+        m_packet_lib = uvm_logic_vector_array::sequence_lib#(CQ_ITEM_WIDTH)::type_id::create("m_packet_lib");
+        m_packet_lib.init_sequence();
+        m_packet_lib.cfg = new();
+        m_packet_lib.cfg.array_size_set(PCIE_LEN_MIN, PCIE_LEN_MAX);
+        m_packet_lib.min_random_count = 150;
+        m_packet_lib.max_random_count = 300;
+        // m_packet_lib.min_random_count = 2000;
+        // m_packet_lib.max_random_count = 3000;
 
         m_info = uvm_dma_ll_info::sequence_lib#(CHANNELS)::type_id::create("m_info");
         m_info.init_sequence();
@@ -77,7 +76,7 @@ class virt_seq#(USR_REGIONS, USR_REGION_SIZE, USR_BLOCK_SIZE, USR_ITEM_WIDTH, CQ
     endtask
 
     function void pre_randomize();
-         m_packet.randomize();
+         m_packet_lib.randomize();
          m_reg.randomize();
     endfunction
 
@@ -107,7 +106,7 @@ class virt_seq#(USR_REGIONS, USR_REGION_SIZE, USR_BLOCK_SIZE, USR_ITEM_WIDTH, CQ
         end
 
         fork
-            m_packet.start(p_sequencer.m_packet.m_data);
+            m_packet_lib.start(p_sequencer.m_packet.m_data);
             forever begin
                 m_info.randomize();
                 m_info.start(p_sequencer.m_packet.m_info);

@@ -4,28 +4,107 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
+class stats;
+
+    local real min;
+    local real max;
+    local real sum;
+    local real sum2;
+    local real values_q[$];
+
+    int unsigned values;
+
+    function new();
+        values = 0;
+        sum  = 0;
+        sum2 = 0;
+    endfunction
+
+
+    function void count(output real min, real max, real avg, real std_dev, real median, real modus);
+        real avg_local;
+        real tmp_mod;
+        int unsigned cnt_mod = 0;
+        int unsigned tmp_cnt = 0;
+
+        min = this.min;
+        max = this.max;
+
+        avg_local = sum/values;
+        avg = avg_local;
+
+        std_dev = (1.0/(values-1)*(sum2 - values*(avg_local**2)))**0.5;
+        values_q.sort();
+        if (values % 2 == 0) begin
+            median = (values_q[values/2] + values_q[(values/2)+1])/2;
+        end else if (values % 2 == 1) begin
+            median = values_q[(values/2)+1];
+        end
+        for (int unsigned it = 0; it < values_q.size(); it++) begin
+            if (tmp_mod == 0) begin
+                tmp_mod = values_q[it];
+            end
+
+            if (tmp_mod == values_q[it]) begin
+                cnt_mod++;
+            end else begin
+                tmp_mod = values_q[it];
+                if (tmp_cnt == 0) begin
+                    tmp_cnt = cnt_mod;
+                    modus = tmp_mod;
+                end else begin
+                    if (cnt_mod > tmp_cnt) begin
+                        tmp_cnt = cnt_mod;
+                        modus = tmp_mod;
+                    end
+                end
+                cnt_mod = 0;
+            end
+        end
+    endfunction
+
+    function void next_val(real val);
+        values_q.push_back(val);
+        if (values == 0) begin
+            min = val;
+            max = val;
+        end else begin
+            if (min > val) begin
+                min = val;
+            end
+
+            if (max < val) begin
+               max = val;
+            end
+        end
+
+        sum   += val;
+        sum2  += val**2;
+
+        values++;
+    endfunction
+endclass
 
 class compare #(ITEM_WIDTH, USER_META_WIDTH, DEBUG, CHANNELS, CHANNEL_ARBITER_EN) extends uvm_component;
     `uvm_component_utils(uvm_dma_ll::compare #(ITEM_WIDTH, USER_META_WIDTH, DEBUG, CHANNELS, CHANNEL_ARBITER_EN))
 
-    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)) model_mfb;
-    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(USER_META_WIDTH))  model_meta;
-    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)) dut_mfb;
-    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(USER_META_WIDTH))  dut_meta;
+    uvm_tlm_analysis_fifo #(uvm_common::model_item #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))) model_mfb;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(USER_META_WIDTH))                            model_meta;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))                           dut_mfb;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(USER_META_WIDTH))                            dut_meta;
 
     int unsigned errors;
     int unsigned compared;
-    int unsigned cnt;
+    stats        m_delay;
 
     function new(string name, uvm_component parent);
         super.new(name, parent);
-        model_mfb = new("model_mfb", this);
+        model_mfb  = new("model_mfb", this);
         model_meta = new("model_meta", this);
-        dut_mfb   = new("dut_mfb", this);
+        dut_mfb    = new("dut_mfb", this);
         dut_meta   = new("dut_meta", this);
-        errors    = 0;
-        compared  = 0;
-        cnt  = 0;
+        errors     = 0;
+        compared   = 0;
     endfunction
 
     task write_meta(uvm_logic_vector::sequence_item#(USER_META_WIDTH)  tr_model_meta,
@@ -77,20 +156,20 @@ class compare #(ITEM_WIDTH, USER_META_WIDTH, DEBUG, CHANNELS, CHANNEL_ARBITER_EN
 
 
     task run_phase(uvm_phase phase);
-        uvm_logic_vector_array::sequence_item#(ITEM_WIDTH) tr_model_mfb;
-        uvm_logic_vector::sequence_item#(USER_META_WIDTH)  tr_model_meta;
-        uvm_logic_vector_array::sequence_item#(ITEM_WIDTH) tr_dut_mfb;
-        uvm_logic_vector::sequence_item#(USER_META_WIDTH)  tr_dut_meta;
+        uvm_common::model_item #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)) tr_model_mfb;
+        uvm_logic_vector::sequence_item#(USER_META_WIDTH)                            tr_model_meta;
+        uvm_common::model_item #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)) tr_dut_mfb;
+        uvm_logic_vector::sequence_item#(USER_META_WIDTH)                            tr_dut_meta;
 
-        uvm_logic_vector_array::sequence_item#(ITEM_WIDTH) tr_dut_mfb_comp;
-        uvm_logic_vector_array::sequence_item#(ITEM_WIDTH) tr_model_mfb_comp;
-        uvm_logic_vector::sequence_item#(USER_META_WIDTH)  tr_dut_meta_comp;
-        uvm_logic_vector::sequence_item#(USER_META_WIDTH)  tr_model_meta_comp;
+        uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)                           tr_dut_mfb_comp;
+        uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)                           tr_model_mfb_comp;
+        uvm_logic_vector::sequence_item#(USER_META_WIDTH)                            tr_dut_meta_comp;
+        uvm_logic_vector::sequence_item#(USER_META_WIDTH)                            tr_model_meta_comp;
 
-        uvm_logic_vector_array::sequence_item#(ITEM_WIDTH) tr_model_mfb_fifo[CHANNELS][$];
-        uvm_logic_vector::sequence_item#(USER_META_WIDTH)  tr_model_meta_fifo[CHANNELS][$];
-        uvm_logic_vector_array::sequence_item#(ITEM_WIDTH) tr_dut_mfb_fifo[CHANNELS][$];
-        uvm_logic_vector::sequence_item#(USER_META_WIDTH)  tr_dut_meta_fifo[CHANNELS][$];
+        uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)                           tr_model_mfb_fifo[CHANNELS][$];
+        uvm_logic_vector::sequence_item#(USER_META_WIDTH)                            tr_model_meta_fifo[CHANNELS][$];
+        uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)                           tr_dut_mfb_fifo[CHANNELS][$];
+        uvm_logic_vector::sequence_item#(USER_META_WIDTH)                            tr_dut_meta_fifo[CHANNELS][$];
 
         logic [ITEM_WIDTH-1 : 0] bad_tr[$];
         int unsigned             bad_tr_pos[$];
@@ -99,18 +178,20 @@ class compare #(ITEM_WIDTH, USER_META_WIDTH, DEBUG, CHANNELS, CHANNEL_ARBITER_EN
         logic [$clog2(CHANNELS)-1 : 0] dut_channel;
 
         forever begin
+            tr_dut_mfb = uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(ITEM_WIDTH))::type_id::create("tr_dut_mfb");
             model_mfb.get(tr_model_mfb);
             model_meta.get(tr_model_meta);
-            dut_mfb.get(tr_dut_mfb);
+            dut_mfb.get(tr_dut_mfb.item);
+            tr_dut_mfb.time_add("dut mfb out", $time());
             dut_meta.get(tr_dut_meta);
 
             model_channel = tr_model_meta.data[$clog2(CHANNELS)+24-1 : 24];
             dut_channel = tr_dut_meta.data[$clog2(CHANNELS)+24-1 : 24];
 
             if (CHANNEL_ARBITER_EN) begin
-                tr_model_mfb_fifo[int'(model_channel)].push_back(tr_model_mfb);
+                tr_model_mfb_fifo[int'(model_channel)].push_back(tr_model_mfb.item);
                 tr_model_meta_fifo[int'(model_channel)].push_back(tr_model_meta);
-                tr_dut_mfb_fifo[int'(dut_channel)].push_back(tr_dut_mfb);
+                tr_dut_mfb_fifo[int'(dut_channel)].push_back(tr_dut_mfb.item);
                 tr_dut_meta_fifo[int'(dut_channel)].push_back(tr_dut_meta);
             end
 
@@ -144,11 +225,16 @@ class compare #(ITEM_WIDTH, USER_META_WIDTH, DEBUG, CHANNELS, CHANNEL_ARBITER_EN
                     write_meta(tr_model_meta, tr_dut_meta);
                 end
 
-                if (tr_model_mfb.compare(tr_dut_mfb) == 0) begin
+                if (tr_model_mfb.item.compare(tr_dut_mfb.item) == 0) begin
                     errors++;
-                    write_data(tr_dut_mfb, tr_model_mfb, tr_model_meta);
+                    write_data(tr_dut_mfb.item, tr_model_mfb.item, tr_model_meta);
                 end
             end
+
+            //count stats
+            //Count delay if you get first data packet.
+            m_delay.next_val((tr_dut_mfb.start["dut mfb out"] - tr_model_mfb.start["model mfb out"])/1ns);
+
         end
     endtask
 
@@ -184,6 +270,12 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, DEVICE, USR_ITEM_WIDTH, USER_META_WID
     uvm_reg_data_t discard_byte_cnt [CHANNELS];
     uvm_status_e   status_r;
 
+    local stats  m_input_speed;
+    local stats  m_delay;
+    local stats  m_output_speed;
+    local uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item#(USR_ITEM_WIDTH)) tx_speed_meter[CHANNELS];
+    local uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item#(CQ_ITEM_WIDTH))  rx_speed_meter;
+
     // Contructor of scoreboard.
     function new(string name, uvm_component parent);
         super.new(name, parent);
@@ -194,9 +286,15 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, DEVICE, USR_ITEM_WIDTH, USER_META_WID
             string it_str;
             it_str.itoa(chan);
             analysis_export_tx_packet[chan] = new({"analysis_export_tx_packet_", it_str}, this);
+            tx_speed_meter[chan]            = new({"tx_speed_meter_", it_str}, this);
             analysis_export_dma[chan]       = new({"analysis_export_dma_", it_str}, this);
             analysis_export_tx_meta[chan]   = new({"analysis_export_tx_meta_"  , it_str}, this);
         end
+        //LOCAL VARIABLES
+        rx_speed_meter = new("rx_speed_meter", this);
+        m_delay = new();
+        m_output_speed = new();
+        m_input_speed  = new();
         compared = 0;
         errors   = 0;
     endfunction
@@ -233,6 +331,7 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, DEVICE, USR_ITEM_WIDTH, USER_META_WID
 
     function void connect_phase(uvm_phase phase);
         analysis_export_rx_packet.connect(m_model.analysis_imp_rx.analysis_export);
+        analysis_export_rx_packet.connect(rx_speed_meter.analysis_export);
         analysis_export_rx_meta.connect(m_model.analysis_imp_rx_meta.analysis_export);
         for (int chan = 0; chan < CHANNELS; chan++) begin
             analysis_export_dma[chan].connect(m_model.discard_comp[chan].analysis_imp_rx_dma.analysis_export);
@@ -240,22 +339,101 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, DEVICE, USR_ITEM_WIDTH, USER_META_WID
             m_model.analysis_port_tx[chan].connect(tr_compare[chan].model_mfb.analysis_export);
             m_model.analysis_port_meta_tx[chan].connect(tr_compare[chan].model_meta.analysis_export);
             analysis_export_tx_packet[chan].connect(tr_compare[chan].dut_mfb.analysis_export);
+            analysis_export_tx_packet[chan].connect(tx_speed_meter[chan].analysis_export);
             analysis_export_tx_meta[chan].connect(tr_compare[chan].dut_meta.analysis_export);
+            tr_compare[chan].m_delay = m_delay;
         end
 
     endfunction
 
+    task run_output(int unsigned chan);
+        uvm_logic_vector_array::sequence_item#(USR_ITEM_WIDTH) tr_dut;
+        int unsigned speed_packet_size = 0;
+        time         speed_start_time  = 0ns;
+
+        forever begin
+            time time_act;
+            time speed_metet_duration;
+
+            tx_speed_meter[chan].get(tr_dut);
+            time_act = $time();
+
+            speed_packet_size += tr_dut.data.size();
+            speed_metet_duration = time_act - speed_start_time;
+            if (speed_metet_duration >= 10us) begin
+                real speed;
+                speed =  real'(speed_packet_size) / (speed_metet_duration/1ns); //result is in GB/s
+                m_output_speed.next_val(speed);
+                speed_start_time  = time_act;
+                speed_packet_size = 0;
+                `uvm_info(this.get_full_name(), $sformatf("\n\tCurrent output speed (PCIE TX) is %0.3fGb/s in time [%0d:%0d]us", speed*8, speed_start_time/1us, time_act/1us), UVM_LOW);
+            end
+        end
+    endtask
+
+    task run_input();
+        int unsigned speed_packet_size = 0;
+        time         speed_start_time  = 0ns;
+
+        forever begin
+            uvm_logic_vector_array::sequence_item#(CQ_ITEM_WIDTH) tr;
+            time time_act;
+            time speed_metet_duration;
+            rx_speed_meter.get(tr);
+            time_act = $time();
+
+            speed_packet_size += tr.data.size();
+            speed_metet_duration = time_act - speed_start_time;
+            if (speed_metet_duration >= 10us) begin
+                real speed;
+                speed =  real'(speed_packet_size) / (speed_metet_duration/1ns); //result is in GB/s
+                m_input_speed.next_val(speed);
+                speed_start_time  = time_act;
+                speed_packet_size = 0;
+                `uvm_info(this.get_full_name(), $sformatf("\n\tCurrent input speed (MFB RX) is %0.3fGb/s in time [%0d:%0d]us", speed*8, speed_start_time/1us, time_act/1us), UVM_LOW);
+            end
+        end
+    endtask
+
+    task run_phase(uvm_phase phase);
+
+        for (int chan = 0; chan < CHANNELS; chan++) begin
+            fork
+                automatic int index = chan;
+                run_output(index);
+            join_none
+        end
+
+        fork
+            run_input();
+        join_none
+
+    endtask
+
     function void report_phase(uvm_phase phase);
+        real min;
+        real max;
+        real avg;
+        real std_dev;
+        real median;
+        real modus;
+        string msg = "";
 
         for (int chan = 0; chan < CHANNELS; chan++) begin
             errors += tr_compare[chan].errors;
             compared += tr_compare[chan].compared;
         end
 
-        `uvm_info(this.get_full_name(), $sformatf("End of test, initial random seed value: %d (in order to successfuly reproduce the test set set this seed using -sv_seed parameter of vsim in top_level.fdo script)", $get_initial_random_seed()), UVM_NONE);
+        if (this.get_report_verbosity_level() >= UVM_LOW) begin
+            m_delay.count(min, max, avg, std_dev, median, modus);
+            $swrite(msg, "%s\n\tDelay statistic (SOF to SOF) => min : %0dns, max : %0dns, average : %0dns, standard deviation : %0dns, median : %0dns, modus : %0dns", msg, min, max, avg, std_dev, median, modus);
+            m_input_speed.count(min, max, avg, std_dev, median, modus);
+            $swrite(msg, "%s\n\tSpeed input  statistic (PCIE RX)  => min : %0dGb/s, max : %0dGb/s, average : %0dGb/s, standard deviation : %0dG/s, median : %0dG/s", msg, min*8, max*8, avg*8, std_dev*8, median*8);
+            m_output_speed.count(min, max, avg, std_dev, median, modus);
+            $swrite(msg, "%s\n\tSpeed output statistic (MFB TX) => min : %0dGb/s, max : %0dGb/s, average : %0dGb/s, standard deviation : %0dG/s, median : %0dG/s", msg, min*8, max*8, avg*8, std_dev*8, median*8);
+        end
 
         if (errors == 0 && this.used() == 0) begin
-            string msg = "";
 
             for (int chan = 0; chan < CHANNELS; chan++) begin
 

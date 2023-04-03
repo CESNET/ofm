@@ -4,14 +4,14 @@
 
 // SPDX-License-Identifier: BSD-3-Clause
 
-class sequence_simple#(MIN_SIZE, PKT_MTU) extends uvm_sequence#(uvm_dma_size::sequence_item);
+class sequence_simple#(MIN_SIZE, PKT_MTU) extends uvm_common::sequence_base #(config_sequence, uvm_dma_size::sequence_item);
     `uvm_object_param_utils(uvm_dma_size::sequence_simple#(MIN_SIZE, PKT_MTU))
 
     rand int unsigned transaction_count;
     int unsigned transaction_count_min = 10;
     int unsigned transaction_count_max = 20;
 
-    constraint c1 {transaction_count inside {[transaction_count_min : transaction_count_max]};}
+    constraint c1 {transaction_count inside {[cfg.transaction_count_min : cfg.transaction_count_max]};}
 
     // Constructor - creates new instance of this class
     function new(string name = "sequence_simple");
@@ -29,16 +29,14 @@ class sequence_simple#(MIN_SIZE, PKT_MTU) extends uvm_sequence#(uvm_dma_size::se
 
 endclass
 
-class sequence_simple_short#(MIN_SIZE, PKT_MTU) extends uvm_sequence#(uvm_dma_size::sequence_item);
+class sequence_simple_short#(MIN_SIZE, PKT_MTU) extends uvm_common::sequence_base #(config_sequence, uvm_dma_size::sequence_item);
     `uvm_object_param_utils(uvm_dma_size::sequence_simple_short#(MIN_SIZE, PKT_MTU))
 
     rand int unsigned transaction_count;
     rand int unsigned max_len;
-    int unsigned transaction_count_min = 10;
-    int unsigned transaction_count_max = 20;
     int unsigned len_count_max = 128;
 
-    constraint c1 {transaction_count inside {[transaction_count_min : transaction_count_max]};}
+    constraint c1 {transaction_count inside {[cfg.transaction_count_min : cfg.transaction_count_max]};}
     constraint max_len_c {max_len inside {[MIN_SIZE : len_count_max]}; MIN_SIZE <= max_len;}
 
     // Constructor - creates new instance of this class
@@ -57,7 +55,7 @@ class sequence_simple_short#(MIN_SIZE, PKT_MTU) extends uvm_sequence#(uvm_dma_si
 
 endclass
 
-class sequence_simple_min#(MIN_SIZE, PKT_MTU) extends uvm_sequence#(uvm_dma_size::sequence_item);
+class sequence_simple_min#(MIN_SIZE, PKT_MTU) extends uvm_common::sequence_base #(config_sequence, uvm_dma_size::sequence_item);
     `uvm_object_param_utils(uvm_dma_size::sequence_simple_min#(MIN_SIZE, PKT_MTU))
 
     rand int unsigned transaction_count;
@@ -88,7 +86,7 @@ endclass
 
 /////////////////////////////////////////////////////////////////////////
 // SEQUENCE LIBRARY
-class sequence_lib#(MIN_SIZE, PKT_MTU) extends uvm_sequence_library#(sequence_item);
+class sequence_lib#(MIN_SIZE, PKT_MTU) extends uvm_common::sequence_library#(config_sequence, sequence_item);
   `uvm_object_param_utils(uvm_dma_size::sequence_lib#(MIN_SIZE, PKT_MTU))
   `uvm_sequence_library_utils(uvm_dma_size::sequence_lib#(MIN_SIZE, PKT_MTU))
 
@@ -99,7 +97,8 @@ class sequence_lib#(MIN_SIZE, PKT_MTU) extends uvm_sequence_library#(sequence_it
 
     // subclass can redefine and change run sequences
     // can be useful in specific tests
-    virtual function void init_sequence();
+    virtual function void init_sequence(config_sequence param_cfg = null);
+        super.init_sequence(param_cfg);
         this.add_sequence(uvm_dma_size::sequence_simple#(MIN_SIZE, PKT_MTU)::get_type());
         this.add_sequence(uvm_dma_size::sequence_simple_short#(MIN_SIZE, PKT_MTU)::get_type());
         this.add_sequence(uvm_dma_size::sequence_simple_min#(MIN_SIZE, PKT_MTU)::get_type());
