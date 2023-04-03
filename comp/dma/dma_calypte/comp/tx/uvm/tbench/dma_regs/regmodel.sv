@@ -5,10 +5,10 @@
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
 class regmodel#(CHANNELS) extends uvm_reg_block;
-    `uvm_object_param_utils(uvm_dma_ll::regmodel#(CHANNELS))
+    `uvm_object_param_utils(uvm_dma_regs::regmodel#(CHANNELS))
 
 
-    uvm_dma_ll::reg_channel channel[CHANNELS];
+    uvm_dma_regs::reg_channel channel[CHANNELS];
 
 
     function new(string name = "m_regmodel");
@@ -16,8 +16,10 @@ class regmodel#(CHANNELS) extends uvm_reg_block;
     endfunction
 
     function void set_frontdoor(uvm_reg_frontdoor frontdoor);
+        uvm_reg_frontdoor c_frontdoor;
         for (int unsigned it = 0; it < CHANNELS; it++) begin
-            channel[it].set_frontdoor(frontdoor.clone());
+            $cast(c_frontdoor, frontdoor.clone());
+            channel[it].set_frontdoor(c_frontdoor);
         end
     endfunction
 
@@ -27,7 +29,7 @@ class regmodel#(CHANNELS) extends uvm_reg_block;
             string it_num;
             it_num.itoa(it);
             //CREATE
-            channel[it] = uvm_dma_ll::reg_channel::type_id::create({"channel_", it_num}, , get_full_name());
+            channel[it] = uvm_dma_regs::reg_channel::type_id::create({"channel_", it_num}, , get_full_name());
             //BUILD and CONFIGURE register
             channel[it].build('h0, bus_width);
             channel[it].configure(this, {"channel_", it_num});

@@ -85,8 +85,8 @@ class stats;
     endfunction
 endclass
 
-class compare #(ITEM_WIDTH, USER_META_WIDTH, DEBUG, CHANNELS, CHANNEL_ARBITER_EN) extends uvm_component;
-    `uvm_component_utils(uvm_dma_ll::compare #(ITEM_WIDTH, USER_META_WIDTH, DEBUG, CHANNELS, CHANNEL_ARBITER_EN))
+class compare #(ITEM_WIDTH, USER_META_WIDTH, DEBUG, CHANNELS) extends uvm_component;
+    `uvm_component_utils(uvm_dma_ll::compare #(ITEM_WIDTH, USER_META_WIDTH, DEBUG, CHANNELS))
 
     uvm_tlm_analysis_fifo #(uvm_common::model_item #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))) model_mfb;
     uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(USER_META_WIDTH))                            model_meta;
@@ -171,9 +171,9 @@ class compare #(ITEM_WIDTH, USER_META_WIDTH, DEBUG, CHANNELS, CHANNEL_ARBITER_EN
         uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)                           tr_dut_mfb_fifo[CHANNELS][$];
         uvm_logic_vector::sequence_item#(USER_META_WIDTH)                            tr_dut_meta_fifo[CHANNELS][$];
 
-        logic [ITEM_WIDTH-1 : 0] bad_tr[$];
-        int unsigned             bad_tr_pos[$];
-        logic [ITEM_WIDTH-1 : 0] correct_tr[$];
+        logic [ITEM_WIDTH-1 : 0]       bad_tr[$];
+        int unsigned                   bad_tr_pos[$];
+        logic [ITEM_WIDTH-1 : 0]       correct_tr[$];
         logic [$clog2(CHANNELS)-1 : 0] model_channel;
         logic [$clog2(CHANNELS)-1 : 0] dut_channel;
 
@@ -188,46 +188,32 @@ class compare #(ITEM_WIDTH, USER_META_WIDTH, DEBUG, CHANNELS, CHANNEL_ARBITER_EN
             model_channel = tr_model_meta.data[$clog2(CHANNELS)+24-1 : 24];
             dut_channel = tr_dut_meta.data[$clog2(CHANNELS)+24-1 : 24];
 
-            if (CHANNEL_ARBITER_EN) begin
-                tr_model_mfb_fifo[int'(model_channel)].push_back(tr_model_mfb.item);
-                tr_model_meta_fifo[int'(model_channel)].push_back(tr_model_meta);
-                tr_dut_mfb_fifo[int'(dut_channel)].push_back(tr_dut_mfb.item);
-                tr_dut_meta_fifo[int'(dut_channel)].push_back(tr_dut_meta);
-            end
+            tr_model_mfb_fifo[int'(model_channel)].push_back(tr_model_mfb.item);
+            tr_model_meta_fifo[int'(model_channel)].push_back(tr_model_meta);
+            tr_dut_mfb_fifo[int'(dut_channel)].push_back(tr_dut_mfb.item);
+            tr_dut_meta_fifo[int'(dut_channel)].push_back(tr_dut_meta);
 
             compared++;
 
-            if (CHANNEL_ARBITER_EN) begin
-                for (int unsigned chan = 0; chan < CHANNELS; chan++) begin
-                    if (tr_model_meta_fifo[chan].size() != 0 && tr_dut_meta_fifo[chan].size() != 0) begin
-                        tr_dut_meta_comp   = tr_dut_meta_fifo[chan].pop_front();
-                        tr_model_meta_comp = tr_model_meta_fifo[chan].pop_front();
+            for (int unsigned chan = 0; chan < CHANNELS; chan++) begin
+                if (tr_model_meta_fifo[chan].size() != 0 && tr_dut_meta_fifo[chan].size() != 0) begin
+                    tr_dut_meta_comp   = tr_dut_meta_fifo[chan].pop_front();
+                    tr_model_meta_comp = tr_model_meta_fifo[chan].pop_front();
 
-                        if (tr_model_meta_comp.compare(tr_dut_meta_comp) == 0) begin
-                            errors++;
-                            write_meta(tr_model_meta_comp, tr_dut_meta_comp);
-                        end
-                    end
-
-                    if (tr_model_mfb_fifo[chan].size() != 0 && tr_dut_mfb_fifo[chan].size() != 0) begin
-                        tr_dut_mfb_comp   = tr_dut_mfb_fifo[chan].pop_front();
-                        tr_model_mfb_comp = tr_model_mfb_fifo[chan].pop_front();
-
-                        if (tr_model_mfb_comp.compare(tr_dut_mfb_comp) == 0) begin
-                            errors++;
-                            write_data(tr_dut_mfb_comp, tr_model_mfb_comp, tr_model_meta_comp);
-                        end
+                    if (tr_model_meta_comp.compare(tr_dut_meta_comp) == 0) begin
+                        errors++;
+                        write_meta(tr_model_meta_comp, tr_dut_meta_comp);
                     end
                 end
-            end else begin
-                if (tr_model_meta.compare(tr_dut_meta) == 0) begin
-                    errors++;
-                    write_meta(tr_model_meta, tr_dut_meta);
-                end
 
-                if (tr_model_mfb.item.compare(tr_dut_mfb.item) == 0) begin
-                    errors++;
-                    write_data(tr_dut_mfb.item, tr_model_mfb.item, tr_model_meta);
+                if (tr_model_mfb_fifo[chan].size() != 0 && tr_dut_mfb_fifo[chan].size() != 0) begin
+                    tr_dut_mfb_comp   = tr_dut_mfb_fifo[chan].pop_front();
+                    tr_model_mfb_comp = tr_model_mfb_fifo[chan].pop_front();
+
+                    if (tr_model_mfb_comp.compare(tr_dut_mfb_comp) == 0) begin
+                        errors++;
+                        write_data(tr_dut_mfb_comp, tr_model_mfb_comp, tr_model_meta_comp);
+                    end
                 end
             end
 
@@ -241,25 +227,25 @@ class compare #(ITEM_WIDTH, USER_META_WIDTH, DEBUG, CHANNELS, CHANNEL_ARBITER_EN
 endclass
 
 class scoreboard #(CHANNELS, PKT_SIZE_MAX, DEVICE, USR_ITEM_WIDTH, USER_META_WIDTH, CQ_ITEM_WIDTH,
-                   DATA_ADDR_W, DEBUG, CHANNEL_ARBITER_EN) extends uvm_scoreboard;
+                   DATA_ADDR_W, DEBUG) extends uvm_scoreboard;
     `uvm_component_param_utils(uvm_dma_ll::scoreboard #(CHANNELS, PKT_SIZE_MAX, DEVICE, USR_ITEM_WIDTH,
                                                         USER_META_WIDTH, CQ_ITEM_WIDTH, DATA_ADDR_W,
-                                                        DEBUG, CHANNEL_ARBITER_EN))
+                                                        DEBUG))
 
     //INPUT TO DUT
     uvm_analysis_export #(uvm_logic_vector_array::sequence_item#(CQ_ITEM_WIDTH))                   analysis_export_rx_packet;
     uvm_analysis_export #(uvm_logic_vector::sequence_item#(sv_pcie_meta_pack::PCIE_CQ_META_WIDTH)) analysis_export_rx_meta;
-    uvm_analysis_export #(uvm_logic_vector::sequence_item#(1))                                     analysis_export_dma[CHANNELS];
+    uvm_analysis_export #(uvm_logic_vector::sequence_item#(1))                                     analysis_export_dma;
     //DUT OUTPUT
-    uvm_analysis_export #(uvm_logic_vector_array::sequence_item#(USR_ITEM_WIDTH)) analysis_export_tx_packet[CHANNELS];
-    uvm_analysis_export #(uvm_logic_vector::sequence_item#(USER_META_WIDTH))      analysis_export_tx_meta[CHANNELS];
+    uvm_analysis_export #(uvm_logic_vector_array::sequence_item#(USR_ITEM_WIDTH)) analysis_export_tx_packet;
+    uvm_analysis_export #(uvm_logic_vector::sequence_item#(USER_META_WIDTH))      analysis_export_tx_meta;
     //OUTPUT TO SCOREBOARD
 
     model #(CHANNELS, PKT_SIZE_MAX, DEVICE, USR_ITEM_WIDTH, USER_META_WIDTH, CQ_ITEM_WIDTH,
-            DATA_ADDR_W, DEBUG, CHANNEL_ARBITER_EN) m_model;
+            DATA_ADDR_W, DEBUG) m_model;
 
-    local regmodel#(CHANNELS) m_regmodel;
-    uvm_dma_ll::compare #(USR_ITEM_WIDTH, USER_META_WIDTH, DEBUG, CHANNELS, CHANNEL_ARBITER_EN) tr_compare[CHANNELS];
+    local uvm_dma_regs::regmodel#(CHANNELS) m_regmodel;
+    uvm_dma_ll::compare #(USR_ITEM_WIDTH, USER_META_WIDTH, DEBUG, CHANNELS) tr_compare;
 
     local int unsigned compared;
     local int unsigned errors;
@@ -273,7 +259,7 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, DEVICE, USR_ITEM_WIDTH, USER_META_WID
     local stats  m_input_speed;
     local stats  m_delay;
     local stats  m_output_speed;
-    local uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item#(USR_ITEM_WIDTH)) tx_speed_meter[CHANNELS];
+    local uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item#(USR_ITEM_WIDTH)) tx_speed_meter;
     local uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item#(CQ_ITEM_WIDTH))  rx_speed_meter;
 
     // Contructor of scoreboard.
@@ -281,15 +267,12 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, DEVICE, USR_ITEM_WIDTH, USER_META_WID
         super.new(name, parent);
         // DUT MODEL COMUNICATION 
         analysis_export_rx_packet = new("analysis_export_rx_packet", this);
-        analysis_export_rx_meta   = new("analysis_export_rx_meta",   this);
-        for (int chan = 0; chan < CHANNELS; chan++) begin
-            string it_str;
-            it_str.itoa(chan);
-            analysis_export_tx_packet[chan] = new({"analysis_export_tx_packet_", it_str}, this);
-            tx_speed_meter[chan]            = new({"tx_speed_meter_", it_str}, this);
-            analysis_export_dma[chan]       = new({"analysis_export_dma_", it_str}, this);
-            analysis_export_tx_meta[chan]   = new({"analysis_export_tx_meta_"  , it_str}, this);
-        end
+        analysis_export_rx_meta   = new("analysis_export_rx_meta"  , this);
+        analysis_export_tx_packet = new("analysis_export_tx_packet", this);
+        tx_speed_meter            = new("tx_speed_meter"           , this);
+        analysis_export_tx_meta   = new("analysis_export_tx_meta"  , this);
+        analysis_export_dma       = new("analysis_export_dma"      , this);
+
         //LOCAL VARIABLES
         rx_speed_meter = new("rx_speed_meter", this);
         m_delay = new();
@@ -302,51 +285,42 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, DEVICE, USR_ITEM_WIDTH, USER_META_WID
         function int unsigned used();
         int unsigned ret = 0;
 
-        for (int chan = 0; chan < CHANNELS; chan++) begin
-            ret |= tr_compare[chan].model_mfb.used()  != 0;
-            ret |= tr_compare[chan].model_meta.used() != 0;
-            ret |= tr_compare[chan].dut_mfb.used()    != 0;
-            ret |= tr_compare[chan].dut_meta.used()   != 0;
-        end
+        ret |= tr_compare.model_mfb.used()  != 0;
+        ret |= tr_compare.model_meta.used() != 0;
+        ret |= tr_compare.dut_mfb.used()    != 0;
+        ret |= tr_compare.dut_meta.used()   != 0;
+
         return ret;
     endfunction
 
-    function void regmodel_set(regmodel#(CHANNELS) m_regmodel);
+    function void regmodel_set(uvm_dma_regs::regmodel#(CHANNELS) m_regmodel);
         this.m_regmodel = m_regmodel;
         m_model.regmodel_set(m_regmodel);
     endfunction
 
     //build phase
     function void build_phase(uvm_phase phase);
-        m_model = model #(CHANNELS, PKT_SIZE_MAX, DEVICE, USR_ITEM_WIDTH, USER_META_WIDTH,
-                          CQ_ITEM_WIDTH, DATA_ADDR_W, DEBUG, CHANNEL_ARBITER_EN)::type_id::create("m_model", this);
-
-        for (int chan = 0; chan < CHANNELS; chan++) begin
-            string it_str;
-            it_str.itoa(chan);
-            tr_compare[chan] = uvm_dma_ll::compare#(USR_ITEM_WIDTH, USER_META_WIDTH, DEBUG,
-                                                    CHANNELS, CHANNEL_ARBITER_EN)::type_id::create({"tr_compare_", it_str}, this);
-        end
+        m_model = model #(CHANNELS, PKT_SIZE_MAX, DEVICE, USR_ITEM_WIDTH, USER_META_WIDTH, CQ_ITEM_WIDTH, DATA_ADDR_W, DEBUG)::type_id::create("m_model", this);
+        tr_compare = uvm_dma_ll::compare#(USR_ITEM_WIDTH, USER_META_WIDTH, DEBUG, CHANNELS)::type_id::create("tr_compare", this);
     endfunction
 
     function void connect_phase(uvm_phase phase);
         analysis_export_rx_packet.connect(m_model.analysis_imp_rx.analysis_export);
         analysis_export_rx_packet.connect(rx_speed_meter.analysis_export);
         analysis_export_rx_meta.connect(m_model.analysis_imp_rx_meta.analysis_export);
-        for (int chan = 0; chan < CHANNELS; chan++) begin
-            analysis_export_dma[chan].connect(m_model.discard_comp[chan].analysis_imp_rx_dma.analysis_export);
 
-            m_model.analysis_port_tx[chan].connect(tr_compare[chan].model_mfb.analysis_export);
-            m_model.analysis_port_meta_tx[chan].connect(tr_compare[chan].model_meta.analysis_export);
-            analysis_export_tx_packet[chan].connect(tr_compare[chan].dut_mfb.analysis_export);
-            analysis_export_tx_packet[chan].connect(tx_speed_meter[chan].analysis_export);
-            analysis_export_tx_meta[chan].connect(tr_compare[chan].dut_meta.analysis_export);
-            tr_compare[chan].m_delay = m_delay;
-        end
+        m_model.analysis_port_tx.connect(tr_compare.model_mfb.analysis_export);
+        m_model.analysis_port_meta_tx.connect(tr_compare.model_meta.analysis_export);
+
+        analysis_export_tx_packet.connect(tr_compare.dut_mfb.analysis_export);
+        analysis_export_tx_packet.connect(tx_speed_meter.analysis_export);
+        analysis_export_tx_meta.connect(tr_compare.dut_meta.analysis_export);
+        tr_compare.m_delay = m_delay;
+        analysis_export_dma.connect(m_model.discard_comp.analysis_imp_rx_dma.analysis_export);
 
     endfunction
 
-    task run_output(int unsigned chan);
+    task run_output();
         uvm_logic_vector_array::sequence_item#(USR_ITEM_WIDTH) tr_dut;
         int unsigned speed_packet_size = 0;
         time         speed_start_time  = 0ns;
@@ -355,7 +329,7 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, DEVICE, USR_ITEM_WIDTH, USER_META_WID
             time time_act;
             time speed_metet_duration;
 
-            tx_speed_meter[chan].get(tr_dut);
+            tx_speed_meter.get(tr_dut);
             time_act = $time();
 
             speed_packet_size += tr_dut.data.size();
@@ -397,14 +371,8 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, DEVICE, USR_ITEM_WIDTH, USER_META_WID
 
     task run_phase(uvm_phase phase);
 
-        for (int chan = 0; chan < CHANNELS; chan++) begin
-            fork
-                automatic int index = chan;
-                run_output(index);
-            join_none
-        end
-
         fork
+            run_output();
             run_input();
         join_none
 
@@ -417,12 +385,10 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, DEVICE, USR_ITEM_WIDTH, USER_META_WID
         real std_dev;
         real median;
         real modus;
-        string msg = "";
+        string msg = "\n";
 
-        for (int chan = 0; chan < CHANNELS; chan++) begin
-            errors += tr_compare[chan].errors;
-            compared += tr_compare[chan].compared;
-        end
+        errors   = tr_compare.errors;
+        compared = tr_compare.compared;
 
         if (this.get_report_verbosity_level() >= UVM_LOW) begin
             m_delay.count(min, max, avg, std_dev, median, modus);
@@ -435,17 +401,17 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, DEVICE, USR_ITEM_WIDTH, USER_META_WID
 
         if (errors == 0 && this.used() == 0) begin
 
-            for (int chan = 0; chan < CHANNELS; chan++) begin
 
-                $swrite(msg, "%s\nCHANNEL                          %d\n", msg, chan                                       );
-                $swrite(msg, "%s================================================================================= \n", msg);
-                $swrite(msg, "%s\nEXPORT USED                        \n", msg                                             );
-                $swrite(msg, "%s================================================================================= \n", msg);
-                $swrite(msg, "%sMODEL_MFB.USED  %d\n", msg, tr_compare[chan].model_mfb.used()                             );
-                $swrite(msg, "%sMODEL_META.USED %d\n", msg, tr_compare[chan].model_meta.used()                            );
-                $swrite(msg, "%sDUT_MFB.USED    %d\n", msg, tr_compare[chan].dut_mfb.used()                               );
-                $swrite(msg, "%sDUT_META.USED   %d\n", msg, tr_compare[chan].dut_meta.used()                              );
-                $swrite(msg, "%s================================================================================= \n", msg);
+            $swrite(msg, "%s================================================================================= \n", msg);
+            $swrite(msg, "%s\nEXPORT USED                        \n", msg                                             );
+            $swrite(msg, "%s================================================================================= \n", msg);
+            $swrite(msg, "%sMODEL_MFB.USED  %d\n", msg, tr_compare.model_mfb.used()                                   );
+            $swrite(msg, "%sMODEL_META.USED %d\n", msg, tr_compare.model_meta.used()                                  );
+            $swrite(msg, "%sDUT_MFB.USED    %d\n", msg, tr_compare.dut_mfb.used()                                     );
+            $swrite(msg, "%sDUT_META.USED   %d\n", msg, tr_compare.dut_meta.used()                                    );
+            $swrite(msg, "%s================================================================================= \n", msg);
+
+            for (int chan = 0; chan < CHANNELS; chan++) begin
 
                 if (byte_cnt[chan] != m_model.cnt_reg[chan].byte_cnt &&
                     dma_cnt[chan]  != m_model.cnt_reg[chan].dma_cnt) begin

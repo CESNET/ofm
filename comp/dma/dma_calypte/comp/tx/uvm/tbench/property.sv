@@ -7,16 +7,13 @@
 import uvm_pkg::*;
 `include "uvm_macros.svh"
 
-module DMA_LL_PROPERTY  #(DEVICE, USER_REGIONS, USER_REGION_SIZE, USER_BLOCK_SIZE, USER_ITEM_WIDTH, PCIE_UP_REGIONS, PCIE_UP_REGION_SIZE, PCIE_UP_BLOCK_SIZE, PCIE_UP_ITEM_WIDTH, CHANNELS, PKT_SIZE_MAX)
+module DMA_LL_PROPERTY  #(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE, USER_TX_MFB_ITEM_WIDTH, USER_META_WIDTH, PCIE_CQ_MFB_REGIONS, PCIE_CQ_MFB_REGION_SIZE, PCIE_CQ_MFB_BLOCK_SIZE, PCIE_CQ_MFB_ITEM_WIDTH)
     (
         input logic RESET,
         mfb_if   mfb_rx,
         mfb_if   mfb_tx,
         mi_if    config_mi
     );
-
-    localparam USER_META_WIDTH = 24 + $clog2(PKT_SIZE_MAX+1) + $clog2(CHANNELS);
-
 
     string module_name = "";
     logic START = 1'b1;
@@ -33,11 +30,11 @@ module DMA_LL_PROPERTY  #(DEVICE, USER_REGIONS, USER_REGION_SIZE, USER_BLOCK_SIZ
     ////////////////////////////////////
     // RX PROPERTY
     mfb_property #(
-        .REGIONS     (USER_REGIONS),
-        .REGION_SIZE (USER_REGION_SIZE),
-        .BLOCK_SIZE  (USER_BLOCK_SIZE ),
-        .ITEM_WIDTH  (USER_ITEM_WIDTH ),
-        .META_WIDTH  (USER_META_WIDTH)
+        .REGIONS     (PCIE_CQ_MFB_REGIONS                  ),
+        .REGION_SIZE (PCIE_CQ_MFB_REGION_SIZE              ),
+        .BLOCK_SIZE  (PCIE_CQ_MFB_BLOCK_SIZE               ),
+        .ITEM_WIDTH  (PCIE_CQ_MFB_ITEM_WIDTH               ),
+        .META_WIDTH  (sv_pcie_meta_pack::PCIE_CQ_META_WIDTH)
     )
     MFB_RX (
         .RESET (RESET),
@@ -48,11 +45,11 @@ module DMA_LL_PROPERTY  #(DEVICE, USER_REGIONS, USER_REGION_SIZE, USER_BLOCK_SIZ
     ////////////////////////////////////
     // TX PROPERTY
     mfb_property #(
-        .REGIONS     (PCIE_UP_REGIONS),
-        .REGION_SIZE (PCIE_UP_REGION_SIZE),
-        .BLOCK_SIZE  (PCIE_UP_BLOCK_SIZE * PCIE_UP_ITEM_WIDTH/8),
-        .ITEM_WIDTH  (8),
-        .META_WIDTH  (0)
+        .REGIONS     (USER_TX_MFB_REGIONS    ),
+        .REGION_SIZE (USER_TX_MFB_REGION_SIZE),
+        .BLOCK_SIZE  (USER_TX_MFB_BLOCK_SIZE ),
+        .ITEM_WIDTH  (USER_TX_MFB_ITEM_WIDTH ),
+        .META_WIDTH  (USER_META_WIDTH        )
     )
     MFB_TX (
         .RESET (RESET),

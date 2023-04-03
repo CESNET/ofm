@@ -5,7 +5,7 @@
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
 class control_register extends uvm_reg;
-    `uvm_object_utils(uvm_dma_ll::control_register)
+    `uvm_object_utils(uvm_dma_regs::control_register)
 
     // Write
     rand uvm_reg_field dma_enable;
@@ -33,7 +33,7 @@ endclass
 
 
 class status_register extends uvm_reg;
-    `uvm_object_utils(uvm_dma_ll::status_register)
+    `uvm_object_utils(uvm_dma_regs::status_register)
 
     // Write
     rand uvm_reg_field dma_status;
@@ -60,13 +60,13 @@ class status_register extends uvm_reg;
 endclass
 
 
-class fifo_status_register extends uvm_reg;
-    `uvm_object_utils(uvm_dma_ll::fifo_status_register)
+class pointer_register extends uvm_reg;
+    `uvm_object_utils(uvm_dma_regs::pointer_register)
 
     // Write
     rand uvm_reg_field pointer;
 
-    function new(string name = "fifo_status_register");
+    function new(string name = "pointer_register");
         super.new(name, 16, UVM_NO_COVERAGE);
     endfunction
 
@@ -89,7 +89,7 @@ endclass
 
 
 class addr_register extends uvm_reg;
-    `uvm_object_utils(uvm_dma_ll::addr_register)
+    `uvm_object_utils(uvm_dma_regs::addr_register)
 
     // Write
     rand uvm_reg_field addr;
@@ -117,7 +117,7 @@ endclass
 
 
 class cnt_register extends uvm_reg;
-    `uvm_object_utils(uvm_dma_ll::cnt_register)
+    `uvm_object_utils(uvm_dma_regs::cnt_register)
 
     // Write
     rand uvm_reg_field cnt;

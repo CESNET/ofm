@@ -31,13 +31,14 @@ package test;
     parameter PCIE_CC_MFB_BLOCK_SIZE  = 8;
     parameter PCIE_CC_MFB_ITEM_WIDTH  = 32;
 
-    parameter FIFO_DEPTH     = 512;
     parameter CHANNELS       = 2;
     parameter CNTRS_WIDTH    = 64;
     parameter HDR_META_WIDTH = 24;
+
+    parameter DATA_POINTER_WIDTH    = 14;
+    parameter DMA_HDR_POINTER_WIDTH = 14;
     // Max size bytes of DMA frame
     parameter PKT_SIZE_MAX       = 2**11;
-    parameter CHANNEL_ARBITER_EN = 0;
     // Parameters that set min and max size of PCIE transaction
     parameter PCIE_LEN_MIN = 1;
     parameter PCIE_LEN_MAX = 256;
@@ -49,6 +50,8 @@ package test;
     parameter CLK_PERIOD = 4ns;
 
 
+    `include "send_pkt.sv"
+    `include "reg_sequence.sv"
     `include "sequence.sv"
     `include "base.sv"
     `include "speed.sv"

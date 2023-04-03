@@ -11,8 +11,8 @@ class sequencer#(USR_REGIONS, USR_REGION_SIZE, USR_BLOCK_SIZE, USR_ITEM_WIDTH, C
 
     uvm_reset::sequencer                                                                                m_reset;
     uvm_dma_ll_rx::sequencer#(CQ_ITEM_WIDTH, CHANNELS)                                                  m_packet;
-    uvm_mfb::sequencer #(USR_REGIONS, USR_REGION_SIZE, USR_BLOCK_SIZE, USR_ITEM_WIDTH, USER_META_WIDTH) m_pcie[CHANNELS];
-    uvm_dma_ll::regmodel #(CHANNELS)                                                                    m_regmodel;
+    uvm_mfb::sequencer #(USR_REGIONS, USR_REGION_SIZE, USR_BLOCK_SIZE, USR_ITEM_WIDTH, USER_META_WIDTH) m_pcie;
+    uvm_dma_regs::regmodel #(CHANNELS)                                                                  m_regmodel;
 
     function new(string name = "virt_sequencer", uvm_component parent);
         super.new(name, parent);

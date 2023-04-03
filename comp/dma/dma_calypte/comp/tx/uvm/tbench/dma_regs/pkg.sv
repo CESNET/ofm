@@ -4,18 +4,18 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
-`ifndef LL_DMA_ENV_SV
-`define LL_DMA_ENV_SV
+`ifndef LL_DMA_REGS_SV
+`define LL_DMA_REGS_SV
 
-package uvm_dma_ll;
+package uvm_dma_regs;
 
     `include "uvm_macros.svh"
     import uvm_pkg::*;
 
-    `include "model.sv"
-    `include "scoreboard.sv"
-    `include "sequencer.sv"
-    `include "env.sv"
+    `include "registers.sv"
+    `include "reg_channel.sv"
+    `include "regmodel.sv"
+    `include "reg_sequence.sv"
 
 endpackage
 
