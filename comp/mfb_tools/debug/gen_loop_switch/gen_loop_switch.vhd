@@ -90,6 +90,8 @@ entity GEN_LOOP_SWITCH is
         TX_DMA_CHANNELS   : natural := 32;
         -- Width of User Header Metadata information
         HDR_META_WIDTH    : natural := 12;
+        -- Depth of FIFO memory in MFB FRAME PLAYERs
+        PLAYER_FIFO_DEPTH : natural := 512;
         -- enable inserting generated NPP Header
         -- at the start of each MFB frame in RX generator
         RX_HDR_INS_EN     : boolean := false;
@@ -921,7 +923,7 @@ not_fake_switch_gen : if (not FAKE_SWITCH) generate
         REGION_SIZE    => REGION_SIZE,
         BLOCK_SIZE     => BLOCK_SIZE ,
         ITEM_WIDTH     => ITEM_WIDTH ,
-        FIFO_DEPTH     => 2**15
+        FIFO_DEPTH     => PLAYER_FIFO_DEPTH
     )
     port map(
         CLK        => CLK  ,
@@ -965,7 +967,7 @@ not_fake_switch_gen : if (not FAKE_SWITCH) generate
         REGION_SIZE    => REGION_SIZE,
         BLOCK_SIZE     => BLOCK_SIZE ,
         ITEM_WIDTH     => ITEM_WIDTH ,
-        FIFO_DEPTH     => 2**15
+        FIFO_DEPTH     => PLAYER_FIFO_DEPTH
     )
     port map(
         CLK        => CLK  ,
