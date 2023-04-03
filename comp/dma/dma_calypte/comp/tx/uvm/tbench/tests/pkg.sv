@@ -41,6 +41,7 @@ package test;
     // Parameters that set min and max size of PCIE transaction
     parameter PCIE_LEN_MIN = 1;
     parameter PCIE_LEN_MAX = 256;
+    // Simulation parameters
     parameter DEBUG        = 0;
 
     parameter TRANSACTION_COUNT = 100000;
