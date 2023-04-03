@@ -37,11 +37,11 @@ package test_pkg is
     -- unit generics
 
     constant DATA_WIDTH   : integer := 34;
-    constant ITEMS        : integer := 16;
-    constant BLOCK_ENABLE : boolean := true;
+    constant ITEMS        : integer := 200;
+    constant BLOCK_ENABLE : boolean := True;
     constant BLOCK_WIDTH  : natural := 17;
     constant OUTPUT_REG   : boolean := true;
-    constant DEVICE       : string  := "ULTRASCALE"; -- "STRATIX10"
+    constant DEVICE       : string  := "SIM"; -- "STRATIX10"
 
     -- functions
 
