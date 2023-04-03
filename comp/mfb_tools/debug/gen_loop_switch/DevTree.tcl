@@ -1,7 +1,7 @@
 # 1. base - base address on MI bus
 # 2. name - instantion name inside device tree hierarchy
 proc dts_gen_loop_switch {base name} {
-    set size 0x100
+    set size 0x200
     set gen2dma_base [expr $base + 0x80]
     set gen2eth_base [expr $base + 0xC0]
     set    ret ""
