@@ -1,4 +1,4 @@
--- ll_dma_pkg.vhd: Provides constants for the DMA/PCIex headers used in the LL DMA design.
+-- dma_hdr_pkg.vhd: Provides constants for the DMA/PCIex headers used in the LL DMA design.
 -- Copyright (c) 2022 CESNET z.s.p.o.
 -- Author(s): Vladislav Valek  <xvalek14@vutbr.cz>
 --
@@ -8,8 +8,7 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 
-
-package ll_dma_pkg is
+package dma_hdr_pkg is
 
     --=============================================================================================================
     -- DMA header parameters widths
@@ -114,6 +113,6 @@ package ll_dma_pkg is
 
 end package;
 
-package body ll_dma_pkg is
+package body dma_hdr_pkg is
 
 end package body;
