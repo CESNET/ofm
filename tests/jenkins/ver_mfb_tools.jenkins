@@ -51,6 +51,7 @@ def COMPONENTS_MULTIVER = [\
     ['SPLITTER_SIMPLE'                    , 'comp/mfb_tools/flow/splitter_simple/ver'                                         , 'top_level.fdo'      , 'tbench/test_pkg.sv' , 'ver_settings.py'    ],\
     ['SPLITTER_SIMPLE_PLUS UVM'           , 'comp/mfb_tools/flow/splitter_simple/uvm'                                         , 'top_level.fdo'      , 'tbench/tests/pkg.sv', 'ver_settings.py'    ],\
     ['TRANSFORMER'                        , 'comp/mfb_tools/flow/transformer/ver'                                             , 'top_level.fdo'      , 'tbench/test_pkg.sv' , 'ver_settings.py'    ],\
+    ['ITEMS_VLD'                          , 'comp/mfb_tools/logic/items_vld/uvm'                                              , 'top_level.fdo'      , 'tbench/tests/pkg.sv' , 'ver_settings.py'   ],\
     ['MFB_FRAME_CNT'                      , 'comp/mfb_tools/logic/frame_cnt/ver'                                              , 'top_level.fdo'      , 'tbench/test_pkg.sv' , 'ver_settings.py'    ],\
     ['FRAME_LENGTH_COUNTER'               , 'comp/mfb_tools/logic/frame_lng/ver'                                              , 'top_level.fdo'      , 'tbench/test_pkg.sv' , 'ver_settings.py'    ],\
     ['GET_ITEMS'                          , 'comp/mfb_tools/logic/get_items/ver'                                              , 'top_level.fdo'      , 'tbench/test_pkg.sv' , 'ver_settings.py'    ],\
