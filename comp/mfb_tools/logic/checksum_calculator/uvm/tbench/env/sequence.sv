@@ -5,12 +5,12 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 // This low level sequence define bus functionality
-class byte_array_sequence extends uvm_sequence#(uvm_logic_vector_array::sequence_item #(8));
-    `uvm_object_utils(uvm_checksum_calculator::byte_array_sequence)
+class byte_array_sequence#(PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH, MFB_ITEM_WIDTH) extends uvm_sequence#(uvm_logic_vector_array::sequence_item #(8));
+    `uvm_object_utils(uvm_checksum_calculator::byte_array_sequence#(PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH, MFB_ITEM_WIDTH))
 
-    mailbox#(uvm_header_type::sequence_item) tr_export;
-    uvm_header_type::sequence_item info_req;
-    uvm_logic_vector_array::sequence_item #(8) req;
+    mailbox#(uvm_header_type::sequence_item#(PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH)) tr_export;
+    uvm_header_type::sequence_item#(PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH)           info_req;
+    uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)                        req;
 
     function new(string name = "checksum_calculator_sequence");
         super.new(name);
@@ -18,17 +18,12 @@ class byte_array_sequence extends uvm_sequence#(uvm_logic_vector_array::sequence
 
     task body;
         forever begin
-            info_req  = uvm_header_type::sequence_item::type_id::create("info_req");
-            req  = uvm_logic_vector_array::sequence_item #(8)::type_id::create("req");
+            info_req  = uvm_header_type::sequence_item#(PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH)::type_id::create("info_req");
+            req  = uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)::type_id::create("req");
+
             tr_export.get(info_req);
             start_item(req);
-            req.randomize() with {data.size == (info_req.payload_size+info_req.l2_size+info_req.l3_size+info_req.l4_size); };
-
-            if (info_req.flag[2] == 1) begin
-                req.data[info_req.l2_size+10] = '0;
-                req.data[info_req.l2_size+11] = '0;
-            end
-
+            void'(req.randomize() with {data.size == (info_req.payload_size); });
             finish_item(req);
         end
     endtask

@@ -13,8 +13,6 @@ package uvm_checksum_calculator;
     `include "uvm_macros.svh"
     import uvm_pkg::*;
 
-    parameter PKT_GEN_PATH = {"`dirname ", `__FILE__, "`/../../../../../../../../ndk-core/intel/uvm/pkt_gen/pkt_gen.py"};
-
     `include "sequencer.sv"
     `include "sequence.sv"
     `include "driver.sv"

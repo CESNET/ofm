@@ -23,8 +23,7 @@ module testbench;
     // Interfaces
     reset_if  reset(CLK);
     mfb_if #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH) mfb_rx(CLK);
-    mvb_if #(MFB_REGIONS, MVB_DATA_WIDTH+1) mvb_tx_l3(CLK);
-    mvb_if #(MFB_REGIONS, MVB_DATA_WIDTH+1) mvb_tx_l4(CLK);
+    mvb_if #(MFB_REGIONS, MVB_DATA_WIDTH+1) mvb_tx(CLK);
 
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // Define clock ticking
@@ -38,8 +37,7 @@ module testbench;
         // Configuration of database
         uvm_config_db#(virtual reset_if)::set(null, "", "vif_reset", reset);
         uvm_config_db#(virtual mfb_if #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH))::set(null, "", "vif_rx", mfb_rx);
-        uvm_config_db#(virtual mvb_if #(MFB_REGIONS, MVB_DATA_WIDTH+1))::set(null, "", "vif_mvb_tx_l3", mvb_tx_l3);
-        uvm_config_db#(virtual mvb_if #(MFB_REGIONS, MVB_DATA_WIDTH+1))::set(null, "", "vif_mvb_tx_l4", mvb_tx_l4);
+        uvm_config_db#(virtual mvb_if #(MFB_REGIONS, MVB_DATA_WIDTH+1))::set(null, "", "vif_mvb_tx", mvb_tx);
 
         m_root = uvm_root::get();
         m_root.finish_on_completion = 0;
@@ -55,11 +53,10 @@ module testbench;
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // DUT
     DUT DUT_U (
-        .CLK        (CLK),
-        .RST        (reset.RESET),
-        .mfb_rx     (mfb_rx),
-        .mvb_tx_l3  (mvb_tx_l3),
-        .mvb_tx_l4  (mvb_tx_l4)
+        .CLK    (CLK),
+        .RST    (reset.RESET),
+        .mfb_rx (mfb_rx),
+        .mvb_tx (mvb_tx)
     );
 
     // Properties
@@ -72,10 +69,9 @@ module testbench;
         .MVB_DATA_WIDTH  (MVB_DATA_WIDTH+1)
     )
     PROPERTY_CHECK (
-        .RESET         (reset.RESET),
-        .rx_mfb_vif    (mfb_rx),
-        .tx_mvb_l3_vif (mvb_tx_l3),
-        .tx_mvb_l4_vif (mvb_tx_l4)
+        .RESET      (reset.RESET),
+        .rx_mfb_vif (mfb_rx),
+        .tx_mvb_vif (mvb_tx)
     );
 
 

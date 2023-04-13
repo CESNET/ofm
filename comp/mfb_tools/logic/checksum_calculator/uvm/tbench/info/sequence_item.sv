@@ -8,32 +8,26 @@
 // Items description
 //
 // ============ ==================================================================
-// FLAG         Flag which contains information about:
-//              Flag[2] Type of L3 protocol (1 - IPv4, 0 - IPv6).
-//              Flag[3] Type of L4 protocol (1 - TCP, 0 - UDP).
-//              Flag[1] TCP/UDP checksum enable.
-//              Flag[0] IP checksum enable.
-// L2_SIZE      Size of L2 header.
-// L3_SIZE      Size of L3 header.
-// L4_SIZE      Size of L4 header.
+// CHSUM_EN     Checksum enable.
+// LENGTH       Length of chunk from which is calculated chsum.
+// OFFSET       Offset of chunk.
 // PAYLOAD_SIZE Size of data payload.
 // ============ ==================================================================
 
 
 // This class represents high level transaction, which can be reusable for other components.
-class sequence_item extends uvm_sequence_item;
+class sequence_item#(PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH) extends uvm_sequence_item;
     // Registration of object tools.
-    `uvm_object_utils(uvm_header_type::sequence_item)
+    `uvm_object_param_utils(uvm_header_type::sequence_item#(PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH))
 
     // -----------------------
     // Variables.
     // -----------------------
 
-    rand int l2_size;
-    rand int l3_size;
-    rand int l4_size;
-    rand int payload_size;
-    rand logic [4-1 : 0] flag;
+    rand logic [LENGTH_WIDTH-1 : 0]    length;
+    rand logic [OFFSET_WIDTH-1 : 0]    offset;
+    rand logic [$clog2(PKT_MTU)-1 : 0] payload_size;
+    rand logic                         chsum_en;
 
     // Constructor - creates new instance of this class
     function new(string name = "sequence_item");
@@ -46,7 +40,7 @@ class sequence_item extends uvm_sequence_item;
 
     // Properly copy all transaction attributes.
     function void do_copy(uvm_object rhs);
-        sequence_item rhs_;
+        sequence_item #(PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH) rhs_;
 
         if(!$cast(rhs_, rhs)) begin
             `uvm_fatal( "do_copy:", "Failed to cast transaction object.")
@@ -54,17 +48,16 @@ class sequence_item extends uvm_sequence_item;
         end
         // Now copy all attributes
         super.do_copy(rhs);
-        flag = rhs_.flag;
-        l2_size = rhs_.l2_size;
-        l3_size = rhs_.l3_size;
-        l4_size = rhs_.l4_size;
+        chsum_en = rhs_.chsum_en;
+        length = rhs_.length;
+        offset = rhs_.offset;
         payload_size = rhs_.payload_size;
     endfunction: do_copy
 
     // Properly compare all transaction attributes representing output pins.
     function bit do_compare(uvm_object rhs, uvm_comparer comparer);
         bit ret;
-        sequence_item rhs_;
+        sequence_item #(PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH) rhs_;
 
         if(!$cast(rhs_, rhs)) begin
             `uvm_fatal("do_compare:", "Failed to cast transaction object.")
@@ -72,10 +65,9 @@ class sequence_item extends uvm_sequence_item;
         end
 
         ret  = super.do_compare(rhs, comparer);
-        ret &= (flag == rhs_.flag);
-        ret &= (l2_size == rhs_.l2_size);
-        ret &= (l3_size == rhs_.l3_size);
-        ret &= (l4_size == rhs_.l4_size);
+        ret &= (chsum_en == rhs_.chsum_en);
+        ret &= (length == rhs_.length);
+        ret &= (offset == rhs_.offset);
         ret &= (payload_size == rhs_.payload_size);
         return ret;
     endfunction: do_compare
@@ -84,8 +76,8 @@ class sequence_item extends uvm_sequence_item;
     function string convert2string();
         string ret;
 
-        $swrite(ret, "\n\tflag : %b\n\tl2_size : %d\n\tl3_size : %d\n\tl4_size : %d\n\tpayload_size : %d\n", 
-                     flag, l2_size, l3_size, l4_size, payload_size);
+        $swrite(ret, "\n\tchsum_en : %b\n\tlength : %d\n\toffset : %d\n\tpayload_size : %d\n", 
+                     chsum_en, length, offset, payload_size);
 
         return ret;
     endfunction

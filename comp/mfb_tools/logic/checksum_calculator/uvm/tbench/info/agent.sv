@@ -4,15 +4,17 @@
 
 // SPDX-License-Identifier: BSD-3-Clause
 
-class agent extends uvm_agent;
-    `uvm_component_utils(uvm_header_type::agent)
+class agent#(PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH) extends uvm_agent;
+    `uvm_component_utils(uvm_header_type::agent#(PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH))
 
     // -----------------------
     // Variables.
     // -----------------------
-    uvm_analysis_port #(sequence_item) analysis_port;
-    monitor m_monitor;
-    sequencer m_sequencer;
+    uvm_analysis_port #(sequence_item#(PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH)) analysis_port;
+
+    monitor#(PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH)   m_monitor;
+    sequencer#(PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH) m_sequencer;
+
     config_item m_config;
 
     // Contructor, where analysis port is created.
@@ -30,9 +32,9 @@ class agent extends uvm_agent;
             `uvm_fatal(this.get_full_name(), "Cannot get configuration object")
         end
 
-        m_monitor = monitor::type_id::create("m_monitor", this);
+        m_monitor = monitor#(PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH)::type_id::create("m_monitor", this);
         if(get_is_active() == UVM_ACTIVE) begin
-            m_sequencer = sequencer::type_id::create("m_sequencer", this);
+            m_sequencer = sequencer#(PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH)::type_id::create("m_sequencer", this);
         end
     endfunction
 
