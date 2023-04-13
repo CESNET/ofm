@@ -1,4 +1,4 @@
--- checksum_calculator.vhd: A top-level component that can calculate the IPv4, TCP, or UDP checksum.
+-- checksum_calculator.vhd: A top-level component that can calculate checksums using the IPv4=TCP=UDP checksum algorithm.
 -- Copyright (C) 2022 CESNET z. s. p. o.
 -- Author(s): Daniel Kondys <kondys@cesnet.cz>
 --
@@ -16,63 +16,62 @@ use work.type_pack.all;
 --  Description
 -- ============================================================================
 
--- This component calculates checksum for the IPv4, TCP, and UDP protocols.
--- Along with the frame data (from which the checksums are calculated), it
--- expects additional information (valid with SOF) as input. This includes the
--- length of the L2 header (i.e., the offset of the L3 header), length of the
--- L3 header (i.e., the offset of the L4 header), and flags (see
--- :vhdl:portsignal:`RX_FLAGS <checksum_calculator.rx_flags>` port).
---
+-- This component calculates checksum from the Section of each frame specified by the Offset and Length.
+-- The IPv4(=TCP=UDP) checksum algorithm is used.
+-- The calculation can be "disabled" per each frame by setting the RX_CHSUM_EN to 0.
+-- This dis/enabling of the checksum results in propagating the inverted value of the RX_CHSUM_EN to the TX_CHSUM_BYPASS output (to be reworked).
 entity CHECKSUM_CALCULATOR is
 generic(
     -- Number of Regions within a data word, must be power of 2.
-    MFB_REGIONS           : natural := 4;
+    MFB_REGIONS     : natural := 4;
     -- Region size (in Blocks).
-    MFB_REGION_SIZE       : natural := 8;
+    MFB_REGION_SIZE : natural := 8;
     -- Block size (in Items).
-    MFB_BLOCK_SIZE        : natural := 8;
+    MFB_BLOCK_SIZE  : natural := 8;
     -- Item width (in bits), must be 8.
-    MFB_ITEM_WIDTH        : natural := 8;
+    MFB_ITEM_WIDTH  : natural := 8;
+
+    -- Maximum size of a packet (in Items).
+    PKT_MTU         : natural := 2**14;
+
+    -- Width of each Offset signal in the in the RX_OFFSET vector.
+    OFFSET_WIDTH    : integer := 7;
+    -- Width of each Length signal in the in the RX_LENGTH vector.
+    LENGTH_WIDTH    : integer := 9;
 
     -- FPGA device name.
     -- Options: ULTRASCALE, STRATIX10, AGILEX, ...
-    DEVICE                : string := "STRATIX10"
+    DEVICE          : string := "STRATIX10"
 );
 port(
     -- ========================================================================
     -- Clock and Reset
     -- ========================================================================
 
-    CLK              : in  std_logic;
-    RESET            : in  std_logic;
+    CLK   : in  std_logic;
+    RESET : in  std_logic;
 
     -- ========================================================================
     -- RX STREAM
     --
     -- #. Input packets (MFB),
-    -- #. Meta information (header lengths, flags) valid with SOF.
+    -- #. Meta information (header offsets and lengths).
     -- ========================================================================
 
-    RX_MFB_DATA      : in  std_logic_vector(MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH-1 downto 0);
-    RX_MFB_SOF_POS   : in  std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE))-1 downto 0);
-    RX_MFB_EOF_POS   : in  std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE))-1 downto 0);
-    RX_MFB_SOF       : in  std_logic_vector(MFB_REGIONS-1 downto 0);
-    RX_MFB_EOF       : in  std_logic_vector(MFB_REGIONS-1 downto 0);
-    RX_MFB_SRC_RDY   : in  std_logic;
-    RX_MFB_DST_RDY   : out std_logic;
+    RX_MFB_DATA    : in  std_logic_vector(MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH-1 downto 0);
+    RX_MFB_SOF_POS : in  std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE))-1 downto 0);
+    RX_MFB_EOF_POS : in  std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE))-1 downto 0);
+    RX_MFB_SOF     : in  std_logic_vector(MFB_REGIONS-1 downto 0);
+    RX_MFB_EOF     : in  std_logic_vector(MFB_REGIONS-1 downto 0);
+    RX_MFB_SRC_RDY : in  std_logic;
+    RX_MFB_DST_RDY : out std_logic;
 
-    -- L3 header offset.
-    RX_L2_HDR_LENGTH : in  std_logic_vector(MFB_REGIONS*7-1 downto 0);
-    -- L4 header offset.
-    RX_L3_HDR_LENGTH : in  std_logic_vector(MFB_REGIONS*9-1 downto 0);
-    -- Flag items:
-    --
-    -- - RX_FLAGS[3]: L4 protocol, 1 = TCP, 0 = UDP
-    -- - RX_FLAGS[2]: L3 protocol, 1 = IPv4, 0 = IPv6
-    -- - RX_FLAGS[1]: TCP/UDP checksum enable
-    -- - RX_FLAGS[0]: IPv4 checksum enable
-    --
-    RX_FLAGS         : in  std_logic_vector(MFB_REGIONS*4-1 downto 0);
+    -- Header offset from SOF POS, valid with SOF.
+    RX_OFFSET      : in  std_logic_vector(MFB_REGIONS*OFFSET_WIDTH-1 downto 0);
+    -- Header length, valid with SOF.
+    RX_LENGTH      : in  std_logic_vector(MFB_REGIONS*LENGTH_WIDTH-1 downto 0);
+    -- Enable checksum calculation, valid with SOF.
+    RX_CHSUM_EN    : in  std_logic_vector(MFB_REGIONS-1 downto 0);
 
     -- ========================================================================
     -- TX MVB STREAM
@@ -81,20 +80,12 @@ port(
     -- ========================================================================
 
     -- The calculated checksum.
-    TX_L3_MVB_DATA     : out std_logic_vector(MFB_REGIONS*16-1 downto 0);
+    TX_MVB_DATA     : out std_logic_vector(MFB_REGIONS*16-1 downto 0);
     -- Bypass checksum insertion (=> checksum caluculation is not desired).
-    TX_L3_CHSUM_BYPASS : out std_logic_vector(MFB_REGIONS-1 downto 0);
-    TX_L3_MVB_VLD      : out std_logic_vector(MFB_REGIONS-1 downto 0);
-    TX_L3_MVB_SRC_RDY  : out std_logic := '0';
-    TX_L3_MVB_DST_RDY  : in  std_logic := '1';
-
-    -- The calculated checksum.
-    TX_L4_MVB_DATA     : out std_logic_vector(MFB_REGIONS*16-1 downto 0);
-    -- Bypass checksum insertion (=> checksum caluculation is not desired).
-    TX_L4_CHSUM_BYPASS : out std_logic_vector(MFB_REGIONS-1 downto 0);
-    TX_L4_MVB_VLD      : out std_logic_vector(MFB_REGIONS-1 downto 0);
-    TX_L4_MVB_SRC_RDY  : out std_logic := '0';
-    TX_L4_MVB_DST_RDY  : in  std_logic := '1'
+    TX_CHSUM_BYPASS : out std_logic_vector(MFB_REGIONS-1 downto 0);
+    TX_MVB_VLD      : out std_logic_vector(MFB_REGIONS-1 downto 0);
+    TX_MVB_SRC_RDY  : out std_logic := '0';
+    TX_MVB_DST_RDY  : in  std_logic := '1'
 );
 end entity;
 
@@ -104,42 +95,41 @@ architecture FULL of CHECKSUM_CALCULATOR is
     --                                CONSTANTS
     -- ========================================================================
 
-    constant L2_HDR_LENGTH_W : natural := 7;
-    constant L3_HDR_LENGTH_W : natural := 9;
-
-    constant CHECKSUM_W      : natural := 16;
+    constant CHECKSUM_W       : natural := 16;
 
     constant MFB_DATA_W       : natural := MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH;
     constant MFB_DATA_ITEMS   : natural := MFB_DATA_W/MFB_ITEM_WIDTH;
     constant MFB_REGION_ITEMS : natural := MFB_DATA_ITEMS/MFB_REGIONS;
 
+    -- "serial", "parallel", "prefixsum"
+    constant AGGREGATE_IMPL   : string := "prefixsum";
+
+    -- ========================================================================
+    --                                FUNCTIONS
+    -- ========================================================================
+
+    function int_is_odd(int : integer) return std_logic is
+        variable slv : std_logic_vector(32-1 downto 0);
+        variable odd : std_logic;
+    begin
+        slv := std_logic_vector(to_unsigned(int, 32));
+        odd := slv(0);
+        return odd;
+    end;
+
     -- ========================================================================
     --                                 SIGNALS
     -- ========================================================================
 
-    signal rx_flags_arr          : slv_array_t     (MFB_REGIONS-1 downto 0)(4-1 downto 0);
-    signal l3_chs_en_flags       : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal l4_chs_en_flags       : std_logic_vector(MFB_REGIONS-1 downto 0);
-
     -- checksum enable fifoxm signals
-    signal chs_en_fifoxm_full    : std_logic;
-
-    signal l3_chs_en_fifoxm_din   : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal l3_chs_en_fifoxm_wr    : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal l3_chs_en_fifoxm_full  : std_logic;
-    signal l3_chs_en_fifoxm_dout  : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal l3_chs_en_fifoxm_rd    : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal l3_chs_en_fifoxm_empty : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal l3_chs_en_fifoxm_vo    : std_logic_vector(MFB_REGIONS-1 downto 0);
-
-    signal l4_chs_en_fifoxm_din   : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal l4_chs_en_fifoxm_wr    : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal l4_chs_en_fifoxm_full  : std_logic;
-    signal l4_chs_en_fifoxm_dout  : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal l4_chs_en_fifoxm_rd    : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal l4_chs_en_fifoxm_empty : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal l4_chs_en_fifoxm_out_rdy : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal l4_chs_en_fifoxm_vo    : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal chs_en_fifoxm_din   : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal chs_en_fifoxm_wr    : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal chs_en_fifoxm_full  : std_logic;
+    signal chs_en_fifoxm_dout  : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal chs_en_fifoxm_rd    : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal chs_en_fifoxm_empty : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal chs_en_fifoxm_out_rdy : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal chs_en_fifoxm_vo    : std_logic_vector(MFB_REGIONS-1 downto 0);
 
     -- input register
     signal rx_ext_data           : std_logic_vector(MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH-1 downto 0);
@@ -149,91 +139,60 @@ architecture FULL of CHECKSUM_CALCULATOR is
     signal rx_ext_eof            : std_logic_vector(MFB_REGIONS-1 downto 0);
     signal rx_ext_src_rdy        : std_logic;
     signal rx_ext_dst_rdy        : std_logic;
-    signal rx_ext_l2_len         : std_logic_vector(MFB_REGIONS*7-1 downto 0);
-    signal rx_ext_l3_len         : std_logic_vector(MFB_REGIONS*9-1 downto 0);
+    signal rx_ext_off            : std_logic_vector(MFB_REGIONS*7-1 downto 0);
+    signal rx_ext_len            : std_logic_vector(MFB_REGIONS*9-1 downto 0);
+    signal rx_ext_en             : std_logic_vector(MFB_REGIONS  -1 downto 0);
 
-    -- Layer 3 checksum signals
-    signal tx_l3_ext_data        : std_logic_vector(MFB_DATA_W-1 downto 0);
-    signal tx_l3_ext_odd         : std_logic_vector(MFB_DATA_ITEMS-1 downto 0);
-    signal tx_l3_ext_vld         : std_logic_vector(MFB_DATA_ITEMS-1 downto 0);
-    signal tx_l3_ext_end         : std_logic_vector(MFB_DATA_ITEMS-1 downto 0);
-    signal tx_l3_ext_src_rdy     : std_logic;
-    signal tx_l3_ext_dst_rdy     : std_logic;
+    -- validated (extracted) checksum data signals
+    signal tx_ext_data        : std_logic_vector(MFB_DATA_W-1 downto 0);
+    signal tx_ext_odd         : std_logic_vector(MFB_DATA_ITEMS-1 downto 0);
+    -- signal tx_ext_odd_reg     : std_logic;
+    signal tx_ext_vld         : std_logic_vector(MFB_DATA_ITEMS-1 downto 0);
+    signal tx_ext_end         : std_logic_vector(MFB_DATA_ITEMS-1 downto 0);
+    signal tx_ext_src_rdy     : std_logic;
+    signal tx_ext_dst_rdy     : std_logic;
 
-    signal rx_l3_rchsum_data     : slv_array_t     (MFB_REGIONS-1 downto 0)(MFB_DATA_W/MFB_REGIONS-1 downto 0);
-    signal rx_l3_rchsum_odd      : slv_array_t     (MFB_REGIONS-1 downto 0)(MFB_REGION_ITEMS-1 downto 0);
-    signal rx_l3_rchsum_end      : slv_array_t     (MFB_REGIONS-1 downto 0)(MFB_REGION_ITEMS-1 downto 0);
-    signal rx_l3_rchsum_vld      : slv_array_t     (MFB_REGIONS-1 downto 0)(MFB_REGION_ITEMS-1 downto 0);
-    signal rx_l3_rchsum_src_rdy  : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal rx_l3_rchsum_dst_rdy  : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal tx_ext_end_reg     : std_logic;
+    signal odd_start          : std_logic_vector(MFB_DATA_ITEMS-1 downto 0);
+    signal last_vld_din       : std_logic_vector(MFB_DATA_ITEMS-1 downto 0);
+    signal last_vld_vld       : std_logic_vector(MFB_DATA_ITEMS-1 downto 0);
 
-    signal tx_l3_rchsum_data     : slv_array_t     (MFB_REGIONS-1 downto 0)(2*CHECKSUM_W-1 downto 0);
-    signal tx_l3_rchsum_end      : slv_array_t     (MFB_REGIONS-1 downto 0)(2-1 downto 0);
-    signal tx_l3_rchsum_vld      : slv_array_t     (MFB_REGIONS-1 downto 0)(2-1 downto 0);
-    signal tx_l3_rchsum_src_rdy  : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal tx_l3_rchsum_dst_rdy  : std_logic_vector(MFB_REGIONS-1 downto 0);
+    -- regional checksum signals
+    signal rx_rchsum_data     : slv_array_t     (MFB_REGIONS-1 downto 0)(MFB_DATA_W/MFB_REGIONS-1 downto 0);
+    signal rx_rchsum_odd      : slv_array_t     (MFB_REGIONS-1 downto 0)(MFB_REGION_ITEMS-1 downto 0);
+    signal rx_rchsum_end      : slv_array_t     (MFB_REGIONS-1 downto 0)(MFB_REGION_ITEMS-1 downto 0);
+    signal rx_rchsum_vld      : slv_array_t     (MFB_REGIONS-1 downto 0)(MFB_REGION_ITEMS-1 downto 0);
+    signal rx_rchsum_src_rdy  : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal rx_rchsum_dst_rdy  : std_logic_vector(MFB_REGIONS-1 downto 0);
 
-    signal rx_l3_fchsum_data     : std_logic_vector(MFB_REGIONS*2*CHECKSUM_W-1 downto 0);
-    signal rx_l3_fchsum_end      : std_logic_vector(MFB_REGIONS*2-1 downto 0);
-    signal rx_l3_fchsum_vld      : std_logic_vector(MFB_REGIONS*2-1 downto 0);
-    signal rx_l3_fchsum_src_rdy  : std_logic;
-    signal rx_l3_fchsum_dst_rdy  : std_logic;
+    signal tx_rchsum_data     : slv_array_t     (MFB_REGIONS-1 downto 0)(2*CHECKSUM_W-1 downto 0);
+    signal tx_rchsum_end      : slv_array_t     (MFB_REGIONS-1 downto 0)(2-1 downto 0);
+    signal tx_rchsum_vld      : slv_array_t     (MFB_REGIONS-1 downto 0)(2-1 downto 0);
+    signal tx_rchsum_src_rdy  : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal tx_rchsum_dst_rdy  : std_logic_vector(MFB_REGIONS-1 downto 0);
 
-    signal tx_l3_fchsum_data     : std_logic_vector(MFB_REGIONS*2*CHECKSUM_W-1 downto 0);
-    signal tx_l3_fchsum_vld      : std_logic_vector(MFB_REGIONS*2-1 downto 0);
-    signal tx_l3_fchsum_src_rdy  : std_logic;
-    signal tx_l3_fchsum_dst_rdy  : std_logic;
+    -- finalized checksum signals
+    signal rx_fchsum_data     : std_logic_vector(MFB_REGIONS*2*CHECKSUM_W-1 downto 0);
+    signal rx_fchsum_end      : std_logic_vector(MFB_REGIONS*2-1 downto 0);
+    signal rx_fchsum_vld      : std_logic_vector(MFB_REGIONS*2-1 downto 0);
+    signal rx_fchsum_src_rdy  : std_logic;
+    signal rx_fchsum_dst_rdy  : std_logic;
 
-    signal l3_fifoxm_datain      : std_logic_vector(MFB_REGIONS*2*CHECKSUM_W-1 downto 0);
-    signal l3_fifoxm_wr          : std_logic_vector(MFB_REGIONS*2-1 downto 0);
-    signal l3_fifoxm_full        : std_logic;
+    signal tx_fchsum_data     : std_logic_vector(MFB_REGIONS*2*CHECKSUM_W-1 downto 0);
+    signal tx_fchsum_vld      : std_logic_vector(MFB_REGIONS*2-1 downto 0);
+    signal tx_fchsum_src_rdy  : std_logic;
+    signal tx_fchsum_dst_rdy  : std_logic;
 
-    signal l3_fifoxm_dataout     : std_logic_vector(MFB_REGIONS*CHECKSUM_W-1 downto 0);
-    signal l3_fifoxm_rd          : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal l3_fifoxm_empty       : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal l3_fifoxm_vo          : std_logic_vector(MFB_REGIONS-1 downto 0);
+    -- checksum FIFOX Multi signals
+    signal fifoxm_datain      : std_logic_vector(MFB_REGIONS*2*CHECKSUM_W-1 downto 0);
+    signal fifoxm_wr          : std_logic_vector(MFB_REGIONS*2-1 downto 0);
+    signal fifoxm_full        : std_logic;
 
-    -- Layer 4 checksum signals
-    signal tx_l4_ext_data        : std_logic_vector(MFB_DATA_W-1 downto 0);
-    signal tx_l4_ext_odd         : std_logic_vector(MFB_DATA_ITEMS-1 downto 0);
-    signal tx_l4_ext_vld         : std_logic_vector(MFB_DATA_ITEMS-1 downto 0);
-    signal tx_l4_ext_end         : std_logic_vector(MFB_DATA_ITEMS-1 downto 0);
-    signal tx_l4_ext_src_rdy     : std_logic;
-    signal tx_l4_ext_dst_rdy     : std_logic;
-
-    signal rx_l4_rchsum_data     : slv_array_t     (MFB_REGIONS-1 downto 0)(MFB_DATA_W/MFB_REGIONS-1 downto 0);
-    signal rx_l4_rchsum_odd      : slv_array_t     (MFB_REGIONS-1 downto 0)(MFB_REGION_ITEMS-1 downto 0);
-    signal rx_l4_rchsum_end      : slv_array_t     (MFB_REGIONS-1 downto 0)(MFB_REGION_ITEMS-1 downto 0);
-    signal rx_l4_rchsum_vld      : slv_array_t     (MFB_REGIONS-1 downto 0)(MFB_REGION_ITEMS-1 downto 0);
-    signal rx_l4_rchsum_src_rdy  : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal rx_l4_rchsum_dst_rdy  : std_logic_vector(MFB_REGIONS-1 downto 0);
-
-    signal tx_l4_rchsum_data     : slv_array_t     (MFB_REGIONS-1 downto 0)(2*CHECKSUM_W-1 downto 0);
-    signal tx_l4_rchsum_end      : slv_array_t     (MFB_REGIONS-1 downto 0)(2-1 downto 0);
-    signal tx_l4_rchsum_vld      : slv_array_t     (MFB_REGIONS-1 downto 0)(2-1 downto 0);
-    signal tx_l4_rchsum_src_rdy  : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal tx_l4_rchsum_dst_rdy  : std_logic_vector(MFB_REGIONS-1 downto 0);
-
-    signal rx_l4_fchsum_data     : std_logic_vector(MFB_REGIONS*2*CHECKSUM_W-1 downto 0);
-    signal rx_l4_fchsum_end      : std_logic_vector(MFB_REGIONS*2-1 downto 0);
-    signal rx_l4_fchsum_vld      : std_logic_vector(MFB_REGIONS*2-1 downto 0);
-    signal rx_l4_fchsum_src_rdy  : std_logic;
-    signal rx_l4_fchsum_dst_rdy  : std_logic;
-
-    signal tx_l4_fchsum_data     : std_logic_vector(MFB_REGIONS*2*CHECKSUM_W-1 downto 0);
-    signal tx_l4_fchsum_vld      : std_logic_vector(MFB_REGIONS*2-1 downto 0);
-    signal tx_l4_fchsum_src_rdy  : std_logic;
-    signal tx_l4_fchsum_dst_rdy  : std_logic;
-
-    signal l4_fifoxm_datain      : std_logic_vector(MFB_REGIONS*2*CHECKSUM_W-1 downto 0);
-    signal l4_fifoxm_wr          : std_logic_vector(MFB_REGIONS*2-1 downto 0);
-    signal l4_fifoxm_full        : std_logic;
-
-    signal l4_fifoxm_dataout     : std_logic_vector(MFB_REGIONS*CHECKSUM_W-1 downto 0);
-    signal l4_fifoxm_rd          : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal l4_fifoxm_empty       : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal l4_fifoxm_out_rdy     : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal l4_fifoxm_vo          : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal fifoxm_dataout     : std_logic_vector(MFB_REGIONS*CHECKSUM_W-1 downto 0);
+    signal fifoxm_rd          : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal fifoxm_empty       : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal fifoxm_out_rdy     : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal fifoxm_vo          : std_logic_vector(MFB_REGIONS-1 downto 0);
 
 begin
 
@@ -243,19 +202,10 @@ begin
     --  Checksum enable flags synchronization
     -- ========================================================================
 
-    rx_flags_arr <= slv_array_deser(RX_FLAGS, MFB_REGIONS);
-    flags_g : for r in 0 to MFB_REGIONS-1 generate
-        l3_chs_en_flags(r) <= rx_flags_arr(r)(0);
-        l4_chs_en_flags(r) <= rx_flags_arr(r)(1);
-    end generate;
+    chs_en_fifoxm_din <= RX_CHSUM_EN;
+    chs_en_fifoxm_wr  <= (RX_MFB_SOF and RX_MFB_SRC_RDY) and RX_MFB_DST_RDY;
 
-    chs_en_fifoxm_full   <= l3_chs_en_fifoxm_full or l4_chs_en_fifoxm_full;
-
-    -- L3
-    l3_chs_en_fifoxm_din <= l3_chs_en_flags;
-    l3_chs_en_fifoxm_wr  <= (RX_MFB_SOF and RX_MFB_SRC_RDY) and RX_MFB_DST_RDY;
-
-    l3_chs_en_fifoxm_i : entity work.FIFOX_MULTI(shakedown)
+    chs_en_fifoxm_i : entity work.FIFOX_MULTI(shakedown)
     generic map(
         DATA_WIDTH          => 1,
         ITEMS               => 512,
@@ -272,70 +222,23 @@ begin
         CLK   => CLK,
         RESET => RESET,
 
-        DI    => l3_chs_en_fifoxm_din   ,
-        WR    => l3_chs_en_fifoxm_wr    ,
-        FULL  => l3_chs_en_fifoxm_full  ,
-        AFULL => open                   ,
+        DI    => chs_en_fifoxm_din   ,
+        WR    => chs_en_fifoxm_wr    ,
+        FULL  => chs_en_fifoxm_full  ,
+        AFULL => open                ,
 
-        DO     => l3_chs_en_fifoxm_dout ,
-        RD     => l3_chs_en_fifoxm_rd   ,
-        EMPTY  => l3_chs_en_fifoxm_empty,
+        DO     => chs_en_fifoxm_dout ,
+        RD     => chs_en_fifoxm_rd   ,
+        EMPTY  => chs_en_fifoxm_empty,
         AEMPTY => open
     );
 
     -- valid out
-    l3_chs_en_fifoxm_vo <= not l3_chs_en_fifoxm_empty;
-    l3_chs_en_fifoxm_read_g : for r in 0 to MFB_REGIONS-1 generate
-        l3_chs_en_fifoxm_rd(r) <= (and l3_chs_en_fifoxm_vo(r downto 0)) and (and l3_fifoxm_vo(r downto 0)) and TX_L3_MVB_DST_RDY;
-    end generate;
-
-    -- L4
-    l4_chs_en_fifoxm_din <= l4_chs_en_flags;
-    l4_chs_en_fifoxm_wr  <= (RX_MFB_SOF and RX_MFB_SRC_RDY) and RX_MFB_DST_RDY;
-
-    l4_chs_en_fifoxm_i : entity work.FIFOX_MULTI(shakedown)
-    generic map(
-        DATA_WIDTH          => 1,
-        ITEMS               => 512,
-        WRITE_PORTS         => MFB_REGIONS,
-        READ_PORTS          => MFB_REGIONS,
-        RAM_TYPE            => "AUTO",
-        DEVICE              => DEVICE,
-        ALMOST_FULL_OFFSET  => 0,
-        ALMOST_EMPTY_OFFSET => 0,
-        ALLOW_SINGLE_FIFO   => true,
-        SAFE_READ_MODE      => false
-    )
-    port map(
-        CLK   => CLK,
-        RESET => RESET,
-
-        DI    => l4_chs_en_fifoxm_din   ,
-        WR    => l4_chs_en_fifoxm_wr    ,
-        FULL  => l4_chs_en_fifoxm_full  ,
-        AFULL => open                   ,
-
-        DO     => l4_chs_en_fifoxm_dout ,
-        RD     => l4_chs_en_fifoxm_rd   ,
-        EMPTY  => l4_chs_en_fifoxm_empty,
-        AEMPTY => open
-    );
-
-    -- valid out
-    l4_chs_en_fifoxm_vo <= not l4_chs_en_fifoxm_empty;
+    chs_en_fifoxm_vo <= not chs_en_fifoxm_empty;
     l4_chs_en_fifoxm_read_g : for r in 0 to MFB_REGIONS-1 generate
-        l4_chs_en_fifoxm_out_rdy(r) <= and l4_chs_en_fifoxm_vo(r downto 0);
-        l4_chs_en_fifoxm_rd(r) <= l4_chs_en_fifoxm_out_rdy(r) and l4_fifoxm_out_rdy(r) and TX_L4_MVB_DST_RDY;
+        chs_en_fifoxm_out_rdy(r) <= and chs_en_fifoxm_vo(r downto 0);
+        chs_en_fifoxm_rd     (r) <= chs_en_fifoxm_out_rdy(r) and fifoxm_out_rdy(r) and TX_MVB_DST_RDY;
     end generate;
-
-    process(clk)
-    begin
-        if rising_edge(clk) then
-            if (TX_L4_MVB_SRC_RDY = '1') and (TX_L4_MVB_DST_RDY = '1') then
-                assert (unsigned(l4_chs_en_fifoxm_rd) = unsigned(l4_fifoxm_rd)) report "ERROR: l4_chs_en_fifoxm_i" severity failure;
-            end if;
-        end if;
-    end process;
 
     -- ========================================================================
     --  Input register
@@ -345,15 +248,16 @@ begin
     begin
         if rising_edge(CLK) then
             if (rx_ext_dst_rdy = '1') then
-                rx_ext_data      <= RX_MFB_DATA;
-                rx_ext_sof_pos   <= RX_MFB_SOF_POS;
-                rx_ext_eof_pos   <= RX_MFB_EOF_POS;
-                rx_ext_sof       <= RX_MFB_SOF;
-                rx_ext_eof       <= RX_MFB_EOF;
-                rx_ext_src_rdy   <= RX_MFB_SRC_RDY and not chs_en_fifoxm_full;
+                rx_ext_data    <= RX_MFB_DATA;
+                rx_ext_sof_pos <= RX_MFB_SOF_POS;
+                rx_ext_eof_pos <= RX_MFB_EOF_POS;
+                rx_ext_sof     <= RX_MFB_SOF;
+                rx_ext_eof     <= RX_MFB_EOF;
+                rx_ext_src_rdy <= RX_MFB_SRC_RDY and not chs_en_fifoxm_full;
 
-                rx_ext_l2_len    <= RX_L2_HDR_LENGTH;
-                rx_ext_l3_len    <= RX_L3_HDR_LENGTH;
+                rx_ext_off     <= RX_OFFSET;
+                rx_ext_len     <= RX_LENGTH;
+                rx_ext_en      <= RX_CHSUM_EN;
             end if;
 
             if (RESET = '1') then
@@ -363,70 +267,123 @@ begin
     end process;
 
     -- ========================================================================
-    --  Checksum data extraction and validation
+    --  Checksum data validation
     -- ========================================================================
 
-    chsum_data_ext_i : entity work.CHSUM_DATA_EXT
+    mfb_items_vld_i : entity work.MFB_ITEMS_VLD
     generic map(
         MFB_REGIONS     => MFB_REGIONS    ,
         MFB_REGION_SIZE => MFB_REGION_SIZE,
         MFB_BLOCK_SIZE  => MFB_BLOCK_SIZE ,
         MFB_ITEM_WIDTH  => MFB_ITEM_WIDTH ,
-
-        L2_HDR_LENGTH_W => L2_HDR_LENGTH_W,
-        L3_HDR_LENGTH_W => L3_HDR_LENGTH_W
+        PKT_MTU         => PKT_MTU        ,
+        OFFSET_WIDTH    => OFFSET_WIDTH   ,
+        LENGTH_WIDTH    => LENGTH_WIDTH
     )
     port map(
         CLK   => CLK,
         RESET => RESET,
 
-        RX_MFB_DATA       => rx_ext_data   ,
-        RX_MFB_SOF_POS    => rx_ext_sof_pos,
-        RX_MFB_EOF_POS    => rx_ext_eof_pos,
-        RX_MFB_SOF        => rx_ext_sof    ,
-        RX_MFB_EOF        => rx_ext_eof    ,
-        RX_MFB_SRC_RDY    => rx_ext_src_rdy,
-        RX_MFB_DST_RDY    => rx_ext_dst_rdy,
+        RX_MFB_DATA    => rx_ext_data   ,
+        RX_MFB_SOF_POS => rx_ext_sof_pos,
+        RX_MFB_EOF_POS => rx_ext_eof_pos,
+        RX_MFB_SOF     => rx_ext_sof    ,
+        RX_MFB_EOF     => rx_ext_eof    ,
+        RX_MFB_SRC_RDY => rx_ext_src_rdy,
+        RX_MFB_DST_RDY => rx_ext_dst_rdy,
 
-        RX_L2_HDR_LENGTH  => rx_ext_l2_len,
-        RX_L3_HDR_LENGTH  => rx_ext_l3_len,
+        RX_OFFSET      => rx_ext_off    ,
+        RX_LENGTH      => rx_ext_len    ,
+        RX_ENABLE      => rx_ext_en     ,
 
-        TX_L3_DATA    => tx_l3_ext_data,
-        TX_L3_ODD     => tx_l3_ext_odd,
-        TX_L3_END     => tx_l3_ext_end,
-        TX_L3_VLD     => tx_l3_ext_vld,
-        TX_L3_SRC_RDY => tx_l3_ext_src_rdy,
-        TX_L3_DST_RDY => tx_l3_ext_dst_rdy,
-
-        TX_L4_DATA    => tx_l4_ext_data,
-        TX_L4_ODD     => tx_l4_ext_odd,
-        TX_L4_END     => tx_l4_ext_end,
-        TX_L4_VLD     => tx_l4_ext_vld,
-        TX_L4_SRC_RDY => tx_l4_ext_src_rdy,
-        TX_L4_DST_RDY => tx_l4_ext_dst_rdy
+        TX_DATA        => tx_ext_data   ,
+        TX_END         => tx_ext_end    ,
+        TX_VLD         => tx_ext_vld    ,
+        TX_SRC_RDY     => tx_ext_src_rdy,
+        TX_DST_RDY     => tx_ext_dst_rdy
     );
 
-    tx_l3_ext_dst_rdy <= and rx_l3_rchsum_dst_rdy;
-    tx_l4_ext_dst_rdy <= and rx_l4_rchsum_dst_rdy;
+
+    process(CLK)
+    begin
+        if rising_edge(CLK) then
+            if (tx_ext_src_rdy = '1') and (tx_ext_dst_rdy = '1') then
+                tx_ext_end_reg <= tx_ext_end(MFB_DATA_ITEMS-1);
+            end if;
+            if (RESET = '1') then
+                tx_ext_end_reg <= '0';
+            end if;
+        end if;
+    end process;
+
+    odd_start(0) <= '0'; -- not needed tho
+    last_vld_din(0) <= '0';
+    last_vld_vld(0) <= tx_ext_end_reg;
+    odd_sig_g : for i in 1 to MFB_DATA_ITEMS-1 generate
+        odd_start   (i) <= not tx_ext_vld(i-1) and tx_ext_vld(i) and int_is_odd(i); -- automatically '0' for all even "i"s
+        last_vld_din(i) <= '0' when tx_ext_end(i-1) = '1' else odd_start(i); -- End always overwrites the Odd signal to '0'
+        last_vld_vld(i) <= odd_start(i) or tx_ext_end(i-1);
+    end generate;
+
+    last_vld_i : entity work.MVB_AGGREGATE_LAST_VLD
+    generic map(
+        ITEMS          => MFB_DATA_ITEMS,
+        ITEM_WIDTH     => 1             ,
+        IMPLEMENTATION => AGGREGATE_IMPL,
+        INTERNAL_REG   => true          ,
+        RESET_DATA     => true
+    )
+    port map(
+        CLK   => CLK,
+        RESET => RESET,
+
+        RX_DATA    => last_vld_din  ,
+        RX_VLD     => last_vld_vld  ,
+        RX_SRC_RDY => tx_ext_src_rdy,
+        RX_DST_RDY => tx_ext_dst_rdy,
+
+        REG_IN_DATA  => (others => '0'),
+        REG_IN_VLD   => '0',
+        REG_OUT_DATA => open,
+        REG_OUT_VLD  => open,
+        REG_OUT_WR   => open,
+
+        TX_DATA         => tx_ext_odd,
+        TX_VLD          => open,
+        TX_PRESCAN_DATA => open,
+        TX_PRESCAN_VLD  => open,
+        TX_SRC_RDY      => open,
+        TX_DST_RDY      => (and rx_rchsum_dst_rdy)
+    );
 
     -- ========================================================================
-    --  Layer 3
+    --  Checksum calculation
     -- ========================================================================
 
-    -- --------------------------------
-    -- Per-region checksum calculation
-    -- --------------------------------
+    process(CLK)
+    begin
+        if rising_edge(CLK) then
+            if (and rx_rchsum_dst_rdy) then
+                rx_rchsum_data    <= slv_array_deser(tx_ext_data, MFB_REGIONS);
+                rx_rchsum_odd     <= slv_array_deser(tx_ext_odd , MFB_REGIONS);
+                rx_rchsum_end     <= slv_array_deser(tx_ext_end , MFB_REGIONS);
+                rx_rchsum_vld     <= slv_array_deser(tx_ext_vld , MFB_REGIONS);
+                rx_rchsum_src_rdy <= (others => tx_ext_src_rdy);
+            end if;
+            if (RESET = '1') then
+                rx_rchsum_vld     <= (others => (others => '0'));
+                rx_rchsum_src_rdy <= (others => '0');
+            end if;
+        end if;
+    end process;
 
-    rx_l3_rchsum_data <= slv_array_deser(tx_l3_ext_data, MFB_REGIONS);
-    rx_l3_rchsum_odd  <= slv_array_deser(tx_l3_ext_odd , MFB_REGIONS);
-    rx_l3_rchsum_end  <= slv_array_deser(tx_l3_ext_end , MFB_REGIONS);
-    rx_l3_rchsum_vld  <= slv_array_deser(tx_l3_ext_vld , MFB_REGIONS);
+    -- -------------------------
+    --  Per-region calculations
+    -- -------------------------
 
-    l3_chsum_regional_g : for r in 0 to MFB_REGIONS-1 generate
+    chsum_regional_g : for r in 0 to MFB_REGIONS-1 generate
 
-        rx_l3_rchsum_src_rdy(r) <= or rx_l3_rchsum_vld(r);
-
-        l3_chsum_regional_i : entity work.CHSUM_REGIONAL
+        chsum_regional_i : entity work.CHSUM_REGIONAL
         generic map(
             ITEMS          => MFB_REGION_ITEMS,
             ITEM_WIDTH     => MFB_ITEM_WIDTH  ,
@@ -436,35 +393,45 @@ begin
             CLK   => CLK,
             RESET => RESET,
 
-            RX_CHSUM_DATA => rx_l3_rchsum_data   (r),
-            RX_CHSUM_ODD  => rx_l3_rchsum_odd    (r),
-            RX_CHSUM_END  => rx_l3_rchsum_end    (r),
-            RX_VALID      => rx_l3_rchsum_vld    (r),
-            RX_SRC_RDY    => rx_l3_rchsum_src_rdy(r),
-            RX_DST_RDY    => rx_l3_rchsum_dst_rdy(r),
+            RX_CHSUM_DATA   => rx_rchsum_data   (r),
+            RX_CHSUM_ODD    => rx_rchsum_odd    (r),
+            RX_CHSUM_END    => rx_rchsum_end    (r),
+            RX_VALID        => rx_rchsum_vld    (r),
+            RX_SRC_RDY      => rx_rchsum_src_rdy(r),
+            RX_DST_RDY      => rx_rchsum_dst_rdy(r),
 
-            TX_CHSUM_REGION => tx_l3_rchsum_data   (r),
-            TX_CHSUM_END    => tx_l3_rchsum_end    (r),
-            TX_CHSUM_VLD    => tx_l3_rchsum_vld    (r),
-            TX_SRC_RDY      => tx_l3_rchsum_src_rdy(r),
-            TX_DST_RDY      => tx_l3_rchsum_dst_rdy(r)
+            TX_CHSUM_REGION => tx_rchsum_data   (r),
+            TX_CHSUM_END    => tx_rchsum_end    (r),
+            TX_CHSUM_VLD    => tx_rchsum_vld    (r),
+            TX_SRC_RDY      => tx_rchsum_src_rdy(r),
+            TX_DST_RDY      => tx_rchsum_dst_rdy(r)
         );
 
     end generate;
 
-    tx_l3_rchsum_dst_rdy <= (others => rx_l4_fchsum_dst_rdy);
+    tx_rchsum_dst_rdy <= (others => rx_fchsum_dst_rdy);
 
-    -- --------------------------------
-    -- Checksum calculation finalization
-    -- --------------------------------
+    -- -----------------------------------
+    --  Checksum calculation finalization
+    -- -----------------------------------
 
-    rx_l3_fchsum_data    <= slv_array_ser(tx_l3_rchsum_data);
-    -- rx_l3_fchsum_swap    <= not slv_array_ser(tx_l3_rchsum_meta); -- not odd
-    rx_l3_fchsum_end     <= slv_array_ser(tx_l3_rchsum_end );
-    rx_l3_fchsum_vld     <= slv_array_ser(tx_l3_rchsum_vld );
-    rx_l3_fchsum_src_rdy <= or tx_l3_rchsum_src_rdy;
+    process(CLK)
+    begin
+        if rising_edge(CLK) then
+            if (rx_fchsum_dst_rdy = '1') then
+                rx_fchsum_data    <= slv_array_ser(tx_rchsum_data);
+                rx_fchsum_end     <= slv_array_ser(tx_rchsum_end );
+                rx_fchsum_vld     <= slv_array_ser(tx_rchsum_vld );
+                rx_fchsum_src_rdy <= or tx_rchsum_src_rdy;
+            end if;
+            if (RESET = '1') then
+                rx_fchsum_vld     <= (others => '0');
+                rx_fchsum_src_rdy <= '0';
+            end if;
+        end if;
+    end process;
 
-    l3_chsum_finalizer_i : entity work.CHSUM_FINALIZER
+    chsum_finalizer_i : entity work.CHSUM_FINALIZER
     generic map(
         REGIONS        => MFB_REGIONS,
         CHECKSUM_WIDTH => CHECKSUM_W
@@ -473,140 +440,27 @@ begin
         CLK   => CLK,
         RESET => RESET,
 
-        RX_CHSUM_REGION => rx_l3_fchsum_data   ,
-        -- RX_SWAP_BYTES   => rx_l3_fchsum_swap   ,
-        RX_CHSUM_END    => rx_l3_fchsum_end    ,
-        RX_CHSUM_VLD    => rx_l3_fchsum_vld    ,
-        RX_SRC_RDY      => rx_l3_fchsum_src_rdy,
-        RX_DST_RDY      => rx_l3_fchsum_dst_rdy,
+        RX_CHSUM_REGION => rx_fchsum_data   ,
+        RX_CHSUM_END    => rx_fchsum_end    ,
+        RX_CHSUM_VLD    => rx_fchsum_vld    ,
+        RX_SRC_RDY      => rx_fchsum_src_rdy,
+        RX_DST_RDY      => rx_fchsum_dst_rdy,
 
-        TX_CHECKSUM => tx_l3_fchsum_data   ,
-        TX_VALID    => tx_l3_fchsum_vld    ,
-        TX_SRC_RDY  => tx_l3_fchsum_src_rdy,
-        TX_DST_RDY  => tx_l3_fchsum_dst_rdy
+        TX_CHECKSUM     => tx_fchsum_data   ,
+        TX_VALID        => tx_fchsum_vld    ,
+        TX_SRC_RDY      => tx_fchsum_src_rdy,
+        TX_DST_RDY      => tx_fchsum_dst_rdy
     );
 
     -- --------------------------------
     -- Output FIFOX MULTI (shakedown)
     -- --------------------------------
 
-    l3_fifoxm_datain <= tx_l3_fchsum_data;
-    l3_fifoxm_wr     <= tx_l3_fchsum_vld and not l3_fifoxm_full;
-    tx_l3_fchsum_dst_rdy <= not l3_fifoxm_full;
+    fifoxm_datain <= tx_fchsum_data;
+    fifoxm_wr     <= tx_fchsum_vld and not fifoxm_full;
+    tx_fchsum_dst_rdy <= not fifoxm_full;
 
-    l3_fifoxm_i : entity work.FIFOX_MULTI
-    generic map(
-        DATA_WIDTH          => CHECKSUM_W,
-        ITEMS               => 512,
-        WRITE_PORTS         => MFB_REGIONS*2,
-        READ_PORTS          => MFB_REGIONS,
-        RAM_TYPE            => "AUTO",
-        DEVICE              => DEVICE,
-        ALMOST_FULL_OFFSET  => 0,
-        ALMOST_EMPTY_OFFSET => 0,
-        ALLOW_SINGLE_FIFO   => true,
-        SAFE_READ_MODE      => true
-    )
-    port map(
-        CLK   => CLK,
-        RESET => RESET,
-
-        DI    => l3_fifoxm_datain,
-        WR    => l3_fifoxm_wr    ,
-        FULL  => l3_fifoxm_full  ,
-        AFULL => open            ,
-
-        DO     => l3_fifoxm_dataout,
-        RD     => l3_fifoxm_rd     ,
-        EMPTY  => l3_fifoxm_empty  ,
-        AEMPTY => open
-    );
-
-    l3_fifoxm_vo <= not l3_fifoxm_empty;
-    l3_fifoxm_dout_g : for r in 0 to MFB_REGIONS-1 generate
-        l3_fifoxm_rd(r) <= (and l3_chs_en_fifoxm_vo(r downto 0)) and (and l3_fifoxm_vo(r downto 0)) and TX_L3_MVB_DST_RDY;
-    end generate;
-
-    -- ========================================================================
-    --  Layer 4
-    -- ========================================================================
-
-    rx_l4_rchsum_data <= slv_array_deser(tx_l4_ext_data, MFB_REGIONS);
-    rx_l4_rchsum_odd  <= slv_array_deser(tx_l4_ext_odd , MFB_REGIONS);
-    rx_l4_rchsum_end  <= slv_array_deser(tx_l4_ext_end , MFB_REGIONS);
-    rx_l4_rchsum_vld  <= slv_array_deser(tx_l4_ext_vld , MFB_REGIONS);
-
-    l4_chsum_regional_g : for r in 0 to MFB_REGIONS-1 generate
-        
-        rx_l4_rchsum_src_rdy(r) <= or rx_l4_rchsum_vld(r);
-
-        l4_chsum_regional_i : entity work.CHSUM_REGIONAL
-        generic map(
-            ITEMS          => MFB_REGION_ITEMS,
-            ITEM_WIDTH     => MFB_ITEM_WIDTH  ,
-            CHECKSUM_WIDTH => CHECKSUM_W
-        )
-        port map(
-            CLK   => CLK,
-            RESET => RESET,
-
-            RX_CHSUM_DATA => rx_l4_rchsum_data   (r),
-            RX_CHSUM_ODD  => rx_l4_rchsum_odd    (r),
-            RX_CHSUM_END  => rx_l4_rchsum_end    (r),
-            RX_VALID      => rx_l4_rchsum_vld    (r),
-            RX_SRC_RDY    => rx_l4_rchsum_src_rdy(r),
-            RX_DST_RDY    => rx_l4_rchsum_dst_rdy(r),
-
-            TX_CHSUM_REGION => tx_l4_rchsum_data   (r),
-            TX_CHSUM_END    => tx_l4_rchsum_end    (r),
-            TX_CHSUM_VLD    => tx_l4_rchsum_vld    (r),
-            TX_SRC_RDY      => tx_l4_rchsum_src_rdy(r),
-            TX_DST_RDY      => tx_l4_rchsum_dst_rdy(r)
-        );
-
-    end generate;
-
-    tx_l4_rchsum_dst_rdy <= (others => rx_l4_fchsum_dst_rdy);
-
-    -- --------------------------------
-    -- Checksum calculation finalization
-    -- --------------------------------
-
-    rx_l4_fchsum_data    <= slv_array_ser(tx_l4_rchsum_data);
-    rx_l4_fchsum_end     <= slv_array_ser(tx_l4_rchsum_end );
-    rx_l4_fchsum_vld     <= slv_array_ser(tx_l4_rchsum_vld );
-    rx_l4_fchsum_src_rdy <= or tx_l4_rchsum_src_rdy;
-
-    l4_chsum_finalizer_i : entity work.CHSUM_FINALIZER
-    generic map(
-        REGIONS        => MFB_REGIONS,
-        CHECKSUM_WIDTH => CHECKSUM_W
-    )
-    port map(
-        CLK   => CLK,
-        RESET => RESET,
-
-        RX_CHSUM_REGION => rx_l4_fchsum_data   ,
-        RX_CHSUM_END    => rx_l4_fchsum_end    ,
-        RX_CHSUM_VLD    => rx_l4_fchsum_vld    ,
-        RX_SRC_RDY      => rx_l4_fchsum_src_rdy,
-        RX_DST_RDY      => rx_l4_fchsum_dst_rdy,
-
-        TX_CHECKSUM => tx_l4_fchsum_data   ,
-        TX_VALID    => tx_l4_fchsum_vld    ,
-        TX_SRC_RDY  => tx_l4_fchsum_src_rdy,
-        TX_DST_RDY  => tx_l4_fchsum_dst_rdy
-    );
-
-    -- --------------------------------
-    -- Output FIFOX MULTI (shakedown)
-    -- --------------------------------
-
-    l4_fifoxm_datain <= tx_l4_fchsum_data;
-    l4_fifoxm_wr     <= tx_l4_fchsum_vld and not l4_fifoxm_full;
-    tx_l4_fchsum_dst_rdy <= not l4_fifoxm_full;
-
-    l4_fifoxm_i : entity work.FIFOX_MULTI
+    fifoxm_i : entity work.FIFOX_MULTI
     generic map(
         DATA_WIDTH          => CHECKSUM_W,
         ITEMS               => 512,
@@ -623,36 +477,31 @@ begin
         CLK   => CLK,
         RESET => RESET,
 
-        DI    => l4_fifoxm_datain,
-        WR    => l4_fifoxm_wr    ,
-        FULL  => l4_fifoxm_full  ,
-        AFULL => open            ,
+        DI     => fifoxm_datain ,
+        WR     => fifoxm_wr     ,
+        FULL   => fifoxm_full   ,
+        AFULL  => open          ,
 
-        DO     => l4_fifoxm_dataout,
-        RD     => l4_fifoxm_rd     ,
-        EMPTY  => l4_fifoxm_empty  ,
+        DO     => fifoxm_dataout,
+        RD     => fifoxm_rd     ,
+        EMPTY  => fifoxm_empty  ,
         AEMPTY => open
     );
 
     -- valid out
-    l4_fifoxm_vo <= not l4_fifoxm_empty;
-    l4_fifoxm_dout_g : for r in 0 to MFB_REGIONS-1 generate
-        l4_fifoxm_out_rdy(r) <= and l4_fifoxm_vo(r downto 0);
-        l4_fifoxm_rd(r) <= l4_chs_en_fifoxm_out_rdy(r) and l4_fifoxm_out_rdy(r) and TX_L4_MVB_DST_RDY;
+    fifoxm_vo <= not fifoxm_empty;
+    fifoxm_dout_g : for r in 0 to MFB_REGIONS-1 generate
+        fifoxm_out_rdy(r) <= and fifoxm_vo(r downto 0);
+        fifoxm_rd(r) <= chs_en_fifoxm_out_rdy(r) and fifoxm_out_rdy(r) and TX_MVB_DST_RDY;
     end generate;
 
     -- ========================================================================
     -- Output assignment
     -- ========================================================================
 
-    TX_L3_MVB_DATA     <= l3_fifoxm_dataout;
-    TX_L3_CHSUM_BYPASS <= not l3_chs_en_fifoxm_dout;
-    TX_L3_MVB_VLD      <= (not l3_fifoxm_empty) and (not l3_chs_en_fifoxm_empty);
-    TX_L3_MVB_SRC_RDY  <= or ((not l3_fifoxm_empty) and (not l3_chs_en_fifoxm_empty));
-
-    TX_L4_MVB_DATA     <= l4_fifoxm_dataout;
-    TX_L4_CHSUM_BYPASS <= not l4_chs_en_fifoxm_dout;
-    TX_L4_MVB_VLD      <= (not l4_fifoxm_empty) and (not l4_chs_en_fifoxm_empty);
-    TX_L4_MVB_SRC_RDY  <= or ((not l4_fifoxm_empty) and (not l4_chs_en_fifoxm_empty));
+    TX_MVB_DATA     <= fifoxm_dataout;
+    TX_CHSUM_BYPASS <= not chs_en_fifoxm_dout; -- inverted checksum enable
+    TX_MVB_VLD      <= (not fifoxm_empty) and (not chs_en_fifoxm_empty);
+    TX_MVB_SRC_RDY  <= or ((not fifoxm_empty) and (not chs_en_fifoxm_empty));
 
 end architecture;
