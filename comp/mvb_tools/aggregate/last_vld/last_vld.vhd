@@ -20,7 +20,8 @@ entity MVB_AGGREGATE_LAST_VLD is
     ITEMS          : integer := 4; -- any possitive value
     ITEM_WIDTH     : integer := 8; -- any possitive value
     IMPLEMENTATION : string := "serial"; -- "serial", "parallel", "prefixsum"
-    INTERNAL_REG   : boolean := true -- when true, REG_* ports are unused and word register is internally implemented
+    INTERNAL_REG   : boolean := true; -- when true, REG_* ports are unused and word register is internally implemented
+    RESET_DATA     : boolean := false -- when true, the RESET signal also resets data, not just valid (only when INTERNAL_REG=true)
   );
   port(
     CLK            : in std_logic;
@@ -80,19 +81,34 @@ begin
     signal reg : item_t;
     signal ce : std_logic;
   begin
-    word_reg : process(CLK)
-    begin
-      if CLK'event and CLK='1' then
-        if RESET='1' then
-          reg.valid <= '0';
-        elsif ce='1' then
-          reg.valid <= tx(ITEMS).valid;
+    reset_data_gen : if RESET_DATA generate
+      word_reg : process(CLK)
+      begin
+        if CLK'event and CLK='1' then
+          if RESET='1' then
+            reg.valid <= '0';
+            reg.value <= (others => '0');
+          elsif ce='1' then
+            reg.valid <= tx(ITEMS).valid;
+            reg.value <= tx(ITEMS).value;
+          end if;
         end if;
-        if ce='1' then
-          reg.value <= tx(ITEMS).value;
+      end process;
+    else generate
+      word_reg : process(CLK)
+      begin
+        if CLK'event and CLK='1' then
+          if RESET='1' then
+            reg.valid <= '0';
+          elsif ce='1' then
+            reg.valid <= tx(ITEMS).valid;
+          end if;
+          if ce='1' then
+            reg.value <= tx(ITEMS).value;
+          end if;
         end if;
-      end if;
-    end process;
+      end process;
+    end generate;
     rx(0) <= reg;
     REG_OUT_DATA <= (others => '0');
     REG_OUT_VLD <= '0';

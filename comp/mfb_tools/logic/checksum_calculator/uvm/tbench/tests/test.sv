@@ -8,10 +8,9 @@ class ex_test extends uvm_test;
     typedef uvm_component_registry#(test::ex_test, "test::ex_test") type_id;
 
     // declare the Environment reference variable
-    uvm_checksum_calculator::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH, MVB_DATA_WIDTH, VERBOSITY) m_env;
+    uvm_checksum_calculator::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH, MVB_DATA_WIDTH, PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY) m_env;
     uvm_reset::sequence_start                              m_reset;
-    uvm_mvb::sequence_lib_tx#(MFB_REGIONS, MVB_DATA_WIDTH+1) m_mvb_l3_seq;
-    uvm_mvb::sequence_lib_tx#(MFB_REGIONS, MVB_DATA_WIDTH+1) m_mvb_l4_seq;
+    uvm_mvb::sequence_lib_tx#(MFB_REGIONS, MVB_DATA_WIDTH+1) m_mvb_seq;
     int unsigned timeout;
 
     // ------------------------------------------------------------------------
@@ -33,20 +32,13 @@ class ex_test extends uvm_test;
     // Build phase function, e.g. the creation of test's internal objects
     function void build_phase(uvm_phase phase);
         // Initializing the reference to the environment
-        m_env = uvm_checksum_calculator::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH, MVB_DATA_WIDTH, VERBOSITY)::type_id::create("m_env", this);
+        m_env = uvm_checksum_calculator::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH, MVB_DATA_WIDTH, PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY)::type_id::create("m_env", this);
     endfunction
 
-    virtual task tx_mvb_l3_seq();
+    virtual task tx_mvb_seq();
         forever begin
-            m_mvb_l3_seq.randomize();
-            m_mvb_l3_seq.start(m_env.m_env_tx_mvb_l3.m_sequencer);
-        end
-    endtask
-
-    virtual task tx_mvb_l4_seq();
-        forever begin
-            m_mvb_l4_seq.randomize();
-            m_mvb_l4_seq.start(m_env.m_env_tx_mvb_l4.m_sequencer);
+            m_mvb_seq.randomize();
+            m_mvb_seq.start(m_env.m_env_tx_mvb.m_sequencer);
         end
     endtask
 
@@ -58,28 +50,23 @@ class ex_test extends uvm_test;
     virtual function void init();
 
         m_reset   = uvm_reset::sequence_start::type_id::create("m_reset_seq");
-        m_mvb_l3_seq = uvm_mvb::sequence_lib_tx#(MFB_REGIONS, MVB_DATA_WIDTH+1)::type_id::create("m_mvb_l3_seq");
-        m_mvb_l4_seq = uvm_mvb::sequence_lib_tx#(MFB_REGIONS, MVB_DATA_WIDTH+1)::type_id::create("m_mvb_l4_seq");
+        m_mvb_seq = uvm_mvb::sequence_lib_tx#(MFB_REGIONS, MVB_DATA_WIDTH+1)::type_id::create("m_mvb_seq");
 
-        m_mvb_l3_seq.init_sequence();
-        m_mvb_l3_seq.min_random_count = 100;
-        m_mvb_l3_seq.max_random_count = 200;
-
-        m_mvb_l4_seq.init_sequence();
-        m_mvb_l4_seq.min_random_count = 100;
-        m_mvb_l4_seq.max_random_count = 200;
+        m_mvb_seq.init_sequence();
+        m_mvb_seq.min_random_count = 100;
+        m_mvb_seq.max_random_count = 200;
 
     endfunction
 
     // ------------------------------------------------------------------------
     // Create environment and Run sequences on their sequencers
     virtual task run_phase(uvm_phase phase);
-        virt_sequence #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH, MVB_DATA_WIDTH) m_vseq;
+        virt_sequence #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH, MVB_DATA_WIDTH, PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH) m_vseq;
 
         phase.raise_objection(this);
 
         //RUN MFB RX SEQUENCE
-        m_vseq = virt_sequence#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH, MVB_DATA_WIDTH)::type_id::create("m_vseq");
+        m_vseq = virt_sequence#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH, MVB_DATA_WIDTH, PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH)::type_id::create("m_vseq");
 
         init();
 
@@ -91,11 +78,7 @@ class ex_test extends uvm_test;
 
         //RUN VSEQ and MVB TX SEQUENCE
         fork
-            tx_mvb_l3_seq();
-        join_none
-
-        fork
-            tx_mvb_l4_seq();
+            tx_mvb_seq();
         join_none
 
         m_vseq.randomize();

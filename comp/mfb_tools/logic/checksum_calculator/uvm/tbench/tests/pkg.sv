@@ -14,21 +14,25 @@ package test;
     import uvm_pkg::*;
 
     // Number of Regions within a data word, must be power of 2.
-    parameter MFB_REGIONS        = 1;
+    parameter MFB_REGIONS        = 4;
     // Region size (in Blocks).
     parameter MFB_REGION_SIZE    = 8;
     // Block size (in Items), must be 8.
     parameter MFB_BLOCK_SIZE     = 8;
     // Item width (in bits), must be 8.
     parameter MFB_ITEM_WIDTH     = 8;
-    parameter META_WIDTH         = 20;
+
+    parameter OFFSET_WIDTH       = 7;
+    parameter LENGTH_WIDTH       = 9;
+    parameter META_WIDTH         = OFFSET_WIDTH+LENGTH_WIDTH+1;
+
+    // Width of output checksums (in bits), other values than 16 are not supported.
     parameter MVB_DATA_WIDTH     = 16;
     // Maximum size of a packet (in Items).
     parameter PKT_MTU            = 2**12;
     // FPGA device name: ULTRASCALE, STRATIX10, AGILEX, ...
     parameter DEVICE             = "STRATIX10";
-    // Size of chunk header
-    parameter L4_HEADER_SIZE        = 128;
+
     // VERBOSITY MODE
     // 0 - None
     // 1 - Basic

@@ -32,11 +32,9 @@ generic(
     REGION_NUMBER   : natural := 0;
 
     -- Maximum amount of Words a single packet can stretch over.
-    MAX_WORDS       : natural := 10;
+    MAX_WORDS       : natural := 100;
     -- Width of the Offset signals.
-    OFFSET_WIDTH    : integer := log2(MAX_WORDS*MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE)+1;
-    -- Width of the Length signal.
-    LENGTH_WIDTH    : integer := log2(MAX_WORDS*MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE)
+    OFFSET_WIDTH    : integer := log2(MAX_WORDS*MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE)
 );
 port(
     -- ========================================================================
@@ -46,29 +44,29 @@ port(
     -- ========================================================================
 
     -- Number of the current word (counted from each SOF).
-    RX_WORD       : in  unsigned(log2(MAX_WORDS)-1 downto 0);
+    RX_WORD             : in  unsigned(log2(MAX_WORDS)-1 downto 0);
 
-    -- Offset of the Section-to-be-validated from the beginning of the word (in Items).
-    RX_NEW_OFFSET : in  unsigned(OFFSET_WIDTH-1 downto 0);
-    -- Length of the Section-to-be-validated (in Items).
-    RX_NEW_LENGTH : in  unsigned(LENGTH_WIDTH-1 downto 0);
+    -- Offset of the Start of the Section-to-be-validated from the beginning of the word (in Items).
+    RX_NEW_OFFSET_START : in  unsigned(OFFSET_WIDTH-1 downto 0);
+    -- Offset of the End of the Section-to-be-validated from the beginning of the word (in Items).
+    RX_NEW_OFFSET_END   : in  unsigned(OFFSET_WIDTH-1 downto 0);
     -- Valid for the RX_NEW signals.
-    RX_NEW_VALID  : in  std_logic;
+    RX_NEW_VALID        : in  std_logic;
 
-    -- Offset of the Section-to-be-validated from the beginning of the word (in Items).
-    RX_OLD_OFFSET : in  unsigned(OFFSET_WIDTH-1 downto 0);
-    -- Length of the Section-to-be-validated (in Items).
-    RX_OLD_LENGTH : in  unsigned(LENGTH_WIDTH-1 downto 0);
+    -- Offset of the Start of the Section-to-be-validated from the beginning of the word (in Items).
+    RX_OLD_OFFSET_START : in  unsigned(OFFSET_WIDTH-1 downto 0);
+    -- Offset of the End of the Section-to-be-validated from the beginning of the word (in Items).
+    RX_OLD_OFFSET_END   : in  unsigned(OFFSET_WIDTH-1 downto 0);
     -- Valid for the RX_OLD signals.
-    RX_OLD_VALID  : in  std_logic;
+    RX_OLD_VALID        : in  std_logic;
 
     -- ========================================================================
     -- TX inf
     -- ========================================================================
 
-    TX_OFFSET  : out unsigned(OFFSET_WIDTH-1 downto 0);
-    TX_LENGTH  : out unsigned(LENGTH_WIDTH-1 downto 0);
-    TX_VALID   : out std_logic
+    TX_OFFSET_START : out unsigned(OFFSET_WIDTH-1 downto 0);
+    TX_OFFSET_END   : out unsigned(OFFSET_WIDTH-1 downto 0);
+    TX_VALID        : out std_logic
 );
 end entity;
 
@@ -84,68 +82,40 @@ architecture FULL of VALIDATION_PREPARE_R is
     -- MAX_REGIONS = maximum amount of Regions (possibly across multiple words) a single packet can strech over.
     constant MAX_REGIONS_W  : natural := max(0, OFFSET_WIDTH - REGION_ITEMS_W);
 
-    constant UPDATED_LEN_W  : natural := tsel(LENGTH_WIDTH >= REGION_ITEMS_W, LENGTH_WIDTH, REGION_ITEMS_W);
-
     -- ========================================================================
     --                                 SIGNALS
     -- ========================================================================
 
-    signal rx_selected_offset     : unsigned(OFFSET_WIDTH-1 downto 0);
-    signal rx_selected_length     : unsigned(LENGTH_WIDTH-1 downto 0);
-    signal rx_valid_input         : std_logic;
-
-    signal offset_word_and_region : unsigned(MAX_REGIONS_W-1 downto 0);
-    signal updated_offset         : unsigned(OFFSET_WIDTH-1 downto 0);
-    signal length_to_end          : unsigned(REGION_ITEMS_W+1-1 downto 0);
-    signal updated_length         : unsigned(UPDATED_LEN_W downto 0);
-    signal length_underflow       : std_logic;
-
-    signal target_word            : unsigned(log2(MAX_WORDS)-1 downto 0);
-    signal target_region          : unsigned(log2(MFB_REGIONS)-1 downto 0);
-    signal target_item            : unsigned(REGION_ITEMS_W-1 downto 0);
-
-    signal section_start          : std_logic;
-
-    signal tx_selected_offset     : unsigned(OFFSET_WIDTH-1 downto 0);
-    signal tx_selected_length     : unsigned(LENGTH_WIDTH-1 downto 0);
-
-    signal tx_length_valid        : std_logic;
+    signal rx_valid_input           : std_logic;
+    signal rx_selected_offset_start : unsigned(OFFSET_WIDTH-1 downto 0);
+    signal rx_selected_offset_end   : unsigned(OFFSET_WIDTH-1 downto 0);
+    signal offset_word_and_region   : unsigned(MAX_REGIONS_W-1 downto 0);
+    signal updated_offset           : unsigned(OFFSET_WIDTH-1 downto 0);
+    signal section_start            : std_logic;
+    signal section_end              : std_logic;
+    signal tx_selected_offset_start : unsigned(OFFSET_WIDTH-1 downto 0);
 
 begin
-
-    assert (LENGTH_WIDTH <= OFFSET_WIDTH)
-        report "VALIDATION_PREPARE_R: the value of the LENGTH_WIDTH is too great!"
-        severity failure;
 
     rx_valid_input <= RX_NEW_VALID or RX_OLD_VALID;
 
     -- ------------------------------------
     --  Select the input Offset and Length
     -- ------------------------------------
-    rx_selected_offset <= RX_NEW_OFFSET when (RX_NEW_VALID = '1') else RX_OLD_OFFSET;
-    rx_selected_length <= RX_NEW_LENGTH when (RX_NEW_VALID = '1') else RX_OLD_LENGTH;
+    rx_selected_offset_start <= RX_NEW_OFFSET_START when (RX_NEW_VALID = '1') else RX_OLD_OFFSET_START;
+    rx_selected_offset_end   <= RX_NEW_OFFSET_END   when (RX_NEW_VALID = '1') else RX_OLD_OFFSET_END;
 
     -- --------------------------
     --  Update Offset and Length
     -- --------------------------
     -- Round up the Offset to the next Region
-    offset_word_and_region <= rx_selected_offset(OFFSET_WIDTH-1 downto REGION_ITEMS_W);
-    updated_offset <= resize_right(offset_word_and_region + to_unsigned(1, MAX_REGIONS_W), OFFSET_WIDTH);
+    offset_word_and_region <= rx_selected_offset_start(OFFSET_WIDTH-1 downto REGION_ITEMS_W);
+    updated_offset <= resize_right(offset_word_and_region + to_unsigned(1, MAX_REGIONS_W), OFFSET_WIDTH); -- Add overflow detection?
 
-    -- Decrement the Length by the number of Items from the Offset to the end of the Region
-    length_to_end <= to_unsigned(REGION_ITEMS, REGION_ITEMS_W+1) - rx_selected_offset(minimum(REGION_ITEMS_W, OFFSET_WIDTH)-1 downto 0);
-    updated_length_g : if LENGTH_WIDTH >= REGION_ITEMS_W generate
-        updated_length <= ('0' & rx_selected_length) - length_to_end;
-        length_underflow <= updated_length(UPDATED_LEN_W); -- MSB
-    else generate
-        updated_length <= rx_selected_length - length_to_end;
-        length_underflow <= updated_length(UPDATED_LEN_W); -- MSB
-    end generate;
-
-    -- ---------------------
-    --  Evaluate the Offset
-    -- ---------------------
-    offset_reached1_i : entity work.OFFSET_REACHED
+    -- ----------------------
+    --  Evaluate the Offsets
+    -- ----------------------
+    offset_start_reached_i : entity work.OFFSET_REACHED
     generic map(
         MAX_WORDS     => MAX_WORDS    ,
         REGIONS       => MFB_REGIONS  ,
@@ -154,26 +124,39 @@ begin
         REGION_NUMBER => REGION_NUMBER
     )
     port map(
-        RX_WORD    => RX_WORD           ,
-        RX_OFFSET  => rx_selected_offset,
-        RX_VALID   => rx_valid_input    ,
+        RX_WORD    => RX_WORD                 ,
+        RX_OFFSET  => rx_selected_offset_start,
+        RX_VALID   => rx_valid_input          ,
 
         TX_REACHED => section_start
     );
 
-    -- ----------------------------------------
-    --  Select the Offset and Length to output
-    -- ----------------------------------------
-    tx_selected_offset <= updated_offset                          when (section_start = '1') else rx_selected_offset;
-    tx_selected_length <= updated_length(LENGTH_WIDTH-1 downto 0) when (section_start = '1') else rx_selected_length;
+    offset_end_reached_i : entity work.OFFSET_REACHED
+    generic map(
+        MAX_WORDS     => MAX_WORDS    ,
+        REGIONS       => MFB_REGIONS  ,
+        REGION_ITEMS  => REGION_ITEMS ,
+        OFFSET_WIDTH  => OFFSET_WIDTH ,
+        REGION_NUMBER => REGION_NUMBER
+    )
+    port map(
+        RX_WORD    => RX_WORD               ,
+        RX_OFFSET  => rx_selected_offset_end,
+        RX_VALID   => rx_valid_input        ,
+
+        TX_REACHED => section_end
+    );
+
+    -- -----------------------------
+    --  Select the Offset to output
+    -- -----------------------------
+    tx_selected_offset_start <= updated_offset when (section_start = '1') else rx_selected_offset_start;
         
     -- -------------------
     --  Output assignment
     -- -------------------    
-    TX_OFFSET  <= tx_selected_offset;
-    TX_LENGTH  <= tx_selected_length;
-
-    tx_length_valid <= '1' when (tx_selected_length > 0) else '0';
-    TX_VALID   <= (rx_valid_input) and not (section_start and (length_underflow or not tx_length_valid));
+    TX_OFFSET_START <= tx_selected_offset_start;
+    TX_OFFSET_END   <= rx_selected_offset_end;
+    TX_VALID        <= rx_valid_input and not section_end;
 
 end architecture;

@@ -8,11 +8,11 @@ SETTINGS = {
         "MFB_REGION_SIZE" : "8",
         "MFB_BLOCK_SIZE"  : "8",
         "MFB_ITEM_SIZE"   : "8",
-        "META_WIDTH"      : "20",
+        "OFFSET_WIDTH"    : "7",
+        "LENGTH_WIDTH"    : "9",
         "MVB_DATA_WIDTH"  : "16",
         "PKT_MTU"         : "2**12",
         "DEVICE"          : "\\\"STRATIX10\\\"",
-        "L4_HEADER_SIZE"  : "128",
     },
     "2_regions" : {
         "MFB_REGIONS"     : "2",
@@ -27,14 +27,15 @@ SETTINGS = {
         "MFB_REGION_SIZE" : "4",
     },
     "_combinations_" : (
-    # (                                             ), # default
-    # (             "region_size_2",                ),
+    (                                             ), # default
+    (             "region_size_2",                ),
     # (             "region_size_4",                ),
     # ("2_regions",                                 ),
     # ("2_regions", "region_size_2",                ),
     # ("2_regions", "region_size_4",                ),
-    ("4_regions",                                 ),
-    ("4_regions", "region_size_2",                ),
+    # ("4_regions", "region_size_2",                ),
     ("4_regions", "region_size_4",                ),
+    ("4_regions",                                 ),
     ),
+
 }

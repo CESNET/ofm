@@ -14,6 +14,7 @@ set MFB_LOGIC_BASE "$OFM_PATH/comp/mfb_tools/logic/"
 lappend PACKAGES "$PKG_BASE/math_pack.vhd"
 lappend PACKAGES "$PKG_BASE/type_pack.vhd"
 
+lappend COMPONENTS [ list "BIN2HOT"         "$LOGIC_BASE/bin2hot"             "FULL" ]
 lappend COMPONENTS [ list "ONES_INSERTOR"   "$LOGIC_BASE/ones_insertor"       "FULL" ]
 lappend COMPONENTS [ list "OFFSET_REACHED"  "$MFB_LOGIC_BASE/offset_reached"  "FULL" ]
 

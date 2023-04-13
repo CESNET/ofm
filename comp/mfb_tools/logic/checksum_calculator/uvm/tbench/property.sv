@@ -9,8 +9,7 @@ module checksum_calculator_property #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SI
     (
         input RESET,
         mfb_if rx_mfb_vif,
-        mvb_if tx_mvb_l3_vif,
-        mvb_if tx_mvb_l4_vif
+        mvb_if tx_mvb_vif
     );
 
     mfb_property #(
@@ -29,18 +28,9 @@ module checksum_calculator_property #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SI
         .ITEMS      (MFB_REGIONS),
         .ITEM_WIDTH (MVB_DATA_WIDTH)
     )
-    tx_mvb_l3_prop (
+    tx_mvb_prop (
         .RESET (RESET),
-        .vif   (tx_mvb_l3_vif)
-    );
-
-    mvb_property #(
-        .ITEMS      (MFB_REGIONS),
-        .ITEM_WIDTH (MVB_DATA_WIDTH)
-    )
-    tx_mvb_l4_prop (
-        .RESET (RESET),
-        .vif   (tx_mvb_l4_vif)
+        .vif   (tx_mvb_vif)
     );
 
 endmodule

@@ -5,27 +5,21 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 
-class model #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, VERBOSITY) extends uvm_component;
-    `uvm_component_param_utils(uvm_checksum_calculator::model #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, VERBOSITY))
+class model #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY) extends uvm_component;
+    `uvm_component_param_utils(uvm_checksum_calculator::model #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY))
 
     uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) input_mfb;
     uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(META_WIDTH))           input_meta;
-    uvm_analysis_port #(uvm_logic_vector::sequence_item #(MVB_DATA_WIDTH))           out_l3_checksum_mvb;
-    uvm_analysis_port #(uvm_logic_vector::sequence_item #(MVB_DATA_WIDTH))           out_l4_checksum_mvb;
-    // uvm_analysis_port #(uvm_logic_vector::sequence_item #(2))                        out_bypass;
-    uvm_analysis_port #(uvm_logic_vector::sequence_item #(1))                        out_l3_bypass;
-    uvm_analysis_port #(uvm_logic_vector::sequence_item #(1))                        out_l4_bypass;
+    uvm_analysis_port #(uvm_logic_vector::sequence_item #(MVB_DATA_WIDTH))           out_checksum_mvb;
+    uvm_analysis_port #(uvm_logic_vector::sequence_item #(1))                        out_bypass;
 
     function new(string name = "model", uvm_component parent = null);
         super.new(name, parent);
 
-        input_mfb           = new("input_mfb", this);
-        input_meta          = new("input_meta", this);
-        out_l3_checksum_mvb = new("out_l3_checksum_mvb", this);
-        out_l4_checksum_mvb = new("out_l4_checksum_mvb", this);
-        // out_bypass          = new("out_bypass", this);
-        out_l3_bypass       = new("out_l3_bypass", this);
-        out_l4_bypass       = new("out_l4_bypass", this);
+        input_mfb        = new("input_mfb", this);
+        input_meta       = new("input_meta", this);
+        out_checksum_mvb = new("out_checksum_mvb", this);
+        out_bypass       = new("out_bypass", this);
 
     endfunction
 
@@ -34,51 +28,38 @@ class model #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, VERBOSITY) extends uvm
         uvm_logic_vector_array::sequence_item #(16) l4_checksum_data;
     } checksum;
 
-    function checksum prepare_checksum_data(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH) frame, logic [7-1 : 0] l2_size, logic [9-1 : 0] l3_size, logic [4-1 : 0] flag);
-        checksum         ret;
-        logic [16-1 : 0] l4_len = '0;
+    function uvm_logic_vector_array::sequence_item #(16) prepare_checksum_data(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH) frame, logic [OFFSET_WIDTH-1 : 0] offset, logic [LENGTH_WIDTH-1 : 0] length);
+        uvm_logic_vector_array::sequence_item #(16) ret;
         int unsigned     data_index = 0;
 
-        ret.l3_checksum_data = uvm_logic_vector_array::sequence_item #(16)::type_id::create("l3_checksum_data");
-        ret.l4_checksum_data = uvm_logic_vector_array::sequence_item #(16)::type_id::create("l4_checksum_data");
+        ret = uvm_logic_vector_array::sequence_item #(16)::type_id::create("ret");
 
-        // $write("DATA bytes\n");
-        // `uvm_info(this.get_full_name(), frame.convert2string() ,UVM_NONE)
-        // $write("FLAG %b\n", flag);
-        if (flag[1] == 1'b1) begin
-            l4_len = frame.data.size() - (l2_size + l3_size);
-            ret.l4_checksum_data.data = new[l4_len/2];
-            // $write("L4 HDR LEN %d\n", (l4_len));
-            // $write("L3 HDR LEN %d\n", (l3_size));
-
-            for (int i = 0; i < l4_len; i += 2) begin
-                ret.l4_checksum_data.data[data_index] = {<<16{frame.data[(l2_size + l3_size) + i +: 2]}};
-                data_index++;
-            end
-
-            if ((l4_len %2) != 0) begin
-                ret.l4_checksum_data.data = {ret.l4_checksum_data.data, {frame.data[frame.data.size()-1], 8'b00000000}};
-                // ret.l4_checksum_data.data = {ret.l4_checksum_data.data, {8'b00000000, frame.data[frame.data.size()-1]}};
-            end
-
-            // $write("DATA checksum\n");
-            // `uvm_info(this.get_full_name(), ret.l4_checksum_data.convert2string() ,UVM_NONE)
+        // Create checksum data array
+        if (length % 2 == 1) begin
+            ret.data = new[int'(length/2)+1];
+        end else begin
+            ret.data = new[int'(length/2)];
         end
 
-        if (flag[0] == 1'b1) begin
-            data_index = 0;
-            ret.l3_checksum_data.data = new[(l3_size/2)];
-            for (int i = 0; i < l3_size; i += 2) begin
-                ret.l3_checksum_data.data[data_index] = {<<16{frame.data[(l2_size) + i +: 2]}};
-                data_index++;
+        // Fill checksum data array with the correct bytes from the input frame
+        for (int i = offset; i < offset+length; i+=2) begin
+            // $write("Frame data part 1 (i=%d): 0x%h\n", i  , frame.data[i]);
+            // $write("Frame data part 2 (i=%d): 0x%h\n", i+1, frame.data[i+1]);
+            ret.data[data_index][15:8]  = frame.data[i];
+            if ((length % 2 == 1) && (data_index == int'(length/2))) begin // at the last last index
+                ret.data[data_index][ 7:0]  = '0;
+            end else begin
+                ret.data[data_index][ 7:0]  = frame.data[i+1];
             end
-
-            // $write("L3 LEN %d\n", l3_size);
-            // `uvm_info(this.get_full_name(), ret.l3_checksum_data.convert2string() ,UVM_NONE)
+            // $write("Return data: (di=%d): 0x%h\n", data_index, ret.data[data_index]);
+            // $write("Current state of the return data array:\n");
+            // `uvm_info(this.get_full_name(), ret.convert2string() ,UVM_NONE)
+            data_index++;
         end
 
-        // `uvm_info(this.get_full_name(), ret.l3_checksum_data.convert2string() ,UVM_NONE)
-        // `uvm_info(this.get_full_name(), ret.l4_checksum_data.convert2string() ,UVM_NONE)
+        // $write("prepare_checksum_data:\n");
+        // $write("CHSUM DATA LEN %d\n", length);
+        // `uvm_info(this.get_full_name(), ret.convert2string() ,UVM_NONE)
         return ret;
     endfunction
 
@@ -90,7 +71,8 @@ class model #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, VERBOSITY) extends uvm
         for(int i = 0; i < checksum_data.data.size(); i++) begin
             temp_checksum += checksum_data.data[i];
             // $write("CHSUM DATA: %h\n", checksum_data.data[i]);
-            // $write("CHSUM: %h\n", temp_checksum);
+            // $write("Length of CHSUM DATA: %d\n", checksum_data.data.size());
+            // $write("Tmp CHSUM: %h\n", temp_checksum);
         end
 
         while (temp_checksum > CHCKS_MAX) begin
@@ -110,16 +92,14 @@ class model #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, VERBOSITY) extends uvm
 
         uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH) tr_input_mfb;
         uvm_logic_vector::sequence_item #(META_WIDTH)           tr_input_meta;
-        uvm_logic_vector::sequence_item #(MVB_DATA_WIDTH)       l3_checksum_mvb;
-        uvm_logic_vector::sequence_item #(MVB_DATA_WIDTH)       l4_checksum_mvb;
-        uvm_logic_vector::sequence_item #(4)                    flag;
-        // uvm_logic_vector::sequence_item #(2)                    bypass;
-        uvm_logic_vector::sequence_item #(1)                    l3_bypass;
-        uvm_logic_vector::sequence_item #(1)                    l4_bypass;
-        logic [7-1 : 0] l2_size = '0;
-        logic [9-1 : 0] l3_size = '0;
-        int             pkt_cnt = 0;
-        checksum        checksum_str;
+        uvm_logic_vector::sequence_item #(MVB_DATA_WIDTH)       checksum_mvb;
+        uvm_logic_vector::sequence_item #(1)                    chsum_en;
+        uvm_logic_vector::sequence_item #(1)                    bypass;
+        uvm_logic_vector_array::sequence_item #(16)             checksum_data;
+
+        logic [OFFSET_WIDTH-1 : 0] offset = '0;
+        logic [LENGTH_WIDTH-1 : 0] length = '0;
+        int                        pkt_cnt = 0;
 
         forever begin
 
@@ -132,35 +112,33 @@ class model #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, VERBOSITY) extends uvm
                 `uvm_info(this.get_full_name(), tr_input_mfb.convert2string() ,UVM_NONE)
             end
 
-            l3_checksum_mvb = uvm_logic_vector::sequence_item #(MVB_DATA_WIDTH)::type_id::create("l3_checksum_mvb");
-            l4_checksum_mvb = uvm_logic_vector::sequence_item #(MVB_DATA_WIDTH)::type_id::create("l4_checksum_mvb");
-            flag            = uvm_logic_vector::sequence_item #(4)::type_id::create("flag");
-            // bypass          = uvm_logic_vector::sequence_item #(2)::type_id::create("bypass");
-            l3_bypass          = uvm_logic_vector::sequence_item #(1)::type_id::create("l3_bypass");
-            l4_bypass          = uvm_logic_vector::sequence_item #(1)::type_id::create("l4_bypass");
+            checksum_mvb = uvm_logic_vector::sequence_item #(MVB_DATA_WIDTH)::type_id::create("checksum_mvb");
+            chsum_en    = uvm_logic_vector::sequence_item #(1)::type_id::create("chsum_en");
+            bypass      = uvm_logic_vector::sequence_item #(1)::type_id::create("bypass");
 
-            l2_size   = tr_input_meta.data[7-1  : 0];
-            l3_size   = tr_input_meta.data[16-1  : 7];
-            flag.data = tr_input_meta.data[20-1  : 16];
+            offset        = tr_input_meta.data[OFFSET_WIDTH-1  : 0];
+            length        = tr_input_meta.data[OFFSET_WIDTH+LENGTH_WIDTH-1  : OFFSET_WIDTH];
+            chsum_en.data = tr_input_meta.data[META_WIDTH-1  : OFFSET_WIDTH+LENGTH_WIDTH];
 
-            checksum_str         = prepare_checksum_data(tr_input_mfb, l2_size, l3_size, flag.data);
-            l3_checksum_mvb.data = checksum_calc(checksum_str.l3_checksum_data);
-            l4_checksum_mvb.data = checksum_calc(checksum_str.l4_checksum_data);
+            // $write("-------------- Model input --------------\n");
+            // $write("Packet data:\n");
+            // `uvm_info(this.get_full_name(), tr_input_mfb.convert2string() ,UVM_NONE)
+            // $write("Metadata:\n");
+            // $write("\tOffset: %d\n\tLength: %d\n\tEnable: %d\n", offset, length, chsum_en.data);
 
-            l3_bypass.data = !flag.data[0];// || !flag.data[2];
-            l4_bypass.data = !flag.data[1];
+            checksum_data     = prepare_checksum_data(tr_input_mfb, offset, length);
+            // `uvm_info(this.get_full_name(), checksum_data.convert2string() ,UVM_NONE)
+            checksum_mvb.data = checksum_calc(checksum_data);
 
-            // bypass.data = {!flag.data[1], !flag.data[0]};
-            // `uvm_info(this.get_full_name(), l3_checksum_mvb.convert2string() ,UVM_NONE)
-            // `uvm_info(this.get_full_name(), l4_checksum_mvb.convert2string() ,UVM_NONE)
-            // `uvm_info(this.get_full_name(), l3_bypass.convert2string() ,UVM_NONE)
-            // `uvm_info(this.get_full_name(), l4_bypass.convert2string() ,UVM_NONE)
+            bypass.data = !chsum_en.data;
 
-            // out_bypass.write(bypass);
-            out_l3_bypass.write(l3_bypass);
-            out_l4_bypass.write(l4_bypass);
-            out_l3_checksum_mvb.write(l3_checksum_mvb);
-            out_l4_checksum_mvb.write(l4_checksum_mvb);
+            if (VERBOSITY >= 1) begin
+                `uvm_info(this.get_full_name(), checksum_mvb.convert2string() ,UVM_NONE)
+                `uvm_info(this.get_full_name(), bypass.convert2string() ,UVM_NONE)
+            end
+
+            out_bypass.write(bypass);
+            out_checksum_mvb.write(checksum_mvb);
         end
 
     endtask
