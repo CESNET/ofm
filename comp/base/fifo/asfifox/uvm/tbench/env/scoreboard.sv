@@ -33,6 +33,11 @@ class scoreboard #(ITEM_WIDTH) extends uvm_scoreboard;
         tx_fifo = new("tx_fifo", this);
     endfunction
 
+    function void flush();
+        rx_fifo.flush();
+        tx_fifo.flush();
+    endfunction
+
     function int unsigned used();
         int unsigned ret = 0;
         ret |= (rx_fifo.used() != 0);
@@ -52,13 +57,14 @@ class scoreboard #(ITEM_WIDTH) extends uvm_scoreboard;
         uvm_logic_vector::sequence_item#(ITEM_WIDTH) tr_dut;
 
         forever begin
-            rx_fifo.get(tr_model);
             tx_fifo.get(tr_dut);
+            rx_fifo.get(tr_model);
 
             compared++;
             if (tr_model.compare(tr_dut) == 0) begin
                 errors++;
                 $swrite(msg, "\nTransactions doesnt match\n\tMODEL Transaction\n%s\n\n\tDUT Transaction\n%s", tr_model.convert2string(), tr_dut.convert2string());
+                `uvm_error(this.get_full_name(), msg);
             end
         end
     endtask

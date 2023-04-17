@@ -21,26 +21,16 @@ module testbench;
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // Interfaces
     mvb_if #(1, ITEM_WIDTH) mvb_wr(RX_CLK);
+    reset_if                reset_wr(RX_CLK);
+
     mvb_if #(1, ITEM_WIDTH) mvb_rd(TX_CLK);
+    reset_if                reset_rd(TX_CLK);
 
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // Define clock period
     always #(RX_CLK_PERIOD) RX_CLK = ~RX_CLK;
     always #(TX_CLK_PERIOD) TX_CLK = ~TX_CLK;
 
-    // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    // Initial reset
-    initial begin
-        RX_RST = 1;
-        #(RX_RESET_CLKS*RX_CLK_PERIOD)
-        RX_RST = 0;
-    end
-
-    initial begin
-        TX_RST = 1;
-        #(TX_RESET_CLKS*TX_CLK_PERIOD)
-        TX_RST = 0;
-    end
 
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // Start of tests
@@ -48,7 +38,9 @@ module testbench;
         uvm_root m_root;
         // Configuration of database
         uvm_config_db#(virtual mvb_if #(1, ITEM_WIDTH))::set(null, "", "vif_rx", mvb_wr);
+        uvm_config_db#(virtual reset_if)::set(null, "", "reset_if_rx", reset_wr);
         uvm_config_db#(virtual mvb_if #(1, ITEM_WIDTH))::set(null, "", "vif_tx", mvb_rd);
+        uvm_config_db#(virtual reset_if)::set(null, "", "reset_if_tx", reset_rd);
 
         m_root = uvm_root::get();
         m_root.finish_on_completion = 0;
@@ -65,9 +57,9 @@ module testbench;
     // DUT
     DUT DUT_U (
         .RX_CLK     (RX_CLK),
-        .RX_RST     (RX_RST),
+        .RX_RST     (reset_wr.RESET),
         .TX_CLK     (TX_CLK),
-        .TX_RST     (TX_RST),
+        .TX_RST     (reset_rd.RESET),
         .mvb_wr     (mvb_wr),
         .mvb_rd     (mvb_rd)
     );
@@ -79,7 +71,7 @@ module testbench;
         .ITEM_WIDTH  (ITEM_WIDTH)
     )
     property_rd(
-        .RESET  (TX_RST),
+        .RESET  (reset_rd.RESET),
         .vif    (mvb_rd)
     );
 
@@ -88,7 +80,7 @@ module testbench;
         .ITEM_WIDTH  (ITEM_WIDTH)
     )
     property_wr (
-        .RESET  (RX_RST),
+        .RESET  (reset_wr.RESET),
         .vif    (mvb_wr)
     );
 

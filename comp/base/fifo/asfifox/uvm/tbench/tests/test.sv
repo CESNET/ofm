@@ -34,6 +34,14 @@ class ex_test extends uvm_test;
         timeout = 0;
     endtask
 
+    task run_reset(uvm_phase phase, uvm_reset::agent m_agent);
+            uvm_reset::sequence_start m_seq;
+
+            m_seq = uvm_reset::sequence_start::type_id::create("m_seq", m_agent.m_sequencer);
+            m_seq.randomize();
+            m_seq.start(m_agent.m_sequencer);
+    endtask
+
     // ------------------------------------------------------------------------
     // Create environment and Run sequences o their sequencers
     task run_seq_rx(uvm_phase phase);
@@ -65,6 +73,11 @@ class ex_test extends uvm_test;
         h_seq_rx = uvm_logic_vector::sequence_simple#(ITEM_WIDTH)::type_id::create("h_seq_rx");
 
         h_seq_tx = uvm_mvb::sequence_simple_tx #(1, ITEM_WIDTH)::type_id::create("h_seq_tx");
+
+        fork
+            run_reset(phase, m_env.rx_reset);
+            run_reset(phase, m_env.tx_reset);
+        join_none
 
         fork
             run_seq_tx(phase);
