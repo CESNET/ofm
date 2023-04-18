@@ -9,8 +9,8 @@
 
 
 # For whole design testing
-set FIRMWARE_BASE      "../../../../../.."
-set CLKGEN_BASE        "$FIRMWARE_BASE/ofm/comp/base/misc/clk_gen"
+set FIRMWARE_BASE      "../../../../.."
+set CLKGEN_BASE        "$FIRMWARE_BASE/comp/base/misc/clk_gen"
 set FL_SIM_BASE        "../../../debug/sim"
 set PACKET_LINKER_BASE "../../../flow/packet_linker"
 

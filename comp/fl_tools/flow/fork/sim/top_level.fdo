@@ -10,8 +10,8 @@
 
 # For whole design testing
 set COMP_BASE          "../../../.."
-set FIRMWARE_BASE      "../../../../../.."
-set CLKGEN_BASE        "$FIRMWARE_BASE/ofm/comp/base/misc/clk_gen"
+set OFM_BASE           "../../../../.."
+set CLKGEN_BASE        "$OFM_BASE/comp/base/misc/clk_gen"
 set FL_FORK_BASE       "../../../flow/fork"
 set FL_SIM_BASE        "../../../debug/sim"
 
@@ -26,7 +26,7 @@ set SIM_COMPONENTS [list [list "CLKGEN"           $CLKGEN_BASE      "FULL"] \
 set COMPONENTS $SIM_COMPONENTS
 
 # Global include file for compilation
-source "$FIRMWARE_BASE/build/Modelsim.inc.fdo"
+source "$OFM_BASE/build/Modelsim.inc.fdo"
 
 # Suppress warnings from arithm library
 puts "Std Arith Warnings - Disabled"
