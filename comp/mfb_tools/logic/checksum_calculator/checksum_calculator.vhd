@@ -139,9 +139,9 @@ architecture FULL of CHECKSUM_CALCULATOR is
     signal rx_ext_eof            : std_logic_vector(MFB_REGIONS-1 downto 0);
     signal rx_ext_src_rdy        : std_logic;
     signal rx_ext_dst_rdy        : std_logic;
-    signal rx_ext_off            : std_logic_vector(MFB_REGIONS*7-1 downto 0);
-    signal rx_ext_len            : std_logic_vector(MFB_REGIONS*9-1 downto 0);
-    signal rx_ext_en             : std_logic_vector(MFB_REGIONS  -1 downto 0);
+    signal rx_ext_off            : std_logic_vector(MFB_REGIONS*OFFSET_WIDTH-1 downto 0);
+    signal rx_ext_len            : std_logic_vector(MFB_REGIONS*LENGTH_WIDTH-1 downto 0);
+    signal rx_ext_en             : std_logic_vector(MFB_REGIONS-1 downto 0);
 
     -- validated (extracted) checksum data signals
     signal tx_ext_data        : std_logic_vector(MFB_DATA_W-1 downto 0);
