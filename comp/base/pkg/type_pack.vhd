@@ -88,6 +88,8 @@ package type_pack is
   function sum(v :   i_array_t) return integer;
   function sum(v :   n_array_t) return integer;
 
+  pure function resize(in_val : std_logic_vector; in_size : natural) return std_logic_vector;
+
 end type_pack;
 
 package body type_pack is
@@ -373,5 +375,9 @@ package body type_pack is
       return slv_array_2d;
    end;
 
+   pure function resize(in_val : std_logic_vector; in_size : natural) return std_logic_vector is
+   begin
+        return std_logic_vector(resize(unsigned(in_val), in_size));
+   end function;
 end type_pack;
 

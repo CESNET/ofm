@@ -188,7 +188,7 @@ begin
         AMM_WRITE           <= '0';
         AMM_ADDRESS         <= (others => '0');
         AMM_WRITE_DATA      <= (others => '0');
-        AMM_BURST_COUNT     <= (0 => '1', others => '0'); 
+        AMM_BURST_COUNT     <= std_logic_vector(to_unsigned(1, AMM_BURST_COUNT_WIDTH)); 
 
         REFRESH_DONE_ANY    <= '0';
         REFRESH_START_ANY   <= '0';

@@ -4,7 +4,7 @@
 #
 # SPDX-License-Identifier: BSD-3-CLause
 
-set SV_MFB_BASE   "$ENTITY_BASE/../../../../../../../../../ofm/comp/mfb_tools/ver"
+set SV_MFB_BASE   "$ENTITY_BASE/../../../../../../../../comp/mfb_tools/ver"
   
 set COMPONENTS [list \
       [ list "SV_MFB"   $SV_MFB_BASE  "FULL"] \

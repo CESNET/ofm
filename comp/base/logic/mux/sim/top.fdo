@@ -7,7 +7,7 @@
 # $Id$
 
 set FIRMWARE_BASE    "../../../../.."
-
+set OFM_PATH        "$FIRMWARE_BASE"
 set TOP_BASE       "$OFM_PATH/comp/base/logic/mux"
 set MATH_PKG_BASE  "$OFM_PATH/comp/base/pkg"
 

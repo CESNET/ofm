@@ -34,7 +34,9 @@ generic (
 
     -- Random data generator seed
     RANDOM_DATA_SEED        : slv_array_t(0 to AMM_DATA_WIDTH / RAND_GEN_DATA_WIDTH - 1)(RAND_GEN_DATA_WIDTH - 1 downto 0);
-    RANDOM_ADDR_SEED        : std_logic_vector(RAND_GEN_ADDR_WIDTH - 1 downto 0) := std_logic_vector(to_unsigned(66844679,RAND_GEN_ADDR_WIDTH));
+    --RANDOM_ADDR_SEED        : std_logic_vector(RAND_GEN_ADDR_WIDTH - 1 downto 0) := std_logic_vector(resize(to_unsigned(66844679, 32), RAND_GEN_ADDR_WIDTH));
+    RANDOM_ADDR_SEED        : std_logic_vector(RAND_GEN_ADDR_WIDTH - 1 downto 0) := resize(X"3FBF807", RAND_GEN_ADDR_WIDTH);
+
 
     -- Manual refresh enable
     REFR_REQ_BEFORE_TEST    : boolean := false;
@@ -735,7 +737,7 @@ begin
     begin
         if (rising_edge(AMM_CLK)) then
             if (total_rst = '1' or (burst_done = '1' and burst_en = '1')) then
-                curr_burst_cnt <= (0 => '1', others => '0');
+                curr_burst_cnt <= std_logic_vector(to_unsigned(1, AMM_BURST_COUNT_WIDTH));
             elsif (burst_en = '1') then
                 curr_burst_cnt <= std_logic_vector(unsigned(curr_burst_cnt) + 1);
             end if;
@@ -746,7 +748,7 @@ begin
     begin
         if (rising_edge(AMM_CLK)) then
             if (total_rst = '1' or (read_burst_done = '1' and read_burst_en = '1')) then
-                curr_read_burst_cnt <= (0 => '1', others => '0');
+                curr_read_burst_cnt <= std_logic_vector(to_unsigned(1, AMM_BURST_COUNT_WIDTH));
             elsif (read_burst_en = '1') then
                 curr_read_burst_cnt <= std_logic_vector(unsigned(curr_read_burst_cnt) + 1);
             end if;

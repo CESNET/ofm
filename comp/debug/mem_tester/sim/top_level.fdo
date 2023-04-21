@@ -6,8 +6,7 @@
 
 
 
-set FIRMWARE_BASE    "../../../../.."
-set OFM_PATH         "$FIRMWARE_BASE/ofm"
+set OFM_PATH         "../../../.."
 set UUT_BASE         ".."
 
 set MI32_SIM_BASE    "$OFM_PATH/comp/mi_tools/sim"
@@ -27,7 +26,6 @@ set COMPONENTS [list \
 ]
 set MOD "emif_sim.vhd"
 
-#source "$FIRMWARE_BASE/build/Modelsim.inc.fdo"
 source "$OFM_PATH/build/Modelsim.inc.fdo"
 
 set StdArithNoWarnings 1

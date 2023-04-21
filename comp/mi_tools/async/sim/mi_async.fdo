@@ -5,7 +5,7 @@
 
 # Directories and files overview
 set FIRMWARE_BASE    "../../../.."
-set OFM_PATH         "$FIRMWARE_BASE/ofm"
+set OFM_PATH         "$FIRMWARE_BASE"
 set ENTITY_BASE      ".."
 
 set TB_FILE          "testbench.vhd"
@@ -17,7 +17,7 @@ set COMPONENTS [ list \
 ]
 
 # Global include file for compilation
-source "$FIRMWARE_BASE/build/Modelsim.inc.fdo"
+source "$OFM_PATH/build/Modelsim.inc.fdo"
 
 # Suppress warnings from libraries
 puts "Std Arith Warnings - Disabled"
