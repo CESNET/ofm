@@ -36,7 +36,9 @@ class driver_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) exte
             if (req != null) begin
                 for (int i = 0; i < REGIONS; i++) begin
                     vif.driver_rx_cb.DATA[(i+1)*DATA_WIDTH - 1 -: DATA_WIDTH]         <= req.data[i];
-                    vif.driver_rx_cb.META[(i+1)*META_WIDTH - 1 -: META_WIDTH]         <= req.meta[i];
+                    if (META_WIDTH > 0) begin
+                        vif.driver_rx_cb.META[(i+1)*META_WIDTH - 1 -: META_WIDTH]     <= req.meta[i];
+                    end
                     vif.driver_rx_cb.SOF_POS[(i+1)*SOF_POS_WIDTH -1 -: SOF_POS_WIDTH] <= req.sof_pos[i];
                     vif.driver_rx_cb.EOF_POS[(i+1)*EOF_POS_WIDTH -1 -: EOF_POS_WIDTH] <= req.eof_pos[i];
                 end

@@ -52,7 +52,11 @@ class monitor #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extend
                 si.eof[it]      = vif.monitor_cb.EOF[it];
 
                 si.data[it]   = vif.monitor_cb.DATA[(it+1)*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH -1 -: REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH];
-                si.meta[it]    = vif.monitor_cb.META[(it+1)*META_WIDTH                        -1 -: META_WIDTH];
+                if (META_WIDTH > 0) begin
+                    si.meta[it]    = vif.monitor_cb.META[(it+1)*META_WIDTH                        -1 -: META_WIDTH];
+                end else begin
+                    si.meta[it]    = 'x; 
+                end
                 si.sof_pos[it] = vif.monitor_cb.SOF_POS[(it+1)*$clog2(REGION_SIZE)            -1 -: $clog2(REGION_SIZE)];
                 si.eof_pos[it] = vif.monitor_cb.EOF_POS[(it+1)*$clog2(REGION_SIZE*BLOCK_SIZE) -1 -: $clog2(REGION_SIZE*BLOCK_SIZE)];
             end
