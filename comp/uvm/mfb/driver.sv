@@ -39,8 +39,12 @@ class driver_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) exte
                     if (META_WIDTH > 0) begin
                         vif.driver_rx_cb.META[(i+1)*META_WIDTH - 1 -: META_WIDTH]     <= req.meta[i];
                     end
-                    vif.driver_rx_cb.SOF_POS[(i+1)*SOF_POS_WIDTH -1 -: SOF_POS_WIDTH] <= req.sof_pos[i];
-                    vif.driver_rx_cb.EOF_POS[(i+1)*EOF_POS_WIDTH -1 -: EOF_POS_WIDTH] <= req.eof_pos[i];
+                    if (SOF_POS_WIDTH > 0) begin
+                        vif.driver_rx_cb.SOF_POS[(i+1)*SOF_POS_WIDTH -1 -: SOF_POS_WIDTH] <= req.sof_pos[i];
+                    end
+                    if (EOF_POS_WIDTH > 0) begin
+                        vif.driver_rx_cb.EOF_POS[(i+1)*EOF_POS_WIDTH -1 -: EOF_POS_WIDTH] <= req.eof_pos[i];
+                    end
                 end
                 vif.driver_rx_cb.SOF      <= req.sof;
                 vif.driver_rx_cb.EOF      <= req.eof;

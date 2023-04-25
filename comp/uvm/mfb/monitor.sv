@@ -57,8 +57,16 @@ class monitor #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) extend
                 end else begin
                     si.meta[it]    = 'x; 
                 end
-                si.sof_pos[it] = vif.monitor_cb.SOF_POS[(it+1)*$clog2(REGION_SIZE)            -1 -: $clog2(REGION_SIZE)];
-                si.eof_pos[it] = vif.monitor_cb.EOF_POS[(it+1)*$clog2(REGION_SIZE*BLOCK_SIZE) -1 -: $clog2(REGION_SIZE*BLOCK_SIZE)];
+                if ($clog2(REGION_SIZE) > 0) begin
+                    si.sof_pos[it] = vif.monitor_cb.SOF_POS[(it+1)*$clog2(REGION_SIZE)            -1 -: $clog2(REGION_SIZE)];
+                end else begin
+                    si.sof_pos[it] = 'x;
+                end
+                if ($clog2(REGION_SIZE*BLOCK_SIZE) > 0) begin
+                    si.eof_pos[it] = vif.monitor_cb.EOF_POS[(it+1)*$clog2(REGION_SIZE*BLOCK_SIZE) -1 -: $clog2(REGION_SIZE*BLOCK_SIZE)];
+                end else begin
+                    si.eof_pos[it] = 'x;
+                end
             end
 
             // Write sequence item to analysis port.
