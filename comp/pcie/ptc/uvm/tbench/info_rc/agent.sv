@@ -4,16 +4,16 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause
 
-class agent extends uvm_agent;
-    `uvm_component_utils(uvm_ptc_info_rc::agent)
+class agent #(DEVICE) extends uvm_agent;
+    `uvm_component_param_utils(uvm_ptc_info_rc::agent #(DEVICE))
 
     // -----------------------
     // Variables.
     // -----------------------
-    uvm_analysis_port #(sequence_item) analysis_port;
-    monitor m_monitor;
-    sequencer m_sequencer;
-    config_item m_config;
+    uvm_analysis_port #(sequence_item #(DEVICE)) analysis_port;
+    monitor #(DEVICE)                  m_monitor;
+    sequencer #(DEVICE)                m_sequencer;
+    config_item                        m_config;
 
     // Contructor, where analysis port is created.
     function new(string name, uvm_component parent);
@@ -30,9 +30,9 @@ class agent extends uvm_agent;
             `uvm_fatal(this.get_full_name(), "Cannot get configuration object")
         end
 
-        m_monitor = monitor::type_id::create("m_monitor", this);
+        m_monitor = monitor #(DEVICE)::type_id::create("m_monitor", this);
         if(get_is_active() == UVM_ACTIVE) begin
-            m_sequencer = sequencer::type_id::create("m_sequencer", this);
+            m_sequencer = sequencer #(DEVICE)::type_id::create("m_sequencer", this);
         end
     endfunction
 

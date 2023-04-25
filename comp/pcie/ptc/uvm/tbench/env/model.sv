@@ -264,7 +264,7 @@ class down_model #(DMA_PORTS) extends uvm_component;
 
             tr_out.data = tr_rc.data;
             tr_out.meta[11-1:0]  = tr_rc.length;
-            tr_out.meta[12-1:0]  = tr_rc.completed;
+            tr_out.meta[12-1]    = tr_rc.completed;
             tr_out.meta[20-1:12] = tr_rc.tag;
             tr_out.meta[28-1:20] = tr_rc.unit_id;
 

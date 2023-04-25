@@ -22,15 +22,17 @@
 
 
 // This class represents high level transaction, which can be reusable for other components.
-class sequence_item extends uvm_sequence_item;
+class sequence_item #(DEVICE) extends uvm_sequence_item;
     // Registration of object tools.
-    `uvm_object_utils(uvm_ptc_info_rc::sequence_item)
+    `uvm_object_param_utils(uvm_ptc_info_rc::sequence_item #(DEVICE))
 
     parameter DMA_COMPLETION_LENGTH_W    = 11;
     parameter DMA_REQUEST_GLOBAL_W       = 32;
     parameter DMA_REQUEST_RELAXED_W      = 1;
     parameter DMA_REQUEST_TAG_W          = 8;
     parameter DMA_COMPLETION_UNITID_W    = 8;
+    parameter LEN_WIDTH                  = (DEVICE == "STRATIX10" || DEVICE == "AGILEX") ? 10 : 11; // 10 for INTEL 11 XILINX
+    parameter LOW_ADDR_WIDTH             = (DEVICE == "STRATIX10" || DEVICE == "AGILEX") ? 7 : 12; // 7 for INTEL 12 XILINX
 
     // -----------------------
     // Variables.
@@ -53,7 +55,9 @@ class sequence_item extends uvm_sequence_item;
         rand logic [DMA_REQUEST_RELAXED_W-1 : 0]   relaxed; // Relaxed bit
         rand logic [1-1 : 0]                       snoop; // Snoop bit
         rand logic [2-1 : 0]                       at;
-        rand logic [10-1 : 0]                      len; // LSB (Paket size in DWORD)
+        rand logic [LEN_WIDTH-1 : 0]               len; // LSB (Paket size in DWORD)
+        // Others
+        rand logic [LOW_ADDR_WIDTH-1 : 0]          low_addr; // LSB (Paket size in DWORD)
 
     // Constructor - creates new instance of this class
     function new(string name = "sequence_item");
@@ -66,7 +70,7 @@ class sequence_item extends uvm_sequence_item;
 
     // Properly copy all transaction attributes.
     function void do_copy(uvm_object rhs);
-        sequence_item rhs_;
+        sequence_item #(DEVICE) rhs_;
 
         if(!$cast(rhs_, rhs)) begin
             `uvm_fatal( "do_copy:", "Failed to cast transaction object.")
@@ -92,12 +96,13 @@ class sequence_item extends uvm_sequence_item;
         snoop     = rhs_.snoop;
         at        = rhs_.at;
         len       = rhs_.len;
+        low_addr  = rhs_.low_addr;
     endfunction: do_copy
 
     // Properly compare all transaction attributes representing output pins.
     function bit do_compare(uvm_object rhs, uvm_comparer comparer);
         bit ret;
-        sequence_item rhs_;
+        sequence_item #(DEVICE) rhs_;
 
         if(!$cast(rhs_, rhs)) begin
             `uvm_fatal("do_compare:", "Failed to cast transaction object.")
@@ -123,6 +128,7 @@ class sequence_item extends uvm_sequence_item;
         ret &= (snoop     == rhs_.snoop);
         ret &= (at        == rhs_.at);
         ret &= (len       == rhs_.len);
+        ret &= (low_addr  == rhs_.low_addr);
         return ret;
     endfunction: do_compare
 
@@ -130,11 +136,11 @@ class sequence_item extends uvm_sequence_item;
     function string convert2string();
         string ret;
 
-        $swrite(ret, "\tglobal_id : %b\n\tpadd_1 : %b\n\treq_id : %b\n\ttag : %b\n\tlastbe : %b\n\tfirstbe : %b\n\tfmt : %b\n\ttype_n : %b\n\ttag_9 : %b\n\ttc : %b\n\ttag_8 : %b\n\tpadd_0 : %b
-                      \n\ttd : %b\n\tep : %b\n\trelaxed : %b\n\tsnoop : %b\n\tat : %b\n\tlen : %b\n", 
+        $swrite(ret, "\tglobal_id : %h\n\tpadd_1 : %b\n\treq_id : %b\n\ttag : %d\n\tlastbe : %b\n\tfirstbe : %b\n\tfmt : %b\n\ttype_n : %b\n\ttag_9 : %b\n\ttc : %b\n\ttag_8 : %b\n\tpadd_0 : %b
+                      \n\ttd : %b\n\tep : %b\n\trelaxed : %b\n\tsnoop : %b\n\tat : %b\n\tlen : %d\n\tlow_addr : %h\n", 
                      global_id, padd_1, req_id, tag, lastbe, firstbe, fmt,
                      type_n, tag_9, tc, tag_8, padd_0, td, ep, relaxed, snoop,
-                     at, len);
+                     at, len, low_addr);
 
         return ret;
     endfunction

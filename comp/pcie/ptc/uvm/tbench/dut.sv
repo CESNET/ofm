@@ -271,7 +271,7 @@ module DUT (
         //-------------------------------------------------------------------------
         // Tag assigning interface to PCIe endpoint
         //-------------------------------------------------------------------------
-        .RCB_SIZE         (1'b0),
+        .RCB_SIZE         (RCB_SIZE),
         .TAG_ASSIGN       (),
         .TAG_ASSIGN_VLD   ()
     );

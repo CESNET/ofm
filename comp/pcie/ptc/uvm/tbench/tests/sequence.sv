@@ -4,16 +4,16 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
-class virt_seq extends uvm_sequence;
+class virt_seq #(MRRS, MPS) extends uvm_sequence;
 
-    `uvm_object_utils(test::virt_seq)
+    `uvm_object_utils(test::virt_seq #(MRRS, MPS))
     `uvm_declare_p_sequencer(uvm_dma_up::sequencer);
 
     function new (string name = "virt_seq");
         super.new(name);
     endfunction
 
-    uvm_ptc_info::sequence_lib_info m_info;
+    uvm_ptc_info::sequence_lib_info #(MRRS) m_info;
     //uvm_reset::sequence_reset     m_reset;
     uvm_logic_vector_array::sequence_lib#(32)  m_packet;
 
@@ -23,11 +23,11 @@ class virt_seq extends uvm_sequence;
         m_packet = uvm_logic_vector_array::sequence_lib#(32)::type_id::create("m_packet");
         m_packet.init_sequence();
         m_packet.cfg = new();
-        m_packet.cfg.array_size_set(2, 128);
+        m_packet.cfg.array_size_set(2, MPS);
         m_packet.min_random_count = 60;
         m_packet.max_random_count = 80;
 
-        m_info   = uvm_ptc_info::sequence_lib_info::type_id::create("m_info");
+        m_info   = uvm_ptc_info::sequence_lib_info #(MRRS)::type_id::create("m_info");
         m_info.init_sequence();
         m_info.min_random_count = 60;
         m_info.max_random_count = 80;

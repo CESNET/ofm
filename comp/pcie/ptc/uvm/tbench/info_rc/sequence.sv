@@ -6,8 +6,8 @@
 
 
 // Reusable high level sequence. Contains transaction, which has only data part.
-class sequence_simple extends uvm_sequence #(uvm_ptc_info_rc::sequence_item);
-    `uvm_object_utils(uvm_ptc_info_rc::sequence_simple)
+class sequence_simple #(DEVICE) extends uvm_sequence #(uvm_ptc_info_rc::sequence_item);
+    `uvm_object_utils(uvm_ptc_info_rc::sequence_simple #(DEVICE))
 
     rand int unsigned transaction_count;
     int unsigned transaction_count_min = 100;

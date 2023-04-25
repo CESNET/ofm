@@ -85,12 +85,11 @@ class rc_compare extends uvm_component;
     int unsigned errors;
     int unsigned compared;
     int unsigned down_cnt;
+    int unsigned whole_len = 0;
 
     function new(string name, uvm_component parent);
         super.new(name, parent);
         model = new("model", this);
-        //model_mfb = new("model_mfb", this);
-        //model_mvb = new("model_mvb", this);
         dut_mfb   = new("dut_mfb", this);
         dut_mvb   = new("dut_mvb", this);
         errors    = 0;
@@ -126,7 +125,9 @@ class rc_compare extends uvm_component;
             end else begin
                 dut_down_mfb_array[tr_dut_mvb.data[20-1 : 12]] = tr_dut_mfb;
                 dut_down_mvb_array[tr_dut_mvb.data[20-1 : 12]] = tr_dut_mvb;
-                tag_sync.remove_element(tr_dut_mvb.data[20-1 : 12]);
+                if (tr_dut_mvb.data[12-1]) begin
+                    tag_sync.remove_element(tr_dut_mvb.data[20-1 : 12]);
+                end
             end
 
             if (dut_down_mfb_array.size() != 0) begin
@@ -154,6 +155,15 @@ class rc_compare extends uvm_component;
             $swrite(msg, "%s\t LENGTH [dut, model]: %0d, %0d \n", msg, mvb.data[10-1 : 0], catch_up.dut_up_mvb_array[mvb.data[20-1 : 12]].data[sv_dma_bus_pack::DMA_REQUEST_LENGTH_W-1 : 0]);
             `uvm_info(this.get_full_name(), msg ,UVM_FULL);
 
+            if (model_mfb.compare(dut_mfb) == 0) begin
+                string msg_1;
+
+                $swrite(msg_1, "\n\t Transaction number: %d\n\t", down_cnt);
+                $swrite(msg_1, "\tCheck MFB failed.\n\tModel data %s\n\tDUT data %s\n", model_mfb.convert2string(), dut_mfb.convert2string());
+                `uvm_error(this.get_full_name(), msg_1);
+                errors++;
+            end
+
             if (mvb.data[10-1 : 0] != dut_mfb.size() || mvb.data[10-1 : 0] != model_mfb.size()) begin
                 string msg_1;
 
@@ -174,23 +184,21 @@ class rc_compare extends uvm_component;
                 `uvm_error(this.get_full_name(), msg_1);
                 errors++;
             end
-            if (model_mfb.compare(dut_mfb) == 0) begin
-                string msg_1;
 
-                $swrite(msg_1, "\n\t Transaction number: %d\n\t", down_cnt);
-                $swrite(msg_1, "\tCheck MFB failed.\n\tModel data %s\n\tDUT data %s\n", model_mfb.convert2string(), dut_mfb.convert2string());
-                `uvm_error(this.get_full_name(), msg_1);
-                errors++;
-            end
-            if (catch_up.dut_up_mvb_array[mvb.data[20-1 : 12]].data[sv_dma_bus_pack::DMA_REQUEST_LENGTH_W-1 : 0] != mvb.data[10-1 : 0]) begin
-                string msg_1;
+            whole_len += mvb.data[10-1 : 0];
+            if (mvb.data[12-1]) begin
 
-                $swrite(msg_1, "\n\t Transaction number: %d\n\t", down_cnt);
-                $swrite(msg_1, "\tCheck LENGTH failed.\n\tModel LENGTH %d\n\tDUT LENGTH %d\n", catch_up.dut_up_mvb_array[mvb.data[20-1 : 12]].data[sv_dma_bus_pack::DMA_REQUEST_LENGTH_W-1 : 0], mvb.data[10-1 : 0]);
-                `uvm_error(this.get_full_name(), msg_1);
-                errors++;
+                if (catch_up.dut_up_mvb_array[mvb.data[20-1 : 12]].data[sv_dma_bus_pack::DMA_REQUEST_LENGTH_W-1 : 0] != whole_len) begin
+                    string msg_1;
+
+                    $swrite(msg_1, "\n\t Transaction number: %d\n\t", down_cnt);
+                    $swrite(msg_1, "\tCheck LENGTH failed.\n\tModel LENGTH %d\n\tDUT LENGTH %d\n", catch_up.dut_up_mvb_array[mvb.data[20-1 : 12]].data[sv_dma_bus_pack::DMA_REQUEST_LENGTH_W-1 : 0], mvb.data[10-1 : 0]);
+                    `uvm_error(this.get_full_name(), msg_1);
+                    errors++;
+                end
+                compared++;
+                whole_len = 0;
             end
-            compared++;
         end else begin
             $displayh("UP LIST of MVB %p\n", catch_up.dut_up_mvb_array);
             $write("DOWN MVB TR TAG    : 0x%h\n", mvb.data[20-1 : 12]);
@@ -199,8 +207,10 @@ class rc_compare extends uvm_component;
             `uvm_error(this.get_full_name(), "Wrong port or read request was not send");
         end
 
-        catch_up.dut_up_mfb_array.delete(mvb.data[20-1 : 12]);
-        catch_up.dut_up_mvb_array.delete(mvb.data[20-1 : 12]);
+        if (mvb.data[12-1]) begin
+            catch_up.dut_up_mfb_array.delete(mvb.data[20-1 : 12]);
+            catch_up.dut_up_mvb_array.delete(mvb.data[20-1 : 12]);
+        end
         dut_down_mvb_array.delete(mvb.data[20-1 : 12]);
         dut_down_mfb_array.delete(mvb.data[20-1 : 12]);
     endtask
@@ -543,8 +553,9 @@ class scoreboard #(META_WIDTH, MFB_DOWN_REGIONS, MFB_UP_REGIONS, DMA_MVB_UP_ITEM
                 out_compare[port_dut].rq_mfb_tr_table.push_back(tr_dut_rq_mfb);
                 out_compare[port_dut].rq_mvb_tr_table.push_back(tr_dut_rq_mvb);
                 rq_write_cnt[port_dut]++;
-            end else
+            end else begin
                 rq_read_cnt[port_dut]++;
+            end
 
             for (int i = 0; i < DMA_PORTS; i++) begin
                 out_compare[i].comp();

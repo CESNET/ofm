@@ -5,8 +5,8 @@
 //-- SPDX-License-Identifier: BSD-3-Clause
 
 
-class sequencer extends uvm_sequencer #(sequence_item);
-    `uvm_component_utils(uvm_ptc_info_rc::sequencer)
+class sequencer #(DEVICE) extends uvm_sequencer #(sequence_item #(DEVICE));
+    `uvm_component_param_utils(uvm_ptc_info_rc::sequencer #(DEVICE))
 
     uvm_reset::sync_terminate reset_sync;
 
