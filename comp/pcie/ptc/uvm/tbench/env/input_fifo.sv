@@ -121,7 +121,10 @@ class model_down_input_fifo_intel#(PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH, DMA_PO
             tr_out = dma_header_rc::type_id::create("tr_out", this);
             tr_out.port = DMA_PORTS > 1 ? tr_meta.data[(PCIE_DOWNHDR_WIDTH-16)+DMA_PORT_WIDTH-1 : (PCIE_DOWNHDR_WIDTH-16)] : 0;
             tr_out.length    = tr_meta.data[10-1 :0];
-            tr_out.completed = 1'b1;
+            if (tr_meta.data[43 : 32] == 0)
+                tr_out.completed = 1'b1;
+            else
+                tr_out.completed = 1'b0;
             tr_out.tag       = tr_meta.data[90-1 : 82];
             tr_out.unit_id   = 0;
             tr_out.data      = tr_data.data;
@@ -156,7 +159,7 @@ class model_down_input_fifo_xilinx#(PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH, DMA_P
             tr_out = dma_header_rc::type_id::create("tr_out", this);
             tr_out.port = DMA_PORTS > 1 ? meta[48+DMA_PORT_WIDTH-1 : 48] : 0;
             tr_out.length    = meta[43-1 : 32];
-            tr_out.completed = meta[75];
+            tr_out.completed = meta[30];
             tr_out.tag       = meta[72-1 : 64];
             tr_out.unit_id   = 0;
             tr_out.data = new[tr_data.data.size() - (PCIE_DOWNHDR_WIDTH/32)];

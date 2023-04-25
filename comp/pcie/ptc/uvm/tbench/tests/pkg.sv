@@ -38,6 +38,8 @@ package test;
     parameter MPS                   = 512/4;
     // Only needed when DMA_PORTS>1 for setting MFB FIFO sizes
     parameter MRRS                  = 512/4;
+    // Read completion boundary status ('0' = RCB is 64B, '1' = RCB is 128B)
+    parameter RCB_SIZE              = 1'b1;
 
     parameter UP_ASFIFO_ITEMS       = 512;
     parameter DOWN_ASFIFO_ITEMS     = 512;

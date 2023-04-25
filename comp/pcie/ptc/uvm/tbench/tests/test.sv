@@ -12,7 +12,7 @@ class ex_test extends uvm_test;
                    MFB_UP_BLOCK_SIZE, MFB_UP_ITEM_WIDTH, MFB_DOWN_REGIONS,
                    DMA_MFB_DOWN_REGIONS, MFB_DOWN_REG_SIZE, MFB_DOWN_BLOCK_SIZE,
                    MFB_DOWN_ITEM_WIDTH, PCIE_UPHDR_WIDTH, PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH, DMA_MVB_UP_ITEMS,
-                   DMA_MVB_DOWN_ITEMS, RQ_TUSER_WIDTH, RC_TUSER_WIDTH, RQ_TDATA_WIDTH, RQ_TDATA_WIDTH, META_WIDTH, DMA_PORTS, ENDPOINT_TYPE, DEVICE) m_env;
+                   DMA_MVB_DOWN_ITEMS, RQ_TUSER_WIDTH, RC_TUSER_WIDTH, RQ_TDATA_WIDTH, RQ_TDATA_WIDTH, META_WIDTH, DMA_PORTS, ENDPOINT_TYPE, RCB_SIZE, CLK_PERIOD, DEVICE) m_env;
 
     int unsigned timeout;
     logic [DMA_PORTS-1 : 0] event_vseq;
@@ -28,7 +28,7 @@ class ex_test extends uvm_test;
                                MFB_UP_BLOCK_SIZE, MFB_UP_ITEM_WIDTH, MFB_DOWN_REGIONS,
                                DMA_MFB_DOWN_REGIONS, MFB_DOWN_REG_SIZE, MFB_DOWN_BLOCK_SIZE,
                                MFB_DOWN_ITEM_WIDTH, PCIE_UPHDR_WIDTH, PCIE_DOWNHDR_WIDTH, PCIE_PREFIX_WIDTH, DMA_MVB_UP_ITEMS,
-                               DMA_MVB_DOWN_ITEMS, RQ_TUSER_WIDTH, RC_TUSER_WIDTH, RQ_TDATA_WIDTH, RQ_TDATA_WIDTH, META_WIDTH, DMA_PORTS, ENDPOINT_TYPE, DEVICE)::type_id::create("m_env", this);
+                               DMA_MVB_DOWN_ITEMS, RQ_TUSER_WIDTH, RC_TUSER_WIDTH, RQ_TDATA_WIDTH, RQ_TDATA_WIDTH, META_WIDTH, DMA_PORTS, ENDPOINT_TYPE, RCB_SIZE, CLK_PERIOD, DEVICE)::type_id::create("m_env", this);
     endfunction
 
     virtual task rq_seq;
@@ -78,8 +78,8 @@ class ex_test extends uvm_test;
     endtask
 
     task run_seq(int unsigned index);
-        virt_seq m_vseq;
-        m_vseq = virt_seq::type_id::create($sformatf("m_vseq%0d", index));
+        virt_seq #(MRRS, MPS) m_vseq;
+        m_vseq = virt_seq #(MRRS, MPS)::type_id::create($sformatf("m_vseq%0d", index));
         m_vseq.randomize();
         m_vseq.start(m_env.m_env_up[index].m_sequencer);
         event_vseq[index] = 1'b0;
