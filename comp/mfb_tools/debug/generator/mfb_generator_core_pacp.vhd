@@ -152,7 +152,8 @@ begin
         CLK   => CLK  ,
         RESET => RESET,
 
-        RX_STR_PKT_META   (0) => (others => (others => '0'))     ,
+        --RX_STR_PKT_META   (0) => (others => (others => '0'))     ,
+        RX_STR_PKT_META       => (others => (others => (others => '0')))     ,
         RX_STR_PKT_LEN    (0) => GEN_LENGTH                      ,
         RX_STR_PKT_VLD    (0) => GEN_VALID                       ,
         RX_STR_PKT_SRC_RDY(0) => (or GEN_VALID) and not gen_afull,
