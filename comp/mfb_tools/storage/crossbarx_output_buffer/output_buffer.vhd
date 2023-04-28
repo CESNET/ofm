@@ -810,7 +810,8 @@ begin
     end generate;
 
     shreg_di     <= slv_array_ser(shreg_di_arr);
-    shreg_di_row <= (0 => shreg_di, others => (others => '0'));
+    shreg_di_row(BUF_BLOCKS-1 downto 1) <= (others => (others => '0'));
+    shreg_di_row(0)                     <= shreg_di;
 
     -- Output
     shreg_do     <= shreg_do_row(0);
