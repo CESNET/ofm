@@ -94,7 +94,7 @@ architecture FULL of RATE_LIMITER is
     constant SR_RUN_FLAG             : integer := 2;
     constant SR_SPEED_PTR_RST_FLAG   : integer := 3;
 
-    constant MI_STATUS_REG_INIT      : std_logic_vector(MI_REG_DATA_WIDTH-1 downto 0) := (0 => '1', others => '0');
+    constant MI_STATUS_REG_INIT      : std_logic_vector(MI_REG_DATA_WIDTH-1 downto 0) := (SR_RUN_FLAG => '1', others => '0');
     constant MI_SEC_LEN_REG_INIT     : std_logic_vector(MI_REG_DATA_WIDTH-1 downto 0) := std_logic_vector(to_unsigned(SECTION_LENGTH, MI_REG_DATA_WIDTH));
     constant MI_INT_LEN_REG_INIT     : std_logic_vector(MI_REG_DATA_WIDTH-1 downto 0) := std_logic_vector(to_unsigned(INTERVAL_LENGTH, MI_REG_DATA_WIDTH));
     constant MI_SPEED_REGS_COUNT     : std_logic_vector(MI_REG_DATA_WIDTH-1 downto 0) := std_logic_vector(to_unsigned(INTERVAL_COUNT, MI_REG_DATA_WIDTH));
@@ -194,7 +194,7 @@ begin
     begin
         if (rising_edge(CLK)) then
             if (RESET = '1') then
-                p_state <= IDLE;
+                p_state <= RUN;
             else
                 p_state <= n_state;
             end if;
