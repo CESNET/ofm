@@ -292,7 +292,9 @@ begin
                     -- End of Transaction pointer
                     reg1_trans_a_eot_ptr(i) <= sot_ptr + resize_left(reg0_trans_len(i),sot_ptr'length) - 1;
                     -- Address must overflow within space of one Buffer B Section
-                    reg1_trans_a_eot_ptr(i)(sot_ptr'high downto sot_ptr'high-log2(BUF_A_SECTIONS)+1) <= resize_right(sot_ptr,log2(BUF_A_SECTIONS));
+                    if (log2(BUF_A_SECTIONS) > 0) then
+                        reg1_trans_a_eot_ptr(i)(sot_ptr'high downto sot_ptr'high-log2(BUF_A_SECTIONS)+1) <= resize_right(sot_ptr,log2(BUF_A_SECTIONS));
+                    end if;
                 end loop;
             end if;
 
