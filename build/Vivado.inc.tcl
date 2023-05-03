@@ -491,7 +491,6 @@ proc SaveDesign {synth_flags} {
     PrintLabel "Write bitstream"
     set ROOTNAME [pwd]/$SYNTH_FLAGS(OUTPUT)
     write_bitstream -force $ROOTNAME.bit
-    write_cfgmem -force -format MCS -size 64 -interface $SYNTH_FLAGS(MCS_IFACE) -loadbit "up 0 $ROOTNAME.bit" $ROOTNAME.mcs
 
     close_project
 
@@ -718,9 +717,6 @@ proc nb_sanitize_vars {synth_flags hierarchy} {
     }
     if {![info exist SYNTH_FLAGS(WRITE_VHDL)]} {
         set SYNTH_FLAGS(WRITE_VHDL) false
-    }
-    if {![info exist SYNTH_FLAGS(MCS_IFACE)] } {
-        set SYNTH_FLAGS(MCS_IFACE) "SMAPx16"
     }
     if {![info exist SYNTH_FLAGS(UPGRADE_IP)] } {
         set SYNTH_FLAGS(UPGRADE_IP) true
