@@ -700,6 +700,12 @@ proc nb_sanitize_vars {synth_flags hierarchy} {
 
     set SYNTH_FLAGS(TOOL) "vivado"
 
+    if {[info commands version] != ""} {
+        set SYNTH_FLAGS(TOOL_VERSION) [version -short]
+    } else {
+        regexp {Vivado v([0-9\.]+) } [exec vivado -version] void SYNTH_FLAGS(TOOL_VERSION)
+    }
+
     # Set default values
     if {![info exists SYNTH_FLAGS(PROJ_ONLY)]} {
         set SYNTH_FLAGS(PROJ_ONLY) false
