@@ -16,8 +16,10 @@ class regmodel#(CHANNELS) extends uvm_reg_block;
     endfunction
 
     function void set_frontdoor(uvm_reg_frontdoor frontdoor);
+        uvm_reg_frontdoor c_frontdoor;
         for (int unsigned it = 0; it < CHANNELS; it++) begin
-            channel[it].set_frontdoor(frontdoor.clone());
+            $cast(c_frontdoor, frontdoor.clone());
+            channel[it].set_frontdoor(c_frontdoor);
         end
     endfunction
 
