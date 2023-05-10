@@ -387,6 +387,8 @@ proc nb_nfw_archive_create {synth_flags} {
         lappend SYNTH_FLAGS(NFW_FILES) [list $SYNTH_FLAGS(OUTPUT).rbf $SYNTH_FLAGS(FPGA).rbf]
     } elseif { [info exist SYNTH_FLAGS(BITSTREAM)] && $SYNTH_FLAGS(BITSTREAM) == "RPD_ASX4"} {
         lappend SYNTH_FLAGS(NFW_FILES) [list $SYNTH_FLAGS(OUTPUT).rpd $SYNTH_FLAGS(FPGA).rpd]
+    } elseif { [info exist SYNTH_FLAGS(BITSTREAM)] && $SYNTH_FLAGS(BITSTREAM) == "OFS_PMCI"} {
+        lappend SYNTH_FLAGS(NFW_FILES) [list fpga_page2_pacsign_user2.bin $SYNTH_FLAGS(FPGA).bin]
     } else {
         lappend SYNTH_FLAGS(NFW_FILES) [list $SYNTH_FLAGS(OUTPUT).sof $SYNTH_FLAGS(FPGA).sof]
     }
