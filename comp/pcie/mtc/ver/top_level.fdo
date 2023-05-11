@@ -16,6 +16,7 @@ set COMPONENTS [list \
 	[ list "VER" "." "SZE"] \
 ]
 
+set SIM_FLAGS(EXTRA_VFLAGS) "-permit_unmatched_virtual_intf"
 source "$FIRMWARE_BASE/build/Modelsim.inc.fdo"
 
 puts "Numeric Std Warnings - Disabled"
