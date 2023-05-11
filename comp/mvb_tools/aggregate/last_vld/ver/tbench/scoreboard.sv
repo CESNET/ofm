@@ -51,7 +51,7 @@ class ScoreboardMonitorCbs extends MonitorCbs;
     TransactionTable #(TR_TABLE_FIRST_ONLY) sc_table;
     Transaction q[$];
     
-    function new (TransactionTable #(0) st);
+    function new (TransactionTable #(TR_TABLE_FIRST_ONLY) st);
         this.sc_table = st;
         q = {};
     endfunction
@@ -95,3 +95,4 @@ class Scoreboard;
     endtask
   
 endclass
+
