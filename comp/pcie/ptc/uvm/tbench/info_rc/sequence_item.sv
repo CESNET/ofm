@@ -22,7 +22,7 @@
 
 
 // This class represents high level transaction, which can be reusable for other components.
-class sequence_item #(DEVICE) extends uvm_sequence_item;
+class sequence_item #(string DEVICE) extends uvm_sequence_item;
     // Registration of object tools.
     `uvm_object_param_utils(uvm_ptc_info_rc::sequence_item #(DEVICE))
 
