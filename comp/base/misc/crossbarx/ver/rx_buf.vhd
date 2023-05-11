@@ -51,9 +51,9 @@ begin
     end generate;
 
     write_pr : process (CLK)
-        variable col       : natural;
-        variable row       : natural;
-        variable item      : natural;
+        variable col       : integer;
+        variable row       : integer;
+        variable item      : integer;
         variable item_data : std_logic_vector(ITEM_WIDTH-1 downto 0);
         variable t         : trans_t;
         variable section_i : unsigned(log2(tsel(DATA_DIR,BUF_A_SECTIONS,BUF_B_SECTIONS))-1 downto 0);
@@ -61,6 +61,8 @@ begin
         variable stream_i  : unsigned(log2(tsel(DATA_DIR,TRANS_STREAMS,1))-1 downto 0);
         variable row_i     : unsigned(log2(tsel(DATA_DIR,BUF_A_STREAM_ROWS,BUF_B_ROWS))-1 downto 0);
         variable item_i    : unsigned(log2(ROW_ITEMS)-1 downto 0);
+        -- hotfix for questasim simulatior
+        variable tmp_addr  : unsigned(col_i'length+row_i'length+item_i'length-1 downto 0);
     begin
         if (rising_edge(CLK)) then
 
@@ -77,18 +79,30 @@ begin
                             item_data := t.data((g+1)*ITEM_WIDTH-1 downto g*ITEM_WIDTH);
 
                             section_i := to_unsigned(tsel(DATA_DIR,t.a_section,t.b_section),section_i'length);
-                            (col_i, row_i, item_i) := to_unsigned(tsel(DATA_DIR,t.a_ptr,t.b_ptr)+g,col_i'length+row_i'length+item_i'length);
-                            stream_i  := to_unsigned(t.a_stream,stream_i'length);
+                            --hotfix
+                            --(col_i, row_i, item_i) := to_unsigned(tsel(DATA_DIR,t.a_ptr,t.b_ptr)+g,col_i'length+row_i'length+item_i'length);
+                            tmp_addr := to_unsigned(tsel(DATA_DIR,t.a_ptr,t.b_ptr)+g,col_i'length+row_i'length+item_i'length);
+                            col_i  := tmp_addr(col_i'length+row_i'length+item_i'length-1 downto row_i'length+item_i'length);
+                            row_i  := tmp_addr(row_i'length+item_i'length-1 downto item_i'length);
+                            item_i := tmp_addr(item_i'length-1 downto 0);
 
+                            stream_i  := to_unsigned(t.a_stream,stream_i'length);
                             row  := to_integer(stream_i & row_i);
                             col  := to_integer(section_i & col_i);
                             item := to_integer(item_i);
 
---                            report "section_i : " & to_string(section_i) & CR &
---                                   "col_i     : " & to_string(col_i)     & CR &
---                                   "row_i     : " & to_string(row_i)     & CR &
---                                   "item_i    : " & to_string(item_i)    & CR &
---                                   "stream_i  : " & to_string(stream_i);
+                            --report "section_i : " & to_string(section_i) & CR &
+                            --       "col_i     : " & to_string(col_i)     & CR &
+                            --       "row_i     : " & to_string(row_i)     & CR &
+                            --       "item_i    : " & to_string(item_i)    & CR &
+                            --       "stream_i  : " & to_string(stream_i)  & CR &
+                            --       "data      : " & to_hstring(item_data);
+
+                            --report "row      : " & to_string(row)  & CR &
+                            --       "col      : " & to_string(col)  & CR &
+                            --       "item_i   : " & to_string(item_i) & CR &
+                            --       "item     : " & to_string(item) & CR &
+                            --       "data     : " & to_hstring(item_data);
 
                             mem(row)(col)((item+1)*ITEM_WIDTH-1 downto item*ITEM_WIDTH) <= item_data;
 
