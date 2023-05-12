@@ -99,6 +99,8 @@ architecture behavioral of fifo_bram is
 
 begin
 
+assert (ITEMS >= 2) report "FIFO_BRAM: ITEMS lower than 2 is not supported" severity failure;
+
 cond_ap : if AUTO_PIPELINE = true generate
    sig_rd <= RD or not sig_dv;
 end generate;
