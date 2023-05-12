@@ -23,10 +23,10 @@ interface iMvbRx #(ITEMS = 4, ITEM_WIDTH = 8) (input logic CLK, RESET);
     localparam WORD_WIDTH = ITEMS * ITEM_WIDTH;
 
 
-    logic [WORD_WIDTH-1 : 0] DATA = 0;
-    logic [ITEMS-1 : 0] VLD = 0;
-    logic SRC_RDY = 0;
-    logic DST_RDY;
+    wire logic [WORD_WIDTH-1 : 0] DATA;
+    wire logic [ITEMS-1 : 0] VLD;
+    wire logic SRC_RDY;
+    wire logic DST_RDY;
 
 
     clocking cb @(posedge CLK);
@@ -59,10 +59,10 @@ interface iMvbTx #(ITEMS = 4, ITEM_WIDTH = 8) (input logic CLK, RESET);
     localparam WORD_WIDTH = ITEMS * ITEM_WIDTH;
 
 
-    logic [WORD_WIDTH-1 : 0] DATA;
-    logic [ITEMS-1 : 0] VLD;
-    logic SRC_RDY;
-    logic DST_RDY = 0;
+    wire logic [WORD_WIDTH-1 : 0] DATA;
+    wire logic [ITEMS-1 : 0] VLD;
+    wire logic SRC_RDY;
+    wire logic DST_RDY;
 
 
     clocking cb @(posedge CLK);

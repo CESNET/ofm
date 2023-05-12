@@ -28,14 +28,14 @@ interface iMfbRx #(REGIONS = 4, REGION_SIZE = 8, BLOCK_SIZE = 8, ITEM_WIDTH = 8,
     localparam EOF_POS_WIDTH = REGIONS * math_pkg::max(1,math_pkg::log2(REGION_SIZE * BLOCK_SIZE));
 
 
-    logic [WORD_WIDTH-1 : 0] DATA = 0;
-    logic [META_WORD_WIDTH-1 : 0] META = 0;
-    logic [SOF_POS_WIDTH-1 : 0] SOF_POS = 0;
-    logic [EOF_POS_WIDTH-1 : 0] EOF_POS = 0;
-    logic [REGIONS-1 : 0] SOF = 0;
-    logic [REGIONS-1 : 0] EOF = 0;
-    logic SRC_RDY = 0;
-    logic DST_RDY;
+    wire logic [WORD_WIDTH-1 : 0] DATA;
+    wire logic [META_WORD_WIDTH-1 : 0] META;
+    wire logic [SOF_POS_WIDTH-1 : 0] SOF_POS;
+    wire logic [EOF_POS_WIDTH-1 : 0] EOF_POS;
+    wire logic [REGIONS-1 : 0] SOF;
+    wire logic [REGIONS-1 : 0] EOF;
+    wire logic SRC_RDY;
+    wire logic DST_RDY;
 
 
     clocking cb @(posedge CLK);
@@ -71,14 +71,14 @@ interface iMfbTx #(REGIONS = 4, REGION_SIZE = 8, BLOCK_SIZE = 8, ITEM_WIDTH = 8,
     localparam EOF_POS_WIDTH = REGIONS * math_pkg::max(1,math_pkg::log2(REGION_SIZE * BLOCK_SIZE));
 
 
-    logic [WORD_WIDTH-1 : 0] DATA;
-    logic [META_WORD_WIDTH-1 : 0] META;
-    logic [SOF_POS_WIDTH-1 : 0] SOF_POS;
-    logic [EOF_POS_WIDTH-1 : 0] EOF_POS;
-    logic [REGIONS-1 : 0] SOF;
-    logic [REGIONS-1 : 0] EOF;
-    logic SRC_RDY;
-    logic DST_RDY = 0;
+    wire logic [WORD_WIDTH-1 : 0] DATA;
+    wire logic [META_WORD_WIDTH-1 : 0] META;
+    wire logic [SOF_POS_WIDTH-1 : 0] SOF_POS;
+    wire logic [EOF_POS_WIDTH-1 : 0] EOF_POS;
+    wire logic [REGIONS-1 : 0] SOF;
+    wire logic [REGIONS-1 : 0] EOF;
+    wire logic SRC_RDY;
+    wire logic DST_RDY;
 
 
     clocking cb @(posedge CLK);
