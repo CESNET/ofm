@@ -124,12 +124,14 @@ class MfbDriver #(REGIONS = 4, REGION_SIZE = 8, BLOCK_SIZE = 8, ITEM_WIDTH = 8, 
             if(wordDelayEn)
                 repeat(wordDelay)begin
                     fillEmptyWord();
-                    @(vif.cb);
+                    vif.cb.SRC_RDY <= 1'b0;
+                   @(vif.cb);
                 end
         end else begin
-            @(vif.cb);
+           fillEmptyWord();
+           vif.cb.SRC_RDY <= 1'b0;
+           @(vif.cb);
         end
-        fillEmptyWord();
         sof = 0;
         eof = 0;
         src_rdy = 0;
@@ -166,6 +168,7 @@ class MfbDriver #(REGIONS = 4, REGION_SIZE = 8, BLOCK_SIZE = 8, ITEM_WIDTH = 8, 
         int i, j, r, p;
         int transaction_get;
         fillEmptyWord();
+        vif.cb.SRC_RDY <= 1'b0;
         @(vif.cb); // initial sync
         sof = 0;
         eof = 0;
