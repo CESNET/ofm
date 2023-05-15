@@ -20,9 +20,8 @@ import test_pkg::*;
 program TEST (
     input logic CLK,
     output logic RESET,
-    iMvbRx.tb RX,
-    iMvbTx.tb TX,
-    iMvbTx.monitor MONITOR
+    iMvbRx RX,
+    iMvbTx TX
 );
 
     MvbTransaction #(DATA_WIDTH) blueprint;
@@ -40,7 +39,7 @@ program TEST (
 
     task createEnvironment();
         driver  = new("Driver", generator.transMbx, RX);
-        monitor = new("Monitor", MONITOR);
+        monitor = new("Monitor", TX);
         responder = new("Responder", TX);
 
         responder.wordDelayEnable_wt = 0;
@@ -71,7 +70,6 @@ program TEST (
             join
         end while(monitor.busy);
         driver.setDisabled();
-        monitor.setDisabled();
         responder.setDisabled();
     endtask
 
@@ -81,6 +79,7 @@ program TEST (
         generator.setEnabled(TRANSACTION_COUNT);
         wait(!generator.enabled);
         disableTestEnvironment();
+        monitor.setDisabled();
         scoreboard.display();
     endtask
 
