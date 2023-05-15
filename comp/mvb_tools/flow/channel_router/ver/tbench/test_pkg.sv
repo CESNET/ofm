@@ -20,10 +20,10 @@ package test_pkg;
     import math_pkg::*;
 
 
-    parameter ITEMS = 4;
-    parameter ITEM_WIDTH = 16;
-    parameter SRC_CHANNELS = 4;
-    parameter DST_CHANNELS = 256;
+    parameter ITEMS = 8;
+    parameter ITEM_WIDTH = 77;
+    parameter SRC_CHANNELS = 16;
+    parameter DST_CHANNELS = 32;
     parameter MI_DATA_WIDTH = 32;
     parameter MI_ADDR_WIDTH = 32;
     parameter OPT_MODE = 0;
@@ -36,7 +36,7 @@ package test_pkg;
     // VERBOSE = 2 show IN adn OUT channel
     // VERBOSE = 3 show values of counters
     // VERBOSE = 4 show information about register
-    parameter VERBOSE = 4;
+    parameter VERBOSE = 0;
     // REG_SETTINGS = 0 set default settings
     // REG_SETTINGS = 1 set increment to SRC_CHANNELS and then at 1
     // REG_SETTINGS = 2 set some random combinations
