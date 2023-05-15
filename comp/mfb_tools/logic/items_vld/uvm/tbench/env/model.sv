@@ -55,6 +55,7 @@ class model #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_W
 
         logic [OFFSET_WIDTH-1 : 0] offset = '0;
         logic [LENGTH_WIDTH-1 : 0] length = '0;
+        logic                      enable = '0;
 
         forever begin
 
@@ -69,12 +70,15 @@ class model #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_W
                 `uvm_info(this.get_full_name(), tr_input_meta.convert2string() ,UVM_MEDIUM) // useless
             end
 
-            offset = tr_input_meta.data[OFFSET_WIDTH-1  : 0];
-            length = tr_input_meta.data[OFFSET_WIDTH+LENGTH_WIDTH-1  : OFFSET_WIDTH];
+            offset = tr_input_meta.data[OFFSET_WIDTH-1              : 0];
+            length = tr_input_meta.data[OFFSET_WIDTH+LENGTH_WIDTH-1 : OFFSET_WIDTH];
+            enable = tr_input_meta.data[OFFSET_WIDTH+LENGTH_WIDTH   : OFFSET_WIDTH+LENGTH_WIDTH];
             $swrite(msg, "\n%s\nOFFSET %d\n", msg, offset);
             $swrite(msg, "\n%sLENGTH %d\n", msg, length);
             `uvm_info(this.get_full_name(), msg ,UVM_MEDIUM)
-            extract_valid_data(tr_input_mfb, offset, length);
+            if (enable) begin
+                extract_valid_data(tr_input_mfb, offset, length);
+            end
 
         end
 
