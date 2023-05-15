@@ -94,11 +94,6 @@ program TEST (
         foreach(streamsDrivers[i])begin
             streamsDrivers[i].setEnabled();
         end
-        // -- Enabling monitors
-        foreach(streamsMonitors[i])begin
-            streamsMonitors[i].setEnabled();
-        end
-        globalMonitor.setEnabled();
         // -- Enabling responders
         foreach(streamResponder[i])begin
             streamResponder[i].setEnabled();
@@ -136,7 +131,11 @@ program TEST (
 
     task test1();
         $write("\n\n############ TEST CASE 1 ############\n\n");
-        enableTestEnvironment();
+        // -- Enabling monitors
+        foreach(streamsMonitors[i])begin
+            streamsMonitors[i].setEnabled();
+        end
+        globalMonitor.setEnabled();
         // -- Enable all generators (one generator have to generate TRANSACTION_COUNT/NUMBER_OF_STREAMS of transactions)
         foreach(packetGenerator[i])begin
             packetGenerator[i].setEnabled(TRANSACTION_COUNT/NUMBER_OF_STREAMS);
@@ -149,8 +148,9 @@ program TEST (
     endtask
 
     initial begin
-        resetDesign();
         createEnvironment();
+        enableTestEnvironment();
+        resetDesign();
         test1();
 
         $write("Verification finished successfully!\n");

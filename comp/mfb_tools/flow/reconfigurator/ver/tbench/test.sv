@@ -48,7 +48,6 @@ program TEST (
 
     task enableTestEnvironment();
         driver.setEnabled();
-        monitor.setEnabled();
         responder.setEnabled();
     endtask
 
@@ -68,7 +67,7 @@ program TEST (
 
     task test1();
         $write("\n\n############ TEST CASE 1 ############\n\n");
-        enableTestEnvironment();
+        monitor.setEnabled();
         generator.setEnabled(TRANSACTION_COUNT);
         wait(!generator.enabled);
         disableTestEnvironment();
@@ -76,9 +75,10 @@ program TEST (
     endtask
 
     initial begin
-        resetDesign();
         createGeneratorEnvironment(FRAME_SIZE_MAX, FRAME_SIZE_MIN);
         createEnvironment();
+        enableTestEnvironment();
+        resetDesign();
         test1();
         if (scoreboard.scoreTable.added==scoreboard.scoreTable.removed)begin
             $write("Verification finished successfully!\n");

@@ -58,8 +58,7 @@ program TEST (
 
     task enableTestEnvironment();
         driver.setEnabled();
-        monitor.setEnabled();
-        //responder.setEnabled();
+        responder.setEnabled();
     endtask
 
     task disableTestEnvironment();
@@ -81,10 +80,10 @@ program TEST (
         $write("\n\n############ TEST CASE 1 ############\n\n");
         responder.wordDelayEnable_wt = 8;
         responder.wordDelayDisable_wt = 2;
-        enableTestEnvironment();
+        monitor.setEnabled();
         generator.setEnabled(TRANSACTION_COUNT);
         #(20*RX_CLK_PERIOD);
-	    responder.setEnabled();
+	    // responder.setEnabled();
         wait(!generator.enabled);
         disableTestEnvironment();
         scoreboard.display();
@@ -94,10 +93,10 @@ program TEST (
         $write("\n\n############ TEST CASE 2 ############\n\n");
         responder.wordDelayEnable_wt = 2;
         responder.wordDelayDisable_wt = 8;
-        enableTestEnvironment();
+        monitor.setEnabled();
         generator.setEnabled(TRANSACTION_COUNT);
         #(20*RX_CLK_PERIOD);
-        responder.setEnabled();
+        // responder.setEnabled();
         wait(!generator.enabled);
         disableTestEnvironment();
         scoreboard.display();
@@ -105,13 +104,15 @@ program TEST (
 
 
     initial begin
-        resetDesign();
         createGeneratorEnvironment();
         createEnvironment();
+        enableTestEnvironment();
+        resetDesign();
         test1();
-        resetDesign();
         createGeneratorEnvironment();
         createEnvironment();
+        enableTestEnvironment();
+        resetDesign();
         test2();
         $write("Verification finished successfully!\n");
         $stop();
