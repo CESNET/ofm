@@ -11,7 +11,7 @@ class model #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_W
     uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) input_mfb;
     uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(META_WIDTH))           input_meta;
     uvm_analysis_port #(uvm_logic_vector::sequence_item #(MVB_DATA_WIDTH))           out_mvb;
-    uvm_analysis_port #(uvm_logic_vector::sequence_item #(LENGTH_WIDTH))             out_mvb_index;
+    uvm_analysis_port #(uvm_logic_vector::sequence_item #(1))                        out_mvb_end;
 
     typedef logic [MVB_DATA_WIDTH-1 : 0] mvb_fifo[$];
     int                                  pkt_cnt = 0;
@@ -22,13 +22,13 @@ class model #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_W
         input_mfb     = new("input_mfb", this);
         input_meta    = new("input_meta", this);
         out_mvb       = new("out_mvb", this);
-        out_mvb_index = new("out_mvb_index", this);
+        out_mvb_end = new("out_mvb_end", this);
 
     endfunction
 
     task extract_valid_data(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH) frame, logic [OFFSET_WIDTH-1 : 0] offset, logic [LENGTH_WIDTH-1 : 0] length);
-        uvm_logic_vector::sequence_item #(MVB_DATA_WIDTH)       out_mvb_tr;
-        uvm_logic_vector::sequence_item #(LENGTH_WIDTH)         out_mvb_index_tr;
+        uvm_logic_vector::sequence_item #(MVB_DATA_WIDTH) out_mvb_tr;
+        uvm_logic_vector::sequence_item #(1)              out_mvb_end_tr;
         string msg = "";
         int    mvb_cnt = 0;
 
@@ -37,12 +37,16 @@ class model #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_W
 
         for (int i = offset; i < offset+length; i++) begin
             out_mvb_tr       = uvm_logic_vector::sequence_item #(MVB_DATA_WIDTH)::type_id::create("out_mvb_tr");
-            out_mvb_index_tr = uvm_logic_vector::sequence_item #(LENGTH_WIDTH)::type_id::create("out_mvb_index_tr");
+            out_mvb_end_tr = uvm_logic_vector::sequence_item #(1)::type_id::create("out_mvb_end_tr");
             out_mvb_tr.data  = frame.data[i];
             `uvm_info(this.get_full_name(), out_mvb_tr.convert2string() ,UVM_MEDIUM)
             mvb_cnt++;
-            out_mvb_index_tr.data = mvb_cnt;
-            out_mvb_index.write(out_mvb_index_tr);
+            if (i < offset+length-1) begin
+                out_mvb_end_tr.data = 1'b0;
+            end else begin
+                out_mvb_end_tr.data = 1'b1;
+            end
+            out_mvb_end.write(out_mvb_end_tr);
             out_mvb.write(out_mvb_tr);
         end
     endtask

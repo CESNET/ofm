@@ -10,6 +10,7 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_W
 
     uvm_logic_vector_array_mfb::env_rx #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH) m_env_rx;
     uvm_logic_vector_mvb::env_tx       #(MVB_ITEMS, MVB_DATA_WIDTH)                                                m_env_tx_mvb;
+    uvm_logic_vector_mvb::env_tx       #(MVB_ITEMS, 1)                                                     m_env_end_mvb;
 
     uvm_items_valid::virt_sequencer #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH, MVB_DATA_WIDTH, PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH) vscr;
 
@@ -18,7 +19,7 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_W
     uvm_reset::agent                                             m_reset;
     uvm_header_type::agent#(PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH) m_info_agent;
 
-    scoreboard #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY) sc;
+    scoreboard #(META_WIDTH, MVB_DATA_WIDTH, MVB_ITEMS, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY) sc;
 
     // Constructor of the environment.
     function new(string name, uvm_component parent);
@@ -32,6 +33,7 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_W
         uvm_logic_vector_array_mfb::config_item m_config_rx;
         uvm_header_type::config_item            m_info_agent_cfg;
         uvm_logic_vector_mvb::config_item       m_config_mvb_tx;
+        uvm_logic_vector_mvb::config_item       m_config_mvb_end;
 
         m_info_agent_cfg        = new();
         m_info_agent_cfg.active = UVM_ACTIVE;
@@ -61,7 +63,14 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_W
         uvm_config_db #(uvm_logic_vector_mvb::config_item)::set(this, "m_env_tx_mvb", "m_config", m_config_mvb_tx);
         m_env_tx_mvb = uvm_logic_vector_mvb::env_tx#(MVB_ITEMS, MVB_DATA_WIDTH)::type_id::create("m_env_tx_mvb", this);
 
-        sc       = scoreboard#(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY)::type_id::create("sc", this);
+        m_config_mvb_end                = new;
+        m_config_mvb_end.active         = UVM_PASSIVE;
+        m_config_mvb_end.interface_name = "vif_mvb_end";
+
+        uvm_config_db #(uvm_logic_vector_mvb::config_item)::set(this, "m_env_end_mvb", "m_config", m_config_mvb_end);
+        m_env_end_mvb = uvm_logic_vector_mvb::env_tx#(MVB_ITEMS, 1)::type_id::create("m_env_end_mvb", this);
+
+        sc       = scoreboard#(META_WIDTH, MVB_DATA_WIDTH, MVB_ITEMS, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY)::type_id::create("sc", this);
         m_driver = driver #(MFB_ITEM_WIDTH, META_WIDTH, PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH)::type_id::create("m_driver", this);
         vscr     = uvm_items_valid::virt_sequencer#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH, MVB_DATA_WIDTH, PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH)::type_id::create("vscr",this);
 
@@ -73,9 +82,11 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_W
         m_env_rx.analysis_port_data.connect(sc.input_mfb);
         m_env_rx.analysis_port_meta.connect(sc.input_meta);
         m_env_tx_mvb.analysis_port.connect(sc.out_mvb);
+        m_env_end_mvb.analysis_port.connect(sc.end_mvb);
 
         m_reset.sync_connect(m_env_rx.reset_sync);
         m_reset.sync_connect(m_env_tx_mvb.reset_sync);
+        m_reset.sync_connect(m_env_end_mvb.reset_sync);
 
         vscr.m_info           = m_info_agent.m_sequencer;
 
