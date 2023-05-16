@@ -87,7 +87,7 @@ class scoreboard #(META_WIDTH, MVB_DATA_WIDTH, MVB_ITEMS, MFB_ITEM_WIDTH, OFFSET
 
             msg = "\n";
             $swrite(msg, "%sMVB Model %s\n" , msg, tr_model_mvb.convert2string());
-            $swrite(msg, "%sItem INDEX %d\n", msg, tr_model_mvb_end.data);
+            $swrite(msg, "%sEND Model %d\n", msg, tr_model_mvb_end.data);
             $swrite(msg, "%sMVB DUT %s\n"   , msg, tr_dut_mvb.convert2string());
             $swrite(msg, "%sEND DUT %d\n"   , msg, tr_dut_end_mvb.data);
             `uvm_info(this.get_full_name(), msg, UVM_MEDIUM)

@@ -79,6 +79,7 @@ class model #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_W
             enable = tr_input_meta.data[OFFSET_WIDTH+LENGTH_WIDTH   : OFFSET_WIDTH+LENGTH_WIDTH];
             $swrite(msg, "\n%s\nOFFSET %d\n", msg, offset);
             $swrite(msg, "\n%sLENGTH %d\n", msg, length);
+            $swrite(msg, "\n%sENABLE %d\n", msg, enable);
             `uvm_info(this.get_full_name(), msg ,UVM_MEDIUM)
             if (enable) begin
                 extract_valid_data(tr_input_mfb, offset, length);
