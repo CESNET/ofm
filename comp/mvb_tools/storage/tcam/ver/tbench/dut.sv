@@ -21,7 +21,7 @@ module DUT (
     logic [MVB_ITEMS*ITEMS-1 : 0] hit_addr;
     genvar i;
 
-    generate for (i=0; i < ITEMS; i++) begin
+    generate for (i=0; i < MVB_ITEMS; i++) begin
         assign MATCH_OUT.DATA[i*(ITEMS+1)+ITEMS-1 : i*(ITEMS+1)] = hit_addr[(i+1)*ITEMS-1 : i*ITEMS];
         assign MATCH_OUT.DATA[i*(ITEMS+1)+ITEMS] = hit[i];
     end endgenerate
