@@ -10,9 +10,9 @@ module DUT(
     input logic CLK,
     input logic RESET,
     iMvbRx.dut  RX_TRANS,
-    iMvbTx      RX_TRANS_MONITOR,
+    iMvbTx.dut  RX_TRANS_MONITOR,
     iMvbRx.dut  RX_CONFS,
-    iMvbTx      RX_CONFS_MONITOR,
+    iMvbTx.dut  RX_CONFS_MONITOR,
     iMvbTx.dut  TX_TRANS,
     iAFull.dut  FIFO_AFULL
 );
@@ -30,20 +30,16 @@ module DUT(
     logic[MAX_TX_TRANS-1:0]     mvb_tx_trans_src_rdy;
 
     // -- ASSIGNING OF DATA FROM RX_TRANS INTERFACE TO RX_TRANS_MONITOR INTERFACE ------------------------------------------------
-    always @(*) begin 
-        RX_TRANS_MONITOR.DATA     <= RX_TRANS.DATA;
-        RX_TRANS_MONITOR.VLD      <= RX_TRANS.VLD;
-        RX_TRANS_MONITOR.SRC_RDY  <= RX_TRANS.SRC_RDY;
-        RX_TRANS_MONITOR.DST_RDY  <= mvb_rx_trans_dst_rdy;
-    end
+    assign RX_TRANS_MONITOR.DATA     = RX_TRANS.DATA;
+    assign RX_TRANS_MONITOR.VLD      = RX_TRANS.VLD;
+    assign RX_TRANS_MONITOR.SRC_RDY  = RX_TRANS.SRC_RDY;
+    assign RX_TRANS_MONITOR.DST_RDY  = mvb_rx_trans_dst_rdy;
     
     // -- ASSIGNING OF DATA FROM RX_CONFS INTERFACE TO RX_CONFS_MONITOR INTERFACE ------------------------------------------------
-    always @(*) begin 
-        RX_CONFS_MONITOR.DATA      <= RX_CONFS.DATA;
-        RX_CONFS_MONITOR.VLD       <= RX_CONFS.VLD;
-        RX_CONFS_MONITOR.SRC_RDY   <= RX_CONFS.SRC_RDY;
-        RX_CONFS_MONITOR.DST_RDY   <= RX_CONFS.DST_RDY;
-    end
+    assign RX_CONFS_MONITOR.DATA      = RX_CONFS.DATA;
+    assign RX_CONFS_MONITOR.VLD       = RX_CONFS.VLD;
+    assign RX_CONFS_MONITOR.SRC_RDY   = RX_CONFS.SRC_RDY;
+    assign RX_CONFS_MONITOR.DST_RDY   = RX_CONFS.DST_RDY;
 
     generate
         // -- ASSIGNING OF DATA FROM RX_TRANS INTERFACE TO LOGIC -----------------------------------------------------------------
