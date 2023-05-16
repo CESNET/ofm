@@ -185,6 +185,7 @@ begin
         )
         port map(
             RX_WORD             => vp_rx_word            (r),
+            RX_WORD_PREV        => vp_rx_word_prev       (r),
             RX_NEW_OFFSET_START => vp_rx_new_offset_start(r),
             RX_NEW_OFFSET_END   => vp_rx_new_offset_end  (r),
             RX_NEW_VALID        => vp_rx_new_valid       (r),
