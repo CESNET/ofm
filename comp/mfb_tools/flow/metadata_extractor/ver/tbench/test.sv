@@ -21,11 +21,9 @@ import test_pkg::*;
 program TEST (
     input logic CLK,
     output logic RESET,
-    iMfbRx.tb RX,
-    iMfbTx.tb TX_MFB,
-    iMvbTx.tb TX_MVB,
-    iMfbTx.monitor MONITOR,
-    iMvbTx.monitor MVB_MONITOR
+    iMfbRx RX,
+    iMfbTx TX_MFB,
+    iMvbTx TX_MVB
 );
 
     MfbTransaction #(MFB_ITEM_WIDTH,MFB_META_WIDTH) blueprint;
@@ -47,10 +45,10 @@ program TEST (
 
     task createEnvironment();
         driver  = new("Driver", generator.transMbx, RX);
-        monitor = new("MFB Monitor", MONITOR);
+        monitor = new("MFB Monitor", TX_MFB);
         responder = new("Responder", TX_MFB);
 
-        mvb_monitor = new("MVB Monitor", MVB_MONITOR);
+        mvb_monitor = new("MVB Monitor", TX_MVB);
         mvb_responder = new("Responder", TX_MVB);
         scoreboard = new;
         driver.setCallbacks(scoreboard.driverCbs);

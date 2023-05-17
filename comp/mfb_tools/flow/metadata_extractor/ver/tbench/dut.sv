@@ -13,7 +13,6 @@
  *
  */
 
-import test_pkg::*;
 
 module DUT (
     input logic CLK,
@@ -25,17 +24,17 @@ module DUT (
 
     METADATA_EXTRACTOR #(
         // MVB characteristics
-        .MVB_ITEMS       (MVB_ITEMS),
+        .MVB_ITEMS       (test_pkg::MVB_ITEMS),
         // MFB characteristics
-        .MFB_REGIONS     (MFB_REGIONS),
-        .MFB_REGION_SIZE (MFB_REGION_SIZE),
-        .MFB_BLOCK_SIZE  (MFB_BLOCK_SIZE),
-        .MFB_ITEM_WIDTH  (MFB_ITEM_WIDTH),
-        .MFB_META_WIDTH  (MFB_META_WIDTH),
+        .MFB_REGIONS     (test_pkg::MFB_REGIONS),
+        .MFB_REGION_SIZE (test_pkg::MFB_REGION_SIZE),
+        .MFB_BLOCK_SIZE  (test_pkg::MFB_BLOCK_SIZE),
+        .MFB_ITEM_WIDTH  (test_pkg::MFB_ITEM_WIDTH),
+        .MFB_META_WIDTH  (test_pkg::MFB_META_WIDTH),
         // Others
-        .EXTRACT_MODE    (EXTRACT_MODE),
-        .OUT_MVB_PIPE_EN (OUT_MVB_PIPE_EN),
-        .OUT_MFB_PIPE_EN (OUT_MFB_PIPE_EN)
+        .EXTRACT_MODE    (test_pkg::EXTRACT_MODE),
+        .OUT_MVB_PIPE_EN (test_pkg::OUT_MVB_PIPE_EN),
+        .OUT_MFB_PIPE_EN (test_pkg::OUT_MFB_PIPE_EN)
     ) VHDL_DUT_U (
         .CLK             (CLK),
         .RESET           (RESET),

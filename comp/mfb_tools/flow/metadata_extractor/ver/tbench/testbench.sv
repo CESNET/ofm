@@ -13,17 +13,15 @@
  *
  */
 
-import test_pkg::*;
-
 module testbench;
 
     logic CLK = 0;
     logic RESET;
-    iMfbRx #(MFB_REGIONS,MFB_REGION_SIZE,MFB_BLOCK_SIZE,MFB_ITEM_WIDTH,MFB_META_WIDTH) RX(CLK, RESET);
-    iMfbTx #(MFB_REGIONS,MFB_REGION_SIZE,MFB_BLOCK_SIZE,MFB_ITEM_WIDTH,MFB_META_WIDTH) TX_MFB(CLK, RESET);
-    iMvbTx #(MVB_ITEMS,MFB_META_WIDTH) TX_MVB(CLK, RESET);
+    iMfbRx #(test_pkg::MFB_REGIONS,test_pkg::MFB_REGION_SIZE,test_pkg::MFB_BLOCK_SIZE,test_pkg::MFB_ITEM_WIDTH,test_pkg::MFB_META_WIDTH) RX(CLK);
+    iMfbTx #(test_pkg::MFB_REGIONS,test_pkg::MFB_REGION_SIZE,test_pkg::MFB_BLOCK_SIZE,test_pkg::MFB_ITEM_WIDTH,test_pkg::MFB_META_WIDTH) TX_MFB(CLK);
+    iMvbTx #(test_pkg::MVB_ITEMS,test_pkg::MFB_META_WIDTH) TX_MVB(CLK);
 
-    always #(CLK_PERIOD/2) CLK = ~CLK;
+    always #(test_pkg::CLK_PERIOD/2) CLK = ~CLK;
 
     DUT DUT_U (
         .CLK         (CLK),
@@ -38,9 +36,7 @@ module testbench;
         .RESET       (RESET),
         .RX          (RX),
         .TX_MFB      (TX_MFB),
-        .TX_MVB      (TX_MVB),
-        .MONITOR     (TX_MFB),
-        .MVB_MONITOR (TX_MVB)
+        .TX_MVB      (TX_MVB)
     );
     
 endmodule
