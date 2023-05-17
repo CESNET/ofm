@@ -21,7 +21,7 @@ set COMPONENTS [list \
 set SIM_FLAGS(CODE_COVERAGE) false
 
 # For full speed uncomment line with UVM_TESTNAME=test::speed and comment line with UVM_TESTNAME=test::ex_test
-set SIM_FLAGS(EXTRA_VFLAGS) "+UVM_TESTNAME=test::ex_test +UVM_VERBOSITY=UVM_NONE -uvmcontrol=all +UVM_MAX_QUIT_COUNT=1"
+set SIM_FLAGS(EXTRA_VFLAGS) "+UVM_TESTNAME=test::ex_test +UVM_VERBOSITY=UVM_NONE -uvmcontrol=all +UVM_MAX_QUIT_COUNT=1 -sv_seed random"
 #set SIM_FLAGS(EXTRA_VFLAGS) "+UVM_TESTNAME=test::speed +UVM_VERBOSITY=UVM_NONE -uvmcontrol=all +UVM_MAX_QUIT_COUNT=1"
 
 

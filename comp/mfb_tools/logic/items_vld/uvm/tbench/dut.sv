@@ -11,18 +11,20 @@ module DUT (
     input logic     CLK,
     input logic     RST,
     mfb_if.dut_rx   mfb_rx,
-    mvb_if.dut_tx   mvb_tx
+    mvb_if.dut_tx   mvb_tx,
+    mvb_if.dut_tx   mvb_end
     );
 
-    logic [MFB_REGIONS*OFFSET_WIDTH-1 : 0]   offset;
-    logic [MFB_REGIONS*LENGTH_WIDTH-1 : 0]   length;
-    logic [MFB_REGIONS-1 : 0]                rx_en;
+    logic [MFB_REGIONS*OFFSET_WIDTH-1 : 0] offset;
+    logic [MFB_REGIONS*LENGTH_WIDTH-1 : 0] length;
+    logic [MFB_REGIONS-1 : 0]              rx_en;
+    logic                                  mvb_src_rdy;
 
     generate
         for (genvar r = 0; r < MFB_REGIONS; r++) begin
             assign offset  [(r+1)*OFFSET_WIDTH-1 : r*OFFSET_WIDTH] = mfb_rx.META[(r*META_WIDTH)+OFFSET_WIDTH-1              : r*META_WIDTH];
             assign length  [(r+1)*LENGTH_WIDTH-1 : r*LENGTH_WIDTH] = mfb_rx.META[(r*META_WIDTH)+OFFSET_WIDTH+LENGTH_WIDTH-1 : OFFSET_WIDTH+(r*META_WIDTH)];
-            assign rx_en[r]                                     = mfb_rx.META[(r*META_WIDTH)+META_WIDTH-1                : OFFSET_WIDTH+LENGTH_WIDTH+(r*META_WIDTH)];
+            assign rx_en[r]                                        = mfb_rx.META[(r*META_WIDTH)+META_WIDTH-1                : OFFSET_WIDTH+LENGTH_WIDTH+(r*META_WIDTH)];
         end
     endgenerate
 
@@ -33,6 +35,12 @@ module DUT (
         end else
             assign sof_pos = '0;
     endgenerate
+
+    assign mvb_tx.SRC_RDY  = mvb_src_rdy;
+
+    assign mvb_end.SRC_RDY = mvb_src_rdy;
+    assign mvb_end.DST_RDY = mvb_tx.DST_RDY;
+    assign mvb_end.VLD     = mvb_tx.VLD;
 
     MFB_ITEMS_VLD #(
         .MFB_REGIONS     (MFB_REGIONS),
@@ -64,8 +72,9 @@ module DUT (
         .TX_DATA        (mvb_tx.DATA),
         // TODO
         .TX_META        (),
+        .TX_END         (mvb_end.DATA),
         .TX_VLD         (mvb_tx.VLD),
-        .TX_SRC_RDY     (mvb_tx.SRC_RDY),
+        .TX_SRC_RDY     (mvb_src_rdy),
         .TX_DST_RDY     (mvb_tx.DST_RDY)
 
     );

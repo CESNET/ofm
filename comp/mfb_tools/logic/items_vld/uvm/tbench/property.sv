@@ -5,11 +5,12 @@
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
 
-module checksum_calculator_property #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH, MVB_DATA_WIDTH, MVB_ITEMS) 
+module items_valid_property #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH, MVB_DATA_WIDTH, MVB_ITEMS) 
     (
         input RESET,
         mfb_if rx_mfb_vif,
-        mvb_if tx_mvb_vif
+        mvb_if tx_mvb_vif,
+        mvb_if end_mvb_vif
     );
 
     mfb_property #(
@@ -31,6 +32,15 @@ module checksum_calculator_property #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SI
     tx_mvb_prop (
         .RESET (RESET),
         .vif   (tx_mvb_vif)
+    );
+
+    mvb_property #(
+        .ITEMS      (MVB_ITEMS),
+        .ITEM_WIDTH (1)
+    )
+    end_mvb_prop (
+        .RESET (RESET),
+        .vif   (end_mvb_vif)
     );
 
 endmodule

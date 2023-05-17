@@ -20,8 +20,8 @@ class virt_sequence #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WID
         m_info_lib = uvm_header_type::sequence_lib #(PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH)::type_id::create("m_info_lib");
 
         m_info_lib.init_sequence();
-        m_info_lib.min_random_count = 10;
-        m_info_lib.max_random_count = 20;
+        m_info_lib.min_random_count = 100;
+        m_info_lib.max_random_count = 200;
         m_info_lib.randomize();
 
     endfunction

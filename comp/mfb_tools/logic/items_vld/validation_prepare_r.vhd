@@ -45,6 +45,8 @@ port(
 
     -- Number of the current word (counted from each SOF).
     RX_WORD             : in  unsigned(log2(MAX_WORDS)-1 downto 0);
+    -- Number of the previous word (counted from each SOF but in the previous Region).
+    RX_WORD_PREV        : in  unsigned(log2(MAX_WORDS)-1 downto 0);
 
     -- Offset of the Start of the Section-to-be-validated from the beginning of the word (in Items).
     RX_NEW_OFFSET_START : in  unsigned(OFFSET_WIDTH-1 downto 0);
@@ -92,6 +94,7 @@ architecture FULL of VALIDATION_PREPARE_R is
     signal offset_word_and_region   : unsigned(MAX_REGIONS_W-1 downto 0);
     signal updated_offset           : unsigned(OFFSET_WIDTH-1 downto 0);
     signal section_start            : std_logic;
+    signal RX_WORD_end              : unsigned(log2(MAX_WORDS)-1 downto 0);
     signal section_end              : std_logic;
     signal tx_selected_offset_start : unsigned(OFFSET_WIDTH-1 downto 0);
 
@@ -131,6 +134,10 @@ begin
         TX_REACHED => section_start
     );
 
+    RX_WORD_end <= RX_WORD         when (RX_NEW_VALID = '1') else
+                   RX_WORD_PREV    when (RX_OLD_VALID = '1') else
+                   (others => '0');
+
     offset_end_reached_i : entity work.OFFSET_REACHED
     generic map(
         MAX_WORDS     => MAX_WORDS    ,
@@ -140,7 +147,7 @@ begin
         REGION_NUMBER => REGION_NUMBER
     )
     port map(
-        RX_WORD    => RX_WORD               ,
+        RX_WORD    => RX_WORD_end           ,
         RX_OFFSET  => rx_selected_offset_end,
         RX_VALID   => rx_valid_input        ,
 

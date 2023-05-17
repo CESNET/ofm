@@ -250,7 +250,7 @@ begin
 
                 rx_offset_start_reg0  <= global_offset_start;
                 rx_offset_end_reg0    <= global_offset_end;
-                rx_valid_reg0         <= RX_MFB_SOF and RX_MFB_SRC_RDY and length_not_0; -- and RX_ENABLE
+                rx_valid_reg0         <= RX_MFB_SOF and RX_MFB_SRC_RDY and length_not_0 and RX_ENABLE;
 
                 rx_src_rdy_reg0       <= RX_MFB_SRC_RDY;
             end if;
