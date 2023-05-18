@@ -20,9 +20,8 @@ import test_pkg::*;
 program TEST (
     input logic CLK,
     output logic RESET,
-    iMfbRx.tb RX,
-    iMfbTx.tb TX[OUTPUT_PORTS],
-    iMfbTx.monitor MONITOR[OUTPUT_PORTS]
+    iMfbRx RX,
+    iMfbTx TX[OUTPUT_PORTS]
 );
 
     MfbTransaction #(ITEM_WIDTH,META_WIDTH) blueprint;
@@ -31,8 +30,7 @@ program TEST (
     MfbResponder #(REGIONS,REGION_SIZE,BLOCK_SIZE,ITEM_WIDTH,META_WIDTH) responder[OUTPUT_PORTS];
     MfbMonitor #(REGIONS,REGION_SIZE,BLOCK_SIZE,ITEM_WIDTH,META_WIDTH) monitor[OUTPUT_PORTS];
     Scoreboard scoreboard;
-    virtual iMfbTx #(REGIONS,REGION_SIZE,BLOCK_SIZE,ITEM_WIDTH,META_WIDTH).tb vTX[OUTPUT_PORTS];
-    virtual iMfbTx #(REGIONS,REGION_SIZE,BLOCK_SIZE,ITEM_WIDTH,META_WIDTH).monitor vMONITOR[OUTPUT_PORTS];
+    virtual iMfbTx #(REGIONS,REGION_SIZE,BLOCK_SIZE,ITEM_WIDTH,META_WIDTH) vTX[OUTPUT_PORTS];
 
     task createGeneratorEnvironment(int packet_size_max, int packet_size_min);
         generator = new("Generator", 0);
@@ -45,11 +43,12 @@ program TEST (
     task createEnvironment();
         scoreboard = new;
         vTX = TX;
-        vMONITOR = MONITOR;
         driver  = new("Driver", generator.transMbx, RX);
         driver.setCallbacks(scoreboard.driverCbs);
         foreach(monitor[i]) begin
-            monitor[i] = new("Monitor", vMONITOR[i]);
+            string name;
+            $swrite(name, "Monitor %0d ", i);
+            monitor[i] = new(name, vTX[i]);
             monitor[i].setCallbacks(scoreboard.monitorCbs[i]);
         end
         foreach(responder[i]) begin
@@ -68,9 +67,6 @@ program TEST (
 
     task enableTestEnvironment();
         driver.setEnabled();
-        foreach(monitor[i]) begin
-            monitor[i].setEnabled();
-        end
         foreach(responder[i]) begin
             responder[i].setEnabled();
         end
@@ -96,7 +92,9 @@ program TEST (
 
     task test1();
         $write("\n\n############ TEST CASE 1 ############\n\n");
-        enableTestEnvironment();
+        foreach(monitor[i]) begin
+            monitor[i].setEnabled();
+        end
         generator.setEnabled(TRANSACTION_COUNT);
         wait(!generator.enabled);
         disableTestEnvironment();
@@ -104,9 +102,10 @@ program TEST (
     endtask
 
     initial begin
-        resetDesign();
         createGeneratorEnvironment(FRAME_SIZE_MAX, FRAME_SIZE_MIN);
         createEnvironment();
+        enableTestEnvironment();
+        resetDesign();
         test1();
         $write("Verification finished successfully!\n");
         $stop();

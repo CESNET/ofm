@@ -73,8 +73,8 @@ class Axi4S_RC_agent #(DATA_WIDTH = 512, USER_WIDTH = 161, ITEM_WIDTH_IN = 8, ST
 
         bit [ST_COUNT-1 : 0] is_sop = {ST_COUNT{1'b0}};
         bit [ST_COUNT-1 : 0] is_eop = {ST_COUNT{1'b0}};
-        bit [1:0] sop_pos[ST_COUNT] = {0};
-        bit [3:0] eop_pos[ST_COUNT] = {0};
+        bit [1:0] sop_pos[ST_COUNT] = '{ST_COUNT {2'b0}};
+        bit [3:0] eop_pos[ST_COUNT] = '{ST_COUNT {2'b0}};
 
         for(st = 0; st < ST_COUNT; st++) begin
            //$write("st: %d\n",st);

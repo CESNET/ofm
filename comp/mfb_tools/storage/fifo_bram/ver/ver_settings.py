@@ -56,7 +56,7 @@ SETTINGS = {
         "ITEM_WIDTH"         : "8",
     },
     "fifo_depth_comb_1" : {
-        "FIFO_DEPTH"          : "1",
+        "FIFO_DEPTH"          : "2",
     },
     "fifo_depth_comb_2" : {
         "FIFO_DEPTH"          : "2048",

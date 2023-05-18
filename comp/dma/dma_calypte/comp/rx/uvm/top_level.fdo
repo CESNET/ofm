@@ -18,7 +18,7 @@ set COMPONENTS [list \
 ]
 
 # Disable Code Coverage
-set SIM_FLAGS(CODE_COVERAGE) "true"
+set SIM_FLAGS(CODE_COVERAGE) "false"
 
 set SIM_FLAGS(EXTRA_VFLAGS) "+UVM_TESTNAME=test::base +UVM_VERBOSITY=UVM_NONE -uvmcontrol=all +UVM_MAX_QUIT_COUNT=1 -sv_seed random"
 #set SIM_FLAGS(EXTRA_VFLAGS) "+UVM_TESTNAME=test::speed +UVM_VERBOSITY=UVM_LOW -uvmcontrol=all +UVM_MAX_QUIT_COUNT=1 -sv_seed random"

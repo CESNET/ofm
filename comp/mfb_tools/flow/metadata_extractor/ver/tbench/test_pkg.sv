@@ -14,8 +14,6 @@
  */
 
 package test_pkg;
-   
-    import math_pkg::*;
 
     parameter MVB_ITEMS = 8;
     parameter MFB_REGIONS = 2;

@@ -65,6 +65,9 @@ architecture behavioral of fifo is
    signal lstblk_minus_one     : std_logic;
 
 begin
+
+   assert (ITEMS >= 2) report "FIFO: ITEMS lower than 2 is not supported" severity failure;
+
    -- Actual write address
    write_address <= reg_write_address(ADDRESS_WIDTH-1 downto 0);
    -- Actual read address

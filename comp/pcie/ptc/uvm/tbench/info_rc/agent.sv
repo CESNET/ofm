@@ -4,7 +4,7 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause
 
-class agent #(DEVICE) extends uvm_agent;
+class agent #(string DEVICE) extends uvm_agent;
     `uvm_component_param_utils(uvm_ptc_info_rc::agent #(DEVICE))
 
     // -----------------------

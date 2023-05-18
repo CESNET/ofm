@@ -20,9 +20,8 @@ import test_pkg::*;
 program TEST (
     input logic CLK,
     output logic RESET,
-    iMvbRx.tb RX,
-    iMvbTx.tb TX,
-    iMvbTx.monitor MONITOR
+    iMvbRx RX,
+    iMvbTx TX
 );
 
     MvbTransaction #(DATA_WIDTH) blueprint;
@@ -40,7 +39,7 @@ program TEST (
 
     task createEnvironment();
         driver  = new("Driver", generator.transMbx, RX);
-        monitor = new("Monitor", MONITOR);
+        monitor = new("Monitor", TX);
         responder = new("Responder", TX);
 
         responder.wordDelayEnable_wt = 0;
@@ -58,7 +57,6 @@ program TEST (
 
     task enableTestEnvironment();
         driver.setEnabled();
-        monitor.setEnabled();
         responder.setEnabled();
     endtask
 
@@ -72,23 +70,24 @@ program TEST (
             join
         end while(monitor.busy);
         driver.setDisabled();
-        monitor.setDisabled();
         responder.setDisabled();
     endtask
 
     task test1();
         $write("\n\n############ TEST CASE 1 ############\n\n");
-        enableTestEnvironment();
+        monitor.setEnabled();
         generator.setEnabled(TRANSACTION_COUNT);
         wait(!generator.enabled);
         disableTestEnvironment();
+        monitor.setDisabled();
         scoreboard.display();
     endtask
 
     initial begin
-        resetDesign();
         createGeneratorEnvironment();
         createEnvironment();
+        enableTestEnvironment();
+        resetDesign();
         test1();
         $write("Verification finished successfully!\n");
         $stop();

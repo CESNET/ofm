@@ -85,8 +85,6 @@ program TEST (
         write_driver.setEnabled();
         read_driver.setEnabled();
         match_driver.setEnabled();
-        read_monitor.setEnabled();
-        match_monitor.setEnabled();
         read_responder.setEnabled();
         match_responder.setEnabled();
     endtask
@@ -120,7 +118,8 @@ program TEST (
 
     task test1();
         $write("\n\n############ TEST CASE 1 ############\n\n");
-        enableTestEnvironment();
+        read_monitor.setEnabled();
+        match_monitor.setEnabled();
         write_gen.setEnabled(WRITE_COUNT);
         wait(!write_gen.enabled);
         wait(!write_driver.busy);
@@ -138,9 +137,10 @@ program TEST (
     endtask
 
     initial begin
-        resetDesign();
         createGeneratorEnvironment();
         createEnvironment();
+        enableTestEnvironment();
+        resetDesign();
         test1();
         $write("Verification finished successfully!\n");
         $stop();

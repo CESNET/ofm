@@ -71,6 +71,8 @@ begin
         variable stream_i  : unsigned(log2(tsel(DATA_DIR,1,TRANS_STREAMS))-1 downto 0);
         variable row_i     : unsigned(log2(tsel(DATA_DIR,BUF_B_ROWS,BUF_A_STREAM_ROWS))-1 downto 0);
         variable item_i    : unsigned(log2(ROW_ITEMS)-1 downto 0);
+        -- hotfix for questasim simulatior
+        variable tmp_addr  : unsigned(col_i'length+row_i'length+item_i'length-1 downto 0);
     begin
         TX_TRANS_SRC_RDY <= RX_TRANS_SRC_RDY;
         RX_TRANS_DST_RDY <= TX_TRANS_DST_RDY;
@@ -88,9 +90,14 @@ begin
                     exit when (g>=t.length);
 
                     section_i := to_unsigned(tsel(DATA_DIR,t.b_section,t.a_section),section_i'length);
-                    (col_i, row_i, item_i) := to_unsigned(tsel(DATA_DIR,t.b_ptr,t.a_ptr)+g,col_i'length+row_i'length+item_i'length);
-                    stream_i  := to_unsigned(t.a_stream,stream_i'length);
+                    --hotfix
+                    --(col_i, row_i, item_i) := to_unsigned(tsel(DATA_DIR,t.b_ptr,t.a_ptr)+g,col_i'length+row_i'length+item_i'length);
+                    tmp_addr := to_unsigned(tsel(DATA_DIR,t.b_ptr,t.a_ptr)+g,col_i'length+row_i'length+item_i'length);
+                    col_i  := tmp_addr(col_i'length+row_i'length+item_i'length-1 downto row_i'length+item_i'length);
+                    row_i  := tmp_addr(row_i'length+item_i'length-1 downto item_i'length);
+                    item_i := tmp_addr(item_i'length-1 downto 0);
 
+                    stream_i  := to_unsigned(t.a_stream,stream_i'length);
                     row  := to_integer(stream_i & row_i);
                     col  := to_integer(section_i & col_i);
                     item := to_integer(item_i);

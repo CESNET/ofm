@@ -200,26 +200,8 @@ architecture FULL of CROSSBARX is
     signal clk_2 : std_logic;
     signal rst_2 : std_logic;
 
-    -- ------------------------------------------------------------------------
-
-    -- ------------------------------------------------------------------------
-    -- Transaction Color Generator
-    -- ------------------------------------------------------------------------
-
-    signal trcg_trans_a_col   : slv_array_t     (TRANS_STREAMS-1 downto 0)(log2(BUF_A_COLS)-1 downto 0);
-    signal trcg_trans_a_item  : slv_array_2d_t  (TRANS_STREAMS-1 downto 0)(TRANSS-1 downto 0)(log2(BUF_A_STREAM_ROWS*ROW_ITEMS)-1 downto 0);
-    signal trcg_trans_b_col   : slv_array_2d_t  (TRANS_STREAMS-1 downto 0)(TRANSS-1 downto 0)(log2(BUF_B_COLS)-1 downto 0);
-    signal trcg_trans_b_item  : slv_array_2d_t  (TRANS_STREAMS-1 downto 0)(TRANSS-1 downto 0)(log2(BUF_B_ROWS*ROW_ITEMS)-1 downto 0);
-    signal trcg_trans_len     : slv_array_2d_t  (TRANS_STREAMS-1 downto 0)(TRANSS-1 downto 0)(log2(TRANS_MTU+1)-1 downto 0);
-    signal trcg_trans_meta    : slv_array_2d_t  (TRANS_STREAMS-1 downto 0)(TRANSS-1 downto 0)(METADATA_WIDTH-1 downto 0);
-    signal trcg_trans_vld     : slv_array_t     (TRANS_STREAMS-1 downto 0)(TRANSS-1 downto 0);
-    signal trcg_trans_color   : std_logic_vector(TRANS_STREAMS-1 downto 0);
-    signal trcg_trans_src_rdy : std_logic_vector(TRANS_STREAMS-1 downto 0);
-    signal trcg_trans_dst_rdy : std_logic_vector(TRANS_STREAMS-1 downto 0);
 
     signal trcg_new_rx_trans  : std_logic_vector(TRANS_STREAMS-1 downto 0);
-
-    -- ------------------------------------------------------------------------
 
     -- ------------------------------------------------------------------------
     -- Transaction Sorter
@@ -396,7 +378,17 @@ begin
     -- ------------------------------------------------------------------------
 
     instr_stream_gen : for s in 0 to TRANS_STREAMS-1 generate
-
+        signal trcg_trans_a_col   : std_logic_vector(log2(BUF_A_COLS)-1 downto 0);
+        signal trcg_trans_a_item  : slv_array_t(TRANSS-1 downto 0)(log2(BUF_A_STREAM_ROWS*ROW_ITEMS)-1 downto 0);
+        signal trcg_trans_b_col   : slv_array_t(TRANSS-1 downto 0)(log2(BUF_B_COLS)-1 downto 0);
+        signal trcg_trans_b_item  : slv_array_t(TRANSS-1 downto 0)(log2(BUF_B_ROWS*ROW_ITEMS)-1 downto 0);
+        signal trcg_trans_len     : slv_array_t(TRANSS-1 downto 0)(log2(TRANS_MTU+1)-1 downto 0);
+        signal trcg_trans_meta    : slv_array_t(TRANSS-1 downto 0)(METADATA_WIDTH-1 downto 0);
+        signal trcg_trans_vld     : std_logic_vector(TRANSS-1 downto 0);
+        signal trcg_trans_color   : std_logic;
+        signal trcg_trans_src_rdy : std_logic;
+        signal trcg_trans_dst_rdy : std_logic;
+    begin
         -- ------------------------------------------------------------------------
         -- Transaction Color Generator(s)
         -- ------------------------------------------------------------------------
@@ -429,16 +421,16 @@ begin
             RX_TRANS_SRC_RDY => TRANS_SRC_RDY(s),
             RX_TRANS_DST_RDY => TRANS_DST_RDY(s),
 
-            TX_TRANS_A_COL   => trcg_trans_a_col  (s),
-            TX_TRANS_A_ITEM  => trcg_trans_a_item (s),
-            TX_TRANS_B_COL   => trcg_trans_b_col  (s),
-            TX_TRANS_B_ITEM  => trcg_trans_b_item (s),
-            TX_TRANS_LEN     => trcg_trans_len    (s),
-            TX_TRANS_META    => trcg_trans_meta   (s),
-            TX_TRANS_VLD     => trcg_trans_vld    (s),
-            TX_TRANS_COLOR   => trcg_trans_color  (s),
-            TX_TRANS_SRC_RDY => trcg_trans_src_rdy(s),
-            TX_TRANS_DST_RDY => trcg_trans_dst_rdy(s) and trsr_trans_dst_rdy(s),
+            TX_TRANS_A_COL   => trcg_trans_a_col,
+            TX_TRANS_A_ITEM  => trcg_trans_a_item,
+            TX_TRANS_B_COL   => trcg_trans_b_col,
+            TX_TRANS_B_ITEM  => trcg_trans_b_item,
+            TX_TRANS_LEN     => trcg_trans_len,
+            TX_TRANS_META    => trcg_trans_meta,
+            TX_TRANS_VLD     => trcg_trans_vld,
+            TX_TRANS_COLOR   => trcg_trans_color,
+            TX_TRANS_SRC_RDY => trcg_trans_src_rdy,
+            TX_TRANS_DST_RDY => trcg_trans_dst_rdy and trsr_trans_dst_rdy(s),
 
             NEW_RX_TRANS     => trcg_new_rx_trans(s),
             COLOR_CONF       => trcg_color_conf  (s)
@@ -505,9 +497,9 @@ begin
             CLK              => clk_0,
             RESET            => rst_0,
 
-            RX_TRANS_ID      => (others => (0 => trcg_trans_color(s))),
-            RX_TRANS_META    => trcg_trans_meta(s),
-            RX_TRANS_SRC_RDY => trcg_trans_vld(s) and trcg_trans_src_rdy(s) and trcg_trans_dst_rdy(s),
+            RX_TRANS_ID      => (others => (0 => trcg_trans_color)),
+            RX_TRANS_META    => trcg_trans_meta,
+            RX_TRANS_SRC_RDY => trcg_trans_vld and trcg_trans_src_rdy and trcg_trans_dst_rdy,
             RX_TRANS_DST_RDY => trsr_trans_dst_rdy(s),
 
             RX_CONF_ID       => (others => (0 => plan_conf_color_delayed(s))),
@@ -519,7 +511,7 @@ begin
             TX_TRANS_DST_RDY => trsr_trans_comp_dst_rdy(s)
         );
 
-        assert (((or trcg_trans_vld(s))='1' and trcg_trans_src_rdy(s)='1' and trcg_trans_dst_rdy(s)='1' and trsr_trans_dst_rdy(s)='0')=false)
+        assert (((or trcg_trans_vld)='1' and trcg_trans_src_rdy='1' and trcg_trans_dst_rdy='1' and trsr_trans_dst_rdy(s)='0')=false)
             report "WARNING: CROSSBARX: Internal Transaction FIFO is FULL causing a decrease in throughput! Consider increasing value of generic TRANS_FIFO_ITEMS (currently "&to_string(TRANS_FIFO_ITEMS)&")."
             severity warning;
 
@@ -576,15 +568,15 @@ begin
             CLK   => clk_0,
             RESET => rst_0,
 
-            TRANS_A_COL   => trcg_trans_a_col  (s),
-            TRANS_A_ITEM  => trcg_trans_a_item (s),
-            TRANS_B_COL   => trcg_trans_b_col  (s),
-            TRANS_B_ITEM  => trcg_trans_b_item (s),
-            TRANS_LEN     => trcg_trans_len    (s),
-            TRANS_VLD     => trcg_trans_vld    (s),
-            TRANS_COLOR   => trcg_trans_color  (s),
-            TRANS_SRC_RDY => trcg_trans_src_rdy(s) and trsr_trans_dst_rdy(s),
-            TRANS_DST_RDY => trcg_trans_dst_rdy(s),
+            TRANS_A_COL   => trcg_trans_a_col,
+            TRANS_A_ITEM  => trcg_trans_a_item,
+            TRANS_B_COL   => trcg_trans_b_col,
+            TRANS_B_ITEM  => trcg_trans_b_item,
+            TRANS_LEN     => trcg_trans_len,
+            TRANS_VLD     => trcg_trans_vld,
+            TRANS_COLOR   => trcg_trans_color,
+            TRANS_SRC_RDY => trcg_trans_src_rdy and trsr_trans_dst_rdy(s),
+            TRANS_DST_RDY => trcg_trans_dst_rdy,
 
             INSTR_A_COL   => trbr_instr_a_col  (s),
             INSTR_A_ITEM  => trbr_instr_a_item (s),

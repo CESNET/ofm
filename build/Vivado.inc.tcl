@@ -491,7 +491,6 @@ proc SaveDesign {synth_flags} {
     PrintLabel "Write bitstream"
     set ROOTNAME [pwd]/$SYNTH_FLAGS(OUTPUT)
     write_bitstream -force $ROOTNAME.bit
-    write_cfgmem -force -format MCS -size 64 -interface $SYNTH_FLAGS(MCS_IFACE) -loadbit "up 0 $ROOTNAME.bit" $ROOTNAME.mcs
 
     close_project
 
@@ -700,6 +699,12 @@ proc nb_sanitize_vars {synth_flags hierarchy} {
 
     set SYNTH_FLAGS(TOOL) "vivado"
 
+    if {[info commands version] != ""} {
+        set SYNTH_FLAGS(TOOL_VERSION) [version -short]
+    } else {
+        regexp {Vivado v([0-9\.]+) } [exec vivado -version] void SYNTH_FLAGS(TOOL_VERSION)
+    }
+
     # Set default values
     if {![info exists SYNTH_FLAGS(PROJ_ONLY)]} {
         set SYNTH_FLAGS(PROJ_ONLY) false
@@ -712,9 +717,6 @@ proc nb_sanitize_vars {synth_flags hierarchy} {
     }
     if {![info exist SYNTH_FLAGS(WRITE_VHDL)]} {
         set SYNTH_FLAGS(WRITE_VHDL) false
-    }
-    if {![info exist SYNTH_FLAGS(MCS_IFACE)] } {
-        set SYNTH_FLAGS(MCS_IFACE) "SMAPx16"
     }
     if {![info exist SYNTH_FLAGS(UPGRADE_IP)] } {
         set SYNTH_FLAGS(UPGRADE_IP) true

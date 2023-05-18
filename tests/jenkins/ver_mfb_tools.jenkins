@@ -36,7 +36,8 @@ def COMPONENTS_MULTIVER = [\
     ['ITEM_RECONF'                        , 'comp/mfb_tools/flow/reconfigurator/comp/item_reconfigurator/ver'                 , 'top_level.fdo'      , 'tbench/test_pkg.sv' , 'ver_settings.py'    ],\
     ['MFB_RECONF'                         , 'comp/mfb_tools/flow/reconfigurator/ver'                                          , 'top_level.fdo'      , 'tbench/test_pkg.sv' , 'ver_settings.py'    ],\
     ['METADATA_EXTRACTOR'                 , 'comp/mfb_tools/flow/metadata_extractor/ver'                                      , 'top_level.fdo'      , 'tbench/test_pkg.sv' , 'ver_settings.py'    ],\
-    ['METADATA_INSERTOR'                  , 'comp/mfb_tools/flow/metadata_insertor/ver'                                       , 'top_level.fdo'      , 'tbench/test_pkg.sv' , 'ver_settings.py'    ],\
+    //['METADATA_INSERTOR'                  , 'comp/mfb_tools/flow/metadata_insertor/ver'                                       , 'top_level.fdo'      , 'tbench/test_pkg.sv' , 'ver_settings.py'    ],\
+    ['UVM METADATA_INSERTOR'              , 'comp/mfb_tools/flow/metadata_insertor/uvm'                                       , 'top_level.fdo'      , 'tbench/tests/pkg.sv', 'ver_settings.py'    ],\
     ['MERGER (MFB+MVB)'                   , 'comp/mfb_tools/flow/merger/ver'                                                  , 'top_level.fdo'      , 'tbench/test_pkg.sv' , 'ver_settings.py'    ],\
     ['SPLITTER (MFB+MVB)'                 , 'comp/mfb_tools/flow/splitter/ver'                                                , 'top_level.fdo'      , 'tbench/test_pkg.sv' , 'ver_settings.py'    ],\
     ['FORK'                               , 'comp/mfb_tools/flow/fork/ver'                                                    , 'top_level.fdo'      , 'tbench/test_pkg.sv' , 'ver_settings.py'    ],\

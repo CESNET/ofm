@@ -37,7 +37,7 @@ SETTINGS = {
         "FIFO_ITEMS"        : "16",
     },
     "fifo_items_2" : {
-        "FIFO_ITEMS"        : "1",
+        "FIFO_ITEMS"        : "2",
     },
     "fifo_items_3" : {
         "FIFO_ITEMS"        : "128",

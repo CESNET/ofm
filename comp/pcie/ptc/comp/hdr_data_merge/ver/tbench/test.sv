@@ -70,7 +70,6 @@ program TEST (
    task enableTestEnvironment();
       mvb_driver.setEnabled();
       mfb_driver.setEnabled();
-      mfb_monitor.setEnabled();
       mfb_responder.setEnabled();
    endtask
 
@@ -91,7 +90,7 @@ program TEST (
 
    task test1();
       $write("\n\n############ TEST CASE 1 ############\n\n");
-      enableTestEnvironment();
+      mfb_monitor.setEnabled();
       generator.setEnabled(TRANSACTION_COUNT);
       wait(!generator.enabled);
       disableTestEnvironment();
@@ -99,8 +98,9 @@ program TEST (
    endtask
 
    initial begin
-      resetDesign();
       createEnvironment(PAYLOAD_RATE, PAYLOAD_SIZE_MAX, PAYLOAD_SIZE_MIN);
+      enableTestEnvironment();
+      resetDesign();
       test1();
       $write("Verification finished successfully!\n");
       $stop();

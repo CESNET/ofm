@@ -5,7 +5,7 @@
 //-- SPDX-License-Identifier: BSD-3-Clause
 
 // This low level sequence define bus functionality
-class logic_vector_array_sequence#(ITEM_WIDTH, DEVICE, ENDPOINT_TYPE) extends uvm_sequence #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH));
+class logic_vector_array_sequence#(ITEM_WIDTH, string DEVICE, string ENDPOINT_TYPE) extends uvm_sequence #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH));
     `uvm_object_param_utils(uvm_pcie_cq::logic_vector_array_sequence#(ITEM_WIDTH, DEVICE, ENDPOINT_TYPE))
 
     localparam IS_INTEL_DEV    = (DEVICE == "STRATIX10" || DEVICE == "AGILEX");

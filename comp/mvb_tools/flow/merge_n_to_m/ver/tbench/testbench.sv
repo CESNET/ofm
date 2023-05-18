@@ -35,8 +35,7 @@ module testbench;
         .CLK     (CLK),
         .RESET   (RESET),
         .RX      (RX),
-        .TX      (TX),
-        .MONITOR (TX)
+        .TX      (TX)
     );
 
 endmodule

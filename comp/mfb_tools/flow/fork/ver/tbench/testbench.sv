@@ -17,7 +17,7 @@ import test_pkg::*;
 
 module testbench;
 
-    logic CLK = 0;
+    logic CLK = 1'b0;
     logic RESET;
     iMfbRx #(REGIONS,REGION_SIZE,BLOCK_SIZE,ITEM_WIDTH,META_WIDTH) RX(CLK, RESET);
     iMfbTx #(REGIONS,REGION_SIZE,BLOCK_SIZE,ITEM_WIDTH,META_WIDTH) TX[OUTPUT_PORTS](CLK, RESET);
@@ -35,8 +35,7 @@ module testbench;
         .CLK     (CLK),
         .RESET   (RESET),
         .RX      (RX),
-        .TX      (TX),
-        .MONITOR (TX)
+        .TX      (TX)
     );
 
 endmodule

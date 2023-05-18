@@ -23,7 +23,7 @@ import sv_flu_pkg::*;
     // ---------------------
     // -- Class Variables --
     // ---------------------
-    TransactionTable sc_table;
+    TransactionTable #(TR_TABLE_FIRST_ONLY) sc_table;
 
     // -------------------
     // -- Class Methods --
@@ -31,7 +31,7 @@ import sv_flu_pkg::*;
 
     // -- Constructor ---------------------------------------------------------
     // Create a class 
-    function new (TransactionTable sc_table);
+    function new (TransactionTable #(TR_TABLE_FIRST_ONLY) sc_table);
       this.sc_table = sc_table;
     endfunction
     
@@ -54,11 +54,11 @@ import sv_flu_pkg::*;
     // ---------------------
     // -- Class Variables --
     // ---------------------
-    TransactionTable sc_table;
+    TransactionTable #(TR_TABLE_FIRST_ONLY) sc_table;
     
     // -- Constructor ---------------------------------------------------------
     // Create a class 
-    function new (TransactionTable sc_table);
+    function new (TransactionTable #(TR_TABLE_FIRST_ONLY) sc_table);
       this.sc_table = sc_table;
     endfunction
     

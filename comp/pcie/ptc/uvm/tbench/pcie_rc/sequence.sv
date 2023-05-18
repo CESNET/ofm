@@ -5,7 +5,7 @@
 //-- SPDX-License-Identifier: BSD-3-Clause
 
 // This low level sequence define bus functionality
-class byte_array_sequence#(PCIE_UPHDR_WIDTH, PCIE_DOWNHDR_WIDTH, RQ_TUSER_WIDTH, RCB_SIZE, CLK_PERIOD, DEVICE) extends uvm_sequence #(uvm_logic_vector_array::sequence_item #(32));
+class byte_array_sequence#(PCIE_UPHDR_WIDTH, PCIE_DOWNHDR_WIDTH, RQ_TUSER_WIDTH, RCB_SIZE, CLK_PERIOD, string DEVICE) extends uvm_sequence #(uvm_logic_vector_array::sequence_item #(32));
     `uvm_object_utils(uvm_pcie_rc::byte_array_sequence#(PCIE_UPHDR_WIDTH, PCIE_DOWNHDR_WIDTH, RQ_TUSER_WIDTH, RCB_SIZE, CLK_PERIOD, DEVICE))
 
     localparam LOW_ADDR_WIDTH = (DEVICE == "STRATIX10" || DEVICE == "AGILEX") ? 7 : 12; // 7 for INTEL 12 XILINX
@@ -32,7 +32,7 @@ class byte_array_sequence#(PCIE_UPHDR_WIDTH, PCIE_DOWNHDR_WIDTH, RQ_TUSER_WIDTH,
     endtask
 endclass
 
-class logic_vector_sequence #(PCIE_DOWNHDR_WIDTH, PCIE_UPHDR_WIDTH, RQ_TUSER_WIDTH, RCB_SIZE, CLK_PERIOD, DEVICE) extends uvm_sequence #(uvm_logic_vector::sequence_item#(PCIE_DOWNHDR_WIDTH));
+class logic_vector_sequence #(PCIE_DOWNHDR_WIDTH, PCIE_UPHDR_WIDTH, RQ_TUSER_WIDTH, RCB_SIZE, CLK_PERIOD, string DEVICE) extends uvm_sequence #(uvm_logic_vector::sequence_item#(PCIE_DOWNHDR_WIDTH));
     `uvm_object_param_utils(uvm_pcie_rc::logic_vector_sequence #(PCIE_DOWNHDR_WIDTH, PCIE_UPHDR_WIDTH, RQ_TUSER_WIDTH, RCB_SIZE, CLK_PERIOD, DEVICE))
 
     localparam LOW_ADDR_WIDTH = (DEVICE == "STRATIX10" || DEVICE == "AGILEX") ? 7 : 12; // 7 for INTEL 12 XILINX

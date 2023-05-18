@@ -18,6 +18,8 @@ set COMPONENTS [list \
     [list "DUT_VER"  $DUT_VER_BASE   "FULL"]\
 ]
 
+#set SIM_FLAGS(EXTRA_VFLAGS) "-voptargs=-nomlopt -vopt_verbose  -no_autoacc"
+set SIM_FLAGS(EXTRA_VFLAGS) "-voptargs=-nomlopt"
 # Disable Code Coverage
 set CODE_COVERAGE "false"
 
@@ -25,6 +27,4 @@ set CODE_COVERAGE "false"
 source "$FIRMWARE_BASE/build/Modelsim.inc.fdo"
 
 # Suppress warnings from arithm library
-puts "Std Arith Warnings - Disabled"
-set StdArithNoWarnings 1
 nb_sim_run

@@ -93,11 +93,13 @@ class MvbDriver #(ITEMS = 4, ITEM_WIDTH = 8) extends Driver;
             if(wordDelayEn)
                 repeat(wordDelay) begin
                     fillEmptyWord();
+                    vif.cb.SRC_RDY <= 1'b0;
                     @(vif.cb);
                 end
             word = word + 1;
         end else begin
             fillEmptyWord();
+            vif.cb.SRC_RDY <= 1'b0;
             @(vif.cb);
         end
         vif.cb.VLD <= 0;
@@ -115,6 +117,7 @@ class MvbDriver #(ITEMS = 4, ITEM_WIDTH = 8) extends Driver;
         Transaction transaction;
         MvbTransaction #(ITEM_WIDTH) tr;
         fillEmptyWord();
+        vif.cb.SRC_RDY <= 0;
         @(vif.cb); // initial sync
         vif.cb.VLD <= 0;
         while(enabled) begin

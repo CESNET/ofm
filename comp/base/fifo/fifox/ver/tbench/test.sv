@@ -56,7 +56,6 @@ program TEST (
 
     task enableTestEnvironment();
         driver.setEnabled();
-        monitor.setEnabled();
         responder.setEnabled();
     endtask
 
@@ -79,10 +78,9 @@ program TEST (
         $write("\n\n############ TEST CASE 1 ############\n\n");
         responder.wordDelayEnable_wt = 8;
         responder.wordDelayDisable_wt = 2;
-        enableTestEnvironment();
+        monitor.setEnabled();
         generator.setEnabled(TRANSACTION_COUNT);
         #(200*CLK_PERIOD);
-	    responder.setEnabled();
         wait(!generator.enabled);
         disableTestEnvironment();
         scoreboard.display();
@@ -92,10 +90,9 @@ program TEST (
         $write("\n\n############ TEST CASE 2 ############\n\n");
         responder.wordDelayEnable_wt = 2;
         responder.wordDelayDisable_wt = 8;
-        enableTestEnvironment();
+        monitor.setEnabled();
         generator.setEnabled(TRANSACTION_COUNT);
         #(20*CLK_PERIOD);
-        responder.setEnabled();
         wait(!generator.enabled);
         disableTestEnvironment();
         scoreboard.display();
@@ -108,10 +105,9 @@ program TEST (
         responder.wordDelayDisable_wt = 4;
         responder.wordDelayLow = 20;
         responder.wordDelayHigh = 40;
-        enableTestEnvironment();
+        monitor.setEnabled();
         generator.setEnabled(TRANSACTION_COUNT);
         #(20*CLK_PERIOD);
-        responder.setEnabled();
         wait(!generator.enabled);
         disableTestEnvironment();
         scoreboard.display();
@@ -122,18 +118,21 @@ program TEST (
     initial begin
         inCov = new(IN_FIFOX);
         outCov= new(OUT_FIFOX);
-        resetDesign();
         createGeneratorEnvironment();
         createEnvironment();
+        enableTestEnvironment();
+        resetDesign();
         // test1 and test2 are basic test with differend word delay in driver  
         test1();
-        resetDesign();
         createGeneratorEnvironment();
         createEnvironment();
+        enableTestEnvironment();
+        resetDesign();
         test2();
-        resetDesign();
         createGeneratorEnvironment();
         createEnvironment();
+        enableTestEnvironment();
+        resetDesign();
         // test3 is designed to fill fifox to full capacity
         test3();
         $write("Verification finished successfully!\n");

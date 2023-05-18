@@ -25,18 +25,31 @@ class reg_channel extends uvm_reg_block;
     endfunction
 
     function void set_frontdoor(uvm_reg_frontdoor frontdoor);
-        control.set_frontdoor(frontdoor.clone());
-        status.set_frontdoor(frontdoor.clone());
-        sw_data_pointer.set_frontdoor(frontdoor.clone());
-        sw_hdr_pointer.set_frontdoor(frontdoor.clone());
-        hw_data_pointer.set_frontdoor(frontdoor.clone());
-        hw_hdr_pointer.set_frontdoor(frontdoor.clone());
-        data_base.set_frontdoor(frontdoor.clone());
-        hdr_base.set_frontdoor(frontdoor.clone());
-        data_mask.set_frontdoor(frontdoor.clone());
-        hdr_mask.set_frontdoor(frontdoor.clone());
-        packets_cnt.set_frontdoor(frontdoor.clone());
-        bytes_cnt.set_frontdoor(frontdoor.clone());
+        uvm_reg_frontdoor c_frontdoor;
+        $cast(c_frontdoor, frontdoor.clone());
+        control.set_frontdoor(c_frontdoor);
+        $cast(c_frontdoor, frontdoor.clone());
+        status.set_frontdoor(c_frontdoor);
+        $cast(c_frontdoor, frontdoor.clone());
+        sw_data_pointer.set_frontdoor(c_frontdoor);
+        $cast(c_frontdoor, frontdoor.clone());
+        sw_hdr_pointer.set_frontdoor(c_frontdoor);
+        $cast(c_frontdoor, frontdoor.clone());
+        hw_data_pointer.set_frontdoor(c_frontdoor);
+        $cast(c_frontdoor, frontdoor.clone());
+        hw_hdr_pointer.set_frontdoor(c_frontdoor);
+        $cast(c_frontdoor, frontdoor.clone());
+        data_base.set_frontdoor(c_frontdoor);
+        $cast(c_frontdoor, frontdoor.clone());
+        hdr_base.set_frontdoor(c_frontdoor);
+        $cast(c_frontdoor, frontdoor.clone());
+        data_mask.set_frontdoor(c_frontdoor);
+        $cast(c_frontdoor, frontdoor.clone());
+        hdr_mask.set_frontdoor(c_frontdoor);
+        $cast(c_frontdoor, frontdoor.clone());
+        packets_cnt.set_frontdoor(c_frontdoor);
+        $cast(c_frontdoor, frontdoor.clone());
+        bytes_cnt.set_frontdoor(c_frontdoor);
     endfunction
 
     virtual function void build(uvm_reg_addr_t base, int unsigned bus_width);

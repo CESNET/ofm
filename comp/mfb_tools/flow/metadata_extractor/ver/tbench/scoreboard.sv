@@ -15,7 +15,6 @@
 import sv_common_pkg::*;
 import sv_mfb_pkg::*;
 import sv_mvb_pkg::*;
-import test_pkg::*;
 
 class ScoreboardDriverCbs extends DriverCbs;
 
