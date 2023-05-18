@@ -34,5 +34,5 @@ puts "Std Arith Warnings - Disabled"
 set  StdArithNoWarnings 1
 
 # File with signals
-source $SIG_FILE
+nb_sim_run 4us
 

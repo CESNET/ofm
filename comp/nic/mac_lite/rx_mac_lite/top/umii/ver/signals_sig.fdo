@@ -30,5 +30,3 @@ all  rxmac  /testbench/DUT_U/VHDL_DUT_U/rx_mac_lite_i
 
 config wave -signalnamewidth 1
 
-restart -f
-run -all

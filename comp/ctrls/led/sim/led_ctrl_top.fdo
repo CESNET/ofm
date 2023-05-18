@@ -10,6 +10,7 @@
 # For whole design testing
 set FIRMWARE_BASE    "../../../.."
 set TB_FILE          "./testbench.vhd" 
+set SIG_FILE         "led_ctrl_top_sig.fdo"
 
 # Modules definition
 set COMPONENTS [list \
@@ -20,4 +21,4 @@ set COMPONENTS [list \
 source "$FIRMWARE_BASE/build/Modelsim.inc.fdo"
 
 # File with signals
-source led_ctrl_top_sig.fdo
+nb_sim_run 100ms

@@ -24,8 +24,3 @@ add wave -divider "PTC Tag Manager"
 add wave -divider ""
 tag_manager "$UUT_PATH" "/testbench/s_org" "$UUT_PATH/tag_manager_i" "$TB_PATH"
 
-config wave -signalnamewidth 1
-
-restart -f
-run -a
-wave zoom full

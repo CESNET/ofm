@@ -21,5 +21,3 @@ delete wave *
 blk_DISTRIB 
 blk_OTHER
 
-restart -f
-run  1us

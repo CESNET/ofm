@@ -27,5 +27,3 @@ tx  TX  /testbench/DUT_U/VHDL_DUT_U
 all_core ALL_CORE /testbench/DUT_U/VHDL_DUT_U/PFIFO_CORE
 all ALL /testbench/DUT_U/VHDL_DUT_U
 
-restart -f
-run -all

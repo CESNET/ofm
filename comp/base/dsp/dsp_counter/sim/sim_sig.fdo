@@ -42,9 +42,3 @@ add wave -divider
 all CNT_DSP_ALL       $CNT_PATH
 all INTEL_CNT_DSP_ALL $CNT_PATH/auto_reset_g/auto_rst_cnt_variant_g/device_g/dsp_counter_stratix_10_atom_i/dsp_i
 
-restart -f
-run 1000 us
-
-config wave -signalnamewidth 1
-
-# wave zoomrange 0 1000ns

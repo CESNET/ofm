@@ -19,5 +19,3 @@ delete wave *
 blk_CAM
 blk_CAM_INT
 
-restart -f
-run 12 us 

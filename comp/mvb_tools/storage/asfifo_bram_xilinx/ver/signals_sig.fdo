@@ -16,5 +16,3 @@ add_wave "-noupdate -color yellow -label RESET"   /testbench/RESET
 rx  RX  /testbench/DUT_U/VHDL_DUT_U
 tx  TX  /testbench/DUT_U/VHDL_DUT_U
 
-restart -f
-run -all

@@ -43,5 +43,4 @@ file delete -force -- cov_html/
 if {$SIM_FLAGS(CODE_COVERAGE)} {
     coverage save -code bcefst -verbose actual.ucdb
 }
-quit
 

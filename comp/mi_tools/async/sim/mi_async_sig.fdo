@@ -29,7 +29,3 @@ add_wave "-noupdate -label p_state"       $MI32_ASYNC_PATH/p_state
 add_wave "-noupdate -label n_state"       $MI32_ASYNC_PATH/n_state
 add_wave "-noupdate -label no_reset_sig"  $MI32_ASYNC_PATH/no_reset_sig
 
-
-restart -f
-run 2 us
-wave zoomrange 0 400ns

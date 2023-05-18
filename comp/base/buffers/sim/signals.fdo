@@ -86,7 +86,3 @@ add_wave "-noupdate -label full" /testbench/uut/outcomp_full
 add_wave "-noupdate -label empty" /testbench/uut/outcomp_empty
 add_wave "-noupdate -uns -label status" /testbench/uut/outcomp_stat
 
-restart -f
-run 2 us
-
-wave zoomrange 0 200ns

@@ -16,7 +16,3 @@ add wave *
 add wave -divider ""
 add_wave "-group { testbench } -noupdate -hex"   $UUT_PATH/*
 
-config wave -signalnamewidth 1
-
-restart -f
-run -all

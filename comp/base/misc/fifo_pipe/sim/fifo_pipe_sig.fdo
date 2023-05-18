@@ -31,5 +31,3 @@ add wave -divider "FIFO_PIPE internals"
 add wave -divider ""
 fifo_pipe_internals "$FIFO_PIPE_PATH" ""
 
-restart -f
-run 250 us

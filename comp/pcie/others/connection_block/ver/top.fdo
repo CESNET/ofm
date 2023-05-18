@@ -20,6 +20,4 @@ set SIM_FLAGS(EXTRA_VFLAGS) "+UVM_TESTNAME=test::ex_test -uvmcontrol=all"
 source "$FIRMWARE_BASE/build/Modelsim.inc.fdo"
 set NumericStdNoWarnings 1
 
-exec make
-restart -f
-run -all
+nb_sim_run

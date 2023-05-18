@@ -18,5 +18,3 @@ delete wave *
 
 flu_adapter_ports        "$TB_BASE"
 
-restart -f
-run 70 us

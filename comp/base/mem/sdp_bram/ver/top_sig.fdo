@@ -40,8 +40,4 @@ uut_internals "$UUT_PATH"
 
 add wave -divider ""
 
-config wave -signalnamewidth 1
 
-restart -f
-run -a
-wave zoom full

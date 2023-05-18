@@ -29,6 +29,4 @@ uut_internals "$UUT_PATH" ""
 
 config wave -signalnamewidth 1
 
-restart -f
-run 250 us
-wave zoom full
+

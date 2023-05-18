@@ -23,7 +23,3 @@ add wave -noupdate -label CLK -color magenta $TB_PATH/clk
 blk_xor8x12
 add wave -noupdate -color orange $TB_PATH/D_8x12
 
-restart -f
-run 1500 ns
-
-wave zoomrange 0 1000ns

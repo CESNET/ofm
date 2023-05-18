@@ -20,7 +20,3 @@ st   STATUS /testbench/DUT_U/VHDL_DUT_U
 #int  INT    /testbench/DUT_U/VHDL_DUT_U
 #int  FSM_INT /testbench/DUT_U/VHDL_DUT_U/
 
-config wave -signalnamewidth 1
-
-restart -f
-run -all

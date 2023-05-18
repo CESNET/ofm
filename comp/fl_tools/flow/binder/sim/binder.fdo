@@ -25,4 +25,4 @@ set PACKAGES "$OFM_PATH/comp/mi_tools/pkg/mi32_pkg.vhd"
 
 source "$FIRMWARE_BASE/build/Modelsim.inc.fdo"
 
-source $SIG_FILE
+nb_sim_run 3us

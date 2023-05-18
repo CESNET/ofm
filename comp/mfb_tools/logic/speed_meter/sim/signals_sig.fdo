@@ -23,5 +23,3 @@ add_wave /testbench/uut/*
 #rx   "$UUT_PATH"
 #sig  "$UUT_PATH"
 
-restart -f
-run 1 us

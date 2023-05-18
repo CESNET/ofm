@@ -23,9 +23,3 @@ delete wave *
 
 all $TB_PATH
 
-restart -f
-run 1 us
-
-config wave -signalnamewidth 1
-
-wave zoom full

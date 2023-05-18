@@ -18,5 +18,3 @@ delete wave *
 
 blk_FL_DEC IFC
 
-restart -f
-run 1 us

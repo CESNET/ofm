@@ -22,8 +22,3 @@ mi32 TX TX "$COMP_PATH"
 
 add_wave "-noupdate -group { internal } -hex"  $COMP_PATH/*
 
-config wave -signalnamewidth 1
-
-restart -f
-run -a
-wave zoom full

@@ -20,6 +20,3 @@ blk_MFB_TRANSFORMER_RX
 add wave -divider "Output interface"
 blk_MFB_TRANSFORMER_TX
 
-restart -f
-run 2 us
-wave zoomrange 0 400ns

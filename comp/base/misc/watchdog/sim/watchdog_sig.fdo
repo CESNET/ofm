@@ -44,5 +44,3 @@ add wave -noupdate -hex -label drd             $TB_PATH/drd
 add wave -noupdate -hex -label ardy            $TB_PATH/ardy
 add wave -noupdate -hex -label drdy            $TB_PATH/drdy
 
-restart -f
-run 2 us

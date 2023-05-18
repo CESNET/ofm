@@ -22,7 +22,3 @@ all mi_int_i $TB_PATH/axi2mi_i/mi_int_i
 all cc_int_i $TB_PATH/axi2mi_i/cc_int_i
 all AXICC2AVST $TB_PATH/pcie_axicc2avst_i
 
-restart -f
-run 2 us
-
-wave zoomrange 0 1000ns

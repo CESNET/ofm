@@ -20,5 +20,3 @@ add wave -noupdate -label base_clk $TB_BASE/clk
 
 blk_FL_RXBUFFER "$TB_BASE" "$FL_RXBUFFER_PATH"
 
-restart -f
-run 5 us

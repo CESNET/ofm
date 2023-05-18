@@ -23,5 +23,3 @@ rx  RX  /testbench/DUT_U/VHDL_DUT_U
 tx  TX  /testbench/DUT_U/VHDL_DUT_U
 inter INTER /testbench/DUT_U/VHDL_DUT_U/dut 
 
-restart -f
-run -all

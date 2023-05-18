@@ -33,5 +33,4 @@ if {$SIM_FLAGS(CODE_COVERAGE)} {
    vcover merge final.ucdb final.ucdb actual.ucdb
 }
 
-quit
 

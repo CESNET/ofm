@@ -27,8 +27,3 @@ add_wave "-noupdate -label first_one_b" /testbench/uut/first_one_b
 add_wave "-noupdate -label first_one_or_input" /testbench/uut/first_one_or_input
 add_wave "-noupdate -label first_one_or_output" /testbench/uut/first_one_or_output
 
-restart -f
-run 5 us
-
-wave zoomrange 0 200ns
-

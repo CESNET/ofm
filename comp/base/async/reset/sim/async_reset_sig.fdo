@@ -20,7 +20,4 @@ delete wave *
 
 blk_ASYNC_RESET
 
-restart -f
-run 250 ns
 
-wave zoomrange 0 250ns

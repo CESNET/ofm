@@ -13,5 +13,3 @@ delete wave *
 
 source      "signals.fdo"
 
-restart -f
-run 100 us

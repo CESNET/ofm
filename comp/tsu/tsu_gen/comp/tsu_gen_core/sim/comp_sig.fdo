@@ -31,5 +31,3 @@ add_wave "-noupdate -label TS_ERR 		    " /testbench/TS_ERR
 
 blk_TSU_CV2_CORE "IFC"
 
-restart -f
-run 4 us

@@ -24,5 +24,3 @@ blk_SH_FIFO "IFC"
 blk_SH_FIFO "INT"
 blk_SH_FIFO "FSM"
 
-restart -f
-run 2 us

@@ -21,8 +21,3 @@ delete wave *
 add wave -noupdate -label RESET -color magenta $TB_PATH/reset
 add wave -noupdate -label CLK -color magenta $TB_PATH/clk
 blk_STATS
-
-restart -f
-run 10010000ns
-
-wave zoomrange 0 10010005ns

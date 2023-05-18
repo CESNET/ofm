@@ -21,6 +21,4 @@ source "$FIRMWARE_BASE/build/Modelsim.inc.fdo"
 puts "Std Arith Warnings - Disabled"
 set  StdArithNoWarnings 1
 
-exec make
-restart -f
-run -all
+nb_sim_run

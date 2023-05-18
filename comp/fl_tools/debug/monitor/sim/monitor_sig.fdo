@@ -29,6 +29,3 @@ FL_MONITOR_RX
 FL_MONITOR_INT
 FL_MONITOR_MI32
 
-
-restart -f
-run 10 us

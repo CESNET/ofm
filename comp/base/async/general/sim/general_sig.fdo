@@ -20,7 +20,3 @@ delete wave *
 
 blk_GENERAL
 
-restart -f
-run 1000 ns
-
-wave zoomrange 0 700ns

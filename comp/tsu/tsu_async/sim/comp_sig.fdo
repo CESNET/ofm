@@ -34,5 +34,3 @@ blk_TSU_ASYNC "IFC"
 
 blk_TSU_CV2 "IFC"
 
-restart -f
-run 40 us

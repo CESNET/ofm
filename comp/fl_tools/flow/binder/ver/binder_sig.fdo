@@ -25,5 +25,3 @@ blk_FL_BINDER "ALIGN_FRAME" 0
 blk_FL_BINDER "NFIFO2FIFO"
 blk_FL_BINDER "DATA_TRANSFORMER"
 
-restart -f
-run -all

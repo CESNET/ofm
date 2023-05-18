@@ -38,5 +38,3 @@ blk_FL_BINDER "SIMPLE_BINDER"
 # blk_FL_BINDER "DATA_TRANSFORMER"
 blk_FL_BINDER "ONLY_TESTS"
 
-restart -f
-run 3 us

@@ -21,6 +21,3 @@ add_wave "-noupdate -color red -label CLK"		$COMP_PATH/CLK
 mi MASTER  IN   "$COMP_PATH"
 mi SLAVE   OUT  "$COMP_PATH"
 
-
-restart -f
-run -all

@@ -37,5 +37,3 @@ FL_SWITCH_INPUT
 FL_SWITCH_SHIFT
 FL_SWITCH_OUT
 
-restart -f
-run 10 us

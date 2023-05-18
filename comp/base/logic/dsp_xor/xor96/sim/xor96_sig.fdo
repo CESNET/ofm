@@ -25,7 +25,3 @@ add wave -noupdate -color orange $TB_PATH/D_96
 add wave -noupdate -color orange $TB_PATH/D_2x48
 add wave -noupdate -color orange $TB_PATH/D_4x24
 
-restart -f
-run 1500 ns
-
-wave zoomrange 0 1000ns

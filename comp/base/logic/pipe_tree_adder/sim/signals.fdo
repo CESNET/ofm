@@ -6,13 +6,6 @@
 #
 # $Id$
 
-proc rst { } {
-   exec make
-   restart -f
-   run 250 us
-   wave zoom full
-}
-
 proc uut_internals { PATH GROUP } {
    eval "add wave $GROUP -divider {Synchronization}"
    add_wave "$GROUP -noupdate -hex -label CLK -color yellow"   $PATH/CLK

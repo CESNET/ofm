@@ -25,5 +25,3 @@ mi32   SLAVE    S    "$COMP_PATH"
 
 add wave -divider "MI32 ASYNC signals"
 
-restart -f
-run -all

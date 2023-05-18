@@ -17,6 +17,3 @@ delete wave *
 
 packet_linker PACKET_LINKER /testbench
 
-
-restart -f
-run 8000 ns

@@ -28,5 +28,3 @@ add wave -divider "MERGE internals"
 add wave -divider ""
 merge_internals "$MERGE_N_TO_M_ROTATE_PATH" ""
 
-restart -f
-run 250 us

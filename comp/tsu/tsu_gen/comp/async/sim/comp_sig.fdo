@@ -23,5 +23,3 @@ delete wave *
 
 blk_ASYNC "IFC"
 
-restart -f
-run 1 us

@@ -31,7 +31,4 @@ add wave -divider "TOP internals"
 add wave -divider ""
 top_internals "$TOP_PATH" ""
 
-config wave -signalnamewidth 1
 
-restart -f
-run 250 us

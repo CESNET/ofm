@@ -17,7 +17,3 @@ delete wave *
 all TOP $TB_PATH
 all DUT $TB_PATH/dut_i
 
-restart -f
-run 1 us
-
-wave zoomrange 0 1000ns

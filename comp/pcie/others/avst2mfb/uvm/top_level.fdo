@@ -31,5 +31,4 @@ nb_sim_run
 if {$SIM_FLAGS(CODE_COVERAGE)} {
     coverage save  -code bcefst -verbose actual.ucdb
 }
-quit
 

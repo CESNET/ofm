@@ -18,5 +18,3 @@ set DISCARD_STAT_PATH "testbench/uut"
 blk_DISCARD_STAT_ifc "IFC"
 blk_DISCARD_STAT_ifc "INT"
 
-restart -f
-run 6 us

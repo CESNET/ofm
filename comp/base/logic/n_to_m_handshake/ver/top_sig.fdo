@@ -31,5 +31,3 @@ top_internals "$TOP_PATH" ""
 
 config wave -signalnamewidth 1
 
-restart -f
-run -all

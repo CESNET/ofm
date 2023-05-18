@@ -19,5 +19,3 @@ add_wave "-noupdate -color yellow -label RESET" /testbench/RESET
 add_wave "-noupdate -label ENABLE" /testbench/enable
 add_wave "-noupdate -label DATA" /testbench/data
 
-restart -f
-run 5 us

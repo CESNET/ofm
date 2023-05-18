@@ -24,7 +24,3 @@ add wave -noupdate -label DI $TB_PATH/u2_di
 add wave -noupdate -label ADDR $TB_PATH/u2_addr
 add wave -noupdate -label ENABLE $TB_PATH/u2_enable
 
-restart -f
-run 10000 ns
-
-wave zoomrange 0 1000ns

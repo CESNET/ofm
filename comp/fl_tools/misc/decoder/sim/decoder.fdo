@@ -18,4 +18,4 @@ set COMPONENTS [list \
 
 source "$FIRMWARE_BASE/build/Modelsim.inc.fdo"
 
-source $SIG_FILE
+nb_sim_run 1us

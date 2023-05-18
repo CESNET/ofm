@@ -22,7 +22,3 @@ add wave -noupdate -label IN_CLK -color magenta $TB_PATH/in_clk
 add wave -noupdate -label OUT_CLK -color magenta $TB_PATH/out_clk
 blk_STREAM
 
-restart -f
-run 1000ns
-
-wave zoomrange 0 1000ns

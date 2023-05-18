@@ -22,5 +22,3 @@ delete wave *
 blk_STATUS_UNIT_OTHER 
 blk_STATUS_UNIT 
 
-restart -f
-run 20000 ns

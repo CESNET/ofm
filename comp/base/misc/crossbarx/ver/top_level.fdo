@@ -55,6 +55,4 @@ eval "add wave -divider {}"
 
 config wave -signalnamewidth 1
 
-restart -f
-run -a
-wave zoom full
+nb_sim_run

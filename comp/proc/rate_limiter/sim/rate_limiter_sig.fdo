@@ -23,7 +23,3 @@ add wave -noupdate -label CLK    -color magenta $TB_PATH/CLK
 
 blk_rate_limiter
 
-restart -f
-run 3 us
-
-wave zoomrange 0 1000ns

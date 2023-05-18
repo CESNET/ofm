@@ -53,6 +53,3 @@ add wave -divider "TX"
 TX "$COMP_PATH"
 
 # window
-restart -f
-run 100 ns
-wave zoomrange 0 94ns

@@ -31,5 +31,4 @@ add wave -divider "FIFO_N1 internals"
 add wave -divider ""
 fifo_n1_internals "$FIFO_N1_PATH" ""
 
-restart -f
-run 4 us
+

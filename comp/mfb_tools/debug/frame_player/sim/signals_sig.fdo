@@ -21,5 +21,4 @@ mi32 "$UUT_PATH"
 tx   "$UUT_PATH"
 sig  "$UUT_PATH"
 
-restart -f
-run 5 us
+

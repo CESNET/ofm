@@ -28,7 +28,4 @@ add_wave "-group {testbench} -noupdate -hex" $TB_PATH/fifo
 #all cc_int_i $TB_PATH/axi2mi_i/cc_int_i
 #all AXICC2AVST $TB_PATH/pcie_axicc2avst_i
 
-restart -f
-run -all
-
 wave zoomrange 0 1000ns

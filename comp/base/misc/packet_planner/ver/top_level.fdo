@@ -34,4 +34,3 @@ puts "Numeric Std Warnings - Disabled"
 set NumericStdNoWarnings 1
 
 nb_sim_run
-quit

@@ -6,13 +6,6 @@
 #
 # $Id$
 
-proc rst { } {
-   exec make
-   restart -f
-   run 250 us
-   wave zoom full
-}
-
 proc tb_internals { PATH GROUP } {
    eval "add wave $GROUP -divider {TB internals}"
 

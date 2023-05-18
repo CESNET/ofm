@@ -22,7 +22,3 @@ add wave -noupdate -label RESET -color magenta $TB_PATH/reset
 add wave -noupdate -label CLK -color magenta $TB_PATH/clk
 blk_PIPE
 
-restart -f
-run 200ns
-
-wave zoomrange 0 205ns

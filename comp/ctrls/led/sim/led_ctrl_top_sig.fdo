@@ -19,7 +19,3 @@ delete wave *
 
 blk_LED_CTRL_TOP\{ \}
 
-restart -f
-run 100 ms
-
-wave zoom full

@@ -31,5 +31,3 @@ add wave -divider "N_ONE internals"
 add wave -divider ""
 n_one_internals "$N_ONE_PATH" ""
 
-restart -f
-run 250 us

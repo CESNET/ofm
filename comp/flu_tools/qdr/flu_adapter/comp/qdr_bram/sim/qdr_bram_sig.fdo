@@ -18,5 +18,3 @@ delete wave *
 
 qdr_bram_ports        "$TB_BASE"
 
-restart -f
-run 5 us

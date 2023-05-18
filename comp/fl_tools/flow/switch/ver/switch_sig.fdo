@@ -25,5 +25,3 @@ tx  TX  //testbench/DUT_U/VHDL_DUT_U
 #internal  INTERNAL  //testbench/DUT_U/VHDL_DUT_U/gen_when_inum_in_word_non0/inst_word_non0
 #internal  INTERNAL  //testbench/DUT_U/VHDL_DUT_U/gen_when_inum_in_word0/inst_word0
 
-restart -f
-run -all

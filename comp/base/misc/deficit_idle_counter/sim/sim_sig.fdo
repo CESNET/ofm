@@ -27,9 +27,4 @@ add wave -divider "Signals"
 all TB_ALL  $TB_PATH
 all COMP_ALL $TB_PATH/uut
 
-restart -f
-run 200 us
 
-config wave -signalnamewidth 1
-
-wave zoom full

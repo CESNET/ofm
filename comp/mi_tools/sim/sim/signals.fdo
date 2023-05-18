@@ -42,6 +42,3 @@ add wave  -label -noupdate "vector_ardy" /testbench/vector_ardy
 add wave  -label -noupdate "vector_drdy" /testbench/vector_drdy
 
 
-restart -f
-run 3us
-

@@ -32,7 +32,6 @@ puts "Std Arith Warnings - Disabled"
 set  StdArithNoWarnings 1
 
 # File with signals
-source $SIG_FILE
-
+nb_sim_run
 #reports
 #coverage report -html -htmldir cov_html -instance /testbench/DUT_U -source -details -assert -directive -cvg -code bcefst -verbose -threshL 50 -threshH 90

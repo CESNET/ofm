@@ -17,6 +17,3 @@ delete wave *
 
 fl_fork FL_FORK /testbench
 
-
-restart -f
-run 3000 ns

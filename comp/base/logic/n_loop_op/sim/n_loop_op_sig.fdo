@@ -31,5 +31,4 @@ add wave -divider "N_LOOP_OP internals"
 add wave -divider ""
 n_loop_op_internals "$N_LOOP_OP_PATH" ""
 
-restart -f
-run 250 us
+

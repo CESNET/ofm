@@ -23,7 +23,3 @@ blk_SH_REG_BASE $SH_REG_BASE_PATH
 blk_UUT $UUT_PATH
 #blk_FSM $FSM_PATH
 
-restart -f
-run  10 us
-#run 30 ms
-

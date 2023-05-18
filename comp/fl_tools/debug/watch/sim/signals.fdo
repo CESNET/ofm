@@ -68,5 +68,3 @@
    add_wave "-noupdate -hex -label mux_in" /testbench/uut/mux_in
    add_wave "-noupdate -hex -label test" /testbench/uut/test
 
-   restart -f
-   run 3 us
