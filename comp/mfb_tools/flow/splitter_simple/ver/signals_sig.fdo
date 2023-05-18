@@ -6,9 +6,6 @@
 #
 
 source "./signals.fdo"
-exec make
-view wave
-delete wave *
 
 add wave -divider "MFB_SPLITTER_SIMPLE"
 add_wave "-noupdate -color yellow -label RESET"   /testbench/RESET

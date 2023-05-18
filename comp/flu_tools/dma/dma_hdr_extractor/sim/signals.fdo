@@ -35,9 +35,6 @@ proc TX {PATH} {
     add_wave "-noupdate -hex -label TX_DST_RDY"  $PATH/TX_DST_RDY
 }
 
-# exec make
-view wave
-delete wave *
 
 # Layout
 add wave -divider ""

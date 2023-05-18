@@ -15,10 +15,6 @@ set TB_ROOT	"/testbench"
 source "signals.fdo"
 
 
-exec make
-view wave
-delete wave *
-
 blk_STATUS_UNIT_OTHER 
 blk_STATUS_UNIT 
 

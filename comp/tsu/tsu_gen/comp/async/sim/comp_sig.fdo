@@ -16,10 +16,5 @@ set ASYNC_PATH       "/testbench/uut/"
 # Files with signals
 source "$ASYNC_BASE/sim/signals.fdo"
 
-
-exec make
-view wave
-delete wave *
-
 blk_ASYNC "IFC"
 

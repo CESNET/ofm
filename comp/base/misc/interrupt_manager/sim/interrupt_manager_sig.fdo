@@ -10,10 +10,6 @@
 # Paths
 set TB_PATH "/testbench"
 
-exec make
-view wave
-delete wave *
-
 add wave -divider "Clock and Reset"
 add_wave "-hex -label CLK"   /testbench/clk
 add_wave "-hex -label RESET" /testbench/reset

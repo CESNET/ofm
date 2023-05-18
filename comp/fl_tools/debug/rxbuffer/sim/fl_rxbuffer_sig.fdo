@@ -11,10 +11,6 @@ set TB_BASE                "/testbench"
 
 source      "signals.fdo"
 
-exec make
-view wave
-delete wave *
-
 add wave -noupdate -label reset $TB_BASE/reset
 add wave -noupdate -label base_clk $TB_BASE/clk
 

@@ -12,10 +12,6 @@ set TB_PATH   "/testbench"
 
 source  "signals.fdo"
 
-exec make
-view wave
-delete wave *
-
 add wave -divider ""
 add_wave "-group { testbench } -noupdate -hex"   $TB_PATH/*
 

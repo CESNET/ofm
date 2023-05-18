@@ -8,9 +8,6 @@
 #
 
 source "./signals.fdo"
-exec make
-view wave
-delete wave *
 
 write_part  "Write part"                /testbench/uut
 read_part   "Read part"                 /testbench/uut

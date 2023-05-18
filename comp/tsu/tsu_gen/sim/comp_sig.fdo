@@ -12,11 +12,6 @@ set TSU_GEN_PATH  "/testbench/uut"
 # Files with signals
 source "$TSU_GEN_BASE/sim/signals.fdo"
 
-
-exec make
-view wave
-delete wave *
-
 add wave -noupdate -label RESET /testbench/reset
 add wave -noupdate -label CLK /testbench/clk
 add wave -noupdate -label MI32_RESET /testbench/mi32_reset

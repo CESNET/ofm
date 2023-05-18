@@ -7,10 +7,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 
-exec make
-view wave
-delete wave *
-
 add wave -divider "TESTBENCH"
 add_wave "-noupdate -label MASK"	/testbench/mask
 add_wave "-noupdate -label FIRST_ONE_ONEHOT" /testbench/first_one_onehot

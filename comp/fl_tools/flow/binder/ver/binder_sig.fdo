@@ -10,9 +10,6 @@
 source "../sim/signals.fdo"
 set FL_BINDER_PATH         "/testbench/DUT_U/VHDL_DUT_U"
 
-exec make
-view wave
-delete wave *
 
 blk_FL_BINDER "IFC"
 

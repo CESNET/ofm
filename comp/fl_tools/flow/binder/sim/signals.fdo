@@ -6,9 +6,6 @@
 #
 # $Id$
 
-   view wave
-   delete wave *
-
 proc blk_FL_BINDER { PARAM {UNIT_ID 0} } {
    global FL_BINDER_PATH
    set BASE "$FL_BINDER_PATH"

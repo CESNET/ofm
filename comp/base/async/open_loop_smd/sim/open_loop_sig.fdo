@@ -14,10 +14,6 @@ set OPEN_LOOP_PATH   "/testbench/uut"
 # include signals
 source      "signals.fdo"
 
-exec make
-view wave
-delete wave *
-
 blk_OPEN_LOOP
 
 

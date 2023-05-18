@@ -9,10 +9,6 @@
 set TB_PATH   "/testbench"
 set MOD_PATH  "/testbench/uut"
 
-exec make
-view wave
-delete wave *
-
 add wave -divider "Common interface"
 add wave -noupdate -hex -label CLK          $MOD_PATH/CLK
 add wave -noupdate -hex -label RESET        $MOD_PATH/RESET

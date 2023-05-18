@@ -7,9 +7,6 @@
 # $Id$
 #
 
-view wave
-delete wave *
-
 proc blk_DISCARD_ifc { PARAM } {
    global DISCARD_PATH
 

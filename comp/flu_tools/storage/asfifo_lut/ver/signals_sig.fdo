@@ -11,9 +11,6 @@
 
 
 source "./signals.fdo"
-exec make
-view wave
-delete wave *
 
 add wave -divider "FLU_ASFIFO"  
 add_wave "-noupdate -color yellow -label RX_RESET"   /testbench/RX_RESET

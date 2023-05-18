@@ -27,4 +27,4 @@ source "$FIRMWARE_BASE/build/Modelsim.inc.fdo"
 set NumericStdNoWarnings 1
 
 # File with signals
-nb_sim_run 1000 us
+nb_sim_run 1000us

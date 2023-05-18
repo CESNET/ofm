@@ -11,11 +11,6 @@
 set TB_PATH             "/testbench"
 set UUT_PATH            "/testbench/uut"
 
-# Global file with signals
-exec make
-view wave
-delete wave *
-
 # Common interface
 add_wave "-noupdate -label reset"   /testbench/uut/reset
 add_wave "-noupdate -label clk"     /testbench/uut/clk

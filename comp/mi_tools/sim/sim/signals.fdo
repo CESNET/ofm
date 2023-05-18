@@ -9,9 +9,6 @@
 #
 
 
-view wave
-delete wave *
-
 add wave -label "CLK" -noupdate /testbench/clk
 #add wave -label "RESET" -noupdate /testbench/reset
 

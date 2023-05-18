@@ -12,9 +12,5 @@ set FL_DEC_BASE            "/testbench/uut"
 
 source      "signals.fdo"
 
-exec make
-view wave
-delete wave *
-
 blk_FL_DEC IFC
 

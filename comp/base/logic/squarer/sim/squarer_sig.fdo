@@ -14,10 +14,6 @@ source $SIGNALS_FILE
 set TB_PATH                   "/testbench"
 set SQUARER_PATH              "$TB_PATH/uut"
 
-exec make
-view wave
-delete wave *
-
 add_wave "-noupdate -label clk    -color yellow    " $TB_PATH/clk
 
 add wave -divider "*****************************"

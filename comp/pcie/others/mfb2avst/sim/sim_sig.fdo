@@ -10,10 +10,6 @@ set TB_PATH          "/testbench"
 # include signals
 source "signals.fdo"
 
-exec make
-view wave
-delete wave *
-
 all TOP $TB_PATH/uut
 all AVST2AXICQ $TB_PATH/pcie_avst2axicq_i
 all AXI2MI $TB_PATH/axi2mi_i

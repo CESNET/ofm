@@ -7,9 +7,5 @@
 # $Id$
 #
 
-exec make
-view wave
-delete wave *
-
 source      "signals.fdo"
 

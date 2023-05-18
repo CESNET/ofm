@@ -6,9 +6,6 @@
 #
 # $Id$
 
-   view wave
-   delete wave *
-
 proc blk_CAM { } {
    global CAM_PATH
    

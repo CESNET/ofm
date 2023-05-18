@@ -14,10 +14,6 @@ set URAM_PATH   "/testbench/uut"
 # include signals
 source      "signals.fdo"
 
-exec make
-view wave
-delete wave *
-
 add wave -noupdate -label RESET -color magenta $TB_PATH/rst
 add wave -noupdate -label CLK -color magenta $TB_PATH/clk
 blk_URAM

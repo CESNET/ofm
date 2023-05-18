@@ -10,10 +10,6 @@ set UUT_PATH   "/testbench/uut"
 
 source			"signals.fdo"
 
-exec make
-view wave
-delete wave *
-
 #add_wave "-noupdate -color yellow -label RST" /testbench/RESET
 #add_wave "-noupdate -color yellow -label CLK" /testbench/CLK
 

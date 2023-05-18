@@ -6,15 +6,6 @@
 
 # restart function
 # (can be used when only VHDL code has been modified)
-proc rst { } {
-   exec make
-   restart -f
-   run -a
-   wave zoom full
-}
-
-view wave
-delete wave *
 
 add wave -divider "PACKER_PLANNER"
 add_wave "-noupdate -color yellow -label RESET"   /testbench/RESET

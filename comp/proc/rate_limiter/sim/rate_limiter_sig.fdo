@@ -14,10 +14,6 @@ set RATE_LIMITER_PATH   "/testbench/uut"
 # Include signals
 source      "signals.fdo"
 
-exec make
-view wave
-delete wave *
-
 add wave -noupdate -label RESET  -color magenta $TB_PATH/RESET
 add wave -noupdate -label CLK    -color magenta $TB_PATH/CLK
 

@@ -8,9 +8,6 @@
 #
 
 source "./signals.fdo"
-exec make
-view wave
-delete wave *
 
 add_wave    "-noupdate -label reset"    /testbench/reset
 write_part  "Write part"                /testbench/uut

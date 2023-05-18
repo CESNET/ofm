@@ -6,9 +6,6 @@
 #
 
 source "./signals.fdo"
-exec make
-view wave
-delete wave *
 
 add_wave "-noupdate -color orange -label DMA_CLK"     /testbench/DMA_CLK
 add_wave "-noupdate -color orange -label DMA_RESET"   /testbench/DMA_RESET

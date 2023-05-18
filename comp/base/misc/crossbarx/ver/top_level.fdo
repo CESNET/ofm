@@ -4,13 +4,6 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-proc rst { } {
-    exec make
-    restart -f
-    run -a
-    wave zoom full
-}
-
 set MAKEFILE_GEN "true"
 
 set FIRMWARE_BASE    "../../../../.."
@@ -31,10 +24,6 @@ set StdArithNoWarnings 1
 set TB_PATH   "/testbench"
 set TEST_PATH "/testbench/tester_i"
 set UUT_PATH  "/testbench/uut"
-
-exec make
-view wave
-delete wave *
 
 eval "add wave -divider {}"
 add_wave "-noupdate -hex -color yellow" $TB_PATH/CLK

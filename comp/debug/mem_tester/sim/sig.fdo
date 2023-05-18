@@ -13,10 +13,6 @@ set TB_PATH   "/testbench"
 
 source  "signals.fdo"
 
-exec make
-view wave
-delete wave *
-
 core_logic  CORE    $UUT_PATH
 amm         AMM     $UUT_PATH
 mi          MI      $UUT_PATH/mem_tester_mi_i

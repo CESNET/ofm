@@ -6,10 +6,6 @@
 
 source "./signals.fdo"
 
-exec make
-view wave
-delete wave *
-
 add wave -divider "SENSOR_INTERFACE"
 add_wave "-noupdate -color yellow -label RESET" /testbench/RESET
 add_wave "-noupdate -color yellow -label CLK"   /testbench/CLK

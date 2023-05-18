@@ -16,11 +16,6 @@ set TSU_CV2_CORE_PATH       "/testbench/uut/"
 # Files with signals
 source "$TSU_CV2_CORE_BASE/sim/signals.fdo"
 
-
-exec make
-view wave
-delete wave *
-
 add wave -noupdate -label TSU_CORE_RESET /testbench/tsu_core_reset
 add wave -noupdate -label TSU_CORE_CLK /testbench/tsu_core_clk
 add wave -noupdate -label MI32_RESET /testbench/mi32_reset

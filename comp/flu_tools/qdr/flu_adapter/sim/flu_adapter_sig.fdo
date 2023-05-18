@@ -12,9 +12,5 @@ set TB_BASE          "/testbench"
 
 source	             "signals.fdo"
 
-exec make
-view wave
-delete wave *
-
 flu_adapter_ports        "$TB_BASE"
 

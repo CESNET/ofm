@@ -17,11 +17,6 @@ set FL_MONITOR_PATH     "$UUT_PATH"
 # Include files with signals
 source signals.fdo
 
-
-exec make
-view wave
-delete wave *
-
 add wave -noupdate -label reset /testbench/uut/reset
 add wave -noupdate -label clk /testbench/uut/clk
 

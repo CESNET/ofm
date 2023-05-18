@@ -6,8 +6,6 @@
 #
 # $Id$
 
-   view wave
-   delete wave *
 
 add_wave "-noupdate -hex -label CLK" /testbench/RX_CLK
 add_wave "-noupdate -hex -label RESET"       /testbench/RX_RESET

@@ -8,20 +8,10 @@
 
 # Paths
 #
-proc rst { } {
-    exec make
-    restart -f
-    run -a
-}
-
 set TB_PATH   "/testbench"
 set UUT_PATH  "/testbench/uut"
 
 source  "signals.fdo"
-
-exec make
-view wave
-delete wave *
 
 add wave -divider ""
 add wave -divider "Testbench"

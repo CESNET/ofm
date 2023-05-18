@@ -13,10 +13,6 @@ source "signals.fdo"
 puts "Numeric Std Warnings - Disabled"
 set NumericStdNoWarnings 1
 
-exec make
-view wave
-delete wave *
-
 all TOP $TB_PATH/uut
 all MEMX $TB_PATH/uut/memx_i
 all  testbench $TB_PATH

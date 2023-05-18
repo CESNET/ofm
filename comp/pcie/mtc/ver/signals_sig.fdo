@@ -9,10 +9,6 @@ set UUT_PATH  "/testbench"
 
 source  "signals.fdo"
 
-exec make
-view wave
-delete wave *
-
 add wave -divider "TB internals"
 tb_internals "$TB_PATH" ""
 

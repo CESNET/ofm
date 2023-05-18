@@ -5,10 +5,6 @@
 
 set MI32_ASYNC_PATH "/testbench/uut_i"
 
-exec make
-view wave
-delete wave *
-
 source "../ver/signals.fdo"
 
 add wave -divider "MI32 ASYNC"

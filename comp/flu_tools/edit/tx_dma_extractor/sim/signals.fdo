@@ -40,9 +40,6 @@ proc IFC_OUT {PATH} {
    add_wave "-noupdate -hex -label IFC_DST_RDY"  $PATH/IFC_DST_RDY
 }
 
-# exec make
-view wave
-delete wave *
 
 # Layout
 add wave -divider ""

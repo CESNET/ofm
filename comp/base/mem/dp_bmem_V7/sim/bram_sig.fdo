@@ -14,10 +14,6 @@ set BRAM_PATH   "/testbench/uut"
 # include signals
 source      "signals.fdo"
 
-exec make
-view wave
-delete wave *
-
 add wave -noupdate -label RESET -color magenta $TB_PATH/reset
 add wave -noupdate -label CLK -color magenta $TB_PATH/clk
 blk_BRAM

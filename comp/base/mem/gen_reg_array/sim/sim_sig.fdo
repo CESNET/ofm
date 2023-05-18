@@ -10,10 +10,6 @@ set TB_PATH          "/testbench"
 # include signals
 source "signals.fdo"
 
-exec make
-view wave
-delete wave *
-
 all TOP $TB_PATH
 all DUT $TB_PATH/dut_i
 

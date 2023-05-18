@@ -10,10 +10,6 @@
 # Paths
 set TB_PATH             "/testbench"
 
-exec make
-view wave
-delete wave *
-
 add wave -divider "BIN -> 1fN"
 add wave -noupdate -label ADDR $TB_PATH/u1_addr
 add wave -noupdate -label DO $TB_PATH/u1_do

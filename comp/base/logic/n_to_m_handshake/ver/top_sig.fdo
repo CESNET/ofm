@@ -10,10 +10,6 @@ set TB_PATH   "/testbench"
 
 source  "signals.fdo"
 
-exec make
-view wave
-delete wave *
-
 add wave -divider ""
 add wave -divider "TB internals"
 add wave -divider ""
