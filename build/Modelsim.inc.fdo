@@ -110,15 +110,22 @@ proc CompileMod {FNAME OPT} {
     }
 }
 
-proc nb_sim_run {} {
-    global env SIG_FILE
-
+proc nb_sim_restart { {run_params "-all"} } {
     if {[catch {exec make}]} {
     }
+
+    # Dont add same signals again
+    restart -f
+    run $run_params
+}
+
+proc nb_sim_run { {run_params "-all"} } {
+    global env SIG_FILE
 
     # Check if it is a Jenkins run; if so, don't add any waves
     if {![info exists env(BUILD_TAG)]} {
         if {[info exists SIG_FILE]} {
+            view wave
             source $SIG_FILE
         }
     } else {
@@ -132,7 +139,7 @@ proc nb_sim_run {} {
         set StdArithNoWarnings 1
     }
     restart -f
-    run -all
+    run $run_params
 }
 
 
