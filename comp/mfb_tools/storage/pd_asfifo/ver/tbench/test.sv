@@ -90,10 +90,8 @@ program TEST (
 
    task enableTestEnvironment();
       mfb_driver.setEnabled();
-      mfb_monitor.setEnabled();
       mfb_responder.setEnabled();
       fd_driver.setEnabled();
-      fd_monitor.setEnabled();
       fd_responder.setEnabled();
       scoreboard.setEnabled();
    endtask
@@ -118,7 +116,8 @@ program TEST (
 
    task test1();
       $write("\n\n############ TEST CASE 1 ############\n\n");
-      enableTestEnvironment();
+      mfb_monitor.setEnabled();
+      fd_monitor.setEnabled();
       fd_generator.setEnabled(TRANSACTION_COUNT);
       generator.setEnabled(TRANSACTION_COUNT);
       wait(!generator.enabled);
@@ -127,9 +126,10 @@ program TEST (
    endtask
 
    initial begin
-      resetDesign();
       createGeneratorEnvironment(FRAME_SIZE_MAX, FRAME_SIZE_MIN);
       createEnvironment();
+      enableTestEnvironment();
+      resetDesign();
       test1();
       $write("Verification finished successfully!\n");
       $stop();

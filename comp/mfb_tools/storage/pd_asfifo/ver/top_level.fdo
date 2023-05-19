@@ -25,8 +25,9 @@ set SIG_FILE              "./signals_sig.fdo"
 set COMPONENTS [list \
     [list "DUT"      $DUT_BASE       "FULL"]\
     [list "DUT_VER"  $DUT_VER_BASE   "FULL"]\
-]
 
+]
+set SIM_FLAGS(EXTRA_VFLAGS) "-voptargs=-nomlopt"
 # Disable Code Coverage
 set CODE_COVERAGE "false"
 
