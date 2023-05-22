@@ -6,6 +6,7 @@
 
 
 
+set FIRMWARE_BASE    "../../../.."
 set OFM_PATH         "../../../.."
 set UUT_BASE         ".."
 
