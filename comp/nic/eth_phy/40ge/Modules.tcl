@@ -13,8 +13,6 @@ set ASYNC_RESET_BASE   "$OFM_PATH/comp/base/async/reset/"
 set OPEN_LOOP_BASE     "$OFM_PATH/comp/base/async/open_loop"
 set BUS_HANDSHAKE_BASE "$OFM_PATH/comp/base/async/bus_handshake"
 
-lappend SRCS(CONSTR_VIVADO) [list "$ENTITY_BASE/phy_40ge_gty.xdc" SCOPED_TO_REF phy_40ge PROCESSING_ORDER NORMAL]
-
 lappend COMPONENTS  [list "40GE_V7_PCS"         $PCS_BASE           "FULL"]
 lappend COMPONENTS  [list "40GE_V7_PMA"         $PMA_BASE           "FULL"]
 lappend COMPONENTS  [list "MGMT"                $MGMT_BASE          "FULL"]
