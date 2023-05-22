@@ -354,7 +354,7 @@ begin
    RXD_O        <= rxd; -- rxd_aligned;
    RXD_CE       <= RXD_VALID(0);
    BLK_ERR_CNTR <= BLK_ERR_CNTR_i;
-   RX_OK        <= linkstatus_i and valid_code;
+   RX_OK        <= linkstatus_i and (and valid_code);
 
 end structural;
 

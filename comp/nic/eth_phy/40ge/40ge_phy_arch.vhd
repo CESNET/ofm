@@ -25,7 +25,6 @@ architecture structural of phy_40ge is
     signal pma_tx_reset_async: std_logic;
     signal pma_rx_reset      : std_logic;
     signal pma_rx_reset_async: std_logic;
-    signal xlgmii_clk        : std_logic;
     
     signal txd               : std_logic_vector(66*4-1 downto 0);
     signal txready           : std_logic_vector( 3 downto 0);
@@ -102,7 +101,7 @@ begin
         MI_DRD        => MI_DRD,
         MI_ARDY       => MI_ARDY,
         MI_DRDY       => MI_DRDY,
-        PCSCLK        => xlgmii_clk,
+        PCSCLK        => XLGMII_CLK,
         PMACLK        => pma_rxclk,
         -- PMA & PMD status/control
         PMA_LPBCK     => pma_lpbck,
@@ -180,7 +179,7 @@ begin
     )
     port map (
         RESET_PCS  => pcs_tx_reset,
-        CLK        => xlgmii_clk,
+        CLK        => XLGMII_CLK,
         XLGMII_TXD => XLGMII_TXD,
         XLGMII_TXC => XLGMII_TXC,
         --
@@ -208,7 +207,7 @@ begin
     )
     port map (
         RESET_PCS     => pcs_rx_reset,
-        CLK           => xlgmii_clk,
+        CLK           => XLGMII_CLK,
         XLGMII_RXD    => XLGMII_RXD,
         XLGMII_RXC    => XLGMII_RXC,
         -- PMA interface
@@ -302,7 +301,7 @@ begin
     --           Clocking, resets
     -- =========================================================================    
     force_pma_reset  <= RESET or pma_reset;
-    xlgmii_clk       <= pma_txclk;
+    XLGMII_CLK       <= pma_txclk;
     
     -- PCS reset sync - MAC/XLGMII RX side
     pcs_rx_rst_async <=  RESET or (not pma_txclk_stable) or pcs_reset or (not pma_rxreset_done);
@@ -311,7 +310,7 @@ begin
         TWO_REG => false
     )
     port map(
-        CLK        => xlgmii_clk,
+        CLK        => XLGMII_CLK,
         ASYNC_RST  => pcs_rx_rst_async,
         OUT_RST(0) => pcs_rx_reset
     );
@@ -323,7 +322,7 @@ begin
         TWO_REG => false
     )
     port map(
-        CLK        => xlgmii_clk,
+        CLK        => XLGMII_CLK,
         ASYNC_RST  => pcs_tx_rst_async,
         OUT_RST(0) => pcs_tx_reset
     );
@@ -355,7 +354,6 @@ begin
     -- =========================================================================
     --           Others
     -- =========================================================================
-    MII_CLK    <= xlgmii_clk;
     CLK_STABLE <= pma_txclk_stable;
     REFCLK_OUT <= refclk_i;
     
