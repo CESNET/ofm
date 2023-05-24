@@ -13,9 +13,7 @@ lappend COMPONENTS [ list "ASYNC_OPEN_LOOP" $OPEN_LOOP_BASE "FULL" ]
 lappend COMPONENTS [ list "ASYNC_RESET"     $ARESET_BASE    "FULL" ]
 lappend COMPONENTS [ list "BLOCK LOCK"      $BLK_LOCK_BASE  "FULL" ]
 
-lappend MOD "$ENTITY_BASE/gty_40ge.xci"
 lappend MOD "$ENTITY_BASE/gt_init.vhd"
-lappend MOD "$ENTITY_BASE/gty_40ge.xci"
 
 # Top level
 lappend MOD "$ENTITY_BASE/pma_xlaui_gty.vhd"
