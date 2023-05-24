@@ -282,15 +282,15 @@ architecture FULL of PACKET_PLANNER is
     signal gshk_wr      : std_logic_vector(PLANNED_PKTS-1 downto 0);
     signal gshk_full    : std_logic;
     signal gshk_afull   : std_logic;
-    signal gshk_do      : std_logic_vector(STREAMS*PKTS*OUT_PKT_WIDTH-1 downto 0);
-    signal gshk_rd      : std_logic_vector(STREAMS*PKTS-1 downto 0);
-    signal gshk_empty   : std_logic_vector(STREAMS*PKTS-1 downto 0);
+    signal gshk_do      : std_logic_vector(PLANNED_PKTS*OUT_PKT_WIDTH-1 downto 0);
+    signal gshk_rd      : std_logic_vector(PLANNED_PKTS-1 downto 0);
+    signal gshk_empty   : std_logic_vector(PLANNED_PKTS-1 downto 0);
 
     signal gshk_di_arr  : slv_array_t     (PLANNED_PKTS-1 downto 0)(OUT_PKT_WIDTH-1 downto 0);
-    signal gshk_do_arr  : slv_array_t     (STREAMS*PKTS-1 downto 0)(OUT_PKT_WIDTH-1 downto 0);
-    signal gshk_do_meta : slv_array_t     (STREAMS*PKTS-1 downto 0)(METADATA_WIDTH-1 downto 0);
-    signal gshk_do_len  : slv_array_t     (STREAMS*PKTS-1 downto 0)(log2(PKT_SIZE+1)-1 downto 0);
-    signal gshk_do_addr : slv_array_t     (STREAMS*PKTS-1 downto 0)(log2(SPACE_SIZE)-1 downto 0);
+    signal gshk_do_arr  : slv_array_t     (PLANNED_PKTS-1 downto 0)(OUT_PKT_WIDTH-1 downto 0);
+    signal gshk_do_meta : slv_array_t     (PLANNED_PKTS-1 downto 0)(METADATA_WIDTH-1 downto 0);
+    signal gshk_do_len  : slv_array_t     (PLANNED_PKTS-1 downto 0)(log2(PKT_SIZE+1)-1 downto 0);
+    signal gshk_do_addr : slv_array_t     (PLANNED_PKTS-1 downto 0)(log2(SPACE_SIZE)-1 downto 0);
 
     -- =====================================================================
 
@@ -771,7 +771,7 @@ begin
             gshk_di <= slv_array_ser(gshk_di_arr);
 
             -- Generate TX
-            gshk_do_arr <= slv_array_deser(gshk_do,STREAMS*PKTS);
+            gshk_do_arr <= slv_array_deser(gshk_do, PLANNED_PKTS);
             gshk_do_gen : for e in 0 to PLANNED_PKTS-1 generate
                 signal tmp_meta : std_logic_vector(METADATA_WIDTH-1 downto 0);
                 signal tmp_len  : std_logic_vector(log2(PKT_SIZE+1)-1 downto 0);
