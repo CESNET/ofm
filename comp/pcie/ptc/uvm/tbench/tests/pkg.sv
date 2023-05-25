@@ -71,8 +71,13 @@ package test;
     parameter CLK_DMA_PERIOD        = 5ns;
     parameter RESET_CLKS            = 10;
     parameter META_WIDTH            = 0;
+    parameter TR_MIN                = 100;
+    parameter TR_MAX                = 300;
+    parameter ONLY_READ             = 0;
+    parameter TEST_NAME             = "test::ex_test";
 
     `include "sequence.sv"
     `include "test.sv"
+    `include "test_slow_dma_down.sv"
 endpackage
 `endif
