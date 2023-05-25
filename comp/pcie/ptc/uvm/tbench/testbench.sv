@@ -10,6 +10,11 @@ import test::*;
 
 module testbench;
 
+        //TESTS
+    typedef test::ex_test ex_test;
+
+    typedef test::slow_dma_down_test slow_dma_down_test;
+
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // Signals
     logic CLK     = 0;
@@ -95,7 +100,7 @@ module testbench;
         uvm_config_db#(int)            ::set(null, "", "recording_detail", 0);
         uvm_config_db#(uvm_bitstream_t)::set(null, "", "recording_detail", 0);
 
-        run_test();
+        run_test(TEST_NAME);
         $stop(2);
     end
 

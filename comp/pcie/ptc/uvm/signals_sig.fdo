@@ -28,5 +28,7 @@ all RC_HDR_DEPARSER_0 /testbench/DUT_U/VHDL_DUT_U/ptc_i/pcie2dma_hdr_transform_i
 all RC_HDR_DEPARSER_1 /testbench/DUT_U/VHDL_DUT_U/ptc_i/pcie2dma_hdr_transform_i/rx_deparse_gen(1)/pcie_rc_hdr_deparser_i
 #all MFB_ASFIFOX /testbench/DUT_U/VHDL_DUT_U/ptc_i/dma_up_ports_g(0)/up_mfb_asynch_fifo_i
 #all MVB_ASFIFOX /testbench/DUT_U/VHDL_DUT_U/ptc_i/dma_up_ports_g(0)/up_mvb_asynch_fifo_i
+add_wave "-group { ST FIFO     } -noupdate -hex" "testbench/DUT_U/VHDL_DUT_U/ptc_i/down_storage_fifo_gen/down_storage_fifo_i/*"
+add_wave "-group { ST FIFOCORE } -noupdate -hex" "testbench/DUT_U/VHDL_DUT_U/ptc_i/down_storage_fifo_gen/down_storage_fifo_i/mfb_main_fifo_i/*"
 
 config wave -signalnamewidth 1

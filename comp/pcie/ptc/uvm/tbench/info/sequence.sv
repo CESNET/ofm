@@ -11,7 +11,7 @@ class sequence_simple #(MRRS) extends uvm_sequence #(uvm_ptc_info::sequence_item
 
     rand int unsigned transaction_count;
     int unsigned transaction_count_min = 100;
-    int unsigned transaction_count_max = 100;
+    int unsigned transaction_count_max = 300;
 
     constraint c1 {transaction_count inside {[transaction_count_min : transaction_count_max]};}
 
@@ -36,7 +36,7 @@ class sequence_simple_write extends uvm_sequence #(uvm_ptc_info::sequence_item);
 
     rand int unsigned transaction_count;
     int unsigned transaction_count_min = 100;
-    int unsigned transaction_count_max = 100;
+    int unsigned transaction_count_max = 300;
 
     constraint c1 {transaction_count inside {[transaction_count_min : transaction_count_max]};}
 
@@ -61,7 +61,7 @@ class sequence_simple_read #(MRRS) extends uvm_sequence #(uvm_ptc_info::sequence
 
     rand int unsigned transaction_count;
     int unsigned transaction_count_min = 100;
-    int unsigned transaction_count_max = 100;
+    int unsigned transaction_count_max = 300;
 
     constraint c1 {transaction_count inside {[transaction_count_min : transaction_count_max]};}
 
@@ -81,9 +81,9 @@ class sequence_simple_read #(MRRS) extends uvm_sequence #(uvm_ptc_info::sequence
 
 endclass
 
-class sequence_lib_info #(MRRS) extends uvm_sequence_library#(uvm_ptc_info::sequence_item);
-    `uvm_object_param_utils(uvm_ptc_info::sequence_lib_info #(MRRS))
-    `uvm_sequence_library_utils(uvm_ptc_info::sequence_lib_info #(MRRS))
+class sequence_lib_info #(MRRS, ONLY_READ) extends uvm_sequence_library#(uvm_ptc_info::sequence_item);
+    `uvm_object_param_utils(uvm_ptc_info::sequence_lib_info #(MRRS, ONLY_READ))
+    `uvm_sequence_library_utils(uvm_ptc_info::sequence_lib_info #(MRRS, ONLY_READ))
 
     function new(string name = "");
       super.new(name);
@@ -91,8 +91,10 @@ class sequence_lib_info #(MRRS) extends uvm_sequence_library#(uvm_ptc_info::sequ
     endfunction
 
     virtual function void init_sequence();
-        this.add_sequence(uvm_ptc_info::sequence_simple#(MRRS)::get_type());
-        this.add_sequence(uvm_ptc_info::sequence_simple_write::get_type());
+        if (ONLY_READ == 0) begin
+            this.add_sequence(uvm_ptc_info::sequence_simple#(MRRS)::get_type());
+            this.add_sequence(uvm_ptc_info::sequence_simple_write::get_type());
+        end
         this.add_sequence(uvm_ptc_info::sequence_simple_read#(MRRS)::get_type());
     endfunction
 endclass

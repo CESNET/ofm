@@ -78,8 +78,8 @@ class ex_test extends uvm_test;
     endtask
 
     task run_seq(int unsigned index);
-        virt_seq #(MRRS, MPS) m_vseq;
-        m_vseq = virt_seq #(MRRS, MPS)::type_id::create($sformatf("m_vseq%0d", index));
+        virt_seq #(MRRS, MPS, ONLY_READ) m_vseq;
+        m_vseq = virt_seq #(MRRS, MPS, ONLY_READ)::type_id::create($sformatf("m_vseq%0d", index));
         m_vseq.randomize();
         m_vseq.start(m_env.m_env_up[index].m_sequencer);
         event_vseq[index] = 1'b0;
