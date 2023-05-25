@@ -1,5 +1,5 @@
 ############################################################
-# rate_limiter.py: Rate Limiter class
+# rate_limiter.py: Rate Limiter component class
 # Copyright (C) 2022 CESNET z. s. p. o.
 # Author(s): Tomas Hak <xhakto01@vut.cz>
 ############################################################
@@ -7,32 +7,37 @@
 import nfb
 
 
-class RateLimiter:
+class RateLimiter(nfb.BaseComp):
     """Rate Limiter component class
 
     This class mediates the HW component address space and communication protocol.
     """
 
+    # DevTree compatible string
+    DT_COMPATIBLE = "cesnet,ofm,rate_limiter"
+
     # MI ADDRESS SPACE
-    STATUS  = 0x00
-    SEC_LEN = 0x04
-    INT_LEN = 0x08
-    INT_CNT = 0x0c
-    FREQ    = 0x10
-    SPEED   = 0x14
+    _REG_STATUS  = 0x00
+    _REG_SEC_LEN = 0x04
+    _REG_INT_LEN = 0x08
+    _REG_INT_CNT = 0x0c
+    _REG_FREQ    = 0x10
+    _REG_SPEED   = 0x14
 
     # STATUS REGISTER FLAGS
-    SR_IDLE_FLAG    = 0x01
-    SR_CONF_FLAG    = 0x02
-    SR_RUN_FLAG     = 0x04
-    SR_PTR_RST_FLAG = 0x08
+    _SR_IDLE_FLAG    = 0x01
+    _SR_CONF_FLAG    = 0x02
+    _SR_RUN_FLAG     = 0x04
+    _SR_PTR_RST_FLAG = 0x08
 
-    def __init__(self, dev, node):
+    def __init__(self, **kwargs):
         """Constructor"""
 
         try:
-            self.comp = dev.comp_open(node)
-            self.name = node.path + '/' + node.name
+            super().__init__(**kwargs)
+            self._name = "Rate Limiter"
+            if "index" in kwargs:
+                self._name += " " + str(kwargs.get("index"))
         except:
             print("Error while opening Rate Limiter component!")
 
@@ -55,27 +60,27 @@ class RateLimiter:
     def get_frequency(self):
         """Retrieve frequency in Hz"""
 
-        return self.comp.read32(self.FREQ) * 1_000_000
+        return self._comp.read32(self._REG_FREQ) * 1_000_000
 
     def print_cfg(self):
         """Print current configuration"""
 
         try:
-            status     = self.comp.read32(self.STATUS)
-            sec_len    = self.comp.read32(self.SEC_LEN)
-            max_speeds = self.comp.read32(self.INT_CNT)
-            frequency  = self.comp.read32(self.FREQ)
+            status     = self._comp.read32(self._REG_STATUS)
+            sec_len    = self._comp.read32(self._REG_SEC_LEN)
+            max_speeds = self._comp.read32(self._REG_INT_CNT)
+            frequency  = self._comp.read32(self._REG_FREQ)
 
             status_s     = "Idle"
-            if (status == self.SR_CONF_FLAG):
+            if (status == self._SR_CONF_FLAG):
                 status_s = "Configuration"
-            elif (status == self.SR_RUN_FLAG):
+            elif (status == self._SR_RUN_FLAG):
                 status_s = "Running traffic shaping"
 
-            speed_reg     = self.SPEED
+            speed_reg     = self._REG_SPEED
             output_speeds = []
             while (len(output_speeds) < max_speeds):
-                speed = self.comp.read32(speed_reg)
+                speed = self._comp.read32(speed_reg)
                 valid = speed & (1 << 31)
                 speed &= (1 << 31) - 1
                 if (valid == 0):
@@ -83,54 +88,54 @@ class RateLimiter:
                 output_speeds.append(self._conv_Bscn2Gbs(speed, sec_len, frequency))
                 speed_reg += 4
 
-            print("\"{}\"".format(self.name))
+            print("\"{}\"".format(self._name))
             print("Status:          {0:08x} ({1})".format(status, status_s))
             print("Section length:  {} clock cycles".format(sec_len))
-            print("Interval length: {} sections".format(self.comp.read32(self.INT_LEN)))
+            print("Interval length: {} sections".format(self._comp.read32(self._REG_INT_LEN)))
             print("Interval count:  {} intervals".format(max_speeds))
             print("Frequency:       {} MHz".format(frequency))
             print("Output speed:    {} Gb/s".format(output_speeds))
         except:
-            print("{}: Error while reading configuration!".format(self.name))
+            print("{}: Error while reading configuration!".format(self._name))
 
 
     def configure(self, cfg):
         """Configure component"""
 
         try:
-            frequency  = self.comp.read32(self.FREQ)
+            frequency  = self._comp.read32(self._REG_FREQ)
             if (cfg["section_length"] >= frequency * 1_000_000):
-                print("{}: Error - Section too long!".format(self.name))
+                print("{}: Error - Section too long!".format(self._name))
                 return
 
-            self.comp.write32(self.STATUS, self.SR_CONF_FLAG)
-            self.comp.write32(self.SEC_LEN, cfg["section_length"])
-            self.comp.write32(self.INT_LEN, cfg["interval_length"])
+            self._comp.write32(self._REG_STATUS, self._SR_CONF_FLAG)
+            self._comp.write32(self._REG_SEC_LEN, cfg["section_length"])
+            self._comp.write32(self._REG_INT_LEN, cfg["interval_length"])
 
-            max_speeds = self.comp.read32(self.INT_CNT)
+            max_speeds = self._comp.read32(self._REG_INT_CNT)
             available  = max_speeds
-            speed_reg  = self.SPEED
+            speed_reg  = self._REG_SPEED
             for speed in cfg["output_speed"]:
                 if (available == 0):
-                    print("{0}: Insufficient number of speed regs in the design ({1})! Ignoring speeds over the limit...".format(self.name, max_speeds))
+                    print("{0}: Insufficient number of speed regs in the design ({1})! Ignoring speeds over the limit...".format(self._name, max_speeds))
                     break
-                self.comp.write32(speed_reg, self._conv_Gbs2Bscn(speed, cfg["section_length"], frequency))
+                self._comp.write32(speed_reg, self._conv_Gbs2Bscn(speed, cfg["section_length"], frequency))
                 speed_reg += 4
                 available -= 1
         except:
-            print("{}: Error while writing configuration!".format(self.name))
+            print("{}: Error while writing configuration!".format(self._name))
         finally:
-            self.comp.write32(self.STATUS, 0)
+            self._comp.write32(self._REG_STATUS, 0)
 
     def start_shaping(self, ptr_reset=False):
         """Start traffic shaping"""
 
         if (ptr_reset):
-            self.comp.write32(self.STATUS, self.SR_PTR_RST_FLAG)
-        self.comp.write32(self.STATUS, self.SR_RUN_FLAG)
+            self._comp.write32(self._REG_STATUS, self._SR_PTR_RST_FLAG)
+        self._comp.write32(self._REG_STATUS, self._SR_RUN_FLAG)
 
     def stop_shaping(self):
         """Stop traffic shaping"""
 
-        self.comp.write32(self.STATUS, 0)
+        self._comp.write32(self._REG_STATUS, 0)
 
