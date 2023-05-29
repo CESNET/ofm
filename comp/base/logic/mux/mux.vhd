@@ -41,7 +41,7 @@ begin
 
    slv_array_data_in <= slv_array_to_deser(DATA_IN, MUX_WIDTH, DATA_WIDTH);
    slv_array_data_in_extg: for i in 0 to MUX_WIDTH-1 generate
-      slv_array_data_in_ext(0 to MUX_WIDTH-1)(i) <= slv_array_data_in(i);
+      slv_array_data_in_ext(i) <= slv_array_data_in(i);
    end generate;
 
    gen_muxg: if MUX_WIDTH /= 1 generate
