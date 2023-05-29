@@ -39,7 +39,9 @@ for root, dirs, files in os.walk(comp_path):
 # build directory tree and copy necessary files
 os.chdir(tmp_dir)
 for init in init_files:
-    shutil.copytree(os.path.dirname(init), init[init.find("ofm") : init.find("sw")])
+    init_dirname = os.path.dirname(init)
+    init_subdirname = init_dirname[init_dirname.find("sw")+3:]
+    shutil.copytree(init_dirname, init[init.find("ofm") : init.find("sw")] + init_subdirname)
 
 # create empty init files in subdirectories
 for root, dirs, files in os.walk("ofm"):
