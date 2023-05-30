@@ -15,58 +15,32 @@ class virt_seq#(USR_REGIONS, USR_REGION_SIZE, USR_BLOCK_SIZE, USR_ITEM_WIDTH, CQ
     localparam USER_META_WIDTH = 24 + $clog2(PKT_SIZE_MAX+1) + $clog2(CHANNELS);
 
     uvm_reset::sequence_start                            m_reset;
-    uvm_logic_vector_array::sequence_lib#(CQ_ITEM_WIDTH) m_packet_lib;
-    uvm_dma_ll_info::sequence_lib#(CHANNELS)             m_info;
 
-    uvm_dma_ll::reg_sequence#(CHANNELS)                                                                                    m_reg;
-    uvm_sequence#(uvm_mfb::sequence_item #(USR_REGIONS, USR_REGION_SIZE, USR_BLOCK_SIZE, USR_ITEM_WIDTH, USER_META_WIDTH)) m_pcie[CHANNELS];
-    uvm_mfb::sequence_lib_tx#(USR_REGIONS, USR_REGION_SIZE, USR_BLOCK_SIZE, USR_ITEM_WIDTH, USER_META_WIDTH)               m_pcie_lib[CHANNELS];
-    uvm_dma_size::sequence_lib #(1, PKT_SIZE_MAX/4)                                                                        m_size_lib[CHANNELS];
+    reg_sequence#(CQ_ITEM_WIDTH, PKT_SIZE_MAX, PCIE_LEN_MIN)                                                               m_reg;
+    uvm_sequence#(uvm_mfb::sequence_item #(USR_REGIONS, USR_REGION_SIZE, USR_BLOCK_SIZE, USR_ITEM_WIDTH, USER_META_WIDTH)) m_pcie;
+    uvm_mfb::sequence_lib_tx#(USR_REGIONS, USR_REGION_SIZE, USR_BLOCK_SIZE, USR_ITEM_WIDTH, USER_META_WIDTH)               m_pcie_lib;
     uvm_phase phase;
+    logic done = 0;
 
-    virtual function void init(uvm_dma_ll::regmodel#(CHANNELS) m_regmodel, uvm_phase phase);
+    virtual function void init(uvm_dma_regs::regmodel#(CHANNELS) m_regmodel, uvm_dma_ll_info::watchdog #(CHANNELS) m_watch_dog, uvm_phase phase);
 
         m_reset = uvm_reset::sequence_start::type_id::create("rst_seq");
 
-        m_packet_lib = uvm_logic_vector_array::sequence_lib#(CQ_ITEM_WIDTH)::type_id::create("m_packet_lib");
-        m_packet_lib.init_sequence();
-        m_packet_lib.cfg = new();
-        m_packet_lib.cfg.array_size_set(PCIE_LEN_MIN, PCIE_LEN_MAX);
-        m_packet_lib.min_random_count = 150;
-        m_packet_lib.max_random_count = 300;
-        // m_packet_lib.min_random_count = 2000;
-        // m_packet_lib.max_random_count = 3000;
+        m_reg             = reg_sequence#(CQ_ITEM_WIDTH, PKT_SIZE_MAX, PCIE_LEN_MIN)::type_id::create("m_reg");
+        m_reg.m_regmodel  = m_regmodel;
+        m_reg.m_watch_dog = m_watch_dog;
 
-        m_info = uvm_dma_ll_info::sequence_lib#(CHANNELS)::type_id::create("m_info");
-        m_info.init_sequence();
-        m_info.min_random_count = 150;
-        m_info.max_random_count = 200;
+        m_pcie_lib = uvm_mfb::sequence_lib_tx#(USR_REGIONS, USR_REGION_SIZE, USR_BLOCK_SIZE, USR_ITEM_WIDTH, USER_META_WIDTH)::type_id::create("m_pcie_lib");
+        m_pcie_lib.init_sequence();
+        m_pcie = m_pcie_lib;
 
-        m_reg            = uvm_dma_ll::reg_sequence#(CHANNELS)::type_id::create("m_reg");
-        m_reg.m_regmodel = m_regmodel;
-
-        for (int chan = 0; chan < CHANNELS; chan++) begin
-            m_pcie_lib[chan]  = uvm_mfb::sequence_lib_tx#(USR_REGIONS, USR_REGION_SIZE, USR_BLOCK_SIZE, USR_ITEM_WIDTH, USER_META_WIDTH)::type_id::create($sformatf("m_pcie_lib%0d", chan));
-            m_pcie_lib[chan].init_sequence();
-            m_pcie[chan] = m_pcie_lib[chan];
-
-            m_size_lib[chan]  = uvm_dma_size::sequence_lib#(1, PKT_SIZE_MAX/4)::type_id::create($sformatf("m_size_lib%0d", chan));
-            m_size_lib[chan].init_sequence();
-        end
         this.phase = phase;
     endfunction
 
-    virtual task run_mfb(int unsigned index);
+    virtual task run_mfb();
         forever begin
-            assert(m_pcie[index].randomize());
-            m_pcie[index].start(p_sequencer.m_pcie[index]);
-        end
-    endtask
-
-    virtual task run_size(int unsigned index);
-        forever begin
-            assert(m_size_lib[index].randomize());
-            m_size_lib[index].start(p_sequencer.m_packet.m_size[index]);
+            assert(m_pcie.randomize());
+            m_pcie.start(p_sequencer.m_pcie);
         end
     endtask
 
@@ -76,7 +50,6 @@ class virt_seq#(USR_REGIONS, USR_REGION_SIZE, USR_BLOCK_SIZE, USR_ITEM_WIDTH, CQ
     endtask
 
     function void pre_randomize();
-         m_packet_lib.randomize();
          m_reg.randomize();
     endfunction
 
@@ -85,33 +58,18 @@ class virt_seq#(USR_REGIONS, USR_REGION_SIZE, USR_BLOCK_SIZE, USR_ITEM_WIDTH, CQ
             run_reset();
             begin
                 #(200ns)
-                m_reg.start(null);
+                m_reg.start(p_sequencer.m_packet);
+                done = 1'b1;
             end
         join_none
 
         #(200ns);
 
-        for (int chan = 0; chan < CHANNELS; chan++) begin
-            fork
-                automatic int index = chan;
-                run_mfb(index);
-            join_none
-        end
-
-        for (int chan = 0; chan < CHANNELS; chan++) begin
-            fork
-                automatic int index = chan;
-                run_size(index);
-            join_none
-        end
-
         fork
-            m_packet_lib.start(p_sequencer.m_packet.m_data);
-            forever begin
-                m_info.randomize();
-                m_info.start(p_sequencer.m_packet.m_info);
-            end
-        join_any
+            run_mfb();
+        join_none
+
+        wait(done);
 
     endtask
 endclass

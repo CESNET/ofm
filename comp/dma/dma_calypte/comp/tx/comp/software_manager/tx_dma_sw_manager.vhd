@@ -1,7 +1,7 @@
 -- tx_dma software_manager.vhd: software manager which serves as an interface
--- between MI bus (software side) and the RX DMA system as a whole. Provides MI configuration
+-- between MI bus (software side) and the TX DMA system as a whole. Provides MI configuration
 -- registers.
--- Copyright (c) 2022 CESNET z.s.p.o.
+-- Copyright (c) 2023 CESNET z.s.p.o.
 -- Author(s): Vladislav Valek  <xvalek14@vutbr.cz>
 
 library ieee;
@@ -32,10 +32,10 @@ generic(
     DISC_PKT_CNT_WIDTH : natural := 64;
     DISC_BTS_CNT_WIDTH : natural := 64;
 
-    -- value is a product of MFB_REGIONS,MFB_REGION_SIZE, MFB_BLOCK_SIZE and MFB_ITEM_WIDTH
-    MFB_WIDTH          : natural := 256;
-    -- depth of the internal buffers in the CHANNEL_CORE
-    DMA_FIFO_DEPTH : natural := 512;
+    -- Width of the pointer to data and DMA header buffers
+    -- signify depth of the internal buffers in the CHANNEL_CORE
+    DATA_POINTER_WIDTH    : natural := 14;
+    DMA_HDR_POINTER_WIDTH : natural := 9;
 
     -- * Maximum size of a packet (in bytes)
     -- * Defines width of Packet length signals.
@@ -87,16 +87,13 @@ port (
     -- general vector of all channels with their activity
     ENABLED_CHAN         : out std_logic_vector(CHANNELS-1 downto 0);
 
-    -- status signals indicate how many data bytes are stored in the buffer of each channel
-    DATA_FIFO_STATUS_CHAN : in std_logic_vector(log2(CHANNELS) -1 downto 0);
-    DATA_FIFO_STATUS_DATA : in std_logic_vector(log2((DMA_FIFO_DEPTH*MFB_WIDTH)/8) downto 0);
-    DATA_FIFO_STATUS_WE   : in std_logic;
-
-    -- status interface of the header FIFO for each channel, indicates how many headers (items) are
-    -- still stored
-    HDR_FIFO_STATUS_CHAN : in std_logic_vector(log2(CHANNELS) -1 downto 0);
-    HDR_FIFO_STATUS_DATA : in std_logic_vector(log2(DMA_FIFO_DEPTH) downto 0);
-    HDR_FIFO_STATUS_WE   : in std_logic
+    -- Hardware pointers writing interface
+    HDP_WR_CHAN     : in  std_logic_vector(log2(CHANNELS)-1 downto 0);
+    HDP_WR_DATA     : in  std_logic_vector(DATA_POINTER_WIDTH-1 downto 0);
+    HDP_WR_EN       : in  std_logic;
+    HHP_WR_CHAN     : in  std_logic_vector(log2(CHANNELS)-1 downto 0);
+    HHP_WR_DATA     : in  std_logic_vector(DMA_HDR_POINTER_WIDTH-1 downto 0);
+    HHP_WR_EN       : in  std_logic
 );
 end entity;
 
@@ -114,14 +111,18 @@ architecture FULL of TX_DMA_SW_MANAGER is
     constant R_CONTROL         : natural :=  0;
     -- DMA Channel Status
     constant R_STATUS          : natural :=  1;
-    -- Data FIFO Status
-    constant R_DFS             : natural :=  4;
-    -- Header FIFO Status
-    constant R_HFS             : natural :=  5;
-    -- Data FIFO depth
-    constant R_DFD             : natural := 22;
-    -- Header FIFO depth
-    constant R_HFD             : natural := 23;
+    -- Software Descriptor Pointer
+    constant R_SDP             : natural :=  4;
+    -- Software Header Pointer
+    constant R_SHP             : natural :=  5;
+    -- Hardware Descriptor Pointer
+    constant R_HDP             : natural :=  6;
+    -- Hardware Header Pointer
+    constant R_HHP             : natural :=  7;
+    -- Mask for SDP and HDP determining Descriptor Buffer size
+    constant R_DPM             : natural := 22;
+    -- Mask for SHP and HHP determining Header Buffer size
+    constant R_HPM             : natural := 23;
     -- Counter for total number of packets sent from the DMA Module (bits 31:0)
     constant R_SENT_PKTS_LOW   : natural := 24;
     -- Counter for total number of packets sent from the DMA Module (bits 63:32)
@@ -142,8 +143,6 @@ architecture FULL of TX_DMA_SW_MANAGER is
     -- reserved register numbers
     constant RSV_2  : natural := 2;
     constant RSV_3  : natural := 3;
-    constant RSV_6  : natural := 6;
-    constant RSV_7  : natural := 7;
     constant RSV_8  : natural := 8;
     constant RSV_9  : natural := 9;
     constant RSV_10 : natural := 10;
@@ -168,10 +167,10 @@ architecture FULL of TX_DMA_SW_MANAGER is
     R_STATUS          => 16#04#,
     RSV_2             => 16#08#,
     RSV_3             => 16#0C#,
-    R_DFS             => 16#10#,
-    R_HFS             => 16#14#,
-    RSV_6             => 16#18#,
-    RSV_7             => 16#1C#,
+    R_SDP             => 16#10#,
+    R_SHP             => 16#14#,
+    R_HDP             => 16#18#,
+    R_HHP             => 16#1C#,
     RSV_8             => 16#20#,
     RSV_9             => 16#24#,
     RSV_10            => 16#28#,
@@ -186,8 +185,8 @@ architecture FULL of TX_DMA_SW_MANAGER is
     RSV_19            => 16#4C#,
     RSV_20            => 16#50#,
     RSV_21            => 16#54#,
-    R_DFD             => 16#58#,
-    R_HFD             => 16#5C#,
+    R_DPM             => 16#58#,
+    R_HPM             => 16#5C#,
     R_SENT_PKTS_LOW   => 16#60#,
     R_SENT_PKTS_HIGH  => 16#64#,
     R_SENT_BYTES_LOW  => 16#68#,
@@ -208,10 +207,10 @@ architecture FULL of TX_DMA_SW_MANAGER is
         R_STATUS          => FALSE,
         RSV_2             => FALSE,
         RSV_3             => FALSE,
-        R_DFS             => FALSE,
-        R_HFS             => FALSE,
-        RSV_6             => FALSE,
-        RSV_7             => FALSE,
+        R_SDP             => FALSE,
+        R_SHP             => FALSE,
+        R_HDP             => FALSE,
+        R_HHP             => FALSE,
         RSV_8             => FALSE,
         RSV_9             => FALSE,
         RSV_10            => FALSE,
@@ -226,8 +225,8 @@ architecture FULL of TX_DMA_SW_MANAGER is
         RSV_19            => FALSE,
         RSV_20            => FALSE,
         RSV_21            => FALSE,
-        R_DFD             => FALSE,
-        R_HFD             => FALSE,
+        R_DPM             => FALSE,
+        R_HPM             => FALSE,
         R_SENT_PKTS_LOW   => TRUE,
         R_SENT_PKTS_HIGH  => TRUE,
         R_SENT_BYTES_LOW  => TRUE,
@@ -238,89 +237,17 @@ architecture FULL of TX_DMA_SW_MANAGER is
         R_DISC_BYTES_HIGH => TRUE
         );
 
-    -- Set TRUE in specific register which have a constant value initialized when design is built
-    constant CONST_REGS : b_array_t(REGS-1 downto 0) := (
-        R_CONTROL         => FALSE,
-        R_STATUS          => FALSE,
-        RSV_2             => FALSE,
-        RSV_3             => FALSE,
-        R_DFS             => FALSE,
-        R_HFS             => FALSE,
-        RSV_6             => FALSE,
-        RSV_7             => FALSE,
-        RSV_8             => FALSE,
-        RSV_9             => FALSE,
-        RSV_10            => FALSE,
-        RSV_11            => FALSE,
-        RSV_12            => FALSE,
-        RSV_13            => FALSE,
-        RSV_14            => FALSE,
-        RSV_15            => FALSE,
-        RSV_16            => FALSE,
-        RSV_17            => FALSE,
-        RSV_18            => FALSE,
-        RSV_19            => FALSE,
-        RSV_20            => FALSE,
-        RSV_21            => FALSE,
-        R_DFD             => TRUE,
-        R_HFD             => TRUE,
-        R_SENT_PKTS_LOW   => FALSE,
-        R_SENT_PKTS_HIGH  => FALSE,
-        R_SENT_BYTES_LOW  => FALSE,
-        R_SENT_BYTES_HIGH => FALSE,
-        R_DISC_PKTS_LOW   => FALSE,
-        R_DISC_PKTS_HIGH  => FALSE,
-        R_DISC_BYTES_LOW  => FALSE,
-        R_DISC_BYTES_HIGH => FALSE
-        );
-
-    -- Initializing constant register values
-    constant CONST_REG_VALS : i_array_t(REGS-1 downto 0) := (
-        R_CONTROL         => 0,
-        R_STATUS          => 0,
-        RSV_2             => 0,
-        RSV_3             => 0,
-        R_DFS             => 0,
-        R_HFS             => 0,
-        RSV_6             => 0,
-        RSV_7             => 0,
-        RSV_8             => 0,
-        RSV_9             => 0,
-        RSV_10            => 0,
-        RSV_11            => 0,
-        RSV_12            => 0,
-        RSV_13            => 0,
-        RSV_14            => 0,
-        RSV_15            => 0,
-        RSV_16            => 0,
-        RSV_17            => 0,
-        RSV_18            => 0,
-        RSV_19            => 0,
-        RSV_20            => 0,
-        RSV_21            => 0,
-        R_DFD             => (MFB_WIDTH*DMA_FIFO_DEPTH)/8,
-        R_HFD             => DMA_FIFO_DEPTH,
-        R_SENT_PKTS_LOW   => 0,
-        R_SENT_PKTS_HIGH  => 0,
-        R_SENT_BYTES_LOW  => 0,
-        R_SENT_BYTES_HIGH => 0,
-        R_DISC_PKTS_LOW   => 0,
-        R_DISC_PKTS_HIGH  => 0,
-        R_DISC_BYTES_LOW  => 0,
-        R_DISC_BYTES_HIGH => 0
-        );
-
-    -- Write enable for software (set to False for read-only registers)
+    -- Write enable (set to False for read-only registers)
     -- Must be set to True, when the coresponding index in STROBE_EN is True
     constant WR_EN : b_array_t(REGS-1 downto 0) := (
         R_CONTROL         => TRUE  or STROBE_EN(R_CONTROL        ),
         R_STATUS          => FALSE or STROBE_EN(R_STATUS         ),
         RSV_2             => FALSE or STROBE_EN(RSV_2            ),
         RSV_3             => FALSE or STROBE_EN(RSV_3            ),
-        R_DFS             => FALSE or STROBE_EN(R_DFS            ),
-        R_HFS             => FALSE or STROBE_EN(R_HFS            ),
-        RSV_6             => FALSE or STROBE_EN(RSV_6            ),
-        RSV_7             => FALSE or STROBE_EN(RSV_7            ),
+        R_SDP             => TRUE  or STROBE_EN(R_SDP            ),
+        R_SHP             => TRUE  or STROBE_EN(R_SHP            ),
+        R_HDP             => FALSE or STROBE_EN(R_HDP            ),
+        R_HHP             => FALSE or STROBE_EN(R_HHP            ),
         RSV_8             => FALSE or STROBE_EN(RSV_8            ),
         RSV_9             => FALSE or STROBE_EN(RSV_9            ),
         RSV_10            => FALSE or STROBE_EN(RSV_10           ),
@@ -335,8 +262,8 @@ architecture FULL of TX_DMA_SW_MANAGER is
         RSV_19            => FALSE or STROBE_EN(RSV_19           ),
         RSV_20            => FALSE or STROBE_EN(RSV_20           ),
         RSV_21            => FALSE or STROBE_EN(RSV_21           ),
-        R_DFD             => FALSE or STROBE_EN(R_DFD            ),
-        R_HFD             => FALSE or STROBE_EN(R_HFD            ),
+        R_DPM             => FALSE or STROBE_EN(R_DPM            ),
+        R_HPM             => FALSE or STROBE_EN(R_HPM            ),
         R_SENT_PKTS_LOW   => TRUE  or STROBE_EN(R_SENT_PKTS_LOW  ),
         R_SENT_PKTS_HIGH  => TRUE  or STROBE_EN(R_SENT_PKTS_HIGH ),
         R_SENT_BYTES_LOW  => TRUE  or STROBE_EN(R_SENT_BYTES_LOW ),
@@ -354,10 +281,10 @@ architecture FULL of TX_DMA_SW_MANAGER is
         R_STATUS          => tsel(WR_EN(R_STATUS         ),1,0) + 1, -- Channel Start/Stop confirmation
         RSV_2             => tsel(WR_EN(RSV_2            ),1,0) + 0,
         RSV_3             => tsel(WR_EN(RSV_3            ),1,0) + 0,
-        R_DFS             => tsel(WR_EN(R_DFS            ),1,0) + 2, -- Channel Start reset + Channel core
-        R_HFS             => tsel(WR_EN(R_HFS            ),1,0) + 2, -- Channel Start reset + Channel core
-        RSV_6             => tsel(WR_EN(RSV_6            ),1,0) + 0,
-        RSV_7             => tsel(WR_EN(RSV_7            ),1,0) + 0,
+        R_SDP             => tsel(WR_EN(R_SDP            ),1,0) + 0,
+        R_SHP             => tsel(WR_EN(R_SHP            ),1,0) + 0,
+        R_HDP             => tsel(WR_EN(R_HDP            ),1,0) + 2, -- Channel Start reset + Start/stop logic of channel core
+        R_HHP             => tsel(WR_EN(R_HHP            ),1,0) + 2, -- Channel Start reset + Start/stop logic of channel core
         RSV_8             => tsel(WR_EN(RSV_8            ),1,0) + 0,
         RSV_9             => tsel(WR_EN(RSV_9            ),1,0) + 0,
         RSV_10            => tsel(WR_EN(RSV_10           ),1,0) + 0,
@@ -372,8 +299,8 @@ architecture FULL of TX_DMA_SW_MANAGER is
         RSV_19            => tsel(WR_EN(RSV_19           ),1,0) + 0,
         RSV_20            => tsel(WR_EN(RSV_20           ),1,0) + 0,
         RSV_21            => tsel(WR_EN(RSV_21           ),1,0) + 0,
-        R_DFD             => tsel(WR_EN(R_DFD            ),1,0) + 0,
-        R_HFD             => tsel(WR_EN(R_HFD            ),1,0) + 0,
+        R_DPM             => tsel(WR_EN(R_DPM            ),1,0) + 0,
+        R_HPM             => tsel(WR_EN(R_HPM            ),1,0) + 0,
         R_SENT_PKTS_LOW   => tsel(WR_EN(R_SENT_PKTS_LOW  ),1,0) + 0,
         R_SENT_PKTS_HIGH  => tsel(WR_EN(R_SENT_PKTS_HIGH ),1,0) + 0,
         R_SENT_BYTES_LOW  => tsel(WR_EN(R_SENT_BYTES_LOW ),1,0) + 0,
@@ -392,10 +319,10 @@ architecture FULL of TX_DMA_SW_MANAGER is
         R_STATUS          => 1 + 1,     -- Channel Start/Stop indication
         RSV_2             => 1 + 0,
         RSV_3             => 1 + 0,
-        R_DFS             => 1 + 1,     -- Channel Stop indication (comparator)
-        R_HFS             => 1 + 1,     -- Channel Stop indication (comparator)
-        RSV_6             => 1 + 0,
-        RSV_7             => 1 + 0,
+        R_SDP             => 1 + 1,     -- Comparator
+        R_SHP             => 1 + 1,     -- Comparator
+        R_HDP             => 1 + 1,     -- Comparator
+        R_HHP             => 1 + 1,     -- Comparator
         RSV_8             => 1 + 0,
         RSV_9             => 1 + 0,
         RSV_10            => 1 + 0,
@@ -410,8 +337,8 @@ architecture FULL of TX_DMA_SW_MANAGER is
         RSV_19            => 1 + 0,
         RSV_20            => 1 + 0,
         RSV_21            => 1 + 0,
-        R_DFD             => 1 + 0,
-        R_HFD             => 1 + 0,
+        R_DPM             => 1 + 0,
+        R_HPM             => 1 + 0,
         R_SENT_PKTS_LOW   => 1 + 0,
         R_SENT_PKTS_HIGH  => 1 + 0,
         R_SENT_BYTES_LOW  => 1 + 0,
@@ -430,10 +357,10 @@ architecture FULL of TX_DMA_SW_MANAGER is
         R_STATUS          => FALSE,
         RSV_2             => FALSE,
         RSV_3             => FALSE,
-        R_DFS             => FALSE,
-        R_HFS             => FALSE,
-        RSV_6             => FALSE,
-        RSV_7             => FALSE,
+        R_SDP             => FALSE,
+        R_SHP             => FALSE,
+        R_HDP             => FALSE,
+        R_HHP             => FALSE,
         RSV_8             => FALSE,
         RSV_9             => FALSE,
         RSV_10            => FALSE,
@@ -448,8 +375,8 @@ architecture FULL of TX_DMA_SW_MANAGER is
         RSV_19            => FALSE,
         RSV_20            => FALSE,
         RSV_21            => FALSE,
-        R_DFD             => FALSE,
-        R_HFD             => FALSE,
+        R_DPM             => FALSE,
+        R_HPM             => FALSE,
         R_SENT_PKTS_LOW   => FALSE,
         R_SENT_PKTS_HIGH  => FALSE,
         R_SENT_BYTES_LOW  => FALSE,
@@ -467,10 +394,10 @@ architecture FULL of TX_DMA_SW_MANAGER is
         R_STATUS          => 1,
         RSV_2             => 0,
         RSV_3             => 0,
-        R_DFS             => log2((DMA_FIFO_DEPTH*MFB_WIDTH)/8) + 1,
-        R_HFS             => log2(DMA_FIFO_DEPTH) + 1,
-        RSV_6             => 0,
-        RSV_7             => 0,
+        R_SDP             => DATA_POINTER_WIDTH,
+        R_SHP             => DMA_HDR_POINTER_WIDTH,
+        R_HDP             => DATA_POINTER_WIDTH,
+        R_HHP             => DMA_HDR_POINTER_WIDTH,
         RSV_8             => 0,
         RSV_9             => 0,
         RSV_10            => 0,
@@ -485,16 +412,88 @@ architecture FULL of TX_DMA_SW_MANAGER is
         RSV_19            => 0,
         RSV_20            => 0,
         RSV_21            => 0,
-        R_DFD             => log2((DMA_FIFO_DEPTH*MFB_WIDTH)/8) + 1,
-        R_HFD             => log2(DMA_FIFO_DEPTH) + 1,
+        R_DPM             => MI_WIDTH,
+        R_HPM             => MI_WIDTH,
         R_SENT_PKTS_LOW   => minimum(MI_WIDTH, RECV_PKT_CNT_WIDTH),
         R_SENT_PKTS_HIGH  => max(0, RECV_PKT_CNT_WIDTH-MI_WIDTH),
         R_SENT_BYTES_LOW  => minimum(MI_WIDTH, RECV_BTS_CNT_WIDTH),
         R_SENT_BYTES_HIGH => max(0, RECV_BTS_CNT_WIDTH-MI_WIDTH),
         R_DISC_PKTS_LOW   => minimum(MI_WIDTH,DISC_PKT_CNT_WIDTH),
-        R_DISC_PKTS_HIGH  => max(0, DISC_PKT_CNT_WIDTH-MI_WIDTH),
+        R_DISC_PKTS_HIGH  => max(0,DISC_PKT_CNT_WIDTH-MI_WIDTH)  ,
         R_DISC_BYTES_LOW  => minimum(MI_WIDTH,DISC_BTS_CNT_WIDTH),
-        R_DISC_BYTES_HIGH => max(0, DISC_BTS_CNT_WIDTH-MI_WIDTH)
+        R_DISC_BYTES_HIGH => max(0,DISC_BTS_CNT_WIDTH-MI_WIDTH)
+        );
+
+    -- Set TRUE in specific register which have a constant value initialized when design is built
+    constant CONST_REGS : b_array_t(REGS-1 downto 0) := (
+        R_CONTROL         => FALSE,
+        R_STATUS          => FALSE,
+        RSV_2             => FALSE,
+        RSV_3             => FALSE,
+        R_SDP             => FALSE,
+        R_SHP             => FALSE,
+        R_HDP             => FALSE,
+        R_HHP             => FALSE,
+        RSV_8             => FALSE,
+        RSV_9             => FALSE,
+        RSV_10            => FALSE,
+        RSV_11            => FALSE,
+        RSV_12            => FALSE,
+        RSV_13            => FALSE,
+        RSV_14            => FALSE,
+        RSV_15            => FALSE,
+        RSV_16            => FALSE,
+        RSV_17            => FALSE,
+        RSV_18            => FALSE,
+        RSV_19            => FALSE,
+        RSV_20            => FALSE,
+        RSV_21            => FALSE,
+        R_DPM             => TRUE,
+        R_HPM             => TRUE,
+        R_SENT_PKTS_LOW   => FALSE,
+        R_SENT_PKTS_HIGH  => FALSE,
+        R_SENT_BYTES_LOW  => FALSE,
+        R_SENT_BYTES_HIGH => FALSE,
+        R_DISC_PKTS_LOW   => FALSE,
+        R_DISC_PKTS_HIGH  => FALSE,
+        R_DISC_BYTES_LOW  => FALSE,
+        R_DISC_BYTES_HIGH => FALSE
+        );
+
+    -- Initializing constant register values
+    constant CONST_REG_VALS : slv_array_t(REGS-1 downto 0)(MI_WIDTH -1 downto 0) := (
+        R_CONTROL         => (others => '0'),
+        R_STATUS          => (others => '0'),
+        RSV_2             => (others => '0'),
+        RSV_3             => (others => '0'),
+        R_SDP             => (others => '0'),
+        R_SHP             => (others => '0'),
+        R_HDP             => (others => '0'),
+        R_HHP             => (others => '0'),
+        RSV_8             => (others => '0'),
+        RSV_9             => (others => '0'),
+        RSV_10            => (others => '0'),
+        RSV_11            => (others => '0'),
+        RSV_12            => (others => '0'),
+        RSV_13            => (others => '0'),
+        RSV_14            => (others => '0'),
+        RSV_15            => (others => '0'),
+        RSV_16            => (others => '0'),
+        RSV_17            => (others => '0'),
+        RSV_18            => (others => '0'),
+        RSV_19            => (others => '0'),
+        RSV_20            => (others => '0'),
+        RSV_21            => (others => '0'),
+        R_DPM             => std_logic_vector(to_unsigned(2**DATA_POINTER_WIDTH -1,MI_WIDTH)),
+        R_HPM             => std_logic_vector(to_unsigned(2**DMA_HDR_POINTER_WIDTH -1,MI_WIDTH)),
+        R_SENT_PKTS_LOW   => (others => '0'),
+        R_SENT_PKTS_HIGH  => (others => '0'),
+        R_SENT_BYTES_LOW  => (others => '0'),
+        R_SENT_BYTES_HIGH => (others => '0'),
+        R_DISC_PKTS_LOW   => (others => '0'),
+        R_DISC_PKTS_HIGH  => (others => '0'),
+        R_DISC_BYTES_LOW  => (others => '0'),
+        R_DISC_BYTES_HIGH => (others => '0')
         );
 
     -- Maximum number of ports for setting width of signals
@@ -595,12 +594,12 @@ architecture FULL of TX_DMA_SW_MANAGER is
     -- =====================================================================
     --  Stop request logic
     -- =====================================================================
-    type stop_fsm_type is (IDLE, WAIT_FOR_REQ_ACK, WAIT_FOR_NULL_STATUS);
+    type stop_fsm_type is (IDLE, WAIT_FOR_REQ_ACK, WAIT_FOR_POINTERS);
     signal stop_fsm_pst : stop_fsm_type;
     signal stop_fsm_nst : stop_fsm_type;
 
     signal stop_chan_ok         : std_logic;
-    signal stop_status_ok       : std_logic;
+    signal stop_ptr_ok          : std_logic;
     signal stop_fsm_channel_reg : std_logic_vector(log2(CHANNELS)-1 downto 0);
     signal stop_fsm_channel     : std_logic_vector(log2(CHANNELS)-1 downto 0);
     signal stop_acked           : std_logic;
@@ -616,15 +615,13 @@ architecture FULL of TX_DMA_SW_MANAGER is
 
 
     -- =====================================================================
-    --  Stop DFS and HFS logic
+    --  Stop HDP and HHP logic
     -- =====================================================================
-    signal comp_dfs_res      : std_logic_vector(1 downto 0);
-    signal comp_hfs_res      : std_logic_vector(1 downto 0);
-    signal stop_dfs_ok_reg   : std_logic;
-    signal stop_hfs_ok_reg   : std_logic;
+    signal comp_hdp_res      : std_logic_vector(1 downto 0);
+    signal comp_hpp_res      : std_logic_vector(1 downto 0);
+    signal stop_hdp_ok_reg   : std_logic;
+    signal stop_hhp_ok_reg   : std_logic;
     -- =====================================================================
-
-
 begin
 
     assert (MI_WIDTH=32)
@@ -789,7 +786,7 @@ begin
 
             -- Connect registers with constant values to the MI, only valid bits
             reg_dob_opt_gen : for e in 0 to RD_PORTS(i)-1 generate
-                reg_dob_opt(i)(e)(RD_WIDTH(i) -1 downto 0) <= std_logic_vector(to_unsigned(CONST_REG_VALS(i),RD_WIDTH(i)));
+                reg_dob_opt(i)(e)(RD_WIDTH(i) -1 downto 0) <= std_logic_vector(resize(unsigned(CONST_REG_VALS(i)),RD_WIDTH(i)));
             end generate;
         end generate;
     end generate;
@@ -810,28 +807,28 @@ begin
     reg_addra(R_STATUS)(0) <= active_chan_reg;
     ------------------------------------
 
-    -- DFS register --------------------
+    -- HDP register --------------------
     -- Reset after DMA Channel Start
-    -- Update by Channel Core module
-    reg_di   (R_DFS)(0) <= (others => '0');
-    reg_we   (R_DFS)(0) <= chan_start_det;
-    reg_addra(R_DFS)(0) <= start_pending_reg_chan;
+    -- Update by Header manager module
+    reg_di   (R_HDP)(0) <= (others => '0');
+    reg_we   (R_HDP)(0) <= chan_start_det;
+    reg_addra(R_HDP)(0) <= start_pending_reg_chan;
 
-    reg_di   (R_DFS)(1) <= std_logic_vector(resize_left(unsigned(DATA_FIFO_STATUS_DATA),MI_WIDTH));
-    reg_we   (R_DFS)(1) <= DATA_FIFO_STATUS_WE;
-    reg_addra(R_DFS)(1) <= DATA_FIFO_STATUS_CHAN;
+    reg_di   (R_HDP)(1) <= std_logic_vector(resize_left(unsigned(HDP_WR_DATA),MI_WIDTH));
+    reg_we   (R_HDP)(1) <= HDP_WR_EN;
+    reg_addra(R_HDP)(1) <= HDP_WR_CHAN;
     ------------------------------------
 
-    -- HFS register --------------------
+    -- HHP register --------------------
     -- Reset after DMA Channel Start
-    -- Update by Channel Core module
-    reg_di   (R_HFS)(0) <= (others => '0');
-    reg_we   (R_HFS)(0) <= chan_start_det;
-    reg_addra(R_HFS)(0) <= start_pending_reg_chan;
+    -- Update by Header Manager module
+    reg_di   (R_HHP)(0) <= (others => '0');
+    reg_we   (R_HHP)(0) <= chan_start_det;
+    reg_addra(R_HHP)(0) <= start_pending_reg_chan;
 
-    reg_di   (R_HFS)(1) <= std_logic_vector(resize_left(unsigned(HDR_FIFO_STATUS_DATA),MI_WIDTH));
-    reg_we   (R_HFS)(1) <= HDR_FIFO_STATUS_WE;
-    reg_addra(R_HFS)(1) <= HDR_FIFO_STATUS_CHAN;
+    reg_di   (R_HHP)(1) <= std_logic_vector(resize_left(unsigned(HHP_WR_DATA),MI_WIDTH));
+    reg_we   (R_HHP)(1) <= HHP_WR_EN;
+    reg_addra(R_HHP)(1) <= HHP_WR_CHAN;
     ------------------------------------
     -- =====================================================================
 
@@ -1024,7 +1021,7 @@ begin
                     start_pending_reg_chan  <= active_chan_reg;
                     start_pending_reg_vld   <= '1';
                     start_pending_reg_acked <= '0';
-                    -- resets DFS a HFS statuses
+                    -- resets HDP a HHP pointers
                     chan_start_det          <= '1';
                     START_REQ_CHAN          <= active_chan_reg;
                     START_REQ_VLD           <= '1';
@@ -1097,13 +1094,12 @@ begin
             when WAIT_FOR_REQ_ACK =>
 
                 if (STOP_REQ_ACK = '1') then
-                    stop_fsm_nst <= WAIT_FOR_NULL_STATUS;
+                    stop_fsm_nst <= WAIT_FOR_POINTERS;
                 end if;
 
-            -- wait till the FIFO in the specific channel is emptied
-            when WAIT_FOR_NULL_STATUS =>
+            when WAIT_FOR_POINTERS =>
 
-                if (stop_chan_ok = '1' and stop_status_ok = '1') then
+                if (stop_chan_ok = '1' and stop_ptr_ok = '1') then
                     stop_fsm_nst                                                 <= IDLE;
                     stop_acked                                                   <= '1';
                     enabled_chan_rst(to_integer(unsigned(stop_fsm_channel_reg))) <= '1';
@@ -1114,9 +1110,8 @@ begin
 
     -- Detect Stop acknowledgement propagation to Status Register
     stop_chan_ok <= '1' when (stop_fsm_channel_reg = active_chan_reg) else '0';
-    stop_status_ok  <= stop_dfs_ok_reg and stop_hfs_ok_reg;
+    stop_ptr_ok  <= stop_hdp_ok_reg and stop_hhp_ok_reg;
     -- =====================================================================
-
 
     -- =====================================================================
     --  Register array of enabled channels
@@ -1137,15 +1132,17 @@ begin
     -- =====================================================================
 
     -- =====================================================================
-    -- Comparing FIFO status for channel stopping logic
+    --  Stop pointer logic
     -- =====================================================================
-    reg_addrb(R_DFS)(1) <= stop_fsm_channel_reg;
-    reg_addrb(R_HFS)(1) <= stop_fsm_channel_reg;
+    reg_addrb(R_HDP)(1) <= stop_fsm_channel_reg;
+    reg_addrb(R_HHP)(1) <= stop_fsm_channel_reg;
+    reg_addrb(R_SDP)(1) <= stop_fsm_channel_reg;
+    reg_addrb(R_SHP)(1) <= stop_fsm_channel_reg;
 
-    -- DSP comparator for DFS
-    dsp_comp_dfs_i : entity work.DSP_COMPARATOR
+    -- DSP comparator for HDP
+    dsp_comp_hdp_i : entity work.DSP_COMPARATOR
     generic map(
-        INPUT_DATA_WIDTH => log2((MFB_WIDTH*DMA_FIFO_DEPTH)/8),
+        INPUT_DATA_WIDTH => DATA_POINTER_WIDTH,
         INPUT_REGS_EN    => false,
         DEVICE           => DEVICE,
         MODE             => "><="
@@ -1155,18 +1152,20 @@ begin
         CLK_EN   => '1'  ,
         RESET    => RESET,
 
-        INPUT_1  => reg_dob_opt(R_DFS)(1)(log2((MFB_WIDTH*DMA_FIFO_DEPTH)/8) -1 downto 0),
-        INPUT_2  => (others => '0'),
+        INPUT_1  => reg_dob_opt(R_HDP)(1)(DATA_POINTER_WIDTH-1 downto 0),
+        INPUT_2  => reg_dob_opt(R_SDP)(1)(DATA_POINTER_WIDTH-1 downto 0),
 
-        RESULT   => comp_dfs_res
+        RESULT   => comp_hdp_res
     );
 
-    stop_dfs_ok_reg <= '1' when (comp_dfs_res = "00") else '0';
+    stop_hdp_ok_reg <= '1' when (comp_hdp_res = "00") else '0';
+    -- =====================================================================
 
-    -- DSP comparator for HFS
-    dsp_comp_hfs_i : entity work.DSP_COMPARATOR
+
+    -- DSP comparator for HHP
+    dsp_comp_hhp_i : entity work.DSP_COMPARATOR
     generic map(
-        INPUT_DATA_WIDTH => log2(DMA_FIFO_DEPTH),
+        INPUT_DATA_WIDTH => DMA_HDR_POINTER_WIDTH,
         INPUT_REGS_EN    => false,
         DEVICE           => DEVICE,
         MODE             => "><="
@@ -1176,13 +1175,13 @@ begin
         CLK_EN   => '1'  ,
         RESET    => RESET,
 
-        INPUT_1  => reg_dob_opt(R_HFS)(1)(log2(DMA_FIFO_DEPTH) -1 downto 0),
-        INPUT_2  => (others => '0'),
+        INPUT_1  => reg_dob_opt(R_HHP)(1)(DMA_HDR_POINTER_WIDTH-1 downto 0),
+        INPUT_2  => reg_dob_opt(R_SHP)(1)(DMA_HDR_POINTER_WIDTH-1 downto 0),
 
-        RESULT   => comp_hfs_res
+        RESULT   => comp_hpp_res
     );
 
-    stop_hfs_ok_reg <= '1' when (comp_hfs_res = "00") else '0';
+    stop_hhp_ok_reg <= '1' when (comp_hpp_res = "00") else '0';
     -- =====================================================================
 
 end architecture;

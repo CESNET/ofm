@@ -8,7 +8,6 @@
 
 lappend PACKAGES "$OFM_PATH/comp/base/pkg/math_pack.vhd"
 lappend PACKAGES "$OFM_PATH/comp/base/pkg/type_pack.vhd"
-lappend PACKAGES "$ENTITY_BASE/pkg/ll_dma_pkg.vhd"
 
 lappend COMPONENTS [ list "ADDR_MANAGER"    "$ENTITY_BASE/comp"                  "FULL" ]
 lappend COMPONENTS [ list "FIFOX"           "$OFM_PATH/comp/base/fifo/fifox"     "FULL" ]

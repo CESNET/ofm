@@ -1,5 +1,5 @@
 # Modules.tcl: Components include script
-# Copyright (C) 2022 CESNET
+# Copyright (C) 2023 CESNET
 # Author(s): Vladislav Valek <xvalek14@vutbr.cz>
 #
 lappend PACKAGES "$OFM_PATH/comp/base/pkg/math_pack.vhd"

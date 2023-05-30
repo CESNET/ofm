@@ -13,13 +13,7 @@ package uvm_dma_ll_info;
     `include "uvm_macros.svh"
     import uvm_pkg::*;
 
-    `include "config.sv"
-    `include "sync_link.sv"
-    `include "sequence_item.sv"
-    `include "sequencer.sv"
-    `include "sequence.sv"
-    `include "monitor.sv"
-    `include "agent.sv"
+    `include "watchdog.sv"
 
 endpackage
 

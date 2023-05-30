@@ -12,11 +12,6 @@ package uvm_dma_ll;
     `include "uvm_macros.svh"
     import uvm_pkg::*;
 
-    `include "registers.sv"
-    `include "reg_channel.sv"
-    `include "regmodel.sv"
-    `include "reg_sequence.sv"
-
     `include "model.sv"
     `include "scoreboard.sv"
     `include "sequencer.sv"

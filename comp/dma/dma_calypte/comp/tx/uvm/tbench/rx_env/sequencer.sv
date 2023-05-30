@@ -7,10 +7,7 @@
 class sequencer#(ITEM_WIDTH, CHANNELS) extends uvm_sequencer;
     `uvm_component_param_utils(uvm_dma_ll_rx::sequencer#(ITEM_WIDTH, CHANNELS));
 
-    uvm_logic_vector_array::sequencer#(ITEM_WIDTH) m_data;
-    uvm_dma_ll_info::sequencer                     m_info;
-    uvm_dma_size::sequencer                        m_size[CHANNELS];
-
+    uvm_logic_vector_array::sequencer#(ITEM_WIDTH) m_data[CHANNELS];
 
     function new(string name, uvm_component parent = null);
         super.new(name, parent);

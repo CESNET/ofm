@@ -10,12 +10,9 @@ use IEEE.numeric_std.all;
 
 use work.math_pack.all;
 
-----------------------------------------------------------------------------
---                         Description
-----------------------------------------------------------------------------
 -- A wrapper for SDP_BRAM to abstract Block Enable signal.
 -- (Byte Enable with arbitrary width.)
-
+--
 entity SDP_BRAM_BE is
     Generic (
         -- Use Block Enable
@@ -24,8 +21,11 @@ entity SDP_BRAM_BE is
         -- Use multiples of 8 or 9 for highest effectivness
         BLOCK_WIDTH     : integer := 8;
 
+        -- =========================================================================================
         -- Other SDP_BRAM generics
+        --
         -- See entity of SDP_BRAM for more detail
+        -- =========================================================================================
         DATA_WIDTH     : integer := 64;
         ITEMS          : integer := 512;
         COMMON_CLOCK   : boolean := True;
@@ -34,8 +34,11 @@ entity SDP_BRAM_BE is
         DEVICE         : string := "ULTRASCALE"
     );
     Port (
+        -- =========================================================================================
         -- SDP_BRAM ports
+        --
         -- See entity of SDP_BRAM for more detail
+        -- =========================================================================================
         WR_CLK      : in  std_logic;
         WR_RST      : in  std_logic;
         WR_EN       : in  std_logic;

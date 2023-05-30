@@ -25,8 +25,9 @@ entity SDP_BRAM is
         BLOCK_WIDTH    : natural := 8;
         -- Designate whether read port and write port are clocked with a common
         -- clock or with independent clocks. Possible values:
-        -- True = clock write port and read port with WR_CLK
-        -- False = clock write port with WR_CLK and read port with RD_CLK
+        --
+        -- * True = clock write port and read port with WR_CLK
+        -- * False = clock write port with WR_CLK and read port with RD_CLK
         COMMON_CLOCK   : boolean := True;
         -- Output directly from BRAM or throw register (better timing).
         OUTPUT_REG     : boolean := True;
@@ -34,7 +35,12 @@ entity SDP_BRAM is
         METADATA_WIDTH : integer := 0;
         -- The DEVICE parameter allows the correct selection of the RAM
         -- implementation according to the FPGA used. Supported values are:
-        -- "7SERIES", "ULTRASCALE", "STRATIX10", "ARRIA10", "AGILEX"
+        --
+        -- * "7SERIES"
+        -- * "ULTRASCALE"
+        -- * "STRATIX10"
+        -- * "ARRIA10"
+        -- * "AGILEX"
         DEVICE         : string := "ULTRASCALE"
     );
     Port (
