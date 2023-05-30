@@ -424,7 +424,7 @@ begin
         RESET         => RESET_IN,
         TX_INIT_DONE  => gtwiz_reset_tx_done,
         RX_INIT_DONE  => gtwiz_reset_rx_done,
-        RX_DATA_OK    => rxdata_ok_i,
+        RX_DATA_OK    => (and BLK_LOCK_OUT),
         RESET_OUT     => reset_all_init,
         RXRESET_OUT   => reset_rx_datapath_init,
         INIT_DONE     => open
