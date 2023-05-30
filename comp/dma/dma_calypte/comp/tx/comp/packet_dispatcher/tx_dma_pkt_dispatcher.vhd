@@ -14,6 +14,12 @@ use work.math_pack.all;
 use work.type_pack.all;
 use work.dma_hdr_pkg.all;
 
+-- This component dispatches the frames from data buffers accoring to available DMA Headers. Frames
+-- are dispatched from all channels in order in which DMA headers did come from the PCI Express.
+-- After dispatching a frame, the component issues an update of header and data pointers. If a channel
+-- is already stopped and DMA header for this channel occurs on the input of this component, this
+-- DMA header is dropped and no frame data are dispatched to the output as well as no update of
+-- pointers is issued.
 entity TX_DMA_PKT_DISPATCHER is
     generic (
         DEVICE : string := "ULTRASCALE";
@@ -51,8 +57,8 @@ entity TX_DMA_PKT_DISPATCHER is
         -- =========================================================================================
         -- Input interface from header buffer
         -- =========================================================================================
-        -- this is not an address for reading interface of the buffer, but the addres on which the
-        -- current header has been written
+        -- This is not an address for reading interface of the buffer, but the addres on which the
+        -- current header has been written.
         HDR_BUFF_ADDR    : in  std_logic_vector(62 -1 downto 0);
         HDR_BUFF_CHAN    : in  std_logic_vector(log2(CHANNELS) -1 downto 0);
         HDR_BUFF_DATA    : in  std_logic_vector(DMA_HDR_WIDTH -1 downto 0);
@@ -68,7 +74,9 @@ entity TX_DMA_PKT_DISPATCHER is
         BUFF_RD_EN   : out std_logic;
 
         -- =========================================================================================
-        -- Interface to the software manager for pointer update and incrementing of packet counter
+        -- Interface to the software manager
+        --
+        -- For pointer update and incrementing of packet counter.
         -- =========================================================================================
         PKT_SENT_CHAN  : out std_logic_vector(log2(CHANNELS) -1 downto 0);
         PKT_SENT_INC   : out std_logic;

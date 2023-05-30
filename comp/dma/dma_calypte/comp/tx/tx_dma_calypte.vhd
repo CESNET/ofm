@@ -1,6 +1,6 @@
 -- tx_dma_calypte.vhd: connecting all important parts of the TX DMA Calypte and adds small logic to
 -- connections when necessary
--- Copyright (C) 2022 CESNET z.s.p.o.
+-- Copyright (C) 2023 CESNET z.s.p.o.
 -- Author(s): Vladislav Valek  <xvalek14@vutbr.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
@@ -19,26 +19,23 @@ use work.pcie_meta_pack.all;
 --    The Completer Completion interface is not supported yet. Calypte Controller
 --    supports only Memory Write PCIe transactions.
 --
--- This is transmitting part of the DMA Calypte core. The major structure can be
--- changed by setting the CHANNEL_ARBITER_EN generic parameter to either true or
--- false. This parameter enables/disables the CHANNEL_ARBITER component which
--- merges streams from all CHANNEL_CORE components. The output interface with
--- enabled arbiter remains the same but valid data are transmitted on the
--- interface no. 0 only. When CHANNEL_ARBITER is disabled, each CHANNEL_CORE has
--- its own separate output. The block scheme of the TX DMA Calypte controller is
--- provided in two following figures (`N = <number of channels> - 1`):
+-- This is the transmitting part of the DMA Calypte core. TX direction behaves
+-- similarly to the RX DMA Calypte. Data buffers are provided in the hardware to
+-- which the data can be stored. The frames are output on the *USR_TX_* side and
+-- PCI Express transactions are accepted on the *PCIE_CQ_* side. Output frame
+-- can constist out of multiple PCIe transactions. Each such frame is delimited
+-- by the DMA header which provides the size of the frame as well as the channel
+-- to which the frame is designated and an address of the first byte of the
+-- frame. PCIe transactions can be send on the unsorted series of adresses. The
+-- DMA header then serves as delimiting block where, after its acceptance,
+-- the frame on the output is read continuously from the address of the first
+-- byte. The block scheme of the TX DMA Calypte controller is provided in the
+-- following figure:
 --
--- .. figure:: img/tx_calypte_block_chan_arb.svg
+-- .. figure:: img/tx_calypte_block-tx_dma_calypte_top.svg
 --     :align: center
 --     :scale: 100%
 --
---     Block scheme of TX DMA Calypte controller with CHANNEL_ARBITER enabled
---
--- .. figure:: img/tx_calypte_block_dis_chan_arb.svg
---     :align: center
---     :scale: 100%
---
---     Block scheme of TX DMA Calypte controller with CHANNEL_ARBITER disabled
 entity TX_DMA_CALYPTE is
     generic (
         DEVICE : string := "ULTRASCALE";
@@ -96,9 +93,6 @@ entity TX_DMA_CALYPTE is
 
         -- =========================================================================================
         -- User MFB signals
-        --
-        -- Each channel has its own output unless CHANNEL_ARBITER is enabled. In that case, only
-        -- line number 0 is used.
         -- =========================================================================================
         USR_TX_MFB_META_PKT_SIZE : out std_logic_vector(log2(PKT_SIZE_MAX + 1) -1 downto 0);
         USR_TX_MFB_META_CHAN     : out std_logic_vector(log2(CHANNELS) -1 downto 0);
@@ -115,7 +109,7 @@ entity TX_DMA_CALYPTE is
         -- =========================================================================================
         -- PCIe Completer Request MFB interface
         --
-        -- Accepts write and read requests
+        -- Accepts PCIe write and read requests
         -- =========================================================================================
         PCIE_CQ_MFB_DATA    : in  std_logic_vector(PCIE_CQ_MFB_REGIONS*PCIE_CQ_MFB_REGION_SIZE*PCIE_CQ_MFB_BLOCK_SIZE*PCIE_CQ_MFB_ITEM_WIDTH-1 downto 0);
         PCIE_CQ_MFB_META    : in  std_logic_vector(PCIE_CQ_META_WIDTH -1 downto 0);

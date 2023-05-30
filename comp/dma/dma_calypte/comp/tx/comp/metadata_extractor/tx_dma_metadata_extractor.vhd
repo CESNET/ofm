@@ -14,12 +14,16 @@ use work.math_pack.all;
 use work.type_pack.all;
 use work.pcie_meta_pack.all;
 
+-- This component processes the incoming PCIe transactions. This does not care about whole DMA
+-- frames delimited by the DMA header but processes all frames in general. The metadata on the
+-- output are chosen according their usefullness later in the design.
 entity TX_DMA_METADATA_EXTRACTOR is
     generic (
         DEVICE : string := "ULTRASCALE";
 
-        -- for generating outputs and calculating the DMA buffers address space
+        -- For generating outputs and calculating the DMA buffers address space
         CHANNELS       : natural := 8;
+        -- Pointer with respect to bytes
         POINTER_WIDTH  : natural := 16;
 
         PCIE_MFB_REGIONS     : natural := 1;
@@ -35,6 +39,7 @@ entity TX_DMA_METADATA_EXTRACTOR is
         -- PCIe MFB interface
         -- =========================================================================================
         PCIE_MFB_DATA    : in  std_logic_vector(PCIE_MFB_REGIONS*PCIE_MFB_REGION_SIZE*PCIE_MFB_BLOCK_SIZE*PCIE_MFB_ITEM_WIDTH-1 downto 0);
+        -- More information about the content of this port can be found in *pcie_meta_pack*
         PCIE_MFB_META    : in  std_logic_vector(PCIE_CQ_META_WIDTH -1 downto 0);
         PCIE_MFB_SOF     : in  std_logic_vector(PCIE_MFB_REGIONS -1 downto 0);
         PCIE_MFB_EOF     : in  std_logic_vector(PCIE_MFB_REGIONS -1 downto 0);
@@ -45,10 +50,17 @@ entity TX_DMA_METADATA_EXTRACTOR is
 
         -- =========================================================================================
         -- User MFB signals
+
+        -- Metadata are all valid with SOF except for USR_MFB_META_BYTE_EN.
         -- =========================================================================================
+        -- One bit indication if a current transaction contains DMA header.
         USR_MFB_META_IS_DMA_HDR : out std_logic;
+        -- Processed adress from the PCIe header of a current transaction.
         USR_MFB_META_PCIE_ADDR  : out std_logic_vector(62 -1 downto 0);
+        -- Index of a channel.
         USR_MFB_META_CHAN_NUM   : out std_logic_vector(log2(CHANNELS) -1 downto 0);
+        -- Byte enable for every MFB word where frame is transmitted. Calculated from Byte Enable
+        -- signals of the PCIe transaction.
         USR_MFB_META_BYTE_EN    : out std_logic_vector((PCIE_MFB_REGIONS*PCIE_MFB_REGION_SIZE*PCIE_MFB_BLOCK_SIZE*PCIE_MFB_ITEM_WIDTH)/8 -1 downto 0);
 
         USR_MFB_DATA    : out std_logic_vector(PCIE_MFB_REGIONS*PCIE_MFB_REGION_SIZE*PCIE_MFB_BLOCK_SIZE*PCIE_MFB_ITEM_WIDTH-1 downto 0);

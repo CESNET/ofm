@@ -14,6 +14,16 @@ use IEEE.numeric_std.all;
 use work.math_pack.all;
 use work.type_pack.all;
 
+-- This component controls the acception of incoming frames according to the running state of a
+-- specific DMA channel. When channel is stopped, all incoming frames to that channel are dropped.
+-- When channel is running, all incoming frames on that channel are accepted and reach the
+-- output *USR_MFB_* bus. When a stop request of a channel comes when a frame is received on this
+-- channel, the frame is received till its end and all other frames will be dropped. The system
+-- works vice versa when a start request comes and a frame is dropped on a single channel.
+--
+-- .. NOTE::
+--    A frame can consist out of multiple smaller frames that are delimited by the DMA header.
+--
 entity TX_DMA_CHAN_START_STOP_CTRL is
     generic (
         DEVICE : string := "ULTRASCALE";

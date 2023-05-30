@@ -19,24 +19,26 @@ entity MVB_FIFOX is
       -- FIFO depth, number of data words
       FIFO_DEPTH          : natural := 512;
       -- Select memory implementation. Options:
-      -- "LUT"   - effective when ITEMS <= 64 (on Intel FPGA <= 32), 
-      -- "BRAM"  - effective when ITEMS  > 64 (on Intel FPGA  > 32), 
-      -- "URAM"  - effective when ITEMS*FIFO_WIDTH >= 288000 
-      --           and FIFO_WIDTH >= 72 (URAM is only for Xilinx Ultrascale(+)),
-      -- "SHIFT" - effective when ITEMS <= 16,
-      -- "AUTO"  - effective implementation dependent on ITEMS and DEVICE.
+      --
+      -- * "LUT"   - effective when ITEMS <= 64 (on Intel FPGA <= 32)
+      -- * "BRAM"  - effective when ITEMS  > 64 (on Intel FPGA  > 32)
+      -- * "URAM"  - effective when ITEMS*FIFO_WIDTH >= 288000
+      --   and FIFO_WIDTH >= 72 (URAM is only for Xilinx Ultrascale(+))
+      -- * "SHIFT" - effective when ITEMS <= 16
+      -- * "AUTO"  - effective implementation dependent on ITEMS and DEVICE
       RAM_TYPE            : string  := "AUTO";
       -- Defines what architecture is FIFO implemented on Options:
-      -- "ULTRASCALE" (Xilinx) 
-      -- "7SERIES"    (Xilinx)
-      -- "ARRIA10"    (Intel)
-      -- "STRATIX10"  (Intel)
+      --
+      -- * "ULTRASCALE" (Xilinx)
+      -- * "7SERIES"    (Xilinx)
+      -- * "ARRIA10"    (Intel)
+      -- * "STRATIX10"  (Intel)
       DEVICE              : string  := "ULTRASCALE";
-      -- Determins how many data words left free when almost_full is triggered.
-      -- (ITEMS - ALMOST_FULL_OFFSET) 
+      -- | Determins how many data words left free when almost_full is triggered.
+      -- | (ITEMS - ALMOST_FULL_OFFSET)
       ALMOST_FULL_OFFSET  : natural := 1;
-      -- Determins how many data words present when almost_empty is triggered.
-      -- (0 + ALMOST_EMPTY_OFFSET) 
+      -- | Determins how many data words present when almost_empty is triggered.
+      -- | (0 + ALMOST_EMPTY_OFFSET)
       ALMOST_EMPTY_OFFSET : natural := 1;
       -- Disables the FIFO implementation and replaces it with straight wires.
       FAKE_FIFO           : boolean := false

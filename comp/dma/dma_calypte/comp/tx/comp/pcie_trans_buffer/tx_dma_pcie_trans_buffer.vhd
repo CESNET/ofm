@@ -13,6 +13,11 @@ use IEEE.numeric_std.all;
 use work.math_pack.all;
 use work.type_pack.all;
 
+-- This component instantiaties data buffers for all channels. Internally, the component constists
+-- of Block RAMs. This component has the largest footprint since data are stored by bytes for every
+-- channel. The component behaves as quasi buffer to which data can by written with the resolution
+-- to DWords and read with the resolution to bytes, i.e. as a RAM with different widths of addresses
+-- for each port.
 entity TX_DMA_PCIE_TRANS_BUFFER is
     generic (
         DEVICE : string := "ULTRASCALE";
@@ -28,12 +33,16 @@ entity TX_DMA_PCIE_TRANS_BUFFER is
         MFB_BLOCK_SIZE  : natural := 8;
         MFB_ITEM_WIDTH  : natural := 32;
 
-        -- determines the number of bytes that can be stored in the buffer
-        POINTER_WIDTH : natural := 16);
+        -- Determines the number of bytes that can be stored in the buffer.
+        POINTER_WIDTH : natural := 16
+        );
     port (
         CLK   : in std_logic;
         RESET : in std_logic;
 
+        -- =========================================================================================
+        -- Input MFB bus (quasi writing interface)
+        -- =========================================================================================
         PCIE_MFB_DATA    : in  std_logic_vector(MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH-1 downto 0);
         PCIE_MFB_META    : in  std_logic_vector((MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH)/8+log2(CHANNELS)+62+1-1 downto 0);
         PCIE_MFB_SOF     : in  std_logic_vector(MFB_REGIONS -1 downto 0);
@@ -43,10 +52,16 @@ entity TX_DMA_PCIE_TRANS_BUFFER is
         PCIE_MFB_SRC_RDY : in  std_logic;
         PCIE_MFB_DST_RDY : out std_logic := '1';
 
+        -- =========================================================================================
+        -- Output reading interface
+        --
+        -- Similar to BRAM block.
+        -- =========================================================================================
         RD_CHAN : in  std_logic_vector(log2(CHANNELS) -1 downto 0);
         RD_DATA : out std_logic_vector(MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH-1 downto 0);
         RD_ADDR : in  std_logic_vector(POINTER_WIDTH -1 downto 0);
-        RD_EN   : in  std_logic);
+        RD_EN   : in  std_logic
+        );
 end entity;
 
 architecture FULL of TX_DMA_PCIE_TRANS_BUFFER is

@@ -1,5 +1,5 @@
 -- tx_dma software_manager.vhd: software manager which serves as an interface
--- between MI bus (software side) and the RX DMA system as a whole. Provides MI configuration
+-- between MI bus (software side) and the TX DMA system as a whole. Provides MI configuration
 -- registers.
 -- Copyright (c) 2023 CESNET z.s.p.o.
 -- Author(s): Vladislav Valek  <xvalek14@vutbr.cz>
