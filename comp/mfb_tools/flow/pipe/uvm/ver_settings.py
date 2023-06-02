@@ -10,9 +10,8 @@ SETTINGS = {
         "ITEM_WIDTH"         : "8",
         "FAKE_PIPE"          : "0",
         "USE_DST_RDY"        : "1",
-        "FRAME_SIZE_MAX"     : "512",
-        "FRAME_SIZE_MIN"     : "60",
-        "TRANSACTION_COUNT"  : "2000",
+        "PIPE_TYPE"          : "\\\"SHREG\\\"",
+        "DEVICE"             : "\\\"ULTRASCALE\\\"",
     },
     "pcie" : {
         "REGIONS"            : "2",
@@ -62,6 +61,9 @@ SETTINGS = {
     "use_dst_rdy_down" : {
         "USE_DST_RDY"        : "0",
     },
+    "pipe_type_reg" : {
+        "PIPE_TYPE"          : "\\\"REG\\\"",
+    },    
     "_combinations_" : (  
     (), # Works the same as '("default",),' as the "default" is applied in every combination
     ("region_comb_1",),
@@ -74,26 +76,23 @@ SETTINGS = {
 
     ("fake_pipe_up",),
     ("use_dst_rdy_down",),
+    ("pipe_type_reg",),
 
     ("pcie", "fake_pipe_up",),
     ("pcie", "use_dst_rdy_down",),
 
     ("region_comb_1", "fake_pipe_up",),
-    ("region_comb_1", "use_dst_rdy_down",),
 
     ("region_comb_2", "fake_pipe_up",),
-    ("region_comb_2", "use_dst_rdy_down",),
 
     ("region_comb_3", "fake_pipe_up",),
     ("region_comb_3", "use_dst_rdy_down",),
 
     ("region_comb_4", "fake_pipe_up",),
-    ("region_comb_4", "use_dst_rdy_down",),
 
     ("region_comb_5", "fake_pipe_up",),
     ("region_comb_5", "use_dst_rdy_down",),
 
     ("region_comb_6", "fake_pipe_up",),
-    ("region_comb_6", "use_dst_rdy_down",),
     ),
 }
