@@ -41,7 +41,7 @@ def COMPONENTS_MULTIVER = [\
     ['MERGER (MFB+MVB)'                   , 'comp/mfb_tools/flow/merger/ver'                                                  , 'top_level.fdo'      , 'tbench/test_pkg.sv' , 'ver_settings.py'    ],\
     ['SPLITTER (MFB+MVB)'                 , 'comp/mfb_tools/flow/splitter/ver'                                                , 'top_level.fdo'      , 'tbench/test_pkg.sv' , 'ver_settings.py'    ],\
     ['FORK'                               , 'comp/mfb_tools/flow/fork/ver'                                                    , 'top_level.fdo'      , 'tbench/test_pkg.sv' , 'ver_settings.py'    ],\
-    ['PIPE'                               , 'comp/mfb_tools/flow/pipe/ver'                                                    , 'top_level.fdo'      , 'tbench/test_pkg.sv' , 'ver_settings.py'    ],\
+    ['PIPE'                               , 'comp/mfb_tools/flow/pipe/uvm'                                                    , 'top_level.fdo'      , 'tbench/tests/pkg.sv', 'ver_settings.py'    ],\
     ['ENABLER'                            , 'comp/mfb_tools/flow/enabler/ver'                                                 , 'top_level.fdo'      , 'tbench/test_pkg.sv' , 'ver_settings.py'    ],\
     ['USER_PACKET_GENERATOR'              , 'comp/mfb_tools/flow/user_packet_gen/ver'                                         , 'top_level.fdo'      , 'tbench/test_pkg.sv' , 'ver_settings.py'    ],\
     ['DUPLICATION'                        , 'comp/mfb_tools/flow/duplication/ver'                                             , 'top_level.fdo'      , 'tbench/test_pkg.sv' , 'ver_settings.py'    ],\
