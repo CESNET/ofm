@@ -47,13 +47,18 @@ generic(
     -- Item width (in bits), must be 8.
     MFB_ITEM_WIDTH        : natural := 8;
 
+    -- Number of RX0 items, same for output (TX)
+    MVB_ITEMS             : natural := MFB_REGIONS;
+    -- RX0 item width in bits
+    MVB_ITEM_WIDTH        : natural := 16;
+
     -- Length of the prepended header (in Items).
-    -- The minimum is 16, because the Length field is necesary for the unpacking.
-    HEADER_LENGTH           : natural := 16;
+    -- The minimum is 2 Items (16b), which are for the Length field that is necesary for the unpacking process.
+    HEADER_LENGTH         : natural := 16;
     -- Number of stages in the Offset pipeline.
     -- It is also the maximum number of individual frames inside a single SuperPacket.
     -- Must be greater than 0!
-    UNPACKING_STAGES       : natural := 20;
+    UNPACKING_STAGES      : natural := 20;
     -- The extracted Header is output as:
     --   - Insert header to output metadata with SOF (MODE 0),
     --   - Insert header to output metadata with EOF (MODE 1),
@@ -75,6 +80,15 @@ port(
     RESET          : in  std_logic;
 
     -- =====================================================================
+    --  TX MVB Headers
+    -- =====================================================================
+
+    RX_MVB_DATA    : in  std_logic_vector(MVB_ITEMS*MVB_ITEM_WIDTH-1 downto 0);
+    RX_MVB_VLD     : in  std_logic_vector(MVB_ITEMS-1 downto 0);
+    RX_MVB_SRC_RDY : in  std_logic;
+    RX_MVB_DST_RDY : out std_logic;
+
+    -- =====================================================================
     --  RX MFB STREAM (SuperPackets)
     -- =====================================================================
 
@@ -91,7 +105,9 @@ port(
     -- =====================================================================
 
     TX_MFB_DATA    : out std_logic_vector(MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH-1 downto 0);
-    TX_MFB_META    : out std_logic_vector(MFB_REGIONS*HEADER_LENGTH*MFB_ITEM_WIDTH-1 downto 0) := (others => '0');
+    -- Valid with SOF, EOF, or not valid at all.
+    -- Contains concatenated MVB header and extracted SuperPacket header (RX_MVB_DATA & getit_indv_hdr_data).
+    TX_MFB_META    : out std_logic_vector(MFB_REGIONS*(MVB_ITEM_WIDTH+HEADER_LENGTH*MFB_ITEM_WIDTH)-1 downto 0) := (others => '0');
     TX_MFB_SOF_POS : out std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE))-1 downto 0);
     TX_MFB_EOF_POS : out std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE))-1 downto 0);
     TX_MFB_SOF     : out std_logic_vector(MFB_REGIONS-1 downto 0);
@@ -103,7 +119,7 @@ port(
     --  TX MVB Headers
     -- =====================================================================
 
-    TX_MVB_DATA    : out std_logic_vector(MFB_REGIONS*HEADER_LENGTH*MFB_ITEM_WIDTH-1 downto 0);
+    TX_MVB_DATA    : out std_logic_vector(MFB_REGIONS*(MVB_ITEM_WIDTH+HEADER_LENGTH*MFB_ITEM_WIDTH)-1 downto 0);
     TX_MVB_VLD     : out std_logic_vector(MFB_REGIONS-1 downto 0);
     TX_MVB_SRC_RDY : out std_logic;
     TX_MVB_DST_RDY : in  std_logic := '1'
@@ -139,6 +155,8 @@ architecture FULL of FRAME_UNPACKER is
 
     -- Offset Processor metadata:          SuPkt SOF POS    + SOF + EOF
     constant OP_META_WIDTH    : natural := MFB_SOFPOS_WIDTH + 1   + 1;
+    -- Width of merged MVB and SuPkt headers.
+    constant MERGED_ITEMS_WIDTH : natural := MVB_ITEM_WIDTH + HDR_WIDTH;
     -- Last Valid implementation.
     -- Options: "serial", "parallel", "prefixsum"
     constant LAST_VLD_IMPL : string := "serial";
@@ -147,12 +165,36 @@ architecture FULL of FRAME_UNPACKER is
     --                                 SIGNALS
     -- ========================================================================
 
+    subtype my_integer is integer range MFB_REGIONS-1 downto 0;
+    type my_integer_vector is array(natural range <>) of my_integer;
+
     -- Debug cnt
     signal rx_pkt_count     : u_array_t(MFB_REGIONS downto 0)(16-1 downto 0);
     -- attribute noprune: boolean;
     -- attribute noprune of rx_pkt_count : signal is true;
     attribute preserve_for_debug : boolean;
     attribute preserve_for_debug of rx_pkt_count : signal is true;
+
+    -- MVB headers
+    signal fifoxm_data         : std_logic_vector(MVB_ITEMS*MVB_ITEM_WIDTH-1 downto 0);
+    signal fifoxm_wr           : std_logic_vector(MVB_ITEMS-1 downto 0);
+    signal fifoxm_full         : std_logic;
+    signal fifoxm_do           : std_logic_vector(MVB_ITEMS*            MVB_ITEM_WIDTH-1 downto 0);
+    signal fifoxm_do_arr       : slv_array_t     (MVB_ITEMS-1 downto 0)(MVB_ITEM_WIDTH-1 downto 0);
+    signal fifoxm_rd           : std_logic_vector(MVB_ITEMS-1 downto 0);
+    signal fifoxm_empty        : std_logic_vector(MVB_ITEMS-1 downto 0);
+
+    signal last_eof_remapped   : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal last_eof_respaced   : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal eof_remapped        : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal fifoxm_output_addr  : my_integer_vector(MFB_REGIONS-1 downto 1);
+
+    signal fifoxm_hdr_data_arr : slv_array_t     (MVB_ITEMS-1 downto 0)(MVB_ITEM_WIDTH-1 downto 0);
+    signal fifoxm_hdr_vld_arr  : std_logic_vector(MVB_ITEMS-1 downto 0);
+    signal fifoxm_hdr_data     : std_logic_vector(MVB_ITEMS*MVB_ITEM_WIDTH-1 downto 0);
+    signal fifoxm_hdr_vld      : std_logic_vector(MVB_ITEMS-1 downto 0);
+    signal fifoxm_hdr_src_rdy  : std_logic;
+    signal fifoxm_hdr_dst_rdy  : std_logic;
 
     -- Input logic
     signal supkt_sof_pos_arr     : slv_array_t(MFB_REGIONS-1 downto 0)(MFB_SOFPOS_WIDTH-1 downto 0);
@@ -285,27 +327,43 @@ architecture FULL of FRAME_UNPACKER is
     signal dst_rdy_new               : std_logic;
 
     -- Third stage register
-    signal indv_pkt_data    : std_logic_vector(MFB_WORD_WIDTH-1 downto 0);
-    signal indv_pkt_sof_pos : std_logic_vector(MFB_REGIONS*MFB_SOFPOS_WIDTH-1 downto 0);
-    signal indv_pkt_eof_pos : std_logic_vector(MFB_REGIONS*MFB_EOFPOS_WIDTH-1 downto 0);
-    signal indv_pkt_sof     : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal indv_pkt_eof     : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal indv_pkt_src_rdy : std_logic;
-    signal indv_pkt_dst_rdy : std_logic;
+    signal indv_pkt_data     : std_logic_vector(MFB_WORD_WIDTH-1 downto 0);
+    signal indv_pkt_sof_pos  : std_logic_vector(MFB_REGIONS*MFB_SOFPOS_WIDTH-1 downto 0);
+    signal indv_pkt_eof_pos  : std_logic_vector(MFB_REGIONS*MFB_EOFPOS_WIDTH-1 downto 0);
+    signal indv_pkt_sof      : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal indv_pkt_eof      : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal indv_pkt_last_eof : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal indv_pkt_src_rdy  : std_logic;
+    signal indv_pkt_dst_rdy  : std_logic;
 
     -- MFB Get Items
-    signal getit_indv_pkt_data    : std_logic_vector(MFB_WORD_WIDTH-1 downto 0);
-    signal getit_indv_pkt_sof_pos : std_logic_vector(MFB_REGIONS*MFB_SOFPOS_WIDTH-1 downto 0);
-    signal getit_indv_pkt_eof_pos : std_logic_vector(MFB_REGIONS*MFB_EOFPOS_WIDTH-1 downto 0);
-    signal getit_indv_pkt_sof     : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal getit_indv_pkt_eof     : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal getit_indv_pkt_src_rdy : std_logic;
-    signal getit_indv_pkt_dst_rdy : std_logic;
+    signal getit_indv_pkt_data     : std_logic_vector(MFB_WORD_WIDTH-1 downto 0);
+    signal getit_indv_pkt_last_eof : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal getit_indv_pkt_sof_pos  : std_logic_vector(MFB_REGIONS*MFB_SOFPOS_WIDTH-1 downto 0);
+    signal getit_indv_pkt_eof_pos  : std_logic_vector(MFB_REGIONS*MFB_EOFPOS_WIDTH-1 downto 0);
+    signal getit_indv_pkt_sof      : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal getit_indv_pkt_eof      : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal getit_indv_pkt_src_rdy  : std_logic;
+    signal getit_indv_pkt_src_rdy2 : std_logic;
+    signal getit_indv_pkt_dst_rdy  : std_logic;
+    signal getit_indv_pkt_dst_rdy2 : std_logic;
 
-    signal getit_indv_hdr_data    : std_logic_vector(MFB_REGIONS*HDR_WIDTH-1 downto 0);
-    signal getit_indv_hdr_vld     : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal getit_indv_hdr_src_rdy : std_logic;
-    signal getit_indv_hdr_dst_rdy : std_logic;
+    signal not_a_single_valid_hdr  : std_logic;
+    signal not_enough_hdrs_to_read : std_logic;
+    signal too_many_eofs           : std_logic;
+    signal more_indv_eofs_follow   : std_logic;
+    signal wait_for_headers        : std_logic;
+
+    signal getit_indv_hdr_data     : std_logic_vector(MFB_REGIONS*HDR_WIDTH-1 downto 0);
+    signal getit_indv_hdr_vld      : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal getit_indv_hdr_src_rdy  : std_logic;
+    signal getit_indv_hdr_dst_rdy  : std_logic;
+
+    -- MVB Merge Items
+    signal merg_hdr_data           : std_logic_vector(MFB_REGIONS*MERGED_ITEMS_WIDTH-1 downto 0);
+    signal merg_hdr_vld            : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal merg_hdr_src_rdy        : std_logic;
+    signal merg_hdr_dst_rdy        : std_logic;
 
     -- MFB FIFOX
     signal fifox_indv_pkt_data    : std_logic_vector(MFB_WORD_WIDTH-1 downto 0);
@@ -317,14 +375,14 @@ architecture FULL of FRAME_UNPACKER is
     signal fifox_indv_pkt_src_rdy : std_logic;
     signal fifox_indv_pkt_dst_rdy : std_logic;
 
-    signal fifox_indv_hdr_data    : std_logic_vector(MFB_REGIONS*HDR_WIDTH-1 downto 0);
+    signal fifox_indv_hdr_data    : std_logic_vector(MFB_REGIONS*MERGED_ITEMS_WIDTH-1 downto 0);
     signal fifox_indv_hdr_vld     : std_logic_vector(MFB_REGIONS-1 downto 0);
     signal fifox_indv_hdr_src_rdy : std_logic;
     signal fifox_indv_hdr_dst_rdy : std_logic;
 
     -- Metadata Insertor
     signal metains_indv_pkt_data    : std_logic_vector(MFB_WORD_WIDTH-1 downto 0);
-    signal metains_indv_pkt_hdr     : std_logic_vector(MFB_REGIONS*HDR_WIDTH-1 downto 0);
+    signal metains_indv_pkt_hdr     : std_logic_vector(MFB_REGIONS*MERGED_ITEMS_WIDTH-1 downto 0);
     signal metains_indv_pkt_sof_pos : std_logic_vector(MFB_REGIONS*MFB_SOFPOS_WIDTH-1 downto 0);
     signal metains_indv_pkt_eof_pos : std_logic_vector(MFB_REGIONS*MFB_EOFPOS_WIDTH-1 downto 0);
     signal metains_indv_pkt_sof     : std_logic_vector(MFB_REGIONS-1 downto 0);
@@ -332,14 +390,14 @@ architecture FULL of FRAME_UNPACKER is
     signal metains_indv_pkt_src_rdy : std_logic;
     signal metains_indv_pkt_dst_rdy : std_logic;
 
-    signal metains_indv_hdr_data    : std_logic_vector(MFB_REGIONS*HDR_WIDTH-1 downto 0);
+    signal metains_indv_hdr_data    : std_logic_vector(MFB_REGIONS*MERGED_ITEMS_WIDTH-1 downto 0);
     signal metains_indv_hdr_vld     : std_logic_vector(MFB_REGIONS-1 downto 0);
     signal metains_indv_hdr_src_rdy : std_logic;
     signal metains_indv_hdr_dst_rdy : std_logic;
     
     -- Cutter
     signal cut_data        : std_logic_vector(MFB_WORD_WIDTH-1 downto 0);
-    signal cut_meta        : std_logic_vector(MFB_REGIONS*HDR_WIDTH-1 downto 0);
+    signal cut_meta        : std_logic_vector(MFB_REGIONS*MERGED_ITEMS_WIDTH-1 downto 0);
     signal cut_sof_pos     : std_logic_vector(MFB_REGIONS*MFB_SOFPOS_WIDTH-1 downto 0);
     signal cut_eof_pos     : std_logic_vector(MFB_REGIONS*MFB_EOFPOS_WIDTH-1 downto 0);
     signal cut_sof         : std_logic_vector(MFB_REGIONS-1 downto 0);
@@ -347,7 +405,7 @@ architecture FULL of FRAME_UNPACKER is
     signal cut_src_rdy     : std_logic;
     signal cut_dst_rdy     : std_logic;
 
-    signal cut_hdr_data    : std_logic_vector(MFB_REGIONS*HDR_WIDTH-1 downto 0);
+    signal cut_hdr_data    : std_logic_vector(MFB_REGIONS*MERGED_ITEMS_WIDTH-1 downto 0);
     signal cut_hdr_vld     : std_logic_vector(MFB_REGIONS-1 downto 0);
     signal cut_hdr_src_rdy : std_logic;
     signal cut_hdr_dst_rdy : std_logic;
@@ -364,7 +422,7 @@ begin
         report "FRAME UNPACKER: The values of the MFB_ITEM_WIDTH and MFB_BLOCK_SIZE generics must be 8!!"
         severity failure;
 
-    assert (HEADER_LENGTH >= 16)
+    assert (HDR_WIDTH >= 16)
         report "FRAME UNPACKER: The value of the HEADER_LENGTH generic is too small!!"
         severity failure;
 
@@ -399,6 +457,112 @@ begin
         rx_pkt_count(r+1) <= rx_pkt_count(r)+1 when (RX_MFB_EOF(r) = '1') else rx_pkt_count(r);
     end generate;
     --pragma synthesis_on
+
+    -- ========================================================================
+    -- SupekPacket MVB headers
+    -- ========================================================================
+
+    fifoxm_data <= RX_MVB_DATA;
+    fifoxm_wr   <= RX_MVB_VLD and RX_MVB_SRC_RDY;
+    RX_MVB_DST_RDY <= not fifoxm_full;
+
+    -- -------------
+    --  FIFOX MULTI
+    -- -------------
+    fifoxm_i : entity work.FIFOX_MULTI
+    generic map(
+        DATA_WIDTH     => MVB_ITEM_WIDTH,
+        ITEMS          => 512           ,
+        WRITE_PORTS    => MVB_ITEMS     ,
+        READ_PORTS     => MVB_ITEMS     ,
+        RAM_TYPE       => "AUTO"        ,
+        SAFE_READ_MODE => false         ,
+        DEVICE         => DEVICE
+    )
+    port map(
+        CLK   => CLK,
+        RESET => RESET,
+
+        DI    => fifoxm_data ,
+        WR    => fifoxm_wr   ,
+        FULL  => fifoxm_full ,
+
+        DO    => fifoxm_do   ,
+        RD    => fifoxm_rd   ,
+        EMPTY => fifoxm_empty
+    );
+
+    fifoxm_do_arr <= slv_array_deser(fifoxm_do, MFB_REGIONS);
+
+    -- ------------------------
+    --  MVB headers read logic
+    -- ------------------------
+
+    -- last EOF remapping (shakedown)
+    process (all)
+        variable last_eof_ptr : integer;
+    begin
+        last_eof_remapped <= (others => '0');
+        last_eof_ptr      := 0;
+        for r in 0 to MFB_REGIONS-1 loop
+            if (getit_indv_pkt_last_eof(r) = '1') and (getit_indv_pkt_src_rdy = '1') then
+                last_eof_remapped(last_eof_ptr) <= '1';
+                last_eof_ptr := last_eof_ptr + 1;
+            end if;
+        end loop;
+    end process;
+
+    fifoxm_rd <= (last_eof_remapped and not fifoxm_empty) and getit_indv_pkt_dst_rdy2;
+
+    -- -------------------
+    --  Header validation
+    -- -------------------
+    -- EOF remapping (shakedown)
+    process (all)
+        variable eof_ptr : integer;
+    begin
+        last_eof_respaced <= (others => '0');
+        eof_remapped      <= (others => '0');
+        eof_ptr := 0;
+        for r in 0 to MFB_REGIONS-1 loop
+            if (getit_indv_pkt_eof(r) = '1') and (getit_indv_pkt_src_rdy = '1') then
+                if (getit_indv_pkt_last_eof(r) = '1') then
+                    last_eof_respaced(eof_ptr) <= '1';
+                end if;
+                eof_remapped(eof_ptr) <= '1';
+                eof_ptr := eof_ptr + 1;
+            end if;
+        end loop;
+    end process;
+
+    -- generate address for FIFOXM output port selection
+    count_ones_g : for r in 1 to MFB_REGIONS-1 generate
+        -- fifoxm_output_addr(0) is always 0
+        fifoxm_output_addr(r) <= count_ones(last_eof_respaced(r-1 downto 0));
+    end generate;
+
+    -- FIFOX MULTI output port selection
+    fifoxm_hdr_data_arr(0) <=     fifoxm_do_arr(0);
+    fifoxm_hdr_vld_arr (0) <= not fifoxm_empty (0) and eof_remapped(0);
+    fifoxm_hdr_data_g : for r in 1 to MFB_REGIONS-1 generate
+        fifoxm_hdr_data_arr(r) <=     fifoxm_do_arr(fifoxm_output_addr(r));
+        fifoxm_hdr_vld_arr (r) <= not fifoxm_empty (fifoxm_output_addr(r)) and eof_remapped(r);
+    end generate;
+
+    process(CLK)
+    begin
+        if rising_edge(CLK) then
+            if (fifoxm_hdr_src_rdy = '1') then
+                for r in 1 to MFB_REGIONS-1 loop
+                    assert not (fifoxm_empty(fifoxm_output_addr(r)) and eof_remapped(r)) report "Potencialni ERROR nam tu nastal x_x" severity note;
+                end loop;
+            end if;
+        end if;
+    end process;
+
+    fifoxm_hdr_data    <= slv_array_ser(fifoxm_hdr_data_arr);
+    fifoxm_hdr_vld     <= fifoxm_hdr_vld_arr and getit_indv_pkt_dst_rdy2;
+    fifoxm_hdr_src_rdy <= or (fifoxm_hdr_vld) and not wait_for_headers;
 
     -- ========================================================================
     -- Input logic
@@ -861,6 +1025,7 @@ begin
                 indv_pkt_eof_pos <= slv_array_ser(eof_pos_new);
                 indv_pkt_sof     <= sof_new;
                 indv_pkt_eof     <= eof_new;
+                indv_pkt_last_eof <= last_supkt_eof;
                 indv_pkt_src_rdy <= src_rdy_new;
             end if;
             if (RESET = '1') then
@@ -879,7 +1044,7 @@ begin
         REGION_SIZE      => MFB_REGION_SIZE,
         BLOCK_SIZE       => MFB_BLOCK_SIZE ,
         ITEM_WIDTH       => MFB_ITEM_WIDTH ,
-        META_WIDTH       => 0              ,
+        META_WIDTH       => 1              ,
 
         MAX_FRAME_LENGHT => PKT_MTU        ,
         EXTRACTED_ITEMS  => HEADER_LENGTH  ,
@@ -889,28 +1054,92 @@ begin
         CLK   => CLK,
         RESET => RESET,
 
-        RX_DATA    => indv_pkt_data         ,
-        RX_META    => (others => '0')       ,
-        RX_SOF_POS => indv_pkt_sof_pos      ,
-        RX_EOF_POS => indv_pkt_eof_pos      ,
-        RX_SOF     => indv_pkt_sof          ,
-        RX_EOF     => indv_pkt_eof          ,
-        RX_SRC_RDY => indv_pkt_src_rdy      ,
-        RX_DST_RDY => indv_pkt_dst_rdy      ,
+        RX_DATA    => indv_pkt_data          ,
+        RX_META    => indv_pkt_last_eof      ,
+        RX_SOF_POS => indv_pkt_sof_pos       ,
+        RX_EOF_POS => indv_pkt_eof_pos       ,
+        RX_SOF     => indv_pkt_sof           ,
+        RX_EOF     => indv_pkt_eof           ,
+        RX_SRC_RDY => indv_pkt_src_rdy       ,
+        RX_DST_RDY => indv_pkt_dst_rdy       ,
 
-        TX_DATA    => getit_indv_pkt_data   ,
-        TX_META    => open                  ,
-        TX_SOF_POS => getit_indv_pkt_sof_pos,
-        TX_EOF_POS => getit_indv_pkt_eof_pos,
-        TX_SOF     => getit_indv_pkt_sof    ,
-        TX_EOF     => getit_indv_pkt_eof    ,
-        TX_SRC_RDY => getit_indv_pkt_src_rdy,
-        TX_DST_RDY => getit_indv_pkt_dst_rdy,
+        TX_DATA    => getit_indv_pkt_data    ,
+        TX_META    => getit_indv_pkt_last_eof,
+        TX_SOF_POS => getit_indv_pkt_sof_pos ,
+        TX_EOF_POS => getit_indv_pkt_eof_pos ,
+        TX_SOF     => getit_indv_pkt_sof     ,
+        TX_EOF     => getit_indv_pkt_eof     ,
+        TX_SRC_RDY => getit_indv_pkt_src_rdy ,
+        TX_DST_RDY => getit_indv_pkt_dst_rdy2,
 
-        EX_DATA    => getit_indv_hdr_data   ,
-        EX_VLD     => getit_indv_hdr_vld    ,
-        EX_SRC_RDY => getit_indv_hdr_src_rdy,
+        EX_DATA    => getit_indv_hdr_data    ,
+        EX_VLD     => getit_indv_hdr_vld     ,
+        EX_SRC_RDY => getit_indv_hdr_src_rdy ,
         EX_DST_RDY => getit_indv_hdr_dst_rdy
+    );
+
+    not_a_single_valid_hdr <= '1' when ((or getit_indv_pkt_eof and getit_indv_pkt_src_rdy) = '1') and (fifoxm_empty(0) = '1') else '0';
+    too_many_eofs          <= '1' when (getit_indv_pkt_src_rdy = '1') and
+                                       (( count_ones(getit_indv_pkt_last_eof) > count_ones(not fifoxm_empty)) or
+                                        ((count_ones(getit_indv_pkt_last_eof) = count_ones(not fifoxm_empty)) and (more_indv_eofs_follow = '1'))) else '0';
+
+    process(all)
+    begin
+        more_indv_eofs_follow <= '0';
+        for r in MFB_REGIONS-2 downto 0 loop
+            if (getit_indv_pkt_last_eof(r) = '1') then
+                more_indv_eofs_follow <= or (getit_indv_pkt_eof(MFB_REGIONS-1 downto r+1));
+                exit;
+            end if;
+        end loop;
+    end process;
+
+    wait_for_headers <= '1' when (not_a_single_valid_hdr = '1') or (too_many_eofs = '1') else '0';
+
+    -- new DST RDY deasserts when not enough MVB headers in FIFOXM are present
+    getit_indv_pkt_dst_rdy2 <= getit_indv_pkt_dst_rdy and not wait_for_headers;
+
+    -- ========================================================================
+    -- Concatenate RX MVB headers and extracted headers of the indv packets
+    -- ========================================================================
+
+    assert (fifoxm_hdr_dst_rdy = '1')
+        report "MVB_MERGE_ITEMS: FIFO at RX1 full!" & CR &
+               "Increase FIFO DEPTH or use the fifoxm_hdr_dst_rdy signal."
+        severity note;
+
+    mvb_merge_items_i : entity work.MVB_MERGE_ITEMS
+    generic map(
+        RX0_ITEMS      => MFB_REGIONS,
+        RX0_ITEM_WIDTH => HDR_WIDTH,
+        RX1_ITEMS      => MVB_ITEMS,
+        RX1_ITEM_WIDTH => MVB_ITEM_WIDTH,
+        TX_ITEM_WIDTH  => MVB_ITEM_WIDTH+HDR_WIDTH,
+        RX0_FIFO_EN    => True,
+        FIFO_DEPTH     => 512,
+        OUTPUT_REG     => False,
+        DEVICE         => DEVICE
+    )
+    port map(
+        CLK   => CLK,
+        RESET => RESET,
+
+        RX0_DATA    => getit_indv_hdr_data   ,
+        RX0_VLD     => getit_indv_hdr_vld    ,
+        RX0_SRC_RDY => getit_indv_hdr_src_rdy,
+        RX0_DST_RDY => getit_indv_hdr_dst_rdy,
+
+        RX1_DATA    => fifoxm_hdr_data       ,
+        RX1_VLD     => fifoxm_hdr_vld        ,
+        RX1_SRC_RDY => fifoxm_hdr_src_rdy    ,
+        RX1_DST_RDY => fifoxm_hdr_dst_rdy    ,
+
+        TX_DATA     => merg_hdr_data         ,
+        TX_DATA0    => open                  ,
+        TX_DATA1    => open                  ,
+        TX_VLD      => merg_hdr_vld          ,
+        TX_SRC_RDY  => merg_hdr_src_rdy      ,
+        TX_DST_RDY  => merg_hdr_dst_rdy
     );
 
     meta_insert_g : if (META_OUT_MODE = 0) or (META_OUT_MODE = 1) generate
@@ -918,6 +1147,9 @@ begin
     -- ========================================================================
     -- Insert headers to metadata
     -- ========================================================================
+
+    -- new SRC RDY deasserts when stopping
+    getit_indv_pkt_src_rdy2 <= getit_indv_pkt_src_rdy and not wait_for_headers;
 
         -- ------------------
         --  Delay MFB stream
@@ -946,7 +1178,7 @@ begin
             RX_EOF_POS => getit_indv_pkt_eof_pos ,
             RX_SOF     => getit_indv_pkt_sof     ,
             RX_EOF     => getit_indv_pkt_eof     ,
-            RX_SRC_RDY => getit_indv_pkt_src_rdy ,
+            RX_SRC_RDY => getit_indv_pkt_src_rdy2,
             RX_DST_RDY => getit_indv_pkt_dst_rdy ,
 
             TX_DATA     => fifox_indv_pkt_data   ,
@@ -962,11 +1194,11 @@ begin
         -- -------------
         --  MVB headers
         -- -------------
-        getit_indv_hdr_dst_rdy <= fifox_indv_hdr_dst_rdy;
+        merg_hdr_dst_rdy <= fifox_indv_hdr_dst_rdy;
 
-        fifox_indv_hdr_data     <= getit_indv_hdr_data;
-        fifox_indv_hdr_vld      <= getit_indv_hdr_vld;
-        fifox_indv_hdr_src_rdy  <= getit_indv_hdr_src_rdy;
+        fifox_indv_hdr_data    <= merg_hdr_data;
+        fifox_indv_hdr_vld     <= merg_hdr_vld;
+        fifox_indv_hdr_src_rdy <= merg_hdr_src_rdy;
 
         -- ---------------
         --  The insertion
@@ -974,7 +1206,7 @@ begin
         metadata_insertor_i : entity work.METADATA_INSERTOR
         generic map(
             MVB_ITEMS            => MFB_REGIONS    ,
-            MVB_ITEM_WIDTH       => HDR_WIDTH      ,
+            MVB_ITEM_WIDTH       => MERGED_ITEMS_WIDTH,
 
             MFB_REGIONS          => MFB_REGIONS    ,
             MFB_REGION_SIZE      => MFB_REGION_SIZE,
@@ -1036,16 +1268,16 @@ begin
         metains_indv_pkt_eof_pos <= getit_indv_pkt_eof_pos;
         metains_indv_pkt_sof     <= getit_indv_pkt_sof;
         metains_indv_pkt_eof     <= getit_indv_pkt_eof;
-        metains_indv_pkt_src_rdy <= getit_indv_pkt_src_rdy;
+        metains_indv_pkt_src_rdy <= getit_indv_pkt_src_rdy and not wait_for_headers;
 
         -- -------------
         --  MVB headers
         -- -------------
-        getit_indv_hdr_dst_rdy <= metains_indv_hdr_dst_rdy;
+        merg_hdr_dst_rdy <= metains_indv_hdr_dst_rdy;
 
-        metains_indv_hdr_data    <= getit_indv_hdr_data;
-        metains_indv_hdr_vld     <= getit_indv_hdr_vld;
-        metains_indv_hdr_src_rdy <= getit_indv_hdr_src_rdy;
+        metains_indv_hdr_data    <= merg_hdr_data;
+        metains_indv_hdr_vld     <= merg_hdr_vld;
+        metains_indv_hdr_src_rdy <= merg_hdr_src_rdy;
 
     end generate;
 
@@ -1062,7 +1294,7 @@ begin
         REGION_SIZE    => MFB_REGION_SIZE,
         BLOCK_SIZE     => MFB_BLOCK_SIZE ,
         ITEM_WIDTH     => MFB_ITEM_WIDTH ,
-        META_WIDTH     => HDR_WIDTH      ,
+        META_WIDTH     => MERGED_ITEMS_WIDTH,
         META_ALIGNMENT => META_OUT_MODE  ,
         CUTTED_ITEMS   => HEADER_LENGTH
     )
