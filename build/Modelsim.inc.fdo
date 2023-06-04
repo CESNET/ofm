@@ -20,6 +20,76 @@ source $OFM_PATH/build/Shared.tcl
 #                     Procedures and Functions
 # ---------------------------------------------------------------------
 
+proc VivadoProcessTCLScript {IP_GEN_PATH SIM_GEN_PATH FNAME SCRIPT} {
+    namespace upvar ::NDKBuild SIM_FLAGS SIM_FLAGS
+
+    set IP_NAME [file rootname [file tail $FNAME]]
+    exec vivado -mode batch -journal ${IP_GEN_PATH}${IP_NAME}_vivado.jou -log ${IP_GEN_PATH}${IP_NAME}_vivado.log -source "$SCRIPT" -tclargs "$SIM_GEN_PATH" "$FNAME" "${SIM_FLAGS(FPGA)}"
+}
+
+proc CompileIPCore {IP_GEN_PATH SIM_GEN_PATH FNAME} {
+    global OFM_PATH
+    namespace upvar ::NDKBuild SIM_FLAGS SIM_FLAGS
+    set VIVADO_IP_BUILD [file normalize [file join $OFM_PATH/build Modelsim.ip.tcl]]
+
+    #IP core compiling
+    puts "Generating IP Core file: $FNAME"
+    if { ![regexp {^.*.xci$} $FNAME] } {
+      return
+    }
+
+    #Generate files using vivado
+    VivadoProcessTCLScript $IP_GEN_PATH $SIM_GEN_PATH $FNAME $VIVADO_IP_BUILD
+}
+
+# Compile vivado block design using modelsim
+proc CompileBlockDesign {IP_GEN_PATH SIM_GEN_PATH FNAME} {
+    global OFM_PATH
+    namespace upvar ::NDKBuild SIM_FLAGS SIM_FLAGS
+    set VIVADO_BD_BUILD [file normalize [file join $OFM_PATH/build Modelsim.bd.tcl]]
+
+    #Block Design compiling
+    puts "Generating Block Design file: $FNAME"
+    if { ![regexp {^.*.bd$} $FNAME] } {
+      return
+    }
+
+    #Generate files using vivado
+    VivadoProcessTCLScript $IP_GEN_PATH $SIM_GEN_PATH $FNAME $VIVADO_IP_BUILD
+}
+
+proc ProcessVivadoSimCompile {COMPILE_FILE} {
+    namespace upvar ::NDKBuild SIM_FLAGS SIM_FLAGS
+
+    exec /bin/sed -i {s/ xil_defaultlib/ work/g} "$COMPILE_FILE"
+    exec /bin/sed -i {/vmap work/d} "$COMPILE_FILE"
+
+    source "$COMPILE_FILE"
+}
+
+proc ProcessVivadoSimulationExport {SIM_FILE} {
+    namespace upvar ::NDKBuild SIM_FLAGS SIM_FLAGS
+    exec /bin/sed -i {s/ xil_defaultlib/ work/g} "$SIM_FILE"
+    set fp [open [ glob "$SIM_FILE"]]
+    set compile_content [read $fp]
+    close $fp
+
+    regexp -line {^vsim .*$} "$compile_content" vsim_content
+    #Regex starting with - must be escaped in tcl ?
+    regexp {\-(?:[^-\s])+(?:\s(?:[^-\s])+){2}((?:\s[^-\s]+)*)$} "$vsim_content" modules_match modules
+    set libraries_match [ regexp -all -inline  {(?:-L ([^-\s]+))} "$vsim_content" ]
+    set libraries [ lmap {match group} $libraries_match { set group } ]
+
+    if {[info exists libraries]} {
+        puts "Adding Libs: $libraries"
+        lappend SIM_FLAGS(SIM_LIB) {*}$libraries
+    }
+    if {[info exists modules]} {
+        puts "Adding Modules: $modules"
+        lappend SIM_FLAGS(SIM_MODULE) {*}$modules
+    }
+}
+
 # Decide which command should be used for particular file
 proc CompileMod {FNAME OPT} {
     namespace upvar ::NDKBuild SIM_FLAGS SIM_FLAGS
@@ -46,36 +116,53 @@ proc CompileMod {FNAME OPT} {
     }
 
     # Generate netlists for utilized Vivado IP cores
+    # TCL Debug trace: trace add execution source enterstep {apply {{cmd op} {puts "+ $cmd"}}}
     if {$opt(TYPE) == "VIVADO_IP_XACT"} {
-      if {![info exists SIM_FLAGS(FPGA)]} {
-          puts "WARNING: SIM_FLAGS(FPGA) doesn't exists, skipping generating netlist for Vivado IP core $FNAME"
-      } else {
-        set IP_GEN_PATH "$SIM_FLAGS(SIM_MODULE)-${SIM_FLAGS(FPGA)}.vivado_ip_tmp/"
-        file mkdir $IP_GEN_PATH
-
-        # Initialization
-        set IP_NAME [file rootname [file tail $FNAME]]
-        set IP_GEN_SCRIPT ${IP_GEN_PATH}${IP_NAME}_netlist_gen.tcl
-        if {[file exists $IP_GEN_SCRIPT]} {
-            puts "$IP_GEN_SCRIPT exists, assume IP core's netlist has already been generated"
-            return
+        if {![info exists SIM_FLAGS(FPGA)]} {
+          puts "WARNING: SIM_FLAGS(FPGA) doesn't exists, generating of Modelsim Simulation for Vivado IP core $FNAME. Will most likely fail"
         }
-        PrintLabel "IP Netlist Generation ($IP_NAME)"
+        if { ![file exist "modelsim_lib"] } {
+            file mkdir "modelsim_lib"
+        }
+        set IP_NAME [file rootname [file tail $FNAME]]
+        set SIM_GET_FOLDER "gen_sim"
+        set IP_GEN_PATH "${SIM_FLAGS(FPGA)}.vivado_ip_tmp/"
+        set SIM_GEN_PATH [file join "$IP_GEN_PATH" "$IP_NAME" ]
+        set compile_do [file join "$SIM_GEN_PATH" "*/modelsim/compile.do" ]
+        set simulate_do [file join "$SIM_GEN_PATH" "*/modelsim/simulate.do" ]
+        try { glob "$compile_do" } trap {TCL OPERATION GLOB NOMATCH} {} { set generate "" }
 
-        # Prepare netlist generation Tcl script for Vivado
-        exec echo "
-            create_project -in_memory -part $SIM_FLAGS(FPGA)
-            set_property target_language VHDL \[current_project\]
-            read_ip $FNAME
-            upgrade_ip \[get_ips $IP_NAME\]
-            set_property GENERATE_SYNTH_CHECKPOINT TRUE \[get_files $FNAME\]
-            synth_ip \[get_ips $IP_NAME\]
-            quit
-        " > $IP_GEN_SCRIPT
+        if {[info exists generate]} {
+            CompileIPCore "$IP_GEN_PATH" "$SIM_GEN_PATH" "$FNAME"
+        }
+        set compile_glob_do [ glob "$compile_do" ]
+        set simulate_glob_do [ glob "$simulate_do" ]
+        ProcessVivadoSimCompile "$compile_glob_do"
+        ProcessVivadoSimulationExport "$simulate_glob_do"
+        return;
+    } elseif {$opt(TYPE) == "VIVADO_BD"} {
+        if {![info exists SIM_FLAGS(FPGA)]} {
+          puts "WARNING: SIM_FLAGS(FPGA) doesn't exists, generating of Modelsim Simulation for Vivado BD $FNAME. Will most likely fail"
+        }
+        if { ![file exist "modelsim_lib"] } {
+            file mkdir "modelsim_lib"
+        }
+        set BD_NAME [file rootname [file tail $FNAME]]
+        set SIM_GET_FOLDER "gen_sim"
+        set BD_GEN_PATH "${SIM_FLAGS(FPGA)}.vivado_ip_tmp/"
+        set SIM_GEN_PATH [file join "$BD_GEN_PATH" "$BD_NAME" ]
+        set compile_do [file join "$SIM_GEN_PATH" "*/modelsim/compile.do" ]
+        set simulate_do [file join "$SIM_GEN_PATH" "*/modelsim/simulate.do" ]
+        try { glob "$compile_do" } trap {TCL OPERATION GLOB NOMATCH} {} { set generate "" }
 
-        # Generate netlist using Vivado
-        exec vivado -mode tcl -journal ${IP_GEN_PATH}${IP_NAME}_vivado.jou -log ${IP_GEN_PATH}${IP_NAME}_vivado.log -source $IP_GEN_SCRIPT >&@stdout
-      }
+        if {[info exists generate]} {
+            CompileBlockDesign "$BD_GEN_PATH" "$SIM_GEN_PATH" "$FNAME"
+        }
+        set compile_glob_do [ glob "$compile_do" ]
+        set simulate_glob_do [ glob "$simulate_do" ]
+        ProcessVivadoSimCompile "$compile_glob_do"
+        ProcessVivadoSimulationExport "$simulate_glob_do"
+        return;
     }
 
     # Skip unknown file types
@@ -94,13 +181,21 @@ proc CompileMod {FNAME OPT} {
     lappend opt(VLOG_SV_FLAGS)
 
     # Source compiling
-    if {$FEXT in [list .v .vh]} {
+    if {$FEXT in [list .vh .svh]} {
+        return
+    } elseif {$FEXT in [list .v]} {
         set CMD [list vlog {*}$COVER_PARAMS -timescale "1ps/1ps" -work $LIB]
     } elseif {$FEXT in [list .sv]} {
+        # Add simulation libarries to .sv files to allow use of modules generated by .ip and .bds
+        set SV_LIBS ""
+        foreach i [uniqueList $SIM_FLAGS(SIM_LIB)] {
+            lappend SV_LIBS -L "$i"
+        }
+
         regsub "/\[^/\]+\$" $FNAME "/" DIR
-        set CMD [list vlog $VMAKE_OPT {*}$COVER_PARAMS_SV -sv -timescale "1ps/1ps" -work $LIB +incdir+$DIR {*}$SIM_FLAGS(VLOG_SV_FLAGS) {*}$opt(VLOG_SV_FLAGS)]
-    } else {
-        set CMD [list vcom -2008 -explicit {*}$COVER_PARAMS -work $LIB]
+        set CMD [list vlog $VMAKE_OPT {*}$COVER_PARAMS_SV -sv -timescale "1ps/1ps" -work $LIB +incdir+$DIR $SV_LIBS {*}$SIM_FLAGS(VLOG_SV_FLAGS) {*}$opt(VLOG_SV_FLAGS)]
+    } elseif {$FEXT in [list .vhd]} {
+        set CMD [list vcom -mixedsvvh b -2008 -explicit {*}$COVER_PARAMS -work $LIB]
     }
 
     if {$SIM_FLAGS(BATCH_COMPILE)} {
@@ -329,6 +424,7 @@ proc nb_vsim_set_flags {vsim_flags sim_flags} {
 }
 
 proc nb_sim_main {{user_sim_flags SIM_FLAGS}} {
+
     # Let VSIM_FLAGS variable to be accessible in top level stack frame for running vsim by hand
     upvar 1 VSIM_FLAGS VSIM_FLAGS
 
@@ -352,6 +448,7 @@ proc nb_sim_main {{user_sim_flags SIM_FLAGS}} {
 
     # Run simulation
     if {!$SIM_FLAGS(VSIM_MANUAL_START)} {
+        puts "vsim {*}$VSIM_FLAGS"
         vsim {*}$VSIM_FLAGS
     }
 }
