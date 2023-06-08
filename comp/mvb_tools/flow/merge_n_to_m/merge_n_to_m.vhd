@@ -1,3 +1,4 @@
+
 -- merge_n_to_m.vhd : Implementation of merger from n inputs to m outputs
 --!
 --! \file
