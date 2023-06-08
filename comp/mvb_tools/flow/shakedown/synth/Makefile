@@ -5,6 +5,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 TOP_LEVEL_ENT=MVB_SHAKEDOWN
+SYNTH=quartus
+
+export DEVICE=AGILEX
 
 .PHONY: all
 all: comp
