@@ -14,6 +14,7 @@ proc dts_dma_calypte_ctrl {dir id base pcie} {
         append ret "data_buff = <&dma_calypte_tx_data_buff$id>;"
         append ret "hdr_buff = <&dma_calypte_tx_hdr_buff$id>;"
     }
+    append ret "params = <&dma_params_$dir$pcie>;"
     append ret "};"
     return $ret
 }
@@ -26,7 +27,7 @@ proc dts_dma_calypte_ctrl {dir id base pcie} {
 # 5. pcie       - index(es) of PCIe endpoint(s) which DMA controller uses.
 proc dts_dma_calypte_tx_buffer {type id base size pcie} {
     set ret ""
-    append ret "dma_calypte_tx_${type}_buff${id} {"
+    append ret "dma_calypte_tx_${type}_buff${id}: dma_calypte_tx_${type}_buff${id} {"
     append ret "compatible = \"cesnet,dma_calypte_tx_${type}_buff\";"
     append ret "reg = <$base $size>;"
     append ret "pcie = <$pcie>;"
