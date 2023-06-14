@@ -30,7 +30,8 @@ entity GEN_MVB_DEMUX is
         -- When False, all RX_DATA are copied to TX_DATA signal,
         -- when True, RX_DATA are demultiplexed and other items
         -- are zeroed.
-        DATA_DEMUX      : boolean := False
+        DATA_DEMUX      : boolean := False;
+        INPUT_REG       : boolean := True
     );
     port (
         -- Clock signal
@@ -91,26 +92,29 @@ architecture behavioral of GEN_MVB_DEMUX is
     signal rx_src_rdy_int       : std_logic;
     signal rx_dst_rdy_int       : std_logic;
 
-begin  -- architecture behavioral
-    pipe_i : entity work.MVB_PIPE
-    generic map (
-        ITEMS       => MVB_ITEMS,
-        ITEM_WIDTH  => DATA_WIDTH + SEL_WIDTH,
-        DEVICE      => DEVICE
-    ) port map (
-        CLK         => CLK,
-        RESET       => RESET,
+begin
+    RX_DST_RDY <= rx_dst_rdy_int;
 
-        RX_DATA     => RX_SEL & RX_DATA,
-        RX_VLD      => RX_VLD,
-        RX_SRC_RDY  => RX_SRC_RDY,
-        RX_DST_RDY  => RX_DST_RDY,
-
-        TX_DATA     => rx_data_all_int,
-        TX_VLD      => rx_vld_int,
-        TX_SRC_RDY  => rx_src_rdy_int,
-        TX_DST_RDY  => rx_dst_rdy_int
-    );
+    input_reg_g : if INPUT_REG generate
+        input_reg_p : process(CLK)
+        begin
+            if rising_edge(CLK) then
+                if (rx_dst_rdy_int = '1') then
+                    rx_data_all_int <= RX_SEL & RX_DATA;
+                    rx_vld_int      <= RX_VLD;
+                    rx_src_rdy_int  <= RX_SRC_RDY;
+                end if;
+                
+                if (RESET = '1') then
+                    rx_src_rdy_int <= '0';
+                end if;
+            end if;
+        end process;  
+    else generate
+        rx_data_all_int <= RX_SEL & RX_DATA;
+        rx_vld_int      <= RX_VLD;
+        rx_src_rdy_int  <= RX_SRC_RDY;
+    end generate;
 
     rx_data_int <= rx_data_all_int(MVB_ITEMS * DATA_WIDTH - 1 downto 0);
     rx_sel_int <= rx_data_all_int(MVB_ITEMS * (DATA_WIDTH + SEL_WIDTH) - 1 downto MVB_ITEMS * DATA_WIDTH);
