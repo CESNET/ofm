@@ -72,9 +72,9 @@ entity TX_DMA_CALYPTE is
         -- Pointer width for data and hdr buffers. The data pointer points to bytes of the packet.
         -- The header pointer points to the header of a current packet.
         DATA_POINTER_WIDTH    : natural := 14;
-        DMA_HDR_POINTER_WIDTH : natural := 9;
+        DMA_HDR_POINTER_WIDTH : natural := 11;
         -- Set the number of DMA channels, each channel has its separate buffer
-        CHANNELS              : natural := 8;
+        CHANNELS              : natural := 32;
 
         -- =========================================================================================
         -- Others
@@ -84,8 +84,10 @@ entity TX_DMA_CALYPTE is
         CNTRS_WIDTH    : natural := 64;
         -- Width of the metadata in bits which are stored in the DMA header.
         HDR_META_WIDTH : natural := 24;
+
+        ST_SP_DBG_SIGNAL_W : natural := 2;
         -- Size of the largest packets that can be transmitted on the USR_TX_MFB interface.
-        PKT_SIZE_MAX   : natural := 2**14
+        PKT_SIZE_MAX   : natural := 2**11
         );
     port (
         CLK   : in std_logic;
@@ -135,6 +137,12 @@ entity TX_DMA_CALYPTE is
         PCIE_CC_MFB_DST_RDY : in  std_logic;
 
         -- =========================================================================================
+        -- Debugging signals
+        -- =========================================================================================
+        ST_SP_DBG_CHAN : out std_logic_vector(log2(CHANNELS) -1 downto 0);
+        ST_SP_DBG_META : out std_logic_vector(ST_SP_DBG_SIGNAL_W -1 downto 0);
+
+        -- =========================================================================================
         -- Control MI bus
         -- =========================================================================================
         MI_ADDR : in  std_logic_vector(MI_WIDTH -1 downto 0);
@@ -160,16 +168,19 @@ architecture FULL of TX_DMA_CALYPTE is
     constant META_PCIE_ADDR_W  : natural := 62;
     constant META_CHAN_NUM_W   : natural := log2(CHANNELS);
     constant META_BE_W         : natural := PCIE_CQ_MFB_WIDTH/8;
+    constant META_BYTE_CNT_W   : natural := 13;
 
     constant META_IS_DMA_HDR_O : natural := 0;
     constant META_PCIE_ADDR_O  : natural := META_IS_DMA_HDR_O + META_IS_DMA_HDR_W;
     constant META_CHAN_NUM_O   : natural := META_PCIE_ADDR_O + META_PCIE_ADDR_W;
     constant META_BE_O         : natural := META_CHAN_NUM_O + META_CHAN_NUM_W;
+    constant META_BYTE_CNT_O   : natural := META_BE_O + META_BE_W;
 
     subtype META_IS_DMA_HDR is natural range META_IS_DMA_HDR_O + META_IS_DMA_HDR_W -1 downto META_IS_DMA_HDR_O;
     subtype META_PCIE_ADDR is natural range META_PCIE_ADDR_O + META_PCIE_ADDR_W -1 downto META_PCIE_ADDR_O;
     subtype META_CHAN_NUM is natural range META_CHAN_NUM_O + META_CHAN_NUM_W -1 downto META_CHAN_NUM_O;
     subtype META_BE is natural range META_BE_O + META_BE_W -1 downto META_BE_O;
+    subtype META_BYTE_CNT is natural range META_BYTE_CNT_O + META_BYTE_CNT_W -1 downto META_BYTE_CNT_O;
 
     -- =============================================================================================
     -- Interconnect signals
@@ -199,9 +210,10 @@ architecture FULL of TX_DMA_CALYPTE is
     signal upd_hhp_en   : std_logic;
 
     signal ext_mfb_meta_is_dma_hdr : std_logic;
-    signal ext_mfb_meta_pcie_addr  : std_logic_vector(62 -1 downto 0);
-    signal ext_mfb_meta_chan_num   : std_logic_vector(log2(CHANNELS) -1 downto 0);
-    signal ext_mfb_meta_byte_en    : std_logic_vector(PCIE_CQ_MFB_WIDTH/8 -1 downto 0);
+    signal ext_mfb_meta_pcie_addr  : std_logic_vector(META_PCIE_ADDR_W -1 downto 0);
+    signal ext_mfb_meta_chan_num   : std_logic_vector(META_CHAN_NUM_W -1 downto 0);
+    signal ext_mfb_meta_byte_en    : std_logic_vector(META_BE_W -1 downto 0);
+    signal ext_mfb_meta_byte_cnt   : std_logic_vector(META_BYTE_CNT_W -1 downto 0);
 
     signal ext_mfb_data    : std_logic_vector(PCIE_CQ_MFB_WIDTH -1 downto 0);
     signal ext_mfb_sof     : std_logic_vector(PCIE_CQ_MFB_REGIONS -1 downto 0);
@@ -230,6 +242,24 @@ architecture FULL of TX_DMA_CALYPTE is
     signal hdr_fifo_tx_dst_rdy : std_logic;
 
     signal enabled_chans : std_logic_vector(CHANNELS -1 downto 0);
+
+    -- attribute mark_debug : string;
+
+    -- attribute mark_debug of start_req_chan : signal is "true";
+    -- attribute mark_debug of start_req_vld  : signal is "true";
+    -- attribute mark_debug of start_req_ack  : signal is "true";
+
+    -- attribute mark_debug of stop_req_chan : signal is "true";
+    -- attribute mark_debug of stop_req_vld  : signal is "true";
+    -- attribute mark_debug of stop_req_ack  : signal is "true";
+
+    -- attribute mark_debug of enabled_chans       : signal is "true";
+    -- attribute mark_debug of hdr_fifo_tx_src_rdy : signal is "true";
+    -- attribute mark_debug of hdr_fifo_tx_dst_rdy : signal is "true";
+
+    signal hdr_fifo_status : std_logic_vector(log2((2**DMA_HDR_POINTER_WIDTH) * CHANNELS) downto 0);
+    -- attribute mark_debug of hdr_fifo_status : signal is "true";
+
 begin
 
     assert (USR_TX_MFB_REGIONS = 1 and USR_TX_MFB_REGION_SIZE = 4 and USR_TX_MFB_BLOCK_SIZE = 8 and USR_TX_MFB_ITEM_WIDTH = 8)
@@ -245,7 +275,11 @@ begin
         severity FAILURE;
 
     assert (PKT_SIZE_MAX <= 2**DATA_POINTER_WIDTH)
-        report "TX_DMA_CALYPTE: too large PKT_SIZE_MAX, the internal FIFO must be able to fit at least one packet of the size of the PKT_SIZE_MAX. Either change FIFO_DEPTH or PKT_SIZE_MAX generic."
+        report "TX_DMA_CALYPTE: too large PKT_SIZE_MAX, the internal buffer must be able to fit at least one packet of the size of the PKT_SIZE_MAX. Either change DATA_POINTER_WIDTH or PKT_SIZE_MAX generic."
+        severity FAILURE;
+
+    assert (DMA_HDR_POINTER_WIDTH <= DATA_POINTER_WIDTH)
+        report "TX_DMA_CALYPTE: The width of the data pointer should be equal or greater than the width of the header pointer"
         severity FAILURE;
 
     assert ((CHANNELS mod 2 = 0 and CHANNELS >= 2))
@@ -306,7 +340,7 @@ begin
         generic map (
             DEVICE        => DEVICE,
             CHANNELS      => CHANNELS,
-            POINTER_WIDTH => DATA_POINTER_WIDTH,
+            POINTER_WIDTH => maximum(DATA_POINTER_WIDTH, DMA_HDR_POINTER_WIDTH+3),
 
             PCIE_MFB_REGIONS     => PCIE_CQ_MFB_REGIONS,
             PCIE_MFB_REGION_SIZE => PCIE_CQ_MFB_REGION_SIZE,
@@ -330,6 +364,7 @@ begin
             USR_MFB_META_PCIE_ADDR  => ext_mfb_meta_pcie_addr,
             USR_MFB_META_CHAN_NUM   => ext_mfb_meta_chan_num,
             USR_MFB_META_BYTE_EN    => ext_mfb_meta_byte_en,
+            USR_MFB_META_BYTE_CNT   => ext_mfb_meta_byte_cnt,
 
             USR_MFB_DATA    => ext_mfb_data,
             USR_MFB_SOF     => ext_mfb_sof,
@@ -349,13 +384,14 @@ begin
             PCIE_MFB_BLOCK_SIZE  => PCIE_CQ_MFB_BLOCK_SIZE,
             PCIE_MFB_ITEM_WIDTH  => PCIE_CQ_MFB_ITEM_WIDTH,
 
-            PKT_SIZE_MAX => PKT_SIZE_MAX)
+            PKT_SIZE_MAX     => PKT_SIZE_MAX,
+            DBG_SIGNAL_WIDTH => ST_SP_DBG_SIGNAL_W)
         port map (
             CLK   => CLK,
             RESET => RESET,
 
             PCIE_MFB_DATA    => ext_mfb_data,
-            PCIE_MFB_META    => ext_mfb_meta_byte_en & ext_mfb_meta_chan_num & ext_mfb_meta_pcie_addr & ext_mfb_meta_is_dma_hdr,
+            PCIE_MFB_META    => ext_mfb_meta_byte_cnt & ext_mfb_meta_byte_en & ext_mfb_meta_chan_num & ext_mfb_meta_pcie_addr & ext_mfb_meta_is_dma_hdr,
             PCIE_MFB_SOF     => ext_mfb_sof,
             PCIE_MFB_EOF     => ext_mfb_eof,
             PCIE_MFB_SOF_POS => ext_mfb_sof_pos,
@@ -381,7 +417,9 @@ begin
 
             PKT_DISC_CHAN  => pkt_disc_chan,
             PKT_DISC_INC   => pkt_disc_inc,
-            PKT_DISC_BYTES => pkt_disc_bytes);
+            PKT_DISC_BYTES => pkt_disc_bytes,
+            ST_SP_DBG_META => ST_SP_DBG_META,
+            ST_SP_DBG_CHAN => ST_SP_DBG_CHAN);
 
     tx_dma_pcie_trans_buffer_i : entity work.TX_DMA_PCIE_TRANS_BUFFER
         generic map (
@@ -416,7 +454,7 @@ begin
         generic map (
             ITEMS               => 1,
             ITEM_WIDTH          => 62 + log2(CHANNELS) + 64,
-            FIFO_DEPTH          => 2**DMA_HDR_POINTER_WIDTH,
+            FIFO_DEPTH          => (2**DMA_HDR_POINTER_WIDTH) * CHANNELS,
             RAM_TYPE            => "AUTO",
             DEVICE              => DEVICE,
             ALMOST_FULL_OFFSET  => 3,
@@ -436,7 +474,7 @@ begin
             TX_SRC_RDY => hdr_fifo_tx_src_rdy,
             TX_DST_RDY => hdr_fifo_tx_dst_rdy,
 
-            STATUS => open,
+            STATUS => hdr_fifo_status,
             AFULL  => open,
             AEMPTY => open);
 

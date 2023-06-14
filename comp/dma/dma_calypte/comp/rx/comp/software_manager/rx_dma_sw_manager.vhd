@@ -306,7 +306,7 @@ architecture FULL of RX_DMA_SW_MANAGER is
     -- Actual number of needed write ports for each register
     -- Must be at least 1 for all registers with Write Enable
     constant WR_PORTS : i_array_t(REGS-1 downto 0) := (
-        R_CONTROL         => tsel(WR_EN(R_CONTROL        ),1,0) + 0,
+        R_CONTROL         => tsel(WR_EN(R_CONTROL        ),1,0) + 1,
         R_STATUS          => tsel(WR_EN(R_STATUS         ),1,0) + 1, -- Channel Start/Stop confirmation
         RSV_2             => tsel(WR_EN(RSV_2            ),1,0) + 0,
         RSV_3             => tsel(WR_EN(RSV_3            ),1,0) + 0,
@@ -582,8 +582,32 @@ architecture FULL of RX_DMA_SW_MANAGER is
     signal stop_hhp_ok_reg   : std_logic;
     -- =====================================================================
 
+    -- attribute mark_debug                           : string;
+    -- attribute mark_debug of active_chan_reg        : signal is "true";
+    -- attribute mark_debug of start_pending_reg_chan : signal is "true";
+    -- attribute mark_debug of stop_fsm_channel_reg   : signal is "true";
+    -- attribute mark_debug of stop_fsm_pst           : signal is "true";
+    -- attribute mark_debug of enabled_chan_rst       : signal is "true";
+    -- attribute mark_debug of stop_chan_ok           : signal is "true";
+    -- attribute mark_debug of stop_ptr_ok            : signal is "true";
+    -- attribute mark_debug of stop_hhp_ok_reg        : signal is "true";
+    -- attribute mark_debug of stop_hdp_ok_reg        : signal is "true";
+
+    -- signal hdp_to_compare : std_logic_vector(POINTER_WIDTH -1 downto 0);
+    -- signal sdp_to_compare : std_logic_vector(POINTER_WIDTH -1 downto 0);
+    -- signal hhp_to_compare : std_logic_vector(POINTER_WIDTH -1 downto 0);
+    -- signal shp_to_compare : std_logic_vector(POINTER_WIDTH -1 downto 0);
+
+    -- attribute mark_debug of hdp_to_compare         : signal is "true";
+    -- attribute mark_debug of sdp_to_compare         : signal is "true";
+    -- attribute mark_debug of hhp_to_compare         : signal is "true";
+    -- attribute mark_debug of shp_to_compare         : signal is "true";
 
 begin
+    -- hdp_to_compare <= reg_dob_opt(R_HDP)(1)(POINTER_WIDTH -1 downto 0);
+    -- sdp_to_compare <= reg_dob_opt(R_SDP)(1)(POINTER_WIDTH -1 downto 0);
+    -- hhp_to_compare <= reg_dob_opt(R_HHP)(1)(POINTER_WIDTH -1 downto 0);
+    -- shp_to_compare <= reg_dob_opt(R_SHP)(1)(POINTER_WIDTH -1 downto 0);
 
     assert (MI_WIDTH=32)
         report "ERROR: RX DMA Software Manager: MI_WIDTH ("&to_string(MI_WIDTH)&") must be 32b!"
@@ -751,11 +775,17 @@ begin
     -- the MI side but there need to be some of them from the internal logic
     -- of the DMA.
 
+    -- Control register -----------------
+    reg_di   (R_CONTROL)(1) <= (others => '0');
+    reg_we   (R_CONTROL)(1) <= RESET;
+    reg_addra(R_CONTROL)(1) <= active_chan_reg;
+    ------------------------------------
+
     -- Status register -----------------
     -- Write '1' when start is detected
     -- Write '0' when acknowledged stop is detected
-    reg_di   (R_STATUS)(0) <= (0 => '1', others => '0') when start_acked='1' else (others => '0');
-    reg_we   (R_STATUS)(0) <= start_acked or stop_acked;
+    reg_di   (R_STATUS)(0) <= (0 => '1', others => '0') when (start_acked='1'  and RESET = '0') else (others => '0');
+    reg_we   (R_STATUS)(0) <= start_acked or stop_acked or RESET;
     reg_addra(R_STATUS)(0) <= active_chan_reg;
     ------------------------------------
 
