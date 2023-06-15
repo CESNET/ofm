@@ -16,8 +16,6 @@ set COMPONENTS [list \
     [list "DUT"      $DUT_BASE       "FULL"]\
 ]
 
-set SIM_FLAGS(EXTRA_VFLAGS) "-voptargs=+acc"
-
 source "$FIRMWARE_BASE/build/Modelsim.inc.fdo"
 set  StdArithNoWarnings 1
 set NumericStdNoWarnings 1
