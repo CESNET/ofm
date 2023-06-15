@@ -95,16 +95,16 @@ class monitor_logic_vector_array #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS,
             keep_index = 0;
             for (int unsigned it = 0; it < REGIONS; it++) begin
                 if (TUSER_WIDTH == 60 || TUSER_WIDTH == 33 || STRADDLING == 0) begin
-                    if (tr.tlast && int'(tr.tkeep) > 255)
+                    if (tr.tlast && int'(tr.tkeep) > 255 && it == 0)
                         last[1] = 1'b1;
-                    else if (tr.tlast && int'(tr.tkeep) <= 255)
+                    else if (tr.tlast && int'(tr.tkeep) <= 255 && it == 0)
                         last[0] = 1'b1;
-                    else
-                        last = '0;
 
                     for (int unsigned jt = 0; jt < ITEMS; jt++) begin
-                        if (tr.tkeep[keep_index])
+
+                        if (tr.tkeep[keep_index]) begin
                             data.push_back(tr.tdata[it][(jt+1)*ITEM_WIDTH-1 -: ITEM_WIDTH]);
+                        end
                         keep_index++;
                     end
                     if (last[it]) begin
@@ -113,6 +113,7 @@ class monitor_logic_vector_array #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS,
                         analysis_port.write(hi_tr);
                         hi_tr = null;
                         data.delete();
+                        last = '0;
                     end
                 end else if (TUSER_WIDTH == 88 || TUSER_WIDTH == 85) begin
                     if (tr.tuser[40] == 1'b1) begin
