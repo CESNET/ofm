@@ -23,9 +23,6 @@ source $OFM_PATH/build/Shared.tcl
 # Decide which command should be used for particular file
 proc CompileMod {FNAME OPT} {
     namespace upvar ::NDKBuild SIM_FLAGS SIM_FLAGS
-
-    set VMAKE_OPT "-vmake"
-
     array set opt $OPT
 
     set LIB "work"
@@ -95,12 +92,12 @@ proc CompileMod {FNAME OPT} {
 
     # Source compiling
     if {$FEXT in [list .v .vh]} {
-        set CMD [list vlog {*}$COVER_PARAMS -timescale "1ps/1ps" -work $LIB]
+        set CMD [list vlog -vmake {*}$COVER_PARAMS -timescale "1ps/1ps" -work $LIB]
     } elseif {$FEXT in [list .sv]} {
         regsub "/\[^/\]+\$" $FNAME "/" DIR
-        set CMD [list vlog $VMAKE_OPT {*}$COVER_PARAMS_SV -sv -timescale "1ps/1ps" -work $LIB +incdir+$DIR {*}$SIM_FLAGS(VLOG_SV_FLAGS) {*}$opt(VLOG_SV_FLAGS)]
+        set CMD [list vlog -vmake {*}$COVER_PARAMS_SV -sv -timescale "1ps/1ps" -work $LIB +incdir+$DIR {*}$SIM_FLAGS(VLOG_SV_FLAGS) {*}$opt(VLOG_SV_FLAGS)]
     } else {
-        set CMD [list vcom -2008 -explicit {*}$COVER_PARAMS -work $LIB]
+        set CMD [list vcom -vmake -2008 -explicit {*}$COVER_PARAMS -work $LIB]
     }
 
     if {$SIM_FLAGS(BATCH_COMPILE)} {
@@ -126,6 +123,7 @@ proc nb_sim_run { {run_params "-all"} } {
     if {![info exists env(BUILD_TAG)]} {
         if {[info exists SIG_FILE]} {
             view wave
+            delete wave *
             source $SIG_FILE
         }
     } else {
@@ -246,14 +244,8 @@ proc nb_vsim_compile_project {sim_flags hierarchy} {
         nb_batch_finish
     }
 
-    # Makefile generate hack
-    if {$SIM_FLAGS(MAKEFILE_GEN)} {
-        # This causes sometimes recompiling of all sources
-        exec vmake > $SIM_FLAGS(MAKEFILE_NAME)
-    } else {
-        # So generate empty makefile as default
-        exec echo "all:" > $SIM_FLAGS(MAKEFILE_NAME)
-    }
+    # This causes sometimes recompiling of all sources
+    exec vmake > $SIM_FLAGS(MAKEFILE_NAME)
 
     # Compile SV libs
     set SIM_FLAGS(SV_LIBS_FLAGS) [nb_vsim_compile_svlibs $SV_LIBS]
@@ -296,12 +288,6 @@ proc nb_sim_sanitize_vars {user_sim_flags sim_flags hierarchy VARS} {
         set SIM_FLAGS(CODE_COVERAGE_SV) false
     }
 
-    if {[info exists MAKEFILE_GEN] && $MAKEFILE_GEN} {
-        set SIM_FLAGS(MAKEFILE_GEN) true
-    } elseif {![info exists SIM_FLAGS(MAKEFILE_GEN)]} {
-        set SIM_FLAGS(MAKEFILE_GEN) false
-    }
-
     if {[info exists SIM_MODULE]} {
         set SIM_FLAGS(SIM_MODULE) $SIM_MODULE
     } else {
@@ -340,7 +326,7 @@ proc nb_sim_main {{user_sim_flags SIM_FLAGS}} {
     upvar 1 VSIM_FLAGS VSIM_FLAGS
 
     # Collect variables in user .fdo script and upvar them
-    lappend VARS CODE_COVERAGE MAKEFILE_GEN SIM_MODULE VLOG_SV_FLAGS
+    lappend VARS CODE_COVERAGE SIM_MODULE VLOG_SV_FLAGS
     lappend VARS PACKAGES COMPONENTS TB_FILE MOD
     upvar 1 $user_sim_flags USER_SIM_FLAGS
     foreach i $VARS {
