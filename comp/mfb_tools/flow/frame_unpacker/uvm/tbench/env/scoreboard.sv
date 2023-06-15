@@ -5,29 +5,30 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 
-class scoreboard #(HEADER_SIZE, MFB_ITEM_WIDTH, VERBOSITY) extends uvm_scoreboard;
-    `uvm_component_param_utils(uvm_superunpacketer::scoreboard #(HEADER_SIZE, MFB_ITEM_WIDTH, VERBOSITY))
+class scoreboard #(HEADER_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, VERBOSITY) extends uvm_scoreboard;
+    `uvm_component_param_utils(uvm_superunpacketer::scoreboard #(HEADER_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, VERBOSITY))
 
     int unsigned compared;
     int unsigned errors;
 
-    uvm_analysis_export #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) input_data;
-    uvm_analysis_export #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) out_data;
-    uvm_analysis_export #(uvm_logic_vector::sequence_item #(HEADER_SIZE))          out_meta;
-    uvm_analysis_export #(uvm_logic_vector::sequence_item #(HEADER_SIZE))          out_mvb;
+    uvm_analysis_export #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))       input_data;
+    uvm_analysis_export #(uvm_logic_vector::sequence_item #(MVB_ITEM_WIDTH))             input_mvb;
+    uvm_analysis_export #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))       out_data;
+    uvm_analysis_export #(uvm_logic_vector::sequence_item #(HEADER_SIZE+MVB_ITEM_WIDTH)) out_meta;
 
-    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) dut_data;
-    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) model_data;
-    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(HEADER_SIZE))          dut_meta;
-    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(HEADER_SIZE))          model_meta;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))       dut_data;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))       model_data;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(HEADER_SIZE+MVB_ITEM_WIDTH)) dut_meta;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(HEADER_SIZE+MVB_ITEM_WIDTH)) model_meta;
 
-    model #(HEADER_SIZE, MFB_ITEM_WIDTH, VERBOSITY) m_model;
+    model #(HEADER_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, VERBOSITY) m_model;
 
     // Contructor of scoreboard.
     function new(string name, uvm_component parent);
         super.new(name, parent);
 
         input_data = new("input_data", this);
+        input_mvb  = new("input_mvb", this);
         out_data   = new("out_data", this);
         out_meta   = new("out_meta", this);
 
@@ -50,13 +51,14 @@ class scoreboard #(HEADER_SIZE, MFB_ITEM_WIDTH, VERBOSITY) extends uvm_scoreboar
 
 
     function void build_phase(uvm_phase phase);
-        m_model = model#(HEADER_SIZE, MFB_ITEM_WIDTH, VERBOSITY)::type_id::create("m_model", this);
+        m_model = model#(HEADER_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, VERBOSITY)::type_id::create("m_model", this);
     endfunction
 
     function void connect_phase(uvm_phase phase);
 
         // connects input data to the input of the model
         input_data.connect(m_model.input_data.analysis_export);
+        input_mvb.connect(m_model.input_mvb.analysis_export);
 
         // processed data from the output of the model connected to the analysis fifo
         m_model.out_data.connect(model_data.analysis_export);
@@ -69,10 +71,10 @@ class scoreboard #(HEADER_SIZE, MFB_ITEM_WIDTH, VERBOSITY) extends uvm_scoreboar
 
     task run_phase(uvm_phase phase);
 
-        uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)        tr_dut_data;
-        uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)        tr_model_data;
-        uvm_logic_vector::sequence_item #(HEADER_SIZE) tr_dut_meta;
-        uvm_logic_vector::sequence_item #(HEADER_SIZE) tr_model_meta;
+        uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)       tr_dut_data;
+        uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)       tr_model_data;
+        uvm_logic_vector::sequence_item #(HEADER_SIZE+MVB_ITEM_WIDTH) tr_dut_meta;
+        uvm_logic_vector::sequence_item #(HEADER_SIZE+MVB_ITEM_WIDTH) tr_model_meta;
         string msg;
 
         forever begin

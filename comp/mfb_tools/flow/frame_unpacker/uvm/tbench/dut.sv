@@ -8,11 +8,12 @@
 import test::*;
 
 module DUT (
-    input logic     CLK,
-    input logic     RST,
-    mfb_if.dut_rx   mfb_rx,
-    mfb_if.dut_tx   mfb_tx,
-    mvb_if.dut_tx   mvb_tx
+    input logic   CLK,
+    input logic   RST,
+    mfb_if.dut_rx mfb_rx,
+    mfb_if.dut_tx mfb_tx,
+    mvb_if.dut_rx mvb_rx,
+    mvb_if.dut_tx mvb_tx
     );
 
     FRAME_UNPACKER #(
@@ -22,6 +23,7 @@ module DUT (
         .MFB_ITEM_WIDTH   (MFB_ITEM_WIDTH)            ,
 
         .HEADER_LENGTH    (HEADER_SIZE/MFB_ITEM_WIDTH),
+        .MVB_ITEM_WIDTH   (MVB_ITEM_WIDTH),
         .UNPACKING_STAGES (UNPACKING_STAGES)          ,
         .META_OUT_MODE    (META_OUT_MODE)             ,
         .PKT_MTU          (PKT_MTU)                   ,
@@ -29,6 +31,11 @@ module DUT (
     ) VHDL_DUT_U (
         .CLK                (CLK)                     ,
         .RESET              (RST)                     ,
+
+        .RX_MVB_DATA        (mvb_rx.DATA)             ,
+        .RX_MVB_VLD         (mvb_rx.VLD)              ,
+        .RX_MVB_SRC_RDY     (mvb_rx.SRC_RDY)          ,
+        .RX_MVB_DST_RDY     (mvb_rx.DST_RDY)          ,
 
         .RX_MFB_DATA        (mfb_rx.DATA)             ,
         .RX_MFB_SOF_POS     (mfb_rx.SOF_POS)          ,

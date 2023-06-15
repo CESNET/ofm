@@ -21,6 +21,8 @@ package test;
     parameter MFB_BLOCK_SIZE     = 8;
     // Item width (in bits), must be 8.
     parameter MFB_ITEM_WIDTH     = 8;
+    // RX0 item width in bits
+    parameter MVB_ITEM_WIDTH     = 16;
     // Number of stages in the Offset pipeline.
     // It is also the maximum number of individual frames inside a single SuperPacket.
     // Must be greater than 0!

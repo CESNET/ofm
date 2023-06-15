@@ -5,20 +5,21 @@
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
 
-module superunpacketer_property #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH) 
+module superunpacketer_property #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, META_WIDTH) 
     (
         input RESET,
         mfb_if tx_mfb_vif,
         mfb_if rx_mfb_vif,
-        mvb_if mvb_vif
+        mvb_if rx_mvb_vif,
+        mvb_if tx_mvb_vif
     );
 
     mfb_property #(
-        .REGIONS      (MFB_REGIONS),
-        .REGION_SIZE  (MFB_REGION_SIZE),
-        .BLOCK_SIZE   (MFB_BLOCK_SIZE),
-        .ITEM_WIDTH   (MFB_ITEM_WIDTH),
-        .META_WIDTH   (META_WIDTH)
+        .REGIONS     (MFB_REGIONS),
+        .REGION_SIZE (MFB_REGION_SIZE),
+        .BLOCK_SIZE  (MFB_BLOCK_SIZE),
+        .ITEM_WIDTH  (MFB_ITEM_WIDTH),
+        .META_WIDTH  (META_WIDTH)
     )
     tx_mfb_prop (
         .RESET (RESET),
@@ -39,11 +40,20 @@ module superunpacketer_property #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, 
 
     mvb_property #(
         .ITEMS      (MFB_REGIONS),
-        .ITEM_WIDTH (META_WIDTH)
+        .ITEM_WIDTH (MVB_ITEM_WIDTH)
     )
-    mvb_prop (
+    rx_mvb_prop (
         .RESET (RESET),
-        .vif   (mvb_vif)
+        .vif   (rx_mvb_vif)
+    );
+
+    mvb_property #(
+        .ITEMS      (MFB_REGIONS),
+        .ITEM_WIDTH (META_WIDTH+MVB_ITEM_WIDTH)
+    )
+    tx_mvb_prop (
+        .RESET (RESET),
+        .vif   (tx_mvb_vif)
     );
 
 endmodule
