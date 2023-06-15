@@ -321,7 +321,7 @@ proc nb_vsim_set_flags {vsim_flags sim_flags} {
 
     # UVM VERIFICATION
     if {[info exists SIM_FLAGS(UVM_ENABLE)] && $SIM_FLAGS(UVM_ENABLE)} {
-        lappend VSIM_FLAGS "-uvmcontrol=all +UVM_MAX_QUIT_COUNT=1"
+        lappend VSIM_FLAGS -uvmcontrol=all,-trlog +UVM_MAX_QUIT_COUNT=1
         if { [info exists SIM_FLAGS(UVM_TEST)]} {
              lappend VSIM_FLAGS "+UVM_TESTNAME=$SIM_FLAGS(UVM_TEST)"
         }
@@ -338,9 +338,9 @@ proc nb_vsim_set_flags {vsim_flags sim_flags} {
     } else {
         lappend VSIM_FLAGS -sv_seed random
     }
-
     lappend VSIM_FLAGS {*}$SIM_FLAGS(SV_LIBS_FLAGS)
     lappend VSIM_FLAGS {*}[uniqueList $SIM_FLAGS(SIM_MODULE)]
+
 }
 
 proc nb_sim_main {{user_sim_flags SIM_FLAGS}} {
