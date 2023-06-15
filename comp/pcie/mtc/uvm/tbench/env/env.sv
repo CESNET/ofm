@@ -74,21 +74,24 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, DEVICE
 
     // Connect agent's ports with ports from scoreboard.
     function void connect_phase(uvm_phase phase);
-        m_env_cq.m_env_rx.analysis_port_data.connect(sc.analysis_export_cq_data);
-        m_env_cq.m_env_rx.analysis_port_meta.connect(sc.analysis_export_cq_meta);
-        m_mi_agent.analysis_port_rs.connect(sc.analysis_export_cc_mi);
-        sc.mi_analysis_port_out.connect(m_monitor.analysis_export);
-        // m_env_cq.m_env_rx.analysis_port_meta.connect(m_monitor.analysis_export);
+        m_env_cq.m_env_rx.analysis_port_data.connect(sc.analysis_export_cq_data.analysis_export);
+        m_env_cq.m_env_rx.analysis_port_meta.connect(sc.analysis_export_cq_meta.analysis_export);
+        m_env_cq.m_env_rx.analysis_port_data.connect(sc.analysis_export_cq_data.analysis_export);
+        m_env_cq.m_env_rx.analysis_port_meta.connect(sc.analysis_export_cq_meta.analysis_export);
+        m_mi_agent.analysis_port_rs.connect(sc.analysis_export_cc_mi.analysis_export);
+        sc.m_mi_cmp_rq.mi_analysis_port_out.connect(m_monitor.analysis_export);
+
         m_sequencer.m_reset  = m_reset.m_sequencer;
         m_sequencer.m_packet = m_env_cq.m_sequencer;
         m_sequencer.m_pcie   = m_env_cc.m_sequencer;
         m_sequencer.m_mi_sqr = m_mi_agent.m_sequencer;
+
         m_reset.sync_connect(m_env_cq.reset_sync);
         m_reset.sync_connect(m_env_cc.reset_sync);
 
         m_env_cc.analysis_port_data.connect(sc.analysis_export_cc_data);
         m_env_cc.analysis_port_meta.connect(sc.analysis_export_cc_meta);
-        m_mi_agent.analysis_port_rq.connect(sc.analysis_export_mi_data);
+        m_mi_agent.analysis_port_rq.connect(sc.mi_scrb.analysis_export);
 
         m_monitor.analysis_port.connect(tr_plan.analysis_imp);
 
@@ -96,7 +99,7 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, DEVICE
 
     virtual task run_phase(uvm_phase phase);
         m_env_cq.m_driver.tag_sync = tag_sync;
-        sc.response_compare.tag_sync = tag_sync;
+        sc.m_mi_cmp_rs.tag_sync = tag_sync;
         if (m_mi_config.active == UVM_ACTIVE) begin
             uvm_mtc::mi_cc_sequence #(MI_DATA_WIDTH, MI_ADDR_WIDTH) mi_seq;
 

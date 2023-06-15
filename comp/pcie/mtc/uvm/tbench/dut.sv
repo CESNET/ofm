@@ -94,7 +94,7 @@ module DUT(
         .CTL_MAX_PAYLOAD_SIZE      (ctl_max_payload_size),
         // BAR aperture value (Intel FPGA only). Defines the size of the address
         // space of BAR in the number of usable address bits.
-        .CTL_BAR_APERTURE          (6'd24),
+        .CTL_BAR_APERTURE          (6'd26),
 
         // =====================================================================
         // MI32 interface (master)
