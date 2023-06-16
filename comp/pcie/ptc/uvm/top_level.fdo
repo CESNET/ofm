@@ -19,7 +19,7 @@ lappend COMPONENTS \
 # Disable Code Coverage
 set SIM_FLAGS(CODE_COVERAGE) "false"
 #set SIM_FLAGS(EXTRA_VFLAGS) "+UVM_TESTNAME=test::ex_test +UVM_VERBOSITY=UVM_NONE -uvmcontrol=all +UVM_MAX_QUIT_COUNT=1"
-set SIM_FLAGS(EXTRA_VFLAGS) "+UVM_VERBOSITY=UVM_NONE -uvmcontrol=all +UVM_MAX_QUIT_COUNT=1"
+set SIM_FLAGS(EXTRA_VFLAGS) "+UVM_VERBOSITY=UVM_NONE -uvmcontrol=all +UVM_MAX_QUIT_COUNT=1 -voptargs=-nomlopt"
 
 # Global include file for compilation
 source "$FIRMWARE_BASE/build/Modelsim.inc.fdo"
