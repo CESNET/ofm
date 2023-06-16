@@ -55,8 +55,8 @@ class scoreboard #(HEADER_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, VERBOSITY) exten
 
         data_cmp.compared_tr_timeout_set(50us);
         meta_cmp.compared_tr_timeout_set(50us);
-        data_cmp.model_tr_timeout_set(10000ns);
-        meta_cmp.model_tr_timeout_set(10000ns);
+        data_cmp.model_tr_timeout_set(50us);
+        meta_cmp.model_tr_timeout_set(50us);
 
         m_model = model#(HEADER_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, VERBOSITY)::type_id::create("m_model", this);
     endfunction
