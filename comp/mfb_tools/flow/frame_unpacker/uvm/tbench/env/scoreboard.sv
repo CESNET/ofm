@@ -11,15 +11,14 @@ class scoreboard #(HEADER_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, VERBOSITY) exten
     int unsigned compared;
     int unsigned errors;
 
-    uvm_analysis_export #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))       input_data;
-    uvm_analysis_export #(uvm_logic_vector::sequence_item #(MVB_ITEM_WIDTH))             input_mvb;
-    uvm_analysis_export #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))       out_data;
-    uvm_analysis_export #(uvm_logic_vector::sequence_item #(HEADER_SIZE+MVB_ITEM_WIDTH)) out_meta;
+    uvm_analysis_export #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))               out_data;
+    uvm_analysis_export #(uvm_logic_vector::sequence_item #(HEADER_SIZE+MVB_ITEM_WIDTH))         out_meta;
 
-    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))       dut_data;
-    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))       model_data;
-    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(HEADER_SIZE+MVB_ITEM_WIDTH)) dut_meta;
-    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(HEADER_SIZE+MVB_ITEM_WIDTH)) model_meta;
+    uvm_common::subscriber #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))            input_data;
+    uvm_common::subscriber #(uvm_logic_vector::sequence_item #(MVB_ITEM_WIDTH))                  input_mvb;
+
+    uvm_common::comparer_ordered #(uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH))       data_cmp;
+    uvm_common::comparer_ordered #(uvm_logic_vector::sequence_item#(HEADER_SIZE+MVB_ITEM_WIDTH)) meta_cmp;
 
     model #(HEADER_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, VERBOSITY) m_model;
 
@@ -27,114 +26,62 @@ class scoreboard #(HEADER_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, VERBOSITY) exten
     function new(string name, uvm_component parent);
         super.new(name, parent);
 
-        input_data = new("input_data", this);
-        input_mvb  = new("input_mvb", this);
         out_data   = new("out_data", this);
         out_meta   = new("out_meta", this);
-
-        dut_data   = new("dut_data", this);
-        dut_meta   = new("dut_meta", this);
-        model_data = new("model_data", this);
-        model_meta = new("model_meta", this);
         compared   = 0;
+    endfunction
 
+    function int unsigned success();
+        int unsigned ret = 0;
+        ret |= data_cmp.success();
+        ret |= meta_cmp.success();
+        return ret;
     endfunction
 
     function int unsigned used();
         int unsigned ret = 0;
-        ret |= (dut_data.used()   != 0);
-        ret |= (model_data.used() != 0);
-        ret |= (dut_meta.used()   != 0);
-        ret |= (model_meta.used() != 0);
+        ret |= data_cmp.used();
+        ret |= meta_cmp.used();
         return ret;
     endfunction
 
-
     function void build_phase(uvm_phase phase);
+
+        input_data = uvm_common::subscriber #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))::type_id::create("input_data", this);
+        input_mvb  = uvm_common::subscriber #(uvm_logic_vector::sequence_item #(MVB_ITEM_WIDTH))::type_id::create("input_mvb", this);
+
+        data_cmp = uvm_common::comparer_ordered #(uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH))::type_id::create("data_cmp", this);
+        meta_cmp = uvm_common::comparer_ordered #(uvm_logic_vector::sequence_item#(HEADER_SIZE+MVB_ITEM_WIDTH))::type_id::create("meta_cmp", this);
+
+        data_cmp.compared_tr_timeout_set(50us);
+        meta_cmp.compared_tr_timeout_set(50us);
+        data_cmp.model_tr_timeout_set(10000ns);
+        meta_cmp.model_tr_timeout_set(10000ns);
+
         m_model = model#(HEADER_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, VERBOSITY)::type_id::create("m_model", this);
     endfunction
 
     function void connect_phase(uvm_phase phase);
 
         // connects input data to the input of the model
-        input_data.connect(m_model.input_data.analysis_export);
-        input_mvb.connect(m_model.input_mvb.analysis_export);
+        input_data.port.connect(m_model.input_data.analysis_export);
+        input_mvb.port.connect(m_model.input_mvb.analysis_export);
 
         // processed data from the output of the model connected to the analysis fifo
-        m_model.out_data.connect(model_data.analysis_export);
-        m_model.out_meta.connect(model_meta.analysis_export);
+        m_model.out_data.connect(data_cmp.analysis_imp_model);
+        m_model.out_meta.connect(meta_cmp.analysis_imp_model);
         // connects the data from the DUT to the analysis fifo
-        out_data.connect(dut_data.analysis_export);
-        out_meta.connect(dut_meta.analysis_export);
+        out_data.connect(data_cmp.analysis_imp_dut);
+        out_meta.connect(meta_cmp.analysis_imp_dut);
 
     endfunction
 
-    task run_phase(uvm_phase phase);
-
-        uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)       tr_dut_data;
-        uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)       tr_model_data;
-        uvm_logic_vector::sequence_item #(HEADER_SIZE+MVB_ITEM_WIDTH) tr_dut_meta;
-        uvm_logic_vector::sequence_item #(HEADER_SIZE+MVB_ITEM_WIDTH) tr_model_meta;
-        string msg;
-
-        forever begin
-            msg = "";
-
-            model_data.get(tr_model_data);
-            model_meta.get(tr_model_meta);
-            dut_data.get(tr_dut_data);
-            dut_meta.get(tr_dut_meta);
-
-            compared++;
-
-            if (VERBOSITY >= 2) begin
-                $swrite(msg, "%s\n ================ SCOREBOARD DEBUG =============== \n", msg);
-                $swrite(msg, "%sDUT TR number [%0d]\n", msg, compared);
-                $swrite(msg, "%s\tDATA %s\n", msg, tr_dut_data.convert2string());
-                $swrite(msg, "%s\tMETA %s\n", msg, tr_dut_meta.convert2string());
-                $swrite(msg, "%sMODEL TR number [%0d]\n", msg, compared);
-                $swrite(msg, "%s\tDATA %s\n", msg, tr_model_data.convert2string());
-                $swrite(msg, "%s\tMETA %s\n", msg, tr_model_meta.convert2string());
-                `uvm_info(this.get_full_name(), msg ,UVM_FULL)
-            end
-
-            if ((compared % 1000) == 0) begin
-                $write("%d transactions were compared\n", compared);
-            end
-
-            if (tr_model_data.compare(tr_dut_data) == 0) begin
-                msg = "";
-                errors++;
-
-                $swrite(msg, "\n\t Comparison failed at packet number %d! \n\tModel packet:\n%s\n\tDUT packet:\n%s", compared, tr_model_data.convert2string(), tr_dut_data.convert2string());
-                `uvm_error(this.get_full_name(), msg);
-            end
-
-            if (tr_model_meta.compare(tr_dut_meta) == 0) begin
-                msg = "";
-                errors++;
-
-                $swrite(msg, "\n\t Comparison failed at meta number %d! \n\tModel meta:\n%s\n\tDUT meta:\n%s\n", compared, tr_model_meta.convert2string(), tr_dut_meta.convert2string());
-                `uvm_error(this.get_full_name(), msg);
-            end
-        end
-
-    endtask
-
     function void report_phase(uvm_phase phase);
-        string msg = "";
 
-        $swrite(msg, "%s\tdut_data USED [%0d]\n"  , msg, dut_data.used());
-        $swrite(msg, "%s\tmodel_data USED [%0d]\n", msg, model_data.used());
-        $swrite(msg, "%s\tdut_meta USED [%0d]\n"  , msg, dut_meta.used());
-        $swrite(msg, "%s\tmodel_meta USED [%0d]\n", msg, model_meta.used());
-
-        if (errors == 0 && this.used() == 0) begin 
-            $swrite(msg, "%sCompared packets: %0d", msg, compared);
-            `uvm_info(get_type_name(), {msg, "\n\n\t---------------------------------------\n\t----     VERIFICATION SUCCESS      ----\n\t---------------------------------------"}, UVM_NONE)
+        if (this.success() && this.used() == 0) begin 
+            `uvm_info(get_type_name(), "\n\n\t---------------------------------------\n\t----     VERIFICATION SUCCESS      ----\n\t---------------------------------------", UVM_NONE)
         end else begin
-            $swrite(msg, "%sCompared packets: %0d errors %0d", msg, compared, errors);
-            `uvm_info(get_type_name(), {msg, "\n\n\t---------------------------------------\n\t----     VERIFICATION FAILED       ----\n\t---------------------------------------"}, UVM_NONE)
+            `uvm_info(get_type_name(), "\n\n\t---------------------------------------\n\t----     VERIFICATION FAILED       ----\n\t---------------------------------------", UVM_NONE)
         end
 
     endfunction

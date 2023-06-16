@@ -8,10 +8,10 @@
 class model #(HEADER_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, VERBOSITY) extends uvm_component;
     `uvm_component_param_utils(uvm_superunpacketer::model #(HEADER_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, VERBOSITY))
 
-    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))   input_data;
-    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(MVB_ITEM_WIDTH))         input_mvb;
-    uvm_analysis_port #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))       out_data;
-    uvm_analysis_port #(uvm_logic_vector::sequence_item #(HEADER_SIZE+MVB_ITEM_WIDTH)) out_meta;
+    uvm_tlm_analysis_fifo #(uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)))   input_data;
+    uvm_tlm_analysis_fifo #(uvm_common::model_item #(uvm_logic_vector::sequence_item #(MVB_ITEM_WIDTH)))         input_mvb;
+    uvm_analysis_port #(uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)))       out_data;
+    uvm_analysis_port #(uvm_common::model_item #(uvm_logic_vector::sequence_item #(HEADER_SIZE+MVB_ITEM_WIDTH))) out_meta;
 
     typedef logic [MFB_ITEM_WIDTH-1 : 0] data_queue[$];
 
@@ -43,10 +43,10 @@ class model #(HEADER_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, VERBOSITY) extends uv
 
     task run_phase(uvm_phase phase);
 
-        uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)       tr_input_packet;
-        uvm_logic_vector::sequence_item #(MVB_ITEM_WIDTH)             tr_input_mvb;
-        uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)       tr_output_packet;
-        uvm_logic_vector::sequence_item #(HEADER_SIZE+MVB_ITEM_WIDTH) tr_output_meta;
+        uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))       tr_input_packet;
+        uvm_common::model_item #(uvm_logic_vector::sequence_item #(MVB_ITEM_WIDTH))             tr_input_mvb;
+        uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))       tr_output_packet;
+        uvm_common::model_item #(uvm_logic_vector::sequence_item #(HEADER_SIZE+MVB_ITEM_WIDTH)) tr_output_meta;
 
         logic [HEADER_SIZE-1 : 0]    header;
         logic [MFB_ITEM_WIDTH-1 : 0] data_fifo[$];
@@ -71,23 +71,25 @@ class model #(HEADER_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, VERBOSITY) extends uv
                 $swrite(msg, "%s\n ================ MODEL DEBUG =============== \n", msg);
                 $swrite(msg, "%s\tSUPERPACKET NUMBER: %d\n", msg, sp_cnt);
             end
-            size_of_sp = tr_input_packet.data.size();
+            size_of_sp = tr_input_packet.item.data.size();
             if (VERBOSITY >= 2) begin
                 $swrite(msg, "%s\tINPUT PACKET: %s\n", msg, tr_input_packet.convert2string());
             end
 
             while(offset != size_of_sp) begin
 
-                tr_output_packet      = uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)::type_id::create("tr_output_packet");
-                tr_output_meta        = uvm_logic_vector::sequence_item #(HEADER_SIZE+MVB_ITEM_WIDTH)::type_id::create("tr_output_packet");
+                tr_output_packet      = uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))::type_id::create("tr_output_packet");
+                tr_output_packet.item = uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)::type_id::create("tr_output_packet_item");
+                tr_output_meta        = uvm_common::model_item #(uvm_logic_vector::sequence_item #(HEADER_SIZE+MVB_ITEM_WIDTH))::type_id::create("tr_output_packet");
+                tr_output_meta.item   = uvm_logic_vector::sequence_item #(HEADER_SIZE+MVB_ITEM_WIDTH)::type_id::create("tr_output_packet_item");
 
-                header                = extract_header(tr_input_packet, offset);
-                size_of_pkt           = header[15-1 : 0];
-                align                 = ((size_of_pkt % MFB_ITEM_WIDTH == 0) || (offset + size_of_pkt + HEADER_SIZE/MFB_ITEM_WIDTH) == size_of_sp) ? 0 : (MFB_ITEM_WIDTH - (size_of_pkt % MFB_ITEM_WIDTH));
-                offset               += (size_of_pkt + HEADER_SIZE/MFB_ITEM_WIDTH + align);
-                tr_output_packet.data = extract_data(tr_input_packet, data_offset, size_of_pkt);
-                data_offset          += size_of_pkt + (HEADER_SIZE/MFB_ITEM_WIDTH) + align;
-                tr_output_meta.data   = {tr_input_mvb.data, header};
+                header                     = extract_header(tr_input_packet.item, offset);
+                size_of_pkt                = header[15-1 : 0];
+                align                      = ((size_of_pkt % MFB_ITEM_WIDTH == 0) || (offset + size_of_pkt + HEADER_SIZE/MFB_ITEM_WIDTH) == size_of_sp) ? 0 : (MFB_ITEM_WIDTH - (size_of_pkt % MFB_ITEM_WIDTH));
+                offset                    += (size_of_pkt + HEADER_SIZE/MFB_ITEM_WIDTH + align);
+                tr_output_packet.item.data = extract_data(tr_input_packet.item, data_offset, size_of_pkt);
+                data_offset               += size_of_pkt + (HEADER_SIZE/MFB_ITEM_WIDTH) + align;
+                tr_output_meta.item.data   = {tr_input_mvb.item.data, header};
                 pkt_cnt++;
 
                 if (VERBOSITY >= 1) begin

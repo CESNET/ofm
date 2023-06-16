@@ -83,6 +83,12 @@ class virt_sequence #(MIN_SIZE, PKT_MTU, DATA_SIZE_MAX, MFB_REGIONS, MFB_REGION_
 
     task body();
 
+        p_sequencer.m_mfb.set_report_verbosity_level(UVM_NONE);
+        p_sequencer.m_mvb_tx.set_report_verbosity_level(UVM_NONE);
+        p_sequencer.m_info.set_report_verbosity_level(UVM_NONE);
+        p_sequencer.m_size.set_report_verbosity_level(UVM_NONE);
+        p_sequencer.m_byte_array_scr.set_report_verbosity_level(UVM_NONE);
+
         fork
             run_reset();
         join_none
