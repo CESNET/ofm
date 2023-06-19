@@ -175,9 +175,10 @@ class sequence_simple_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS, BLOCK_SIZE, STRADDL
             return;
         end
 
-        gen.tvalid         = 0;
+        gen.tvalid = 0;
         // SOF
-        is_sop = '0;
+        is_sop     = '0;
+        gen.tuser  = '0;
         // Requester side
         if (TUSER_WIDTH == 161) begin
             gen.tuser[67 : 64] = '0;
@@ -379,9 +380,10 @@ class sequence_full_speed_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS, BLOCK_SIZE, STR
             return;
         end
 
-        gen.tvalid         = 0;
+        gen.tvalid = 0;
         // SOF
-        is_sop = '0;
+        is_sop     = '0;
+        gen.tuser  = '0;
         // Requester side
         if (TUSER_WIDTH == 161) begin
             gen.tuser[67 : 64] = '0;
@@ -544,7 +546,8 @@ class sequence_stop_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS, BLOCK_SIZE, STRADDLIN
         int unsigned index = 0;
         gen.randomize();
 
-        gen.tvalid         = 0;
+        gen.tvalid = 0;
+        gen.tuser  = '0;
 
         // Requester side
         if (TUSER_WIDTH == 161) begin

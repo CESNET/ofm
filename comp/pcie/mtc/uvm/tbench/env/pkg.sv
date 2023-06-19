@@ -13,6 +13,8 @@ package uvm_mtc;
     import uvm_pkg::*;
 
     `include "model.sv"
+    `include "mi_subscriber.sv"
+    `include "scoreboard_cmp.sv"
     `include "scoreboard.sv"
     `include "tr_planner.sv"
     `include "sequencer.sv"

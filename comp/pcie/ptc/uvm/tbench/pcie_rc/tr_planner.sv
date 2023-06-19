@@ -6,7 +6,7 @@
 
 let min(a,b) = (a < b) ? a : b;
 
-class tr_planner #(ITEM_WIDTH, RQ_TUSER_WIDTH, PCIE_DOWNHDR_WIDTH, RCB_SIZE, CLK_PERIOD, DEVICE) extends uvm_component;
+class tr_planner #(ITEM_WIDTH, RQ_TUSER_WIDTH, PCIE_DOWNHDR_WIDTH, RCB_SIZE, CLK_PERIOD, string DEVICE) extends uvm_component;
     `uvm_component_param_utils(uvm_pcie_rc::tr_planner #(ITEM_WIDTH, RQ_TUSER_WIDTH, PCIE_DOWNHDR_WIDTH, RCB_SIZE, CLK_PERIOD, DEVICE))
 
     localparam LOW_ADDR_WIDTH = (DEVICE == "STRATIX10" || DEVICE == "AGILEX") ? 7 : 12; // 7 for INTEL 12 XILINX
@@ -83,6 +83,7 @@ class tr_planner #(ITEM_WIDTH, RQ_TUSER_WIDTH, PCIE_DOWNHDR_WIDTH, RCB_SIZE, CLK
                 $swrite(debug_msg, "%s\n\t Deparsed RC MVB TR: \n", debug_msg);
 
                 $swrite(debug_msg, "%s\n\t PACKET SIZE:       %0d", debug_msg, pcie_tr.len);
+                $swrite(debug_msg, "%s\n\t LEN OF PART:       %0d", debug_msg, comp_length);
                 $swrite(debug_msg, "%s\n\t ATRIBUTES:        0x%h", debug_msg, pcie_tr.at);
                 $swrite(debug_msg, "%s\n\t SNOOP:            0x%h", debug_msg, pcie_tr.snoop);
                 $swrite(debug_msg, "%s\n\t RELAXED:          0x%h", debug_msg, pcie_tr.relaxed);
@@ -94,7 +95,7 @@ class tr_planner #(ITEM_WIDTH, RQ_TUSER_WIDTH, PCIE_DOWNHDR_WIDTH, RCB_SIZE, CLK
                 $swrite(debug_msg, "%s\n\t TAG_9:            0x%h", debug_msg, pcie_tr.tag_9);
                 $swrite(debug_msg, "%s\n\t CONST:            0x%h", debug_msg, 8'b01001010);
                 $swrite(debug_msg, "%s\n\t BYTE CNT:         0x%h", debug_msg, byte_count);
-                $swrite(debug_msg, "%s\n\t BYTE CNT:         0x%h", debug_msg, comp_hdr.data[43 : 32]);
+                $swrite(debug_msg, "%s\n\t BYTE CNT HDR:     0x%h", debug_msg, comp_hdr.data[43 : 32]);
                 $swrite(debug_msg, "%s\n\t BCM:              0x%h", debug_msg, bcm);
                 $swrite(debug_msg, "%s\n\t COMPLETE STATUS:  0x%h", debug_msg, complete_st);
                 $swrite(debug_msg, "%s\n\t COMPLETER ID:     0x%h", debug_msg, completer_id);
@@ -102,7 +103,6 @@ class tr_planner #(ITEM_WIDTH, RQ_TUSER_WIDTH, PCIE_DOWNHDR_WIDTH, RCB_SIZE, CLK
                 $swrite(debug_msg, "%s\n\t CONST:            0x%h", debug_msg, 1'b0);
                 $swrite(debug_msg, "%s\n\t TAG:              0x%h", debug_msg, pcie_tr.tag);
                 $swrite(debug_msg, "%s\n\t REQUEST ID:       0x%h", debug_msg, pcie_tr.req_id);
-                `uvm_info(this.get_full_name(), debug_msg ,UVM_MEDIUM);
 
                 // $write("\n\t BYTE CNT:         0x%h", comp_hdr.data[43 : 32]);
 
@@ -151,7 +151,6 @@ class tr_planner #(ITEM_WIDTH, RQ_TUSER_WIDTH, PCIE_DOWNHDR_WIDTH, RCB_SIZE, CLK
                 $swrite(debug_msg, "%s\t TR CLASS             %0d \n", debug_msg, comp_hdr.data[91 : 89]);
                 $swrite(debug_msg, "%s\t ATTRIBUTES           %0d \n", debug_msg, comp_hdr.data[94 : 92]);
                 $swrite(debug_msg, "%s\t DOWN SEQ           :  %s \n", debug_msg, comp_hdr.convert2string());
-                `uvm_info(this.get_full_name(), debug_msg ,UVM_MEDIUM)
 
                 comp_data.data = new[comp_length + (PCIE_DOWNHDR_WIDTH/32)];
                 comp_data.data[0 : 3-1] = {<<32{comp_hdr.data}};
@@ -178,6 +177,7 @@ class tr_planner #(ITEM_WIDTH, RQ_TUSER_WIDTH, PCIE_DOWNHDR_WIDTH, RCB_SIZE, CLK
             logic_array.push_back(comp_hdr);
 
         end
+        `uvm_info(this.get_full_name(), debug_msg ,UVM_MEDIUM);
 
     endtask
 
