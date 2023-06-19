@@ -16,6 +16,7 @@ class start_channel extends uvm_sequence;
     logic [16-1 : 0] hhp;
     logic [16-1 : 0] sdp;
     logic [16-1 : 0] shp;
+    logic [16-1 : 0] mask;
     int unsigned channel;
 
     function new (string name = "start_channel");
@@ -38,6 +39,9 @@ class start_channel extends uvm_sequence;
         //write sw_pointers
         m_regmodel.sw_data_pointer.write(status, 'h0, .parent(this));
         m_regmodel.sw_hdr_pointer.write(status,  'h0, .parent(this));
+
+        ptr_read(m_regmodel.data_mask , mask);
+        ptr_read(m_regmodel.hdr_mask , mask);
 
         //startup channel
         m_regmodel.status.read(status, data, .parent(this));

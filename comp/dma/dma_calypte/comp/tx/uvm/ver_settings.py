@@ -23,12 +23,13 @@ SETTINGS = {
         "PCIE_CC_MFB_BLOCK_SIZE"  : "8",
         "PCIE_CC_MFB_ITEM_WIDTH"  : "32",
 
-        "FIFO_DEPTH"              : "512",
         "CHANNELS"                : "2",
         "CNTRS_WIDTH"             : "64",
         "HDR_META_WIDTH"          : "24",
         "PKT_SIZE_MAX"            : "2**11",
-        "CHANNEL_ARBITER_EN"      : "0",
+
+        "DATA_POINTER_WIDTH"      : "14",
+        "DMA_HDR_POINTER_WIDTH"   : "14",
 
         "PCIE_LEN_MIN"            : "1",
         "PCIE_LEN_MAX"            : "256",
@@ -39,20 +40,13 @@ SETTINGS = {
     "8_channels" : {
         "CHANNELS"                : "8",
     },
-    "channel_arb_en" : {
-        "CHANNEL_ARBITER_EN"      : "1",
+    "buff_size_comb_small" : {
+        "DATA_POINTER_WIDTH"      : "11",
+        "DMA_HDR_POINTER_WIDTH"   : "11",
     },
-    "fifo_depth_comb_small" : {
-        "FIFO_DEPTH"              : "64",
-    },
-    "fifo_depth_comb_large" : {
-        "FIFO_DEPTH"              : "512",
-    },
-    "small_dma_frames" : {
-        "PKT_SIZE_MAX"            : "2**11",
-    },
-    "large_dma_frames" : {
-        "PKT_SIZE_MAX"            : "2**11",
+    "buff_size_comb_large" : {
+        "DATA_POINTER_WIDTH"      : "16",
+        "DMA_HDR_POINTER_WIDTH"   : "16",
     },
     "min_pcie_frames" : {
         "PCIE_LEN_MIN"            : "1",
@@ -67,7 +61,7 @@ SETTINGS = {
         "PCIE_LEN_MAX"            : "256",
     },
     "_combinations_" : (
-    (                                                                  ), # default
+    # (                                                                  ), # default
     # (             "4_channels",                                        ),
     (             "8_channels",                                        ),
     # (                                             "min_pcie_frames"   ,),
@@ -78,11 +72,12 @@ SETTINGS = {
     # (             "4_channels"                  , "large_pcie_frames" ,),
     (             "8_channels"                  , "min_pcie_frames"   ,),
     # (             "8_channels"                  , "medium_pcie_frames",),
-    (             "8_channels"                  , "large_pcie_frames" ,),
-    # (                                                                 "fifo_depth_comb_small",),
-    # (             "4_channels",                                       "fifo_depth_comb_small",),
-    # (                                             "min_pcie_frames",  "fifo_depth_comb_small",),
-    # (             "8_channels",                   "min_pcie_frames",  "fifo_depth_comb_small",),
-    (             "8_channels",                                       "fifo_depth_comb_small",),
+    # (             "8_channels"                  , "large_pcie_frames" ,),
+    (                                                                 "buff_size_comb_small",),
+    (                                                                 "buff_size_comb_large",),
+    # (             "4_channels",                                       "buff_size_comb_small",),
+    # (                                             "min_pcie_frames",  "buff_size_comb_small",),
+    # (             "8_channels",                   "min_pcie_frames",  "buff_size_comb_small",),
+    # (             "8_channels",                                       "buff_size_comb_small",),
     ),
 }
