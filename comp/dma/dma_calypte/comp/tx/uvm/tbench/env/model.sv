@@ -37,51 +37,6 @@ class model #(CHANNELS, PKT_SIZE_MAX, DEVICE, USR_ITEM_WIDTH, USER_META_WIDTH, C
 
     uvm_dma_ll::discard#(CHANNELS) discard_comp;
 
-    task ptr_read(uvm_reg register, output logic [16-1:0] ptr);
-        uvm_status_e   status;
-        uvm_reg_data_t data;
-        register.read(status, data);
-        ptr = data;
-    endtask
-
-    task ptr_get(uvm_reg register, output logic [16-1:0] ptr);
-        uvm_status_e   status;
-        uvm_reg_data_t data;
-        data = register.get();
-        ptr = data;
-    endtask
-
-    task ptr_write(uvm_reg register, logic [16-1:0] ptr);
-        uvm_status_e   status;
-        uvm_reg_data_t data;
-
-        data = ptr;
-        register.write(status, data);
-    endtask
-
-    task ptr_update(int unsigned sw_move, uvm_reg hw_register, uvm_reg sw_register);
-        logic [16-1 : 0] hw_ptr;
-        logic [16-1 : 0] sw_ptr;
-        logic [16-1 : 0] sw_mask = 16'h3fff;
-        string msg;
-
-        ptr_read(hw_register, hw_ptr);
-        ptr_get(sw_register , sw_ptr);
-
-        sw_ptr = sw_ptr & sw_mask;
-
-        while ((((hw_ptr - (sw_ptr + sw_move)) & sw_mask) < sw_move)) begin
-            msg = "\n";
-            $swrite(msg, "%sTIME%t\nHW PTR %h(%d), SW PTR %h(%d), SW MOVE %h(%d)\n", msg, $time(), hw_ptr, hw_ptr, sw_ptr, sw_ptr, sw_move, sw_move);
-            `uvm_info(this.get_full_name(), msg, UVM_DEBUG)
-            #(200ns);
-            ptr_read(hw_register, hw_ptr);
-        end
-
-        ptr_write(sw_register, ((sw_ptr + (sw_move)) & sw_mask));
-
-    endtask
-
     typedef struct{
         logic [11-1 : 0]                                        dword_cnt;
         logic [$clog2(CHANNELS)-1 : 0]                          channel;
@@ -250,10 +205,6 @@ class model #(CHANNELS, PKT_SIZE_MAX, DEVICE, USR_ITEM_WIDTH, USER_META_WIDTH, C
                         sw_move = pcie_data_tr[int'(m_pcie_info.channel)].data.size() - int'(m_pcie_info.lbe[int'(m_pcie_info.channel)]) - int'(m_pcie_info.fbe[int'(m_pcie_info.channel)]);
                     end
 
-                    // if (m_model_info.run[1] == 0 || (m_model_info.run[1] == 1 && discard_comp.drop == 0)) begin
-                    //     ptr_update(sw_move, m_regmodel.channel[int'(m_pcie_info.channel)].hw_data_pointer, m_regmodel.channel[int'(m_pcie_info.channel)].sw_data_pointer);
-                    // end
-
                     debug_msg = "\n";
                     $swrite(debug_msg, "%sFBE %d\n",      debug_msg, m_pcie_info.fbe[int'(m_pcie_info.channel)]);
                     $swrite(debug_msg, "%sLBE %d\n",      debug_msg, m_pcie_info.lbe[int'(m_pcie_info.channel)]);
@@ -289,7 +240,6 @@ class model #(CHANNELS, PKT_SIZE_MAX, DEVICE, USR_ITEM_WIDTH, USER_META_WIDTH, C
                     if (m_model_info.run[1] == 0 || (m_model_info.run[1] == 1 && discard_comp.drop == 0)) begin
                         cnt_reg[int'(m_pcie_info.channel)].dma_cnt++;
                         cnt_reg[int'(m_pcie_info.channel)].byte_cnt += dma_hdr.dma_size;
-                        // ptr_update(sw_move, m_regmodel.channel[int'(m_pcie_info.channel)].hw_hdr_pointer, m_regmodel.channel[int'(m_pcie_info.channel)].sw_hdr_pointer);
 
                         debug_msg = "";
                         $swrite(debug_msg, "%s\nOUT META %s\n", debug_msg, out_meta_tr.convert2string());

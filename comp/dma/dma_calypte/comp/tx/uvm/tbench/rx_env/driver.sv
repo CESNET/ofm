@@ -9,7 +9,6 @@ class driver#(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends u
     `uvm_component_param_utils(uvm_dma_ll_rx::driver#(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE))
 
     uvm_seq_item_pull_port #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH), uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)) seq_item_port_logic_vector_array;
-    localparam FRAME_PTR_W = DATA_ADDR_W;
 
     mailbox#(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))                      logic_vector_array_export;
     mailbox#(uvm_logic_vector::sequence_item#(17))                                    sdp_export;
@@ -28,8 +27,11 @@ class driver#(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends u
     int unsigned                 dma_cnt     = 0;
     string                       debug_msg_c;
     logic [$clog2(CHANNELS)-1:0] channel;
-    logic [FRAME_PTR_W-1 : 0]    frame_pointer;
-    logic [FRAME_PTR_W-1 : 0]    dma_len_c = 0;
+    logic [DATA_ADDR_W-1 : 0]    frame_pointer;
+    logic [DATA_ADDR_W-1 : 0]    dma_len_c = 0;
+    int unsigned min_index = 1;
+    int unsigned max_index;
+    int unsigned index_q[$];
 
     // ------------------------------------------------------------------------
     // Constructor
@@ -222,6 +224,7 @@ class driver#(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends u
         // Preparation for out of order generation
         pcie_info                    pcie_tr_fifo[$];
         pcie_info                    pcie_tr;
+        logic[16-1 : 0]              prev_sdp = '0;
 
         fork
             check_status();
@@ -255,6 +258,7 @@ class driver#(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends u
             frame_pointer = dma_len_c;
             last = 1'b0;
             pcie_tr.index = 0;
+            prev_sdp = 0;
 
             while (dma_len) begin
                 data_index = 0;
@@ -293,7 +297,6 @@ class driver#(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends u
                 pcie_tr.meta      = uvm_logic_vector::sequence_item#(sv_pcie_meta_pack::PCIE_CQ_META_WIDTH)::type_id::create("pcie_tr.meta");
                 pcie_tr.sdp       = uvm_logic_vector::sequence_item# (17)::type_id::create("pcie_tr.sdp");
                 pcie_tr.meta.data = '0;
-                pcie_tr.index++;
 
                 if (DEVICE == "ULTRASCALE") begin
                     // In case of Xilinx
@@ -352,9 +355,11 @@ class driver#(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends u
 
                 sdp_tr = uvm_logic_vector::sequence_item# (17)::type_id::create("sdp_tr");
 
-                sdp_tr.data[16-1 : 0] = (pcie_len*4) - dfbe - dlbe;
+                sdp_tr.data[16-1 : 0] = prev_sdp + (pcie_len*4) - dfbe - dlbe;
                 sdp_tr.data[16] = 1'b0;
+                prev_sdp += (pcie_len*4) - dfbe - dlbe;
                 pcie_tr.sdp = sdp_tr;
+                pcie_tr.index++;
 
                 pcie_tr_fifo.push_back(pcie_tr);
                 if (dma_len < 0) begin
@@ -372,6 +377,7 @@ class driver#(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends u
 
             end
 
+            prev_sdp = '0;
             $swrite(debug_msg, "%sSIZE IN BYTES - BE %d\n", debug_msg, final_size_be);
 
             // Preparation for out of order generation
@@ -384,15 +390,25 @@ class driver#(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends u
                 $swrite(debug_msg, "%sOUT DATA ADDR     0x%h(%d)\n", debug_msg, pcie_tr.data.data[0][DATA_ADDR_W-1 : 2], pcie_tr.data.data[0][DATA_ADDR_W-1 : 2]);
                 $swrite(debug_msg, "%sOUT Transaction ID     %d\n", debug_msg, pcie_tr.index);
                 $swrite(debug_msg, "%sOUT DATA               %s\n", debug_msg, pcie_tr.data.convert2string());
+
+                if (pcie_tr.index >= min_index) begin
+                    sdp_tr.data[16-1 :0] = pcie_tr.sdp.data[16-1 :0] - prev_sdp;
+                    sdp_tr.data[16] = pcie_tr.sdp.data[16];
+                    prev_sdp = pcie_tr.sdp.data[16-1 :0];
+                    min_index = pcie_tr.index;
+                end else begin
+                    sdp_tr = pcie_tr.sdp;
+                    sdp_tr.data[16-1 :0] = '0;
+                end
+
                 logic_vector_array_new = pcie_tr.data;
                 logic_vector_new       = pcie_tr.meta;
-                sdp_tr                 = pcie_tr.sdp;
                 logic_vector_array_export.put(logic_vector_array_new);
                 sdp_export.put(sdp_tr);
                 logic_vector_export.put(logic_vector_new);
 
             end
-
+            min_index = 1;
             // ====================================================================
             // DMA HDR logic
             logic_vector_new       = uvm_logic_vector::sequence_item#(sv_pcie_meta_pack::PCIE_CQ_META_WIDTH)::type_id::create("logic_vector_new");
@@ -469,7 +485,7 @@ class driver#(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends u
             $swrite(debug_msg, "%sDMA CNT %d\n", debug_msg, dma_cnt);
             $swrite(debug_msg, "%sDMA HDR\n"   , debug_msg);
             $swrite(debug_msg, "%s===============================================\n", debug_msg);
-            `uvm_info(this.get_full_name(),              debug_msg, UVM_DEBUG)
+            `uvm_info(this.get_full_name(),              debug_msg, UVM_HIGH)
 
             logic_vector_array_new.data = {pcie_hdr[31 : 0], pcie_hdr[63 : 32], pcie_hdr[95 : 64], pcie_hdr[127 : 96], dma_hdr[31 : 0], dma_hdr[63 : 32]};
 
