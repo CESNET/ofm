@@ -75,7 +75,7 @@ class monitor_logic_vector_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH,
                         end
                     end
 
-                    if (tr.eof[it] && hi_tr != null) begin
+                    if (tr.eof[it]) begin
                         if (hi_tr == null) begin
                             `uvm_error(this.get_full_name(), "\n\tEOF has been set before frame heve been started. SOF havent been set before this EOF")
                         end else begin
