@@ -16,7 +16,6 @@ set SIG_FILE         "./sim_sig.fdo"
 set COMPONENTS [list [list "DUT" $DUT_BASE "SIM"]]
 
 # Global include file for compilation
-set SIM_FLAGS(EXTRA_VFLAGS) "-voptargs=-nomlopt"
 source "$FIRMWARE_BASE/build/Modelsim.inc.fdo"
 
 # Suppress warnings from arithm library

@@ -20,7 +20,6 @@ set COMPONENTS [list \
     [list "DUT_VER"  $DUT_VER_BASE   "FULL"]\
 
 ]
-set SIM_FLAGS(EXTRA_VFLAGS) "-voptargs=-nomlopt"
 # Disable Code Coverage
 set CODE_COVERAGE "false"
 

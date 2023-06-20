@@ -332,6 +332,13 @@ proc nb_vsim_set_flags {vsim_flags sim_flags} {
         }
     }
 
+    if {[info exists SIM_FLAGS(VOPT_ARGS)] } {
+        lappend VSIM_FLAGS "-voptargs=-nomlopt $SIM_FLAGS(VOPT_ARGS)"
+    } else {
+        lappend VSIM_FLAGS -voptargs=-nomlopt
+    }
+
+
     # Randomization
     if {[info exists SIM_FLAGS(RAND_SEED)] } {
         lappend VSIM_FLAGS -sv_seed $SIM_FLAGS(RAND_SEED)

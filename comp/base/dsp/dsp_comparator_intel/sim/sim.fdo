@@ -16,7 +16,7 @@ set SIG_FILE         "./sim_sig.fdo"
 set COMPONENTS [list [list "DUT" $DUT_BASE "SIM"]]
 
 
-set SIM_FLAGS(EXTRA_VFLAGS) "-voptargs=+acc=v+-floatparameters+/testbench"
+set SIM_FLAGS(VOPT_ARGS) "+acc=v+-floatparameters+/testbench"
 
 # Global include file for compilation
 source "$FIRMWARE_BASE/build/Modelsim.inc.fdo"
