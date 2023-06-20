@@ -90,14 +90,23 @@ proc CompileMod {FNAME OPT} {
     }
     lappend opt(VLOG_SV_FLAGS)
 
+    set VCOM_PARAM ""
+    set VLOG_PARAM ""
+    if {[info exists SIM_FLAGS(DEBUG)] && $SIM_FLAGS(DEBUG)} {
+        set VCOM_PARAM "-lint"
+    } else {
+        set VCOM_PARAM "-nodebug=ports"
+        set VLOG_PARAM "-nodebug"
+    }
+
     # Source compiling
     if {$FEXT in [list .v .vh]} {
-        set CMD [list vlog -vmake {*}$COVER_PARAMS -timescale "1ps/1ps" -work $LIB]
+        set CMD [list vlog -vmake {*}$COVER_PARAMS -timescale "1ps/1ps" {*}$VLOG_PARAM -work $LIB]
     } elseif {$FEXT in [list .sv]} {
         regsub "/\[^/\]+\$" $FNAME "/" DIR
-        set CMD [list vlog -vmake {*}$COVER_PARAMS_SV -sv -timescale "1ps/1ps" -work $LIB +incdir+$DIR {*}$SIM_FLAGS(VLOG_SV_FLAGS) {*}$opt(VLOG_SV_FLAGS)]
+        set CMD [list vlog -vmake {*}$COVER_PARAMS_SV -sv -timescale "1ps/1ps" {*}$VLOG_PARAM -work $LIB +incdir+$DIR {*}$SIM_FLAGS(VLOG_SV_FLAGS) {*}$opt(VLOG_SV_FLAGS)]
     } else {
-        set CMD [list vcom -vmake -2008 -explicit {*}$COVER_PARAMS -work $LIB]
+        set CMD [list vcom -vmake -2008 -explicit {*}$COVER_PARAMS {*}$VCOM_PARAM  -work $LIB]
     }
 
     if {$SIM_FLAGS(BATCH_COMPILE)} {
@@ -332,10 +341,19 @@ proc nb_vsim_set_flags {vsim_flags sim_flags} {
         }
     }
 
-    if {[info exists SIM_FLAGS(VOPT_ARGS)] } {
-        lappend VSIM_FLAGS "-voptargs=-nomlopt $SIM_FLAGS(VOPT_ARGS)"
+
+    #VOPT ARGS
+    set VOPT_DEBUG ""
+    if {[info exists SIM_FLAGS(DEBUG)] && $SIM_FLAGS(DEBUG)} {
+        set VOPT_DEBUG "-lint=full +acc"
     } else {
-        lappend VSIM_FLAGS -voptargs=-nomlopt
+        set VOPT_DEBUG "-nodebug"
+    }
+
+    if {[info exists SIM_FLAGS(VOPT_ARGS)] } {
+        lappend VSIM_FLAGS "-voptargs=-nomlopt $VOPT_DEBUG $SIM_FLAGS(VOPT_ARGS)"
+    } else {
+        lappend VSIM_FLAGS "-voptargs=-nomlopt $VOPT_DEBUG"
     }
 
 
