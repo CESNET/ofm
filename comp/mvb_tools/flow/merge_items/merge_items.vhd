@@ -181,7 +181,7 @@ begin
     fifo_rx0_dst_rdy <= TX_DST_RDY and not must_wait;
 
     tx_data_g : for i in 0 to RX0_ITEMS-1 generate
-        tx_data1_arr(i) <= fifoxm_do_arr(to_integer(demux_sel(i)));
+        tx_data1_arr(i) <= fifoxm_do_arr(to_integer(tsel(log2(RX0_ITEMS) = 0, to_unsigned(0, 1), demux_sel(i))));
         tx_data_arr(i) <= tx_data1_arr(i) & rx0_data_arr(i);
     end generate;
 

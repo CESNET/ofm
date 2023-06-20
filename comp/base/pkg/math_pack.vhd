@@ -67,6 +67,7 @@ package math_pack is
    function tsel(cond : boolean; true_val: integer; false_val: integer) return integer;
    function tsel(cond : boolean; true_val: real; false_val: real) return real;
    function tsel(cond : boolean; true_val: std_logic; false_val: std_logic) return std_logic;
+   function tsel(cond : boolean; true_val: unsigned; false_val: unsigned) return unsigned;
    function tsel(cond : boolean; true_val: bit; false_val: bit) return bit;
    function tsel(cond : boolean; true_val: std_logic_vector; false_val: std_logic_vector) return std_logic_vector;
    function tsel(cond : boolean; true_val: string; false_val: string) return string;
@@ -227,6 +228,15 @@ package body math_pack is
       end if;
    end;
 
+  function tsel(cond : boolean; true_val: unsigned; false_val: unsigned) return unsigned is
+   begin
+      if cond then
+         return true_val;
+      else
+         return false_val;
+      end if;
+   end;
+
    function tsel(cond : boolean; true_val: bit; false_val: bit) return bit is
    begin
       if cond then
@@ -254,7 +264,6 @@ package body math_pack is
          return false_val;
       end if;
    end;
-
 
    function ceil(x,base : integer) return integer is
      variable m : integer;
