@@ -354,7 +354,7 @@ begin
 
          -- substract 1 for every MVB item read from main MVB FIFO
          decrement := (others => '0');
-         if (TX_MVB_SRC_RDY='1' and TX_MFB_DST_RDY='1') then
+         if (TX_MVB_SRC_RDY='1' and TX_MVB_DST_RDY='1') then
             decrement := mvb_items_vld_cnt;
          end if;
 
