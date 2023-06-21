@@ -38,10 +38,14 @@ class ex_test extends uvm_test;
         rq_axi_lib = uvm_axi::sequence_lib_tx #(RQ_TDATA_WIDTH, RQ_TUSER_WIDTH, MFB_UP_REGIONS)::type_id::create("axi_rq_seq", this);
 
         rq_mfb_lib.init_sequence();
+        rq_mfb_lib.cfg = new();
+        rq_mfb_lib.cfg.probability_set(RQ_MFB_DST_RDY_PROB_MIN, RQ_MFB_DST_RDY_PROB_MAX);
         rq_mfb_lib.min_random_count = 60;
         rq_mfb_lib.max_random_count = 80;
 
         rq_axi_lib.init_sequence();
+        rq_axi_lib.cfg = new();
+        rq_axi_lib.cfg.probability_set(RQ_MFB_DST_RDY_PROB_MIN, RQ_MFB_DST_RDY_PROB_MAX);
         rq_axi_lib.min_random_count = 60;
         rq_axi_lib.max_random_count = 80;
 
@@ -57,6 +61,8 @@ class ex_test extends uvm_test;
         uvm_mfb::sequence_lib_tx#(DMA_MFB_DOWN_REGIONS, MFB_DOWN_REG_SIZE, MFB_DOWN_BLOCK_SIZE, MFB_DOWN_ITEM_WIDTH, META_WIDTH) down_seq;
         down_seq = uvm_mfb::sequence_lib_tx#(DMA_MFB_DOWN_REGIONS, MFB_DOWN_REG_SIZE, MFB_DOWN_BLOCK_SIZE, MFB_DOWN_ITEM_WIDTH, META_WIDTH)::type_id::create($sformatf("mfb_eth_down_seq%0d", index));
         down_seq.init_sequence();
+        down_seq.cfg = new();
+        down_seq.cfg.probability_set(DOWN_MFB_DST_RDY_PROB_MIN, DOWN_MFB_DST_RDY_PROB_MAX);
         down_seq.min_random_count = 60;
         down_seq.max_random_count = 80;
 
@@ -69,6 +75,8 @@ class ex_test extends uvm_test;
         uvm_mvb::sequence_lib_tx#(DMA_MVB_DOWN_ITEMS, sv_dma_bus_pack::DMA_DOWNHDR_WIDTH) down_mvb_seq;
         down_mvb_seq = uvm_mvb::sequence_lib_tx#(DMA_MVB_DOWN_ITEMS, sv_dma_bus_pack::DMA_DOWNHDR_WIDTH)::type_id::create($sformatf("mvb_eth_down_seq%0d", index));
         down_mvb_seq.init_sequence();
+        down_mvb_seq.cfg = new();
+        down_mvb_seq.cfg.probability_set(DOWN_MVB_DST_RDY_PROB_MIN, DOWN_MVB_DST_RDY_PROB_MAX);
         down_mvb_seq.min_random_count = 60;
         down_mvb_seq.max_random_count = 80;
 
@@ -78,8 +86,8 @@ class ex_test extends uvm_test;
     endtask
 
     task run_seq(int unsigned index);
-        virt_seq #(MRRS, MPS, ONLY_READ) m_vseq;
-        m_vseq = virt_seq #(MRRS, MPS, ONLY_READ)::type_id::create($sformatf("m_vseq%0d", index));
+        virt_seq #(MRRS, MIN_READ_REQ_SIZE, MPS, MIN_WRITE_REQ_SIZE) m_vseq;
+        m_vseq = virt_seq #(MRRS, MIN_READ_REQ_SIZE, MPS, MIN_WRITE_REQ_SIZE)::type_id::create($sformatf("m_vseq%0d", index));
         m_vseq.randomize();
         m_vseq.start(m_env.m_env_up[index].m_sequencer);
         event_vseq[index] = 1'b0;
