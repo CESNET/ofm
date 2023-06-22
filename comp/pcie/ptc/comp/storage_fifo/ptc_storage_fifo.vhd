@@ -164,13 +164,11 @@ architecture full of PTC_STORAGE_FIFO is
    signal main_mfb_fifo_in_sof_pos : std_logic_vector(MFB_REGIONS*SOF_POS_WIDTH-1 downto 0);
    signal main_mfb_fifo_in_eof_pos : std_logic_vector(MFB_REGIONS*EOF_POS_WIDTH-1 downto 0);
    signal main_mfb_fifo_in_src_rdy : std_logic;
-   signal main_mfb_fifo_in_dst_rdy : std_logic; -- always '1'
-   signal main_mfb_fifo_afull      : std_logic; -- for simulation debug purposes
+   signal main_mfb_fifo_in_dst_rdy : std_logic;
 
    ---------------------------------------------------------------------------
 
    signal rx_mfb_ext_err_reg       : std_logic; -- for simulation debug purposes
-   signal mfb_main_fifo_err_reg    : std_logic; -- for simulation debug purposes
    signal mvb_main_fifo_err_reg    : std_logic; -- for simulation debug purposes
 
 begin
@@ -250,7 +248,7 @@ begin
    input_mfb_shake_fifoxm_i : entity work.FIFOX_MULTI
    generic map (
       DATA_WIDTH          => MFB_FIFOXM_ITEM_WIDTH,
-      ITEMS               => INPUT_MFB_FIFOXM_ITEMS*MFB_REGIONS,
+      ITEMS               => MAIN_FIFO_ITEMS*MFB_REGIONS,
       
       WRITE_PORTS         => MFB_REGIONS,
       READ_PORTS          => MFB_REGIONS,
@@ -320,7 +318,7 @@ begin
                last_sof_vld := '0'; -- there is a EOF after the previous SOF
             end if;
 
-            in_mfb_fifoxm_rd(i) <= '1'; -- only read from valid regions
+            in_mfb_fifoxm_rd(i) <= main_mfb_fifo_in_dst_rdy; -- only read from valid regions
          end if;
       end loop;
 
@@ -354,7 +352,7 @@ begin
 
          -- substract 1 for every MVB item read from main MVB FIFO
          decrement := (others => '0');
-         if (TX_MVB_SRC_RDY='1' and TX_MFB_DST_RDY='1') then
+         if (TX_MVB_SRC_RDY='1' and TX_MVB_DST_RDY='1') then
             decrement := mvb_items_vld_cnt;
          end if;
 
@@ -370,65 +368,31 @@ begin
    -- -------------------------------------------------------------------------
 
    -- -------------------------------------------------------------------------
-   -- Main MFB FIFOX
+   -- OUTPUT MFB REGISTER
    -- -------------------------------------------------------------------------
 
    -- mask SOF and EOF by FIFO read (valid)
    main_mfb_fifo_in_sof_act <= main_mfb_fifo_in_sof and in_mfb_fifoxm_rd;
    main_mfb_fifo_in_eof_act <= main_mfb_fifo_in_eof and in_mfb_fifoxm_rd;
 
-   mfb_main_fifo_i : entity work.MFB_FIFOX
-   generic map (
-      REGIONS             => MFB_REGIONS    ,
-      REGION_SIZE         => MFB_REG_SIZE   ,
-      BLOCK_SIZE          => MFB_BLOCK_SIZE ,
-      ITEM_WIDTH          => MFB_ITEM_WIDTH ,
-      FIFO_DEPTH          => MAIN_FIFO_ITEMS,
-      RAM_TYPE            => "AUTO",
-      DEVICE              => DEVICE,
-      ALMOST_FULL_OFFSET  => 1,--MAIN_FIFO_ITEMS,
-      ALMOST_EMPTY_OFFSET => 1
-   )
-   port map (
-      CLK         => CLK  ,
-      RST         => RESET,
-
-      RX_DATA     => main_mfb_fifo_in_data   ,
-      RX_SOF_POS  => main_mfb_fifo_in_sof_pos,
-      RX_EOF_POS  => main_mfb_fifo_in_eof_pos,
-      RX_SOF      => main_mfb_fifo_in_sof_act,
-      RX_EOF      => main_mfb_fifo_in_eof_act,
-      RX_SRC_RDY  => main_mfb_fifo_in_src_rdy,
-      RX_DST_RDY  => main_mfb_fifo_in_dst_rdy, -- always '1'
-
-      TX_DATA     => TX_MFB_DATA   ,
-      TX_SOF_POS  => TX_MFB_SOF_POS,
-      TX_EOF_POS  => TX_MFB_EOF_POS,
-      TX_SOF      => TX_MFB_SOF    ,
-      TX_EOF      => TX_MFB_EOF    ,
-      TX_SRC_RDY  => TX_MFB_SRC_RDY,
-      TX_DST_RDY  => TX_MFB_DST_RDY,
-
-      FIFO_STATUS => open,
-      FIFO_AFULL  => main_mfb_fifo_afull,
-      FIFO_AEMPTY => open
-   );
+   main_mfb_fifo_in_dst_rdy <= TX_MFB_DST_RDY;
 
    process (CLK)
    begin
       if (rising_edge(CLK)) then
-         if (main_mfb_fifo_in_dst_rdy = '0') then
-            mfb_main_fifo_err_reg <= '1';
+         if (TX_MFB_DST_RDY = '1') then
+            TX_MFB_DATA    <= main_mfb_fifo_in_data;
+            TX_MFB_SOF_POS <= main_mfb_fifo_in_sof_pos;
+            TX_MFB_EOF_POS <= main_mfb_fifo_in_eof_pos;
+            TX_MFB_SOF     <= main_mfb_fifo_in_sof_act;
+            TX_MFB_EOF     <= main_mfb_fifo_in_eof_act;
+            TX_MFB_SRC_RDY <= main_mfb_fifo_in_src_rdy;
          end if;
          if (RESET = '1') then
-            mfb_main_fifo_err_reg <= '0';
+            TX_MFB_SRC_RDY <= '0';
          end if;
       end if;
    end process;
-
-   assert (mfb_main_fifo_err_reg /= '1') 
-      report "PTC: Storage main MFB FIFO dst_rdy fall error!"
-      severity failure;
 
    -- -------------------------------------------------------------------------
 

@@ -5,6 +5,23 @@
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
 
+class virt_seq_slow_dma_down#(MRRS, MIN_READ_REQ_SIZE, MPS, MIN_WRITE_REQ_SIZE) extends virt_seq#(MRRS, MIN_READ_REQ_SIZE, MPS, MIN_WRITE_REQ_SIZE);
+
+    `uvm_object_param_utils(test::virt_seq_slow_dma_down#(MRRS, MIN_READ_REQ_SIZE, MPS, MIN_WRITE_REQ_SIZE))
+
+    `uvm_declare_p_sequencer(uvm_dma_up::sequencer)
+
+    function new (string name = "virt_seq_slow_dma_down");
+        super.new(name);
+    endfunction
+
+    virtual function void init();
+        super.init();
+        m_info = uvm_ptc_info::sequence_simple_read#(MRRS, MIN_READ_REQ_SIZE)::type_id::create("m_info");
+    endfunction
+endclass
+
+
 class sequence_stop_var_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH, TR_MIN, TR_MAX) extends uvm_mfb::sequence_stop_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH);
     `uvm_object_param_utils(test::sequence_stop_var_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH, TR_MIN, TR_MAX))
 
@@ -194,8 +211,8 @@ class slow_dma_down_test extends uvm_test;
     endtask
 
     task run_seq(int unsigned index);
-        virt_seq #(MRRS, MPS, ONLY_READ) m_vseq;
-        m_vseq = virt_seq #(MRRS, MPS, ONLY_READ)::type_id::create($sformatf("m_vseq%0d", index));
+        virt_seq_slow_dma_down #(MRRS, MIN_READ_REQ_SIZE, MPS, MIN_WRITE_REQ_SIZE) m_vseq;
+        m_vseq = virt_seq_slow_dma_down #(MRRS, MIN_READ_REQ_SIZE, MPS, MIN_WRITE_REQ_SIZE)::type_id::create($sformatf("m_vseq%0d", index));
         m_vseq.randomize();
         m_vseq.start(m_env.m_env_up[index].m_sequencer);
         event_vseq[index] = 1'b0;

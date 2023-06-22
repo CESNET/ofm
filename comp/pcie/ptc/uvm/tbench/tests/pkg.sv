@@ -12,7 +12,7 @@ package test;
     `include "uvm_macros.svh"
     import uvm_pkg::*;
 
-// Number of DMA ports per one PTC, possible values: 1, 2.
+    // Number of DMA ports per one PTC, possible values: 1, 2, 4.
     parameter DMA_PORTS             = 2;
     parameter MVB_UP_ITEMS          = 1;
     parameter DMA_MVB_UP_ITEMS      = 2;
@@ -67,14 +67,23 @@ package test;
     // PCIE header is in MVB data only if ENDPOINT is P_TILE and DEVICE is STRATIX10 or DEVICE is Agilex
 
     // VERIFICATION PARAMETERS
-    parameter CLK_PERIOD            = 2.22222222ns;
-    parameter CLK_DMA_PERIOD        = 5ns;
-    parameter RESET_CLKS            = 10;
-    parameter META_WIDTH            = 0;
-    parameter TR_MIN                = 100;
-    parameter TR_MAX                = 300;
-    parameter ONLY_READ             = 0;
-    parameter TEST_NAME             = "test::ex_test";
+    parameter CLK_PERIOD                = 2.22222222ns;
+    parameter CLK_DMA_PERIOD            = 5ns;
+    parameter RESET_CLKS                = 10;
+    parameter META_WIDTH                = 0;
+    parameter TR_MIN                    = 100;
+    parameter TR_MAX                    = 300;
+    parameter TEST_NAME                 = "test::ex_test";
+    // MIN FRAME SIZE
+    parameter MIN_READ_REQ_SIZE         = 1;
+    parameter MIN_WRITE_REQ_SIZE        = 1;
+    // DST RDY PROBABILITY
+    parameter DOWN_MVB_DST_RDY_PROB_MIN = 0;
+    parameter DOWN_MVB_DST_RDY_PROB_MAX = 100;
+    parameter DOWN_MFB_DST_RDY_PROB_MIN = 0;
+    parameter DOWN_MFB_DST_RDY_PROB_MAX = 100;
+    parameter RQ_MFB_DST_RDY_PROB_MIN   = 0;
+    parameter RQ_MFB_DST_RDY_PROB_MAX   = 100;
 
     `include "sequence.sv"
     `include "test.sv"
