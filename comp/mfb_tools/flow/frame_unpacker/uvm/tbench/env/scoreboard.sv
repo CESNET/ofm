@@ -8,9 +8,6 @@
 class scoreboard #(HEADER_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, VERBOSITY) extends uvm_scoreboard;
     `uvm_component_param_utils(uvm_superunpacketer::scoreboard #(HEADER_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, VERBOSITY))
 
-    int unsigned compared;
-    int unsigned errors;
-
     uvm_analysis_export #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))               out_data;
     uvm_analysis_export #(uvm_logic_vector::sequence_item #(HEADER_SIZE+MVB_ITEM_WIDTH))         out_meta;
 
@@ -28,7 +25,6 @@ class scoreboard #(HEADER_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, VERBOSITY) exten
 
         out_data   = new("out_data", this);
         out_meta   = new("out_meta", this);
-        compared   = 0;
     endfunction
 
     function int unsigned success();
@@ -55,17 +51,23 @@ class scoreboard #(HEADER_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, VERBOSITY) exten
 
         data_cmp.compared_tr_timeout_set(50us);
         meta_cmp.compared_tr_timeout_set(50us);
-        data_cmp.model_tr_timeout_set(50us);
-        meta_cmp.model_tr_timeout_set(50us);
+        data_cmp.model_tr_timeout_set(1ms);
+        meta_cmp.model_tr_timeout_set(1ms);
 
         m_model = model#(HEADER_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, VERBOSITY)::type_id::create("m_model", this);
+
+        m_model.input_data = uvm_common::fifo_convertor #(uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)))::type_id::create("model_input_data", this);
+        m_model.input_mvb = uvm_common::fifo_convertor #(uvm_common::model_item #(uvm_logic_vector::sequence_item #(MVB_ITEM_WIDTH)))::type_id::create("model_input_mvb", this);
     endfunction
 
     function void connect_phase(uvm_phase phase);
+        uvm_common::fifo_convertor#(uvm_common::model_item#(uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH))) mfb_in;
+        uvm_common::fifo_convertor#(uvm_common::model_item#(uvm_logic_vector::sequence_item#(MVB_ITEM_WIDTH))) mvb_in;
 
-        // connects input data to the input of the model
-        input_data.port.connect(m_model.input_data.analysis_export);
-        input_mvb.port.connect(m_model.input_mvb.analysis_export);
+        $cast(mfb_in, m_model.input_data);
+        input_data.port.connect(mfb_in.analysis_export);
+        $cast(mvb_in, m_model.input_mvb);
+        input_mvb.port.connect(mvb_in.analysis_export);
 
         // processed data from the output of the model connected to the analysis fifo
         m_model.out_data.connect(data_cmp.analysis_imp_model);

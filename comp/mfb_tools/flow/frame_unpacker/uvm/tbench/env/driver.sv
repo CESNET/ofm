@@ -4,8 +4,8 @@
 
 // SPDX-License-Identifier: BSD-3-Clause
 
-class driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, OFF_PIPE_STAGES) extends uvm_component;
-    `uvm_component_param_utils(uvm_superunpacketer::driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, OFF_PIPE_STAGES))
+class driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, OFF_PIPE_STAGES, ZERO_TS = 0) extends uvm_component;
+    `uvm_component_param_utils(uvm_superunpacketer::driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, OFF_PIPE_STAGES, ZERO_TS))
 
     uvm_seq_item_pull_port #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH), uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) seq_item_port_byte_array;
     uvm_seq_item_pull_port #(uvm_superpacket_header::sequence_item #(MVB_ITEM_WIDTH), uvm_superpacket_header::sequence_item #(MVB_ITEM_WIDTH))           seq_item_port_header;
@@ -37,8 +37,18 @@ class driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITE
     logic [HEADER_SIZE-1 : 0]          header;
     local logic [MFB_ITEM_WIDTH-1 : 0] data_fifo[$];
 
-    function logic[HEADER_SIZE-1 : 0] fill_header(uvm_superpacket_header::sequence_item #(MVB_ITEM_WIDTH) info, logic first);
-        logic[HEADER_SIZE-1 : 0] ret = '0;
+    string debug_msg;
+
+    typedef struct{
+        logic next;
+        logic[HEADER_SIZE-1 : 0] hdr;
+    } sp_info;
+
+
+
+    function sp_info fill_header(uvm_superpacket_header::sequence_item #(MVB_ITEM_WIDTH) info, logic first);
+        logic[HEADER_SIZE-1 : 0] hdr = '0;
+        sp_info ret;
         info.next = 1'b1;
 
         if((size_of_sp.sp_size - ((act_size + HEADER_SIZE/MFB_ITEM_WIDTH) + info.length)) < MIN_SIZE) begin
@@ -54,22 +64,29 @@ class driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITE
         end
         end_of_packet = info.length + HEADER_SIZE/MFB_ITEM_WIDTH;
 
-        ret = {info.timestamp, info.loop_id, info.mask, info.next, info.length};
+        if (ZERO_TS == 1) begin
+            info.timestamp = '0;
+        end
+        hdr = {info.timestamp, info.loop_id, info.mask, info.length};
+        ret.hdr = hdr;
+        ret.next = info.next;
         return ret;
     endfunction
 
-    function void fill_tr(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH) pkt, logic[HEADER_SIZE-1 : 0] header);
+    function void fill_tr(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH) pkt, sp_info sp_st);
         int align  = 0;
         string msg = "";
 
         align = MFB_BLOCK_SIZE - end_of_packet[3-1 : 0];
-        if (header[15] == 1'b1 && end_of_packet[3-1 : 0] > 0) begin
+        if (sp_st.next == 1'b1 && end_of_packet[3-1 : 0] > 0) begin
             end_of_packet += align;
         end
+        $swrite(debug_msg, "%sheader %h\n", debug_msg, sp_st.hdr);
+        $swrite(debug_msg, "%sPKT %s\n", debug_msg, pkt.convert2string());
 
         for (int i = 0; i < end_of_packet; i++) begin
             if (i < HEADER_SIZE/MFB_ITEM_WIDTH) begin
-                data_fifo.push_back(header[(i+1)*MFB_ITEM_WIDTH-1 -: MFB_ITEM_WIDTH]);
+                data_fifo.push_back(sp_st.hdr[(i+1)*MFB_ITEM_WIDTH-1 -: MFB_ITEM_WIDTH]);
             end else if (i < pkt.data.size() + (HEADER_SIZE/MFB_ITEM_WIDTH)) begin
                 data_fifo.push_back(pkt.data[i - (HEADER_SIZE/MFB_ITEM_WIDTH)]);
             end else
@@ -78,7 +95,7 @@ class driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITE
             act_size++;
         end
 
-        if (header[15] == 1'b0 && end_of_packet[3-1 : 0]) begin
+        if (sp_st.next == 1'b0 && end_of_packet[3-1 : 0]) begin
             for (int i = 0; i < align; i++) begin
                 data_fifo.push_back('0);
             end
@@ -100,8 +117,8 @@ class driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITE
         seq_item_port_header     = new("seq_item_port_header", this);
         seq_item_port_sp_size    = new("seq_item_port_sp_size", this);
 
-        byte_array_export        = new(10);
-        logic_vector_export      = new(10);
+        byte_array_export        = new(100);
+        logic_vector_export      = new(100);
     endfunction
 
     // ------------------------------------------------------------------------
@@ -110,19 +127,21 @@ class driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITE
         localparam MIN_DATA_SIZE = MIN_SIZE - HEADER_SIZE/MFB_ITEM_WIDTH;
         logic[16-1 : 0] len_with_hdr = 0;
         string msg = "";
+        sp_info sp_st;
 
         forever begin
 
             done = 1'b0;
+            debug_msg = "\n";
+            $swrite(debug_msg, "%s\n ================ DEBUG IN DRIVER =============== \n", debug_msg);
             while (done != 1'b1) begin
-
                 seq_item_port_byte_array.get_next_item(byte_array_req);
                 pkt_cnt++;
                 seq_item_port_header.get_next_item(info_req);
 
                 $cast(byte_array_new, byte_array_req.clone());
                 info_req.length = byte_array_new.data.size();
-                header = '0;
+                sp_st.hdr = '0;
 
                 if (state == FIRST) begin
                     state          = DATA;
@@ -136,7 +155,7 @@ class driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITE
                     seq_item_port_sp_size.get_next_item(size_of_sp);
                 end
 
-                header = fill_header(info_req, 1'b1);
+                sp_st = fill_header(info_req, 1'b1);
 
                 len_with_hdr = byte_array_new.size() + HEADER_SIZE/MFB_ITEM_WIDTH;
                 if (VERBOSITY >= 3) begin
@@ -153,16 +172,16 @@ class driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITE
 
                 // Check if there is a place for another packet
                 if (signed'((size_of_sp.sp_size - (act_size + len_with_hdr + HEADER_SIZE/MFB_ITEM_WIDTH + MIN_DATA_SIZE + (MFB_BLOCK_SIZE - int'(len_with_hdr[3-1 : 0]) )))) < 0) begin
-                    header[15] = 1'b0;
+                    sp_st.next = 1'b0;
                 end
 
-                fill_tr(byte_array_new, header);
+                fill_tr(byte_array_new, sp_st);
 
-                if (header[15-1 : 0] < MIN_DATA_SIZE) begin
+                if (sp_st.hdr[16-1 : 0] < MIN_DATA_SIZE) begin
                     `uvm_fatal(this.get_full_name(), "Data length is too small.");
                 end
 
-                if (header[15] == 1'b0) begin
+                if (sp_st.next == 1'b0) begin
                     done                = 1'b1;
                     pkt_cnt_stat[pkt_cnt] += 1;
                     pkt_cnt             = 1'b0;
@@ -171,6 +190,7 @@ class driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITE
                     if (byte_array_out.size() > size_of_sp.sp_size + sup_align) begin
                         `uvm_fatal(this.get_full_name(), "Data length is too long.");
                     end
+                    $swrite(debug_msg, "%sSUPERPACKET %s\n", debug_msg, byte_array_out.convert2string());
                     byte_array_export.put(byte_array_out);
                     sp_cnt++;
                     act_size = 0;
@@ -178,6 +198,8 @@ class driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITE
                     byte_array_out = null;
                     state = FIRST;
                     seq_item_port_sp_size.item_done();
+                    $swrite(debug_msg, "%s\n ====================================== \n", debug_msg);
+                    `uvm_info(this.get_full_name(), debug_msg ,UVM_FULL)
                 end
                 end_of_packet = 0;
                 seq_item_port_byte_array.item_done();

@@ -26,7 +26,7 @@ class sequence_item #(MVB_ITEM_WIDTH) extends uvm_sequence_item;
     // Variables.
     // -----------------------
 
-    rand logic [15-1 : 0]             length;
+    rand logic [16-1 : 0]             length;
     rand logic [1-1 : 0]              next;
     rand logic [(4*8)-1 : 0]          mask;
     rand logic [(2*8)-1 : 0]          loop_id;
