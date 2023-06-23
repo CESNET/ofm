@@ -15,7 +15,11 @@ use work.type_pack.all;
 --  Description
 -- =========================================================================
 
--- This component limits output according to given Timestamps.
+-- This component limits output speed according to given Timestamps via the :vhdl:portsignal:`RX_MFB_TIMESTAMP <mfb_timestamp_limiter.rx_mfb_timestamp>` port.
+-- The incoming packets are split into queues (e.g., per each DMA Channel), where the order of packets is kept the same.
+-- Then in each Queue, the MFB Packet Delayer component outputs each packet when the time is right.
+-- Finally, the packets from all Queues are merged back into a single stream (no order is kept here).
+--
 entity MFB_TIMESTAMP_LIMITER is
 generic(
     -- Number of Regions within a data word, must be power of 2.
@@ -45,10 +49,7 @@ generic(
     -- Number of Items in the Packet Delayer's RX FIFO (the main buffer).
     BUFFER_SIZE           : natural := 2048;
     -- The number of Queues (DMA Channels).
-
     QUEUES                : natural := 1;
-    -- Maximum size of a packet (in Items).
-    PKT_MTU               : natural := 2**14; -- not used
 
     -- FPGA device name: ULTRASCALE, STRATIX10, AGILEX, ...
     DEVICE                : string := "STRATIX10"

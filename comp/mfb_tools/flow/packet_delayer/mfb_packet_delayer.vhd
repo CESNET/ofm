@@ -15,6 +15,11 @@ use work.type_pack.all;
 --  Description
 -- =========================================================================
 
+-- Incoming packets with Timestamps [ns] are stored in the RX FIFO, from which they are read when the Time Counter value reaches the Timestamp value.
+-- There are 2 Timestamp formats that are currently supported (see the :vhdl:genconstant:`TS_FORMAT <mfb_packet_delayer.ts_format>` generic).
+-- The packets read from the RX FIFO are stored in the TX FIFO.
+-- The read logic of the RX FIFO is very simplified and not made for high efficiency and it's been tested for MFB_REGIONS=1 only.
+--
 entity MFB_PACKET_DELAYER is
 generic(
     -- Number of Regions within a data word, must be power of 2.

@@ -6,22 +6,22 @@
 
 .. _mfb_packet_delayer:
 
-.. Packet Delayer
-.. --------------
+Packet Delayer
+--------------
 
-.. .. vhdl:autoentity:: mfb_packet_delayer
+.. vhdl:autoentity:: MFB_PACKET_DELAYER
 
 .. Architecture
 .. ~~~~~~~~~~~
 
 
-.. Block diagram
-.. ~~~~~~~~~~~~~
+Block diagram
+~~~~~~~~~~~~~
 
-.. .. _packet_delayer_schematic:
+.. _packet_delayer_diagram:
 
-.. .. image:: img/packet_delayer.drawio.svg
-..       :align: center
-..       :width: 100 %
-..       :alt:
+.. image:: img/packet_delayer_diagram.drawio.svg
+      :align: center
+      :width: 70 %
+      :alt:
 

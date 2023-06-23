@@ -6,21 +6,21 @@
 
 .. _mfb_timestamp_limiter:
 
-.. Timestamp Limiter
-.. -----------------
+Timestamp Limiter
+-----------------
 
-.. .. vhdl:autoentity:: mfb_timestamp_limiter
+.. vhdl:autoentity:: MFB_TIMESTAMP_LIMITER
 
 .. Arcitecture
 .. ~~~~~~~~~~~
 
 
-.. Block diagram
-.. ~~~~~~~~~~~~~
+Block diagram
+~~~~~~~~~~~~~
 
-.. .. _timestamp_limiter_schematic:
+.. _timestamp_limiter_diagram:
 
-.. .. image:: img/timestamp_limiter.drawio.svg
-..       :align: center
-..       :width: 100 %
-..       :alt:
+.. image:: img/timestamp_limiter_diagram.drawio.svg
+      :align: center
+      :width: 60 %
+      :alt:
