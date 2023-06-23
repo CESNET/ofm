@@ -13,7 +13,7 @@ use work.type_pack.all;
 
 
 -- =========================================================================
---  Description
+--  Basic description (more information in README)
 -- =========================================================================
 
 -- This unit accepts and processes SuperPackets.
@@ -36,6 +36,7 @@ use work.type_pack.all;
 -- "gaps" between them (max MBLOCK_SIZE-1 Items). This component can also deal with frames that have the small alignment gap
 -- after the last frame of the SuperPacket (i.e., when the EOF POS of the SuperPacket is extended by the alignment gap and is
 -- a few Items behind the EOF POS of the individual frame).
+--
 entity FRAME_UNPACKER is
 generic(
     -- Number of Regions within a data word, must be power of 2.
@@ -47,9 +48,9 @@ generic(
     -- Item width (in bits), must be 8.
     MFB_ITEM_WIDTH        : natural := 8;
 
-    -- Number of RX0 items, same for output (TX)
+    -- Number of MVB headers.
     MVB_ITEMS             : natural := MFB_REGIONS;
-    -- RX0 item width in bits
+    -- Width of each MVB header (in bits).
     MVB_ITEM_WIDTH        : natural := 16;
 
     -- Length of the prepended header (in Items).
@@ -62,7 +63,7 @@ generic(
     -- The extracted Header is output as:
     --   - Insert header to output metadata with SOF (MODE 0),
     --   - Insert header to output metadata with EOF (MODE 1),
-    --   - Insert header on MVB (MODE 2)
+    --   - Insert header on MVB (MODE 2).
     META_OUT_MODE         : natural := 0;
 
     -- Maximum size of a packet (in Items).
@@ -80,7 +81,7 @@ port(
     RESET          : in  std_logic;
 
     -- =====================================================================
-    --  TX MVB Headers
+    --  TX MVB Headers (per each SuperPacket)
     -- =====================================================================
 
     RX_MVB_DATA    : in  std_logic_vector(MVB_ITEMS*MVB_ITEM_WIDTH-1 downto 0);
@@ -116,7 +117,7 @@ port(
     TX_MFB_DST_RDY : in  std_logic;
 
     -- =====================================================================
-    --  TX MVB Headers
+    --  TX MVB Headers (MVB and SuperPacket headers)
     -- =====================================================================
 
     TX_MVB_DATA    : out std_logic_vector(MFB_REGIONS*(MVB_ITEM_WIDTH+HEADER_LENGTH*MFB_ITEM_WIDTH)-1 downto 0);
@@ -134,7 +135,7 @@ architecture FULL of FRAME_UNPACKER is
 
     -- Header length (in bits).
     constant HDR_WIDTH        : natural := HEADER_LENGTH*MFB_ITEM_WIDTH;
-    -- Length of the Length field.
+    -- Length of the Length field (in bits).
     constant LENGTH_WIDTH     : natural := 16;
 
     -- Width of one MFB Region.
@@ -497,7 +498,6 @@ begin
     -- ------------------------
     --  MVB headers read logic
     -- ------------------------
-
     -- last EOF remapping (shakedown)
     process (all)
         variable last_eof_ptr : integer;
@@ -514,9 +514,9 @@ begin
 
     fifoxm_rd <= (last_eof_remapped and not fifoxm_empty) and getit_indv_pkt_dst_rdy2;
 
-    -- -------------------
-    --  Header validation
-    -- -------------------
+    -- ------------------------------------------
+    --  MVB headers data redirect and validation
+    -- ------------------------------------------
     -- EOF remapping (shakedown)
     process (all)
         variable eof_ptr : integer;
@@ -548,17 +548,6 @@ begin
         fifoxm_hdr_data_arr(r) <=     fifoxm_do_arr(fifoxm_output_addr(r));
         fifoxm_hdr_vld_arr (r) <= not fifoxm_empty (fifoxm_output_addr(r)) and eof_remapped(r);
     end generate;
-
-    process(CLK)
-    begin
-        if rising_edge(CLK) then
-            if (fifoxm_hdr_src_rdy = '1') then
-                for r in 1 to MFB_REGIONS-1 loop
-                    assert not (fifoxm_empty(fifoxm_output_addr(r)) and eof_remapped(r)) report "Potencialni ERROR nam tu nastal x_x" severity note;
-                end loop;
-            end if;
-        end if;
-    end process;
 
     fifoxm_hdr_data    <= slv_array_ser(fifoxm_hdr_data_arr);
     fifoxm_hdr_vld     <= fifoxm_hdr_vld_arr and getit_indv_pkt_dst_rdy2;
