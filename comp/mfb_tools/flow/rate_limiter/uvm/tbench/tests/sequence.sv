@@ -108,13 +108,9 @@ class virt_seq#(SECTION_LENGTH, INTERVAL_LENGTH, INTERVAL_COUNT, OUTPUT_SPEED, M
 
         fork
             run_mfb_tx();
-        join_none
-
-        fork
             run_mfb_rx_data();
-        join_none
-
-        run_mfb_rx_meta();
+            run_mfb_rx_meta();
+        join_any
     endtask
 
 endclass

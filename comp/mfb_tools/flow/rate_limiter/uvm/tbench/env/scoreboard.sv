@@ -128,4 +128,24 @@ class scoreboard#(MFB_ITEM_WIDTH, MFB_META_WIDTH, INTERVAL_COUNT, CLK_PERIOD) ex
             speed_test_bytes += tr_dut_out.data.size();
         end
     endtask
+
+    function int unsigned used();
+        int unsigned ret = 0;
+        ret |= dut_input.used();
+        ret |= dut_input_meta.used();
+        ret |= dut_output.used();
+        ret |= dut_output_meta.used();
+        return ret;
+    endfunction
+
+    function void report_phase(uvm_phase phase);
+
+        if (this.used() == 0) begin
+            `uvm_info(get_type_name(), "\n\n\t---------------------------------------\n\t----     VERIFICATION SUCCESS      ----\n\t---------------------------------------", UVM_NONE)
+        end else begin
+            `uvm_info(get_type_name(), "\n\n\t---------------------------------------\n\t----     VERIFICATION FAILED       ----\n\t---------------------------------------", UVM_NONE)
+        end
+
+    endfunction
+
 endclass
