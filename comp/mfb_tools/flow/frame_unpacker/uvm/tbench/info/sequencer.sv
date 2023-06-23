@@ -5,8 +5,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 
-class sequencer #(MVB_ITEM_WIDTH) extends uvm_sequencer #(sequence_item #(MVB_ITEM_WIDTH));
-    `uvm_component_param_utils(uvm_superpacket_header::sequencer #(MVB_ITEM_WIDTH))
+class sequencer #(MVB_ITEM_WIDTH, HEADER_SIZE) extends uvm_sequencer #(sequence_item #(MVB_ITEM_WIDTH, HEADER_SIZE));
+    `uvm_component_param_utils(uvm_superpacket_header::sequencer #(MVB_ITEM_WIDTH, HEADER_SIZE))
 
     uvm_reset::sync_terminate reset_sync;
 

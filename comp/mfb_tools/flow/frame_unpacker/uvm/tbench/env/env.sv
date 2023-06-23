@@ -15,12 +15,12 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, HEADER
 
     driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, OFF_PIPE_STAGES) m_driver;
 
-    uvm_superunpacketer::virt_sequencer #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, HEADER_SIZE, MVB_ITEM_WIDTH) vscr;
+    uvm_superunpacketer::virt_sequencer #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, HEADER_SIZE, MVB_ITEM_WIDTH, HEADER_SIZE) vscr;
 
-    uvm_reset::agent                               m_reset;
-    uvm_superpacket_header::agent#(MVB_ITEM_WIDTH) m_info_agent;
-    uvm_superpacket_size::agent                    m_size_agent;
-    uvm_logic_vector_array::agent#(MFB_ITEM_WIDTH) m_byte_array_agent;
+    uvm_reset::agent                                            m_reset;
+    uvm_superpacket_header::agent#(MVB_ITEM_WIDTH, HEADER_SIZE) m_info_agent;
+    uvm_superpacket_size::agent                                 m_size_agent;
+    uvm_logic_vector_array::agent#(MFB_ITEM_WIDTH)              m_byte_array_agent;
 
     scoreboard #(HEADER_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, VERBOSITY) sc;
 
@@ -44,7 +44,7 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, HEADER
         m_info_agent_cfg        = new();
         m_info_agent_cfg.active = UVM_ACTIVE;
         uvm_config_db #(uvm_superpacket_header::config_item)::set(this, "m_info_agent", "m_config", m_info_agent_cfg);
-        m_info_agent = uvm_superpacket_header::agent#(MVB_ITEM_WIDTH)::type_id::create("m_info_agent", this);
+        m_info_agent = uvm_superpacket_header::agent#(MVB_ITEM_WIDTH, HEADER_SIZE)::type_id::create("m_info_agent", this);
 
         m_size_agent_cfg        = new();
         m_size_agent_cfg.active = UVM_ACTIVE;
@@ -97,7 +97,7 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, HEADER
 
         sc       = scoreboard#(HEADER_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, VERBOSITY)::type_id::create("sc", this);
         m_driver = driver #(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, OFF_PIPE_STAGES)::type_id::create("m_driver", this);
-        vscr     = uvm_superunpacketer::virt_sequencer#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, HEADER_SIZE, MVB_ITEM_WIDTH)::type_id::create("vscr",this);
+        vscr     = uvm_superunpacketer::virt_sequencer#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, HEADER_SIZE, MVB_ITEM_WIDTH, HEADER_SIZE)::type_id::create("vscr",this);
 
     endfunction
 

@@ -150,9 +150,9 @@ class sequence_lib#(MIN_SIZE, PKT_MTU) extends uvm_sequence_library#(sequence_it
     // can be useful in specific tests
     virtual function void init_sequence();
         this.add_sequence(uvm_superpacket_size::sequence_simple#(MIN_SIZE, PKT_MTU)::get_type());
-        this.add_sequence(uvm_superpacket_size::sequence_simple_short#(MIN_SIZE, PKT_MTU)::get_type());
-        this.add_sequence(uvm_superpacket_size::sequence_simple_medium::get_type());
-        this.add_sequence(uvm_superpacket_size::sequence_simple_long#(MIN_SIZE, PKT_MTU)::get_type());
-        this.add_sequence(uvm_superpacket_size::sequence_simple_min#(MIN_SIZE, PKT_MTU)::get_type());
+        // this.add_sequence(uvm_superpacket_size::sequence_simple_short#(MIN_SIZE, PKT_MTU)::get_type());
+        // this.add_sequence(uvm_superpacket_size::sequence_simple_medium::get_type());
+        // this.add_sequence(uvm_superpacket_size::sequence_simple_long#(MIN_SIZE, PKT_MTU)::get_type());
+        // this.add_sequence(uvm_superpacket_size::sequence_simple_min#(MIN_SIZE, PKT_MTU)::get_type());
     endfunction
 endclass

@@ -7,9 +7,9 @@
 class driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, OFF_PIPE_STAGES, ZERO_TS = 0) extends uvm_component;
     `uvm_component_param_utils(uvm_superunpacketer::driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, OFF_PIPE_STAGES, ZERO_TS))
 
-    uvm_seq_item_pull_port #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH), uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) seq_item_port_byte_array;
-    uvm_seq_item_pull_port #(uvm_superpacket_header::sequence_item #(MVB_ITEM_WIDTH), uvm_superpacket_header::sequence_item #(MVB_ITEM_WIDTH))           seq_item_port_header;
-    uvm_seq_item_pull_port #(uvm_superpacket_size::sequence_item, uvm_superpacket_size::sequence_item)               seq_item_port_sp_size;
+    uvm_seq_item_pull_port #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH), uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))                           seq_item_port_byte_array;
+    uvm_seq_item_pull_port #(uvm_superpacket_header::sequence_item #(MVB_ITEM_WIDTH, HEADER_SIZE), uvm_superpacket_header::sequence_item #(MVB_ITEM_WIDTH, HEADER_SIZE)) seq_item_port_header;
+    uvm_seq_item_pull_port #(uvm_superpacket_size::sequence_item, uvm_superpacket_size::sequence_item)                                                                   seq_item_port_sp_size;
 
     mailbox#(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) byte_array_export;
     mailbox#(uvm_logic_vector::sequence_item #(MVB_ITEM_WIDTH))       logic_vector_export;
@@ -18,12 +18,12 @@ class driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITE
     parameter FIRST = 0;
     parameter DATA  = 1;
 
-    uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH) byte_array_req;
-    uvm_superpacket_header::sequence_item #(MVB_ITEM_WIDTH) info_req;
-    uvm_superpacket_size::sequence_item                     size_of_sp; // Size of superpacket in bytes with headers
-    uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH) byte_array_new;
-    uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH) byte_array_out;
-    uvm_logic_vector::sequence_item #(MVB_ITEM_WIDTH)       logic_vector_out;
+    uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)              byte_array_req;
+    uvm_superpacket_header::sequence_item #(MVB_ITEM_WIDTH, HEADER_SIZE) info_req;
+    uvm_superpacket_size::sequence_item                                  size_of_sp; // Size of superpacket in bytes with headers
+    uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)              byte_array_new;
+    uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)              byte_array_out;
+    uvm_logic_vector::sequence_item #(MVB_ITEM_WIDTH)                    logic_vector_out;
 
     int pkt_cnt_stat[OFF_PIPE_STAGES] = '{default:'0};
     int state                         = 0;
@@ -46,7 +46,7 @@ class driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITE
 
 
 
-    function sp_info fill_header(uvm_superpacket_header::sequence_item #(MVB_ITEM_WIDTH) info, logic first);
+    function sp_info fill_header(uvm_superpacket_header::sequence_item #(MVB_ITEM_WIDTH, HEADER_SIZE) info, logic first);
         logic[HEADER_SIZE-1 : 0] hdr = '0;
         sp_info ret;
         info.next = 1'b1;
@@ -65,9 +65,9 @@ class driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITE
         end_of_packet = info.length + HEADER_SIZE/MFB_ITEM_WIDTH;
 
         if (ZERO_TS == 1) begin
-            info.timestamp = '0;
+            info.meta = '0;
         end
-        hdr = {info.timestamp, info.loop_id, info.mask, info.length};
+        hdr = {info.meta, info.length};
         ret.hdr = hdr;
         ret.next = info.next;
         return ret;

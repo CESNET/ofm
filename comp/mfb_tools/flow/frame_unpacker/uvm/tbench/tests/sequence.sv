@@ -7,7 +7,7 @@
 
 class virt_sequence #(MIN_SIZE, PKT_MTU, DATA_SIZE_MAX, MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, HEADER_SIZE, MVB_ITEM_WIDTH) extends uvm_sequence;
     `uvm_object_param_utils(test::virt_sequence #(MIN_SIZE, PKT_MTU, DATA_SIZE_MAX, MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, HEADER_SIZE, MVB_ITEM_WIDTH))
-    `uvm_declare_p_sequencer(uvm_superunpacketer::virt_sequencer #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, HEADER_SIZE, MVB_ITEM_WIDTH))
+    `uvm_declare_p_sequencer(uvm_superunpacketer::virt_sequencer #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, HEADER_SIZE, MVB_ITEM_WIDTH, HEADER_SIZE))
 
     function new (string name = "virt_sequence");
         super.new(name);
@@ -17,7 +17,7 @@ class virt_sequence #(MIN_SIZE, PKT_MTU, DATA_SIZE_MAX, MFB_REGIONS, MFB_REGION_
     uvm_sequence#(uvm_mfb::sequence_item#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, HEADER_SIZE+MVB_ITEM_WIDTH)) m_mfb_seq;
     uvm_sequence#(uvm_mvb::sequence_item#(MFB_REGIONS, HEADER_SIZE+MVB_ITEM_WIDTH))                                                  m_mvb_seq;
     uvm_logic_vector_array::sequence_lib #(MFB_ITEM_WIDTH)                                                                           m_byte_array_sq_lib;
-    uvm_superpacket_header::sequence_simple #(MVB_ITEM_WIDTH)                                                                        m_info;
+    uvm_superpacket_header::sequence_simple #(MVB_ITEM_WIDTH, HEADER_SIZE)                                                           m_info;
     uvm_superpacket_size::sequence_lib#(MIN_SIZE, PKT_MTU)                                                                           m_size_sq_lib;
     uvm_mfb::sequence_lib_tx#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, HEADER_SIZE+MVB_ITEM_WIDTH)              m_mfb_seq_lib;
     uvm_mvb::sequence_lib_tx#(MFB_REGIONS, HEADER_SIZE+MVB_ITEM_WIDTH)                                                               m_mvb_seq_lib;
@@ -27,7 +27,7 @@ class virt_sequence #(MIN_SIZE, PKT_MTU, DATA_SIZE_MAX, MFB_REGIONS, MFB_REGION_
 
         m_reset             = uvm_reset::sequence_start::type_id::create("m_reset_seq");
         m_byte_array_sq_lib = uvm_logic_vector_array::sequence_lib #(MFB_ITEM_WIDTH)::type_id::create("m_byte_array_seq_lib");
-        m_info              = uvm_superpacket_header::sequence_simple#(MVB_ITEM_WIDTH)::type_id::create("m_info");
+        m_info              = uvm_superpacket_header::sequence_simple#(MVB_ITEM_WIDTH, HEADER_SIZE)::type_id::create("m_info");
         m_size_sq_lib       = uvm_superpacket_size::sequence_lib#(MIN_SIZE, PKT_MTU)::type_id::create("m_size_seq_lib");
         m_mvb_seq_lib       = uvm_mvb::sequence_lib_tx#(MFB_REGIONS, HEADER_SIZE+MVB_ITEM_WIDTH)::type_id::create("m_mvb_seq_lib");
         m_mfb_seq_lib       = uvm_mfb::sequence_lib_tx#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, HEADER_SIZE+MVB_ITEM_WIDTH)::type_id::create("m_mfb_seq_lib");
