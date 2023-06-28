@@ -16,6 +16,7 @@ class logic_vector_array_sequence #(MFB_ITEM_WIDTH) extends uvm_sequence#(uvm_lo
 
     task body;
         forever begin
+            wait(tr_export.num() > 0);
             tr_export.get(req);
             start_item(req);
             finish_item(req);
@@ -34,6 +35,7 @@ class mvb_data_sequence #(MVB_ITEM_WIDTH) extends uvm_sequence#(uvm_logic_vector
 
     task body;
         forever begin
+            wait(tr_export.num() > 0);
             tr_export.get(req);
             start_item(req);
             finish_item(req);

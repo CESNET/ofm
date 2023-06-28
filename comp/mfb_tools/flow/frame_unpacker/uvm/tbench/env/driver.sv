@@ -29,6 +29,7 @@ class driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITE
     int state                         = 0;
     int act_size                      = 0;
     int sp_cnt                        = 0;
+    int hdr_cnt                       = 0;
     int pkt_cnt                       = 0;
     int end_of_packet                 = 0;
     int sup_align                     = 0;
@@ -117,8 +118,8 @@ class driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITE
         seq_item_port_header     = new("seq_item_port_header", this);
         seq_item_port_sp_size    = new("seq_item_port_sp_size", this);
 
-        byte_array_export        = new(100);
-        logic_vector_export      = new(100);
+        byte_array_export        = new();
+        logic_vector_export      = new();
     endfunction
 
     // ------------------------------------------------------------------------
@@ -128,9 +129,13 @@ class driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITE
         logic[16-1 : 0] len_with_hdr = 0;
         string msg = "";
         sp_info sp_st;
+        int unsigned wait_period;
 
         forever begin
 
+            wait_period = $urandom_range(0, 500);
+
+            #(wait_period*1ns);
             done = 1'b0;
             debug_msg = "\n";
             $swrite(debug_msg, "%s\n ================ DEBUG IN DRIVER =============== \n", debug_msg);
@@ -139,7 +144,7 @@ class driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITE
                 pkt_cnt++;
                 seq_item_port_header.get_next_item(info_req);
 
-                $cast(byte_array_new, byte_array_req.clone());
+                assert($cast(byte_array_new, byte_array_req.clone()));
                 info_req.length = byte_array_new.data.size();
                 sp_st.hdr = '0;
 
@@ -151,6 +156,7 @@ class driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITE
 
                     logic_vector_out.data = info_req.meta;
                     logic_vector_export.put(logic_vector_out);
+                    hdr_cnt++;
 
                     seq_item_port_sp_size.get_next_item(size_of_sp);
                 end
@@ -206,7 +212,6 @@ class driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITE
                 seq_item_port_header.item_done();
 
             end
-
         end
     endtask
 
