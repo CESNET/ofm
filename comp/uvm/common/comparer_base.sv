@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
 */
 
-class comparer_dut #(type ITEM_TYPE);
+class dut_item #(type ITEM_TYPE);
     int unsigned in_id;
     time      in_time;
     ITEM_TYPE in_item;
@@ -19,26 +19,44 @@ class comparer_dut #(type ITEM_TYPE);
         in_time = t;
         in_item = item;
     endfunction
+
+    function string convert2string_time();
+        string msg = "";
+        $swrite(msg, "%s\n\tINPUT TIME : %0.2fns", msg, in_time/1ns);
+
+        return msg;
+    endfunction
+
+    function string convert2string();
+        string msg = "";
+
+        $swrite(msg, "%s%s\n\tDATA :\n%s", msg, this.convert2string_time(), in_item.convert2string());
+        return msg;
+    endfunction
 endclass
 
 
 virtual class comparer_base#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) extends uvm_component;
 
-    localparam COMPARED_PRINT_WAIT = 5ms;
-
     typedef comparer_base#(MODEL_ITEM, DUT_ITEM) this_type;
     uvm_analysis_imp_model#(model_item#(MODEL_ITEM), this_type) analysis_imp_model;
     uvm_analysis_imp_dut  #(DUT_ITEM, this_type)                analysis_imp_dut;
 
+    protected time compared_tr_timeout;
     protected time dut_tr_timeout;
     protected time model_tr_timeout;
 
     function new(string name, uvm_component parent = null);
         super.new(name, parent);
-        dut_tr_timeout  = 10s;
-        model_tr_timeout = 0ns;
-        analysis_imp_model = new("analysis_imp_model", this);
-        analysis_imp_dut   = new("analysis_imp_dut"  , this);
+        dut_tr_timeout      = 10s;
+        model_tr_timeout    = 0ns;
+        compared_tr_timeout = 50us;
+        analysis_imp_model  = new("analysis_imp_model", this);
+        analysis_imp_dut    = new("analysis_imp_dut"  , this);
+    endfunction
+
+    function void compared_tr_timeout_set(time timeout);
+        compared_tr_timeout = timeout;
     endfunction
 
     function void dut_tr_timeout_set(time timeout);
@@ -61,8 +79,8 @@ virtual class comparer_base#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) extends uvm
         `uvm_fatal(this.get_full_name(), "WRITE DUT FUNCTION IS NOT IMPLEMENTED");
     endfunction
 
-    pure virtual function int unsigned compare(MODEL_ITEM tr_model, DUT_ITEM tr_dut);
-    pure virtual function string message(MODEL_ITEM tr_model, DUT_ITEM tr_dut);
+    pure virtual function int unsigned compare(model_item#(MODEL_ITEM) tr_model, dut_item #(DUT_ITEM) tr_dut);
+    pure virtual function string message(model_item#(MODEL_ITEM) tr_model, dut_item #(DUT_ITEM) tr_dut);
 
 
     pure virtual task run_model_delay_check();
@@ -79,7 +97,7 @@ virtual class comparer_base#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) extends uvm
 
     task print_info();
         forever begin
-            #(COMPARED_PRINT_WAIT)
+            #(compared_tr_timeout)
             `uvm_info(this.get_full_name(), $sformatf("Time : %0dns%s", $time()/1ns, info()), UVM_LOW);
         end
     endtask
