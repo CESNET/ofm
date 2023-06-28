@@ -16,13 +16,13 @@ class comparer_ordered #(type CLASS_TYPE) extends uvm_common::comparer_base_orde
         super.new(name, parent);
     endfunction
 
-    virtual function int unsigned compare(MODEL_ITEM tr_model, DUT_ITEM tr_dut);
-        return tr_model.compare(tr_dut);
+    virtual function int unsigned compare(model_item #(MODEL_ITEM) tr_model, dut_item #(DUT_ITEM) tr_dut);
+        return tr_model.item.compare(tr_dut.in_item);
     endfunction
 
-    virtual function string message(MODEL_ITEM tr_model, DUT_ITEM tr_dut);
+    virtual function string message(model_item#(MODEL_ITEM) tr_model, dut_item #(DUT_ITEM) tr_dut);
         string msg = "";
-        $swrite(msg, "%s\n\tDUT PACKET %s\n\n",   msg, tr_dut.convert2string());
+        $swrite(msg, "%s\n\tDUT PACKET %s\n\n",   msg, tr_dut.in_item.convert2string());
         $swrite(msg, "%s\n\tMODEL PACKET%s\n\n",  msg, tr_model.convert2string());
         return msg;
     endfunction
@@ -35,13 +35,13 @@ class comparer_disordered #(type CLASS_TYPE) extends uvm_common::comparer_base_d
         super.new(name, parent);
     endfunction
 
-    virtual function int unsigned compare(MODEL_ITEM tr_model, DUT_ITEM tr_dut);
-        return tr_model.compare(tr_dut);
+    virtual function int unsigned compare(model_item#(MODEL_ITEM) tr_model, dut_item #(DUT_ITEM) tr_dut);
+        return tr_model.item.compare(tr_dut.in_item);
     endfunction
 
-    virtual function string message(MODEL_ITEM tr_model, DUT_ITEM tr_dut);
+    virtual function string message(model_item#(MODEL_ITEM) tr_model, dut_item #(DUT_ITEM) tr_dut);
         string msg = "";
-        $swrite(msg, "%s\n\tDUT PACKET %s\n\n",   msg, tr_dut.convert2string());
+        $swrite(msg, "%s\n\tDUT PACKET %s\n\n",   msg, tr_dut.in_item.convert2string());
         $swrite(msg, "%s\n\tMODEL PACKET%s\n\n",  msg, tr_model.convert2string());
         return msg;
     endfunction
@@ -55,13 +55,13 @@ class comparer_taged #(type CLASS_TYPE) extends uvm_common::comparer_base_tagged
         super.new(name, parent);
     endfunction
 
-    virtual function int unsigned compare(MODEL_ITEM tr_model, DUT_ITEM tr_dut);
-        return tr_model.compare(tr_dut);
+    virtual function int unsigned compare(model_item#(MODEL_ITEM) tr_model, dut_item #(DUT_ITEM) tr_dut);
+        return tr_model.item.compare(tr_dut.in_item);
     endfunction
 
-    virtual function string message(MODEL_ITEM tr_model, DUT_ITEM tr_dut);
+    virtual function string message(model_item#(MODEL_ITEM) tr_model, dut_item #(DUT_ITEM) tr_dut);
         string msg = "";
-        $swrite(msg, "%s\n\tDUT PACKET %s\n\n",   msg, tr_dut.convert2string());
+        $swrite(msg, "%s\n\tDUT PACKET %s\n\n",   msg, tr_dut.in_item.convert2string());
         $swrite(msg, "%s\n\tMODEL PACKET%s\n\n",  msg, tr_model.convert2string());
         return msg;
     endfunction

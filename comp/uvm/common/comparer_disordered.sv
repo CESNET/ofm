@@ -13,7 +13,7 @@ virtual class comparer_base_disordered#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) 
 
     int unsigned dut_sends;
     model_item#(MODEL_ITEM) model_items[$];
-    comparer_dut#(DUT_ITEM) dut_items[$];
+    dut_item#(DUT_ITEM) dut_items[$];
     int unsigned compared;
     int unsigned errors;
 
@@ -40,7 +40,7 @@ virtual class comparer_base_disordered#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) 
         int unsigned it    = 0;
         //try get item from DUT
         while (it < dut_items.size() && w_end == 0) begin
-            w_end = compare(tr.item, dut_items[it].in_item);
+            w_end = compare(tr, dut_items[it]);
             if (w_end == 0) begin
                 it++;
             end else begin
@@ -57,11 +57,12 @@ virtual class comparer_base_disordered#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) 
     virtual function void write_dut(DUT_ITEM tr);
         int unsigned w_end = 0;
         int unsigned it    = 0;
+        dut_item#(DUT_ITEM) tmp_tr = new(dut_sends, $time(), tr);
 
         dut_sends += 1;
         //try get item from DUT
         while (it < model_items.size() && w_end == 0) begin
-            w_end = compare(model_items[it].item, tr);
+            w_end = compare(model_items[it], tmp_tr);
             if (w_end == 0) begin
                 it++;
             end else begin
@@ -71,23 +72,22 @@ virtual class comparer_base_disordered#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) 
         end
 
         if (w_end == 0) begin
-            comparer_dut#(DUT_ITEM) tmp_tr = new(dut_sends, $time(), tr);
             dut_items.push_back(tmp_tr);
         end
     endfunction
 
-    function string dut_tr_get(MODEL_ITEM tr, time tr_time);
+    function string dut_tr_get(model_item#(MODEL_ITEM) tr, time tr_time);
         string msg = "";
         for (int unsigned it = 0; it < dut_items.size(); it++) begin
-            $swrite(msg, "%s\n\nOutput time %0dns (%0dns) \n%s", msg, dut_items[it].in_time/1ns, (dut_items[it].in_time - tr_time)/1ns, this.message(tr, dut_items[it].in_item));
+            $swrite(msg, "%s\n\nOutput time %0dns (%0dns) \n%s", msg, dut_items[it].in_time/1ns, (dut_items[it].in_time - tr_time)/1ns, this.message(tr, dut_items[it]));
         end
         return msg;
     endfunction
 
-    function string model_tr_get(DUT_ITEM tr);
+    function string model_tr_get(dut_item #(DUT_ITEM) tr);
         string msg = "";
         for (int unsigned it = 0; it < model_items.size(); it++) begin
-            $swrite(msg, "%s\n\n%s\n%s", msg, model_items[it].convert2string_time(), this.message(model_items[it].item, tr));
+            $swrite(msg, "%s\n\n%s\n%s", msg, model_items[it].convert2string_time(), this.message(model_items[it], tr));
         end
         return msg;
     endfunction
@@ -101,7 +101,7 @@ virtual class comparer_base_disordered#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) 
                 errors++;
                `uvm_error(this.get_full_name(), $sformatf("\n\tTransaction from DUT is delayed %0dns. Probably stuck.\n\tErrors/Compared %0d/%0d\n%s\n\nDUT transactions:\n%s",
                                                          errors, compared, delay/1ns, model_items[0].convert2string(),
-                                                         this.dut_tr_get(model_items[0].item, model_items[0].time_last())));
+                                                         this.dut_tr_get(model_items[0], model_items[0].time_last())));
                 model_items.delete(0);
             end else begin
                 #(dut_tr_timeout - delay);
@@ -118,7 +118,7 @@ virtual class comparer_base_disordered#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) 
                 errors++;
                 `uvm_error(this.get_full_name(), $sformatf("\n\tTransaction %0d from DUT is unexpected.\n\tErrors/Compared %0d/%0d Output time %0dns. Delay %0dns. Probably unexpected transaction.\n%s\n\n%s",
                                                            dut_items[0].in_id, errors, compared, dut_items[0].in_time/1ns, delay/1ns,
-                                                           dut_items[0].in_item.convert2string(), this.model_tr_get(dut_items[0].in_item)));
+                                                           dut_items[0].in_item.convert2string(), this.model_tr_get(dut_items[0])));
                 dut_items.delete(0);
             end else begin
                 #(model_tr_timeout - delay);
