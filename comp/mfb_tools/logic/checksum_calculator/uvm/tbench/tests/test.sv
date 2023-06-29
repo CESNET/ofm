@@ -8,9 +8,9 @@ class ex_test extends uvm_test;
     typedef uvm_component_registry#(test::ex_test, "test::ex_test") type_id;
 
     // declare the Environment reference variable
-    uvm_checksum_calculator::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH, MVB_DATA_WIDTH, PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY) m_env;
-    uvm_reset::sequence_start                              m_reset;
-    uvm_mvb::sequence_lib_tx#(MFB_REGIONS, MVB_DATA_WIDTH+1) m_mvb_seq;
+    uvm_checksum_calculator::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH, MVB_DATA_WIDTH, PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY, MFB_META_WIDTH) m_env;
+    uvm_reset::sequence_start                                m_reset;
+    uvm_mvb::sequence_lib_tx#(MFB_REGIONS, MVB_DATA_WIDTH+1+MFB_META_WIDTH) m_mvb_seq;
     int unsigned timeout;
 
     // ------------------------------------------------------------------------
@@ -32,7 +32,7 @@ class ex_test extends uvm_test;
     // Build phase function, e.g. the creation of test's internal objects
     function void build_phase(uvm_phase phase);
         // Initializing the reference to the environment
-        m_env = uvm_checksum_calculator::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH, MVB_DATA_WIDTH, PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY)::type_id::create("m_env", this);
+        m_env = uvm_checksum_calculator::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH, MVB_DATA_WIDTH, PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY, MFB_META_WIDTH)::type_id::create("m_env", this);
     endfunction
 
     virtual task tx_mvb_seq();
@@ -50,7 +50,7 @@ class ex_test extends uvm_test;
     virtual function void init();
 
         m_reset   = uvm_reset::sequence_start::type_id::create("m_reset_seq");
-        m_mvb_seq = uvm_mvb::sequence_lib_tx#(MFB_REGIONS, MVB_DATA_WIDTH+1)::type_id::create("m_mvb_seq");
+        m_mvb_seq = uvm_mvb::sequence_lib_tx#(MFB_REGIONS, MVB_DATA_WIDTH+1+MFB_META_WIDTH)::type_id::create("m_mvb_seq");
 
         m_mvb_seq.init_sequence();
         m_mvb_seq.min_random_count = 100;
