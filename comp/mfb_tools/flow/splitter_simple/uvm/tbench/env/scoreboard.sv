@@ -86,14 +86,14 @@ class comparer_data #(ITEM_WIDTH, META_WIDTH) extends uvm_common::comparer_base_
         super.new(name, parent);
     endfunction
 
-    virtual function int unsigned compare(MODEL_ITEM tr_model, DUT_ITEM tr_dut);
-        return tr_model.data.compare(tr_dut);
+    virtual function int unsigned compare(uvm_common::model_item #(MODEL_ITEM) tr_model, uvm_common::dut_item #(DUT_ITEM) tr_dut);
+        return tr_model.item.data.compare(tr_dut.in_item);
     endfunction
 
-    virtual function string message(MODEL_ITEM tr_model, DUT_ITEM tr_dut);
+    virtual function string message(uvm_common::model_item #(MODEL_ITEM) tr_model, uvm_common::dut_item #(DUT_ITEM) tr_dut);
         string msg = "";
         $swrite(msg, "%s\n\tDUT PACKET %s\n\n",   msg, tr_dut.convert2string());
-        $swrite(msg, "%s\n\tMODEL PACKET%s\n\n",  msg, tr_model.data.convert2string());
+        $swrite(msg, "%s\n\tMODEL PACKET%s\n\n",  msg, tr_model.convert2string());
         return msg;
     endfunction
 endclass
@@ -105,14 +105,14 @@ class comparer_meta #(ITEM_WIDTH, META_WIDTH) extends uvm_common::comparer_base_
         super.new(name, parent);
     endfunction
 
-    virtual function int unsigned compare(MODEL_ITEM tr_model, DUT_ITEM tr_dut);
-        return tr_model.meta.compare(tr_dut);
+    virtual function int unsigned compare(uvm_common::model_item #(MODEL_ITEM) tr_model, uvm_common::dut_item #(DUT_ITEM) tr_dut);
+        return tr_model.item.meta.compare(tr_dut.in_item);
     endfunction
 
-    virtual function string message(MODEL_ITEM tr_model, DUT_ITEM tr_dut);
+    virtual function string message(uvm_common::model_item #(MODEL_ITEM) tr_model, uvm_common::dut_item #(DUT_ITEM) tr_dut);
         string msg = "";
         $swrite(msg, "%s\n\tDUT PACKET %s\n\n",   msg, tr_dut.convert2string());
-        $swrite(msg, "%s\n\tMODEL PACKET%s\n\n",  msg, tr_model.meta.convert2string());
+        $swrite(msg, "%s\n\tMODEL PACKET%s\n\n",  msg, tr_model.convert2string());
         return msg;
     endfunction
 endclass
@@ -196,6 +196,16 @@ class scoreboard #(ITEM_WIDTH, META_WIDTH, CHANNELS) extends uvm_scoreboard;
         return ret;
     endfunction
 
+    function int unsigned success();
+        int unsigned ret = 0;
+
+        for (int unsigned it = 0; it < CHANNELS; it++) begin
+            ret |= compare_data[it].success();
+            ret |= compare_meta[it].success();
+        end
+        return ret;
+    endfunction
+
     function void write_reset(uvm_reset::sequence_item tr);
         if (tr.reset == 1'b1) begin
             m_model.reset();
@@ -208,14 +218,9 @@ class scoreboard #(ITEM_WIDTH, META_WIDTH, CHANNELS) extends uvm_scoreboard;
 
 
     function void report_phase(uvm_phase phase);
-        int unsigned errors = 0;
         string msg = "";
 
-        for (int unsigned it = 0; it < CHANNELS; it++) begin
-            $swrite(msg, "%s\n\tOUTPUT [%0d]\n\t\tDATA  %s\n\t\tMEATA  %s", msg, it, compare_data[it].info(), compare_meta[it].info());
-        end
-
-        if (errors == 0 && this.used() == 0) begin
+        if (this.success() && this.used() == 0) begin
             `uvm_info(get_type_name(), {msg, "\n\n\t---------------------------------------\n\t----     VERIFICATION SUCCESS      ----\n\t---------------------------------------"}, UVM_NONE)
         end else begin
             `uvm_info(get_type_name(), {msg, "\n\n\t---------------------------------------\n\t----     VERIFICATION FAIL      ----\n\t---------------------------------------"}, UVM_NONE)

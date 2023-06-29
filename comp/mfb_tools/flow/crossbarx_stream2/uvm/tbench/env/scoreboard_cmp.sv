@@ -12,12 +12,12 @@ class cxs2_comparer #(type CLASS_TYPE) extends uvm_common::comparer_ordered#(CLA
         super.new(name, parent);
     endfunction
 
-    virtual function int unsigned compare(MODEL_ITEM tr_model, DUT_ITEM tr_dut);
+    virtual function int unsigned compare(uvm_common::model_item #(MODEL_ITEM) tr_model, uvm_common::dut_item #(DUT_ITEM) tr_dut);
         int unsigned ret = 1;
         string msg = "";
-        if (tr_model.data.size() != tr_dut.data.size()) return 0;
-        for (int unsigned it = 0; it < tr_model.size(); it++) begin
-            if (!$isunknown(tr_model.data[it]) && tr_model.data[it] !== tr_dut.data[it]) begin
+        if (tr_model.item.data.size() != tr_dut.in_item.data.size()) return 0;
+        for (int unsigned it = 0; it < tr_model.item.size(); it++) begin
+            if (!$isunknown(tr_model.item.data[it]) && tr_model.item.data[it] !== tr_dut.in_item.data[it]) begin
                 return 0;
             end
         end
