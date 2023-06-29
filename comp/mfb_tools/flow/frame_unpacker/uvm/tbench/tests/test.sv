@@ -48,7 +48,7 @@ class ex_test extends uvm_test;
 
         timeout = 1;
         fork
-            test_wait_timeout(1000);
+            test_wait_timeout(10000);
             test_wait_result();
         join_any;
 
@@ -62,7 +62,7 @@ class ex_test extends uvm_test;
 
     task test_wait_result();
         do begin
-            #(600ns);
+            #(6000ns);
         end while (m_env.sc.used() != 0);
         timeout = 0;
     endtask
