@@ -17,6 +17,7 @@ package uvm_checksum_calculator;
     `include "sequence.sv"
     `include "driver.sv"
     `include "model.sv"
+    `include "scoreboard_cmp.sv"
     `include "scoreboard.sv"
     `include "env.sv"
 
