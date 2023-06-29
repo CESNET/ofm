@@ -294,7 +294,7 @@ begin
 
         RX_OFFSET      => rx_ext_off    ,
         RX_LENGTH      => rx_ext_len    ,
-        RX_ENABLE      => rx_ext_en     ,
+        RX_ENABLE      => (others => '1'),
 
         TX_DATA        => tx_ext_data   ,
         TX_END         => tx_ext_end    ,
