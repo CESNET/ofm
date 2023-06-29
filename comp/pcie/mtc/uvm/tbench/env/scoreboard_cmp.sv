@@ -19,14 +19,12 @@ class mi_cmp_rq #(MI_DATA_WIDTH, type CLASS_TYPE) extends uvm_common::comparer_o
         compared_write = 0;
     endfunction
 
-    virtual function int unsigned compare(MODEL_ITEM tr_model, DUT_ITEM tr_dut);
+    virtual function int unsigned compare(uvm_common::model_item #(MODEL_ITEM) tr_model, uvm_common::dut_item #(DUT_ITEM) tr_dut);
         int unsigned ret = 1;
 
-        // $write("%s", message(tr_model, tr_dut));
-
         lv_mi_tr = uvm_logic_vector::sequence_item #(MI_DATA_WIDTH)::type_id::create("lv_mi_tr");
-        ret = tr_model.compare(tr_dut);
-        if (tr_dut.rd) begin
+        ret = tr_model.item.compare(tr_dut.in_item);
+        if (tr_dut.in_item.rd) begin
             lv_mi_tr.data = '1;
             mi_analysis_port_out.write(lv_mi_tr);
             compared_read++;
@@ -43,7 +41,7 @@ class mi_cmp_rq #(MI_DATA_WIDTH, type CLASS_TYPE) extends uvm_common::comparer_o
         return msg;
     endfunction
 
-    virtual function string message(MODEL_ITEM tr_model, DUT_ITEM tr_dut);
+    virtual function string message(uvm_common::model_item #(MODEL_ITEM) tr_model, uvm_common::dut_item #(DUT_ITEM) tr_dut);
         string msg = "";
         $swrite(msg, "%s\n\tDUT PACKET %s\n\n",   msg, tr_dut.convert2string());
         $swrite(msg, "%s\n\tMODEL PACKET%s\n\n",  msg, tr_model.convert2string());
@@ -61,26 +59,26 @@ class mi_cmp_rs #(MFB_ITEM_WIDTH) extends uvm_common::comparer_base_ordered#(uvm
         super.new(name, parent);
     endfunction
 
-    virtual function int unsigned compare(MODEL_ITEM tr_model, DUT_ITEM tr_dut);
+    virtual function int unsigned compare(uvm_common::model_item #(MODEL_ITEM) tr_model, uvm_common::dut_item #(DUT_ITEM) tr_dut);
         int unsigned ret = 1;
 
-        if (tr_model.error == '0) begin
-            ret = tr_model.data_tr.compare(tr_dut);
+        if (tr_model.item.error == '0) begin
+            ret = tr_model.item.data_tr.compare(tr_dut.in_item);
         end
 
-        if ((tag_sync.list_of_tags.exists(tr_model.tag))) begin
+        if ((tag_sync.list_of_tags.exists(tr_model.item.tag))) begin
             string msg;
             tag_sync.print_all();
-            $swrite(msg, "%sTAG %h EXISTS\n", msg, tr_model.tag);
+            $swrite(msg, "%sTAG %h EXISTS\n", msg, tr_model.item.tag);
             $swrite(msg, "%sNUMBER %d\n", msg, compared);
             `uvm_error(this.get_full_name(), msg);
         end
-        tag_sync.add_element(tr_model.tag);
+        tag_sync.add_element(tr_model.item.tag);
 
         return ret;
     endfunction
 
-    virtual function string message(MODEL_ITEM tr_model, DUT_ITEM tr_dut);
+    virtual function string message(uvm_common::model_item #(MODEL_ITEM) tr_model, uvm_common::dut_item #(DUT_ITEM) tr_dut);
         string msg = "";
         $swrite(msg, "%s\n\tDUT PACKET %s\n\n",   msg, tr_dut.convert2string());
         $swrite(msg, "%s\n\tMODEL PACKET%s\n\n",  msg, tr_model.convert2string());
