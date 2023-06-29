@@ -65,6 +65,7 @@ def COMPONENTS_MULTIVER = [\
     ['FRAME_UNPACKER'                     , 'comp/mfb_tools/flow/frame_unpacker/uvm'                                          , 'top_level.fdo'      , 'tbench/tests/pkg.sv', 'ver_settings.py'    ],\
     ['CROSSBARX_STREAM2'                  , 'comp/mfb_tools/flow/crossbarx_stream2/uvm'                                       , 'top_level.fdo'      , 'tbench/tests/pkg.sv', 'ver_settings.py'    ],\
     ['RATE_LIMITER'                       , 'comp/mfb_tools/flow/rate_limiter/uvm'                                            , 'top_level.fdo'      , 'tbench/tests/pkg.sv', 'ver_settings.py'    ],\
+    ['CHECKSUM_CALCULATOR'                , 'comp/mfb_tools/logic/checksum_calculator/uvm'                                    , 'top_level.fdo'      , 'tbench/tests/pkg.sv', 'ver_settings.py'    ],\
 ]
 // /////////////////////////////////////////////////////////////////////////////
 
