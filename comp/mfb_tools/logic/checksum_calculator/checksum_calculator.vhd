@@ -30,6 +30,8 @@ generic(
     MFB_BLOCK_SIZE  : natural := 8;
     -- Item width (in bits), must be 8.
     MFB_ITEM_WIDTH  : natural := 8;
+    -- Metadata width (in bits), valid with SOF.
+    MFB_META_WIDTH  : natural := 0;
 
     -- Maximum size of a packet (in Items).
     PKT_MTU         : natural := 2**14;
@@ -59,6 +61,7 @@ port(
     -- ========================================================================
 
     RX_MFB_DATA    : in  std_logic_vector(MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH-1 downto 0);
+    RX_MFB_META    : in  std_logic_vector(MFB_REGIONS*MFB_META_WIDTH-1 downto 0);
     RX_MFB_SOF_POS : in  std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE))-1 downto 0);
     RX_MFB_EOF_POS : in  std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE))-1 downto 0);
     RX_MFB_SOF     : in  std_logic_vector(MFB_REGIONS-1 downto 0);
@@ -81,6 +84,7 @@ port(
 
     -- The calculated checksum.
     TX_MVB_DATA     : out std_logic_vector(MFB_REGIONS*16-1 downto 0);
+    TX_MVB_META     : out std_logic_vector(MFB_REGIONS*MFB_META_WIDTH-1 downto 0); 
     -- Bypass checksum insertion (=> checksum caluculation is not desired).
     TX_CHSUM_BYPASS : out std_logic_vector(MFB_REGIONS-1 downto 0);
     TX_MVB_VLD      : out std_logic_vector(MFB_REGIONS-1 downto 0);
@@ -121,15 +125,20 @@ architecture FULL of CHECKSUM_CALCULATOR is
     --                                 SIGNALS
     -- ========================================================================
 
-    -- checksum enable fifoxm signals
-    signal chs_en_fifoxm_din   : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal chs_en_fifoxm_wr    : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal chs_en_fifoxm_full  : std_logic;
-    signal chs_en_fifoxm_dout  : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal chs_en_fifoxm_rd    : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal chs_en_fifoxm_empty : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal chs_en_fifoxm_out_rdy : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal chs_en_fifoxm_vo    : std_logic_vector(MFB_REGIONS-1 downto 0);
+    -- Metadata FIFOXM signals
+    signal rx_mfb_meta_arr      : slv_array_t     (MFB_REGIONS-1 downto 0)(MFB_META_WIDTH   -1 downto 0);
+    signal meta_fifoxm_din_arr  : slv_array_t     (MFB_REGIONS-1 downto 0)(MFB_META_WIDTH+1 -1 downto 0);
+    signal meta_fifoxm_din      : std_logic_vector(MFB_REGIONS*           (MFB_META_WIDTH+1)-1 downto 0);
+    signal meta_fifoxm_wr       : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal meta_fifoxm_full     : std_logic;
+    signal meta_fifoxm_dout     : std_logic_vector(MFB_REGIONS*           (MFB_META_WIDTH+1)-1 downto 0);
+    signal meta_fifoxm_dout_arr : slv_array_t     (MFB_REGIONS-1 downto 0)(MFB_META_WIDTH+1 -1 downto 0);
+    signal meta_fifoxm_rd       : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal meta_fifoxm_empty    : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal meta_fifoxm_out_rdy  : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal meta_fifoxm_vo       : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal meta_fifoxm_meta_arr : slv_array_t     (MFB_REGIONS-1 downto 0)(MFB_META_WIDTH-1 downto 0);
+    signal meta_fifoxm_bypass   : std_logic_vector(MFB_REGIONS-1 downto 0);
 
     -- input register
     signal rx_ext_data           : std_logic_vector(MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH-1 downto 0);
@@ -196,48 +205,58 @@ architecture FULL of CHECKSUM_CALCULATOR is
 
 begin
 
-    RX_MFB_DST_RDY <= rx_ext_dst_rdy and not chs_en_fifoxm_full;
+    RX_MFB_DST_RDY <= rx_ext_dst_rdy and not meta_fifoxm_full;
 
     -- ========================================================================
     --  Checksum enable flags synchronization
     -- ========================================================================
 
-    chs_en_fifoxm_din <= RX_CHSUM_EN;
-    chs_en_fifoxm_wr  <= (RX_MFB_SOF and RX_MFB_SRC_RDY) and RX_MFB_DST_RDY;
+    rx_mfb_meta_arr <= slv_array_deser(RX_MFB_META, MFB_REGIONS);
+    rx_meta_g : for r in 0 to MFB_REGIONS-1 generate
+        meta_fifoxm_din_arr(r) <= rx_mfb_meta_arr(r) & RX_CHSUM_EN(r);
+    end generate;
+    meta_fifoxm_din <= slv_array_ser(meta_fifoxm_din_arr);
+    meta_fifoxm_wr  <= (RX_MFB_SOF and RX_MFB_SRC_RDY) and RX_MFB_DST_RDY;
 
-    chs_en_fifoxm_i : entity work.FIFOX_MULTI(shakedown)
+    meta_fifoxm_i : entity work.FIFOX_MULTI(shakedown)
     generic map(
-        DATA_WIDTH          => 1,
-        ITEMS               => 512,
-        WRITE_PORTS         => MFB_REGIONS,
-        READ_PORTS          => MFB_REGIONS,
-        RAM_TYPE            => "AUTO",
-        DEVICE              => DEVICE,
-        ALMOST_FULL_OFFSET  => 0,
-        ALMOST_EMPTY_OFFSET => 0,
-        ALLOW_SINGLE_FIFO   => true,
-        SAFE_READ_MODE      => false
+        DATA_WIDTH          => MFB_META_WIDTH+1,
+        ITEMS               => 512             ,
+        WRITE_PORTS         => MFB_REGIONS     ,
+        READ_PORTS          => MFB_REGIONS     ,
+        RAM_TYPE            => "AUTO"          ,
+        DEVICE              => DEVICE          ,
+        ALMOST_FULL_OFFSET  => 0               ,
+        ALMOST_EMPTY_OFFSET => 0               ,
+        ALLOW_SINGLE_FIFO   => True            ,
+        SAFE_READ_MODE      => False
     )
     port map(
         CLK   => CLK,
         RESET => RESET,
 
-        DI    => chs_en_fifoxm_din   ,
-        WR    => chs_en_fifoxm_wr    ,
-        FULL  => chs_en_fifoxm_full  ,
-        AFULL => open                ,
+        DI    => meta_fifoxm_din   ,
+        WR    => meta_fifoxm_wr    ,
+        FULL  => meta_fifoxm_full  ,
+        AFULL => open              ,
 
-        DO     => chs_en_fifoxm_dout ,
-        RD     => chs_en_fifoxm_rd   ,
-        EMPTY  => chs_en_fifoxm_empty,
+        DO     => meta_fifoxm_dout ,
+        RD     => meta_fifoxm_rd   ,
+        EMPTY  => meta_fifoxm_empty,
         AEMPTY => open
     );
 
     -- valid out
-    chs_en_fifoxm_vo <= not chs_en_fifoxm_empty;
-    l4_chs_en_fifoxm_read_g : for r in 0 to MFB_REGIONS-1 generate
-        chs_en_fifoxm_out_rdy(r) <= and chs_en_fifoxm_vo(r downto 0);
-        chs_en_fifoxm_rd     (r) <= chs_en_fifoxm_out_rdy(r) and fifoxm_out_rdy(r) and TX_MVB_DST_RDY;
+    meta_fifoxm_vo <= not meta_fifoxm_empty;
+    meta_fifoxm_read_g : for r in 0 to MFB_REGIONS-1 generate
+        meta_fifoxm_out_rdy(r) <= and meta_fifoxm_vo(r downto 0);
+        meta_fifoxm_rd     (r) <= meta_fifoxm_out_rdy(r) and fifoxm_out_rdy(r) and TX_MVB_DST_RDY;
+    end generate;
+
+    meta_fifoxm_dout_arr <= slv_array_deser(meta_fifoxm_dout, MFB_REGIONS);
+    tx_meta_g : for r in 0 to MFB_REGIONS-1 generate
+        meta_fifoxm_meta_arr(r) <=     meta_fifoxm_dout_arr(r)(MFB_META_WIDTH+1-1 downto 1);
+        meta_fifoxm_bypass  (r) <= not meta_fifoxm_dout_arr(r)(0);
     end generate;
 
     -- ========================================================================
@@ -253,7 +272,7 @@ begin
                 rx_ext_eof_pos <= RX_MFB_EOF_POS;
                 rx_ext_sof     <= RX_MFB_SOF;
                 rx_ext_eof     <= RX_MFB_EOF;
-                rx_ext_src_rdy <= RX_MFB_SRC_RDY and not chs_en_fifoxm_full;
+                rx_ext_src_rdy <= RX_MFB_SRC_RDY and not meta_fifoxm_full;
 
                 rx_ext_off     <= RX_OFFSET;
                 rx_ext_len     <= RX_LENGTH;
@@ -462,16 +481,16 @@ begin
 
     fifoxm_i : entity work.FIFOX_MULTI
     generic map(
-        DATA_WIDTH          => CHECKSUM_W,
-        ITEMS               => 512,
+        DATA_WIDTH          => CHECKSUM_W   ,
+        ITEMS               => 512          ,
         WRITE_PORTS         => MFB_REGIONS*2,
-        READ_PORTS          => MFB_REGIONS,
-        RAM_TYPE            => "AUTO",
-        DEVICE              => DEVICE,
-        ALMOST_FULL_OFFSET  => 0,
-        ALMOST_EMPTY_OFFSET => 0,
-        ALLOW_SINGLE_FIFO   => true,
-        SAFE_READ_MODE      => false
+        READ_PORTS          => MFB_REGIONS  ,
+        RAM_TYPE            => "AUTO"       ,
+        DEVICE              => DEVICE       ,
+        ALMOST_FULL_OFFSET  => 0            ,
+        ALMOST_EMPTY_OFFSET => 0            ,
+        ALLOW_SINGLE_FIFO   => True         ,
+        SAFE_READ_MODE      => False
     )
     port map(
         CLK   => CLK,
@@ -492,7 +511,7 @@ begin
     fifoxm_vo <= not fifoxm_empty;
     fifoxm_dout_g : for r in 0 to MFB_REGIONS-1 generate
         fifoxm_out_rdy(r) <= and fifoxm_vo(r downto 0);
-        fifoxm_rd(r) <= chs_en_fifoxm_out_rdy(r) and fifoxm_out_rdy(r) and TX_MVB_DST_RDY;
+        fifoxm_rd(r) <= meta_fifoxm_out_rdy(r) and fifoxm_out_rdy(r) and TX_MVB_DST_RDY;
     end generate;
 
     -- ========================================================================
@@ -500,8 +519,9 @@ begin
     -- ========================================================================
 
     TX_MVB_DATA     <= fifoxm_dataout;
-    TX_CHSUM_BYPASS <= not chs_en_fifoxm_dout; -- inverted checksum enable
-    TX_MVB_VLD      <= (not fifoxm_empty) and (not chs_en_fifoxm_empty);
-    TX_MVB_SRC_RDY  <= or ((not fifoxm_empty) and (not chs_en_fifoxm_empty));
+    TX_MVB_META     <= slv_array_ser(meta_fifoxm_meta_arr);
+    TX_CHSUM_BYPASS <= meta_fifoxm_bypass; -- inverted checksum enable
+    TX_MVB_VLD      <= fifoxm_vo and meta_fifoxm_vo;
+    TX_MVB_SRC_RDY  <= or TX_MVB_VLD;
 
 end architecture;
