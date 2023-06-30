@@ -2,6 +2,7 @@
 # Copyright (C) 2022 CESNET z. s. p. o.
 # Author(s): Lukas Nevrkla <xnevrk03@stud.fit.vutbr.cz>
 
+import pytest
 from mem_tester import MemTester
 from mem_logger.mem_logger import MemLogger
 
@@ -14,8 +15,10 @@ from mem_logger.mem_logger import MemLogger
 # TESTS #
 #########
 
+device = '/dev/nfb0'
+
 def comp_cnt(comp=MemTester.DT_COMPATIBLE):
-    return MemTester.compatible_cnt(comp=comp)
+    return MemTester.compatible_cnt(comp=comp, dev=device)
 
 def test_comp_cnt():
     tester_cnt = comp_cnt()
@@ -27,8 +30,8 @@ def test_comp_cnt():
     assert logger_cnt == tester_cnt, "Number of mem_testers does not match number of mem_loggers"
 
 def open(index):
-    logger = MemLogger(index=index)
-    tester = MemTester(logger, index=index)
+    logger = MemLogger(index=index, dev=device)
+    tester = MemTester(logger, index=index, dev=device)
     return tester
 
 def test_open():
