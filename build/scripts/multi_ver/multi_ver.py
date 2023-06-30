@@ -5,6 +5,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import argparse
+import os
 from os import system, popen
 from importlib.machinery import SourceFileLoader
 from random import randint
@@ -46,19 +47,32 @@ def create_setting_from_combination(settings,combination):
 
 # Modify package file according to setting
 def apply_setting(pkg_file,setting,sed_str):
+    env = {}
     for i in setting.keys():
-        #print(sed_str.format(i,setting[i],pkg_file))
-        system(sed_str.format(i,setting[i],pkg_file))
+        if i == '__archgrp__':
+            env['ARCHGRP'] = " ".join([f'{k}={v}' for k,v in setting[i].items()])
+        elif i == '__core_params__':
+            env['CORE_PARAMS'] = " ".join([f'{k}={v}' for k,v in setting[i].items()])
+        else:
+            #print(sed_str.format(i,setting[i],pkg_file))
+            system(sed_str.format(i,setting[i],pkg_file))
+    return env
 
 # Run Modelsim with the current test_pkg file
-def run_modelsim(fdo_file,manual=False,gui=False):
+def run_modelsim(fdo_file,manual=False,gui=False, env={}):
     global FAIL
     c = "\"" if (gui) else "; quit -f\" -c"
+    for k, v in env.items():
+        os.environ[k] = v
+
     if (manual):
         system("vsim -do \"do "+fdo_file+c)
         result = system("grep -i \"success\" transcript")
     else:
         result = system("vsim -do \"do "+fdo_file+c+" | grep -i \"success\"")
+
+    for k in env:
+        del os.environ[k]
     return result
 
 ##########
@@ -135,10 +149,10 @@ if (args.setting==None):
     for c in COMBINATIONS:
         SETTING = create_setting_from_combination(SETTINGS,c)
 
-        apply_setting(args.test_pkg_file,SETTING,PKG_MOD_SED)
+        env = apply_setting(args.test_pkg_file,SETTING,PKG_MOD_SED)
 
         print("Running combination: "+" ".join(c))
-        result = run_modelsim(args.fdo_file)
+        result = run_modelsim(args.fdo_file,env=env)
         if (result!=0): # detect failure
             print("Run FAILED ("+" ".join(c)+")")
             FAIL = True
@@ -156,11 +170,11 @@ else:
 
     SETTING = create_setting_from_combination(SETTINGS,args.setting)
 
-    apply_setting(args.test_pkg_file,SETTING,PKG_MOD_SED)
+    env = apply_setting(args.test_pkg_file,SETTING,PKG_MOD_SED)
 
     if (not args.dry_run):
         print("Running combination: "+" ".join(args.setting))
-        result = run_modelsim(args.fdo_file,True,(not args.command_line))
+        result = run_modelsim(args.fdo_file,True,(not args.command_line),env=env)
         if (result!=0): # detect failure
             print("Run FAILED ("+" ".join(args.setting)+")")
             FAIL = True
