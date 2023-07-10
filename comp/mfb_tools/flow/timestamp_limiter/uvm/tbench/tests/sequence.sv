@@ -32,8 +32,8 @@ class virt_sequence #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WID
         m_mfb_data_sq_lib.init_sequence();
         m_mfb_data_sq_lib.cfg = new();
         m_mfb_data_sq_lib.cfg.array_size_set(FRAME_SIZE_MIN, PKT_MTU);
-        m_mfb_data_sq_lib.min_random_count = 100;
-        m_mfb_data_sq_lib.max_random_count = 300;
+        m_mfb_data_sq_lib.min_random_count = 60;
+        m_mfb_data_sq_lib.max_random_count = 80;
         m_mfb_data_sq_lib.randomize();
 
         m_mfb_rdy_lib.init_sequence();
