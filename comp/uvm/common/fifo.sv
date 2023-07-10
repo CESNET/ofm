@@ -33,7 +33,7 @@ virtual class fifo #(type ITEM_TYPE) extends uvm_component;
         return queue.size();
     endfunction
 
-    function try_get(output ITEM_TYPE tr);
+    function void try_get(output ITEM_TYPE tr);
         if(queue.size() != 0) begin
             tr = queue.pop_front();
         end else begin
