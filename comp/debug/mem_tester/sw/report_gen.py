@@ -292,9 +292,9 @@ if __name__ == '__main__':
     )
 
     info  = gen.data['info']
-    card  = run_cmd('nfb-info -q card')
-    proj  = run_cmd('nfb-info -q project')
-    build = run_cmd('nfb-info -q build')
+    card  = run_cmd(f'nfb-info -q card    -d {args.device}')
+    proj  = run_cmd(f'nfb-info -q project -d {args.device}')
+    build = run_cmd(f'nfb-info -q build   -d {args.device}')
 
     pdf.heading(2, "Test conditions")
     header  = ['Parameter', 'Value']
