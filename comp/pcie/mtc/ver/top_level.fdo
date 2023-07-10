@@ -23,4 +23,4 @@ puts "Numeric Std Warnings - Disabled"
 set NumericStdNoWarnings 1
 set StdArithNoWarnings 1
 
-source $SIG_FILE
+nb_sim_run

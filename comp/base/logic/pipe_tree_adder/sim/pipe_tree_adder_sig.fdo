@@ -13,10 +13,6 @@ set UUT_PATH   "/testbench/uut"
 
 source  "signals.fdo"
 
-exec make
-view wave
-delete wave *
-
 add wave -divider ""
 add wave -divider "TB internals"
 add wave -divider ""
@@ -29,6 +25,4 @@ uut_internals "$UUT_PATH" ""
 
 config wave -signalnamewidth 1
 
-restart -f
-run 250 us
-wave zoom full
+

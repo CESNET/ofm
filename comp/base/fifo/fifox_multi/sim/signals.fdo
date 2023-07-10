@@ -4,13 +4,6 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-proc rst { } {
-    exec make
-    restart -f
-    run -all
-    wave zoom full
-}
-
 proc uut_internals { PATH GROUP } {
     eval "add wave $GROUP -divider {Synchronization}"
     add_wave "$GROUP -noupdate -hex -label CLK -color yellow"   $PATH/CLK

@@ -4,22 +4,11 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-proc rst { } {
-   exec make
-   restart -f
-   run 2 us
-   wave zoom full
-}
-
 # Paths
 set TB_PATH "/testbench"
 
 # include signals
 source "signals.fdo"
-
-exec make
-view wave
-delete wave *
 
 add wave -divider "GENERICS"
 add_wave "-label auto_reset" $TB_PATH/AUTO_RESET
@@ -38,9 +27,4 @@ all CNT_ALL  $TB_PATH/uut
 all CNT_ATOM $TB_PATH/uut/auto_reset_g/auto_rst_cnt_variant_g/device_g/dsp_counter_stratix_10_atom_i
 all CNT_DSP  $TB_PATH/uut/auto_reset_g/auto_rst_cnt_variant_g/device_g/dsp_counter_stratix_10_atom_i/dsp_i
 
-restart -f
-run 500 us
 
-config wave -signalnamewidth 1
-
-wave zoomrange 0 350ns

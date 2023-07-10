@@ -6,8 +6,6 @@
 #
 
 source "./signals.fdo"
-view wave
-delete wave *
 
 add wave -divider "FIFO"
 add_wave "-noupdate -color yellow -label RESET"   /testbench/RESET

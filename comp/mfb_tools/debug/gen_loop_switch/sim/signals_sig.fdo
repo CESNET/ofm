@@ -4,15 +4,6 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-proc rst { } {
-   exec make
-   restart -f
-   run -a
-   wave zoom full
-}
-
-view wave
-delete wave *
 
 add wave -divider
 add_wave "-noupdate -color yellow -label RESET"   /testbench/RESET

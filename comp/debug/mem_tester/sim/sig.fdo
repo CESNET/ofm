@@ -13,10 +13,6 @@ set TB_PATH   "/testbench"
 
 source  "signals.fdo"
 
-exec make
-view wave
-delete wave *
-
 core_logic  CORE    $UUT_PATH
 amm         AMM     $UUT_PATH
 mi          MI      $UUT_PATH/mem_tester_mi_i
@@ -66,8 +62,3 @@ add_wave "-group { mmr_mux } -noupdate -hex"   $UUT_PATH/mmr_mux_i/*
 add wave -divider ""
 add_wave "-group { emif_sim } -noupdate -hex"   $EMIF_SIM_PATH/*
 
-config wave -signalnamewidth 1
-
-restart -f
-run -all
-#run 50000ns

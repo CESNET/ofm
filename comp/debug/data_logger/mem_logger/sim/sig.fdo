@@ -12,10 +12,6 @@ set TB_PATH   "/testbench"
 
 source  "signals.fdo"
 
-exec make
-view wave
-delete wave *
-
 add wave -divider ""
 add_wave "-group { testbench } -noupdate -hex"   $TB_PATH/*
 
@@ -28,11 +24,3 @@ add_wave "-group { data_logger } -noupdate -hex"   $TB_PATH/uut/data_logger_i/*
 add wave -divider ""
 add_wave "-group { histogramer } -noupdate -hex"   $TB_PATH/uut/data_logger_i/hist_g(0)/hist_if_g/hist_i/*
 
-
-
-
-config wave -signalnamewidth 1
-
-restart -f
-run -all
-#run 50000ns

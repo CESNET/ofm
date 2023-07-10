@@ -10,13 +10,8 @@
 
 
 source "./signals.fdo"
-exec make
-view wave
-delete wave *
 
 # procedures
 blk_ASFIFO /uut ASFIFO
 blk_ASFIFO_MISC /uut ASFIFO
 
-restart -f
-run 5 us

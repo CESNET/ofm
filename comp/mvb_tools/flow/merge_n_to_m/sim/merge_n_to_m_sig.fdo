@@ -9,10 +9,6 @@ set TB_PATH   "/testbench"
 
 source  "signals.fdo"
 
-exec make
-view wave
-delete wave *
-
 add wave -divider ""
 add wave -divider "TB internals"
 add wave -divider ""
@@ -28,5 +24,3 @@ add wave -divider "MERGE internals"
 add wave -divider ""
 merge_internals "$MERGE_N_TO_M_PATH" ""
 
-restart -f
-run 250 us

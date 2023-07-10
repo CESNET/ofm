@@ -10,14 +10,8 @@ set UUT_PATH   "/testbench/uut"
 
 #source "signals.fdo"
 
-exec make
-view wave
-delete wave *
-
 add_wave "-noupdate -color yellow -label CLK" /testbench/CLK
 add_wave "-noupdate -color yellow -label RESET" /testbench/RESET
 add_wave "-noupdate -label ENABLE" /testbench/enable
 add_wave "-noupdate -label DATA" /testbench/data
 
-restart -f
-run 5 us

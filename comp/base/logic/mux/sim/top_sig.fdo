@@ -12,10 +12,6 @@ set TB_PATH   "/testbench"
 
 source  "signals.fdo"
 
-exec make
-view wave
-delete wave *
-
 add wave -divider ""
 add wave -divider "TB internals"
 add wave -divider ""
@@ -31,7 +27,4 @@ add wave -divider "TOP internals"
 add wave -divider ""
 top_internals "$TOP_PATH" ""
 
-config wave -signalnamewidth 1
 
-restart -f
-run 250 us

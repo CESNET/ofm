@@ -6,9 +6,6 @@
 #
 # $Id$
 
-   view wave
-   delete wave *
-
 proc blk_FL_DEC { PARAM } {
    global FL_DEC_BASE
    

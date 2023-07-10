@@ -9,9 +9,6 @@
 #
 
 
-view wave
-delete wave *
-
 set PATH /testbench/UUT
 
 add wave -divider "MI Splitter"
@@ -69,7 +66,4 @@ add_wave "-noupdate -hex -label drd_delay_out"    /testbench/drd_delay_out
 add_wave "-noupdate -bin -label drdy_delay_in"    /testbench/drdy_delay_in
 add_wave "-noupdate -hex -label drdy_delay"       /testbench/drdy_delay
 add_wave "-noupdate -bin -label drdy_delay_out"   /testbench/drdy_delay_out
-
-restart -f
-run 3us
 

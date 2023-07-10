@@ -12,10 +12,6 @@ set TB_PATH                  "/testbench"
 set FL_FIFO_PATH             "/testbench/fl_dfifo"
 set ID                                " "
 
-exec make
-view wave
-delete wave *
-
 add_wave "-noupdate -hex -label CLK"         /testbench/CLK
 add_wave "-noupdate -hex -label RESET"       /testbench/RESET
 

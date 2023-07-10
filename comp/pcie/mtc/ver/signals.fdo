@@ -4,18 +4,8 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-proc rst { } {
-	exec make
-	restart -f
-	run -a
-	wave zoom full
-}
 
-proc rstSim { } {
-	vsim -novopt work.testbench
-	set StdArithNoWarnings 1
-	set NumericStdNoWarnings 1
-}
+
 
 proc tb_internals { PATH GROUP } {
 	eval "add wave $GROUP -divider {Clocking}"

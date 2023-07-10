@@ -14,16 +14,8 @@ set xor8x12_PATH   "/testbench/uut"
 # include signals
 source      "signals.fdo"
 
-exec make
-view wave
-delete wave *
-
 add wave -noupdate -label RESET -color magenta $TB_PATH/reset
 add wave -noupdate -label CLK -color magenta $TB_PATH/clk
 blk_xor8x12
 add wave -noupdate -color orange $TB_PATH/D_8x12
 
-restart -f
-run 1500 ns
-
-wave zoomrange 0 1000ns

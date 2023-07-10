@@ -17,9 +17,8 @@ set COMPONENTS [list \
     [list "DUT_VER"  $DUT_VER_BASE   "FULL"]\
 ]
 
-set SIM_FLAGS(EXTRA_VFLAGS) "-voptargs=-nomlopt"
 # Disable Code Coverage
-set CODE_COVERAGE "false"
+set CODE_COVERAGE false
 
 # Global include file for compilation
 source "$FIRMWARE_BASE/build/Modelsim.inc.fdo"
@@ -34,4 +33,3 @@ puts "Numeric Std Warnings - Disabled"
 set NumericStdNoWarnings 1
 
 nb_sim_run
-quit

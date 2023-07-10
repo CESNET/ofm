@@ -6,8 +6,6 @@
 #
 # $Id$
 
-   view wave
-   delete wave *
 
 proc flu_adapter_ports { TB } {
    

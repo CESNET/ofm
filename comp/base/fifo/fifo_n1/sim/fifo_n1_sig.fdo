@@ -12,10 +12,6 @@ set TB_PATH   "/testbench"
 
 source  "signals.fdo"
 
-exec make
-view wave
-delete wave *
-
 add wave -divider ""
 add wave -divider "TB internals"
 add wave -divider ""
@@ -31,5 +27,4 @@ add wave -divider "FIFO_N1 internals"
 add wave -divider ""
 fifo_n1_internals "$FIFO_N1_PATH" ""
 
-restart -f
-run 4 us
+

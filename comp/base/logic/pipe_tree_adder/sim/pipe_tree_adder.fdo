@@ -26,4 +26,4 @@ source "$FIRMWARE_BASE/build/Modelsim.inc.fdo"
 puts "Numeric Std Warnings - Disabled"
 set NumericStdNoWarnings 1
 
-source $SIG_FILE
+nb_sim_run 250us

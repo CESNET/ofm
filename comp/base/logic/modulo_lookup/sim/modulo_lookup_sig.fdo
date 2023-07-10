@@ -9,10 +9,6 @@
 set TB_PATH   "/testbench"
 set MOD_PATH  "/testbench/uut"
 
-exec make
-view wave
-delete wave *
-
 add wave -divider "Common interface"
 add wave -noupdate -hex -label CLK          $MOD_PATH/CLK
 add wave -noupdate -hex -label RESET        $MOD_PATH/RESET
@@ -26,7 +22,3 @@ add wave -divider "Output interface"
 add wave -noupdate -hex -label RESULT       $MOD_PATH/RESULT
 add wave -noupdate -hex -label OUT_VLD      $MOD_PATH/OUT_VLD
 
-restart -f
-run 500 us
-
-wave zoomrange 0 400ns

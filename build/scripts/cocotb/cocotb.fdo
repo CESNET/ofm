@@ -25,7 +25,7 @@ set SIM_FLAGS(VSIM_MANUAL_START) true
 set COCOTB_PATH [eval cocotb-config --lib-name-path fli modelsim]
 lappend SIM_FLAGS(EXTRA_VFLAGS) -foreign "cocotb_init $COCOTB_PATH"
 #lappend SIM_FLAGS(EXTRA_VFLAGS) -onfinish exit
-lappend SIM_FLAGS(EXTRA_VFLAGS) -voptargs=+acc
+lappend SIM_FLAGS(VOPT_ARGS) +acc
 if {[info exists USER_VFLAGS]} {
 	lappend SIM_FLAGS(EXTRA_VFLAGS) {*}USER_VFLAGS
 }

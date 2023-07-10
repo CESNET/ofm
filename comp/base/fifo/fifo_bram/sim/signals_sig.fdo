@@ -6,9 +6,6 @@
 #
 
 source "./signals.fdo"
-exec make
-view wave
-delete wave *
 
 #add_wave "-noupdate -color yellow -label RESET"   /testbench/RESET
 #add_wave "-noupdate -color yellow -label CLK"     /testbench/CLK
@@ -17,5 +14,3 @@ delete wave *
 all ALL_FIFO /testbench/uut/
 all ALL_BRAM /testbench/uut/bram_i/
 
-restart -f
-run 2 us

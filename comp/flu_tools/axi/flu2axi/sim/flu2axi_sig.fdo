@@ -14,9 +14,6 @@ set FLU2AXI_PATH   "/testbench/uut"
 # include signals
 source      "signals.fdo"
 
-exec make
-view wave
-delete wave *
 
 add wave -divider "COMMON INTERFACE"
 add wave -noupdate -label RESET -color magenta $TB_PATH/RESET
@@ -25,7 +22,3 @@ blk_FLU2AXI_RX
 
 blk_FLU2AXI_TX
 
-restart -f
-run 2 us
-
-wave zoomrange 0 1000ns

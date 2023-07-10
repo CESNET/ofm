@@ -8,9 +8,6 @@
 #
 
 source "./signals.fdo"
-exec make
-view wave
-delete wave *
 
 add wave -divider "MI memory space"
 add_wave "-noupdate -color yellow -label RESET"   /testbench/RESET
@@ -19,5 +16,3 @@ add_wave "-noupdate -color yellow -label CLK"     /testbench/CLK
 mi  "MI32"     /testbench
 others OTHERS /testbench/DUT_U/VHDL_DUT_U
 
-restart -f
-run -all

@@ -11,9 +11,6 @@
 
 
 source "./signals.fdo"
-exec make
-view wave
-delete wave *
 
 add wave -divider "HINS"  
 add_wave "-noupdate -color yellow -label RESET"   /testbench/RESET
@@ -24,5 +21,3 @@ edit EDIT    /testbench/DUT_U/VHDL_DUT_U
 tx   TX      /testbench/DUT_U/VHDL_DUT_U
 internal Internal /testbench/DUT_U/VHDL_DUT_U
 
-restart -f
-run -all

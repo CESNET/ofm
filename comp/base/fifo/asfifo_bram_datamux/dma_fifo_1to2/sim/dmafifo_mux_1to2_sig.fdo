@@ -8,13 +8,8 @@
 #
 
 source "./signals.fdo"
-exec make
-view wave
-delete wave *
 
 write_part  "Write part"                /testbench/uut
 read_part   "Read part"                 /testbench/uut
 internal    "Internal signals"          /testbench/uut
 
-restart -f
-run 5 us

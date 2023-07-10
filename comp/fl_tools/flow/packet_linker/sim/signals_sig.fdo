@@ -11,12 +11,6 @@
 
 
 source "./signals.fdo"
-exec make
-view wave
-delete wave *
 
 packet_linker PACKET_LINKER /testbench
 
-
-restart -f
-run 8000 ns

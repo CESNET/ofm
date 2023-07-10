@@ -18,10 +18,6 @@ set TSU_CV2_PATH           "/testbench/tsu_cv2_i"
 source "$TSU_ASYNC_BASE/sim/signals.fdo"
 
 
-exec make
-view wave
-delete wave *
-
 add wave -noupdate -label COMBOV2_REF_RESET /testbench/combov2_ref_reset
 add wave -noupdate -label COMBOV2_REF_CLK /testbench/combov2_ref_clk
 add wave -noupdate -label PTM_PRECISE_RESET /testbench/ptm_precise_reset
@@ -34,5 +30,3 @@ blk_TSU_ASYNC "IFC"
 
 blk_TSU_CV2 "IFC"
 
-restart -f
-run 40 us

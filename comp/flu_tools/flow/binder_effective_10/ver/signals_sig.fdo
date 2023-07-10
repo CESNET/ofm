@@ -11,9 +11,6 @@
 
 
 source "./signals.fdo"
-exec make
-view wave
-delete wave *
 
 add wave -divider "FLU_SAMPLER"  
 add_wave "-noupdate -color yellow -label RESET"   /testbench/RESET
@@ -36,5 +33,3 @@ flua_shifter_rx         "FLUA Shifter 1 - RX"         /testbench/DUT_U/VHDL_DUT_
 flua_shifter_tx         "FLUA Shifter 1 - TX"         /testbench/DUT_U/VHDL_DUT_U/FLUA_TO_FLU_BIND_I/FLUA_SHIFTER_1_I
 flua_shifter_internal   "FLUA Shifter 1 - Internal"   /testbench/DUT_U/VHDL_DUT_U/FLUA_TO_FLU_BIND_I/FLUA_SHIFTER_1_I/CORE_I
 
-restart -f
-run -all

@@ -12,10 +12,6 @@ set TB_PATH   "/testbench"
 
 source  "signals.fdo"
 
-exec make
-view wave
-delete wave *
-
 add wave -divider ""
 add wave -divider "TB internals"
 add wave -divider ""
@@ -31,5 +27,4 @@ add wave -divider "N_LOOP_OP_PRO internals"
 add wave -divider ""
 n_loop_op_pro_internals "$N_LOOP_OP_PRO_PATH" ""
 
-restart -f
-run 250 us
+

@@ -6,9 +6,6 @@
 #
 
 source "./signals.fdo"
-exec make
-view wave
-delete wave *
 
 add_wave "-noupdate -color yellow -label RESET"   /testbench/RESET
 add_wave "-noupdate -color yellow -label CLK"     /testbench/CLK
@@ -111,5 +108,3 @@ add_wave "-group {GENERICS} -noupdate -hex" $DUT/PKT_CNT_MAX
 
 #all ALL /testbench/DUT_U/VHDL_DUT_U
 
-restart -f
-run -all

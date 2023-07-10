@@ -3,13 +3,6 @@
 # Author: Tomas Hak <xhakto01@stud.fit.vutbr.cz> 
 
 # SPDX-License-Identifier: BSD-3-Clause
-proc rst { } {
-    exec make
-    restart -f
-    run -a
-    wave zoom full
-}
-
 set MAKEFILE_GEN "true"
 
 set FIRMWARE_BASE         "../../../../../../.."

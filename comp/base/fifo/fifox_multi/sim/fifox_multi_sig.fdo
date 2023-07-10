@@ -12,10 +12,6 @@ set UUT1_PATH  "/testbench/shake_gen/uut"
 
 source  "signals.fdo"
 
-exec make
-view wave
-delete wave *
-
 add wave -divider ""
 add wave -divider "TB internals"
 add wave -divider ""
@@ -29,6 +25,4 @@ uut_internals "$UUT1_PATH" ""
 
 config wave -signalnamewidth 1
 
-restart -f
-run -all
 wave zoom full

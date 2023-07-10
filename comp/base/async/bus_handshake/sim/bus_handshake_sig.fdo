@@ -14,14 +14,7 @@ set bus_handshake_PATH "/testbench/uut"
 # include signals
 source      "signals.fdo"
 
-exec make
-view wave
-delete wave *
 
 blk_bus_handshake_ifc
 blk_bus_handshake_internals
 
-restart -f
-run 2000 ns
-
-wave zoomrange 0 1000ns

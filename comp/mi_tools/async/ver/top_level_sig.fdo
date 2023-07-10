@@ -12,10 +12,6 @@ source "./signals.fdo"
 
 set COMP_PATH "/testbench/DUT_U/VHDL_DUT_U"
 
-exec make
-view wave
-delete wave *
-
 add wave -divider "MI32 ASYNC"  
 add_wave "-noupdate -color yellow -label MASTER_RESET"      /testbench/MASTER_RESET
 add_wave "-noupdate -color yellow -label SLAVE_RESET"       /testbench/SLAVE_RESET
@@ -25,5 +21,3 @@ mi32   SLAVE    S    "$COMP_PATH"
 
 add wave -divider "MI32 ASYNC signals"
 
-restart -f
-run -all

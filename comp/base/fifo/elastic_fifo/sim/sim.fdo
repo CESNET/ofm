@@ -17,13 +17,5 @@ set COMPONENTS [list \
 
 source "$FIRMWARE_BASE/build/Modelsim.inc.fdo"
 
-exec make
-view wave
-delete wave *
+nb_sim_run
 
-source "./signals.fdo"
-
-restart -f
-
-run 1 us
-wave zoom full

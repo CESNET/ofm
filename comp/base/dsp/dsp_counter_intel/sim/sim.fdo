@@ -26,4 +26,4 @@ set  StdArithNoWarnings 1
 set NumericStdNoWarnings 1
 
 # File with signals
-source $SIG_FILE
+nb_sim_run 500us

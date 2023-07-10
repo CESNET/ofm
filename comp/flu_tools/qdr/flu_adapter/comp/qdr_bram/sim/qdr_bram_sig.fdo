@@ -12,11 +12,5 @@ set TB_BASE          "/testbench"
 
 source	             "signals.fdo"
 
-exec make
-view wave
-delete wave *
-
 qdr_bram_ports        "$TB_BASE"
 
-restart -f
-run 5 us

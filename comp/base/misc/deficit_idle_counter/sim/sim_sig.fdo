@@ -4,22 +4,11 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-proc rst { } {
-   exec make
-   restart -f
-   run 2 us
-   wave zoom full
-}
-
 # Paths
 set TB_PATH "/testbench"
 
 # include signals
 source "signals.fdo"
-
-exec make
-view wave
-delete wave *
 
 add wave -divider "Generics and constants"
 #add wave $TB_PATH/*
@@ -27,9 +16,4 @@ add wave -divider "Signals"
 all TB_ALL  $TB_PATH
 all COMP_ALL $TB_PATH/uut
 
-restart -f
-run 200 us
 
-config wave -signalnamewidth 1
-
-wave zoom full

@@ -10,10 +10,6 @@
 # Paths
 set TB_PATH "/testbench"
 
-exec make
-view wave
-delete wave *
-
 add wave -divider "Clock and Reset"
 add_wave "-hex -label CLK"   /testbench/clk
 add_wave "-hex -label RESET" /testbench/reset
@@ -31,7 +27,4 @@ add_wave "-hex -label intr_in_pulse" /testbench/uut/intr_in_pulse
 add_wave "-hex -label input_or" /testbench/uut/input_or
 add_wave "-hex -label cnt_delay" /testbench/cnt_delay
 
-restart -f
-run 3 us
 
-wave zoomrange 0ns 400ns

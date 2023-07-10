@@ -4,17 +4,8 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-proc rst { } {
-   exec make
-   restart -f
-   run -a
-   wave zoom full
-}
 
 source "./signals.fdo"
-exec make
-view wave
-delete wave *
 
 add wave -divider "TX MAC LITE"
 add_wave "-noupdate -color yellow -label RX_CLK"    /testbench/RX_CLK
@@ -37,7 +28,3 @@ all MAC        /testbench/DUT_U/VHDL_DUT_U/tx_mac_lite_i
 #all MI32_DEC   /testbench/DUT_U/VHDL_DUT_U/tx_mac_lite_i/adc_i
 #all ENC        /testbench/DUT_U/VHDL_DUT_U/umii_enc_i
 
-config wave -signalnamewidth 1
-
-restart -f
-run -all

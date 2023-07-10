@@ -4,12 +4,6 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-proc rst { } {
-   exec make
-   restart -f
-   run 100 us
-   wave zoom full
-}
 
 # Paths
 set TB_PATH "/testbench"
@@ -17,11 +11,6 @@ set CMP_PATH "/testbench/uut/device_g/comparator_i"
 
 # include signals
 source "signals.fdo"
-
-exec make
-view wave
-delete wave *
-
 
 add wave -divider "Generics and constants"
 add wave $TB_PATH/MODE
@@ -41,9 +30,3 @@ all TB_ALL      $TB_PATH
 all CMP_ALL     $TB_PATH/uut
 all DSP_CMP_ALL $CMP_PATH
 
-restart -f
-run 1000 us
-
-config wave -signalnamewidth 1
-
-wave zoomrange 0 1000ns

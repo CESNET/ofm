@@ -11,12 +11,6 @@
 
 
 source "./signals.fdo"
-exec make
-view wave
-delete wave *
 
 fl_sim FL_SIM /testbench
 
-
-restart -f
-run 2000 ns

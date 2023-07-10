@@ -11,8 +11,6 @@
 
 
 source "./signals.fdo"
-view wave
-delete wave *
 
 add wave -divider "FLU_SAMPLER"  
 add_wave "-noupdate -color yellow -label RESET"   /testbench/RESET

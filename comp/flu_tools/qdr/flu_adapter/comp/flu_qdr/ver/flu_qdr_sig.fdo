@@ -14,16 +14,9 @@ set TB_BASE          "/testbench"
 
 source                "signals.fdo"
 
-exec make
-view wave
-delete wave *
-
 #flu_qdr_ports        "$TB_BASE/DUT_U/VHDL_DUT_U"
 
 #flu2qdr_ports        "$TB_BASE/DUT_U/VHDL_DUT_U/flu_adapteri/flu2qdri"
 
 #qdr_ports        "$TB_BASE/DUT_U/VHDL_DUT_U/flu_adapteri/qdri"
-
-restart -f
-run -all
 

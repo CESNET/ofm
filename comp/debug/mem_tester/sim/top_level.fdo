@@ -31,4 +31,4 @@ source "$OFM_PATH/build/Modelsim.inc.fdo"
 set StdArithNoWarnings 1
 set NumericStdNoWarnings 1
 
-source $SIG_FILE
+nb_sim_run

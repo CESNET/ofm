@@ -20,7 +20,6 @@ set COMPONENTS [list \
 
 # Disable Code Coverage
 set CODE_COVERAGE "false"
-set SIM_FLAGS(EXTRA_VFLAGS) "-voptargs=\"-nomlopt\""
 
 # Global include file for compilation
 source "$FIRMWARE_BASE/build/Modelsim.inc.fdo"
@@ -30,4 +29,4 @@ puts "Std Arith Warnings - Disabled"
 set StdArithNoWarnings 1
 
 # File with signals
-source $SIG_FILE
+nb_sim_run

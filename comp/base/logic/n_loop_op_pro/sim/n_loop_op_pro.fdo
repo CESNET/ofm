@@ -11,13 +11,6 @@ set DUT_BASE         ".."
 
 set MAKEFILE_GEN "true"
 
-proc rst { } {
-   exec make
-   restart -f
-   run -a
-   wave zoom full
-}
-
 # adding DMA Module top signals
 
 set SIG_FILE            "./n_loop_op_pro_sig.fdo"
@@ -27,10 +20,10 @@ set COMPONENTS [list \
    [list "DUT"      $DUT_BASE       "FULL"]\
 ]
 
-set SIM_FLAGS(EXTRA_VFLAGS) "-voptargs=+acc"
+set SIM_FLAGS(VOPT_ARGS) "+acc"
 
 source "$FIRMWARE_BASE/build/Modelsim.inc.fdo"
 set  StdArithNoWarnings 1
 set NumericStdNoWarnings 1
 
-source $SIG_FILE
+nb_sim_run 250us

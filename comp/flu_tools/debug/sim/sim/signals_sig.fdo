@@ -11,12 +11,6 @@
 
 
 source "./signals.fdo"
-exec make
-view wave
-delete wave *
 
 flu_bfm FLU_BFM /testbench
 
-
-restart -f
-run 7500 ns

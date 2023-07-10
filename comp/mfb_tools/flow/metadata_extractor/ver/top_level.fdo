@@ -18,8 +18,7 @@ set COMPONENTS [list \
     [list "DUT_VER"  $DUT_VER_BASE   "FULL"]\
 ]
 
-#set SIM_FLAGS(EXTRA_VFLAGS) "-voptargs=-nomlopt -vopt_verbose  -no_autoacc"
-set SIM_FLAGS(EXTRA_VFLAGS) "-voptargs=-nomlopt"
+#set SIM_FLAGS(EXTRA_VFLAGS) "-vopt_verbose  -no_autoacc"
 # Disable Code Coverage
 set CODE_COVERAGE "false"
 

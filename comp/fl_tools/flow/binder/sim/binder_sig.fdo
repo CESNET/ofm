@@ -14,10 +14,6 @@ set FL_BINDER_PATH         "$TB_PATH/uut"
 
 source      "signals.fdo"
 
-exec make
-view wave
-delete wave *
-
 add_wave "-label binder_frame_err -color magenta" /testbench/frame_err
 add wave -noupdate -label reset $TB_PATH/reset
 add wave -noupdate -label base_clk $TB_PATH/clk
@@ -38,5 +34,3 @@ blk_FL_BINDER "SIMPLE_BINDER"
 # blk_FL_BINDER "DATA_TRANSFORMER"
 blk_FL_BINDER "ONLY_TESTS"
 
-restart -f
-run 3 us

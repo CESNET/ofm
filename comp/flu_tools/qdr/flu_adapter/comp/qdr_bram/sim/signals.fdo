@@ -6,8 +6,6 @@
 #
 # $Id$
 
-   view wave
-   delete wave *
 
 proc qdr_bram_ports { TB } {
    

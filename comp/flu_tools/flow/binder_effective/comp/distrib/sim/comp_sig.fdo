@@ -13,13 +13,7 @@ set TESTBENCH_PATH	    "/testbench"
 # Files with signals
 source "signals.fdo"
 
-exec make
-view wave
-delete wave *
-
 # Functions for vsim wave setup
 blk_DISTRIB 
 blk_OTHER
 
-restart -f
-run  1us

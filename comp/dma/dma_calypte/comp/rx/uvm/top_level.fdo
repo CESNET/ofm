@@ -18,10 +18,10 @@ set COMPONENTS [list \
 ]
 
 # Disable Code Coverage
-set SIM_FLAGS(CODE_COVERAGE) "false"
-
-set SIM_FLAGS(EXTRA_VFLAGS) "+UVM_TESTNAME=test::base +UVM_VERBOSITY=UVM_NONE -uvmcontrol=all +UVM_MAX_QUIT_COUNT=1 -sv_seed random"
-#set SIM_FLAGS(EXTRA_VFLAGS) "+UVM_TESTNAME=test::speed +UVM_VERBOSITY=UVM_LOW -uvmcontrol=all +UVM_MAX_QUIT_COUNT=1 -sv_seed random"
+set SIM_FLAGS(CODE_COVERAGE) false
+set SIM_FLAGS(UVM_ENABLE) true
+set SIM_FLAGS(UVM_TEST) "test::base"
+set SIM_FLAGS(UVM_VERBOSITY) "UVM_NONE"
 
 # Global include file for compilation
 source "$FIRMWARE_BASE/build/Modelsim.inc.fdo"
@@ -41,4 +41,3 @@ if {$SIM_FLAGS(CODE_COVERAGE)} {
     vcover report -html -output cov_html -details -threshL 50 -threshH 90 final.ucdb
 }
 
-quit

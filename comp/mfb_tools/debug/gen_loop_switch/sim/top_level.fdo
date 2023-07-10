@@ -29,6 +29,4 @@ set NumericStdNoWarnings 1
 config wave -signalnamewidth 1
 
 nb_sim_run
-#restart -f
-#run -a
-#wave zoom full
+

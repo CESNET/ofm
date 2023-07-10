@@ -18,10 +18,6 @@ set FL_DISTRIBUTOR_PATH      "$UUT_PATH/gen_when_inum_in_non0_word/inst_word_non
 source signals.fdo
 
 
-exec make
-view wave
-delete wave *
-
 add wave -noupdate -label reset /testbench/uut/reset
 add wave -noupdate -label clk /testbench/uut/clk
 
@@ -31,5 +27,3 @@ FL_DISTRIBUTOR_INT
 FL_DISTRIBUTOR_INPUT
 FL_DISTRIBUTOR_OUT
 
-restart -f
-run 10 us

@@ -9,9 +9,6 @@
 #
 
 
-view wave
-delete wave *
-
 add wave -label "CLK" -noupdate /testbench/clk
 #add wave -label "RESET" -noupdate /testbench/reset
 
@@ -41,7 +38,4 @@ add wave  -hexa -label -noupdate "rm_drdy" /testbench/rm_drdy
 add wave  -label -noupdate "vector_ardy" /testbench/vector_ardy
 add wave  -label -noupdate "vector_drdy" /testbench/vector_drdy
 
-
-restart -f
-run 3us
 

@@ -5,8 +5,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 source "./signals.fdo"
-view wave
-delete wave *
 
 add wave -divider "TCAM"
 add_wave "-noupdate -color yellow -label RESET"   /testbench/DUT_U/VHDL_DUT_U/RESET

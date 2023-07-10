@@ -6,10 +6,6 @@
 #
 # $Id$
 
-   exec make
-   view wave
-   delete wave *
-
    add_wave "-noupdate -hex -label RESET"       /testbench/RESET
    add_wave "-noupdate -hex -label CLK"       /testbench/CLK
    
@@ -26,5 +22,3 @@
 
    add wave -divider "internal signals"
 
-   restart -f 
-   run 3 us

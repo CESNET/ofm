@@ -6,9 +6,6 @@
 #
 
 source "./signals.fdo"
-exec make
-view wave
-delete wave *
 
 add wave -divider "FLU Dump & Replay"
 add_wave "-noupdate -color yellow -label RESET"   /testbench/RESET
@@ -17,5 +14,3 @@ add_wave "-noupdate -color yellow -label CLK"     /testbench/CLK
 show    DUMP  /testbench/DUT_U/DUMP_U
 show  REPLAY  /testbench/DUT_U/REPLAY_U
 
-restart -f
-run -all

@@ -26,5 +26,4 @@ set COMPONENTS [list [list "DUT"     $DUT_BASE     "FULL"]\
 source "$FIRMWARE_BASE/build/Modelsim.inc.fdo"
 
 # File with signals
-source $SIG_FILE
-
+nb_sim_run 3us

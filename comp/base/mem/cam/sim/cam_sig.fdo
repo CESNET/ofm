@@ -12,12 +12,6 @@ set CAM_PATH      "/testbench/uut"
 
 source      "signals.fdo"
 
-exec make
-view wave
-delete wave *
-
 blk_CAM
 blk_CAM_INT
 
-restart -f
-run 12 us 

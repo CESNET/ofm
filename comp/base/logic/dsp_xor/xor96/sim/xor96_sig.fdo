@@ -14,10 +14,6 @@ set xor96_PATH   "/testbench/uut"
 # include signals
 source      "signals.fdo"
 
-exec make
-view wave
-delete wave *
-
 add wave -noupdate -label RESET -color magenta $TB_PATH/reset
 add wave -noupdate -label CLK -color magenta $TB_PATH/clk
 blk_xor96
@@ -25,7 +21,3 @@ add wave -noupdate -color orange $TB_PATH/D_96
 add wave -noupdate -color orange $TB_PATH/D_2x48
 add wave -noupdate -color orange $TB_PATH/D_4x24
 
-restart -f
-run 1500 ns
-
-wave zoomrange 0 1000ns

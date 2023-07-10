@@ -7,9 +7,6 @@
 # $Id$
 #
 
-view wave
-delete wave *
-
 add_wave "-noupdate -label CLK" /testbench/CLK
 add_wave "-noupdate -label RESET" /testbench/RESET
 add wave -divider

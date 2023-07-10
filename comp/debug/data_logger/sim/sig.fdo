@@ -12,20 +12,9 @@ set TB_PATH   "/testbench"
 
 source  "signals.fdo"
 
-exec make
-view wave
-delete wave *
-
 add wave -divider ""
 add_wave "-group { testbench } -noupdate -hex"   $TB_PATH/*
 
 add wave -divider ""
 add_wave "-group { uut } -noupdate -hex"   $TB_PATH/uut/*
 
-
-
-config wave -signalnamewidth 1
-
-restart -f
-run -all
-#run 50000ns

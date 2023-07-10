@@ -3,12 +3,7 @@
 # Author: Jan Kubalek <kubalek@cesnet.cz>
 
 # SPDX-License-Identifier: BSD-3-Clause
-proc rst { } {
-   exec make
-   restart -f
-   run -a
-   wave zoom full
-}
+
 
 proc uut_internals { PATH1 PATH2 PATH3 } {
    eval "add wave  -divider {Synchronization}"

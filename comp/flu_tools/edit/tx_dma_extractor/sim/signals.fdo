@@ -40,9 +40,6 @@ proc IFC_OUT {PATH} {
    add_wave "-noupdate -hex -label IFC_DST_RDY"  $PATH/IFC_DST_RDY
 }
 
-# exec make
-view wave
-delete wave *
 
 # Layout
 add wave -divider ""
@@ -60,6 +57,3 @@ add wave -divider "IFC_OUT"
 IFC_OUT "$COMP_PATH"
 
 # window
-restart -f
-run 200 ns
-wave zoomrange 0 210ns
