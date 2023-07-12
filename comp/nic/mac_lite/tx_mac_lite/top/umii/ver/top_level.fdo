@@ -4,7 +4,7 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-set FIRMWARE_BASE         "../../../../../../../.."
+set FIRMWARE_BASE         "../../../../../../.."
 set COMP_BASE             "$FIRMWARE_BASE/comp"
 
 set DUT_BASE              ".."
@@ -22,6 +22,8 @@ set COMPONENTS [list \
 set CODE_COVERAGE "false"
 
 set MAKEFILE_GEN "true"
+
+set SIM_FLAGS(EXTRA_VFLAGS) "-permit_unmatched_virtual_intf"
 
 # Global include file for compilation
 source "$FIRMWARE_BASE/build/Modelsim.inc.fdo"
