@@ -57,23 +57,15 @@ class model #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_W
 
         // Fill checksum data array with the correct bytes from the input frame
         for (int i = offset; i < offset+length; i+=2) begin
-            // $write("Frame data part 1 (i=%d): 0x%h\n", i  , frame.data[i]);
-            // $write("Frame data part 2 (i=%d): 0x%h\n", i+1, frame.data[i+1]);
             ret.data[data_index][15:8]  = frame.data[i];
             if ((length % 2 == 1) && (data_index == int'(length/2))) begin // at the last last index
                 ret.data[data_index][ 7:0]  = '0;
             end else begin
                 ret.data[data_index][ 7:0]  = frame.data[i+1];
             end
-            // $write("Return data: (di=%d): 0x%h\n", data_index, ret.data[data_index]);
-            // $write("Current state of the return data array:\n");
-            // `uvm_info(this.get_full_name(), ret.convert2string() ,UVM_NONE)
             data_index++;
         end
 
-        // $write("prepare_checksum_data:\n");
-        // $write("CHSUM DATA LEN %d\n", length);
-        // `uvm_info(this.get_full_name(), ret.convert2string() ,UVM_NONE)
         return ret;
     endfunction
 
@@ -84,20 +76,14 @@ class model #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_W
 
         for(int i = 0; i < checksum_data.data.size(); i++) begin
             temp_checksum += checksum_data.data[i];
-            // $write("CHSUM DATA: %h\n", checksum_data.data[i]);
-            // $write("Length of CHSUM DATA: %d\n", checksum_data.data.size());
-            // $write("Tmp CHSUM: %h\n", temp_checksum);
         end
 
         while (temp_checksum > CHCKS_MAX) begin
             temp_checksum = temp_checksum[15 : 0] + temp_checksum[31 : 16];
-            // $write("FINAL CHSUM: %h\n", temp_checksum);
         end
 
         ret = temp_checksum[15 : 0] + temp_checksum[31 : 16];
-        // $write("BEFORE REVERT CHSUM: %h\n", ret);
         ret = ~ret;
-        // $write("REVERT CHSUM: %h\n", ret);
 
         return ret;
     endfunction
@@ -139,14 +125,7 @@ class model #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_W
             chsum_en.data          = tr_input_meta.item.data[OFFSET_WIDTH+LENGTH_WIDTH+1-1  : OFFSET_WIDTH+LENGTH_WIDTH];
             tr_out_chsum.item.meta = tr_input_meta.item.data[META_WIDTH-1  : OFFSET_WIDTH+LENGTH_WIDTH+1];
 
-            // $write("-------------- Model input --------------\n");
-            // $write("Packet data:\n");
-            // `uvm_info(this.get_full_name(), tr_input_mfb.convert2string() ,UVM_NONE)
-            // $write("Metadata:\n");
-            // $write("\tOffset: %d\n\tLength: %d\n\tEnable: %d\n", offset, length, chsum_en.data);
-
             checksum_data     = prepare_checksum_data(tr_input_mfb.item, offset, length);
-            // `uvm_info(this.get_full_name(), checksum_data.convert2string() ,UVM_NONE)
             tr_out_chsum.item.data_tr.data = checksum_calc(checksum_data);
 
             tr_out_chsum.item.bypass    = !chsum_en.data;
