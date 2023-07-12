@@ -13,8 +13,8 @@
 class sequence_reset extends uvm_sequence#(uvm_reset::sequence_item);
     `uvm_object_utils(uvm_reset::sequence_reset)
 
-    int unsigned length_min = 2;
-    int unsigned length_max = 20;
+    int unsigned length_min = 7;
+    int unsigned length_max = 30;
     rand int unsigned length;
 
     constraint c_reset {length inside {[length_min:length_max]};};
