@@ -234,7 +234,7 @@ architecture FULL of MTC is
     signal reg1_cq_first_ib          : unsigned(2-1 downto 0);
     signal reg1_cq_hdr_request_id    : std_logic_vector(16-1 downto 0);
     signal reg1_cq_hdr_tc            : std_logic_vector(3-1 downto 0);
-    signal reg1_cq_hdr_dword_count   : unsigned(11-1 downto 0);
+    signal reg1_cq_hdr_dword_count   : unsigned(10-1 downto 0);
     signal reg1_cq_hdr_attr          : std_logic_vector(3-1 downto 0);
     signal reg1_cq_meta_function_id  : std_logic_vector(8-1 downto 0);
     signal reg1_cq_meta_tph_present  : std_logic;
@@ -607,7 +607,7 @@ begin
                     reg1_cq_hdr_last_be       <= cq_hdr_last_be;
                     reg1_cq_hdr_request_id    <= cq_hdr_request_id;
                     reg1_cq_hdr_tc            <= cq_hdr_tc;
-                    reg1_cq_hdr_dword_count   <= cq_hdr_dword_count;
+                    reg1_cq_hdr_dword_count   <= cq_hdr_dword_count(10-1 downto 0);
                     reg1_cq_hdr_attr          <= cq_hdr_attr;
                     reg1_cq_meta_function_id  <= cq_meta_function_id;
                     reg1_cq_data_index_begin  <= cq_data_index_begin;
