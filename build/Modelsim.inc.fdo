@@ -227,6 +227,7 @@ proc nb_vsim_compile_svlibs {SV_LIBS} {
 }
 
 proc nb_vsim_compile_project {sim_flags hierarchy} {
+    global env
     upvar 1 $sim_flags SIM_FLAGS $hierarchy HIERARCHY
 
     set FILES [list ]
@@ -234,6 +235,21 @@ proc nb_vsim_compile_project {sim_flags hierarchy} {
 
     if {$SIM_FLAGS(BATCH_COMPILE)} {
         nb_batch_init
+    }
+
+    if {[info exists env(ARCHGRP)]} {
+        for {set i 0} {$i < [llength $HIERARCHY(COMPONENTS)]} {incr i} {
+            set COMP [lindex $HIERARCHY(COMPONENTS) $i]
+            lassign $COMP COMP_NAME COMP_PATH COMP_ARCHGRP
+
+            foreach ARCH $env(ARCHGRP) {
+                lassign [split $ARCH "="] ARCHGRP_COMP_NAME ARCHGRP_NAME
+                if {$COMP_NAME == $ARCHGRP_COMP_NAME} {
+                    lset COMP 2 $ARCHGRP_NAME
+                    lset HIERARCHY(COMPONENTS) $i $COMP
+                }
+            }
+        }
     }
 
     PrintLabel "Packages Compilation"
