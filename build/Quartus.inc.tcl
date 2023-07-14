@@ -90,6 +90,12 @@ proc EvalFile {FNAME OPT} {
             puts "- file assigned to instance: $opt(SDC_ENTITY_FILE)"
             set_instance_assignment -entity $opt(SDC_ENTITY_FILE) -name SDC_ENTITY_FILE $FNAME
         }
+    } elseif {$opt(TYPE) == "PARTITION_QDB"} {
+        if {[info exists opt(PARTITION_NAME)]} {
+            puts "- partition $opt(PARTITION_NAME) assigned to instance: $opt(PARTITION_PATH)"
+            set_instance_assignment -name PARTITION $opt(PARTITION_NAME) -to $opt(PARTITION_PATH)
+            set_instance_assignment -name QDB_FILE_PARTITION $FNAME -to $opt(PARTITION_PATH)
+        }
     }
 }
 
