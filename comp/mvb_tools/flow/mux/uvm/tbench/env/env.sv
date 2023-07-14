@@ -83,6 +83,8 @@ class env #(ITEMS, ITEM_WIDTH, RX_MVB_CNT) extends uvm_env;
         end
 
         m_reset.sync_connect(tx_env.reset_sync);
+        m_reset.sync_connect(rx_sel_env.reset_sync);
+
         tx_env.m_mvb_agent.analysis_port.connect(m_cover_tx.analysis_export);
 
         vscr.m_reset = m_reset.m_sequencer;
