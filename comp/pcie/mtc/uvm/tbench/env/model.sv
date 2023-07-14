@@ -134,7 +134,6 @@ class model #(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE, MI_DATA_WIDTH, MI_ADDR_WIDT
             meta = cq_meta_tr.item.data[sv_pcie_meta_pack::PCIE_CQ_META_WIDTH-1 : sv_pcie_meta_pack::PCIE_META_REQ_HDR_W];
             `uvm_info(this.get_full_name(), cq_meta_tr.convert2string() ,UVM_MEDIUM)
 
-
             if (IS_MFB_META_DEV) begin
                 // Only Intel
                 hdr      = cq_meta_tr.item.data[sv_pcie_meta_pack::PCIE_META_REQ_HDR_W-1 : 0];
@@ -174,6 +173,10 @@ class model #(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE, MI_DATA_WIDTH, MI_ADDR_WIDT
                 end
             end
 
+            if (dw_cnt == 0) begin
+                dw_cnt = 1024;
+            end
+
             rw = uvm_pcie_hdr::encode_type(req_type, IS_INTEL_DEV);
 
             if (!(rw == 3'b011 || rw == 3'b010 || rw == 3'b100)) begin
@@ -191,8 +194,9 @@ class model #(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE, MI_DATA_WIDTH, MI_ADDR_WIDT
 
                     if (rw == 3'b001) begin
                         gen_mi_write(mi_addr_base + (it - hdr_offset)*4, cq_data_tr.item.data[it], be, mi_tr.item);
-                    end else if (rw == 3'b000)
+                    end else if (rw == 3'b000) begin
                         gen_mi_read(mi_addr_base + (it - hdr_offset)*4, be, mi_tr.item);
+                    end
 
                     analysis_port_mi_data.write(mi_tr);
                 end
@@ -436,6 +440,10 @@ class response_model #(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE, MI_DATA_WIDTH, MI_
                     dw_cnt = pcie_meta.hdr[10-1 : 0];
                 end else
                     dw_cnt = pcie_meta.hdr[43-1 : 32];
+
+                if (dw_cnt == 0) begin
+                    dw_cnt = 1024;
+                end
 
                 if (!pcie_meta.error) begin
                     while (item != int'(dw_cnt)) begin
