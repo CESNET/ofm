@@ -314,10 +314,12 @@ class FrameLinkUDriver #(int pDataWidth=512, int pEopWidth=6, int pSopWidth=3)
             else
                oneword_transaction = 0;
 
-            // Schedule the transaction to be finished later
-            fork
-               delayedFinishTransaction();
-            join_none; // No wait
+            // Schedule the transaction to be finished later only if it will not be finished below
+            if (m<pDataWidth) begin
+               fork
+                  delayedFinishTransaction();
+               join_none; // No wait
+            end
          end
 
          // When data word is ready to be sent
