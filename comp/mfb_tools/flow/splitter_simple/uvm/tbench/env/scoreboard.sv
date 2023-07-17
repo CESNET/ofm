@@ -163,7 +163,7 @@ class scoreboard #(ITEM_WIDTH, META_WIDTH, CHANNELS) extends uvm_scoreboard;
             it_string.itoa(it);
             compare_data[it] = comparer_data #(ITEM_WIDTH, META_WIDTH)::type_id::create({"compare_data_", it_string}, this);
             compare_meta[it] = comparer_meta #(ITEM_WIDTH, META_WIDTH)::type_id::create({"compare_meta_", it_string}, this);
-            compare_meta[it].model_tr_timeout_set(50000ns);
+            compare_meta[it].model_tr_timeout_set(100us);
         end
 
     endfunction
