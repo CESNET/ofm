@@ -4,22 +4,36 @@
 
 // SPDX-License-Identifier: BSD-3-Clause
 
+class chsum_calc_item#(MVB_DATA_WIDTH, MFB_META_WIDTH);
 
-class model #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY) extends uvm_component;
-    `uvm_component_param_utils(uvm_checksum_calculator::model #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY))
+    logic                                             bypass;
+    logic[MFB_META_WIDTH-1 : 0]                       meta;
+    uvm_logic_vector::sequence_item #(MVB_DATA_WIDTH) data_tr;
 
-    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) input_mfb;
-    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(META_WIDTH))           input_meta;
-    uvm_analysis_port #(uvm_logic_vector::sequence_item #(MVB_DATA_WIDTH))           out_checksum_mvb;
-    uvm_analysis_port #(uvm_logic_vector::sequence_item #(1))                        out_bypass;
+    function string convert2string();
+        string msg;
+
+        $swrite(msg, "%s\n\tbypass %b\n", msg, bypass);
+        $swrite(msg, "%s\n\tDATA: %s", msg, data_tr.convert2string());
+        return msg;
+    endfunction
+
+endclass
+
+
+class model #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY, MFB_META_WIDTH) extends uvm_component;
+    `uvm_component_param_utils(uvm_checksum_calculator::model #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY, MFB_META_WIDTH))
+
+    uvm_common::fifo #(uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))) input_data;
+    uvm_common::fifo #(uvm_common::model_item #(uvm_logic_vector::sequence_item #(META_WIDTH)))           input_meta;
+    uvm_analysis_port #(uvm_common::model_item #(chsum_calc_item#(MVB_DATA_WIDTH, MFB_META_WIDTH)))                       out_checksum;
 
     function new(string name = "model", uvm_component parent = null);
         super.new(name, parent);
 
-        input_mfb        = new("input_mfb", this);
-        input_meta       = new("input_meta", this);
-        out_checksum_mvb = new("out_checksum_mvb", this);
-        out_bypass       = new("out_bypass", this);
+        out_checksum = new("out_checksum", this);
+        input_data   = null;
+        input_meta   = null;
 
     endfunction
 
@@ -43,23 +57,15 @@ class model #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_W
 
         // Fill checksum data array with the correct bytes from the input frame
         for (int i = offset; i < offset+length; i+=2) begin
-            // $write("Frame data part 1 (i=%d): 0x%h\n", i  , frame.data[i]);
-            // $write("Frame data part 2 (i=%d): 0x%h\n", i+1, frame.data[i+1]);
             ret.data[data_index][15:8]  = frame.data[i];
             if ((length % 2 == 1) && (data_index == int'(length/2))) begin // at the last last index
                 ret.data[data_index][ 7:0]  = '0;
             end else begin
                 ret.data[data_index][ 7:0]  = frame.data[i+1];
             end
-            // $write("Return data: (di=%d): 0x%h\n", data_index, ret.data[data_index]);
-            // $write("Current state of the return data array:\n");
-            // `uvm_info(this.get_full_name(), ret.convert2string() ,UVM_NONE)
             data_index++;
         end
 
-        // $write("prepare_checksum_data:\n");
-        // $write("CHSUM DATA LEN %d\n", length);
-        // `uvm_info(this.get_full_name(), ret.convert2string() ,UVM_NONE)
         return ret;
     endfunction
 
@@ -70,29 +76,23 @@ class model #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_W
 
         for(int i = 0; i < checksum_data.data.size(); i++) begin
             temp_checksum += checksum_data.data[i];
-            // $write("CHSUM DATA: %h\n", checksum_data.data[i]);
-            // $write("Length of CHSUM DATA: %d\n", checksum_data.data.size());
-            // $write("Tmp CHSUM: %h\n", temp_checksum);
         end
 
         while (temp_checksum > CHCKS_MAX) begin
             temp_checksum = temp_checksum[15 : 0] + temp_checksum[31 : 16];
-            // $write("FINAL CHSUM: %h\n", temp_checksum);
         end
 
         ret = temp_checksum[15 : 0] + temp_checksum[31 : 16];
-        // $write("BEFORE REVERT CHSUM: %h\n", ret);
         ret = ~ret;
-        // $write("REVERT CHSUM: %h\n", ret);
 
         return ret;
     endfunction
 
     task run_phase(uvm_phase phase);
 
-        uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH) tr_input_mfb;
-        uvm_logic_vector::sequence_item #(META_WIDTH)           tr_input_meta;
-        uvm_logic_vector::sequence_item #(MVB_DATA_WIDTH)       checksum_mvb;
+        uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) tr_input_mfb;
+        uvm_common::model_item #(uvm_logic_vector::sequence_item #(META_WIDTH))           tr_input_meta;
+        uvm_common::model_item #(chsum_calc_item#(MVB_DATA_WIDTH, MFB_META_WIDTH))        tr_out_chsum;
         uvm_logic_vector::sequence_item #(1)                    chsum_en;
         uvm_logic_vector::sequence_item #(1)                    bypass;
         uvm_logic_vector_array::sequence_item #(16)             checksum_data;
@@ -103,7 +103,7 @@ class model #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_W
 
         forever begin
 
-            input_mfb.get(tr_input_mfb);
+            input_data.get(tr_input_mfb);
             input_meta.get(tr_input_meta);
 
             pkt_cnt++;
@@ -112,33 +112,29 @@ class model #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_W
                 `uvm_info(this.get_full_name(), tr_input_mfb.convert2string() ,UVM_NONE)
             end
 
-            checksum_mvb = uvm_logic_vector::sequence_item #(MVB_DATA_WIDTH)::type_id::create("checksum_mvb");
+            tr_out_chsum              = uvm_common::model_item #(chsum_calc_item#(MVB_DATA_WIDTH, MFB_META_WIDTH))::type_id::create("tr_out_chsum");
+            tr_out_chsum.item         = new();
+            tr_out_chsum.item.data_tr = uvm_logic_vector::sequence_item #(MVB_DATA_WIDTH)::type_id::create("tr_out_chsum.item.data_tr");
+            tr_out_chsum.time_array_add(tr_input_mfb.start);
+
             chsum_en    = uvm_logic_vector::sequence_item #(1)::type_id::create("chsum_en");
             bypass      = uvm_logic_vector::sequence_item #(1)::type_id::create("bypass");
 
-            offset        = tr_input_meta.data[OFFSET_WIDTH-1  : 0];
-            length        = tr_input_meta.data[OFFSET_WIDTH+LENGTH_WIDTH-1  : OFFSET_WIDTH];
-            chsum_en.data = tr_input_meta.data[META_WIDTH-1  : OFFSET_WIDTH+LENGTH_WIDTH];
+            offset                 = tr_input_meta.item.data[OFFSET_WIDTH-1  : 0];
+            length                 = tr_input_meta.item.data[OFFSET_WIDTH+LENGTH_WIDTH-1  : OFFSET_WIDTH];
+            chsum_en.data          = tr_input_meta.item.data[OFFSET_WIDTH+LENGTH_WIDTH+1-1  : OFFSET_WIDTH+LENGTH_WIDTH];
+            tr_out_chsum.item.meta = tr_input_meta.item.data[META_WIDTH-1  : OFFSET_WIDTH+LENGTH_WIDTH+1];
 
-            // $write("-------------- Model input --------------\n");
-            // $write("Packet data:\n");
-            // `uvm_info(this.get_full_name(), tr_input_mfb.convert2string() ,UVM_NONE)
-            // $write("Metadata:\n");
-            // $write("\tOffset: %d\n\tLength: %d\n\tEnable: %d\n", offset, length, chsum_en.data);
+            checksum_data     = prepare_checksum_data(tr_input_mfb.item, offset, length);
+            tr_out_chsum.item.data_tr.data = checksum_calc(checksum_data);
 
-            checksum_data     = prepare_checksum_data(tr_input_mfb, offset, length);
-            // `uvm_info(this.get_full_name(), checksum_data.convert2string() ,UVM_NONE)
-            checksum_mvb.data = checksum_calc(checksum_data);
-
-            bypass.data = !chsum_en.data;
+            tr_out_chsum.item.bypass    = !chsum_en.data;
 
             if (VERBOSITY >= 1) begin
-                `uvm_info(this.get_full_name(), checksum_mvb.convert2string() ,UVM_NONE)
-                `uvm_info(this.get_full_name(), bypass.convert2string() ,UVM_NONE)
+                `uvm_info(this.get_full_name(), tr_out_chsum.convert2string() ,UVM_NONE)
             end
 
-            out_bypass.write(bypass);
-            out_checksum_mvb.write(checksum_mvb);
+            out_checksum.write(tr_out_chsum);
         end
 
     endtask

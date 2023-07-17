@@ -24,7 +24,8 @@ package test;
 
     parameter OFFSET_WIDTH       = 7;
     parameter LENGTH_WIDTH       = 9;
-    parameter META_WIDTH         = OFFSET_WIDTH+LENGTH_WIDTH+1;
+    parameter MFB_META_WIDTH     = 16;
+    parameter META_WIDTH         = OFFSET_WIDTH+LENGTH_WIDTH+1+MFB_META_WIDTH;
 
     // Width of output checksums (in bits), other values than 16 are not supported.
     parameter MVB_DATA_WIDTH     = 16;

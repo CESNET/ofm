@@ -5,11 +5,11 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 // Environment for the functional verification.
-class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH, MVB_DATA_WIDTH, PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY) extends uvm_env;
-    `uvm_component_param_utils(uvm_checksum_calculator::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH, MVB_DATA_WIDTH, PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY));
+class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH, MVB_DATA_WIDTH, PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY, MFB_META_WIDTH) extends uvm_env;
+    `uvm_component_param_utils(uvm_checksum_calculator::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH, MVB_DATA_WIDTH, PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY, MFB_META_WIDTH));
 
     uvm_logic_vector_array_mfb::env_rx #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH) m_env_rx;
-    uvm_logic_vector_mvb::env_tx       #(MFB_REGIONS, MVB_DATA_WIDTH+1)                                            m_env_tx_mvb;
+    uvm_logic_vector_mvb::env_tx       #(MFB_REGIONS, MVB_DATA_WIDTH+1+MFB_META_WIDTH)                             m_env_tx_mvb;
 
     uvm_checksum_calculator::virt_sequencer #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH, MVB_DATA_WIDTH, PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH) vscr;
 
@@ -18,7 +18,7 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_W
     uvm_reset::agent                                             m_reset;
     uvm_header_type::agent#(PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH) m_info_agent;
 
-    scoreboard #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY) sc;
+    scoreboard #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY, MFB_META_WIDTH) sc;
 
     // Constructor of the environment.
     function new(string name, uvm_component parent);
@@ -59,9 +59,9 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_W
         m_config_mvb_tx.interface_name = "vif_mvb_tx";
 
         uvm_config_db #(uvm_logic_vector_mvb::config_item)::set(this, "m_env_tx_mvb", "m_config", m_config_mvb_tx);
-        m_env_tx_mvb = uvm_logic_vector_mvb::env_tx#(MFB_REGIONS, MVB_DATA_WIDTH+1)::type_id::create("m_env_tx_mvb", this);
+        m_env_tx_mvb = uvm_logic_vector_mvb::env_tx#(MFB_REGIONS, MVB_DATA_WIDTH+1+MFB_META_WIDTH)::type_id::create("m_env_tx_mvb", this);
 
-        sc       = scoreboard#(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY)::type_id::create("sc", this);
+        sc       = scoreboard#(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY, MFB_META_WIDTH)::type_id::create("sc", this);
         m_driver = driver #(MFB_ITEM_WIDTH, META_WIDTH, PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH)::type_id::create("m_driver", this);
         vscr     = uvm_checksum_calculator::virt_sequencer#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH, MVB_DATA_WIDTH, PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH)::type_id::create("vscr",this);
 
@@ -70,9 +70,9 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_W
     // Connect agent's ports with ports from the scoreboard.
     function void connect_phase(uvm_phase phase);
 
-        m_env_rx.analysis_port_data.connect(sc.input_mfb);
-        m_env_rx.analysis_port_meta.connect(sc.input_meta);
-        m_env_tx_mvb.analysis_port.connect(sc.out_mvb);
+        m_env_rx.analysis_port_data.connect(sc.input_data.analysis_export);
+        m_env_rx.analysis_port_meta.connect(sc.input_meta.analysis_export);
+        m_env_tx_mvb.analysis_port.connect(sc.dut_out_mvb);
 
         m_reset.sync_connect(m_env_rx.reset_sync);
         m_reset.sync_connect(m_env_tx_mvb.reset_sync);
