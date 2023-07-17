@@ -1,0 +1,122 @@
+# signals.fdo : Include file with signals
+# Copyright (C) 2023 CESNET z. s. p. o.
+# Author(s): Yaroslav Marushchenko <xmarus09@stud.fit.vutbr.cz>
+
+# SPDX-License-Identifier: BSD-3-Clause 
+
+proc all {NAME PATH} {
+    add wave -divider ""
+    add wave -divider "$NAME"
+    add wave -divider ""
+
+    add_wave "-noupdate  -hex"       $PATH/*
+}
+
+proc INTERFACE {PATH} {
+    add wave -divider ""
+    add wave -divider "INTERFACE"
+    add wave -divider ""
+
+    add_wave "-noupdate  -hex"       $PATH/CLK
+    add_wave "-noupdate  -hex"       $PATH/RESET
+
+    add wave -divider ""
+
+    add_wave "-noupdate  -hex"       $PATH/RX_DATA
+    add_wave "-noupdate  -hex"       $PATH/RX_META
+    add_wave "-noupdate  -bin"       $PATH/RX_SOF
+    add_wave "-noupdate  -bin"       $PATH/RX_EOF
+    add_wave "-noupdate  -bin"       $PATH/RX_SOF_POS
+    add_wave "-noupdate  -bin"       $PATH/RX_EOF_POS
+    add_wave "-noupdate  -hex"       $PATH/RX_SRC_RDY
+    add_wave "-noupdate  -hex"       $PATH/RX_DST_RDY
+
+    add wave -divider ""
+
+    add_wave "-noupdate  -hex"       $PATH/TX_DATA
+    add_wave "-noupdate  -hex"       $PATH/TX_META
+    add_wave "-noupdate  -bin"       $PATH/TX_SOF
+    add_wave "-noupdate  -bin"       $PATH/TX_EOF
+    add_wave "-noupdate  -bin"       $PATH/TX_SOF_POS
+    add_wave "-noupdate  -bin"       $PATH/TX_EOF_POS
+    add_wave "-noupdate  -hex"       $PATH/TX_SRC_RDY
+    add_wave "-noupdate  -hex"       $PATH/TX_DST_RDY
+
+    #add wave -divider ""
+
+    add_wave "-noupdate  -bin"       $PATH/TX_MASK
+}
+
+proc DEBUG {PATH} {
+    add wave -divider ""
+    add wave -divider "DEBUG"
+    add wave -divider ""
+
+    add wave -divider "MFB_PIPE output signals"
+
+    add_wave "-noupdate  -hex"       $PATH/pipe_tx_data
+    add_wave "-noupdate  -hex"       $PATH/pipe_tx_meta
+    add_wave "-noupdate  -bin"       $PATH/pipe_tx_sof
+    add_wave "-noupdate  -bin"       $PATH/pipe_tx_eof
+    add_wave "-noupdate  -bin"       $PATH/pipe_tx_sof_pos
+    add_wave "-noupdate  -bin"       $PATH/pipe_tx_eof_pos
+    add_wave "-noupdate  -bin"       $PATH/pipe_tx_src_rdy
+    add_wave "-noupdate  -bin"       $PATH/pipe_tx_dst_rdy
+
+    add wave -divider "Stored MFB data word"
+
+    add_wave "-noupdate  -hex"       $PATH/data_reg
+    add_wave "-noupdate  -hex"       $PATH/meta_reg
+    add_wave "-noupdate  -bin"       $PATH/sof_reg
+    add_wave "-noupdate  -bin"       $PATH/eof_reg
+    add_wave "-noupdate  -bin"       $PATH/sof_pos_reg
+    add_wave "-noupdate  -bin"       $PATH/eof_pos_reg
+
+    add wave -divider "FSM signals"
+
+    add_wave "-noupdate  -hex"       $PATH/curr_state
+    add_wave "-noupdate  -hex"       $PATH/next_state
+
+    add wave -divider "Mask signals"
+
+    add_wave "-noupdate  -bin"       $PATH/full_mask
+
+    add wave -divider "Other signals"
+
+    add_wave "-noupdate  -bin"       $PATH/u_array_sof_pos_items
+    add_wave "-noupdate  -bin"       $PATH/u_array_sof_pos
+    add_wave "-noupdate  -bin"       $PATH/u_array_eof_pos
+
+    add wave -divider ""
+
+    add_wave "-noupdate  -bin"       $PATH/prev_mask
+    add_wave "-noupdate  -bin"       $PATH/whole_frame
+    add_wave "-noupdate  -bin"       $PATH/frame_only_with_beginning
+    add_wave "-noupdate  -bin"       $PATH/frame_only_with_ending
+    add_wave "-noupdate  -bin"       $PATH/masked_sof
+    add_wave "-noupdate  -bin"       $PATH/masked_eof
+
+    add wave -divider ""
+
+    add_wave "-noupdate  -bin"       $PATH/regions_to_drop
+    add_wave "-noupdate  -bin"       $PATH/regions_to_hide
+    add_wave "-noupdate  -bin"       $PATH/hidden_regions_reg
+    add_wave "-noupdate  -bin"       $PATH/dropped_regions_reg
+
+    add wave -divider ""
+    
+    add_wave "-noupdate  -bin"       $PATH/need_to_drop_next_single_eof_reg
+    add_wave "-noupdate  -bin"       $PATH/next_single_eof_mask
+
+    add wave -divider ""
+
+    add_wave "-noupdate  -bin"       $PATH/start_of_processing
+    add_wave "-noupdate  -bin"       $PATH/end_of_processing
+
+    add wave -divider ""
+
+    add_wave "-noupdate  -bin"       $PATH/need_to_process
+    add_wave "-noupdate  -bin"       $PATH/is_done
+    add_wave "-noupdate  -bin"       $PATH/is_masking
+    add_wave "-noupdate  -integer"   $PATH/highest_mask_index
+}
