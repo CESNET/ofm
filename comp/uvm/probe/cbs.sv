@@ -3,10 +3,62 @@
  * Copyright (C) 2023 CESNET z. s. p. o.
  * description: callback remove data from one fifo and put into other
  * date       : 2023
- * author     : Radek Iša <isa@cesnet.ch>
+ * authors    : Radek Iša <isa@cesnet.ch>
+ *            : Oliver Gurka <oliver.gurka@cesnet.cz>
  *
  * SPDX-License-Identifier: BSD-3-Clause
 */
+
+class cbs_simple #(int unsigned DATA_WIDTH) extends uvm_event_callback;
+    `uvm_object_param_utils(uvm_probe::cbs_simple #(DATA_WIDTH))
+
+    protected typedef struct {
+        logic [DATA_WIDTH-1:0] dut;
+    } t_output;
+
+    protected mailbox #(t_output) out;
+
+    function new(string name = "");
+        super.new(name);
+
+        out = new();
+    endfunction
+
+    //---------------------------------------
+    // pre trigger method
+    //---------------------------------------
+    virtual function bit pre_trigger(uvm_event e, uvm_object data);
+    endfunction
+
+    //---------------------------------------
+    // post trigger method
+    //---------------------------------------
+    virtual function void post_trigger(uvm_event e, uvm_object data);
+        uvm_probe::data#(DATA_WIDTH) c_data;
+        t_output out_data;
+
+        $cast(c_data, data);
+        
+        out_data.dut = c_data.data;
+
+        if (out.try_put(out_data) == 0) begin
+            `uvm_fatal(this.get_full_name(), $sformatf("\n\tCannot put event %h into queue\n", out_data.dut));
+        end
+    endfunction
+
+    //---------------------------------------
+    // OTHERS METHODS
+    //---------------------------------------
+    task get(output logic [DATA_WIDTH-1:0] dut_info);
+        t_output tr_tmp;
+        out.get(tr_tmp);
+        dut_info = tr_tmp.dut;
+    endtask
+
+    function int unsigned used();
+        return (out.num() != 0);
+    endfunction
+endclass
 
 class cbs_fifo#(type T_TYPE, int unsigned DATA_WIDTH) extends uvm_event_callback;
     `uvm_object_param_utils(uvm_probe::cbs_fifo#(T_TYPE, DATA_WIDTH))
