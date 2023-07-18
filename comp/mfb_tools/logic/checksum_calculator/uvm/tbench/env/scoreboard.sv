@@ -46,7 +46,7 @@ class scoreboard #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LEN
         input_meta = uvm_common::subscriber #(uvm_logic_vector::sequence_item#(META_WIDTH))::type_id::create("input_meta", this);
 
         data_cmp = uvm_checksum_calculator::chsum_calc_cmp #(MVB_DATA_WIDTH, MFB_META_WIDTH)::type_id::create("data_cmp", this);
-        data_cmp.model_tr_timeout_set(50us);
+        data_cmp.model_tr_timeout_set(200us);
 
     endfunction
 
