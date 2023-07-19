@@ -41,7 +41,7 @@ class speed extends uvm_test;
      typedef uvm_component_registry#(test::speed, "test::speed") type_id;
 
     // declare the Environment reference variable
-    uvm_timestamp_limiter::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTAMP_WIDTH) m_env;
+    uvm_timestamp_limiter::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTAMP_WIDTH, QUEUES) m_env;
     int unsigned timeout;
 
     // ------------------------------------------------------------------------
@@ -65,7 +65,7 @@ class speed extends uvm_test;
         {this.get_full_name(), ".m_env.m_env_rx.*"});
 
         // Initializing the reference to the environment
-        m_env = uvm_timestamp_limiter::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTAMP_WIDTH)::type_id::create("m_env", this);
+        m_env = uvm_timestamp_limiter::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTAMP_WIDTH, QUEUES)::type_id::create("m_env", this);
     endfunction
 
     // ------------------------------------------------------------------------

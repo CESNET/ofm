@@ -14,12 +14,18 @@ module DUT (
     mfb_if.dut_tx   mfb_tx
     );
 
+    localparam R_QUEUES = (QUEUES != 1) ? $clog2(QUEUES) : 1;
+
     logic [MFB_REGIONS*TIMESTAMP_WIDTH-1 : 0] timestamp;
     logic [MFB_REGIONS*MFB_META_WIDTH-1 : 0]  meta;
+    logic [MFB_REGIONS*R_QUEUES-1 : 0]        mfb_queue;
 
     for (genvar regions = 0; regions < MFB_REGIONS; regions++) begin
-        assign timestamp [(regions+1)*TIMESTAMP_WIDTH-1 -: TIMESTAMP_WIDTH] = mfb_rx.META[regions*RX_MFB_META_WIDTH + TIMESTAMP_WIDTH                 -1 -: TIMESTAMP_WIDTH];
-        assign meta      [(regions+1)*MFB_META_WIDTH -1 -: MFB_META_WIDTH]  = mfb_rx.META[regions*RX_MFB_META_WIDTH + TIMESTAMP_WIDTH + MFB_META_WIDTH-1 -: MFB_META_WIDTH];
+        assign timestamp [(regions+1)*TIMESTAMP_WIDTH-1 -: TIMESTAMP_WIDTH] = mfb_rx.META[regions*RX_MFB_META_WIDTH + TIMESTAMP_WIDTH                            -1 -: TIMESTAMP_WIDTH];
+        if (QUEUES !=1) begin 
+            assign mfb_queue [(regions+1)*$clog2(QUEUES)       -1 -: $clog2(QUEUES)       ] = mfb_rx.META[regions*RX_MFB_META_WIDTH + TIMESTAMP_WIDTH + $clog2(QUEUES)           -1 -: $clog2(QUEUES) ];
+        end
+        assign meta      [(regions+1)*MFB_META_WIDTH -1 -: MFB_META_WIDTH ] = mfb_rx.META[regions*RX_MFB_META_WIDTH + TIMESTAMP_WIDTH + $clog2(QUEUES) + MFB_META_WIDTH-1 -: MFB_META_WIDTH ];
     end
 
     MFB_TIMESTAMP_LIMITER #(
@@ -43,6 +49,7 @@ module DUT (
         .RX_MFB_DATA        (mfb_rx.DATA)   ,
         .RX_MFB_TIMESTAMP   (timestamp)     ,
         .RX_MFB_META        (meta)          ,
+        .RX_MFB_QUEUE       (mfb_queue)     ,
         .RX_MFB_SOF_POS     (mfb_rx.SOF_POS),
         .RX_MFB_EOF_POS     (mfb_rx.EOF_POS),
         .RX_MFB_SOF         (mfb_rx.SOF)    ,

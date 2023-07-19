@@ -19,8 +19,8 @@ class ts_limiter_item#(MFB_ITEM_WIDTH, TIMESTAMP_WIDTH);
 endclass
 
 
-class model #(MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTAMP_WIDTH) extends uvm_component;
-    `uvm_component_param_utils(uvm_timestamp_limiter::model #(MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTAMP_WIDTH))
+class model #(MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTAMP_WIDTH, QUEUES) extends uvm_component;
+    `uvm_component_param_utils(uvm_timestamp_limiter::model #(MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTAMP_WIDTH, QUEUES))
 
     uvm_tlm_analysis_fifo #(uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)))              input_data;
     uvm_tlm_analysis_fifo #(uvm_common::model_item #(uvm_logic_vector::sequence_item #(RX_MFB_META_WIDTH)))                 input_meta;
@@ -45,7 +45,9 @@ class model #(MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTAMP_WI
         uvm_common::model_item #(uvm_logic_vector::sequence_item #(TX_MFB_META_WIDTH))                     tr_output_meta;
 
         forever begin
+            logic [$clog2(QUEUES)-1 : 0] mfb_queue = '0;
             string msg = "\n";
+            string queue_str = "";
 
             input_data.get(tr_input_data);
             input_meta.get(tr_input_meta);
@@ -59,7 +61,7 @@ class model #(MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTAMP_WI
             $swrite(msg, "%s INPUT DATA\n", msg);
             $swrite(msg, "%s %s\n", msg, tr_input_data.convert2string());
             $swrite(msg, "%s INPUT TS %h\n", msg, tr_input_meta.item.data[TIMESTAMP_WIDTH-1 : 0]);
-            $swrite(msg, "%s INPUT META %h\n", msg, tr_input_meta.item.data[RX_MFB_META_WIDTH-1 : TIMESTAMP_WIDTH]);
+            $swrite(msg, "%s INPUT META %h\n", msg, tr_input_meta.item.data[RX_MFB_META_WIDTH-1 : TIMESTAMP_WIDTH+$clog2(QUEUES)]);
             $swrite(msg, "%s %s\n", msg, tr_input_meta.convert2string());
 
             tr_output_data.time_array_add(tr_input_data.start);
@@ -67,13 +69,20 @@ class model #(MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTAMP_WI
             tr_output_meta.time_array_add(tr_input_data.start);
             tr_output_meta.time_array_add(tr_input_meta.start);
 
-            tr_output_meta.item.data = tr_input_meta.item.data[RX_MFB_META_WIDTH-1 : TIMESTAMP_WIDTH];
+            tr_output_meta.item.data = tr_input_meta.item.data[RX_MFB_META_WIDTH-1 : TIMESTAMP_WIDTH+$clog2(QUEUES)];
             $swrite(msg, "%s OUTPUT META\n", msg);
             $swrite(msg, "%s %s\n", msg, tr_output_meta.convert2string());
             `uvm_info(get_type_name(), msg, UVM_MEDIUM)
 
             tr_output_data.item.data_tr.copy(tr_input_data.item);
-            tr_output_data.item.timestamp = tr_input_meta.item.data[TIMESTAMP_WIDTH-1 : 0];
+            tr_output_data.item.timestamp = tr_input_meta.item.data[TIMESTAMP_WIDTH               -1 : 0              ];
+            if (QUEUES != 1) begin 
+                mfb_queue                 = tr_input_meta.item.data[TIMESTAMP_WIDTH+$clog2(QUEUES)-1 : TIMESTAMP_WIDTH];
+            end
+
+            queue_str.itoa(int'(mfb_queue));
+            tr_output_meta.tag = {"TS_LIMITER_META_", queue_str};
+            tr_output_data.tag = {"TS_LIMITER_DATA_", queue_str};
 
             out_data.write(tr_output_data);
             if (TX_MFB_META_WIDTH > 0) begin 

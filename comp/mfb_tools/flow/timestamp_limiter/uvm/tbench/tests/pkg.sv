@@ -44,7 +44,7 @@ package test;
     // Number of Items in the Packet Delayer's RX FIFO (the main buffer).
     parameter BUFFER_SIZE       = 2048;
     // The number of Queues (DMA Channels).
-    parameter QUEUES            = 1;
+    parameter QUEUES            = 2;
     // Maximum size of a packet (in Items).
     parameter PKT_MTU           = 2**11;
 
@@ -66,7 +66,7 @@ package test;
     parameter TIMESTAMP_MAX     = 50;
 
     // Width of RX Metadata (in bits).
-    parameter RX_MFB_META_WIDTH = MFB_META_WIDTH + TIMESTAMP_WIDTH;
+    parameter RX_MFB_META_WIDTH = MFB_META_WIDTH + TIMESTAMP_WIDTH + $clog2(QUEUES);
     // Width of TX Metadata (in bits).
     parameter TX_MFB_META_WIDTH = MFB_META_WIDTH;
 
