@@ -229,6 +229,8 @@ architecture behavioral of FIFOX is
          return "BRAM";
       end if;
    end function;
+
+   constant RAM_TYPE_SELECTED : string := auto_ram_type(DATA_WIDTH,ITEMS_INTER,RAM_TYPE,DEVICE);
   
    -- Enable signals have high fanout for data size higher than 1000
    -- Vivado optimize this situation with clock buffer while implementation but this solution 
@@ -249,7 +251,7 @@ begin
       --                   BRAM MEMOMRY GENERATION
       -- -------------------------------------------------------------------------
       
-      bram_g : if auto_ram_type(DATA_WIDTH,ITEMS_INTER,RAM_TYPE,DEVICE) = "BRAM"  generate 
+      bram_g : if RAM_TYPE_SELECTED = "BRAM"  generate 
          bram_i : entity work.SDP_BRAM_BEHAV
             generic map(
                DATA_WIDTH  => DATA_WIDTH,
@@ -278,7 +280,7 @@ begin
       --                   LUT MEMEORY GENERATION
       -- -------------------------------------------------------------------------
       
-      logic_g : if auto_ram_type(DATA_WIDTH,ITEMS_INTER,RAM_TYPE,DEVICE) = "LUT" generate
+      logic_g : if RAM_TYPE_SELECTED = "LUT" generate
          sdp_lutram_i : entity work.GEN_LUTRAM
          generic map (
             DATA_WIDTH         => DATA_WIDTH,
@@ -322,7 +324,7 @@ begin
       --                      ULTRA-RAM MEMORY GENERATION
       -- -------------------------------------------------------------------------
 
-      uram_g : if auto_ram_type(DATA_WIDTH,ITEMS_INTER,RAM_TYPE,DEVICE) = "URAM" generate
+      uram_g : if RAM_TYPE_SELECTED = "URAM" generate
          -- Ultra RAM is only on UltraScale devices
          uram_i : entity work.SDP_URAM_XILINX
          generic map(
@@ -457,7 +459,7 @@ begin
       rd_reg_ce <= RD OR EMPTY;
       rd_ce <= rd_reg_ce OR empty_reg;
 
-      non_shift_fifo_g : if (auto_ram_type(DATA_WIDTH,ITEMS_INTER,RAM_TYPE,DEVICE) /= "SHIFT") generate
+      non_shift_fifo_g : if (RAM_TYPE_SELECTED /= "SHIFT") generate
          -- -------------------------------------------------------------------------
          --                      FIFO WRITE ADDRESS COUNTER
          -- -------------------------------------------------------------------------
@@ -562,7 +564,7 @@ begin
          --                    SHIFT MEMORY GENERATION
          -- ----------------------------------------------------------------------
 
-      sh_mem_g : if (auto_ram_type(DATA_WIDTH,ITEMS_INTER,RAM_TYPE,DEVICE) = "SHIFT") generate
+      sh_mem_g : if (RAM_TYPE_SELECTED = "SHIFT") generate
          sh_mem_i : entity work.SH_REG_BASE_DYNAMIC
             generic map(
                DATA_WIDTH => DATA_WIDTH,
