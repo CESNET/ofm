@@ -37,7 +37,7 @@ package body ab_init_pack is
     begin
 
         pb_init_l : for i in ITEMS_X-1 downto 0 loop
-            randint(s1, s2, 0, 2**28, x);
+            randint(s1, s2, 0, max(0, 2**DATA_WIDTH-1), x);
             v := std_logic_vector(unsigned(v) - x);
             addr_base_arr_dto(i) := v;
         end loop pb_init_l;
@@ -56,7 +56,7 @@ package body ab_init_pack is
     begin
 
         pb_init_l : for i in ITEMS_X-1 downto 0 loop
-            randint(s1, s2, 0, 2**28, x);
+            randint(s1, s2, 0, max(0, 2**DATA_WIDTH-1), x);
             v := std_logic_vector(unsigned(v) - x);
             addr_base_arr_to(i) := v;
         end loop pb_init_l;
