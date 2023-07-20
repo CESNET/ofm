@@ -12,7 +12,7 @@ import os
 
 setup_file = "setup.py"
 tmp_dir    = "__ofm_pkg_tmp__"
-comp_dir   = "../comp/"
+comp_dir   = "../../comp/"
 init_files = []
 
 # remove existing tmp directory
