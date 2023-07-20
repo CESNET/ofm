@@ -49,6 +49,7 @@ module DUT (
         end else begin
             // -- In other situations the separed process changing space_glb_rd_ptr 
             assign space_glb_rd_ptr = PTR_INT.SPACE_GLB_RD_PTR;
+            assign PTR_INT.SPACE_GLB_WR_PTR = space_glb_wr_ptr;
         end
         for (genvar i = 0 ; i < NUMBER_OF_STREAMS ; i++ ) begin
             // -- Assigning interface RX_STREAM 
@@ -63,9 +64,9 @@ module DUT (
 
             // -- Assigning interface TX_STREAMS
             for (genvar z = 0 ; z < NUMBER_OF_PACKETS ; z++) begin
-                assign TX_STREAMS[i].DATA[TX_ITEM_WIDTH*(1+z)-1:ADDRES_WIDTH+LEN+z*TX_ITEM_WIDTH]           = mvb_tx_stream_meta[i][z];
-                assign TX_STREAMS[i].DATA[LEN+ADDRES_WIDTH-1+z*TX_ITEM_WIDTH:ADDRES_WIDTH+z*TX_ITEM_WIDTH]  = mvb_tx_stream_len[i][z];                
-                assign TX_STREAMS[i].DATA[ADDRES_WIDTH-1+z*TX_ITEM_WIDTH:z*TX_ITEM_WIDTH]                   = mvb_tx_stream_addr[i][z];
+                assign TX_STREAMS[i].DATA[TX_ITEM_WIDTH*z + META_WIDTH + ADDRES_WIDTH+LEN-1 -: META_WIDTH] = mvb_tx_stream_meta[i][z];
+                assign TX_STREAMS[i].DATA[TX_ITEM_WIDTH*z + ADDRES_WIDTH+LEN-1 -: LEN]                     = mvb_tx_stream_len[i][z];
+                assign TX_STREAMS[i].DATA[TX_ITEM_WIDTH*z + ADDRES_WIDTH-1 -: ADDRES_WIDTH]                = mvb_tx_stream_addr[i][z];
                 if(STREAM_OUTPUT_AFULL==0) begin
                     // -- Assigning bit DST_RDY of the interface to all TX_STR_PKT_DST_RDY bits
                     assign mvb_tx_stream_dst_rdy[i][z] = TX_STREAMS[i].DST_RDY;

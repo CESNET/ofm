@@ -28,50 +28,68 @@ class  PointerMover;
         this.enabled=0;
     endfunction
 
+
+    //task run();
+    //    logic [SPACE_GLB_PTR-1:0]    spaceGlbRdPtr = 0;
+    //    int unsigned read_size;
+    //    time rand_delay;
+
+    //    while (enabled==1 || spaceGlbRdPtr != PTR_INT.cb.SPACE_GLB_WR_PTR) begin
+    //        // -- Waiting for rising edge of CLK signal
+    //        rand_delay = $urandom_range(200ns, 0ns);
+    //        #(rand_delay);
+
+    //        read_size = $urandom_range((unsigned'(PTR_INT.cb.SPACE_GLB_WR_PTR) - spaceGlbRdPtr) & (2**SPACE_GLB_PTR-1));
+    //        spaceGlbRdPtr = spaceGlbRdPtr + read_size;
+    //        @(PTR_INT.cb);
+    //        PTR_INT.cb.SPACE_GLB_RD_PTR <= spaceGlbRdPtr;
+    //    end
+    //endtask
+
     task run();
-        while (enabled==1) begin
-            int numOfPacketToRemove = $urandom_range(MAX_NUMBER_OF_PACKETS_TO_BE_REMOVED,0);
-            logic [SPACE_GLB_PTR-1:0]    spaceGlbRdPtr;
-            logic [ADDRES_WIDTH-1:0]    addrOfActualPacket;
+        logic [SPACE_GLB_PTR-1:0]    spaceGlbRdPtr = 0;
+        int unsigned raw_size;
+        int unsigned read_size;
+
+        @(PTR_INT.cb);
+        @(PTR_INT.cb);
+
+        while (enabled==1 || spaceGlbRdPtr != PTR_INT.cb.SPACE_GLB_WR_PTR) begin
+            int numOfPacketToRemove = MAX_NUMBER_OF_PACKETS_TO_BE_REMOVED;// $urandom_range(MAX_NUMBER_OF_PACKETS_TO_BE_REMOVED, 0);
+            logic [SPACE_GLB_PTR-1:0]    spaceGlbRdPtr = 0;
 
             // -- Waiting for rising edge of CLK signal
-            @(PTR_INT.cb);
             if(VERBOSE_LEVEL>5) begin
                 $timeformat(-9, 3, " ns", 8);
                 $write("%t Number of packets to be removed in this CLK: %d\n",$time,numOfPacketToRemove);
             end
-            for (int i = 0; i < numOfPacketToRemove && acceptedTransaction.tr_table.size > 0 ; i++) begin
-                MvbTransaction #(TX_GLOBAL_ITEM_WIDTH) oldestTr=new;
+
+            //for (int i = 0; i < numOfPacketToRemove && acceptedTransaction.tr_table.size > 0 ; i++) begin
+            while (acceptedTransaction.tr_table.size() > 0) begin
+                int unsigned raw_size;
+                MvbTransaction #(TX_GLOBAL_ITEM_WIDTH) oldestTr;
                 bit roundUpFlag = 0, status = 0;
-                $cast(oldestTr,acceptedTransaction.tr_table[0]);
+
+                $cast(oldestTr, acceptedTransaction.tr_table[0]);
                 // -- Counting end of packet
-                addrOfActualPacket=oldestTr.data[ADDRES_WIDTH-1:0];
-                addrOfActualPacket=addrOfActualPacket+oldestTr.data[LEN+ADDRES_WIDTH-1:ADDRES_WIDTH];
-                
+                raw_size = unsigned'(oldestTr.data[ADDRES_WIDTH-1 -: ADDRES_WIDTH]) + unsigned'(oldestTr.data[LEN+ADDRES_WIDTH-1 -: LEN]);
+                spaceGlbRdPtr = (raw_size + ADRESS_ALIGNMENT -1)/ADRESS_ALIGNMENT;
+                //spaceGlbRdPtr = spaceGlbRdPtr + (raw_size + ADRESS_ALIGNMENT -1)/ADRESS_ALIGNMENT;
+
                 if(VERBOSE_LEVEL>4)begin
                     oldestTr.display();
-                    $write("ADDR %b\nLEN %b\nADDR+LEN %b\n",oldestTr.data[ADDRES_WIDTH-1:0],oldestTr.data[LEN+ADDRES_WIDTH-1:ADDRES_WIDTH],addrOfActualPacket);
+                    $write("ADDR %b\nLEN %b\n",oldestTr.data[ADDRES_WIDTH-1:0],oldestTr.data[LEN+ADDRES_WIDTH-1:ADDRES_WIDTH]);
                 end
                 // -- Round up addres to ADRESS_ALIGNMENT and shift addres by sqrt(ADDRESS_ALIGMENT) to right (in the addrOfActualPacket is end of packet align to ADRESS_ALIGNMENT)
-                for ( int x = 0 ; x < $sqrt(ADRESS_ALIGNMENT); x++) begin
-                    if (addrOfActualPacket[0]==1) begin
-                        roundUpFlag=1;
-                    end
-                    addrOfActualPacket=addrOfActualPacket>>1;
-                end
-                if(roundUpFlag)begin
-                    addrOfActualPacket+=1;
-                end
+                //addrOfActualPacket = (addrOfActualPacket + ADRESS_ALIGNMENT -1)/ADRESS_ALIGNMENT;
                 // -- End of round up
-                
-                if (VERBOSE_LEVEL > 4) begin
-                    $write("newAdress %b\n",addrOfActualPacket[SPACE_GLB_PTR-1:0]);  
-                end
-                // -- Assigning the result of the calculation to the SPACE_GLB_RD_PTR input of the DUT
-                PTR_INT.cb.SPACE_GLB_RD_PTR<=addrOfActualPacket[SPACE_GLB_PTR-1:0];
-                // -- And remove the Transaction from transaction table
+
                 acceptedTransaction.remove(oldestTr,status);
             end
+            // -- Assigning the result of the calculation to the SPACE_GLB_RD_PTR input of the DUT
+            @(PTR_INT.cb);
+            PTR_INT.cb.SPACE_GLB_RD_PTR <= PTR_INT.cb.SPACE_GLB_WR_PTR;
+            // -- And remove the Transaction from transaction table
         end
     endtask
 endclass
@@ -270,12 +288,16 @@ class Scoreboard;
     endfunction
 
     task display();
-        if(GLOBAL_OUTPUT_EN) begin                
-        globalScoreTable.display(1,"Global Score Table");
+        if(GLOBAL_OUTPUT_EN) begin
+            globalScoreTable.display(1,"Global Score Table");
         end
         if(STREAM_OUTPUT_EN) begin
-        streamScoreTable.display(1, "Stream Score Table");
+            streamScoreTable.display(1, "Stream Score Table");
+        end
+
+        if ((GLOBAL_OUTPUT_EN && globalScoreTable.tr_table.size() != 0) || (STREAM_OUTPUT_EN && streamScoreTable.tr_table.size() != 0)) begin
+            $error("Transaction tables is not empty\n");
+            $stop();
         end
     endtask
-  
 endclass
