@@ -236,9 +236,10 @@ begin
         OUT_RST   => reset_s_sync
     );
 
-    no_reset_logic_g : if not RESET_LOGIC generate
-        p_state <= NO_RESET;
-    end generate;
+    -- INFO: obsolete, generates warning in simulation
+    --no_reset_logic_g : if not RESET_LOGIC generate
+    --    p_state <= NO_RESET;
+    --end generate;
 
     reset_logic_g : if RESET_LOGIC generate
         fsm_state_p : process (CLK_M)
