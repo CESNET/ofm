@@ -109,7 +109,7 @@ program TEST (
             wait(!packetGenerator[i].enabled);
         end
         // -- Waiting for DUT to finish the process
-        #(10000*CLK_PERIOD); 
+        scoreboard.wait_for();
         // -- Disabling process
         scoreboard.ptrMov.setDisabled();
         // -- Disabling drivers
@@ -140,8 +140,6 @@ program TEST (
         foreach(packetGenerator[i])begin
             packetGenerator[i].setEnabled(TRANSACTION_COUNT/NUMBER_OF_STREAMS);
         end
-
-        #(20*CLK_PERIOD);
 
         disableTestEnvironment();
         scoreboard.display();
