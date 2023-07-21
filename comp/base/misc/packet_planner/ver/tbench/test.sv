@@ -68,10 +68,10 @@ program TEST (
         // -- Creating responders
         foreach(streamResponder[i])begin
             streamResponder[i] = new("Responder", vTX_STREAMS[i]);
-            streamResponder[i].wordDelayEnable_wt=20;
+            streamResponder[i].wordDelayEnable_wt = STREAM_OUTPUT_AFULL ?  0 : 20;
         end
         globalResponder = new("Global responder", TX_GLOBAL);
-        globalResponder.wordDelayEnable_wt=20;
+        globalResponder.wordDelayEnable_wt  =  GLOBAL_OUTPUT_AFULL ? 0 : 10;
 
         scoreboard=new(PTR_INT);
         // -- Set up callbacks
