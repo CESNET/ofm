@@ -4,12 +4,17 @@
 
 // SPDX-License-Identifier: BSD-3-Clause
 
-class driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, OFF_PIPE_STAGES, ZERO_TS = 0) extends uvm_component;
-    `uvm_component_param_utils(uvm_superunpacketer::driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, OFF_PIPE_STAGES, ZERO_TS))
+class driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, OFF_PIPE_STAGES, ZERO_TS = 0, CHSUM_EN = 0, META_WIDTH = 0) extends uvm_component;
+    `uvm_component_param_utils(uvm_superunpacketer::driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, OFF_PIPE_STAGES, ZERO_TS, CHSUM_EN, META_WIDTH))
+
+    localparam L2_HDR_WIDTH = 7;
+    localparam L3_HDR_WIDTH = 9;
 
     uvm_seq_item_pull_port #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH), uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))                           seq_item_port_byte_array;
     uvm_seq_item_pull_port #(uvm_superpacket_header::sequence_item #(MVB_ITEM_WIDTH, HEADER_SIZE), uvm_superpacket_header::sequence_item #(MVB_ITEM_WIDTH, HEADER_SIZE)) seq_item_port_header;
     uvm_seq_item_pull_port #(uvm_superpacket_size::sequence_item, uvm_superpacket_size::sequence_item)                                                                   seq_item_port_sp_size;
+
+    uvm_seq_item_pull_port #(uvm_logic_vector::sequence_item #(META_WIDTH), uvm_logic_vector::sequence_item #(META_WIDTH)) seq_item_port_chsum_hdr;
 
     mailbox#(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) byte_array_export;
     mailbox#(uvm_logic_vector::sequence_item #(MVB_ITEM_WIDTH))       logic_vector_export;
@@ -21,18 +26,20 @@ class driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITE
     uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)              byte_array_req;
     uvm_superpacket_header::sequence_item #(MVB_ITEM_WIDTH, HEADER_SIZE) info_req;
     uvm_superpacket_size::sequence_item                                  size_of_sp; // Size of superpacket in bytes with headers
+    uvm_logic_vector::sequence_item #(META_WIDTH)                        chsum_hdr;
     uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)              byte_array_new;
     uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)              byte_array_out;
     uvm_logic_vector::sequence_item #(MVB_ITEM_WIDTH)                    logic_vector_out;
 
-    int pkt_cnt_stat[OFF_PIPE_STAGES] = '{default:'0};
-    int state                         = 0;
-    int act_size                      = 0;
-    int sp_cnt                        = 0;
-    int hdr_cnt                       = 0;
-    int pkt_cnt                       = 0;
-    int end_of_packet                 = 0;
-    int sup_align                     = 0;
+    int pkt_cnt_stat[OFF_PIPE_STAGES+1] = '{default:'0};
+    int state                           = 0;
+    int act_size                        = 0;
+    int sp_cnt                          = 0;
+    int hdr_cnt                         = 0;
+    int pkt_cnt                         = 0;
+    int end_of_packet                   = 0;
+    int sup_align                       = 0;
+    logic chsum_overflow                = 0;
 
     logic                              done = 1'b0;
     logic [HEADER_SIZE-1 : 0]          header;
@@ -50,6 +57,7 @@ class driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITE
     function sp_info fill_header(uvm_superpacket_header::sequence_item #(MVB_ITEM_WIDTH, HEADER_SIZE) info, logic first);
         logic[HEADER_SIZE-1 : 0] hdr = '0;
         sp_info ret;
+        int unsigned chsum_hdrs_len = 0;
         info.next = 1'b1;
 
         if((size_of_sp.sp_size - ((act_size + HEADER_SIZE/MFB_ITEM_WIDTH) + info.length)) < MIN_SIZE) begin
@@ -68,6 +76,16 @@ class driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITE
         if (ZERO_TS == 1) begin
             info.meta = '0;
         end
+        if (CHSUM_EN) begin
+            info.meta                                                            = '0;
+            info.meta[L2_HDR_WIDTH-1                : 0                        ] = chsum_hdr.data[$clog2(PKT_MTU)+L2_HDR_WIDTH               -1 : $clog2(PKT_MTU)                          ];
+            info.meta[L3_HDR_WIDTH+L2_HDR_WIDTH-1   : L2_HDR_WIDTH             ] = chsum_hdr.data[$clog2(PKT_MTU)+L2_HDR_WIDTH+L3_HDR_WIDTH  -1 : $clog2(PKT_MTU)+L2_HDR_WIDTH             ];
+            info.meta[L3_HDR_WIDTH+L2_HDR_WIDTH+3-1 : L3_HDR_WIDTH+L2_HDR_WIDTH] = chsum_hdr.data[$clog2(PKT_MTU)+L2_HDR_WIDTH+L3_HDR_WIDTH+3-1 : $clog2(PKT_MTU)+L2_HDR_WIDTH+L3_HDR_WIDTH];
+            chsum_hdrs_len = info.meta[L2_HDR_WIDTH-1 : 0] + info.meta[L3_HDR_WIDTH+L2_HDR_WIDTH-1: L2_HDR_WIDTH] + info.meta[L3_HDR_WIDTH+L2_HDR_WIDTH+3-1 : L3_HDR_WIDTH+L2_HDR_WIDTH] + 20;
+            if ((act_size + HEADER_SIZE/MFB_ITEM_WIDTH + chsum_hdrs_len) >= size_of_sp.sp_size) begin
+                chsum_overflow = 1;
+            end
+        end
         hdr = {info.meta, info.length};
         ret.hdr = hdr;
         ret.next = info.next;
@@ -77,24 +95,31 @@ class driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITE
     function void fill_tr(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH) pkt, sp_info sp_st);
         int align  = 0;
         string msg = "";
+        logic [MFB_ITEM_WIDTH-1 : 0] tmp_data_fifo[$];
+        uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH) tmp_data;
+        tmp_data = uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)::type_id::create("tmp_data");
 
         align = MFB_BLOCK_SIZE - end_of_packet[3-1 : 0];
         if (sp_st.next == 1'b1 && end_of_packet[3-1 : 0] > 0) begin
             end_of_packet += align;
         end
-        $swrite(debug_msg, "%sheader %h\n", debug_msg, sp_st.hdr);
-        $swrite(debug_msg, "%sPKT %s\n", debug_msg, pkt.convert2string());
+        // $swrite(debug_msg, "%sheader %h\n", debug_msg, sp_st.hdr);
+        // $swrite(debug_msg, "%sPKT %s\n", debug_msg, pkt.convert2string());
 
         for (int i = 0; i < end_of_packet; i++) begin
             if (i < HEADER_SIZE/MFB_ITEM_WIDTH) begin
                 data_fifo.push_back(sp_st.hdr[(i+1)*MFB_ITEM_WIDTH-1 -: MFB_ITEM_WIDTH]);
             end else if (i < pkt.data.size() + (HEADER_SIZE/MFB_ITEM_WIDTH)) begin
                 data_fifo.push_back(pkt.data[i - (HEADER_SIZE/MFB_ITEM_WIDTH)]);
-            end else
+                tmp_data_fifo.push_back(pkt.data[i - (HEADER_SIZE/MFB_ITEM_WIDTH)]);
+            end else begin
                 data_fifo.push_back('0);
+            end
 
             act_size++;
         end
+        tmp_data.data = tmp_data_fifo;
+        $swrite(debug_msg, "%sPACKET %s\n", debug_msg, tmp_data.convert2string());
 
         if (sp_st.next == 1'b0 && end_of_packet[3-1 : 0]) begin
             for (int i = 0; i < align; i++) begin
@@ -117,6 +142,7 @@ class driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITE
         seq_item_port_byte_array = new("seq_item_port_byte_array", this);
         seq_item_port_header     = new("seq_item_port_header", this);
         seq_item_port_sp_size    = new("seq_item_port_sp_size", this);
+        seq_item_port_chsum_hdr  = new("seq_item_port_chsum_hdr", this);
 
         byte_array_export        = new();
         logic_vector_export      = new();
@@ -137,12 +163,16 @@ class driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITE
 
             #(wait_period*1ns);
             done = 1'b0;
+            chsum_overflow = 0;
             debug_msg = "\n";
-            $swrite(debug_msg, "%s\n ================ DEBUG IN DRIVER =============== \n", debug_msg);
+            $swrite(debug_msg, "%s\n ================ SUPERPACKET %d IN DRIVER =============== \n", debug_msg, sp_cnt+1);
             while (done != 1'b1) begin
                 seq_item_port_byte_array.get_next_item(byte_array_req);
                 pkt_cnt++;
                 seq_item_port_header.get_next_item(info_req);
+                if (CHSUM_EN) begin
+                    seq_item_port_chsum_hdr.get_next_item(chsum_hdr);
+                end
 
                 assert($cast(byte_array_new, byte_array_req.clone()));
                 info_req.length = byte_array_new.data.size();
@@ -162,6 +192,11 @@ class driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITE
                 end
 
                 sp_st = fill_header(info_req, 1'b1);
+                $swrite(debug_msg, "%sCHSUM HDR: \n", debug_msg);
+                $swrite(debug_msg, "%sPAYLOAD LEN %d\n", debug_msg, sp_st.hdr[16      -1 : 0     ]);
+                $swrite(debug_msg, "%sL2 LEN %d\n"     , debug_msg, sp_st.hdr[16+7    -1 : 16    ]);
+                $swrite(debug_msg, "%sL3 LEN %d\n"     , debug_msg, sp_st.hdr[16+7+9  -1 : 16+7  ]);
+                $swrite(debug_msg, "%sFLAG   %b\n"     , debug_msg, sp_st.hdr[16+7+9+3-1 : 16+7+9]);
 
                 len_with_hdr = byte_array_new.size() + HEADER_SIZE/MFB_ITEM_WIDTH;
                 if (VERBOSITY >= 3) begin
@@ -181,7 +216,9 @@ class driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITE
                     sp_st.next = 1'b0;
                 end
 
-                fill_tr(byte_array_new, sp_st);
+                if (!chsum_overflow) begin
+                    fill_tr(byte_array_new, sp_st);
+                end
 
                 if (sp_st.hdr[16-1 : 0] < MIN_DATA_SIZE) begin
                     `uvm_fatal(this.get_full_name(), "Data length is too small.");
@@ -196,7 +233,8 @@ class driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITE
                     if (byte_array_out.size() > size_of_sp.sp_size + sup_align) begin
                         `uvm_fatal(this.get_full_name(), "Data length is too long.");
                     end
-                    $swrite(debug_msg, "%sSUPERPACKET %s\n", debug_msg, byte_array_out.convert2string());
+                    // $swrite(debug_msg, "%sSUPERPACKET %s\n", debug_msg, byte_array_out.convert2string());
+                    // $write("SP LEN %d\n", byte_array_out.size());
                     byte_array_export.put(byte_array_out);
                     sp_cnt++;
                     act_size = 0;
@@ -210,6 +248,9 @@ class driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITE
                 end_of_packet = 0;
                 seq_item_port_byte_array.item_done();
                 seq_item_port_header.item_done();
+                if (CHSUM_EN) begin
+                    seq_item_port_chsum_hdr.item_done();
+                end
 
             end
         end
