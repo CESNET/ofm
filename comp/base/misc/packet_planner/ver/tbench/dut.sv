@@ -76,7 +76,7 @@ module DUT (
             assign TX_STREAMS[i].SRC_RDY    = |mvb_tx_stream_vld[i];  
             if (STREAM_OUTPUT_AFULL == 1) begin
                 // -- Assigning bit DST_RDY to TX_STR_PKT_AFULL
-                assign mvb_tx_stream_afull[i] = TX_STREAMS[i].DST_RDY;
+                assign mvb_tx_stream_afull[i] = !TX_STREAMS[i].DST_RDY;
             end
         end
         
@@ -94,7 +94,7 @@ module DUT (
         assign TX_GLOBAL.SRC_RDY    = |mvb_tx_global_vld;
         if(GLOBAL_OUTPUT_AFULL==1) begin
             // -- Assigning bit DST_RDY to TX_GLB_PKT_AFULL
-            assign mvb_tx_global_afull = TX_GLOBAL.DST_RDY;
+            assign mvb_tx_global_afull = !TX_GLOBAL.DST_RDY;
         end
         
     endgenerate

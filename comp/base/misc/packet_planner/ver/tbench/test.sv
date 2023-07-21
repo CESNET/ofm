@@ -68,10 +68,10 @@ program TEST (
         // -- Creating responders
         foreach(streamResponder[i])begin
             streamResponder[i] = new("Responder", vTX_STREAMS[i]);
-            streamResponder[i].wordDelayEnable_wt=20;
+            streamResponder[i].wordDelayEnable_wt = STREAM_OUTPUT_AFULL ?  0 : 20;
         end
         globalResponder = new("Global responder", TX_GLOBAL);
-        globalResponder.wordDelayEnable_wt=20;
+        globalResponder.wordDelayEnable_wt  =  GLOBAL_OUTPUT_AFULL ? 0 : 10;
 
         scoreboard=new(PTR_INT);
         // -- Set up callbacks
@@ -109,7 +109,7 @@ program TEST (
             wait(!packetGenerator[i].enabled);
         end
         // -- Waiting for DUT to finish the process
-        #(10000*CLK_PERIOD); 
+        scoreboard.wait_for();
         // -- Disabling process
         scoreboard.ptrMov.setDisabled();
         // -- Disabling drivers
@@ -140,8 +140,6 @@ program TEST (
         foreach(packetGenerator[i])begin
             packetGenerator[i].setEnabled(TRANSACTION_COUNT/NUMBER_OF_STREAMS);
         end
-
-        #(20*CLK_PERIOD);
 
         disableTestEnvironment();
         scoreboard.display();

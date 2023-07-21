@@ -76,6 +76,7 @@ generic(
     -- (The specific number depends on the number of registers in this unit
     -- after the internal input serialization FIFO.)
     -- Only relevant when the respected OUT_EN generic is True.
+    -- IN STREAM_OUT_AFULL dont forget on MVB_SHAKEDOWN delay
     STREAM_OUT_AFULL  : boolean := false;
     GLOBAL_OUT_AFULL  : boolean := false
 );
@@ -648,6 +649,8 @@ begin
 
                 TX_STR_PKT_VLD (i) <= not oshk_empty(i);
 
+                -- Read when output is ready
+                oshk_rd(i) <= TX_STR_PKT_DST_RDY(i);
             else generate
 
                 out_mvb_shake_i : entity work.MVB_SHAKEDOWN
@@ -668,7 +671,7 @@ begin
 
                     TX_DATA    => oshk_do (i),
                     TX_VLD     => oshk_vld(i),
-                    TX_NEXT    => oshk_rd (i)
+                    TX_NEXT    => (others => '1') 
                 );
 
                 -- Check Shakedown overflow
@@ -707,10 +710,6 @@ begin
                 TX_STR_PKT_LEN (i)(e) <= tmp_len;
                 TX_STR_PKT_ADDR(i)(e) <= tmp_addr;
             end generate;
-
-            -- Read when output is ready
-            oshk_rd(i) <= TX_STR_PKT_DST_RDY(i);
-
         end generate;
 
     else generate

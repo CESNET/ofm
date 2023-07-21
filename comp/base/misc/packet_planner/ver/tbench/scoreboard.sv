@@ -287,6 +287,20 @@ class Scoreboard;
         globalMonitorCbs    = new(globalScoreTable, acceptedTransaction);
     endfunction
 
+    task wait_for();
+        int unsigned timeout = 0;
+        
+        fork
+            begin #(10000*CLK_PERIOD); timeout = 1; end
+            begin wait((!GLOBAL_OUTPUT_EN || globalScoreTable.tr_table.size() == 0) && (!STREAM_OUTPUT_EN || streamScoreTable.tr_table.size() == 0)); end
+        join_any
+
+        if (timeout) begin
+            $error("Design is probubly stack. Timeout on end of verification\n");
+            $strop();
+        end
+    endtask
+
     task display();
         if(GLOBAL_OUTPUT_EN) begin
             globalScoreTable.display(1,"Global Score Table");
