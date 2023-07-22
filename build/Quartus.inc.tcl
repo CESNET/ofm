@@ -96,6 +96,9 @@ proc EvalFile {FNAME OPT} {
             set_instance_assignment -name PARTITION $opt(PARTITION_NAME) -to $opt(PARTITION_PATH)
             set_instance_assignment -name QDB_FILE_PARTITION $FNAME -to $opt(PARTITION_PATH)
         }
+    } elseif {$opt(TYPE) == "SEARCH_PATH"} {
+        puts "- set SEARCH_PATH for custom Quartus IP: $FNAME"
+        set_global_assignment -name SEARCH_PATH $FNAME
     }
 }
 
