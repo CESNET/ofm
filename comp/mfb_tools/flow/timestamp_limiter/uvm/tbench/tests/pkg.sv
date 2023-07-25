@@ -26,7 +26,7 @@ package test;
     // Item width (in bits), must be 8.
     parameter MFB_ITEM_WIDTH    = 8;
     // Width of Metadata (in bits).
-    parameter MFB_META_WIDTH    = 10;
+    parameter MFB_META_WIDTH    = 32;
 
     // Freq of the CLK signal (in Hz).
     parameter CLK_FREQUENCY     = 200000000;
@@ -36,20 +36,19 @@ package test;
     //
     // - ``0`` number of NS between individual packets,
     // - ``1`` number of NS from RESET. WIP, not used yet
-    parameter TIMESTAMP_FORMAT  = 0;
-    // Number of NS(?) in IDLE state until scheduling an autoreset.
-    // Autoreset (Only for TS_FORMAT=1?) will reset accumulated time from the prev RESET with the next SOF.
-    // WIP, not used yet
-    parameter AUTORESET_TIMEOUT = 1000000;
+    parameter TIMESTAMP_FORMAT  = 1;
     // Number of Items in the Packet Delayer's RX FIFO (the main buffer).
     parameter BUFFER_SIZE       = 2048;
     // The number of Queues (DMA Channels).
-    parameter QUEUES            = 1;
+    parameter QUEUES            = 2;
     // Maximum size of a packet (in Items).
     parameter PKT_MTU           = 2**11;
 
     // FPGA device name: ULTRASCALE, STRATIX10, AGILEX, ...
     parameter DEVICE            = "STRATIX10";
+
+    parameter MI_DATA_WIDTH     = 32;
+    parameter MI_ADDR_WIDTH     = 32;
 
     // /////////////////////////
     //  VERIFICATION PARAMETERS
@@ -66,7 +65,7 @@ package test;
     parameter TIMESTAMP_MAX     = 50;
 
     // Width of RX Metadata (in bits).
-    parameter RX_MFB_META_WIDTH = MFB_META_WIDTH + TIMESTAMP_WIDTH;
+    parameter RX_MFB_META_WIDTH = MFB_META_WIDTH + TIMESTAMP_WIDTH + $clog2(QUEUES);
     // Width of TX Metadata (in bits).
     parameter TX_MFB_META_WIDTH = MFB_META_WIDTH;
 

@@ -11,6 +11,7 @@ lappend COMPONENTS \
       [ list "SV_RESET"                    "$SV_UVM_BASE/reset"                    "FULL"] \
       [ list "SV_MFB_UVM_BASE"             "$SV_UVM_BASE/mfb"                      "FULL"] \
       [ list "SV_BYTE_ARRAY_MFB_UVM_BASE"  "$SV_UVM_BASE/logic_vector_array_mfb"   "FULL"] \
+      [ list "SV_MI"                       "$SV_UVM_BASE/mi"                       "FULL"] \
 
 lappend MOD "$ENTITY_BASE/tbench/env/pkg.sv"      \
             "$ENTITY_BASE/tbench/tests/pkg.sv"    \

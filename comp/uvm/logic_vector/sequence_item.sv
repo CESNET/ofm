@@ -48,7 +48,7 @@ class sequence_item #(DATA_WIDTH)extends uvm_sequence_item;
         end
 
         ret = super.do_compare(rhs, comparer);
-        ret &= comparer.compare_field("logic_vector", data, rhs_.data, $bits(data));
+        ret &= (rhs_.data === data);
 
         // Using simple equivalence operator (faster).
         return ret;

@@ -25,7 +25,7 @@ module testbench;
     reset_if  reset(CLK);
     mfb_if #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, RX_MFB_META_WIDTH) mfb_rx(CLK);
     mfb_if #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, TX_MFB_META_WIDTH) mfb_tx(CLK);
-
+    mi_if #(MI_DATA_WIDTH, MI_ADDR_WIDTH)                                                     mi_config (CLK);
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // Define clock ticking
     always #(CLK_PERIOD/2) CLK = ~CLK;
@@ -39,6 +39,7 @@ module testbench;
         uvm_config_db#(virtual reset_if)::set(null, "", "vif_reset", reset);
         uvm_config_db#(virtual mfb_if #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, RX_MFB_META_WIDTH))::set(null, "", "vif_rx", mfb_rx);
         uvm_config_db#(virtual mfb_if #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, TX_MFB_META_WIDTH))::set(null, "", "vif_tx", mfb_tx);
+        uvm_config_db#(virtual mi_if #(MI_DATA_WIDTH, MI_ADDR_WIDTH))::set(null, "", "vif_mi", mi_config);
 
         m_root = uvm_root::get();
         m_root.finish_on_completion = 0;
@@ -57,7 +58,8 @@ module testbench;
         .CLK        (CLK),
         .RST        (reset.RESET),
         .mfb_rx     (mfb_rx),
-        .mfb_tx     (mfb_tx)
+        .mfb_tx     (mfb_tx),
+        .config_mi  (mi_config)
     );
 
     // Properties

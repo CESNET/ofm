@@ -34,7 +34,7 @@ generic(
     MFB_META_WIDTH        : natural := 0;
 
     -- Freq of the CLK signal (in Hz).
-    CLK_FREQUENCY         : natural := 322265625;
+    CLK_FREQUENCY         : natural := 200000000;
     -- Width of Timestamps (in bits).
     TS_WIDTH              : natural := 48;
     -- Format of Timestamps. Options:
@@ -42,9 +42,6 @@ generic(
     -- - ``0`` number of NS between individual packets,
     -- - ``1`` number of NS from RESET.
     TS_FORMAT             : natural := 0;
-    -- Number of NS(?) in IDLE state until scheduling an autoreset.
-    -- Autoreset (Only for TS_FORMAT=1?) will reset accumulated time from the prev RESET with the next SOF.
-    AUTORESET_TIMEOUT     : natural := 1000000;
     -- Number of Items in the Input packet FIFOX_MULTI (main buffer).
     FIFO_DEPTH            : natural := 2048;
 
@@ -58,6 +55,10 @@ port(
 
     CLK            : in  std_logic;
     RESET          : in  std_logic;
+
+    -- Reset current time (applies only when TS_FORMAT=1).
+    -- Time counter is reset with the next first SOF.
+    TIME_RESET     : in  std_logic;
 
     -- =====================================================================
     --  RX inf
@@ -471,7 +472,7 @@ begin
         process(CLK)
         begin
             if rising_edge(CLK) then
-                if (RESET = '1') then
+                if (RESET = '1') or (TIME_RESET = '1') then
                     waiting_for_first_sof <= '1';
                 end if;
                 if ((or sof_read) = '1') then

@@ -13,6 +13,9 @@ package uvm_timestamp_limiter;
     `include "uvm_macros.svh"
     import uvm_pkg::*;
 
+    `include "registers.sv"
+    `include "regmodel.sv"
+
     `include "sequencer.sv"
     `include "sequence.sv"
     `include "model.sv"

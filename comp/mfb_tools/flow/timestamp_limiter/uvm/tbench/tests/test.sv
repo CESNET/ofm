@@ -8,7 +8,7 @@ class ex_test extends uvm_test;
     typedef uvm_component_registry#(test::ex_test, "test::ex_test") type_id;
 
     // declare the Environment reference variable
-    uvm_timestamp_limiter::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTAMP_WIDTH) m_env;
+    uvm_timestamp_limiter::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTAMP_WIDTH, QUEUES, TIMESTAMP_FORMAT, MI_DATA_WIDTH, MI_ADDR_WIDTH) m_env;
     int unsigned timeout;
 
     // ------------------------------------------------------------------------
@@ -30,17 +30,17 @@ class ex_test extends uvm_test;
     // Build phase function, e.g. the creation of test's internal objects
     function void build_phase(uvm_phase phase);
         // Initializing the reference to the environment
-        m_env = uvm_timestamp_limiter::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTAMP_WIDTH)::type_id::create("m_env", this);
+        m_env = uvm_timestamp_limiter::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTAMP_WIDTH, QUEUES, TIMESTAMP_FORMAT, MI_DATA_WIDTH, MI_ADDR_WIDTH)::type_id::create("m_env", this);
     endfunction
 
     // ------------------------------------------------------------------------
     // Create environment and Run sequences on their sequencers
     virtual task run_phase(uvm_phase phase);
-        virt_sequence #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, FRAME_SIZE_MIN, PKT_MTU, TIMESTAMP_MIN, TIMESTAMP_MAX, TIMESTAMP_WIDTH) m_vseq;
-        m_vseq = virt_sequence#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, FRAME_SIZE_MIN, PKT_MTU, TIMESTAMP_MIN, TIMESTAMP_MAX, TIMESTAMP_WIDTH)::type_id::create("m_vseq");
+        virt_sequence #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, FRAME_SIZE_MIN, PKT_MTU, TIMESTAMP_MIN, TIMESTAMP_MAX, TIMESTAMP_WIDTH, QUEUES) m_vseq;
+        m_vseq = virt_sequence#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, FRAME_SIZE_MIN, PKT_MTU, TIMESTAMP_MIN, TIMESTAMP_MAX, TIMESTAMP_WIDTH, QUEUES)::type_id::create("m_vseq");
 
         phase.raise_objection(this);
-        m_vseq.init(phase);
+        m_vseq.init(m_env.m_regmodel.m_regmodel, phase);
 
         //RUN MFB RX SEQUENCE
         m_vseq.randomize();

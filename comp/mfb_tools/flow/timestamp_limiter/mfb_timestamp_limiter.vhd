@@ -20,6 +20,23 @@ use work.type_pack.all;
 -- Then in each Queue, the MFB Packet Delayer component outputs each packet when the time is right.
 -- Finally, the packets from all Queues are merged back into a single stream (no order is kept here).
 --
+-- The MI interface enables the user to reset Time in the Packet Delayers.
+-- This is useful when using the :vhdl:genconstant:`Timestamp format 1 <MFB_TIMESTAMP_LIMITER.TIMESTAMP_FORMAT>`,
+-- where the time is being incremented in each clock cycle since the very first packet after boot/reset passes through.
+-- You can simply reset all Packet Delayers (all Queues) by setting the MI_RESET_REG register, or you can
+-- select specific Queues by setting the MI_SEL_QUEUE_REG register before setting the MI_RESET_REG register.
+-- After writing a **1** to the MI_RESET_REG register to issue the reset, its value automatically returns back to **0**.
+--
+-- **MI address space**
+--
+-- +----------------+----------------------------------------------------+
+-- | Address offset | MI Register                                        |
+-- +================+====================================================+
+-- |           0x00 | Reset register (write only)                        |
+-- +----------------+----------------------------------------------------+
+-- |           0x04 | Select Queues for reset register                   |
+-- +----------------+----------------------------------------------------+
+--
 entity MFB_TIMESTAMP_LIMITER is
 generic(
     -- Number of Regions within a data word, must be power of 2.
@@ -33,19 +50,18 @@ generic(
     -- Metadata width (in bits).
     MFB_META_WIDTH        : natural := 0;
 
+    MI_DATA_WIDTH         : natural := 32;
+    MI_ADDR_WIDTH         : natural := 32;
+
     -- Freq of the CLK signal (in Hz).
-    CLK_FREQUENCY         : natural := 322265625;
+    CLK_FREQUENCY         : natural := 200000000;
     -- Width of Timestamps (in bits).
     TIMESTAMP_WIDTH       : natural := 48;
     -- Format of Timestamps. Options:
     --
     -- - ``0`` number of NS between individual packets,
-    -- - ``1`` number of NS from RESET. WIP, not used yet
+    -- - ``1`` number of NS from RESET.
     TIMESTAMP_FORMAT      : natural := 0;
-    -- Number of NS(?) in IDLE state until scheduling an autoreset.
-    -- Autoreset (Only for TS_FORMAT=1?) will reset accumulated time from the prev RESET with the next SOF.
-    -- WIP, not used yet
-    AUTORESET_TIMEOUT     : natural := 1000000;
     -- Number of Items in the Packet Delayer's RX FIFO (the main buffer).
     BUFFER_SIZE           : natural := 2048;
     -- The number of Queues (DMA Channels).
@@ -92,7 +108,20 @@ port(
     TX_MFB_SOF       : out std_logic_vector(MFB_REGIONS-1 downto 0);
     TX_MFB_EOF       : out std_logic_vector(MFB_REGIONS-1 downto 0);
     TX_MFB_SRC_RDY   : out std_logic;
-    TX_MFB_DST_RDY   : in  std_logic
+    TX_MFB_DST_RDY   : in  std_logic;
+
+    -- =====================================================================
+    --  MI INTERFACE
+    -- =====================================================================
+
+    MI_DWR     : in  std_logic_vector(MI_DATA_WIDTH-1 downto 0);
+    MI_ADDR    : in  std_logic_vector(MI_ADDR_WIDTH-1 downto 0);
+    MI_BE      : in  std_logic_vector(MI_DATA_WIDTH/8-1 downto 0); -- Not supported!
+    MI_WR      : in  std_logic;
+    MI_RD      : in  std_logic;
+    MI_ARDY    : out std_logic;
+    MI_DRD     : out std_logic_vector(MI_DATA_WIDTH-1 downto 0);
+    MI_DRDY    : out std_logic
 );
 end entity;
 
@@ -101,6 +130,16 @@ architecture FULL of MFB_TIMESTAMP_LIMITER is
     -- ========================================================================
     --                                CONSTANTS
     -- ========================================================================
+
+    -- MI REG ADDR for: reset of Time counters in Packet Delayers.
+    -- Reset Time in ``all`` (default) or selected Queues (according to MI_SEL_QUEUE_REG).
+    -- Not readable.
+    constant MI_RESET_REG     : integer := 0;
+    -- MI REG ADDR for: select Queues to be reset.
+    -- Each bit corresponds to one Queue (bit mask).
+    -- Set '1' to perform the reset. Default value is (others => '1');
+    -- MAX 32 Queues! For more Queues you need to add more MI regs for the selection.
+    constant MI_SEL_QUEUE_REG : integer := 4;
 
     constant MFB_REGION_WIDTH : natural := MFB_REGION_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH;
     constant MFB_WORD_WIDTH   : natural := MFB_REGIONS*MFB_REGION_WIDTH;
@@ -112,6 +151,19 @@ architecture FULL of MFB_TIMESTAMP_LIMITER is
     -- ========================================================================
     --                                 SIGNALS
     -- ========================================================================
+
+    signal mi_addr_int          : integer range 2**4-1 downto 0;
+
+    signal time_reset_en        : std_logic;
+    signal queue_sel_en         : std_logic;
+
+    signal time_reset_reg       : std_logic;
+    signal sel_queue_reg        : std_logic_vector(MI_DATA_WIDTH-1 downto 0) := (others => '1');
+
+    signal time_reset_edge      : std_logic;
+    signal time_reset_pulse     : std_logic;
+
+    signal pd_time_reset        : std_logic_vector(QUEUES-1 downto 0);
 
     signal rx_mfb_meta_arr      : slv_array_t     (MFB_REGIONS-1 downto 0)(MFB_META_WIDTH-1 downto 0);
     signal rx_mfb_ts_arr        : slv_array_t     (MFB_REGIONS-1 downto 0)(TIMESTAMP_WIDTH-1 downto 0);
@@ -143,6 +195,105 @@ architecture FULL of MFB_TIMESTAMP_LIMITER is
     signal tx_pd_dst_rdy        : std_logic_vector(QUEUES-1 downto 0);
 
 begin
+
+    assert (QUEUES > 0) and (QUEUES <= 32)
+        report "TIMESTAMP LIMITER: Currently supported number of Queues is between 0 and 32 (inclusive)!" & LF &
+               "In case of needing more, simply add more MI_SEL_QUEUE_REG registers." & LF
+        severity Failure;
+
+    -- ========================================================================
+    -- MI logic
+    -- ========================================================================
+
+    MI_ARDY <= MI_RD or MI_WR;
+
+    -- ---------------
+    --  MI read logic
+    -- ---------------
+    mi_addr_int <= to_integer(unsigned(MI_ADDR(4-1 downto 0)));
+    process (CLK)
+    begin
+        if (rising_edge(CLK)) then
+            case mi_addr_int is
+                when MI_SEL_QUEUE_REG => MI_DRD <= sel_queue_reg;
+                when others           => MI_DRD <= X"0000BEEF";
+            end case;
+        end if;
+    end process;
+
+    mi_drdy_reg_p : process (CLK)
+    begin
+        if (rising_edge(CLK)) then
+            MI_DRDY <= MI_RD;
+            if (RESET = '1') then
+                MI_DRDY <= '0';
+            end if;
+        end if;
+    end process;
+
+    -- ----------------
+    --  MI write logic
+    -- ----------------
+    time_reset_en <= '1' when (MI_WR = '1') and (mi_addr_int = MI_RESET_REG    ) else '0';
+    queue_sel_en  <= '1' when (MI_WR = '1') and (mi_addr_int = MI_SEL_QUEUE_REG) else '0';
+
+    process (CLK)
+    begin
+        if (rising_edge(CLK)) then
+            if (time_reset_en = '1') then
+                time_reset_reg <= MI_DWR(0);
+            end if;
+            if (RESET = '1') or (time_reset_edge = '1') then
+                time_reset_reg <= '0';
+            end if;
+        end if;
+    end process;
+
+    process (CLK)
+    begin
+        if (rising_edge(CLK)) then
+            if (queue_sel_en = '1') then
+                sel_queue_reg <= MI_DWR;
+            end if;
+            if (RESET = '1') then
+                sel_queue_reg <= (others => '1');
+            end if;
+        end if;
+    end process;
+
+    -- ------------------
+    --  Time reset logic
+    -- ------------------
+    -- Detect rising edge of the time_reset_reg signal.
+    edge_detect_i : entity work.EDGE_DETECT
+    port map(
+        CLK  => CLK,
+        DI   => time_reset_reg,
+        EDGE => time_reset_edge
+    );
+
+    -- Delay the detected edge to reset the MI_RESET_REG.
+    process(CLK)
+    begin
+        if rising_edge(CLK) then
+            reset_time_reset_reg <= time_reset_edge;
+        end if;
+    end process;
+
+    -- Use the detected edge to extend the reset pulse.
+    pulse_extend_i : entity work.PULSE_EXTEND
+    generic map(
+        N => 5
+    )
+    port map(
+        RST => RESET,
+        CLK => CLK,
+        I   => time_reset_edge,
+        O   => time_reset_pulse
+    );
+
+    -- Time reset finalization
+    pd_time_reset <= sel_queue_reg(QUEUES-1 downto 0) when (time_reset_pulse = '1') else (others => '0');
 
     -- ========================================================================
     -- Input MFB Splitter
@@ -207,22 +358,23 @@ begin
 
         packet_delayer_i : entity work.MFB_PACKET_DELAYER
         generic map(
-            MFB_REGIONS     => MFB_REGIONS        ,
-            MFB_REGION_SIZE => MFB_REGION_SIZE    ,
-            MFB_BLOCK_SIZE  => MFB_BLOCK_SIZE     ,
-            MFB_ITEM_WIDTH  => MFB_ITEM_WIDTH     ,
-            MFB_META_WIDTH  => MFB_META_WIDTH     ,
+            MFB_REGIONS     => MFB_REGIONS       ,
+            MFB_REGION_SIZE => MFB_REGION_SIZE   ,
+            MFB_BLOCK_SIZE  => MFB_BLOCK_SIZE    ,
+            MFB_ITEM_WIDTH  => MFB_ITEM_WIDTH    ,
+            MFB_META_WIDTH  => MFB_META_WIDTH    ,
 
-            CLK_FREQUENCY     => CLK_FREQUENCY    ,
-            TS_WIDTH          => TIMESTAMP_WIDTH  ,
-            TS_FORMAT         => TIMESTAMP_FORMAT ,
-            AUTORESET_TIMEOUT => AUTORESET_TIMEOUT,
-            FIFO_DEPTH        => BUFFER_SIZE      ,
+            CLK_FREQUENCY     => CLK_FREQUENCY   ,
+            TS_WIDTH          => TIMESTAMP_WIDTH ,
+            TS_FORMAT         => TIMESTAMP_FORMAT,
+            FIFO_DEPTH        => BUFFER_SIZE     ,
             DEVICE            => DEVICE
         )
         port map(
             CLK   => CLK,
             RESET => RESET,
+
+            TIME_RESET     => pd_time_reset(q),
 
             RX_MFB_DATA    => rx_pd_data   (q),
             RX_MFB_META    => rx_pd_meta   (q),

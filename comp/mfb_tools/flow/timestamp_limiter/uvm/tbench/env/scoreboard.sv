@@ -5,19 +5,19 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 
-class scoreboard #(MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTAMP_WIDTH) extends uvm_scoreboard;
-    `uvm_component_param_utils(uvm_timestamp_limiter::scoreboard #(MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTAMP_WIDTH))
+class scoreboard #(MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTAMP_WIDTH, QUEUES, TIMESTAMP_FORMAT) extends uvm_scoreboard;
+    `uvm_component_param_utils(uvm_timestamp_limiter::scoreboard #(MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTAMP_WIDTH, QUEUES, TIMESTAMP_FORMAT))
 
     uvm_analysis_export #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) out_data;
     uvm_analysis_export #(uvm_logic_vector::sequence_item #(TX_MFB_META_WIDTH))    out_meta;
 
     uvm_timestamp_limiter::delayer_cmp #(MFB_ITEM_WIDTH, TIMESTAMP_WIDTH)               data_cmp;
-    uvm_common::comparer_ordered #(uvm_logic_vector::sequence_item#(TX_MFB_META_WIDTH)) meta_cmp;
+    uvm_common::comparer_taged #(uvm_logic_vector::sequence_item#(TX_MFB_META_WIDTH)) meta_cmp;
 
     uvm_common::subscriber #(uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH)) analysis_imp_mfb_data;
     uvm_common::subscriber #(uvm_logic_vector::sequence_item#(RX_MFB_META_WIDTH))    analysis_imp_mfb_meta;
 
-    model #(MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTAMP_WIDTH) m_model;
+    model #(MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTAMP_WIDTH, QUEUES, TIMESTAMP_FORMAT) m_model;
 
     // Contructor of scoreboard.
     function new(string name, uvm_component parent);
@@ -44,13 +44,13 @@ class scoreboard #(MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTA
 
 
     function void build_phase(uvm_phase phase);
-        m_model = model#(MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTAMP_WIDTH)::type_id::create("m_model", this);
+        m_model = model#(MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTAMP_WIDTH, QUEUES, TIMESTAMP_FORMAT)::type_id::create("m_model", this);
 
         analysis_imp_mfb_data = uvm_common::subscriber #(uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH))::type_id::create("analysis_imp_mfb_data", this);
         analysis_imp_mfb_meta = uvm_common::subscriber #(uvm_logic_vector::sequence_item#(RX_MFB_META_WIDTH))::type_id::create("analysis_imp_mfb_meta", this);
 
         data_cmp = uvm_timestamp_limiter::delayer_cmp #(MFB_ITEM_WIDTH, TIMESTAMP_WIDTH)::type_id::create("data_cmp", this);
-        meta_cmp = uvm_common::comparer_ordered #(uvm_logic_vector::sequence_item#(TX_MFB_META_WIDTH))::type_id::create("meta_cmp", this);
+        meta_cmp = uvm_common::comparer_taged #(uvm_logic_vector::sequence_item#(TX_MFB_META_WIDTH))::type_id::create("meta_cmp", this);
 
         data_cmp.model_tr_timeout_set(100us);
         meta_cmp.model_tr_timeout_set(100us);
