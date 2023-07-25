@@ -54,18 +54,14 @@ generic(
     MI_ADDR_WIDTH         : natural := 32;
 
     -- Freq of the CLK signal (in Hz).
-    CLK_FREQUENCY         : natural := 322265625;
+    CLK_FREQUENCY         : natural := 200000000;
     -- Width of Timestamps (in bits).
     TIMESTAMP_WIDTH       : natural := 48;
     -- Format of Timestamps. Options:
     --
     -- - ``0`` number of NS between individual packets,
-    -- - ``1`` number of NS from RESET. WIP, not used yet
+    -- - ``1`` number of NS from RESET.
     TIMESTAMP_FORMAT      : natural := 0;
-    -- Number of NS(?) in IDLE state until scheduling an autoreset.
-    -- Autoreset (Only for TS_FORMAT=1?) will reset accumulated time from the prev RESET with the next SOF.
-    -- WIP, not used yet
-    AUTORESET_TIMEOUT     : natural := 1000000;
     -- Number of Items in the Packet Delayer's RX FIFO (the main buffer).
     BUFFER_SIZE           : natural := 2048;
     -- The number of Queues (DMA Channels).
@@ -362,17 +358,16 @@ begin
 
         packet_delayer_i : entity work.MFB_PACKET_DELAYER
         generic map(
-            MFB_REGIONS     => MFB_REGIONS        ,
-            MFB_REGION_SIZE => MFB_REGION_SIZE    ,
-            MFB_BLOCK_SIZE  => MFB_BLOCK_SIZE     ,
-            MFB_ITEM_WIDTH  => MFB_ITEM_WIDTH     ,
-            MFB_META_WIDTH  => MFB_META_WIDTH     ,
+            MFB_REGIONS     => MFB_REGIONS       ,
+            MFB_REGION_SIZE => MFB_REGION_SIZE   ,
+            MFB_BLOCK_SIZE  => MFB_BLOCK_SIZE    ,
+            MFB_ITEM_WIDTH  => MFB_ITEM_WIDTH    ,
+            MFB_META_WIDTH  => MFB_META_WIDTH    ,
 
-            CLK_FREQUENCY     => CLK_FREQUENCY    ,
-            TS_WIDTH          => TIMESTAMP_WIDTH  ,
-            TS_FORMAT         => TIMESTAMP_FORMAT ,
-            AUTORESET_TIMEOUT => AUTORESET_TIMEOUT,
-            FIFO_DEPTH        => BUFFER_SIZE      ,
+            CLK_FREQUENCY     => CLK_FREQUENCY   ,
+            TS_WIDTH          => TIMESTAMP_WIDTH ,
+            TS_FORMAT         => TIMESTAMP_FORMAT,
+            FIFO_DEPTH        => BUFFER_SIZE     ,
             DEVICE            => DEVICE
         )
         port map(
