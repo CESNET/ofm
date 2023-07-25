@@ -41,12 +41,11 @@ set env(COCOTB_RESOLVE_X) "ZEROS"
 
 proc sim_pre_run {} {
     global env
-    view wave
-    delete wave *
-
-    config wave -signalnamewidth 1
 
     if {[file exists $env(COCOTB_MODULE)_sig.fdo]} {
+        view wave
+        delete wave *
+        config wave -signalnamewidth 1
         source $env(COCOTB_MODULE)_sig.fdo
     }
 }
