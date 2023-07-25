@@ -59,6 +59,10 @@ port(
     CLK            : in  std_logic;
     RESET          : in  std_logic;
 
+    -- Reset current time (applies only when TS_FORMAT=1).
+    -- Time counter is reset with the next first SOF.
+    TIME_RESET     : in  std_logic;
+
     -- =====================================================================
     --  RX inf
     -- =====================================================================
@@ -471,7 +475,7 @@ begin
         process(CLK)
         begin
             if rising_edge(CLK) then
-                if (RESET = '1') then
+                if (RESET = '1') or (TIME_RESET = '1') then
                     waiting_for_first_sof <= '1';
                 end if;
                 if ((or sof_read) = '1') then
