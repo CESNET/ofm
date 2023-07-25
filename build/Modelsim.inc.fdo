@@ -360,7 +360,11 @@ proc nb_vsim_set_flags {vsim_flags sim_flags} {
 
     #VOPT ARGS
     lappend VOPT_ARGS
-    lappend VOPT_ARGS "-nomlopt"
+    # check if current version of vopt supports the -nomlopt flag
+    if {[catch {vopt -nomlopt -version}] eq 0} {
+        lappend VOPT_ARGS "-nomlopt"
+    }
+
     if {[info exists SIM_FLAGS(DEBUG)] && $SIM_FLAGS(DEBUG)} {
         lappend VOPT_ARGS -lint=full +acc
     } else {
