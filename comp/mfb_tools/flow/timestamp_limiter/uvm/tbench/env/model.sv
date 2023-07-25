@@ -19,8 +19,8 @@ class ts_limiter_item#(MFB_ITEM_WIDTH, TIMESTAMP_WIDTH);
 endclass
 
 
-class model #(MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTAMP_WIDTH, QUEUES) extends uvm_component;
-    `uvm_component_param_utils(uvm_timestamp_limiter::model #(MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTAMP_WIDTH, QUEUES))
+class model #(MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTAMP_WIDTH, QUEUES, TIMESTAMP_FORMAT) extends uvm_component;
+    `uvm_component_param_utils(uvm_timestamp_limiter::model #(MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTAMP_WIDTH, QUEUES, TIMESTAMP_FORMAT))
 
     uvm_tlm_analysis_fifo #(uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)))              input_data;
     uvm_tlm_analysis_fifo #(uvm_common::model_item #(uvm_logic_vector::sequence_item #(RX_MFB_META_WIDTH)))                 input_meta;
@@ -43,6 +43,7 @@ class model #(MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTAMP_WI
         uvm_common::model_item #(uvm_logic_vector::sequence_item #(RX_MFB_META_WIDTH))                     tr_input_meta;
         uvm_common::model_item #(uvm_timestamp_limiter::ts_limiter_item#(MFB_ITEM_WIDTH, TIMESTAMP_WIDTH)) tr_output_data;
         uvm_common::model_item #(uvm_logic_vector::sequence_item #(TX_MFB_META_WIDTH))                     tr_output_meta;
+        logic [TIMESTAMP_WIDTH-1 : 0] prev_ts = 0;
 
         forever begin
             logic [$clog2(QUEUES)-1 : 0] mfb_queue = '0;
@@ -75,9 +76,15 @@ class model #(MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTAMP_WI
             `uvm_info(get_type_name(), msg, UVM_MEDIUM)
 
             tr_output_data.item.data_tr.copy(tr_input_data.item);
-            tr_output_data.item.timestamp = tr_input_meta.item.data[TIMESTAMP_WIDTH               -1 : 0              ];
+            if (TIMESTAMP_FORMAT == 0) begin
+                tr_output_data.item.timestamp = tr_input_meta.item.data[TIMESTAMP_WIDTH-1 : 0];
+            end else begin
+                tr_output_data.item.timestamp = tr_input_meta.item.data[TIMESTAMP_WIDTH-1 : 0] - prev_ts;
+                prev_ts = tr_input_meta.item.data[TIMESTAMP_WIDTH-1 : 0];
+            end
             if (QUEUES != 1) begin 
-                mfb_queue                 = tr_input_meta.item.data[TIMESTAMP_WIDTH+$clog2(QUEUES)-1 : TIMESTAMP_WIDTH];
+                mfb_queue = tr_input_meta.item.data[TIMESTAMP_WIDTH+$clog2(QUEUES)-1 : TIMESTAMP_WIDTH];
+                $swrite(msg, "%s INPUT QUEUE %d\n", msg, mfb_queue);
             end
 
             queue_str.itoa(int'(mfb_queue));

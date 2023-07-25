@@ -5,8 +5,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 
-class scoreboard #(MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTAMP_WIDTH, QUEUES) extends uvm_scoreboard;
-    `uvm_component_param_utils(uvm_timestamp_limiter::scoreboard #(MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTAMP_WIDTH, QUEUES))
+class scoreboard #(MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTAMP_WIDTH, QUEUES, TIMESTAMP_FORMAT) extends uvm_scoreboard;
+    `uvm_component_param_utils(uvm_timestamp_limiter::scoreboard #(MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTAMP_WIDTH, QUEUES, TIMESTAMP_FORMAT))
 
     uvm_analysis_export #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) out_data;
     uvm_analysis_export #(uvm_logic_vector::sequence_item #(TX_MFB_META_WIDTH))    out_meta;
@@ -17,7 +17,7 @@ class scoreboard #(MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTA
     uvm_common::subscriber #(uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH)) analysis_imp_mfb_data;
     uvm_common::subscriber #(uvm_logic_vector::sequence_item#(RX_MFB_META_WIDTH))    analysis_imp_mfb_meta;
 
-    model #(MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTAMP_WIDTH, QUEUES) m_model;
+    model #(MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTAMP_WIDTH, QUEUES, TIMESTAMP_FORMAT) m_model;
 
     // Contructor of scoreboard.
     function new(string name, uvm_component parent);
@@ -44,7 +44,7 @@ class scoreboard #(MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTA
 
 
     function void build_phase(uvm_phase phase);
-        m_model = model#(MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTAMP_WIDTH, QUEUES)::type_id::create("m_model", this);
+        m_model = model#(MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTAMP_WIDTH, QUEUES, TIMESTAMP_FORMAT)::type_id::create("m_model", this);
 
         analysis_imp_mfb_data = uvm_common::subscriber #(uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH))::type_id::create("analysis_imp_mfb_data", this);
         analysis_imp_mfb_meta = uvm_common::subscriber #(uvm_logic_vector::sequence_item#(RX_MFB_META_WIDTH))::type_id::create("analysis_imp_mfb_meta", this);
