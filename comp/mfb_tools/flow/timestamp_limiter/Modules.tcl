@@ -6,6 +6,8 @@
 
 # Paths to components
 set MFB_FLOW_BASE    "$OFM_PATH/comp/mfb_tools/flow"
+set BASE_LOGIC_BASE  "$OFM_PATH/comp/base/logic"
+set MGMT_BASE        "$OFM_PATH/comp/nic/eth_phy/comp/mgmt"
 
 # Packages
 lappend PACKAGES "$OFM_PATH/comp/base/pkg/math_pack.vhd"
@@ -14,6 +16,8 @@ lappend PACKAGES "$OFM_PATH/comp/base/pkg/type_pack.vhd"
 lappend COMPONENTS [ list "MFB_PACKET_DELAYER"    "$MFB_FLOW_BASE/packet_delayer"    "FULL" ]
 lappend COMPONENTS [ list "MFB_MERGER_GEN"        "$MFB_FLOW_BASE/merger_simple"     "FULL" ]
 lappend COMPONENTS [ list "MFB_SPLITTER_GEN"      "$MFB_FLOW_BASE/splitter_simple"   "FULL" ]
+lappend COMPONENTS [ list "EDGE_DETECT"           "$BASE_LOGIC_BASE/edge_detect"     "FULL" ]
+lappend COMPONENTS [ list "PULSE_EXTEND"          $MGMT_BASE                         "FULL" ]
 
 # Source files for implemented component
 lappend MOD "$ENTITY_BASE/mfb_timestamp_limiter.vhd"
