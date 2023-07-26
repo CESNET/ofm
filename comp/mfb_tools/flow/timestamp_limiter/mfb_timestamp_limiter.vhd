@@ -272,14 +272,6 @@ begin
         EDGE => time_reset_edge
     );
 
-    -- Delay the detected edge to reset the MI_RESET_REG.
-    process(CLK)
-    begin
-        if rising_edge(CLK) then
-            reset_time_reset_reg <= time_reset_edge;
-        end if;
-    end process;
-
     -- Use the detected edge to extend the reset pulse.
     pulse_extend_i : entity work.PULSE_EXTEND
     generic map(
