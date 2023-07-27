@@ -93,8 +93,8 @@ package math_pack is
    --   constant B : unsigned( 4-1 downto 0) := resize_left(A,4);
    --   constant C : unsigned( 7-1 downto 0) := resize_right(A,7);
    --   -> B=="1001" and C=="0100100"
-   alias resize_left is resize [unsigned,natural return unsigned]; -- defined in numeric_std
-   alias resize_left is resize [signed,natural return signed]; -- defined in numeric_std
+   function resize_left(vector : unsigned; new_width : natural) return unsigned;
+   function resize_left(vector : signed; new_width : natural) return signed;
    function resize_right(vector : unsigned; new_width : natural) return unsigned;
    function resize_right(vector : signed; new_width : natural) return signed;
 
@@ -373,6 +373,16 @@ package body math_pack is
          v(width_addition+vector'high downto vector'low) := vector(vector'high downto vector'low-width_addition);
       end if;
       return v;
+   end;
+   
+   function resize_left(vector : unsigned; new_width : natural) return unsigned is
+   begin
+      return resize(vector,new_width);
+   end;
+
+   function resize_left(vector : signed; new_width : natural) return signed is
+   begin
+      return resize(vector,new_width);
    end;
    
    function resize_right(vector : unsigned; new_width : natural) return unsigned is
