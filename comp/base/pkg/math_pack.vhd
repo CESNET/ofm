@@ -339,16 +339,6 @@ package body math_pack is
       return v;
    end;
 
-   function resize_right(vector : unsigned; new_width : natural) return unsigned is
-   begin
-      return enlarge_right(vector,new_width-vector'length);
-   end;
-
-   function resize_right(vector : signed; new_width : natural) return signed is
-   begin
-      return enlarge_right(vector,new_width-vector'length);
-   end;
-
    function enlarge_left(vector : unsigned; width_addition : integer) return unsigned is
    begin
       return resize(vector,vector'length+width_addition);
@@ -384,7 +374,16 @@ package body math_pack is
       end if;
       return v;
    end;
+   
+   function resize_right(vector : unsigned; new_width : natural) return unsigned is
+   begin
+      return enlarge_right(vector,new_width-vector'length);
+   end;
+
+   function resize_right(vector : signed; new_width : natural) return signed is
+   begin
+      return enlarge_right(vector,new_width-vector'length);
+   end;
 
    -- ----------------------------------------------------------------------
 end math_pack;
-
