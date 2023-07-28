@@ -10,7 +10,7 @@ set PACKAGES "$PACKAGES $OFM_PATH/comp/base/pkg/type_pack.vhd"
 set MOD "$MOD $ENTITY_BASE/sdp_bram_xilinx_ent.vhd"
 
 global SYNTH_FLAGS
-if { [info exists SYNTH_FLAGS(TOOL)] && $SYNTH_FLAGS(TOOL) == "quartus" } {
+if { [info exists SYNTH_FLAGS(TOOL)] && $SYNTH_FLAGS(TOOL) != "vivado" } {
     set MOD "$MOD $ENTITY_BASE/sdp_bram_xilinx_empty.vhd"
 } else {
     set MOD "$MOD $ENTITY_BASE/sdp_bram_xilinx.vhd"
