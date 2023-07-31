@@ -28,8 +28,10 @@ entity RATE_LIMITER is
         -- MFB metadata width (in bits)
         MFB_META_WIDTH  : natural := 0;
         -- Default section length (in number of clock cycles)
+        -- Maximum: 2**MI_DATA_WIDTH
         SECTION_LENGTH  : natural := 1000;
         -- Default interval length (in number of sections)
+        -- Maximum: 2**MI_DATA_WIDTH
         INTERVAL_LENGTH : natural := 40;
         -- Maximum number of intervals (different speed registers)
         INTERVAL_COUNT  : natural := 32;
