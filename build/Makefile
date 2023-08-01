@@ -19,6 +19,8 @@ ifeq ($(SYNTH),vivado)
 	SYNTH_MAKEFILE := build/Makefile.Vivado.inc
 else ifeq ($(findstring quartus,$(SYNTH)),quartus)
 	SYNTH_MAKEFILE := build/Makefile.Quartus.inc
+else ifeq ($(findstring synplify,$(SYNTH)),synplify)
+	SYNTH_MAKEFILE := build/Makefile.Synplify.inc
 else
 	$(error "Unknown synth tool '$(SYNTH)', please update common Makefile")
 endif
@@ -26,6 +28,6 @@ endif
 include $(OFM_PATH)$(SYNTH_MAKEFILE)
 
 # For lazy users
-.PHONY: vivado quartus
-vivado quartus:
+.PHONY: vivado quartus synplify
+vivado quartus synplify:
 	@$(MAKE) SYNTH=$@
