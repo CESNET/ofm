@@ -62,6 +62,11 @@ generic(
     -- - ``0`` number of NS between individual packets,
     -- - ``1`` number of NS from RESET.
     TIMESTAMP_FORMAT      : natural := 0;
+    -- Select Time source. Options:
+    --
+    -- True - use external source of time (port :vhdl:portsignal:`EXTERNAL_TIME <mfb_timestamp_limiter.external_time>`),
+    -- False (default) - internal "Time Counter" with increment given by CLK_FREQUENCY.
+    EXTERNAL_TIME_SRC     : boolean := False;
     -- Number of Items in the Packet Delayer's RX FIFO (the main buffer).
     BUFFER_SIZE           : natural := 2048;
     -- The number of Queues (DMA Channels).
@@ -77,6 +82,8 @@ port(
 
     CLK              : in  std_logic;
     RESET            : in  std_logic;
+
+    EXTERNAL_TIME    : in  std_logic_vector(64-1 downto 0);
 
     -- =====================================================================
     --  RX MFB STREAM
@@ -148,6 +155,11 @@ architecture FULL of MFB_TIMESTAMP_LIMITER is
 
     constant MFB_META_COMB_WIDTH : natural := MFB_META_WIDTH + TIMESTAMP_WIDTH;
 
+    -- Clock period in nanoseconds
+    constant CLK_PERIOD         : natural := integer(real(1)/real(CLK_FREQUENCY)*real(10**9));
+    -- Counter increment (in ns)
+    constant TIME_CNT_INC       : std_logic_vector := std_logic_vector(to_unsigned(CLK_PERIOD, log2(CLK_PERIOD)));
+
     -- ========================================================================
     --                                 SIGNALS
     -- ========================================================================
@@ -164,6 +176,9 @@ architecture FULL of MFB_TIMESTAMP_LIMITER is
     signal time_reset_pulse     : std_logic;
 
     signal pd_time_reset        : std_logic_vector(QUEUES-1 downto 0);
+
+    signal time_cnt             : std_logic_vector(64-1 downto 0);
+    signal input_time           : std_logic_vector(64-1 downto 0);
 
     signal rx_mfb_meta_arr      : slv_array_t     (MFB_REGIONS-1 downto 0)(MFB_META_WIDTH-1 downto 0);
     signal rx_mfb_ts_arr        : slv_array_t     (MFB_REGIONS-1 downto 0)(TIMESTAMP_WIDTH-1 downto 0);
@@ -288,6 +303,37 @@ begin
     pd_time_reset <= sel_queue_reg(QUEUES-1 downto 0) when (time_reset_pulse = '1') else (others => '0');
 
     -- ========================================================================
+    -- Time counter
+    -- ========================================================================
+    
+    time_cnt_i : entity work.DSP_COUNTER
+    generic map (
+        INPUT_WIDTH  => log2(CLK_PERIOD),
+        OUTPUT_WIDTH => 64,
+        INPUT_REGS   => True,
+        DEVICE       => DEVICE,
+        DSP_ENABLE   => True
+    )
+    port map (
+        CLK        => CLK,
+        CLK_EN     => '1',
+        RESET      => RESET,
+        INCREMENT  => TIME_CNT_INC,
+        MAX_VAL    => (others => '1'),
+        RESULT     => time_cnt
+    );
+
+    -- ========================================================================
+    -- Time selection
+    -- ========================================================================
+
+    time_sel_g : if (EXTERNAL_TIME_SRC) generate
+        input_time <= EXTERNAL_TIME;
+    else generate
+        input_time <= time_cnt;
+    end generate;
+            
+    -- ========================================================================
     -- Input MFB Splitter
     -- ========================================================================
 
@@ -367,6 +413,7 @@ begin
             RESET => RESET,
 
             TIME_RESET     => pd_time_reset(q),
+            CURRENT_TIME   => input_time      ,
 
             RX_MFB_DATA    => rx_pd_data   (q),
             RX_MFB_META    => rx_pd_meta   (q),
