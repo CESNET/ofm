@@ -21,6 +21,7 @@ set SIM_FLAGS(EXTRA_VFLAGS) [list -suppress 1130,1339,8664,8683,8684,8822,12110,
 set SIM_FLAGS(MAKEFILE_GEN) true
 set SIM_FLAGS(MAKEFILE_NAME) simulation.Makefile
 set SIM_FLAGS(VSIM_MANUAL_START) true
+set SIM_FLAGS(DEBUG) true
 
 set COCOTB_PATH [eval cocotb-config --lib-name-path fli modelsim]
 lappend SIM_FLAGS(EXTRA_VFLAGS) -foreign "cocotb_init $COCOTB_PATH"
@@ -40,12 +41,11 @@ set env(COCOTB_RESOLVE_X) "ZEROS"
 
 proc sim_pre_run {} {
     global env
-    view wave
-    delete wave *
-
-    config wave -signalnamewidth 1
 
     if {[file exists $env(COCOTB_MODULE)_sig.fdo]} {
+        view wave
+        delete wave *
+        config wave -signalnamewidth 1
         source $env(COCOTB_MODULE)_sig.fdo
     }
 }

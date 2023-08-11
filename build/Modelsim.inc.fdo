@@ -93,10 +93,10 @@ proc CompileMod {FNAME OPT} {
     set VCOM_PARAM ""
     set VLOG_PARAM ""
     if {[info exists SIM_FLAGS(DEBUG)] && $SIM_FLAGS(DEBUG)} {
-        set VCOM_PARAM "-lint"
+        lappend VCOM_PARAM "-lint"
     } else {
-        set VCOM_PARAM "-nodebug=ports"
-        set VLOG_PARAM "-nodebug"
+        lappend VCOM_PARAM "-nodebug=ports"
+        lappend VLOG_PARAM "-nodebug"
     }
 
     # Source compiling
@@ -359,19 +359,22 @@ proc nb_vsim_set_flags {vsim_flags sim_flags} {
 
 
     #VOPT ARGS
-    set VOPT_DEBUG ""
+    lappend VOPT_ARGS
+    # check if current version of vopt supports the -nomlopt flag
+    if {[catch {vopt -nomlopt -version}] eq 0} {
+        lappend VOPT_ARGS "-nomlopt"
+    }
+
     if {[info exists SIM_FLAGS(DEBUG)] && $SIM_FLAGS(DEBUG)} {
-        set VOPT_DEBUG "-lint=full +acc"
+        lappend VOPT_ARGS -lint=full +acc
     } else {
-        set VOPT_DEBUG "-nodebug"
+        lappend VOPT_ARGS -nodebug
     }
 
-    if {[info exists SIM_FLAGS(VOPT_ARGS)] } {
-        lappend VSIM_FLAGS "-voptargs=-nomlopt $VOPT_DEBUG $SIM_FLAGS(VOPT_ARGS)"
-    } else {
-        lappend VSIM_FLAGS "-voptargs=-nomlopt $VOPT_DEBUG"
-    }
+    lappend SIM_FLAGS(VOPT_ARGS)
+    lappend VOPT_ARGS {*}$SIM_FLAGS(VOPT_ARGS)
 
+    lappend VSIM_FLAGS "-voptargs=$VOPT_ARGS"
 
     # Randomization
     if {[info exists SIM_FLAGS(RAND_SEED)] } {
@@ -381,7 +384,6 @@ proc nb_vsim_set_flags {vsim_flags sim_flags} {
     }
     lappend VSIM_FLAGS {*}$SIM_FLAGS(SV_LIBS_FLAGS)
     lappend VSIM_FLAGS {*}[uniqueList $SIM_FLAGS(SIM_MODULE)]
-
 }
 
 proc nb_sim_main {{user_sim_flags SIM_FLAGS}} {
