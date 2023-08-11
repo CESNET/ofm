@@ -146,11 +146,12 @@ architecture FULL of MFB_LOOPBACK is
 begin
 
     fake_loopback_g : if (FAKE_LOOPBACK) generate
-        MI_ARDY <= '1';
-        MI_DRDY <= '0';
+        MI_ARDY <= MI_RD or MI_WR;
+        MI_DRDY <= MI_RD;
         MI_DRD  <= (others => '0');
 
         TX_MFB_DATA_OUT    <= TX_MFB_DATA_IN;
+        TX_MFB_META_OUT    <= TX_MFB_META_IN;
         TX_MFB_SOF_OUT     <= TX_MFB_SOF_IN;
         TX_MFB_EOF_OUT     <= TX_MFB_EOF_IN;
         TX_MFB_SOF_POS_OUT <= TX_MFB_SOF_POS_IN;
@@ -159,6 +160,7 @@ begin
         TX_MFB_DST_RDY_IN  <= TX_MFB_DST_RDY_OUT;
 
         RX_MFB_DATA_OUT    <= RX_MFB_DATA_IN;
+        RX_MFB_META_OUT    <= RX_MFB_META_IN;
         RX_MFB_SOF_OUT     <= RX_MFB_SOF_IN;
         RX_MFB_EOF_OUT     <= RX_MFB_EOF_IN;
         RX_MFB_SOF_POS_OUT <= RX_MFB_SOF_POS_IN;
