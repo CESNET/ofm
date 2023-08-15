@@ -48,7 +48,8 @@ class monitor_logic_vector_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH,
         if (reset_sync.has_been_reset()) begin
             hi_tr = null;
         end
-        if (tr.src_rdy == 1'b1 && tr.dst_rdy == 1'b1) begin
+
+        if (tr.src_rdy == 1'b1 && tr.dst_rdy == 1'b1 && !reset_sync.is_reset()) begin
             for (int unsigned it = 0; it < REGIONS; it++) begin
                 //$write("MFB MON FIFO %h\n", tr.data[it]);
                 int unsigned sof_pos = SOF_POS_WIDTH != 0 ? BLOCK_SIZE*tr.sof_pos[it] : 0;
