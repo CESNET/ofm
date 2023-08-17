@@ -27,10 +27,6 @@ entity MVB_SHAKEDOWN is
         -- lot of resources. When one needs value of 3, consider using ``MULTI_FIFOX`` for such use case.
         -- Ingored when using *MUX* implemetation.
         SHAKE_PORTS : natural := 2; -- allowed values: 1, 2, 3
-
-        -- Resource optimized N to 1 implementation using only one multiplexer
-        USE_MUX_IMPL : boolean := False;
-        
         DEVICE              : string  := "AGILEX"
     );
     port(
@@ -96,9 +92,14 @@ architecture FULL of MVB_SHAKEDOWN is
     -- Shift register implemetation signals
     -- =====================================
     
-    signal rx_split_tx_data     : std_logic_vector(RX_ITEMS * ITEM_WIDTH - 1 downto 0);
-    signal rx_split_tx_src_rdy  : std_logic_vector(RX_ITEMS - 1 downto 0);
-    signal rx_split_tx_dst_rdy  : std_logic_vector(RX_ITEMS - 1 downto 0);
+    signal item_sent_reg        : std_logic_vector(RX_ITEMS - 1 downto 0);
+    signal item_sent_reg_set    : std_logic_vector(RX_ITEMS - 1 downto 0);
+    signal item_sent_reg_reset  : std_logic_vector(RX_ITEMS - 1 downto 0);
+
+    signal item_vld_vec         : std_logic_vector(RX_ITEMS - 1 downto 0);
+    signal items_left           : std_logic_vector(log2(RX_ITEMS + 1) - 1 downto 0);
+    signal no_items_left        : std_logic;
+    signal one_item_left        : std_logic;
 
     signal first_one_src_rdy    : std_logic_vector(RX_ITEMS - 1 downto 0);
     signal enc_if_addr          : std_logic_vector(max(log2(RX_ITEMS), 1) - 1 downto 0);
@@ -106,7 +107,7 @@ architecture FULL of MVB_SHAKEDOWN is
     signal mux_tx_data          : std_logic_vector(ITEM_WIDTH - 1 downto 0);
     signal mux_tx_vld           : std_logic_vector(0 downto 0);
 begin
-    mvb_shakedown_g : if not (TX_ITEMS = 1 and USE_MUX_IMPL) generate
+    mvb_shakedown_g : if not (TX_ITEMS = 1) generate
         -- ============================
         -- Unequal RX/TX ITEMS interface wrapper
         -- ============================
@@ -225,32 +226,83 @@ begin
     end generate;
     
     -- Implement effective N to 1 MVB shakedown
-    shift_shakedown_g : if (TX_ITEMS = 1 and USE_MUX_IMPL) generate
+    shift_shakedown_g : if (TX_ITEMS = 1) generate
+        signal rx_data_int      : std_logic_vector(RX_ITEMS * ITEM_WIDTH - 1 downto 0);
+        signal rx_vld_int       : std_logic_vector(RX_ITEMS - 1 downto 0);
+        signal rx_src_rdy_int   : std_logic;
+        signal rx_dst_rdy_int   : std_logic;
     begin
-        rx_split_i : entity work.MVB_SPLIT
+        RX_DST_RDY <= rx_dst_rdy_int;
+
+        input_reg_p : process(CLK)
+        begin
+            if rising_edge(CLK) then
+                if (rx_dst_rdy_int = '1') then
+                    rx_data_int     <= RX_DATA;
+                    rx_vld_int      <= RX_VLD;
+                    rx_src_rdy_int  <= RX_SRC_RDY;
+                end if;
+                
+                if (RESET = '1') then
+                    rx_src_rdy_int <= '0';
+                end if;
+            end if;
+        end process;
+
+        process (CLK)
+        begin
+            if rising_edge(CLK) then
+                if RESET = '1' then
+                    item_sent_reg <= (others => '1');
+                else
+                    for rx_it in 0 to RX_ITEMS - 1 loop
+                        if item_sent_reg_set(rx_it) = '1' then
+                            item_sent_reg(rx_it) <= '1';
+                        elsif item_sent_reg_reset(rx_it) = '1' then
+                            item_sent_reg(rx_it) <= '0';
+                        end if;
+                    end loop;
+                end if;
+            end if;
+        end process;
+
+        process (all)
+        begin
+            for i in 0 to RX_ITEMS - 1 loop
+                item_vld_vec(i) <= item_sent_reg(i) and rx_vld_int(i) and rx_src_rdy_int;
+            end loop;
+        end process;
+
+        no_items_left <= '1' when unsigned(items_left) = to_unsigned(0, log2(RX_ITEMS + 1)) else '0';
+        one_item_left <= '1' when unsigned(items_left) = to_unsigned(1, log2(RX_ITEMS + 1)) else '0';
+
+        rx_dst_rdy_int <= '1' when no_items_left = '1' or (one_item_left = '1' and TX_NEXT = "1") else '0';
+        item_sent_reg_set <= (others => rx_dst_rdy_int);
+
+        TX_VLD(0) <= not no_items_left and rx_src_rdy_int;
+
+        -- TODO maybe replace with lookup table
+        sum_one_i : entity work.SUM_ONE
         generic map (
-            ITEMS       => RX_ITEMS,
-            ITEM_WIDTH  => ITEM_WIDTH,
-            USE_DST_RDY => true
+            INPUT_WIDTH     => RX_ITEMS,
+            OUTPUT_REG      => False
         ) port map (
-            CLK         => CLK,
-            RESET       => RESET,
+            CLK             => CLK,
+            RESET           => RESET,
 
-            RX_DATA     => RX_DATA,
-            RX_VLD      => RX_VLD,
-            RX_SRC_RDY  => RX_SRC_RDY,
-            RX_DST_RDY  => RX_DST_RDY,
+            DIN             => item_vld_vec,
+            DIN_MASK        => (others => '1'),
+            DIN_VLD         => '1',
 
-            TX_DATA     => rx_split_tx_data,
-            TX_SRC_RDY  => rx_split_tx_src_rdy,
-            TX_DST_RDY  => rx_split_tx_dst_rdy
+            DOUT            => items_left,
+            DOUT_VLD        => open
         );
 
         first_one_i : entity work.FIRST_ONE
         generic map (
             DATA_WIDTH  => RX_ITEMS
         ) port map (
-            DI          => rx_split_tx_src_rdy,
+            DI          => item_vld_vec,
             DO          => first_one_src_rdy
         );
 
@@ -268,19 +320,9 @@ begin
             DATA_WIDTH  => ITEM_WIDTH,
             MUX_WIDTH   => RX_ITEMS
         ) port map (
-            DATA_IN     => rx_split_tx_data,
+            DATA_IN     => rx_data_int,
             SEL         => enc_if_addr,
             DATA_OUT    => TX_DATA
-        );
-
-        srdy_mux_i : entity work.GEN_MUX
-        generic map (
-            DATA_WIDTH  => 1,
-            MUX_WIDTH   => RX_ITEMS
-        ) port map (
-            DATA_IN     => rx_split_tx_src_rdy,
-            SEL         => enc_if_addr,
-            DATA_OUT    => TX_VLD
         );
 
         drdy_demux_i : entity work.GEN_DEMUX
@@ -291,7 +333,7 @@ begin
         ) port map (
             DATA_IN     => TX_NEXT,
             SEL         => enc_if_addr,
-            DATA_OUT    => rx_split_tx_dst_rdy
+            DATA_OUT    => item_sent_reg_reset
         );
     end generate;
 end architecture;
