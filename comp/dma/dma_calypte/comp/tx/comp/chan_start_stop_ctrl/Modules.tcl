@@ -4,6 +4,7 @@
 #
 
 lappend PACKAGES "$OFM_PATH/comp/base/pkg/math_pack.vhd"
+lappend PACKAGES "$OFM_PATH/comp/dma/dma_calypte/comp/rx/comp/hdr_manager/pkg/dma_hdr_pkg.vhd"
 
 set MFB_DROPPER_BASE       "$OFM_PATH/comp/mfb_tools/flow/dropper"
 

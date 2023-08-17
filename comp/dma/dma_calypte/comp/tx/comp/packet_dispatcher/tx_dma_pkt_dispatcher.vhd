@@ -111,6 +111,9 @@ architecture FULL of TX_DMA_PKT_DISPATCHER is
     signal disp_fsm_mfb_src_rdy : std_logic;
     signal mfb_dst_rdy_reg      : std_logic;
     signal buff_rd_data_reg     : std_logic_vector(BUFF_RD_DATA'range);
+
+    signal fr_len_round_up_msk : unsigned(16 -1 downto 0);
+    signal fr_len_rounded      : unsigned(16 -1 downto 0);
 begin
 
     pkt_dispatch_fsm_reg_p : process (CLK) is
@@ -232,10 +235,13 @@ begin
     PKT_SENT_CHAN  <= HDR_BUFF_CHAN;
     PKT_SENT_BYTES <= HDR_BUFF_DATA(DMA_FRAME_LENGTH)(PKT_SENT_BYTES'range);
 
+    fr_len_round_up_msk <= not to_unsigned(31,16);
+    fr_len_rounded <= (unsigned(HDR_BUFF_DATA(DMA_FRAME_LENGTH)) + 31) and fr_len_round_up_msk;
+
     UPD_HDP_CHAN <= HDR_BUFF_CHAN;
-    UPD_HDP_DATA <= std_logic_vector(resize(unsigned(HDR_BUFF_DATA(DMA_FRAME_LENGTH)) + unsigned(HDR_BUFF_DATA(DMA_FRAME_PTR)), DATA_POINTER_WIDTH));
+    UPD_HDP_DATA <= std_logic_vector(resize(fr_len_rounded + unsigned(HDR_BUFF_DATA(DMA_FRAME_PTR)), DATA_POINTER_WIDTH));
     UPD_HHP_CHAN <= HDR_BUFF_CHAN;
-    UPD_HHP_DATA <= std_logic_vector(resize((unsigned(HDR_BUFF_ADDR) & "00"), DMA_HDR_POINTER_WIDTH) + 8);
+    UPD_HHP_DATA <= std_logic_vector(unsigned(HDR_BUFF_ADDR(1 + DMA_HDR_POINTER_WIDTH -1 downto 1)) + 1);
 
     -- This process delays the set of all output MFB signals because the data come from the data
     -- buffer one clock cycle after the address and enable signal have been set.
@@ -256,7 +262,7 @@ begin
         end if;
     end process;
 
-    USR_MFB_META_HDR_META <= HDR_BUFF_DATA(DMA_USR_METADATA);
+    USR_MFB_META_HDR_META <= resize(HDR_BUFF_DATA(DMA_USR_METADATA),HDR_META_WIDTH);
     USR_MFB_META_CHAN     <= HDR_BUFF_CHAN;
     USR_MFB_META_PKT_SIZE <= HDR_BUFF_DATA(DMA_FRAME_LENGTH)(USR_MFB_META_PKT_SIZE'range);
 

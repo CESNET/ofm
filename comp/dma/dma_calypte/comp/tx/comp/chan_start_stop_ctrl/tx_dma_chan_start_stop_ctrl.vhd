@@ -13,6 +13,7 @@ use IEEE.numeric_std.all;
 
 use work.math_pack.all;
 use work.type_pack.all;
+use work.dma_hdr_pkg.all;
 
 -- This component controls the acception of incoming frames according to the running state of a
 -- specific DMA channel. When channel is stopped, all incoming frames to that channel are dropped.
@@ -43,7 +44,9 @@ entity TX_DMA_CHAN_START_STOP_CTRL is
         -- Others
         -- =========================================================================================
         -- Largest packet (in bytes) which can come out of USR_MFB interface
-        PKT_SIZE_MAX : natural := 2**16 - 1
+        PKT_SIZE_MAX : natural := 2**16 - 1;
+
+        DBG_SIGNAL_WIDTH : natural := 2
         );
     port (
         CLK   : in std_logic;
@@ -53,7 +56,7 @@ entity TX_DMA_CHAN_START_STOP_CTRL is
         -- Input PCIe MFB interface
         -- =========================================================================================
         PCIE_MFB_DATA    : in  std_logic_vector(PCIE_MFB_REGIONS*PCIE_MFB_REGION_SIZE*PCIE_MFB_BLOCK_SIZE*PCIE_MFB_ITEM_WIDTH-1 downto 0);
-        PCIE_MFB_META    : in  std_logic_vector((PCIE_MFB_REGIONS*PCIE_MFB_REGION_SIZE*PCIE_MFB_BLOCK_SIZE*PCIE_MFB_ITEM_WIDTH)/8+log2(CHANNELS)+62+1-1 downto 0);
+        PCIE_MFB_META    : in  std_logic_vector(13 + (PCIE_MFB_REGIONS*PCIE_MFB_REGION_SIZE*PCIE_MFB_BLOCK_SIZE*PCIE_MFB_ITEM_WIDTH)/8+log2(CHANNELS)+62+1-1 downto 0);
         PCIE_MFB_SOF     : in  std_logic_vector(PCIE_MFB_REGIONS -1 downto 0);
         PCIE_MFB_EOF     : in  std_logic_vector(PCIE_MFB_REGIONS -1 downto 0);
         PCIE_MFB_SOF_POS : in  std_logic_vector(PCIE_MFB_REGIONS*max(1, log2(PCIE_MFB_REGION_SIZE)) -1 downto 0);
@@ -76,7 +79,7 @@ entity TX_DMA_CHAN_START_STOP_CTRL is
         -- =========================================================================================
         -- Start/stop interface from the TX_DMA_SW_MANAGER
         -- =========================================================================================
-        START_REQ_CHAN : in std_logic_vector(log2(CHANNELS)-1 downto 0);
+        START_REQ_CHAN : in  std_logic_vector(log2(CHANNELS)-1 downto 0);
         START_REQ_VLD  : in  std_logic;
         START_REQ_ACK  : out std_logic;
         STOP_REQ_CHAN  : in  std_logic_vector(log2(CHANNELS)-1 downto 0);
@@ -86,9 +89,15 @@ entity TX_DMA_CHAN_START_STOP_CTRL is
         -- =========================================================================================
         -- Control signals for the counter of discarded packets
         -- =========================================================================================
-        PKT_DISC_CHAN : out std_logic_vector(log2(CHANNELS) -1 downto 0);
-        PKT_DISC_INC  : out std_logic;
-        PKT_DISC_BYTES : out std_logic_vector(log2(PKT_SIZE_MAX+1) -1 downto 0)
+        PKT_DISC_CHAN  : out std_logic_vector(log2(CHANNELS) -1 downto 0);
+        PKT_DISC_INC   : out std_logic;
+        PKT_DISC_BYTES : out std_logic_vector(log2(PKT_SIZE_MAX+1) -1 downto 0);
+
+        -- =========================================================================================
+        -- Debug signals
+        -- =========================================================================================
+        ST_SP_DBG_CHAN : out std_logic_vector(log2(CHANNELS) -1 downto 0);
+        ST_SP_DBG_META : out std_logic_vector(DBG_SIGNAL_WIDTH -1 downto 0)
         );
 end entity;
 
@@ -103,16 +112,19 @@ architecture FULL of TX_DMA_CHAN_START_STOP_CTRL is
     constant META_PCIE_ADDR_W  : natural := 62;
     constant META_CHAN_NUM_W   : natural := log2(CHANNELS);
     constant META_BE_W         : natural := MFB_LENGTH/8;
+    constant META_BYTE_CNT_W   : natural := 13;
 
     constant META_IS_DMA_HDR_O : natural := 0;
     constant META_PCIE_ADDR_O  : natural := META_IS_DMA_HDR_O + META_IS_DMA_HDR_W;
     constant META_CHAN_NUM_O   : natural := META_PCIE_ADDR_O + META_PCIE_ADDR_W;
     constant META_BE_O         : natural := META_CHAN_NUM_O + META_CHAN_NUM_W;
+    constant META_BYTE_CNT_O   : natural := META_BE_O + META_BE_W;
 
     subtype META_IS_DMA_HDR is natural range META_IS_DMA_HDR_O + META_IS_DMA_HDR_W -1 downto META_IS_DMA_HDR_O;
     subtype META_PCIE_ADDR is natural range META_PCIE_ADDR_O + META_PCIE_ADDR_W -1 downto META_PCIE_ADDR_O;
     subtype META_CHAN_NUM is natural range META_CHAN_NUM_O + META_CHAN_NUM_W -1 downto META_CHAN_NUM_O;
     subtype META_BE is natural range META_BE_O + META_BE_W -1 downto META_BE_O;
+    subtype META_BYTE_CNT is natural range META_BYTE_CNT_O + META_BYTE_CNT_W -1 downto META_BYTE_CNT_O;
 
     -- =============================================================================================
     -- State machines' states
@@ -133,12 +145,65 @@ architecture FULL of TX_DMA_CHAN_START_STOP_CTRL is
     signal chan_pkt_drop_en : slv_array_t(CHANNELS -1 downto 0)(PCIE_MFB_REGIONS -1 downto 0);
     -- MUXed from all channels
     signal pkt_drop_en      : std_logic_vector(PCIE_MFB_REGIONS -1 downto 0);
+
+    -- =============================================================================================
+    -- All things debugging
+    -- =============================================================================================
+    signal dma_hdr_out_of_order_chan : std_logic_vector(CHANNELS -1 downto 0);
+    signal dma_frame_lng_correct     : std_logic_vector(CHANNELS -1 downto 0);
+    signal dma_frame_lng_incorrect   : std_logic_vector(CHANNELS -1 downto 0);
+
+    signal tr_byte_lng_stored : u_array_t(CHANNELS -1 downto 0)(log2(PKT_SIZE_MAX+1) -1 downto 0);
+    signal tr_byte_lng_curr   : u_array_t(CHANNELS -1 downto 0)(log2(PKT_SIZE_MAX+1) -1 downto 0);
+
+    -- attribute mark_debug                       : string;
+    -- attribute mark_debug of channel_active_pst : signal is "true";
+    -- attribute mark_debug of pkt_acc_pst        : signal is "true";
+    -- attribute mark_debug of chan_start_req_ack : signal is "true";
+    -- attribute mark_debug of chan_stop_req_ack  : signal is "true";
+
+    -- attribute mark_debug of dma_hdr_out_of_order_chan : signal is "true";
+    -- attribute mark_debug of chan_pkt_drop_en          : signal is "true";
+
+    signal meta_is_dma_hdr_int : std_logic_vector(META_IS_DMA_HDR);
+    signal meta_pcie_addr_int  : std_logic_vector(META_PCIE_ADDR);
+    signal meta_chan_num_int   : std_logic_vector(META_CHAN_NUM);
+
+    -- attribute mark_debug of PCIE_MFB_DATA       : signal is "true";
+    -- attribute mark_debug of meta_is_dma_hdr_int : signal is "true";
+    -- attribute mark_debug of meta_pcie_addr_int  : signal is "true";
+    -- attribute mark_debug of meta_chan_num_int   : signal is "true";
+    -- attribute mark_debug of PCIE_MFB_SOF        : signal is "true";
+    -- attribute mark_debug of PCIE_MFB_EOF        : signal is "true";
+    -- attribute mark_debug of PCIE_MFB_SOF_POS    : signal is "true";
+    -- attribute mark_debug of PCIE_MFB_EOF_POS    : signal is "true";
+    -- attribute mark_debug of PCIE_MFB_SRC_RDY    : signal is "true";
+    -- attribute mark_debug of PCIE_MFB_DST_RDY    : signal is "true";
+
+    signal stop_req_while_pending                       : std_logic_vector(CHANNELS -1 downto 0);
+    signal stop_req_while_pending_ored                  : std_logic;
+    -- attribute mark_debug of stop_req_while_pending      : signal is "true";
+    -- attribute mark_debug of stop_req_while_pending_ored : signal is "true";
+
+    -- attribute mark_debug of ST_SP_DBG_META : signal is "true";
 begin
+
+    stop_req_while_pending_ored <= or stop_req_while_pending;
+    meta_is_dma_hdr_int         <= PCIE_MFB_META(META_IS_DMA_HDR);
+    meta_pcie_addr_int          <= PCIE_MFB_META(META_PCIE_ADDR);
+    meta_chan_num_int           <= PCIE_MFB_META(META_CHAN_NUM);
 
     -- =============================================================================================
     -- Channel start/stop control
     -- =============================================================================================
     channel_active_fsm_g : for j in (CHANNELS -1) downto 0 generate
+
+        stop_req_while_pending(j) <= '1' when (
+            pkt_acc_pst(j) = S_PKT_PENDING
+            and STOP_REQ_VLD = '1'
+            and std_logic_vector(to_unsigned(j, log2(CHANNELS))) = STOP_REQ_CHAN
+            ) else '0';
+
         channel_active_state_reg_p : process (CLK) is
         begin
             if (rising_edge(CLK)) then
@@ -193,9 +258,11 @@ begin
         begin
             if (rising_edge(CLK)) then
                 if (RESET = '1') then
-                    pkt_acc_pst(j) <= S_IDLE;
-                else
-                    pkt_acc_pst(j) <= pkt_acc_nst(j);
+                    pkt_acc_pst(j)        <= S_IDLE;
+                    tr_byte_lng_stored(j) <= (others => '0');
+                elsif (PCIE_MFB_DST_RDY = '1') then
+                    pkt_acc_pst(j)        <= pkt_acc_nst(j);
+                    tr_byte_lng_stored(j) <= tr_byte_lng_curr(j);
                 end if;
             end if;
         end process;
@@ -203,18 +270,24 @@ begin
         pkt_acceptor_nst_logic_p : process (all) is
         begin
             pkt_acc_nst(j)      <= pkt_acc_pst(j);
-            chan_pkt_drop_en(j) <= (others => '0');
+            tr_byte_lng_curr(j) <= tr_byte_lng_stored(j);
+
+            chan_pkt_drop_en(j)        <= (others => '0');
+            dma_frame_lng_correct(j)   <= '0';
+            dma_frame_lng_incorrect(j) <= '0';
 
             case pkt_acc_pst(j) is
                 when S_IDLE =>
                     if (
                         PCIE_MFB_SRC_RDY = '1'
                         and PCIE_MFB_SOF = "1"
+                        and PCIE_MFB_META(META_IS_DMA_HDR) = "0"
                         and std_logic_vector(to_unsigned(j, log2(CHANNELS))) = PCIE_MFB_META(META_CHAN_NUM)
                         ) then
 
                         if (channel_active_pst(j) = CHANNEL_RUNNING) then
-                            pkt_acc_nst(j) <= S_PKT_PENDING;
+                            pkt_acc_nst(j)      <= S_PKT_PENDING;
+                            tr_byte_lng_curr(j) <= resize(unsigned(PCIE_MFB_META(META_BYTE_CNT)), log2(PKT_SIZE_MAX+1));
                         else
                             pkt_acc_nst(j)      <= S_PKT_DROP;
                             chan_pkt_drop_en(j) <= (others => '1');
@@ -222,18 +295,32 @@ begin
                     end if;
 
                 when S_PKT_PENDING =>
-                    if (
-                        PCIE_MFB_SRC_RDY = '1'
-                        and PCIE_MFB_META(META_IS_DMA_HDR) = "1"
+                    if (PCIE_MFB_SRC_RDY = '1'
+                        and PCIE_MFB_SOF = "1"
                         and std_logic_vector(to_unsigned(j, log2(CHANNELS))) = PCIE_MFB_META(META_CHAN_NUM)
                         ) then
-                        pkt_acc_nst(j) <= S_IDLE;
+
+                        if (PCIE_MFB_META(META_IS_DMA_HDR) = "1") then
+
+                            pkt_acc_nst(j) <= S_IDLE;
+
+                            if (tr_byte_lng_stored(j) = unsigned(PCIE_MFB_DATA(DMA_FRAME_LENGTH))) then
+                                dma_frame_lng_correct(j) <= '1';
+                            else
+                                dma_frame_lng_incorrect(j) <= '1';
+                            end if;
+
+                        elsif (PCIE_MFB_META(META_IS_DMA_HDR) = "0") then
+                            tr_byte_lng_curr(j) <= tr_byte_lng_stored(j) + resize(unsigned(PCIE_MFB_META(META_BYTE_CNT)), log2(PKT_SIZE_MAX+1));
+                        end if;
                     end if;
 
                 when S_PKT_DROP =>
                     if (PCIE_MFB_SRC_RDY = '1'
                         and PCIE_MFB_SOF = "1"
-                        and std_logic_vector(to_unsigned(j, log2(CHANNELS))) = PCIE_MFB_META(META_CHAN_NUM)) then
+                        and std_logic_vector(to_unsigned(j, log2(CHANNELS))) = PCIE_MFB_META(META_CHAN_NUM)
+                        ) then
+
                         chan_pkt_drop_en(j) <= (others => '1');
 
                         if (PCIE_MFB_META(META_IS_DMA_HDR) = "1") then
@@ -242,12 +329,28 @@ begin
                     end if;
             end case;
         end process;
+
+        dma_hdr_out_of_order_chan(j) <= '1' when (
+            pkt_acc_pst(j) = S_IDLE
+            and PCIE_MFB_SRC_RDY = '1'
+            and PCIE_MFB_DST_RDY = '1'
+            and PCIE_MFB_SOF = "1"
+            and PCIE_MFB_META(META_IS_DMA_HDR) = "1"
+            and std_logic_vector(to_unsigned(j, log2(CHANNELS))) = PCIE_MFB_META(META_CHAN_NUM)
+            ) else '0';
+
     end generate;
 
-    PKT_DISC_CHAN <= PCIE_MFB_META(META_CHAN_NUM);
+    ST_SP_DBG_CHAN    <= PCIE_MFB_META(META_CHAN_NUM);
+    ST_SP_DBG_META(0) <= (or dma_hdr_out_of_order_chan);
+    ST_SP_DBG_META(1) <= '1' when (PCIE_MFB_SRC_RDY = '1' and PCIE_MFB_DST_RDY = '1' and PCIE_MFB_SOF = "1" and PCIE_MFB_META(META_IS_DMA_HDR) = "1") else '0';
+    ST_SP_DBG_META(2) <= (or dma_frame_lng_correct) and PCIE_MFB_DST_RDY;
+    ST_SP_DBG_META(3) <= (or dma_frame_lng_incorrect) and PCIE_MFB_DST_RDY;
+
+    PKT_DISC_CHAN  <= PCIE_MFB_META(META_CHAN_NUM);
     -- choose only packet size from the DMA header
     PKT_DISC_BYTES <= PCIE_MFB_DATA(log2(PKT_SIZE_MAX+1) -1 downto 0);
-    PKT_DISC_INC  <= '1' when
+    PKT_DISC_INC   <= '1' when
                     (
                         pkt_acc_pst(to_integer(unsigned(PCIE_MFB_META(META_CHAN_NUM)))) = S_PKT_DROP
                         and PCIE_MFB_META(META_IS_DMA_HDR) = "1"
@@ -269,13 +372,13 @@ begin
             REGION_SIZE => PCIE_MFB_REGION_SIZE,
             BLOCK_SIZE  => PCIE_MFB_BLOCK_SIZE,
             ITEM_WIDTH  => PCIE_MFB_ITEM_WIDTH,
-            META_WIDTH  => PCIE_MFB_META'length)
+            META_WIDTH  => PCIE_MFB_META'length - META_BYTE_CNT_W)
         port map (
             CLK   => CLK,
             RESET => RESET,
 
             RX_DATA    => PCIE_MFB_DATA,
-            RX_META    => PCIE_MFB_META,
+            RX_META    => PCIE_MFB_META(META_BE_O + META_BE_W -1 downto 0),
             RX_SOF_POS => PCIE_MFB_SOF_POS,
             RX_EOF_POS => PCIE_MFB_EOF_POS,
             RX_SOF     => PCIE_MFB_SOF,

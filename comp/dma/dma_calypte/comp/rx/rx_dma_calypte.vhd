@@ -226,7 +226,8 @@ architecture FULL of RX_DMA_CALYPTE is
 
     -- attribute mark_debug of hdrm_pcie_hdr_type    : signal is "true";
     -- attribute mark_debug of hdrm_pcie_hdr_data    : signal is "true";
-    -- attribute mark_debug of hdrm_pcie_hdr_src_rdy : signal is "true";
+    -- attribute mark_debug of hdrm_pcie_hdr_src_rdy_dma_hdr : signal is "true";
+    -- attribute mark_debug of hdrm_pcie_hdr_src_rdy_data_tran : signal is "true";
     -- attribute mark_debug of hdrm_pcie_hdr_dst_rdy : signal is "true";
 
     -- attribute mark_debug of hdrm_pkt_drop        : signal is "true";
