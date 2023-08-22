@@ -60,6 +60,9 @@ port(
     -- Time counter is reset with the next first SOF.
     TIME_RESET     : in  std_logic;
 
+    -- Input Time used to decide whether a packet's Timestamp is OK or not.
+    CURRENT_TIME   : in  std_logic_vector(64-1 downto 0);
+
     -- =====================================================================
     --  RX inf
     -- =====================================================================
@@ -185,9 +188,12 @@ architecture FULL of MFB_PACKET_DELAYER is
     signal sof_read                     : std_logic_vector(MFB_REGIONS-1 downto 0);
     signal first_sof_read               : std_logic;
     signal waiting_for_first_sof        : std_logic;
-    signal time_cnt_reset               : std_logic;
-    signal time_cnt                     : std_logic_vector                        (TS_WIDTH-1 downto 0);
-    signal time_cnt_fixed               : u_array_t       (MFB_REGIONS-1 downto 0)(TS_WIDTH-1 downto 0);
+    signal update_stored_time           : std_logic;
+    signal current_time_reg             : unsigned(64-1 downto 0);
+    signal one_clk_period_time_diff     : unsigned                         (TS_WIDTH-1 downto 0);
+    signal accum_time_diff              : unsigned                         (TS_WIDTH-1 downto 0);
+    signal stored_time_diff             : unsigned                         (TS_WIDTH-1 downto 0);
+    signal stored_time_diff_fixed       : u_array_t(MFB_REGIONS-1 downto 0)(TS_WIDTH-1 downto 0);
 
     signal mfb_data_mid_reg             : std_logic_vector(WORD_WIDTH-1 downto 0);
     signal mfb_meta_mid_reg             : std_logic_vector(MFB_REGIONS*MFB_META_WIDTH-1 downto 0);
@@ -448,13 +454,13 @@ begin
     end process;
 
     -- The SOF and TS is always at Block 0
-    ts_ok(0) <= '1' when (time_cnt_fixed(0) >= unsigned(rx_fifoxm_out_ts_blocks(0))) else '0';
+    ts_ok(0) <= '1' when (stored_time_diff_fixed(0) >= unsigned(rx_fifoxm_out_ts_blocks(0))) else '0';
     eof_rd_vec_en <= '0' when ((rx_fifoxm_out_sof_onehot_vld(0) = '1') and (ts_ok(0) = '0')) else '1';
 
     rx_fifoxm_rd <= (eof_rd_vec and eof_rd_vec_en) and mfb_dst_rdy_mid_reg;
 
     -- ========================================================================
-    -- Time Counter
+    -- Time logic
     -- ========================================================================
 
     sof_read_g : for r in 0 to MFB_REGIONS-1 generate
@@ -462,11 +468,11 @@ begin
     end generate;
 
     reset_g : if TS_FORMAT=0 generate
-        -- reset also with each read SOF
-        time_cnt_reset <= RESET or (or sof_read);
+        -- Store new value of CURRENT_TIME with each read SOF
+        update_stored_time <= or sof_read;
     else generate
-        -- reset also when the first SOF is read
-        time_cnt_reset <= RESET or first_sof_read;
+        -- Store new value of CURRENT_TIME when the first SOF is read
+        update_stored_time <= first_sof_read;
 
         first_sof_read <= (or sof_read) and waiting_for_first_sof;
         process(CLK)
@@ -482,27 +488,35 @@ begin
         end process;
     end generate;
 
-    time_cnt_i : entity work.DSP_COUNTER
-    generic map (
-        INPUT_WIDTH  => log2(CLK_PERIOD),
-        OUTPUT_WIDTH => TS_WIDTH,
-        INPUT_REGS   => True,
-        DEVICE       => DEVICE,
-        DSP_ENABLE   => True
-    )
-    port map (
-        CLK        => CLK,
-        CLK_EN     => '1',
-        RESET      => time_cnt_reset,
-        INCREMENT  => TIME_CNT_INC,
-        MAX_VAL    => (others => '1'),
-        RESULT     => time_cnt
-    );
+    -- Get the duration of a single clock period in [ns]
+    process(CLK)
+    begin
+        if rising_edge(CLK) then
+            current_time_reg <= unsigned(CURRENT_TIME);
+        end if;
+    end process;
+    one_clk_period_time_diff <= resize(unsigned(CURRENT_TIME)-current_time_reg  , TS_WIDTH);
 
-    time_cnt_fixed(0) <= unsigned(time_cnt);
-    -- when on of the previous Regions with SOF were read, "fix" time (set to 0 ns)
-    fix_time_count_g : for r in 0 to MFB_REGIONS-2 generate
-        time_cnt_fixed(r+1) <= unsigned(time_cnt) when (or sof_read(r downto 0) = '0') else (others => '0');
+    -- Update the time difference that is then used for comparison with the packet's Timestamp
+    process(CLK)
+    begin
+        if rising_edge(CLK) then
+            -- Accumulate time until update_stored_time='1'
+            stored_time_diff <= resize(stored_time_diff+one_clk_period_time_diff, TS_WIDTH);
+            if (update_stored_time = '1') then
+                -- Basically a reset, but to the duration of one clock period instead of 0 [ns]
+                stored_time_diff <= one_clk_period_time_diff;
+            end if;
+            if (RESET = '1') then
+                stored_time_diff <= (others => '0');
+            end if;
+        end if;
+    end process;
+
+    stored_time_diff_fixed(0) <= stored_time_diff;
+    -- when on of the previous Regions with SOF were read, "fix" the time in the current word (set it to 0 ns)
+    fix_time_g : for r in 0 to MFB_REGIONS-2 generate
+        stored_time_diff_fixed(r+1) <= stored_time_diff when (or sof_read(r downto 0) = '0') else (others => '0');
     end generate;
 
     -- ========================================================================
