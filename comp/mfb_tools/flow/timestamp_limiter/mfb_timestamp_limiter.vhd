@@ -17,7 +17,7 @@ use work.type_pack.all;
 
 -- This component limits output speed according to given Timestamps via the :vhdl:portsignal:`RX_MFB_TIMESTAMP <mfb_timestamp_limiter.rx_mfb_timestamp>` port.
 -- The incoming packets are split into queues (e.g., per each DMA Channel), where the order of packets is kept the same.
--- Then in each Queue, the MFB Packet Delayer component outputs each packet when the time is right.
+-- Then in each Queue, the :ref:`MFB Packet Delayer component <mfb_packet_delayer>` outputs each packet when the time is right.
 -- Finally, the packets from all Queues are merged back into a single stream (no order is kept here).
 --
 -- The MI interface enables the user to reset Time in the Packet Delayers.
