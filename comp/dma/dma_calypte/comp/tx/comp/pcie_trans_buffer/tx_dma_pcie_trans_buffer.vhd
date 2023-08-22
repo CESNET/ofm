@@ -87,12 +87,27 @@ architecture FULL of TX_DMA_PCIE_TRANS_BUFFER is
     subtype META_CHAN_NUM is natural range META_CHAN_NUM_O + META_CHAN_NUM_W -1 downto META_CHAN_NUM_O;
     subtype META_BE is natural range META_BE_O + META_BE_W -1 downto META_BE_O;
 
+    constant BRAM_REG_NUM : natural := 2;
+    constant INP_REG_NUM  : natural := 1;
+
+    signal pcie_mfb_data_reg    : slv_array_t(INP_REG_NUM -1 downto 0)(PCIE_MFB_DATA'range);
+    signal pcie_mfb_meta_reg    : slv_array_t(INP_REG_NUM -1 downto 0)(PCIE_MFB_META'range);
+    signal pcie_mfb_sof_reg     : slv_array_t(INP_REG_NUM -1 downto 0)(PCIE_MFB_SOF'range);
+    signal pcie_mfb_eof_reg     : slv_array_t(INP_REG_NUM -1 downto 0)(PCIE_MFB_EOF'range);
+    signal pcie_mfb_sof_pos_reg : slv_array_t(INP_REG_NUM -1 downto 0)(PCIE_MFB_SOF_POS'range);
+    signal pcie_mfb_eof_pos_reg : slv_array_t(INP_REG_NUM -1 downto 0)(PCIE_MFB_EOF_POS'range);
+    signal pcie_mfb_src_rdy_reg : std_logic_vector(INP_REG_NUM -1 downto 0);
+
     -- counter of the address for each valid word following the beginning of the transaction
     signal addr_cntr_pst : unsigned(PCIE_MFB_META(META_PCIE_ADDR)'length -1 downto 0);
     signal addr_cntr_nst : unsigned(PCIE_MFB_META(META_PCIE_ADDR)'length -1 downto 0);
 
     -- control of the amount of shift on the writing barrel shifters
     signal wr_shift_sel : std_logic_vector(log2(MFB_LENGTH/32) -1 downto 0);
+
+    signal wr_be_bram_demux_reg      : slv_array_2d_t(BRAM_REG_NUM -1 downto 0)(CHANNELS -1 downto 0)((PCIE_MFB_DATA'length/8) -1 downto 0);
+    signal wr_addr_bram_by_shift_reg : slv_array_2d_t(BRAM_REG_NUM -1 downto 0)((PCIE_MFB_DATA'length/32) -1 downto 0)(log2(BUFFER_DEPTH) -1 downto 0);
+    signal wr_data_bram_bshifter_reg : slv_array_t(BRAM_REG_NUM -1 downto 0)(MFB_LENGTH -1 downto 0);
 
     signal wr_be_bram_bshifter   : std_logic_vector((PCIE_MFB_DATA'length/8) -1 downto 0);
     signal wr_be_bram_demux      : slv_array_t(CHANNELS -1 downto 0)((PCIE_MFB_DATA'length/8) -1 downto 0);
@@ -107,6 +122,43 @@ architecture FULL of TX_DMA_PCIE_TRANS_BUFFER is
     signal rd_data_bram       : slv_array_t(CHANNELS -1 downto 0)(MFB_LENGTH -1 downto 0);
     signal rd_addr_bram_by_shift : slv_array_t((PCIE_MFB_DATA'length/8) -1 downto 0)(log2(BUFFER_DEPTH) -1 downto 0);
 begin
+
+    inp_reg_g: if (INP_REG_NUM = 1) generate
+        inp_reg_p: process (CLK) is
+        begin
+            if (rising_edge(CLK)) then
+                if (RESET = '1') then
+                    pcie_mfb_src_rdy_reg <= (others => '0');
+                else
+                    pcie_mfb_data_reg(0)    <= PCIE_MFB_DATA;
+                    pcie_mfb_meta_reg(0)    <= PCIE_MFB_META;
+                    pcie_mfb_sof_reg(0)     <= PCIE_MFB_SOF;
+                    pcie_mfb_eof_reg(0)     <= PCIE_MFB_EOF;
+                    pcie_mfb_sof_pos_reg(0) <= PCIE_MFB_SOF_POS;
+                    pcie_mfb_eof_pos_reg(0) <= PCIE_MFB_EOF_POS;
+                    pcie_mfb_src_rdy_reg(0) <= PCIE_MFB_SRC_RDY;
+                end if;
+            end if;
+        end process;
+
+    else generate
+        inp_reg_p: process (CLK) is
+        begin
+            if (rising_edge(CLK)) then
+                if (RESET = '1') then
+                    pcie_mfb_src_rdy_reg <= (others => '0');
+                else
+                    pcie_mfb_data_reg    <= pcie_mfb_data_reg(INP_REG_NUM -2 downto 0)    & PCIE_MFB_DATA;
+                    pcie_mfb_meta_reg    <= pcie_mfb_meta_reg(INP_REG_NUM -2 downto 0)    & PCIE_MFB_META;
+                    pcie_mfb_sof_reg     <= pcie_mfb_sof_reg(INP_REG_NUM -2 downto 0)     & PCIE_MFB_SOF;
+                    pcie_mfb_eof_reg     <= pcie_mfb_eof_reg(INP_REG_NUM -2 downto 0)     & PCIE_MFB_EOF;
+                    pcie_mfb_sof_pos_reg <= pcie_mfb_sof_pos_reg(INP_REG_NUM -2 downto 0) & PCIE_MFB_SOF_POS;
+                    pcie_mfb_eof_pos_reg <= pcie_mfb_eof_pos_reg(INP_REG_NUM -2 downto 0) & PCIE_MFB_EOF_POS;
+                    pcie_mfb_src_rdy_reg <= pcie_mfb_src_rdy_reg(INP_REG_NUM -2 downto 0) & PCIE_MFB_SRC_RDY;
+                end if;
+            end if;
+        end process;
+    end generate;
 
     addr_cntr_reg_p : process (CLK) is
     begin
@@ -125,10 +177,10 @@ begin
 
         -- Increment the address for a next word by 8 (the number of DWs in the word) to be written
         -- to the BRAMs.
-        if (PCIE_MFB_SRC_RDY = '1') then
-            if (PCIE_MFB_SOF = "1" and PCIE_MFB_EOF = "0") then
-                addr_cntr_nst <= unsigned(PCIE_MFB_META(META_PCIE_ADDR)) + 8;
-            elsif (PCIE_MFB_SOF = "0" and PCIE_MFB_EOF = "0") then
+        if (pcie_mfb_src_rdy_reg(INP_REG_NUM -1) = '1') then
+            if (pcie_mfb_sof_reg(INP_REG_NUM -1) = "1" and pcie_mfb_eof_reg(INP_REG_NUM -1) = "0") then
+                addr_cntr_nst <= unsigned(pcie_mfb_meta_reg(INP_REG_NUM -1)(META_PCIE_ADDR)) + 8;
+            elsif (pcie_mfb_sof_reg(INP_REG_NUM -1) = "0" and pcie_mfb_eof_reg(INP_REG_NUM -1) = "0") then
                 addr_cntr_nst <= addr_cntr_pst + 8;
             end if;
         end if;
@@ -142,33 +194,33 @@ begin
     begin
         wr_shift_sel <= (others => '0');
 
-        if (PCIE_MFB_SRC_RDY = '1') then
-            if (PCIE_MFB_SOF = "1") then
-                pcie_mfb_meta_addr_v := PCIE_MFB_META(META_PCIE_ADDR);
-                wr_shift_sel         <= pcie_mfb_meta_addr_v(2 downto 0);
+        if (pcie_mfb_src_rdy_reg(INP_REG_NUM -1) = '1') then
+            if (pcie_mfb_sof_reg(INP_REG_NUM -1) = "1") then
+                pcie_mfb_meta_addr_v := pcie_mfb_meta_reg(INP_REG_NUM -1)(META_PCIE_ADDR);
+                wr_shift_sel         <= pcie_mfb_meta_addr_v(log2(MFB_LENGTH/32)-1 downto 0);
             else
-                wr_shift_sel <= std_logic_vector(addr_cntr_pst(2 downto 0));
+                wr_shift_sel <= std_logic_vector(addr_cntr_pst(log2(MFB_LENGTH/32)-1 downto 0));
             end if;
         end if;
     end process;
 
     wr_data_barrel_shifter_i : entity work.BARREL_SHIFTER_GEN
         generic map (
-            BLOCKS     => 8,
+            BLOCKS     => MFB_LENGTH/32,
             BLOCK_SIZE => 32,
             SHIFT_LEFT => TRUE)
         port map (
-            DATA_IN  => PCIE_MFB_DATA,
+            DATA_IN  => pcie_mfb_data_reg(INP_REG_NUM -1),
             DATA_OUT => wr_data_bram_bshifter,
             SEL      => wr_shift_sel);
 
     wr_be_barrel_shifter_i : entity work.BARREL_SHIFTER_GEN
         generic map (
-            BLOCKS     => 8,
+            BLOCKS     => MFB_LENGTH/32,
             BLOCK_SIZE => 4,
             SHIFT_LEFT => TRUE)
         port map (
-            DATA_IN  => PCIE_MFB_META(META_BE),
+            DATA_IN  => pcie_mfb_meta_reg(INP_REG_NUM -1)(META_BE),
             DATA_OUT => wr_be_bram_bshifter,
             SEL      => wr_shift_sel);
 
@@ -181,9 +233,9 @@ begin
     begin
         wr_addr_bram_by_shift <= (others => (others => '0'));
 
-        if (PCIE_MFB_SRC_RDY = '1') then
-            if (PCIE_MFB_SOF = "1") then
-                pcie_mfb_meta_addr_v := PCIE_MFB_META(META_PCIE_ADDR);
+        if (pcie_mfb_src_rdy_reg(INP_REG_NUM -1) = '1') then
+            if (pcie_mfb_sof_reg(INP_REG_NUM -1) = "1") then
+                pcie_mfb_meta_addr_v := pcie_mfb_meta_reg(INP_REG_NUM -1)(META_PCIE_ADDR);
                 wr_addr_bram_by_shift <= (others => pcie_mfb_meta_addr_v(log2(BUFFER_DEPTH)+3 -1 downto 3));
 
                 for i in 0 to ((MFB_LENGTH/32) -1) loop
@@ -222,8 +274,8 @@ begin
     begin
         chan_num_nst <= chan_num_pst;
 
-        if (PCIE_MFB_SRC_RDY = '1' and PCIE_MFB_SOF = "1") then
-            chan_num_nst <= PCIE_MFB_META(META_CHAN_NUM);
+        if (pcie_mfb_src_rdy_reg(INP_REG_NUM -1) = '1' and pcie_mfb_sof_reg(INP_REG_NUM -1) = "1") then
+            chan_num_nst <= pcie_mfb_meta_reg(INP_REG_NUM -1)(META_CHAN_NUM);
         end if;
     end process;
 
@@ -231,11 +283,24 @@ begin
     begin
         wr_be_bram_demux <= (others => (others => '0'));
 
-        if (PCIE_MFB_SRC_RDY = '1') then
-            if (PCIE_MFB_SOF = "1") then
-                wr_be_bram_demux(to_integer(unsigned(PCIE_MFB_META(META_CHAN_NUM)))) <= wr_be_bram_bshifter;
+        if (pcie_mfb_src_rdy_reg(INP_REG_NUM -1) = '1') then
+            if (pcie_mfb_sof_reg(INP_REG_NUM -1) = "1") then
+                wr_be_bram_demux(to_integer(unsigned(pcie_mfb_meta_reg(INP_REG_NUM -1)(META_CHAN_NUM)))) <= wr_be_bram_bshifter;
             else
                 wr_be_bram_demux(to_integer(unsigned(chan_num_pst))) <= wr_be_bram_bshifter;
+            end if;
+        end if;
+    end process;
+
+    bram_regs_p: process (CLK) is
+    begin
+        if (rising_edge(CLK)) then
+            if (RESET = '1') then
+                wr_be_bram_demux_reg      <= (others => (others => (others => '0')));
+            else
+                wr_be_bram_demux_reg      <= wr_be_bram_demux_reg(BRAM_REG_NUM -2 downto 0) & wr_be_bram_demux;
+                wr_addr_bram_by_shift_reg <= wr_addr_bram_by_shift_reg(BRAM_REG_NUM -2 downto 0) & wr_addr_bram_by_shift;
+                wr_data_bram_bshifter_reg <= wr_data_bram_bshifter_reg(BRAM_REG_NUM -2 downto 0) & wr_data_bram_bshifter;
             end if;
         end if;
     end process;
@@ -260,10 +325,10 @@ begin
                     port map (
                         WR_CLK  => CLK,
                         WR_RST  => RESET,
-                        WR_EN   => wr_be_bram_demux(j)(i),
+                        WR_EN   => wr_be_bram_demux_reg(BRAM_REG_NUM -1)(j)(i),
                         WR_BE   => (others => '1'),
-                        WR_ADDR => wr_addr_bram_by_shift(i/4),
-                        WR_DATA => wr_data_bram_bshifter(i*8 +7 downto i*8),
+                        WR_ADDR => wr_addr_bram_by_shift_reg(BRAM_REG_NUM -1)(i/4),
+                        WR_DATA => wr_data_bram_bshifter_reg(BRAM_REG_NUM -1)(i*8 +7 downto i*8),
 
                         RD_CLK      => CLK,
                         RD_RST      => RESET,
@@ -311,13 +376,13 @@ begin
     -- reading side
     rd_data_barrel_shifter_i : entity work.BARREL_SHIFTER_GEN
         generic map (
-            BLOCKS     => 32,
+            BLOCKS     => MFB_LENGTH/8,
             BLOCK_SIZE => 8,
             SHIFT_LEFT => FALSE)
         port map (
             DATA_IN  => rd_data_bram_mux,
             DATA_OUT => RD_DATA,
-            SEL      => RD_ADDR(4 downto 0));
+            SEL      => RD_ADDR(log2(MFB_LENGTH/8)-1 downto 0));
 
     rd_addr_recalc_p : process (all) is
     begin

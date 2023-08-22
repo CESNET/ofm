@@ -97,7 +97,7 @@ entity DMA_CALYPTE is
         -- Defines width of signals used for these values in DMA Module
         -- Affects logic complexity
         -- Maximum value: 32 (restricted by size of SDP and HDP MI register)
-        TX_PTR_WIDTH : natural := 14;
+        TX_PTR_WIDTH        : natural := 14;
         -- Maximum size of a User packet (in bytes)
         -- Defines width of Packet length signals.
         -- the maximum is 2**16 - 1
@@ -110,13 +110,13 @@ entity DMA_CALYPTE is
         -- at entity-area constants.
         -- =====================================================================
         -- Width of DSP packet and byte statistics counters
-        DSP_CNT_WIDTH : natural := 64;
+        DSP_CNT_WIDTH      : natural := 64;
         -- Enable generation of RX/TX side of DMA Module
-        RX_GEN_EN     : boolean := TRUE;
-        TX_GEN_EN     : boolean := TRUE;
+        RX_GEN_EN          : boolean := TRUE;
+        TX_GEN_EN          : boolean := TRUE;
         ST_SP_DBG_SIGNAL_W : natural := 2;
         -- Width of MI bus
-        MI_WIDTH      : natural := 32
+        MI_WIDTH           : natural := 32
         );
     port (
         CLK   : in std_logic;
@@ -160,7 +160,7 @@ entity DMA_CALYPTE is
         -- =====================================================================
         -- Upstream MFB interface (for sending data to PCIe Endpoints)
         PCIE_RQ_MFB_DATA    : out std_logic_vector(PCIE_RQ_MFB_REGIONS*PCIE_RQ_MFB_REGION_SIZE*PCIE_RQ_MFB_BLOCK_SIZE*PCIE_RQ_MFB_ITEM_WIDTH-1 downto 0);
-        PCIE_RQ_MFB_META    : out std_logic_vector(PCIE_RQ_META_WIDTH -1 downto 0);
+        PCIE_RQ_MFB_META    : out std_logic_vector(PCIE_RQ_MFB_REGIONS*PCIE_RQ_META_WIDTH -1 downto 0);
         PCIE_RQ_MFB_SOF     : out std_logic_vector(PCIE_RQ_MFB_REGIONS -1 downto 0);
         PCIE_RQ_MFB_EOF     : out std_logic_vector(PCIE_RQ_MFB_REGIONS -1 downto 0);
         PCIE_RQ_MFB_SOF_POS : out std_logic_vector(PCIE_RQ_MFB_REGIONS*max(1, log2(PCIE_RQ_MFB_REGION_SIZE)) -1 downto 0);
@@ -170,7 +170,7 @@ entity DMA_CALYPTE is
 
         -- Downstream MFB interface (for sending data from PCIe Endpoints)
         PCIE_CQ_MFB_DATA    : in  std_logic_vector(PCIE_CQ_MFB_REGIONS*PCIE_CQ_MFB_REGION_SIZE*PCIE_CQ_MFB_BLOCK_SIZE*PCIE_CQ_MFB_ITEM_WIDTH-1 downto 0);
-        PCIE_CQ_MFB_META    : in  std_logic_vector(PCIE_CQ_META_WIDTH -1 downto 0);
+        PCIE_CQ_MFB_META    : in  std_logic_vector(PCIE_CQ_MFB_REGIONS*PCIE_CQ_META_WIDTH -1 downto 0);
         PCIE_CQ_MFB_SOF     : in  std_logic_vector(PCIE_CQ_MFB_REGIONS -1 downto 0);
         PCIE_CQ_MFB_EOF     : in  std_logic_vector(PCIE_CQ_MFB_REGIONS -1 downto 0);
         PCIE_CQ_MFB_SOF_POS : in  std_logic_vector(PCIE_CQ_MFB_REGIONS*max(1, log2(PCIE_CQ_MFB_REGION_SIZE)) -1 downto 0);
@@ -180,7 +180,7 @@ entity DMA_CALYPTE is
 
         -- Response interface for PCIe CQ requests
         PCIE_CC_MFB_DATA    : out std_logic_vector(PCIE_CC_MFB_REGIONS*PCIE_CC_MFB_REGION_SIZE*PCIE_CC_MFB_BLOCK_SIZE*PCIE_CC_MFB_ITEM_WIDTH-1 downto 0);
-        PCIE_CC_MFB_META    : out std_logic_vector(PCIE_CC_META_WIDTH -1 downto 0);
+        PCIE_CC_MFB_META    : out std_logic_vector(PCIE_CC_MFB_REGIONS*PCIE_CC_META_WIDTH -1 downto 0);
         PCIE_CC_MFB_SOF     : out std_logic_vector(PCIE_CC_MFB_REGIONS -1 downto 0);
         PCIE_CC_MFB_EOF     : out std_logic_vector(PCIE_CC_MFB_REGIONS -1 downto 0);
         PCIE_CC_MFB_SOF_POS : out std_logic_vector(PCIE_CC_MFB_REGIONS*max(1, log2(PCIE_CC_MFB_REGION_SIZE)) -1 downto 0);
@@ -224,14 +224,14 @@ architecture FULL of DMA_CALYPTE is
 
     signal inp_fifo_status : std_logic_vector(log2(512) downto 0);
 
-    signal inp_fifo_mfb_data          : std_logic_vector(PCIE_CQ_MFB_REGIONS*PCIE_CQ_MFB_REGION_SIZE*PCIE_CQ_MFB_BLOCK_SIZE*PCIE_CQ_MFB_ITEM_WIDTH-1 downto 0);
-    signal inp_fifo_mfb_meta          : std_logic_vector(PCIE_CQ_META_WIDTH -1 downto 0);
-    signal inp_fifo_mfb_sof           : std_logic_vector(PCIE_CQ_MFB_REGIONS -1 downto 0);
-    signal inp_fifo_mfb_eof           : std_logic_vector(PCIE_CQ_MFB_REGIONS -1 downto 0);
-    signal inp_fifo_mfb_sof_pos       : std_logic_vector(max(1, log2(PCIE_CQ_MFB_REGION_SIZE)) -1 downto 0);
-    signal inp_fifo_mfb_eof_pos       : std_logic_vector(max(1, log2(PCIE_CQ_MFB_REGION_SIZE*PCIE_CQ_MFB_BLOCK_SIZE)) -1 downto 0);
-    signal inp_fifo_mfb_src_rdy       : std_logic;
-    signal inp_fifo_mfb_dst_rdy       : std_logic;
+    signal inp_fifo_mfb_data    : std_logic_vector(PCIE_CQ_MFB_REGIONS*PCIE_CQ_MFB_REGION_SIZE*PCIE_CQ_MFB_BLOCK_SIZE*PCIE_CQ_MFB_ITEM_WIDTH-1 downto 0);
+    signal inp_fifo_mfb_meta    : std_logic_vector(PCIE_CQ_META_WIDTH -1 downto 0);
+    signal inp_fifo_mfb_sof     : std_logic_vector(PCIE_CQ_MFB_REGIONS -1 downto 0);
+    signal inp_fifo_mfb_eof     : std_logic_vector(PCIE_CQ_MFB_REGIONS -1 downto 0);
+    signal inp_fifo_mfb_sof_pos : std_logic_vector(PCIE_CQ_MFB_REGIONS*max(1, log2(PCIE_CQ_MFB_REGION_SIZE)) -1 downto 0);
+    signal inp_fifo_mfb_eof_pos : std_logic_vector(PCIE_CQ_MFB_REGIONS*max(1, log2(PCIE_CQ_MFB_REGION_SIZE*PCIE_CQ_MFB_BLOCK_SIZE)) -1 downto 0);
+    signal inp_fifo_mfb_src_rdy : std_logic;
+    signal inp_fifo_mfb_dst_rdy : std_logic;
 
     -- attribute mark_debug : string;
 

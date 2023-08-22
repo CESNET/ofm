@@ -241,6 +241,17 @@ architecture FULL of TX_DMA_CALYPTE is
     signal hdr_fifo_tx_src_rdy : std_logic;
     signal hdr_fifo_tx_dst_rdy : std_logic;
 
+    signal pkt_disp_mfb_meta_hdr_meta    : std_logic_vector(HDR_META_WIDTH -1 downto 0);
+    signal pkt_disp_mfb_meta_chan    : std_logic_vector(log2(CHANNELS) -1 downto 0);
+    signal pkt_disp_mfb_meta_pkt_size    : std_logic_vector(log2(PKT_SIZE_MAX+1) -1 downto 0);
+
+    signal pkt_disp_mfb_data    : std_logic_vector(USR_TX_MFB_WIDTH -1 downto 0);
+    signal pkt_disp_mfb_sof     : std_logic_vector(USR_TX_MFB_REGIONS -1 downto 0);
+    signal pkt_disp_mfb_eof     : std_logic_vector(USR_TX_MFB_REGIONS -1 downto 0);
+    signal pkt_disp_mfb_sof_pos : std_logic_vector(USR_TX_MFB_REGIONS*max(1, log2(USR_TX_MFB_REGION_SIZE)) -1 downto 0);
+    signal pkt_disp_mfb_eof_pos : std_logic_vector(USR_TX_MFB_REGIONS*max(1, log2(USR_TX_MFB_REGION_SIZE*USR_TX_MFB_BLOCK_SIZE)) -1 downto 0);
+    signal pkt_disp_mfb_src_rdy : std_logic;
+
     signal enabled_chans : std_logic_vector(CHANNELS -1 downto 0);
 
     -- attribute mark_debug : string;
@@ -505,16 +516,16 @@ begin
             CLK   => CLK,
             RESET => RESET,
 
-            USR_MFB_META_HDR_META => USR_TX_MFB_META_HDR_META,
-            USR_MFB_META_CHAN     => USR_TX_MFB_META_CHAN,
-            USR_MFB_META_PKT_SIZE => USR_TX_MFB_META_PKT_SIZE,
+            USR_MFB_META_HDR_META => pkt_disp_mfb_meta_hdr_meta,
+            USR_MFB_META_CHAN     => pkt_disp_mfb_meta_chan,
+            USR_MFB_META_PKT_SIZE => pkt_disp_mfb_meta_pkt_size,
 
-            USR_MFB_DATA    => USR_TX_MFB_DATA,
-            USR_MFB_SOF     => USR_TX_MFB_SOF,
-            USR_MFB_EOF     => USR_TX_MFB_EOF,
-            USR_MFB_SOF_POS => USR_TX_MFB_SOF_POS,
-            USR_MFB_EOF_POS => USR_TX_MFB_EOF_POS,
-            USR_MFB_SRC_RDY => USR_TX_MFB_SRC_RDY,
+            USR_MFB_DATA    => pkt_disp_mfb_data,
+            USR_MFB_SOF     => pkt_disp_mfb_sof,
+            USR_MFB_EOF     => pkt_disp_mfb_eof,
+            USR_MFB_SOF_POS => pkt_disp_mfb_sof_pos,
+            USR_MFB_EOF_POS => pkt_disp_mfb_eof_pos,
+            USR_MFB_SRC_RDY => pkt_disp_mfb_src_rdy,
             USR_MFB_DST_RDY => USR_TX_MFB_DST_RDY,
 
             HDR_BUFF_ADDR    => hdr_fifo_tx_data(62+log2(CHANNELS)+64 -1 downto log2(CHANNELS)+64),
@@ -541,4 +552,24 @@ begin
             UPD_HHP_CHAN => upd_hhp_chan,
             UPD_HHP_DATA => upd_hhp_data,
             UPD_HHP_EN   => upd_hhp_en);
+
+    out_reg_p : process (CLK) is
+    begin
+        if (rising_edge(CLK)) then
+            if (RESET = '1') then
+                USR_TX_MFB_SRC_RDY <= '0';
+            elsif (USR_TX_MFB_DST_RDY = '1') then
+                USR_TX_MFB_META_HDR_META <= pkt_disp_mfb_meta_hdr_meta;
+                USR_TX_MFB_META_CHAN     <= pkt_disp_mfb_meta_chan;
+                USR_TX_MFB_META_PKT_SIZE <= pkt_disp_mfb_meta_pkt_size;
+
+                USR_TX_MFB_DATA          <= pkt_disp_mfb_data;
+                USR_TX_MFB_SOF           <= pkt_disp_mfb_sof;
+                USR_TX_MFB_EOF           <= pkt_disp_mfb_eof;
+                USR_TX_MFB_SOF_POS       <= pkt_disp_mfb_sof_pos;
+                USR_TX_MFB_EOF_POS       <= pkt_disp_mfb_eof_pos;
+                USR_TX_MFB_SRC_RDY       <= pkt_disp_mfb_src_rdy;
+            end if;
+        end if;
+    end process;
 end architecture;
