@@ -10,10 +10,16 @@ use ieee.std_logic_arith.all;
 use ieee.std_logic_unsigned.all;
 use work.math_pack.all;
 
--- Timestamp unit is used to generate accurate 64b timestamps. It supports
--- a pulse per second (PPS) external signal, for example from a precision GPS
--- receiver. The TSU must be properly configured and activated to start.
--- Configuration is performed by the software tool via the MI interface.
+-- The TimeStamp Unit is used to generate accurate 64b timestamps in two different
+-- formats (see the description of the :vhdl:portsignal:`TS <tsu_gen.ts>`
+-- and :vhdl:portsignal:`TS_NS <tsu_gen.ts_ns>` ports). Conversion to another
+-- format, where the whole Timestamp represented as a number of nanoseconds, is
+-- available with the :ref:`TSU_FORMAT_TO_NS component <tsu_format_to_ns>`
+-- (one directory above).
+--
+-- The TSU supports a pulse per second (PPS) external signal, for example, from
+-- a precision GPS receiver. The TSU must be properly configured and activated
+-- to start. Configuration is performed by the software tool via the MI interface.
 --
 -- **MI address space:**
 --
