@@ -33,14 +33,13 @@ architecture FULL of MFB_MERGER is
     -- Constants
     ---------------------------------------------------------------------------
 
-    constant INPUT_FIFOXM_SIZE  : integer := max(MVB_ITEMS,MFB_REGIONS)*INPUT_FIFO_SIZE;
     constant SOF_POS_WIDTH      : integer := max(1,log2(MFB_REG_SIZE));
     constant EOF_POS_WIDTH      : integer := max(1,log2(MFB_REG_SIZE*MFB_BLOCK_SIZE));
     constant CORR_SOF_POS_WIDTH : integer := log2(MFB_REG_SIZE);
     constant MFB_DATA_WIDTH     : integer := MFB_REG_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH;
-    constant MFB_FIFOXM_WIDTH   : integer := MFB_DATA_WIDTH+SOF_POS_WIDTH+EOF_POS_WIDTH+2;
     type boolean_array_t is array (natural range <>) of boolean;
     constant PAYLOAD_ENABLED : boolean_array_t(2-1 downto 0) := (RX1_PAYLOAD_ENABLED, RX0_PAYLOAD_ENABLED);
+    constant MVB_DATA_W      : natural := HDR_WIDTH+2;
 
     ---------------------------------------------------------------------------
 
@@ -76,6 +75,7 @@ architecture FULL of MFB_MERGER is
     signal rx_in_pipe_mvb_hdr_p_arr : slv_array_2d_t(2-1 downto 0)(MVB_ITEMS-1 downto 0)(1+HDR_WIDTH-1 downto 0);
 
     -- RX MVB from input PIPEs
+    signal rx_in_pipe_mvb_data     : slv_array_t(2-1 downto 0)(MVB_ITEMS*MVB_DATA_W-1 downto 0);
     signal rx_in_pipe_mvb_hdr      : slv_array_t(2-1 downto 0)(MVB_ITEMS*HDR_WIDTH-1 downto 0);
     signal rx_in_pipe_mvb_payload  : slv_array_t(2-1 downto 0)(MVB_ITEMS          -1 downto 0);
     signal rx_in_pipe_mvb_vld      : slv_array_t(2-1 downto 0)(MVB_ITEMS          -1 downto 0);
@@ -127,34 +127,10 @@ architecture FULL of MFB_MERGER is
     signal mfb_input_reg_upd          : std_logic_vector(2-1 downto 0);
 
     -- MVB Shakedown
-    signal mvb_input_shake_rx_data    : std_logic_vector(2*MVB_ITEMS*(2+HDR_WIDTH)-1 downto 0);
-    signal mvb_input_shake_rx_vld     : std_logic_vector(2*MVB_ITEMS              -1 downto 0);
-    signal mvb_input_shake_rx_src_rdy : std_logic;
-    signal mvb_input_shake_rx_dst_rdy : std_logic;
-    signal mvb_input_shake_tx_data    : std_logic_vector(2*MVB_ITEMS*(2+HDR_WIDTH)-1 downto 0);
-    signal mvb_input_shake_tx_vld     : std_logic_vector(2*MVB_ITEMS              -1 downto 0);
-    signal mvb_input_shake_tx_next    : std_logic_vector(2*MVB_ITEMS              -1 downto 0);
-
-    -- Setting this value higher would increase the throughput of MVB stream, but since MVB stream
-    -- is usually quite sparse, it does not really matter.
-    -- Higher value will lead to worse timing.
-    -- Value 1 will eliminate all shakedown abilities and greately decrease input MVB throughput.
-    constant MVB_INPUT_SHAKE_PORTS : integer := 2;
-
-    -----------------------------------------------
-
-    -- data from MVB input registers ordered as one wider MVB word
-    signal mvb_input_hdr        :      slv_array_t(2*MVB_ITEMS-1 downto 0)(HDR_WIDTH-1 downto 0);
-    signal mvb_input_payload    : std_logic_vector(2*MVB_ITEMS-1 downto 0);
-    signal mvb_input_vld        : std_logic_vector(2*MVB_ITEMS-1 downto 0);
-    signal mvb_input_update_vld : std_logic_vector(2*MVB_ITEMS-1 downto 0);
-
-    -----------------------------------------------
-
-    -- current MVB input read pointer
-    signal mvb_input_ptr_new : unsigned(log2(2*MVB_ITEMS)-1 downto 0);
-    signal mvb_input_ptr_reg : unsigned(log2(2*MVB_ITEMS)-1 downto 0);
-    signal mvb_input_ptr_wr  : std_logic;
+    signal mvb_input_shake_tx_data    : std_logic_vector(MVB_ITEMS*MVB_DATA_W-1 downto 0);
+    signal mvb_input_shake_tx_vld     : std_logic_vector(MVB_ITEMS           -1 downto 0);
+    signal mvb_input_shake_tx_src_rdy : std_logic;
+    signal mvb_input_shake_tx_dst_rdy : std_logic;
 
     -----------------------------------------------
 
@@ -214,9 +190,9 @@ architecture FULL of MFB_MERGER is
     signal mvb_output_hdr_reg     : std_logic_vector(MVB_ITEMS*HDR_WIDTH-1 downto 0);
     signal mvb_output_payload_reg : std_logic_vector(MVB_ITEMS          -1 downto 0);
     signal mvb_output_vld_reg     : std_logic_vector(MVB_ITEMS          -1 downto 0);
-    signal mvb_output_reg_vld     : std_logic;
-    signal mvb_output_reg_rd      : std_logic;
-    signal mvb_output_reg_wr      : std_logic;
+    signal mvb_output_src_rdy_reg : std_logic;
+    signal mvb_output_dst_rdy_reg : std_logic;
+    signal mvb_output_dst_rdy     : std_logic;
 
     -- MFB output register
     signal mfb_output_data_reg    : std_logic_vector(MFB_REGIONS*MFB_DATA_WIDTH-1 downto 0);
@@ -225,9 +201,9 @@ architecture FULL of MFB_MERGER is
     signal mfb_output_eof_reg     : std_logic_vector(MFB_REGIONS-1 downto 0);
     signal mfb_output_sof_pos_reg : std_logic_vector(MFB_REGIONS*SOF_POS_WIDTH-1 downto 0);
     signal mfb_output_eof_pos_reg : std_logic_vector(MFB_REGIONS*EOF_POS_WIDTH-1 downto 0);
-    signal mfb_output_reg_vld     : std_logic;
-    signal mfb_output_reg_rd      : std_logic;
-    signal mfb_output_reg_wr      : std_logic;
+    signal mfb_output_src_rdy_reg : std_logic;
+    signal mfb_output_dst_rdy_reg : std_logic;
+    signal mfb_output_dst_rdy     : std_logic;
 
     ---------------------------------------------------------------------------
 
@@ -245,13 +221,6 @@ architecture FULL of MFB_MERGER is
     --attribute mark_debug of mfb_input_update_eof     : signal is "true";
     --attribute mark_debug of mfb_input_update_vld     : signal is "true";
     --attribute mark_debug of mfb_input_reg_upd        : signal is "true";
-    --attribute mark_debug of mvb_input_hdr        : signal is "true";
-    --attribute mark_debug of mvb_input_payload    : signal is "true";
-    --attribute mark_debug of mvb_input_vld        : signal is "true";
-    --attribute mark_debug of mvb_input_update_vld : signal is "true";
-    --attribute mark_debug of mvb_input_ptr_new : signal is "true";
-    --attribute mark_debug of mvb_input_ptr_reg : signal is "true";
-    --attribute mark_debug of mvb_input_ptr_wr  : signal is "true";
     --attribute mark_debug of switch_fifoxm_di    : signal is "true";
     --attribute mark_debug of switch_fifoxm_wr    : signal is "true";
     --attribute mark_debug of switch_fifoxm_full  : signal is "true";
@@ -278,9 +247,9 @@ architecture FULL of MFB_MERGER is
     --attribute mark_debug of mfb_output_eof_pos : signal is "true";
     --attribute mark_debug of mfb_output_src_rdy : signal is "true";
     --attribute mark_debug of mvb_output_vld_reg : signal is "true";
-    --attribute mark_debug of mvb_output_reg_vld : signal is "true";
-    --attribute mark_debug of mvb_output_reg_rd  : signal is "true";
-    --attribute mark_debug of mvb_output_reg_wr  : signal is "true";
+    --attribute mark_debug of mvb_output_src_rdy_reg : signal is "true";
+    --attribute mark_debug of mvb_output_dst_rdy_reg  : signal is "true";
+    --attribute mark_debug of mvb_output_dst_rdy  : signal is "true";
 
 begin
 
@@ -554,47 +523,48 @@ begin
     -- MVB sending
     -- -------------------------------------------------------------------------
 
-    mvb_shake_rx_gen : for i in 0 to 2-1 generate
-        mvb_shake_rx_part_gen : for e in 0 to MVB_ITEMS-1 generate
-            mvb_input_shake_rx_data((i*MVB_ITEMS+e+1)*(2+HDR_WIDTH)-1 downto (i*MVB_ITEMS+e)*(2+HDR_WIDTH)) <= rx_in_pipe_mvb_payload(i)(e) & std_logic_vector(to_unsigned(i,1)) & rx_in_pipe_mvb_hdr(i)((e+1)*HDR_WIDTH-1 downto e*HDR_WIDTH);
-            mvb_input_shake_rx_vld(i*MVB_ITEMS+e) <= rx_in_pipe_mvb_vld(i)(e) and rx_in_pipe_mvb_src_rdy(i);
+    rx_in_pipe_mvb_data_g : for i in 0 to 2-1 generate
+        rx_in_pipe_mvb_data_g2 : for e in 0 to MVB_ITEMS-1 generate
+            rx_in_pipe_mvb_data(i)(e*(MVB_DATA_W)+HDR_WIDTH-1 downto e*(MVB_DATA_W)) <= rx_in_pipe_mvb_hdr(i)((e+1)*HDR_WIDTH-1 downto e*HDR_WIDTH);
+            rx_in_pipe_mvb_data(i)(e*(MVB_DATA_W)+HDR_WIDTH)                          <= '0' when (i = 0) else '1';
+            rx_in_pipe_mvb_data(i)(e*(MVB_DATA_W)+HDR_WIDTH+1)                        <= rx_in_pipe_mvb_payload(i)(e);
         end generate;
     end generate;
 
-    mvb_input_shake_rx_src_rdy <= (or rx_in_pipe_mvb_src_rdy);
-    rx_in_pipe_mvb_dst_rdy     <= (others => mvb_input_shake_rx_dst_rdy);
-
-    mvb_shake_i : entity work.MVB_SHAKEDOWN
+    mvb_merge_st_i : entity work.MVB_MERGE_STREAMS
     generic map(
-        RX_ITEMS    => 2*MVB_ITEMS,
-        TX_ITEMS    => 2*MVB_ITEMS,
-        ITEM_WIDTH  => 2+HDR_WIDTH, -- payload & switch & header
-        SHAKE_PORTS => MVB_INPUT_SHAKE_PORTS
+        MVB_ITEMS       => MVB_ITEMS,
+        MVB_ITEM_WIDTH  => MVB_DATA_W, -- payload & switch & header
+        RX_STREAMS      => 2,
+        RX_SHAKEDOWN_EN => True,
+        SW_TIMEOUT_W    => SW_TIMEOUT_WIDTH,
+        DEVICE          => DEVICE
     )
     port map(
-        CLK        => CLK  ,
+        CLK        => CLK,
         RESET      => RESET,
 
-        RX_DATA    => mvb_input_shake_rx_data   ,
-        RX_VLD     => mvb_input_shake_rx_vld    ,
-        RX_SRC_RDY => mvb_input_shake_rx_src_rdy,
-        RX_DST_RDY => mvb_input_shake_rx_dst_rdy,
+        RX_DATA    => rx_in_pipe_mvb_data,
+        RX_VLD     => rx_in_pipe_mvb_vld,
+        RX_SRC_RDY => rx_in_pipe_mvb_src_rdy,
+        RX_DST_RDY => rx_in_pipe_mvb_dst_rdy,
 
-        TX_DATA    => mvb_input_shake_tx_data   ,
-        TX_VLD     => mvb_input_shake_tx_vld    ,
-        TX_NEXT    => mvb_input_shake_tx_next
+        TX_DATA    => mvb_input_shake_tx_data,
+        TX_VLD     => mvb_input_shake_tx_vld,
+        TX_SRC_RDY => mvb_input_shake_tx_src_rdy,
+        TX_DST_RDY => mvb_input_shake_tx_dst_rdy
     );
 
     mvb_shake_tx_gen : for i in 0 to MVB_ITEMS-1 generate
-        mvb_output_hdr        ((i+1)*HDR_WIDTH-1 downto i*HDR_WIDTH) <= mvb_input_shake_tx_data(i*(2+HDR_WIDTH)+HDR_WIDTH-1 downto i*(2+HDR_WIDTH));
-        mvb_output_payload    (i)                                    <= mvb_input_shake_tx_data(i*(2+HDR_WIDTH)+HDR_WIDTH+1);
+        mvb_output_hdr        ((i+1)*HDR_WIDTH-1 downto i*HDR_WIDTH) <= mvb_input_shake_tx_data(i*(MVB_DATA_W)+HDR_WIDTH-1 downto i*(MVB_DATA_W));
+        mvb_output_payload    (i)                                    <= mvb_input_shake_tx_data(i*(MVB_DATA_W)+HDR_WIDTH+1);
 
         mvb_output_hdr_payload((i+1)*(1+HDR_WIDTH)-1 downto i*(1+HDR_WIDTH)) <= mvb_output_payload(i) & mvb_output_hdr((i+1)*HDR_WIDTH-1 downto i*HDR_WIDTH);
     end generate;
 
-    mvb_output_vld          <= mvb_input_shake_tx_vld(MVB_ITEMS-1 downto 0);
-    mvb_output_src_rdy      <= (or mvb_output_vld) and (not switch_fifoxm_full);
-    mvb_input_shake_tx_next <= (MVB_ITEMS*2-1 downto MVB_ITEMS => '0', others => (mvb_output_reg_wr and (not switch_fifoxm_full))); -- only one MVB word can be read
+    mvb_output_vld             <= mvb_input_shake_tx_vld;
+    mvb_output_src_rdy         <= mvb_input_shake_tx_src_rdy and (not switch_fifoxm_full);
+    mvb_input_shake_tx_dst_rdy <= mvb_output_dst_rdy and (not switch_fifoxm_full);
 
     -- -------------------------------------------------------------------------
 
@@ -603,9 +573,9 @@ begin
     -- -------------------------------------------------------------------------
 
     switch_fifoxm_in_gen : for i in 0 to MVB_ITEMS-1 generate
-        switch_fifoxm_di(i) <= mvb_input_shake_tx_data(i*(2+HDR_WIDTH)+HDR_WIDTH);
-        --                     (     valid header      ) and (              header with payload                 ) and ( out reg ready )
-        switch_fifoxm_wr(i) <= mvb_input_shake_tx_vld(i) and mvb_input_shake_tx_data(i*(2+HDR_WIDTH)+HDR_WIDTH+1) and mvb_output_reg_wr;
+        switch_fifoxm_di(i) <= mvb_input_shake_tx_data(i*(MVB_DATA_W)+HDR_WIDTH);
+        --                    (     src_rdy header      ) and (     valid header      ) and (              header with payload                 ) and ( out reg ready )
+        switch_fifoxm_wr(i) <= mvb_input_shake_tx_src_rdy and mvb_input_shake_tx_vld(i) and mvb_input_shake_tx_data(i*(MVB_DATA_W)+HDR_WIDTH+1) and mvb_output_dst_rdy;
     end generate;
 
     switch_fifoxm_i : entity work.FIFOX_MULTI(SHAKEDOWN)
@@ -763,11 +733,11 @@ begin
     mfb_send_ctrl_gen : for i in 0 to 2-1 generate
 
         mfb_input_reg_rd (i) <= '1' when     switch_currentI=i and switch_current_pac_cntI>=mfb_input_pac_appeared_cntI(mfb_data_mux_selI)(MFB_REGIONS) -- read whole input when all packets can be processed
-                                         and mfb_output_reg_wr='1'                                                                                      -- only read when output is ready
+                                         and mfb_output_dst_rdy='1'                                                                                      -- only read when output is ready
                                          and switch_fifoxm_empty(0)='0'                                                                                 -- only read when switch info is valid
                                          else '0';
 
-        mfb_input_reg_upd(i) <= '1' when     mfb_output_reg_wr='1'      -- only update when output is ready
+        mfb_input_reg_upd(i) <= '1' when     mfb_output_dst_rdy='1'      -- only update when output is ready
                                          and switch_fifoxm_empty(0)='0' -- only read when switch info is valid
                                          else '0';
 
@@ -778,7 +748,7 @@ begin
 
         switch_fifoxm_rd (i) <= '1' when     i<mfb_input_pac_passed_cntI(mfb_data_mux_selI)(MFB_REGIONS) -- read switch for each packet with an EOF in this word
                                          and i<switch_current_pac_cntI                                   -- only read currently active reads
-                                         and mfb_output_reg_wr='1'                                       -- only read when output is ready
+                                         and mfb_output_dst_rdy='1'                                       -- only read when output is ready
                                          and mfb_input_reg_vld(mfb_data_mux_selI)='1'                    -- only read when input is valid
                                          else '0';
 
@@ -796,26 +766,19 @@ begin
         mvb_output_reg_pr : process (CLK)
         begin
             if (rising_edge(CLK)) then
-                -- read
-                if (mvb_output_reg_rd='1') then
-                    mvb_output_reg_vld <= '0';
-                end if;
-
-                -- write
-                if (mvb_output_reg_wr='1') then
+                if (mvb_output_dst_rdy='1') then
                     mvb_output_hdr_reg     <= mvb_output_hdr;
                     mvb_output_payload_reg <= mvb_output_payload;
                     mvb_output_vld_reg     <= mvb_output_vld;
-                    mvb_output_reg_vld     <= mvb_output_src_rdy;
+                    mvb_output_src_rdy_reg <= mvb_output_src_rdy;
                 end if;
-
                 if (RESET='1') then
-                    mvb_output_reg_vld <= '0';
+                    mvb_output_src_rdy_reg <= '0';
                 end if;
             end if;
         end process;
 
-        mvb_output_reg_wr <= '1' when mvb_output_reg_vld='0' or mvb_output_reg_rd='1' else '0';
+        mvb_output_dst_rdy <= mvb_output_dst_rdy_reg or not mvb_output_src_rdy_reg;
 
         -- -------------------------------------------------------------------------
 
@@ -826,29 +789,22 @@ begin
         mfb_output_reg_pr : process (CLK)
         begin
             if (rising_edge(CLK)) then
-                -- read
-                if (mfb_output_reg_rd='1') then
-                    mfb_output_reg_vld <= '0';
-                end if;
-
-                -- write
-                if (mfb_output_reg_wr='1') then
+                if (mfb_output_dst_rdy='1') then
                     mfb_output_data_reg    <= mfb_output_data;
                     mfb_output_meta_reg    <= mfb_output_meta;
                     mfb_output_sof_reg     <= mfb_output_sof;
                     mfb_output_eof_reg     <= mfb_output_eof;
                     mfb_output_sof_pos_reg <= mfb_output_sof_pos;
                     mfb_output_eof_pos_reg <= mfb_output_eof_pos;
-                    mfb_output_reg_vld     <= mfb_output_src_rdy;
+                    mfb_output_src_rdy_reg <= mfb_output_src_rdy;
                 end if;
-
                 if (RESET='1') then
-                    mfb_output_reg_vld <= '0';
+                    mfb_output_src_rdy_reg <= '0';
                 end if;
             end if;
         end process;
 
-        mfb_output_reg_wr <= '1' when mfb_output_reg_vld='0' or mfb_output_reg_rd='1' else '0';
+        mfb_output_dst_rdy <= mfb_output_dst_rdy_reg or not mfb_output_src_rdy_reg;
 
         -- -------------------------------------------------------------------------
 
@@ -856,11 +812,11 @@ begin
         -- TX generation
         -- -------------------------------------------------------------------------
 
-        TX_MVB_HDR        <= mvb_output_hdr_reg;
-        TX_MVB_PAYLOAD    <= mvb_output_payload_reg;
-        TX_MVB_VLD        <= mvb_output_vld_reg;
-        TX_MVB_SRC_RDY    <= mvb_output_reg_vld;
-        mvb_output_reg_rd <= TX_MVB_DST_RDY;
+        TX_MVB_HDR             <= mvb_output_hdr_reg;
+        TX_MVB_PAYLOAD         <= mvb_output_payload_reg;
+        TX_MVB_VLD             <= mvb_output_vld_reg;
+        TX_MVB_SRC_RDY         <= mvb_output_src_rdy_reg;
+        mvb_output_dst_rdy_reg <= TX_MVB_DST_RDY;
 
         TX_MFB_DATA       <= mfb_output_data_reg;
         TX_MFB_META       <= mfb_output_meta_reg;
@@ -868,8 +824,8 @@ begin
         TX_MFB_EOF        <= mfb_output_eof_reg;
         TX_MFB_SOF_POS    <= mfb_output_sof_pos_reg;
         TX_MFB_EOF_POS    <= mfb_output_eof_pos_reg;
-        TX_MFB_SRC_RDY    <= mfb_output_reg_vld;
-        mfb_output_reg_rd <= TX_MFB_DST_RDY;
+        TX_MFB_SRC_RDY    <= mfb_output_src_rdy_reg;
+        mfb_output_dst_rdy_reg <= TX_MFB_DST_RDY;
 
         -- -------------------------------------------------------------------------
     end generate;
@@ -895,7 +851,7 @@ begin
            RX_DATA       => mvb_output_hdr_payload,
            RX_VLD        => mvb_output_vld        ,
            RX_SRC_RDY    => mvb_output_src_rdy    ,
-           RX_DST_RDY    => mvb_output_reg_wr     ,
+           RX_DST_RDY    => mvb_output_dst_rdy    ,
 
            TX_DATA       => tx_mvb_hdr_payload    ,
            TX_VLD        => TX_MVB_VLD            ,
@@ -936,7 +892,7 @@ begin
            RX_SOF        => mfb_output_sof    ,
            RX_EOF        => mfb_output_eof    ,
            RX_SRC_RDY    => mfb_output_src_rdy,
-           RX_DST_RDY    => mfb_output_reg_wr ,
+           RX_DST_RDY    => mfb_output_dst_rdy ,
 
            TX_DATA       => TX_MFB_DATA   ,
            TX_META       => TX_MFB_META   ,

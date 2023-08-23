@@ -59,6 +59,10 @@ entity MFB_MERGER_GEN is
         -- Currently used only in SIMPLE architecture to optimize usage of input/output pipes
         RX_PAYLOAD_EN   : b_array_t(MERGER_INPUTS-1 downto 0) := (others => true);
 
+        -- Width of timeout counter, determines the time when the switch to
+        -- the next active MVB/MFB stream occurs.
+        SW_TIMEOUT_WIDTH : natural := 4;
+
         -- Input PIPEs enable for all 2:1 Mergers
         -- Input registers is created when this is set to false.
         IN_PIPE_EN      : boolean := false;
@@ -203,6 +207,7 @@ begin
                 RX0_PAYLOAD_ENABLED => get_payload_en(s,2*i  ),
                 RX1_PAYLOAD_ENABLED => get_payload_en(s,2*i+1),
                 INPUT_FIFO_SIZE     => INPUT_FIFO_SIZE        ,
+                SW_TIMEOUT_WIDTH    => SW_TIMEOUT_WIDTH       ,
                 IN_PIPE_EN          => IN_PIPE_EN             ,
                 OUT_PIPE_EN         => OUT_PIPE_EN            ,
                 DEVICE              => DEVICE
