@@ -33,7 +33,7 @@ class monitor_byte_array#(SEGMENTS) extends uvm_byte_array::monitor;
             data.delete();
         end
 
-        if (tr.valid !== 1) begin
+        if (tr.valid !== 1 || reset_sync.is_reset() == 1) begin
             return;
         end
 

@@ -33,7 +33,7 @@ class monitor_logic_vector#(WIDTH, SEGMENTS) extends uvm_logic_vector::monitor #
             state = NO_FRAME;
         end
 
-        if (tr.valid !== 1) begin
+        if (tr.valid !== 1 || reset_sync.is_reset() == 1) begin
             return;
         end
 
