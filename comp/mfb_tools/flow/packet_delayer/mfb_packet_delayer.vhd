@@ -15,10 +15,10 @@ use work.type_pack.all;
 --  Description
 -- =========================================================================
 
--- Incoming packets with Timestamps [ns] are stored in the RX FIFO, from which they are read when the Time Counter value reaches the Timestamp value.
+-- Incoming packets with Timestamps [ns] are stored in the RX FIFO.
+-- From there each packet is read when the Stored time value reaches the packet's Timestamp value.
 -- There are 2 Timestamp formats that are currently supported (see the :vhdl:genconstant:`TS_FORMAT <mfb_packet_delayer.ts_format>` generic).
 -- The packets read from the RX FIFO are stored in the TX FIFO.
--- The read logic of the RX FIFO is very simplified and not made for high efficiency and it's been tested for MFB_REGIONS=1 only.
 --
 entity MFB_PACKET_DELAYER is
 generic(
@@ -33,8 +33,6 @@ generic(
     -- Metadata width (in bits).
     MFB_META_WIDTH        : natural := 0;
 
-    -- Freq of the CLK signal (in Hz).
-    CLK_FREQUENCY         : natural := 200000000;
     -- Width of Timestamps (in bits).
     TS_WIDTH              : natural := 48;
     -- Format of Timestamps. Options:
@@ -56,11 +54,13 @@ port(
     CLK            : in  std_logic;
     RESET          : in  std_logic;
 
-    -- Reset current time (applies only when TS_FORMAT=1).
+    -- Reset time accumulation (applies only when TS_FORMAT=1).
     -- Time counter is reset with the next first SOF.
     TIME_RESET     : in  std_logic;
 
-    -- Input Time used to decide whether a packet's Timestamp is OK or not.
+    -- A 64-bit value representing Time, which is used to decide whether a packet's Timestamp is OK and can be transmitted or not.
+    -- It can be a precise time from the TSU, a value from a simple incrementing counter, or anything in between.
+    -- The quality of the time source affects the precision of the packet's transmission but not the component's functionality.
     CURRENT_TIME   : in  std_logic_vector(64-1 downto 0);
 
     -- =====================================================================
@@ -113,10 +113,6 @@ architecture FULL of MFB_PACKET_DELAYER is
 
     --                                       Data        + Meta           + Timestamps + SOFs and EOFs + EOF POS (only Items)
     constant RX_FIFO_DATA_WIDTH : natural := BLOCK_WIDTH + MFB_META_WIDTH + TS_WIDTH   + 2             + max(1,log2(MFB_BLOCK_SIZE));
-    -- Clock period in nanoseconds
-    constant CLK_PERIOD         : natural := integer(real(1)/real(CLK_FREQUENCY)*real(10**9));
-    -- Counter increment (in ns)
-    constant TIME_CNT_INC       : std_logic_vector := std_logic_vector(to_unsigned(CLK_PERIOD, log2(CLK_PERIOD)));
 
     -- ========================================================================
     --                                 SIGNALS
@@ -423,7 +419,11 @@ begin
             ADDR   => eof_pos_blocks_region(r)
         );
         eof_pos_items_region(r) <= rx_fifoxm_out_eof_pos_items((r*MFB_REGION_SIZE) + to_integer(unsigned(eof_pos_blocks_region(r))));
-        eof_pos_region(r) <= eof_pos_blocks_region(r) & eof_pos_items_region(r);
+        eof_pos_region_g : if MFB_REGION_SIZE>1 generate
+            eof_pos_region(r) <= eof_pos_blocks_region(r) & eof_pos_items_region(r);
+        else generate
+            eof_pos_region(r) <= eof_pos_items_region(r);
+        end generate;
 
         -- Address to Block with SOF
         sof_pos_ptr(r) <= to_integer(unsigned(sof_pos_region(r)));
@@ -495,7 +495,7 @@ begin
             current_time_reg <= unsigned(CURRENT_TIME);
         end if;
     end process;
-    one_clk_period_time_diff <= resize(unsigned(CURRENT_TIME)-current_time_reg  , TS_WIDTH);
+    one_clk_period_time_diff <= resize(unsigned(CURRENT_TIME)-current_time_reg, TS_WIDTH);
 
     -- Update the time difference that is then used for comparison with the packet's Timestamp
     process(CLK)

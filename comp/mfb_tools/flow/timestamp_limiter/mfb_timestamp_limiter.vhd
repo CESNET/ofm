@@ -16,12 +16,20 @@ use work.type_pack.all;
 -- =========================================================================
 
 -- This component limits output speed according to given Timestamps via the :vhdl:portsignal:`RX_MFB_TIMESTAMP <mfb_timestamp_limiter.rx_mfb_timestamp>` port.
+-- There are 2 Timestamp formats that are currently supported (see the :vhdl:genconstant:`TIMESTAMP_FORMAT <mfb_packet_delayer.timestamp_format>` generic).
 -- The incoming packets are split into queues (e.g., per each DMA Channel), where the order of packets is kept the same.
 -- Then in each Queue, the :ref:`MFB Packet Delayer component <mfb_packet_delayer>` outputs each packet when the time is right.
 -- Finally, the packets from all Queues are merged back into a single stream (no order is kept here).
 --
+-- The Packet Delayers use a time source, according to which they calculate the time that has passed and whether a packet is due to be sent.
+-- The default is to use the so-called Time Counter (see diagram below), which is basically a counter that increments its value by the duration of one clock period derived from the
+-- value of the :vhdl:genconstant:`CLK_FREQUENCY <mfb_timestamp_limiter.clk_frequency>` generic.
+-- Another option is to use an external time source, for example, the TSU (for better precision).
+-- In this case, set the :vhdl:genconstant:`EXTERNAL_TIME_SRC <mfb_timestamp_limiter.external_time_src>` generic to ``True`` and connect your time source to the
+-- :vhdl:portsignal:`EXTERNAL_TIME <mfb_timestamp_limiter.external_time>` port.
+--
 -- The MI interface enables the user to reset Time in the Packet Delayers.
--- This is useful when using the :vhdl:genconstant:`Timestamp format 1 <MFB_TIMESTAMP_LIMITER.TIMESTAMP_FORMAT>`,
+-- This is useful when using the :vhdl:genconstant:`Timestamp format 1 <mfb_timestamp_limiter.timestamp_format>`,
 -- where the time is being incremented in each clock cycle since the very first packet after boot/reset passes through.
 -- You can simply reset all Packet Delayers (all Queues) by setting the MI_RESET_REG register, or you can
 -- select specific Queues by setting the MI_SEL_QUEUE_REG register before setting the MI_RESET_REG register.
@@ -83,6 +91,7 @@ port(
     CLK              : in  std_logic;
     RESET            : in  std_logic;
 
+    -- Connect your own Time source to this port (used when the :vhdl:genconstant:`EXTERNAL_TIME_SRC <mfb_timestamp_limiter.external_time_src>` generic is ``True``).
     EXTERNAL_TIME    : in  std_logic_vector(64-1 downto 0);
 
     -- =====================================================================
@@ -396,17 +405,16 @@ begin
 
         packet_delayer_i : entity work.MFB_PACKET_DELAYER
         generic map(
-            MFB_REGIONS     => MFB_REGIONS       ,
-            MFB_REGION_SIZE => MFB_REGION_SIZE   ,
-            MFB_BLOCK_SIZE  => MFB_BLOCK_SIZE    ,
-            MFB_ITEM_WIDTH  => MFB_ITEM_WIDTH    ,
-            MFB_META_WIDTH  => MFB_META_WIDTH    ,
+            MFB_REGIONS     => MFB_REGIONS     ,
+            MFB_REGION_SIZE => MFB_REGION_SIZE ,
+            MFB_BLOCK_SIZE  => MFB_BLOCK_SIZE  ,
+            MFB_ITEM_WIDTH  => MFB_ITEM_WIDTH  ,
+            MFB_META_WIDTH  => MFB_META_WIDTH  ,
 
-            CLK_FREQUENCY     => CLK_FREQUENCY   ,
-            TS_WIDTH          => TIMESTAMP_WIDTH ,
-            TS_FORMAT         => TIMESTAMP_FORMAT,
-            FIFO_DEPTH        => BUFFER_SIZE     ,
-            DEVICE            => DEVICE
+            TS_WIDTH        => TIMESTAMP_WIDTH ,
+            TS_FORMAT       => TIMESTAMP_FORMAT,
+            FIFO_DEPTH      => BUFFER_SIZE     ,
+            DEVICE          => DEVICE
         )
         port map(
             CLK   => CLK,
