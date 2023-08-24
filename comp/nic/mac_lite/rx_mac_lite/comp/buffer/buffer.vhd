@@ -20,8 +20,8 @@ entity RX_MAC_LITE_BUFFER is
         META_WIDTH     : natural := 16;
         META_ALIGN2SOF : boolean := True;
         DFIFO_ITEMS    : natural := 512;
-        MFIFO_ITEMS    : natural := 32;
-        MFIFO_RAM_TYPE : string  := "LUT";
+        MFIFO_ITEMS    : natural := 2048;
+        MFIFO_RAM_TYPE : string  := "BRAM";
         DEVICE         : string  := "STRATIX10"
     );
    port(
@@ -40,7 +40,7 @@ entity RX_MAC_LITE_BUFFER is
         RX_EOF_POS      : in  std_logic_vector(REGIONS*max(1,log2(REGION_SIZE*BLOCK_SIZE))-1 downto 0);
         RX_SOF          : in  std_logic_vector(REGIONS-1 downto 0);
         RX_EOF          : in  std_logic_vector(REGIONS-1 downto 0);
-        RX_ERROR        : in  std_logic_vector(REGIONS-1 downto 0);
+        RX_ERROR        : in  std_logic_vector(REGIONS-1 downto 0) := (others => '0');
         RX_METADATA     : in  slv_array_t(REGIONS-1 downto 0)(META_WIDTH-1 downto 0);
         RX_SRC_RDY      : in  std_logic;
 
@@ -82,20 +82,29 @@ end entity;
 architecture FULL of RX_MAC_LITE_BUFFER is
 
     constant SOF_INDEX_WIDTH : natural := log2(REGIONS);
-    constant MBUF_WIDTH      : natural := META_WIDTH+SOF_INDEX_WIDTH+1+1;
+    constant MBUF_WIDTH      : natural := META_WIDTH;--+SOF_INDEX_WIDTH+1+1;
 
-    type fsm_t is (st_idle, st_recovery);
+    type fsm_t is (st_idle, st_last_word, st_overfull);
 
     signal s_inc_frame          : std_logic_vector(REGIONS downto 0);
     signal s_inc_frame_reg      : std_logic;
     signal s_whole_frame        : std_logic_vector(REGIONS-1 downto 0);
 
+    signal s_rx_word_end_ok     : std_logic;
+    signal s_rx_rdy2recovery    : std_logic;
+    signal s_rx_without_sof     : std_logic;
+    signal s_rx_first_eof       : std_logic_vector(REGIONS-1 downto 0);
+    signal s_rx_sof_pos_arr     : slv_array_t(REGIONS-1 downto 0)(max(1,log2(REGION_SIZE))-1 downto 0);
+    signal s_rx_eof_pos_arr     : slv_array_t(REGIONS-1 downto 0)(max(1,log2(REGION_SIZE*BLOCK_SIZE))-1 downto 0);
+    signal s_full_flag          : std_logic;
+
     signal fsm_pst              : fsm_t;
     signal fsm_nst              : fsm_t;
-    signal s_wait_for_recovery  : std_logic;
-    signal s_rx_eof_removed     : std_logic_vector(REGIONS-1 downto 0);
-    signal s_rx_src_rdy_clear   : std_logic;
-    signal s_rx_recovered       : std_logic;
+    signal s_rx_sof_mod         : std_logic_vector(REGIONS-1 downto 0); 
+    signal s_rx_eof_mod         : std_logic_vector(REGIONS-1 downto 0); 
+    signal s_rx_eof_pos_mod     : slv_array_t(REGIONS-1 downto 0)(max(1,log2(REGION_SIZE*BLOCK_SIZE))-1 downto 0);
+    signal s_rx_src_rdy_mod     : std_logic;
+    signal s_rx_force_drop      : std_logic_vector(REGIONS-1 downto 0);
 
     signal s_rx_data_reg        : std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
     signal s_rx_sof_pos_reg     : std_logic_vector(REGIONS*max(1,log2(REGION_SIZE))-1 downto 0);
@@ -105,51 +114,39 @@ architecture FULL of RX_MAC_LITE_BUFFER is
     signal s_rx_error_reg       : std_logic_vector(REGIONS-1 downto 0);
     signal s_rx_metadata_reg    : slv_array_t(REGIONS-1 downto 0)(META_WIDTH-1 downto 0);
     signal s_rx_src_rdy_reg     : std_logic;
-    signal s_rx_eof_removed_reg : std_logic_vector(REGIONS-1 downto 0);
-    signal s_rx_recovered_reg   : std_logic;
     signal s_whole_frame_reg    : std_logic_vector(REGIONS-1 downto 0);
 
-    signal s_rx_stop_reg        : std_logic;
-    signal s_rx_stop_reg2       : std_logic;
+    signal s_rx_force_drop_reg   : std_logic_vector(REGIONS-1 downto 0);
+    signal s_rx_eof_orig_reg     : std_logic_vector(REGIONS-1 downto 0);
+    signal s_rx_src_rdy_orig_reg : std_logic;
 
-    signal s_full_flag          : std_logic;
-    signal s_stop_reg           : std_logic;
-    signal s_stop_flag          : std_logic;
-
-    signal s_dbuf_wr            : std_logic;
     signal s_dbuf_rdy           : std_logic;
     signal s_dbuf_full          : std_logic;
     signal s_dbuf_discard       : std_logic_vector(REGIONS-1 downto 0);
-    signal s_dbuf_force_discard : std_logic;
+    signal s_dbuf_ovf_err_reg   : std_logic;
+    signal s_dbuf_afull     : std_logic;
+    signal s_dbuf_afull_reg : std_logic;
 
-    signal s_last_sof           : std_logic_vector(REGIONS-1 downto 0);
-    signal s_dist_sof_index     : slv_array_t(REGIONS downto 0)(SOF_INDEX_WIDTH-1 downto 0);
-    signal s_dist_sof_liw       : std_logic_vector(REGIONS downto 0);
-    signal s_dist_sof_index_fix : slv_array_t(REGIONS-1 downto 0)(SOF_INDEX_WIDTH-1 downto 0);
-    signal s_dist_sof_liw_fix   : std_logic_vector(REGIONS-1 downto 0);
-    signal s_fake_item          : std_logic_vector(REGIONS-1 downto 0);
-    signal s_fake_item_vld      : std_logic_vector(REGIONS-1 downto 0);
-    signal s_fake_item_src_rdy  : std_logic;
-
-    signal s_meta_vld           : std_logic_vector(REGIONS-1 downto 0);
-    signal s_meta_src_rdy       : std_logic;
-
-    signal s_mbuf_din           : slv_array_t(REGIONS-1 downto 0)(MBUF_WIDTH-1 downto 0);
+    signal s_mbuf_din           : std_logic_vector(REGIONS*MBUF_WIDTH-1 downto 0);
     signal s_mbuf_vld           : std_logic_vector(REGIONS-1 downto 0);
     signal s_mbuf_src_rdy       : std_logic;
+    signal s_mbuf_dst_rdy       : std_logic;
+    signal s_mbuf_ovf_err_reg   : std_logic;
     signal s_mbuf_status        : std_logic_vector(log2(MFIFO_ITEMS) downto 0);
     signal s_mbuf_afull         : std_logic;
     signal s_mbuf_afull_reg     : std_logic;
     signal s_mbuf_afull_reg2    : std_logic;
     signal s_mbuf_dout_ser      : std_logic_vector(REGIONS*MBUF_WIDTH-1 downto 0);
-    signal s_mbuf_dout          : slv_array_t(REGIONS-1 downto 0)(MBUF_WIDTH-1 downto 0);
-    signal s_mbuf_mvb_data      : slv_array_t(REGIONS-1 downto 0)(META_WIDTH-1 downto 0);
-    signal s_mbuf_mvb_new_pos   : slv_array_t(REGIONS-1 downto 0)(SOF_INDEX_WIDTH-1 downto 0);
-    signal s_mbuf_mvb_new_liw   : std_logic_vector(REGIONS-1 downto 0);
-    signal s_mbuf_mvb_fake      : std_logic_vector(REGIONS-1 downto 0);
     signal s_mbuf_mvb_vld       : std_logic_vector(REGIONS-1 downto 0);
     signal s_mbuf_mvb_src_rdy   : std_logic;
     signal s_mbuf_mvb_dst_rdy   : std_logic;
+
+    signal s_mfb_error     : std_logic_vector(REGIONS-1 downto 0);
+    signal s_mfb_error_reg : std_logic;
+
+    attribute preserve_for_debug : boolean;
+    attribute preserve_for_debug of s_mfb_error : signal is true;
+    attribute preserve_for_debug of s_mfb_error_reg : signal is true;
   
 begin
 
@@ -161,6 +158,9 @@ begin
         s_inc_frame(r+1) <= (RX_SOF(r) and not RX_EOF(r) and not s_inc_frame(r)) or
                             (RX_SOF(r) and RX_EOF(r) and s_inc_frame(r)) or
                             (not RX_SOF(r) and not RX_EOF(r) and s_inc_frame(r));
+
+        s_mfb_error(r) <= (RX_SOF(r) and not RX_EOF(r) and s_inc_frame(r)) or
+                          (not RX_SOF(r) and RX_EOF(r) and not s_inc_frame(r));
     end generate;
 
     inc_frame_last_reg_p : process (RX_CLK)
@@ -169,9 +169,11 @@ begin
             if (RX_RESET = '1') then
                 s_inc_frame(0)  <= '0';
                 s_inc_frame_reg <= '0';
+                s_mfb_error_reg <= '0';
             elsif (RX_SRC_RDY = '1') then
                 s_inc_frame(0)  <= s_inc_frame(REGIONS);
                 s_inc_frame_reg <= s_inc_frame(REGIONS); -- register duplication for better timing
+                s_mfb_error_reg <= (or s_mfb_error);
             end if;
         end if;
     end process;
@@ -181,6 +183,26 @@ begin
     -- -------------------------------------------------------------------------
     --  AFTER BUFFER OVERFULL RECOVERY LOGIC
     -- -------------------------------------------------------------------------
+
+    s_rx_word_end_ok  <= (not s_inc_frame(REGIONS) and RX_SRC_RDY) or (not s_inc_frame_reg and not RX_SRC_RDY);
+    s_rx_rdy2recovery <= ((RX_SRC_RDY and (or RX_EOF)) or (not RX_SRC_RDY and not s_inc_frame_reg));
+    s_rx_without_sof  <= not (or RX_SOF);
+
+    process (all)
+    begin
+        s_rx_first_eof <= (others => '0');
+        for r in 0 to REGIONS-1 loop
+            if (RX_EOF(r) = '1') then
+                s_rx_first_eof(r) <= RX_SRC_RDY and s_inc_frame_reg;
+                exit;
+            end if;
+        end loop;
+    end process;
+
+    s_rx_sof_pos_arr <= slv_array_deser(RX_SOF_POS, REGIONS);
+    s_rx_eof_pos_arr <= slv_array_deser(RX_EOF_POS, REGIONS);
+
+    s_full_flag <= s_dbuf_afull_reg or s_mbuf_afull_reg2;
 
     process (RX_CLK)
     begin
@@ -195,34 +217,43 @@ begin
     process (all)
     begin
         fsm_nst <= fsm_pst;
+        s_rx_sof_mod     <= RX_SOF;
+        s_rx_eof_mod     <= RX_EOF;
+        s_rx_eof_pos_mod <= s_rx_eof_pos_arr;
+        s_rx_src_rdy_mod <= RX_SRC_RDY;
+        s_rx_force_drop  <= (others => '0');
+
         case (fsm_pst) is
             when st_idle =>
-                s_wait_for_recovery <= '0';
-                if (s_rx_stop_reg = '0' and s_rx_stop_reg2 = '1') then
-                    fsm_nst <= st_recovery;
+                if (s_full_flag = '1') then
+                    fsm_nst <= st_last_word;
                 end if;
 
-            when st_recovery =>
-                s_wait_for_recovery <= '1';
-                if (s_rx_recovered = '1') then
-                    fsm_nst <= st_idle;
+            when st_last_word =>
+                s_rx_sof_mod <= RX_SOF and RX_SRC_RDY;
+                s_rx_eof_mod <= RX_EOF and RX_SRC_RDY;
+                s_rx_src_rdy_mod <= RX_SRC_RDY;
+                if (s_rx_word_end_ok = '0') then -- force end is needed
+                    -- discard the last SOF if an EOF exists in the last region
+                    s_rx_sof_mod(REGIONS-1)     <= (RX_SOF(REGIONS-1) and RX_SRC_RDY) and not (RX_EOF(REGIONS-1) and RX_SRC_RDY);
+                    s_rx_eof_mod(REGIONS-1)     <= '1'; -- force end in the last region ...
+                    s_rx_eof_pos_mod(REGIONS-1) <= (others => '1'); -- ... and the last byte to truncate the packet at the very end of the word
+                    s_rx_force_drop(REGIONS-1)  <= '1'; -- mark the packet to be dropped (valid with EOF)
+                    s_rx_src_rdy_mod <= '1';
+                end if;
+                fsm_nst <= st_overfull;
+
+            when st_overfull =>
+                s_rx_force_drop  <= (others => '1');
+                s_rx_src_rdy_mod <= '0';
+                if (s_rx_rdy2recovery = '1' and s_full_flag = '0') then
+                    s_rx_force_drop  <= s_rx_first_eof;
+                    s_rx_eof_mod     <= RX_EOF and not s_rx_first_eof; -- discard first the EOF if it ever arrives
+                    s_rx_src_rdy_mod <= RX_SRC_RDY and not s_rx_without_sof; -- clear word without any SOF
+                    fsm_nst          <= st_idle;
                 end if;
         end case;
     end process;
-
-    process (all)
-    begin
-        s_rx_eof_removed <= (others => '0');
-        for r in 0 to REGIONS-1 loop
-            if (RX_EOF(r) = '1') then
-                s_rx_eof_removed(r) <= RX_SRC_RDY and s_wait_for_recovery and s_inc_frame_reg;
-                exit;
-            end if;
-        end loop;
-    end process;
-
-    s_rx_src_rdy_clear <= not (or RX_SOF) and s_inc_frame_reg and s_wait_for_recovery;
-    s_rx_recovered <= ((RX_SRC_RDY and (or RX_EOF)) or (not RX_SRC_RDY and not s_inc_frame_reg)) and s_wait_for_recovery;
 
     -- -------------------------------------------------------------------------
     --  REGISTER STAGE
@@ -232,13 +263,14 @@ begin
     begin
         if (rising_edge(RX_CLK)) then
             s_rx_data_reg        <= RX_DATA;
-            s_rx_sof_pos_reg     <= RX_SOF_POS;
-            s_rx_eof_pos_reg     <= RX_EOF_POS;
-            s_rx_sof_reg         <= RX_SOF;
-            s_rx_eof_reg         <= RX_EOF and not s_rx_eof_removed;
+            s_rx_sof_reg         <= s_rx_sof_mod;
+            s_rx_sof_pos_reg     <= slv_array_ser(s_rx_sof_pos_arr);
+            s_rx_eof_reg         <= s_rx_eof_mod;
+            s_rx_eof_orig_reg    <= RX_EOF;
+            s_rx_eof_pos_reg     <= slv_array_ser(s_rx_eof_pos_mod);
             s_rx_error_reg       <= RX_ERROR;
             s_rx_metadata_reg    <= RX_METADATA;
-            s_rx_eof_removed_reg <= s_rx_eof_removed;
+            s_rx_force_drop_reg  <= s_rx_force_drop;
             s_whole_frame_reg    <= s_whole_frame;
         end if;
     end process;
@@ -247,24 +279,11 @@ begin
     begin
         if (rising_edge(RX_CLK)) then
             if (RX_RESET = '1') then
-                s_rx_src_rdy_reg   <= '0';
-                s_rx_recovered_reg <= '0';
+                s_rx_src_rdy_reg      <= '0';
+                s_rx_src_rdy_orig_reg <= '0';
             else
-                s_rx_src_rdy_reg   <= RX_SRC_RDY and not s_rx_src_rdy_clear;
-                s_rx_recovered_reg <= s_rx_recovered;
-            end if;
-        end if;
-    end process;
-
-    process (RX_CLK)
-    begin
-        if (rising_edge(RX_CLK)) then
-            if (RX_RESET = '1') then
-                s_rx_stop_reg  <= '0';
-                s_rx_stop_reg2 <= '0';
-            else
-                s_rx_stop_reg  <= s_full_flag;
-                s_rx_stop_reg2 <= s_rx_stop_reg;
+                s_rx_src_rdy_reg      <= s_rx_src_rdy_mod;
+                s_rx_src_rdy_orig_reg <= RX_SRC_RDY;
             end if;
         end if;
     end process;
@@ -273,33 +292,14 @@ begin
     --  FIFOs CONTROL LOGIC
     -- -------------------------------------------------------------------------
 
-    s_full_flag <= s_dbuf_full or s_mbuf_afull_reg2;
-
-    stop_reg_p : process (RX_CLK)
-    begin
-        if (rising_edge(RX_CLK)) then
-            if (RX_RESET = '1') then
-                s_stop_reg <= '0';
-            elsif (s_full_flag = '1') then
-                s_stop_reg <= '1';
-            elsif (s_rx_recovered_reg = '1') then
-                s_stop_reg <= '0';  
-            end if;
-        end if;
-    end process;
-
-    s_stop_flag <= s_full_flag or (s_stop_reg and not s_rx_recovered_reg);
-
-    s_dbuf_wr            <= s_rx_src_rdy_reg;
-    s_dbuf_full          <= not s_dbuf_rdy;
-    s_dbuf_discard       <= s_rx_error_reg;
-    s_dbuf_force_discard <= s_stop_flag;
+    s_dbuf_full    <= not s_dbuf_rdy;
+    s_dbuf_discard <= s_rx_error_reg or s_rx_force_drop_reg;
 
     buffer_status_reg_p : process (RX_CLK)
     begin
         if (rising_edge(RX_CLK)) then
-            BUFFER_STATUS(0) <= s_mbuf_afull_reg2 and s_rx_src_rdy_reg;
-            BUFFER_STATUS(1) <= s_dbuf_full and s_rx_src_rdy_reg;
+            BUFFER_STATUS(0) <= s_mbuf_afull_reg2 and s_rx_src_rdy_orig_reg;
+            BUFFER_STATUS(1) <= s_dbuf_full and s_rx_src_rdy_orig_reg;
         end if;
     end process;
 
@@ -310,10 +310,10 @@ begin
     process (RX_CLK)
     begin
         if (rising_edge(RX_CLK)) then
-            STAT_BUFFER_OVF <= (s_rx_src_rdy_reg and s_rx_eof_reg and s_stop_flag) or s_rx_eof_removed_reg;
-            STAT_DISCARD    <= (s_rx_src_rdy_reg and s_rx_eof_reg and (s_rx_error_reg or s_stop_flag)) or s_rx_eof_removed_reg;
+            STAT_BUFFER_OVF <= (s_rx_src_rdy_orig_reg and s_rx_eof_orig_reg) and s_rx_force_drop_reg;
+            STAT_DISCARD    <= (s_rx_src_rdy_orig_reg and s_rx_eof_orig_reg) and (s_rx_error_reg or s_rx_force_drop_reg);
             STAT_METADATA   <= s_rx_metadata_reg;
-            STAT_VALID      <= (s_rx_src_rdy_reg and s_rx_eof_reg) or s_rx_eof_removed_reg;
+            STAT_VALID      <= s_rx_src_rdy_orig_reg and s_rx_eof_orig_reg;
             if (RX_RESET = '1') then
                 STAT_VALID <= (others => '0');
             end if;
@@ -324,14 +324,15 @@ begin
     --  DATA and META BUFFER
     -- -------------------------------------------------------------------------
 
-    dbuf_i : entity work.MFB_PD_ASFIFO
+    dbuf_i : entity work.MFB_PD_ASFIFO_SIMPLE
     generic map(
-        REGIONS     => REGIONS,
-        REGION_SIZE => REGION_SIZE,
-        BLOCK_SIZE  => BLOCK_SIZE,
-        ITEM_WIDTH  => ITEM_WIDTH,
-        ITEMS       => DFIFO_ITEMS,
-        DEVICE      => DEVICE
+        MFB_REGIONS     => REGIONS,
+        MFB_REGION_SIZE => REGION_SIZE,
+        MFB_BLOCK_SIZE  => BLOCK_SIZE,
+        MFB_ITEM_WIDTH  => ITEM_WIDTH,
+        FIFO_ITEMS      => DFIFO_ITEMS,
+        AFULL_OFFSET    => 8,
+        DEVICE          => DEVICE
     )
     port map(
         RX_CLK           => RX_CLK,
@@ -342,12 +343,13 @@ begin
         RX_EOF_POS       => s_rx_eof_pos_reg,
         RX_SOF           => s_rx_sof_reg,
         RX_EOF           => s_rx_eof_reg,
-        RX_SRC_RDY       => s_dbuf_wr,
+        RX_SRC_RDY       => s_rx_src_rdy_reg,
         RX_DST_RDY       => s_dbuf_rdy,
-
         RX_DISCARD       => s_dbuf_discard,
-        RX_FORCE_DISCARD => s_dbuf_force_discard,
-        STATUS           => open,
+        RX_AFULL         => s_dbuf_afull,
+
+        --RX_FORCE_DISCARD => s_dbuf_force_discard,
+        --STATUS           => open,
 
         TX_CLK           => TX_CLK,
         TX_RESET         => TX_RESET,
@@ -361,75 +363,36 @@ begin
         TX_DST_RDY       => TX_MFB_DST_RDY
     );
 
-    dist_sof_g: if META_ALIGN2SOF generate
-        last_sof_p : process (all)
-        begin
-            s_last_sof <= (others => '0');
-            for i in REGIONS-1 downto 0 loop
-                if (s_rx_sof_reg(i) = '1') then
-                    s_last_sof(i) <= '1';
-                    exit;
-                end if;
-            end loop;
-        end process;
-
-        dist_sof_g : for i in 0 to REGIONS-1 generate
-            dist_sof_p : process (all)
-            begin
-                if (s_rx_sof_reg(i) = '1') then
-                    s_dist_sof_index(i+1) <= std_logic_vector(to_unsigned(i,SOF_INDEX_WIDTH));
-                    s_dist_sof_liw(i+1)   <= s_last_sof(i);
-                else
-                    s_dist_sof_index(i+1) <= s_dist_sof_index(i);
-                    s_dist_sof_liw(i+1)   <= s_dist_sof_liw(i);
-                end if;
-            end process;
-        end generate;
-
-        dist_sof_fix_g : for i in 0 to REGIONS-1 generate
-            dist_sof_fix_p : process (all)
-            begin
-                if (s_whole_frame_reg(i) = '1') then
-                    s_dist_sof_index_fix(i) <= std_logic_vector(to_unsigned(i,SOF_INDEX_WIDTH));
-                    s_dist_sof_liw_fix(i)   <= s_last_sof(i);
-                else
-                    s_dist_sof_index_fix(i) <= s_dist_sof_index(i);
-                    s_dist_sof_liw_fix(i)   <= s_dist_sof_liw(i);
-                end if;
-            end process;
-        end generate;
-
-        dist_sof_reg_p : process (RX_CLK)
-        begin
-            if (rising_edge(RX_CLK)) then
-                if (s_rx_src_rdy_reg = '1') then
-                    s_dist_sof_index(0) <= s_dist_sof_index(REGIONS);
-                    s_dist_sof_liw(0)   <= s_dist_sof_liw(REGIONS);
-                end if;
+    process (RX_CLK)
+    begin
+        if (rising_edge(RX_CLK)) then
+            if (s_dbuf_rdy = '0' and s_rx_src_rdy_reg = '1') then
+                s_dbuf_ovf_err_reg <= '1';
             end if;
-        end process;
+            if (RX_RESET = '1') then
+                s_dbuf_ovf_err_reg <= '0';
+            end if;
+        end if;
+    end process;
+ 
+    assert (s_dbuf_ovf_err_reg /= '1') 
+       report "RX_MAC_LITE_BUFFER: Ilegal wite to full dbuf_i FIFO!"
+       severity failure;
 
-        s_fake_item         <= s_rx_error_reg or s_stop_flag;
-        s_fake_item_vld     <= s_dist_sof_liw_fix and s_rx_eof_reg and s_rx_src_rdy_reg;
-        s_fake_item_src_rdy <= or s_fake_item_vld;
-    else generate
-        s_dist_sof_index_fix <= (others => (others => '0'));
-        s_dist_sof_liw_fix   <= (others => '0');
+    process (RX_CLK)
+    begin
+        if (rising_edge(RX_CLK)) then
+            if (RX_RESET = '1') then
+                s_dbuf_afull_reg <= '0';
+            else
+                s_dbuf_afull_reg <= s_dbuf_afull;
+            end if;
+        end if;
+    end process;
 
-        s_fake_item         <= (others => '0');
-        s_fake_item_vld     <= (others => '0');
-        s_fake_item_src_rdy <= '0';
-    end generate;
-
-    s_meta_vld <= s_rx_eof_reg and not s_rx_error_reg and not s_stop_flag and s_rx_src_rdy_reg;
-    s_meta_src_rdy <= or s_meta_vld;
-
-    mbuf_din_g : for i in 0 to REGIONS-1 generate
-        s_mbuf_din(i) <= s_rx_metadata_reg(i) & s_dist_sof_index_fix(i) & s_dist_sof_liw_fix(i) & s_fake_item(i);
-    end generate;
-
-    s_mbuf_vld     <= s_meta_vld or s_fake_item_vld;
-    s_mbuf_src_rdy <= s_meta_src_rdy or s_fake_item_src_rdy;
+    s_mbuf_din     <= slv_array_ser(s_rx_metadata_reg);
+    s_mbuf_vld     <= s_rx_eof_reg and not s_dbuf_discard and s_rx_src_rdy_reg;
+    s_mbuf_src_rdy <= or s_mbuf_vld;
 
     mbuf_i : entity work.MVB_ASFIFOX
     generic map(
@@ -444,10 +407,10 @@ begin
     port map(
         RX_CLK     => RX_CLK,
         RX_RESET   => RX_RESET,
-        RX_DATA    => slv_array_ser(s_mbuf_din,REGIONS,MBUF_WIDTH),
+        RX_DATA    => s_mbuf_din,
         RX_VLD     => s_mbuf_vld,
         RX_SRC_RDY => s_mbuf_src_rdy,
-        RX_DST_RDY => open,
+        RX_DST_RDY => s_mbuf_dst_rdy,
         RX_AFULL   => open,
         RX_STATUS  => s_mbuf_status,
 
@@ -458,6 +421,22 @@ begin
         TX_SRC_RDY => s_mbuf_mvb_src_rdy,
         TX_DST_RDY => s_mbuf_mvb_dst_rdy
     );
+
+    process (RX_CLK)
+    begin
+        if (rising_edge(RX_CLK)) then
+            if (s_mbuf_dst_rdy = '0' and s_mbuf_src_rdy = '1') then
+                s_mbuf_ovf_err_reg <= '1';
+            end if;
+            if (RX_RESET = '1') then
+                s_mbuf_ovf_err_reg <= '0';
+            end if;
+        end if;
+    end process;
+ 
+    assert (s_mbuf_ovf_err_reg /= '1') 
+       report "RX_MAC_LITE_BUFFER: Ilegal wite to full mbuf_i FIFO!"
+       severity failure;
 
     process (RX_CLK)
     begin
@@ -485,44 +464,9 @@ begin
         end if;
     end process;
 
-    s_mbuf_dout <= slv_array_downto_deser(s_mbuf_dout_ser,REGIONS,MBUF_WIDTH);
-
-    mbuf_mvb_g : for i in 0 to REGIONS-1 generate
-        s_mbuf_mvb_data(i)    <= s_mbuf_dout(i)(MBUF_WIDTH-1 downto 2+SOF_INDEX_WIDTH);
-        s_mbuf_mvb_new_pos(i) <= s_mbuf_dout(i)(2+SOF_INDEX_WIDTH-1 downto 2);
-        s_mbuf_mvb_new_liw(i) <= s_mbuf_dout(i)(1);
-        s_mbuf_mvb_fake(i)    <= s_mbuf_dout(i)(0);
-    end generate;
-
-    mvb_aligner_g: if META_ALIGN2SOF generate
-        mvb_aligner_i : entity work.MVB_ALIGNER
-        generic map(
-            ITEMS      => REGIONS,
-            ITEM_WIDTH => META_WIDTH,
-            DEVICE     => DEVICE
-        )
-        port map(
-            CLK        => TX_CLK,
-            RESET      => TX_RESET,
-
-            RX_DATA    => slv_array_ser(s_mbuf_mvb_data,REGIONS,META_WIDTH),
-            RX_NEW_POS => slv_array_ser(s_mbuf_mvb_new_pos,REGIONS,SOF_INDEX_WIDTH),
-            RX_NEW_LIW => s_mbuf_mvb_new_liw,
-            RX_FAKE    => s_mbuf_mvb_fake,
-            RX_VLD     => s_mbuf_mvb_vld,
-            RX_SRC_RDY => s_mbuf_mvb_src_rdy,
-            RX_DST_RDY => s_mbuf_mvb_dst_rdy,
-
-            TX_DATA    => TX_MVB_DATA,
-            TX_VLD     => TX_MVB_VLD,
-            TX_SRC_RDY => TX_MVB_SRC_RDY,
-            TX_DST_RDY => TX_MVB_DST_RDY
-        );
-    else generate
-        TX_MVB_DATA        <= slv_array_ser(s_mbuf_mvb_data,REGIONS,META_WIDTH);
-        TX_MVB_VLD         <= s_mbuf_mvb_vld;
-        TX_MVB_SRC_RDY     <= s_mbuf_mvb_src_rdy;
-        s_mbuf_mvb_dst_rdy <= TX_MVB_DST_RDY;
-    end generate;
+    TX_MVB_DATA        <= s_mbuf_dout_ser;
+    TX_MVB_VLD         <= s_mbuf_mvb_vld;
+    TX_MVB_SRC_RDY     <= s_mbuf_mvb_src_rdy;
+    s_mbuf_mvb_dst_rdy <= TX_MVB_DST_RDY;
 
 end architecture;
