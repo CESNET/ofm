@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
 */
 
-class seq_small_pkt extends uvm_byte_array::sequence_simple;
+class seq_small_pkt extends uvm_logic_vector_array::sequence_simple#(8);
     `uvm_object_utils(uvm_mac_seg_rx::seq_small_pkt)
     function new(string name="seq_small_pkt");
         super.new(name);
@@ -17,7 +17,7 @@ class seq_small_pkt extends uvm_byte_array::sequence_simple;
         cfg.transaction_count_set(1, 20);
     endfunction
 
-    function void config_set(uvm_byte_array::config_sequence cfg);
+    function void config_set(uvm_logic_vector_array::config_sequence cfg);
    endfunction
 endclass
 
@@ -46,7 +46,7 @@ class sequence_simple_1 extends uvm_sequence;
 
     //////////////////////////////////
     // variables
-    uvm_sequence #(uvm_byte_array::sequence_item)   rx_packet;
+    uvm_sequence #(uvm_logic_vector_array::sequence_item#(8))   rx_packet;
     uvm_logic_vector::sequence_simple#(LOGIC_WIDTH) rx_error;
     uvm_sequence#(uvm_reset::sequence_item)         reset_seq;
 
@@ -57,9 +57,9 @@ class sequence_simple_1 extends uvm_sequence;
     endfunction
 
     virtual function void seq_create();
-              uvm_byte_array::sequence_lib rx_packet_lib;
+              uvm_logic_vector_array::sequence_lib#(8) rx_packet_lib;
 
-        rx_packet_lib = uvm_byte_array::sequence_lib::type_id::create("seq_data");
+        rx_packet_lib = uvm_logic_vector_array::sequence_lib#(8)::type_id::create("seq_data");
         rx_packet_lib.init_sequence();
         rx_packet_lib.add_sequence(seq_small_pkt::get_type());
         rx_packet_lib.min_random_count = 100;

@@ -18,7 +18,7 @@ class sequencer extends uvm_sequencer;
 
     // variables
     uvm_reset::sequencer                      reset;
-    uvm_byte_array::sequencer                 rx_packet;
+    uvm_logic_vector_array::sequencer#(8)     rx_packet;
     uvm_logic_vector::sequencer#(LOGIC_WIDTH) rx_error;
 
     //functions

@@ -16,7 +16,7 @@ class sequencer#(SEGMENTS) extends uvm_sequencer;
 
     // variables
     uvm_reset::sequencer                      reset_sequencer;
-    uvm_byte_array_mfb::sequencer_rx#(1)      rx_sequencer;
+    uvm_logic_vector_array_mfb::sequencer_rx#(8, 1) rx_sequencer;
     uvm_intel_mac_seg::sequencer#(SEGMENTS)   tx_sequencer;
 
     //functions
