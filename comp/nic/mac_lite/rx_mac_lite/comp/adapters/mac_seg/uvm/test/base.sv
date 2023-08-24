@@ -14,7 +14,6 @@ class base extends uvm_test;
     /////////////////////
     // variables
     uvm_mac_seg_rx::env#(SEGMENTS, REGIONS, REGION_SIZE) m_env;
-    bit   timeout;
 
     /////////////////////
     // functions
@@ -30,15 +29,9 @@ class base extends uvm_test;
         #(time_length*1us);
     endtask
 
-    task test_wait_result();
-        do begin
-            #(600ns);
-        end while (m_env.sc.used() != 0);
-        timeout = 0;
-    endtask
-
     //run virtual sequence on virtual sequencer
     virtual task run_phase(uvm_phase phase);
+        time time_start;
         uvm_mac_seg_rx::sequence_simple_1 seq;
 
         uvm_component c;
@@ -53,18 +46,16 @@ class base extends uvm_test;
         seq.randomize();
         seq.start(m_env.m_sequencer);
 
-        timeout = 1;
-        fork
-            test_wait_timeout(20);
-            test_wait_result();
-        join_any;
-
+        time_start = $time();
+        while ((time_start + 20us) > $time() && m_env.sc.used() != 0) begin
+            #(600ns);
+        end
         phase.drop_objection(this);
     endtask
 
     function void report_phase(uvm_phase phase);
         `uvm_info(this.get_full_name(), {"\n\tTEST : ", this.get_type_name(), " END\n"}, UVM_NONE);
-        if (timeout) begin
+        if (m_env.sc.used() != 0) begin
             `uvm_error(this.get_full_name(), "\n\t===================================================\n\tTIMEOUT SOME PACKET STUCK IN DESIGN\n\t===================================================\n\n");
         end
     endfunction

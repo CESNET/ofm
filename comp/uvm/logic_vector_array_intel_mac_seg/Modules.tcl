@@ -6,7 +6,7 @@
 lappend COMPONENTS [list "RESET"        "$OFM_PATH/comp/uvm/reset"          "FULL"]
 lappend COMPONENTS [list "COMMON"       "$OFM_PATH/comp/uvm/common"         "FULL"]
 lappend COMPONENTS [list "MAC_SEG"      "$OFM_PATH/comp/uvm/intel_mac_seg"  "FULL"]
-lappend COMPONENTS [list "BYTE_ARRAY"   "$OFM_PATH/comp/uvm/byte_array"     "FULL"]
+lappend COMPONENTS [list "LOGIC_VECTOR_ARRAY"   "$OFM_PATH/comp/uvm/logic_vector_array"     "FULL"]
 lappend COMPONENTS [list "LOGIC_VECTOR" "$OFM_PATH/comp/uvm/logic_vector"   "FULL"]
 
 

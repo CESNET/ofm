@@ -30,10 +30,12 @@ class sequence_simple_1#(SEGMENTS) extends uvm_sequence;
     `uvm_object_param_utils(uvm_mac_seg_tx::sequence_simple_1#(SEGMENTS))
     `uvm_declare_p_sequencer(uvm_mac_seg_tx::sequencer#(SEGMENTS));
 
+    localparam ITEM_WIDTH = 8;
+
 	//byte_array::sequence_simple rx_seq;
 	uvm_sequence#(uvm_reset::sequence_item)          reset_seq;
     uvm_sequence #(uvm_logic_vector::sequence_item #(1)) rx_seq_meta;
-    uvm_sequence #(uvm_byte_array::sequence_item)        rx_seq_data;
+    uvm_sequence #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))        rx_seq_data;
     uvm_intel_mac_seg::sequence_simple_tx#(SEGMENTS) tx_seq;
 
     //////////////////////////////////
@@ -43,10 +45,10 @@ class sequence_simple_1#(SEGMENTS) extends uvm_sequence;
     endfunction
 
     virtual function void seq_create();
-        uvm_byte_array::sequence_lib rx_seq_data_lib;
+        uvm_logic_vector_array::sequence_lib#(ITEM_WIDTH) rx_seq_data_lib;
 
         rx_seq_meta = sequence_meta::type_id::create("seq_meta");
-        rx_seq_data_lib = uvm_byte_array::sequence_lib::type_id::create("seq_data");
+        rx_seq_data_lib = uvm_logic_vector_array::sequence_lib#(ITEM_WIDTH)::type_id::create("seq_data");
         rx_seq_data_lib.init_sequence();
         rx_seq_data_lib.min_random_count = 50;
         rx_seq_data_lib.max_random_count = 100;
@@ -56,7 +58,7 @@ class sequence_simple_1#(SEGMENTS) extends uvm_sequence;
         tx_seq      = uvm_intel_mac_seg::sequence_simple_tx#(SEGMENTS)::type_id::create("intel_mac_tx_seq");
 
         rx_seq_data = rx_seq_data_lib;
-        //rx_seq_data = uvm_byte_array::sequence_simple::type_id::create("seq_data");
+        //rx_seq_data = uvm_logic_vector_array::sequence_simple#(ITEM_WIDTH)::type_id::create("seq_data");
     endfunction
 
 	task intel_mac_seg_tx();

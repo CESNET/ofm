@@ -13,11 +13,12 @@ class model extends uvm_component;
     `uvm_component_param_utils(uvm_mac_seg_rx::model)
 
 	localparam LOGIC_WIDTH = 6;
+	localparam ITEM_WIDTH = 8;
 
-    uvm_tlm_analysis_fifo #(uvm_byte_array::sequence_item)                 rx_packet;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))                 rx_packet;
     uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(LOGIC_WIDTH)) rx_error;
 
-    uvm_analysis_port#(uvm_byte_array::sequence_item)                 tx_packet;
+    uvm_analysis_port#(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))                 tx_packet;
     uvm_analysis_port#(uvm_logic_vector::sequence_item#(1))           tx_error;
 
     local uvm_common::stats packet_size_stats;
@@ -33,10 +34,10 @@ class model extends uvm_component;
     endfunction
 
     task run();
-        uvm_byte_array::sequence_item                 rx_tr_packet;
+        uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)                 rx_tr_packet;
         uvm_logic_vector::sequence_item#(LOGIC_WIDTH) rx_tr_error;
 
-        uvm_byte_array::sequence_item                 tx_tr_packet;
+        uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)                 tx_tr_packet;
         uvm_logic_vector::sequence_item#(1)           tx_tr_error;
 
         forever begin

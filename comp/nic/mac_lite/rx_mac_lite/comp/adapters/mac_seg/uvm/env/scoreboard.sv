@@ -12,16 +12,17 @@ class scoreboard extends uvm_scoreboard;
    `uvm_component_utils(uvm_mac_seg_rx::scoreboard)
 
     localparam LOGIC_WIDTH = 6;
+    localparam ITEM_WIDTH = 8;
 
     //CONNECT DUT
-    uvm_analysis_export #(uvm_byte_array::sequence_item)                 analysis_export_rx_packet;
+    uvm_analysis_export #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))                 analysis_export_rx_packet;
     uvm_analysis_export #(uvm_logic_vector::sequence_item#(LOGIC_WIDTH)) analysis_export_rx_error;
-    uvm_analysis_export #(uvm_byte_array::sequence_item)                 analysis_export_tx_packet;
+    uvm_analysis_export #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))                 analysis_export_tx_packet;
     uvm_analysis_export #(uvm_logic_vector::sequence_item#(1))           analysis_export_tx_error;
     //output fifos
-    uvm_tlm_analysis_fifo #(uvm_byte_array::sequence_item)       model_fifo_packet;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))       model_fifo_packet;
     uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(1)) model_fifo_error;
-    uvm_tlm_analysis_fifo #(uvm_byte_array::sequence_item)       dut_fifo_packet;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))       dut_fifo_packet;
     uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(1)) dut_fifo_error;
     //models
     model m_model;
@@ -70,9 +71,9 @@ class scoreboard extends uvm_scoreboard;
     endfunction
 
     task run_phase(uvm_phase phase);
-        uvm_byte_array::sequence_item tr_model_packet;
+        uvm_logic_vector_array::sequence_item#(ITEM_WIDTH) tr_model_packet;
         uvm_logic_vector::sequence_item#(1) tr_model_error;
-        uvm_byte_array::sequence_item tr_dut_packet;
+        uvm_logic_vector_array::sequence_item#(ITEM_WIDTH) tr_dut_packet;
         uvm_logic_vector::sequence_item#(1) tr_dut_error;
 
         forever begin

@@ -7,8 +7,8 @@
 set COMPONENTS [ list \
     [list "COMMON"     "$OFM_PATH/comp/uvm/common"                    "FULL"] \
     [list "RESET"      "$OFM_PATH/comp/uvm/reset"                     "FULL"] \
-    [list "MFB"        "$OFM_PATH/comp/uvm/byte_array_mfb"            "FULL"] \
-    [list "MAC_SEG"    "$OFM_PATH/comp/uvm/byte_array_intel_mac_seg"  "FULL"] \
+    [list "MFB"        "$OFM_PATH/comp/uvm/logic_vector_array_mfb"            "FULL"] \
+    [list "MAC_SEG"    "$OFM_PATH/comp/uvm/logic_vector_array_intel_mac_seg"  "FULL"] \
 ]
 
 

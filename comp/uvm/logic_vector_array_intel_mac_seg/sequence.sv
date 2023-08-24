@@ -11,14 +11,15 @@
 //////////////////////////////////////////////////
 // BASE CLASS CONTAINING COMMON FUNCTIONS
 class sequence_simple_rx_base #(SEGMENTS) extends uvm_intel_mac_seg::sequence_simple_rx #(SEGMENTS);
-   `uvm_object_param_utils(uvm_byte_array_intel_mac_seg::sequence_simple_rx_base#(SEGMENTS))
+   `uvm_object_param_utils(uvm_logic_vector_array_intel_mac_seg::sequence_simple_rx_base#(SEGMENTS))
    `uvm_declare_p_sequencer(uvm_intel_mac_seg::sequencer#(SEGMENTS));
    localparam LOGIC_WIDTH = 6;
+   localparam ITEM_WIDTH = 8;
 
     sequencer             hl_sqr;
     uvm_intel_mac_seg::sequence_item #(SEGMENTS) gen;
     //DAta
-    uvm_byte_array::sequence_item                 hl_tr = null;
+    uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)                 hl_tr = null;
     uvm_logic_vector::sequence_item#(LOGIC_WIDTH) hl_tr_err = null;
     int unsigned                              hl_tr_index;
     int unsigned                              space_size = 0;
@@ -156,7 +157,7 @@ class sequence_simple_rx_base #(SEGMENTS) extends uvm_intel_mac_seg::sequence_si
 endclass
 
 class sequence_simple_rx #(SEGMENTS) extends sequence_simple_rx_base #(SEGMENTS);
-    `uvm_object_param_utils(uvm_byte_array_intel_mac_seg::sequence_simple_rx#(SEGMENTS))
+    `uvm_object_param_utils(uvm_logic_vector_array_intel_mac_seg::sequence_simple_rx#(SEGMENTS))
     uvm_common::rand_length   rdy_length;
 
     function new (string name = "req");
@@ -203,7 +204,7 @@ class sequence_simple_rx #(SEGMENTS) extends sequence_simple_rx_base #(SEGMENTS)
 endclass
 
 class sequence_sop_pos_rx #(SEGMENTS) extends sequence_simple_rx_base #(SEGMENTS);
-    `uvm_object_param_utils(uvm_byte_array_intel_mac_seg::sequence_sop_pos_rx #(SEGMENTS))
+    `uvm_object_param_utils(uvm_logic_vector_array_intel_mac_seg::sequence_sop_pos_rx #(SEGMENTS))
 
     uvm_common::rand_length   rdy_length;
     rand int unsigned sop_position;
@@ -258,7 +259,7 @@ endclass
 
 
 class sequence_max_rx #(SEGMENTS) extends sequence_simple_rx_base #(SEGMENTS);
-    `uvm_object_param_utils(uvm_byte_array_intel_mac_seg::sequence_max_rx#(SEGMENTS))
+    `uvm_object_param_utils(uvm_logic_vector_array_intel_mac_seg::sequence_max_rx#(SEGMENTS))
 
     function new (string name = "req");
         super.new(name);
@@ -311,8 +312,8 @@ endclass
 // SEQUENCE LIBRARY
 ///////////////////////////////////////////////////////////////
 class sequence_lib_rx#(SEGMENTS) extends uvm_sequence_library#(uvm_intel_mac_seg::sequence_item #(SEGMENTS));
-  `uvm_object_param_utils(uvm_byte_array_intel_mac_seg::sequence_lib_rx#(SEGMENTS))
-  `uvm_sequence_library_utils(uvm_byte_array_intel_mac_seg::sequence_lib_rx#(SEGMENTS))
+  `uvm_object_param_utils(uvm_logic_vector_array_intel_mac_seg::sequence_lib_rx#(SEGMENTS))
+  `uvm_sequence_library_utils(uvm_logic_vector_array_intel_mac_seg::sequence_lib_rx#(SEGMENTS))
   function new(string name = "");
     super.new(name);
     init_sequence_library();
@@ -320,9 +321,9 @@ class sequence_lib_rx#(SEGMENTS) extends uvm_sequence_library#(uvm_intel_mac_seg
     // subclass can redefine and change run sequences
     // can be useful in specific tests
     virtual function void init_sequence();
-        this.add_sequence(uvm_byte_array_intel_mac_seg::sequence_simple_rx#(SEGMENTS)::get_type());
-        this.add_sequence(uvm_byte_array_intel_mac_seg::sequence_sop_pos_rx #(SEGMENTS)::get_type());
-        this.add_sequence(uvm_byte_array_intel_mac_seg::sequence_max_rx#(SEGMENTS)::get_type());
+        this.add_sequence(uvm_logic_vector_array_intel_mac_seg::sequence_simple_rx#(SEGMENTS)::get_type());
+        this.add_sequence(uvm_logic_vector_array_intel_mac_seg::sequence_sop_pos_rx #(SEGMENTS)::get_type());
+        this.add_sequence(uvm_logic_vector_array_intel_mac_seg::sequence_max_rx#(SEGMENTS)::get_type());
     endfunction
 endclass
 
