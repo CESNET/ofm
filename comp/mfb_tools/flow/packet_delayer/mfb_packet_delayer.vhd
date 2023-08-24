@@ -15,10 +15,10 @@ use work.type_pack.all;
 --  Description
 -- =========================================================================
 
--- Incoming packets with Timestamps [ns] are stored in the RX FIFO, from which they are read when the Time Counter value reaches the Timestamp value.
+-- Incoming packets with Timestamps [ns] are stored in the RX FIFO.
+-- From there each packet is read when the Stored time value reaches the packet's Timestamp value.
 -- There are 2 Timestamp formats that are currently supported (see the :vhdl:genconstant:`TS_FORMAT <mfb_packet_delayer.ts_format>` generic).
 -- The packets read from the RX FIFO are stored in the TX FIFO.
--- The read logic of the RX FIFO is very simplified and not made for high efficiency and it's been tested for MFB_REGIONS=1 only.
 --
 entity MFB_PACKET_DELAYER is
 generic(
@@ -54,11 +54,13 @@ port(
     CLK            : in  std_logic;
     RESET          : in  std_logic;
 
-    -- Reset current time (applies only when TS_FORMAT=1).
+    -- Reset time accumulation (applies only when TS_FORMAT=1).
     -- Time counter is reset with the next first SOF.
     TIME_RESET     : in  std_logic;
 
-    -- Input Time used to decide whether a packet's Timestamp is OK or not.
+    -- A 64-bit value representing Time, which is used to decide whether a packet's Timestamp is OK and can be transmitted or not.
+    -- It can be a precise time from the TSU, a value from a simple incrementing counter, or anything in between.
+    -- The quality of the time source affects the precision of the packet's transmission but not the component's functionality.
     CURRENT_TIME   : in  std_logic_vector(64-1 downto 0);
 
     -- =====================================================================
