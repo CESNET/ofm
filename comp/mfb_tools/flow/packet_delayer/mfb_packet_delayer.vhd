@@ -419,7 +419,11 @@ begin
             ADDR   => eof_pos_blocks_region(r)
         );
         eof_pos_items_region(r) <= rx_fifoxm_out_eof_pos_items((r*MFB_REGION_SIZE) + to_integer(unsigned(eof_pos_blocks_region(r))));
-        eof_pos_region(r) <= eof_pos_blocks_region(r) & eof_pos_items_region(r);
+        eof_pos_region_g : if MFB_REGION_SIZE>1 generate
+            eof_pos_region(r) <= eof_pos_blocks_region(r) & eof_pos_items_region(r);
+        else generate
+            eof_pos_region(r) <= eof_pos_items_region(r);
+        end generate;
 
         -- Address to Block with SOF
         sof_pos_ptr(r) <= to_integer(unsigned(sof_pos_region(r)));
@@ -491,7 +495,7 @@ begin
             current_time_reg <= unsigned(CURRENT_TIME);
         end if;
     end process;
-    one_clk_period_time_diff <= resize(unsigned(CURRENT_TIME)-current_time_reg  , TS_WIDTH);
+    one_clk_period_time_diff <= resize(unsigned(CURRENT_TIME)-current_time_reg, TS_WIDTH);
 
     -- Update the time difference that is then used for comparison with the packet's Timestamp
     process(CLK)
