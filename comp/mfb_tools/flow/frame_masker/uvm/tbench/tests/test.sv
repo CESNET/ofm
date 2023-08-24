@@ -1,6 +1,6 @@
 // test.sv: Verification test
 // Copyright (C) 2023 CESNET z. s. p. o.
-// Author(s): Yaroslav Marushchenko <xmarus09@stud.fit.vutbr.cz>
+// Author(s): Daniel Kondys <kondys@cesnet.cz>
 
 // SPDX-License-Identifier: BSD-3-Clause
 
@@ -8,7 +8,7 @@ class ex_test extends uvm_test;
     typedef uvm_component_registry #(test::ex_test, "test::ex_test") type_id;
 
     // declare the Environment reference variable
-    frame_masker::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH, USE_PIPE) m_env;
+    frame_masker::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH) m_env;
     int unsigned timeout;
 
     // ------------------------------------------------------------------------
@@ -30,7 +30,7 @@ class ex_test extends uvm_test;
     // Build phase function, e.g. the creation of test's internal objects
     function void build_phase(uvm_phase phase);
         // Initializing the reference to the environment
-        m_env = frame_masker::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH, USE_PIPE)::type_id::create("m_env", this);
+        m_env = frame_masker::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH)::type_id::create("m_env", this);
     endfunction
 
     // ------------------------------------------------------------------------

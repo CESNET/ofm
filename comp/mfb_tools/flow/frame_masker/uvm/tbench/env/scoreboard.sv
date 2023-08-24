@@ -1,46 +1,37 @@
 // scoreboard.sv: Scoreboard for verification
 // Copyright (C) 2023 CESNET z. s. p. o.
-// Author(s): Yaroslav Marushchenko <xmarus09@stud.fit.vutbr.cz>
+// Author(s): Daniel Kondys <kondys@cesnet.cz>
 
 // SPDX-License-Identifier: BSD-3-Clause
 
 
-class scoreboard #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH, USE_PIPE) extends uvm_scoreboard;
-    `uvm_component_param_utils(frame_masker::scoreboard #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH, USE_PIPE))
+class scoreboard #(MFB_REGIONS, MFB_ITEM_WIDTH, MFB_META_WIDTH) extends uvm_scoreboard;
+    `uvm_component_param_utils(frame_masker::scoreboard #(MFB_REGIONS, MFB_ITEM_WIDTH, MFB_META_WIDTH))
 
-    uvm_analysis_export #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) out_data;
-    uvm_analysis_export #(uvm_logic_vector::sequence_item #(MFB_META_WIDTH))       out_meta;
+    uvm_analysis_export #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) data_dut;
+    uvm_analysis_export #(uvm_logic_vector::sequence_item #(MFB_META_WIDTH))       meta_dut;
 
-    uvm_common::comparer_ordered #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) data_cmp;
-    uvm_common::comparer_ordered #(uvm_logic_vector::sequence_item #(MFB_META_WIDTH))       meta_cmp;
+    protected model #(MFB_REGIONS, MFB_ITEM_WIDTH, MFB_META_WIDTH) m_model;
 
-    uvm_analysis_export    #(uvm_mfb::sequence_item #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH)) analysis_imp_mfb_data;
-    uvm_common::subscriber #(uvm_logic_vector::sequence_item #(MFB_META_WIDTH))                                                      analysis_imp_mfb_meta;
-    uvm_analysis_export    #(uvm_mvb::sequence_item #(MFB_REGIONS, 1))                                                               analysis_imp_mvb_data;
+    uvm_common::subscriber #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) m_data_subscriber;
+    uvm_common::subscriber #(uvm_logic_vector::sequence_item #(MFB_META_WIDTH))       m_meta_subscriber;
 
-    model #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH, USE_PIPE) m_model;
-
-    uvm_logic_vector_array_mfb::monitor_logic_vector_array #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH) m_data_monitor;
-    uvm_logic_vector_array_mfb::monitor_logic_vector       #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH) m_meta_monitor;
-    uvm_common::subscriber                                 #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))                      m_data_subscriber;
-    uvm_common::subscriber                                 #(uvm_logic_vector::sequence_item #(MFB_META_WIDTH))                            m_meta_subscriber;
+    protected uvm_common::comparer_ordered #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) data_cmp;
+    protected uvm_common::comparer_ordered #(uvm_logic_vector::sequence_item #(MFB_META_WIDTH))       meta_cmp;
 
     // Contructor of scoreboard.
     function new(string name, uvm_component parent);
         super.new(name, parent);
 
-        analysis_imp_mfb_data = new("analysis_imp_mfb_data", this);
-        analysis_imp_mvb_data = new("analysis_imp_mvb_data", this);
-
-        out_data = new("out_data", this);
-        out_meta = new("out_meta", this);
+        data_dut = new("data_dut", this);
+        meta_dut = new("meta_dut", this);
 
     endfunction
 
     function int unsigned success();
-        int unsigned ret = 0;
-        ret |= data_cmp.success();
-        ret |= meta_cmp.success();
+        int unsigned ret = 1;
+        ret &= data_cmp.success();
+        ret &= meta_cmp.success();
         return ret;
     endfunction
 
@@ -49,45 +40,37 @@ class scoreboard #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH,
         ret |= data_cmp.used();
         ret |= meta_cmp.used();
         ret |= m_model.input_data.used();
-        ret |= m_model.input_mvb.used();
+        ret |= m_model.input_meta.used();
         return ret;
     endfunction
 
 
     function void build_phase(uvm_phase phase);
-        m_data_monitor    = uvm_logic_vector_array_mfb::monitor_logic_vector_array #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH)::type_id::create("m_data_monitor",    this);
-        m_meta_monitor    = uvm_logic_vector_array_mfb::monitor_logic_vector       #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH)::type_id::create("m_meta_monitor",    this);
-        m_data_subscriber = uvm_common::subscriber                                 #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))                     ::type_id::create("m_data_subscriber", this);
-        m_meta_subscriber = uvm_common::subscriber                                 #(uvm_logic_vector::sequence_item #(MFB_META_WIDTH))                           ::type_id::create("m_meta_subscriber", this);
+        m_data_subscriber = uvm_common::subscriber #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))::type_id::create("m_data_subscriber", this);
+        m_meta_subscriber = uvm_common::subscriber #(uvm_logic_vector::sequence_item #(MFB_META_WIDTH))      ::type_id::create("m_meta_subscriber", this);
 
-        m_model = model #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH, USE_PIPE)::type_id::create("m_model", this);
-
-        analysis_imp_mfb_meta = uvm_common::subscriber #(uvm_logic_vector::sequence_item #(MFB_META_WIDTH))::type_id::create("analysis_imp_mfb_meta", this);
+        m_model = model #(MFB_REGIONS, MFB_ITEM_WIDTH, MFB_META_WIDTH)::type_id::create("m_model", this);
 
         data_cmp = uvm_common::comparer_ordered #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))::type_id::create("data_cmp", this);
         meta_cmp = uvm_common::comparer_ordered #(uvm_logic_vector::sequence_item #(MFB_META_WIDTH))      ::type_id::create("meta_cmp", this);
 
-        data_cmp.model_tr_timeout_set(200us);
-        meta_cmp.model_tr_timeout_set(200us);
+        data_cmp.model_tr_timeout_set(100us); // might not be enough in for some seeds
+        meta_cmp.model_tr_timeout_set(100us); // might not be enough in for some seeds
+
     endfunction
 
     function void connect_phase(uvm_phase phase);
-        m_model.out_data.connect(m_data_monitor.analysis_export);
-        m_model.out_data.connect(m_meta_monitor.analysis_export);
-        m_data_monitor.analysis_port.connect(m_data_subscriber.analysis_export);
-        m_meta_monitor.analysis_port.connect(m_meta_subscriber.analysis_export);
 
-        // connects input data to the input of the model
-        analysis_imp_mfb_data.connect(m_model.input_data.analysis_export);
-        analysis_imp_mvb_data.connect(m_model.input_mvb.analysis_export);
+        // connects the input data (from the Subscriber - connection in Env) to the input of the Model
+        m_data_subscriber.port.connect(m_model.input_data.analysis_export);
+        m_meta_subscriber.port.connect(m_model.input_meta.analysis_export);
+        // and then from the Model to the Comparator
+        m_model.out_data.connect(data_cmp.analysis_imp_model);
+        m_model.out_meta.connect(meta_cmp.analysis_imp_model);
 
-        // processed data from the output of the model connected to the analysis fifo
-        m_data_subscriber.port.connect(data_cmp.analysis_imp_model);
-        m_meta_subscriber.port.connect(meta_cmp.analysis_imp_model);
-
-        // connects the data from the DUT to the analysis fifo
-        out_data.connect(data_cmp.analysis_imp_dut);
-        out_meta.connect(meta_cmp.analysis_imp_dut);
+        // connects the data and metadata from the DUT to the Comparator
+        data_dut.connect(data_cmp.analysis_imp_dut);
+        meta_dut.connect(meta_cmp.analysis_imp_dut);
 
     endfunction
 

@@ -1,6 +1,6 @@
 // dut.sv: Design under test
 // Copyright (C) 2023 CESNET z. s. p. o.
-// Author(s): Yaroslav Marushchenko <xmarus09@stud.fit.vutbr.cz>
+// Author(s): Daniel Kondys <kondys@cesnet.cz>
 
 // SPDX-License-Identifier: BSD-3-Clause
 
@@ -27,27 +27,36 @@ module DUT (
         .META_WIDTH  (MFB_META_WIDTH ),
         .USE_PIPE    (USE_PIPE       )
     ) VHDL_DUT_U (
-        .CLK        (CLK),
-        .RESET      (RST),
+        .CLK             (CLK),
+        .RESET           (RST),
 
-        .RX_DATA    (mfb_rx.DATA   ),
-        .RX_META    (mfb_rx.META   ),
-        .RX_SOF_POS (mfb_rx.SOF_POS),
-        .RX_EOF_POS (mfb_rx.EOF_POS),
-        .RX_SOF     (mfb_rx.SOF    ),
-        .RX_EOF     (mfb_rx.EOF    ),
-        .RX_SRC_RDY (mfb_rx.SRC_RDY),
-        .RX_DST_RDY (mfb_rx.DST_RDY),
+        .RX_DATA         (mfb_rx.DATA   ),
+        .RX_META         (mfb_rx.META   ),
+        .RX_SOF_POS      (mfb_rx.SOF_POS),
+        .RX_EOF_POS      (mfb_rx.EOF_POS),
+        .RX_SOF          (mfb_rx.SOF    ),
+        .RX_EOF          (mfb_rx.EOF    ),
+        .RX_SRC_RDY      (mfb_rx.SRC_RDY),
+        .RX_DST_RDY      (mfb_rx.DST_RDY),
 
-        .TX_DATA    (mfb_tx.DATA   ),
-        .TX_META    (mfb_tx.META   ),
-        .TX_SOF_POS (mfb_tx.SOF_POS),
-        .TX_EOF_POS (mfb_tx.EOF_POS),
-        .TX_SOF     (mfb_tx.SOF    ),
-        .TX_EOF     (mfb_tx.EOF    ),
-        .TX_SRC_RDY (mfb_tx.SRC_RDY),
-        .TX_DST_RDY (mfb_tx.DST_RDY),
-        .TX_MASK    (mvb_rx.DATA   )
+        .TX_DATA         (mfb_tx.DATA   ),
+        .TX_META         (mfb_tx.META   ),
+        .TX_SOF_POS      (mfb_tx.SOF_POS),
+        .TX_EOF_POS      (mfb_tx.EOF_POS),
+        .TX_SOF_MASKED   (mfb_tx.SOF    ),
+        .TX_EOF_MASKED   (mfb_tx.EOF    ),
+        .TX_SRC_RDY      (mfb_tx.SRC_RDY),
+        .TX_DST_RDY      (mfb_tx.DST_RDY),
+
+        // .TX_SOF_UNMASKED (mfb_tx.SOF    ),
+        // .TX_EOF_UNMASKED (mfb_tx.EOF    ),
+        // .TX_SRC_RDY      (mfb_tx.SRC_RDY),
+
+        // .TX_SOF_ORIGINAL (mfb_tx.SOF    ),
+        // .TX_EOF_ORIGINAL (mfb_tx.EOF    ),
+        // .TX_SRC_RDY      (mfb_tx.SRC_RDY),
+
+        .TX_MASK         (mvb_rx.DATA   )
     );
 
     

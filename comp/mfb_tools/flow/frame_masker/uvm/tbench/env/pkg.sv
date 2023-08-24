@@ -1,6 +1,6 @@
 // pkg.sv: Package for environment
 // Copyright (C) 2023 CESNET z. s. p. o.
-// Author(s): Yaroslav Marushchenko <xmarus09@stud.fit.vutbr.cz>
+// Author(s): Daniel Kondys <kondys@cesnet.cz>
 
 // SPDX-License-Identifier: BSD-3-Clause
 
@@ -14,6 +14,7 @@ package frame_masker;
     import uvm_pkg::*;
 
     `include "sequencer.sv"
+    `include "probe_cbs.sv"
     `include "model.sv"
     `include "scoreboard.sv"
     `include "env.sv"

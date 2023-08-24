@@ -1,12 +1,12 @@
 // env.sv: Verification environment
 // Copyright (C) 2023 CESNET z. s. p. o.
-// Author(s): Yaroslav Marushchenko <xmarus09@stud.fit.vutbr.cz>
+// Author(s): Daniel Kondys <kondys@cesnet.cz>
 
 // SPDX-License-Identifier: BSD-3-Clause
 
 // Environment for the functional verification.
-class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH, USE_PIPE) extends uvm_env;
-    `uvm_component_param_utils(frame_masker::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH, USE_PIPE));
+class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH) extends uvm_env;
+    `uvm_component_param_utils(frame_masker::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH));
   
     uvm_reset::agent m_reset;
 
@@ -16,9 +16,9 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_ME
 
     frame_masker::virt_sequencer #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH) vscr;
 
-    scoreboard #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH, USE_PIPE) sc;
+    scoreboard #(MFB_REGIONS, MFB_ITEM_WIDTH, MFB_META_WIDTH) sc;
 
-    protected uvm_logic_vector_array_mfb::config_item m_config_rx;
+    protected uvm_logic_vector_array_mfb::config_item m_config_rx; // why is it protected and why is it declared here instead of the Build Phase ?
 
     // Constructor of the environment.
     function new(string name, uvm_component parent);
@@ -58,7 +58,7 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_ME
         uvm_config_db #(uvm_logic_vector_mvb::config_item)::set(this, "m_env_rx_mvb", "m_config", m_config_mvb_rx);
         m_env_rx_mvb = uvm_logic_vector_mvb::env_rx #(MFB_REGIONS, 1)::type_id::create("m_env_rx_mvb", this);
 
-        sc   = scoreboard                   #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH, USE_PIPE)::type_id::create("sc", this);
+        sc   = scoreboard                   #(MFB_REGIONS, MFB_ITEM_WIDTH, MFB_META_WIDTH)::type_id::create("sc", this);
         vscr = frame_masker::virt_sequencer #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH)::type_id::create("vscr",this);
 
     endfunction
@@ -66,14 +66,12 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_ME
     // Connect agent's ports with ports from the scoreboard.
     function void connect_phase(uvm_phase phase);
 
-        sc.m_meta_monitor.meta_behav = m_config_rx.meta_behav;
+        // connects input data to the Subscriber in the Scoreboard
+        m_env_rx.analysis_port_data.connect(sc.m_data_subscriber.analysis_export);
+        m_env_rx.analysis_port_meta.connect(sc.m_meta_subscriber.analysis_export);
 
-        m_env_rx.m_mfb_agent.analysis_port    .connect(sc.analysis_imp_mfb_data                );
-        m_env_rx.analysis_port_meta           .connect(sc.analysis_imp_mfb_meta.analysis_export);
-        m_env_rx_mvb.m_mvb_agent.analysis_port.connect(sc.analysis_imp_mvb_data                );
-
-        m_env_tx.analysis_port_data.connect(sc.out_data);
-        m_env_tx.analysis_port_meta.connect(sc.out_meta);
+        m_env_tx.analysis_port_data.connect(sc.data_dut);
+        m_env_tx.analysis_port_meta.connect(sc.meta_dut);
 
         m_reset.sync_connect(m_env_rx    .reset_sync);
         m_reset.sync_connect(m_env_tx    .reset_sync);
