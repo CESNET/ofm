@@ -405,17 +405,16 @@ begin
 
         packet_delayer_i : entity work.MFB_PACKET_DELAYER
         generic map(
-            MFB_REGIONS     => MFB_REGIONS       ,
-            MFB_REGION_SIZE => MFB_REGION_SIZE   ,
-            MFB_BLOCK_SIZE  => MFB_BLOCK_SIZE    ,
-            MFB_ITEM_WIDTH  => MFB_ITEM_WIDTH    ,
-            MFB_META_WIDTH  => MFB_META_WIDTH    ,
+            MFB_REGIONS     => MFB_REGIONS     ,
+            MFB_REGION_SIZE => MFB_REGION_SIZE ,
+            MFB_BLOCK_SIZE  => MFB_BLOCK_SIZE  ,
+            MFB_ITEM_WIDTH  => MFB_ITEM_WIDTH  ,
+            MFB_META_WIDTH  => MFB_META_WIDTH  ,
 
-            CLK_FREQUENCY     => CLK_FREQUENCY   ,
-            TS_WIDTH          => TIMESTAMP_WIDTH ,
-            TS_FORMAT         => TIMESTAMP_FORMAT,
-            FIFO_DEPTH        => BUFFER_SIZE     ,
-            DEVICE            => DEVICE
+            TS_WIDTH        => TIMESTAMP_WIDTH ,
+            TS_FORMAT       => TIMESTAMP_FORMAT,
+            FIFO_DEPTH      => BUFFER_SIZE     ,
+            DEVICE          => DEVICE
         )
         port map(
             CLK   => CLK,
