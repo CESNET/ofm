@@ -153,6 +153,12 @@ entity mgmt is
       LANE_MAP      : in  std_logic_vector(NUM_LANES*5-1 downto 0);
       -- PCS lane align for individual lanes
       LANE_ALIGN    : in  std_logic_vector(NUM_LANES-1 downto 0);
+      -- PCS vendor specific control register (3.4000)
+      PCS_CONTROL   : out std_logic_vector(16-1 downto 0);
+      -- PCS vendor specific control register (3.4000)
+      PCS_CONTROL_I : in std_logic_vector(16-1 downto 0) := (others => '0');
+      -- PCS vendor specific control readback (3.4000) + status (3.4001) register
+      PCS_STATUS    : in  std_logic_vector(16-1 downto 0) := (others => '0');
 
       -- =====================================================================
       -- PMA control
@@ -304,6 +310,8 @@ signal sync_lane_map               : std_logic_vector(NUM_LANES*5-1 downto 0);
 signal sync_bip_err_cntrs          : std_logic_vector(NUM_LANES*16-1 downto 0);
 signal sync_pma_rx_ok              : std_logic_vector(PMA_RX_OK'range);
 signal sync_pmd_sig_det            : std_logic_vector(PMD_SIG_DET'range);
+signal sync_pcs_status             : std_logic_vector(PCS_STATUS'range);
+signal sync_pcs_control            : std_logic_vector(PCS_CONTROL_I'range);
 signal mi_bip_err_clr              : std_logic_vector(NUM_LANES-1 downto 0);
 signal pma_control_r               : std_logic_vector(PMA_CONTROL'range) := PMA_CONTROL_INIT;
 signal pma_status_sync             : std_logic_vector(PMA_STATUS'range);
@@ -576,6 +584,34 @@ GEN_PMASTAT_CROSS: for i in PMA_STATUS'range generate
    );
 end generate;
 
+GEN_PCSSTAT_CROSS: for i in PCS_STATUS'range generate
+   PCSSTAT_CROSS: entity work.ASYNC_OPEN_LOOP
+   generic map(IN_REG  => false, TWO_REG => true)
+   port map (
+      ACLK     => '0',
+      ARST     => '0',
+      ADATAIN  => PCS_STATUS(i),
+      --
+      BCLK     => MI_CLK,
+      BRST     => '0',
+      BDATAOUT => sync_pcs_status(i)
+   );
+end generate;
+
+GEN_PCSCTRL_CROSS: for i in PCS_CONTROL_I'range generate
+   PCSCTRL_CROSS: entity work.ASYNC_OPEN_LOOP
+   generic map(IN_REG  => false, TWO_REG => true)
+   port map (
+      ACLK     => '0',
+      ARST     => '0',
+      ADATAIN  => PCS_CONTROL_I(i),
+      --
+      BCLK     => MI_CLK,
+      BRST     => '0',
+      BDATAOUT => sync_pcs_control(i)
+   );
+end generate;
+
 GEN_RSFEC_STATS: if (RSFEC_ABLE = '1') generate 
 
 GEN_FEC_AM_LOCK_CROSS: for i in FEC_AM_LOCK'range generate
@@ -736,6 +772,9 @@ begin
    r1217_rd <= '0';
    r3200_rd <= (others => '0');
    mi_drd_i <= (others => '0');
+   ----------------------------------------------------------------------------
+   -- PMA
+   ----------------------------------------------------------------------------
    if mi_addr_masked(19 downto 15) = "00010" then -- select PMA (device 0x1)
       case mi_addr_masked(8 downto 2) is
           when "0000000" => -- PMA status1 & control 1        11    10:7      6:2          1             0
@@ -1007,9 +1046,18 @@ begin
          when others => 
       end case;   
    end if;
+   -------------------------------------------------------------------------
    --- PCS registers -------------------------------------------------------
+   -------------------------------------------------------------------------
    if mi_addr_masked(19 downto 16) = X"3" then -- select PCS (device 0x3)
-      if mi_addr_masked(9 downto 7) = "000" then
+      if mi_addr_masked(15)  = '1' then
+         case mi_addr_masked(3 downto 2) is
+            when "00" =>
+               mi_drd_i(15 downto  0) <= sync_pcs_control(15 downto 0);
+               mi_drd_i(31 downto 16) <= sync_pcs_status(15 downto 0);
+            when others => mi_drd_i <= (others => '0');
+         end case;
+      elsif mi_addr_masked(9 downto 7) = "000" then
          case mi_addr_masked(6 downto 2) is
             when "00000" => -- 0x0000
                mi_drd_i(15 downto  0) <= pcs_rst & pcs_lpbk & "10" & pcs_low_pwr & "00001" & "0000" & scr_bypass_r;-- 3.0 PCS control 1 -- r3.0
@@ -1324,7 +1372,16 @@ begin
          end if;
       --- PCS registers -------------------------------------------------------
       elsif (mi_addr_masked(19 downto 16) = X"3") and (MI_WR = '1') then -- select PCS (device 0x3)
-         if mi_addr_masked(9 downto 7) = "000" then
+         -- 0x8000 : Vendor specific control registers
+         if mi_addr_masked(15) = '1' then
+            case mi_addr_masked(3 downto 2) is
+               when "00" =>
+                  if (MI_BE(0) = '1') then
+                      PCS_CONTROL(15 downto 0) <= MI_DWR(15 downto 0);
+                  end if;
+               when others => null;
+            end case;
+         elsif mi_addr_masked(9 downto 7) = "000" then
             case mi_addr_masked(6 downto 2) is -- 3.0 -- 3.0 PCS control 1
                when "00000" => 
                   if (MI_BE(0) = '1') then
