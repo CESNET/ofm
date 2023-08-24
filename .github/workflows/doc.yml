@@ -2,7 +2,7 @@ name: documentation
 
 on:
   push:
-    branches: [main]
+    branches: [devel]
 
 jobs:
   build:
@@ -14,8 +14,15 @@ jobs:
       - name: Setup and build
         run: |
           sudo apt-get install python3-pip
-          pip3 install sphinx sphinx-vhdl sphinx_rtd_theme
-          sphinx-build -M html doc/source public
+          pip3 install sphinx==5.3.0 sphinx-vhdl sphinx_rtd_theme GitPython
+          mkdir public
+          mkdir public/html
+          cp doc/source/index.html public/html/
+          sphinx-build -M html doc/source public/devel
+          git checkout main
+          sphinx-build -M html doc/source public/main
+          mv public/main/html/ public/html/main
+          mv public/devel/html/ public/html/devel
           touch public/html/.nojekyll
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@4.1.4
