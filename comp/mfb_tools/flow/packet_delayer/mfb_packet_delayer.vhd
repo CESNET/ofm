@@ -33,8 +33,6 @@ generic(
     -- Metadata width (in bits).
     MFB_META_WIDTH        : natural := 0;
 
-    -- Freq of the CLK signal (in Hz).
-    CLK_FREQUENCY         : natural := 200000000;
     -- Width of Timestamps (in bits).
     TS_WIDTH              : natural := 48;
     -- Format of Timestamps. Options:
@@ -113,10 +111,6 @@ architecture FULL of MFB_PACKET_DELAYER is
 
     --                                       Data        + Meta           + Timestamps + SOFs and EOFs + EOF POS (only Items)
     constant RX_FIFO_DATA_WIDTH : natural := BLOCK_WIDTH + MFB_META_WIDTH + TS_WIDTH   + 2             + max(1,log2(MFB_BLOCK_SIZE));
-    -- Clock period in nanoseconds
-    constant CLK_PERIOD         : natural := integer(real(1)/real(CLK_FREQUENCY)*real(10**9));
-    -- Counter increment (in ns)
-    constant TIME_CNT_INC       : std_logic_vector := std_logic_vector(to_unsigned(CLK_PERIOD, log2(CLK_PERIOD)));
 
     -- ========================================================================
     --                                 SIGNALS
