@@ -39,6 +39,8 @@ virtual class comparer_base_ordered#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) ext
     endfunction
 
     virtual function void write_model(model_item#(MODEL_ITEM) tr);
+        `uvm_info(this.get_full_name(), $sformatf("\n\tReceived transactions from Model\n%s", tr.convert2string()), UVM_FULL);
+
         if (dut_items.size() != 0) begin
             dut_item#(DUT_ITEM) item;
 
@@ -58,6 +60,7 @@ virtual class comparer_base_ordered#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) ext
         dut_item#(DUT_ITEM) tmp_tr = new(dut_sends+1, $time(), tr);
         dut_sends += 1;
 
+        `uvm_info(this.get_full_name(), $sformatf("\n\tReceived transactions from DUT\n%s", tr.convert2string()), UVM_FULL);
         if (model_items.size() != 0) begin
             model_item#(MODEL_ITEM) item;
 

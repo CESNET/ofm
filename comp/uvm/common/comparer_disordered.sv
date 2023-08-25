@@ -39,6 +39,8 @@ virtual class comparer_base_disordered#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) 
         int unsigned w_end = 0;
         int unsigned it    = 0;
         //try get item from DUT
+
+        `uvm_info(this.get_full_name(), $sformatf("\n\tReceived transactions from Model\n%s", tr.convert2string()), UVM_FULL);
         while (it < dut_items.size() && w_end == 0) begin
             w_end = compare(tr, dut_items[it]);
             if (w_end == 0) begin
@@ -61,6 +63,7 @@ virtual class comparer_base_disordered#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) 
 
         dut_sends += 1;
         //try get item from DUT
+        `uvm_info(this.get_full_name(), $sformatf("\n\tReceived transactions from DUT\n%s", tr.convert2string()), UVM_FULL);
         while (it < model_items.size() && w_end == 0) begin
             w_end = compare(model_items[it], tmp_tr);
             if (w_end == 0) begin
