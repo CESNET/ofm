@@ -5,81 +5,7 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause
 
-`uvm_analysis_imp_decl(_data)
-`uvm_analysis_imp_decl(_meta)
-
-class model_bind#(ITEM_WIDTH, META_WIDTH) extends uvm_common::fifo#(uvm_common::model_item#(model_data#(ITEM_WIDTH, META_WIDTH)));
-    `uvm_component_param_utils(uvm_splitter_simple::model_bind#(ITEM_WIDTH, META_WIDTH))
-
-    typedef model_bind#(ITEM_WIDTH, META_WIDTH) this_type;
-    uvm_analysis_imp_data#(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH), this_type) data;
-    uvm_analysis_imp_meta#(uvm_logic_vector::sequence_item #(META_WIDTH), this_type)      meta;
-
-    protected uvm_common::model_item#(model_data#(ITEM_WIDTH, META_WIDTH)) tmp[$];
-    protected string tag_name;
-
-    function new(string name, uvm_component parent = null);
-        super.new(name, parent);
-    endfunction
-
-    virtual function void flush();
-        super.flush();
-        tmp.delete();
-    endfunction
-
-    virtual function int unsigned used();
-        return (super.used() || tmp.size() != 0);
-    endfunction
-
-    function void build_phase(uvm_phase phase);
-        super.build_phase(phase);
-
-        data = new("data", this);
-        meta = new("meta", this);
-
-        if (!uvm_config_db #(string)::get(this, "", "tag", tag_name)) begin
-            tag_name = this.get_full_name();
-        end
-    endfunction
-
-    function void write_data(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH) tr);
-        uvm_common::model_item#(model_data#(ITEM_WIDTH, META_WIDTH)) item;
-
-        if (tmp.size() == 0 || tmp[0].item.data != null) begin
-            item = uvm_common::model_item#(model_data#(ITEM_WIDTH, META_WIDTH))::type_id::create("item", this);
-            item.tag = tag_name;
-            item.start[{tag_name, " DATA"}] = $time();
-            item.item = model_data#(ITEM_WIDTH, META_WIDTH)::type_id::create("item_item", this);
-            item.item.data = tr;
-            tmp.push_back(item);
-        end else begin
-            item = tmp.pop_front();
-            item.start[{tag_name, " DATA"}] = $time();
-            item.item.data = tr;
-            this.push_back(item);
-        end
-    endfunction
-
-    function void write_meta(uvm_logic_vector::sequence_item #(META_WIDTH) tr);
-        uvm_common::model_item#(model_data#(ITEM_WIDTH, META_WIDTH)) item;
-
-        if (tmp.size() == 0 || tmp[0].item.meta != null) begin
-            item = uvm_common::model_item#(model_data#(ITEM_WIDTH, META_WIDTH))::type_id::create("item", this);
-            item.tag = tag_name;
-            item.start[{tag_name, " META"}] = $time();
-            item.item = model_data#(ITEM_WIDTH, META_WIDTH)::type_id::create("item_item", this);
-            item.item.meta = tr; 
-            tmp.push_back(item);
-        end else begin
-            item = tmp.pop_front();
-            item.start[{tag_name, " META"}] = $time();
-            item.item.meta = tr;
-            this.push_back(item);
-        end
-    endfunction
-endclass
-
-class comparer_data #(ITEM_WIDTH, META_WIDTH) extends uvm_common::comparer_base_ordered#(model_data#(ITEM_WIDTH, META_WIDTH), uvm_logic_vector_array::sequence_item#(ITEM_WIDTH));
+class comparer_data #(ITEM_WIDTH, META_WIDTH) extends uvm_common::comparer_base_ordered#(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH), uvm_logic_vector_array::sequence_item#(ITEM_WIDTH));
     `uvm_component_param_utils(uvm_splitter_simple::comparer_data #(ITEM_WIDTH, META_WIDTH))
 
     function new(string name, uvm_component parent = null);
@@ -87,7 +13,7 @@ class comparer_data #(ITEM_WIDTH, META_WIDTH) extends uvm_common::comparer_base_
     endfunction
 
     virtual function int unsigned compare(uvm_common::model_item #(MODEL_ITEM) tr_model, uvm_common::dut_item #(DUT_ITEM) tr_dut);
-        return tr_model.item.data.compare(tr_dut.in_item);
+        return tr_model.item.compare(tr_dut.in_item);
     endfunction
 
     virtual function string message(uvm_common::model_item #(MODEL_ITEM) tr_model, uvm_common::dut_item #(DUT_ITEM) tr_dut);
@@ -98,7 +24,7 @@ class comparer_data #(ITEM_WIDTH, META_WIDTH) extends uvm_common::comparer_base_
     endfunction
 endclass
 
-class comparer_meta #(ITEM_WIDTH, META_WIDTH) extends uvm_common::comparer_base_ordered#(model_data#(ITEM_WIDTH, META_WIDTH), uvm_logic_vector::sequence_item #(META_WIDTH));
+class comparer_meta #(ITEM_WIDTH, META_WIDTH) extends uvm_common::comparer_base_ordered#(uvm_logic_vector::sequence_item #(META_WIDTH), uvm_logic_vector::sequence_item #(META_WIDTH));
     `uvm_component_param_utils(uvm_splitter_simple::comparer_meta #(ITEM_WIDTH, META_WIDTH))
 
     function new(string name, uvm_component parent = null);
@@ -106,7 +32,7 @@ class comparer_meta #(ITEM_WIDTH, META_WIDTH) extends uvm_common::comparer_base_
     endfunction
 
     virtual function int unsigned compare(uvm_common::model_item #(MODEL_ITEM) tr_model, uvm_common::dut_item #(DUT_ITEM) tr_dut);
-        return tr_model.item.meta.compare(tr_dut.in_item);
+        return tr_model.item.compare(tr_dut.in_item);
     endfunction
 
     virtual function string message(uvm_common::model_item #(MODEL_ITEM) tr_model, uvm_common::dut_item #(DUT_ITEM) tr_dut);
@@ -155,7 +81,8 @@ class scoreboard #(ITEM_WIDTH, META_WIDTH, CHANNELS) extends uvm_scoreboard;
 
     function void build_phase(uvm_phase phase);
         m_model    = model #(ITEM_WIDTH, META_WIDTH, CHANNELS)::type_id::create("m_model", this);
-        m_model.in = model_bind#(ITEM_WIDTH, $clog2(CHANNELS) + META_WIDTH)::type_id::create("m_model_bind", m_model);
+        m_model.in_data = uvm_common::fifo_model_input#(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)              )::type_id::create("in_data", m_model);
+        m_model.in_meta = uvm_common::fifo_model_input#(uvm_logic_vector::sequence_item #($clog2(CHANNELS) + META_WIDTH))::type_id::create("in_meta", m_model);
 
         for (int it = 0; it < CHANNELS; it++) begin
             string it_string;
@@ -163,24 +90,24 @@ class scoreboard #(ITEM_WIDTH, META_WIDTH, CHANNELS) extends uvm_scoreboard;
             it_string.itoa(it);
             compare_data[it] = comparer_data #(ITEM_WIDTH, META_WIDTH)::type_id::create({"compare_data_", it_string}, this);
             compare_meta[it] = comparer_meta #(ITEM_WIDTH, META_WIDTH)::type_id::create({"compare_meta_", it_string}, this);
-            compare_meta[it].model_tr_timeout_set(100us);
         end
 
     endfunction
 
     function void connect_phase(uvm_phase phase);
-        model_bind#(ITEM_WIDTH, $clog2(CHANNELS) + META_WIDTH)  m_model_input;
+        uvm_common::fifo_model_input#(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)              ) model_in_data;
+        uvm_common::fifo_model_input#(uvm_logic_vector::sequence_item #($clog2(CHANNELS) + META_WIDTH)) model_in_meta;
 
-        $cast(m_model_input, m_model.in);
-        input_data.connect(m_model_input.data);
-        input_meta.connect(m_model_input.meta);
-
+        $cast(model_in_data, m_model.in_data);
+        $cast(model_in_meta, m_model.in_meta);
+        input_data.connect(model_in_data.analysis_export);
+        input_meta.connect(model_in_meta.analysis_export);
 
         for (int it = 0; it < CHANNELS; it++) begin
             string i_string;
 
-            m_model.out[it].connect(compare_data[it].analysis_imp_model);
-            m_model.out[it].connect(compare_meta[it].analysis_imp_model);
+            m_model.out_data[it].connect(compare_data[it].analysis_imp_model);
+            m_model.out_meta[it].connect(compare_meta[it].analysis_imp_model);
             out_data[it].connect(compare_data[it].analysis_imp_dut);
             out_meta[it].connect(compare_meta[it].analysis_imp_dut);
         end
@@ -189,6 +116,7 @@ class scoreboard #(ITEM_WIDTH, META_WIDTH, CHANNELS) extends uvm_scoreboard;
     function int unsigned used();
         int unsigned ret = 0;
 
+        ret |= m_model.used();
         for (int unsigned it = 0; it < CHANNELS; it++) begin
             ret |= compare_data[it].used();
             ret |= compare_meta[it].used();

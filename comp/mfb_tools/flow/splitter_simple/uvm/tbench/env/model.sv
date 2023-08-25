@@ -5,88 +5,121 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
-
-//uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))                     input_data;
-//uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(SEL_WIDTH + META_WIDTH)) input_meta;
-
-
-class model_data #(ITEM_WIDTH, META_WIDTH) extends uvm_object;
-    `uvm_object_param_utils(uvm_splitter_simple::model_data #(ITEM_WIDTH, META_WIDTH))
-
-    uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)  data;
-    uvm_logic_vector::sequence_item #(META_WIDTH)       meta;
-
-    function new(string name = "");
-        super.new(name);
-    endfunction
-
-    function string convert2string();
-        return $sformatf("\n\tMEATA %s\n\tDATA\n%s\n", meta.convert2string(), data.convert2string());
-    endfunction
-endclass
-
-
 class model #(ITEM_WIDTH, META_WIDTH, CHANNELS) extends uvm_component;
     `uvm_component_param_utils(uvm_splitter_simple::model#(ITEM_WIDTH, META_WIDTH, CHANNELS))
 
     localparam SEL_WIDTH = $clog2(CHANNELS);
 
-    uvm_common::fifo  #(uvm_common::model_item#(model_data#(ITEM_WIDTH, SEL_WIDTH + META_WIDTH))) in;
-    uvm_analysis_port #(uvm_common::model_item#(model_data#(ITEM_WIDTH, META_WIDTH)))             out[CHANNELS];
+    uvm_common::fifo#(uvm_common::model_item#(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))) in_data;
+    uvm_common::fifo#(uvm_common::model_item#(uvm_logic_vector::sequence_item #($clog2(CHANNELS) + META_WIDTH))) in_meta;
+
+    uvm_analysis_port #(uvm_common::model_item#(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))) out_data[CHANNELS];
+    uvm_analysis_port #(uvm_common::model_item#(uvm_logic_vector::sequence_item #(META_WIDTH)))      out_meta[CHANNELS];
+
+    protected uvm_common::model_item#(uvm_logic_vector::sequence_item #($clog2(CHANNELS) + META_WIDTH)) headers[$];
 
     function new(string name = "model", uvm_component parent = null);
         super.new(name, parent);
 
-        in = null;
+        in_data = null; //new("in_data", this);
+        in_meta = null; //new("in_meta", this);
         for (int unsigned it = 0; it < CHANNELS; it++) begin
             string str_it;
 
             str_it.itoa(it);
-            out[it] = new({"out_data_", str_it}, this);
+            out_data[it] = new({"out_data_", str_it}, this);
+            out_meta[it] = new({"out_meta_", str_it}, this);
         end
     endfunction
 
     function void reset();
-       in.flush();
+       in_data.flush();
+       in_meta.flush();
+       headers.delete();
     endfunction
 
-    task run_phase(uvm_phase phase);
-        uvm_common::model_item#(model_data #(ITEM_WIDTH, SEL_WIDTH + META_WIDTH)) tr_input;
-        uvm_common::model_item#(model_data #(ITEM_WIDTH, META_WIDTH)) tr_output;
-        int unsigned channel;
-
-        if (in == null) begin
-            `uvm_fatal(this.get_full_name(), "\n\tInput fifo \"in\" is null");
-        end
-
+    function int unsigned used();
+        int unsigned ret = 0;
+        ret |= (in_data.used() != 0);
+        ret |= (in_meta.used() != 0);
+        ret |= (headers.size() != 0);
+        return ret;
+    endfunction
+   
+    task run_meta(uvm_phase phase);
         forever begin
+            uvm_common::model_item#(uvm_logic_vector::sequence_item #($clog2(CHANNELS) + META_WIDTH)) tr_in;
+            uvm_common::model_item#(uvm_logic_vector::sequence_item #(META_WIDTH))                    tr_out;
+            int unsigned channel;
             string msg;
-            in.get(tr_input);
 
-            channel = tr_input.item.meta.data[SEL_WIDTH + META_WIDTH-1 : META_WIDTH];
+            in_meta.get(tr_in);
             if (this.get_report_verbosity_level() >= UVM_FULL) begin
-                msg = tr_input.convert2string();
+                msg = tr_in.item.convert2string();
             end else begin
                 msg = "";
             end
+
+            //save it for data
+            headers.push_back(tr_in);
+            //Create output header
+            tr_out = uvm_common::model_item#(uvm_logic_vector::sequence_item #(META_WIDTH))::type_id::create("tr_output_meta", this);
+            tr_out.start = tr_in.start;
+            tr_out.tag   = tr_in.tag;
+            tr_out.item  = uvm_logic_vector::sequence_item #(META_WIDTH)::type_id::create("tr_out_meta_item", this);
+            tr_out.item.data = tr_in.item.data[META_WIDTH-1:0];
+            channel          = tr_in.item.data[SEL_WIDTH + META_WIDTH-1 : META_WIDTH];
 
             if (channel >= CHANNELS) begin
                 string msg;
                 $swrite(msg, "\n\tWrong channel num %0d Channel range is 0-%0d", channel, CHANNELS-1);
                 `uvm_fatal(this.get_full_name(), msg);
             end else begin
-                tr_output = uvm_common::model_item#(model_data#(ITEM_WIDTH, META_WIDTH))::type_id::create("tr_output", this);
-                tr_output.tag   = tr_input.tag;
-                tr_output.start = tr_input.start;
-                tr_output.item  =  model_data #(ITEM_WIDTH, META_WIDTH)::type_id::create("tr_output.item", this);
-                //create data
-                tr_output.item.data = tr_input.item.data;
-                //create meta
-                tr_output.item.meta      = uvm_logic_vector::sequence_item #(META_WIDTH)::type_id::create("tr_output_meta");
-                tr_output.item.meta.data = tr_input.item.meta.data[META_WIDTH-1:0];
-                `uvm_info(this.get_full_name(), $sformatf("\nINPUT\n\t%s\nOUTPUT : \n%s\n\n", msg, tr_output.convert2string()), UVM_HIGH);
-                out[channel].write(tr_output);
+                `uvm_info(this.get_full_name(), $sformatf("\nINPUT\n\t%s\nOUTPUT : \n%s\n\n", msg, tr_out.convert2string()), UVM_HIGH);
+                out_meta[channel].write(tr_out);
             end
         end
+    endtask
+
+    task run_data(uvm_phase phase);
+        forever begin
+            uvm_common::model_item#(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)) tr_in;
+            uvm_common::model_item#(uvm_logic_vector::sequence_item #($clog2(CHANNELS) + META_WIDTH)) tr_in_meta;
+            uvm_common::model_item#(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)) tr_out;
+            int unsigned channel;
+            string msg;
+
+            in_data.get(tr_in);
+            wait (headers.size != 0);
+            tr_in_meta = headers.pop_front();
+            if (this.get_report_verbosity_level() >= UVM_FULL) begin
+                msg = $sformatf("\nMeta %s\nDATA\n%s\n", tr_in.item.convert2string(), tr_in_meta.item.convert2string());
+            end else begin
+                msg = "";
+            end
+
+            tr_out = uvm_common::model_item#(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))::type_id::create("tr_out" ,this);
+            tr_out.start = tr_in.start;
+            tr_out.time_array_add(tr_in_meta.start);
+            tr_out.tag  = tr_in.tag;
+            tr_out.item = tr_in.item;
+            channel     = tr_in_meta.item.data[SEL_WIDTH + META_WIDTH-1 : META_WIDTH];
+      
+            if (channel >= CHANNELS) begin
+                string msg;
+                $swrite(msg, "\n\tWrong channel num %0d Channel range is 0-%0d", channel, CHANNELS-1);
+                `uvm_fatal(this.get_full_name(), msg);
+            end else begin
+                `uvm_info(this.get_full_name(), $sformatf("\nINPUT\n\t%s\nOUTPUT : \n%s\n\n", msg, tr_out.convert2string()), UVM_HIGH);
+                out_data[channel].write(tr_out);
+            end
+        end
+    endtask
+
+    task run_phase(uvm_phase phase);
+        fork
+            run_data(phase);
+            run_meta(phase);
+        join
     endtask
 endclass
