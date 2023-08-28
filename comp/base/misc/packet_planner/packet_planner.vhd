@@ -459,13 +459,13 @@ begin
 
         RX_PKT_LEN     => reg0_len    ,
         RX_PKT_VLD     => reg0_vld    ,
-        RX_PKT_SRC_RDY => '1'         ,
+        RX_PKT_SRC_RDY => reg2_dst_rdy,
         RX_PKT_DST_RDY => open        ,
 
         TX_PKT_GAP     => reg0_gap_len,
         TX_PKT_VLD     => open        ,
         TX_PKT_SRC_RDY => open        ,
-        TX_PKT_DST_RDY => '1'
+        TX_PKT_DST_RDY => reg2_dst_rdy
     );
 
     -- =====================================================================
