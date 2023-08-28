@@ -79,7 +79,7 @@ virtual class comparer_base_ordered#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) ext
     function string dut_tr_get(model_item#(MODEL_ITEM) tr, time tr_time);
         string msg = "";
         for (int unsigned it = 0; it < dut_items.size(); it++) begin
-            $swrite(msg, "%s\n\nOutput time %0dns (%0dns) \n%s", msg, dut_items[it].in_time/1ns, (dut_items[it].in_time - tr_time)/1ns, this.message(tr, dut_items[it]));
+            msg = {msg, $sformatf("\n\nOutput time %0dns (%0dns) \n%s", dut_items[it].in_time/1ns, (dut_items[it].in_time - tr_time)/1ns, this.message(tr, dut_items[it]))};
         end
         return msg;
     endfunction
@@ -87,7 +87,7 @@ virtual class comparer_base_ordered#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) ext
     function string model_tr_get(dut_item#(DUT_ITEM) tr);
         string msg = "";
         for (int unsigned it = 0; it < model_items.size(); it++) begin
-            $swrite(msg, "%s\n\n%s\n%s", msg, model_items[it].convert2string_time(), this.message(model_items[it], tr));
+            msg = {msg, $sformatf("\n\n%s\n%s", model_items[it].convert2string_time(), this.message(model_items[it], tr))};
         end
         return msg;
     endfunction

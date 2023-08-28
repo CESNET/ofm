@@ -138,8 +138,8 @@ virtual class comparer_base_tagged#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) exte
                 if (dut_last.in_time > dut_items[it].in_time) begin
 
                     string msg;
-                    $swrite(msg, "%s\n\tSome transaction %0d what have output time %0dns have been outruned by transaction %0d  with otput time %0dns\n\ttag %s\nOutrun transaction\n%s\nOutruned transaction\n%s\n",
-                            msg, dut_last.in_id, dut_last.in_time/1ns, dut_items[it].in_id,
+                    msg = $sformatf("\n\tSome transaction %0d what have output time %0dns have been outruned by transaction %0d  with otput time %0dns\n\ttag %s\nOutrun transaction\n%s\nOutruned transaction\n%s\n",
+                            dut_last.in_id, dut_last.in_time/1ns, dut_items[it].in_id,
                             dut_items[it].in_time/1ns, tr.tag,
                             dut_last.in_item.convert2string(),
                             dut_items[it].in_item.convert2string());
@@ -200,7 +200,7 @@ virtual class comparer_base_tagged#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) exte
     function string dut_tr_get(model_item#(MODEL_ITEM) tr, time tr_time);
         string msg = "";
         for (int unsigned it = 0; it < dut_items.size(); it++) begin
-            $swrite(msg, "%s\n\nOutput time %0dns (%0dns) \n%s", msg, dut_items[it].in_time/1ns, (dut_items[it].in_time - tr_time)/1ns, this.message(tr, dut_items[it]));
+            msg = {msg, $sformatf("\n\nOutput time %0dns (%0dns) \n%s", dut_items[it].in_time/1ns, (dut_items[it].in_time - tr_time)/1ns, this.message(tr, dut_items[it]))};
         end
         return msg;
     endfunction
@@ -214,7 +214,7 @@ virtual class comparer_base_tagged#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) exte
         while (index_valid != 0) begin
             for (int unsigned it = 0; it < model_items[index].size(); it++) begin
                 model_item#(MODEL_ITEM) tmp_item = model_items[index].get(it);
-                $swrite(msg, "%s\n\nTag %s\n%s\n%s", msg, index, tmp_item.convert2string_time(), this.message(tmp_item, tr));
+                msg = {msg, $sformatf("\n\nTag %s\n%s\n%s", index, tmp_item.convert2string_time(), this.message(tmp_item, tr))};
             end
             //next index
             index_valid = model_items.next(index);

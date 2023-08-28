@@ -22,15 +22,14 @@ class dut_item #(type ITEM_TYPE);
 
     function string convert2string_time();
         string msg = "";
-        $swrite(msg, "%s\n\tINPUT TIME : %0.2fns", msg, in_time/1ns);
-
+        msg = {msg, $sformatf("\n\tINPUT TIME : %0.2fns", in_time/1ns)};
         return msg;
     endfunction
 
     function string convert2string();
         string msg = "";
 
-        $swrite(msg, "%s%s\n\tDATA :\n%s", msg, this.convert2string_time(), in_item.convert2string());
+        msg = {msg, $sformatf("%s\n\tDATA :\n%s", this.convert2string_time(), in_item.convert2string())};
         return msg;
     endfunction
 endclass
