@@ -85,7 +85,7 @@ virtual class comparer_base#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) extends uvm
 
     pure virtual task run_model_delay_check();
     pure virtual task run_dut_delay_check();
-    pure virtual function string info();
+    pure virtual function string info(logic data = 0);
 
     task run_phase(uvm_phase phase);
         fork
@@ -109,7 +109,7 @@ virtual class comparer_base#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) extends uvm
 
         if (this.used()) begin
             msg = "";
-            `uvm_error(this.get_full_name(), {"\n\tWait for some transaction", info()});
+            `uvm_error(this.get_full_name(), {"\n\tWait for some transaction", info(1)});
         end
     endfunction
 

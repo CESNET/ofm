@@ -283,17 +283,28 @@ virtual class comparer_base_tagged#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) exte
         end
     endtask
 
-    virtual function string info();
+    virtual function string info(logic data = 0);
         int unsigned index_valid;
         string index;
         string msg = "";
-            index_valid = model_items.first(index);
-            $swrite(msg, "\n\tErrors %0d", dut_errors);
-            while (index_valid != 0) begin
-                $swrite(msg, "%s\n\tTag %s Errors/Compared %0d/%0d transactions", msg, index, model_items[index].errors, model_items[index].compared);
-                //next index
-                index_valid = model_items.next(index);
+        index_valid = model_items.first(index);
+        msg = {msg, $sformatf("\n\tErrors %0d", dut_errors)};
+        while (index_valid != 0) begin
+            msg = {msg, $sformatf("\n\tTag %s Errors/Compared %0d/%0d transactions", index, model_items[index].errors, model_items[index].compared)};
+            if (data == 1) begin
+                for (int unsigned it = 0; it < model_items[index].size(); it++) begin
+                    msg = {msg, $sformatf("\n\tModels transaction : %0d", it), model_items[index].get(it).convert2string()};
+                end
             end
+            //next index
+            index_valid = model_items.next(index);
+        end
+
+        if (data == 1) begin
+            for (int unsigned it = 0; it < dut_items.size(); it++) begin
+                msg = {msg, $sformatf("\n\tDUT transaction : %0d", it), dut_items[it].convert2string()};
+            end
+        end
         return msg;
     endfunction
 endclass

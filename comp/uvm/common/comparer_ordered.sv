@@ -126,9 +126,18 @@ virtual class comparer_base_ordered#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) ext
         end
     endtask
 
-    virtual function string info();
+    virtual function string info(logic data = 0);
         string msg ="";
         msg = $sformatf("\n\tErrors %0d Compared %0d Wait for tramsaction DUT(%0d) MODEL(%0d)", errors, compared, dut_items.size(), model_items.size());
+        if (data == 1) begin
+            for (int unsigned it = 0; it < model_items.size(); it++) begin
+                msg = {msg, $sformatf("\n\nModels transaction : %0d", it) , model_items[it].convert2string()};
+            end
+            msg = {msg, "\n\n"};
+            for (int unsigned it = 0; it < dut_items.size(); it++) begin
+                msg = {msg, $sformatf("\n\nDUT transactions : %0d", it), dut_items[it].convert2string()};
+            end
+        end
         return msg;
     endfunction
 endclass
