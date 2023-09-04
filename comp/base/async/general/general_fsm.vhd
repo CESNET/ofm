@@ -36,6 +36,8 @@ architecture FULL of ASYNC_GENERAL_FSM is
    signal adata_next    : std_logic := '0';
    signal last_adatain  : std_logic := '0';
 
+   signal adatain_masked      : std_logic := '0';
+
    signal comp_last_adatain   : std_logic := '0';
    signal comp_last_adatain2  : std_logic := '0';
    signal comp_adatain        : std_logic := '0';
@@ -104,14 +106,16 @@ begin
       end if;
    end process;
 
+   adatain_masked <= ADATAIN and not ARST;
+
    --! Next State logic
-   next_state_logic: process (present_st, ADATAIN, SIG_AREADY, last_adatain, comp_last_adatain, comp_adatain, comp_last_adatain2, comp_adatain2)
+   next_state_logic: process (present_st, adatain_masked, SIG_AREADY, last_adatain, comp_last_adatain, comp_adatain, comp_last_adatain2, comp_adatain2)
    begin
       case present_st is
 
          --! STATE st0
          when st0 =>
-            if ((last_adatain = comp_last_adatain AND ADATAIN = comp_adatain) OR (last_adatain = comp_last_adatain2 AND ADATAIN = comp_adatain2)) then
+            if ((last_adatain = comp_last_adatain AND adatain_masked = comp_adatain) OR (last_adatain = comp_last_adatain2 AND adatain_masked = comp_adatain2)) then
                next_st <= st1;
             else
                next_st <= st0;
@@ -132,7 +136,7 @@ begin
    end process;
 
    --Output logic
-   output_logic: process (present_st, ADATAIN, sig_adata, last_adatain, comp_last_adatain, comp_adatain, comp_last_adatain2, comp_adatain2)
+   output_logic: process (present_st, adatain_masked, sig_adata, last_adatain, comp_last_adatain, comp_adatain, comp_last_adatain2, comp_adatain2)
    begin
       case present_st is
 
@@ -140,7 +144,7 @@ begin
          when st0 =>
             AREADY <= '1';
 
-            if ((last_adatain = comp_last_adatain AND ADATAIN = comp_adatain) OR (last_adatain = comp_last_adatain2 AND ADATAIN = comp_adatain2)) then
+            if ((last_adatain = comp_last_adatain AND adatain_masked = comp_adatain) OR (last_adatain = comp_last_adatain2 AND adatain_masked = comp_adatain2)) then
                if (sig_adata = '1') then
                   adata_next <= '0';
                else
