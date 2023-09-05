@@ -62,6 +62,10 @@ generic(
     -- Minimum value is 2!
     INPUT_FIFO_SIZE     : integer := 8;
 
+    -- Width of timeout counter, determines the time when the switch to
+    -- the next active MVB/MFB stream occurs.
+    SW_TIMEOUT_WIDTH    : natural := 4;
+
     -- Input PIPEs enable
     -- Only used in architecture SIMPLE.
     -- Input registers is created when this is set to false.
