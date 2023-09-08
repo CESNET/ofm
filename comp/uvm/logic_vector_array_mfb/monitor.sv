@@ -13,9 +13,8 @@ class monitor_logic_vector_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH,
 
     uvm_reset::sync_terminate reset_sync;
     localparam SOF_POS_WIDTH = $clog2(REGION_SIZE);
-    local uvm_logic_vector_array::sequence_item #(ITEM_WIDTH) hi_tr;
-    local logic [ITEM_WIDTH-1 : 0] data[$];
-    int data_index = 0;
+    protected uvm_logic_vector_array::sequence_item #(ITEM_WIDTH) hi_tr;
+    protected logic [ITEM_WIDTH-1 : 0] data[$];
 
     function new (string name, uvm_component parent);
         super.new(name, parent);
@@ -24,7 +23,7 @@ class monitor_logic_vector_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH,
         reset_sync = new();
     endfunction
 
-    function void process_eof(int unsigned index, int unsigned start_pos, uvm_mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) tr);
+    virtual function void process_eof(int unsigned index, int unsigned start_pos, uvm_mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) tr);
         if (hi_tr != null) begin
             for (int unsigned it = start_pos; it <= tr.eof_pos[index]; it++) begin
                 data.push_back(tr.data[index][(it+1)*ITEM_WIDTH-1 -: ITEM_WIDTH]);
@@ -34,9 +33,9 @@ class monitor_logic_vector_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH,
         end
     endfunction
 
-    function void process_sof(int unsigned index, int unsigned end_pos, uvm_mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) tr);
+    virtual function void process_sof(int unsigned index, int unsigned end_pos, uvm_mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) tr);
         int unsigned sof_pos = (SOF_POS_WIDTH != 0 ? BLOCK_SIZE*tr.sof_pos[index] : 0);
-        hi_tr = uvm_logic_vector_array::sequence_item #(ITEM_WIDTH)::type_id::create("hi_tr");
+        hi_tr = uvm_logic_vector_array::sequence_item #(ITEM_WIDTH)::type_id::create("hi_tr", this);
         data.delete();
         for (int unsigned it = sof_pos; it <= end_pos; it++) begin
             data.push_back(tr.data[index][(it+1)*ITEM_WIDTH-1 -: ITEM_WIDTH]);
@@ -61,22 +60,13 @@ class monitor_logic_vector_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH,
                     process_eof(it, 0, tr);
                     process_sof(it, REGION_SIZE*BLOCK_SIZE-1, tr);
                 end else begin
-                    int unsigned pos_start = tr.sof[it] ? sof_pos : 0;
                     int unsigned pos_end   = tr.eof[it] ? tr.eof_pos[it] : (REGION_SIZE*BLOCK_SIZE-1);
 
                     if (tr.sof[it]) begin
-                        if (hi_tr != null) begin
-                            `uvm_error(this.get_full_name(), "\n\tSOF has been set before previous frame haven't correctly ended. EOF haven't been set on end of packet")
-                        end
-                        hi_tr = uvm_logic_vector_array::sequence_item #(ITEM_WIDTH)::type_id::create("hi_tr");
-                        data.delete();
-                    end
-
-                    if (hi_tr != null) begin
-                        inframe = 1;
-                        for (int unsigned jt = pos_start; jt <= pos_end; jt++) begin
+                        process_sof(it, pos_end, tr);
+                    end else if (hi_tr != null) begin
+                        for (int unsigned jt = 0; jt <= pos_end; jt++) begin
                             data.push_back(tr.data[it][(jt+1)*ITEM_WIDTH-1 -: ITEM_WIDTH]);
-                            data_index++;
                         end
                     end
 
