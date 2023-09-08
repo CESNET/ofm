@@ -23,6 +23,10 @@ set SIM_FLAGS(MAKEFILE_NAME) simulation.Makefile
 set SIM_FLAGS(VSIM_MANUAL_START) true
 set SIM_FLAGS(DEBUG) true
 
+if {[info exists env(SYNTH_TOOL)]} {
+    set SYNTH_FLAGS(TOOL) $env(SYNTH_TOOL)
+}
+
 set COCOTB_PATH [eval cocotb-config --lib-name-path fli modelsim]
 lappend SIM_FLAGS(EXTRA_VFLAGS) -foreign "cocotb_init $COCOTB_PATH"
 #lappend SIM_FLAGS(EXTRA_VFLAGS) -onfinish exit

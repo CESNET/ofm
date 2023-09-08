@@ -266,6 +266,8 @@ proc DeduceType {FNAME {TYPE ""}} {
         set type "DEVTREE"
     } elseif {[regexp ".xci$" $FNAME] && $TYPE == ""} {
         set type "VIVADO_IP_XACT"
+    } elseif {[regexp ".ip$" $FNAME] && $TYPE == ""} {
+        set type "QUARTUS_IP"
     } elseif {[regexp ".bd$" $FNAME] && $TYPE == ""} {
         set type "VIVADO_BD"
     } 

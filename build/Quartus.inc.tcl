@@ -64,10 +64,6 @@ proc EvalFile {FNAME OPT} {
             # SDC file
             set_global_assignment -name SDC_FILE $FNAME
             puts "INFO: Constraints file added: $FNAME"
-        } elseif { $FEXT == ".ip" } {
-            # IP file
-            set_global_assignment -name IP_FILE $FNAME
-            puts "INFO: IP file added: $FNAME"
         } elseif { $FEXT == ".qsys" } {
             # QSYS file
             set_global_assignment -name QSYS_FILE $FNAME
@@ -99,6 +95,10 @@ proc EvalFile {FNAME OPT} {
     } elseif {$opt(TYPE) == "SEARCH_PATH"} {
         puts "- set SEARCH_PATH for custom Quartus IP: $FNAME"
         set_global_assignment -name SEARCH_PATH $FNAME
+    } elseif {$opt(TYPE) == "QUARTUS_IP" } {
+        # IP file
+        set_global_assignment -name IP_FILE $FNAME
+        puts "INFO: IP file added: $FNAME"
     }
 }
 
