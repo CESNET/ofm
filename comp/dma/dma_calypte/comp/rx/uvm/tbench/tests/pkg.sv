@@ -23,7 +23,7 @@ package test;
     parameter PCIE_UP_REGION_SIZE = 1;
     parameter PCIE_UP_BLOCK_SIZE  = 8;
     parameter PCIE_UP_ITEM_WIDTH  = 32;
-    parameter PCIE_UP_META_WIDTH  = sv_pcie_meta_pack::PCIE_CQ_META_WIDTH;
+    parameter PCIE_UP_META_WIDTH  = sv_pcie_meta_pack::PCIE_RQ_META_WIDTH;
 
     parameter CHANNELS       = 8;
     parameter POINTER_WIDTH  = 16;

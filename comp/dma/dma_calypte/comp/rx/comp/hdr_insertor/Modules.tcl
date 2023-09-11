@@ -3,6 +3,7 @@
 # Author(s): Vladislav Valek <xvalek14@vutbr.cz>
 #
 # SPDX-License-Identifier: BSD-3-Clause
+lappend PACKAGES "$OFM_PATH/comp/base/pkg/pcie_meta_pack.vhd"
 
 lappend MOD "$ENTITY_BASE/rx_dma_hdr_insertor.vhd"
 

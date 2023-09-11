@@ -14,6 +14,12 @@ module DMA_LL_DUT #(DEVICE, USER_REGIONS, USER_REGION_SIZE, USER_BLOCK_SIZE, USE
         mi_if.dut_slave config_mi
     );
 
+    // UVM_PROBE //
+    // Drop indicator + Drop Channel
+    // Trigger: hdr_dma_hdr_src_rdy & hdr_dma_hdr_dst_rdy 
+    bind RX_DMA_CALYPTE: VHDL_DUT_U probe_inf #(1)                probe_discard((hdrm_dma_hdr_src_rdy & hdrm_dma_hdr_dst_rdy & (RESET === 1'b0)), hdrm_pkt_drop, CLK);
+    bind RX_DMA_CALYPTE: VHDL_DUT_U probe_inf #($clog2(CHANNELS)) probe_channel((hdrm_dma_hdr_src_rdy & hdrm_dma_hdr_dst_rdy & (RESET === 1'b0)), hdrm_dma_hdr_chan_num, CLK);
+
     logic [$clog2(PKT_SIZE_MAX+1)-1:0] packet_size;
     logic [$clog2(CHANNELS)-1:0]       channel;
     logic [24-1:0]                     meta;
@@ -76,6 +82,7 @@ module DMA_LL_DUT #(DEVICE, USER_REGIONS, USER_REGION_SIZE, USER_BLOCK_SIZE, USE
         .USER_RX_MFB_DST_RDY     (mfb_rx.DST_RDY),
 
         .PCIE_UP_MFB_DATA     (mfb_tx.DATA),
+        .PCIE_UP_MFB_META     (mfb_tx.META),
         .PCIE_UP_MFB_SOF_POS  (sof_pos),
         .PCIE_UP_MFB_EOF_POS  (mfb_tx.EOF_POS),
         .PCIE_UP_MFB_SOF      (mfb_tx.SOF),

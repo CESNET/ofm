@@ -225,7 +225,7 @@ architecture FULL of DMA_CALYPTE is
     signal inp_fifo_status : std_logic_vector(log2(512) downto 0);
 
     signal inp_fifo_mfb_data    : std_logic_vector(PCIE_CQ_MFB_REGIONS*PCIE_CQ_MFB_REGION_SIZE*PCIE_CQ_MFB_BLOCK_SIZE*PCIE_CQ_MFB_ITEM_WIDTH-1 downto 0);
-    signal inp_fifo_mfb_meta    : std_logic_vector(PCIE_CQ_META_WIDTH -1 downto 0);
+    signal inp_fifo_mfb_meta    : std_logic_vector(PCIE_CQ_MFB_REGIONS*PCIE_CQ_META_WIDTH -1 downto 0);
     signal inp_fifo_mfb_sof     : std_logic_vector(PCIE_CQ_MFB_REGIONS -1 downto 0);
     signal inp_fifo_mfb_eof     : std_logic_vector(PCIE_CQ_MFB_REGIONS -1 downto 0);
     signal inp_fifo_mfb_sof_pos : std_logic_vector(PCIE_CQ_MFB_REGIONS*max(1, log2(PCIE_CQ_MFB_REGION_SIZE)) -1 downto 0);
@@ -266,11 +266,6 @@ architecture FULL of DMA_CALYPTE is
     -- attribute mark_debug of PCIE_CQ_MFB_SRC_RDY : signal is "true";
     -- attribute mark_debug of PCIE_CQ_MFB_DST_RDY : signal is "true";
 begin
-
-    PCIE_RQ_MFB_META(PCIE_RQ_META_HEADER) <= (others => '0');
-    PCIE_RQ_MFB_META(PCIE_RQ_META_PREFIX) <= (others => '0');
-    PCIE_RQ_MFB_META(PCIE_RQ_META_FBE)    <= (others => '1');
-    PCIE_RQ_MFB_META(PCIE_RQ_META_LBE)    <= (others => '1');
 
     rx_dma_calypte_g : if (RX_GEN_EN) generate
         rx_dma_calypte_i : entity work.RX_DMA_CALYPTE
@@ -322,6 +317,7 @@ begin
                 USER_RX_MFB_DST_RDY => USR_RX_MFB_DST_RDY,
 
                 PCIE_UP_MFB_DATA    => PCIE_RQ_MFB_DATA,
+                PCIE_UP_MFB_META    => PCIE_RQ_MFB_META,
                 PCIE_UP_MFB_SOF     => PCIE_RQ_MFB_SOF,
                 PCIE_UP_MFB_EOF     => PCIE_RQ_MFB_EOF,
                 PCIE_UP_MFB_SOF_POS => PCIE_RQ_MFB_SOF_POS,

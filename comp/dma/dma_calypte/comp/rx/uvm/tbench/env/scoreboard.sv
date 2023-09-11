@@ -57,7 +57,6 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_score
     `uvm_component_param_utils(uvm_dma_ll::scoreboard #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE))
 
     localparam LOGIC_WIDTH  = 24 + $clog2(PKT_SIZE_MAX+1) + $clog2(CHANNELS);
-    localparam IS_INTEL_DEV = (DEVICE == "STRATIX10" || DEVICE == "AGILEX");
 
     //INPUT TO DUT
     uvm_analysis_export #(uvm_byte_array::sequence_item)                  analysis_export_rx_packet;
@@ -99,13 +98,11 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_score
         analysis_export_rx_meta   = new("analysis_export_rx_meta",   this);
         analysis_export_dma       = new("analysis_export_dma",       this);
         analysis_export_tx_packet = new("analysis_export_tx_packet", this);
+        analysis_export_tx_meta   = new("analysis_export_tx_meta",   this);
         model_output              = new("model_output",              this);
+        model_meta_output         = new("model_meta_output",         this);
         dut_data_output           = new("dut_data_output",           this);
-        if (IS_INTEL_DEV) begin
-            dut_meta_output         = new("dut_meta_output",           this);
-            analysis_export_tx_meta = new("analysis_export_tx_meta",   this);
-            model_meta_output       = new("model_meta_output",         this);
-        end
+        dut_meta_output           = new("dut_meta_output",           this);
 
         //LOCAL VARIABLES
         rx_speed_meter = new("rx_speed_meter", this);
@@ -130,13 +127,10 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_score
         analysis_export_rx_meta.connect(m_model.analysis_imp_rx_meta.analysis_export);
         analysis_export_dma.connect(m_model.analysis_dma.analysis_export);
         analysis_export_tx_packet.connect(dut_data_output.analysis_export);
-
-        if (IS_INTEL_DEV) begin 
-            analysis_export_tx_meta.connect(dut_meta_output.analysis_export);
-            m_model.analysis_port_tx_meta.connect(model_meta_output.analysis_export);
-        end
+        analysis_export_tx_meta.connect(dut_meta_output.analysis_export);
 
         m_model.analysis_port_tx.connect(model_output.analysis_export);
+        m_model.analysis_port_tx_meta.connect(model_meta_output.analysis_export);
     endfunction
 
     function bit pcie_compare(uvm_logic_vector_array::sequence_item#(32) tr_dut, uvm_logic_vector::sequence_item#(META_WIDTH) tr_meta_dut, model_packet packet_model, uvm_logic_vector::sequence_item#(META_WIDTH) tr_meta_model);
@@ -160,9 +154,7 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_score
             ret           = tr_dut.compare(tr_model);
         end
 
-        if (IS_INTEL_DEV) begin
-            ret = tr_meta_dut.compare(tr_meta_model);
-        end
+        ret = tr_meta_dut.compare(tr_meta_model);
 
         return ret;
     endfunction
@@ -201,10 +193,9 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_score
         forever begin
             time time_act;
             time speed_metet_duration;
-            if (IS_INTEL_DEV) begin
-                dut_meta_output.get(tr_meta);
-                data.meta = tr_meta;
-            end
+
+            dut_meta_output.get(tr_meta);
+            data.meta = tr_meta;
 
             dut_data_output.get(tr_dut);
             time_act = $time();
@@ -247,10 +238,10 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_score
             wait (out_data.size() != 0);
             tr_dut = out_data.pop_front();
             // Get transaction from model
-            tr_meta_model = uvm_logic_vector::sequence_item#(META_WIDTH)::type_id::create("tr_meta_model");
-            tr_meta_model.data = '0;
-            if (IS_INTEL_DEV)
-                model_meta_output.get(tr_meta_model);
+            //tr_meta_model = uvm_logic_vector::sequence_item#(META_WIDTH)::type_id::create("tr_meta_model");
+            //tr_meta_model.data = '0;
+
+            model_meta_output.get(tr_meta_model);
             model_output.get(tr_model);
 
             $cast(packet_model, tr_model);
@@ -267,7 +258,9 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_score
                 errors++;
 
                 $swrite(msg, "%s\nExpected transaction is:\n\t\tPart is : %s\n\t\tChannel : %0d\n\t\tPart %0d/%0d\n\t\tInput time : %dns", msg, packet_model.data_packet == 1 ? "DATA" : "HEADER",  packet_model.channel, packet_model.part, packet_model.part_num, packet_model.start_time/1ns);
-                `uvm_error(this.get_full_name(), $sformatf("%s\nMODEL transaction%s\nDUT Transaction%s\n\tDUT doesnt match MODEL transaction", msg, tr_model.convert2string(), tr_dut.item.convert2string()));
+                msg = $sformatf("%s\nMODEL transaction%s\nDUT Transaction%s", msg, tr_model.convert2string(), tr_dut.item.convert2string());
+                msg = $sformatf("%s\nMODEL META%s\nDUT META%s\n\tDUT doesnt match MODEL transaction", msg, tr_meta_model.convert2string(), tr_dut.meta.convert2string());
+                `uvm_error(this.get_full_name(), msg);
             end else begin
                 $swrite(msg, "%s\nRecive correct transaction :\n\t\tPart is : %s\n\t\tChannel : %0d\n\t\tPart %0d/%0d\n\t\tPart is delay from SOF on input %0dns", msg, packet_model.data_packet == 1 ? "DATA" : "HEADER",  packet_model.channel, packet_model.part, packet_model.part_num, (tr_dut.output_time - packet_model.start_time)/1ns);
                 `uvm_info(this.get_full_name(), $sformatf("%s\nTransaction%s", msg, tr_model.convert2string()), UVM_MEDIUM);
