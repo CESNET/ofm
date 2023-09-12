@@ -116,13 +116,13 @@ class model #(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE, MI_DATA_WIDTH, MI_ADDR_WIDT
         uvm_common::model_item #(uvm_logic_vector::sequence_item#(sv_pcie_meta_pack::PCIE_CQ_META_WIDTH)) cq_meta_tr;
         uvm_common::model_item #(uvm_mi::sequence_item_request #(MI_DATA_WIDTH, MI_ADDR_WIDTH, 0))        mi_tr;
 
-        logic [64-1 : 0]     mi_addr_base = '0;
-        logic [11-1 : 0]     dw_cnt       = '0;
-        logic [4-1 : 0]      fbe          = '0;
-        logic [4-1 : 0]      lbe          = '0;
-        logic [8-1 : 0]      req_type     = '0;
-        logic [(32/8)-1 : 0] be           = '0;
-        logic [3-1 : 0]      rw           = '0;
+        logic [64-1 : 0]     mi_addr_base;
+        logic [11-1 : 0]     dw_cnt;
+        logic [4-1 : 0]      fbe;
+        logic [4-1 : 0]      lbe;
+        logic [8-1 : 0]      req_type;
+        logic [(32/8)-1 : 0] be;
+        uvm_pcie_hdr::msg_type rw;
         int unsigned hdr_offset           = 0;
 
         logic[sv_pcie_meta_pack::PCIE_META_REQ_HDR_W-1 : 0] hdr;
@@ -177,9 +177,10 @@ class model #(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE, MI_DATA_WIDTH, MI_ADDR_WIDT
                 dw_cnt = 1024;
             end
 
+           
             rw = uvm_pcie_hdr::encode_type(req_type, IS_INTEL_DEV);
 
-            if (!(rw == 3'b011 || rw == 3'b010 || rw == 3'b100)) begin
+            if (rw == uvm_pcie_hdr::TYPE_WRITE || rw == uvm_pcie_hdr::TYPE_READ) begin
                 count_mi_addr(hdr, meta, mi_addr_base, hdr_offset);
                 for (int unsigned it = hdr_offset; it < (dw_cnt + hdr_offset); it++) begin
                     mi_tr      = uvm_common::model_item #(uvm_mi::sequence_item_request #(MI_DATA_WIDTH, MI_ADDR_WIDTH, 0))::type_id::create("mi_tr");
@@ -192,9 +193,9 @@ class model #(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE, MI_DATA_WIDTH, MI_ADDR_WIDT
                     else
                         be = '1;
 
-                    if (rw == 3'b001) begin
+                    if (rw == uvm_pcie_hdr::TYPE_WRITE) begin
                         gen_mi_write(mi_addr_base + (it - hdr_offset)*4, cq_data_tr.item.data[it], be, mi_tr.item);
-                    end else if (rw == 3'b000) begin
+                    end else if (rw == uvm_pcie_hdr::TYPE_READ) begin
                         gen_mi_read(mi_addr_base + (it - hdr_offset)*4, be, mi_tr.item);
                     end
 
@@ -245,7 +246,7 @@ class response_model #(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE, MI_DATA_WIDTH, MI_
 
         logic[sv_pcie_meta_pack::PCIE_META_REQ_HDR_W-1 : 0] hdr;
         logic[8-1 : 0]                                      req_type;
-        logic[3-1 : 0]                                      rw = '0;
+        uvm_pcie_hdr::msg_type                              rw;
 
         analysis_imp_cq_meta.get(cq_meta_tr);
 
@@ -264,8 +265,7 @@ class response_model #(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE, MI_DATA_WIDTH, MI_
         req_type = (IS_INTEL_DEV) ? hdr[32-1 : 24] : {4'b0000, hdr[79-1 : 75]};
 
         rw = uvm_pcie_hdr::encode_type(req_type, IS_INTEL_DEV);
-
-        if (rw == 3'b000 || rw == 3'b100) begin
+        if (rw == uvm_pcie_hdr::TYPE_READ || rw == uvm_pcie_hdr::TYPE_ERR) begin
             hdrs.push_back(hdr);
             metas.push_back(cq_meta_tr.item.data[sv_pcie_meta_pack::PCIE_CQ_META_WIDTH-1 : sv_pcie_meta_pack::PCIE_META_REQ_HDR_W]);
         end
@@ -286,7 +286,7 @@ class response_model #(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE, MI_DATA_WIDTH, MI_
             logic [3-1 : 0]  attr;
             logic            comp_with_data = 1'b1;
             logic [8-1 : 0]  req_type = '0;
-            logic[3-1 : 0]   rw = '0;
+            uvm_pcie_hdr::msg_type  rw;
 
             logic [8-1 : 0] tph_st_tag;
             logic [2-1 : 0] tph_type;
@@ -337,7 +337,7 @@ class response_model #(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE, MI_DATA_WIDTH, MI_
 
                 rw = uvm_pcie_hdr::encode_type(req_type, IS_INTEL_DEV);
 
-                if (rw == 3'b100) begin
+                if (rw == uvm_pcie_hdr::TYPE_ERR) begin
                     // completion status (unsupported request)
                     comp_st = 3'b001;
                     low_addr = '0;
@@ -379,7 +379,7 @@ class response_model #(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE, MI_DATA_WIDTH, MI_
                 else
                     byte_cnt = int'(hdr[75-1 : 64] * 4) - int'(sv_dma_bus_pack::encode_fbe(meta[39-1 : 35])) - int'(sv_dma_bus_pack::encode_lbe(meta[43-1 : 39]));
 
-                if (rw == 3'b100) begin
+                if (rw == uvm_pcie_hdr::TYPE_ERR) begin
                     // completion status (unsupported request)
                     comp_st = 3'b001;
                     low_addr = '0;

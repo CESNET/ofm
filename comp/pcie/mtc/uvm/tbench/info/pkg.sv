@@ -21,13 +21,14 @@ package uvm_pcie_hdr;
     `include "monitor.sv"
     `include "agent.sv"
 
-    function logic[3-1 : 0] encode_type(logic [8-1 : 0] req_type, logic intel);
-        logic[3-1 : 0] ret;
+    typedef enum {TYPE_READ, TYPE_WRITE, TYPE_MSG, TYPE_MSGD, TYPE_ERR} msg_type;
+    function msg_type encode_type(logic [8-1 : 0] req_type, logic intel);
+        msg_type ret;
         if (intel) begin
             case (req_type)
                 // READ
-                8'b00000000 : ret = 3'b000;
-                8'b00100000 : ret = 3'b000;
+                8'b00000000 : ret = TYPE_READ;
+                8'b00100000 : ret = TYPE_READ;
                 // Read locked
                 // 8'b00000001 : ret = 3'b000;
                 // 8'b00100001 : ret = 3'b000;
@@ -41,8 +42,8 @@ package uvm_pcie_hdr;
                 // 8'b00001011 : ret = 3'b000;
 
                 // WRITE;
-                8'b01100000 : ret = 3'b001;
-                8'b01000000 : ret = 3'b001;
+                8'b01100000 : ret = TYPE_WRITE;
+                8'b01000000 : ret = TYPE_WRITE;
                 // IOWrite
                 // 8'b01000010 : ret = 3'b001;
                 // // Cfg Write
@@ -68,30 +69,30 @@ package uvm_pcie_hdr;
                 // 8'b01101110 : ret = 3'b001;
 
                 // MSG
-                8'b00110000 : ret = 3'b010;
-                8'b00110001 : ret = 3'b010;
-                8'b00110010 : ret = 3'b010;
-                8'b00110011 : ret = 3'b010;
-                8'b00110100 : ret = 3'b010;
-                8'b00110101 : ret = 3'b010;
+                8'b00110000 : ret = TYPE_MSG;
+                8'b00110001 : ret = TYPE_MSG;
+                8'b00110010 : ret = TYPE_MSG;
+                8'b00110011 : ret = TYPE_MSG;
+                8'b00110100 : ret = TYPE_MSG;
+                8'b00110101 : ret = TYPE_MSG;
                 // MSGd
-                8'b01110000 : ret = 3'b011;
-                8'b01110001 : ret = 3'b011;
-                8'b01110010 : ret = 3'b011;
-                8'b01110011 : ret = 3'b011;
-                8'b01110100 : ret = 3'b011;
-                8'b01110101 : ret = 3'b011;
+                8'b01110000 : ret = TYPE_MSGD;
+                8'b01110001 : ret = TYPE_MSGD;
+                8'b01110010 : ret = TYPE_MSGD;
+                8'b01110011 : ret = TYPE_MSGD;
+                8'b01110100 : ret = TYPE_MSGD;
+                8'b01110101 : ret = TYPE_MSGD;
                 // ERROR
-                default     : ret = 3'b100;
+                default     : ret = TYPE_ERR;
             endcase
         end else begin
             case (req_type[4-1 : 0])
                 // READ
-                4'b0000 : ret = 3'b000;
+                4'b0000 : ret = TYPE_READ;
                 // WRITE;
-                4'b0001 : ret = 3'b001;
+                4'b0001 : ret = TYPE_WRITE;
                 // ERROR
-                default : ret = 3'b100;
+                default : ret = TYPE_ERR;
             endcase
         end
         return ret;

@@ -124,13 +124,12 @@ class driver#(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE) extends uvm_component;
     // ------------------------------------------------------------------------
     // Starts driving signals to interface
     task run_phase(uvm_phase phase);
-
         tag_sync.fill_array();
 
         forever begin
             string          msg = "";
             pcie            pcie_tr;
-            logic [3-1 : 0] rw;
+            uvm_pcie_hdr::msg_type rw;
             seq_item_port_pcie_hdr.get_next_item(cq_header_req);
 
             cq_pcie_hdr            = uvm_logic_vector::sequence_item#(sv_pcie_meta_pack::PCIE_CQ_META_WIDTH)::type_id::create("cq_pcie_hdr");
@@ -140,10 +139,11 @@ class driver#(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE) extends uvm_component;
 
             rw = uvm_pcie_hdr::encode_type(cq_header_req.req_type, IS_INTEL_DEV);
 
-            if (rw == 3'b000 || rw == 3'b100) begin
+            if (rw == uvm_pcie_hdr::TYPE_READ || rw == uvm_pcie_hdr::TYPE_ERR) begin
                 while (!(tag_sync.list_of_tags.exists(cq_header_req.tag))) begin
                     #(10ns*$urandom_range(1, 100));
                 end
+
                 tag_sync.remove_element(cq_header_req.tag);
             end
 

@@ -20,7 +20,7 @@ class logic_vector_array_sequence#(ITEM_WIDTH, string DEVICE, string ENDPOINT_TY
     task body;
         uvm_logic_vector::sequence_item#(131) pcie_hdr;
         uvm_logic_vector_array::sequence_item#(ITEM_WIDTH) m_pcie_data;
-        logic [3-1 : 0] rw;
+        uvm_pcie_hdr::msg_type rw;
         int             tr_cnt;
 
         forever begin
@@ -53,7 +53,7 @@ class logic_vector_array_sequence#(ITEM_WIDTH, string DEVICE, string ENDPOINT_TY
                 end
             end
 
-            if (rw == 3'b000) begin
+            if (rw == uvm_pcie_hdr::TYPE_READ) begin
                 req = uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)::type_id::create("req");
                 if (!IS_MFB_META_DEV) begin
                     req.data = new[sv_pcie_meta_pack::PCIE_META_REQ_HDR_W/ITEM_WIDTH];
