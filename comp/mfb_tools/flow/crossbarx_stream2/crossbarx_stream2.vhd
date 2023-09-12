@@ -211,6 +211,15 @@ architecture FULL of MFB_CROSSBARX_STREAM2 is
     signal txbuf_wr_ie                : slv_array_t(TXBUF_BLOCKS-1 downto 0)(MFB_BLOCK_SIZE-1 downto 0);
     signal txbuf_wr_en                : std_logic_vector(TXBUF_BLOCKS-1 downto 0);
 
+    signal dbg_rx_mvb_pkt_cnt         : unsigned(64-1 downto 0);
+    signal dbg_rx_mfb_pkt_cnt         : unsigned(64-1 downto 0);
+    signal dbg_tx_mvb_pkt_cnt         : unsigned(64-1 downto 0);
+    signal dbg_tx_mfb_pkt_cnt         : unsigned(64-1 downto 0);
+    signal dbg_plan_glb_cnt           : unsigned(64-1 downto 0);
+    signal dbg_crox_instr_cnt         : unsigned(64-1 downto 0);
+    signal dbg_crox_done_cnt          : unsigned(64-1 downto 0);
+    signal dbg_txbuf_instr_cnt        : unsigned(64-1 downto 0);
+
 begin
 
     assert (IN_STREAMS = 1) 
@@ -550,6 +559,7 @@ begin
         MFB_REGIONS => MFB_REGIONS,
         STREAMS     => IN_STREAMS,
         PKT_MTU     => PKT_MTU,
+        PKT_ID_W    => PKT_ID_WIDTH,
         USERMETA_W  => USERMETA_WIDTH,
         TXBUF_BYTES => TXBUF_BYTES,
         DEVICE      => DEVICE
@@ -645,5 +655,140 @@ begin
         TX_MFB_SRC_RDY   => TX_MFB_SRC_RDY,
         TX_MFB_DST_RDY   => TX_MFB_DST_RDY
     );
+
+    -- =========================================================================
+    -- DEBUG LOGIC
+    -- =========================================================================
+
+    --pragma synthesis_off
+    process (CLK)
+        variable dbg_pkt_cnt_v : unsigned(63 downto 0);
+    begin
+        dbg_pkt_cnt_v := (others => '0');
+        if (rising_edge(CLK)) then
+            if (RESET = '1') then
+                dbg_rx_mvb_pkt_cnt <= (others => '0');
+            elsif (RX_MVB_SRC_RDY(0) = '1' and RX_MVB_DST_RDY(0) = '1') then
+                for i in 0 to MFB_REGIONS-1 loop
+                    dbg_pkt_cnt_v := dbg_pkt_cnt_v + RX_MVB_VLD(0)(i);
+                end loop;
+                dbg_rx_mvb_pkt_cnt <= dbg_rx_mvb_pkt_cnt + dbg_pkt_cnt_v;
+            end if;
+        end if;
+    end process;
+
+    process (CLK)
+        variable dbg_pkt_cnt_v : unsigned(63 downto 0);
+    begin
+        dbg_pkt_cnt_v := (others => '0');
+        if (rising_edge(CLK)) then
+            if (RESET = '1') then
+                dbg_tx_mvb_pkt_cnt <= (others => '0');
+            elsif (TX_MVB_SRC_RDY = '1' and TX_MVB_DST_RDY = '1') then
+                for i in 0 to MFB_REGIONS-1 loop
+                    dbg_pkt_cnt_v := dbg_pkt_cnt_v + TX_MVB_VLD(i);
+                end loop;
+                    dbg_tx_mvb_pkt_cnt <= dbg_tx_mvb_pkt_cnt + dbg_pkt_cnt_v;
+            end if;
+        end if;
+    end process;
+
+    process (CLK)
+        variable dbg_pkt_cnt_v : unsigned(63 downto 0);
+    begin
+        dbg_pkt_cnt_v := (others => '0');
+        if (rising_edge(CLK)) then
+            if (RESET = '1') then
+                dbg_rx_mfb_pkt_cnt <= (others => '0');
+            elsif (RX_MFB_SRC_RDY(0) = '1' and RX_MFB_DST_RDY(0) = '1') then
+                for i in 0 to MFB_REGIONS-1 loop
+                    dbg_pkt_cnt_v := dbg_pkt_cnt_v + RX_MFB_EOF(0)(i);
+                end loop;
+                dbg_rx_mfb_pkt_cnt <= dbg_rx_mfb_pkt_cnt + dbg_pkt_cnt_v;
+            end if;
+        end if;
+    end process;
+
+    process (CLK)
+        variable dbg_pkt_cnt_v : unsigned(63 downto 0);
+    begin
+        dbg_pkt_cnt_v := (others => '0');
+        if (rising_edge(CLK)) then
+            if (RESET = '1') then
+                dbg_tx_mfb_pkt_cnt <= (others => '0');
+            elsif (TX_MFB_SRC_RDY = '1' and TX_MFB_DST_RDY = '1') then
+                for i in 0 to MFB_REGIONS-1 loop
+                    dbg_pkt_cnt_v := dbg_pkt_cnt_v + TX_MFB_EOF(i);
+                end loop;
+                    dbg_tx_mfb_pkt_cnt <= dbg_tx_mfb_pkt_cnt + dbg_pkt_cnt_v;
+            end if;
+        end if;
+    end process;
+
+    process (CLK)
+        variable dbg_pkt_cnt_v : unsigned(63 downto 0);
+    begin
+        dbg_pkt_cnt_v := (others => '0');
+        if (rising_edge(CLK)) then
+            if (RESET = '1') then
+                dbg_txbuf_instr_cnt <= (others => '0');
+            elsif (txbuf_instr_src_rdy = '1' and txbuf_instr_dst_rdy = '1') then
+                for i in 0 to MFB_REGIONS-1 loop
+                    dbg_pkt_cnt_v := dbg_pkt_cnt_v + txbuf_instr_vld(i);
+                end loop;
+                    dbg_txbuf_instr_cnt <= dbg_txbuf_instr_cnt + dbg_pkt_cnt_v;
+            end if;
+        end if;
+    end process;
+
+    process (CLK)
+        variable dbg_pkt_cnt_v : unsigned(63 downto 0);
+    begin
+        dbg_pkt_cnt_v := (others => '0');
+        if (rising_edge(CLK)) then
+            if (RESET = '1') then
+                dbg_plan_glb_cnt <= (others => '0');
+            elsif (plan_glb_mvb_dst_rdy = '1') then
+                for i in 0 to MFB_REGIONS-1 loop
+                    dbg_pkt_cnt_v := dbg_pkt_cnt_v + plan_glb_mvb_vld(i);
+                end loop;
+                dbg_plan_glb_cnt <= dbg_plan_glb_cnt + dbg_pkt_cnt_v;
+            end if;
+        end if;
+    end process;
+
+    process (CLK)
+        variable dbg_pkt_cnt_v : unsigned(63 downto 0);
+    begin
+        dbg_pkt_cnt_v := (others => '0');
+        if (rising_edge(CLK)) then
+            if (RESET = '1') then
+                dbg_crox_instr_cnt <= (others => '0');
+            elsif (crox_instr_src_rdy(0) = '1' and crox_instr_dst_rdy(0) = '1') then
+                for i in 0 to MFB_REGIONS-1 loop
+                    dbg_pkt_cnt_v := dbg_pkt_cnt_v + crox_instr_vld(0)(i);
+                end loop;
+                dbg_crox_instr_cnt <= dbg_crox_instr_cnt + dbg_pkt_cnt_v;
+            end if;
+        end if;
+    end process;
+
+    process (CLK)
+        variable dbg_pkt_cnt_v : unsigned(63 downto 0);
+    begin
+        dbg_pkt_cnt_v := (others => '0');
+        if (rising_edge(CLK)) then
+            if (RESET = '1') then
+                dbg_crox_done_cnt <= (others => '0');
+            else
+                for i in 0 to MFB_REGIONS-1 loop
+                    dbg_pkt_cnt_v := dbg_pkt_cnt_v + crox_done_vld(0)(i);
+                end loop;
+                dbg_crox_done_cnt <= dbg_crox_done_cnt + dbg_pkt_cnt_v;
+            end if;
+        end if;
+    end process;
+
+    --pragma synthesis_on
 
 end architecture;
