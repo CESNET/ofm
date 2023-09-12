@@ -92,12 +92,12 @@ class Model;
         int frame_len_max_fix;
         int frame_len_min_fix;
 
-        if (INBANDFCS) begin
-            frame_len_max_fix = FRAME_LEN_MAX;
-            frame_len_min_fix = FRAME_LEN_MIN;
-        end else begin
+        if (CRC_REMOVE_EN || (!CRC_IS_RECEIVED)) begin
             frame_len_max_fix = FRAME_LEN_MAX - 4;
             frame_len_min_fix = FRAME_LEN_MIN - 4;
+        end else begin
+            frame_len_max_fix = FRAME_LEN_MAX;
+            frame_len_min_fix = FRAME_LEN_MIN;
         end
 
         while (enabled) begin // Repeat while enabled
@@ -105,7 +105,7 @@ class Model;
             rxMbx.get(mbx_tr);
             $cast(frame, mbx_tr);
 
-            if (!INBANDFCS) begin
+            if (CRC_REMOVE_EN) begin
                 // cut CRC from data
                 //$write("Frame before cut CRC:\n");
                 //frame.display();
@@ -137,7 +137,7 @@ class Model;
             end
 
             // Frame length with CRC for stat model
-            if (INBANDFCS) begin
+            if (CRC_IS_RECEIVED && CRC_REMOVE_EN) begin
                 stat.packetLength = frame.data.size - 4;
             end else begin
                 stat.packetLength = frame.data.size;
@@ -156,6 +156,9 @@ class Model;
             end
 
             frame.error = frame.adapter_error || frame.mac_error || frame.mintu_error || frame.maxtu_error || frame.crc_error;
+
+            //$write("Frame in model:\n");
+            //frame.display();
             
             if (!frame.error) begin
                 sc_table.add(frame);

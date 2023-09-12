@@ -15,7 +15,8 @@ SETTINGS = {
         "RESIZE_BUFFER"     : "0",
         "CRC_CHECK_EN"      : "1",
         "MAC_CHECK_EN"      : "1",
-        "INBANDFCS"         : "0",
+        "CRC_IS_RECEIVED"   : "1",
+        "CRC_REMOVE_EN"     : "1",
         "FRAME_SIZE_MAX"    : "512",
         "FRAME_SIZE_MIN"    : "50",
         "TRANSACTION_COUNT" : "2500",
@@ -55,6 +56,7 @@ SETTINGS = {
     "frames_big" : {
         "FRAME_SIZE_MAX"    : "4096",
         "FRAME_SIZE_MIN"    : "256",
+        "TRANSACTION_COUNT" : "1500",
     },
     "frames_small" : {
         "FRAME_SIZE_MAX"    : "128",
@@ -65,7 +67,8 @@ SETTINGS = {
     },
     "hard_ip_rdy" : {
         "CRC_CHECK_EN"      : "0",
-        "INBANDFCS"         : "0",
+        "CRC_IS_RECEIVED"   : "0",
+        "CRC_REMOVE_EN"     : "0",
     },
     "tx_slow" : {
         "RX_CLK_PERIOD"     : "5ns",
@@ -83,7 +86,8 @@ SETTINGS = {
         "RESIZE_BUFFER"     : "1",
         "CRC_CHECK_EN"      : "0",
         "MAC_CHECK_EN"      : "1",
-        "INBANDFCS"         : "0",
+        "CRC_IS_RECEIVED"   : "0",
+        "CRC_REMOVE_EN"     : "0",
         "FRAME_SIZE_MAX"    : "100",
         "FRAME_SIZE_MIN"    : "100",
         "TRANSACTION_COUNT" : "5000",

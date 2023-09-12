@@ -31,8 +31,9 @@ module DUT (
         .TX_BLOCK_SIZE   (TX_BLOCK_SIZE),
         .TX_ITEM_WIDTH   (TX_ITEM_WIDTH),
         .RESIZE_BUFFER   (RESIZE_BUFFER),
+        .CRC_IS_RECEIVED (CRC_IS_RECEIVED),
         .CRC_CHECK_EN    (CRC_CHECK_EN),
-        .CRC_REMOVE_EN   (!INBANDFCS),
+        .CRC_REMOVE_EN   (CRC_REMOVE_EN),
         .MAC_CHECK_EN    (MAC_CHECK_EN),
         .TIMESTAMP_EN    (TIMESTAMP_EN),
         .MAC_COUNT       (MAC_COUNT_MAX)
