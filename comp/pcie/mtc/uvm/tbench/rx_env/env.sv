@@ -10,7 +10,7 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, DEVICE
     localparam CQ_MFB_META_WIDTH = sv_pcie_meta_pack::PCIE_CQ_META_WIDTH;
 
     //top sequencer
-    sequencer#(MFB_ITEM_WIDTH)                     m_sequencer;
+    //sequencer                                    m_sequencer;
     driver#(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE) m_driver;
 
     //toplevel
@@ -52,7 +52,6 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, DEVICE
         m_env_rx = uvm_logic_vector_array_mfb::env_rx #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, sv_pcie_meta_pack::PCIE_CQ_META_WIDTH)::type_id::create("m_env_rx", this);
 
         if (m_config.active == UVM_ACTIVE) begin
-            m_sequencer = sequencer#(MFB_ITEM_WIDTH     )::type_id::create("m_sequencer", this);
             m_driver    = driver#(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE)::type_id::create("m_driver", this);
         end
 
@@ -62,7 +61,6 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, DEVICE
     // Connect agent's ports with ports from scoreboard.
     function void connect_phase(uvm_phase phase);
         if (m_config.active == UVM_ACTIVE) begin
-            m_sequencer.m_pcie_hdr = m_pcie_hdr_agent.m_sequencer;
             m_driver.seq_item_port_pcie_hdr.connect(m_pcie_hdr_agent.m_sequencer.seq_item_export);
         end
 
