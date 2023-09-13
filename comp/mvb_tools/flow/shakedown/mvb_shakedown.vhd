@@ -17,16 +17,20 @@ use work.type_pack.all;
 entity MVB_SHAKEDOWN is
     generic(
         -- RX MVB item count
-        RX_ITEMS    : natural := 4;
+        RX_ITEMS            : natural := 4;
         -- TX MVB independent interfaces count (can be merged to one MVB with MERGE component)
-        TX_ITEMS    : natural := 1;
+        TX_ITEMS            : natural := 1;
         -- Data item width
-        ITEM_WIDTH  : natural := 128;
+        ITEM_WIDTH          : natural := 128;
         -- Shake ports, when 1, ``RX_ITEMS`` must be read from TX interface to accept next transaction
         -- on RX MVB. When 2, ``RX_ITEMS/2`` must be read, etc. Scale this number carefully, consumes
         -- lot of resources. When one needs value of 3, consider using ``MULTI_FIFOX`` for such use case.
         -- Ingored when using *MUX* implemetation.
-        SHAKE_PORTS : natural := 2; -- allowed values: 1, 2, 3
+        SHAKE_PORTS         : natural := 2; -- allowed values: 1, 2, 3
+        -- If set to true and TX_ITEMS = 1, this component will be implemented as simple
+        -- multiplexer and logic emulating shakedown. This implementation does not provide
+        -- buffering and does not break existing logic loops between SRC and DST readies.
+        USE_MUX_IMPL        : boolean := False;
         DEVICE              : string  := "AGILEX"
     );
     port(
@@ -107,7 +111,7 @@ architecture FULL of MVB_SHAKEDOWN is
     signal mux_tx_data          : std_logic_vector(ITEM_WIDTH - 1 downto 0);
     signal mux_tx_vld           : std_logic_vector(0 downto 0);
 begin
-    mvb_shakedown_g : if not (TX_ITEMS = 1) generate
+    mvb_shakedown_g : if not (TX_ITEMS = 1 and USE_MUX_IMPL) generate
         -- ============================
         -- Unequal RX/TX ITEMS interface wrapper
         -- ============================
@@ -226,7 +230,7 @@ begin
     end generate;
     
     -- Implement effective N to 1 MVB shakedown
-    shift_shakedown_g : if (TX_ITEMS = 1) generate
+    mux_shakedown_g : if (TX_ITEMS = 1 and USE_MUX_IMPL) generate
         signal rx_data_int      : std_logic_vector(RX_ITEMS * ITEM_WIDTH - 1 downto 0);
         signal rx_vld_int       : std_logic_vector(RX_ITEMS - 1 downto 0);
         signal rx_src_rdy_int   : std_logic;
