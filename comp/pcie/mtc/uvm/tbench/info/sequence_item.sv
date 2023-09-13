@@ -107,7 +107,7 @@ class sequence_item extends uvm_sequence_item;
     function string convert2string();
         string ret;
 
-        $swrite(ret, "\tAddress_type : %h\n\tAddress : %h\n\tDword count : %h\n\tRequest_type : %h\n\tIntel_type : %h\n\tRequest_id : %h\n\tTag : %h\n\tTarget_function : %h\n\tBar_aperture : %h\n\tTransaction_class : %h\n\tSnoop bit : %h\n\tRelax bit : %h\n\tID-based : %h\n\tBar : %h\n\tFBE : %h\n\tLBE : %h\n\ttph_present : %h\n\ttph_type : %h\n\ttph_st_tag : %h\n", addr[2-1 : 0], addr[64-1 : 2], dw_count, req_type, intel_type, req_id, tag, t_func, bar_ap, tc, attr[0], attr[1], attr[2], bar, fbe, lbe, tph_present, tph_type, tph_st_tag);
+        $swrite(ret, "\tAddress_type : 0x%h\n\tAddress : 0x%h\n\tDword count : %0d\n\tRequest_type : x%b\n\tIntel_type : 0x%h\n\tRequest_id : %0d\n\tTag : %0d\n\tTarget_function : 0x%h\n\tBar_aperture : %0d\n\tTransaction_class : 0x%h\n\tSnoop bit : 0x%h\n\tRelax bit : 0x%h\n\tID-based : 0x%h\n\tBar : %0d\n\tFBE : x%b\n\tLBE : x%b\n\ttph_present : 0x%h\n\ttph_type : 0x%h\n\ttph_st_tag : 0x%h\n", addr[2-1 : 0], addr[64-1 : 2], dw_count, req_type, intel_type, req_id, tag, t_func, bar_ap, tc, attr[0], attr[1], attr[2], bar, fbe, lbe, tph_present, tph_type, tph_st_tag);
 
         return ret;
     endfunction
