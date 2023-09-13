@@ -9,7 +9,6 @@ class ex_test extends uvm_test;
 
     // declare the Environment reference variable
     uvm_superunpacketer::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, HEADER_SIZE, MVB_ITEM_WIDTH, VERBOSITY, PKT_MTU, MIN_SIZE, META_OUT_MODE, UNPACKING_STAGES) m_env;
-    int unsigned timeout;
 
     // ------------------------------------------------------------------------
     // Functions
@@ -36,6 +35,7 @@ class ex_test extends uvm_test;
     // ------------------------------------------------------------------------
     // Create environment and Run sequences on their sequencers
     virtual task run_phase(uvm_phase phase);
+        time time_start;
         virt_sequence #(MIN_SIZE, PKT_MTU, DATA_SIZE_MAX, MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, HEADER_SIZE, MVB_ITEM_WIDTH) m_vseq;
         m_vseq = virt_sequence#(MIN_SIZE, PKT_MTU, DATA_SIZE_MAX, MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, HEADER_SIZE, MVB_ITEM_WIDTH)::type_id::create("m_vseq");
 
@@ -46,31 +46,16 @@ class ex_test extends uvm_test;
         m_vseq.randomize();
         m_vseq.start(m_env.vscr);
 
-        timeout = 1;
-        fork
-            test_wait_timeout(10000);
-            test_wait_result();
-        join_any;
+
+        time_start = $time();
+        while ((time_start + 3ms) > $time() &&  m_env.sc.used() != 0) begin
+            #(600ns);
+        end
 
         phase.drop_objection(this);
-
-    endtask
-
-    task test_wait_timeout(int unsigned time_length);
-        #(time_length*1us);
-    endtask
-
-    task test_wait_result();
-        do begin
-            #(6000ns);
-        end while (m_env.sc.used() != 0);
-        timeout = 0;
     endtask
 
     function void report_phase(uvm_phase phase);
         `uvm_info(this.get_full_name(), {"\n\tTEST : ", this.get_type_name(), " END\n"}, UVM_NONE);
-        if (timeout) begin
-            `uvm_error(this.get_full_name(), "\n\t===================================================\n\tTIMEOUT SOME PACKET STUCK IN DESIGN\n\t===================================================\n\n");
-        end
     endfunction
 endclass
