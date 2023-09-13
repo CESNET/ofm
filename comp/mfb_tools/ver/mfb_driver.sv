@@ -77,8 +77,13 @@ class MfbDriver #(REGIONS = 4, REGION_SIZE = 8, BLOCK_SIZE = 8, ITEM_WIDTH = 8, 
         sof = 0;
         eof = 0;
         src_rdy = 0;
+        vif.cb.DATA <= 0;
+        vif.cb.META <= 0;
+        vif.cb.SOF <= 0;
+        vif.cb.EOF <= 0;
         vif.cb.SOF_POS <= 0;
         vif.cb.EOF_POS <= 0;
+        vif.cb.SRC_RDY <= 0;
     endfunction
 
     function void fillEmptyWord();

@@ -41,6 +41,7 @@ class MfbResponder #(REGIONS = 4, REGION_SIZE = 8, BLOCK_SIZE = 8, ITEM_WIDTH = 
         enabled = 0;
         vif = v;
         inst = i;
+        vif.cb.DST_RDY <= 0;
     endfunction
 
     task setEnabled();
