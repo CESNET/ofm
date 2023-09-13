@@ -44,4 +44,7 @@ class sync_tag extends uvm_component;
         $write("TAG: %0d\n", list_of_tags[tag]);
     endfunction
 
+    function int unsigned used();
+        return (list_of_tags.size() != 256);
+    endfunction
 endclass

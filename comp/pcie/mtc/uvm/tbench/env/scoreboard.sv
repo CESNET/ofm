@@ -55,6 +55,7 @@ class scoreboard #(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE, MI_DATA_WIDTH, MI_ADDR
         ret |= m_mi_cmp_rq.used();
         ret |= m_mi_cmp_meta_rs.used();
         ret |= m_mi_cmp_rs.used();
+        ret |= m_mi_cmp_rs.tag_sync.used();
         return ret;
     endfunction
 
