@@ -426,10 +426,9 @@ class response_model #(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE, MI_DATA_WIDTH, MI_
         logic[(sv_pcie_meta_pack::PCIE_CQ_META_WIDTH-sv_pcie_meta_pack::PCIE_META_REQ_HDR_W)-1 : 0] meta;
 
         forever begin
+            msg = "";
 
-            fork
-                hdr_catch();
-            join
+            hdr_catch();
 
             if (hdrs.size() != 0 && metas.size() != 0) begin
                 hdr  = hdrs.pop_front();

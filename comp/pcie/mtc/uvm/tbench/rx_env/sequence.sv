@@ -11,7 +11,6 @@ class logic_vector_array_sequence#(ITEM_WIDTH, string DEVICE, string ENDPOINT_TY
     localparam IS_INTEL_DEV    = (DEVICE == "STRATIX10" || DEVICE == "AGILEX");
     localparam IS_MFB_META_DEV = (ENDPOINT_TYPE == "P_TILE" || ENDPOINT_TYPE == "R_TILE") && IS_INTEL_DEV;
     mailbox#(uvm_logic_vector::sequence_item#(131)) tr_export;
-    mailbox#(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)) tr_export_2;
 
     function new(string name = "logic_vector_array_sequence");
         super.new(name);

@@ -11,7 +11,6 @@ class driver#(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE) extends uvm_component;
     uvm_seq_item_pull_port #(uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH), uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH)) seq_item_port_pcie_data;
     uvm_seq_item_pull_port #(uvm_pcie_hdr::sequence_item, uvm_pcie_hdr::sequence_item)                                                       seq_item_port_pcie_hdr;
 
-    mailbox#(uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH))                  logic_vector_array_export;
     mailbox#(uvm_logic_vector::sequence_item#(sv_pcie_meta_pack::PCIE_CQ_META_WIDTH)) logic_vector_export;
     mailbox#(uvm_logic_vector::sequence_item#(131))                                   pcie_hdr_rw_export;
 
@@ -33,7 +32,6 @@ class driver#(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE) extends uvm_component;
         seq_item_port_pcie_data = new("seq_item_port_pcie_data", this);
         seq_item_port_pcie_hdr  = new("seq_item_port_pcie_hdr", this);
 
-        logic_vector_array_export = new(1);
         logic_vector_export       = new(1);
         pcie_hdr_rw_export       = new(1);
     endfunction
