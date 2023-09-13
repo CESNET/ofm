@@ -35,7 +35,7 @@ class model #(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE, MI_DATA_WIDTH, MI_ADDR_WIDT
     endfunction
 
     // TODO: Prepare for other DEVICEs, now support STRATIX10 (P_TILE)
-    task count_mi_addr(input logic[sv_pcie_meta_pack::PCIE_META_REQ_HDR_W-1 : 0] hdr, input logic[(sv_pcie_meta_pack::PCIE_CQ_META_WIDTH-sv_pcie_meta_pack::PCIE_META_REQ_HDR_W)-1 : 0] meta, output logic [64-1 : 0] mi_addr_base, output int unsigned hdr_offset);
+    function void count_mi_addr(input logic[sv_pcie_meta_pack::PCIE_META_REQ_HDR_W-1 : 0] hdr, input logic[(sv_pcie_meta_pack::PCIE_CQ_META_WIDTH-sv_pcie_meta_pack::PCIE_META_REQ_HDR_W)-1 : 0] meta, output logic [64-1 : 0] mi_addr_base, output int unsigned hdr_offset);
         logic [32-1 : 0] bar_base_addr = '0;
         logic [64-1 : 0] addr          = '0;
         logic [3-1 : 0]  bar           = '0;
@@ -80,11 +80,12 @@ class model #(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE, MI_DATA_WIDTH, MI_ADDR_WIDT
         end
 
         mi_addr_base = (addr & tlp_addr_mask) + bar_base_addr;
-    endtask
+    endfunction
 
-    task gen_mi_read(input logic[32-1 : 0] addr, input logic[(32/8)-1 : 0] be, output uvm_mi::sequence_item_request #(MI_DATA_WIDTH, MI_ADDR_WIDTH, 0) mi_tr);
+    function uvm_mi::sequence_item_request #(MI_DATA_WIDTH, MI_ADDR_WIDTH, 0) gen_mi_read(input logic[32-1 : 0] addr, input logic[(32/8)-1 : 0] be);
+        uvm_mi::sequence_item_request #(MI_DATA_WIDTH, MI_ADDR_WIDTH, 0) mi_tr;
+
         mi_tr = uvm_mi::sequence_item_request #(MI_DATA_WIDTH, MI_ADDR_WIDTH, 0)::type_id::create("mi_tr");
-
         mi_tr.dwr  = '0;
         mi_tr.addr = addr;
         mi_tr.be   = be;
@@ -92,11 +93,13 @@ class model #(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE, MI_DATA_WIDTH, MI_ADDR_WIDT
         mi_tr.rd   = 1'b1;
         mi_tr.ardy = 1'b1;
         mi_tr.meta = 'z;
-    endtask
+        return mi_tr;
+    endfunction
 
-    task gen_mi_write(input logic[32-1 : 0] addr, input logic[MFB_ITEM_WIDTH-1 : 0] data, input logic[(MI_DATA_WIDTH/8)-1 : 0] be, output uvm_mi::sequence_item_request #(MI_DATA_WIDTH, MI_ADDR_WIDTH, 0) mi_tr);
+    function uvm_mi::sequence_item_request #(MI_DATA_WIDTH, MI_ADDR_WIDTH, 0) gen_mi_write(input logic[32-1 : 0] addr, input logic[MFB_ITEM_WIDTH-1 : 0] data, input logic[(MI_DATA_WIDTH/8)-1 : 0] be);
+        uvm_mi::sequence_item_request #(MI_DATA_WIDTH, MI_ADDR_WIDTH, 0) mi_tr;
+
         mi_tr = uvm_mi::sequence_item_request #(MI_DATA_WIDTH, MI_ADDR_WIDTH, 0)::type_id::create("mi_tr");
-
         mi_tr.dwr  = data;
         mi_tr.addr = addr;
         mi_tr.be   = be;
@@ -104,7 +107,9 @@ class model #(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE, MI_DATA_WIDTH, MI_ADDR_WIDT
         mi_tr.rd   = 1'b0;
         mi_tr.ardy = 1'b1;
         mi_tr.meta = 'z;
-    endtask
+
+        return mi_tr;
+    endfunction
 
     task run_phase(uvm_phase phase);
     
@@ -182,21 +187,23 @@ class model #(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE, MI_DATA_WIDTH, MI_ADDR_WIDT
 
             if (rw == uvm_pcie_hdr::TYPE_WRITE || rw == uvm_pcie_hdr::TYPE_READ) begin
                 count_mi_addr(hdr, meta, mi_addr_base, hdr_offset);
-                for (int unsigned it = hdr_offset; it < (dw_cnt + hdr_offset); it++) begin
+                for (int unsigned it = 0; it < dw_cnt; it++) begin
                     mi_tr      = uvm_common::model_item #(uvm_mi::sequence_item_request #(MI_DATA_WIDTH, MI_ADDR_WIDTH, 0))::type_id::create("mi_tr");
-                    mi_tr.item = uvm_mi::sequence_item_request #(MI_DATA_WIDTH, MI_ADDR_WIDTH, 0)::type_id::create("mi_tr_item");
 
-                    if (it == hdr_offset)
+                    if (it == 0) begin
                         be = fbe;
-                    else if (it == (dw_cnt + hdr_offset) - MFB_ITEM_WIDTH/MI_DATA_WIDTH)
+                    end else if (it == (dw_cnt - MFB_ITEM_WIDTH/MI_DATA_WIDTH)) begin
                         be = lbe;
-                    else
+                    end else begin
                         be = '1;
+                    end
 
                     if (rw == uvm_pcie_hdr::TYPE_WRITE) begin
-                        gen_mi_write(mi_addr_base + (it - hdr_offset)*4, cq_data_tr.item.data[it], be, mi_tr.item);
+                        mi_tr.item = gen_mi_write(mi_addr_base + it*4, cq_data_tr.item.data[it+hdr_offset], be);
                     end else if (rw == uvm_pcie_hdr::TYPE_READ) begin
-                        gen_mi_read(mi_addr_base + (it - hdr_offset)*4, be, mi_tr.item);
+                        mi_tr.item = gen_mi_read(mi_addr_base + it*4, be);
+                    end else begin
+                        mi_tr.item = uvm_mi::sequence_item_request #(MI_DATA_WIDTH, MI_ADDR_WIDTH, 0)::type_id::create("mi_tr_item");
                     end
 
                     analysis_port_mi_data.write(mi_tr);
@@ -401,6 +408,8 @@ class response_model #(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE, MI_DATA_WIDTH, MI_
             ret.tag = tag;
             return ret;
     endfunction
+
+
     task run_phase(uvm_phase phase);
         uvm_common::model_item #(uvm_mi::sequence_item_response #(MI_DATA_WIDTH))                         mi_cc_tr;
         uvm_common::model_item #(uvm_mtc::cc_mtc_item#(MFB_ITEM_WIDTH))                                   cc_tr;
@@ -446,7 +455,7 @@ class response_model #(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE, MI_DATA_WIDTH, MI_
                 end
 
                 if (!pcie_meta.error) begin
-                    while (item != int'(dw_cnt)) begin
+                    while (item != unsigned'(dw_cnt)) begin
                         analysis_imp_cc_mi.get(mi_cc_tr);
                         if (mi_cc_tr.item.drdy == 1'b1) begin
                             data_fifo.push_back(mi_cc_tr.item.drd);
