@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NP LUT RAM &mdash; Open FPGA Modules Docs  documentation</title>
+  <title>Multi-port BRAM &mdash; Open FPGA Modules Docs  documentation</title>
       <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../../_static/css/theme_overrides.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -20,8 +20,8 @@
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
-    <link rel="next" title="Simple dual-port BRAM" href="../sdp_bram/readme.html" />
-    <link rel="prev" title="Memory modules" href="../../../../memory.html" /> 
+    <link rel="next" title="FIFO components" href="../../../../fifo.html" />
+    <link rel="prev" title="Simple dual-port BRAM" href="../sdp_bram/readme.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -55,10 +55,10 @@
 <li class="toctree-l1 current"><a class="reference internal" href="../../../../base.html">Basic Tools</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../../../../async.html">Asynchronous modules</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../../../../memory.html">Memory modules</a><ul class="current">
-<li class="toctree-l3 current"><a class="current reference internal" href="#">NP LUT RAM</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../np_lutram/readme.html">NP LUT RAM</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../sdp_bram/readme.html">Simple dual-port BRAM</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../sdp_bram/readme.html#simple-dual-port-bram-with-byte-enable">Simple dual-port BRAM with Byte Enable</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../mp_bram/readme.html">Multi-port BRAM</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Multi-port BRAM</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../memory.html#references">References</a></li>
 </ul>
 </li>
@@ -101,9 +101,9 @@
       <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../../../base.html">Basic Tools</a></li>
           <li class="breadcrumb-item"><a href="../../../../memory.html">Memory modules</a></li>
-      <li class="breadcrumb-item active">NP LUT RAM</li>
+      <li class="breadcrumb-item active">Multi-port BRAM</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../../../../_sources/comp/base/mem/np_lutram/readme.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../../../../_sources/comp/base/mem/mp_bram/readme.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -111,12 +111,13 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="np-lut-ram">
-<span id="np-lutram"></span><h1>NP LUT RAM<a class="headerlink" href="#np-lut-ram" title="Permalink to this heading"></a></h1>
+  <section id="multi-port-bram">
+<span id="mp-bram"></span><h1>Multi-port BRAM<a class="headerlink" href="#multi-port-bram" title="Permalink to this heading"></a></h1>
 <dl class="vhdl autoentity">
-<dt class="sig sig-object vhdl" id="vhdl-entity-np_lutram">
-<span class="k"><span class="pre">ENTITY</span> </span><span class="sig-name descname"><span class="pre">np_lutram</span></span><span class="k"> <span class="pre">IS</span></span><a class="headerlink" href="#vhdl-entity-np_lutram" title="Permalink to this definition"></a></dt>
-<dd><p>Generic N-port distributed LUT memory</p>
+<dt class="sig sig-object vhdl" id="vhdl-entity-mp_bram">
+<span class="k"><span class="pre">ENTITY</span> </span><span class="sig-name descname"><span class="pre">MP_BRAM</span></span><span class="k"> <span class="pre">IS</span></span><a class="headerlink" href="#vhdl-entity-mp_bram" title="Permalink to this definition"></a></dt>
+<dd><p>Multi-port BRAM. Currently supports only one write port. This will change in future.
+Amount of read ports is not restricted.</p>
 <span class="sig-name descname">Generics</span><table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Generic</p></th>
@@ -126,30 +127,62 @@
 </tr>
 </thead>
 <tbody>
-<tr class="row-even" id="vhdl-gengeneric-np_lutram-data_width"><td><p>DATA_WIDTH</p></td>
+<tr class="row-even" id="vhdl-gengeneric-mp_bram-data_width"><td><p>DATA_WIDTH</p></td>
 <td><p>integer</p></td>
 <td><p>1</p></td>
-<td></td>
+<td><p>Data word width in bits. If BLOCK_ENABLE is True then DATA_WIDTH must
+be N*BLOCK_WIDTH.</p></td>
 </tr>
-<tr class="row-odd" id="vhdl-gengeneric-np_lutram-items"><td><p>ITEMS</p></td>
+<tr class="row-odd" id="vhdl-gengeneric-mp_bram-items"><td><p>ITEMS</p></td>
 <td><p>integer</p></td>
-<td><p>64</p></td>
-<td></td>
+<td><p>4096</p></td>
+<td><p>Depth of BRAM in number of the data words.</p></td>
 </tr>
-<tr class="row-even" id="vhdl-gengeneric-np_lutram-write_ports"><td><p>WRITE_PORTS</p></td>
+<tr class="row-even" id="vhdl-gengeneric-mp_bram-block_enable"><td><p>BLOCK_ENABLE</p></td>
+<td><p>boolean</p></td>
+<td><p>False</p></td>
+<td><p>Enable masking of WR_DATA signal per BLOCK_WIDTH.</p></td>
+</tr>
+<tr class="row-odd" id="vhdl-gengeneric-mp_bram-block_width"><td><p>BLOCK_WIDTH</p></td>
+<td><p>natural</p></td>
+<td><p>8</p></td>
+<td><p>Width of one data block. Allowed values are 8 or 9. The parameter is
+ignored when BLOCK_ENABLE=False.</p></td>
+</tr>
+<tr class="row-even" id="vhdl-gengeneric-mp_bram-output_reg"><td><p>OUTPUT_REG</p></td>
+<td><p>boolean</p></td>
+<td><p>True</p></td>
+<td><p>Output directly from BRAM or throw register (better timing).</p></td>
+</tr>
+<tr class="row-odd" id="vhdl-gengeneric-mp_bram-metadata_width"><td><p>METADATA_WIDTH</p></td>
 <td><p>integer</p></td>
+<td><p>0</p></td>
+<td><p>Width of read metadata signal</p></td>
+</tr>
+<tr class="row-even" id="vhdl-gengeneric-mp_bram-write_ports"><td><p>WRITE_PORTS</p></td>
+<td><p>natural</p></td>
 <td><p>1</p></td>
-<td></td>
+<td><p>Amount of write ports, currently supports just 1 write port.</p></td>
 </tr>
-<tr class="row-odd" id="vhdl-gengeneric-np_lutram-read_ports"><td><p>READ_PORTS</p></td>
-<td><p>integer</p></td>
-<td><p>3</p></td>
-<td></td>
+<tr class="row-odd" id="vhdl-gengeneric-mp_bram-read_ports"><td><p>READ_PORTS</p></td>
+<td><p>natural</p></td>
+<td><p>2</p></td>
+<td><p>Amount of read ports. For each read port, BRAM is replicated to provide one
+read port.</p></td>
 </tr>
-<tr class="row-even" id="vhdl-gengeneric-np_lutram-device"><td><p>DEVICE</p></td>
+<tr class="row-even" id="vhdl-gengeneric-mp_bram-device"><td><p>DEVICE</p></td>
 <td><p>string</p></td>
-<td><p>“7SERIES”</p></td>
-<td></td>
+<td><p>“AGILEX”</p></td>
+<td><p>The DEVICE parameter allows the correct selection of the RAM
+implementation according to the FPGA used. Supported values are:</p>
+<ul class="simple">
+<li><p>“7SERIES”</p></li>
+<li><p>“ULTRASCALE”</p></li>
+<li><p>“STRATIX10”</p></li>
+<li><p>“ARRIA10”</p></li>
+<li><p>“AGILEX”</p></li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
@@ -162,35 +195,80 @@
 </tr>
 </thead>
 <tbody>
-<tr class="row-even" id="vhdl-portsignal-np_lutram-di"><td><p>DI</p></td>
-<td><p>slv_array_t(WRITE_PORTS-1 downto 0)(DATA_WIDTH-1 downto 0)</p></td>
-<td><p>in</p></td>
-<td></td>
-</tr>
-<tr class="row-odd" id="vhdl-portsignal-np_lutram-we"><td><p>WE</p></td>
-<td><p>std_logic_vector(WRITE_PORTS-1 downto 0)</p></td>
-<td><p>in</p></td>
-<td></td>
-</tr>
-<tr class="row-even" id="vhdl-portsignal-np_lutram-wclk"><td><p>WCLK</p></td>
+<tr class="row-even" id="vhdl-portsignal-mp_bram-clk"><td><p>CLK</p></td>
 <td><p>std_logic</p></td>
 <td><p>in</p></td>
 <td></td>
 </tr>
-<tr class="row-odd" id="vhdl-portsignal-np_lutram-addra"><td><p>ADDRA</p></td>
-<td><p>slv_array_t(WRITE_PORTS-1 downto 0)(LOG2(ITEMS)-1 downto 0)</p></td>
+<tr class="row-odd" id="vhdl-portsignal-mp_bram-reset"><td><p>RESET</p></td>
+<td><p>std_logic</p></td>
 <td><p>in</p></td>
 <td></td>
 </tr>
-<tr class="row-even" id="vhdl-portsignal-np_lutram-addrb"><td><p>ADDRB</p></td>
-<td><p>slv_array_t(READ_PORTS-1 downto 0)(LOG2(ITEMS)-1 downto 0)</p></td>
-<td><p>in</p></td>
-<td></td>
+<tr class="row-even"><td><p>=====</p></td>
+<td><p>WRITE PORTS</p></td>
+<td><p>=====</p></td>
+<td><p>=====</p></td>
 </tr>
-<tr class="row-odd" id="vhdl-portsignal-np_lutram-dob"><td><p>DOB</p></td>
-<td><p>slv_array_t(READ_PORTS-1 downto 0)(DATA_WIDTH-1 downto 0)</p></td>
+<tr class="row-odd" id="vhdl-portsignal-mp_bram-wr_en"><td><p>WR_EN</p></td>
+<td><p>std_logic_vector(WRITE_PORTS - 1 downto 0)</p></td>
+<td><p>in</p></td>
+<td><p>Enable of write port.</p></td>
+</tr>
+<tr class="row-even" id="vhdl-portsignal-mp_bram-wr_be"><td><p>WR_BE</p></td>
+<td><p>slv_array_t(WRITE_PORTS - 1 downto 0)(max((DATA_WIDTH/BLOCK_WIDTH),1)-1 downto 0)</p></td>
+<td><p>in</p></td>
+<td><p>Block enable of written data, used only when BLOCK_ENABLE = True.</p></td>
+</tr>
+<tr class="row-odd" id="vhdl-portsignal-mp_bram-wr_addr"><td><p>WR_ADDR</p></td>
+<td><p>slv_array_t(WRITE_PORTS - 1 downto 0)(log2(ITEMS)-1 downto 0)</p></td>
+<td><p>in</p></td>
+<td><p>Write address.</p></td>
+</tr>
+<tr class="row-even" id="vhdl-portsignal-mp_bram-wr_data"><td><p>WR_DATA</p></td>
+<td><p>slv_array_t(WRITE_PORTS - 1 downto 0)(DATA_WIDTH-1 downto 0)</p></td>
+<td><p>in</p></td>
+<td><p>Write data input.</p></td>
+</tr>
+<tr class="row-odd"><td><p>=====</p></td>
+<td><p>READ PORTS</p></td>
+<td><p>=====</p></td>
+<td><p>=====</p></td>
+</tr>
+<tr class="row-even" id="vhdl-portsignal-mp_bram-rd_en"><td><p>RD_EN</p></td>
+<td><p>std_logic_vector(READ_PORTS - 1 downto 0)</p></td>
+<td><p>in</p></td>
+<td><p>Read enable signal, it is only used to generate RD_DATA_VLD.</p></td>
+</tr>
+<tr class="row-odd" id="vhdl-portsignal-mp_bram-rd_pipe_en"><td><p>RD_PIPE_EN</p></td>
+<td><p>std_logic_vector(READ_PORTS - 1 downto 0)</p></td>
+<td><p>in</p></td>
+<td><p>Clock enable of read port.</p></td>
+</tr>
+<tr class="row-even" id="vhdl-portsignal-mp_bram-rd_meta_in"><td><p>RD_META_IN</p></td>
+<td><p>slv_array_t(READ_PORTS - 1 downto 0)(METADATA_WIDTH-1 downto 0)</p></td>
+<td><p>in</p></td>
+<td><p>Metadata propagated when RD_PIPE_EN==’1’ (valid on RD_EN)</p></td>
+</tr>
+<tr class="row-odd" id="vhdl-portsignal-mp_bram-rd_addr"><td><p>RD_ADDR</p></td>
+<td><p>slv_array_t(READ_PORTS - 1 downto 0)(log2(ITEMS)-1 downto 0)</p></td>
+<td><p>in</p></td>
+<td><p>Read address.</p></td>
+</tr>
+<tr class="row-even" id="vhdl-portsignal-mp_bram-rd_data"><td><p>RD_DATA</p></td>
+<td><p>slv_array_t(READ_PORTS - 1 downto 0)(DATA_WIDTH-1 downto 0)</p></td>
 <td><p>out</p></td>
-<td></td>
+<td><p>Read data output.</p></td>
+</tr>
+<tr class="row-odd" id="vhdl-portsignal-mp_bram-rd_meta_out"><td><p>RD_META_OUT</p></td>
+<td><p>slv_array_t(READ_PORTS - 1 downto 0)(METADATA_WIDTH-1 downto 0)</p></td>
+<td><p>out</p></td>
+<td><p>Metadata propagated when RD_PIPE_EN==’1’ (valid on RD_DATA_VLD)</p></td>
+</tr>
+<tr class="row-even" id="vhdl-portsignal-mp_bram-rd_data_vld"><td><p>RD_DATA_VLD</p></td>
+<td><p>std_logic_vector(READ_PORTS - 1 downto 0)</p></td>
+<td><p>out</p></td>
+<td><p>Valid bit of output read data.</p></td>
 </tr>
 </tbody>
 </table>
@@ -202,8 +280,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../../../../memory.html" class="btn btn-neutral float-left" title="Memory modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../sdp_bram/readme.html" class="btn btn-neutral float-right" title="Simple dual-port BRAM" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../sdp_bram/readme.html" class="btn btn-neutral float-left" title="Simple dual-port BRAM" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../../../fifo.html" class="btn btn-neutral float-right" title="FIFO components" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
