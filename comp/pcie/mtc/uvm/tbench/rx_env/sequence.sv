@@ -20,7 +20,7 @@ class logic_vector_array_sequence#(ITEM_WIDTH, string DEVICE, string ENDPOINT_TY
         uvm_logic_vector::sequence_item#(131) pcie_hdr;
         uvm_logic_vector_array::sequence_item#(ITEM_WIDTH) m_pcie_data;
         uvm_pcie_hdr::msg_type rw;
-        int             tr_cnt;
+        int unsigned tr_cnt;
 
         forever begin
             string msg = "";
@@ -87,14 +87,18 @@ class logic_vector_sequence#(META_WIDTH) extends uvm_sequence #(uvm_logic_vector
     `uvm_object_param_utils(uvm_pcie_cq::logic_vector_sequence#(META_WIDTH))
 
     mailbox#(uvm_logic_vector::sequence_item#(META_WIDTH)) tr_export;
+    int unsigned tr_cnt;
 
     function new(string name = "logic_vector_sequence");
         super.new(name);
+        tr_cnt = 0;
     endfunction
 
     task body;
         forever begin
             tr_export.get(req);
+
+            tr_cnt++;
             start_item(req);
             finish_item(req);
         end

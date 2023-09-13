@@ -27,11 +27,15 @@ class model #(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE, MI_DATA_WIDTH, MI_ADDR_WIDT
     uvm_tlm_analysis_fifo #(uvm_common::model_item #(uvm_logic_vector::sequence_item#(sv_pcie_meta_pack::PCIE_CQ_META_WIDTH))) analysis_imp_cq_meta;
     uvm_analysis_port     #(uvm_common::model_item #(uvm_mi::sequence_item_request #(MI_DATA_WIDTH, MI_ADDR_WIDTH, 0)))        analysis_port_mi_data;
 
+    protected int unsigned mi_tr_cnt;
+
     function new (string name, uvm_component parent = null);
         super.new(name, parent);
         analysis_imp_cq_data  = new("analysis_imp_cq_data" , this);
         analysis_imp_cq_meta  = new("analysis_imp_cq_meta" , this);
         analysis_port_mi_data = new("analysis_port_mi_data", this);
+
+        mi_tr_cnt = 0;
     endfunction
 
     // TODO: Prepare for other DEVICEs, now support STRATIX10 (P_TILE)
