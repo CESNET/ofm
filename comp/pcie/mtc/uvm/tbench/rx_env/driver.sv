@@ -149,7 +149,7 @@ class driver#(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE) extends uvm_component;
 
             if (IS_MFB_META_DEV) begin
                 // Add PCIe HDR to metadata
-                cq_pcie_hdr.data[sv_pcie_meta_pack::PCIE_META_REQ_HDR_W-1 : 0] = pcie_tr.hdr;
+                cq_pcie_hdr.data[sv_pcie_meta_pack::PCIE_RQ_META_HEADER_O+sv_pcie_meta_pack::PCIE_META_REQ_HDR_W-1 : sv_pcie_meta_pack::PCIE_RQ_META_HEADER_O] = pcie_tr.hdr;
             end
             cq_pcie_hdr.data[sv_pcie_meta_pack::PCIE_CQ_META_WIDTH-1 : sv_pcie_meta_pack::PCIE_META_REQ_HDR_W] = pcie_tr.meta;
 
