@@ -24,21 +24,26 @@ class logic_vector_array_sequence#(ITEM_WIDTH, string DEVICE, string ENDPOINT_TY
 
         forever begin
             string msg = "";
+            int unsigned data_size;
+
+
             tr_export.get(pcie_hdr);
             rw = pcie_hdr.data[131-1 : 128];
 
             req         = uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)::type_id::create("req");
             m_pcie_data = uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)::type_id::create("m_pcie_data");
 
-            if (IS_INTEL_DEV)
-                assert(m_pcie_data.randomize() with {m_pcie_data.data.size() == int'(pcie_hdr.data[10-1 : 0]); });
-            else
-                assert(m_pcie_data.randomize() with {m_pcie_data.data.size() == int'(pcie_hdr.data[75-1 : 64]); });
+            if (IS_INTEL_DEV) begin
+                data_size = unsigned'(pcie_hdr.data[10-1 : 0]) != 0 ? unsigned'(pcie_hdr.data[10-1 : 0]) : 'h400; 
+            end else begin
+                data_size = unsigned'(pcie_hdr.data[75-1 : 64]); 
+            end
+            assert(m_pcie_data.randomize() with {m_pcie_data.data.size() == data_size;});
 
             if (IS_MFB_META_DEV) begin
                 // In case of Intel
                 // Add only data to array
-                req.data = new[m_pcie_data.data.size()];
+                //req.data = new[m_pcie_data.data.size()];
                 req.data = m_pcie_data.data;
             end else begin
                 // Add PCIe HDR and data to array
