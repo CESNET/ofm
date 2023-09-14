@@ -326,7 +326,7 @@ proc nb_sim_sanitize_vars {user_sim_flags sim_flags hierarchy VARS} {
     }
 
     lappend SIM_FLAGS(SVLIB_FLAGS)
-    if {[info exists USER_SIM_FLAGS(SVLIB_FLAGS]} {
+    if {[info exists USER_SIM_FLAGS(SVLIB_FLAGS)]} {
         lappend SIM_FLAGS(SVLIB_FLAGS) {*}$USER_SIM_FLAGS(SVLIB_FLAGS)
     }
 }
