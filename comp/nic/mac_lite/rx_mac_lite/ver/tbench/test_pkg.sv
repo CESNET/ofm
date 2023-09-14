@@ -19,32 +19,33 @@ package test_pkg;
     parameter RX_ITEM_WIDTH   = 8;
     // TX MFB configuration, by default the same as RX. Useful, for example,
     // for enlargement data width from 128b (RX) to 512b (TX).
-    parameter TX_REGIONS      = RX_REGIONS;
+    parameter TX_REGIONS      = 2*RX_REGIONS;
     parameter TX_REGION_SIZE  = RX_REGION_SIZE;
     parameter TX_BLOCK_SIZE   = RX_BLOCK_SIZE;
     parameter TX_ITEM_WIDTH   = RX_ITEM_WIDTH;
 
-    parameter RESIZE_BUFFER   = 0;
+    parameter RESIZE_BUFFER   = 1;
     parameter METADATA_WIDTH  = 102;
     
-    parameter CRC_CHECK_EN    = TRUE;
+    parameter CRC_IS_RECEIVED = FALSE;
+    parameter CRC_REMOVE_EN   = FALSE;
+    parameter CRC_CHECK_EN    = FALSE;
     parameter MAC_CHECK_EN    = TRUE;
     parameter MAC_COUNT_MAX   = 16;
     parameter TIMESTAMP_EN    = FALSE;
-    parameter INBANDFCS       = FALSE;
 
     // Parameters for MI32 configuration
-    parameter FRAME_LEN_MAX = 501;
-    parameter FRAME_LEN_MIN = 67;
+    parameter FRAME_LEN_MAX = 1533;
+    parameter FRAME_LEN_MIN = 64;
     parameter MAC_COUNT = 10;
     parameter MAC_CHECK_MODE = 3;
 
     // Generator parameters
-    parameter FRAME_SIZE_MAX    = 512;
-    parameter FRAME_SIZE_MIN    = 1;
-    parameter TRANSACTION_COUNT = 10000;
+    parameter FRAME_SIZE_MAX    = 2048;
+    parameter FRAME_SIZE_MIN    = 40;
+    parameter TRANSACTION_COUNT = 15000;
 
-    parameter RX_CLK_PERIOD = 4.90ns;
+    parameter RX_CLK_PERIOD = 2.40ns;
     parameter TX_CLK_PERIOD = 5.00ns;
     parameter MI_CLK_PERIOD = 10ns;
     parameter RESET_TIME    = 10*MI_CLK_PERIOD;

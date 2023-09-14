@@ -61,12 +61,12 @@ program TEST (
 
         mfb_driver = new("MFB Driver", generator.transMbx, RX_MFB);
         mfb_driver.setCallbacks(scoreboard.mfbDriverCbs);
-        mfb_driver.wordDelayEnable_wt = 0;
-        mfb_driver.wordDelayDisable_wt = 1;
+        mfb_driver.wordDelayEnable_wt = 1;
+        mfb_driver.wordDelayDisable_wt = 16;
         mfb_driver.wordDelayLow = 1;
         mfb_driver.wordDelayHigh = 6;
-        mfb_driver.ifgEnable_wt = 3;
-        mfb_driver.ifgDisable_wt = 1;
+        mfb_driver.ifgEnable_wt = 2;
+        mfb_driver.ifgDisable_wt = 10;
         mfb_driver.mode = 2;
 
         mfb_monitor = new("MFB Monitor", MFB_MONITOR);
@@ -105,6 +105,7 @@ program TEST (
 
     task disableTestEnvironment();
         int ready2stop;
+        #(1000*TX_CLK_PERIOD);
         wait(!mfb_driver.busy);
         //$write("DisableTestEnvironment start, time: %t\n", $time);
         ready2stop = 0;
@@ -115,9 +116,9 @@ program TEST (
                 ready2stop = 0;
             end;
             //$write("ready2stop %d, time: %t\n", ready2stop, $time);
-            #(33*TX_CLK_PERIOD);
-        end while (ready2stop < 10);
-        #(100*TX_CLK_PERIOD);
+            #(500*TX_CLK_PERIOD);
+        end while (ready2stop < 100);
+        #(5000*TX_CLK_PERIOD);
         //$write("DisableTestEnvironment ready, time: %t\n", $time);
         mfb_driver.setDisabled();
         mfb_monitor.setDisabled();
@@ -562,14 +563,14 @@ program TEST (
     task test2();
         $write("\n\n############ TEST CASE 2 ############\n\n");
         //resetDesign();
-        mfb_responder.wordDelayEnable_wt = 1;
-        mfb_responder.wordDelayDisable_wt = 1;
-        mfb_responder.wordDelayLow = 1;
-        mfb_responder.wordDelayHigh = 3;
-        mvb_responder.wordDelayEnable_wt = 8;
+        mfb_responder.wordDelayEnable_wt = 3;
+        mfb_responder.wordDelayDisable_wt = 2;
+        mfb_responder.wordDelayLow = 5;
+        mfb_responder.wordDelayHigh = 20;
+        mvb_responder.wordDelayEnable_wt = 2;
         mvb_responder.wordDelayDisable_wt = 1;
-        mvb_responder.wordDelayLow = 1;
-        mvb_responder.wordDelayHigh = 9;
+        mvb_responder.wordDelayLow = 5;
+        mvb_responder.wordDelayHigh = 20;
         initConfig();
         enableTestEnvironment();
         generator.setEnabled(TRANSACTION_COUNT);
