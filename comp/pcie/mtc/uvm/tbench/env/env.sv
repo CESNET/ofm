@@ -24,7 +24,7 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, DEVICE
     uvm_mtc::tr_planner #(MI_DATA_WIDTH, MI_ADDR_WIDTH) tr_plan;
     monitor #(MI_DATA_WIDTH, MI_ADDR_WIDTH) m_monitor;
 
-    scoreboard #(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE, MI_DATA_WIDTH, MI_ADDR_WIDTH) sc;
+    scoreboard #(MFB_ITEM_WIDTH, MI_DATA_WIDTH, MI_ADDR_WIDTH) sc;
     uvm_mi::config_item                     m_mi_config;
 
     // Constructor of environment.
@@ -63,7 +63,9 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, DEVICE
         uvm_config_db#(uvm_mi::config_item)::set(this, "m_mi_agent", "m_config", m_mi_config);
         m_mi_agent = uvm_mi::agent_master #(MI_DATA_WIDTH, MI_ADDR_WIDTH)::type_id::create("m_mi_agent", this);
 
-        sc          = scoreboard #(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE, MI_DATA_WIDTH, MI_ADDR_WIDTH)::type_id::create("sc", this);
+        //change Select devices
+        set_type_override_by_type(uvm_mtc::model #(MFB_ITEM_WIDTH, MI_DATA_WIDTH, MI_ADDR_WIDTH)::get_type(), uvm_mtc::model_base #(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE, MI_DATA_WIDTH, MI_ADDR_WIDTH)::get_type());
+        sc          = scoreboard #(MFB_ITEM_WIDTH, MI_DATA_WIDTH, MI_ADDR_WIDTH)::type_id::create("sc", this);
         m_sequencer = sequencer  #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MI_DATA_WIDTH, MI_ADDR_WIDTH)::type_id::create("m_sequencer", this);
 
         tag_sync  = uvm_pcie_hdr::sync_tag::type_id::create("tag_sync", this);
