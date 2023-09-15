@@ -12,16 +12,10 @@
 class cbs_simple #(int unsigned DATA_WIDTH) extends uvm_event_callback;
     `uvm_object_param_utils(uvm_probe::cbs_simple #(DATA_WIDTH))
 
-    protected typedef struct {
-        logic [DATA_WIDTH-1:0] dut;
-    } t_output;
-
-    protected mailbox #(t_output) out;
+    protected logic [DATA_WIDTH-1:0] out[$];
 
     function new(string name = "");
         super.new(name);
-
-        out = new();
     endfunction
 
     //---------------------------------------
@@ -35,28 +29,21 @@ class cbs_simple #(int unsigned DATA_WIDTH) extends uvm_event_callback;
     //---------------------------------------
     virtual function void post_trigger(uvm_event e, uvm_object data);
         uvm_probe::data#(DATA_WIDTH) c_data;
-        t_output out_data;
 
         $cast(c_data, data);
-        
-        out_data.dut = c_data.data;
-
-        if (out.try_put(out_data) == 0) begin
-            `uvm_fatal(this.get_full_name(), $sformatf("\n\tCannot put event %h into queue\n", out_data.dut));
-        end
+        out.push_back(c_data.data);
     endfunction
 
     //---------------------------------------
     // OTHERS METHODS
     //---------------------------------------
     task get(output logic [DATA_WIDTH-1:0] dut_info);
-        t_output tr_tmp;
-        out.get(tr_tmp);
-        dut_info = tr_tmp.dut;
+        wait(out.size() != 0);
+        dut_info = out.pop_front();
     endtask
 
     function int unsigned used();
-        return (out.num() != 0);
+        return (out.size() != 0);
     endfunction
 endclass
 
