@@ -1081,6 +1081,9 @@ begin
                 exit;
             end if;
         end loop;
+        if (getit_indv_pkt_last_eof(MFB_REGIONS-1) = '1') then
+            more_indv_eofs_follow <= '0';
+        end if;
     end process;
 
     wait_for_headers <= '1' when (not_a_single_valid_hdr = '1') or (too_many_eofs = '1') else '0';

@@ -14,33 +14,37 @@ class sync_tag extends uvm_component;
         super.new(name, parent);
     endfunction
 
-    task fill_array();
+    function fill_array();
         for (int unsigned it = 0; it < 256; it++) begin
             list_of_tags[it] = it;
             tag_cnt++;
         end
-    endtask
+    endfunction
 
-    task add_element(logic[8-1 : 0] tag);
+    function void add_element(logic[8-1 : 0] tag);
         list_of_tags[tag] = tag;
         tag_cnt++;
-    endtask
+    endfunction
 
-    task remove_element(logic[8-1 : 0] tag);
+    function void remove_element(logic[8-1 : 0] tag);
         list_of_tags.delete(tag);
         tag_cnt--;
-    endtask
+    endfunction
 
-    task print_all();
+    function void print_all();
+        $write("TAG MANAGER : %0dns\n", $time()/1ns);
         for (int unsigned it = 0; it < 256; it++) begin
-            if (list_of_tags.exists(it)) begin
-                $write("TAG: %0d\n", list_of_tags[it]);
+            if (!list_of_tags.exists(it)) begin
+                $write("\tTAG: %0d\n", it);
             end
         end
-    endtask
+    endfunction
 
-    task print_element(logic[8-1 : 0] tag);
+    function void print_element(logic[8-1 : 0] tag);
         $write("TAG: %0d\n", list_of_tags[tag]);
-    endtask
+    endfunction
 
+    function int unsigned used();
+        return (list_of_tags.size() != 256);
+    endfunction
 endclass

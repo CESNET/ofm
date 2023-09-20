@@ -56,6 +56,7 @@ class base extends uvm_test;
     // ------------------------------------------------------------------------
     // Create environment and Run sequences o their sequencers
     virtual task run_phase(uvm_phase phase);
+        time start_time;
 
         //RISE OBJECTION
         phase.raise_objection(this);
@@ -64,25 +65,12 @@ class base extends uvm_test;
         m_vseq.randomize();
         m_vseq.start(m_env.m_sequencer);
 
-        timeout = 1;
-        fork
-            test_wait_timeout(200);
-            test_wait_result();
-        join_any;
+        start_time = $time();
+        while((timeout = ((start_time + 600us) < $time())) == 0 && m_env.sc.used() != 0) begin
+            #(600ns);
+        end
 
         phase.drop_objection(this);
-
-    endtask
-
-    task test_wait_timeout(int unsigned time_length);
-        #(time_length*1us);
-    endtask
-
-    task test_wait_result();
-        do begin
-            #(6000ns);
-        end while (m_env.sc.used() != 0);
-        timeout = 0;
     endtask
 
     function void report_phase(uvm_phase phase);

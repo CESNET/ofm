@@ -35,9 +35,10 @@ class mi_cmp_rq #(MI_DATA_WIDTH, type CLASS_TYPE) extends uvm_common::comparer_o
         return ret;
     endfunction
 
-    virtual function string info();
+    virtual function string info(logic data = 0);
         string msg ="";
         msg = $sformatf("\n\tErrors %0d Compared %0d Compared write tr %0d Compared read tr %0d Wait for tramsaction DUT(%0d) MODEL(%0d)", errors, compared, compared_write, compared_read, dut_items.size(), model_items.size());
+        msg = {msg, super.info()};
         return msg;
     endfunction
 
@@ -69,7 +70,7 @@ class mi_cmp_rs #(MFB_ITEM_WIDTH) extends uvm_common::comparer_base_ordered#(uvm
         if ((tag_sync.list_of_tags.exists(tr_model.item.tag))) begin
             string msg;
             tag_sync.print_all();
-            $swrite(msg, "%sTAG %h EXISTS\n", msg, tr_model.item.tag);
+            $swrite(msg, "%sTAG %0d EXISTS\n", msg, tr_model.item.tag);
             $swrite(msg, "%sNUMBER %d\n", msg, compared);
             `uvm_error(this.get_full_name(), msg);
         end
@@ -85,4 +86,10 @@ class mi_cmp_rs #(MFB_ITEM_WIDTH) extends uvm_common::comparer_base_ordered#(uvm
         return msg;
     endfunction
 
+    virtual function string info(logic data = 0);
+        if (data == 1) begin
+            tag_sync.print_all();
+        end
+        return super.info(data);
+    endfunction
 endclass

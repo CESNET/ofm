@@ -60,10 +60,12 @@ class sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, ME
             data_index = 0;
             if (data != null) begin
                 if (hl_sqr.meta_behav != config_item::META_NONE && META_WIDTH != 0) begin
+                    //Send metadata
                     hl_sqr.m_meta.get_next_item(meta);
-                end
-
-                if (data.data.size() == 0) begin
+                    hl_transactions--;
+                    state_packet = state_packet_new;
+                end else if (data.data.size() == 0) begin
+                    //Donst send anything if there is no metadata and data size is zero
                     item_done();
                     state_packet = state_packet_none;
                 end else begin

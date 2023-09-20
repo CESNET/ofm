@@ -45,6 +45,8 @@ class monitor_logic_vector_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH,
 
 
     virtual function void write(uvm_mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) tr);
+        int unsigned inframe = 0;
+
         if (reset_sync.has_been_reset()) begin
             hi_tr = null;
         end
@@ -55,6 +57,7 @@ class monitor_logic_vector_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH,
                 int unsigned sof_pos = SOF_POS_WIDTH != 0 ? BLOCK_SIZE*tr.sof_pos[it] : 0;
                 // Eop is before next packet start
                 if (tr.sof[it] && tr.eof[it] && tr.eof_pos[it] < sof_pos) begin
+                    inframe = 1;
                     process_eof(it, 0, tr);
                     process_sof(it, REGION_SIZE*BLOCK_SIZE-1, tr);
                 end else begin
@@ -70,6 +73,7 @@ class monitor_logic_vector_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH,
                     end
 
                     if (hi_tr != null) begin
+                        inframe = 1;
                         for (int unsigned jt = pos_start; jt <= pos_end; jt++) begin
                             data.push_back(tr.data[it][(jt+1)*ITEM_WIDTH-1 -: ITEM_WIDTH]);
                             data_index++;
@@ -86,6 +90,10 @@ class monitor_logic_vector_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH,
                         end
                     end
                 end
+            end
+
+            if (inframe == 0) begin
+                `uvm_error(this.get_full_name(), "\n\tSRC RDY is set outside of frame!");
             end
         end
     endfunction

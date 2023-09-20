@@ -138,8 +138,8 @@ virtual class comparer_base_tagged#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) exte
                 if (dut_last.in_time > dut_items[it].in_time) begin
 
                     string msg;
-                    $swrite(msg, "%s\n\tSome transaction %0d what have output time %0dns have been outruned by transaction %0d  with otput time %0dns\n\ttag %s\nOutrun transaction\n%s\nOutruned transaction\n%s\n",
-                            msg, dut_last.in_id, dut_last.in_time/1ns, dut_items[it].in_id,
+                    msg = $sformatf("\n\tSome transaction %0d what have output time %0dns have been outruned by transaction %0d  with otput time %0dns\n\ttag %s\nOutrun transaction\n%s\nOutruned transaction\n%s\n",
+                            dut_last.in_id, dut_last.in_time/1ns, dut_items[it].in_id,
                             dut_items[it].in_time/1ns, tr.tag,
                             dut_last.in_item.convert2string(),
                             dut_items[it].in_item.convert2string());
@@ -200,7 +200,7 @@ virtual class comparer_base_tagged#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) exte
     function string dut_tr_get(model_item#(MODEL_ITEM) tr, time tr_time);
         string msg = "";
         for (int unsigned it = 0; it < dut_items.size(); it++) begin
-            $swrite(msg, "%s\n\nOutput time %0dns (%0dns) \n%s", msg, dut_items[it].in_time/1ns, (dut_items[it].in_time - tr_time)/1ns, this.message(tr, dut_items[it]));
+            msg = {msg, $sformatf("\n\nOutput time %0dns (%0dns) \n%s", dut_items[it].in_time/1ns, (dut_items[it].in_time - tr_time)/1ns, this.message(tr, dut_items[it]))};
         end
         return msg;
     endfunction
@@ -214,7 +214,7 @@ virtual class comparer_base_tagged#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) exte
         while (index_valid != 0) begin
             for (int unsigned it = 0; it < model_items[index].size(); it++) begin
                 model_item#(MODEL_ITEM) tmp_item = model_items[index].get(it);
-                $swrite(msg, "%s\n\nTag %s\n%s\n%s", msg, index, tmp_item.convert2string_time(), this.message(tmp_item, tr));
+                msg = {msg, $sformatf("\n\nTag %s\n%s\n%s", index, tmp_item.convert2string_time(), this.message(tmp_item, tr))};
             end
             //next index
             index_valid = model_items.next(index);
@@ -283,17 +283,28 @@ virtual class comparer_base_tagged#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) exte
         end
     endtask
 
-    virtual function string info();
+    virtual function string info(logic data = 0);
         int unsigned index_valid;
         string index;
         string msg = "";
-            index_valid = model_items.first(index);
-            $swrite(msg, "\n\tErrors %0d", dut_errors);
-            while (index_valid != 0) begin
-                $swrite(msg, "%s\n\tTag %s Errors/Compared %0d/%0d transactions", msg, index, model_items[index].errors, model_items[index].compared);
-                //next index
-                index_valid = model_items.next(index);
+        index_valid = model_items.first(index);
+        msg = {msg, $sformatf("\n\tErrors %0d", dut_errors)};
+        while (index_valid != 0) begin
+            msg = {msg, $sformatf("\n\tTag %s Errors/Compared %0d/%0d transactions", index, model_items[index].errors, model_items[index].compared)};
+            if (data == 1) begin
+                for (int unsigned it = 0; it < model_items[index].size(); it++) begin
+                    msg = {msg, $sformatf("\n\tModels transaction : %0d", it), model_items[index].get(it).convert2string()};
+                end
             end
+            //next index
+            index_valid = model_items.next(index);
+        end
+
+        if (data == 1) begin
+            for (int unsigned it = 0; it < dut_items.size(); it++) begin
+                msg = {msg, $sformatf("\n\tDUT transaction : %0d", it), dut_items[it].convert2string()};
+            end
+        end
         return msg;
     endfunction
 endclass

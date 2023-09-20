@@ -44,6 +44,8 @@ class monitor_byte_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends
 
 
     virtual function void write(uvm_mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) tr);
+        int unsigned inframe = 0;
+
         if (reset_sync.has_been_reset()) begin
             hi_tr = null;
         end
@@ -52,6 +54,7 @@ class monitor_byte_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends
             for (int unsigned it = 0; it < REGIONS; it++) begin
                 // Eop is before next packet start
                 if (tr.sof[it] && tr.eof[it] && tr.eof_pos[it] < (BLOCK_SIZE*tr.sof_pos[it])) begin
+                    inframe = 1;
                     process_eof(it, 0, tr);
                     process_sof(it, REGION_SIZE*BLOCK_SIZE-1, tr);
                 end else begin
@@ -59,7 +62,7 @@ class monitor_byte_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends
                     int unsigned pos_end   = tr.eof[it] ? tr.eof_pos[it] : (REGION_SIZE*BLOCK_SIZE-1);
 
                     if (tr.sof[it]) begin
-                        if (hi_tr != null) begin
+                           if (hi_tr != null) begin
                             `uvm_error(this.get_full_name(), "\n\tSOF has been set before previous frame haven't correctly ended. EOF haven't been set on end of packet")
                         end
                         hi_tr = uvm_byte_array::sequence_item::type_id::create("hi_tr");
@@ -67,6 +70,7 @@ class monitor_byte_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends
                     end
 
                     if (hi_tr != null) begin
+                        inframe = 1;
                         for (int unsigned jt = pos_start; jt <= pos_end; jt++) begin
                             data.push_back(tr.data[it][(jt+1)*ITEM_WIDTH-1 -: ITEM_WIDTH]);
                         end
@@ -82,6 +86,10 @@ class monitor_byte_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends
                         end
                     end
                 end
+            end
+
+            if (inframe == 0) begin
+                `uvm_error(this.get_full_name(), "\n\tSRC RDY is set outside of frame!");
             end
         end
     endfunction

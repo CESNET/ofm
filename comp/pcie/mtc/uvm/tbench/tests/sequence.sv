@@ -63,15 +63,12 @@ class virt_seq#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, PC
             run_reset();
         join_none
 
-        #(200ns)
+        #(400ns)
 
         fork
             run_mfb();
         join_none
 
-        fork
-            m_pcie_hdr.start(p_sequencer.m_packet.m_pcie_hdr);
-        join_any
-
+        m_pcie_hdr.start(p_sequencer.m_packet);
     endtask
 endclass

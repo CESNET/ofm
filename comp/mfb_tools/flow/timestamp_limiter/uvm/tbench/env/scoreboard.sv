@@ -51,9 +51,6 @@ class scoreboard #(MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTA
 
         data_cmp = uvm_timestamp_limiter::delayer_cmp #(MFB_ITEM_WIDTH, TIMESTAMP_WIDTH)::type_id::create("data_cmp", this);
         meta_cmp = uvm_common::comparer_taged #(uvm_logic_vector::sequence_item#(TX_MFB_META_WIDTH))::type_id::create("meta_cmp", this);
-
-        data_cmp.model_tr_timeout_set(100us);
-        meta_cmp.model_tr_timeout_set(100us);
     endfunction
 
     function void connect_phase(uvm_phase phase);

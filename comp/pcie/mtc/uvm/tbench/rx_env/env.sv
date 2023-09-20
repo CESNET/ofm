@@ -10,7 +10,7 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, DEVICE
     localparam CQ_MFB_META_WIDTH = sv_pcie_meta_pack::PCIE_CQ_META_WIDTH;
 
     //top sequencer
-    sequencer#(MFB_ITEM_WIDTH)                     m_sequencer;
+    //sequencer             m_sequencer;
     driver#(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE) m_driver;
 
     //toplevel
@@ -52,7 +52,6 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, DEVICE
         m_env_rx = uvm_logic_vector_array_mfb::env_rx #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, sv_pcie_meta_pack::PCIE_CQ_META_WIDTH)::type_id::create("m_env_rx", this);
 
         if (m_config.active == UVM_ACTIVE) begin
-            m_sequencer = sequencer#(MFB_ITEM_WIDTH     )::type_id::create("m_sequencer", this);
             m_driver    = driver#(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE)::type_id::create("m_driver", this);
         end
 
@@ -62,7 +61,6 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, DEVICE
     // Connect agent's ports with ports from scoreboard.
     function void connect_phase(uvm_phase phase);
         if (m_config.active == UVM_ACTIVE) begin
-            m_sequencer.m_pcie_hdr = m_pcie_hdr_agent.m_sequencer;
             m_driver.seq_item_port_pcie_hdr.connect(m_pcie_hdr_agent.m_sequencer.seq_item_export);
         end
 
@@ -71,10 +69,10 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, DEVICE
 
     virtual task run_phase(uvm_phase phase);
         if (m_config.active == UVM_ACTIVE) begin
-            uvm_pcie_cq::logic_vector_sequence#(sv_pcie_meta_pack::PCIE_CQ_META_WIDTH)       logic_vector_seq;
+            uvm_pcie_cq::logic_vector_sequence#(sv_pcie_meta_pack::PCIE_CQ_META_WIDTH, DEVICE, ENDPOINT_TYPE)       logic_vector_seq;
             uvm_pcie_cq::logic_vector_array_sequence#(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE) logic_vector_array_seq;
 
-            logic_vector_seq                 = uvm_pcie_cq::logic_vector_sequence#(sv_pcie_meta_pack::PCIE_CQ_META_WIDTH)::type_id::create("logic_vector_seq", this);
+            logic_vector_seq                 = uvm_pcie_cq::logic_vector_sequence#(sv_pcie_meta_pack::PCIE_CQ_META_WIDTH, DEVICE, ENDPOINT_TYPE)::type_id::create("logic_vector_seq", this);
             logic_vector_array_seq           = uvm_pcie_cq::logic_vector_array_sequence #(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE)::type_id::create("logic_vector_array_seq", this);
             logic_vector_seq.tr_export       = m_driver.logic_vector_export;
             logic_vector_array_seq.tr_export = m_driver.pcie_hdr_rw_export;

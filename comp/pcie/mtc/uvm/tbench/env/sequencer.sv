@@ -10,7 +10,7 @@ class sequencer#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, M
     localparam CC_MFB_META_WIDTH = sv_pcie_meta_pack::PCIE_CC_META_WIDTH;
 
     uvm_reset::sequencer                                                                                  m_reset;
-    uvm_pcie_cq::sequencer#(MFB_ITEM_WIDTH)                                                               m_packet;
+    uvm_pcie_hdr::sequencer                                                                               m_packet;
     uvm_mfb::sequencer #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, CC_MFB_META_WIDTH) m_pcie;
     uvm_mi::sequencer_master#(MI_DATA_WIDTH, MI_ADDR_WIDTH)                                               m_mi_sqr;
 

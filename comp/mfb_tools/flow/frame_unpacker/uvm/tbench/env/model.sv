@@ -92,8 +92,10 @@ class model #(HEADER_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, VERBOSITY) extends uv
                 tr_output_meta.item.data   = {tr_input_mvb.item.data, header};
                 pkt_cnt++;
 
-                tr_output_packet.time_add("SUP_PACKET", $time());
-                tr_output_meta.time_add("SUP_HDR", $time());
+                tr_output_packet.time_array_add(tr_input_packet.start);
+                tr_output_packet.time_array_add(tr_input_mvb.start);
+                tr_output_meta.time_array_add(tr_input_packet.start);
+                tr_output_meta.time_array_add(tr_input_mvb.start);
 
                 if (this.get_report_verbosity_level() == 200) begin
                     $swrite(msg, "%s\tHEADER %h\n", msg, header);
@@ -127,7 +129,6 @@ class model #(HEADER_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, VERBOSITY) extends uv
             offset = 0;
             data_offset = HEADER_SIZE/MFB_ITEM_WIDTH;
             pkt_cnt = 0;
-
         end
 
     endtask

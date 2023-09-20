@@ -22,15 +22,14 @@ class dut_item #(type ITEM_TYPE);
 
     function string convert2string_time();
         string msg = "";
-        $swrite(msg, "%s\n\tINPUT TIME : %0.2fns", msg, in_time/1ns);
-
+        msg = {msg, $sformatf("\n\tINPUT TIME : %0.2fns", in_time/1ns)};
         return msg;
     endfunction
 
     function string convert2string();
         string msg = "";
 
-        $swrite(msg, "%s%s\n\tDATA :\n%s", msg, this.convert2string_time(), in_item.convert2string());
+        msg = {msg, $sformatf("%s\n\tDATA :\n%s", this.convert2string_time(), in_item.convert2string())};
         return msg;
     endfunction
 endclass
@@ -85,7 +84,7 @@ virtual class comparer_base#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) extends uvm
 
     pure virtual task run_model_delay_check();
     pure virtual task run_dut_delay_check();
-    pure virtual function string info();
+    pure virtual function string info(logic data = 0);
 
     task run_phase(uvm_phase phase);
         fork
@@ -109,7 +108,7 @@ virtual class comparer_base#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) extends uvm
 
         if (this.used()) begin
             msg = "";
-            `uvm_error(this.get_full_name(), {"\n\tWait for some transaction", info()});
+            `uvm_error(this.get_full_name(), {"\n\tWait for some transaction", info(1)});
         end
     endfunction
 
