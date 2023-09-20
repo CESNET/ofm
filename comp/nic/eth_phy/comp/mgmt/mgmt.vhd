@@ -348,6 +348,7 @@ signal drp_drd_sync  : std_logic_vector(DRPDO'range);
 signal drp_drdy_sync : std_logic;
 signal drp_rd        : std_logic;
 signal drp_wr        : std_logic;
+signal drpbusy_r     : std_logic;
 signal drpbusy       : std_logic;
 signal speed_int     : natural;
 signal speed_cap_int : std_logic_vector(15 downto 0);
@@ -688,12 +689,14 @@ begin
       end if;
       -- DRP read ready/done flag
       if (drpen_i = '1') and (drpwe_r = '0') then
-         drpbusy <= '1';
+         drpbusy_r <= '1';
       elsif (drp_drdy_sync = '1') then
-         drpbusy <= '0';
+         drpbusy_r <= '0';
       end if;
    end if;
 end process;
+
+drpbusy <= (drpen_i and (not drpwe_r)) or drpbusy_r;
 
 drp_cdc_i : entity work.MI_ASYNC
 generic map (
