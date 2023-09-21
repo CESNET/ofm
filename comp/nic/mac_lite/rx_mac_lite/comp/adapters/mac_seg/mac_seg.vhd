@@ -127,6 +127,9 @@ architecture FULL of RX_MAC_LITE_ADAPTER_MAC_SEG is
     signal sig1_mfb_eof_pos_arr      : slv_array_t     (REGIONS-1 downto 0)(log2(REGION_SIZE*8)-1 downto 0);
     signal sig1_mfb_error            : std_logic_vector(REGIONS-1 downto 0);
 
+    signal sig1_mfb_pkt_cont         : std_logic_vector(REGIONS+1-1 downto 0);
+    signal sig1_mfb_vld              : std_logic_vector(REGIONS-1 downto 0);
+
 begin
 
     mac_boundary_g : if (SEGMENTS=1) generate
@@ -357,14 +360,8 @@ begin
         end loop;
     end process;
 
-    -- invalidate word when there is an empty word OR there is a mid-packet gap
-    mask_valid_p : process(all)
-    begin
-        reg2_mac_valid_masked <= reg2_mac_valid;
-        if ((or reg2_mac_sop_masked = '0') and (or reg2_mac_eop_masked = '0') and (tx_mfb_lng_cof(0) = '0')) or (tx_mfb_lng_mid_pkt_gap = '1') then
-            reg2_mac_valid_masked <= '0';
-        end if;
-    end process;
+    -- invalidate word when there is a mid-packet gap
+    reg2_mac_valid_masked <= reg2_mac_valid and not tx_mfb_lng_mid_pkt_gap;
 
     -- ========================================================================
     -- Convert to MFB
@@ -418,6 +415,26 @@ begin
         sig1_mfb_error(0) <= or (reg2_mac_eop_masked and reg2_mac_error);
     end generate;
 
+    sig1_mfb_pkt_cont_g : for r in 0 to REGIONS-1 generate
+        sig1_mfb_pkt_cont(r+1) <= (    sig1_mfb_sof(r) and not sig1_mfb_eof(r) and not sig1_mfb_pkt_cont(r)) or
+                                  (    sig1_mfb_sof(r) and     sig1_mfb_eof(r) and     sig1_mfb_pkt_cont(r)) or
+                                  (not sig1_mfb_sof(r) and not sig1_mfb_eof(r) and     sig1_mfb_pkt_cont(r));
+
+        sig1_mfb_vld(r) <= sig1_mfb_sof(r) or sig1_mfb_eof(r) or sig1_mfb_pkt_cont(r);
+    end generate;
+
+    process (CLK)
+    begin
+        if (rising_edge(CLK)) then
+            if (reg2_mac_valid_masked = '1') then
+                sig1_mfb_pkt_cont(0) <= sig1_mfb_pkt_cont(REGIONS);
+            end if;
+            if (RESET = '1') then
+                sig1_mfb_pkt_cont(0) <= '0';
+            end if;
+        end if;
+    end process;
+
     mfb_reg_out_p : process (CLK)
     begin
         if (rising_edge(CLK)) then
@@ -427,7 +444,7 @@ begin
             OUT_MFB_EOF     <= sig1_mfb_eof;
             OUT_MFB_EOF_POS <= slv_array_ser(sig1_mfb_eof_pos_arr);
             OUT_MFB_ERROR   <= sig1_mfb_error;
-            OUT_MFB_SRC_RDY <= reg2_mac_valid_masked;
+            OUT_MFB_SRC_RDY <= (or sig1_mfb_vld) and reg2_mac_valid_masked;
             if (RESET = '1') then
                 OUT_MFB_SRC_RDY <= '0';
             end if;
