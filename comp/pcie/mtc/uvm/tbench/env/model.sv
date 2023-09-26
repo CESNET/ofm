@@ -73,6 +73,13 @@ virtual class model #(MFB_ITEM_WIDTH, MI_DATA_WIDTH, MI_ADDR_WIDTH) extends uvm_
         mi_tr_cnt   = 0;
     endfunction
 
+    function int unsigned used();
+        int unsigned ret = 0;
+        ret |= (analysis_imp_cq_data.used() != 0);
+        ret |= (analysis_imp_cq_meta.used() != 0);
+        return ret;
+    endfunction
+
     function uvm_mi::sequence_item_request #(MI_DATA_WIDTH, MI_ADDR_WIDTH, 0) gen_mi_read(input logic[32-1 : 0] addr, input logic[(32/8)-1 : 0] be);
         uvm_mi::sequence_item_request #(MI_DATA_WIDTH, MI_ADDR_WIDTH, 0) mi_tr;
 

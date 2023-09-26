@@ -41,10 +41,11 @@ class scoreboard #(MFB_ITEM_WIDTH, MI_DATA_WIDTH, MI_ADDR_WIDTH) extends uvm_sco
     endfunction
 
     function int unsigned success();
-        int unsigned ret = 0;
-        ret |= m_mi_cmp_rq.success();
-        ret |= m_mi_cmp_meta_rs.success();
-        ret |= m_mi_cmp_rs.success();
+        int unsigned ret = 1;
+        ret &= m_mi_cmp_rq.success();
+        ret &= m_mi_cmp_meta_rs.success();
+        ret &= m_mi_cmp_rs.success();
+        ret &= (m_mi_cmp_rs.tag_sync.used() == 0);
         return ret;
     endfunction
 
@@ -54,6 +55,7 @@ class scoreboard #(MFB_ITEM_WIDTH, MI_DATA_WIDTH, MI_ADDR_WIDTH) extends uvm_sco
         ret |= m_mi_cmp_meta_rs.used();
         ret |= m_mi_cmp_rs.used();
         ret |= m_mi_cmp_rs.tag_sync.used();
+        ret |= m_model.used();
         return ret;
     endfunction
 
