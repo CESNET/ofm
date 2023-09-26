@@ -5,8 +5,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 
-class model #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY) extends uvm_component;
-    `uvm_component_param_utils(uvm_items_valid::model #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY))
+class model #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_WIDTH) extends uvm_component;
+    `uvm_component_param_utils(uvm_items_valid::model #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_WIDTH))
 
     uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) input_mfb;
     uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(META_WIDTH))           input_meta;
@@ -69,10 +69,8 @@ class model #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_W
             input_meta.get(tr_input_meta);
 
             pkt_cnt++;
-            if (VERBOSITY >= 1) begin
-                `uvm_info(this.get_full_name(), tr_input_mfb.convert2string() ,UVM_NONE)
-                `uvm_info(this.get_full_name(), tr_input_meta.convert2string() ,UVM_MEDIUM) // useless
-            end
+            `uvm_info(this.get_full_name(), tr_input_mfb.convert2string() ,UVM_FULL)
+            `uvm_info(this.get_full_name(), tr_input_meta.convert2string() ,UVM_FULL) // useless
 
             offset = tr_input_meta.data[OFFSET_WIDTH-1              : 0];
             length = tr_input_meta.data[OFFSET_WIDTH+LENGTH_WIDTH-1 : OFFSET_WIDTH];

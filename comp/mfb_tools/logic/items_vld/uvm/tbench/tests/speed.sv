@@ -46,7 +46,7 @@ class speed extends uvm_test;
      typedef uvm_component_registry#(test::speed, "test::speed") type_id;
 
     // declare the Environment reference variable
-    uvm_items_valid::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH, MVB_DATA_WIDTH, MVB_ITEMS, PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY) m_env;
+    uvm_items_valid::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH, MVB_DATA_WIDTH, MVB_ITEMS, PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH) m_env;
     test::mvb_tx_speed#(MVB_ITEMS, MVB_DATA_WIDTH)                                                                                                                              mvb_tx_speed;
     uvm_reset::sequence_start                                                                                                                                                   m_reset;
 
@@ -70,7 +70,7 @@ class speed extends uvm_test;
         uvm_logic_vector_array_mfb::sequence_lib_rx#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH)::type_id::set_inst_override(mfb_rx_speed#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH)::get_type(),
         {this.get_full_name(), ".m_env.m_env_rx.*"});
         // Initializing the reference to the environment
-        m_env = uvm_items_valid::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH, MVB_DATA_WIDTH, MVB_ITEMS, PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY)::type_id::create("m_env", this);
+        m_env = uvm_items_valid::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH, MVB_DATA_WIDTH, MVB_ITEMS, PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH)::type_id::create("m_env", this);
     endfunction
 
     virtual task tx_mvb_seq();

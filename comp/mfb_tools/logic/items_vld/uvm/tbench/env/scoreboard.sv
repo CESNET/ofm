@@ -4,8 +4,8 @@
 
 // SPDX-License-Identifier: BSD-3-Clause
 
-class scoreboard #(META_WIDTH, MVB_DATA_WIDTH, MVB_ITEMS, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY) extends uvm_scoreboard;
-    `uvm_component_param_utils(uvm_items_valid::scoreboard #(META_WIDTH, MVB_DATA_WIDTH, MVB_ITEMS, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY))
+class scoreboard #(META_WIDTH, MVB_DATA_WIDTH, MVB_ITEMS, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_WIDTH) extends uvm_scoreboard;
+    `uvm_component_param_utils(uvm_items_valid::scoreboard #(META_WIDTH, MVB_DATA_WIDTH, MVB_ITEMS, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_WIDTH))
 
     int unsigned compared;
     int unsigned errors;
@@ -20,7 +20,7 @@ class scoreboard #(META_WIDTH, MVB_DATA_WIDTH, MVB_ITEMS, MFB_ITEM_WIDTH, OFFSET
     uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(MVB_DATA_WIDTH))   model_mvb;
     uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(1))                model_mvb_end;
 
-    model #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY) m_model;
+    model #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_WIDTH) m_model;
 
     // Contructor of scoreboard.
     function new(string name, uvm_component parent);
@@ -52,7 +52,7 @@ class scoreboard #(META_WIDTH, MVB_DATA_WIDTH, MVB_ITEMS, MFB_ITEM_WIDTH, OFFSET
 
 
     function void build_phase(uvm_phase phase);
-        m_model    = model#(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY)::type_id::create("m_model", this);
+        m_model    = model#(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_WIDTH)::type_id::create("m_model", this);
     endfunction
 
     function void connect_phase(uvm_phase phase);
