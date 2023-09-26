@@ -71,10 +71,6 @@ class model_base #(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE, MI_DATA_WIDTH, MI_ADDR
             end
         end
 
-        if (info.dw_cnt == 0) begin
-            info.dw_cnt = 1024;
-        end
-
         if (DEVICE == "ULTRASCALE" || DEVICE == "7SERIES") begin
             hdr_offset = sv_pcie_meta_pack::PCIE_META_REQ_HDR_W/MFB_ITEM_WIDTH;
         end else if(DEVICE == "STRATIX10" || DEVICE == "AGILEX") begin
@@ -136,6 +132,10 @@ class model_base #(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE, MI_DATA_WIDTH, MI_ADDR
             info.tph_st_tag  = meta[54-1 : 46];
             info.tph_type    = meta[46-1 : 44];
             info.tph_present = meta[44-1 : 43];
+        end
+
+        if (info.dw_cnt == 0) begin
+            info.dw_cnt = 1024;
         end
     endtask
 
