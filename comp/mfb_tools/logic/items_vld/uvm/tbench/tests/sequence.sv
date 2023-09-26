@@ -30,10 +30,7 @@ class virt_sequence #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WID
 
         init();
 
-        fork
-            m_info_lib.start(p_sequencer.m_info);
-        join_any
-
+        m_info_lib.start(p_sequencer.m_info);
     endtask
 
 endclass
