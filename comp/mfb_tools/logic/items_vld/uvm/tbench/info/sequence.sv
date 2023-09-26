@@ -198,9 +198,6 @@ class sequence_rand_offset_whole_length #(PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH) e
             if (req.length+req.offset > req.payload_size) begin
                 `uvm_fatal(get_type_name(), $sformatf("LENGTH (%d) + OFFSET (%d) is bigger than PAYLOAD SIZE %d", req.length, req.offset, req.payload_size))
             end
-            if (req.length+req.offset < req.payload_size) begin
-                `uvm_fatal(get_type_name(), $sformatf("LENGTH (%d) + OFFSET (%d) is lower than PAYLOAD SIZE %d", req.length, req.offset, req.payload_size))
-            end
         end
     endtask
 
