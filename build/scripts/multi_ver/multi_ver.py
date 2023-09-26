@@ -67,9 +67,9 @@ def run_modelsim(fdo_file,manual=False,gui=False, env={}):
 
     if (manual):
         system("vsim -do \"do "+fdo_file+c)
-        result = system("grep -i \"success\" transcript")
+        result = system("grep -E \"(Verification finished successfully)|(VERIFICATION SUCCESS)\" transcript")
     else:
-        result = system("vsim -do \"do "+fdo_file+c+" | grep -i \"success\"")
+        result = system("vsim -do \"do "+fdo_file+c+" | grep -E \"(Verification finished successfully)|(VERIFICATION SUCCESS)\"")
 
     for k in env:
         del os.environ[k]
