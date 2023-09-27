@@ -40,8 +40,8 @@ def COMPONENTS_MULTIVER = [\
     ['TRANS_SORTER'      , 'comp/base/misc/trans_sorter/ver'         , 'top_level.fdo'      , 'tbench/test_pkg.sv' , 'ver_settings.py'       ],\
     ['CROSSBARX'         , 'comp/base/misc/crossbarx/ver'            , 'top_level.fdo'      , 'test_pkg.vhd'       , 'ver_settings.py'       ],\
     ['PACKET_PLANNER'    , 'comp/base/misc/packet_planner/ver'       , 'top_level.fdo'      , 'tbench/test_pkg.sv' , 'ver_settings.py'       ],\
-    ['FIFOX'             , 'comp/base/fifo/fifox/ver'                , 'top_level.fdo'      , 'tbench/test_pkg.sv' , 'ver_settings.py'       ],\
-    ['FIFOX_MULTI'       , 'comp/base/fifo/fifox_multi/sim'          , 'fifox_multi.fdo'    , 'testbench.vhd'      , 'ver_settings.py'       ],\
+    ['FIFOX'             , 'comp/base/fifo/fifox/uvm'                , 'top_level.fdo'      , 'tbench/tests/pkg.sv', 'ver_settings.py'       ],\
+    ['FIFOX_MULTI'       , 'comp/base/fifo/fifox_multi/uvm'          , 'top_level.fdo'      , 'tbench/tests/pkg.sv', 'ver_settings.py'       ],\
     ['N_LOOP_OP'         , 'comp/base/logic/n_loop_op/sim'           , 'n_loop_op.fdo'      , 'testbench.vhd'      , 'ver_settings.py'       ],\
     ['N_LOOP_OP_PRO'     , 'comp/base/logic/n_loop_op_pro/sim'       , 'n_loop_op_pro.fdo'  , 'testbench.vhd'      , 'ver_settings.py'       ],\
     ['DSP_CNT_INTEL'     , 'comp/base/dsp/dsp_counter_intel/sim'     , 'sim.fdo'            , 'testbench.vhd'      , 'ver_settings.py'       ],\

@@ -22,15 +22,16 @@ class model #(ITEM_WIDTH) extends uvm_component;
     endfunction
 
     task run_phase(uvm_phase phase);
+
         uvm_common::model_item #(uvm_logic_vector::sequence_item #(ITEM_WIDTH)) tr_mvb_in;
         uvm_common::model_item #(uvm_logic_vector::sequence_item #(ITEM_WIDTH)) tr_mvb_out;
 
         forever begin
+
+            // Gets the input transaction
             model_mvb_in.get(tr_mvb_in);
-
-            $cast(tr_mvb_out, tr_mvb_in.clone());
-
-            model_mvb_out.write(tr_mvb_out);
+            // Sends the output transaction
+            model_mvb_out.write(tr_mvb_in);
 
         end
 

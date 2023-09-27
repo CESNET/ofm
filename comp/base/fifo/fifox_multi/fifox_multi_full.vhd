@@ -137,9 +137,9 @@ architecture FULL of FIFOX_MULTI is
     signal rd_num_reg    : unsigned(log2(READ_PORTS+1)-1 downto 0);
 
     -- status register
-    signal status_reg    : unsigned(log2(ITEMS_ACT+1)-1 downto 0);
-    signal status_reg1   : unsigned(log2(ITEMS_ACT+1)-1 downto 0);
-    signal status_reg2   : unsigned(log2(ITEMS_ACT+1)-1 downto 0);
+    signal status_reg    : unsigned(log2(ITEMS_ACT+WRITE_PORTS*3+1)-1 downto 0);
+    signal status_reg1   : unsigned(log2(ITEMS_ACT+WRITE_PORTS*3+1)-1 downto 0);
+    signal status_reg2   : unsigned(log2(ITEMS_ACT+WRITE_PORTS*3+1)-1 downto 0);
 
     -- almost full / almost empty
     signal al_full_reg   : std_logic;
@@ -164,6 +164,12 @@ begin
     assert_pr : process (CLK)
         variable rd_en : boolean;
     begin
+        if (FIFOX_ITEMS < 2) then
+            assert (false)
+                report "ERROR: FIFOX Multi: FIFOX_ITEMS < 2!"
+                severity failure;
+        end if;
+
         if (rising_edge(CLK)) then
             if (RESET/='1') then
                 rd_en := true;
