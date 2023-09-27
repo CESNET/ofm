@@ -411,7 +411,7 @@ begin
             wait until (rising_edge(CLK));
         end loop;
         
-        write(l,string'("Verification SUCCESS!"));writeline(output,l);
+        write(l,string'("VERIFICATION SUCCESS"));writeline(output,l);
         stop;
     end process;
     
