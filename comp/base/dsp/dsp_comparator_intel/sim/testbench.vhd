@@ -425,7 +425,7 @@ begin
     begin
         wait until stop_at_the_end = '1';
         if (incorrect_results = 1) then
-            write(l, string'("Success.")); writeline(output, l);
+            write(l, string'("VERIFICATION SUCCESS")); writeline(output, l);
         else
             write(l, string'("There were some incorrect results.")); writeline(output, l);
         end if;

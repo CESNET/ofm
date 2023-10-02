@@ -81,7 +81,7 @@ port(
     -- Valid per each Item.
     TX_END        : out std_logic_vector(MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE-1 downto 0);
     TX_VLD        : out std_logic_vector(MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE-1 downto 0);
-    TX_SRC_RDY    : out std_logic := '0';
+    TX_SRC_RDY    : out std_logic;
     TX_DST_RDY    : in  std_logic
 );
 end entity;

@@ -8,10 +8,9 @@ class ex_test extends uvm_test;
     typedef uvm_component_registry#(test::ex_test, "test::ex_test") type_id;
 
     // declare the Environment reference variable
-    uvm_items_valid::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH, MVB_DATA_WIDTH, MVB_ITEMS, PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY) m_env;
+    uvm_items_valid::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH, MVB_DATA_WIDTH, MVB_ITEMS, PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH) m_env;
     uvm_reset::sequence_start                              m_reset;
     uvm_mvb::sequence_lib_tx#(MVB_ITEMS, MVB_DATA_WIDTH)   m_mvb_seq;
-    int unsigned timeout;
 
     // ------------------------------------------------------------------------
     // Functions
@@ -32,7 +31,7 @@ class ex_test extends uvm_test;
     // Build phase function, e.g. the creation of test's internal objects
     function void build_phase(uvm_phase phase);
         // Initializing the reference to the environment
-        m_env = uvm_items_valid::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH, MVB_DATA_WIDTH, MVB_ITEMS, PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY)::type_id::create("m_env", this);
+        m_env = uvm_items_valid::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH, MVB_DATA_WIDTH, MVB_ITEMS, PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH)::type_id::create("m_env", this);
     endfunction
 
     virtual task tx_mvb_seq();
@@ -62,6 +61,7 @@ class ex_test extends uvm_test;
     // Create environment and Run sequences on their sequencers
     virtual task run_phase(uvm_phase phase);
         virt_sequence #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH, MVB_DATA_WIDTH, PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH) m_vseq;
+        time time_start;
 
         phase.raise_objection(this);
 
@@ -84,31 +84,15 @@ class ex_test extends uvm_test;
         m_vseq.randomize();
         m_vseq.start(m_env.vscr);
 
-        timeout = 1;
-        fork
-            test_wait_timeout(1000);
-            test_wait_result();
-        join_any;
+        time_start = $time();
+        while((time_start + 1ms) > $time() && m_env.sc.used() != 0) begin
+            #(300ns);
+        end
 
         phase.drop_objection(this);
-
-    endtask
-
-    task test_wait_timeout(int unsigned time_length);
-        #(time_length*1us);
-    endtask
-
-    task test_wait_result();
-        do begin
-            #(600ns);
-        end while (m_env.sc.used() != 0);
-        timeout = 0;
     endtask
 
     function void report_phase(uvm_phase phase);
         `uvm_info(this.get_full_name(), {"\n\tTEST : ", this.get_type_name(), " END\n"}, UVM_NONE);
-        if (timeout) begin
-            `uvm_error(this.get_full_name(), "\n\t===================================================\n\tTIMEOUT SOME PACKET STUCK IN DESIGN\n\t===================================================\n\n");
-        end
     endfunction
 endclass

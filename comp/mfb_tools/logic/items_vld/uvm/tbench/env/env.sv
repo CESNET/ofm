@@ -5,8 +5,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 // Environment for the functional verification.
-class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH, MVB_DATA_WIDTH, MVB_ITEMS, PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY) extends uvm_env;
-    `uvm_component_param_utils(uvm_items_valid::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH, MVB_DATA_WIDTH, MVB_ITEMS, PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY));
+class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH, MVB_DATA_WIDTH, MVB_ITEMS, PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH) extends uvm_env;
+    `uvm_component_param_utils(uvm_items_valid::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH, MVB_DATA_WIDTH, MVB_ITEMS, PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH));
 
     uvm_logic_vector_array_mfb::env_rx #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH) m_env_rx;
     uvm_logic_vector_mvb::env_tx       #(MVB_ITEMS, MVB_DATA_WIDTH)                                                m_env_tx_mvb;
@@ -19,7 +19,7 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_W
     uvm_reset::agent                                             m_reset;
     uvm_header_type::agent#(PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH) m_info_agent;
 
-    scoreboard #(META_WIDTH, MVB_DATA_WIDTH, MVB_ITEMS, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY) sc;
+    scoreboard #(META_WIDTH, MVB_DATA_WIDTH, MVB_ITEMS, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_WIDTH) sc;
 
     // Constructor of the environment.
     function new(string name, uvm_component parent);
@@ -70,7 +70,7 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_W
         uvm_config_db #(uvm_logic_vector_mvb::config_item)::set(this, "m_env_end_mvb", "m_config", m_config_mvb_end);
         m_env_end_mvb = uvm_logic_vector_mvb::env_tx#(MVB_ITEMS, 1)::type_id::create("m_env_end_mvb", this);
 
-        sc       = scoreboard#(META_WIDTH, MVB_DATA_WIDTH, MVB_ITEMS, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY)::type_id::create("sc", this);
+        sc       = scoreboard#(META_WIDTH, MVB_DATA_WIDTH, MVB_ITEMS, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_WIDTH)::type_id::create("sc", this);
         m_driver = driver #(MFB_ITEM_WIDTH, META_WIDTH, PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH)::type_id::create("m_driver", this);
         vscr     = uvm_items_valid::virt_sequencer#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH, MVB_DATA_WIDTH, PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH)::type_id::create("vscr",this);
 

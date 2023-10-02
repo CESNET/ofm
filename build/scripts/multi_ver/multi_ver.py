@@ -67,9 +67,9 @@ def run_modelsim(fdo_file,manual=False,gui=False, env={}):
 
     if (manual):
         system("vsim -do \"do "+fdo_file+c)
-        result = system("grep -i \"success\" transcript")
+        result = system("grep -E \"(Verification finished successfully)|(VERIFICATION SUCCESS)\" transcript >/dev/null")
     else:
-        result = system("vsim -do \"do "+fdo_file+c+" | grep -i \"success\"")
+        result = system("vsim -do \"do "+fdo_file+c+" | grep -E \"(Verification finished successfully)|(VERIFICATION SUCCESS)\" >/dev/null")
 
     for k in env:
         del os.environ[k]
@@ -141,6 +141,9 @@ elif ("_combinations_run_percentage_" in SETTINGS.keys()):
 
 ##########
 
+#Print current directory where verification is running
+print(os.getcwd())
+
 if (args.setting==None):
     ##########
     # Run all settings
@@ -153,7 +156,9 @@ if (args.setting==None):
 
         print("Running combination: "+" ".join(c))
         result = run_modelsim(args.fdo_file,env=env)
-        if (result!=0): # detect failure
+        if (result == 0): # detect failure
+            print("Run SUCCEEDED ("+" ".join(c)+")")
+        else:
             print("Run FAILED ("+" ".join(c)+")")
             FAIL = True
 
@@ -175,7 +180,9 @@ else:
     if (not args.dry_run):
         print("Running combination: "+" ".join(args.setting))
         result = run_modelsim(args.fdo_file,True,(not args.command_line),env=env)
-        if (result!=0): # detect failure
+        if (result == 0): # detect failure
+            print("Run SUCCEEDED ("+" ".join(args.setting)+")")
+        else:
             print("Run FAILED ("+" ".join(args.setting)+")")
             FAIL = True
 

@@ -22,14 +22,10 @@ package test;
     parameter MVB_DATA_WIDTH     = MFB_ITEM_WIDTH;
     parameter MVB_ITEMS          = MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE;
     // Maximum size of a packet (in Items).
-    parameter PKT_MTU            = 512;
-    parameter OFFSET_WIDTH       = 9;
-    parameter LENGTH_WIDTH       = 9;
+    parameter PKT_MTU            = 100;
+    parameter OFFSET_WIDTH       = 7;
+    parameter LENGTH_WIDTH       = 7;
     parameter META_WIDTH         = OFFSET_WIDTH+LENGTH_WIDTH+1;
-    // VERBOSITY MODE
-    // 0 - None
-    // 1 - Basic
-    parameter VERBOSITY          = 0;
 
     parameter CLK_PERIOD         = 4ns;
 

@@ -25,6 +25,7 @@ SETTINGS = {
         "CLK_PERIOD"        : "10ns"             ,
         "PCIE_LEN_MIN"      : "1"                ,
         "PCIE_LEN_MAX"      : "256"              ,
+        "__core_params__": {"UVM_TEST": "test::base"},
     },
 
     "device_agilex"     : {
@@ -65,6 +66,9 @@ SETTINGS = {
     "4_region"                 : {
         "MFB_REGIONS"             : "4"   ,
     },
+    "test_speed" : {
+        "__core_params__": {"UVM_TEST": "test::speed"},
+    },
     "_combinations_"    : (
         (                                                                         ),
         ("default"      , "endpoint_rtile",                                       ),
@@ -73,6 +77,12 @@ SETTINGS = {
         ("device_agilex", "endpoint_htile",                                       ),
         ("default"      , "device_ultrascale",                                    ),
         ("default"      , "device_7series",                                       ),
+        ("default"      , "endpoint_rtile",    "test_speed",                      ),
+        ("default"      , "endpoint_htile",    "test_speed",                      ),
+        ("device_agilex", "endpoint_rtile",    "test_speed",                      ),
+        ("device_agilex", "endpoint_htile",    "test_speed",                      ),
+        ("default"      , "device_ultrascale", "test_speed",                      ),
+        ("default"      , "device_7series",    "test_speed",                      ),
         (                                      "max_payload_size_128",            ),
         (                                      "max_payload_size_256",            ),
         (                                      "max_payload_size_512",            ),

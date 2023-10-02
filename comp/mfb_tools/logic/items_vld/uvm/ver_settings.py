@@ -12,6 +12,7 @@ SETTINGS = {
         "PKT_MTU"         : "512",
         "OFFSET_WIDTH"    : "9",
         "LENGTH_WIDTH"    : "9",
+        "__core_params__": {"UVM_TEST": "test::ex_test"},
     },
     "4_regions" : {
         "MFB_REGIONS"     : "4",
@@ -41,9 +42,14 @@ SETTINGS = {
     "small_lengths" : {
         "LENGTH_WIDTH"    : "2",
     },
+    "test_speed" : {
+        "__core_params__": {"UVM_TEST": "test::speed"},
+    },
     "_combinations_" : (
     (                                                                                                            ), # default
     (             "small_mtu",                                                                                   ),
+    (                           "test_speed", ), # default
+    (             "small_mtu",  "test_speed", ),
     (             "small_mtu", "small_offsets",                                                                  ),
     (             "small_mtu",                  "small_lengths",                                                 ),
     (             "small_mtu", "small_offsets", "small_lengths",                                                 ),

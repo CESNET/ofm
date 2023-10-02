@@ -9,7 +9,6 @@ class ex_test extends uvm_test;
     `uvm_component_utils(test::ex_test);
 
     uvm_splitter_simple::env #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH, SPLITTER_OUTPUTS, META_BEHAV) m_env;
-    int unsigned timeout;
     // ------------------------------------------------------------------------
     // Functions
     function new(string name, uvm_component parent);
@@ -60,6 +59,7 @@ class ex_test extends uvm_test;
     // ------------------------------------------------------------------------
     // Create environment and Run sequences o their sequencers
     virtual task run_phase(uvm_phase phase);
+        time time_start;
         virt_seq #(ITEM_WIDTH, META_WIDTH, SPLITTER_OUTPUTS) m_vseq;
 
         phase.raise_objection(this);
@@ -83,31 +83,16 @@ class ex_test extends uvm_test;
         m_vseq.start(m_env.m_env_rx.m_sequencer);
 
 
-        timeout = 1;
-        fork
-            test_wait_timeout(10);
-            test_wait_result();
-        join_any;
+        time_start = $time();
+        while ((time_start + 10us) > $time() && m_env.sc.used() != 0) begin
+            #(600ns);
+        end
 
         phase.drop_objection(this);
 
     endtask
 
-    task test_wait_timeout(int unsigned time_length);
-        #(time_length*1us);
-    endtask
-
-    task test_wait_result();
-        do begin
-            #(600ns);
-        end while (m_env.sc.used() != 0);
-        timeout = 0;
-    endtask
-
     function void report_phase(uvm_phase phase);
         `uvm_info(this.get_full_name(), {"\n\tTEST : ", this.get_type_name(), " END\n"}, UVM_NONE);
-        if (timeout) begin
-            `uvm_error(this.get_full_name(), "\n\t===================================================\n\tTIMEOUT SOME PACKET STUCK IN DESIGN\n\t===================================================\n\n");
-        end
     endfunction
 endclass

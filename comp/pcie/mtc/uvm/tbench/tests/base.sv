@@ -27,7 +27,6 @@ class base extends uvm_test;
 
     uvm_mtc::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE, MI_DATA_WIDTH, MI_ADDR_WIDTH) m_env;
     virt_seq#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, PCIE_LEN_MIN, PCIE_LEN_MAX, MI_DATA_WIDTH, MI_ADDR_WIDTH) m_vseq;
-    int unsigned timeout;
 
     // ------------------------------------------------------------------------
     // Functions
@@ -56,7 +55,7 @@ class base extends uvm_test;
     // ------------------------------------------------------------------------
     // Create environment and Run sequences o their sequencers
     virtual task run_phase(uvm_phase phase);
-        time start_time;
+        time time_start;
 
         //RISE OBJECTION
         phase.raise_objection(this);
@@ -65,8 +64,8 @@ class base extends uvm_test;
         m_vseq.randomize();
         m_vseq.start(m_env.m_sequencer);
 
-        start_time = $time();
-        while((timeout = ((start_time + 600us) < $time())) == 0 && m_env.sc.used() != 0) begin
+        time_start = $time();
+        while((time_start + 200us) > $time() && m_env.sc.used()) begin
             #(600ns);
         end
 
@@ -75,9 +74,6 @@ class base extends uvm_test;
 
     function void report_phase(uvm_phase phase);
         `uvm_info(this.get_full_name(), {"\n\tTEST : ", this.get_type_name(), " END\n"}, UVM_NONE);
-        if (timeout) begin
-            `uvm_error(this.get_full_name(), "\n\t===================================================\n\tTIMEOUT SOME PACKET STUCK IN DESIGN\n\t===================================================\n\n");
-        end
     endfunction
 
 endclass

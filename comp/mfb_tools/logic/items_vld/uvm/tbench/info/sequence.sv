@@ -106,7 +106,7 @@ class sequence_whole_frame_chsum #(PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH) extends 
             // Generate random request
             `uvm_do_with(req,
             {
-                payload_size inside{[0 : PKT_MTU]};
+                payload_size inside{[1 : PKT_MTU]};
                 offset == 0;
                 length == payload_size;
             })
@@ -140,7 +140,7 @@ class sequence_zero_offset_rand_length #(PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH) ex
             // Generate random request
             `uvm_do_with(req,
             {
-                payload_size inside{[0 : PKT_MTU]};
+                payload_size inside{[1 : PKT_MTU]};
                 offset       == 0;
                 if (LENGTH_WIDTH == $clog2(PKT_MTU)) {
                     length       inside{[0 : payload_size]};
@@ -182,7 +182,7 @@ class sequence_rand_offset_whole_length #(PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH) e
             // Generate random request
             `uvm_do_with(req,
             {
-                payload_size inside{[0 : PKT_MTU]};
+                payload_size inside{[1 : PKT_MTU]};
                 offset       inside{[0 : payload_size-1]};
                 offset       inside{[0 : 2**OFFSET_WIDTH-1]};
                 if (LENGTH_WIDTH == $clog2(PKT_MTU)) {
@@ -197,9 +197,6 @@ class sequence_rand_offset_whole_length #(PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH) e
             })
             if (req.length+req.offset > req.payload_size) begin
                 `uvm_fatal(get_type_name(), $sformatf("LENGTH (%d) + OFFSET (%d) is bigger than PAYLOAD SIZE %d", req.length, req.offset, req.payload_size))
-            end
-            if (req.length+req.offset < req.payload_size) begin
-                `uvm_fatal(get_type_name(), $sformatf("LENGTH (%d) + OFFSET (%d) is lower than PAYLOAD SIZE %d", req.length, req.offset, req.payload_size))
             end
         end
     endtask

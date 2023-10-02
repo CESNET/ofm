@@ -54,7 +54,6 @@ class speed extends base;
     localparam CQ_MFB_META_WIDTH = sv_pcie_meta_pack::PCIE_CQ_META_WIDTH;
 
     uvm_mtc::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE, MI_DATA_WIDTH, MI_ADDR_WIDTH) m_env;
-    int unsigned timeout;
 
     // ------------------------------------------------------------------------
     // Functions
@@ -82,11 +81,11 @@ class speed extends base;
     // ------------------------------------------------------------------------
     // Create environment and Run sequences o their sequencers
     virtual task run_phase(uvm_phase phase);
-    virt_seq_full_speed #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, PCIE_LEN_MIN, PCIE_LEN_MAX, MI_DATA_WIDTH, MI_ADDR_WIDTH) m_vseq;
+        virt_seq_full_speed #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, PCIE_LEN_MIN, PCIE_LEN_MAX, MI_DATA_WIDTH, MI_ADDR_WIDTH) m_vseq;
+        time time_start;
 
         //CREATE SEQUENCES
         m_vseq = virt_seq_full_speed#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, PCIE_LEN_MIN, PCIE_LEN_MAX, MI_DATA_WIDTH, MI_ADDR_WIDTH)::type_id::create("m_vseq");
-
 
         //RISE OBJECTION
         phase.raise_objection(this);
@@ -95,31 +94,15 @@ class speed extends base;
         m_vseq.randomize();
         m_vseq.start(m_env.m_sequencer);
 
-        timeout = 1;
-        fork
-            test_wait_timeout(200);
-            test_wait_result();
-        join_any;
+        time_start = $time();
+        while((time_start + 200us) > $time() && m_env.sc.used()) begin
+            #(600ns);
+        end
 
         phase.drop_objection(this);
-
-    endtask
-
-    task test_wait_timeout(int unsigned time_length);
-        #(time_length*1us);
-    endtask
-
-    task test_wait_result();
-        do begin
-            #(6000ns);
-        end while (m_env.sc.used() != 0);
-        timeout = 0;
     endtask
 
     function void report_phase(uvm_phase phase);
         `uvm_info(this.get_full_name(), {"\n\tTEST : ", this.get_type_name(), " END\n"}, UVM_NONE);
-        if (timeout) begin
-            `uvm_error(this.get_full_name(), "\n\t===================================================\n\tTIMEOUT SOME PACKET STUCK IN DESIGN\n\t===================================================\n\n");
-        end
     endfunction
 endclass

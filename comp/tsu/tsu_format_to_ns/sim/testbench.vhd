@@ -200,7 +200,7 @@ begin
     begin
         wait until stop_at_the_end = '1';
         if (incorrect_results = 0) then
-            write(l, "Success!" & LF);
+            write(l, "VERIFICATION SUCCESS" & LF);
         else
             write(l, "There were " & integer'image(incorrect_results) & " incorrect results!" & LF);
         end if;
