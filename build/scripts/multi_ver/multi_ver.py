@@ -141,6 +141,9 @@ elif ("_combinations_run_percentage_" in SETTINGS.keys()):
 
 ##########
 
+#Print current directory where verification is running
+print(os.getcwd())
+
 if (args.setting==None):
     ##########
     # Run all settings
