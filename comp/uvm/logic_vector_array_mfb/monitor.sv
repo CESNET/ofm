@@ -30,11 +30,18 @@ class monitor_logic_vector_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH,
             end
             hi_tr.data = data;
             analysis_port.write(hi_tr);
+            hi_tr = null;
+        end else begin
+            `uvm_error(this.get_full_name(), "\n\n\tTwo EOFs without a SOF between them were detected!\nThe frame's SOF is missing or an EOF has been duplicated.\n")
         end
     endfunction
 
     virtual function void process_sof(int unsigned index, int unsigned end_pos, uvm_mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) tr);
         int unsigned sof_pos = (SOF_POS_WIDTH != 0 ? BLOCK_SIZE*tr.sof_pos[index] : 0);
+        
+        if (hi_tr != null) begin
+            `uvm_error(this.get_full_name(), "\n\n\tTwo SOFs without an EOF between them were detected!\nThe frame's EOF is missing or a SOF has been duplicated.\n")
+        end
         hi_tr = uvm_logic_vector_array::sequence_item #(ITEM_WIDTH)::type_id::create("hi_tr", this);
         data.delete();
         for (int unsigned it = sof_pos; it <= end_pos; it++) begin
@@ -60,7 +67,7 @@ class monitor_logic_vector_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH,
                     process_eof(it, 0, tr);
                     process_sof(it, REGION_SIZE*BLOCK_SIZE-1, tr);
                 end else begin
-                    int unsigned pos_end   = tr.eof[it] ? tr.eof_pos[it] : (REGION_SIZE*BLOCK_SIZE-1);
+                    int unsigned pos_end = tr.eof[it] ? tr.eof_pos[it] : (REGION_SIZE*BLOCK_SIZE-1);
 
                     if (tr.sof[it]) begin
                         process_sof(it, pos_end, tr);
@@ -71,13 +78,7 @@ class monitor_logic_vector_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH,
                     end
 
                     if (tr.eof[it]) begin
-                        if (hi_tr == null) begin
-                            `uvm_error(this.get_full_name(), "\n\tEOF has been set before frame heve been started. SOF havent been set before this EOF")
-                        end else begin
-                            hi_tr.data = data;
-                            analysis_port.write(hi_tr);
-                            hi_tr = null;
-                        end
+                        process_eof(it, sof_pos, tr);
                     end
                 end
             end
