@@ -1,6 +1,7 @@
 -- mfb_generator_mi32.vhd: This is the MI32 encapsulation of the mfb_generator component.
--- Copyright (C) 2019 CESNET z. s. p. o.
+-- Copyright (C) 2023 CESNET z. s. p. o.
 -- Author(s): Daniel Kondys <xkondy00@vutbr.cz>
+--            Vladislav Valek <valekv@cesnet.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --
@@ -59,6 +60,10 @@ use work.math_pack.all;
 --
 -- - incr       : RR increment. 0 = round-robin disable (stay on zero channel). Default 0x01
 -- - CONFIG     : CONFIG[0] = channel reverse enable, others bit are reserved. Default 0x00
+--              : CONFIG[1] = Experimental: Enables burst mode in which the amount of burst_size
+--                packets are sent and the transmission is stopped until next cycle of enable of the
+--                generator occurs (that is burst is sent -> disable -> enable).
+--                NOTE: Does not work with USE_PACP_ARCH set to true
 -- - burst_size : number of packets to begenerated before channel is changed
 -- - ch_min     : the lowest channel number for round-robin distribution. Default 0x0000
 -- - ch_max     : the highest channel number for round-robin distribution. Default 0xFFFF
