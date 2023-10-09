@@ -31,7 +31,6 @@ entity ETH_AVST_ADAPTER_SHAKEDOWN is
         -- INPUT MFB INTERFACE
         IN_MFB_DATA       : in std_logic_vector(DATA_WIDTH-1 downto 0);
         IN_MFB_SOF        : in std_logic;
-        IN_MFB_SOF_POS    : in std_logic_vector(1-1 downto 0); -- not used, it exists only for verification
         IN_MFB_EOF        : in std_logic;
         IN_MFB_EOF_POS    : in std_logic_vector(max(1,log2(TX_REGION_SIZE*8))-1 downto 0);
         IN_MFB_ERROR      : in std_logic_vector(1-1 downto 0) := (others => '0'); -- aligned to EOF
