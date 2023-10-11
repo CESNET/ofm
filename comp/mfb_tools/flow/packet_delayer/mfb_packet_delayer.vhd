@@ -111,75 +111,46 @@ architecture FULL of MFB_PACKET_DELAYER is
     constant SOF_POS_WIDTH : natural := max(1,log2(MFB_REGION_SIZE));
     constant EOF_POS_WIDTH : natural := max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE));
 
-    --                                       Data        + Meta           + Timestamps + SOFs and EOFs + EOF POS (only Items)
-    constant RX_FIFO_DATA_WIDTH : natural := BLOCK_WIDTH + MFB_META_WIDTH + TS_WIDTH   + 2             + max(1,log2(MFB_BLOCK_SIZE));
+    --                                      Meta           + Timestamps
+    constant RX_META_WIDTH_EXT : natural := MFB_META_WIDTH + TS_WIDTH;
 
     -- ========================================================================
     --                                 SIGNALS
     -- ========================================================================
 
-    signal rx_mfb_data_arr              : slv_array_t(WORD_BLOCKS-1 downto 0)(BLOCK_WIDTH-1 downto 0);
-    signal rx_mfb_meta_regions_arr      : slv_array_t(MFB_REGIONS-1 downto 0)(MFB_META_WIDTH-1 downto 0);
-    signal rx_mfb_meta_blocks_arr       : slv_array_t(WORD_BLOCKS-1 downto 0)(MFB_META_WIDTH-1 downto 0);
-    signal rx_mfb_ts_regions_arr        : slv_array_t(MFB_REGIONS-1 downto 0)(TS_WIDTH-1 downto 0);
-    signal rx_mfb_ts_blocks_arr         : slv_array_t(WORD_BLOCKS-1 downto 0)(TS_WIDTH-1 downto 0);
-    signal rx_mfb_sof_pos_arr           : slv_array_t(MFB_REGIONS-1 downto 0)(SOF_POS_WIDTH-1 downto 0);
-    signal rx_mfb_eof_pos_arr           : slv_array_t(MFB_REGIONS-1 downto 0)(EOF_POS_WIDTH-1 downto 0);
+    signal rx_mfb_meta_regions_arr      : slv_array_t     (MFB_REGIONS-1 downto 0)(MFB_META_WIDTH   -1 downto 0);
+    signal rx_mfb_ts_regions_arr        : slv_array_t     (MFB_REGIONS-1 downto 0)(TS_WIDTH         -1 downto 0);
+    signal rx_mfb_meta_plus_arr         : slv_array_t     (MFB_REGIONS-1 downto 0)(RX_META_WIDTH_EXT-1 downto 0);
+    signal rx_mfb_meta_plus             : std_logic_vector(MFB_REGIONS*            RX_META_WIDTH_EXT-1 downto 0);
 
-    signal rx_fifoxm_in_sof_onehot      : slv_array_t   (MFB_REGIONS-1 downto 0)(MFB_REGION_SIZE-1 downto 0);
-    signal rx_fifoxm_in_eof_onehot      : slv_array_t   (MFB_REGIONS-1 downto 0)(MFB_REGION_SIZE-1 downto 0);
-    signal rx_fifoxm_in_eof_pos_items   : slv_array_2d_t(MFB_REGIONS-1 downto 0)(MFB_REGION_SIZE-1 downto 0)(max(1,log2(MFB_BLOCK_SIZE))-1 downto 0);
+    signal fm_rx_data                   : std_logic_vector(WORD_WIDTH-1 downto 0);
+    signal fm_rx_meta_plus              : std_logic_vector(MFB_REGIONS*RX_META_WIDTH_EXT-1 downto 0);
+    signal fm_rx_sof_pos                : std_logic_vector(MFB_REGIONS*SOF_POS_WIDTH-1 downto 0);
+    signal fm_rx_eof_pos                : std_logic_vector(MFB_REGIONS*EOF_POS_WIDTH-1 downto 0);
+    signal fm_rx_sof                    : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal fm_rx_eof                    : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal fm_rx_src_rdy                : std_logic;
+    signal fm_rx_dst_rdy                : std_logic;
 
-    signal rx_mfb_sof_ser               : std_logic_vector(WORD_BLOCKS-1 downto 0);
-    signal rx_mfb_eof_ser               : std_logic_vector(WORD_BLOCKS-1 downto 0);
-    signal rx_mfb_eof_pos_ser           : std_logic_vector(WORD_BLOCKS*            max(1,log2(MFB_BLOCK_SIZE))-1 downto 0);
-    signal rx_mfb_eof_pos_blocks_arr    : slv_array_t     (WORD_BLOCKS-1 downto 0)(max(1,log2(MFB_BLOCK_SIZE))-1 downto 0);
+    signal fm_tx_data                   : std_logic_vector(WORD_WIDTH-1 downto 0);
+    signal fm_tx_meta_plus              : std_logic_vector(MFB_REGIONS*RX_META_WIDTH_EXT-1 downto 0);
+    signal fm_tx_sof_pos                : std_logic_vector(MFB_REGIONS*SOF_POS_WIDTH-1 downto 0);
+    signal fm_tx_eof_pos                : std_logic_vector(MFB_REGIONS*EOF_POS_WIDTH-1 downto 0);
+    signal fm_tx_sof                    : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal fm_tx_eof                    : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal fm_tx_src_rdy                : std_logic;
+    signal fm_tx_dst_rdy                : std_logic;
 
-    signal rx_fifoxm_din_arr            : slv_array_t      (WORD_BLOCKS-1 downto 0)(RX_FIFO_DATA_WIDTH-1 downto 0);
-    signal rx_fifoxm_din                : std_logic_vector (WORD_BLOCKS*            RX_FIFO_DATA_WIDTH-1 downto 0);
-    signal rx_mfb_pkt_cont              : std_logic_vector (MFB_REGIONS downto 0);
-    signal rx_mfb_sof_pos_ptr           : my_integer_vector(MFB_REGIONS-1 downto 0);
-    signal rx_mfb_eof_pos_ptr           : my_integer_vector(MFB_REGIONS-1 downto 0);
-    signal rx_mfb_blocks_to_write       : slv_array_t      (MFB_REGIONS-1 downto 0)(MFB_REGION_SIZE-1 downto 0);
-    signal rx_fifoxm_wr                 : std_logic_vector (WORD_BLOCKS-1 downto 0);
-    signal rx_fifoxm_full               : std_logic;
+    signal fm_tx_sof_unmasked           : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal fm_tx_src_rdy_unmasked       : std_logic;
+    signal fm_tx_mask                   : std_logic_vector(MFB_REGIONS-1 downto 0);
 
-    signal rx_fifoxm_dout               : std_logic_vector(WORD_BLOCKS*RX_FIFO_DATA_WIDTH-1 downto 0);
-    signal rx_fifoxm_rd                 : std_logic_vector(WORD_BLOCKS-1 downto 0);
-    signal rx_fifoxm_empty              : std_logic_vector(WORD_BLOCKS-1 downto 0);
+    signal fm_tx_meta_plus_arr          : slv_array_t     (MFB_REGIONS-1 downto 0)(RX_META_WIDTH_EXT-1 downto 0);
+    signal fm_tx_meta                   : slv_array_t     (MFB_REGIONS-1 downto 0)(MFB_META_WIDTH   -1 downto 0);
+    signal fm_tx_ts                     : slv_array_t     (MFB_REGIONS-1 downto 0)(TS_WIDTH         -1 downto 0);
 
-    signal rx_fifoxm_dout_arr           : slv_array_t     (WORD_BLOCKS-1 downto 0)(RX_FIFO_DATA_WIDTH-1 downto 0);
-    signal rx_fifoxm_out_data           : slv_array_t     (WORD_BLOCKS-1 downto 0)(BLOCK_WIDTH-1 downto 0);
-    signal rx_fifoxm_out_meta_blocks    : slv_array_t     (WORD_BLOCKS-1 downto 0)(MFB_META_WIDTH-1 downto 0);
-    signal rx_fifoxm_out_ts_blocks      : slv_array_t     (WORD_BLOCKS-1 downto 0)(TS_WIDTH-1 downto 0);
-    signal rx_fifoxm_out_sof_onehot     : std_logic_vector(WORD_BLOCKS-1 downto 0);
-    signal rx_fifoxm_out_eof_onehot     : std_logic_vector(WORD_BLOCKS-1 downto 0);
-    signal rx_fifoxm_out_eof_pos_items  : slv_array_t     (WORD_BLOCKS-1 downto 0)(max(1,log2(MFB_BLOCK_SIZE))-1 downto 0);
-
-    signal rx_fifoxm_out_sof_onehot_vld : std_logic_vector(WORD_BLOCKS-1 downto 0);
-    signal rx_fifoxm_out_eof_onehot_vld : std_logic_vector(WORD_BLOCKS-1 downto 0);
-
-    signal sof_onehot_region            : slv_array_t(MFB_REGIONS-1 downto 0)(MFB_REGION_SIZE-1 downto 0);
-    signal eof_onehot_region            : slv_array_t(MFB_REGIONS-1 downto 0)(MFB_REGION_SIZE-1 downto 0);
-
-    signal sof                          : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal sof_pos_region               : slv_array_t     (MFB_REGIONS-1 downto 0)(SOF_POS_WIDTH-1 downto 0);
-    signal eof                          : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal eof_pos_blocks_region        : slv_array_t     (MFB_REGIONS-1 downto 0)(SOF_POS_WIDTH-1 downto 0);
-    signal eof_pos_items_region         : slv_array_t     (MFB_REGIONS-1 downto 0)(max(1,log2(MFB_BLOCK_SIZE))-1 downto 0);
-    signal eof_pos_region               : slv_array_t     (MFB_REGIONS-1 downto 0)(EOF_POS_WIDTH-1 downto 0);
-
-    signal rx_fifoxm_out_meta_regions   : slv_array_t     (MFB_REGIONS-1 downto 0)(MFB_META_WIDTH-1 downto 0);
-    signal rx_fifoxm_out_ts_regions     : u_array_t       (MFB_REGIONS-1 downto 0)(TS_WIDTH-1 downto 0);
     signal ts_ok                        : std_logic_vector(MFB_REGIONS-1 downto 0);
-
-    signal sof_rd_vec                   : std_logic_vector(WORD_BLOCKS-1 downto 0);
-    signal eof_rd_vec                   : std_logic_vector(WORD_BLOCKS-1 downto 0);
-    signal eof_rd_vec_en                : std_logic;
-
-    signal cont_rd                      : std_logic;
-    signal blocks_to_read               : slv_array_t      (MFB_REGIONS-1 downto 0)(MFB_REGION_SIZE-1 downto 0);
-    signal sof_pos_ptr                  : my_integer_vector(MFB_REGIONS-1 downto 0);
+    signal fm_tx_sof_to_read            : std_logic_vector(MFB_REGIONS-1 downto 0);
 
     signal sof_read                     : std_logic_vector(MFB_REGIONS-1 downto 0);
     signal first_sof_read               : std_logic;
@@ -187,7 +158,6 @@ architecture FULL of MFB_PACKET_DELAYER is
     signal update_stored_time           : std_logic;
     signal current_time_reg             : unsigned(64-1 downto 0);
     signal one_clk_period_time_diff     : unsigned                         (TS_WIDTH-1 downto 0);
-    signal accum_time_diff              : unsigned                         (TS_WIDTH-1 downto 0);
     signal stored_time_diff             : unsigned                         (TS_WIDTH-1 downto 0);
     signal stored_time_diff_fixed       : u_array_t(MFB_REGIONS-1 downto 0)(TS_WIDTH-1 downto 0);
 
@@ -202,270 +172,120 @@ architecture FULL of MFB_PACKET_DELAYER is
 
 begin
 
-    RX_MFB_DST_RDY <= not rx_fifoxm_full;
-
-    -- ========================================================================
-    -- RX data preparation
-    -- ========================================================================
-
-    rx_mfb_data_arr         <= slv_array_deser(RX_MFB_DATA   , WORD_BLOCKS);
-    rx_mfb_meta_regions_arr <= slv_array_deser(RX_MFB_META   , MFB_REGIONS);
-    rx_mfb_ts_regions_arr   <= slv_array_deser(RX_MFB_TS     , MFB_REGIONS);
-    rx_mfb_sof_pos_arr      <= slv_array_deser(RX_MFB_SOF_POS, MFB_REGIONS);
-    rx_mfb_eof_pos_arr      <= slv_array_deser(RX_MFB_EOF_POS, MFB_REGIONS);
-
-    -- -----------------------------------
-    --  Convert Metadata and TS to Blocks
-    -- -----------------------------------
-    meta_and_ts_blocks_p : process(all)
-    begin
-        rx_mfb_meta_blocks_arr <= (others => (others => '0'));
-        rx_mfb_ts_blocks_arr   <= (others => (others => '0'));
-
-        for r in 0 to MFB_REGIONS-1 loop
-            rx_mfb_sof_pos_ptr(r) <= to_integer(unsigned(rx_mfb_sof_pos_arr(r)));
-            rx_mfb_eof_pos_ptr(r) <= to_integer(unsigned(rx_mfb_eof_pos_arr(r)(EOF_POS_WIDTH-1 downto log2(MFB_BLOCK_SIZE)))); -- Points to a Block with EOF
-
-            rx_mfb_meta_blocks_arr(r*MFB_REGION_SIZE+rx_mfb_sof_pos_ptr(r)) <= rx_mfb_meta_regions_arr(r);
-            rx_mfb_ts_blocks_arr  (r*MFB_REGION_SIZE+rx_mfb_sof_pos_ptr(r)) <= rx_mfb_ts_regions_arr  (r);
-        end loop;
-    end process;
-
-    -- ----------------------------------------------------------------------
-    --  Convert SOF, SOF POS, EOF, and EOF POS from Regional to Block effect
-    -- ----------------------------------------------------------------------
-    sof_eof_p : process(all)
-    begin
-        rx_fifoxm_in_sof_onehot    <= (others => (others => '0'));
-        rx_fifoxm_in_eof_onehot    <= (others => (others => '0'));
-        rx_fifoxm_in_eof_pos_items <= (others => (others => (others => '0')));
-        for r in 0 to MFB_REGIONS-1 loop
-            -- SOF, SOF POS
-            -- Just a simple conversion to one-hot format
-            if (RX_MFB_SOF(r) = '1') and (RX_MFB_SRC_RDY = '1') then
-                for b in 0 to MFB_REGION_SIZE-1 loop
-                    if (b = unsigned(rx_mfb_sof_pos_arr(r))) then
-                        rx_fifoxm_in_sof_onehot(r)(b) <= '1';
-                    end if;
-                end loop;
-            end if;
-            -- EOF, EOF POS
-            -- Split EOF POS into 2 parts: MSBs identify the Block, LSBs identify the Item.
-            -- Then convert the MSBs part into one-hot (like SOF).
-            if (RX_MFB_EOF(r) = '1') and (RX_MFB_SRC_RDY = '1') then
-                for b in 0 to MFB_REGION_SIZE-1 loop
-                    if (b = unsigned(rx_mfb_eof_pos_arr(r)(EOF_POS_WIDTH-1 downto log2(MFB_BLOCK_SIZE)))) then
-                        rx_fifoxm_in_eof_onehot   (r)(b) <= '1'; -- valid for the rx_fifoxm_in_eof_pos_items signal
-                        rx_fifoxm_in_eof_pos_items(r)(b) <= rx_mfb_eof_pos_arr(r)(log2(MFB_BLOCK_SIZE)-1 downto 0);
-                    end if;
-                end loop;
-            end if;
-        end loop;
-    end process;
-
-    rx_mfb_sof_ser <= slv_array_ser(rx_fifoxm_in_sof_onehot); -- SOF on Blocks instead of Regions, therefore also indicates SOF POS
-    rx_mfb_eof_ser <= slv_array_ser(rx_fifoxm_in_eof_onehot); -- EOF on Blocks instead of Regions, therefore also indicates a part of EOF POS
-    rx_mfb_eof_pos_ser        <= slv_array_2d_ser(rx_fifoxm_in_eof_pos_items); -- only the Item id of the EOF POS (instead of Block&Item id)
-    rx_mfb_eof_pos_blocks_arr <= slv_array_deser(rx_mfb_eof_pos_ser, WORD_BLOCKS);
+    rx_mfb_meta_regions_arr <= slv_array_deser(RX_MFB_META, MFB_REGIONS);
+    rx_mfb_ts_regions_arr   <= slv_array_deser(RX_MFB_TS  , MFB_REGIONS);
+    rx_fifo_meta_g : for r in 0 to MFB_REGIONS-1 generate
+        rx_mfb_meta_plus_arr(r) <= rx_mfb_meta_regions_arr(r) & rx_mfb_ts_regions_arr(r);
+    end generate;
+    rx_mfb_meta_plus <= slv_array_ser(rx_mfb_meta_plus_arr);
 
     -- ========================================================================
     -- RX FIFO
     -- ========================================================================
 
-    -- ---------------
-    --  RX FIFO input
-    -- ---------------
-    -- Data
-    rx_fifoxm_in_g : for b in 0 to WORD_BLOCKS-1 generate
-        rx_fifoxm_din_arr(b) <= rx_mfb_data_arr          (b) &
-                                rx_mfb_meta_blocks_arr   (b) &
-                                rx_mfb_ts_blocks_arr     (b) &
-                                rx_mfb_sof_ser           (b) &
-                                rx_mfb_eof_ser           (b) &
-                                rx_mfb_eof_pos_blocks_arr(b);
-    end generate;
-    rx_fifoxm_din <= slv_array_ser(rx_fifoxm_din_arr);
-
-    -- Write
-    rx_mfb_pkt_cont_g : for r in 0 to MFB_REGIONS-1 generate 
-        rx_mfb_pkt_cont(r+1) <= (    RX_MFB_SOF(r) and not RX_MFB_EOF(r) and not rx_mfb_pkt_cont(r)) or
-                                (    RX_MFB_SOF(r) and     RX_MFB_EOF(r) and     rx_mfb_pkt_cont(r)) or
-                                (not RX_MFB_SOF(r) and not RX_MFB_EOF(r) and     rx_mfb_pkt_cont(r));
-    end generate;
-    
-    process(CLK)
-    begin
-        if (rising_edge(CLK)) then
-            if (RESET = '1') then
-                rx_mfb_pkt_cont(0) <= '0';
-            elsif (RX_MFB_SRC_RDY = '1' and RX_MFB_DST_RDY = '1') then
-                rx_mfb_pkt_cont(0) <= rx_mfb_pkt_cont(MFB_REGIONS);
-            end if;
-        end if;
-    end process;
-
-    rx_mfb_blocks_to_write_p : process(all)
-    begin
-        rx_mfb_blocks_to_write <= (others => (others => '0'));
-        for r in 0 to MFB_REGIONS-1 loop
-            if ((RX_MFB_SOF(r) = '1') and (RX_MFB_EOF(r) = '1')) then
-                if (rx_mfb_pkt_cont(r) = '1') then
-                    -- inverted approach: make a '1's vector and overwrite it with '0's between SOF and EOF
-                    rx_mfb_blocks_to_write(r) <= (others => '1');
-                    rx_mfb_blocks_to_write(r)(rx_mfb_sof_pos_ptr(r)-1 downto rx_mfb_eof_pos_ptr(r)+1) <= (others => '0');
-                else
-                    -- overwrite the '0's vector and with '1's between SOF and EOF
-                    rx_mfb_blocks_to_write(r)(rx_mfb_eof_pos_ptr(r) downto rx_mfb_sof_pos_ptr(r)) <= (others => '1');
-                end if;
-            elsif ((RX_MFB_SOF(r) = '1') and (RX_MFB_EOF(r) = '0')) then
-                -- overwrite the '0's vector and with '1's between MSB and SOF
-                rx_mfb_blocks_to_write(r)(MFB_REGION_SIZE-1 downto rx_mfb_sof_pos_ptr(r)) <= (others => '1');
-            elsif ((RX_MFB_SOF(r) = '0') and (RX_MFB_EOF(r) = '1')) then
-                -- overwrite the '0's vector and with '1's between 0 and EOF
-                rx_mfb_blocks_to_write(r)(rx_mfb_eof_pos_ptr(r) downto 0) <= (others => '1');
-            elsif (rx_mfb_pkt_cont(r) = '1') then
-                -- overwrite the '0's vector and with '1's
-                rx_mfb_blocks_to_write(r) <= (others => '1');
-            end if;
-        end loop;
-    end process;
-
-    rx_fifoxm_wr <= slv_array_ser(rx_mfb_blocks_to_write) and RX_MFB_SRC_RDY;
-
-    -- ----------------
-    --  RX FIFOX Multi
-    -- ----------------
-    rx_fifoxm_i : entity work.FIFOX_MULTI
+    rx_mfb_fifox_i : entity work.MFB_FIFOX
     generic map(
-        DATA_WIDTH          => RX_FIFO_DATA_WIDTH,
-        ITEMS               => FIFO_DEPTH        ,
-        WRITE_PORTS         => WORD_BLOCKS       ,
-        READ_PORTS          => WORD_BLOCKS       ,
-        RAM_TYPE            => "AUTO"            ,
-        DEVICE              => DEVICE            ,
-        ALMOST_FULL_OFFSET  => 0                 ,
-        ALMOST_EMPTY_OFFSET => 0                 ,
-        ALLOW_SINGLE_FIFO   => True              ,
-        SAFE_READ_MODE      => False
+        REGIONS             => MFB_REGIONS      ,
+        REGION_SIZE         => MFB_REGION_SIZE  ,
+        BLOCK_SIZE          => MFB_BLOCK_SIZE   ,
+        ITEM_WIDTH          => MFB_ITEM_WIDTH   ,
+        META_WIDTH          => RX_META_WIDTH_EXT,
+        FIFO_DEPTH          => FIFO_DEPTH       ,
+        RAM_TYPE            => "AUTO"           ,
+        DEVICE              => DEVICE           ,
+        ALMOST_FULL_OFFSET  => 0                ,
+        ALMOST_EMPTY_OFFSET => 0          
+    )
+    port map(
+        CLK => CLK,
+        RST => RESET,
+
+        RX_DATA     => RX_MFB_DATA     ,
+        RX_META     => rx_mfb_meta_plus,
+        RX_SOF_POS  => RX_MFB_SOF_POS  ,
+        RX_EOF_POS  => RX_MFB_EOF_POS  ,
+        RX_SOF      => RX_MFB_SOF      ,
+        RX_EOF      => RX_MFB_EOF      ,
+        RX_SRC_RDY  => RX_MFB_SRC_RDY  ,
+        RX_DST_RDY  => RX_MFB_DST_RDY  ,
+
+        TX_DATA     => fm_rx_data      ,
+        TX_META     => fm_rx_meta_plus ,
+        TX_SOF_POS  => fm_rx_sof_pos   ,
+        TX_EOF_POS  => fm_rx_eof_pos   ,
+        TX_SOF      => fm_rx_sof       ,
+        TX_EOF      => fm_rx_eof       ,
+        TX_SRC_RDY  => fm_rx_src_rdy   ,
+        TX_DST_RDY  => fm_rx_dst_rdy   ,
+
+        FIFO_STATUS => open            ,
+        FIFO_AFULL  => open            ,
+        FIFO_AEMPTY => open
+    );
+
+    frame_masker_i : entity work.MFB_FRAME_MASKER
+    generic map(
+        REGIONS     => MFB_REGIONS      ,
+        REGION_SIZE => MFB_REGION_SIZE  ,
+        BLOCK_SIZE  => MFB_BLOCK_SIZE   ,
+        ITEM_WIDTH  => MFB_ITEM_WIDTH   ,
+        META_WIDTH  => RX_META_WIDTH_EXT,
+        USE_PIPE    => False            ,
+        PIPE_TYPE   => "SHREG"          ,
+        DEVICE      => DEVICE
     )
     port map(
         CLK   => CLK,
         RESET => RESET,
 
-        DI     => rx_fifoxm_din  ,
-        WR     => rx_fifoxm_wr   ,
-        FULL   => rx_fifoxm_full ,
-        AFULL  => open           ,
+        RX_DATA             => fm_rx_data            ,
+        RX_META             => fm_rx_meta_plus       ,
+        RX_SOF_POS          => fm_rx_sof_pos         ,
+        RX_EOF_POS          => fm_rx_eof_pos         ,
+        RX_SOF              => fm_rx_sof             ,
+        RX_EOF              => fm_rx_eof             ,
+        RX_SRC_RDY          => fm_rx_src_rdy         ,
+        RX_DST_RDY          => fm_rx_dst_rdy         ,
 
-        DO     => rx_fifoxm_dout ,
-        RD     => rx_fifoxm_rd   ,
-        EMPTY  => rx_fifoxm_empty,
-        AEMPTY => open
+        TX_DATA             => fm_tx_data            ,
+        TX_META             => fm_tx_meta_plus       ,
+        TX_SOF_POS          => fm_tx_sof_pos         ,
+        TX_EOF_POS          => fm_tx_eof_pos         ,
+        TX_SOF_MASKED       => fm_tx_sof             , -- open - can prepare my own
+        TX_EOF_MASKED       => fm_tx_eof             ,
+        TX_SRC_RDY          => fm_tx_src_rdy         ,
+        TX_DST_RDY          => fm_tx_dst_rdy         ,
+
+        TX_SOF_UNMASKED     => fm_tx_sof_unmasked    ,
+        TX_EOF_UNMASKED     => open                  ,
+        TX_SRC_RDY_UNMASKED => fm_tx_src_rdy_unmasked,
+
+        TX_SOF_ORIGINAL     => open                  ,
+        TX_EOF_ORIGINAL     => open                  ,
+        TX_SRC_RDY_ORIGINAL => open                  ,
+
+        TX_MASK             => fm_tx_mask
     );
 
-    -- ----------------
-    --  RX FIFO output
-    -- ----------------
-    rx_fifoxm_dout_arr <= slv_array_deser(rx_fifoxm_dout, WORD_BLOCKS);
-    rx_fifoxm_dout_parse_g : for b in 0 to WORD_BLOCKS-1 generate
-        -- For easier orientation:
-        -- rx_fifoxm_dout_arr : slv_array_t(WORD_BLOCKS-1 downto 0)(RX_FIFO_DATA_WIDTH-1 downto 0), where
-        -- RX_FIFO_DATA_WIDTH = BLOCK_WIDTH + MFB_META_WIDTH + TS_WIDTH + 1 + 1 + max(1,log2(MFB_BLOCK_SIZE)).
-        rx_fifoxm_out_data         (b) <= rx_fifoxm_dout_arr(b)(RX_FIFO_DATA_WIDTH                                         -1 downto RX_FIFO_DATA_WIDTH-BLOCK_WIDTH                        );
-        rx_fifoxm_out_meta_blocks  (b) <= rx_fifoxm_dout_arr(b)(RX_FIFO_DATA_WIDTH-BLOCK_WIDTH                             -1 downto RX_FIFO_DATA_WIDTH-BLOCK_WIDTH-MFB_META_WIDTH         );
-        rx_fifoxm_out_ts_blocks    (b) <= rx_fifoxm_dout_arr(b)(RX_FIFO_DATA_WIDTH-BLOCK_WIDTH-MFB_META_WIDTH              -1 downto RX_FIFO_DATA_WIDTH-BLOCK_WIDTH-MFB_META_WIDTH-TS_WIDTH);
-        rx_fifoxm_out_sof_onehot   (b) <= rx_fifoxm_dout_arr(b)(RX_FIFO_DATA_WIDTH-BLOCK_WIDTH-MFB_META_WIDTH-TS_WIDTH     -1                                                              );
-        rx_fifoxm_out_eof_onehot   (b) <= rx_fifoxm_dout_arr(b)(RX_FIFO_DATA_WIDTH-BLOCK_WIDTH-MFB_META_WIDTH-TS_WIDTH-1   -1                                                              );
-        rx_fifoxm_out_eof_pos_items(b) <= rx_fifoxm_dout_arr(b)(RX_FIFO_DATA_WIDTH-BLOCK_WIDTH-MFB_META_WIDTH-TS_WIDTH-1-1 -1 downto 0                                                     );
-    end generate;
-
-    -- ========================================================================
-    -- Packet transmitting logic
-    -- ========================================================================
-
-    rx_fifoxm_out_sof_onehot_vld <= rx_fifoxm_out_sof_onehot and not rx_fifoxm_empty;
-    rx_fifoxm_out_eof_onehot_vld <= rx_fifoxm_out_eof_onehot and not rx_fifoxm_empty;
-
-    sof_onehot_region <= slv_array_deser(rx_fifoxm_out_sof_onehot_vld, MFB_REGIONS);
-    eof_onehot_region <= slv_array_deser(rx_fifoxm_out_eof_onehot_vld, MFB_REGIONS);
-
-    -- --------------------------------
-    --  MFB control signals recreation
-    -- --------------------------------
-    sof_eof_g : for r in 0 to MFB_REGIONS-1 generate
-        -- SOF
-        sof(r) <= or sof_onehot_region(r);
-        -- SOF POS
-        gen_enc_sofpos_i : entity work.gen_enc
-        generic map(
-            ITEMS  => MFB_REGION_SIZE,
-            DEVICE => DEVICE
-        )
-        port map(
-            DI     => sof_onehot_region(r),
-            ADDR   => sof_pos_region   (r)
-        );
-
-        -- EOF
-        eof(r) <= or eof_onehot_region(r);
-        -- EOF POS
-        gen_enc_eofpos_i : entity work.gen_enc
-        generic map(
-            ITEMS  => MFB_REGION_SIZE,
-            DEVICE => DEVICE
-        )
-        port map(
-            DI     => eof_onehot_region    (r),
-            ADDR   => eof_pos_blocks_region(r)
-        );
-        eof_pos_items_region(r) <= rx_fifoxm_out_eof_pos_items((r*MFB_REGION_SIZE) + to_integer(unsigned(eof_pos_blocks_region(r))));
-        eof_pos_region_g : if MFB_REGION_SIZE>1 generate
-            eof_pos_region(r) <= eof_pos_blocks_region(r) & eof_pos_items_region(r);
-        else generate
-            eof_pos_region(r) <= eof_pos_items_region(r);
-        end generate;
-
-        -- Address to Block with SOF
-        sof_pos_ptr(r) <= to_integer(unsigned(sof_pos_region(r)));
-    end generate;
-
-    -- ---------------------
-    --  Metadata recreation
-    -- ---------------------
+    fm_tx_meta_plus_arr <= slv_array_deser(fm_tx_meta_plus, MFB_REGIONS);
     fifoxm_out_meta_g : for r in 0 to MFB_REGIONS-1 generate
-        rx_fifoxm_out_meta_regions(r) <= rx_fifoxm_out_meta_blocks(sof_pos_ptr(r));
+        fm_tx_meta(r) <= fm_tx_meta_plus_arr(r)(RX_META_WIDTH_EXT-1 downto TS_WIDTH);
+        fm_tx_ts  (r) <= fm_tx_meta_plus_arr(r)(TS_WIDTH         -1 downto 0);
     end generate;
 
-    -- ---------------------------
-    --  RX FIFOX Multi read logic
-    -- ---------------------------
-    -- read Blocks only up to the first EOF
-    -- -> the next SOF will be at Block 0
-    eof_rd_vec_p : process(all)
-    begin
-        eof_rd_vec <= (others => not rx_fifoxm_empty(WORD_BLOCKS-1));
-        for b in 0 to WORD_BLOCKS-1 loop
-            if (rx_fifoxm_out_eof_onehot_vld(b) = '1') then
-                eof_rd_vec(WORD_BLOCKS-1 downto b+1) <= (others => '0');
-                eof_rd_vec(b downto 0) <= (others => '1');
-                exit;
-            end if;
-        end loop;
-    end process;
+    ts_ok_g : for r in 0 to MFB_REGIONS-1 generate
+        ts_ok(r) <= '1' when (stored_time_diff_fixed(r) >= unsigned(fm_tx_ts(r))) else '0';
+    end generate;
+    fm_tx_sof_to_read <= (fm_tx_sof_unmasked and fm_tx_src_rdy_unmasked) and ts_ok;
+    fm_tx_mask <= fm_tx_sof_to_read;
 
-    -- The SOF and TS is always at Block 0
-    ts_ok(0) <= '1' when (stored_time_diff_fixed(0) >= unsigned(rx_fifoxm_out_ts_blocks(0))) else '0';
-    eof_rd_vec_en <= '0' when ((rx_fifoxm_out_sof_onehot_vld(0) = '1') and (ts_ok(0) = '0')) else '1';
-
-    rx_fifoxm_rd <= (eof_rd_vec and eof_rd_vec_en) and mfb_dst_rdy_mid_reg;
+    fm_tx_dst_rdy <= mfb_dst_rdy_mid_reg;
 
     -- ========================================================================
     -- Time logic
     -- ========================================================================
 
-    sof_read_g : for r in 0 to MFB_REGIONS-1 generate
-        sof_read(r) <= sof(r) and (or rx_fifoxm_rd((r+1)*MFB_REGION_SIZE-1 downto r*MFB_REGION_SIZE+sof_pos_ptr(r)));
-    end generate;
+    sof_read <= fm_tx_sof;
 
     reset_g : if TS_FORMAT=0 generate
         -- Store new value of CURRENT_TIME with each read SOF
@@ -519,6 +339,18 @@ begin
         stored_time_diff_fixed(r+1) <= stored_time_diff when (or sof_read(r downto 0) = '0') else (others => '0');
     end generate;
 
+    -- Another version for the stored_time_diff_fixed signal above
+    -- process(all)
+    -- begin
+    --     stored_time_diff_fixed <= (others => stored_time_diff);
+    --     for r in 0 to MFB_REGIONS-1 loop
+    --         if (sof_read(r) = '1') then
+    --             stored_time_diff_fixed(r to MFB_REGIONS-1) <= (others => '0');
+    --             exit; -- this might be unnecessary
+    --         end if;
+    --     end loop;
+    -- end process;
+
     -- ========================================================================
     -- Middle register
     -- ========================================================================
@@ -527,13 +359,13 @@ begin
     begin
         if rising_edge(CLK) then
             if (mfb_dst_rdy_mid_reg = '1') then
-                mfb_data_mid_reg    <= slv_array_ser(rx_fifoxm_out_data);
-                mfb_meta_mid_reg    <= slv_array_ser(rx_fifoxm_out_meta_regions);
-                mfb_sof_pos_mid_reg <= slv_array_ser(sof_pos_region);
-                mfb_eof_pos_mid_reg <= slv_array_ser(eof_pos_region);
-                mfb_sof_mid_reg     <= sof_read;
-                mfb_eof_mid_reg     <= eof;
-                mfb_src_rdy_mid_reg <= or rx_fifoxm_rd;
+                mfb_data_mid_reg    <= fm_tx_data;
+                mfb_meta_mid_reg    <= slv_array_ser(fm_tx_meta);
+                mfb_sof_pos_mid_reg <= fm_tx_sof_pos;
+                mfb_eof_pos_mid_reg <= fm_tx_eof_pos;
+                mfb_sof_mid_reg     <= fm_tx_sof;
+                mfb_eof_mid_reg     <= fm_tx_eof;
+                mfb_src_rdy_mid_reg <= fm_tx_src_rdy and fm_tx_dst_rdy; -- (and fm_tx_dst_rdy) might be unnecessary
             end if;
             if (RESET = '1') then
                 mfb_src_rdy_mid_reg <= '0';

@@ -1,6 +1,6 @@
 // tbench.sv: Testbench
 // Copyright (C) 2023 CESNET z. s. p. o.
-// Author(s): Yaroslav Marushchenko <xmarus09@stud.fit.vutbr.cz>
+// Author(s): Daniel Kondys <kondys@cesnet.cz>
 
 // SPDX-License-Identifier: BSD-3-Clause
 
@@ -26,6 +26,8 @@ module testbench;
     mfb_if #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH) mfb_rx(CLK);
     mfb_if #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH) mfb_tx(CLK);
     mvb_if #(MFB_REGIONS, 1)                                                               mvb_rx(CLK);
+    
+    bind MFB_FRAME_MASKER : DUT_U.VHDL_DUT_U probe_inf#(REGIONS*2) probe_mask2discard(TX_DST_RDY & src_rdy_reg, {TX_SOF_UNMASKED, TX_MASK}, CLK);
 
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // Define clock ticking

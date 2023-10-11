@@ -1,6 +1,6 @@
 // test.sv: Verification test
 // Copyright (C) 2023 CESNET z. s. p. o.
-// Author(s): Yaroslav Marushchenko <xmarus09@stud.fit.vutbr.cz>
+// Author(s): Daniel Kondys <kondys@cesnet.cz>
 
 // SPDX-License-Identifier: BSD-3-Clause
 
@@ -41,7 +41,7 @@ class speed extends uvm_test;
      typedef uvm_component_registry #(test::speed, "test::speed") type_id;
 
     // declare the Environment reference variable
-    frame_masker::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH, USE_PIPE) m_env;
+    frame_masker::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH) m_env;
     int unsigned timeout;
 
     // ------------------------------------------------------------------------
@@ -65,7 +65,7 @@ class speed extends uvm_test;
         {this.get_full_name(), ".m_env.m_env_rx.*"});
 
         // Initializing the reference to the environment
-        m_env = frame_masker::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH, USE_PIPE)::type_id::create("m_env", this);
+        m_env = frame_masker::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH)::type_id::create("m_env", this);
     endfunction
 
     // ------------------------------------------------------------------------
