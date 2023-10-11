@@ -23,11 +23,8 @@ class monitor_logic_vector_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH,
         reset_sync = new();
     endfunction
 
-    virtual function void process_eof(int unsigned index, int unsigned start_pos, uvm_mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) tr);
+    virtual function void process_eof(int unsigned index, uvm_mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) tr);
         if (hi_tr != null) begin
-            for (int unsigned it = start_pos; it <= tr.eof_pos[index]; it++) begin
-                data.push_back(tr.data[index][(it+1)*ITEM_WIDTH-1 -: ITEM_WIDTH]);
-            end
             hi_tr.data = data;
             analysis_port.write(hi_tr);
             hi_tr = null;
@@ -64,21 +61,27 @@ class monitor_logic_vector_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH,
                 // Eop is before next packet start
                 if (tr.sof[it] && tr.eof[it] && tr.eof_pos[it] < sof_pos) begin
                     inframe = 1;
-                    process_eof(it, 0, tr);
+                    for (int unsigned jt = 0; jt <= tr.eof_pos[it]; jt++) begin
+                        data.push_back(tr.data[it][(jt+1)*ITEM_WIDTH-1 -: ITEM_WIDTH]);
+                    end                    
+                    process_eof(it, tr);
                     process_sof(it, REGION_SIZE*BLOCK_SIZE-1, tr);
                 end else begin
+                    
                     int unsigned pos_end = tr.eof[it] ? tr.eof_pos[it] : (REGION_SIZE*BLOCK_SIZE-1);
 
                     if (tr.sof[it]) begin
+                        inframe = 1;
                         process_sof(it, pos_end, tr);
                     end else if (hi_tr != null) begin
+                        inframe = 1;
                         for (int unsigned jt = 0; jt <= pos_end; jt++) begin
                             data.push_back(tr.data[it][(jt+1)*ITEM_WIDTH-1 -: ITEM_WIDTH]);
                         end
                     end
 
                     if (tr.eof[it]) begin
-                        process_eof(it, sof_pos, tr);
+                        process_eof(it, tr);
                     end
                 end
             end
