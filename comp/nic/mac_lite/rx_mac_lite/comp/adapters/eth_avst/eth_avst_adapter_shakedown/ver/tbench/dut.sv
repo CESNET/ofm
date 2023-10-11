@@ -14,6 +14,7 @@ module DUT (
     iMfbTx.dut TX
 );
 
+    //RX.SOF_POS RX SOF is unconnected
     ETH_AVST_ADAPTER_SHAKEDOWN #(
         .DATA_WIDTH     (DATA_WIDTH),
         .TX_REGION_SIZE (TX_REGION_SIZE)
@@ -22,7 +23,6 @@ module DUT (
         .RESET             (RESET),
         .IN_MFB_DATA       (RX.DATA),
         .IN_MFB_SOF        (RX.SOF),
-        .IN_MFB_SOF_POS    (RX.SOF_POS),
         .IN_MFB_EOF        (RX.EOF),
         .IN_MFB_EOF_POS    (RX.EOF_POS),
         .IN_MFB_UNDERSIZED (RX.META[0]),
