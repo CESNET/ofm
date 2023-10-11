@@ -40,8 +40,11 @@ generic(
     -- - ``0`` number of NS between individual packets,
     -- - ``1`` number of NS from RESET.
     TS_FORMAT             : natural := 0;
-    -- Number of Items in the Input packet FIFOX_MULTI (main buffer).
+    -- Number of Items in the Input MFB_FIFOX (main buffer).
     FIFO_DEPTH            : natural := 2048;
+    -- Almost Full Offset of the input MFB_FIFOX.
+    -- States the number of Items it can accept after Almost Full is asserted.
+    FIFO_AF_OFFSET        : natural := 10;
 
     -- FPGA device name: ULTRASCALE, STRATIX10, AGILEX, ...
     DEVICE                : string := "STRATIX10"
@@ -62,6 +65,9 @@ port(
     -- It can be a precise time from the TSU, a value from a simple incrementing counter, or anything in between.
     -- The quality of the time source affects the precision of the packet's transmission but not the component's functionality.
     CURRENT_TIME   : in  std_logic_vector(64-1 downto 0);
+
+    -- Used to pause incomming traffic when the buffer is Almost Full.
+    PAUSE_REQUEST  : out std_logic;
 
     -- =====================================================================
     --  RX inf
@@ -118,6 +124,9 @@ architecture FULL of MFB_PACKET_DELAYER is
     --                                 SIGNALS
     -- ========================================================================
 
+    signal rx_fifo_afull                : std_logic;
+    signal rx_fifo_aempty               : std_logic;
+
     signal rx_mfb_meta_regions_arr      : slv_array_t     (MFB_REGIONS-1 downto 0)(MFB_META_WIDTH   -1 downto 0);
     signal rx_mfb_ts_regions_arr        : slv_array_t     (MFB_REGIONS-1 downto 0)(TS_WIDTH         -1 downto 0);
     signal rx_mfb_meta_plus_arr         : slv_array_t     (MFB_REGIONS-1 downto 0)(RX_META_WIDTH_EXT-1 downto 0);
@@ -172,6 +181,20 @@ architecture FULL of MFB_PACKET_DELAYER is
 
 begin
 
+    -- Pause incomming traffic when RX FIFO is getting full.
+    -- Restart it again after some of its contents have been read.
+    process(CLK)
+    begin
+        if rising_edge(CLK) then
+            if (rx_fifo_afull = '1') then
+                PAUSE_REQUEST <= '1';
+            end if;
+            if (RESET = '1') or (rx_fifo_aempty = '1') then
+                PAUSE_REQUEST <= '0';
+            end if;
+        end if;
+    end process;
+
     rx_mfb_meta_regions_arr <= slv_array_deser(RX_MFB_META, MFB_REGIONS);
     rx_mfb_ts_regions_arr   <= slv_array_deser(RX_MFB_TS  , MFB_REGIONS);
     rx_fifo_meta_g : for r in 0 to MFB_REGIONS-1 generate
@@ -193,8 +216,8 @@ begin
         FIFO_DEPTH          => FIFO_DEPTH       ,
         RAM_TYPE            => "AUTO"           ,
         DEVICE              => DEVICE           ,
-        ALMOST_FULL_OFFSET  => 0                ,
-        ALMOST_EMPTY_OFFSET => 0          
+        ALMOST_FULL_OFFSET  => FIFO_AF_OFFSET   ,
+        ALMOST_EMPTY_OFFSET => FIFO_AF_OFFSET/2
     )
     port map(
         CLK => CLK,
@@ -219,8 +242,8 @@ begin
         TX_DST_RDY  => fm_rx_dst_rdy   ,
 
         FIFO_STATUS => open            ,
-        FIFO_AFULL  => open            ,
-        FIFO_AEMPTY => open
+        FIFO_AFULL  => rx_fifo_afull   ,
+        FIFO_AEMPTY => rx_fifo_aempty
     );
 
     frame_masker_i : entity work.MFB_FRAME_MASKER
@@ -384,7 +407,7 @@ begin
         BLOCK_SIZE          => MFB_BLOCK_SIZE ,
         ITEM_WIDTH          => MFB_ITEM_WIDTH ,
         META_WIDTH          => MFB_META_WIDTH ,
-        FIFO_DEPTH          => FIFO_DEPTH     ,
+        FIFO_DEPTH          => 512            ,
         RAM_TYPE            => "AUTO"         ,
         DEVICE              => DEVICE         ,
         ALMOST_FULL_OFFSET  => 0              ,
