@@ -7,6 +7,7 @@
 set FIRMWARE_BASE         "../../../../../../../../"
 
 set TB_FILE               "./testbench.sv"
+set SIG_FILE              "./signals_sig.fdo"
 
 set COMPONENTS [list \
     [list "DUT"      ".."   "FULL"]\
