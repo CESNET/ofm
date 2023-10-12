@@ -4,20 +4,28 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
+# Paths
+set DEC1FN_ENABLE_BASE "$OFM_PATH/comp/base/logic/dec1fn"
 
-# PACKAGES:
-set PACKAGES "$PACKAGES $OFM_PATH/comp/base/pkg/math_pack.vhd"
+# Packages
+lappend PACKAGES "$OFM_PATH/comp/base/pkg/math_pack.vhd"
+lappend PACKAGES "$OFM_PATH/comp/base/pkg/type_pack.vhd"
 
-# MODULES:
 if { $ARCHGRP == "FULL" } { 
-  set MOD "$MOD $ENTITY_BASE/streaming_debug_probe.vhd"
-  set MOD "$MOD $ENTITY_BASE/streaming_debug_probe_n.vhd"
-  set MOD "$MOD $OFM_PATH/comp/base/logic/dec1fn/dec1fn_enable.vhd"
-  set MOD "$MOD $ENTITY_BASE/streaming_debug_master.vhd"
-  set MOD "$MOD $ENTITY_BASE/DevTree.tcl"
+  # Components
+  lappend COMPONENTS [ list "DEC1FN_ENABLE" $DEC1FN_ENABLE_BASE "FULL" ]
+
+  # Files
+  lappend MOD "$ENTITY_BASE/streaming_debug_probe.vhd"
+  lappend MOD "$ENTITY_BASE/streaming_debug_probe_n.vhd"
+  lappend MOD "$ENTITY_BASE/streaming_debug_probe_mfb.vhd"
+  lappend MOD "$ENTITY_BASE/streaming_debug_master.vhd"
+  lappend MOD "$ENTITY_BASE/DevTree.tcl"
 }
 
 if { $ARCHGRP == "PROBE" } {
-  set MOD "$MOD $ENTITY_BASE/streaming_debug_probe.vhd"
-  set MOD "$MOD $ENTITY_BASE/streaming_debug_probe_n.vhd"
+  # Files
+  lappend MOD "$ENTITY_BASE/streaming_debug_probe.vhd"
+  lappend MOD "$ENTITY_BASE/streaming_debug_probe_n.vhd"
+  lappend MOD "$ENTITY_BASE/streaming_debug_probe_mfb.vhd"
 }

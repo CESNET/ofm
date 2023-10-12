@@ -7,13 +7,17 @@
 
 library IEEE;
 use IEEE.std_logic_1164.all;
-use ieee.std_logic_arith.all;
-use ieee.std_logic_unsigned.all;
+use IEEE.numeric_std.all;
+
+use work.math_pack.all;
+use work.type_pack.all;
 
 entity STREAMING_DEBUG_MASTER is
   generic (
     --! \brief Number of connected probes.
     CONNECTED_PROBES   : integer := 4;
+    -- Number of MFB regions.
+    REGIONS            : natural := 1;
     --! \brief Master debuging enable switch.
     --! \description True means full architecture implementation, false means empty architecture implementation.
     DEBUG_ENABLED      : boolean := false;
@@ -61,18 +65,10 @@ entity STREAMING_DEBUG_MASTER is
     DEBUG_DROP         : out std_logic_vector(CONNECTED_PROBES-1 downto 0) := (others => '0');
     DEBUG_SRC_RDY      : in  std_logic_vector(CONNECTED_PROBES-1 downto 0) := (others => '0');
     DEBUG_DST_RDY      : in  std_logic_vector(CONNECTED_PROBES-1 downto 0) := (others => '0');
-    DEBUG_SOP          : in  std_logic_vector(CONNECTED_PROBES-1 downto 0) := (others => '0');
-    DEBUG_EOP          : in  std_logic_vector(CONNECTED_PROBES-1 downto 0) := (others => '0')                  
+    DEBUG_SOP          : in  std_logic_vector(CONNECTED_PROBES*REGIONS-1 downto 0) := (others => '0');
+    DEBUG_EOP          : in  std_logic_vector(CONNECTED_PROBES*REGIONS-1 downto 0) := (others => '0')                  
   );
 end entity; 
-
-
-
-library IEEE;
-use IEEE.std_logic_1164.all;
-use ieee.std_logic_arith.all;
-use ieee.std_logic_unsigned.all;
-use work.math_pack.all;
 
 architecture full of STREAMING_DEBUG_MASTER is
   -- Functions converting enable character to reasonable types
@@ -90,49 +86,68 @@ architecture full of STREAMING_DEBUG_MASTER is
     end if;
     return false;
   end function;
-  -- Signals and types
-  type counter_array_t is array(0 to CONNECTED_PROBES-1) of std_logic_vector(63 downto 0);
-  signal word_cnt, wait_cnt, dst_hold_cnt, src_hold_cnt, sop_cnt, eop_cnt : counter_array_t :=(others => (others => '0'));   
-  type d32_array_t is array(integer range <>) of std_logic_vector(31 downto 0);
-  signal mi_drds       : d32_array_t(0 to CONNECTED_PROBES*16-1):=(others => (others => '0'));
-  signal mi_wes        : std_logic_vector(CONNECTED_PROBES*16-1 downto 0);
-  signal cnt_start, cnt_stop, cnt_running : std_logic_vector(CONNECTED_PROBES-1 downto 0);
-  signal line_block, line_drop, line_blocked, line_droped, line_req : std_logic_vector(CONNECTED_PROBES-1 downto 0) := (others => '0');
 
-  signal reg_debug_block, reg_debug_drop, reg_debug_src_rdy, reg_debug_dst_rdy, reg_debug_sop, reg_debug_eop : std_logic_vector(CONNECTED_PROBES-1 downto 0);
+  -- Signals and types
+  signal word_cnt          : u_array_t(CONNECTED_PROBES-1 downto 0)(64-1 downto 0);
+  signal wait_cnt          : u_array_t(CONNECTED_PROBES-1 downto 0)(64-1 downto 0);
+  signal dst_hold_cnt      : u_array_t(CONNECTED_PROBES-1 downto 0)(64-1 downto 0);
+  signal src_hold_cnt      : u_array_t(CONNECTED_PROBES-1 downto 0)(64-1 downto 0);
+  signal sop_cnt           : u_array_t(CONNECTED_PROBES-1 downto 0)(64-1 downto 0);
+  signal eop_cnt           : u_array_t(CONNECTED_PROBES-1 downto 0)(64-1 downto 0);
+
+  type d32_array_t is array(integer range <>) of std_logic_vector(31 downto 0);
+  signal mi_drds           : d32_array_t(0 to CONNECTED_PROBES*16-1):=(others => (others => '0'));
+  signal mi_wes            : std_logic_vector(CONNECTED_PROBES*16-1 downto 0);
+
+  signal cnt_start         : std_logic_vector(CONNECTED_PROBES-1 downto 0);
+  signal cnt_stop          : std_logic_vector(CONNECTED_PROBES-1 downto 0);
+  signal cnt_running       : std_logic_vector(CONNECTED_PROBES-1 downto 0);
+
+  signal line_block        : std_logic_vector(CONNECTED_PROBES-1 downto 0) := (others => '0');
+  signal line_drop         : std_logic_vector(CONNECTED_PROBES-1 downto 0) := (others => '0');
+  signal line_blocked      : std_logic_vector(CONNECTED_PROBES-1 downto 0) := (others => '0');
+  signal line_droped       : std_logic_vector(CONNECTED_PROBES-1 downto 0) := (others => '0');
+  signal line_req          : std_logic_vector(CONNECTED_PROBES-1 downto 0) := (others => '0');
+
+  signal reg_debug_block   : std_logic_vector(CONNECTED_PROBES-1 downto 0);
+  signal reg_debug_drop    : std_logic_vector(CONNECTED_PROBES-1 downto 0);
+  signal reg_debug_src_rdy : std_logic_vector(CONNECTED_PROBES-1 downto 0);
+  signal reg_debug_dst_rdy : std_logic_vector(CONNECTED_PROBES-1 downto 0);
+  signal reg_debug_sop     : slv_array_t(CONNECTED_PROBES-1 downto 0)(REGIONS-1 downto 0);
+  signal reg_debug_eop     : slv_array_t(CONNECTED_PROBES-1 downto 0)(REGIONS-1 downto 0);
 
 begin
   full_architecture_gen : if DEBUG_ENABLED generate
 
     -- Debug interface registers
     debug_reg_gen : if DEBUG_REG generate
-       debug_reg : process(CLK)
-       begin
-          if CLK'event and CLK='1' then
-             DEBUG_BLOCK <= reg_debug_block;
-             DEBUG_DROP <= reg_debug_drop;
-             reg_debug_src_rdy <= DEBUG_SRC_RDY;
-             reg_debug_dst_rdy <= DEBUG_DST_RDY;
-             reg_debug_sop <= DEBUG_SOP;
-             reg_debug_eop <= DEBUG_EOP;
-          end if;
-       end process;
+      debug_reg : process(CLK)
+      begin
+        if rising_edge(CLK) then
+          DEBUG_BLOCK <= reg_debug_block;
+          DEBUG_DROP <= reg_debug_drop;
+          reg_debug_src_rdy <= DEBUG_SRC_RDY;
+          reg_debug_dst_rdy <= DEBUG_DST_RDY;
+          reg_debug_sop <= slv_array_deser(DEBUG_SOP, CONNECTED_PROBES, REGIONS);
+          reg_debug_eop <= slv_array_deser(DEBUG_EOP, CONNECTED_PROBES, REGIONS);
+        end if;
+      end process;
     end generate;
     debug_noreg_gen : if not DEBUG_REG generate
-       DEBUG_BLOCK <= reg_debug_block;
-       DEBUG_DROP <= reg_debug_drop;
-       reg_debug_src_rdy <= DEBUG_SRC_RDY;
-       reg_debug_dst_rdy <= DEBUG_DST_RDY;
-       reg_debug_sop <= DEBUG_SOP;
-       reg_debug_eop <= DEBUG_EOP;
+      DEBUG_BLOCK <= reg_debug_block;
+      DEBUG_DROP <= reg_debug_drop;
+      reg_debug_src_rdy <= DEBUG_SRC_RDY;
+      reg_debug_dst_rdy <= DEBUG_DST_RDY;
+      reg_debug_sop <= slv_array_deser(DEBUG_SOP, CONNECTED_PROBES, REGIONS);
+      reg_debug_eop <= slv_array_deser(DEBUG_EOP, CONNECTED_PROBES, REGIONS);
     end generate;
 
     -- Address Decorder on MI interface
     MI_ARDY       <= MI_RD or MI_WR;
     read_data_reg : process (CLK)
     begin
-      if CLK'event and CLK='1' then
-        MI_DRD        <= mi_drds(conv_integer(MI_ADDR(log2(CONNECTED_PROBES)+5 downto 2)));
+      if rising_edge(CLK) then
+        MI_DRD        <= mi_drds(to_integer(unsigned(MI_ADDR(log2(CONNECTED_PROBES)+5 downto 2))));
         MI_DRDY       <= MI_RD;
       end if;
     end process;
@@ -150,22 +165,22 @@ begin
         line_req(i)   <= mi_wes(i*16+15);
         
         -- Read data mapping for single probe
-        mi_drds(i*16+ 0) <= word_cnt(i)(31 downto 0);
-        mi_drds(i*16+ 1) <= word_cnt(i)(63 downto 32);
-        mi_drds(i*16+ 2) <= wait_cnt(i)(31 downto 0);
-        mi_drds(i*16+ 3) <= wait_cnt(i)(63 downto 32);
-        mi_drds(i*16+ 4) <= dst_hold_cnt(i)(31 downto 0);
-        mi_drds(i*16+ 5) <= dst_hold_cnt(i)(63 downto 32);
-        mi_drds(i*16+ 6) <= src_hold_cnt(i)(31 downto 0);
-        mi_drds(i*16+ 7) <= src_hold_cnt(i)(63 downto 32);
-        mi_drds(i*16+ 8) <= sop_cnt(i)(31 downto 0);
-        mi_drds(i*16+ 9) <= sop_cnt(i)(63 downto 32);
-        mi_drds(i*16+10) <= eop_cnt(i)(31 downto 0);
-        mi_drds(i*16+11) <= eop_cnt(i)(63 downto 32);
-        mi_drds(i*16+12) <= conv_std_logic_vector(character'pos(PROBE_NAMES(i*4+4)),8) &
-                            conv_std_logic_vector(character'pos(PROBE_NAMES(i*4+3)),8) &
-                            conv_std_logic_vector(character'pos(PROBE_NAMES(i*4+2)),8) &
-                            conv_std_logic_vector(character'pos(PROBE_NAMES(i*4+1)),8);
+        mi_drds(i*16+ 0) <= std_logic_vector(word_cnt(i)(31 downto 0));
+        mi_drds(i*16+ 1) <= std_logic_vector(word_cnt(i)(63 downto 32));
+        mi_drds(i*16+ 2) <= std_logic_vector(wait_cnt(i)(31 downto 0));
+        mi_drds(i*16+ 3) <= std_logic_vector(wait_cnt(i)(63 downto 32));
+        mi_drds(i*16+ 4) <= std_logic_vector(dst_hold_cnt(i)(31 downto 0));
+        mi_drds(i*16+ 5) <= std_logic_vector(dst_hold_cnt(i)(63 downto 32));
+        mi_drds(i*16+ 6) <= std_logic_vector(src_hold_cnt(i)(31 downto 0));
+        mi_drds(i*16+ 7) <= std_logic_vector(src_hold_cnt(i)(63 downto 32));
+        mi_drds(i*16+ 8) <= std_logic_vector(sop_cnt(i)(31 downto 0));
+        mi_drds(i*16+ 9) <= std_logic_vector(sop_cnt(i)(63 downto 32));
+        mi_drds(i*16+10) <= std_logic_vector(eop_cnt(i)(31 downto 0));
+        mi_drds(i*16+11) <= std_logic_vector(eop_cnt(i)(63 downto 32));
+        mi_drds(i*16+12) <= std_logic_vector(to_unsigned(character'pos(PROBE_NAMES(i*4+4)),8)) &
+                            std_logic_vector(to_unsigned(character'pos(PROBE_NAMES(i*4+3)),8)) &
+                            std_logic_vector(to_unsigned(character'pos(PROBE_NAMES(i*4+2)),8)) &
+                            std_logic_vector(to_unsigned(character'pos(PROBE_NAMES(i*4+1)),8));
         mi_drds(i*16+13) <= X"000000" &
                             '1' &                              -- probe enabled
                             'X' &                              -- reserved
@@ -181,28 +196,28 @@ begin
         -- Counters enabled (running) register
         cnt_en_reg : process (CLK)
         begin
-           if CLK'event and CLK='1' then
-              if RESET='1' or cnt_start(i)='1' then
-                 cnt_running(i) <= '1';
-              elsif cnt_stop(i)='1' then
-                 cnt_running(i) <= '0';
-              end if;
-           end if;
+          if rising_edge(CLK) then
+            if RESET='1' or cnt_start(i)='1' then
+              cnt_running(i) <= '1';
+            elsif cnt_stop(i)='1' then
+              cnt_running(i) <= '0';
+            end if;
+          end if;
         end process;
         
         -- Line controlling registers
         bus_control_gen : if enableChar2bool(BUS_CONTROL(i+1)) generate
           line_ctrl_reg : process (CLK)
           begin
-             if CLK'event and CLK='1' then
-                if RESET='1' then
-                   line_blocked(i) <= '0';
-                   line_droped(i)  <= '0';
-                elsif line_req(i)='1' then
-                   line_blocked(i) <= line_block(i);
-                   line_droped(i)  <= line_drop(i);
-                end if;
-             end if;
+            if rising_edge(CLK) then
+              if RESET='1' then
+                line_blocked(i) <= '0';
+                line_droped(i)  <= '0';
+              elsif line_req(i)='1' then
+                line_blocked(i) <= line_block(i);
+                line_droped(i)  <= line_drop(i);
+              end if;
+            end if;
           end process;
         end generate;
         reg_debug_block(i) <= line_blocked(i);
@@ -212,78 +227,88 @@ begin
         word_cnt_gen : if enableChar2bool(COUNTER_WORD(i+1)) generate
           word_cnt_reg : process (CLK)
           begin
-             if CLK'event and CLK='1' then
-                if RESET='1' or cnt_start(i)='1' then
-                   word_cnt(i) <= (others => '0');
-                elsif cnt_running(i)='1' and reg_debug_src_rdy(i)='1' and reg_debug_dst_rdy(i)='1' then
-                   word_cnt(i) <= word_cnt(i)+1;
-                end if;
-             end if;
+            if rising_edge(CLK) then
+              if RESET='1' or cnt_start(i)='1' then
+                word_cnt(i) <= (others => '0');
+              elsif cnt_running(i)='1' and reg_debug_src_rdy(i)='1' and reg_debug_dst_rdy(i)='1' then
+                word_cnt(i) <= word_cnt(i)+1;
+              end if;
+            end if;
           end process;
         end generate;
         -- Wait counter
         wait_cnt_gen : if enableChar2bool(COUNTER_WAIT(i+1)) generate
           wait_cnt_reg : process (CLK)
           begin
-             if CLK'event and CLK='1' then
-                if RESET='1' or cnt_start(i)='1' then
-                   wait_cnt(i) <= (others => '0');
-                elsif cnt_running(i)='1' and reg_debug_src_rdy(i)='0' and reg_debug_dst_rdy(i)='0' then
-                   wait_cnt(i) <= wait_cnt(i)+1;
-                end if;
-             end if;
+            if rising_edge(CLK) then
+              if RESET='1' or cnt_start(i)='1' then
+                wait_cnt(i) <= (others => '0');
+              elsif cnt_running(i)='1' and reg_debug_src_rdy(i)='0' and reg_debug_dst_rdy(i)='0' then
+                wait_cnt(i) <= wait_cnt(i)+1;
+              end if;
+            end if;
           end process;
         end generate;
         -- Destination hold counter
         dst_hold_cnt_gen : if enableChar2bool(COUNTER_DST_HOLD(i+1)) generate
           dst_hold_cnt_reg : process (CLK)
           begin
-             if CLK'event and CLK='1' then
-                if RESET='1' or cnt_start(i)='1' then
-                   dst_hold_cnt(i) <= (others => '0');
-                elsif cnt_running(i)='1' and reg_debug_src_rdy(i)='1' and reg_debug_dst_rdy(i)='0' then
-                   dst_hold_cnt(i) <= dst_hold_cnt(i)+1;
-                end if;
-             end if;
+            if rising_edge(CLK) then
+              if RESET='1' or cnt_start(i)='1' then
+                dst_hold_cnt(i) <= (others => '0');
+              elsif cnt_running(i)='1' and reg_debug_src_rdy(i)='1' and reg_debug_dst_rdy(i)='0' then
+                dst_hold_cnt(i) <= dst_hold_cnt(i)+1;
+              end if;
+            end if;
           end process;
         end generate;
         -- Source hold counter
         src_hold_cnt_gen : if enableChar2bool(COUNTER_SRC_HOLD(i+1)) generate
           dst_hold_cnt_reg : process (CLK)
           begin
-             if CLK'event and CLK='1' then
-                if RESET='1' or cnt_start(i)='1' then
-                   src_hold_cnt(i) <= (others => '0');
-                elsif cnt_running(i)='1' and reg_debug_src_rdy(i)='0' and reg_debug_dst_rdy(i)='1' then
-                   src_hold_cnt(i) <= src_hold_cnt(i)+1;
-                end if;
-             end if;
+            if rising_edge(CLK) then
+              if RESET='1' or cnt_start(i)='1' then
+                src_hold_cnt(i) <= (others => '0');
+              elsif cnt_running(i)='1' and reg_debug_src_rdy(i)='0' and reg_debug_dst_rdy(i)='1' then
+                src_hold_cnt(i) <= src_hold_cnt(i)+1;
+              end if;
+            end if;
           end process;
         end generate;  
         -- Start of transaction counter
         sop_cnt_gen : if enableChar2bool(COUNTER_SOP(i+1)) generate
           sop_cnt_reg : process (CLK)
+            variable v_tmp_cnt : unsigned(log2(REGIONS+1)-1 downto 0);
           begin
-             if CLK'event and CLK='1' then
-                if RESET='1' or cnt_start(i)='1' then
-                   sop_cnt(i) <= (others => '0');
-                elsif cnt_running(i)='1' and reg_debug_src_rdy(i)='1' and reg_debug_dst_rdy(i)='1' and reg_debug_sop(i)='1' then
-                   sop_cnt(i) <= sop_cnt(i)+1;
-                end if;
-             end if;
+            if rising_edge(CLK) then
+              if RESET='1' or cnt_start(i)='1' then
+                sop_cnt(i) <= (others => '0');
+              elsif cnt_running(i)='1' and reg_debug_src_rdy(i)='1' and reg_debug_dst_rdy(i)='1' then
+                v_tmp_cnt := (others => '0');
+                for r in 0 to REGIONS-1 loop
+                  v_tmp_cnt := v_tmp_cnt + reg_debug_sop(i)(r);
+                end loop;
+                sop_cnt(i) <= sop_cnt(i) + v_tmp_cnt;
+              end if;
+            end if;
           end process;
         end generate;  
         -- End of transaction counter
         eop_cnt_gen : if enableChar2bool(COUNTER_EOP(i+1)) generate
           eop_cnt_reg : process (CLK)
+            variable v_tmp_cnt : unsigned(log2(REGIONS+1)-1 downto 0);
           begin
-             if CLK'event and CLK='1' then
-                if RESET='1' or cnt_start(i)='1' then
-                   eop_cnt(i) <= (others => '0');
-                elsif cnt_running(i)='1' and reg_debug_src_rdy(i)='1' and reg_debug_dst_rdy(i)='1' and reg_debug_eop(i)='1' then
-                   eop_cnt(i) <= eop_cnt(i)+1;
-                end if;
-             end if;
+            if rising_edge(CLK) then
+              if RESET='1' or cnt_start(i)='1' then
+                eop_cnt(i) <= (others => '0');
+              elsif cnt_running(i)='1' and reg_debug_src_rdy(i)='1' and reg_debug_dst_rdy(i)='1' then
+                v_tmp_cnt := (others => '0');
+                for r in 0 to REGIONS-1 loop
+                  v_tmp_cnt := v_tmp_cnt + reg_debug_eop(i)(r);
+                end loop;
+                eop_cnt(i) <= eop_cnt(i) + v_tmp_cnt;
+              end if;
+            end if;
           end process;
         end generate;
       end generate;
