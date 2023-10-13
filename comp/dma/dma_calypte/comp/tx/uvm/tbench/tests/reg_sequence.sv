@@ -35,6 +35,8 @@ class start_channel extends uvm_sequence;
         uvm_status_e   status;
         uvm_reg_data_t data;
 
+        `uvm_info(this.get_full_name(), $sformatf("\n============= REQUEST TO START CHANNEL %0d! =============", channel) ,UVM_MEDIUM)
+
         //Randomize sequence of doing this
         //write sw_pointers
         m_regmodel.sw_data_pointer.write(status, 'h0, .parent(this));
@@ -60,6 +62,7 @@ class start_channel extends uvm_sequence;
         ptr_read(m_regmodel.sw_hdr_pointer , shp);
 
         `uvm_info(this.get_full_name(), $sformatf("Pointers in the end %d, HDP %h(%d), SDP %h(%d), HHP %h(%d), SHP %h(%d)\n", channel, hdp, hdp, sdp, sdp, hhp, hhp, shp, shp), UVM_DEBUG)
+        `uvm_info(this.get_full_name(), $sformatf("\n============= CHANNEL %0d IS RUNNING! =============", channel) ,UVM_MEDIUM)
 
         if (sdp != hdp || shp != hhp) begin
             `uvm_error(this.get_full_name(), $sformatf("Pointers have not been cleared\n\tchannel: %d\n\tHDP: 0x%h(%d)\n\tSDP: 0x%h(%d)\n\tHHP: 0x%h(%d)\n\tSHP: 0x%h(%d)\n", channel, hdp, hdp, sdp, sdp, hhp, hhp, shp, shp));
@@ -96,6 +99,8 @@ class stop_channel extends uvm_sequence;
         uvm_reg_data_t data;
         time act_time;
 
+        `uvm_info(this.get_full_name(), $sformatf("\n============= REQUEST TO STOP CHANNEL %0d! =============", channel) ,UVM_MEDIUM)
+
         //startup channel
         m_regmodel.control.write(status, 32'h0, .parent(this));
         m_regmodel.status.read(status, data, .parent(this));
@@ -121,7 +126,7 @@ class stop_channel extends uvm_sequence;
         `uvm_info(this.get_full_name(), "Pointers are equal\n" ,UVM_DEBUG)
 
         do begin
-            `uvm_info(this.get_full_name(), "\nCHANNEL STOPPED" ,UVM_DEBUG)
+            `uvm_info(this.get_full_name(), $sformatf("\n============= CHANNEL %0d IS STOPPED! =============", channel) ,UVM_MEDIUM)
             #(300ns)
             m_regmodel.status.read(status, data, .parent(this));
         end while ((data & 32'h1) == 1);

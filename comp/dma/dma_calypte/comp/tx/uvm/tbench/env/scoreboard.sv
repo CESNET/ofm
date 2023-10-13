@@ -176,6 +176,7 @@ class compare #(ITEM_WIDTH, USER_META_WIDTH, DEBUG, CHANNELS) extends uvm_compon
         logic [ITEM_WIDTH-1 : 0]       correct_tr[$];
         logic [$clog2(CHANNELS)-1 : 0] model_channel;
         logic [$clog2(CHANNELS)-1 : 0] dut_channel;
+        string                       debug_msg;
 
         forever begin
             tr_dut_mfb = uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(ITEM_WIDTH))::type_id::create("tr_dut_mfb");
@@ -216,6 +217,14 @@ class compare #(ITEM_WIDTH, USER_META_WIDTH, DEBUG, CHANNELS) extends uvm_compon
                     end
                 end
             end
+
+            debug_msg = "\n";
+            $swrite(debug_msg, "%s================================================================================= \n", debug_msg);
+            $swrite(debug_msg, "%SDUT TRANSACTION %0d COMPARED!\n", debug_msg, compared);
+            $swrite(debug_msg, "%s================================================================================= \n", debug_msg);
+            $swrite(debug_msg, "%sCHANNEL : %0d\n", debug_msg, dut_channel);
+            $swrite(debug_msg, "%sDATA    : %s\n", debug_msg, tr_dut_mfb.item.convert2string());
+            `uvm_info(this.get_full_name(),        debug_msg, UVM_MEDIUM)
 
             //count stats
             //Count delay if you get first data packet.

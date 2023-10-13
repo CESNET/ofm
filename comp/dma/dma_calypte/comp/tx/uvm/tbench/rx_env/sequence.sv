@@ -9,10 +9,10 @@ class logic_vector_array_sequence#(ITEM_WIDTH, CHANNELS) extends uvm_sequence #(
     `uvm_object_param_utils(uvm_dma_ll_rx::logic_vector_array_sequence#(ITEM_WIDTH, CHANNELS))
 
     mailbox#(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)) tr_export;
-    mailbox#(uvm_logic_vector::sequence_item#(17))               tr_sdp_export;
+    mailbox#(uvm_logic_vector::sequence_item#(18))               tr_sdp_export;
     mailbox#(uvm_logic_vector::sequence_item#($clog2(CHANNELS))) channel_export;
     local uvm_dma_regs::regmodel#(CHANNELS)                      m_regmodel;
-    uvm_logic_vector::sequence_item#(17)                         sdp_tr;
+    uvm_logic_vector::sequence_item#(18)                         sdp_tr;
     uvm_logic_vector::sequence_item#($clog2(CHANNELS))           chan_tr;
     protected int unsigned buffer_hdr_space[CHANNELS] = '{default:'0};
     protected int unsigned buffer_data_space[CHANNELS] = '{default:'0};
@@ -24,6 +24,7 @@ class logic_vector_array_sequence#(ITEM_WIDTH, CHANNELS) extends uvm_sequence #(
     uvm_dma_ll_info::watchdog #(CHANNELS) m_watch_dog;
 
     int unsigned channel;
+    string msg;
 
     function new(string name = "sequence_simple_rx_base");
         super.new(name);
@@ -67,6 +68,12 @@ class logic_vector_array_sequence#(ITEM_WIDTH, CHANNELS) extends uvm_sequence #(
             if (hdr) begin
                 buffer_hdr_space[chan] = (hw_ptr-1 - sw_ptr) & sw_mask;
                 while (buffer_hdr_space[chan] < pkt_len) begin
+                    msg = "\n";
+                    $swrite(msg, "%s==================== WAIT FOR SPACE IN HDR BUFFER - CHANNEL %0d! ====================\n", msg, chan);
+                    $swrite(msg, "%sHW PTR         : 0x%0h (%0d)\n", msg, hw_ptr, hw_ptr);
+                    $swrite(msg, "%sSW PTR         : 0x%0h (%0d)\n", msg, sw_ptr, sw_ptr);
+                    $swrite(msg, "%sHDR BUF SPACE  : 0x%0h (%0d)\n", msg, buffer_hdr_space[chan], buffer_hdr_space[chan]);
+                    `uvm_info(this.get_full_name(), msg, UVM_MEDIUM)
                     #(200ns);
                     hw_ptr_prev = hw_ptr;
                     ptr_read(hw_register, hw_ptr);
@@ -77,6 +84,12 @@ class logic_vector_array_sequence#(ITEM_WIDTH, CHANNELS) extends uvm_sequence #(
             end else begin
                 buffer_data_space[chan] = (hw_ptr-1 - sw_ptr) & sw_mask;
                 while (buffer_data_space[chan] < pkt_len) begin
+                    msg = "\n";
+                    $swrite(msg, "%s==================== WAIT FOR SPACE IN DATA BUFFER - CHANNEL %0d! ====================\n", msg, chan);
+                    $swrite(msg, "%sHW PTR         : 0x%0h (%0d)\n", msg, hw_ptr, hw_ptr);
+                    $swrite(msg, "%sSW PTR         : 0x%0h (%0d)\n", msg, sw_ptr, sw_ptr);
+                    $swrite(msg, "%sDATA BUF SPACE : 0x%0h (%0d)\n", msg, buffer_data_space[chan], buffer_data_space[chan]);
+                    `uvm_info(this.get_full_name(), msg, UVM_MEDIUM)
                     #(200ns);
                     hw_ptr_prev = hw_ptr;
                     ptr_read(hw_register, hw_ptr);
@@ -85,6 +98,22 @@ class logic_vector_array_sequence#(ITEM_WIDTH, CHANNELS) extends uvm_sequence #(
                     end
                 end
             end
+
+        msg = "\n";
+        $swrite(msg, "%s==========================================================\n", msg);
+        if (hdr) begin
+            $swrite(msg, "%sHDR BUFFER COUNT FREE SPACE\n", msg);
+        end else begin
+            $swrite(msg, "%sDATA BUFFER COUNT FREE SPACE\n", msg);
+        end
+        $swrite(msg, "%sCHANNEL        : %0d\n", msg, chan);
+        $swrite(msg, "%sPKT LEN        : %0d\n", msg, pkt_len);
+        $swrite(msg, "%sHW PTR         : 0x%0h (%0d)\n", msg, hw_ptr, hw_ptr);
+        $swrite(msg, "%sSW PTR         : 0x%0h (%0d)\n", msg, sw_ptr, sw_ptr);
+        $swrite(msg, "%sHDR BUF SPACE  : 0x%0h (%0d)\n", msg, buffer_hdr_space[chan], buffer_hdr_space[chan]);
+        $swrite(msg, "%sDATA BUF SPACE : 0x%0h (%0d)\n", msg, buffer_data_space[chan], buffer_data_space[chan]);
+        $swrite(msg, "%s==========================================================\n", msg);
+        `uvm_info(this.get_full_name(), msg, UVM_FULL)
     endtask
 
 
@@ -101,10 +130,18 @@ class logic_vector_array_sequence#(ITEM_WIDTH, CHANNELS) extends uvm_sequence #(
         sw_ptr = sw_ptr;
 
         msg = "\n";
+        $swrite(msg, "%s==========================================================\n", msg);
         if (hdr) begin
-            $swrite(msg, "%sHDR ", msg);
+            $swrite(msg, "%sHDR POINTER UPDATE - CHANNEL %0d\n", msg, chan);
+            $swrite(msg, "%sHDR BUF SPACE  : 0x%0h (%0d)\n", msg, buffer_hdr_space[chan], buffer_hdr_space[chan]);
+        end else begin
+            $swrite(msg, "%sDATA POINTER UPDATE - CHANNEL %0d\n", msg, chan);
+            $swrite(msg, "%sDATA BUF SPACE : 0x%0h (%0d)\n", msg, buffer_data_space[chan], buffer_data_space[chan]);
         end
-        $swrite(msg, "%sHW PTR %h(%d), SW PTR %h(%d), SW MOVE %h(%d) on channel: %d\n", msg, hw_ptr, hw_ptr, sw_ptr, sw_ptr, sw_move, sw_move, chan);
+        $swrite(msg, "%sHW PTR         : 0x%0h (%0d)\n", msg, hw_ptr, hw_ptr);
+        $swrite(msg, "%sSW PTR         : 0x%0h (%0d)\n", msg, sw_ptr, sw_ptr);
+        $swrite(msg, "%sSW MOVE        : 0x%0h (%0d)\n", msg, sw_move, sw_move);
+        $swrite(msg, "%s==========================================================\n", msg);
         `uvm_info(this.get_full_name(), msg, UVM_MEDIUM)
         ptr_write(sw_register, ((sw_ptr + sw_move) & sw_mask));
 
@@ -122,6 +159,19 @@ class logic_vector_array_sequence#(ITEM_WIDTH, CHANNELS) extends uvm_sequence #(
             tr_sdp_export.get(sdp_tr);
             channel = chan_tr.data;
 
+            msg = "\n";
+            $swrite(msg, "%s==========================================================\n", msg);
+            $swrite(msg, "%sPOINTER CHECK PER TRANSACTION - CHANNEL %0d\n", msg, channel);
+            $swrite(msg, "%s==========================================================\n", msg);
+            $swrite(msg, "%sCHANNEL        : %0d\n", msg, channel);
+            $swrite(msg, "%sSDP            : %0d\n", msg, int'(sdp_tr.data[16-1 : 0]));
+            $swrite(msg, "%sIS HEADER      : %0b\n", msg, sdp_tr.data[16]);
+            $swrite(msg, "%sIS PTR UPDATE  : %0b\n", msg, sdp_tr.data[17]);
+            $swrite(msg, "%sHDR BUF SPACE  : 0x%0h (%0d)\n", msg, buffer_hdr_space[channel], buffer_hdr_space[channel]);
+            $swrite(msg, "%sDATA BUF SPACE : 0x%0h (%0d)\n", msg, buffer_data_space[channel], buffer_data_space[channel]);
+            $swrite(msg, "%s==========================================================\n", msg);
+            `uvm_info(this.get_full_name(), msg, UVM_FULL)
+
             if (sdp_tr.data[16] == 0) begin
                 count_free_space(int'(sdp_tr.data[16-1 : 0]), m_regmodel.channel[int'(channel)].hw_data_pointer, m_regmodel.channel[int'(channel)].sw_data_pointer, m_regmodel.channel[int'(channel)].data_mask, sdp_tr.data[16], channel);
             end else begin
@@ -131,7 +181,7 @@ class logic_vector_array_sequence#(ITEM_WIDTH, CHANNELS) extends uvm_sequence #(
             start_item(req);
             finish_item(req);
 
-            if (m_watch_dog.channel_status[channel] == 1'b1) begin
+            if (m_watch_dog.channel_status[channel] == 1'b1 && sdp_tr.data[17] == 1) begin
                 if (sdp_tr.data[16] == 0) begin
                     ptr_update(int'(sdp_tr.data[16-1 : 0]), m_regmodel.channel[int'(channel)].hw_data_pointer, m_regmodel.channel[int'(channel)].sw_data_pointer, m_regmodel.channel[int'(channel)].data_mask, sdp_tr.data[16], channel);
                 end else begin
