@@ -85,7 +85,7 @@ entity TX_DMA_CALYPTE is
         -- Width of the metadata in bits which are stored in the DMA header.
         HDR_META_WIDTH : natural := 24;
 
-        ST_SP_DBG_SIGNAL_W : natural := 2;
+        ST_SP_DBG_SIGNAL_W : natural := 4;
         -- Size of the largest packets that can be transmitted on the USR_TX_MFB interface.
         PKT_SIZE_MAX   : natural := 2**11
         );
