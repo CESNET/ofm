@@ -21,8 +21,10 @@ interface probe_inf #(int unsigned DATA_WIDTH) (
 
         function new();
             uvm_probe::pool pool;
+
             pool = uvm_probe::pool::get_global_pool();
-            probe_event = pool.get({"probe_event_component_", PATH});
+            probe_event = new();
+            pool.add({"probe_event_component_", PATH}, probe_event);
         endfunction
 
         task body();

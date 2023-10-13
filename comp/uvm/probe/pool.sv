@@ -24,6 +24,14 @@ class pool extends uvm_object_string_pool #(uvm_event);
         return type_name;
     endfunction
 
+    virtual function uvm_event get(string key);
+        if (!m_global_pool.exists(key)) begin
+           `uvm_fatal(this.get_full_name(), {"Probe : ", key , " was not located in the Global Pool of Probes! Check the name of your Probe."});
+        end
+
+        return super.get(key);
+    endfunction
+
     static function this_type get_global_pool ();
         if (m_global_pool==null)
             m_global_pool = new("global_pool");
