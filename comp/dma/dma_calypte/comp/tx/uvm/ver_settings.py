@@ -29,7 +29,7 @@ SETTINGS = {
         "PKT_SIZE_MAX"            : "2**11",
 
         "DATA_POINTER_WIDTH"      : "14",
-        "DMA_HDR_POINTER_WIDTH"   : "14",
+        "DMA_HDR_POINTER_WIDTH"   : "11",
 
         "PCIE_LEN_MIN"            : "1",
         "PCIE_LEN_MAX"            : "256",
@@ -41,19 +41,19 @@ SETTINGS = {
         "CHANNELS"                : "8",
     },
     "buff_size_comb_small" : {
-        "DATA_POINTER_WIDTH"      : "11",
-        "DMA_HDR_POINTER_WIDTH"   : "11",
+        "DATA_POINTER_WIDTH"      : "13",
+        "DMA_HDR_POINTER_WIDTH"   : "10",
     },
     "buff_size_comb_large" : {
         "DATA_POINTER_WIDTH"      : "16",
-        "DMA_HDR_POINTER_WIDTH"   : "16",
+        "DMA_HDR_POINTER_WIDTH"   : "13",
     },
     "min_pcie_frames" : {
         "PCIE_LEN_MIN"            : "1",
-        "PCIE_LEN_MAX"            : "2",
+        "PCIE_LEN_MAX"            : "32",
     },
     "medium_pcie_frames" : {
-        "PCIE_LEN_MIN"            : "2",
+        "PCIE_LEN_MIN"            : "32",
         "PCIE_LEN_MAX"            : "128",
     },
     "large_pcie_frames" : {
@@ -63,7 +63,7 @@ SETTINGS = {
     "_combinations_" : (
     # (                                                                  ), # default
     # (             "4_channels",                                        ),
-    (             "8_channels",                                        ),
+    (             "4_channels",                                        ),
     # (                                             "min_pcie_frames"   ,),
     # (                                             "medium_pcie_frames",),
     # (                                             "large_pcie_frames" ,),

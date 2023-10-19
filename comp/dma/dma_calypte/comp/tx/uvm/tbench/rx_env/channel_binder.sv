@@ -9,11 +9,11 @@ class channel_binder #(CHANNELS, ITEM_WIDTH) extends uvm_component;
 
     mailbox#(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))                      data_in_export[CHANNELS];
     mailbox#(uvm_logic_vector::sequence_item#(sv_pcie_meta_pack::PCIE_CQ_META_WIDTH)) meta_in_export[CHANNELS];
-    mailbox#(uvm_logic_vector::sequence_item#(17))                                    sdp_in_export[CHANNELS];
+    mailbox#(uvm_logic_vector::sequence_item#(18))                                    sdp_in_export[CHANNELS];
 
     mailbox#(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))                      data_out_export;
     mailbox#(uvm_logic_vector::sequence_item#(sv_pcie_meta_pack::PCIE_CQ_META_WIDTH)) meta_out_export;
-    mailbox#(uvm_logic_vector::sequence_item#(17))                                    sdp_out_export;
+    mailbox#(uvm_logic_vector::sequence_item#(18))                                    sdp_out_export;
     mailbox#(uvm_logic_vector::sequence_item#($clog2(CHANNELS)))                      chan_out_export;
     semaphore sem;
     uvm_dma_ll_info::watchdog #(CHANNELS) m_watch_dog;
@@ -39,7 +39,7 @@ class channel_binder #(CHANNELS, ITEM_WIDTH) extends uvm_component;
     task read_chan(int unsigned channel);
         uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)                      data_tr;
         uvm_logic_vector::sequence_item#(sv_pcie_meta_pack::PCIE_CQ_META_WIDTH) meta_tr;
-        uvm_logic_vector::sequence_item#(17)                                    sdp_tr;
+        uvm_logic_vector::sequence_item#(18)                                    sdp_tr;
         uvm_logic_vector::sequence_item#($clog2(CHANNELS))                      chan_tr;
 
         data_in_export[channel].get(data_tr);
