@@ -282,6 +282,14 @@ begin
         report "TX_DMA_CALYPTE: The width of the data pointer should be equal or greater than the width of the header pointer"
         severity FAILURE;
 
+    assert (DMA_HDR_POINTER_WIDTH + 3 = DATA_POINTER_WIDTH)
+        report "TX_DMA_CALYPTE: The width of HDR pointer needs to be shorter by 3 bits from DATA pointer in order for PCIe addres fields to be aligned."
+        severity FAILURE;
+
+    assert (DATA_POINTER_WIDTH <= 16)
+        report "TX_DMA_CALYPTE: Too large data pointer, the length of 16 already allows to store 64KiB of data."
+        severity FAILURE;
+
     assert ((CHANNELS mod 2 = 0 and CHANNELS >= 2))
         report "TX_DMA_CALYPTE: Wrong number of channels, the number should be the power of two greater than 1"
         severity FAILURE;
