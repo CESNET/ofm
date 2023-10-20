@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 TOP_LEVEL_ENT=STREAMING_DEBUG_MASTER
-#SYNTH=quartus
+SYNTH=quartus
 #export CLK_PERIOD=4.0
 #export DEVICE=ULTRASCALE
 
