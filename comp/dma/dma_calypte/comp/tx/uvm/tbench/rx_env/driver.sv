@@ -120,6 +120,61 @@ class driver#(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends u
         return pkt_be;
     endfunction
 
+    function pcie_info create_pcie_req(logic [64-1 : 0] pcie_addr,
+                                       logic [11-1 : 0] pcie_len,
+                                       logic [4-1:0] pcie_fbe,
+                                       logic [4-1:0] pcie_lbe,
+                                       uvm_logic_vector_array::sequence_item#(ITEM_WIDTH) pcie_data
+    );
+        pcie_info pcie_tlp;
+        logic [128-1:0] pcie_hdr_xilinx;
+        logic [128-1:0] pcie_hdr_intel;
+        logic is_4dw_tlp;
+
+        if (pcie_addr[63 : 32] == 0) begin
+            is_4dw_tlp = '0;
+        end else begin
+            is_4dw_tlp = '1;
+        end
+
+        pcie_tlp.data      = uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)::type_id::create("pcie_tr.data");
+        pcie_tlp.meta      = uvm_logic_vector::sequence_item#(sv_pcie_meta_pack::PCIE_CQ_META_WIDTH)::type_id::create("pcie_tr.meta");
+        pcie_tlp.sdp       = uvm_logic_vector::sequence_item# (18)::type_id::create("pcie_tr.sdp");
+        pcie_tlp.meta.data = '0;
+
+        if (DEVICE == "ULTRASCALE") begin
+            pcie_hdr_xilinx = '0;
+            pcie_hdr_xilinx[63 : 2]    = pcie_addr[63 : 2];
+            pcie_hdr_xilinx[74 : 64]   = pcie_len;
+            pcie_hdr_xilinx[78 : 75]   = 4'b0001; // REQ TYPE = WRITE
+            pcie_hdr_xilinx[114 : 112] = 3'b010; // BAR ID
+            pcie_hdr_xilinx[120 : 115] = 6'd26; // BAR Aperure
+
+            pcie_tlp.data.data = {pcie_hdr_xilinx[31 : 0], pcie_hdr_xilinx[63 : 32], pcie_hdr_xilinx[95 : 64], pcie_hdr_xilinx[127 : 96], pcie_data.data};
+            pcie_tlp.meta.data[166 : 163] = pcie_fbe;
+            pcie_tlp.meta.data[170 : 167] = pcie_lbe;
+        end else begin // Intel P/R-Tile
+            pcie_hdr_intel = '0;
+            pcie_hdr_intel[9 : 0]   = pcie_len[9 : 0];
+            pcie_hdr_intel[31 : 24] = 8'b01000000;
+            pcie_hdr_intel[29]      = is_4dw_tlp;
+            pcie_hdr_intel[35 : 32] = pcie_fbe;
+            pcie_hdr_intel[39 : 36] = pcie_lbe;
+            if (is_4dw_tlp == 1) begin
+                pcie_hdr_intel[95 : 64]  = pcie_addr[63 : 32];
+                pcie_hdr_intel[127 : 98] = pcie_addr[31 : 2];
+            end else begin
+                pcie_hdr_intel[95 : 66] = pcie_addr[31 : 2];
+            end
+
+            pcie_tlp.data.data = pcie_data.data;
+            pcie_tlp.meta.data[127 : 0]   = pcie_hdr_intel;
+            pcie_tlp.meta.data[162 : 160] = 3'b010; // BAR ID
+        end
+
+        return pcie_tlp;
+    endfunction
+
     task check_status();
         forever begin
             if (m_watch_dog.channel_status[channel] == 1'b0) begin
@@ -170,6 +225,7 @@ class driver#(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends u
         logic[16-1 : 0]              sdp_move;
         logic [DATA_ADDR_W-1 : 0]    frame_pointer_old;
         logic [DATA_ADDR_W-1 : 0]    frame_pointer_first;
+        logic [64-1 : 0]             pcie_addr;
 
         fork
             check_status();
@@ -240,7 +296,6 @@ class driver#(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends u
 
                 $swrite(debug_msg, "%sPCIE LEN IN DWORDS :        %0d\n", debug_msg, pcie_len);
 
-                //pkt_be = count_be(channel, pcie_len, last);
                 pkt_be = count_be_new(pcie_len, prev_lbe, first, last);
                 first = 1'b0;
                 dma_done = 1'b0;
@@ -257,60 +312,17 @@ class driver#(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends u
                 end
 
                 dma_len -= pcie_len;
-                pcie_tr.data      = uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)::type_id::create("pcie_tr.data");
-                pcie_tr.meta      = uvm_logic_vector::sequence_item#(sv_pcie_meta_pack::PCIE_CQ_META_WIDTH)::type_id::create("pcie_tr.meta");
-                pcie_tr.sdp       = uvm_logic_vector::sequence_item# (18)::type_id::create("pcie_tr.sdp");
-                pcie_tr.meta.data = '0;
 
-                if (DEVICE == "ULTRASCALE") begin
-                    // In case of Xilinx
-                    pcie_hdr[DATA_ADDR_W-1 : 2] = addr.data_addr;
-                    // Channel num
-                    pcie_hdr[(DATA_ADDR_W+1+$clog2(CHANNELS))-1 : DATA_ADDR_W+1] = channel;
-                    // pcie length in DWORDS
-                    pcie_hdr[74 : 64]   = pcie_len; 
-                    // REQ TYPE
-                    pcie_hdr[78 : 75]   = 4'b0001;
-                    // REQ ID
-                    pcie_hdr[95 : 80]   = '0;
-                    // TAG
-                    pcie_hdr[103 : 96]  = '0;
-                    // Target Function
-                    pcie_hdr[111 : 104] = '0;
-                    // BAR ID
-                    pcie_hdr[114 : 112] = 3'b010;
-                    // BAR Aperure
-                    pcie_hdr[120 : 115] = 6'd26;
-                    // TC
-                    pcie_hdr[123 : 121] = '0;
-                    // ATTR
-                    pcie_hdr[126 : 124] = '0;
-                    // IS DMA HDR
-                    pcie_hdr[(DATA_ADDR_W+$clog2(CHANNELS)+1)] = 1'b0;
-                    // BAR
-                    pcie_tr.meta.data[162 : 160] = 3'b010;
-                    // FBE
-                    pcie_tr.meta.data[166 : 163] = fbe;
-                    // LBE
-                    pcie_tr.meta.data[170 : 167] = lbe;
-                    // TPH_PRESENT
-                    pcie_tr.meta.data[171 : 171] = '0;
-                    // TPH TYPE
-                    pcie_tr.meta.data[173 : 172] = '0;
-                    // TPH_ST_TAG
-                    pcie_tr.meta.data[181 : 174] = '0;
-                end else begin
-                    // In case of Intel
-                    pcie_tr.meta.data[127 : 0] = pcie_hdr;
-                    // BAR PREFIX
-                    logic_vector_new.data[159 : 128] = 6'd26;
-                end
+                pcie_addr = '0;
+                pcie_addr[DATA_ADDR_W-1 : 2] = addr.data_addr;
+                pcie_addr[(DATA_ADDR_W+1+$clog2(CHANNELS))-1 : DATA_ADDR_W+1] = channel;
+                pcie_addr[(DATA_ADDR_W+$clog2(CHANNELS)+1)] = 1'b0;
 
                 $swrite(debug_msg, "%sFBE                :        %b\n", debug_msg, fbe);
                 $swrite(debug_msg, "%sDFBE               :        %d\n", debug_msg, dfbe);
                 $swrite(debug_msg, "%sLBE                :        %b\n", debug_msg, lbe);
                 $swrite(debug_msg, "%sDLBE               :        %d\n", debug_msg, dlbe);
-                $swrite(debug_msg, "%sFULL ADDR          :        0x%0h\n", debug_msg, pcie_hdr[63 : 0]);
+                $swrite(debug_msg, "%sFULL ADDR          :        0x%0h\n", debug_msg, pcie_addr);
                 $swrite(debug_msg, "%sDATA ADDR          :        0x%0h (%0d)\n", debug_msg, addr.data_addr, addr.data_addr);
                 $swrite(debug_msg, "%sFRAME POINTER      :        0x%0h (%0d)\n", debug_msg, frame_pointer, frame_pointer);
 
@@ -322,8 +334,8 @@ class driver#(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends u
                     data_index++;
                 end
 
-                // todo intel fpga support
-                pcie_tr.data.data = {pcie_hdr[31 : 0], pcie_hdr[63 : 32], pcie_hdr[95 : 64], pcie_hdr[127 : 96], data.data};
+                pcie_tr = create_pcie_req(pcie_addr, pcie_len, fbe, lbe, data);
+
                 pcie_cnt += pcie_len;
 
                 sdp_tr = uvm_logic_vector::sequence_item# (18)::type_id::create("sdp_tr");
@@ -436,55 +448,12 @@ class driver#(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends u
             lbe                   = '1;
             pcie_len              = 2;
 
-            if (DEVICE == "ULTRASCALE") begin
-                // In case of Xilinx
-                logic_vector_array_new.data = new[((DMA_HDR_SIZE+PCIE_HDR_SIZE)/ITEM_WIDTH)];
-                // HDR address
-                pcie_hdr[DATA_ADDR_W-1 : 2] = addr.hdr_addr;
-                // Channel num
-                pcie_hdr[(DATA_ADDR_W+1+$clog2(CHANNELS))-1 : DATA_ADDR_W+1] = channel;
-                // pcie length in DWORDS
-                pcie_hdr[74 : 64]   = pcie_len; 
-                // REQ TYPE
-                pcie_hdr[78 : 75]   = 4'b0001;
-                // REQ ID
-                pcie_hdr[95 : 80]   = '0;
-                // TAG
-                pcie_hdr[103 : 96]  = '0;
-                // Target Function
-                pcie_hdr[111 : 104] = '0;
-                // BAR ID
-                pcie_hdr[114 : 112] = 3'b010;
-                // BAR Aperure
-                pcie_hdr[120 : 115] = 6'd26;
-                // TC
-                pcie_hdr[123 : 121] = '0;
-                // ATTR
-                pcie_hdr[126 : 124] = '0;
-                // IS DMA HDR
-                pcie_hdr[(DATA_ADDR_W+$clog2(CHANNELS)+1)] = 1'b1;
-                // BAR
-                logic_vector_new.data[162 : 160] = 3'b010;
-                // FBE
-                logic_vector_new.data[166 : 163] = fbe;
-                // LBE
-                logic_vector_new.data[170 : 167] = lbe;
-                // TPH_PRESENT
-                logic_vector_new.data[171 : 171] = '0;
-                // TPH TYPE
-                logic_vector_new.data[173 : 172] = '0;
-                // TPH_ST_TAG
-                logic_vector_new.data[181 : 174] = '0;
-            end else begin
-                // In case of Intel
-                logic_vector_array_new.data = new[((DMA_HDR_SIZE)/ITEM_WIDTH)];
-                // PCIE HDR
-                logic_vector_new.data[127 : 0] = pcie_hdr;
-                // BAR PREFIX
-                logic_vector_new.data[159 : 128] = 6'd26;
-            end
+            pcie_addr = '0;
+            pcie_addr[DATA_ADDR_W-1 : 2] = addr.hdr_addr;
+            pcie_addr[(DATA_ADDR_W+1+$clog2(CHANNELS))-1 : DATA_ADDR_W+1] = channel;
+            pcie_addr[(DATA_ADDR_W+$clog2(CHANNELS)+1)] = 1'b1;
 
-            $swrite(debug_msg, "%sFULL ADDR          :        0x%0h\n", debug_msg, pcie_hdr[63 : 0]);
+            $swrite(debug_msg, "%sFULL ADDR          :        0x%0h\n", debug_msg, pcie_addr);
             $swrite(debug_msg, "%sHDR ADDR           :        0x%0h (%0d)\n", debug_msg, addr.hdr_addr, addr.hdr_addr);
 
             // DMA HDR Filling
@@ -498,14 +467,18 @@ class driver#(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends u
             // Increment HDR address
             addr.hdr_addr += pcie_len;
 
+            data.data = new[pcie_len];
+            data.data = {dma_hdr[31 : 0], dma_hdr[63 : 32]};
+
+            pcie_tr = create_pcie_req(pcie_addr, pcie_len, fbe, lbe, data);
+            logic_vector_array_new = pcie_tr.data;
+            logic_vector_new       = pcie_tr.meta;
+
             $swrite(debug_msg, "%sDMA SIZE           :        %0d\n", debug_msg, dma_hdr[15 : 0]);
             $swrite(debug_msg, "%sDMA CNT            :        %0d\n", debug_msg, dma_cnt);
             $swrite(debug_msg, "%sDMA HDR %s\n"   , debug_msg, logic_vector_array_new.convert2string());
             $swrite(debug_msg, "%s===============================================\n", debug_msg);
             `uvm_info(this.get_full_name(),              debug_msg, UVM_MEDIUM)
-
-            // todo intel fpga support
-            logic_vector_array_new.data = {pcie_hdr[31 : 0], pcie_hdr[63 : 32], pcie_hdr[95 : 64], pcie_hdr[127 : 96], dma_hdr[31 : 0], dma_hdr[63 : 32]};
 
             sdp_tr.data[16-1 : 0] = 1; // one HDR = one item in SHP
             sdp_tr.data[16] = 1'b1; // is header pointer
