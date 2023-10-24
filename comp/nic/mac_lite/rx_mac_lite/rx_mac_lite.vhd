@@ -231,7 +231,7 @@ architecture FULL of RX_MAC_LITE is
     constant DFIFO_ITEMS              : natural := max(DFIFO_ITEMS_MIN,512);
     constant MFIFO_ITEMS              : natural := (DFIFO_ITEMS*BF_DATA_W)/512;
     constant LEN_WIDTH                : natural := 16;
-    constant MAC_STATUS_WIDTH         : natural := log2(MAC_COUNT)+3;
+    constant MAC_STATUS_WIDTH         : natural := log2(MAC_COUNT)+4;
     constant FLC_SYNC_WIDTH           : natural := 1+RX_EOF_POS_W+RX_SOF_POS_W+RX_DATA_W+(LEN_WIDTH+5)*RX_REGIONS;
     constant INBANDCRC                : boolean := CRC_IS_RECEIVED and not CRC_REMOVE_EN;
     constant SM_CNT_TICKS_WIDTH       : natural := 24;
@@ -294,6 +294,7 @@ architecture FULL of RX_MAC_LITE is
     signal s_sync_mac_err             : std_logic_vector(RX_REGIONS-1 downto 0);
     signal s_sync_mac_bcast           : std_logic_vector(RX_REGIONS-1 downto 0);
     signal s_sync_mac_mcast           : std_logic_vector(RX_REGIONS-1 downto 0);
+    signal s_sync_mac_hit_vld         : std_logic_vector(RX_REGIONS-1 downto 0);
     signal s_sync_mac_hit_addr        : slv_array_t(RX_REGIONS-1 downto 0)(log2(MAC_COUNT)-1 downto 0);
     signal s_sync_timestamp_ser       : std_logic_vector(RX_REGIONS*65-1 downto 0);
     signal s_sync_timestamp           : slv_array_t(RX_REGIONS-1 downto 0)(65-1 downto 0);
@@ -676,7 +677,8 @@ begin
             s_sync_mac_err(r)      <= s_sync_mac_status(r*MAC_STATUS_WIDTH);
             s_sync_mac_bcast(r)    <= s_sync_mac_status(r*MAC_STATUS_WIDTH+1);
             s_sync_mac_mcast(r)    <= s_sync_mac_status(r*MAC_STATUS_WIDTH+2);
-            s_sync_mac_hit_addr(r) <= s_sync_mac_status((r+1)*MAC_STATUS_WIDTH-1 downto r*MAC_STATUS_WIDTH+3);
+            s_sync_mac_hit_vld(r)  <= s_sync_mac_status(r*MAC_STATUS_WIDTH+3);
+            s_sync_mac_hit_addr(r) <= s_sync_mac_status((r+1)*MAC_STATUS_WIDTH-1 downto r*MAC_STATUS_WIDTH+4);
         end generate;
     end generate;
 
@@ -684,6 +686,7 @@ begin
         s_sync_mac_err      <= (others => '0');
         s_sync_mac_bcast    <= (others => '0');
         s_sync_mac_mcast    <= (others => '0');
+        s_sync_mac_hit_vld  <= (others => '0');
         s_sync_mac_hit_addr <= (others => (others => '0'));
         s_cam_write_rdy     <= '1';
     end generate;
@@ -759,7 +762,7 @@ begin
         s_sync_metadata(r)(ETH_RX_HDR_ERRORMAC_O)     <= s_sync_mac_err_masked(r);
         s_sync_metadata(r)(ETH_RX_HDR_BROADCAST_O)    <= s_sync_mac_bcast(r);
         s_sync_metadata(r)(ETH_RX_HDR_MULTICAST_O)    <= s_sync_mac_mcast(r);
-        s_sync_metadata(r)(ETH_RX_HDR_HITMACVLD_O)    <= '1'; --TODO
+        s_sync_metadata(r)(ETH_RX_HDR_HITMACVLD_O)    <= s_sync_mac_hit_vld(r);
         s_sync_metadata(r)(ETH_RX_HDR_HITMAC)         <= std_logic_vector(resize(unsigned(s_sync_mac_hit_addr(r)),ETH_RX_HDR_HITMAC_W));
         s_sync_metadata(r)(ETH_RX_HDR_TIMESTAMPVLD_O) <= s_sync_timestamp(r)(0);
         s_sync_metadata(r)(ETH_RX_HDR_TIMESTAMP)      <= s_sync_timestamp(r)(ETH_RX_HDR_TIMESTAMP_W+1-1 downto 1);

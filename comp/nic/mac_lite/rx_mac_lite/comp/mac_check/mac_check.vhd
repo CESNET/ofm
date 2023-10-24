@@ -56,11 +56,12 @@ entity RX_MAC_LITE_MAC_CHECK is
         -- OUTPUT MVB MAC STATUS INTERFACE
         -- =====================================================================
         -- MAC status format for each region:
-        -- log2(MAC_COUNT)+2 downto 3 = MAC hit address
-        --                          2 = MAC multicast
-        --                          1 = MAC broadcast
-        --                          0 = MAC error
-        MAC_STATUS         : out std_logic_vector(REGIONS*(log2(MAC_COUNT)+3)-1 downto 0);
+        -- log2(MAC_COUNT)+4-1 downto 4 = MAC hit address
+        --                            3 = MAC hit valid
+        --                            2 = MAC multicast
+        --                            1 = MAC broadcast
+        --                            0 = MAC error
+        MAC_STATUS         : out std_logic_vector(REGIONS*(log2(MAC_COUNT)+4)-1 downto 0);
         -- valid flag of MAC status signal for each region
         MAC_STATUS_VLD     : out std_logic_vector(REGIONS-1 downto 0);
         -- source ready of MAC status signal
@@ -72,7 +73,7 @@ architecture FULL of RX_MAC_LITE_MAC_CHECK is
 
     constant REGION_WIDTH     : natural := REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH;
     constant SOF_POS_SIZE     : natural := max(1,log2(REGION_SIZE));
-    constant MAC_STATUS_WIDTH : natural := log2(MAC_COUNT)+3;
+    constant MAC_STATUS_WIDTH : natural := log2(MAC_COUNT)+4;
 
     signal s_inc_frame              : std_logic_vector(REGIONS downto 0);
 
@@ -344,7 +345,7 @@ begin
     mac_status_g : for r in 0 to REGIONS-1 generate
         s_mac_broadcast(r)  <= not s_broadcast_err_reg3(r);
         s_mac_multicast(r)  <= not s_multicast_err_reg3(r);
-        s_mac_status_arr(r) <= s_mac_hit_addr_arr_reg3(r) & s_mac_multicast(r) & s_mac_broadcast(r) & s_mac_err(r);
+        s_mac_status_arr(r) <= s_mac_hit_addr_arr_reg3(r) & s_cam_match_out_hit(r) & s_mac_multicast(r) & s_mac_broadcast(r) & s_mac_err(r);
     end generate;
 
     -- distribution last valid MAC status
