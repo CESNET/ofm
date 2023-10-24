@@ -201,26 +201,30 @@ class sequence_slave_sim#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends sequen
     // Task that allow you to create your own MI write transaction
     task write(logic [ADDR_WIDTH-1:0] addr, logic [DATA_WIDTH-1:0] dwr, logic [DATA_WIDTH/8-1:0] be = '1);
 
-        start_item(req);
-        req.wr   = 1'b1;
-        req.rd   = 1'b0;
-        req.dwr  = dwr;
-        req.addr = addr;
-        req.be   = be;
-        finish_item(req);
+        do begin
+            start_item(req);
+            req.wr   = 1'b1;
+            req.rd   = 1'b0;
+            req.dwr  = dwr;
+            req.addr = addr;
+            req.be   = be;
+            finish_item(req);
+        end while (req.ardy === '0);
 
     endtask
 
     // Task that allow you to create your own MI read transaction
     task read(logic [ADDR_WIDTH-1:0] addr, logic [DATA_WIDTH/8-1:0] be = '1);
 
-        start_item(req);
-        req.wr   = 1'b0;
-        req.rd   = 1'b1;
-        req.dwr  = 'x;
-        req.addr = addr;
-        req.be   = be;
-        finish_item(req);
+        do begin
+            start_item(req);
+            req.wr   = 1'b0;
+            req.rd   = 1'b1;
+            req.dwr  = 'x;
+            req.addr = addr;
+            req.be   = be;
+            finish_item(req);
+        end while (req.ardy === '0);
 
         rd_count++;
 
