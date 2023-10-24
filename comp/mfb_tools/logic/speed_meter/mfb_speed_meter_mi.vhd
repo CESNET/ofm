@@ -125,7 +125,7 @@ begin
     logic_reg_p : process (CLK)
     begin
         if (rising_edge(CLK)) then
-            case MI_ADDR(5-1 downto 0) is
+            case MI_ADDR(8-1 downto 0) is
                 when X"00"  => MI_DRD <= std_logic_vector(resize(unsigned(cnt_ticks_reg), MI_DATA_WIDTH));
                 when X"04"  => MI_DRD <= (0 => cnt_ticks_max_reg, others => '0');
                 when X"08"  => MI_DRD <= cnt_bytes_reg;

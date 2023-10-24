@@ -21,6 +21,7 @@ class MyTransaction #(ITEM_WIDTH = 8) extends Transaction;
     bit mac_bcast = 0;
     int dataSizeMax = 512;
     int dataSizeMin = 64;
+    bit mac_hit = 0;
     int mac_count = 0; 
     int mac_type = 0; 
     rand int mac_index;
@@ -43,7 +44,7 @@ class MyTransaction #(ITEM_WIDTH = 8) extends Transaction;
         $write("Adapter Error: %1d\n", adapter_error);
         $write("CRC Error: %1d (CRC value: %h %h %h %h)\n", crc_error, crc[0], crc[1], crc[2], crc[3]);
         $write("MaxTU Error: %1d, MinTU Error: %1d\n", maxtu_error, mintu_error);
-        $write("MAC Error: %1d (MAC Multicast: %1d, MAC Broadcast: %1d, MAC index %1d)\n", mac_error, mac_mcast, mac_bcast, mac_index);
+        $write("MAC Error: %1d (MAC Multicast: %1d, MAC Broadcast: %1d, MAC index %1d, MAC hit %1d)\n", mac_error, mac_mcast, mac_bcast, mac_index, mac_hit);
         $write("Frame size: %1d items, Data:", data.size);
         for(int j=0; j < data.size; j++) begin
             if(j%32==0) $write("\n\t");
@@ -71,6 +72,7 @@ class MyTransaction #(ITEM_WIDTH = 8) extends Transaction;
         tr.mac_error = mac_error;
         tr.mac_mcast = mac_mcast;
         tr.mac_bcast = mac_bcast;
+        tr.mac_hit   = mac_hit;
         tr.mac_count = mac_count;
         tr.mac_index = mac_index;
         tr.mac_array = mac_array;
@@ -133,11 +135,16 @@ class MyTransaction #(ITEM_WIDTH = 8) extends Transaction;
             return 0;
         end
 
+        if (mac_hit != tr.mac_hit) begin
+            $swrite(diff, "MAC HIT flag does not match");
+            return 0;
+        end
+
         if ((mac_index != tr.mac_index) && mac_type == 1) begin
             $swrite(diff, "MAC index does not match");
             return 0;
         end
-        
+
         return 1;
     endfunction
 

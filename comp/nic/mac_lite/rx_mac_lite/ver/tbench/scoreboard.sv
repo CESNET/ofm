@@ -81,6 +81,7 @@ class Model;
             default : $write("Error in MAC_CHECK_MODE SEL \n"); 
         endcase
 
+        frame.mac_hit   = is_allowed_mac;
         frame.mac_mcast = is_mac_mcast;
         frame.mac_bcast = is_mac_bcast;
     endtask
@@ -241,6 +242,7 @@ class Checker;
             tx_tr.mac_error     = mvb_tr.data[29];
             tx_tr.mac_bcast     = mvb_tr.data[30];
             tx_tr.mac_mcast     = mvb_tr.data[31];
+            tx_tr.mac_hit       = mvb_tr.data[32];
             tx_tr.mac_index     = mvb_tr.data[36:33];
 
             // TODO - ONLY FOR META ALIGNED TO SOF
