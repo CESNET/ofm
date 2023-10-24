@@ -4,15 +4,15 @@
 
 // SPDX-License-Identifier: BSD-3-Clause
 
-class env#(MI_DATA_WIDTH, MI_ADDR_WIDTH, MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH, INTERVAL_COUNT, CLK_PERIOD) extends uvm_env;
-    `uvm_component_param_utils(uvm_rate_limiter::env#(MI_DATA_WIDTH, MI_ADDR_WIDTH, MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH, INTERVAL_COUNT, CLK_PERIOD));
+class env#(MI_DATA_WIDTH, MI_ADDR_WIDTH, MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH, INTERVAL_COUNT, SHAPING_TYPE, CLK_PERIOD) extends uvm_env;
+    `uvm_component_param_utils(uvm_rate_limiter::env#(MI_DATA_WIDTH, MI_ADDR_WIDTH, MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH, INTERVAL_COUNT, SHAPING_TYPE, CLK_PERIOD));
 
     uvm_reset::agent                                                                                                   m_reset;
     uvm_mi::regmodel                   #(regmodel#(INTERVAL_COUNT), MI_DATA_WIDTH, MI_ADDR_WIDTH)                      m_regmodel;
     uvm_logic_vector_array_mfb::env_rx #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH) m_env_rx;
     uvm_logic_vector_array_mfb::env_tx #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH) m_env_tx;
     uvm_rate_limiter::virt_sequencer   #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH) m_sequencer;
-    scoreboard                         #(MFB_ITEM_WIDTH, MFB_META_WIDTH, INTERVAL_COUNT, CLK_PERIOD)                   sc;
+    scoreboard                         #(MFB_ITEM_WIDTH, MFB_META_WIDTH, INTERVAL_COUNT, SHAPING_TYPE, CLK_PERIOD)     sc;
 
     function new(string name, uvm_component parent);
         super.new(name, parent);
@@ -53,7 +53,7 @@ class env#(MI_DATA_WIDTH, MI_ADDR_WIDTH, MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK
 
         m_sequencer = uvm_rate_limiter::virt_sequencer#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH)::type_id::create("m_sequencer", this);
 
-        sc = scoreboard#(MFB_ITEM_WIDTH, MFB_META_WIDTH, INTERVAL_COUNT, CLK_PERIOD)::type_id::create("sc", this);
+        sc = scoreboard#(MFB_ITEM_WIDTH, MFB_META_WIDTH, INTERVAL_COUNT, SHAPING_TYPE, CLK_PERIOD)::type_id::create("sc", this);
     endfunction
 
     function void connect_phase(uvm_phase phase);

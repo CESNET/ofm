@@ -28,7 +28,9 @@ class RateLimiter(nfb.BaseComp):
     _SR_IDLE_FLAG    = 0x01
     _SR_CONF_FLAG    = 0x02
     _SR_RUN_FLAG     = 0x04
-    _SR_PTR_RST_FLAG = 0x08
+    _SR_WR_AUX_FLAG  = 0x08
+    _SR_PTR_RST_FLAG = 0x10
+    _SR_SHAPE_FLAG   = 0x20
 
     def __init__(self, **kwargs):
         """Constructor"""
@@ -47,7 +49,7 @@ class RateLimiter(nfb.BaseComp):
         ticks_per_sec    = freq * 1_000_000
         sections_per_sec = ticks_per_sec / sec_len
         bytes_per_sec    = speed * 125_000_000
-        return (int)(bytes_per_sec / sections_per_sec)
+        return int(round(bytes_per_sec / sections_per_sec))
 
     def _conv_Bscn2Gbs(self, speed, sec_len, freq):
         """Convert B/section to Gb/s"""
@@ -55,12 +57,31 @@ class RateLimiter(nfb.BaseComp):
         ticks_per_sec    = freq * 1_000_000
         sections_per_sec = ticks_per_sec / sec_len
         bytes_per_sec    = speed * sections_per_sec
-        return (int)(bytes_per_sec / 125_000_000)
+        return int(round(bytes_per_sec / 125_000_000))
+
+    def _conv_Ps2Pscn(self, speed, sec_len, freq):
+        """Convert pkts/s to pkts/section"""
+
+        ticks_per_sec    = freq * 1_000_000
+        sections_per_sec = ticks_per_sec / sec_len
+        return int(round(speed / sections_per_sec))
+
+    def _conv_Pscn2Ps(self, speed, sec_len, freq):
+        """Convert pkts/section to pkts/s"""
+
+        ticks_per_sec    = freq * 1_000_000
+        sections_per_sec = ticks_per_sec / sec_len
+        return int(round(speed * sections_per_sec))
 
     def get_frequency(self):
         """Retrieve frequency in Hz"""
 
         return self._comp.read32(self._REG_FREQ) * 1_000_000
+
+    def get_limit_type(self):
+        """Retrieve type of limiting"""
+
+        return self._comp.read32(self._REG_STATUS) & self._SR_SHAPE_FLAG
 
     def print_cfg(self):
         """Print current configuration"""
@@ -72,20 +93,31 @@ class RateLimiter(nfb.BaseComp):
             frequency  = self._comp.read32(self._REG_FREQ)
 
             status_s     = "Idle"
-            if (status == self._SR_CONF_FLAG):
+            if (status & self._SR_CONF_FLAG):
                 status_s = "Configuration"
-            elif (status == self._SR_RUN_FLAG):
+            elif (status & self._SR_RUN_FLAG):
                 status_s = "Running traffic shaping"
+
+            limit_s      = "Gb/s"
+            limit_alt_s  = "Bytes/section"
+            if (status & self._SR_SHAPE_FLAG):
+                limit_s     = "pkts/s"
+                limit_alt_s = "pkts/section"
 
             speed_reg     = self._REG_SPEED
             output_speeds = []
+            alt_speeds    = []
             while (len(output_speeds) < max_speeds):
                 speed = self._comp.read32(speed_reg)
                 valid = speed & (1 << 31)
                 speed &= (1 << 31) - 1
                 if (valid == 0):
                     break
-                output_speeds.append(self._conv_Bscn2Gbs(speed, sec_len, frequency))
+                if (status & self._SR_SHAPE_FLAG):
+                    output_speeds.append(self._conv_Pscn2Ps(speed, sec_len, frequency))
+                else:
+                    output_speeds.append(self._conv_Bscn2Gbs(speed, sec_len, frequency))
+                alt_speeds.append(speed)
                 speed_reg += 4
 
             print("\"{}\"".format(self._name))
@@ -94,7 +126,8 @@ class RateLimiter(nfb.BaseComp):
             print("Interval length: {} sections".format(self._comp.read32(self._REG_INT_LEN)))
             print("Interval count:  {} intervals".format(max_speeds))
             print("Frequency:       {} MHz".format(frequency))
-            print("Output speed:    {} Gb/s".format(output_speeds))
+            print("Output speed:    {0} {1}".format(output_speeds, limit_s))
+            print("Output speed:    {0} {1}".format(alt_speeds, limit_alt_s))
         except:
             print("{}: Error while reading configuration!".format(self._name))
 
@@ -119,19 +152,28 @@ class RateLimiter(nfb.BaseComp):
                 if (available == 0):
                     print("{0}: Insufficient number of speed regs in the design ({1})! Ignoring speeds over the limit...".format(self._name, max_speeds))
                     break
-                self._comp.write32(speed_reg, self._conv_Gbs2Bscn(speed, cfg["section_length"], frequency))
+                if (cfg["limit_packets"]):
+                    self._comp.write32(speed_reg, self._conv_Ps2Pscn(speed, cfg["section_length"], frequency))
+                else:
+                    self._comp.write32(speed_reg, self._conv_Gbs2Bscn(speed, cfg["section_length"], frequency))
                 speed_reg += 4
                 available -= 1
         except:
             print("{}: Error while writing configuration!".format(self._name))
         finally:
+            auxiliary_flags = 0
+            if (cfg["limit_packets"]):
+                auxiliary_flags |= self._SR_SHAPE_FLAG
+            self._comp.write32(self._REG_STATUS, (self._SR_WR_AUX_FLAG | auxiliary_flags))
             self._comp.write32(self._REG_STATUS, 0)
 
     def start_shaping(self, ptr_reset=False):
         """Start traffic shaping"""
 
         if (ptr_reset):
-            self._comp.write32(self._REG_STATUS, self._SR_PTR_RST_FLAG)
+            status = self._comp.read32(self._REG_STATUS)
+            auxiliary_flags = status - (status & (self._SR_WR_AUX_FLAG - 1))
+            self._comp.write32(self._REG_STATUS, (self._SR_WR_AUX_FLAG | auxiliary_flags | self._SR_PTR_RST_FLAG))
         self._comp.write32(self._REG_STATUS, self._SR_RUN_FLAG)
 
     def stop_shaping(self):

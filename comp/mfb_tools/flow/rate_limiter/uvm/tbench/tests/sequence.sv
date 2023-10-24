@@ -24,8 +24,8 @@ class sequence_lib_rx#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WI
 
 endclass
 
-class virt_seq#(SECTION_LENGTH, INTERVAL_LENGTH, INTERVAL_COUNT, OUTPUT_SPEED, MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH) extends uvm_sequence;
-    `uvm_object_param_utils(test::virt_seq#(SECTION_LENGTH, INTERVAL_LENGTH, INTERVAL_COUNT, OUTPUT_SPEED, MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH))
+class virt_seq#(SECTION_LENGTH, INTERVAL_LENGTH, INTERVAL_COUNT, SHAPING_TYPE, OUTPUT_SPEED, MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH) extends uvm_sequence;
+    `uvm_object_param_utils(test::virt_seq#(SECTION_LENGTH, INTERVAL_LENGTH, INTERVAL_COUNT, SHAPING_TYPE, OUTPUT_SPEED, MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH))
     `uvm_declare_p_sequencer(uvm_rate_limiter::virt_sequencer#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH))
 
     uvm_reset::sequence_start                                                                                      m_reset;
@@ -62,13 +62,20 @@ class virt_seq#(SECTION_LENGTH, INTERVAL_LENGTH, INTERVAL_COUNT, OUTPUT_SPEED, M
         m_reset.start(p_sequencer.m_reset);
     endtask
 
-    task run_init();
+    task configure();
         uvm_status_e status;
         m_regmodel.status.write(status, 'h02);
         m_regmodel.section.write(status, SECTION_LENGTH);
         m_regmodel.interval.write(status, INTERVAL_LENGTH);
         for (int i = 0; i < INTERVAL_COUNT/2; i++)
             m_regmodel.speed[i].write(status, interval_speed[i]);
+        if (SHAPING_TYPE != 0)
+            m_regmodel.status.write(status, 'h28);
+        m_regmodel.status.write(status, 'h00);
+    endtask
+
+    task run_shaping();
+        uvm_status_e status;
         m_regmodel.status.write(status, 'h04);
     endtask
 
@@ -101,10 +108,14 @@ class virt_seq#(SECTION_LENGTH, INTERVAL_LENGTH, INTERVAL_COUNT, OUTPUT_SPEED, M
         #(200ns);
 
         fork
-            run_init();
+            configure();
         join_none
 
         #(200ns);
+
+        fork
+            run_shaping();
+        join_none
 
         fork
             run_mfb_tx();

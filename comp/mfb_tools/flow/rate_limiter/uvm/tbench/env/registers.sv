@@ -10,7 +10,9 @@ class status_register extends uvm_reg;
     uvm_reg_field idle;
     uvm_reg_field conf;
     uvm_reg_field run;
+    uvm_reg_field wr_aux;
     uvm_reg_field ptr_rst;
+    uvm_reg_field shaping;
 
     function new(string name = "reg_status");
         super.new(name, 32, UVM_NO_COVERAGE);
@@ -20,13 +22,17 @@ class status_register extends uvm_reg;
         idle    = uvm_reg_field::type_id::create("idle");
         conf    = uvm_reg_field::type_id::create("conf");
         run     = uvm_reg_field::type_id::create("run");
+        wr_aux  = uvm_reg_field::type_id::create("wr_aux");
         ptr_rst = uvm_reg_field::type_id::create("ptr_rst");
+        shaping = uvm_reg_field::type_id::create("shaping");
 
         //                 parent, bits, lsb, access, volatile?, reset value, reset?, random?, byte?
         idle.configure(    this  , 1   , 0  , "RO"  , 0        , 1          , 1     , 0      , 0     );
         conf.configure(    this  , 1   , 1  , "RW"  , 0        , 0          , 1     , 0      , 0     );
         run.configure(     this  , 1   , 2  , "RW"  , 0        , 0          , 1     , 0      , 0     );
-        ptr_rst.configure( this  , 1   , 3  , "RW"  , 0        , 0          , 1     , 0      , 0     );
+        wr_aux.configure(  this  , 1   , 3  , "RW"  , 0        , 0          , 1     , 0      , 0     );
+        ptr_rst.configure( this  , 1   , 4  , "RW"  , 0        , 0          , 1     , 0      , 0     );
+        shaping.configure( this  , 1   , 5  , "RW"  , 0        , 0          , 1     , 0      , 0     );
     endfunction
 endclass
 
