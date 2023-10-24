@@ -35,7 +35,7 @@ entity RATE_LIMITER is
         INTERVAL_LENGTH : natural := 40;
         -- Maximum number of intervals (different speed registers)
         INTERVAL_COUNT  : natural := 32;
-        -- Default output speed (in bytes per section)
+        -- Default output speed (in bytes per section or packets per section)
         OUTPUT_SPEED    : natural := 62500;
         -- Operating frequency in MHz (used in SW for calculation of output speed)
         FREQUENCY       : natural := 200;
@@ -94,9 +94,11 @@ architecture FULL of RATE_LIMITER is
     constant SR_IDLE_FLAG            : integer := 0;
     constant SR_CONF_FLAG            : integer := 1;
     constant SR_RUN_FLAG             : integer := 2;
-    constant SR_SPEED_PTR_RST_FLAG   : integer := 3;
+    constant SR_WRITE_AUX_FLAGS_FLAG : integer := 3;
+    constant SR_SPEED_PTR_RST_FLAG   : integer := 4;
+    constant SR_SHAPING_TYPE_FLAG    : integer := 5;
 
-    constant MI_STATUS_REG_INIT      : std_logic_vector(MI_REG_DATA_WIDTH-1 downto 0) := (SR_RUN_FLAG => '1', others => '0');
+    constant MI_STATUS_REG_INIT      : std_logic_vector(MI_REG_DATA_WIDTH-1 downto 0) := (SR_IDLE_FLAG => '1', others => '0');
     constant MI_SEC_LEN_REG_INIT     : std_logic_vector(MI_REG_DATA_WIDTH-1 downto 0) := std_logic_vector(to_unsigned(SECTION_LENGTH, MI_REG_DATA_WIDTH));
     constant MI_INT_LEN_REG_INIT     : std_logic_vector(MI_REG_DATA_WIDTH-1 downto 0) := std_logic_vector(to_unsigned(INTERVAL_LENGTH, MI_REG_DATA_WIDTH));
     constant MI_SPEED_REGS_COUNT     : std_logic_vector(MI_REG_DATA_WIDTH-1 downto 0) := std_logic_vector(to_unsigned(INTERVAL_COUNT, MI_REG_DATA_WIDTH));
@@ -121,19 +123,28 @@ architecture FULL of RATE_LIMITER is
     signal mi_speed_regs_vld_ptr     : std_logic_vector(max(1, log2(INTERVAL_COUNT))-1 downto 0);
 
     type mode is (IDLE, CONF, RUN);
-    signal p_state                   : mode := RUN;
+    signal p_state                   : mode := IDLE;
     signal n_state                   : mode;
+    signal write_ctrl_flag           : std_logic;
+    signal write_aux_flag            : std_logic;
     signal start_conf_flag           : std_logic;
     signal stop_conf_flag            : std_logic;
     signal start_run_flag            : std_logic;
     signal stop_run_flag             : std_logic;
     signal reset_ptr_flag            : std_logic;
+    signal limit_byte_flag           : std_logic;
+    signal limit_pkts_flag           : std_logic;
 
     -- ------------------------------------------------------------------------
     -- MFB PACKET PROCESSING
     -- ------------------------------------------------------------------------
 
-    signal start_traffic             : std_logic;
+    constant MFB_SPEED_METER_BYTES_LATENCY : integer := 3;
+    constant MFB_SPEED_METER_PKTS_LATENCY  : integer := 1;
+    constant LATENCY_RESERVE_BYTES         : integer := MFB_SPEED_METER_BYTES_LATENCY*RX_MFB_DATA'length/8;
+    constant LATENCY_RESERVE_PKTS          : integer := MFB_SPEED_METER_PKTS_LATENCY*MFB_REGIONS;
+
+    signal start_shaping             : std_logic;
     signal next_speed_req            : std_logic;
     signal next_speed_vld            : std_logic;
     signal next_speed_vld_vec        : std_logic_vector(1-1 downto 0);
@@ -144,10 +155,32 @@ architecture FULL of RATE_LIMITER is
 
     signal active_speed              : std_logic_vector(MI_REG_DATA_WIDTH-1 downto 0);
     signal bytes_in_sec              : std_logic_vector(MI_REG_DATA_WIDTH-1 downto 0);
+    signal eofs_in_sec               : std_logic_vector(MI_REG_DATA_WIDTH-1 downto 0);
+    signal last_eof                  : std_logic;
+    signal any_eof                   : std_logic;
     signal bytes_over                : std_logic;
+    signal packets_over              : std_logic;
+    signal limit_bytes               : std_logic;
+    signal limit_reached             : std_logic;
     signal mfb_rx_src_rdy_shaped     : std_logic;
     signal mfb_tx_dst_rdy_shaped     : std_logic;
 
+    signal rx_mfb_eof_last           : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal rx_mfb_eof_rest           : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal rx_mfb_eof_rest_reg       : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal rx_mfb_eof_masked         : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal rx_mfb_sof_last           : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal rx_mfb_sof_rest           : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal rx_mfb_sof_rest_reg       : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal rx_mfb_sof_mask           : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal rx_mfb_sof_masked         : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal rx_mfb_sof_before_eof     : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal rx_mfb_sof_mask_auto      : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal rx_mfb_sof_pos_deser      : slv_array_t(MFB_REGIONS-1 downto 0)(max(1, log2(MFB_REGION_SIZE))-1 downto 0);
+    signal rx_mfb_eof_pos_deser      : slv_array_t(MFB_REGIONS-1 downto 0)(max(1, log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE))-1 downto 0);
+    signal send_last_eof             : std_logic;
+    signal send_last_eof_reg         : std_logic;
+    signal send_rest                 : std_logic;
 begin
 
     -- ------------------------------------------------------------------------
@@ -196,7 +229,7 @@ begin
     begin
         if (rising_edge(CLK)) then
             if (RESET = '1') then
-                p_state <= RUN;
+                p_state <= IDLE;
             else
                 p_state <= n_state;
             end if;
@@ -207,20 +240,20 @@ begin
     fsm_mode_n_state_logic_p: process (p_state, start_conf_flag, start_run_flag, stop_conf_flag, stop_run_flag)
     begin
         n_state <= p_state;
-        start_traffic <= '0';
+        start_shaping <= '0';
         case p_state is
             when IDLE =>
                 if (start_conf_flag = '1') then
                     n_state <= CONF;
                 elsif (start_run_flag = '1') then
                     n_state <= RUN;
-                    start_traffic <= '1';
+                    start_shaping <= '1';
                 end if;
             when CONF =>
                 if (stop_conf_flag = '1') then
                     if (start_run_flag = '1') then
                         n_state <= RUN;
-                        start_traffic <= '1';
+                        start_shaping <= '1';
                     else
                         n_state <= IDLE;
                     end if;
@@ -236,12 +269,18 @@ begin
         end case;
     end process;
 
-    -- status register change flags
-    start_conf_flag <= mi_status_reg_write_flag and not MI_DWR(SR_SPEED_PTR_RST_FLAG) and     MI_DWR(SR_CONF_FLAG);
-    stop_conf_flag  <= mi_status_reg_write_flag and not MI_DWR(SR_SPEED_PTR_RST_FLAG) and not MI_DWR(SR_CONF_FLAG);
-    start_run_flag  <= mi_status_reg_write_flag and not MI_DWR(SR_SPEED_PTR_RST_FLAG) and     MI_DWR(SR_RUN_FLAG);
-    stop_run_flag   <= mi_status_reg_write_flag and not MI_DWR(SR_SPEED_PTR_RST_FLAG) and not MI_DWR(SR_RUN_FLAG);
-    reset_ptr_flag  <= mi_status_reg_write_flag and     MI_DWR(SR_SPEED_PTR_RST_FLAG);
+    -- differentiate between state control flags and auxiliary flags
+    write_ctrl_flag <= mi_status_reg_write_flag and not MI_DWR(SR_WRITE_AUX_FLAGS_FLAG);
+    write_aux_flag  <= mi_status_reg_write_flag and     MI_DWR(SR_WRITE_AUX_FLAGS_FLAG);
+    -- state control flags
+    start_conf_flag <= write_ctrl_flag          and     MI_DWR(SR_CONF_FLAG);
+    stop_conf_flag  <= write_ctrl_flag          and not MI_DWR(SR_CONF_FLAG);
+    start_run_flag  <= write_ctrl_flag          and     MI_DWR(SR_RUN_FLAG);
+    stop_run_flag   <= write_ctrl_flag          and not MI_DWR(SR_RUN_FLAG);
+    -- auxiliary flags
+    reset_ptr_flag  <= write_aux_flag           and     MI_DWR(SR_SPEED_PTR_RST_FLAG);
+    limit_byte_flag <= write_aux_flag           and not MI_DWR(SR_SHAPING_TYPE_FLAG);
+    limit_pkts_flag <= write_aux_flag           and     MI_DWR(SR_SHAPING_TYPE_FLAG);
 
     -- status register
     mi_status_reg_write_flag <= mi_regs_en(MI_STATUS_REG_POS) and MI_WR and MI_BE(0);
@@ -251,6 +290,7 @@ begin
             if (RESET = '1') then
                 mi_status_reg <= MI_STATUS_REG_INIT;
             else
+                -- indicate current state of the component
                 if (n_state = CONF) then
                     mi_status_reg(SR_IDLE_FLAG) <= '0';
                     mi_status_reg(SR_CONF_FLAG) <= '1';
@@ -263,6 +303,13 @@ begin
                     mi_status_reg(SR_IDLE_FLAG) <= '1';
                     mi_status_reg(SR_CONF_FLAG) <= '0';
                     mi_status_reg(SR_RUN_FLAG)  <= '0';
+                end if;
+
+                -- indicate traffic limiting choice
+                if (limit_byte_flag = '1') then
+                    mi_status_reg(SR_SHAPING_TYPE_FLAG) <= '0';
+                elsif (limit_pkts_flag = '1') then
+                    mi_status_reg(SR_SHAPING_TYPE_FLAG) <= '1';
                 end if;
             end if;
         end if;
@@ -325,7 +372,7 @@ begin
         if (rising_edge(CLK)) then
             if (RESET = '1') then
                 mi_speed_regs_ptr <= (others => '0');
-            elsif(p_state = CONF or (p_state = IDLE and reset_ptr_flag = '1') or (next_speed_req = '1' and next_speed_vld = '0')) then
+            elsif (p_state = CONF or (p_state = IDLE and reset_ptr_flag = '1') or (next_speed_req = '1' and next_speed_vld = '0')) then
                 mi_speed_regs_ptr <= (others => '0');
             elsif (next_speed_req = '1' and next_speed_vld = '1') then
                 mi_speed_regs_ptr <= mi_speed_regs_vld_ptr;
@@ -373,7 +420,7 @@ begin
         if (rising_edge(CLK)) then
             if (RESET = '1') then
                 sec_len_cnt <= (others => '0');
-            elsif (start_traffic = '1' or end_of_sec = '1') then
+            elsif (start_shaping = '1' or end_of_sec = '1') then
                 sec_len_cnt <= (others => '0');
             elsif (p_state = RUN) then
                 sec_len_cnt <= std_logic_vector(unsigned(sec_len_cnt) + 1);
@@ -387,7 +434,7 @@ begin
         if (rising_edge(CLK)) then
             if (RESET = '1') then
                 int_len_cnt <= (others => '0');
-            elsif (start_traffic = '1' or next_speed_req = '1') then
+            elsif (start_shaping = '1' or next_speed_req = '1') then
                 int_len_cnt <= (others => '0');
             elsif (p_state = RUN and end_of_sec = '1') then
                 int_len_cnt <= std_logic_vector(unsigned(int_len_cnt) + 1);
@@ -396,12 +443,17 @@ begin
     end process;
 
     -- speed_meter component
+    -- bytes_in_sec latency = 3 clock cycles
+    -- eofs_in_sec  latency = 1 clock cycle
     speed_meter_i: entity work.MFB_SPEED_METER
     generic map (
         REGIONS         => MFB_REGIONS,
         REGION_SIZE     => MFB_REGION_SIZE,
         BLOCK_SIZE      => MFB_BLOCK_SIZE,
-        ITEM_WIDTH      => MFB_ITEM_WIDTH
+        ITEM_WIDTH      => MFB_ITEM_WIDTH,
+        DISABLE_ON_CLR  => false,
+        COUNT_PACKETS   => true,
+        ADD_ARR_PKTS    => true
     )
     port map (
         CLK           => CLK,
@@ -409,31 +461,94 @@ begin
 
         RX_SOF_POS    => RX_MFB_SOF_POS,
         RX_EOF_POS    => RX_MFB_EOF_POS,
-        RX_SOF        => RX_MFB_SOF,
-        RX_EOF        => RX_MFB_EOF,
+        RX_SOF        => rx_mfb_sof_masked,
+        RX_EOF        => rx_mfb_eof_masked,
         RX_SRC_RDY    => mfb_rx_src_rdy_shaped,
         RX_DST_RDY    => mfb_tx_dst_rdy_shaped,
 
         CNT_TICKS     => open,
         CNT_TICKS_MAX => open,
         CNT_BYTES     => bytes_in_sec,
+        CNT_PKT_SOFS  => open,
+        CNT_PKT_EOFS  => eofs_in_sec,
         CNT_CLEAR     => end_of_sec
     );
 
-    -- compare requested and actual speed
-    bytes_over <= '1' when active_speed <= bytes_in_sec else '0';
+    -- compare requested and actual speed (in packets per section)
+    last_eof     <= '1' when unsigned(active_speed) <= unsigned(eofs_in_sec) + LATENCY_RESERVE_PKTS else '0';
+    any_eof      <= (or RX_MFB_EOF) and RX_MFB_SRC_RDY;
+    packets_over <= last_eof and any_eof;
+
+    -- first eof present is the last eof sent
+    rx_mfb_eof_first_one_i: entity work.FIRST_ONE
+    generic map (
+        DATA_WIDTH => MFB_REGIONS
+    )
+    port map (
+        DI => RX_MFB_EOF,
+        DO => rx_mfb_eof_last
+    );
+
+    -- sof and eof masking
+    rx_mfb_sof_pos_deser <= slv_array_deser(RX_MFB_SOF_POS, MFB_REGIONS);
+    rx_mfb_eof_pos_deser <= slv_array_deser(RX_MFB_EOF_POS, MFB_REGIONS);
+
+    rx_mfb_eof_rest   <= RX_MFB_EOF and not rx_mfb_eof_last;
+    rx_mfb_eof_masked <= RX_MFB_EOF when send_last_eof_reg = '0' else rx_mfb_eof_rest_reg;
+
+    rx_mfb_sof_mask_g: for i in 0 to MFB_REGIONS-1 generate
+        rx_mfb_sof_before_eof(i) <= '1' when unsigned(rx_mfb_eof_pos_deser(i)) >= enlarge_right(unsigned(rx_mfb_sof_pos_deser(i)), log2(MFB_BLOCK_SIZE)) else '0';
+        rx_mfb_sof_mask_auto(i)  <= '1' when shift_right(unsigned(rx_mfb_eof_last), i) > 1 else '0';
+        rx_mfb_sof_mask(i)       <= rx_mfb_sof_before_eof(i) when rx_mfb_eof_last(i) = '1' else rx_mfb_sof_mask_auto(i);
+    end generate;
+
+    rx_mfb_sof_last   <= RX_MFB_SOF and     rx_mfb_sof_mask;
+    rx_mfb_sof_rest   <= RX_MFB_SOF and not rx_mfb_sof_mask;
+    rx_mfb_sof_masked <= RX_MFB_SOF when send_last_eof_reg = '0' else rx_mfb_sof_rest_reg;
+
+    rx_mfb_rest_regs_p: process (CLK)
+    begin
+        if (rising_edge(CLK)) then
+            if (send_last_eof = '1') then
+                rx_mfb_eof_rest_reg <= rx_mfb_eof_rest;
+                rx_mfb_sof_rest_reg <= rx_mfb_sof_rest;
+            end if;
+        end if;
+    end process;
+
+    -- control logic for sending masked eof
+    send_last_eof <= not limit_bytes and packets_over and TX_MFB_DST_RDY and not send_last_eof_reg;
+    send_rest     <= '1' when send_last_eof_reg = '1' and ((p_state = RUN  and mfb_rx_src_rdy_shaped = '1' and mfb_tx_dst_rdy_shaped = '1')
+                                                        or (p_state = IDLE and RX_MFB_SRC_RDY        = '1' and TX_MFB_DST_RDY        = '1')) else '0';
+    send_last_eof_reg_p: process (CLK)
+    begin
+        if (rising_edge(CLK)) then
+            if (RESET = '1' or send_rest = '1') then
+                send_last_eof_reg <= '0';
+            elsif (send_last_eof = '1') then
+                send_last_eof_reg <= '1';
+            end if;
+        end if;
+    end process;
+
+    -- compare requested and actual speed (in bytes per section)
+    bytes_over <= '1' when unsigned(active_speed) <= unsigned(bytes_in_sec) + LATENCY_RESERVE_BYTES else '0';
+
+    -- choose between byte limiting and packet limiting
+    limit_bytes   <= not mi_status_reg(SR_SHAPING_TYPE_FLAG);
+    limit_reached <= bytes_over when limit_bytes = '1' else packets_over;
 
     -- RX dest and TX src logic
-    mfb_rx_src_rdy_shaped <= RX_MFB_SRC_RDY when p_state = RUN and bytes_over = '0' else '0';
-    mfb_tx_dst_rdy_shaped <= TX_MFB_DST_RDY when p_state = RUN and bytes_over = '0' else '0';
+    mfb_rx_src_rdy_shaped <= RX_MFB_SRC_RDY when p_state = RUN and (limit_reached = '0' or send_last_eof = '1') else '0';
+    mfb_tx_dst_rdy_shaped <= TX_MFB_DST_RDY when p_state = RUN and limit_reached = '0' else '0';
 
     TX_MFB_DATA    <= RX_MFB_DATA;
     TX_MFB_META    <= RX_MFB_META;
-    TX_MFB_SOF     <= RX_MFB_SOF;
-    TX_MFB_EOF     <= RX_MFB_EOF;
+    TX_MFB_SOF     <= rx_mfb_sof_masked when send_last_eof = '0' else rx_mfb_sof_last;
+    TX_MFB_EOF     <= rx_mfb_eof_masked when send_last_eof = '0' else rx_mfb_eof_last;
     TX_MFB_SOF_POS <= RX_MFB_SOF_POS;
     TX_MFB_EOF_POS <= RX_MFB_EOF_POS;
-    TX_MFB_SRC_RDY <= mfb_rx_src_rdy_shaped;
-    RX_MFB_DST_RDY <= mfb_tx_dst_rdy_shaped;
+    TX_MFB_SRC_RDY <= RX_MFB_SRC_RDY when p_state = IDLE else mfb_rx_src_rdy_shaped;
+    RX_MFB_DST_RDY <= TX_MFB_DST_RDY when p_state = IDLE else mfb_tx_dst_rdy_shaped;
 
 end architecture;

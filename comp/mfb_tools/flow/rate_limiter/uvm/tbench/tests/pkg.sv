@@ -23,6 +23,7 @@ package test;
     parameter SECTION_LENGTH  = 1000;
     parameter INTERVAL_LENGTH = 40;
     parameter INTERVAL_COUNT  = 32;
+    parameter SHAPING_TYPE    = 0;
     parameter OUTPUT_SPEED    = 62500;
     parameter FREQUENCY       = 200;
     parameter DEVICE          = "AGILEX";
