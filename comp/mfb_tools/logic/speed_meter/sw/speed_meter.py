@@ -21,6 +21,8 @@ class SpeedMeter(nfb.BaseComp):
     _REG_STATUS = 0x04
     _REG_BYTES  = 0x08
     _REG_CLEAR  = 0x0c
+    _REG_SOFS   = 0x10
+    _REG_EOFS   = 0x14
 
     # STATUS REGISTER FIELDS
     _SR_DONE_FLAG = 0x00
@@ -44,7 +46,7 @@ class SpeedMeter(nfb.BaseComp):
     def get_data(self):
         """Retrieve measured data"""
 
-        return self._comp.read32(self._REG_BYTES), self._comp.read32(self._REG_TICKS)
+        return self._comp.read32(self._REG_BYTES), self._comp.read32(self._REG_SOFS), self._comp.read32(self._REG_EOFS), self._comp.read32(self._REG_TICKS)
 
     def clear_data(self):
         """Reset measurement statistics"""

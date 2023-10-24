@@ -27,6 +27,15 @@ entity MFB_SPEED_METER_MI is
         -- Set width of valid bytes counter. Optimum and MINIMUM value is:
         -- log2(((2^CNT_TICKS_WIDTH)-1)*REGIONS*REGION_SIZE*BLOCK_SIZE)
         CNT_BYTES_WIDTH  : natural := 32;
+        -- Set width of packet counters.
+        CNT_PKTS_WIDTH   : natural := 32;
+        -- Disable Speed Meter when CNT_CLEAR is asserted (enable with next SOF).
+        DISABLE_ON_CLR   : boolean := true;
+        -- Set to true to count incoming SOFs and EOFs.
+        COUNT_PACKETS    : boolean := false;
+        -- Set to true to add SOFs and EOFs from the currently arriving word to the total sums.
+        -- Set to false to count only accepted words.
+        ADD_ARR_PKTS     : boolean := false;
         -- MI32 parameters
         MI_DATA_WIDTH    : natural := 32;
         MI_ADDRESS_WIDTH : natural := 32
@@ -61,6 +70,8 @@ architecture FULL of MFB_SPEED_METER_MI is
     signal cnt_ticks_reg     : std_logic_vector(CNT_TICKS_WIDTH-1 downto 0);
     signal cnt_ticks_max_reg : std_logic;
     signal cnt_bytes_reg     : std_logic_vector(CNT_BYTES_WIDTH-1 downto 0);
+    signal cnt_sofs_reg      : std_logic_vector(CNT_PKTS_WIDTH-1 downto 0);
+    signal cnt_eofs_reg      : std_logic_vector(CNT_PKTS_WIDTH-1 downto 0);
     signal cnt_clear         : std_logic;
     signal cnt_clear_reg     : std_logic;
 
@@ -72,7 +83,11 @@ begin
         BLOCK_SIZE      => BLOCK_SIZE,
         ITEM_WIDTH      => ITEM_WIDTH,
         CNT_TICKS_WIDTH => CNT_TICKS_WIDTH,
-        CNT_BYTES_WIDTH => CNT_BYTES_WIDTH
+        CNT_BYTES_WIDTH => CNT_BYTES_WIDTH,
+        CNT_PKTS_WIDTH  => CNT_PKTS_WIDTH,
+        DISABLE_ON_CLR  => DISABLE_ON_CLR,
+        COUNT_PACKETS   => COUNT_PACKETS,
+        ADD_ARR_PKTS    => ADD_ARR_PKTS
     )
     port map (
         CLK             => CLK,
@@ -89,6 +104,8 @@ begin
         CNT_TICKS       => cnt_ticks_reg,
         CNT_TICKS_MAX   => cnt_ticks_max_reg,
         CNT_BYTES       => cnt_bytes_reg,
+        CNT_PKT_SOFS    => cnt_sofs_reg,
+        CNT_PKT_EOFS    => cnt_eofs_reg,
         CNT_CLEAR       => cnt_clear_reg
     );
 
@@ -108,10 +125,12 @@ begin
     logic_reg_p : process (CLK)
     begin
         if (rising_edge(CLK)) then
-            case MI_ADDR(4-1 downto 0) is
-                when X"0"   => MI_DRD <= std_logic_vector(resize(unsigned(cnt_ticks_reg), MI_DATA_WIDTH));
-                when X"4"   => MI_DRD <= (0 => cnt_ticks_max_reg, others => '0');
-                when X"8"   => MI_DRD <= cnt_bytes_reg;
+            case MI_ADDR(5-1 downto 0) is
+                when X"00"  => MI_DRD <= std_logic_vector(resize(unsigned(cnt_ticks_reg), MI_DATA_WIDTH));
+                when X"04"  => MI_DRD <= (0 => cnt_ticks_max_reg, others => '0');
+                when X"08"  => MI_DRD <= cnt_bytes_reg;
+                when X"10"  => MI_DRD <= cnt_sofs_reg;
+                when X"14"  => MI_DRD <= cnt_eofs_reg;
                 when others => MI_DRD <= (others => '0');
             end case;
         end if;
