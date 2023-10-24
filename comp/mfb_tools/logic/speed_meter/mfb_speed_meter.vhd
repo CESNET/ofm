@@ -31,7 +31,16 @@ entity MFB_SPEED_METER is
       CNT_TICKS_WIDTH : natural := 24;
       -- Set width of valid bytes counter. Optimum and MINIMUM value is:
       -- log2(((2^CNT_TICKS_WIDTH)-1)*REGIONS*REGION_SIZE*BLOCK_SIZE)
-      CNT_BYTES_WIDTH : natural := 32
+      CNT_BYTES_WIDTH : natural := 32;
+      -- Set width of packet counters.
+      CNT_PKTS_WIDTH  : natural := 32;
+      -- Disable Speed Meter when CNT_CLEAR is asserted (enable with next SOF).
+      DISABLE_ON_CLR  : boolean := true;
+      -- Set to true to count incoming SOFs and EOFs.
+      COUNT_PACKETS   : boolean := false;
+      -- Set to true to add SOFs and EOFs from the currently arriving word to the total sums.
+      -- Set to false to count only accepted words.
+      ADD_ARR_PKTS    : boolean := false
    );
    port(
       -- =================
@@ -62,6 +71,10 @@ entity MFB_SPEED_METER is
       CNT_TICKS_MAX : out std_logic;
       -- counter of valid bytes
       CNT_BYTES     : out std_logic_vector(CNT_BYTES_WIDTH-1 downto 0);
+      -- counter of packet SOFs
+      CNT_PKT_SOFS  : out std_logic_vector(CNT_PKTS_WIDTH-1 downto 0);
+      -- counter of packet EOFs
+      CNT_PKT_EOFS  : out std_logic_vector(CNT_PKTS_WIDTH-1 downto 0);
       -- reset all counters
       CNT_CLEAR     : in  std_logic
    );
@@ -90,6 +103,7 @@ architecture FULL of MFB_SPEED_METER is
    signal valid_word           : std_logic;
    signal valid_word2          : std_logic;
    signal any_sof              : std_logic;
+   signal any_eof              : std_logic;
    signal enable_reg           : std_logic;
 
    signal sof_pos_arr          : slv_array_t(REGIONS-1 downto 0)(SOF_POS_SIZE-1 downto 0);
@@ -107,6 +121,17 @@ architecture FULL of MFB_SPEED_METER is
 
    signal bytes_cnt            : uns_array_t(REGIONS downto 0)(WORD_BYTES_WIDTH-1 downto 0);
    signal bytes_cnt_reg        : unsigned(CNT_BYTES_WIDTH-1 downto 0);
+
+   signal sof_sum_one          : std_logic_vector(CNT_PKTS_WIDTH-1 downto 0);
+   signal sof_sum_one_vld      : std_logic;
+   signal sof_cnt              : std_logic_vector(CNT_PKTS_WIDTH-1 downto 0);
+   signal sof_cnt_reg          : std_logic_vector(CNT_PKTS_WIDTH-1 downto 0);
+   signal sof_cnt_total        : std_logic_vector(CNT_PKTS_WIDTH-1 downto 0);
+   signal eof_sum_one          : std_logic_vector(CNT_PKTS_WIDTH-1 downto 0);
+   signal eof_sum_one_vld      : std_logic;
+   signal eof_cnt              : std_logic_vector(CNT_PKTS_WIDTH-1 downto 0);
+   signal eof_cnt_reg          : std_logic_vector(CNT_PKTS_WIDTH-1 downto 0);
+   signal eof_cnt_total        : std_logic_vector(CNT_PKTS_WIDTH-1 downto 0);
 
    signal ticks_cnt_reg        : unsigned(CNT_TICKS_WIDTH-1 downto 0);
    signal ticks_cnt_reg_max    : std_logic;
@@ -191,12 +216,13 @@ begin
    -- --------------------------------------------------------------------------
 
    any_sof <= or rx_sof_reg;   
+   any_eof <= or rx_eof_reg;
 
    -- counters start with first SOF
    enable_reg_p : process (CLK)
    begin
       if (rising_edge(CLK)) then
-         if (CNT_CLEAR = '1' or RST = '1') then
+         if ((CNT_CLEAR = '1' and DISABLE_ON_CLR = true) or RST = '1') then
             enable_reg <= '0';
          elsif (valid_word = '1' and any_sof = '1') then
             enable_reg <= '1';  
@@ -258,6 +284,89 @@ begin
    end process;
 
    -- --------------------------------------------------------------------------
+   --  PACKET COUNTERS LOGIC
+   -- --------------------------------------------------------------------------
+
+   count_pkts_g: if COUNT_PACKETS = true generate
+
+      sof_sum_one_i: entity work.SUM_ONE
+      generic map (
+         INPUT_WIDTH  => REGIONS,
+         OUTPUT_WIDTH => CNT_PKTS_WIDTH,
+         OUTPUT_REG   => false
+      )
+      port map (
+         CLK      => CLK,
+         RESET    => RST,
+
+         DIN      => rx_sof_reg,
+         DIN_MASK => (others => '1'),
+         DIN_VLD  => rx_src_rdy_reg,
+
+         DOUT     => sof_sum_one,
+         DOUT_VLD => sof_sum_one_vld
+      );
+
+      eof_sum_one_i: entity work.SUM_ONE
+      generic map (
+         INPUT_WIDTH  => REGIONS,
+         OUTPUT_WIDTH => CNT_PKTS_WIDTH,
+         OUTPUT_REG   => false
+      )
+      port map (
+         CLK      => CLK,
+         RESET    => RST,
+
+         DIN      => rx_eof_reg,
+         DIN_MASK => (others => '1'),
+         DIN_VLD  => rx_src_rdy_reg,
+
+         DOUT     => eof_sum_one,
+         DOUT_VLD => eof_sum_one_vld
+      );
+
+      -- --------------------------------------------------------------------------
+      --  PACKET COUNTERS REGISTERS
+      -- --------------------------------------------------------------------------
+
+      sof_cnt_reg_p: process (CLK)
+      begin
+         if (rising_edge(CLK)) then
+            if (CNT_CLEAR = '1' or RST = '1') then
+               sof_cnt_reg <= (others => '0');
+            elsif (any_sof = '1' and valid_word = '1' and ticks_cnt_reg_max = '0') then
+               sof_cnt_reg <= sof_cnt_total;
+            end if;
+         end if;
+      end process;
+
+      sof_cnt       <= sof_sum_one when sof_sum_one_vld = '1' else (others => '0');
+      sof_cnt_total <= std_logic_vector(unsigned(sof_cnt) + unsigned(sof_cnt_reg));
+
+      eof_cnt_reg_p: process (CLK)
+      begin
+         if (rising_edge(CLK)) then
+            if (CNT_CLEAR = '1' or RST = '1') then
+               eof_cnt_reg <= (others => '0');
+            elsif (any_eof = '1' and valid_word = '1' and ticks_cnt_reg_max = '0') then
+               eof_cnt_reg <= eof_cnt_total;
+            end if;
+         end if;
+      end process;
+
+      eof_cnt       <= eof_sum_one when eof_sum_one_vld = '1' else (others => '0');
+      eof_cnt_total <= std_logic_vector(unsigned(eof_cnt) + unsigned(eof_cnt_reg));
+
+   else generate
+
+      sof_cnt_reg   <= (others => '0');
+      sof_cnt_total <= (others => '0');
+      eof_cnt_reg   <= (others => '0');
+      eof_cnt_total <= (others => '0');
+
+   end generate;
+
+   -- --------------------------------------------------------------------------
    --  TICKS COUNTER REGISTER
    -- --------------------------------------------------------------------------
 
@@ -282,5 +391,13 @@ begin
    CNT_BYTES     <= std_logic_vector(bytes_cnt_reg);
    CNT_TICKS     <= std_logic_vector(ticks_cnt_reg);
    CNT_TICKS_MAX <= ticks_cnt_reg_max;
+
+   sum_pkts_g: if ADD_ARR_PKTS = false generate
+      CNT_PKT_SOFS <= sof_cnt_reg;
+      CNT_PKT_EOFS <= eof_cnt_reg;
+   else generate
+      CNT_PKT_SOFS <= sof_cnt_total;
+      CNT_PKT_EOFS <= eof_cnt_total;
+   end generate;
 
 end architecture;
