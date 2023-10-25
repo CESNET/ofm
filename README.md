@@ -7,8 +7,7 @@ The OFM repository is primarily used within the Network Development Kit (NDK), s
 ## Documentation
 
 We use a documentation system based on the [Sphinx tool](https://www.sphinx-doc.org), which compiles complete documentation from source files in the [reStructuredText](https://docutils.sourceforge.io/rst.html) format. We also use the [Sphinx-vhdl](https://github.com/CESNET/sphinx-vhdl) for generating documentation from the VHDL code. The documentation automatically build with each contribution to the devel branch and is available online here:
-- [**OFM documentation (public GitHub Pages - built from devel branch)**](https://cesnet.github.io/ofm/devel/).
-- [**OFM documentation (public GitHub Pages - built from main branch)**](https://cesnet.github.io/ofm/main/).
+- [**OFM documentation (public GitHub Pages - built from main branch)**](https://cesnet.github.io/ofm/).
 
 ### How to manually build documentation
 
