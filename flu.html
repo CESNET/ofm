@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OFM User Guide &mdash; Open FPGA Modules Docs  documentation</title>
+  <title>FLU Tools &mdash; Open FPGA Modules Docs  documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme_overrides.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -20,7 +20,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Build System" href="build/readme.html" /> 
+    <link rel="next" title="FLU bus specification" href="comp/flu_tools/readme.html" />
+    <link rel="prev" title="FL Tools" href="fl.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -31,7 +32,7 @@
 
           
           
-          <a href="#" class="icon icon-home">
+          <a href="index.html" class="icon icon-home">
             Open FPGA Modules Docs
           </a>
               <div class="version">
@@ -50,11 +51,14 @@
 <li class="toctree-l1"><a class="reference internal" href="build/readme.html">Build System</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Components:</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="base.html">Basic Tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ctrls.html">Controllers &amp; TSU</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fl.html">FL Tools</a></li>
-<li class="toctree-l1"><a class="reference internal" href="flu.html">FLU Tools</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">FLU Tools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="comp/flu_tools/readme.html">FLU bus specification</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="mi.html">MI Tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mfb.html">MFB Tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mvb.html">MVB Tools</a></li>
@@ -74,17 +78,17 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="#">Open FPGA Modules Docs</a>
+          <a href="index.html">Open FPGA Modules Docs</a>
       </nav>
 
       <div class="wy-nav-content">
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">OFM User Guide</li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">FLU Tools</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/flu.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -92,18 +96,15 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="ofm-user-guide">
-<h1>OFM User Guide<a class="headerlink" href="#ofm-user-guide" title="Permalink to this heading"></a></h1>
-<p><strong>Welcome to OFM (Open FPGA Modules) User Guide!</strong></p>
-<p>This repository contains open-source FPGA modules implemented within the
-development and research activities of CESNET z.s.p.o. in the field of
-monitoring, security and network infrastructure configuration.</p>
-<a class="reference internal image-reference" href="_images/liberouter_logo.svg"><img alt="_images/liberouter_logo.svg" class="align-center" src="_images/liberouter_logo.svg" width="50%" /></a>
+  <section id="flu-tools">
+<h1>FLU Tools<a class="headerlink" href="#flu-tools" title="Permalink to this heading"></a></h1>
+<p>This chapter contains the specifications of the FLU bus and a description of the components that use FLU bus.
+Components using the FLU bus are typically located in the <code class="docutils literal notranslate"><span class="pre">comp/flu_tools/</span></code> directory in the OFM repository.</p>
 <div class="toctree-wrapper compound">
-</div>
-<div class="toctree-wrapper compound">
-</div>
-<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Content:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="comp/flu_tools/readme.html">FLU bus specification</a></li>
+</ul>
 </div>
 </section>
 
@@ -111,7 +112,8 @@ monitoring, security and network infrastructure configuration.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="build/readme.html" class="btn btn-neutral float-right" title="Build System" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="fl.html" class="btn btn-neutral float-left" title="FL Tools" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="comp/flu_tools/readme.html" class="btn btn-neutral float-right" title="FLU bus specification" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
