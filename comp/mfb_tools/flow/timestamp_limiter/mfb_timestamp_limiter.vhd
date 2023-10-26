@@ -77,6 +77,9 @@ generic(
     EXTERNAL_TIME_SRC     : boolean := False;
     -- Number of Items in the Packet Delayer's RX FIFO (the main buffer).
     BUFFER_SIZE           : natural := 2048;
+    -- Almost Full Offset of the main buffer in Packet Delayers.
+    -- States the number of data words it can accept after Almost Full is asserted.
+    BUFFER_AF_OFFSET      : natural := 10;
     -- The number of Queues (DMA Channels).
     QUEUES                : natural := 1;
 
@@ -93,6 +96,9 @@ port(
 
     -- Connect your own Time source to this port (used when the :vhdl:genconstant:`EXTERNAL_TIME_SRC <mfb_timestamp_limiter.external_time_src>` generic is ``True``).
     EXTERNAL_TIME    : in  std_logic_vector(64-1 downto 0);
+
+    -- Issues a request to pause corresponding DMA channel.
+    PAUSE_QUEUE      : out std_logic_vector(QUEUES-1 downto 0);
 
     -- =====================================================================
     --  RX MFB STREAM
@@ -414,6 +420,7 @@ begin
             TS_WIDTH        => TIMESTAMP_WIDTH ,
             TS_FORMAT       => TIMESTAMP_FORMAT,
             FIFO_DEPTH      => BUFFER_SIZE     ,
+            FIFO_AF_OFFSET  => BUFFER_AF_OFFSET,
             DEVICE          => DEVICE
         )
         port map(
@@ -422,6 +429,7 @@ begin
 
             TIME_RESET     => pd_time_reset(q),
             CURRENT_TIME   => input_time      ,
+            PAUSE_REQUEST  => PAUSE_QUEUE  (q),
 
             RX_MFB_DATA    => rx_pd_data   (q),
             RX_MFB_META    => rx_pd_meta   (q),
