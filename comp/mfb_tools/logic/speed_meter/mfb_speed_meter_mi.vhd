@@ -48,7 +48,7 @@ entity MFB_SPEED_METER_MI is
         -- MI32 interface
         MI_DWR     : in  std_logic_vector(MI_DATA_WIDTH-1 downto 0);
         MI_ADDR    : in  std_logic_vector(MI_ADDRESS_WIDTH-1 downto 0);
-        MI_BE      : in  std_logic_vector(3 downto 0); -- Not supported!
+        MI_BE      : in  std_logic_vector(MI_DATA_WIDTH/8-1 downto 0); -- Not supported!
         MI_RD      : in  std_logic;
         MI_WR      : in  std_logic;
         MI_ARDY    : out std_logic;
@@ -113,7 +113,7 @@ begin
     --  MI BUS LOGIC
     -- --------------------------------------------------------------------------
 
-    cnt_clear <= '1' when MI_WR = '1' and MI_ADDR(4-1 downto 0) = X"C" else '0';
+    cnt_clear <= '1' when MI_WR = '1' and MI_ADDR(5-1 downto 0) = "01100" else '0';
 
     cnt_clear_reg_p : process (CLK)
     begin
@@ -125,13 +125,13 @@ begin
     logic_reg_p : process (CLK)
     begin
         if (rising_edge(CLK)) then
-            case MI_ADDR(8-1 downto 0) is
-                when X"00"  => MI_DRD <= std_logic_vector(resize(unsigned(cnt_ticks_reg), MI_DATA_WIDTH));
-                when X"04"  => MI_DRD <= (0 => cnt_ticks_max_reg, others => '0');
-                when X"08"  => MI_DRD <= cnt_bytes_reg;
-                when X"10"  => MI_DRD <= cnt_sofs_reg;
-                when X"14"  => MI_DRD <= cnt_eofs_reg;
-                when others => MI_DRD <= (others => '0');
+            case MI_ADDR(5-1 downto 0) is
+                when "00000" => MI_DRD <= std_logic_vector(resize(unsigned(cnt_ticks_reg), MI_DATA_WIDTH));
+                when "00100" => MI_DRD <= (0 => cnt_ticks_max_reg, others => '0');
+                when "01000" => MI_DRD <= cnt_bytes_reg;
+                when "10000" => MI_DRD <= cnt_sofs_reg;
+                when "10100" => MI_DRD <= cnt_eofs_reg;
+                when others  => MI_DRD <= (others => '0');
             end case;
         end if;
     end process;
