@@ -13,15 +13,19 @@ class MemLogger(DataLogger):
 
     _BIT_LATENCY_TO_FIRST    = 0
 
-
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        try:
+            super().__init__(**kwargs)
 
-        ctrli = self.load_ctrl(False)
-        self.config["MEM_DATA_WIDTH"]   = self.get_bits(ctrli, self.mi_width, self.mi_width * 0)
-        self.config["MEM_ADDR_WIDTH"]   = self.get_bits(ctrli, self.mi_width, self.mi_width * 1)
-        self.config["MEM_BURST_WIDTH"]  = self.get_bits(ctrli, self.mi_width, self.mi_width * 2)
-        self.config["MEM_FREQ_KHZ"]     = self.get_bits(ctrli, self.mi_width, self.mi_width * 3)
+            ctrli = self.load_ctrl(False)
+            self.config["MEM_DATA_WIDTH"]   = self.get_bits(ctrli, self.mi_width, self.mi_width * 0)
+            self.config["MEM_ADDR_WIDTH"]   = self.get_bits(ctrli, self.mi_width, self.mi_width * 1)
+            self.config["MEM_BURST_WIDTH"]  = self.get_bits(ctrli, self.mi_width, self.mi_width * 2)
+            self.config["MEM_FREQ_KHZ"]     = self.get_bits(ctrli, self.mi_width, self.mi_width * 3)
+
+        except:
+            print("ERROR while opening MemLogger component!\nMaybe unsupported FPGA firmware?!")
+            exit(1)
 
     def set_config(self, latency_to_first):
         self.set_ctrlo(latency_to_first & 1)
