@@ -241,7 +241,7 @@ if __name__ == '__main__':
             "rand read",
         ])
         graph_gen.set_xlabel("burst size [B]")
-        graph_gen.set_ylabel("data flow [Gbs]")
+        graph_gen.set_ylabel("data flow [Gbps]")
         graph_gen.plot_save(f"{index}_flow")
     
         # Plot latency histogram
@@ -335,9 +335,9 @@ if __name__ == '__main__':
         data.append(get_row("total time",      full_data['total_time_ms'], "ms"    ))
         data.append(get_row("write time",      full_data['wr_time_ms'],    "ms"    ))
         data.append(get_row("read time",       full_data['rd_time_ms'],    "ms"    ))
-        data.append(get_row("total data flow", full_data['total_flow_gbs'],"GBs"   ))
-        data.append(get_row("write data flow", full_data['wr_flow_gbs'],   "GBs"   ))
-        data.append(get_row("read data flow",  full_data['rd_flow_gbs'],   "GBs"   ))
+        data.append(get_row("total data flow", full_data['total_flow_gbs'],"Gbps"  ))
+        data.append(get_row("write data flow", full_data['wr_flow_gbs'],   "Gbps"  ))
+        data.append(get_row("read data flow",  full_data['rd_flow_gbs'],   "Gbps"  ))
         data.append(get_row("min read latency",full_data['latency']['min_ns'], "ns"))
         data.append(get_row("avg read latency",full_data['latency']['avg_ns'], "ns"))
         data.append(get_row("max read latency",full_data['latency']['max_ns'], "ns"))
