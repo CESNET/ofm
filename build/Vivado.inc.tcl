@@ -249,6 +249,13 @@ proc SynthesizeDesignSetup {synth_flags} {
             -value $SYNTH_FLAGS(RETIMING) -objects [get_runs synth_1]
     }
 
+    # Set rebuild
+    if {[info exist SYNTH_FLAGS(FLATTEN_HIERARCHY)] } {
+        puts "set flattening mode: $SYNTH_FLAGS(FLATTEN_HIERARCHY)"
+        set_property -name {STEPS.SYNTH_DESIGN.ARGS.FLATTEN_HIERARCHY} \
+            -value $SYNTH_FLAGS(FLATTEN_HIERARCHY) -objects [get_runs synth_1]
+    }
+
     # Set build generics of toplevel entity
     if {[info exist SYNTH_FLAGS(USER_GENERICS)]} {
         set MOREOPT ""
