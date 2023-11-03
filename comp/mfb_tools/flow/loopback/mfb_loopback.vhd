@@ -66,50 +66,50 @@ entity MFB_LOOPBACK is
         -- =========================================================================================
         -- Input of the RX MFB interface
         -- =========================================================================================
-        RX_MFB_DATA_IN    : in  std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH -1 downto 0);
-        RX_MFB_META_IN    : in  std_logic_vector(META_WIDTH -1 downto 0);
-        RX_MFB_SOF_IN     : in  std_logic_vector(REGIONS -1 downto 0);
-        RX_MFB_EOF_IN     : in  std_logic_vector(REGIONS -1 downto 0);
-        RX_MFB_SOF_POS_IN : in  std_logic_vector(REGIONS*max(1, log2(REGION_SIZE)) -1 downto 0);
-        RX_MFB_EOF_POS_IN : in  std_logic_vector(REGIONS*max(1, log2(REGION_SIZE*BLOCK_SIZE)) -1 downto 0);
-        RX_MFB_SRC_RDY_IN : in  std_logic;
-        RX_MFB_DST_RDY_IN : out std_logic;
+        RX_DATA_IN    : in  std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH -1 downto 0);
+        RX_META_IN    : in  std_logic_vector(META_WIDTH -1 downto 0);
+        RX_SOF_IN     : in  std_logic_vector(REGIONS -1 downto 0);
+        RX_EOF_IN     : in  std_logic_vector(REGIONS -1 downto 0);
+        RX_SOF_POS_IN : in  std_logic_vector(REGIONS*max(1, log2(REGION_SIZE)) -1 downto 0);
+        RX_EOF_POS_IN : in  std_logic_vector(REGIONS*max(1, log2(REGION_SIZE*BLOCK_SIZE)) -1 downto 0);
+        RX_SRC_RDY_IN : in  std_logic;
+        RX_DST_RDY_IN : out std_logic;
 
         -- =========================================================================================
         -- Output of the RX MFB interface
         -- =========================================================================================
-        RX_MFB_DATA_OUT    : out std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH -1 downto 0);
-        RX_MFB_META_OUT    : out std_logic_vector(META_WIDTH -1 downto 0);
-        RX_MFB_SOF_OUT     : out std_logic_vector(REGIONS -1 downto 0);
-        RX_MFB_EOF_OUT     : out std_logic_vector(REGIONS -1 downto 0);
-        RX_MFB_SOF_POS_OUT : out std_logic_vector(REGIONS*max(1, log2(REGION_SIZE)) -1 downto 0);
-        RX_MFB_EOF_POS_OUT : out std_logic_vector(REGIONS*max(1, log2(REGION_SIZE*BLOCK_SIZE)) -1 downto 0);
-        RX_MFB_SRC_RDY_OUT : out std_logic;
-        RX_MFB_DST_RDY_OUT : in  std_logic;
+        RX_DATA_OUT    : out std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH -1 downto 0);
+        RX_META_OUT    : out std_logic_vector(META_WIDTH -1 downto 0);
+        RX_SOF_OUT     : out std_logic_vector(REGIONS -1 downto 0);
+        RX_EOF_OUT     : out std_logic_vector(REGIONS -1 downto 0);
+        RX_SOF_POS_OUT : out std_logic_vector(REGIONS*max(1, log2(REGION_SIZE)) -1 downto 0);
+        RX_EOF_POS_OUT : out std_logic_vector(REGIONS*max(1, log2(REGION_SIZE*BLOCK_SIZE)) -1 downto 0);
+        RX_SRC_RDY_OUT : out std_logic;
+        RX_DST_RDY_OUT : in  std_logic;
 
         -- =========================================================================================
         -- Output of the TX MFB interface
         -- =========================================================================================
-        TX_MFB_DATA_OUT    : out std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH -1 downto 0);
-        TX_MFB_META_OUT    : out std_logic_vector(META_WIDTH -1 downto 0);
-        TX_MFB_SOF_OUT     : out std_logic_vector(REGIONS -1 downto 0);
-        TX_MFB_EOF_OUT     : out std_logic_vector(REGIONS -1 downto 0);
-        TX_MFB_SOF_POS_OUT : out std_logic_vector(REGIONS*max(1, log2(REGION_SIZE)) -1 downto 0);
-        TX_MFB_EOF_POS_OUT : out std_logic_vector(REGIONS*max(1, log2(REGION_SIZE*BLOCK_SIZE)) -1 downto 0);
-        TX_MFB_SRC_RDY_OUT : out std_logic;
-        TX_MFB_DST_RDY_OUT : in  std_logic;
+        TX_DATA_OUT    : out std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH -1 downto 0);
+        TX_META_OUT    : out std_logic_vector(META_WIDTH -1 downto 0);
+        TX_SOF_OUT     : out std_logic_vector(REGIONS -1 downto 0);
+        TX_EOF_OUT     : out std_logic_vector(REGIONS -1 downto 0);
+        TX_SOF_POS_OUT : out std_logic_vector(REGIONS*max(1, log2(REGION_SIZE)) -1 downto 0);
+        TX_EOF_POS_OUT : out std_logic_vector(REGIONS*max(1, log2(REGION_SIZE*BLOCK_SIZE)) -1 downto 0);
+        TX_SRC_RDY_OUT : out std_logic;
+        TX_DST_RDY_OUT : in  std_logic;
 
         -- =========================================================================================
         -- Input of the TX MFB interface
         -- =========================================================================================
-        TX_MFB_DATA_IN    : in  std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH -1 downto 0);
-        TX_MFB_META_IN    : in  std_logic_vector(META_WIDTH -1 downto 0);
-        TX_MFB_SOF_IN     : in  std_logic_vector(REGIONS -1 downto 0);
-        TX_MFB_EOF_IN     : in  std_logic_vector(REGIONS -1 downto 0);
-        TX_MFB_SOF_POS_IN : in  std_logic_vector(REGIONS*max(1, log2(REGION_SIZE)) -1 downto 0);
-        TX_MFB_EOF_POS_IN : in  std_logic_vector(REGIONS*max(1, log2(REGION_SIZE*BLOCK_SIZE)) -1 downto 0);
-        TX_MFB_SRC_RDY_IN : in  std_logic;
-        TX_MFB_DST_RDY_IN : out std_logic
+        TX_DATA_IN    : in  std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH -1 downto 0);
+        TX_META_IN    : in  std_logic_vector(META_WIDTH -1 downto 0);
+        TX_SOF_IN     : in  std_logic_vector(REGIONS -1 downto 0);
+        TX_EOF_IN     : in  std_logic_vector(REGIONS -1 downto 0);
+        TX_SOF_POS_IN : in  std_logic_vector(REGIONS*max(1, log2(REGION_SIZE)) -1 downto 0);
+        TX_EOF_POS_IN : in  std_logic_vector(REGIONS*max(1, log2(REGION_SIZE*BLOCK_SIZE)) -1 downto 0);
+        TX_SRC_RDY_IN : in  std_logic;
+        TX_DST_RDY_IN : out std_logic
         );
 end entity;
 
@@ -150,23 +150,23 @@ begin
         MI_DRDY <= MI_RD;
         MI_DRD  <= (others => '0');
 
-        TX_MFB_DATA_OUT    <= TX_MFB_DATA_IN;
-        TX_MFB_META_OUT    <= TX_MFB_META_IN;
-        TX_MFB_SOF_OUT     <= TX_MFB_SOF_IN;
-        TX_MFB_EOF_OUT     <= TX_MFB_EOF_IN;
-        TX_MFB_SOF_POS_OUT <= TX_MFB_SOF_POS_IN;
-        TX_MFB_EOF_POS_OUT <= TX_MFB_EOF_POS_IN;
-        TX_MFB_SRC_RDY_OUT <= TX_MFB_SRC_RDY_IN;
-        TX_MFB_DST_RDY_IN  <= TX_MFB_DST_RDY_OUT;
+        TX_DATA_OUT    <= TX_DATA_IN;
+        TX_META_OUT    <= TX_META_IN;
+        TX_SOF_OUT     <= TX_SOF_IN;
+        TX_EOF_OUT     <= TX_EOF_IN;
+        TX_SOF_POS_OUT <= TX_SOF_POS_IN;
+        TX_EOF_POS_OUT <= TX_EOF_POS_IN;
+        TX_SRC_RDY_OUT <= TX_SRC_RDY_IN;
+        TX_DST_RDY_IN  <= TX_DST_RDY_OUT;
 
-        RX_MFB_DATA_OUT    <= RX_MFB_DATA_IN;
-        RX_MFB_META_OUT    <= RX_MFB_META_IN;
-        RX_MFB_SOF_OUT     <= RX_MFB_SOF_IN;
-        RX_MFB_EOF_OUT     <= RX_MFB_EOF_IN;
-        RX_MFB_SOF_POS_OUT <= RX_MFB_SOF_POS_IN;
-        RX_MFB_EOF_POS_OUT <= RX_MFB_EOF_POS_IN;
-        RX_MFB_SRC_RDY_OUT <= RX_MFB_SRC_RDY_IN;
-        RX_MFB_DST_RDY_IN  <= RX_MFB_DST_RDY_OUT;
+        RX_DATA_OUT    <= RX_DATA_IN;
+        RX_META_OUT    <= RX_META_IN;
+        RX_SOF_OUT     <= RX_SOF_IN;
+        RX_EOF_OUT     <= RX_EOF_IN;
+        RX_SOF_POS_OUT <= RX_SOF_POS_IN;
+        RX_EOF_POS_OUT <= RX_EOF_POS_IN;
+        RX_SRC_RDY_OUT <= RX_SRC_RDY_IN;
+        RX_DST_RDY_IN  <= RX_DST_RDY_OUT;
     end generate;
 
     not_fake_switch_g : if (not FAKE_LOOPBACK) generate
@@ -272,31 +272,33 @@ begin
         -- =========================================================================================
         -- TX -> RX Loopback MUX
         -- =========================================================================================
-        RX_MFB_DATA_OUT    <= RX_MFB_DATA_IN                                     when tx2rx_loop_mux_sel_reg = '0' else TX_MFB_DATA_IN;
-        RX_MFB_META_OUT    <= RX_MFB_META_IN                                     when tx2rx_loop_mux_sel_reg = '0' else TX_MFB_META_IN;
-        RX_MFB_SOF_OUT     <= RX_MFB_SOF_IN                                      when tx2rx_loop_mux_sel_reg = '0' else TX_MFB_SOF_IN;
-        RX_MFB_EOF_OUT     <= RX_MFB_EOF_IN                                      when tx2rx_loop_mux_sel_reg = '0' else TX_MFB_EOF_IN;
-        RX_MFB_SOF_POS_OUT <= RX_MFB_SOF_POS_IN                                  when tx2rx_loop_mux_sel_reg = '0' else TX_MFB_SOF_POS_IN;
-        RX_MFB_EOF_POS_OUT <= RX_MFB_EOF_POS_IN                                  when tx2rx_loop_mux_sel_reg = '0' else TX_MFB_EOF_POS_IN;
-        RX_MFB_SRC_RDY_OUT <= RX_MFB_SRC_RDY_IN and (not rx2tx_loop_mux_sel_reg) when tx2rx_loop_mux_sel_reg = '0' else TX_MFB_SRC_RDY_IN;
 
-        rx_mfb_dst_rdy_in_int <= RX_MFB_DST_RDY_OUT    when tx2rx_loop_mux_sel_reg = '0' else '1';
-        RX_MFB_DST_RDY_IN     <= rx_mfb_dst_rdy_in_int when rx2tx_loop_mux_sel_reg = '0' else TX_MFB_DST_RDY_OUT;
+        RX_DATA_OUT    <= RX_DATA_IN                                     when tx2rx_loop_mux_sel_reg = '0' else TX_DATA_IN;
+        RX_META_OUT    <= RX_META_IN                                     when tx2rx_loop_mux_sel_reg = '0' else TX_META_IN;
+        RX_SOF_OUT     <= RX_SOF_IN                                      when tx2rx_loop_mux_sel_reg = '0' else TX_SOF_IN;
+        RX_EOF_OUT     <= RX_EOF_IN                                      when tx2rx_loop_mux_sel_reg = '0' else TX_EOF_IN;
+        RX_SOF_POS_OUT <= RX_SOF_POS_IN                                  when tx2rx_loop_mux_sel_reg = '0' else TX_SOF_POS_IN;
+        RX_EOF_POS_OUT <= RX_EOF_POS_IN                                  when tx2rx_loop_mux_sel_reg = '0' else TX_EOF_POS_IN;
+        RX_SRC_RDY_OUT <= RX_SRC_RDY_IN and (not rx2tx_loop_mux_sel_reg) when tx2rx_loop_mux_sel_reg = '0' else TX_SRC_RDY_IN;
+
+        rx_mfb_dst_rdy_in_int <= RX_DST_RDY_OUT    when tx2rx_loop_mux_sel_reg = '0' else '1';
+        RX_DST_RDY_IN     <= rx_mfb_dst_rdy_in_int when rx2tx_loop_mux_sel_reg = '0' else TX_DST_RDY_OUT;
 
         -- =========================================================================================
         -- RX -> TX Loopback MUX
         -- =========================================================================================
-        TX_MFB_DATA_OUT    <= TX_MFB_DATA_IN                                     when rx2tx_loop_mux_sel_reg = '0' else RX_MFB_DATA_IN;
-        TX_MFB_META_OUT    <= TX_MFB_META_IN                                     when rx2tx_loop_mux_sel_reg = '0' else RX_MFB_META_IN;
-        TX_MFB_SOF_OUT     <= TX_MFB_SOF_IN                                      when rx2tx_loop_mux_sel_reg = '0' else RX_MFB_SOF_IN;
-        TX_MFB_EOF_OUT     <= TX_MFB_EOF_IN                                      when rx2tx_loop_mux_sel_reg = '0' else RX_MFB_EOF_IN;
-        TX_MFB_SOF_POS_OUT <= TX_MFB_SOF_POS_IN                                  when rx2tx_loop_mux_sel_reg = '0' else RX_MFB_SOF_POS_IN;
-        TX_MFB_EOF_POS_OUT <= TX_MFB_EOF_POS_IN                                  when rx2tx_loop_mux_sel_reg = '0' else RX_MFB_EOF_POS_IN;
+        TX_DATA_OUT    <= TX_DATA_IN                                     when rx2tx_loop_mux_sel_reg = '0' else RX_DATA_IN;
+        TX_META_OUT    <= TX_META_IN                                     when rx2tx_loop_mux_sel_reg = '0' else RX_META_IN;
+        TX_SOF_OUT     <= TX_SOF_IN                                      when rx2tx_loop_mux_sel_reg = '0' else RX_SOF_IN;
+        TX_EOF_OUT     <= TX_EOF_IN                                      when rx2tx_loop_mux_sel_reg = '0' else RX_EOF_IN;
+        TX_SOF_POS_OUT <= TX_SOF_POS_IN                                  when rx2tx_loop_mux_sel_reg = '0' else RX_SOF_POS_IN;
+        TX_EOF_POS_OUT <= TX_EOF_POS_IN                                  when rx2tx_loop_mux_sel_reg = '0' else RX_EOF_POS_IN;
         -- when TX->RX loopback is activated, assign this port to 0 because there is no point to send
         -- valid data when backpressure signal is disconnected
-        TX_MFB_SRC_RDY_OUT <= TX_MFB_SRC_RDY_IN and (not tx2rx_loop_mux_sel_reg) when rx2tx_loop_mux_sel_reg = '0' else RX_MFB_SRC_RDY_IN;
+        TX_SRC_RDY_OUT <= TX_SRC_RDY_IN and (not tx2rx_loop_mux_sel_reg) when rx2tx_loop_mux_sel_reg = '0' else RX_SRC_RDY_IN;
 
-        tx_mfb_dst_rdy_in_int <= TX_MFB_DST_RDY_OUT    when rx2tx_loop_mux_sel_reg = '0' else '1';
-        TX_MFB_DST_RDY_IN     <= tx_mfb_dst_rdy_in_int when tx2rx_loop_mux_sel_reg = '0' else RX_MFB_DST_RDY_OUT;
+        tx_mfb_dst_rdy_in_int <= TX_DST_RDY_OUT        when rx2tx_loop_mux_sel_reg = '0' else '1';
+        TX_DST_RDY_IN         <= tx_mfb_dst_rdy_in_int when tx2rx_loop_mux_sel_reg = '0' else RX_DST_RDY_OUT;
+
     end generate;
 end architecture;
