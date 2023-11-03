@@ -38,6 +38,8 @@ entity MFB_LOOPBACK is
         -- When true, simple interconnect from input to output is inserted, the loopback logic is
         -- not applied
         FAKE_LOOPBACK : boolean := FALSE;
+        -- Puts MFB pipes to all of the ports
+        PIPED_PORTS   : boolean := FALSE;
         -- When true, the MI bus and the internal logic use the same clock, otherwise the
         -- asynchronous crossing is inserted
         SAME_CLK      : boolean := TRUE
@@ -128,9 +130,54 @@ architecture FULL of MFB_LOOPBACK is
 
     signal mi_sync_addr_local : unsigned(6-1 downto 0);
 
+    -- =============================================================================================
+    -- Internal MFB signals
+    -- =============================================================================================
+    signal rx_data_in_pipe    : std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
+    signal rx_meta_in_pipe    : std_logic_vector(META_WIDTH -1 downto 0);
+    signal rx_sof_in_pipe     : std_logic_vector(REGIONS -1 downto 0);
+    signal rx_eof_in_pipe     : std_logic_vector(REGIONS -1 downto 0);
+    signal rx_sof_pos_in_pipe : std_logic_vector(REGIONS*max(1, log2(REGION_SIZE)) -1 downto 0);
+    signal rx_eof_pos_in_pipe : std_logic_vector(REGIONS*max(1, log2(REGION_SIZE*BLOCK_SIZE)) -1 downto 0);
+    signal rx_src_rdy_in_pipe : std_logic;
+    signal rx_dst_rdy_in_pipe : std_logic;
+
+    signal rx_data_out_pipe    : std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
+    signal rx_meta_out_pipe    : std_logic_vector(META_WIDTH -1 downto 0);
+    signal rx_sof_out_pipe     : std_logic_vector(REGIONS -1 downto 0);
+    signal rx_eof_out_pipe     : std_logic_vector(REGIONS -1 downto 0);
+    signal rx_sof_pos_out_pipe : std_logic_vector(REGIONS*max(1, log2(REGION_SIZE)) -1 downto 0);
+    signal rx_eof_pos_out_pipe : std_logic_vector(REGIONS*max(1, log2(REGION_SIZE*BLOCK_SIZE)) -1 downto 0);
+    signal rx_src_rdy_out_pipe : std_logic;
+    signal rx_dst_rdy_out_pipe : std_logic;
+
+    signal tx_data_in_pipe    : std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
+    signal tx_meta_in_pipe    : std_logic_vector(META_WIDTH -1 downto 0);
+    signal tx_sof_in_pipe     : std_logic_vector(REGIONS -1 downto 0);
+    signal tx_eof_in_pipe     : std_logic_vector(REGIONS -1 downto 0);
+    signal tx_sof_pos_in_pipe : std_logic_vector(REGIONS*max(1, log2(REGION_SIZE)) -1 downto 0);
+    signal tx_eof_pos_in_pipe : std_logic_vector(REGIONS*max(1, log2(REGION_SIZE*BLOCK_SIZE)) -1 downto 0);
+    signal tx_src_rdy_in_pipe : std_logic;
+    signal tx_dst_rdy_in_pipe : std_logic;
+
+    signal tx_data_out_pipe    : std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
+    signal tx_meta_out_pipe    : std_logic_vector(META_WIDTH -1 downto 0);
+    signal tx_sof_out_pipe     : std_logic_vector(REGIONS -1 downto 0);
+    signal tx_eof_out_pipe     : std_logic_vector(REGIONS -1 downto 0);
+    signal tx_sof_pos_out_pipe : std_logic_vector(REGIONS*max(1, log2(REGION_SIZE)) -1 downto 0);
+    signal tx_eof_pos_out_pipe : std_logic_vector(REGIONS*max(1, log2(REGION_SIZE*BLOCK_SIZE)) -1 downto 0);
+    signal tx_src_rdy_out_pipe : std_logic;
+    signal tx_dst_rdy_out_pipe : std_logic;
+
+    -- =============================================================================================
+    -- MUX registers
+    -- =============================================================================================
     signal tx2rx_loop_mux_sel_reg : std_logic;
     signal rx2tx_loop_mux_sel_reg : std_logic;
 
+    -- =============================================================================================
+    -- Miscelaneous MFB signals
+    -- =============================================================================================
     signal rx_mfb_dst_rdy_in_int : std_logic;
     signal tx_mfb_dst_rdy_in_int : std_logic;
 
@@ -150,23 +197,23 @@ begin
         MI_DRDY <= MI_RD;
         MI_DRD  <= (others => '0');
 
-        TX_DATA_OUT    <= TX_DATA_IN;
-        TX_META_OUT    <= TX_META_IN;
-        TX_SOF_OUT     <= TX_SOF_IN;
-        TX_EOF_OUT     <= TX_EOF_IN;
-        TX_SOF_POS_OUT <= TX_SOF_POS_IN;
-        TX_EOF_POS_OUT <= TX_EOF_POS_IN;
-        TX_SRC_RDY_OUT <= TX_SRC_RDY_IN;
-        TX_DST_RDY_IN  <= TX_DST_RDY_OUT;
+        tx_data_out_pipe    <= tx_data_in_pipe;
+        tx_meta_out_pipe    <= tx_meta_in_pipe;
+        tx_sof_out_pipe     <= tx_sof_in_pipe;
+        tx_eof_out_pipe     <= tx_eof_in_pipe;
+        tx_sof_pos_out_pipe <= tx_sof_pos_in_pipe;
+        tx_eof_pos_out_pipe <= tx_eof_pos_in_pipe;
+        tx_src_rdy_out_pipe <= tx_src_rdy_in_pipe;
+        tx_dst_rdy_in_pipe  <= tx_dst_rdy_out_pipe;
 
-        RX_DATA_OUT    <= RX_DATA_IN;
-        RX_META_OUT    <= RX_META_IN;
-        RX_SOF_OUT     <= RX_SOF_IN;
-        RX_EOF_OUT     <= RX_EOF_IN;
-        RX_SOF_POS_OUT <= RX_SOF_POS_IN;
-        RX_EOF_POS_OUT <= RX_EOF_POS_IN;
-        RX_SRC_RDY_OUT <= RX_SRC_RDY_IN;
-        RX_DST_RDY_IN  <= RX_DST_RDY_OUT;
+        rx_data_out_pipe    <= rx_data_in_pipe;
+        rx_meta_out_pipe    <= rx_meta_in_pipe;
+        rx_sof_out_pipe     <= rx_sof_in_pipe;
+        rx_eof_out_pipe     <= rx_eof_in_pipe;
+        rx_sof_pos_out_pipe <= rx_sof_pos_in_pipe;
+        rx_eof_pos_out_pipe <= rx_eof_pos_in_pipe;
+        rx_src_rdy_out_pipe <= rx_src_rdy_in_pipe;
+        rx_dst_rdy_in_pipe  <= rx_dst_rdy_out_pipe;
     end generate;
 
     not_fake_switch_g : if (not FAKE_LOOPBACK) generate
@@ -272,33 +319,167 @@ begin
         -- =========================================================================================
         -- TX -> RX Loopback MUX
         -- =========================================================================================
+        rx_data_out_pipe    <= rx_data_in_pipe                                     when tx2rx_loop_mux_sel_reg = '0' else tx_data_in_pipe;
+        rx_meta_out_pipe    <= rx_meta_in_pipe                                     when tx2rx_loop_mux_sel_reg = '0' else tx_meta_in_pipe;
+        rx_sof_out_pipe     <= rx_sof_in_pipe                                      when tx2rx_loop_mux_sel_reg = '0' else tx_sof_in_pipe;
+        rx_eof_out_pipe     <= rx_eof_in_pipe                                      when tx2rx_loop_mux_sel_reg = '0' else tx_eof_in_pipe;
+        rx_sof_pos_out_pipe <= rx_sof_pos_in_pipe                                  when tx2rx_loop_mux_sel_reg = '0' else tx_sof_pos_in_pipe;
+        rx_eof_pos_out_pipe <= rx_eof_pos_in_pipe                                  when tx2rx_loop_mux_sel_reg = '0' else tx_eof_pos_in_pipe;
+        rx_src_rdy_out_pipe <= rx_src_rdy_in_pipe and (not rx2tx_loop_mux_sel_reg) when tx2rx_loop_mux_sel_reg = '0' else tx_src_rdy_in_pipe;
 
-        RX_DATA_OUT    <= RX_DATA_IN                                     when tx2rx_loop_mux_sel_reg = '0' else TX_DATA_IN;
-        RX_META_OUT    <= RX_META_IN                                     when tx2rx_loop_mux_sel_reg = '0' else TX_META_IN;
-        RX_SOF_OUT     <= RX_SOF_IN                                      when tx2rx_loop_mux_sel_reg = '0' else TX_SOF_IN;
-        RX_EOF_OUT     <= RX_EOF_IN                                      when tx2rx_loop_mux_sel_reg = '0' else TX_EOF_IN;
-        RX_SOF_POS_OUT <= RX_SOF_POS_IN                                  when tx2rx_loop_mux_sel_reg = '0' else TX_SOF_POS_IN;
-        RX_EOF_POS_OUT <= RX_EOF_POS_IN                                  when tx2rx_loop_mux_sel_reg = '0' else TX_EOF_POS_IN;
-        RX_SRC_RDY_OUT <= RX_SRC_RDY_IN and (not rx2tx_loop_mux_sel_reg) when tx2rx_loop_mux_sel_reg = '0' else TX_SRC_RDY_IN;
-
-        rx_mfb_dst_rdy_in_int <= RX_DST_RDY_OUT    when tx2rx_loop_mux_sel_reg = '0' else '1';
-        RX_DST_RDY_IN     <= rx_mfb_dst_rdy_in_int when rx2tx_loop_mux_sel_reg = '0' else TX_DST_RDY_OUT;
+        rx_mfb_dst_rdy_in_int <= rx_dst_rdy_out_pipe   when tx2rx_loop_mux_sel_reg = '0' else '1';
+        rx_dst_rdy_in_pipe    <= rx_mfb_dst_rdy_in_int when rx2tx_loop_mux_sel_reg = '0' else tx_dst_rdy_out_pipe;
 
         -- =========================================================================================
         -- RX -> TX Loopback MUX
         -- =========================================================================================
-        TX_DATA_OUT    <= TX_DATA_IN                                     when rx2tx_loop_mux_sel_reg = '0' else RX_DATA_IN;
-        TX_META_OUT    <= TX_META_IN                                     when rx2tx_loop_mux_sel_reg = '0' else RX_META_IN;
-        TX_SOF_OUT     <= TX_SOF_IN                                      when rx2tx_loop_mux_sel_reg = '0' else RX_SOF_IN;
-        TX_EOF_OUT     <= TX_EOF_IN                                      when rx2tx_loop_mux_sel_reg = '0' else RX_EOF_IN;
-        TX_SOF_POS_OUT <= TX_SOF_POS_IN                                  when rx2tx_loop_mux_sel_reg = '0' else RX_SOF_POS_IN;
-        TX_EOF_POS_OUT <= TX_EOF_POS_IN                                  when rx2tx_loop_mux_sel_reg = '0' else RX_EOF_POS_IN;
+        tx_data_out_pipe    <= tx_data_in_pipe                                     when rx2tx_loop_mux_sel_reg = '0' else rx_data_in_pipe;
+        tx_meta_out_pipe    <= tx_meta_in_pipe                                     when rx2tx_loop_mux_sel_reg = '0' else rx_meta_in_pipe;
+        tx_sof_out_pipe     <= tx_sof_in_pipe                                      when rx2tx_loop_mux_sel_reg = '0' else rx_sof_in_pipe;
+        tx_eof_out_pipe     <= tx_eof_in_pipe                                      when rx2tx_loop_mux_sel_reg = '0' else rx_eof_in_pipe;
+        tx_sof_pos_out_pipe <= tx_sof_pos_in_pipe                                  when rx2tx_loop_mux_sel_reg = '0' else rx_sof_pos_in_pipe;
+        tx_eof_pos_out_pipe <= tx_eof_pos_in_pipe                                  when rx2tx_loop_mux_sel_reg = '0' else rx_eof_pos_in_pipe;
         -- when TX->RX loopback is activated, assign this port to 0 because there is no point to send
         -- valid data when backpressure signal is disconnected
-        TX_SRC_RDY_OUT <= TX_SRC_RDY_IN and (not tx2rx_loop_mux_sel_reg) when rx2tx_loop_mux_sel_reg = '0' else RX_SRC_RDY_IN;
+        tx_src_rdy_out_pipe <= tx_src_rdy_in_pipe and (not tx2rx_loop_mux_sel_reg) when rx2tx_loop_mux_sel_reg = '0' else rx_src_rdy_in_pipe;
 
-        tx_mfb_dst_rdy_in_int <= TX_DST_RDY_OUT        when rx2tx_loop_mux_sel_reg = '0' else '1';
-        TX_DST_RDY_IN         <= tx_mfb_dst_rdy_in_int when tx2rx_loop_mux_sel_reg = '0' else RX_DST_RDY_OUT;
-
+        tx_mfb_dst_rdy_in_int <= tx_dst_rdy_out_pipe   when rx2tx_loop_mux_sel_reg = '0' else '1';
+        tx_dst_rdy_in_pipe    <= tx_mfb_dst_rdy_in_int when tx2rx_loop_mux_sel_reg = '0' else rx_dst_rdy_out_pipe;
     end generate;
+
+    rx_in_mfb_pipe_i : entity work.MFB_PIPE
+        generic map (
+            REGIONS     => REGIONS,
+            REGION_SIZE => REGION_SIZE,
+            BLOCK_SIZE  => BLOCK_SIZE,
+            ITEM_WIDTH  => ITEM_WIDTH,
+            META_WIDTH  => META_WIDTH,
+
+            FAKE_PIPE   => (not PIPED_PORTS) or FAKE_LOOPBACK,
+            USE_DST_RDY => true,
+            PIPE_TYPE   => "REG",
+            DEVICE      => DEVICE)
+        port map (
+            CLK        => CLK,
+            RESET      => RESET,
+
+            RX_DATA    => RX_DATA_IN,
+            RX_META    => RX_META_IN,
+            RX_SOF_POS => RX_SOF_POS_IN,
+            RX_EOF_POS => RX_EOF_POS_IN,
+            RX_SOF     => RX_SOF_IN,
+            RX_EOF     => RX_EOF_IN,
+            RX_SRC_RDY => RX_SRC_RDY_IN,
+            RX_DST_RDY => RX_DST_RDY_IN,
+
+            TX_DATA    => rx_data_in_pipe,
+            TX_META    => rx_meta_in_pipe,
+            TX_SOF_POS => rx_sof_pos_in_pipe,
+            TX_EOF_POS => rx_eof_pos_in_pipe,
+            TX_SOF     => rx_sof_in_pipe,
+            TX_EOF     => rx_eof_in_pipe,
+            TX_SRC_RDY => rx_src_rdy_in_pipe,
+            TX_DST_RDY => rx_dst_rdy_in_pipe);
+
+    rx_out_mfb_pipe_i : entity work.MFB_PIPE
+        generic map (
+            REGIONS     => REGIONS,
+            REGION_SIZE => REGION_SIZE,
+            BLOCK_SIZE  => BLOCK_SIZE,
+            ITEM_WIDTH  => ITEM_WIDTH,
+            META_WIDTH  => META_WIDTH,
+
+            FAKE_PIPE   => (not PIPED_PORTS) or FAKE_LOOPBACK,
+            USE_DST_RDY => true,
+            PIPE_TYPE   => "REG",
+            DEVICE      => DEVICE)
+        port map (
+            CLK        => CLK,
+            RESET      => RESET,
+
+            RX_DATA    => rx_data_out_pipe,
+            RX_META    => rx_meta_out_pipe,
+            RX_SOF_POS => rx_sof_pos_out_pipe,
+            RX_EOF_POS => rx_eof_pos_out_pipe,
+            RX_SOF     => rx_sof_out_pipe,
+            RX_EOF     => rx_eof_out_pipe,
+            RX_SRC_RDY => rx_src_rdy_out_pipe,
+            RX_DST_RDY => rx_dst_rdy_out_pipe,
+
+            TX_DATA    => RX_DATA_OUT,
+            TX_META    => RX_META_OUT,
+            TX_SOF_POS => RX_SOF_POS_OUT,
+            TX_EOF_POS => RX_EOF_POS_OUT,
+            TX_SOF     => RX_SOF_OUT,
+            TX_EOF     => RX_EOF_OUT,
+            TX_SRC_RDY => RX_SRC_RDY_OUT,
+            TX_DST_RDY => RX_DST_RDY_OUT);
+
+    tx_in_mfb_pipe_i : entity work.MFB_PIPE
+        generic map (
+            REGIONS     => REGIONS,
+            REGION_SIZE => REGION_SIZE,
+            BLOCK_SIZE  => BLOCK_SIZE,
+            ITEM_WIDTH  => ITEM_WIDTH,
+            META_WIDTH  => META_WIDTH,
+
+            FAKE_PIPE   => (not PIPED_PORTS) or FAKE_LOOPBACK,
+            USE_DST_RDY => true,
+            PIPE_TYPE   => "REG",
+            DEVICE      => DEVICE)
+        port map (
+            CLK        => CLK,
+            RESET      => RESET,
+
+            RX_DATA    => TX_DATA_IN,
+            RX_META    => TX_META_IN,
+            RX_SOF_POS => TX_SOF_POS_IN,
+            RX_EOF_POS => TX_EOF_POS_IN,
+            RX_SOF     => TX_SOF_IN,
+            RX_EOF     => TX_EOF_IN,
+            RX_SRC_RDY => TX_SRC_RDY_IN,
+            RX_DST_RDY => TX_DST_RDY_IN,
+
+            TX_DATA    => tx_data_in_pipe,
+            TX_META    => tx_meta_in_pipe,
+            TX_SOF_POS => tx_sof_pos_in_pipe,
+            TX_EOF_POS => tx_eof_pos_in_pipe,
+            TX_SOF     => tx_sof_in_pipe,
+            TX_EOF     => tx_eof_in_pipe,
+            TX_SRC_RDY => tx_src_rdy_in_pipe,
+            TX_DST_RDY => tx_dst_rdy_in_pipe);
+
+    tx_out_mfb_pipe_i : entity work.MFB_PIPE
+        generic map (
+            REGIONS     => REGIONS,
+            REGION_SIZE => REGION_SIZE,
+            BLOCK_SIZE  => BLOCK_SIZE,
+            ITEM_WIDTH  => ITEM_WIDTH,
+            META_WIDTH  => META_WIDTH,
+
+            FAKE_PIPE   => (not PIPED_PORTS) or FAKE_LOOPBACK,
+            USE_DST_RDY => true,
+            PIPE_TYPE   => "REG",
+            DEVICE      => DEVICE)
+        port map (
+            CLK        => CLK,
+            RESET      => RESET,
+
+            RX_DATA    => tx_data_out_pipe,
+            RX_META    => tx_meta_out_pipe,
+            RX_SOF_POS => tx_sof_pos_out_pipe,
+            RX_EOF_POS => tx_eof_pos_out_pipe,
+            RX_SOF     => tx_sof_out_pipe,
+            RX_EOF     => tx_eof_out_pipe,
+            RX_SRC_RDY => tx_src_rdy_out_pipe,
+            RX_DST_RDY => tx_dst_rdy_out_pipe,
+
+            TX_DATA    => TX_DATA_OUT,
+            TX_META    => TX_META_OUT,
+            TX_SOF_POS => TX_SOF_POS_OUT,
+            TX_EOF_POS => TX_EOF_POS_OUT,
+            TX_SOF     => TX_SOF_OUT,
+            TX_EOF     => TX_EOF_OUT,
+            TX_SRC_RDY => TX_SRC_RDY_OUT,
+            TX_DST_RDY => TX_DST_RDY_OUT);
 end architecture;
