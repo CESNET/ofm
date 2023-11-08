@@ -203,6 +203,9 @@ architecture FULL of CHECKSUM_CALCULATOR is
     signal fifoxm_out_rdy     : std_logic_vector(MFB_REGIONS-1 downto 0);
     signal fifoxm_vo          : std_logic_vector(MFB_REGIONS-1 downto 0);
 
+    signal fifoxm_dataout_arr : slv_array_t     (MFB_REGIONS-1 downto 0)(CHECKSUM_W-1 downto 0);
+    signal tx_mvb_data_arr    : slv_array_t     (MFB_REGIONS-1 downto 0)(CHECKSUM_W-1 downto 0);
+
 begin
 
     RX_MFB_DST_RDY <= rx_ext_dst_rdy and not meta_fifoxm_full;
@@ -518,7 +521,14 @@ begin
     -- Output assignment
     -- ========================================================================
 
-    TX_MVB_DATA     <= fifoxm_dataout;
+    -- Byte switcharoo to the Network order
+    fifoxm_dataout_arr <= slv_array_deser(fifoxm_dataout, MFB_REGIONS);
+    output_g : for r in 0 to MFB_REGIONS-1 generate
+        tx_mvb_data_arr(r)(CHECKSUM_W  -1 downto CHECKSUM_W/2) <= fifoxm_dataout_arr(r)(CHECKSUM_W/2-1 downto            0);
+        tx_mvb_data_arr(r)(CHECKSUM_W/2-1 downto            0) <= fifoxm_dataout_arr(r)(CHECKSUM_W  -1 downto CHECKSUM_W/2);
+    end generate;
+
+    TX_MVB_DATA     <= slv_array_ser(tx_mvb_data_arr);
     TX_MVB_META     <= slv_array_ser(meta_fifoxm_meta_arr);
     TX_CHSUM_BYPASS <= meta_fifoxm_bypass; -- inverted checksum enable
     TX_MVB_VLD      <= fifoxm_vo and meta_fifoxm_vo;
