@@ -36,6 +36,8 @@ entity MFB_SPEED_METER_MI is
         -- Set to true to add SOFs and EOFs from the currently arriving word to the total sums.
         -- Set to false to count only accepted words.
         ADD_ARR_PKTS     : boolean := false;
+        -- Operating frequency in MHz (used in SW for calculation of output speed)
+        FREQUENCY        : natural := 200;
         -- MI32 parameters
         MI_DATA_WIDTH    : natural := 32;
         MI_ADDRESS_WIDTH : natural := 32
@@ -131,6 +133,7 @@ begin
                 when "01000" => MI_DRD <= cnt_bytes_reg;
                 when "10000" => MI_DRD <= cnt_sofs_reg;
                 when "10100" => MI_DRD <= cnt_eofs_reg;
+                when "11000" => MI_DRD <= std_logic_vector(to_unsigned(FREQUENCY, MI_DATA_WIDTH));
                 when others  => MI_DRD <= (others => '0');
             end case;
         end if;
