@@ -209,6 +209,11 @@ architecture FULL of CHECKSUM_CALCULATOR is
 
 begin
 
+    assert MFB_ITEM_WIDTH=8
+        report "CHECKSUM CALCULATOR: MFB_ITEM_WIDTH must be 8!" &
+               "MFB_ITEM_WIDTH is currently " & integer'image(MFB_ITEM_WIDTH)
+        severity Failure;
+
     RX_MFB_DST_RDY <= rx_ext_dst_rdy and not meta_fifoxm_full;
 
     -- ========================================================================
