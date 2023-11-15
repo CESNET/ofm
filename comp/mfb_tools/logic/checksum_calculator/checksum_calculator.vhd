@@ -41,6 +41,8 @@ generic(
     -- Width of each Length signal in the in the RX_LENGTH vector.
     LENGTH_WIDTH    : integer := 9;
 
+    -- Select Network order (checksum bytes are swapped at the output).
+    NETWORK_ORDER   : boolean := True;
     -- FPGA device name.
     -- Options: ULTRASCALE, STRATIX10, AGILEX, ...
     DEVICE          : string := "STRATIX10"
@@ -192,7 +194,7 @@ architecture FULL of CHECKSUM_CALCULATOR is
     signal tx_fchsum_src_rdy  : std_logic;
     signal tx_fchsum_dst_rdy  : std_logic;
 
-    -- checksum FIFOX Multi signals
+    -- checksum FIFOX Multi and output signals
     signal fifoxm_datain      : std_logic_vector(MFB_REGIONS*2*CHECKSUM_W-1 downto 0);
     signal fifoxm_wr          : std_logic_vector(MFB_REGIONS*2-1 downto 0);
     signal fifoxm_full        : std_logic;
@@ -203,7 +205,14 @@ architecture FULL of CHECKSUM_CALCULATOR is
     signal fifoxm_out_rdy     : std_logic_vector(MFB_REGIONS-1 downto 0);
     signal fifoxm_vo          : std_logic_vector(MFB_REGIONS-1 downto 0);
 
+    signal tx_mvb_data_reordered : std_logic_vector(MFB_REGIONS*CHECKSUM_W-1 downto 0);
+
 begin
+
+    assert MFB_ITEM_WIDTH=8
+        report "CHECKSUM CALCULATOR: MFB_ITEM_WIDTH must be 8!" &
+               "MFB_ITEM_WIDTH is currently " & integer'image(MFB_ITEM_WIDTH)
+        severity Failure;
 
     RX_MFB_DST_RDY <= rx_ext_dst_rdy and not meta_fifoxm_full;
 
@@ -515,10 +524,31 @@ begin
     end generate;
 
     -- ========================================================================
-    -- Output assignment
+    --  Output assignment
     -- ========================================================================
 
-    TX_MVB_DATA     <= fifoxm_dataout;
+    byte_order_g : if NETWORK_ORDER generate
+
+        signal tx_mvb_data_reordered_arr : slv_array_t(MFB_REGIONS-1 downto 0)(CHECKSUM_W-1 downto 0);
+        signal fifoxm_dataout_arr        : slv_array_t(MFB_REGIONS-1 downto 0)(CHECKSUM_W-1 downto 0);
+
+    begin
+
+        fifoxm_dataout_arr <= slv_array_deser(fifoxm_dataout, MFB_REGIONS);
+        -- Byte switcharoo to the Network order
+        output_g : for r in 0 to MFB_REGIONS-1 generate
+            tx_mvb_data_reordered_arr(r)(CHECKSUM_W  -1 downto CHECKSUM_W/2) <= fifoxm_dataout_arr(r)(CHECKSUM_W/2-1 downto            0);
+            tx_mvb_data_reordered_arr(r)(CHECKSUM_W/2-1 downto            0) <= fifoxm_dataout_arr(r)(CHECKSUM_W  -1 downto CHECKSUM_W/2);
+        end generate;
+        tx_mvb_data_reordered <= slv_array_ser(tx_mvb_data_reordered_arr);
+
+    else generate
+
+        tx_mvb_data_reordered <= fifoxm_dataout;
+
+    end generate;
+
+    TX_MVB_DATA     <= tx_mvb_data_reordered;
     TX_MVB_META     <= slv_array_ser(meta_fifoxm_meta_arr);
     TX_CHSUM_BYPASS <= meta_fifoxm_bypass; -- inverted checksum enable
     TX_MVB_VLD      <= fifoxm_vo and meta_fifoxm_vo;
