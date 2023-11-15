@@ -42,7 +42,7 @@ generic(
     LENGTH_WIDTH    : integer := 9;
 
     -- Select Network order (checksum bytes are swapped at the output).
-    NETWORK_ORDER   : boolean := True;
+    NETWORK_ORDER   : boolean := False;
     -- FPGA device name.
     -- Options: ULTRASCALE, STRATIX10, AGILEX, ...
     DEVICE          : string := "STRATIX10"
