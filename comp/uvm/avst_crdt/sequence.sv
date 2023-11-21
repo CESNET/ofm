@@ -32,11 +32,20 @@ class sequence_simple extends uvm_common::sequence_base #(config_sequence, seque
     // ------------------------------------------------------------------------
     // Generates transactions
     task body;
+        int unsigned it;
+        uvm_common::sequence_cfg state;
+
+        if(!uvm_config_db#(uvm_common::sequence_cfg)::get(m_sequencer, "", "state", state)) begin
+            state = null;
+        end
+
         // Generate transaction_count transactions
         req = sequence_item::type_id::create("req");
-        repeat(transaction_count) begin
+        it = 0;
+        while (it < transaction_count && (state == null || state.next())) begin
             // Create a request for sequence item
             send_frame();
+            it++;
         end
     endtask
 endclass
@@ -69,11 +78,19 @@ class sequence_stop extends uvm_common::sequence_base #(config_sequence, sequenc
     // ------------------------------------------------------------------------
     // Generates transactions
     task body;
+        int unsigned it;
+        uvm_common::sequence_cfg state;
+
+        if(!uvm_config_db#(uvm_common::sequence_cfg)::get(m_sequencer, "", "state", state)) begin
+            state = null;
+        end
         // Generate transaction_count transactions
         req = sequence_item::type_id::create("req");
-        repeat(transaction_count) begin
+        it = 0;
+        while (it < transaction_count && (state == null || state.next())) begin
             // Create a request for sequence item
             send_frame();
+            it++;
         end
     endtask
 endclass

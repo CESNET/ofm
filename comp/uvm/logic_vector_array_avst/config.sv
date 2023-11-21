@@ -5,9 +5,9 @@
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
 class config_sequence extends uvm_object;
-    // this configuration is aproximation
-    // there is no quratte that currently running sequence will follow this rules.
-    // Guaranteed can be onli minimal space size.
+    `uvm_object_utils(uvm_logic_vector_array_avst::config_sequence)
+
+    uvm_common::sequence_cfg state;
 
     //configure space between packet
     int unsigned space_size_min     = 0;
@@ -17,6 +17,11 @@ class config_sequence extends uvm_object;
     int unsigned rdy_probability_max = 100; // inside [0:100]
     // Straddling is used only with seq_type == "PCIE"
     logic straddling                 = 0;
+
+    function new(string name = "uvm_logic_vector_array_avst::config_sequence");
+        super.new(name);
+        state = null;
+    endfunction
 
     function void probability_set(int unsigned min, int unsigned max);
         rdy_probability_min = min;

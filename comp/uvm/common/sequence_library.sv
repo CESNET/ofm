@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
 */
 
-class sequence_library#(type CONFIG_TYPE, REQ=uvm_sequence_item, RSP=REQ) extends uvm_sequence_library#(REQ, RSP);
+class sequence_library#(type CONFIG_TYPE, type REQ=uvm_sequence_item, RSP=REQ) extends uvm_sequence_library#(REQ, RSP);
     `uvm_object_param_utils(uvm_common::sequence_library#(CONFIG_TYPE, REQ, RSP))
     //`uvm_sequence_library_utils(uvm_byte_array::sequence_lib)
 
@@ -30,51 +30,59 @@ class sequence_library#(type CONFIG_TYPE, REQ=uvm_sequence_item, RSP=REQ) extend
     endfunction
 
     task body();
-        if (cfg == null) begin
-            cfg = new();
+        uvm_common::sequence_cfg state;
+        uvm_object_wrapper wrap;
+
+        if(!uvm_config_db#(uvm_common::sequence_cfg)::get(m_sequencer, "", "state", state)) begin
+            state = null;
         end
 
-        super.body();
+        if (sequences.size() == 0) begin
+            `uvm_error(m_sequencer.get_full_name(), "Sequence library does not contain any sequences. Did you forget to call init_sequence_library() in the constructor?");
+            return;
+        end
+
+        `uvm_info(m_sequencer.get_full_name(), $sformatf("\nStarting sequence library %s with configuration %s",  get_type_name(), cfg.convert2string()), UVM_DEBUG);
+        sequences_executed = 0;
+
+        while (sequences_executed < sequence_count && (state == null || !state.stopped())) begin
+            int unsigned select_sequence = $urandom_range(sequences.size()-1);
+
+            execute(sequences[select_sequence]);
+            sequences_executed++;
+        end
+
+      `uvm_info(m_sequencer.get_full_name(), $sformatf("\n\tEnding sequence library in phase\n%p", seqs_distrib), UVM_DEBUG);
     endtask
+
 
     // execute
     // -------
     task execute(uvm_object_wrapper wrap);
         sequence_base#(CONFIG_TYPE, REQ, RSP) cast_sequence;
+        string m_sequencer_path;
 
         uvm_object obj;
-        uvm_sequence_item seq_or_item;
-        uvm_sequence_base seq_base;
-        REQ req_item;
         uvm_coreservice_t cs = uvm_coreservice_t::get();
         uvm_factory factory=cs.get_factory();
 
-        obj = factory.create_object_by_type(wrap,get_full_name(), $sformatf("%s:%0d",wrap.get_type_name(), sequences_executed+1));
-        //$write("TEST %s:%0d\n", wrap.get_type_name(), sequences_executed);
+        m_sequencer_path = (m_sequencer != null) ? m_sequencer.get_full_name() : "";
+        obj = factory.create_object_by_type(wrap, m_sequencer_path, $sformatf("%s:%0d", wrap.get_type_name(), seqs_distrib[wrap.get_type_name()]));
 
-        if (!$cast(seq_base, obj)) begin
-           // If we're executing an item (not a sequence)
-           if (!$cast(req_item, obj)) begin
-              // But it's not our item type (This can happen if we were parameterized with
-              // a pure virtual type, because we're getting get_type() from the base class)
-              `uvm_error("SEQLIB/WRONG_ITEM_TYPE", {"The item created by '", get_full_name(), "' when in 'UVM_SEQ_LIB_ITEM' mode doesn't match the REQ type which  was passed in to the uvm_sequence_library#(REQ[,RSP]), this can happen if the REQ type which was passed in was a pure-virtual type.  Either configure the factory overrides to properly generate items for this sequence library, or do not execute this sequence library in UVM_SEQ_LIB_ITEM mode."})
-               return;
-           end
+        if (!$cast(cast_sequence, obj)) begin
+            `uvm_error(m_sequencer.get_full_name(), $sformatf("\n\tCannot convert %s to sequence", obj.get_type_name()));
+            return;
         end
 
-        if ($cast(cast_sequence, obj)) begin
-            cast_sequence.config_set(cfg);
+        cast_sequence.config_set(cfg);
+        `uvm_info(m_sequencer.get_full_name(), {"\n\tExecuting sequence ", cast_sequence.get_type_name()}, UVM_DEBUG);
+
+        if(!cast_sequence.randomize()) begin
+            `uvm_error(m_sequencer.get_full_name(), $sformatf("\n\tCannot randomize sequence %s", obj.get_type_name()));
+            return;
         end
-
-        void'($cast(seq_or_item,obj)); // already qualified, 
-
-        `uvm_info("SEQLIB/EXEC",{"Executing ",(seq_or_item.is_item() ? "item " : "sequence "),seq_or_item.get_name(),
-                                 " (",seq_or_item.get_type_name(),")"},UVM_FULL)
-        seq_or_item.print_sequence_info = 1;
-        `uvm_rand_send(seq_or_item)
-        seqs_distrib[seq_or_item.get_type_name()] = seqs_distrib[seq_or_item.get_type_name()]+1;
-
-        sequences_executed++;
+        cast_sequence.start(m_sequencer, this);
+        seqs_distrib[cast_sequence.get_type_name()] = seqs_distrib[cast_sequence.get_type_name()]+1;
     endtask
 
 endclass

@@ -36,13 +36,21 @@ class sequence_simple_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WI
     // ------------------------------------------------------------------------
     // Generates transactions
     task body;
+        int unsigned it;
+        uvm_common::sequence_cfg state;
+
+        if(!uvm_config_db#(uvm_common::sequence_cfg)::get(m_sequencer, "", "state", state)) begin
+            state = null;
+        end
         rdy.bound_set(cfg.rdy_probability_min, cfg.rdy_probability_max);
 
         // Generate transaction_count transactions
         req = sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::type_id::create("req");
-        repeat(transaction_count) begin
+        it = 0;
+        while (it < transaction_count && (state == null || state.next())) begin
             // Create a request for sequence item
             send_frame();
+            it++;
         end
     endtask
 endclass
@@ -76,11 +84,20 @@ class sequence_full_speed_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, MET
     // ------------------------------------------------------------------------
     // Generates transactions
     task body;
+        int unsigned it;
+        uvm_common::sequence_cfg state;
+
+        if(!uvm_config_db#(uvm_common::sequence_cfg)::get(m_sequencer, "", "state", state)) begin
+            state = null;
+        end
+
         // Generate transaction_count transactions
         req = sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::type_id::create("req");
-        repeat(transaction_count) begin
+        it = 0;
+        while (it < transaction_count && (state == null || state.next())) begin
             // Create a request for sequence item
             send_frame();
+            it++;
         end
     endtask
 endclass
@@ -114,11 +131,19 @@ class sequence_stop_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDT
     // ------------------------------------------------------------------------
     // Generates transactions
     task body;
+        int unsigned it;
+        uvm_common::sequence_cfg state;
+
+        if(!uvm_config_db#(uvm_common::sequence_cfg)::get(m_sequencer, "", "state", state)) begin
+            state = null;
+        end
         // Generate transaction_count transactions
         req = sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::type_id::create("req");
-        repeat(transaction_count) begin
+        it = 0;
+        while (it < transaction_count && (state == null || state.next())) begin
             // Create a request for sequence item
             send_frame();
+            it++;
         end
     endtask
 endclass

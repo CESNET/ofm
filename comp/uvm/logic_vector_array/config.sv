@@ -8,32 +8,24 @@
  * SPDX-License-Identifier: BSD-3-Clause
 */
 
-`ifndef SIZE_GEN_CONFIG_SV 
-`define SIZE_GEN_CONFIG_SV 
+`ifndef SIZE_GEN_CONFIG_SV
+`define SIZE_GEN_CONFIG_SV
 
 
 class config_sequence extends uvm_object;
-    // this configuration is aproximation
-    // there is no quratte that currently running sequence will follow this rules.
+    `uvm_object_utils(uvm_logic_vector_array::config_sequence)
 
     // Default value is ethernet MTU (64-1500)
     int unsigned array_size_min = 64;   // size have to be bigger than zero
     int unsigned array_size_max = 1500;
 
-    // this configuration works for all sequences run by sequences library.
-    // if two sequences will run by sequences library then 20 to 400 transactios
-    // are going to be generated
-    int unsigned transaction_count_min = 10;   // size have to be bigger than zero
-    int unsigned transaction_count_max = 200;
+    function new (string name = "uvm_logic_vector_array::config_sequence");
+        super.new(name);
+    endfunction
 
     function void array_size_set(int unsigned min, int unsigned max);
         array_size_min = min;
         array_size_max = max;
-    endfunction
-
-    function void transaction_count_set(int unsigned min, int unsigned max);
-        transaction_count_min = min;
-        transaction_count_max = max;
     endfunction
 endclass
 

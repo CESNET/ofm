@@ -47,11 +47,19 @@ class sequence_simple_rx #(SEGMENTS) extends uvm_sequence #(sequence_item #(SEGM
     // ------------------------------------------------------------------------
     // Generates transactions
     task body;
+        int unsigned it;
+        uvm_common::sequence_cfg state;
+
+        if(!uvm_config_db#(uvm_common::sequence_cfg)::get(m_sequencer, "", "state", state)) begin
+            state = null;
+        end
         // Generate transaction_count transactions
         req = sequence_item #(SEGMENTS)::type_id::create("req");
-        repeat(transaction_count) begin
+        it = 0;
+        while (it < transaction_count && (state == null || state.next())) begin
             // Create a request for sequence item
             send_frame();
+            it++;
         end
     endtask
 endclass
@@ -89,11 +97,19 @@ class sequence_simple_tx #(SEGMENTS) extends uvm_sequence #(sequence_item #(SEGM
     // ------------------------------------------------------------------------
     // Generates transactions
     task body;
+        int unsigned it;
+        uvm_common::sequence_cfg state;
+
+        if(!uvm_config_db#(uvm_common::sequence_cfg)::get(m_sequencer, "", "state", state)) begin
+            state = null;
+        end
         // Generate transaction_count transactions
         req = sequence_item #(SEGMENTS)::type_id::create("req");
-        repeat(transaction_count) begin
+        it = 0;
+        while (it < transaction_count && (state == null || state.next())) begin
             // Create a request for sequence item
             send_frame();
+            it++;
         end
     endtask
 endclass
