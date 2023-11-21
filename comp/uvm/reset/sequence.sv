@@ -85,9 +85,9 @@ class sequence_simple extends uvm_sequence#(uvm_reset::sequence_item);
     task body;
         forever begin
             reset.randomize();
-            reset.start(p_sequencer);
+            reset.start(p_sequencer, this);
             run.randomize();
-            run.start(p_sequencer);
+            run.start(p_sequencer, this);
         end
     endtask
 endclass
