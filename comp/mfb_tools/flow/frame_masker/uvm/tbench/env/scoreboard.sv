@@ -54,9 +54,6 @@ class scoreboard #(MFB_REGIONS, MFB_ITEM_WIDTH, MFB_META_WIDTH) extends uvm_scor
         data_cmp = uvm_common::comparer_ordered #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))::type_id::create("data_cmp", this);
         meta_cmp = uvm_common::comparer_ordered #(uvm_logic_vector::sequence_item #(MFB_META_WIDTH))      ::type_id::create("meta_cmp", this);
 
-        data_cmp.model_tr_timeout_set(100us); // might not be enough in for some seeds
-        meta_cmp.model_tr_timeout_set(100us); // might not be enough in for some seeds
-
     endfunction
 
     function void connect_phase(uvm_phase phase);
