@@ -7,7 +7,8 @@
 class probe_cbs #(int unsigned REGIONS) extends uvm_event_callback;
     `uvm_object_param_utils(frame_masker::probe_cbs #(REGIONS))
 
-    protected logic [1-1:0] out[$];
+    protected logic [1-1:0] out_discard_data[$];
+    protected logic [1-1:0] out_discard_meta[$];
 
 
     function new(string name = "");
@@ -60,14 +61,16 @@ class probe_cbs #(int unsigned REGIONS) extends uvm_event_callback;
 
             // Store Discard values (only those that are valid) to output FIFO
             for (int r = discard_cnt; r > 0; r--) begin
-                out.push_back(discard[r-1]);
+                out_discard_data.push_back(discard[r-1]);
+                out_discard_meta.push_back(discard[r-1]);
             end
 
         // For one Region, packets can't be skipped/discarded
         end else begin
             // for each SOF, send a discard=0 to the output
             if (sof[0] == 1) begin
-                out.push_back(0);
+                out_discard_data.push_back(0);
+                out_discard_meta.push_back(0);
             end
         end
         
@@ -76,12 +79,17 @@ class probe_cbs #(int unsigned REGIONS) extends uvm_event_callback;
     //---------------------------------------
     // OTHERS METHODS
     //---------------------------------------
-    task get(output logic [1-1:0] discard);
-        wait(out.size() != 0);
-        discard = out.pop_front();
+    task get_discard_data(output logic [1-1:0] discard);
+        wait(out_discard_data.size() != 0);
+        discard = out_discard_data.pop_front();
+    endtask
+
+    task get_discard_meta(output logic [1-1:0] discard);
+        wait(out_discard_meta.size() != 0);
+        discard = out_discard_meta.pop_front();
     endtask
 
     function int unsigned used();
-        return (out.size() != 0);
+        return ((out_discard_data.size() != 0) || (out_discard_meta.size() != 0));
     endfunction
 endclass
