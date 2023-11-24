@@ -4,14 +4,12 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause
 
-class regmodel#(CHANNELS) extends uvm_reg_block;
-    `uvm_object_param_utils(uvm_dma_regs::regmodel#(CHANNELS))
+class regmodel_top #(int unsigned CHANNELS) extends uvm_reg_block;
+    `uvm_object_param_utils(uvm_tx_dma_calypte_regs::regmodel_top #(CHANNELS))
 
+    uvm_tx_dma_calypte_regs::regmodel_channel m_regmodel_channel [CHANNELS];
 
-    uvm_dma_regs::reg_channel channel[CHANNELS];
-
-
-    function new(string name = "m_regmodel");
+    function new(string name = "m_regmodel_top");
         super.new(name, build_coverage(UVM_NO_COVERAGE));
     endfunction
 
@@ -19,7 +17,7 @@ class regmodel#(CHANNELS) extends uvm_reg_block;
         uvm_reg_frontdoor c_frontdoor;
         for (int unsigned it = 0; it < CHANNELS; it++) begin
             $cast(c_frontdoor, frontdoor.clone());
-            channel[it].set_frontdoor(c_frontdoor);
+            m_regmodel_channel[it].set_frontdoor(c_frontdoor);
         end
     endfunction
 
@@ -29,17 +27,18 @@ class regmodel#(CHANNELS) extends uvm_reg_block;
             string it_num;
             it_num.itoa(it);
             //CREATE
-            channel[it] = uvm_dma_regs::reg_channel::type_id::create({"channel_", it_num}, , get_full_name());
+            m_regmodel_channel[it] = uvm_tx_dma_calypte_regs::regmodel_channel::type_id::create({"m_regmodel_channel_", it_num}, , get_full_name());
             //BUILD and CONFIGURE register
-            channel[it].build('h0, bus_width);
-            channel[it].configure(this, {"channel_", it_num});
+            m_regmodel_channel[it].build('h0, bus_width);
+            m_regmodel_channel[it].configure(this, {"m_regmodel_channel_", it_num});
         end
 
         //create map
         this.default_map = create_map("MAP", base, bus_width/8, UVM_LITTLE_ENDIAN);
+
         //Add registers to map
         for(int unsigned it = 0; it < CHANNELS; it++) begin
-            this.default_map.add_submap(channel[it].default_map, it * 32'h80);
+            this.default_map.add_submap(m_regmodel_channel[it].default_map, it * 32'h80);
         end
 
         this.lock_model();

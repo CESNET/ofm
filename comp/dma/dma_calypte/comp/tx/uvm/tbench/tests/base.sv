@@ -7,14 +7,30 @@
 class base extends uvm_test;
     typedef uvm_component_registry#(test::base, "test::base") type_id;
 
+    uvm_tx_dma_calypte::env #(
+        DEVICE,
+        MI_WIDTH,
 
-    uvm_dma_ll::env #(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE, USER_TX_MFB_ITEM_WIDTH, PCIE_CQ_MFB_REGIONS,
-                      PCIE_CQ_MFB_REGION_SIZE, PCIE_CQ_MFB_BLOCK_SIZE, PCIE_CQ_MFB_ITEM_WIDTH, PCIE_LEN_MAX, CHANNELS, PKT_SIZE_MAX, MI_WIDTH, DEVICE, DATA_POINTER_WIDTH) m_env;
+        USR_MFB_REGIONS,
+        USR_MFB_REGION_SIZE,
+        USR_MFB_BLOCK_SIZE,
+        USR_MFB_ITEM_WIDTH,
 
-    bit            timeout;
-    uvm_reg_data_t dma_cnt          [CHANNELS];
+        PCIE_CQ_MFB_REGIONS,
+        PCIE_CQ_MFB_REGION_SIZE,
+        PCIE_CQ_MFB_BLOCK_SIZE,
+        PCIE_CQ_MFB_ITEM_WIDTH,
+
+        CHANNELS,
+        HDR_META_WIDTH,
+        DATA_POINTER_WIDTH,
+        PKT_SIZE_MAX,
+        PCIE_LEN_MAX
+    ) m_env;
+
+    uvm_reg_data_t pkt_cnt          [CHANNELS];
     uvm_reg_data_t byte_cnt         [CHANNELS];
-    uvm_reg_data_t discard_dma_cnt  [CHANNELS];
+    uvm_reg_data_t discard_pkt_cnt  [CHANNELS];
     uvm_reg_data_t discard_byte_cnt [CHANNELS];
     uvm_status_e   status_r;
 
@@ -33,49 +49,49 @@ class base extends uvm_test;
     endfunction
 
     function void build_phase(uvm_phase phase);
-        m_env = uvm_dma_ll::env #(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE, USER_TX_MFB_ITEM_WIDTH, PCIE_CQ_MFB_REGIONS,
-                                  PCIE_CQ_MFB_REGION_SIZE, PCIE_CQ_MFB_BLOCK_SIZE, PCIE_CQ_MFB_ITEM_WIDTH, PCIE_LEN_MAX, CHANNELS, PKT_SIZE_MAX, MI_WIDTH, DEVICE, DATA_POINTER_WIDTH)::type_id::create("m_env", this);
+        m_env = uvm_tx_dma_calypte::env #(DEVICE, MI_WIDTH,
+                                          USR_MFB_REGIONS, USR_MFB_REGION_SIZE, USR_MFB_BLOCK_SIZE, USR_MFB_ITEM_WIDTH,
+                                          PCIE_CQ_MFB_REGIONS, PCIE_CQ_MFB_REGION_SIZE, PCIE_CQ_MFB_BLOCK_SIZE, PCIE_CQ_MFB_ITEM_WIDTH,
+                                          CHANNELS, HDR_META_WIDTH, DATA_POINTER_WIDTH, PKT_SIZE_MAX, PCIE_LEN_MAX)::type_id::create("m_env", this);
     endfunction
 
-    // ------------------------------------------------------------------------
-    // Create environment and Run sequences o their sequencers
     virtual task run_phase(uvm_phase phase);
-        time time_start;
-        virt_seq#(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE, USER_TX_MFB_ITEM_WIDTH,
-                  CHANNELS, PKT_SIZE_MAX) m_vseq;
+        time end_time;
+        virt_seq #(USR_MFB_REGIONS, USR_MFB_REGION_SIZE, USR_MFB_BLOCK_SIZE, USR_MFB_ITEM_WIDTH,
+                   CHANNELS, HDR_META_WIDTH, PKT_SIZE_MAX) m_virt_seq;
 
-        //CREATE SEQUENCES
-        m_vseq = virt_seq#(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE, USER_TX_MFB_ITEM_WIDTH,
-                           CHANNELS, PKT_SIZE_MAX)::type_id::create("m_vseq");
+        m_virt_seq = virt_seq #(USR_MFB_REGIONS, USR_MFB_REGION_SIZE, USR_MFB_BLOCK_SIZE, USR_MFB_ITEM_WIDTH,
+                                CHANNELS, HDR_META_WIDTH, PKT_SIZE_MAX)::type_id::create("m_virt_seq");
 
-        //RISE OBJECTION
         phase.raise_objection(this);
 
-        m_vseq.init();
-        m_vseq.randomize();
-        m_vseq.start(m_env.m_sequencer);
+        m_virt_seq.init();
+        m_virt_seq.randomize();
+        m_virt_seq.start(m_env.m_sequencer);
 
-        time_start = $time();
-        while((time_start + 500us) > $time() && m_env.sc.used()) begin
+        end_time = $time();
+        `uvm_info(this.get_full_name(), $sformatf("\n\tVirtual sequence finished (%0d ns). Scoreboard used: %0d", end_time/1ns, m_env.m_scoreboard.used()), UVM_HIGH);
+
+        while((end_time + 200us) > $time() && (m_env.m_scoreboard.used() != 0)) begin
             #(600ns);
+            `uvm_info(this.get_full_name(), $sformatf("\n\tWaiting after virtual sequence finished."), UVM_HIGH);
         end
 
-
         for (int unsigned chan = 0; chan < CHANNELS; chan++) begin
-            m_env.m_regmodel.m_regmodel.channel[chan].sent_packets.write(status_r, {32'h1, 32'h1});
-            m_env.m_regmodel.m_regmodel.channel[chan].sent_packets.read(status_r, dma_cnt[chan]);
-            m_env.m_regmodel.m_regmodel.channel[chan].sent_bytes.write(status_r, {32'h1, 32'h1});
-            m_env.m_regmodel.m_regmodel.channel[chan].sent_bytes.read(status_r, byte_cnt[chan]);
+            m_env.m_regmodel_top.m_regmodel.m_regmodel_channel[chan].sent_packets_reg.write(status_r, {32'h1, 32'h1});
+            m_env.m_regmodel_top.m_regmodel.m_regmodel_channel[chan].sent_packets_reg.read(status_r, pkt_cnt[chan]);
+            m_env.m_regmodel_top.m_regmodel.m_regmodel_channel[chan].sent_bytes_reg.write(status_r, {32'h1, 32'h1});
+            m_env.m_regmodel_top.m_regmodel.m_regmodel_channel[chan].sent_bytes_reg.read(status_r, byte_cnt[chan]);
 
-            m_env.m_regmodel.m_regmodel.channel[chan].discarded_packets.write(status_r, {32'h1, 32'h1});
-            m_env.m_regmodel.m_regmodel.channel[chan].discarded_packets.read(status_r, discard_dma_cnt[chan]);
-            m_env.m_regmodel.m_regmodel.channel[chan].discarded_bytes.write(status_r, {32'h1, 32'h1});
-            m_env.m_regmodel.m_regmodel.channel[chan].discarded_bytes.read(status_r, discard_byte_cnt[chan]);
+            m_env.m_regmodel_top.m_regmodel.m_regmodel_channel[chan].discarded_packets_reg.write(status_r, {32'h1, 32'h1});
+            m_env.m_regmodel_top.m_regmodel.m_regmodel_channel[chan].discarded_packets_reg.read(status_r, discard_pkt_cnt[chan]);
+            m_env.m_regmodel_top.m_regmodel.m_regmodel_channel[chan].discarded_bytes_reg.write(status_r, {32'h1, 32'h1});
+            m_env.m_regmodel_top.m_regmodel.m_regmodel_channel[chan].discarded_bytes_reg.read(status_r, discard_byte_cnt[chan]);
 
-            m_env.sc.byte_cnt[chan]         = byte_cnt[chan];
-            m_env.sc.dma_cnt[chan]          = dma_cnt[chan];
-            m_env.sc.discard_byte_cnt[chan] = discard_byte_cnt[chan];
-            m_env.sc.discard_dma_cnt[chan]  = discard_dma_cnt[chan];
+            m_env.m_scoreboard.byte_cnt[chan]         = byte_cnt[chan];
+            m_env.m_scoreboard.pkt_cnt[chan]          = pkt_cnt[chan];
+            m_env.m_scoreboard.discard_byte_cnt[chan] = discard_byte_cnt[chan];
+            m_env.m_scoreboard.discard_pkt_cnt[chan]  = discard_pkt_cnt[chan];
         end
 
         phase.drop_objection(this);
@@ -84,5 +100,4 @@ class base extends uvm_test;
     function void report_phase(uvm_phase phase);
         `uvm_info(this.get_full_name(), {"\n\tTEST : ", this.get_type_name(), " END\n"}, UVM_NONE);
     endfunction
-
 endclass

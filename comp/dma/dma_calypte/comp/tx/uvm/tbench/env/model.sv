@@ -4,371 +4,292 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause
 
-class discard #(CHANNELS) extends uvm_component;
-    `uvm_component_param_utils(uvm_dma_ll::discard #(CHANNELS))
+class discard #(int unsigned CHANNELS) extends uvm_component;
+    `uvm_component_param_utils(uvm_tx_dma_calypte::discard #(CHANNELS))
 
-    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(1)) analysis_imp_rx_dma;
-    logic drop = 0;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(1)) m_internal_meta_analysis_fifo;
 
     function new(string name, uvm_component parent = null);
         super.new(name, parent);
-        analysis_imp_rx_dma = new("analysis_imp_rx_dma", this);
+        m_internal_meta_analysis_fifo = new("m_internal_meta_analysis_fifo", this);
     endfunction
 
-    task get_tr();
+    task get_tr(output logic drop);
         uvm_logic_vector::sequence_item#(1) drop_tr;
-        analysis_imp_rx_dma.get(drop_tr);
+        m_internal_meta_analysis_fifo.get(drop_tr);
         drop = drop_tr.data;
     endtask
-
 endclass
 
 //model
-class model #(CHANNELS, USR_ITEM_WIDTH, USER_META_WIDTH, CQ_ITEM_WIDTH, DATA_ADDR_W) extends uvm_component;
-    `uvm_component_param_utils(uvm_dma_ll::model #(CHANNELS, USR_ITEM_WIDTH, USER_META_WIDTH,
-                                                   CQ_ITEM_WIDTH, DATA_ADDR_W))
+class model #(
+    int unsigned USR_MFB_ITEM_WIDTH,
+    int unsigned PCIE_CQ_MFB_ITEM_WIDTH,
+    int unsigned CHANNELS,
+    int unsigned DATA_POINTER_WIDTH,
+    int unsigned USR_MFB_META_WIDTH,
+) extends uvm_component;
 
-    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item#(CQ_ITEM_WIDTH))                            analysis_imp_rx;
-    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(sv_pcie_meta_pack::PCIE_CQ_META_WIDTH))          analysis_imp_rx_meta;
-    uvm_analysis_port     #(uvm_logic_vector_array::sequence_item#(USR_ITEM_WIDTH))                            analysis_port_tx;
-    uvm_analysis_port     #(uvm_logic_vector::sequence_item#(USER_META_WIDTH))                                analysis_port_meta_tx;
-    local uvm_dma_regs::regmodel#(CHANNELS)                                                                   m_regmodel;
+    `uvm_component_param_utils(uvm_tx_dma_calypte::model #(USR_MFB_ITEM_WIDTH, PCIE_CQ_MFB_ITEM_WIDTH, CHANNELS, DATA_POINTER_WIDTH, USR_MFB_META_WIDTH))
 
-    uvm_dma_ll::discard#(CHANNELS) discard_comp;
+    localparam DATA_ADDR_MASK = 2**DATA_POINTER_WIDTH-1;
 
+    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item #(PCIE_CQ_MFB_ITEM_WIDTH))                m_cq_data_analysis_fifo;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector      ::sequence_item #(sv_pcie_meta_pack::PCIE_CQ_META_WIDTH)) m_cq_meta_analysis_fifo;
+    uvm_analysis_port     #(uvm_logic_vector_array::sequence_item #(USR_MFB_ITEM_WIDTH))                    m_usr_data_analysis_port;
+    uvm_analysis_port     #(uvm_logic_vector      ::sequence_item #(USR_MFB_META_WIDTH))                    m_usr_meta_analysis_port;
+
+    local uvm_tx_dma_calypte_regs::regmodel_top #(CHANNELS) m_regmodel_top;
+
+    protected int unsigned m_discard_wait;
+    discard #(CHANNELS) m_discard_comp;
+
+    // Counters for all of the channels
+    protected int unsigned m_pcie_transactions;
+    protected int unsigned m_dma_transactions;
+    protected int unsigned m_drop_transactions;
+
+    // Channel specific statisics
     typedef struct{
-        logic [11-1 : 0]                                        dword_cnt;
-        logic [$clog2(CHANNELS)-1 : 0]                          channel;
-        logic [2-1 : 0]                                         fbe[CHANNELS];
-        logic [2-1 : 0]                                         lbe[CHANNELS];
-        logic [4-1 : 0]                                         fbe_vld[CHANNELS];
-        logic [4-1 : 0]                                         lbe_vld[CHANNELS];
-        logic                                                   hdr_identifier;
-        logic [DATA_ADDR_W-2-1 : 0]                             addr;
-        uvm_logic_vector_array::sequence_item #(USR_ITEM_WIDTH) pcie_data;
-    } pcie_info;
-    local pcie_info m_pcie_info;
+        int unsigned pcie_transactions;
+        int unsigned dma_transactions;
+        int unsigned drop_transactions;
 
-    typedef struct{
-        logic [2-1 : 0] run; //[0] -> run, [1] -> soft compare
-        logic           status[CHANNELS] ;
-        logic           control[CHANNELS];
-    } model_info;
-    local model_info m_model_info;
+        int unsigned dma_transactions_bytes;
+        int unsigned drop_transactions_bytes;
 
-    typedef struct{
-        logic [16-1 : 0] dma_size     = '0;
-        logic [24-1 : 0] dma_meta     = '0;
-        logic [16-1 : 0] frame_pointer    ;
-    } dma_info;
-    local dma_info dma_hdr;
+        time  infs[string];
 
-    typedef struct{
-        int unsigned dma_cnt            = 0;
-        int unsigned byte_cnt           = 0;
-        int unsigned discard_dma_cnt    = 0;
-        int unsigned discard_byte_cnt   = 0;
-        logic        read_valid         = 1'b1;
-        int unsigned read_delay_discard = 0;
-    } dma_cnt_reg;
-    dma_cnt_reg cnt_reg [CHANNELS];
+        logic [8-1:0] memory [2**DATA_POINTER_WIDTH];
+    } channel_info_t;
+
+    channel_info_t m_channel_info [CHANNELS];
 
     function new (string name, uvm_component parent = null);
         super.new(name, parent);
-        analysis_imp_rx       = new("analysis_imp_rx", this);
-        analysis_imp_rx_meta  = new("analysis_imp_rx_meta", this);
-        analysis_port_tx      = new("analysis_port_tx", this);
-        analysis_port_meta_tx = new("analysis_port_meta_tx", this);
-        discard_comp          = uvm_dma_ll::discard#(CHANNELS)::type_id::create("discard_comp", this);
+
+        m_cq_data_analysis_fifo  = new("m_cq_data_analysis_fifo",  this);
+        m_cq_meta_analysis_fifo  = new("m_cq_meta_analysis_fifo",  this);
+        m_usr_data_analysis_port = new("m_usr_data_analysis_port", this);
+        m_usr_meta_analysis_port = new("m_usr_meta_analysis_port", this);
+
+        m_pcie_transactions = 0;
+        m_dma_transactions  = 0;
+        m_drop_transactions = 0;
+
+        for (int unsigned it = 0; it < CHANNELS; it++) begin
+            m_channel_info[it].pcie_transactions       = 0;
+            m_channel_info[it].dma_transactions        = 0;
+            m_channel_info[it].drop_transactions       = 0;
+            m_channel_info[it].dma_transactions_bytes  = 0;
+            m_channel_info[it].drop_transactions_bytes = 0;
+        end
     endfunction
 
-    function void regmodel_set(uvm_dma_regs::regmodel#(CHANNELS) m_regmodel);
-        this.m_regmodel = m_regmodel;
+    function void regmodel_set(uvm_tx_dma_calypte_regs::regmodel_top #(CHANNELS) regmodel);
+        this.m_regmodel_top = regmodel;
     endfunction
 
-    function logic[4-1 : 0] count_fbe_vld(logic [4-1 : 0] be);
-        logic[4-1 : 0] ret;
-        casex (be)
-            4'b1xx1 : ret = 4'b1111;
-            4'b01x1 : ret = 4'b0111;
-            4'b1x10 : ret = 4'b1110;
-            4'b0011 : ret = 4'b0011;
-            4'b0110 : ret = 4'b0110;
-            4'b1100 : ret = 4'b1100;
-            4'b0001 : ret = 4'b0001;
-            4'b0010 : ret = 4'b0010;
-            4'b0100 : ret = 4'b0100;
-            4'b1000 : ret = 4'b1000;
-            4'b0000 : ret = 4'b0000;
-        endcase
+    function void time_add (int unsigned channel, time inf_time[string], int unsigned id);
+        foreach(inf_time[it]) begin
+           m_channel_info[channel].infs[$sformatf("%s(%0d)", it, id)] = inf_time[it];
+        end
+    endfunction
+
+    function int unsigned used();
+        int unsigned ret = 0;
+        ret |= (m_cq_data_analysis_fifo.used() != 0);
+        ret |= (m_cq_meta_analysis_fifo.used() != 0);
+        ret |= m_discard_wait;
         return ret;
     endfunction
 
+    function void build_phase(uvm_phase phase);
+        m_discard_comp = discard #(CHANNELS)::type_id::create("m_discard_comp", this);
+    endfunction
+
+    function int unsigned encode_fbe(logic [PCIE_CQ_MFB_ITEM_WIDTH/8-1 : 0] be);
+        int unsigned it = 0;
+
+        if (be != 0) begin
+            while (it < PCIE_CQ_MFB_ITEM_WIDTH/8 && be[it] == 0) begin
+                it++;
+            end
+        end
+        return it;
+    endfunction
+
+    function int unsigned encode_lbe(logic [PCIE_CQ_MFB_ITEM_WIDTH/8-1 : 0] be);
+        int unsigned it  = PCIE_CQ_MFB_ITEM_WIDTH/8;
+
+        if (be != 0) begin
+            while (it > 0 && be[it-1] == 0) begin
+                it--;
+            end;
+        end
+        return it;
+    endfunction
+
     task run_phase(uvm_phase phase);
+        uvm_logic_vector_array::sequence_item#(PCIE_CQ_MFB_ITEM_WIDTH)          cq_data_tr;
+        uvm_logic_vector::sequence_item#(sv_pcie_meta_pack::PCIE_CQ_META_WIDTH) cq_meta_tr;
+        uvm_logic_vector_array::sequence_item#(USR_MFB_ITEM_WIDTH)              usr_tx_data_tr;
+        uvm_logic_vector::sequence_item#(USR_MFB_META_WIDTH)                    usr_tx_meta_tr;
 
-        uvm_logic_vector_array::sequence_item#(CQ_ITEM_WIDTH)                            in_data_tr;
-        uvm_logic_vector_array::sequence_item#(CQ_ITEM_WIDTH)                            data_tr[CHANNELS];
-        uvm_logic_vector_array::sequence_item#(USR_ITEM_WIDTH)                           pcie_data_tr[CHANNELS];
-        uvm_logic_vector_array::sequence_item#(USR_ITEM_WIDTH)                           out_data_tr;
-        uvm_logic_vector::sequence_item#(sv_pcie_meta_pack::PCIE_CQ_META_WIDTH)          meta_tr;
-        uvm_logic_vector::sequence_item#(USER_META_WIDTH)                                out_meta_tr;
-
-        logic [USR_ITEM_WIDTH-1 : 0] dma_memory[CHANNELS][logic [DATA_ADDR_W-1 : 0]];
-
-        uvm_reg_data_t   dma_cnt         ;
-        uvm_reg_data_t   byte_cnt        ;
-        uvm_reg_data_t   discard_dma_cnt ;
-        uvm_reg_data_t   discard_byte_cnt;
-        uvm_status_e     status_r        ;
-        string           debug_msg       ;
-        int unsigned     data_index  = 0 ;
-        int unsigned     sw_move     = 0 ;
-        int unsigned     tr_cnt      = 0 ;
+        string                         debug_msg;
+        logic                          drop;
+        logic [DATA_POINTER_WIDTH-1:2] addr;
+        int unsigned                   dword_cnt;
+        logic [$clog2(CHANNELS)-1:0]   channel;
+        logic [1-1:0]                  hdr_inf;
+        logic                          res;
+        int unsigned                   fbe;
+        int unsigned                   lbe;
 
         forever begin
+            int unsigned   start_it;
+            logic [64-1:0] pcie_addr;
 
-           for (int chan = 0; chan < CHANNELS; chan++) begin
-                string i_string;
-                i_string.itoa(chan);
-                pcie_data_tr[chan] = uvm_logic_vector_array::sequence_item #(USR_ITEM_WIDTH)::type_id::create({"pcie_data_tr_", i_string});
-                data_tr[chan]      = uvm_logic_vector_array::sequence_item #(CQ_ITEM_WIDTH)::type_id::create({"data_tr_", i_string});
+            //GET PCIE TRANSACTION
+            m_cq_data_analysis_fifo.get(cq_data_tr);
+            m_cq_meta_analysis_fifo.get(cq_meta_tr);
+
+            m_discard_wait = 1;
+            // Get information if the current transaction should be dropped
+            m_discard_comp.get_tr(drop);
+            m_discard_wait = 0;
+
+            dword_cnt  = cq_data_tr.item.data[2][11-1 : 0];
+            if (dword_cnt == 0) begin
+                dword_cnt  = 1024;
             end
 
-            out_data_tr = uvm_logic_vector_array::sequence_item #(USR_ITEM_WIDTH)::type_id::create("out_data_tr", this);
-            out_meta_tr = uvm_logic_vector::sequence_item #(USER_META_WIDTH)::type_id::create("out_meta_tr");
+            pcie_addr  = {cq_data_tr.item.data[1], cq_data_tr.item.data[0]};
+            addr       = pcie_addr[DATA_POINTER_WIDTH-1 : 2];
+            channel    = pcie_addr[(DATA_POINTER_WIDTH+1+$clog2(CHANNELS))-1 : DATA_POINTER_WIDTH+1];
+            hdr_inf    = pcie_addr[(DATA_POINTER_WIDTH+1+$clog2(CHANNELS))];
+
+            m_pcie_transactions++;
+            m_channel_info[channel].pcie_transactions++;
 
             debug_msg = "\n";
-            debug_msg = {debug_msg, $sformatf("================ MODEL - WAIT FOR DATA ==================== \n")};
-            `uvm_info(this.get_full_name(), debug_msg, UVM_FULL)
+            debug_msg = { debug_msg, $sformatf("================================================================================= \n")};
+            debug_msg = { debug_msg, $sformatf("MODEL INPUT PCIe TRANSACTION %0d\n", m_pcie_transactions)};
+            debug_msg = { debug_msg, $sformatf("================================================================================= \n")};
+            debug_msg = { debug_msg, $sformatf("CHANNEL     : %0d\n", channel)};
+            debug_msg = { debug_msg, $sformatf("TRANSACTION : %0d\n", m_channel_info[channel].pcie_transactions)};
+            debug_msg = { debug_msg, $sformatf("DROP        : %0d\n", drop)};
+            debug_msg = { debug_msg, $sformatf("ADDR        : %0d\n", {addr, 2'b00})};
+            debug_msg = { debug_msg, $sformatf("HDR FLAG    : %0b\n", (hdr_inf != 1'b0))};
+            debug_msg = { debug_msg, $sformatf("DW CNT      : %0d\n", dword_cnt)};
+            debug_msg = { debug_msg, $sformatf("FBE         : %b\n", cq_meta_tr.item.data[167-1 : 163])};
+            debug_msg = { debug_msg, $sformatf("LBE         : %b\n", dword_cnt > 1 ? cq_meta_tr.item.data[171-1 : 167] : cq_meta_tr.item.data[167-1 : 163])};
+            debug_msg = { debug_msg, $sformatf("DATA        : %s\n", cq_data_tr.convert2string())};
+            debug_msg = { debug_msg, $sformatf("================================================================================= \n")};
+            `uvm_info(this.get_full_name(), debug_msg, UVM_MEDIUM);
 
-            analysis_imp_rx.get(in_data_tr);
-            out_data_tr.start["model mfb out"] = $time();
-
-            debug_msg = "\n";
-            debug_msg = {debug_msg, $sformatf("================ MODEL - WAIT FOR META ==================== \n")};
-            `uvm_info(this.get_full_name(), debug_msg, UVM_FULL)
-
-            analysis_imp_rx_meta.get(meta_tr);
-
-            m_pcie_info.dword_cnt      = in_data_tr.data[2][11-1 : 0];
-            m_pcie_info.addr           = in_data_tr.data[0][DATA_ADDR_W-1 : 2];
-            m_pcie_info.channel        = in_data_tr.data[0][(DATA_ADDR_W+1+$clog2(CHANNELS))-1 : DATA_ADDR_W+1];
-            m_pcie_info.hdr_identifier = in_data_tr.data[0][(DATA_ADDR_W+1+$clog2(CHANNELS))];
-
-            if (m_pcie_info.dword_cnt > 1) begin
-                m_pcie_info.fbe[int'(m_pcie_info.channel)] = sv_dma_bus_pack::encode_fbe(meta_tr.data[167-1 : 163]);
-                m_pcie_info.lbe[int'(m_pcie_info.channel)] = sv_dma_bus_pack::encode_lbe(meta_tr.data[171-1 : 167]);
-            end else begin
-                m_pcie_info.lbe[int'(m_pcie_info.channel)]     = '0;
-                m_pcie_info.fbe[int'(m_pcie_info.channel)]     = '0;
-                m_pcie_info.lbe_vld[int'(m_pcie_info.channel)] = meta_tr.data[167-1 : 163];
-                m_pcie_info.lbe_vld[int'(m_pcie_info.channel)] = count_fbe_vld(meta_tr.data[167-1 : 163]);
-            end
-
-            discard_comp.get_tr();
-
-            debug_msg = "\n";
-            tr_cnt++;
-            debug_msg = {debug_msg, $sformatf("================================================================================= \n")};
-            debug_msg = {debug_msg, $sformatf("MODEL INPUT PCIe TRANSACTION %0d\n",  tr_cnt)};
-            debug_msg = {debug_msg, $sformatf("================================================================================= \n")};
-            debug_msg = {debug_msg, $sformatf("CHANNEL   : %0d\n",  int'(m_pcie_info.channel))};
-            debug_msg = {debug_msg, $sformatf("HDR FLAG  : %0b\n",  (m_pcie_info.hdr_identifier != 1'b0))};
-            debug_msg = {debug_msg, $sformatf("DW CNT    : %0d\n",  m_pcie_info.dword_cnt)};
-            debug_msg = {debug_msg, $sformatf("FBE       : %b\n",  meta_tr.data[167-1 : 163])};
-            debug_msg = {debug_msg, $sformatf("DFBE      : %d\n",  m_pcie_info.fbe[int'(m_pcie_info.channel)])};
-            debug_msg = {debug_msg, $sformatf("LBE       : %b\n",  meta_tr.data[171-1 : 167])};
-            debug_msg = {debug_msg, $sformatf("DLBE      : %d\n",  m_pcie_info.lbe[int'(m_pcie_info.channel)])};
-            //debug_msg = {debug_msg, $sformatf("DROP FLAG : %0b\n",  (m_model_info.run[0] && discard_comp.drop == 0))};
-            debug_msg = {debug_msg, $sformatf("DATA      : %s\n",  in_data_tr.convert2string())};
-            debug_msg = {debug_msg, $sformatf("================================================================================= \n")};
-            `uvm_info(this.get_full_name(), debug_msg, UVM_FULL)
-
-            m_model_info.run[0] = (m_regmodel.channel[m_pcie_info.channel].status.get() & 32'h1 ) | (m_regmodel.channel[m_pcie_info.channel].control.get() & 32'h1);
-            m_model_info.run[1] = (m_regmodel.channel[m_pcie_info.channel].status.get() & 32'h1 ) ^ (m_regmodel.channel[m_pcie_info.channel].control.get() & 32'h1);
-
-            m_model_info.status[m_pcie_info.channel]  = m_regmodel.channel[m_pcie_info.channel].status.get() & 32'h1;
-            m_model_info.control[m_pcie_info.channel] = m_regmodel.channel[m_pcie_info.channel].control.get() & 32'h1;
-
-            if (m_model_info.run[0] && discard_comp.drop == 0) begin
-                data_tr[int'(m_pcie_info.channel)].data = new[m_pcie_info.dword_cnt];
-                for (int unsigned it = 0; it < (in_data_tr.data.size()-4); it++) begin
-                    data_tr[int'(m_pcie_info.channel)].data[it] = in_data_tr.data[it+4];
-                end
-
-                pcie_data_tr[int'(m_pcie_info.channel)].data = new[(data_tr[int'(m_pcie_info.channel)].data.size()*4)];
-
-                // Unpack data from 32b to 8b
-                for (int unsigned it = 0; it < data_tr[int'(m_pcie_info.channel)].data.size(); it++) begin
-                    pcie_data_tr[int'(m_pcie_info.channel)].data[it*4 +: 4] = {<<8{data_tr[int'(m_pcie_info.channel)].data[it]}};
-                end
-
-                m_pcie_info.pcie_data = pcie_data_tr[int'(m_pcie_info.channel)];
-
-                debug_msg = "\n";
-                debug_msg = {debug_msg, $sformatf("MODEL INPUT PCIe TRANSACTION %0d -- CONVERSION TO BYTES\n",  tr_cnt)};
-                debug_msg = {debug_msg, $sformatf("================================================================================= \n")};
-                debug_msg = {debug_msg, $sformatf("SIZE IN BYTES : %0d\n",  data_tr[int'(m_pcie_info.channel)].data.size()*4)};
-                debug_msg = {debug_msg, $sformatf("DATA : %s\n",  pcie_data_tr[int'(m_pcie_info.channel)].convert2string())};
-                debug_msg = {debug_msg, $sformatf("================================================================================= \n")};
-                `uvm_info(this.get_full_name(),        debug_msg, UVM_FULL)
-                sw_move = 0;
-
-                // If PCIE transaction is not DMA HDR, insert it to DMA FRAME
-                if (m_pcie_info.hdr_identifier == 1'b0) begin
-                    if (m_pcie_info.dword_cnt == 1) begin
-                        for (int unsigned it = 0; it < 4; it++) begin
-                            if (m_pcie_info.lbe_vld[int'(m_pcie_info.channel)][it] == 1'b1) begin
-                                dma_memory[int'(m_pcie_info.channel)][m_pcie_info.addr*4+it] = pcie_data_tr[int'(m_pcie_info.channel)].data[it];
-                                sw_move++;
-                            end
-                        end
-                    end else begin
-                        for (int unsigned it = int'(m_pcie_info.fbe[int'(m_pcie_info.channel)]); it < pcie_data_tr[int'(m_pcie_info.channel)].data.size() - int'(m_pcie_info.lbe[int'(m_pcie_info.channel)]); it++) begin
-                            dma_memory[int'(m_pcie_info.channel)][m_pcie_info.addr*4+it] = pcie_data_tr[int'(m_pcie_info.channel)].data[it];
-                        end
-                        sw_move = pcie_data_tr[int'(m_pcie_info.channel)].data.size() - int'(m_pcie_info.lbe[int'(m_pcie_info.channel)]) - int'(m_pcie_info.fbe[int'(m_pcie_info.channel)]);
+            //if PCIE transaction is not DMA HEADER
+            if (hdr_inf == 1'b0) begin
+                fbe = encode_fbe(cq_meta_tr.item.data[167-1 : 163]);
+                if (dword_cnt <= 1) begin
+                    lbe = encode_lbe(cq_meta_tr.item.data[167-1 : 163]);
+                    for (int unsigned it = fbe; it < lbe; it++) begin
+                         m_channel_info[channel].memory[{addr, 2'b00} + it] = cq_data_tr.item.data[4][(it+1)*8-1 -: 8];
                     end
-
-                    debug_msg = "";
-                    debug_msg = {debug_msg, $sformatf("CHANNEL       : %0d\n",  m_pcie_info.channel)};
-                    debug_msg = {debug_msg, $sformatf("PCIE ADDR     : 0x%0h (%0d)\n",  m_pcie_info.addr, m_pcie_info.addr)};
-                    debug_msg = {debug_msg, $sformatf("FBE           : %0d\n",  m_pcie_info.fbe[int'(m_pcie_info.channel)])};
-                    debug_msg = {debug_msg, $sformatf("LBE           : %0d\n",  m_pcie_info.lbe[int'(m_pcie_info.channel)])};
-                    debug_msg = {debug_msg, $sformatf("DW CNT        : %0d\n",  m_pcie_info.dword_cnt)};
-                    debug_msg = {debug_msg, $sformatf("SIZE IN BYTES : %0d\n",  pcie_data_tr[int'(m_pcie_info.channel)].data.size())};
-                    debug_msg = {debug_msg, $sformatf("================================================================================= \n")};
-                    `uvm_info(this.get_full_name(),       debug_msg, UVM_FULL)
-                // If PCIE transaction is DMA HDR, construct metadata and and DMA FRAME wihtout HDR
                 end else begin
-                    // DMA HDR construction
-                    dma_hdr.dma_size      = in_data_tr.data[4][15 : 0];
-                    dma_hdr.frame_pointer = in_data_tr.data[4][31 : 16];
-                    dma_hdr.dma_meta      = in_data_tr.data[5][31 : 8];
-                    out_meta_tr.data      = {dma_hdr.dma_size, m_pcie_info.channel, dma_hdr.dma_meta};
+                    logic [DATA_POINTER_WIDTH-1:0] addr_act = {addr, 2'b00};
+                    lbe = encode_lbe(cq_meta_tr.item.data[171-1 : 167]);
+                    //peeling start
+                    for (int unsigned it = fbe; it < 4; it++) begin
+                         m_channel_info[channel].memory[addr_act + it] = cq_data_tr.item.data[4][(it+1)*8-1 -: 8];
+                    end
+                    addr_act = (addr_act + 4) & DATA_ADDR_MASK;
+                    //Main loop
+                    for (int unsigned it = 1; (it+1) < dword_cnt; it++) begin
+                         {<<8{m_channel_info[channel].memory[addr_act +: 4]}} = cq_data_tr.item.data[4 + it];
+                         addr_act = (addr_act + 4) & DATA_ADDR_MASK;
+                    end
+                    //peeling end
+                    for (int unsigned it = 0; it < lbe; it++) begin
+                         m_channel_info[channel].memory[addr_act + it] = cq_data_tr.item.data[4 + dword_cnt-1][(it+1)*8-1 -: 8];
+                    end
+                end
 
-                    out_data_tr.data = new[dma_hdr.dma_size];
+                this.time_add (channel, cq_data_tr.start, m_pcie_transactions);
+                this.time_add (channel, cq_meta_tr.start, m_pcie_transactions);
+            end else begin
+
+                //if PCIE transaction is DMA HEADER then create output packečt and send it
+                logic [16-1 : 0] packet_size;
+                logic [24-1 : 0] dma_meta;
+                logic [DATA_POINTER_WIDTH-1 : 0] frame_pointer;
+
+                packet_size   = cq_data_tr.item.data[4][16-1 : 0];
+                frame_pointer = cq_data_tr.item.data[4][32-1 : 16];
+                dma_meta      = cq_data_tr.item.data[5][32-1 : 8];
+
+                if (drop == 1'b0) begin
+                    usr_tx_data_tr      = uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(USR_MFB_ITEM_WIDTH))::type_id::create("usr_tx_data_tr", this);
+                    usr_tx_data_tr.item = uvm_logic_vector_array::sequence_item #(USR_MFB_ITEM_WIDTH)::type_id::create("usr_tx_data_tr.item", this);
+                    usr_tx_meta_tr      = uvm_common::model_item #(uvm_logic_vector::sequence_item #(USR_MFB_META_WIDTH))::type_id::create("usr_tx_meta_tr", this);
+                    usr_tx_meta_tr.item = uvm_logic_vector::sequence_item #(USR_MFB_META_WIDTH)::type_id::create("usr_tx_meta_tr.item", this);
+
+                    usr_tx_data_tr.start = m_channel_info[channel].infs;
+                    usr_tx_data_tr.time_array_add(cq_data_tr.start);
+                    usr_tx_data_tr.time_array_add(cq_meta_tr.start);
+                    usr_tx_meta_tr.start = m_channel_info[channel].infs;
+                    usr_tx_meta_tr.time_array_add(cq_data_tr.start);
+                    usr_tx_meta_tr.time_array_add(cq_meta_tr.start);
+
+                    usr_tx_data_tr.data = new[packet_size];
+                    for (int unsigned it = 0; it < packet_size; it++) begin
+                        int unsigned dma_mem_addr = (frame_pointer + it) & DATA_ADDR_MASK;
+                        usr_tx_data_tr.data[it] = m_channel_info[channel].memory[dma_mem_addr];
+                    end
+                    usr_tx_meta_tr.data = {packet_size, channel, dma_meta};
+
+                    m_dma_transactions++;
+                    m_channel_info[channel].dma_transactions++;
+                    m_channel_info[channel].dma_transactions_bytes += packet_size;
 
                     debug_msg = "\n";
-                    debug_msg = {debug_msg, $sformatf("CHANNEL              : %0d\n",  int'(m_pcie_info.channel))};
-                    debug_msg = {debug_msg, $sformatf("FRAME POINTER        : %0d\n",  dma_hdr.frame_pointer)};
-                    debug_msg = {debug_msg, $sformatf("SIZE IN BYTES        : %0d\n",  dma_hdr.dma_size)};
-                    debug_msg = {debug_msg, $sformatf("METADATA             : %0d\n",  dma_hdr.dma_meta)};
                     debug_msg = {debug_msg, $sformatf("================================================================================= \n")};
-                    `uvm_info(this.get_full_name(), debug_msg, UVM_FULL)
+                    debug_msg = {debug_msg, $sformatf("MODEL OUTPUT DMA TRANSACTION %0d\n", m_dma_transactions)};
+                    debug_msg = {debug_msg, $sformatf("================================================================================= \n")};
+                    debug_msg = {debug_msg, $sformatf("CHANNEL              : %0d\n", channel)};
+                    debug_msg = {debug_msg, $sformatf("TRANSACTION          : %0d\n", m_channel_info[channel].dma_transactions)};
+                    debug_msg = {debug_msg, $sformatf("FRAME POINTER        : %0d\n", frame_pointer)};
+                    debug_msg = {debug_msg, $sformatf("SIZE IN BYTES        : %0d\n", packet_size)};
+                    debug_msg = {debug_msg, $sformatf("================================================================================= \n")};
+                    debug_msg = {debug_msg, $sformatf("OUT META: %s\n", usr_tx_meta_tr.convert2string())};
+                    debug_msg = {debug_msg, $sformatf("OUT DATA: %s\n", usr_tx_data_tr.convert2string())};
+                    debug_msg = {debug_msg, $sformatf("================================================================================= \n")};
+                    `uvm_info(this.get_full_name(), debug_msg, UVM_MEDIUM)
 
-                    sw_move = 8;
+                    m_usr_data_analysis_port.write(usr_tx_data_tr);
+                    m_usr_meta_analysis_port.write(usr_tx_meta_tr);
+                end else begin
+                    m_drop_transactions++;
+                    m_channel_info[channel].drop_transactions++;
+                    m_channel_info[channel].drop_transactions_bytes += packet_size;
 
-                    data_index = 0;
-                    for (int unsigned it = dma_hdr.frame_pointer; it < dma_hdr.frame_pointer+dma_hdr.dma_size; it++) begin
-                        out_data_tr.data[data_index] = dma_memory[int'(m_pcie_info.channel)][it];
-                        data_index++;
-                    end
-
-                    if (out_data_tr.data.size() != dma_hdr.dma_size) begin
-                        debug_msg = "";
-                        debug_msg = {debug_msg, $sformatf("\nSize of transaction %d and size in HDR %d does not fit\n",  out_data_tr.data.size(), dma_hdr.dma_size)};
-                        `uvm_error(this.get_full_name(), debug_msg);
-                    end
-
-                    // Check if data are valid (channel is running and there is no drop)
-                    if (m_model_info.run[1] == 0 || (m_model_info.run[1] == 1 && discard_comp.drop == 0)) begin
-                        cnt_reg[int'(m_pcie_info.channel)].dma_cnt++;
-                        cnt_reg[int'(m_pcie_info.channel)].byte_cnt += dma_hdr.dma_size;
-
-                        debug_msg = "\n";
-                        debug_msg = {debug_msg, $sformatf("================================================================================= \n")};
-                        debug_msg = {debug_msg, $sformatf("MODEL OUTPUT DMA TRANSACTION %0d\n",  cnt_reg[int'(m_pcie_info.channel)].dma_cnt)};
-                        debug_msg = {debug_msg, $sformatf("================================================================================= \n")};
-                        debug_msg = {debug_msg, $sformatf("CHANNEL              : %0d\n",  int'(m_pcie_info.channel))};
-                        debug_msg = {debug_msg, $sformatf("FRAME POINTER        : %0d\n",  dma_hdr.frame_pointer)};
-                        debug_msg = {debug_msg, $sformatf("SIZE IN BYTES        : %0d\n",  dma_hdr.dma_size)};
-                        debug_msg = {debug_msg, $sformatf("CHANNEL STATUS FLAG  : %0b\n",  m_model_info.status[int'(m_pcie_info.channel)])};
-                        debug_msg = {debug_msg, $sformatf("CHANNEL CONTROL FLAG : %0b\n",  m_model_info.control[int'(m_pcie_info.channel)])};
-                        debug_msg = {debug_msg, $sformatf("================================================================================= \n")};
-                        debug_msg = {debug_msg, $sformatf("OUT META: %s\n",  out_meta_tr.convert2string())};
-                        debug_msg = {debug_msg, $sformatf("OUT DATA: %s\n",  out_data_tr.convert2string())};
-                        debug_msg = {debug_msg, $sformatf("================================================================================= \n")};
-                        `uvm_info(this.get_full_name(), debug_msg, UVM_MEDIUM)
-
-
-                        analysis_port_tx.write(out_data_tr);
-                        analysis_port_meta_tx.write(out_meta_tr);
-                    end
+                    debug_msg = "\n";
+                    debug_msg = {debug_msg, $sformatf("================================================================================= \n")};
+                    debug_msg = {debug_msg, $sformatf("MODEL DROP %0d\n", m_drop_transactions)};
+                    debug_msg = {debug_msg, $sformatf("================================================================================= \n")};
+                    debug_msg = {debug_msg, $sformatf("CHANNEL              : %0d\n", channel)};
+                    debug_msg = {debug_msg, $sformatf("TRANSACTION          : %0d\n", m_channel_info[channel].drop_transactions)};
+                    debug_msg = {debug_msg, $sformatf("FRAME POINTER        : %0d\n", frame_pointer)};
+                    debug_msg = {debug_msg, $sformatf("SIZE IN BYTES        : %0d\n", packet_size)};
+                    debug_msg = {debug_msg, $sformatf("================================================================================= \n")};
+                    debug_msg = {debug_msg, $sformatf("OUT META: %s\n", usr_tx_meta_tr.convert2string())};
+                    debug_msg = {debug_msg, $sformatf("OUT DATA: %s\n", usr_tx_data_tr.convert2string())};
+                    debug_msg = {debug_msg, $sformatf("================================================================================= \n")};
+                    `uvm_info(this.get_full_name(), debug_msg, UVM_MEDIUM)
                 end
+
+                m_channel_info[channel].infs.delete();
             end
-
-            // Counters checker
-            if (discard_comp.drop == 1) begin
-                cnt_reg[int'(m_pcie_info.channel)].read_delay_discard = 0;
-                if (m_pcie_info.hdr_identifier == 1'b1) begin
-                    dma_hdr.dma_size = in_data_tr.data[4][15 : 0];
-
-                    cnt_reg[int'(m_pcie_info.channel)].discard_dma_cnt++;
-                    cnt_reg[int'(m_pcie_info.channel)].discard_byte_cnt += dma_hdr.dma_size;
-
-                    if (m_model_info.status[int'(m_pcie_info.channel)] == 1'b0 && cnt_reg[int'(m_pcie_info.channel)].read_valid == 1'b1) begin
-                        m_regmodel.channel[int'(m_pcie_info.channel)].sent_packets.write(status_r, {32'h1, 32'h1});
-                        m_regmodel.channel[int'(m_pcie_info.channel)].sent_packets.read(status_r, dma_cnt);
-                        m_regmodel.channel[int'(m_pcie_info.channel)].sent_bytes.write(status_r, {32'h1, 32'h1});
-                        m_regmodel.channel[int'(m_pcie_info.channel)].sent_bytes.read(status_r, byte_cnt);
-
-                        if (int'(byte_cnt) != cnt_reg[int'(m_pcie_info.channel)].byte_cnt &&
-                            int'(dma_cnt)  != cnt_reg[int'(m_pcie_info.channel)].dma_cnt) begin
-                            debug_msg = "";
-                            debug_msg = {debug_msg, $sformatf("\nWRONG VALID COUNTERS ON CHANNEL %d\n",  int'(m_pcie_info.channel))};
-                            debug_msg = {debug_msg, $sformatf("\nDUT BYTE COUNT %d and MODEL BYTE COUNT %d\n",  byte_cnt, cnt_reg[int'(m_pcie_info.channel)].byte_cnt)};
-                            debug_msg = {debug_msg, $sformatf("DUT DMA COUNT %d and MODEL DMA COUNT %d\n",  dma_cnt, cnt_reg[int'(m_pcie_info.channel)].dma_cnt)};
-                            `uvm_error(this.get_full_name(),                                      debug_msg);
-                        end
-
-                        debug_msg = "";
-                        debug_msg = {debug_msg, $sformatf("\nRECEIVED STATISTICS\n")};
-                        debug_msg = {debug_msg, $sformatf("TIME %t\n",  $time())};
-                        debug_msg = {debug_msg, $sformatf("CHANNEL %d\n",  int'(m_pcie_info.channel))};
-                        debug_msg = {debug_msg, $sformatf("DMA CNT %d\n",  cnt_reg[int'(m_pcie_info.channel)].dma_cnt)};
-                        debug_msg = {debug_msg, $sformatf("DMA CNT REG %d\n",  dma_cnt)};
-                        debug_msg = {debug_msg, $sformatf("BYTE CNT %d\n",  cnt_reg[int'(m_pcie_info.channel)].byte_cnt)};
-                        debug_msg = {debug_msg, $sformatf("BYTE CNT REG %d\n",  byte_cnt)};
-                        `uvm_info(this.get_full_name(),                 debug_msg, UVM_MEDIUM)
-
-                        cnt_reg[int'(m_pcie_info.channel)].read_valid = 0;
-
-                    end
-                end
-
-            end else begin
-                cnt_reg[int'(m_pcie_info.channel)].read_valid = 1;
-
-                if (cnt_reg[int'(m_pcie_info.channel)].read_delay_discard == 30) begin
-                    m_regmodel.channel[int'(m_pcie_info.channel)].discarded_packets.write(status_r, {32'h1, 32'h1});
-                    m_regmodel.channel[int'(m_pcie_info.channel)].discarded_packets.read(status_r, discard_dma_cnt);
-                    m_regmodel.channel[int'(m_pcie_info.channel)].discarded_bytes.write(status_r, {32'h1, 32'h1});
-                    m_regmodel.channel[int'(m_pcie_info.channel)].discarded_bytes.read(status_r, discard_byte_cnt);
-
-                    if (int'(discard_byte_cnt) != cnt_reg[int'(m_pcie_info.channel)].discard_byte_cnt &&
-                        int'(discard_dma_cnt)  != cnt_reg[int'(m_pcie_info.channel)].discard_dma_cnt) begin
-                        debug_msg = "";
-                        debug_msg = {debug_msg, $sformatf("\nWRONG DISCARD COUNTERS ON CHANNEL %d\n",  int'(m_pcie_info.channel))};
-                        debug_msg = {debug_msg, $sformatf("\nDUT DISCARD BYTE COUNT %d and MODEL DISCARD BYTE COUNT %d\n",  discard_byte_cnt, cnt_reg[int'(m_pcie_info.channel)].discard_byte_cnt)};
-                        debug_msg = {debug_msg, $sformatf("DUT DISCARD DMA COUNT %d and MODEL DISCARD DMA COUNT %d\n",  discard_dma_cnt, cnt_reg[int'(m_pcie_info.channel)].discard_dma_cnt)};
-                        `uvm_error(this.get_full_name(), debug_msg);
-                    end
-
-                    debug_msg = "";
-                    debug_msg = {debug_msg, $sformatf("\nDISCARD STATISTICS\n")};
-                    debug_msg = {debug_msg, $sformatf("TIME %t\n",  $time())};
-                    debug_msg = {debug_msg, $sformatf("CHANNEL %d\n",  int'(m_pcie_info.channel))};
-                    debug_msg = {debug_msg, $sformatf("DMA CNT %d\n",  cnt_reg[int'(m_pcie_info.channel)].discard_dma_cnt)};
-                    debug_msg = {debug_msg, $sformatf("DMA CNT REG %d\n",  discard_dma_cnt)};
-                    debug_msg = {debug_msg, $sformatf("BYTE CNT %d\n",  cnt_reg[int'(m_pcie_info.channel)].discard_byte_cnt)};
-                    debug_msg = {debug_msg, $sformatf("BYTE CNT REG %d\n",  discard_byte_cnt)};
-                    `uvm_info(this.get_full_name(),                debug_msg, UVM_MEDIUM)
-                end
-                cnt_reg[int'(m_pcie_info.channel)].read_delay_discard++;
-            end
-
         end
     endtask
-
 endclass

@@ -5,12 +5,12 @@
 //-- SPDX-License-Identifier: BSD-3-Clause
 
 class control_register extends uvm_reg;
-    `uvm_object_utils(uvm_dma_regs::control_register)
+    `uvm_object_utils(uvm_tx_dma_calypte_regs::control_register)
 
     // Write
     rand uvm_reg_field dma_enable;
 
-    function new(string name = "reg_status");
+    function new(string name = "control_register");
         super.new(name, 1, UVM_NO_COVERAGE);
     endfunction
 
@@ -31,14 +31,13 @@ class control_register extends uvm_reg;
     endfunction
 endclass
 
-
 class status_register extends uvm_reg;
-    `uvm_object_utils(uvm_dma_regs::status_register)
+    `uvm_object_utils(uvm_tx_dma_calypte_regs::status_register)
 
     // Write
     rand uvm_reg_field dma_status;
 
-    function new(string name = "reg_status");
+    function new(string name = "status_register");
         super.new(name, 1, UVM_NO_COVERAGE);
     endfunction
 
@@ -59,9 +58,8 @@ class status_register extends uvm_reg;
     endfunction
 endclass
 
-
 class pointer_register extends uvm_reg;
-    `uvm_object_utils(uvm_dma_regs::pointer_register)
+    `uvm_object_utils(uvm_tx_dma_calypte_regs::pointer_register)
 
     // Write
     rand uvm_reg_field pointer;
@@ -87,42 +85,40 @@ class pointer_register extends uvm_reg;
     endfunction
 endclass
 
-
-class addr_register extends uvm_reg;
-    `uvm_object_utils(uvm_dma_regs::addr_register)
+class pointer_mask_register extends uvm_reg;
+    `uvm_object_utils(uvm_tx_dma_calypte_regs::pointer_mask_register)
 
     // Write
-    rand uvm_reg_field addr;
+    rand uvm_reg_field pointer;
 
-    function new(string name = "addr_register");
-        super.new(name, 64, UVM_NO_COVERAGE);
+    function new(string name = "pointer_mask_register");
+        super.new(name, 16, UVM_NO_COVERAGE);
     endfunction
 
     virtual function void build();
         //Create fields
-        addr = uvm_reg_field::type_id::create("addr");
+        pointer = uvm_reg_field::type_id::create("pointer_mask");
         //Configure
-        addr.configure(this, // Parent
-                       64   , // Number of bits
-                       0  , // LSB
-                       "RW", // Access
-                       0   , // Volatility
-                       0   , // Value on reset
-                       1   , // Can the value be reset?
-                       1   , // Can the value be randomized?
-                       0     // Does the field occupy an entire byte lane?
-                       );
+        pointer.configure(this, // Parent
+                         16   , // Number of bits
+                         0  , // LSB
+                         "RO", // Access
+                         0   , // Volatility
+                         0   , // Value on reset
+                         0   , // Can the value be reset?
+                         0   , // Can the value be randomized?
+                         0     // Does the field occupy an entire byte lane?
+                         );
     endfunction
 endclass
 
-
 class cnt_register extends uvm_reg;
-    `uvm_object_utils(uvm_dma_regs::cnt_register)
+    `uvm_object_utils(uvm_tx_dma_calypte_regs::cnt_register)
 
     // Write
     rand uvm_reg_field cnt;
 
-    function new(string name = "cnt");
+    function new(string name = "cnt_register");
         super.new(name, 64, UVM_NO_COVERAGE);
     endfunction
 
@@ -142,6 +138,3 @@ class cnt_register extends uvm_reg;
                       );
     endfunction
 endclass
-
-
-

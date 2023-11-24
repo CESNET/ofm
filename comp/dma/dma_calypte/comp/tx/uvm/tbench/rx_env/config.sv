@@ -6,13 +6,9 @@
 
 class config_item extends uvm_object;
 
-    // ------------------------------------------------------------------------
-    // configuration variables
     uvm_active_passive_enum active;
     string interface_name;
 
-    // ------------------------------------------------------------------------
-    // functions
     function new (string name = "");
         super.new(name);
     endfunction

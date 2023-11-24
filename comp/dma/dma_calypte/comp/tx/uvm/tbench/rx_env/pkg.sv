@@ -4,11 +4,10 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause
 
-`ifndef RX_ENV_PKG
-`define RX_ENV_PKG
+`ifndef TX_DMA_CALYPTE_CQ_ENV_PKG
+`define TX_DMA_CALYPTE_CQ_ENV_PKG
 
-//package byte_array_mfb_env;
-package uvm_dma_ll_rx;
+package uvm_tx_dma_calypte_cq;
 
     `include "uvm_macros.svh"
     import uvm_pkg::*;
@@ -19,7 +18,6 @@ package uvm_dma_ll_rx;
     `include "sequence.sv"
     `include "driver.sv"
     `include "env.sv"
-
 endpackage
 
 `endif

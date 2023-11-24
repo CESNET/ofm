@@ -17,12 +17,12 @@ set COMPONENTS [list \
     [list "DUT_UVM"  $DUT_UVM_BASE   "FULL"]\
 ]
 
-# Disable Code Coverage
 set SIM_FLAGS(CODE_COVERAGE) false
 set SIM_FLAGS(UVM_ENABLE) true
 set SIM_FLAGS(UVM_TEST) "test::base"
-#set SIM_FLAGS(UVM_VERBOSITY) "UVM_MEDIUM"
+set SIM_FLAGS(UVM_VERBOSITY) "UVM_NONE"
 set SIM_FLAGS(DEBUG) false
+#set SIM_FLAGS(RAND_SEED) 3622864090
 
 # Global include file for compilation
 source "$FIRMWARE_BASE/build/Modelsim.inc.fdo"

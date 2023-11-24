@@ -4,10 +4,10 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause
 
-`ifndef LL_DMA_REGS_SV
-`define LL_DMA_REGS_SV
+`ifndef TX_DMA_CALYPTE_REGS_SV
+`define TX_DMA_CALYPTE_REGS_SV
 
-package uvm_dma_regs;
+package uvm_tx_dma_calypte_regs;
 
     `include "uvm_macros.svh"
     import uvm_pkg::*;

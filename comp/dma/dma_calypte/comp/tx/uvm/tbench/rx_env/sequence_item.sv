@@ -8,18 +8,17 @@
 
 
 class sequence_item extends uvm_sequence_item;
-    `uvm_object_param_utils(uvm_dma_ll_rx::sequence_item)
+    `uvm_object_param_utils(uvm_tx_dma_calypte_cq::sequence_item)
 
     localparam ITEM_WIDTH = 8;
     localparam META_WIDTH = 24;
 
-    rand logic [ITEM_WIDTH-1:0] packet[];
-    rand logic [META_WIDTH-1:0] meta;
+    rand logic [ITEM_WIDTH-1:0] m_packet[];
+    rand logic [META_WIDTH-1:0] m_meta;
 
-    function new(string name = "dma_ll_rx::sequence_item");
+    function new(string name = "sequence_item");
         super.new(name);
     endfunction
-
 
     // Properly copy all transaction attributes.
     function void do_copy(uvm_object rhs);
@@ -31,8 +30,8 @@ class sequence_item extends uvm_sequence_item;
         end
         // Now copy all attributes
         super.do_copy(rhs);
-        packet   = rhs_.packet;
-        meta = meta;
+        m_packet = rhs_.m_packet;
+        m_meta   = rhs_.m_meta;
     endfunction: do_copy
 
     // Properly compare all transaction attributes representing output pins.
@@ -46,9 +45,9 @@ class sequence_item extends uvm_sequence_item;
         end
 
         ret = super.do_compare(rhs, comparer);
-        ret = (packet === rhs_.packet);
-        ret = (meta  === meta);
         // Using simple equivalence operator (faster).
+        ret &= (m_packet === rhs_.m_packet);
+        ret &= (m_meta  === rhs_.m_meta);
         return ret;
     endfunction: do_compare
 
@@ -60,21 +59,21 @@ class sequence_item extends uvm_sequence_item;
     function string convert2block(int unsigned region_width);
         string ret;
 
-        ret = $sformatf("%s\n\tdma_rx_ll_rx::sequence_item meta %h size %0d", super.convert2string(), meta, packet.size());
-        for (int unsigned it = 0; it < packet.size(); it++) begin
+        ret = $sformatf("%s\n\tdma_rx_ll_rx::sequence_item meta %h size %0d", super.convert2string(), m_meta, m_packet.size());
+        for (int unsigned it = 0; it < m_packet.size(); it++) begin
             if (it % (region_width*4) == 0) begin
-                ret = {ret, $sformatf("\n\t\t%x", packet[it])};
+                ret = {ret, $sformatf("\n\t\t%x", m_packet[it])};
             end else if (it % (region_width) == 0) begin
-                ret = {ret, $sformatf("    %x", packet[it])};
+                ret = {ret, $sformatf("    %x", m_packet[it])};
             end else begin
-                ret = {ret, $sformatf(" %x", packet[it])};
+                ret = {ret, $sformatf(" %x", m_packet[it])};
             end
         end
         return ret;
     endfunction
 
     function int unsigned size();
-        return packet.size();
+        return m_packet.size();
     endfunction
 endclass
 

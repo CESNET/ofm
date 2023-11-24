@@ -4,10 +4,10 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause
 
-`ifndef LL_DMA_ENV_SV
-`define LL_DMA_ENV_SV
+`ifndef TX_DMA_CALYPTE_ENV_SV
+`define TX_DMA_CALYPTE_ENV_SV
 
-package uvm_dma_ll;
+package uvm_tx_dma_calypte;
 
     `include "uvm_macros.svh"
     import uvm_pkg::*;
@@ -16,6 +16,7 @@ package uvm_dma_ll;
     `include "sequencer.sv"
     `include "model.sv"
     `include "scoreboard.sv"
+    `include "coverage.sv"
     `include "env.sv"
 
 endpackage
