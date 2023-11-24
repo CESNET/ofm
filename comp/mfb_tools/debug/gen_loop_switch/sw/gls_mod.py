@@ -235,7 +235,6 @@ def run_test(mode,min_fr_size,max_fr_size,fr_size_step,gls_clk_freq,log_en,demo_
         # Stop TX generator
         if (mode=="tx" or mode=="rxtx" or mode=="dma_tx" or mode=="dma_rxtx" or mode=="dma_loop"):
             ndp_gen.send_signal(signal.SIGINT)
-            ndp_gen.terminate()
         if (mode=="rx" or mode=="eth_gen"):
             # Stop TX generator
             nfb_bus(dt_path_gen2eth[p], 0x0, 0x0)
@@ -280,7 +279,7 @@ def print_modes():
     print("4: TX DMA --> TX ETH     ==> RX ETH --> RX DMA;     (ext. ETH loopback required)")
     print("5: HW Gen --> RX DMA     ###")
     print("6: TX DMA --> Black Hole ###")
-    print("7: TX DMA --> Black Hole ### RX DMA --> Black Hole;")
+    print("7: TX DMA --> Black Hole ### HW Gen --> RX DMA;")
     print("8: TX DMA --> RX DMA     ### (internal DMA loopback)")
     print()
     print("Port list: (default: \"0\")")
