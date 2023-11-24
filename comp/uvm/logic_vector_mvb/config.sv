@@ -5,13 +5,18 @@
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
 class config_sequence extends uvm_object;
-    // this configuration is aproximation
-    // there is no quratte that currently running sequence will follow this rules exactly.
-    // Guaranteed can be onli minimal space size.
+    `uvm_object_utils(uvm_logic_vector_mvb::config_sequence)
+
+    uvm_common::sequence_cfg state;
 
     // configurate minimal and maximal space between items
     int unsigned space_size_min     =   0; // minimal space between two items it is usefull for full speed
     int unsigned space_size_max     = 200; // aproximation of maximal space size between two items is used for
+
+    function new(string name = "uvm_logic_vector_mvb::config_sequence");
+        super.new(name);
+        state = null;
+    endfunction
 
 
     function void space_size_set(int unsigned min, int unsigned max);

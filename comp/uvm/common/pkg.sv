@@ -24,6 +24,7 @@ package uvm_common;
     `include "rand_rdy.sv"
     `include "rand_length.sv"
 
+    `include "sequence_cfg.sv"
     `include "sequence.sv"
     `include "sequence_library.sv"
 

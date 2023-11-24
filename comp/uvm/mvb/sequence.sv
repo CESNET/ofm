@@ -29,10 +29,18 @@ class sequence_simple_rx #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(uvm_mvb::se
     // ------------------------------------------------------------------------
     // Generates transactions
     task body;
+        int unsigned it;
+        uvm_common::sequence_cfg state;
+
+        if(!uvm_config_db#(uvm_common::sequence_cfg)::get(m_sequencer, "", "state", state)) begin
+            state = null;
+        end
+
         // Generate transaction_count transactions
         req = sequence_item #(ITEMS, ITEM_WIDTH)::type_id::create("req");
 
-        repeat(transaction_count) begin
+        it = 0;
+        while (it < transaction_count && (state == null || state.next())) begin
             start_item(req);
 
             if (!req.randomize()) begin
@@ -41,13 +49,14 @@ class sequence_simple_rx #(ITEMS, ITEM_WIDTH) extends uvm_sequence #(uvm_mvb::se
             finish_item(req);
             get_response(rsp);
 
+
             while (rsp.src_rdy && !rsp.dst_rdy) begin
                 start_item(req);
                 finish_item(req);
 
                 get_response(rsp);
             end
-
+            it++;
         end
     endtask
 endclass
@@ -97,16 +106,27 @@ class sequence_simple_tx #(ITEMS, ITEM_WIDTH) extends uvm_common::sequence_base#
 
     // ------------------------------------------------------------------------
     // Generates transactions
-    task body;
+    task body();
+        int unsigned it;
+        uvm_common::sequence_cfg state;
+
+        `uvm_info(m_sequencer.get_full_name(), "\n\tuvm_mvb::sequence_simple_tx is running", UVM_DEBUG);
+        if(!uvm_config_db#(uvm_common::sequence_cfg)::get(m_sequencer, "", "state", state)) begin
+            state = null;
+        end
+
         // Generate transaction_count transactions
         req = sequence_item#(ITEMS, ITEM_WIDTH)::type_id::create("req");
-        repeat(transaction_count) begin
+        it = 0;
+        while(it < transaction_count && (state == null || state.next())) begin
             // Create a request for sequence item
             start_item(req);
             void'(rdy.randomize());
             void'(req.randomize() with {dst_rdy == rdy.m_value;});
             finish_item(req);
             get_response(rsp);
+
+            it++;
         end
     endtask
 
@@ -139,14 +159,23 @@ class sequence_full_speed_tx #(ITEMS, ITEM_WIDTH) extends uvm_common::sequence_b
     // ------------------------------------------------------------------------
     // Generates transactions
     task body;
-        // Generate transaction_count transactions
+        int unsigned it;
+        uvm_common::sequence_cfg state;
+
+        `uvm_info(m_sequencer.get_full_name(), "\n\tuvm_mvb::sequence_full_speed_tx is running", UVM_DEBUG);
+        if(!uvm_config_db#(uvm_common::sequence_cfg)::get(m_sequencer, "", "state", state)) begin
+            state = null;
+        end
+
         req = sequence_item#(ITEMS, ITEM_WIDTH)::type_id::create("req");
-        repeat(transaction_count) begin
+        it = 0;
+        while (it < transaction_count && (state == null || state.next())) begin
             // Create a request for sequence item
             start_item(req);
             void'(req.randomize() with {dst_rdy == 1'b1;});
             finish_item(req);
             get_response(rsp);
+            it++;
         end
     endtask
 
@@ -173,15 +202,27 @@ class sequence_stop_tx #(ITEMS, ITEM_WIDTH) extends uvm_common::sequence_base#(c
     // ------------------------------------------------------------------------
     // Generates transactions
     task body;
+        int unsigned it;
+        uvm_common::sequence_cfg state;
+
+        `uvm_info(m_sequencer.get_full_name(), "\n\tuvm_mvb::sequence_stop_tx is running", UVM_DEBUG);
+
+        if(!uvm_config_db#(uvm_common::sequence_cfg)::get(m_sequencer, "", "state", state)) begin
+            state = null;
+        end
         // Generate transaction_count transactions
         req = sequence_item#(ITEMS, ITEM_WIDTH)::type_id::create("req");
-        repeat(transaction_count) begin
+        it = 0;
+        while (it < transaction_count && (state == null || state.next())) begin
             // Create a request for sequence item
             start_item(req);
             void'(req.randomize() with {dst_rdy == 1'b0;});
             finish_item(req);
             get_response(rsp);
+
+            it++;
         end
+
     endtask
 
 endclass

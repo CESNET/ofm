@@ -39,19 +39,23 @@ class monitor_logic_vector_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH,
             hi_tr = null;
         end
 
-        if (tr.ready == 1'b1) begin
-            ready_latency_cnt = 0;
-            if (|tr.valid == 0 && inframe) begin
-                valid_cnt++;
-                if (valid_cnt > READY_LATENCY)
-                    `uvm_error(this.get_full_name(), "\n\tValid has not been triggered within READY_LATENCY inside of frame")
+        if (READY_LATENCY != 0) begin
+            if (tr.ready == 1'b1) begin
+                ready_latency_cnt = 0;
+                if (|tr.valid == 0 && inframe) begin
+                    valid_cnt++;
+                    if (valid_cnt > READY_LATENCY)
+                        `uvm_error(this.get_full_name(), "\n\tValid has not been triggered within READY_LATENCY inside of frame")
+                end
+            end else begin
+                if (|tr.valid) begin
+                    ready_latency_cnt++;
+                    if (ready_latency_cnt > READY_LATENCY)
+                        `uvm_error(this.get_full_name(), "\n\tReady latency is higher than allowed")
+                end
             end
-        end else begin
-            if (|tr.valid) begin
-                ready_latency_cnt++;
-                if (ready_latency_cnt > READY_LATENCY)
-                    `uvm_error(this.get_full_name(), "\n\tReady latency is higher than allowed")
-            end
+        end else if (|tr.valid == 0 || tr.ready == 0) begin
+            return;
         end
 
         for (int unsigned it = 0; it < REGIONS; it++) begin
@@ -117,19 +121,23 @@ class monitor_logic_vector #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_
     virtual function void write(uvm_avst::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) tr);
         logic inframe = 1'b0;
 
-        if (tr.ready == 1'b1) begin
-            ready_latency_cnt = 0;
-            if (|tr.valid == 0 && inframe) begin
-                valid_cnt++;
-                if (valid_cnt > READY_LATENCY)
-                    `uvm_error(this.get_full_name(), "\n\tValid has not been triggered within READY_LATENCY inside of frame")
+        if (READY_LATENCY != 0) begin
+            if (tr.ready == 1'b1) begin
+                ready_latency_cnt = 0;
+                if (|tr.valid == 0 && inframe) begin
+                    valid_cnt++;
+                    if (valid_cnt > READY_LATENCY)
+                        `uvm_error(this.get_full_name(), "\n\tValid has not been triggered within READY_LATENCY inside of frame")
+                end
+            end else begin
+                if (|tr.valid) begin
+                    ready_latency_cnt++;
+                    if (ready_latency_cnt > READY_LATENCY)
+                        `uvm_error(this.get_full_name(), "\n\tReady latency is higher than allowed")
+                end
             end
-        end else begin
-            if (|tr.valid) begin
-                ready_latency_cnt++;
-                if (ready_latency_cnt > READY_LATENCY)
-                    `uvm_error(this.get_full_name(), "\n\tReady latency is higher than allowed")
-            end
+        end else if (|tr.valid == 0 || tr.ready == 0) begin
+            return;
         end
 
         for (int it = 0; it < REGIONS; it++) begin
