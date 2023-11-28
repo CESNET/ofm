@@ -395,26 +395,26 @@ proc ImplementDesignSetup {synth_flags} {
     }
 
     # backward compatibility (run post_place_power_opt_design by default)
-    if {![info exist SYNTH_FLAGS(PP_POWER_OPT_DESIGN)] } {
-        set SYNTH_FLAGS(PP_POWER_OPT_DESIGN) true
+    if {![info exist SYNTH_FLAGS(PPLACE_POWER_OPT_DESIGN)] } {
+        set SYNTH_FLAGS(PPLACE_POWER_OPT_DESIGN) true
     }
 
     # post_place_power_opt_design
     # (currently commented out becase power_opt_design is already enabled before
     #  placement)
-#    puts "Run Post-place Power Opt Design: $SYNTH_FLAGS(PP_POWER_OPT_DESIGN)"
+#    puts "Run Post-place Power Opt Design: $SYNTH_FLAGS(PPLACE_POWER_OPT_DESIGN)"
 #    set_property -name {STEPS.POST_PLACE_POWER_OPT_DESIGN.ARGS.IS_ENABLED} \
-#        -value $SYNTH_FLAGS(PP_POWER_OPT_DESIGN) -objects [get_runs impl_1]
+#        -value $SYNTH_FLAGS(PPLACE_POWER_OPT_DESIGN) -objects [get_runs impl_1]
 #    set_property -name {STEPS.POST_PLACE_POWER_OPT_DESIGN.ARGS.MORE OPTIONS} \
 #        -value {-verbose} -objects [get_runs impl_1]
 
-    if {[info exist SYNTH_FLAGS(POPT_DIRECTIVE)] } {
-        puts "Post-place physical optimization directive set to: $SYNTH_FLAGS(POPT_DIRECTIVE)"
+    if {[info exist SYNTH_FLAGS(PPLACE_PHYS_OPT_DIRECTIVE)] } {
+        puts "Post-place physical optimization directive set to: $SYNTH_FLAGS(PPLACE_PHYS_OPT_DIRECTIVE)"
         # phys_opt_design (See Xilinx UG904)
         set_property -name {STEPS.PHYS_OPT_DESIGN.ARGS.IS_ENABLED}   \
             -value {true}              -objects [get_runs impl_1]
         set_property -name {STEPS.PHYS_OPT_DESIGN.ARGS.DIRECTIVE}    \
-            -value $SYNTH_FLAGS(POPT_DIRECTIVE) -objects [get_runs impl_1]
+            -value $SYNTH_FLAGS(PPLACE_PHYS_OPT_DIRECTIVE) -objects [get_runs impl_1]
         set_property -name {STEPS.PHYS_OPT_DESIGN.ARGS.MORE OPTIONS} \
             -value {-verbose}          -objects [get_runs impl_1]
     }
@@ -428,13 +428,13 @@ proc ImplementDesignSetup {synth_flags} {
             -value {-verbose} -objects [get_runs impl_1]
     }
 
-    if {[info exist SYNTH_FLAGS(PROUTE_POPT_DIRECTIVE)] } {
-        puts "Post-route physical optimization directive set to: $SYNTH_FLAGS(PROUTE_POPT_DIRECTIVE)"
+    if {[info exist SYNTH_FLAGS(PROUTE_PHYS_OPT_DIRECTIVE)] } {
+        puts "Post-route physical optimization directive set to: $SYNTH_FLAGS(PROUTE_PHYS_OPT_DIRECTIVE)"
         # phys_opt_design (See Xilinx UG904)
         set_property -name {STEPS.POST_ROUTE_PHYS_OPT_DESIGN.ARGS.IS_ENABLED}   \
             -value {true}              -objects [get_runs impl_1]
         set_property -name {STEPS.POST_ROUTE_PHYS_OPT_DESIGN.ARGS.DIRECTIVE}    \
-            -value $SYNTH_FLAGS(PROUTE_POPT_DIRECTIVE) -objects [get_runs impl_1]
+            -value $SYNTH_FLAGS(PROUTE_PHYS_OPT_DIRECTIVE) -objects [get_runs impl_1]
         set_property -name {STEPS.POST_ROUTE_PHYS_OPT_DESIGN.ARGS.MORE OPTIONS} \
             -value {-verbose}          -objects [get_runs impl_1]
     }
