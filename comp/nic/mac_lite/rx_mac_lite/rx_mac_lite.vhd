@@ -369,6 +369,7 @@ architecture FULL of RX_MAC_LITE is
     signal s_sm_cnt_ticks             : std_logic_vector(SM_CNT_TICKS_WIDTH-1 downto 0);
     signal s_sm_cnt_ticks_max         : std_logic;
     signal s_sm_cnt_bytes             : std_logic_vector(SM_CNT_BYTES_WIDTH-1 downto 0);
+    signal s_sm_cnt_packets           : std_logic_vector(SM_CNT_BYTES_WIDTH-1 downto 0);
     signal s_sm_cnt_clear             : std_logic;
 
     signal s_ctl_enable               : std_logic;
@@ -779,7 +780,10 @@ begin
         BLOCK_SIZE      => RX_BLOCK_SIZE,
         ITEM_WIDTH      => RX_ITEM_WIDTH,
         CNT_TICKS_WIDTH => SM_CNT_TICKS_WIDTH,
-        CNT_BYTES_WIDTH => SM_CNT_BYTES_WIDTH
+        CNT_BYTES_WIDTH => SM_CNT_BYTES_WIDTH,
+        CNT_PKTS_WIDTH  => SM_CNT_BYTES_WIDTH,
+        DISABLE_ON_CLR  => True,
+        COUNT_PACKETS   => True
     )
     port map(
         CLK           => RX_CLK,
@@ -795,6 +799,7 @@ begin
         CNT_TICKS     => s_sm_cnt_ticks,
         CNT_TICKS_MAX => s_sm_cnt_ticks_max,
         CNT_BYTES     => s_sm_cnt_bytes,
+        CNT_PKT_EOFS  => s_sm_cnt_packets,
         CNT_CLEAR     => s_sm_cnt_clear
     );
 
@@ -1090,6 +1095,7 @@ begin
         SM_CNT_TICKS            => s_sm_cnt_ticks,
         SM_CNT_TICKS_MAX        => s_sm_cnt_ticks_max,
         SM_CNT_BYTES            => s_sm_cnt_bytes,
+        SM_CNT_PACKETS          => s_sm_cnt_packets,
         SM_CNT_CLEAR            => s_sm_cnt_clear,
         -- CAM WRITE INTERFACE
         CAM_WRITE_DATA          => s_cam_write_data,
