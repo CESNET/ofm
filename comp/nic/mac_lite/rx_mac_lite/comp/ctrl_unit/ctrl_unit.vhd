@@ -54,6 +54,8 @@ entity RX_MAC_LITE_CTRL_UNIT is
         SM_CNT_TICKS_MAX       : in  std_logic;
         -- counter of valid bytes
         SM_CNT_BYTES           : in  std_logic_vector(SM_CNT_BYTES_WIDTH-1 downto 0);
+        -- counter of valid packets
+        SM_CNT_PACKETS         : in  std_logic_vector(SM_CNT_BYTES_WIDTH-1 downto 0);
         -- reset all speed meter counters
         SM_CNT_CLEAR           : out std_logic;
         -- =====================================================================
@@ -150,6 +152,7 @@ architecture FULL of RX_MAC_LITE_CTRL_UNIT is
     constant OROC_H_ADDR             : std_logic_vector(7 downto 2) := "010000"; -- 0x40
     constant SM_CNT_TICKS_ADDR       : std_logic_vector(7 downto 2) := "010001"; -- 0x44
     constant SM_CNT_BYTES_ADDR       : std_logic_vector(7 downto 2) := "010010"; -- 0x48
+    constant SM_CNT_PACKETS_ADDR     : std_logic_vector(7 downto 2) := "010011"; -- 0x4C
     constant CAM_BASE_ADDR           : std_logic_vector(7 downto 2) := "100000"; -- 0x80
     
     -- =====================================================================
@@ -243,6 +246,7 @@ architecture FULL of RX_MAC_LITE_CTRL_UNIT is
     signal s_reg_mac_check_mode          : std_logic_vector(1 downto 0);
     signal s_sm_cnt_ticks_reg            : std_logic_vector(31 downto 0);
     signal s_sm_cnt_bytes_reg            : std_logic_vector(31 downto 0);
+    signal s_sm_cnt_packets_reg          : std_logic_vector(31 downto 0);
 
     -- Command decoder
     signal s_cmd_sample_sel              : std_logic;
@@ -632,10 +636,12 @@ begin
     sm_cnt_reg_p : process (CLK)
     begin
         if (rising_edge(CLK)) then
-            s_sm_cnt_ticks_reg <= (others => '0');
-            s_sm_cnt_bytes_reg <= (others => '0');
-            s_sm_cnt_ticks_reg(SM_CNT_TICKS_WIDTH-1 downto 0) <= SM_CNT_TICKS;
-            s_sm_cnt_bytes_reg(SM_CNT_BYTES_WIDTH-1 downto 0) <= SM_CNT_BYTES;
+            s_sm_cnt_ticks_reg   <= (others => '0');
+            s_sm_cnt_bytes_reg   <= (others => '0');
+            s_sm_cnt_packets_reg <= (others => '0');
+            s_sm_cnt_ticks_reg(SM_CNT_TICKS_WIDTH-1 downto 0)   <= SM_CNT_TICKS;
+            s_sm_cnt_bytes_reg(SM_CNT_BYTES_WIDTH-1 downto 0)   <= SM_CNT_BYTES;
+            s_sm_cnt_packets_reg(SM_CNT_BYTES_WIDTH-1 downto 0) <= SM_CNT_PACKETS;
         end if;
     end process;
 
@@ -663,6 +669,8 @@ begin
                 s_mx_ctrl_regs_out <= s_sm_cnt_ticks_reg;
             when SM_CNT_BYTES_ADDR =>
                 s_mx_ctrl_regs_out <= s_sm_cnt_bytes_reg;
+            when SM_CNT_PACKETS_ADDR =>
+                s_mx_ctrl_regs_out <= s_sm_cnt_packets_reg;
             when others =>
                 s_mx_ctrl_regs_out <= X"DEADCAFE";
         end case;
