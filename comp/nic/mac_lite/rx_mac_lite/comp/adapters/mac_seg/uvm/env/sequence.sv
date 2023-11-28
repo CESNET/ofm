@@ -14,11 +14,14 @@ class seq_small_pkt extends uvm_logic_vector_array::sequence_simple#(8);
         super.new(name);
         cfg = new();
         cfg.array_size_set(12, 128);
-        cfg.transaction_count_set(1, 20);
+
+        //cfg.transaction_count_set(1, 20);
+        transaction_count_min = 1;
+        transaction_count_max = 20;
     endfunction
 
     function void config_set(uvm_logic_vector_array::config_sequence cfg);
-   endfunction
+    endfunction
 endclass
 
 
