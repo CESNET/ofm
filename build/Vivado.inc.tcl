@@ -287,6 +287,9 @@ proc SynthesizeDesignSetup {synth_flags} {
         set_msg_config -id {Synth 8-63} -severity WARNING -new_severity ERROR
     }
 
+    # Set severity of 'multi-driven net on pin ...'
+    set_msg_config -id {Synth 8-6858} -severity WARNING -new_severity ERROR
+    set_msg_config -id {Synth 8-6859} -severity WARNING -new_severity ERROR
     # Set severity of 'sensitivity list mistake'
     set_msg_config -id {Synth 8-614} -severity WARNING -new_severity ERROR
 
