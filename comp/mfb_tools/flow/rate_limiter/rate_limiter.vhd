@@ -319,7 +319,7 @@ begin
     mi_sec_len_reg_p: process (CLK)
     begin
         if (rising_edge(CLK)) then
-            if (RESET = '1') then
+            if (RESET = '1') or (p_state = IDLE) then
                 mi_sec_len_reg <= MI_SEC_LEN_REG_INIT;
             elsif (p_state = CONF and mi_regs_en(MI_SEC_LEN_REG_POS) = '1' and MI_WR = '1') then
                 mi_sec_len_reg <= mi_regs_dwr;
@@ -331,7 +331,7 @@ begin
     mi_int_len_reg_p: process (CLK)
     begin
         if (rising_edge(CLK)) then
-            if (RESET = '1') then
+            if (RESET = '1') or (p_state = IDLE) then
                 mi_int_len_reg <= MI_INT_LEN_REG_INIT;
             elsif (p_state = CONF and mi_regs_en(MI_INT_LEN_REG_POS) = '1' and MI_WR = '1') then
                 mi_int_len_reg <= mi_regs_dwr;
@@ -343,10 +343,10 @@ begin
     mi_speed_reg_first_p: process (CLK)
     begin
         if (rising_edge(CLK)) then
-            if (RESET = '1' or start_conf_flag = '1') then
+            if (RESET = '1') or (start_conf_flag = '1') or (p_state = IDLE) then
                 mi_speed_regs(0)         <= MI_SPEED_REG_INIT;
-                mi_speed_regs_vld_reg(0) <= '1';
-            elsif (p_state = CONF and mi_regs_en(MI_FIRST_SPEED_REG_POS) = '1' and MI_WR = '1') then
+                mi_speed_regs_vld_reg(0) <= '1'; -- The first Speed register is always valid
+            elsif (p_state = CONF) and (mi_regs_en(MI_FIRST_SPEED_REG_POS) = '1') and (MI_WR = '1') then
                 mi_speed_regs(0)         <= mi_regs_dwr;
             end if;
         end if;
@@ -356,7 +356,8 @@ begin
         mi_speed_regs_p: process (CLK)
         begin
             if (rising_edge(CLK)) then
-                if (RESET = '1' or start_conf_flag = '1') then
+                if (RESET = '1') or (start_conf_flag = '1') or (p_state = IDLE) then
+                    mi_speed_regs(i)         <= (others => '0');
                     mi_speed_regs_vld_reg(i) <= '0';
                 elsif (p_state = CONF and mi_regs_en(MI_CONFIG_REGS-INTERVAL_COUNT+i) = '1' and MI_WR = '1') then
                     mi_speed_regs(i)         <= mi_regs_dwr;
