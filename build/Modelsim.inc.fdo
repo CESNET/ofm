@@ -83,7 +83,10 @@ proc CompileMod {FNAME OPT} {
     set COVER_PARAMS [list ]
     set COVER_PARAMS_SV [list ]
     if {$SIM_FLAGS(CODE_COVERAGE)} {
-        lappend COVER_PARAMS -cover sbce
+        lappend COVER_PARAMS -cover sbceft -togglewidthlimit 8 -coverdeglitch 5ps -fsmmultitrans
+        if {!$SIM_FLAGS(DEBUG)} {
+            lappend COVER_PARAMS -coveropt 4
+        }
     }
     if {$SIM_FLAGS(CODE_COVERAGE_SV)} {
         lappend COVER_PARAMS_SV -cover sbce
@@ -92,9 +95,9 @@ proc CompileMod {FNAME OPT} {
 
     set VCOM_PARAM ""
     set VLOG_PARAM ""
-    if {[info exists SIM_FLAGS(DEBUG)] && $SIM_FLAGS(DEBUG)} {
+    if {$SIM_FLAGS(DEBUG)} {
         lappend VCOM_PARAM "-lint"
-    } else {
+    } elseif { !$SIM_FLAGS(CODE_COVERAGE) } {
         lappend VCOM_PARAM "-nodebug=ports"
         lappend VLOG_PARAM "-nodebug"
     }
@@ -313,6 +316,10 @@ proc nb_sim_sanitize_vars {user_sim_flags sim_flags hierarchy VARS} {
         set SIM_FLAGS(CODE_COVERAGE_SV) false
     }
 
+    if {![info exists SIM_FLAGS(DEBUG)]} {
+        set SIM_FLAGS(DEBUG) false
+    }
+
     if {[info exists SIM_MODULE]} {
         set SIM_FLAGS(SIM_MODULE) $SIM_MODULE
     } else {
@@ -336,7 +343,10 @@ proc nb_vsim_set_flags {vsim_flags sim_flags} {
 
     set VSIM_FLAGS "-t 1ps -lib work -no_autoacc"
     if {$SIM_FLAGS(CODE_COVERAGE)} {
-        lappend VSIM_FLAGS "-coverage"
+        lappend VSIM_FLAGS -coverage -togglewidthlimit 8
+        if {!$SIM_FLAGS(DEBUG)} {
+            lappend VSIM_FLAGS -cvgopt=+minhitcnt
+        }
     }
     foreach i [uniqueList $SIM_FLAGS(SIM_LIB)] {
         lappend VSIM_FLAGS -L $i
@@ -365,9 +375,9 @@ proc nb_vsim_set_flags {vsim_flags sim_flags} {
         lappend VOPT_ARGS "-nomlopt"
     }
 
-    if {[info exists SIM_FLAGS(DEBUG)] && $SIM_FLAGS(DEBUG)} {
+    if {$SIM_FLAGS(DEBUG)} {
         lappend VOPT_ARGS -lint=full +acc
-    } else {
+    } elseif { !$SIM_FLAGS(CODE_COVERAGE) } {
         lappend VOPT_ARGS -nodebug
     }
 
