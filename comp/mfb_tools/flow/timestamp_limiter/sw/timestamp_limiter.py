@@ -19,6 +19,7 @@ class TimestampLimiter(nfb.BaseComp):
     # MI ADDRESS SPACE
     _RESET_REG  = 0x00
     _SEL_QUEUE_REG = 0x04
+    _TOP_SPEED_REG = 0x08
 
 
     def __init__(self, **kwargs):
@@ -37,21 +38,24 @@ class TimestampLimiter(nfb.BaseComp):
         """Print current configuration"""
 
         sel_queues = bin(self._comp.read32(self._SEL_QUEUE_REG))[2:]
+        top_speed_en = self._comp.read32(self._TOP_SPEED_REG)
 
         if not "1" in sel_queues:
-            msg = "Warning: No queues selected for reset. The reset will have no effect."
+            msg_queues = "Warning: No queues selected for reset. The reset will have no effect."
         elif not "0" in sel_queues:
-            msg = "All queues selected for reset (default)"
+            msg_queues = "All queues selected for reset (default)"
         else:
-            msg = "Queues selected for reset: "
+            msg_queues = "Queues selected for reset: "
             first = True
             for i,q in enumerate(reversed(sel_queues)):
                 if q == "1":
-                    msg += ("" if first else ",") + str(i)
+                    msg_queues += ("" if first else ",") + str(i)
                     first = False
-            msg += "\n{NOTE: The listed Queues (above) are values from a 32-bit register and may not correspond with the number of Queues in each Timestamp Limiter}"
+            msg_queues += "\n{NOTE: The listed Queues (above) are values from a 32-bit register and may not correspond with the number of Queues in each Timestamp Limiter}"
 
-        print("\"{0}\"\n{1}".format(self._name, msg))
+        msg_speed = "Top speed: {}".format("enabled" if top_speed_en else "disabled")
+
+        print("\"{0}\"\n{1}\n{2}".format(self._name, msg_queues, msg_speed))
 
 
     def configure(self, cfg):
@@ -59,6 +63,7 @@ class TimestampLimiter(nfb.BaseComp):
 
         try:
             self._comp.write32(self._SEL_QUEUE_REG, cfg["select_queue_bitmap"])
+            self._comp.write32(self._TOP_SPEED_REG, cfg["top_speed_en"])
         except:
             print("{}: Error while writing configuration!".format(self._name))
             # Reset all queues in the default state
@@ -69,3 +74,9 @@ class TimestampLimiter(nfb.BaseComp):
         """Issue a reset for the selected queues"""
 
         self._comp.write32(self._RESET_REG, 1)
+
+
+    def top_speed_en(enable, self):
+        """Enable or disable top speed"""
+
+        self._comp.write32(self._TOP_SPEED_REG, enable)

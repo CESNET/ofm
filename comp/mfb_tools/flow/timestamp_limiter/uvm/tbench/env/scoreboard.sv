@@ -11,8 +11,8 @@ class scoreboard #(MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTA
     uvm_analysis_export #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) out_data;
     uvm_analysis_export #(uvm_logic_vector::sequence_item #(TX_MFB_META_WIDTH))    out_meta;
 
-    uvm_timestamp_limiter::delayer_cmp #(MFB_ITEM_WIDTH, TIMESTAMP_WIDTH)               data_cmp;
-    uvm_common::comparer_taged #(uvm_logic_vector::sequence_item#(TX_MFB_META_WIDTH)) meta_cmp;
+    uvm_timestamp_limiter::delayer_cmp #(MFB_ITEM_WIDTH, TIMESTAMP_WIDTH)                  data_cmp;
+    uvm_common::comparer_disordered #(uvm_logic_vector::sequence_item#(TX_MFB_META_WIDTH)) meta_cmp;
 
     uvm_common::subscriber #(uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH)) analysis_imp_mfb_data;
     uvm_common::subscriber #(uvm_logic_vector::sequence_item#(RX_MFB_META_WIDTH))    analysis_imp_mfb_meta;
@@ -50,7 +50,7 @@ class scoreboard #(MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTA
         analysis_imp_mfb_meta = uvm_common::subscriber #(uvm_logic_vector::sequence_item#(RX_MFB_META_WIDTH))::type_id::create("analysis_imp_mfb_meta", this);
 
         data_cmp = uvm_timestamp_limiter::delayer_cmp #(MFB_ITEM_WIDTH, TIMESTAMP_WIDTH)::type_id::create("data_cmp", this);
-        meta_cmp = uvm_common::comparer_taged #(uvm_logic_vector::sequence_item#(TX_MFB_META_WIDTH))::type_id::create("meta_cmp", this);
+        meta_cmp = uvm_common::comparer_disordered #(uvm_logic_vector::sequence_item#(TX_MFB_META_WIDTH))::type_id::create("meta_cmp", this);
     endfunction
 
     function void connect_phase(uvm_phase phase);

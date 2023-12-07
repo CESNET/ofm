@@ -6,7 +6,7 @@
 
 let abs(a) = (a < 0) ? -a : a;
 
-class delayer_cmp #(MFB_ITEM_WIDTH, TIMESTAMP_WIDTH) extends uvm_common::comparer_base_tagged#(uvm_timestamp_limiter::ts_limiter_item#(MFB_ITEM_WIDTH, TIMESTAMP_WIDTH), uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH));
+class delayer_cmp #(MFB_ITEM_WIDTH, TIMESTAMP_WIDTH) extends uvm_common::comparer_base_disordered#(uvm_timestamp_limiter::ts_limiter_item#(MFB_ITEM_WIDTH, TIMESTAMP_WIDTH), uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH));
     `uvm_component_param_utils(uvm_timestamp_limiter::delayer_cmp #(MFB_ITEM_WIDTH, TIMESTAMP_WIDTH))
 
     protected uvm_common::dut_item #(DUT_ITEM) times2cmp[$];

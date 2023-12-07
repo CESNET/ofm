@@ -28,12 +28,18 @@ use work.type_pack.all;
 -- In this case, set the :vhdl:genconstant:`EXTERNAL_TIME_SRC <mfb_timestamp_limiter.external_time_src>` generic to ``True`` and connect your time source to the
 -- :vhdl:portsignal:`EXTERNAL_TIME <mfb_timestamp_limiter.external_time>` port.
 --
--- The MI interface enables the user to reset Time in the Packet Delayers.
+-- The MI interface enables the user to do two things.
+--
+-- #. Reset the accumulated "time" in the Packet Delayers.
 -- This is useful when using the :vhdl:genconstant:`Timestamp format 1 <mfb_timestamp_limiter.timestamp_format>`,
 -- where the time is being incremented in each clock cycle since the very first packet after boot/reset passes through.
 -- You can simply reset all Packet Delayers (all Queues) by setting the MI_RESET_REG register, or you can
 -- select specific Queues by setting the MI_SEL_QUEUE_REG register before setting the MI_RESET_REG register.
 -- After writing a **1** to the MI_RESET_REG register to issue the reset, its value automatically returns back to **0**.
+-- #. Bypass timestamp limiting and transmit data at top speed.
+-- When enabled, all timestamp values are automatically set to 0 and all packets are redirected to Queue 0 to avoid merging at the end.
+-- NOTE that the top speed is ON in the default state!
+-- To enable timestamp limiting, write 0 to the MI_TOP_SPEED_REG register.
 --
 -- **MI address space**
 --
@@ -43,6 +49,8 @@ use work.type_pack.all;
 -- |           0x00 | Reset register (write only)                        |
 -- +----------------+----------------------------------------------------+
 -- |           0x04 | Select Queues for reset register                   |
+-- +----------------+----------------------------------------------------+
+-- |           0x08 | Top speed register                                 |
 -- +----------------+----------------------------------------------------+
 --
 entity MFB_TIMESTAMP_LIMITER is
@@ -162,6 +170,9 @@ architecture FULL of MFB_TIMESTAMP_LIMITER is
     -- Set '1' to perform the reset. Default value is (others => '1');
     -- MAX 32 Queues! For more Queues you need to add more MI regs for the selection.
     constant MI_SEL_QUEUE_REG : integer := 4;
+    -- MI REG ADDR for: optional bypass without any limiting.
+    -- Each packet is routed to Queue 0 (to avoid merging) and its TS is also set to 0 (to avoid any delays).
+    constant MI_TOP_SPEED_REG : integer := 8;
 
     constant MFB_REGION_WIDTH : natural := MFB_REGION_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH;
     constant MFB_WORD_WIDTH   : natural := MFB_REGIONS*MFB_REGION_WIDTH;
@@ -181,16 +192,21 @@ architecture FULL of MFB_TIMESTAMP_LIMITER is
 
     signal mi_addr_int          : integer range 2**4-1 downto 0;
 
-    signal time_reset_en        : std_logic;
-    signal queue_sel_en         : std_logic;
+    signal time_reset_reg_wr    : std_logic;
+    signal queue_sel_reg_wr     : std_logic;
+    signal top_speed_reg_wr     : std_logic;
 
-    signal time_reset_reg       : std_logic;
+    signal time_reset_reg       : std_logic := '0';
     signal sel_queue_reg        : std_logic_vector(MI_DATA_WIDTH-1 downto 0) := (others => '1');
+    signal top_speed_reg        : std_logic := '1';
 
     signal time_reset_edge      : std_logic;
     signal time_reset_pulse     : std_logic;
 
     signal pd_time_reset        : std_logic_vector(QUEUES-1 downto 0);
+
+    signal RX_MFB_TIMESTAMP_adj : std_logic_vector(MFB_REGIONS*TIMESTAMP_WIDTH-1 downto 0);
+    signal RX_MFB_QUEUE_adj     : std_logic_vector(MFB_REGIONS*max(1,log2(QUEUES))-1 downto 0);
 
     signal time_cnt             : std_logic_vector(64-1 downto 0);
     signal input_time           : std_logic_vector(64-1 downto 0);
@@ -246,6 +262,7 @@ begin
         if (rising_edge(CLK)) then
             case mi_addr_int is
                 when MI_SEL_QUEUE_REG => MI_DRD <= sel_queue_reg;
+                when MI_TOP_SPEED_REG => MI_DRD <= (0 => top_speed_reg, others => '0');
                 when others           => MI_DRD <= X"0000BEEF";
             end case;
         end if;
@@ -264,13 +281,14 @@ begin
     -- ----------------
     --  MI write logic
     -- ----------------
-    time_reset_en <= '1' when (MI_WR = '1') and (mi_addr_int = MI_RESET_REG    ) else '0';
-    queue_sel_en  <= '1' when (MI_WR = '1') and (mi_addr_int = MI_SEL_QUEUE_REG) else '0';
+    time_reset_reg_wr <= '1' when (MI_WR = '1') and (mi_addr_int = MI_RESET_REG    ) else '0';
+    queue_sel_reg_wr  <= '1' when (MI_WR = '1') and (mi_addr_int = MI_SEL_QUEUE_REG) else '0';
+    top_speed_reg_wr  <= '1' when (MI_WR = '1') and (mi_addr_int = MI_TOP_SPEED_REG) else '0';
 
     process (CLK)
     begin
         if (rising_edge(CLK)) then
-            if (time_reset_en = '1') then
+            if (time_reset_reg_wr = '1') then
                 time_reset_reg <= MI_DWR(0);
             end if;
             if (RESET = '1') or (time_reset_edge = '1') then
@@ -282,11 +300,23 @@ begin
     process (CLK)
     begin
         if (rising_edge(CLK)) then
-            if (queue_sel_en = '1') then
+            if (queue_sel_reg_wr = '1') then
                 sel_queue_reg <= MI_DWR;
             end if;
             if (RESET = '1') then
                 sel_queue_reg <= (others => '1');
+            end if;
+        end if;
+    end process;
+
+    process (CLK)
+    begin
+        if (rising_edge(CLK)) then
+            if (top_speed_reg_wr = '1') then
+                top_speed_reg <= MI_DWR(0);
+            end if;
+            if (RESET = '1') then
+                top_speed_reg <= '1';
             end if;
         end if;
     end process;
@@ -316,6 +346,12 @@ begin
 
     -- Time reset finalization
     pd_time_reset <= sel_queue_reg(QUEUES-1 downto 0) when (time_reset_pulse = '1') else (others => '0');
+
+    -- ----------------------
+    --  Top speed activation
+    -- ----------------------
+    RX_MFB_TIMESTAMP_adj <= (others => '0') when (top_speed_reg = '1') else RX_MFB_TIMESTAMP;
+    RX_MFB_QUEUE_adj     <= (others => '0') when (top_speed_reg = '1') else RX_MFB_QUEUE;
 
     -- ========================================================================
     -- Time counter
@@ -352,8 +388,8 @@ begin
     -- Input MFB Splitter
     -- ========================================================================
 
-    rx_mfb_meta_arr <= slv_array_deser(RX_MFB_META     , MFB_REGIONS);
-    rx_mfb_ts_arr   <= slv_array_deser(RX_MFB_TIMESTAMP, MFB_REGIONS);
+    rx_mfb_meta_arr <= slv_array_deser(RX_MFB_META         , MFB_REGIONS);
+    rx_mfb_ts_arr   <= slv_array_deser(RX_MFB_TIMESTAMP_adj, MFB_REGIONS);
 
     rx_splitter_g : for r in 0 to MFB_REGIONS-1 generate
         rx_mfb_comb_meta_arr(r) <= rx_mfb_meta_arr(r) & rx_mfb_ts_arr(r);
@@ -374,7 +410,7 @@ begin
         CLK             => CLK,
         RESET           => RESET,
 
-        RX_MFB_SEL      => RX_MFB_QUEUE    ,
+        RX_MFB_SEL      => RX_MFB_QUEUE_adj,
         RX_MFB_DATA     => RX_MFB_DATA     ,
         RX_MFB_META     => rx_mfb_comb_meta,
         RX_MFB_SOF      => RX_MFB_SOF      ,
