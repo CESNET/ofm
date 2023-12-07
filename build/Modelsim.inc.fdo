@@ -386,6 +386,33 @@ proc nb_vsim_set_flags {vsim_flags sim_flags} {
     lappend VSIM_FLAGS {*}[uniqueList $SIM_FLAGS(SIM_MODULE)]
 }
 
+proc nb_sim_parse_parameters {sim_flags} {
+    upvar 1 $sim_flags SIM_FLAGS
+
+    global env
+    array set PARAMS {}
+
+    if {[info exists env(CORE_PARAMS)]} {
+        foreach P $env(CORE_PARAMS) {
+            lassign [split $P "="] PARAM_NAME PARAM_VALUE
+            lappend PARAM_LIST $PARAM_NAME $PARAM_VALUE
+        }
+        array set PARAMS $PARAM_LIST
+    }
+
+    lappend REPLACE_PARAMS \
+        UVM_TEST CODE_COVERAGE RAND_SEED
+
+    echo "============================"
+    foreach param $REPLACE_PARAMS {
+        if {[info exists PARAMS($param)]} {
+            echo "Replacing SIM_FLAGS($param) with $PARAMS($param)"
+            set SIM_FLAGS($param) $PARAMS($param)
+        }
+    }
+    echo "============================"
+}
+
 proc nb_sim_main {{user_sim_flags SIM_FLAGS}} {
     # Let VSIM_FLAGS variable to be accessible in top level stack frame for running vsim by hand
     upvar 1 VSIM_FLAGS VSIM_FLAGS
@@ -403,6 +430,7 @@ proc nb_sim_main {{user_sim_flags SIM_FLAGS}} {
     namespace upvar NDKBuild SIM_FLAGS SIM_FLAGS
 
     nb_sim_sanitize_vars USER_SIM_FLAGS SIM_FLAGS HIERARCHY $VARS
+    nb_sim_parse_parameters SIM_FLAGS
 
     nb_vsim_prepare
     nb_vsim_compile_project SIM_FLAGS HIERARCHY
