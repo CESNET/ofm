@@ -5,6 +5,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 TOP_LEVEL_ENT=MFB_USER_PACKET_GEN
+SYNTH=quartus
+DEVICE=AGILEX
 
 .PHONY: all
 all: comp
