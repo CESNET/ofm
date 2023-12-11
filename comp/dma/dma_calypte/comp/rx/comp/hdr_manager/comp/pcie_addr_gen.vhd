@@ -173,7 +173,7 @@ begin
         case state_r0 is
 
             when IDLE        =>
-
+                -- Only change state if there is new packet waiting at the input FIFO
                 if (input_rdy = '1') then
                     state_next <= fsm_new_status_next;
                 end if;
@@ -181,8 +181,10 @@ begin
              when PACKET_RECEIVE | PACKET_NEW  =>
                 state_next <= PACKET_RECEIVE;
                 if (pkt_size <= BLOCK_SIZE) then
+                    -- New packet waiting in the input FIFO
                     if (input_rdy = '1') then
                         state_next <= fsm_new_status_next;
+                    -- No new packet in the input FIFO go for IDLE
                     else
                         state_next <= IDLE;
                     end if;
@@ -198,6 +200,7 @@ begin
     end process;
 
 
+    -- Counter of packet size. Decrements as the segments of a packet are dispatched.
     size_pprocess : process (CLK)
     begin
         if (rising_edge(CLK)) then
@@ -209,6 +212,7 @@ begin
         end if;
     end process;
 
+    -- Announce the end of a packet when the last segment has been reached
     process (CLK)
     begin
         if (rising_edge(CLK)) then
