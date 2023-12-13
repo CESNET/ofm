@@ -71,7 +71,6 @@ class virt_seq#(SECTION_LENGTH, INTERVAL_LENGTH, INTERVAL_COUNT, SHAPING_TYPE, O
             m_regmodel.speed[i].write(status, interval_speed[i]);
         if (SHAPING_TYPE != 0)
             m_regmodel.status.write(status, 'h28);
-        m_regmodel.status.write(status, 'h00);
     endtask
 
     task run_shaping();
