@@ -151,6 +151,7 @@ architecture FULL of RATE_LIMITER is
     signal sec_len_cnt               : std_logic_vector(MI_REG_DATA_WIDTH-1 downto 0);
     signal int_len_cnt               : std_logic_vector(MI_REG_DATA_WIDTH-1 downto 0);
     signal end_of_sec                : std_logic;
+    signal new_section               : std_logic;
     signal end_of_int                : std_logic;
 
     signal active_speed              : std_logic_vector(MI_REG_DATA_WIDTH-1 downto 0);
@@ -162,6 +163,7 @@ architecture FULL of RATE_LIMITER is
     signal packets_over              : std_logic;
     signal limit_bytes               : std_logic;
     signal limit_reached             : std_logic;
+    signal rx_mfb_src_rdy_masked     : std_logic;
     signal mfb_rx_src_rdy_shaped     : std_logic;
     signal mfb_tx_dst_rdy_shaped     : std_logic;
 
@@ -429,6 +431,17 @@ begin
         end if;
     end process;
 
+    process(CLK)
+    begin
+        if rising_edge(CLK) then
+            if (RESET = '1') then
+                new_section <= '0';
+            else
+                new_section <= end_of_sec;
+            end if;
+        end if;
+    end process;
+
     -- interval length counter
     int_len_cnt_p: process (CLK)
     begin
@@ -494,8 +507,10 @@ begin
     rx_mfb_sof_pos_deser <= slv_array_deser(RX_MFB_SOF_POS, MFB_REGIONS);
     rx_mfb_eof_pos_deser <= slv_array_deser(RX_MFB_EOF_POS, MFB_REGIONS);
 
-    rx_mfb_eof_rest   <= RX_MFB_EOF and not rx_mfb_eof_last;
-    rx_mfb_eof_masked <= RX_MFB_EOF when send_last_eof_reg = '0' else rx_mfb_eof_rest_reg;
+    rx_mfb_eof_rest   <= RX_MFB_SRC_RDY and RX_MFB_EOF and not rx_mfb_eof_last;
+    rx_mfb_eof_masked <= rx_mfb_eof_rest_reg when send_rest = '1' else RX_MFB_EOF;
+
+    send_rest <= new_section and send_last_eof_reg;
 
     rx_mfb_sof_mask_g: for i in 0 to MFB_REGIONS-1 generate
         rx_mfb_sof_before_eof(i) <= '1' when unsigned(rx_mfb_eof_pos_deser(i)) >= enlarge_right(unsigned(rx_mfb_sof_pos_deser(i)), log2(MFB_BLOCK_SIZE)) else '0';
@@ -503,9 +518,9 @@ begin
         rx_mfb_sof_mask(i)       <= rx_mfb_sof_before_eof(i) when rx_mfb_eof_last(i) = '1' else rx_mfb_sof_mask_auto(i);
     end generate;
 
-    rx_mfb_sof_last   <= RX_MFB_SOF and     rx_mfb_sof_mask;
-    rx_mfb_sof_rest   <= RX_MFB_SOF and not rx_mfb_sof_mask;
-    rx_mfb_sof_masked <= RX_MFB_SOF when send_last_eof_reg = '0' else rx_mfb_sof_rest_reg;
+    rx_mfb_sof_last   <= RX_MFB_SOF and rx_mfb_sof_mask;
+    rx_mfb_sof_rest   <= RX_MFB_SRC_RDY and RX_MFB_SOF and not rx_mfb_sof_mask;
+    rx_mfb_sof_masked <= rx_mfb_sof_rest_reg when send_rest = '1' else RX_MFB_SOF;
 
     rx_mfb_rest_regs_p: process (CLK)
     begin
@@ -519,12 +534,10 @@ begin
 
     -- control logic for sending masked eof
     send_last_eof <= not limit_bytes and packets_over and TX_MFB_DST_RDY and not send_last_eof_reg;
-    send_rest     <= '1' when send_last_eof_reg = '1' and ((p_state = RUN  and mfb_rx_src_rdy_shaped = '1' and mfb_tx_dst_rdy_shaped = '1')
-                                                        or (p_state = IDLE and RX_MFB_SRC_RDY        = '1' and TX_MFB_DST_RDY        = '1')) else '0';
     send_last_eof_reg_p: process (CLK)
     begin
         if (rising_edge(CLK)) then
-            if (RESET = '1' or send_rest = '1') then
+            if (RESET = '1' or send_rest = '1') then -- or p_state /= RUN  ??
                 send_last_eof_reg <= '0';
             elsif (send_last_eof = '1') then
                 send_last_eof_reg <= '1';
@@ -540,7 +553,8 @@ begin
     limit_reached <= bytes_over when limit_bytes = '1' else packets_over;
 
     -- RX dest and TX src logic
-    mfb_rx_src_rdy_shaped <= RX_MFB_SRC_RDY when p_state = RUN and (limit_reached = '0' or send_last_eof = '1') else '0';
+    rx_mfb_src_rdy_masked <= RX_MFB_SRC_RDY when send_rest = '0' else (or rx_mfb_sof_rest_reg) or (or rx_mfb_eof_rest_reg);
+    mfb_rx_src_rdy_shaped <= rx_mfb_src_rdy_masked when p_state = RUN and (limit_reached = '0' or send_last_eof = '1') else '0';
     mfb_tx_dst_rdy_shaped <= TX_MFB_DST_RDY when p_state = RUN and limit_reached = '0' else '0';
 
     TX_MFB_DATA    <= RX_MFB_DATA;
