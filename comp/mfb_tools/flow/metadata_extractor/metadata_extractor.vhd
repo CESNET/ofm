@@ -50,6 +50,9 @@ generic(
     --     1 - Metadata from EOF Region
     EXTRACT_MODE    : integer := 0;
 
+    -- MVB SHAKEDOWN enables
+    MVB_SHAKEDOWN_EN : boolean := True;
+
     -- Output PIPE enables
     OUT_MVB_PIPE_EN : boolean := false;
     OUT_MFB_PIPE_EN : boolean := false;
@@ -119,7 +122,9 @@ architecture FULL of METADATA_EXTRACTOR is
     -- Signals
     ---------------------------------------------------------------------------
 
+    signal shake_rx_src_rdy  : std_logic;
     signal shake_rx_dst_rdy  : std_logic;
+    
     signal shake_tx_data     : std_logic_vector(MVB_ITEMS*MFB_META_WIDTH-1 downto 0);
     signal shake_tx_vld      : std_logic_vector(MVB_ITEMS-1 downto 0);
     signal shake_tx_next     : std_logic_vector(MVB_ITEMS-1 downto 0);
@@ -128,9 +133,8 @@ architecture FULL of METADATA_EXTRACTOR is
 
     signal RX_MFB_XOF         : std_logic_vector(MFB_REGIONS-1 downto 0);
     signal rx_mfb_xof_present : std_logic;
-    signal hdrs_rdy           : std_logic;
 
-    signal pipe_mvb_dst_rdy  : std_logic;
+    signal pipe_mfb_src_rdy  : std_logic;
     signal pipe_mfb_dst_rdy  : std_logic;
 
     ---------------------------------------------------------------------------
@@ -140,12 +144,13 @@ begin
     -- -------------------------------------------------------------------------
     -- RX MFB processing
     -- -------------------------------------------------------------------------
-
     RX_MFB_XOF         <= RX_MFB_EOF when EXTRACT_MODE=1 else RX_MFB_SOF;
     rx_mfb_xof_present <= (or RX_MFB_XOF);
 
-    hdrs_rdy       <= '1' when rx_mfb_xof_present='0' or shake_rx_dst_rdy='1' else '0';
-    RX_MFB_DST_RDY <= '1' when pipe_mfb_dst_rdy='1' and hdrs_rdy='1' else '0';
+    RX_MFB_DST_RDY <= pipe_mfb_dst_rdy and (shake_rx_dst_rdy or not rx_mfb_xof_present);
+
+    pipe_mfb_src_rdy <= RX_MFB_SRC_RDY and (shake_rx_dst_rdy or not rx_mfb_xof_present);
+    shake_rx_src_rdy <= rx_mfb_xof_present and RX_MFB_SRC_RDY and pipe_mfb_dst_rdy;
 
     -- -------------------------------------------------------------------------
 
@@ -153,29 +158,36 @@ begin
     -- MVB Shakedown
     -- -------------------------------------------------------------------------
 
-    mvb_shake_i : entity work.MVB_SHAKEDOWN
-    generic map(
-        RX_ITEMS    => MFB_REGIONS   ,
-        TX_ITEMS    => MVB_ITEMS     ,
-        ITEM_WIDTH  => MFB_META_WIDTH,
-        SHAKE_PORTS => 2
-    )
-    port map(
-        CLK        => CLK  ,
-        RESET      => RESET,
-
-        RX_DATA    => RX_MFB_META     ,
-        RX_VLD     => RX_MFB_XOF      ,
-        RX_SRC_RDY => RX_MFB_SRC_RDY and pipe_mfb_dst_rdy,
-        RX_DST_RDY => shake_rx_dst_rdy,
-
-        TX_DATA    => shake_tx_data,
-        TX_VLD     => shake_tx_vld ,
-        TX_NEXT    => shake_tx_next
-    );
-
-    shake_tx_next    <= (others => shake_tx_dst_rdy);
-    shake_tx_src_rdy <= (or shake_tx_vld);
+    mvb_shake_g: if MVB_SHAKEDOWN_EN generate
+        mvb_shake_i : entity work.MVB_SHAKEDOWN
+        generic map(
+            RX_ITEMS    => MFB_REGIONS   ,
+            TX_ITEMS    => MVB_ITEMS     ,
+            ITEM_WIDTH  => MFB_META_WIDTH,
+            SHAKE_PORTS => 2
+        )
+        port map(
+            CLK        => CLK  ,
+            RESET      => RESET,
+    
+            RX_DATA    => RX_MFB_META     ,
+            RX_VLD     => RX_MFB_XOF      ,
+            RX_SRC_RDY => shake_rx_src_rdy,
+            RX_DST_RDY => shake_rx_dst_rdy,
+    
+            TX_DATA    => shake_tx_data,
+            TX_VLD     => shake_tx_vld ,
+            TX_NEXT    => shake_tx_next
+        );
+    
+        shake_tx_next    <= (others => shake_tx_dst_rdy);
+        shake_tx_src_rdy <= (or shake_tx_vld);
+    else generate
+        shake_tx_data    <= RX_MFB_META;
+        shake_tx_vld     <= RX_MFB_XOF;
+        shake_tx_src_rdy <= shake_rx_src_rdy;
+        shake_rx_dst_rdy <= shake_tx_dst_rdy;
+    end generate;
 
     -- -------------------------------------------------------------------------
 
@@ -229,7 +241,7 @@ begin
         RX_EOF     => RX_MFB_EOF    ,
         RX_SOF_POS => RX_MFB_SOF_POS,
         RX_EOF_POS => RX_MFB_EOF_POS,
-        RX_SRC_RDY => RX_MFB_SRC_RDY and hdrs_rdy,
+        RX_SRC_RDY => pipe_mfb_src_rdy,
         RX_DST_RDY => pipe_mfb_dst_rdy,
 
         TX_DATA    => TX_MFB_DATA   ,
