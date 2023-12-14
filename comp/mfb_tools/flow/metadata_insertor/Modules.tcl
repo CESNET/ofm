@@ -4,16 +4,18 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-set PKG_BASE         "$OFM_PATH/comp/base/pkg"
+set SHAKEDOWN_BASE   "$OFM_PATH/comp/mvb_tools/flow/shakedown"
+set MVB_FIFOX_BASE   "$OFM_PATH/comp/mvb_tools/storage/fifox"
+set FIFOX_MULTI_BASE "$OFM_PATH/comp/base/fifo/fifox_multi"
 
-set PACKAGES "$PACKAGES $PKG_BASE/math_pack.vhd"
-set PACKAGES "$PACKAGES $PKG_BASE/type_pack.vhd"
+# Packages
+lappend PACKAGES "$OFM_PATH/comp/base/pkg/math_pack.vhd"
+lappend PACKAGES "$OFM_PATH/comp/base/pkg/type_pack.vhd"
 
-# list of sub-components
-set COMPONENTS [ list \
-    [ list "SHAKEDOWN"   "$OFM_PATH/comp/mvb_tools/flow/shakedown"   "FULL" ] \
-    [ list "MVB_FIFOX"   "$OFM_PATH/comp/mvb_tools/storage/fifox"    "FULL" ] \
-]
+# Components
+lappend COMPONENTS [ list "SHAKEDOWN"   $SHAKEDOWN_BASE   "FULL" ]
+lappend COMPONENTS [ list "MVB_FIFOX"   $MVB_FIFOX_BASE   "FULL" ]
+lappend COMPONENTS [ list "FIFOX_MULTI" $FIFOX_MULTI_BASE "FULL" ]
 
-# Source files for implemented component
-set MOD "$MOD $ENTITY_BASE/metadata_insertor.vhd"
+# Files
+lappend MOD "$ENTITY_BASE/metadata_insertor.vhd"
