@@ -249,7 +249,8 @@ begin
         MFB_META_WIDTH  => MFB_META_WIDTH,
 
         INSERT_MODE     => 0, -- insert to SOF region
-        MVB_FIFO_SIZE   => 0, -- we need MVB_ASFIFOX
+        MVB_FIFO_SIZE   => 16,
+        MVB_FIFOX_MULTI => True, -- we need also MVB_ASFIFOX
         DEVICE          => DEVICE
     )
     port map(
