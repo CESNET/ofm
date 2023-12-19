@@ -329,6 +329,10 @@ begin
                 PCIE_UP_MFB_SRC_RDY => PCIE_RQ_MFB_SRC_RDY,
                 PCIE_UP_MFB_DST_RDY => PCIE_RQ_MFB_DST_RDY);
     else generate
+        mi_split_drd(0)  <= x"DEAD_BEAD";
+        mi_split_ardy(0) <= mi_split_rd(0) or mi_split_wr(0);
+        mi_split_drdy(0) <= mi_split_rd(0);
+
         USR_RX_MFB_DST_RDY <= '1';
 
         PCIE_RQ_MFB_DATA    <= (others => '0');
@@ -466,6 +470,9 @@ begin
                 MI_DRDY => mi_split_drdy(1));
 
     else generate
+        mi_split_drd(1) <= x"DEAD_BEAD";
+        mi_split_ardy(1) <= mi_split_rd(1) or mi_split_wr(1);
+        mi_split_drdy(1) <= mi_split_rd(1);
 
         USR_TX_MFB_META_PKT_SIZE <= (others => '0');
         USR_TX_MFB_META_CHAN     <= (others => '0');
@@ -492,61 +499,40 @@ begin
         ST_SP_DBG_META <= (others => '0');
     end generate;
 
-    mi_splitter_g : if (TX_GEN_EN and RX_GEN_EN) generate
-        mi_splitter_i : entity work.MI_SPLITTER_PLUS_GEN
-            generic map (
-                ADDR_WIDTH => MI_WIDTH,
-                DATA_WIDTH => MI_WIDTH,
-                META_WIDTH => 0,
-                PORTS      => 2,
-                PIPE_OUT   => (others => FALSE),
+    mi_splitter_i : entity work.MI_SPLITTER_PLUS_GEN
+        generic map (
+            ADDR_WIDTH => MI_WIDTH,
+            DATA_WIDTH => MI_WIDTH,
+            META_WIDTH => 0,
+            PORTS      => 2,
+            PIPE_OUT   => (others => FALSE),
 
-                ADDR_BASES => 2,
-                ADDR_BASE  => MI_SPLIT_BASES,
-                ADDR_MASK  => x"00200000",
+            ADDR_BASES => 2,
+            ADDR_BASE  => MI_SPLIT_BASES,
+            ADDR_MASK  => x"00200000",
 
-                DEVICE => DEVICE)
-            port map (
-                CLK   => CLK,
-                RESET => RESET,
+            DEVICE => DEVICE)
+        port map (
+            CLK   => CLK,
+            RESET => RESET,
 
-                RX_DWR  => MI_DWR,
-                RX_MWR  => (others => '0'),
-                RX_ADDR => MI_ADDR,
-                RX_BE   => MI_BE,
-                RX_RD   => MI_RD,
-                RX_WR   => MI_WR,
-                RX_ARDY => MI_ARDY,
-                RX_DRD  => MI_DRD,
-                RX_DRDY => MI_DRDY,
+            RX_DWR  => MI_DWR,
+            RX_MWR  => (others => '0'),
+            RX_ADDR => MI_ADDR,
+            RX_BE   => MI_BE,
+            RX_RD   => MI_RD,
+            RX_WR   => MI_WR,
+            RX_ARDY => MI_ARDY,
+            RX_DRD  => MI_DRD,
+            RX_DRDY => MI_DRDY,
 
-                TX_DWR  => mi_split_dwr,
-                TX_MWR  => open,
-                TX_ADDR => mi_split_addr,
-                TX_BE   => mi_split_be,
-                TX_RD   => mi_split_rd,
-                TX_WR   => mi_split_wr,
-                TX_ARDY => mi_split_ardy,
-                TX_DRD  => mi_split_drd,
-                TX_DRDY => mi_split_drdy);
-
-    elsif (TX_GEN_EN and (not RX_GEN_EN)) generate
-        mi_split_dwr(1)  <= MI_DWR;
-        mi_split_addr(1) <= MI_ADDR;
-        mi_split_be(1)   <= MI_BE;
-        mi_split_rd(1)   <= MI_RD;
-        mi_split_wr(1)   <= MI_WR;
-        MI_ARDY          <= mi_split_ardy(1);
-        MI_DRD           <= mi_split_drd(1);
-        MI_DRDY          <= mi_split_drdy(1);
-    else generate
-        mi_split_dwr(0)  <= MI_DWR;
-        mi_split_addr(0) <= MI_ADDR;
-        mi_split_be(0)   <= MI_BE;
-        mi_split_rd(0)   <= MI_RD;
-        mi_split_wr(0)   <= MI_WR;
-        MI_ARDY          <= mi_split_ardy(0);
-        MI_DRD           <= mi_split_drd(0);
-        MI_DRDY          <= mi_split_drdy(0);
-    end generate;
+            TX_DWR  => mi_split_dwr,
+            TX_MWR  => open,
+            TX_ADDR => mi_split_addr,
+            TX_BE   => mi_split_be,
+            TX_RD   => mi_split_rd,
+            TX_WR   => mi_split_wr,
+            TX_ARDY => mi_split_ardy,
+            TX_DRD  => mi_split_drd,
+            TX_DRDY => mi_split_drdy);
 end architecture;
