@@ -47,7 +47,7 @@ class ex_test extends uvm_test;
     endtask
 
     task test_wait_timeout(int unsigned time_length);
-        #(time_length*1us);
+        #(time_length*1ms);
     endtask
 
     task test_wait_result();
