@@ -37,8 +37,6 @@ class virt_sequence #(MIN_SIZE, PKT_MTU, DATA_SIZE_MAX, MFB_REGIONS, MFB_REGION_
         m_byte_array_sq_lib.cfg.array_size_set(64, DATA_SIZE_MAX);
         m_byte_array_sq_lib.min_random_count = 100;
         m_byte_array_sq_lib.max_random_count = 200;
-        // m_byte_array_sq_lib.min_random_count = 1000;
-        // m_byte_array_sq_lib.max_random_count = 2000;
         m_byte_array_sq_lib.randomize();
 
         m_size_sq_lib.init_sequence();
