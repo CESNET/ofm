@@ -72,6 +72,7 @@ package type_pack is
   type b_array_t is array (natural range <>) of boolean;
   type b_array_2d_t is array (natural range <>) of b_array_t;
   type b_array_3d_t is array (natural range <>) of b_array_2d_t;
+  type str_array_t is array (natural range <>) of string;
 
   -- Conversion functions
   -- std_logic_vector -> unsigned
@@ -80,6 +81,11 @@ package type_pack is
   -- unsigned -> std_logic_vector
   function u_arr_to_slv_arr   (u_array   : u_array_t) return slv_array_t;
   function u_arr_to_slv_arr_2d(u_array_2d: u_array_2d_t) return slv_array_2d_t;
+
+  -- Serialize array of strings
+  function str_array_ser(str_array: str_array_t) return string;
+  -- Serialize array of strings in reverse order (item(0) will be on the left)
+  function str_array_ser_rev(str_array: str_array_t) return string;
 
   -- Sumation of different types of array
   function sum(v : slv_array_t) return std_logic_vector;
@@ -379,5 +385,24 @@ package body type_pack is
    begin
         return std_logic_vector(resize(unsigned(in_val), in_size));
    end function;
+
+   function str_array_ser(str_array: str_array_t) return string is
+      variable ret : string(1 to str_array'length*(str_array(str_array'low)'length));
+   begin
+      for i in str_array'low to str_array'high loop
+         ret(i*str_array(str_array'low)'length+1 to (i+1)*str_array(str_array'low)'length) := str_array(i);
+      end loop;
+      return ret;
+   end;
+
+   function str_array_ser_rev(str_array: str_array_t) return string is
+      variable ret : string(1 to str_array'length*(str_array(str_array'low)'length));
+   begin
+      for i in str_array'low to str_array'high loop
+         ret(i*str_array(str_array'low)'length+1 to (i+1)*str_array(str_array'low)'length) := str_array(str_array'high-i);
+      end loop;
+      return ret;
+   end;
+
 end type_pack;
 

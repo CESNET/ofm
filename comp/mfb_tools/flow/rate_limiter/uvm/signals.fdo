@@ -9,23 +9,24 @@ proc mi {} {
 }
 
 proc mfb {PATH} {
-    add wave -group "MFB" -noupdate -hex /testbench/mfb_rx/*         \
-                                         $PATH/mfb_rx_src_rdy_shaped \
-                                         $PATH/rx_mfb_eof_last       \
-                                         $PATH/rx_mfb_eof_rest       \
-                                         $PATH/rx_mfb_eof_rest_reg   \
-                                         $PATH/rx_mfb_eof_masked     \
-                                         $PATH/rx_mfb_sof_last       \
-                                         $PATH/rx_mfb_sof_rest       \
-                                         $PATH/rx_mfb_sof_rest_reg   \
-                                         $PATH/rx_mfb_sof_mask       \
-                                         $PATH/rx_mfb_sof_masked     \
-                                         $PATH/rx_mfb_sof_before_eof \
-                                         $PATH/rx_mfb_sof_mask_auto  \
-                                         $PATH/rx_mfb_sof_pos_deser  \
-                                         $PATH/rx_mfb_eof_pos_deser  \
-                                         /testbench/mfb_tx/*         \
-                                         $PATH/mfb_tx_dst_rdy_shaped
+    add wave -group "MFB RX" -noupdate -hex /testbench/mfb_rx/*         \
+                                            $PATH/rx_mfb_src_rdy_masked \
+                                            $PATH/mfb_rx_src_rdy_shaped \
+                                            $PATH/rx_mfb_eof_last       \
+                                            $PATH/rx_mfb_eof_rest       \
+                                            $PATH/rx_mfb_eof_rest_reg   \
+                                            $PATH/rx_mfb_eof_masked     \
+                                            $PATH/rx_mfb_sof_last       \
+                                            $PATH/rx_mfb_sof_rest       \
+                                            $PATH/rx_mfb_sof_rest_reg   \
+                                            $PATH/rx_mfb_sof_mask       \
+                                            $PATH/rx_mfb_sof_masked     \
+                                            $PATH/rx_mfb_sof_before_eof \
+                                            $PATH/rx_mfb_sof_mask_auto  \
+                                            $PATH/rx_mfb_sof_pos_deser  \
+                                            $PATH/rx_mfb_eof_pos_deser
+    add wave -group "MFB TX" -noupdate -hex /testbench/mfb_tx/*         \
+                                            $PATH/mfb_tx_dst_rdy_shaped
 }
 
 proc fsm {PATH} {
@@ -66,6 +67,7 @@ proc traffic {PATH} {
                                         $PATH/sec_len_cnt       \
                                         $PATH/int_len_cnt       \
                                         $PATH/end_of_sec        \
+                                        $PATH/new_section       \
                                         $PATH/end_of_int        \
                                         $PATH/active_speed      \
                                         $PATH/bytes_in_sec      \

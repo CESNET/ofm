@@ -55,7 +55,7 @@ class SpeedMeter(nfb.BaseComp):
         return self._comp.read32(self._REG_BYTES), self._comp.read32(self._REG_SOFS), self._comp.read32(self._REG_EOFS), self._comp.read32(self._REG_TICKS)
 
     def get_speed(self):
-        """Retrieve speed both in B/s and in pkt/s"""
+        """Retrieve speed both in b/s and in pkt/s"""
 
         ticks = self._comp.read32(self._REG_TICKS)
         if ticks != 0:
@@ -65,7 +65,7 @@ class SpeedMeter(nfb.BaseComp):
             frequency  = self._comp.read32(self._REG_FREQ) * 1_000_000
             bps_speed  = float(frequency) / ticks * self._comp.read32(self._REG_BYTES)
             pkts_speed = float(frequency) / ticks * self._comp.read32(self._REG_SOFS)
-            return bps_speed, pkts_speed
+            return bps_speed*8, pkts_speed
         else:
             return 0, 0
 
