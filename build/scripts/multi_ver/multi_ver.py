@@ -17,17 +17,18 @@ def reduce_combinations(combinations, reduction_perc = 100):
     if (reduction_perc >= 100):
         return combinations
 
-    comb = list(combinations)
-    items = len(comb)
+    items = len(combinations)
     new_items = items * reduction_perc // 100
     if (new_items < 1):
         new_items = 1
 
-    new_comb = []
+    comb = list(combinations.keys())
+    new_comb = dict()
     for i in range(new_items):
-        new_comb.append(comb.pop(randint(0,len(comb)-1)))
+        new_item_key = comb.pop(randint(0,len(comb)-1))
+        new_comb[new_item_key] = combinations[new_item_key]
 
-    return tuple(new_comb)
+    return new_comb
 
 # Modify setting variable
 def create_setting_from_combination(settings,combination):
@@ -59,17 +60,37 @@ def apply_setting(pkg_file,setting,sed_str):
     return env
 
 # Run Modelsim with the current test_pkg file
-def run_modelsim(fdo_file,manual=False,gui=False, env={}):
+def run_modelsim(fdo_file, test_name, manual=False, gui=False, coverage=False, env={}):
     global FAIL
-    c = "\"" if (gui) else "; quit -f\" -c"
+
+    logfile_name = f"transcript_{test_name}"
+
+    command  = f"do {fdo_file};"
+    if coverage:
+        command += f"coverage save -codeAll -testname {test_name} {test_name}.ucdb;"
+    if not gui:
+        command += "quit -f;"
+
+    params =  ""
+    params += f" -logfile {logfile_name} "
+    params += "" if gui else " -c "
+
+    if coverage:
+        if ('CORE_PARAMS' in env):
+            env['CORE_PARAMS'] += " CODE_COVERAGE=true"
+        else:
+            env['CORE_PARAMS'] = " CODE_COVERAGE=true"
+
     for k, v in env.items():
         os.environ[k] = v
 
+    cmd_vsim = f'vsim -do "{command}" {params}'
+    cmd_grep = f'grep -E "(Verification finished successfully)|(VERIFICATION SUCCESS)"'
     if (manual):
-        system("vsim -do \"do "+fdo_file+c)
-        result = system("grep -E \"(Verification finished successfully)|(VERIFICATION SUCCESS)\" transcript >/dev/null")
+        system(cmd_vsim)
+        result = system(f'{cmd_grep} {logfile_name} >/dev/null')
     else:
-        result = system("vsim -do \"do "+fdo_file+c+" | grep -E \"(Verification finished successfully)|(VERIFICATION SUCCESS)\" >/dev/null")
+        result = system(f'{cmd_vsim} | {cmd_grep} >/dev/null')
 
     for k in env:
         del os.environ[k]
@@ -88,6 +109,8 @@ parser.add_argument("-s","--setting", nargs="+", help="Name of a specific settin
 parser.add_argument("-d","--dry-run", action="store_true", help="(Used together with '-s') Only sets the requested setting to test package without starting the verification")
 parser.add_argument("-c","--command-line", action="store_true", help="(Used together with '-s') Starts ModelSim with parameter '-c' for command line run")
 parser.add_argument("-r","--run-percantage", action="store", help="(Used without '-s') Randomly reduces number of performed combination to the given percantage ('100' for running all combinations)")
+parser.add_argument("-n","--test-name", action="store", help="(Used with '-s') select name of test. Some file will be saved with this suffix", default="test_default")
+parser.add_argument("--coverage", action="store_true", help="Generate and save code coverarge to <test_name>.ucdb file")
 
 args = parser.parse_args()
 
@@ -118,15 +141,22 @@ SETTING = {}
 # Define settings combinations
 ##########
 
-COMBINATIONS = ()
+COMBINATIONS = dict()
 
 if ("_combinations_" in SETTINGS.keys()):
     # User defined combinations
-    COMBINATIONS = SETTINGS["_combinations_"]
+    if type(SETTINGS["_combinations_"]) is dict:
+        COMBINATIONS = SETTINGS["_combinations_"]
+    if type(SETTINGS["_combinations_"]) is tuple:
+        for it, comb in enumerate(SETTINGS["_combinations_"]):
+            COMBINATIONS[f"test_name_{it}"] = comb
+
     del SETTINGS["_combinations_"]
+
 else:
     # Default combinations
-    COMBINATIONS = tuple([(x,) for x in SETTINGS.keys()])
+    for key in SETTINGS.keys():
+        COMBINATIONS[key] = (key, )
 
 if (args.run_percantage):
     # Randomly reduce number of combinations based on command argument
@@ -149,24 +179,25 @@ if (args.setting==None):
     # Run all settings
     ##########
 
-    for c in COMBINATIONS:
-        SETTING = create_setting_from_combination(SETTINGS,c)
+    for key in COMBINATIONS:
+        comb = COMBINATIONS[key]
+        SETTING = create_setting_from_combination(SETTINGS, comb)
 
         env = apply_setting(args.test_pkg_file,SETTING,PKG_MOD_SED)
 
-        print("Running combination: "+" ".join(c))
-        result = run_modelsim(args.fdo_file,env=env)
+        comb_name = " ".join(comb)
+        print(f"Running combination: {key} ({comb_name})")
+        result = run_modelsim(args.fdo_file, key, coverage=args.coverage, env=env)
         if (result == 0): # detect failure
-            print("Run SUCCEEDED ("+" ".join(c)+")")
+            print(f"Run SUCCEEDED ({key})")
         else:
-            print("Run FAILED ("+" ".join(c)+")")
+            print(f"Run FAILED ({key})")
             FAIL = True
 
         # backup transcript
-        system("cp transcript transcript_"+"_".join(c))
+        # system("cp transcript transcript_"+"_".join(c))
         # backup test_pkg
-        #system("cp {} {}_".format(args.test_pkg_file,args.test_pkg_file)+"_".join(c))
-    
+        # system("cp {} {}_".format(args.test_pkg_file,args.test_pkg_file)+"_".join(c))
     ##########
 else:
     ##########
@@ -179,7 +210,7 @@ else:
 
     if (not args.dry_run):
         print("Running combination: "+" ".join(args.setting))
-        result = run_modelsim(args.fdo_file,True,(not args.command_line),env=env)
+        result = run_modelsim(args.fdo_file, args.test_name, True, (not args.command_line), coverage=args.coverage, env=env)
         if (result == 0): # detect failure
             print("Run SUCCEEDED ("+" ".join(args.setting)+")")
         else:
