@@ -75,6 +75,9 @@ architecture FULL of MFB_TRANSFORMER_DOWN is
     signal tx_eop_sel        : std_logic_vector(TX_EOP'range);
     signal inside_packet_reg : std_logic := '0';
 
+    type t_state is (S_IDLE, S_MAX, S_OTHERS);
+    signal state : t_state;
+
 begin
 
     -- data, sop, eop, sop_pos and eop_pos multiplexers
@@ -145,6 +148,10 @@ begin
         DATA_OUT   => TX_EOP_POS
     );
 
+    state <= S_IDLE when sel = IDLE else
+             S_MAX  when sel = MAX  else
+             S_OTHERS;
+
     -- counter handles the select signal for multiplexers
     -- sel signal is one bit wider (for IDLE state)
     cnt_p : process(CLK)
@@ -153,12 +160,12 @@ begin
             if RESET = '1' then
                 sel <= IDLE;
             else
-                case sel is
-                    when IDLE =>
+                case state is
+                    when S_IDLE =>
                         if RX_SRC_RDY = '1' then
                             sel <= (others => '0');
                         end if;
-                    when MAX =>
+                    when S_MAX =>
                         if TX_DST_RDY = '1' then
                             if RX_SRC_RDY = '1' then
                                 sel <= (others => '0');
@@ -166,7 +173,7 @@ begin
                                 sel <= IDLE;
                             end if;
                         end if;
-                    when others =>
+                    when S_OTHERS =>
                         if TX_DST_RDY = '1' then
                             sel <= std_logic_vector(unsigned(sel)+1);
                         end if;
@@ -176,22 +183,21 @@ begin
     end process;
 
     -- logic defining RX_DST_RDY, TX_SRC_RDY
-    communication_logic_p : process(RESET, sel, TX_DST_RDY, tx_sop_sel, tx_eop_sel, inside_packet_reg)
+    communication_logic_p : process(RESET, state, sel, TX_DST_RDY, tx_sop_sel, tx_eop_sel, inside_packet_reg)
     begin
             RX_DST_RDY <= '0';
             TX_SRC_RDY <= '0';
-            case sel is
-                when IDLE =>
+            case state is
+                when S_IDLE =>
                     RX_DST_RDY <= '1';
-                when MAX =>
+                when S_MAX =>
                     if TX_DST_RDY = '1' then
                         RX_DST_RDY <= '1';
                     end if;
                     TX_SRC_RDY <= '0' when inside_packet_reg = '0' and unsigned(tx_sop_sel) = 0 and unsigned(tx_eop_sel) = 0 else '1';
-                when others =>
+                when S_OTHERS =>
                     TX_SRC_RDY <= '0' when inside_packet_reg = '0' and unsigned(tx_sop_sel) = 0 and unsigned(tx_eop_sel) = 0 else '1';
             end case;
-
     end process;
 
     -- process controlling whether we're inside a packet or not
