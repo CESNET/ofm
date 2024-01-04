@@ -121,9 +121,9 @@ architecture FULL of TCAM2 is
 
     -- Input registers augmented
     signal input_m_data_reg_aug      : std_logic_vector(COLUMNS*CELL_WIDTH-1 downto 0);
-    signal input_wr_data_reg_aug     : std_logic_vector(COLUMNS*CELL_WIDTH-1 downto 0);
-    signal input_wr_mask_reg_aug     : std_logic_vector(COLUMNS*CELL_WIDTH-1 downto 0);
-    signal input_wr_addr_reg_aug     : std_logic_vector(log2(ROWS*ALIGNED_CELL_HEIGHT)-1 downto 0);
+    signal input_wr_data_reg_aug     : std_logic_vector(COLUMNS*CELL_WIDTH-1 downto 0) := (others => '0');
+    signal input_wr_mask_reg_aug     : std_logic_vector(COLUMNS*CELL_WIDTH-1 downto 0) := (others => '0');
+    signal input_wr_addr_reg_aug     : std_logic_vector(log2(ROWS*ALIGNED_CELL_HEIGHT)-1 downto 0) := (others => '0');
 
     -- Input registers augmented arrays
     signal input_m_data_reg_aug_arr  : slv_array_t(COLUMNS-1 downto 0)(CELL_WIDTH-1 downto 0);
@@ -432,9 +432,9 @@ begin
     end process;
 
     -- write signals registers padding
-    input_wr_data_reg_aug <= (input_wr_data_reg'range => input_wr_data_reg, others => '0');
-    input_wr_mask_reg_aug <= (input_wr_mask_reg'range => input_wr_mask_reg, others => '0');
-    input_wr_addr_reg_aug <= (input_wr_addr_reg'range => input_wr_addr_reg, others => '0');
+    input_wr_data_reg_aug(input_wr_data_reg'range) <= input_wr_data_reg;
+    input_wr_mask_reg_aug(input_wr_mask_reg'range) <= input_wr_mask_reg;
+    input_wr_addr_reg_aug(input_wr_addr_reg'range) <= input_wr_addr_reg;
     -- write data and mask registers arrays
     input_wr_data_reg_aug_arr <= slv_array_deser(input_wr_data_reg_aug,COLUMNS);
     input_wr_mask_reg_aug_arr <= slv_array_deser(input_wr_mask_reg_aug,COLUMNS);
@@ -620,7 +620,8 @@ begin
             begin
                 if rising_edge(CLK) then
                     if (m_aug_reg_we(j) = '1') then
-                        m_aug_reg(i)(j) <= (mem_match_out(i)'range => mem_match_out(i), others=>'0');
+                        m_aug_reg(i)(j) <= (others=>'0');
+                        m_aug_reg(i)(j)(mem_match_out(i)'range) <= mem_match_out(i);
                     end if;
                 end if;
             end process;

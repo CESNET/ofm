@@ -837,7 +837,9 @@ begin
             old_space_rd_ptr_reg <= unsigned(SPACE_GLB_RD_PTR);
 
             if (RESET='1') then
-                free_space_cnt_reg   <= (free_space_cnt_reg'high => '1', others => '0');
+                free_space_cnt_reg   <= (others => '0');
+                free_space_cnt_reg(free_space_cnt_reg'high) <= '1';
+
                 old_space_rd_ptr_reg <= (others => '0');
             end if;
         end if;

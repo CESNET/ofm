@@ -258,7 +258,8 @@ begin
             dst_buf_free_space_reg <= tmp_data_size;
 
             if (RESET='1') then
-                dst_buf_free_space_reg <= (dst_buf_free_space_reg'high => '1', others => '0');
+                dst_buf_free_space_reg <= (others => '0');
+                dst_buf_free_space_reg(dst_buf_free_space_reg'high) <= '1';
             end if;
         end if;
     end process;
