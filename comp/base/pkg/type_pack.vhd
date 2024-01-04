@@ -214,7 +214,7 @@ package body type_pack is
       variable DATA_WIDTH : integer := 0;
    begin
       if (ITEMS_X=0) then
-         return (-1 downto 0 => "X"); -- null slv_array
+         return (0 downto 1 => "X"); -- null slv_array
       else
          DATA_WIDTH := slv_array'length/ITEMS_X;
          assert ((ITEMS_X*DATA_WIDTH)=slv_array'length)
@@ -237,7 +237,7 @@ package body type_pack is
       variable DATA_WIDTH : integer := 0;
    begin
       if (ITEMS_X=0) then
-         return (0 to -1 => "X"); -- null slv_array
+         return (1 to 0 => "X"); -- null slv_array
       else
          DATA_WIDTH := slv_array'length/ITEMS_X;
          assert ((ITEMS_X*DATA_WIDTH)=slv_array'length)
@@ -294,7 +294,7 @@ package body type_pack is
       variable DATA_WIDTH : integer := 0;
    begin
       if (ITEMS_X=0 or ITEMS_Y=0) then
-         return (-1 downto 0 => (-1 downto 0 => "X")); -- null slv_array_2d
+         return (0 downto 1 => (0 downto 1 => "X")); -- null slv_array_2d
       else
          DATA_WIDTH := slv_array_2d'length/ITEMS_X/ITEMS_Y;
          assert ((ITEMS_X*ITEMS_Y*DATA_WIDTH)=slv_array_2d'length)
@@ -319,7 +319,7 @@ package body type_pack is
       variable DATA_WIDTH : integer := 0;
    begin
       if (ITEMS_X=0 or ITEMS_Y=0) then
-         return (0 to -1 => (0 to -1 => "X")); -- null slv_array_2d
+         return (1 to 0 => (1 to 0 => "X")); -- null slv_array_2d
       else
          DATA_WIDTH := slv_array_2d'length/ITEMS_X/ITEMS_Y;
          assert ((ITEMS_X*ITEMS_Y*DATA_WIDTH)=slv_array_2d'length)
