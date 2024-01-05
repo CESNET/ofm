@@ -18,8 +18,10 @@ use work.type_pack.all;
 -- This component limits output speed according to given Timestamps via the :vhdl:portsignal:`RX_MFB_TIMESTAMP <mfb_timestamp_limiter.rx_mfb_timestamp>` port.
 -- There are 2 Timestamp formats that are currently supported (see the :vhdl:genconstant:`TIMESTAMP_FORMAT <mfb_packet_delayer.timestamp_format>` generic).
 -- The incoming packets are split into queues (e.g., per each DMA Channel), where the order of packets is kept the same.
--- Then in each Queue, the :ref:`MFB Packet Delayer component <mfb_packet_delayer>` outputs each packet when the time is right.
--- Finally, the packets from all Queues are merged back into a single stream (no order is kept here).
+-- Then in each **Selected Queue**, the :ref:`MFB Packet Delayer component <mfb_packet_delayer>` outputs each packet when the time is right.
+-- Selected Queues are a subset of all available Queues in range 0 to :vhdl:genconstant:`SELECTED_QUEUES <mfb_timestamp_limiter.selected_queues>`-1.
+-- Only in these Selected Queues are the packets transmitted according to the Timestamps; FIFOs are in the other "unselected" Queues.
+-- Finally, behind the Packet Delayers and FIFOs, the packets from all Queues are merged back into a single stream (no order is kept here).
 --
 -- The Packet Delayers use a time source, according to which they calculate the time that has passed and whether a packet is due to be sent.
 -- The default is to use the so-called Time Counter (see diagram below), which is basically a counter that increments its value by the duration of one clock period derived from the
@@ -90,6 +92,10 @@ generic(
     BUFFER_AF_OFFSET      : natural := 10;
     -- The number of Queues (DMA Channels).
     QUEUES                : natural := 1;
+    -- The number of selected Queues (DMA Channels) for timestamp limiting.
+    -- The range is from 0 to SELECTED_QUEUES-1.
+    -- Timestamps in other Queues are ignored as packets pass through FIFOs instead of Packet Delayers.
+    SELECTED_QUEUES       : natural := QUEUES;
 
     -- FPGA device name: ULTRASCALE, STRATIX10, AGILEX, ...
     DEVICE                : string := "STRATIX10"
@@ -245,6 +251,10 @@ begin
     assert (QUEUES > 0) and (QUEUES <= 32)
         report "TIMESTAMP LIMITER: Currently supported number of Queues is between 0 and 32 (inclusive)!" & LF &
                "In case of needing more, simply add more MI_SEL_QUEUE_REG registers." & LF
+        severity Failure;
+
+    assert (SELECTED_QUEUES <= QUEUES)
+        report "Selected more Queues for Timestamp Limiting than available!"
         severity Failure;
 
     -- ========================================================================
@@ -445,48 +455,95 @@ begin
         rx_pd_meta(q) <= slv_array_ser(rx_pd_meta_arr(q));
         rx_pd_ts  (q) <= slv_array_ser(rx_pd_ts_arr  (q));
 
-        packet_delayer_i : entity work.MFB_PACKET_DELAYER
-        generic map(
-            MFB_REGIONS     => MFB_REGIONS     ,
-            MFB_REGION_SIZE => MFB_REGION_SIZE ,
-            MFB_BLOCK_SIZE  => MFB_BLOCK_SIZE  ,
-            MFB_ITEM_WIDTH  => MFB_ITEM_WIDTH  ,
-            MFB_META_WIDTH  => MFB_META_WIDTH  ,
+        selected_queues_g : if q <= SELECTED_QUEUES generate
 
-            TS_WIDTH        => TIMESTAMP_WIDTH ,
-            TS_FORMAT       => TIMESTAMP_FORMAT,
-            FIFO_DEPTH      => BUFFER_SIZE     ,
-            FIFO_AF_OFFSET  => BUFFER_AF_OFFSET,
-            DEVICE          => DEVICE
-        )
-        port map(
-            CLK   => CLK,
-            RESET => RESET,
+            packet_delayer_i : entity work.MFB_PACKET_DELAYER
+            generic map(
+                MFB_REGIONS     => MFB_REGIONS     ,
+                MFB_REGION_SIZE => MFB_REGION_SIZE ,
+                MFB_BLOCK_SIZE  => MFB_BLOCK_SIZE  ,
+                MFB_ITEM_WIDTH  => MFB_ITEM_WIDTH  ,
+                MFB_META_WIDTH  => MFB_META_WIDTH  ,
 
-            TIME_RESET     => pd_time_reset(q),
-            CURRENT_TIME   => input_time      ,
-            PAUSE_REQUEST  => PAUSE_QUEUE  (q),
+                TS_WIDTH        => TIMESTAMP_WIDTH ,
+                TS_FORMAT       => TIMESTAMP_FORMAT,
+                FIFO_DEPTH      => BUFFER_SIZE     ,
+                FIFO_AF_OFFSET  => BUFFER_AF_OFFSET,
+                DEVICE          => DEVICE
+            )
+            port map(
+                CLK   => CLK,
+                RESET => RESET,
 
-            RX_MFB_DATA    => rx_pd_data   (q),
-            RX_MFB_META    => rx_pd_meta   (q),
-            RX_MFB_TS      => rx_pd_ts     (q),
-            RX_MFB_SOF_POS => rx_pd_sof_pos(q),
-            RX_MFB_EOF_POS => rx_pd_eof_pos(q),
-            RX_MFB_SOF     => rx_pd_sof    (q),
-            RX_MFB_EOF     => rx_pd_eof    (q),
-            RX_MFB_SRC_RDY => rx_pd_src_rdy(q),
-            RX_MFB_DST_RDY => rx_pd_dst_rdy(q),
+                TIME_RESET     => pd_time_reset(q),
+                CURRENT_TIME   => input_time      ,
+                PAUSE_REQUEST  => PAUSE_QUEUE  (q),
 
-            TX_MFB_DATA    => tx_pd_data   (q),
-            TX_MFB_META    => tx_pd_meta   (q),
-            TX_MFB_SOF_POS => tx_pd_sof_pos(q),
-            TX_MFB_EOF_POS => tx_pd_eof_pos(q),
-            TX_MFB_SOF     => tx_pd_sof    (q),
-            TX_MFB_EOF     => tx_pd_eof    (q),
-            TX_MFB_SRC_RDY => tx_pd_src_rdy(q),
-            TX_MFB_DST_RDY => tx_pd_dst_rdy(q)
-        );
-            
+                RX_MFB_DATA    => rx_pd_data   (q),
+                RX_MFB_META    => rx_pd_meta   (q),
+                RX_MFB_TS      => rx_pd_ts     (q),
+                RX_MFB_SOF_POS => rx_pd_sof_pos(q),
+                RX_MFB_EOF_POS => rx_pd_eof_pos(q),
+                RX_MFB_SOF     => rx_pd_sof    (q),
+                RX_MFB_EOF     => rx_pd_eof    (q),
+                RX_MFB_SRC_RDY => rx_pd_src_rdy(q),
+                RX_MFB_DST_RDY => rx_pd_dst_rdy(q),
+
+                TX_MFB_DATA    => tx_pd_data   (q),
+                TX_MFB_META    => tx_pd_meta   (q),
+                TX_MFB_SOF_POS => tx_pd_sof_pos(q),
+                TX_MFB_EOF_POS => tx_pd_eof_pos(q),
+                TX_MFB_SOF     => tx_pd_sof    (q),
+                TX_MFB_EOF     => tx_pd_eof    (q),
+                TX_MFB_SRC_RDY => tx_pd_src_rdy(q),
+                TX_MFB_DST_RDY => tx_pd_dst_rdy(q)
+            );
+
+        else generate
+
+            PAUSE_QUEUE(q) <= '0';
+            mfb_fifox_i : entity work.MFB_FIFOX
+            generic map(
+                REGIONS             => MFB_REGIONS    ,
+                REGION_SIZE         => MFB_REGION_SIZE,
+                BLOCK_SIZE          => MFB_BLOCK_SIZE ,
+                ITEM_WIDTH          => MFB_ITEM_WIDTH ,
+                META_WIDTH          => MFB_META_WIDTH ,
+                FIFO_DEPTH          => 256            ,
+                RAM_TYPE            => "AUTO"         ,
+                DEVICE              => DEVICE         ,
+                ALMOST_FULL_OFFSET  => 0              ,
+                ALMOST_EMPTY_OFFSET => 0          
+            )
+            port map(
+                CLK => CLK,
+                RST => RESET,
+
+                RX_DATA     => rx_pd_data   (q),
+                RX_META     => rx_pd_meta   (q),
+                RX_SOF_POS  => rx_pd_sof_pos(q),
+                RX_EOF_POS  => rx_pd_eof_pos(q),
+                RX_SOF      => rx_pd_sof    (q),
+                RX_EOF      => rx_pd_eof    (q),
+                RX_SRC_RDY  => rx_pd_src_rdy(q),
+                RX_DST_RDY  => rx_pd_dst_rdy(q),
+
+                TX_DATA     => tx_pd_data   (q),
+                TX_META     => tx_pd_meta   (q),
+                TX_SOF_POS  => tx_pd_sof_pos(q),
+                TX_EOF_POS  => tx_pd_eof_pos(q),
+                TX_SOF      => tx_pd_sof    (q),
+                TX_EOF      => tx_pd_eof    (q),
+                TX_SRC_RDY  => tx_pd_src_rdy(q),
+                TX_DST_RDY  => tx_pd_dst_rdy(q),
+
+                FIFO_STATUS => open            ,
+                FIFO_AFULL  => open            ,
+                FIFO_AEMPTY => open
+            );
+
+        end generate;
+
     end generate;
 
     -- ========================================================================
