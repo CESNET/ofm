@@ -107,7 +107,7 @@ class sequence_simple_rx_base #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, ME
                         send_empty_frame();
                         get_response(rsp);
                     end while(rsp.ready != 1);
-                    std::randomize(simple_reg.latency_cnt) with {simple_reg.latency_cnt inside {[0 : (READY_LATENCY - 1)]}; };
+                    assert(std::randomize(simple_reg.latency_cnt) with {simple_reg.latency_cnt inside {[0 : (READY_LATENCY - 1)]}; }) else `uvm_fatal(this.get_full_name(), "\n\tCannot randomize latency");
                     for (int unsigned it = 0; it < simple_reg.latency_cnt; it++) begin
                         send_empty_frame();
                         get_response(rsp);
