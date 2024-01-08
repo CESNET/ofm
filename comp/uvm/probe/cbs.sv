@@ -22,6 +22,7 @@ class cbs_simple #(int unsigned DATA_WIDTH) extends uvm_event_callback;
     // pre trigger method
     //---------------------------------------
     virtual function bit pre_trigger(uvm_event e, uvm_object data);
+        return 0;
     endfunction
 
     //---------------------------------------
@@ -67,6 +68,7 @@ class cbs_fifo#(type T_TYPE, int unsigned DATA_WIDTH) extends uvm_event_callback
     // pre trigger method
     //---------------------------------------
     virtual function bit pre_trigger(uvm_event e,uvm_object data);
+        return 0;
     endfunction
 
     //---------------------------------------
@@ -127,6 +129,7 @@ class cbs_msgbox#(type T_TYPE, int unsigned DATA_WIDTH) extends uvm_event_callba
     // pre trigger method
     //---------------------------------------
     virtual function bit pre_trigger(uvm_event e,uvm_object data);
+        return 0;
     endfunction
 
     //---------------------------------------
