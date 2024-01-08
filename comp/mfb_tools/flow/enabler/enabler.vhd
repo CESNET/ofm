@@ -164,10 +164,8 @@ begin
    end process;
 
    -- Masking SOF and EOF
-   sof_eof_masked_g : for r in 0 to REGIONS-1 generate
-      s_sof_masked(r) <= RX_SOF(r) and s_sof_mask_after_leof(r);
-      s_eof_masked(r) <= RX_EOF(r) and s_eof_mask_before_fsof(r);
-   end generate;
+   s_sof_masked <= RX_SOF and s_sof_mask_after_leof;
+   s_eof_masked <= RX_EOF and s_eof_mask_before_fsof;
 
    -- ==========================================================================
    -- FSM CURRENT STATE REGISTER
@@ -253,10 +251,13 @@ begin
    -- ==========================================================================
 
    -- Discarded frame
-   discarded_frame_g : for r in 0 to REGIONS-1 generate
-      s_discarded_frame(r) <= (RX_EOF(r) and not s_eof_fsm(r) and s_valid and not RESET) or
+    process(all)
+    begin
+        for r in 0 to REGIONS-1 loop
+          s_discarded_frame(r) <= (RX_EOF(r) and not s_eof_fsm(r) and s_valid and not RESET) or
                               (RX_EOF(r) and RX_SRC_RDY and not s_valid and not RESET);
-   end generate;
+        end loop;
+    end process;
 
    -- ==========================================================================
    -- OUTPUT REGISTERS

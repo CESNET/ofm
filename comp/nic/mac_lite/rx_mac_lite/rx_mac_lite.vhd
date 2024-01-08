@@ -390,11 +390,15 @@ begin
 
     LINK_UP <= ADAPTER_LINK_UP;
 
-    rx_inc_frame_g : for r in 0 to RX_REGIONS-1 generate
-        s_rx_inc_frame(r+1) <= (RX_MFB_SOF(r) and not RX_MFB_EOF(r) and not s_rx_inc_frame(r)) or
+    process(all)
+    begin
+        for r in 0 to RX_REGIONS-1 loop
+            s_rx_inc_frame(r+1) <= (RX_MFB_SOF(r) and not RX_MFB_EOF(r) and not s_rx_inc_frame(r)) or
                                (RX_MFB_SOF(r) and RX_MFB_EOF(r) and s_rx_inc_frame(r)) or
                                (not RX_MFB_SOF(r) and not RX_MFB_EOF(r) and s_rx_inc_frame(r));
-    end generate;
+
+        end loop;
+    end process;
 
     process (RX_CLK)
     begin
