@@ -24,15 +24,23 @@ class sequence_reset extends uvm_sequence#(uvm_reset::sequence_item);
     endfunction
 
     task body;
+        int unsigned it;
+        uvm_common::sequence_cfg state;
+
+        if(!uvm_config_db#(uvm_common::sequence_cfg)::get(m_sequencer, "", "state", state)) begin
+            state = null;
+        end
+
         req = sequence_item::type_id::create("req");
-
-
-        repeat(length) begin
+        it = 0;
+        while(it < length && (state == null || state.next())) begin
             start_item(req);
             req.reset = 1'b1;
             finish_item(req);
-        end
-    endtask
+            it++;
+         end
+     endtask
+
 endclass
 
 
@@ -83,7 +91,13 @@ class sequence_simple extends uvm_sequence#(uvm_reset::sequence_item);
     endfunction
 
     task body;
-        forever begin
+        uvm_common::sequence_cfg state;
+
+        if(!uvm_config_db#(uvm_common::sequence_cfg)::get(m_sequencer, "", "state", state)) begin
+            state = null;
+        end
+
+        while (state == null || !state.stopped()) begin
             reset.randomize();
             reset.start(p_sequencer, this);
             run.randomize();
