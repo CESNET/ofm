@@ -1,3 +1,6 @@
+import builtins
+import sys
+
 from ctypes import *
 
 #__lib = cdll.LoadLibrary('/opt/modeltech/modeltech/linux_x86_64/libmtipli.so')
@@ -5,6 +8,8 @@ __lib = cdll.LoadLibrary('libmtipli.so')
 
 __lib.mti_Cmd.argtypes = [c_char_p]
 __lib.mti_Cmd.restype = c_int
+
+__lib.mti_Break.argtypes = []
 
 __lib.mti_Interp.argtypes = []
 __lib.mti_Interp.restype = c_void_p
@@ -27,6 +32,13 @@ def cmd(command):
     ret = res.decode()
     __lib.Tcl_ResetResult(__interp)
     return ret
+
+def mti_break():
+    __lib.mti_Break()
+
+def print(*args, **kwargs):
+    builtins.print(*args, **kwargs)
+    sys.stdout.flush()
 
 def cocotb2path(obj):
     return "/" + obj._path.replace(".", "/").replace("[", "(").replace("]", ")")
