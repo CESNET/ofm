@@ -14,6 +14,5 @@ set COMPONENTS [ list \
     [ list "OPEN LOOP" $OL_BASE  "FULL" ] \
 ]
  
-set MOD "$MOD $ENTITY_BASE/i2c_op.vhd"
 set MOD "$MOD $ENTITY_BASE/io_exp.vhd"
 
