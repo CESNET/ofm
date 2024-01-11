@@ -8,6 +8,23 @@
  * SPDX-License-Identifier: BSD-3-Clause
 */
 
+/* FIX BUG IN QUESTA SIM */
+class sync_class;
+    protected semaphore sem;
+
+    function new();
+        sem = new(1);
+    endfunction
+
+    task get();
+        sem.get();
+    endtask
+
+    task put();
+        sem.put();
+    endtask
+endclass
+
 class reg2bus_frontdoor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_reg_frontdoor;
     `uvm_object_param_utils(uvm_mi::reg2bus_frontdoor#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
     `uvm_declare_p_sequencer(uvm_mi::sequencer_slave#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
@@ -20,7 +37,7 @@ class reg2bus_frontdoor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_re
         logic [DATA_BYTES_WIDTH-1:0] be;
     } item_t;
 
-    semaphore sem;
+    sync_class sem;
 
     function new(string name = "reg2bus_frontdoor");
         super.new(name);
@@ -85,9 +102,9 @@ class reg2bus_frontdoor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_re
 
         ////////////
         // get semaphore
-        if (uvm_config_db#(semaphore)::get(sequencer, "", "sem", sem) == 0) begin
-            sem = new(1);
-            uvm_config_db#(semaphore)::set(sequencer, "", "sem", sem);
+        if (uvm_config_db#(sync_class)::get(sequencer, "", "sem", sem) == 0) begin
+            sem = new();
+            uvm_config_db#(sync_class)::set(sequencer, "", "sem", sem);
         end
 
         ///////////////////
