@@ -1,5 +1,5 @@
--- io_exp.vhd : "Device driver" for the i2C IO expander (like TCA5455)
---              DIR, I and O ports are propagated to the expander
+-- io_exp.vhd : "Device driver" for the i2C IO expander (like TCA6408A)
+--              DIR, I and O ports are propagated to the expander ports
 -- Copyright (C) 2022 CESNET z. s. p. o.
 -- Author(s): Stepan Friedl <friedl@cesnet.cz>
 --
@@ -18,16 +18,16 @@ entity i2c_io_exp is
         IIC_DEV_ADDR  : std_logic_vector( 6 downto 0) := "0100000";
         -- Configure the IO ports direction upon releasing reset
         PWR_UP_CONFIG : boolean := true;
-        -- Address of port direction register. Predefined for the tca5455 chip
+        -- Address of port direction register. Predefined for the TCA6408A chip
         IIC_REG_DIR   : std_logic_vector( 7 downto 0) := X"03";
-        -- Address of output port register
-        IIC_REG_I     : std_logic_vector( 7 downto 0) := X"00";
         -- Address of input port register
+        IIC_REG_I     : std_logic_vector( 7 downto 0) := X"00";
+        -- Address of output port register
         IIC_REG_O     : std_logic_vector( 7 downto 0) := X"01";
         -- Enable auto refresh of the remote inputs (I port)
         AUTO_REFRESH : boolean := true;
         -- Number of clock cycles for refreshing I input. Range 0 to 2^24-1, 0 = refresh as fast as possible
-        REFRESH_CYCLES: natural := 16#010000#
+        REFRESH_CYCLES: natural := 16#0010000#
     );
     port (
         -- =====================
@@ -45,7 +45,7 @@ entity i2c_io_exp is
         DIR        : in  std_logic_vector(7 downto 0);
         -- Remote input
         I          : out std_logic_vector(7 downto 0);
-        -- Remote output 
+        -- Remote output
         O          : in  std_logic_vector(7 downto 0);
 
         -- =====================
@@ -73,7 +73,7 @@ entity i2c_io_exp is
         I2C_DONE   : out std_logic;
 
         -- =====================
-        -- I2C interface 
+        -- I2C interface
         -- =====================
 
         SCL_I      : in  std_logic;
@@ -120,28 +120,28 @@ signal done          : std_logic;
 
 signal o_change      : std_logic;
 signal dir_change    : std_logic;
-signal refr_timer    : unsigned(23 downto 0);
+signal refr_timer    : unsigned(27 downto 0);
 signal refr_timer_done : std_logic := '0';
 signal i_refresh       : std_logic;
 
 begin
 
 cdc_g: for i in DIR'range generate
-    sync_dir: entity work.ASYNC_OPEN_LOOP 
+    sync_dir: entity work.ASYNC_OPEN_LOOP
     generic map (
         IN_REG   => false,
-        TWO_REG  => true 
-    )   
+        TWO_REG  => true
+    )
     port map (
         ADATAIN  => DIR(i),
         BCLK     => CLK,
         BDATAOUT => dir_sync(i)
     );
-    sync_o: entity work.ASYNC_OPEN_LOOP 
+    sync_o: entity work.ASYNC_OPEN_LOOP
     generic map (
         IN_REG   => false,
-        TWO_REG  => true 
-    )   
+        TWO_REG  => true
+    )
     port map (
         ADATAIN  => O(i),
         BCLK     => CLK,
@@ -157,7 +157,7 @@ refresh_cntr_g: if AUTO_REFRESH generate
     refresh_cntr_p: process(CLK)
     begin
         if (rising_edge(CLK)) then
-            if refr_timer = REFRESH_CYCLES then
+            if RESET = '1' or refr_timer = REFRESH_CYCLES then
                 refr_timer <= (others => '0');
             else
                 refr_timer <= refr_timer + 1;
@@ -176,15 +176,17 @@ i_refresh <= refr_timer_done or REFRESH;
 fsm_control_p: process(CLK)
 begin
     if (rising_edge(CLK)) then
-        -- Set the request flags when a change is detected and FSM is not busy 
+        -- Set the request flags when a change is detected and FSM is not busy
         if (busy = '0') then
             if (dir_change = '1') then
                 dir_r   <= dir_sync;
                 dir_set <= '1';
-            elsif (o_change = '1') then
+            end if;
+            if (o_change = '1') then
                 o_r   <= o_sync;
                 o_set <= '1';
-            elsif (i_refresh = '1') then
+            end if;
+            if (i_refresh = '1') then
                 i_get <= '1';
             end if;
         end if;
@@ -202,8 +204,8 @@ begin
         --end if;
         if RESET = '1' then
             if PWR_UP_CONFIG then
-                -- Set change detection registers in such way, that it forces 
-                -- the io expander to be re-configured (dir_change and o_change 
+                -- Set change detection registers in such way, that it forces
+                -- the io expander to be re-configured (dir_change and o_change
                 -- will be high) after reset
                 dir_r <= not dir_sync;
                 o_r   <= not o_sync;
@@ -239,17 +241,17 @@ I2C_DONE  <= done;
                     if (I2C_GNT = '1') then
                         if (i_get = '1')  then
                             state     <= S_RD_BUSY;
-                            iic_reg   <= X"00";
+                            iic_reg   <= IIC_REG_I;
                             iic_wr    <= '0';
                             iic_start <= '1';
                             busy      <= '1';
                             i_ack     <= '1';
                             o_ack     <= '0';
-                            d_ack     <= '0';                            
+                            d_ack     <= '0';
                         end if;
                         if (o_set = '1') then
                             state     <= S_WR_BUSY;
-                            iic_reg   <= X"01";
+                            iic_reg   <= IIC_REG_O;
                             iic_wr    <= '1';
                             iic_dwr   <= o_sync(7 downto 0);
                             iic_start <= '1';
@@ -275,10 +277,11 @@ I2C_DONE  <= done;
                 when S_WR_BUSY =>
                     iic_start <= '0';
                     busy      <= '1';
-                    if (IIC_ERROR = '1') then
+                    if (iic_error = '1') then
                         state   <= S_DONE;
                         ERROR   <= '1';
-                    elsif (IIC_DONE = '1') then
+                        done    <= '1';
+                    elsif (iic_done = '1') then
                         state <= S_DONE;
                         done  <= '1';
                     end if;
@@ -287,23 +290,24 @@ I2C_DONE  <= done;
                 when S_RD_BUSY =>
                     iic_start <= '0';
                     busy      <= '1';
-                    if (IIC_ERROR = '1') then
+                    if (iic_error = '1') then
                         state   <= S_DONE;
                         ERROR   <= '1';
-                    elsif (IIC_DONE = '1') then
+                        done    <= '1';
+                    elsif (iic_done = '1') then
                         state <= S_DONE;
                         I     <= iic_drd(7 downto 0);
                         done  <= '1';
                     end if;
-                    
-                -- One wait state to provide some time for bus arbiter 
+
+                -- One wait state to provide some time for bus arbiter
                 when S_DONE =>
                     iic_start <= '0';
                     busy      <= '0';
                     done      <= '0';
                     ERROR     <= '0';
                     state   <= S_IDLE;
-     
+
             end case;
 
             if RESET = '1' then
@@ -314,14 +318,14 @@ I2C_DONE  <= done;
         end if;
     end process;
 
-    I2C_CTRL: entity work.i2c_op 
+    I2C_CTRL: entity work.i2c_op
     generic map (
        CLK_CNT => IIC_CLK_CNT
     )
     port map (
         RESET   => RESET,
         CLK     => CLK,
-        -- I2C interface 
+        -- I2C interface
         scl_i   => SCL_I,
         scl_o   => SCL_O,
         scl_oen => SCL_OEN,
