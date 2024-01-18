@@ -310,12 +310,6 @@ proc SynthesizeDesignRun {synth_flags} {
     wait_on_run synth_1
     open_run synth_1
 
-    if {[info exist SYNTH_FLAGS(SOPT_DIRECTIVE)] } {
-        PrintLabel "Post-synthesis Optimization"
-        # opt_design (See Xilinx UG904)
-        opt_design -directive $SYNTH_FLAGS(SOPT_DIRECTIVE) -verbose
-    }
-
     PrintLabel "Report timing"
     set_delay_model -interconnect estimated
     report_timing_summary -delay_type min_max -report_unconstrained -check_timing_verbose -max_paths 10 -input_pins -name timing_1 -file $SYNTH_FLAGS(OUTPUT)_synth.tim
@@ -365,15 +359,15 @@ proc ImplementDesignSetup {synth_flags} {
     global OFM_PATH
     set_property STEPS.WRITE_BITSTREAM.TCL.PRE [file normalize $OFM_PATH/build/misc/vivado_wbs_pre.tcl] [get_runs impl_1]
 
-    if {[info exist SYNTH_FLAGS(IOPT_DIRECTIVE)] } {
-        puts "Implementation optimization directive set to: $SYNTH_FLAGS(IOPT_DIRECTIVE)"
+    if {[info exist SYNTH_FLAGS(SOPT_DIRECTIVE)] } {
+        puts "Implementation optimization directive set to: $SYNTH_FLAGS(SOPT_DIRECTIVE)"
         # opt_design (See Xilinx UG904)
         set_property -name {STEPS.OPT_DESIGN.ARGS.IS_ENABLED} \
             -value {true}        -objects [get_runs impl_1]
         set_property -name {STEPS.OPT_DESIGN.ARGS.VERBOSE}    \
-            -value $SYNTH_FLAGS(IOPT_VERBOSE)   -objects [get_runs impl_1]
+            -value $SYNTH_FLAGS(SOPT_VERBOSE)   -objects [get_runs impl_1]
         set_property -name {STEPS.OPT_DESIGN.ARGS.DIRECTIVE}  \
-            -value $SYNTH_FLAGS(IOPT_DIRECTIVE) -objects [get_runs impl_1]
+            -value $SYNTH_FLAGS(SOPT_DIRECTIVE) -objects [get_runs impl_1]
     }
 
     # backward compatibility (run power_opt_design by default)
@@ -731,8 +725,8 @@ proc nb_sanitize_vars {synth_flags hierarchy} {
     if {![info exist SYNTH_FLAGS(UPGRADE_IP)] } {
         set SYNTH_FLAGS(UPGRADE_IP) true
     }
-    if {![info exist SYNTH_FLAGS(IOPT_VERBOSE)] } {
-        set SYNTH_FLAGS(IOPT_VERBOSE) false
+    if {![info exist SYNTH_FLAGS(SOPT_VERBOSE)] } {
+        set SYNTH_FLAGS(SOPT_VERBOSE) false
     }
 }
 
