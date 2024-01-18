@@ -241,37 +241,58 @@ begin
     end process;
 
     brams_for_channels_g : for j in 0 to (CHANNELS -1) generate
-        sdp_bram_be_g : for i in 0 to ((MFB_LENGTH/8) -1) generate
-            sdp_bram_be_i : entity work.SDP_BRAM_BE
-                generic map (
-                    BLOCK_ENABLE   => false,
-                    -- allow individual bytes to be assigned
-                    BLOCK_WIDTH    => 8,
-                    -- each BRAM allows to write a single DW
-                    DATA_WIDTH     => 8,
-                    -- the depth of the buffer
-                    ITEMS          => BUFFER_DEPTH,
-                    COMMON_CLOCK   => TRUE,
-                    OUTPUT_REG     => FALSE,
-                    METADATA_WIDTH => 0,
-                    DEVICE         => DEVICE)
-                port map (
-                    WR_CLK  => CLK,
-                    WR_RST  => RESET,
-                    WR_EN   => wr_be_bram_demux(j)(i),
-                    WR_BE   => (others => '1'),
-                    WR_ADDR => wr_addr_bram_by_shift(i/4),
-                    WR_DATA => wr_data_bram_bshifter(i*8 +7 downto i*8),
+        brams_per_byte_g : for i in 0 to ((MFB_LENGTH/8) -1) generate
+            bram_type_g: if (BUFFER_DEPTH >= 2048) generate
 
-                    RD_CLK      => CLK,
-                    RD_RST      => RESET,
-                    RD_EN       => '1',
-                    RD_PIPE_EN  => rd_en_bram_demux(j),
-                    RD_META_IN  => (others => '0'),
-                    RD_ADDR     => rd_addr_bram_by_shift(i),
-                    RD_DATA     => rd_data_bram(j)(i*8 +7 downto i*8),
-                    RD_META_OUT => open,
-                    RD_DATA_VLD => open);
+                sdp_bram_be_i : entity work.SDP_BRAM_BE
+                    generic map (
+                        BLOCK_ENABLE   => false,
+                        -- allow individual bytes to be assigned
+                        BLOCK_WIDTH    => 8,
+                        -- each BRAM allows to write a single DW
+                        DATA_WIDTH     => 8,
+                        -- the depth of the buffer
+                        ITEMS          => BUFFER_DEPTH,
+                        COMMON_CLOCK   => TRUE,
+                        OUTPUT_REG     => FALSE,
+                        METADATA_WIDTH => 0,
+                        DEVICE         => DEVICE)
+                    port map (
+                        WR_CLK  => CLK,
+                        WR_RST  => RESET,
+                        WR_EN   => wr_be_bram_demux(j)(i),
+                        WR_BE   => (others => '1'),
+                        WR_ADDR => wr_addr_bram_by_shift(i/4),
+                        WR_DATA => wr_data_bram_bshifter(i*8 +7 downto i*8),
+
+                        RD_CLK      => CLK,
+                        RD_RST      => RESET,
+                        RD_EN       => '1',
+                        RD_PIPE_EN  => rd_en_bram_demux(j),
+                        RD_META_IN  => (others => '0'),
+                        RD_ADDR     => rd_addr_bram_by_shift(i),
+                        RD_DATA     => rd_data_bram(j)(i*8 +7 downto i*8),
+                        RD_META_OUT => open,
+                        RD_DATA_VLD => open);
+            else generate
+
+                gen_lutram_i: entity work.GEN_LUTRAM
+                    generic map (
+                        DATA_WIDTH         => 8,
+                        ITEMS              => BUFFER_DEPTH,
+                        RD_PORTS           => 1,
+                        RD_LATENCY         => 1,
+                        WRITE_USE_RD_ADDR0 => False,
+                        MLAB_CONSTR_RDW_DC => True,
+                        DEVICE             => DEVICE)
+                    port map (
+                        CLK     => CLK,
+                        WR_EN   => wr_be_bram_demux_reg(BRAM_REG_NUM -1)(j)(i),
+                        WR_ADDR => wr_addr_bram_by_shift_reg(BRAM_REG_NUM -1)(i/4),
+                        WR_DATA => wr_data_bram_bshifter_reg(BRAM_REG_NUM -1)(i*8 +7 downto i*8),
+                        RD_ADDR => rd_addr_bram_by_shift(i),
+                        RD_DATA => rd_data_bram(j)(i*8 +7 downto i*8));
+            end generate;
         end generate;
     end generate;
 

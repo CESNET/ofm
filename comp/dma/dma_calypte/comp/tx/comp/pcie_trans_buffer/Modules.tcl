@@ -13,6 +13,7 @@ lappend PACKAGES "$PKG_BASE/type_pack.vhd"
 
 # Components
 lappend COMPONENTS [ list "SDP_BRAM"           "$OFM_PATH/comp/base/mem/sdp_bram"    "FULL" ]
+lappend COMPONENTS [ list "GEN_LUTRAM"         "$OFM_PATH/comp/base/mem/gen_lutram"    "FULL" ]
 lappend COMPONENTS [ list "BARREL_SHIFTER_GEN" "$OFM_PATH/comp/base/logic/barrel_shifter" "FULL" ]
 
 # Source files for implemented component
