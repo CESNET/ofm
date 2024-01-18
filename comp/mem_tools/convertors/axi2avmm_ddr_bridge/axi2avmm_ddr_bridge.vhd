@@ -13,11 +13,16 @@ use work.type_pack.all;
 
 entity AXI2AVMM_BRIDGE is
     generic(
-        AMM_BURST_COUNT_WIDTH   : integer :=8;
-        AMM_ADDR_WIDTH          : integer :=26;
-        AMM_DATA_WIDTH          : integer :=512;
-        DDR_AXI_ADDR_WIDTH      : integer :=32;
-        DDR_AXI_DATA_WIDTH      : integer :=512
+        AMM_BURST_COUNT_WIDTH : natural := 8;
+        AMM_ADDR_WIDTH        : natural := 26;
+        AMM_DATA_WIDTH        : natural := 512;
+        AXI_ADDR_WIDTH        : natural := 32;
+        AXI_DATA_WIDTH        : natural := 512;
+        AXI_ID_WIDTH          : natural := 4;
+        AXI_BURST_WIDTH       : natural := 2;
+        AXI_SIZE_WIDTH        : natural := 3;
+        AXI_RESP_WIDTH        : natural := 2;
+        AXI_LEN_WIDTH         : natural := 8
     );
     port(
         MEM_CLK                 : in std_logic;
@@ -36,39 +41,39 @@ entity AXI2AVMM_BRIDGE is
 
         ----Xilinx interface----
         --Address Write Channel
-        DDR_S_AXI_AWID          : out std_logic_vector(3 downto 0);
-        DDR_S_AXI_AWADDR        : out std_logic_vector(DDR_AXI_ADDR_WIDTH-1 downto 0);
-        DDR_S_AXI_AWLEN         : out std_logic_vector(7 downto 0);
-        DDR_S_AXI_AWSIZE        : out std_logic_vector(2 downto 0);
-        DDR_S_AXI_AWBURST       : out std_logic_vector(1 downto 0);
+        DDR_S_AXI_AWID          : out std_logic_vector(AXI_ID_WIDTH-1 downto 0);
+        DDR_S_AXI_AWADDR        : out std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) := (others => '0');
+        DDR_S_AXI_AWLEN         : out std_logic_vector(AXI_LEN_WIDTH-1 downto 0);
+        DDR_S_AXI_AWSIZE        : out std_logic_vector(AXI_SIZE_WIDTH-1 downto 0);
+        DDR_S_AXI_AWBURST       : out std_logic_vector(AXI_BURST_WIDTH-1 downto 0);
         DDR_S_AXI_AWVALID       : out std_logic;
         DDR_S_AXI_AWREADY       : in  std_logic; 
         -- Write Channel 
-        DDR_S_AXI_WDATA         : out std_logic_vector(DDR_AXI_DATA_WIDTH-1 downto 0);
-        DDR_S_AXI_WSTRB         : out std_logic_vector(DDR_AXI_DATA_WIDTH/8-1 downto 0);
+        DDR_S_AXI_WDATA         : out std_logic_vector(AXI_DATA_WIDTH-1 downto 0);
+        DDR_S_AXI_WSTRB         : out std_logic_vector(AXI_DATA_WIDTH/8-1 downto 0);
         DDR_S_AXI_WLAST         : out std_logic;
         DDR_S_AXI_WVALID        : out std_logic;
         DDR_S_AXI_WREADY        : in  std_logic;
         -- Write response Channel
         DDR_S_AXI_BREADY        : out std_logic;
-        DDR_S_AXI_BID           : in  std_logic_vector(3 downto 0);
-        DDR_S_AXI_BRESP         : in  std_logic_vector(1 downto 0);
+        DDR_S_AXI_BID           : in  std_logic_vector(AXI_ID_WIDTH-1 downto 0);
+        DDR_S_AXI_BRESP         : in  std_logic_vector(AXI_RESP_WIDTH-1 downto 0);
         DDR_S_AXI_BVALID        : in  std_logic;
         --Address Read Channel
-        DDR_S_AXI_ARID          : out std_logic_vector(3 downto 0);
-        DDR_S_AXI_ARADDR        : out std_logic_vector(DDR_AXI_ADDR_WIDTH-1 downto 0);
-        DDR_S_AXI_ARLEN         : out std_logic_vector(7 downto 0);
-        DDR_S_AXI_ARSIZE        : out std_logic_vector(2 downto 0);
-        DDR_S_AXI_ARBURST       : out std_logic_vector(1 downto 0);
+        DDR_S_AXI_ARID          : out std_logic_vector(AXI_ID_WIDTH-1 downto 0);
+        DDR_S_AXI_ARADDR        : out std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) := (others => '0');
+        DDR_S_AXI_ARLEN         : out std_logic_vector(AXI_LEN_WIDTH-1 downto 0);
+        DDR_S_AXI_ARSIZE        : out std_logic_vector(AXI_SIZE_WIDTH-1 downto 0);
+        DDR_S_AXI_ARBURST       : out std_logic_vector(AXI_BURST_WIDTH-1 downto 0);
         DDR_S_AXI_ARVALID       : out std_logic;
         DDR_S_AXI_ARREADY       : in  std_logic;
         -- Read Channel
         DDR_S_AXI_RREADY        : out std_logic;
         DDR_S_AXI_RVALID        : in  std_logic;
         DDR_S_AXI_RLAST         : in  std_logic;
-        DDR_S_AXI_RRESP         : in  std_logic_vector(1 downto 0);
-        DDR_S_AXI_RID           : in  std_logic_vector(3 downto 0);
-        DDR_S_AXI_RDATA         : in  std_logic_vector(DDR_AXI_DATA_WIDTH-1 downto 0)
+        DDR_S_AXI_RRESP         : in  std_logic_vector(AXI_RESP_WIDTH-1 downto 0);
+        DDR_S_AXI_RID           : in  std_logic_vector(AXI_ID_WIDTH-1 downto 0);
+        DDR_S_AXI_RDATA         : in  std_logic_vector(AXI_DATA_WIDTH-1 downto 0)
     );
 end entity;
 
@@ -93,16 +98,16 @@ architecture FULL of AXI2AVMM_BRIDGE is
 begin
     -- Specific for Data bus width 512 bits
     -- Address is cut by log2(Bytes in transfer) ... in our case by 6 bits (31 downto 6)
-    DDR_S_AXI_AWSIZE    <= "110";
-    DDR_S_AXI_ARSIZE    <= "110";
+    DDR_S_AXI_AWSIZE    <= std_logic_vector(to_unsigned(log2(AMM_DATA_WIDTH/8), AXI_SIZE_WIDTH));
+    DDR_S_AXI_ARSIZE    <= std_logic_vector(to_unsigned(log2(AMM_DATA_WIDTH/8), AXI_SIZE_WIDTH));
 
     -- Byte enable: all bytes in transaction are enabled
     DDR_S_AXI_WSTRB     <= (others => '1');
 
     -- Number of transaction in one burst
     -- Avalon is giving exact number 
-    DDR_S_AXI_AWLEN     <= std_logic_vector(unsigned(AMM_BURST_COUNT) - 1);
-    DDR_S_AXI_ARLEN     <= std_logic_vector(unsigned(AMM_BURST_COUNT) - 1);
+    DDR_S_AXI_AWLEN     <= std_logic_vector(resize((unsigned(AMM_BURST_COUNT) - 1), AXI_LEN_WIDTH));
+    DDR_S_AXI_ARLEN     <= std_logic_vector(resize((unsigned(AMM_BURST_COUNT) - 1), AXI_LEN_WIDTH));
 
     -- The data transfer for a sequence of read transactions with the same AxID value must be returned in the order 
     -- in which the master issued the addresses
@@ -233,7 +238,7 @@ begin
     end process;
 
     --Write address
-    DDR_S_AXI_AWADDR(31 downto 6)   <= AMM_ADDRESS;
+    DDR_S_AXI_AWADDR((AMM_ADDR_WIDTH+log2(AMM_DATA_WIDTH/8))-1 downto log2(AMM_DATA_WIDTH/8)) <= AMM_ADDRESS;
 
     --Write data
     DDR_S_AXI_WDATA                 <= AMM_WRITE_DATA;
@@ -242,7 +247,7 @@ begin
     DDR_S_AXI_BREADY                <= '1';
 
     --Read address
-    DDR_S_AXI_ARADDR(31 downto 6)   <= AMM_ADDRESS;
+    DDR_S_AXI_ARADDR((AMM_ADDR_WIDTH+log2(AMM_DATA_WIDTH/8))-1 downto log2(AMM_DATA_WIDTH/8)) <= AMM_ADDRESS;
 
     --Read data 
     AMM_READ_DATA_VALID             <= DDR_S_AXI_RVALID;
