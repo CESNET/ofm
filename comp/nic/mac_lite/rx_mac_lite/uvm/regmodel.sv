@@ -1,174 +1,157 @@
+
 //-- regmodel.sv: register model of rx_mac_lite 
 //-- Copyright (C) 2024 CESNET z. s. p. o.
 //-- Author(s): Radek Iša <isa@cesnet.cz>
 
 //-- SPDX-License-Identifier: BSD-3-Clause
 
+class reg2bus_indirect_frontdoor_sync extends uvm_common::sync_id;
+    int unsigned bank;
+
+    function new();
+        super.new();
+        bank = 1;
+    endfunction
+endclass
+
+
+class frontdoor_command_cbs extends uvm_mi::base_reg_frontdoor_cbs;
+    local reg2bus_indirect_frontdoor_sync sync;
+    local int unsigned id;
+    local int unsigned offset;
+
+    function new(int unsigned id, reg2bus_indirect_frontdoor_sync sync);
+        this.id   = id;
+        this.sync = sync;
+    endfunction
+
+    virtual task cbs_pre(uvm_reg_frontdoor fr);
+        sync.get(id);
+    endtask
+
+    virtual task cbs_post(uvm_reg_frontdoor fr);
+        int unsigned data;
+
+        if (fr.rw_info.kind == UVM_WRITE) begin
+            data = fr.rw_info.value[0];
+
+            if (this.sync.bank == 1) begin
+                if (data == 3) begin
+                    //switch bank
+                    this.sync.bank = 2;
+                end
+            end else if (this.sync.bank == 2) begin
+                if (data == 3) begin
+                    //switch bank
+                    this.sync.bank = 1;
+                end
+            end
+        end
+        sync.put();
+    endtask
+endclass
+
+class frontdoor_cbs extends uvm_mi::base_reg_frontdoor_cbs;
+
+    local reg2bus_indirect_frontdoor_sync sync;
+    local int unsigned id;
+    local reg_command command;
+
+    function new(int unsigned id, reg_command  command, reg2bus_indirect_frontdoor_sync sync);
+        this.id      = id;
+        this.sync    = sync;
+        this.command = command;
+    endfunction
+
+    virtual task cbs_pre(uvm_reg_frontdoor fr);
+        uvm_mi::base_reg_frontdoor c_fr;
+
+        sync.get_start(id);
+        while (id != sync.bank) begin
+            uvm_mi::base_reg_frontdoor c_fr;
+
+            //uvm_status_e   status;
+            //command.write(status, 3);
+
+            $cast(c_fr, fr);
+            //c_fr.indirect_switch(offset + 'h2c, 3);
+            c_fr.indirect_switch(command.get_address(), 3);
+            sync.bank = id;
+        end
+        sync.get_end();
+    endtask
+
+    virtual task cbs_post(uvm_reg_frontdoor fr);
+        sync.put();
+    endtask
+
+endclass
+
+
 class regmodel#(MAC_COUNT) extends uvm_reg_block;
-    `uvm_object_param_utils(uvm_rx_mac_lite::regmodel#(MAC_COUNT))
+    `uvm_object_utils(uvm_rx_mac_lite::regmodel#(MAC_COUNT))
 
+    protected reg2bus_indirect_frontdoor_sync sync;
 
-    rand reg_counter   trfcl;       // total received frames counter -> low part
-    rand reg_counter   cfcl;        // correct frames counter -> low part
-    rand reg_counter   dfcl;        // discarded frames counterf -> low part
-    rand reg_counter   bodfcl;      // counter of frames discarded due to buffer overflow -> low part
-    rand reg_counter   trfch;       // total received frames counter -> high part
-    rand reg_counter   cfch;        // correct frames counter -> high part
-    rand reg_counter   dfch;        // discarded frames counterf -> high part
-    rand reg_counter   bodfch;      // counter of frames discarded due to buffer overflow -> high part
-
-    rand reg_enable    enable;      // enable registers
-    rand reg_error     error;
-    rand reg_status    status;
     rand reg_command   command;
-
-    rand reg_mtu       min;
-    rand reg_mtu       max;
-    rand reg_mac_check mac_check;
-    rand reg_counter   orocl;       // octets received OK counter -> low  part
-    rand reg_counter   oroch;       // octets received OK counter -> high part
-    //rand MAC ADDR
-    rand reg_mac       mac[MAC_COUNT]; // MAC ADDR
-
+    base_cnt#(MAC_COUNT) base;
+    rfc_cnt              rfc;
 
     function new(string name = "regmodel");
         super.new(name, build_coverage(UVM_NO_COVERAGE));
     endfunction
 
     virtual function void set_frontdoor(uvm_reg_frontdoor frontdoor);
-        uvm_reg_frontdoor casted;
+        //reg2bus_indirect_frontdoor new_frontdoor;
+        uvm_mi::base_reg_frontdoor new_frontdoor;
+        frontdoor_cbs         cbs;
+        frontdoor_command_cbs cbs_cmd;
 
-        void'($cast(casted, frontdoor.clone()));
-        trfcl    .set_frontdoor(casted);
-        void'($cast(casted, frontdoor.clone()));
-        cfcl     .set_frontdoor(casted);
-        void'($cast(casted, frontdoor.clone()));
-        dfcl     .set_frontdoor(casted);
-        void'($cast(casted, frontdoor.clone()));
-        bodfcl   .set_frontdoor(casted);
-        void'($cast(casted, frontdoor.clone()));
-        trfch    .set_frontdoor(casted);
-        void'($cast(casted, frontdoor.clone()));
-        cfch     .set_frontdoor(casted);
-        void'($cast(casted, frontdoor.clone()));
-        dfch     .set_frontdoor(casted);
-        void'($cast(casted, frontdoor.clone()));
-        bodfch   .set_frontdoor(casted);
-        void'($cast(casted, frontdoor.clone()));
-        enable   .set_frontdoor(casted);
-        void'($cast(casted, frontdoor.clone()));
-        error    .set_frontdoor(casted);
-        void'($cast(casted, frontdoor.clone()));
-        status   .set_frontdoor(casted);
-        void'($cast(casted, frontdoor.clone()));
-        command  .set_frontdoor(casted);
-        void'($cast(casted, frontdoor.clone()));
-        min      .set_frontdoor(casted);
-        void'($cast(casted, frontdoor.clone()));
-        max      .set_frontdoor(casted);
-        void'($cast(casted, frontdoor.clone()));
-        mac_check.set_frontdoor(casted);
-        void'($cast(casted, frontdoor.clone()));
-        orocl    .set_frontdoor(casted);
-        void'($cast(casted, frontdoor.clone()));
-        oroch    .set_frontdoor(casted);
-        for (int unsigned it = 0; it < MAC_COUNT; it++) begin
-            void'($cast(casted, frontdoor.clone()));
-            mac[it].set_frontdoor(casted);
+        sync = new();
+
+        if($cast(new_frontdoor, frontdoor.clone()) != 1) begin
+            `uvm_fatal(this.get_name(), "\n\tWrong front door seqeuence type!!");
         end
+        cbs_cmd = new(0, sync);
+        new_frontdoor.register_cbs(cbs_cmd);
+        command  .set_frontdoor(new_frontdoor);
+
+        if($cast(new_frontdoor, frontdoor.clone()) != 1) begin
+            `uvm_fatal(this.get_name(), "\n\tWrong front door seqeuence type!!");
+        end
+        cbs = new(1, command, sync);
+        new_frontdoor.register_cbs(cbs);
+        base.set_frontdoor(new_frontdoor);
+
+        if($cast(new_frontdoor, frontdoor.clone()) != 1) begin
+            `uvm_fatal(this.get_name(), "\n\tWrong front door seqeuence type!!");
+        end
+        cbs = new(2, command, sync);
+        new_frontdoor.register_cbs(cbs);
+        rfc.set_frontdoor(new_frontdoor);
     endfunction
 
     virtual function void build(uvm_reg_addr_t base, int unsigned bus_width);
-        trfcl     = reg_counter  ::type_id::create("trfcl");
-        cfcl      = reg_counter  ::type_id::create("cfcl");
-        dfcl      = reg_counter  ::type_id::create("dfcl");
-        bodfcl    = reg_counter  ::type_id::create("bodfcl");
-        trfch     = reg_counter  ::type_id::create("trfch");
-        cfch      = reg_counter  ::type_id::create("cfch");
-        dfch      = reg_counter  ::type_id::create("dfch");
-        bodfch    = reg_counter  ::type_id::create("bodfch");
-        enable    = reg_enable   ::type_id::create("enable");
-        error     = reg_error    ::type_id::create("error");
-        status    = reg_status   ::type_id::create("status");
-        command   = reg_command  ::type_id::create("command");
-        min       = reg_mtu      ::type_id::create("min");
-        max       = reg_mtu      ::type_id::create("max");
-        mac_check = reg_mac_check::type_id::create("mac_check");
-        orocl     = reg_counter  ::type_id::create("orocl");
-        oroch     = reg_counter  ::type_id::create("oroch");
+        this.command   = reg_command  ::type_id::create("command");
+        this.base = base_cnt#(MAC_COUNT)::type_id::create("base", , get_full_name());
+        this.rfc  = rfc_cnt::type_id::create("rfc", , get_full_name());
 
-        for (int unsigned it = 0; it < MAC_COUNT; it++) begin
-            mac[it] = reg_mac::type_id::create($sformatf("mac_%0d", it));
-        end
+        this.command.configure(this);
+        this.base.configure(this);
+        this.rfc.configure(this);
 
+        this.command  .build();
+        this.base.build(base, bus_width);
+        this.rfc.build(base, bus_width);
 
-
-        trfcl    .configure(this);
-        cfcl     .configure(this);
-        dfcl     .configure(this);
-        bodfcl   .configure(this);
-        trfch    .configure(this);
-        cfch     .configure(this);
-        dfch     .configure(this);
-        bodfch   .configure(this);
-        enable   .configure(this);
-        error    .configure(this);
-        status   .configure(this);
-        command  .configure(this);
-        min      .configure(this);
-        max      .configure(this);
-        mac_check.configure(this);
-        orocl    .configure(this);
-        oroch    .configure(this);
-        for (int unsigned it = 0; it < MAC_COUNT; it++) begin
-            mac[it].configure(this);
-        end
-
-
-        trfcl    .build();
-        cfcl     .build();
-        dfcl     .build();
-        bodfcl   .build();
-        trfch    .build();
-        cfch     .build();
-        dfch     .build();
-        bodfch   .build();
-        enable   .build();
-        error    .build();
-        status   .build();
-        command  .build();
-        min      .build(64);
-        max      .build(1526);
-        mac_check.build();
-        orocl    .build();
-        oroch    .build();
-        for (int unsigned it = 0; it < MAC_COUNT; it++) begin
-            mac[it].build();
-        end
 
         //create map
         this.default_map = create_map("MAP", base, bus_width/8, UVM_LITTLE_ENDIAN);
         //Add registers to map
-        this.default_map.add_reg(trfcl    , 'h00, "RO");
-        this.default_map.add_reg(cfcl     , 'h04, "RO");
-        this.default_map.add_reg(dfcl     , 'h08, "RO");
-        this.default_map.add_reg(bodfcl   , 'h0C, "RO");
-        this.default_map.add_reg(trfch    , 'h10, "RO");
-        this.default_map.add_reg(cfch     , 'h14, "RO");
-        this.default_map.add_reg(dfch     , 'h18, "RO");
-        this.default_map.add_reg(bodfch   , 'h1C, "RO");
-        this.default_map.add_reg(enable   , 'h20, "RW");
-        this.default_map.add_reg(error    , 'h24, "RW");
-        this.default_map.add_reg(status   , 'h28, "RW");
-        this.default_map.add_reg(command  , 'h2C, "RW");
-        this.default_map.add_reg(min      , 'h30, "RW");
-        this.default_map.add_reg(max      , 'h34, "RW");
-        this.default_map.add_reg(mac_check, 'h38, "RW");
-        this.default_map.add_reg(orocl    , 'h3C, "RO");
-        this.default_map.add_reg(oroch    , 'h40, "RO");
-        for (int unsigned it = 0; it < MAC_COUNT; it++) begin
-            this.default_map.add_reg(mac[it] , 'h80 + it * 'h08, "RW");
-        end
+        this.default_map.add_submap(this.base.default_map, 'h0);
+        this.default_map.add_submap(this.rfc.default_map, 'h0);
+        this.default_map.add_reg(command  , 'h2C, "WO");
+        //this.default_map.add_reg(trfcl    , 'h00, "RO");
 
         this.lock_model();
     endfunction
