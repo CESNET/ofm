@@ -43,6 +43,13 @@ class RateLimiter(nfb.BaseComp):
         except:
             print("Error while opening Rate Limiter component!")
 
+    def _fix_sec_len(self, orig_speed, sec_len, freq, min_speed):
+        """Increase Section length when the speed of the Speed register would be below the limit"""
+
+        if (sec_len < min_speed * freq / orig_speed):
+            return int(min_speed * freq / orig_speed)
+        return sec_len
+
     def _conv_Gbs2Bscn(self, speed, sec_len, freq):
         """Convert Gb/s to B/section"""
 
