@@ -5,6 +5,7 @@
 ############################################################
 
 import nfb
+from math import ceil
 
 
 class RateLimiter(nfb.BaseComp):
@@ -53,10 +54,17 @@ class RateLimiter(nfb.BaseComp):
     def _conv_Gbs2Bscn(self, speed, sec_len, freq):
         """Convert Gb/s to B/section"""
 
+        # TODO: automatic setting
+        mfb_word_width = 512 # 100G -> 512, 400G -> 2048
+        min_speed = 1 + 3*mfb_word_width/8
+        fixed_sec_len = self._fix_sec_len(speed*125_000_000, sec_len, freq*1_000_000, min_speed)
+
+        self._comp.write32(self._REG_SEC_LEN, fixed_sec_len)
+
         ticks_per_sec    = freq * 1_000_000
-        sections_per_sec = ticks_per_sec / sec_len
+        sections_per_sec = ticks_per_sec / fixed_sec_len
         bytes_per_sec    = speed * 125_000_000
-        return int(round(bytes_per_sec / sections_per_sec))
+        return int(ceil(bytes_per_sec / sections_per_sec))
 
     def _conv_Bscn2Gbs(self, speed, sec_len, freq):
         """Convert B/section to Gb/s"""
@@ -69,9 +77,16 @@ class RateLimiter(nfb.BaseComp):
     def _conv_Ps2Pscn(self, speed, sec_len, freq):
         """Convert pkts/s to pkts/section"""
 
+        # TODO: automatic setting
+        mfb_regions = 1 # 100G -> 1, 400G -> 4
+        min_speed = 1 + mfb_regions
+        fixed_sec_len = self._fix_sec_len(speed, sec_len, freq*1_000_000, min_speed)
+
+        self._comp.write32(self._REG_SEC_LEN, fixed_sec_len)
+
         ticks_per_sec    = freq * 1_000_000
-        sections_per_sec = ticks_per_sec / sec_len
-        return int(round(speed / sections_per_sec))
+        sections_per_sec = ticks_per_sec / fixed_sec_len
+        return int(ceil(speed / sections_per_sec))
 
     def _conv_Pscn2Ps(self, speed, sec_len, freq):
         """Convert pkts/section to pkts/s"""
