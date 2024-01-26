@@ -165,7 +165,6 @@ class RateLimiter(nfb.BaseComp):
             if (cfg["limit_packets"]):
                 auxiliary_flags |= self._SR_SHAPE_FLAG
             self._comp.write32(self._REG_STATUS, (self._SR_WR_AUX_FLAG | auxiliary_flags))
-            self._comp.write32(self._REG_STATUS, 0)
 
     def start_shaping(self, ptr_reset=False):
         """Start traffic shaping"""
