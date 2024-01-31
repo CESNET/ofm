@@ -123,7 +123,7 @@ architecture FULL of DMA_MFB_GENERATOR is
 
     signal mfb_gen_meta_arr : slv_array_t(REGIONS-1 downto 0)(DMA_CHANNELS_WIDTH+LENGTH_WIDTH-1 downto 0);
     signal pkt_len          : slv_array_t(REGIONS-1 downto 0)(LENGTH_WIDTH-1 downto 0);
-    signal dma_meta_hdr_data: slv_array_t(REGIONS-1 downto 0)(HDR_META_WIDTH-1 downto 0);
+    signal dma_meta_hdr_data: slv_array_t(REGIONS-1 downto 0)(HDR_META_WIDTH-1 downto 0) := (others => (others => '0'));
     signal dma_hdr_data     : slv_array_t(REGIONS-1 downto 0)(NPP_HDR_SIZE*8-1 downto 0);
     signal dma_channel      : slv_array_t(REGIONS-1 downto 0)(DMA_CHANNELS_WIDTH-1 downto 0);
     signal dma_blk_len      : slv_array_t(REGIONS-1 downto 0)(log2(PKT_MTU/8+1)-1 downto 0);
@@ -251,7 +251,7 @@ begin
         pkt_len(i)           <= mfb_gen_meta_arr(i)(LENGTH_WIDTH-1 downto 0);
         dma_channel(i)       <= mfb_gen_meta_arr(i)(LENGTH_WIDTH+DMA_CHANNELS_WIDTH-1 downto LENGTH_WIDTH);
         dma_blk_len(i)       <= std_logic_vector(resize(enlarge_right(round_up(resize(unsigned(pkt_len(i)),LENGTH_WIDTH+1),3),-3),log2(PKT_MTU/8+1)));
-        dma_meta_hdr_data(i) <= (USER_HDR_FLAG_INDEX => '1', others => '0');
+        dma_meta_hdr_data(i)(USER_HDR_FLAG_INDEX) <= '1';
         dma_hdr_data(i)      <= "0000" & dma_meta_hdr_data(i) & std_logic_vector(resize(unsigned(pkt_len(i)),NPP_HDR_SIZE*8-4-HDR_META_WIDTH));
     end generate;
 

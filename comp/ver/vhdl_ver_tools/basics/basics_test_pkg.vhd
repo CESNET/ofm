@@ -200,7 +200,10 @@ package body basics_test_pkg is
             v := v/16;
          end loop;
 
-         write(l,string'(rev_line(ptr+1 to 16)));
+         --write(l,string'(rev_line(ptr+1 to 16)));
+         for i in ptr+1 to 16 loop
+            write(l, rev_line(i));
+         end loop;
       end if;
    end procedure; 
 
