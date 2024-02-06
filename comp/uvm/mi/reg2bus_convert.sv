@@ -8,9 +8,53 @@
  * SPDX-License-Identifier: BSD-3-Clause
 */
 
-class reg2bus_frontdoor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_reg_frontdoor;
+/* FIX BUG IN QUESTA SIM */
+class sync_class;
+    protected semaphore sem;
+
+    function new();
+        sem = new(1);
+    endfunction
+
+    task get();
+        sem.get();
+    endtask
+
+    task put();
+        sem.put();
+    endtask
+endclass
+
+virtual class base_reg_frontdoor_cbs;
+
+    pure virtual task cbs_pre(uvm_reg_frontdoor fr);
+    pure virtual task cbs_post(uvm_reg_frontdoor fr);
+
+endclass
+
+virtual class base_reg_frontdoor  extends uvm_reg_frontdoor;
+    protected base_reg_frontdoor_cbs cbs[$];
+
+    function new(string name);
+        super.new(name);
+    endfunction
+
+    virtual function void do_copy (	uvm_object 	rhs	);
+        base_reg_frontdoor c_rhs;
+        super.do_copy(rhs);
+        $cast(c_rhs, rhs);
+        this.cbs = c_rhs.cbs;
+    endfunction
+
+    function register_cbs(base_reg_frontdoor_cbs cbs);
+        this.cbs.push_back(cbs);
+    endfunction
+
+    pure virtual task indirect_switch(int unsigned addr, int unsigned data);
+endclass
+
+class reg2bus_frontdoor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends base_reg_frontdoor;
     `uvm_object_param_utils(uvm_mi::reg2bus_frontdoor#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
-    `uvm_declare_p_sequencer(uvm_mi::sequencer_slave#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
 
     localparam DATA_BYTES_WIDTH = (DATA_WIDTH+8-1)/8;
 
@@ -20,10 +64,15 @@ class reg2bus_frontdoor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_re
         logic [DATA_BYTES_WIDTH-1:0] be;
     } item_t;
 
-    semaphore sem;
+    sync_class sem;
 
     function new(string name = "reg2bus_frontdoor");
         super.new(name);
+        sem = null;
+    endfunction
+
+    virtual function void do_copy (	uvm_object 	rhs	);
+        super.do_copy(rhs);
     endfunction
 
     function void configure(uvm_reg_map map);
@@ -75,6 +124,10 @@ class reg2bus_frontdoor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_re
         sem.put();
     endtask
 
+    virtual task indirect_switch(int unsigned addr, int unsigned data);
+        send_frame(data, '1, addr);
+    endtask
+
     task body();
         item_t items[];
         int unsigned target_width;
@@ -85,9 +138,13 @@ class reg2bus_frontdoor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_re
 
         ////////////
         // get semaphore
-        if (uvm_config_db#(semaphore)::get(sequencer, "", "sem", sem) == 0) begin
-            sem = new(1);
-            uvm_config_db#(semaphore)::set(sequencer, "", "sem", sem);
+        if (sem == null && uvm_config_db#(sync_class)::get(sequencer, "", "sem", sem) == 0) begin
+            sem = new();
+            uvm_config_db#(sync_class)::set(sequencer, "", "sem", sem);
+        end
+
+        for(int unsigned it = 0; it < cbs.size(); it++) begin
+            cbs[it].cbs_pre(this);
         end
 
         ///////////////////
@@ -97,7 +154,7 @@ class reg2bus_frontdoor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_re
             int unsigned item_num; // required words in interface
 
             if (!$cast(target, rw_info.element)) begin
-                `uvm_fatal(p_sequencer.get_full_name(), "\n\tCannot get memmory");
+                `uvm_fatal(m_sequencer.get_full_name(), "\n\tCannot get memmory");
             end
 
             target_width = target.get_n_bits();
@@ -109,7 +166,7 @@ class reg2bus_frontdoor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_re
             int unsigned item_num; // required words in interface
 
             if (!$cast(target, rw_info.element)) begin
-                `uvm_fatal(p_sequencer.get_full_name(), "\n\tCannot get register");
+                `uvm_fatal(m_sequencer.get_full_name(), "\n\tCannot get register");
             end
 
             target_width = target.get_n_bits();
@@ -117,9 +174,8 @@ class reg2bus_frontdoor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_re
             addr         = target.get_address();
             items        = new[item_num];
         end else begin
-             `uvm_fatal(p_sequencer.get_full_name(), "\n\tThis sequence support only access to UVM_REG and UVM_MEM");
+             `uvm_fatal(m_sequencer.get_full_name(), "\n\tThis sequence support only access to UVM_REG and UVM_MEM");
         end
-
 
         /////////////////////////////
         // OPERATION
@@ -188,6 +244,10 @@ class reg2bus_frontdoor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_re
                     end
                 end
             end
+        end
+
+        for(int unsigned it = 0; it < cbs.size(); it++) begin
+            cbs[it].cbs_post(this);
         end
     endtask
 endclass

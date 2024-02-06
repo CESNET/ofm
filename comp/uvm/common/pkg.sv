@@ -23,6 +23,7 @@ package uvm_common;
 
     `include "rand_rdy.sv"
     `include "rand_length.sv"
+    `include "sync.sv"
 
     `include "sequence_cfg.sv"
     `include "sequence.sv"
