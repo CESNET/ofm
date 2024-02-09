@@ -1,0 +1,18 @@
+image: python:3.7-alpine
+
+
+stages:
+  - build
+
+build-job:
+  stage: build
+  script:
+    - apk add rpm
+    - cd python/ofm
+    - ln -s ../../comp comp
+    - python3 setup.py bdist_rpm
+  artifacts:
+    paths:
+    - python/ofm/dist/*.noarch.rpm
+#  only:
+#  - devel
