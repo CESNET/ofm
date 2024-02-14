@@ -12,9 +12,10 @@ package uvm_dma_ll;
     `include "uvm_macros.svh"
     import uvm_pkg::*;
 
+    `include "sequence.sv"
+    `include "sequencer.sv"
     `include "model.sv"
     `include "scoreboard.sv"
-    `include "sequencer.sv"
     `include "env.sv"
 
 endpackage

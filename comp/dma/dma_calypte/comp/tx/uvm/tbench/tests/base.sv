@@ -50,7 +50,7 @@ class base extends uvm_test;
         //RISE OBJECTION
         phase.raise_objection(this);
 
-        m_vseq.init(m_env.m_regmodel.m_regmodel, m_env.m_watch_dog, phase);
+        m_vseq.init();
         m_vseq.randomize();
         m_vseq.start(m_env.m_sequencer);
 

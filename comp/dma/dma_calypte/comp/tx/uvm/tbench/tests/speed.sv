@@ -23,8 +23,8 @@ class virt_seq_full_speed#(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX
         super.new(name);
     endfunction
 
-    virtual function void init(uvm_dma_regs::regmodel#(CHANNELS) m_regmodel, uvm_dma_ll_info::watchdog #(CHANNELS) m_watch_dog, uvm_phase phase);
-        super.init(m_regmodel, m_watch_dog, phase);
+    virtual function void init();
+        super.init();
         m_pcie = uvm_mfb::sequence_full_speed_tx#(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE, USER_TX_MFB_ITEM_WIDTH, USER_META_WIDTH)::type_id::create("m_pcie_lib");
     endfunction
 endclass
@@ -99,7 +99,7 @@ class speed extends base;
         //RISE OBJECTION
         phase.raise_objection(this);
 
-        m_vseq.init(m_env.m_regmodel.m_regmodel, m_env.m_watch_dog, phase);
+        m_vseq.init();
         m_vseq.randomize();
         m_vseq.start(m_env.m_sequencer);
 

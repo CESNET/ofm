@@ -25,7 +25,7 @@ class env #(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE
     uvm_logic_vector_mvb::env_tx #(1, 1)                                                                               m_dma;
     uvm_mi::regmodel#(uvm_dma_regs::regmodel#(CHANNELS), MI_WIDTH, MI_WIDTH)                                           m_regmodel;
 
-    uvm_dma_ll_info::watchdog #(CHANNELS) m_watch_dog;
+    //uvm_dma_ll_info::watchdog #(CHANNELS) m_watch_dog;
 
     scoreboard #(CHANNELS, PKT_SIZE_MAX, DEVICE, USER_TX_MFB_ITEM_WIDTH, USER_META_WIDTH, PCIE_CQ_MFB_ITEM_WIDTH,
                  DATA_PTR_WIDTH, DEBUG) sc;
@@ -43,7 +43,7 @@ class env #(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE
         uvm_logic_vector_mvb::config_item       m_dma_config;
         uvm_mi::regmodel_config                 m_mi_config;
 
-        m_watch_dog = uvm_dma_ll_info::watchdog#(CHANNELS)::type_id::create("m_watch_dog", this);
+        //m_watch_dog = uvm_dma_ll_info::watchdog#(CHANNELS)::type_id::create("m_watch_dog", this);
 
         m_config_reset                = new;
         m_config_reset.active         = UVM_ACTIVE;
@@ -91,11 +91,12 @@ class env #(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE
         m_env_rx.m_env_rx.analysis_port_data.connect(sc.analysis_export_rx_packet);
         m_env_rx.m_env_rx.analysis_port_meta.connect(sc.analysis_export_rx_meta);
         m_sequencer.m_reset    = m_reset.m_sequencer;
-        m_sequencer.m_packet   = m_env_rx.m_sequencer;
-        m_sequencer.m_regmodel = m_regmodel.m_regmodel;
+        for (int unsigned chan = 0; chan < CHANNELS; chan++) begin
+            m_sequencer.m_packet[chan]   = m_env_rx.m_sequencer[chan];
+        end
         sc.regmodel_set(m_regmodel.m_regmodel);
         m_env_rx.regmodel_set(m_regmodel.m_regmodel);
-        m_env_rx.m_watch_dog = m_watch_dog;
+        //m_env_rx.m_watch_dog = m_watch_dog;
         m_reset.sync_connect(m_env_rx.reset_sync);
 
         m_dma.analysis_port.connect(sc.analysis_export_dma);
@@ -103,7 +104,7 @@ class env #(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE
         m_env_tx.analysis_port_meta.connect(sc.analysis_export_tx_meta);
         m_sequencer.m_pcie = m_env_tx.m_sequencer;
 
-        m_reset.sync_connect(m_env_rx.reset_sync);
+        //m_reset.sync_connect(m_env_rx.reset_sync);
     endfunction
 
 endclass
