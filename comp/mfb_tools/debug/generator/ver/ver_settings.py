@@ -51,7 +51,6 @@ SETTINGS = {
     ("region_comb_2", "use_pacp_arch",),
     ("region_comb_3",),
     ("region_comb_3", "use_pacp_arch",),
-    ("pcie",),
     ("pcie",          "use_pacp_arch",),
     ),
 }

@@ -86,6 +86,10 @@ architecture FULL of MFB_GENERATOR_CORE is
 
 begin
 
+    assert (REGION_SIZE > 1)
+        report "MFB_GENERATOR_CORE: Unsupported REGION_SIZE, use higher than 1!"
+        severity FAILURE;
+
     ----------------------------------------------------------------------------
     -- MFB WORD COUNTER
     ----------------------------------------------------------------------------
