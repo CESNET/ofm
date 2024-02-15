@@ -1,4 +1,4 @@
-%global pkg_name ofm
+%global pkg_name python3-ofm
 %global pkg_sitename ofm
 %global pkg_version 0.0.1
 %global pkg_release 1
