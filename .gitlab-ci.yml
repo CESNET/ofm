@@ -1,18 +1,28 @@
-image: python:3.7-alpine
-
-
 stages:
   - build
 
-build-job:
+variables:
+  GIT_STRATEGY: clone
+  GIT_SUBMODULE_STRATEGY: recursive
+
+.rpmbuild:
   stage: build
+  image: oraclelinux:$VERSION_OS
   script:
-    - apk add rpm
-    - cd python/ofm
-    - ln -s ../../comp comp
-    - python3 setup.py bdist_rpm
+    - dnf install -y make python3 python3-setuptools python3-devel rpm-build
+    - (cd python/ofm/; make rpm)
+    - mkdir $VERSION_OS
+    - cp -rv python/ofm/RPMBUILD/RPMS $VERSION_OS
   artifacts:
-    paths:
-    - python/ofm/dist/*.noarch.rpm
-#  only:
-#  - devel
+    paths: [$VERSION_OS/RPMS/*/*.rpm]
+    expire_in: 1 week
+
+rpmbuild [OL8]:
+  extends: .rpmbuild
+  variables:
+    VERSION_OS: 8
+
+rpmbuild [OL9]:
+  extends: .rpmbuild
+  variables:
+    VERSION_OS: 9
