@@ -6,7 +6,7 @@
 Name:           %{pkg_name}
 Version:        %{pkg_version}
 Release:        %{pkg_release}%{?dist}
-Source0:        %{pkg_name}-%{pkg_version}.tar.gz
+Source0:        %{pkg_sitename}-%{pkg_version}.tar.gz
 Summary:        Open FPGA Modules package
 License:        Copyright (C) CESNET z.s.p.o.
 URL:            https://github.com/CESNET/ofm
@@ -21,8 +21,8 @@ BuildRequires:	python%{python3_pkgversion}-devel
 Python modules to control components from the OFM
 
 %prep
-%autosetup -n %{pkg_name}-%{pkg_version}
-rm -rf %{pkg_name}.egg-info
+%autosetup -n %{pkg_sitename}-%{pkg_version}
+rm -rf %{pkg_sitename}.egg-info
 
 %build
 %py3_build
