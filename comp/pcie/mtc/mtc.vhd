@@ -1090,7 +1090,11 @@ begin
     --  OUTPUT STAGE - CONVERSION CC INTERFACE TO MFB
     -- =========================================================================
 
-    mfb_sof <= (MFB_REGIONS-1 downto 1 => '0') & cc_sot;
+    cc_sot_fill_g: if (MFB_REGIONS = 1) generate
+        mfb_sof(0) <= cc_sot;
+    else generate
+        mfb_sof <= (MFB_REGIONS-1 downto 1 => '0') & cc_sot;
+    end generate;
 
     process (cc_eot, cc_eot_pos)
     begin

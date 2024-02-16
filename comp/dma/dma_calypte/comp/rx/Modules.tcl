@@ -6,6 +6,7 @@
 
 lappend PACKAGES "$OFM_PATH/comp/base/pkg/math_pack.vhd"
 lappend PACKAGES "$OFM_PATH/comp/base/pkg/type_pack.vhd"
+lappend PACKAGES "$OFM_PATH/comp/base/pkg/pcie_meta_pack.vhd"
 
 set HDR_INSERTOR_BASE       "$ENTITY_BASE/comp/hdr_insertor"
 set HDR_MANAGER_BASE        "$ENTITY_BASE/comp/hdr_manager"

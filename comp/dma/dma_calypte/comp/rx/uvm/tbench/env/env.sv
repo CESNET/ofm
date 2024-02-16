@@ -10,7 +10,6 @@ class env #(USER_REGIONS, USER_REGION_SIZE, USER_BLOCK_SIZE, USER_ITEM_WIDTH, PC
     `uvm_component_param_utils(uvm_dma_ll::env #(USER_REGIONS, USER_REGION_SIZE, USER_BLOCK_SIZE, USER_ITEM_WIDTH, PCIE_UP_REGIONS, PCIE_UP_REGION_SIZE, PCIE_UP_BLOCK_SIZE, PCIE_UP_ITEM_WIDTH, PCIE_UP_META_WIDTH, CHANNELS, PKT_SIZE_MAX, MI_WIDTH, DEVICE));
 
     localparam INPUT_META_WIDTH = 24 + $clog2(PKT_SIZE_MAX+1) + $clog2(CHANNELS);
-    localparam IS_INTEL_DEV     = (DEVICE == "STRATIX10" || DEVICE == "AGILEX");
 
     sequencer#(PCIE_UP_REGIONS, PCIE_UP_REGION_SIZE, PCIE_UP_BLOCK_SIZE, PCIE_UP_ITEM_WIDTH, PCIE_UP_META_WIDTH, CHANNELS) m_sequencer;
 
@@ -50,7 +49,7 @@ class env #(USER_REGIONS, USER_REGION_SIZE, USER_BLOCK_SIZE, USER_ITEM_WIDTH, PC
         m_config_tx                = new;
         m_config_tx.active         = UVM_ACTIVE;
         m_config_tx.interface_name = "vif_tx";
-        m_config_tx.meta_behav     = (IS_INTEL_DEV) ? uvm_logic_vector_array_mfb::config_item::META_SOF : uvm_logic_vector_array_mfb::config_item::META_NONE;
+        m_config_tx.meta_behav     = uvm_logic_vector_array_mfb::config_item::META_SOF;
         uvm_config_db #(uvm_logic_vector_array_mfb::config_item)::set(this, "m_env_tx", "m_config", m_config_tx);
         m_env_tx    = uvm_logic_vector_array_mfb::env_tx#(PCIE_UP_REGIONS, PCIE_UP_REGION_SIZE, PCIE_UP_BLOCK_SIZE, PCIE_UP_ITEM_WIDTH, PCIE_UP_META_WIDTH)::type_id::create("m_env_tx", this);
 
@@ -85,8 +84,7 @@ class env #(USER_REGIONS, USER_REGION_SIZE, USER_BLOCK_SIZE, USER_ITEM_WIDTH, PC
 
         m_dma.analysis_port.connect(sc.analysis_export_dma);
         m_env_tx.analysis_port_data.connect(sc.analysis_export_tx_packet);
-        if (IS_INTEL_DEV)
-            m_env_tx.analysis_port_meta.connect(sc.analysis_export_tx_meta);
+        m_env_tx.analysis_port_meta.connect(sc.analysis_export_tx_meta);
 
         m_reset.sync_connect(m_env_rx.reset_sync);
     endfunction

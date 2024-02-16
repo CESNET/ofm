@@ -1,6 +1,7 @@
 -- mfb_generator.vhd: This component generates packets of desired length.
--- Copyright (C) 2019 CESNET z. s. p. o.
+-- Copyright (C) 2023 CESNET z. s. p. o.
 -- Author(s): Daniel Kondys <xkondy00@vutbr.cz>
+--            Vladislav Valek <valekv@cesnet.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 
@@ -44,6 +45,7 @@ entity MFB_GENERATOR is
     Port (
         CLK             : in  std_logic;
         RST             : in  std_logic;
+
         -- Control interface
         CTRL_EN           : in std_logic;
         CTRL_CHAN_INC     : in std_logic_vector(32-1 downto 0);
@@ -53,7 +55,8 @@ entity MFB_GENERATOR is
         CTRL_MAC_SRC      : in std_logic_vector(48-1 downto 0);
         CTRL_PKT_CNT_CLR  : in std_logic;
         CTRL_PKT_CNT      : out std_logic_vector(PKT_CNT_WIDTH-1 downto 0);
-        -- tx interface
+
+        -- TX interface
         TX_MFB_DATA     : out std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
         TX_MFB_META     : out std_logic_vector(REGIONS*(CHANNELS_WIDTH+LENGTH_WIDTH)-1 downto 0); -- packet channel & packet length
         TX_MFB_SOF      : out std_logic_vector(REGIONS-1 downto 0);
@@ -72,8 +75,6 @@ architecture BEHAV of MFB_GENERATOR is
 
     signal pkt_cnt              : u_array_t(REGIONS downto 0)(PKT_CNT_WIDTH-1 downto 0);
     signal pkt_cnt_reg          : unsigned(PKT_CNT_WIDTH-1 downto 0);
-    signal zero_sig             : std_logic_vector((REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH - 32 - 2*48 - 16)-1 downto 0); -- fills data signal with a certain amount of zeros (-16 is the ETHER_TYPE)
-    signal region_data_with_sof : std_logic_vector(REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0); -- the data with mac addresses, ether type and packet count (and some zeros), that makes up the data when SOF asserts
 
     signal sof                  : std_logic_vector(REGIONS-1 downto 0);
     signal eof                  : std_logic_vector(REGIONS-1 downto 0);
@@ -86,6 +87,30 @@ architecture BEHAV of MFB_GENERATOR is
     signal chan_min             : unsigned(16-1 downto 0);
     signal chan_max             : unsigned(16-1 downto 0);
     signal chan_burst           : unsigned(16-1 downto 0);
+
+    signal burst_size           : unsigned(16 -1 downto 0);
+    signal burst_mode_en        : std_logic;
+    -- Input delay register
+    signal ctrl_en_delay        : std_logic;
+    signal ctrl_length_delay    : std_logic_vector(LENGTH_WIDTH -1 downto 0);
+    -- Rising edge detect
+    signal ctrl_en_ris_edge     : std_logic;
+    -- General control mask for regions to the packet generator
+    signal gen_vld              : std_logic_vector(REGIONS -1 downto 0);
+    -- Control mask for each region that controls the generator when burst_mode is enabled.
+    signal gen_vld_regions      : std_logic_vector(REGIONS -1 downto 0);
+    -- Confirmation signal that packets requested with gen_vld will be generated
+    signal gen_accept           : std_logic_vector(REGIONS -1 downto 0);
+
+    type burst_fsm_state_t is (S_TRIGGER_DETECT, S_BURST_COUNTDOWN);
+    signal burst_fsm_pst : burst_fsm_state_t := S_TRIGGER_DETECT;
+    signal burst_fsm_nst : burst_fsm_state_t := S_TRIGGER_DETECT;
+
+    signal ones_offs_high       : unsigned(log2(REGIONS) -1 downto 0);
+    signal ones_insert_en       : std_logic;
+
+    signal my_burst_cntr_pst : unsigned(16 -1 downto 0);
+    signal my_burst_cntr_nst : unsigned(16 -1 downto 0);
 
     signal burst_cnt            : u_array_t(REGIONS downto 0)(16-1 downto 0);
     signal chan_cnt             : u_array_t(REGIONS downto 0)(CHANNELS_WIDTH-1 downto 0);
@@ -106,6 +131,23 @@ architecture BEHAV of MFB_GENERATOR is
     signal data_word            : slv_array_t(REGIONS*REGION_SIZE-1 downto 0)(BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
     signal data_word_ser        : std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
 
+    function count_ones (
+        INP_VECTOR : std_logic_vector)
+        return unsigned is
+
+        variable count : unsigned(log2(INP_VECTOR'length) downto 0);
+    begin
+        if (INP_VECTOR'length = 1) then
+            return (INP_VECTOR'range => INP_VECTOR(0));
+        end if;
+
+        count := (others => '0');
+        for i in INP_VECTOR'range loop
+            count := count + ((count'high downto count'low+1 => '0') & INP_VECTOR(i));
+        end loop;
+        return count;
+    end function;
+
 begin
 
     core_arch_gen : if (not USE_PACP_ARCH) generate
@@ -122,9 +164,9 @@ begin
             CLK            => CLK,
             RESET          => RST,
 
-            GEN_LENGTH     => (others => CTRL_LENGTH),
-            GEN_VALID      => (others => CTRL_EN),
-            GEN_ACCEPT     => open,
+            GEN_LENGTH     => (others => ctrl_length_delay),
+            GEN_VALID      => gen_vld,
+            GEN_ACCEPT     => gen_accept,
 
             TX_MFB_SOF_POS => sof_pos,
             TX_MFB_EOF_POS => eof_pos,
@@ -163,10 +205,106 @@ begin
 
     end generate;
 
+    burst_mode_logic_g: if (not USE_PACP_ARCH) generate
+
+        gen_vld <= (others => CTRL_EN) when burst_mode_en = '0' else gen_vld_regions;
+
+        -- =============================================================================================
+        -- Burst mode control
+        -- =============================================================================================
+        ctrl_en_delay_reg_p: process (CLK) is
+        begin
+            if (rising_edge(CLK)) then
+                ctrl_en_delay     <= CTRL_EN;
+                ctrl_length_delay <= CTRL_LENGTH;
+            end if;
+        end process;
+
+        -- Detect rising edge
+        ctrl_en_ris_edge <= (not ctrl_en_delay) and CTRL_EN;
+
+        burst_mode_fsm_state_reg_p : process (CLK) is
+        begin
+            if (rising_edge(CLK)) then
+                if (RST = '1') then
+                    burst_fsm_pst <= S_TRIGGER_DETECT;
+                    my_burst_cntr_pst <= (others => '0');
+                else
+                    burst_fsm_pst     <= burst_fsm_nst;
+                    my_burst_cntr_pst <= my_burst_cntr_nst;
+                end if;
+            end if;
+        end process;
+
+        burst_mod_fsm_out_logic: process (all) is
+            variable accepted_regions : unsigned(log2(REGIONS) downto 0);
+        begin
+            burst_fsm_nst     <= burst_fsm_pst;
+            my_burst_cntr_nst <= my_burst_cntr_pst;
+            ones_insert_en    <= '0';
+            ones_offs_high    <= (others => '0');
+
+            case burst_fsm_pst is
+                when S_TRIGGER_DETECT =>
+
+                    if (ctrl_en_ris_edge = '1' and burst_mode_en = '1') then
+
+                        accepted_regions := BEHAV.count_ones(gen_accept);
+
+                        if (dst_rdy = '1') then
+                            my_burst_cntr_nst <= burst_size - accepted_regions;
+                            ones_insert_en    <= '1';
+                        end if;
+
+                        if (burst_size > REGIONS) then
+                            ones_offs_high <= (others => '1');
+                        else
+                            ones_offs_high <= resize(burst_size -1, log2(REGIONS));
+                        end if;
+
+                        -- If burst is bigger then the number of regions, the generation needs to be
+                        -- split through more clock cycles OR if generator CORE is not able to process
+                        -- all of the requested packets at once.
+                        if (burst_size > REGIONS or accepted_regions < burst_size) then
+                            burst_fsm_nst  <= S_BURST_COUNTDOWN;
+                        end if;
+
+                    end if;
+
+                when S_BURST_COUNTDOWN =>
+
+                    accepted_regions := BEHAV.count_ones(gen_accept);
+
+                    if (dst_rdy = '1') then
+                        my_burst_cntr_nst <= my_burst_cntr_pst - accepted_regions;
+                        ones_insert_en <= '1';
+                    end if;
+
+                    if (my_burst_cntr_pst > REGIONS) then
+                        ones_offs_high <= (others => '1');
+                    else
+                        if (accepted_regions = my_burst_cntr_pst) then
+                            burst_fsm_nst <= S_TRIGGER_DETECT;
+                        end if;
+
+                        ones_offs_high <= resize(my_burst_cntr_pst -1, log2(REGIONS));
+                    end if;
+            end case;
+        end process;
+
+        ones_insertor_i : entity work.ONES_INSERTOR
+            generic map (
+                OFFSET_WIDTH => log2(REGIONS))
+            port map (
+                OFFSET_LOW  => (others => '0'),
+                OFFSET_HIGH => ones_offs_high,
+                VALID       => ones_insert_en,
+                ONES_VECTOR => gen_vld_regions);
+    end generate;
+
     -- ======================================================================================
     --  packet counter
     -- ======================================================================================
-
     pkt_cnt_p : process (all)
         variable v_pkt_cnt : unsigned(log2(REGIONS+1)-1 downto 0);
     begin
@@ -194,13 +332,13 @@ begin
     -- ======================================================================================
     --  Channel select
     -- ======================================================================================
-    --  Round-robin distribution increment register format:
+    --  Round-robin distribution increment register format (signal CTRL_CHAN_INC):
     --  31             23              15             7           0
     -- +----------------------------------------------------------+
     -- | burst_size                   | CONFIG       |    incr    |
     -- +----------------------------------------------------------+
 
-    --  Round-robin distribution value register format:
+    --  Round-robin distribution value register format (signal CTRL_CHAN_VAL):
     --  31             23              15             7           0
     -- +----------------------------------------------------------+
     -- | ch_max                       | ch_min                    |
@@ -209,6 +347,12 @@ begin
     -- Distribution of Ethernet frames to channels
     --   incr       : RR increment. 0 = round-robin disable (stay on zero channel). Default 0x01
     --   CONFIG     : CONFIG[0] = channel reverse enable, others bit are reserved. Default 0x00
+    --              : CONFIG[1] = Experimental: Enables burst mode in which N packets (where N
+    --                corresponds to burst_size) are send only with occurence of rising edge on
+    --                CTRL_EN signal and the transmission stops unless another rising edge occurs.
+    --                Setting this bit to 0 enables streaming mode where packets are sent
+    --                continuously.
+    --                NOTE: Does not work with USE_PACP_ARCH set to true
     --   burst_size : number of packets to begenerated before channel is changed
     --   ch_min     : the lowest channel number for round-robin distribution. Default 0x0000
     --   ch_max     : the highest channel number for round-robin distribution. Default 0xFFFF
@@ -221,19 +365,22 @@ begin
 
     chan_inc        <= unsigned(CTRL_CHAN_INC(8-1 downto 0));
     chan_reverse_en <= CTRL_CHAN_INC(8);
+    burst_mode_en   <= CTRL_CHAN_INC(9);
+    burst_size      <= unsigned(CTRL_CHAN_INC(32-1 downto 16));
+
     chan_min        <= unsigned(CTRL_CHAN_VAL(16-1 downto 0));
     chan_max        <= unsigned(CTRL_CHAN_VAL(32-1 downto 16));
 
-    -- Channel burst size is used decremented
-    -- This is only done when the value is not 0 (default value)
-    -- One cycle delay is not a problem
     chan_burst_p : process (CLK)
     begin
+        -- One cycle delay is not a problem
         if (rising_edge(CLK)) then
-            if ((or CTRL_CHAN_INC(32-1 downto 16))='1') then
-                chan_burst <= unsigned(CTRL_CHAN_INC(32-1 downto 16)) - 1;
+            if ((or burst_size)='1') then
+                -- Channel burst size is used decremented
+                chan_burst <= burst_size - 1;
             else
-                chan_burst <= unsigned(CTRL_CHAN_INC(32-1 downto 16));
+                -- When size is 0
+                chan_burst <= burst_size;
             end if;
         end if;
     end process;

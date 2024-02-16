@@ -31,7 +31,8 @@ entity TX_DMA_DEBUG_CORE is
         ST_SP_DBG_SIGNAL_W : natural := 2;
 
         -- Width of MI bus
-        MI_WIDTH : natural := 32
+        MI_WIDTH    : natural := 32;
+        MI_SAME_CLK : boolean := FALSE
         );
     port(
         -- =======================================================================
@@ -44,8 +45,7 @@ entity TX_DMA_DEBUG_CORE is
         -- Various other debug interfaces
         -- =========================================================================================
         ST_SP_DBG_CHAN : in std_logic_vector(log2(CHANNELS) -1 downto 0);
-        ST_SP_DBG_META : std_logic_vector(ST_SP_DBG_SIGNAL_W - 1 downto 0);
-        FORCE_RESET : out std_logic;
+        ST_SP_DBG_META : in std_logic_vector(ST_SP_DBG_SIGNAL_W - 1 downto 0);
 
         -- =======================================================================
         -- RX MFB INTERFACE
@@ -356,8 +356,8 @@ architecture FULL of TX_DMA_DEBUG_CORE is
     constant MI_SPLIT_PORTS : natural := 2;
     constant MI_SPLIT_BASES : slv_array_t(MI_SPLIT_PORTS-1 downto 0)(MI_WIDTH-1 downto 0) := (
         0 => X"00000000",   -- Counters
-        1 => X"00020000");  -- MFB Generator
-    constant MI_SPLIT_ADDR_MASK : std_logic_vector(MI_WIDTH -1 downto 0) := X"00020000";
+        1 => X"00008000");  -- MFB Generator
+    constant MI_SPLIT_ADDR_MASK : std_logic_vector(MI_WIDTH -1 downto 0) := X"00008000";
 
 
     -- =============================================================================================
@@ -464,12 +464,12 @@ architecture FULL of TX_DMA_DEBUG_CORE is
     signal pattern_copy_val  : std_logic_vector(TX_MFB_DATA'range);
     signal comp_val_stored   : std_logic_vector(TX_MFB_DATA'range);
     signal comp_val_curr     : std_logic_vector(TX_MFB_DATA'range);
-    signal comp_res_imm      : std_logic_vector(31 downto 0);
-    signal comp_res_reg      : std_logic_vector(31 downto 0);
-    signal comp_res_imm_vld  : std_logic_vector(31 downto 0);
-    signal comp_res_reg_vld  : std_logic_vector(31 downto 0);
-    signal comp_res_imm_diff : std_logic_vector(31 downto 0);
-    signal comp_res_reg_diff : std_logic_vector(31 downto 0);
+    signal comp_res_imm      : std_logic_vector(TX_MFB_DATA'length/8 -1 downto 0);
+    signal comp_res_reg      : std_logic_vector(TX_MFB_DATA'length/8 -1 downto 0);
+    signal comp_res_imm_vld  : std_logic_vector(TX_MFB_DATA'length/8 -1 downto 0);
+    signal comp_res_reg_vld  : std_logic_vector(TX_MFB_DATA'length/8 -1 downto 0);
+    signal comp_res_imm_diff : std_logic_vector(TX_MFB_DATA'length/8 -1 downto 0);
+    signal comp_res_reg_diff : std_logic_vector(TX_MFB_DATA'length/8 -1 downto 0);
 
     signal pattern_match_cntr_incr    : std_logic;
     signal pattern_mismatch_cntr_incr : std_logic;
@@ -480,12 +480,12 @@ architecture FULL of TX_DMA_DEBUG_CORE is
     signal meta_pattern_copy_val  : std_logic_vector(TX_MFB_DATA'range);
     signal meta_comp_val_stored   : std_logic_vector(TX_MFB_DATA'range);
     signal meta_comp_val_curr     : std_logic_vector(TX_MFB_DATA'range);
-    signal meta_comp_res_imm      : std_logic_vector(31 downto 0);
-    signal meta_comp_res_reg      : std_logic_vector(31 downto 0);
-    signal meta_comp_res_imm_vld  : std_logic_vector(31 downto 0);
-    signal meta_comp_res_reg_vld  : std_logic_vector(31 downto 0);
-    signal meta_comp_res_imm_diff : std_logic_vector(31 downto 0);
-    signal meta_comp_res_reg_diff : std_logic_vector(31 downto 0);
+    signal meta_comp_res_imm      : std_logic_vector(TX_MFB_DATA'length/8 -1 downto 0);
+    signal meta_comp_res_reg      : std_logic_vector(TX_MFB_DATA'length/8 -1 downto 0);
+    signal meta_comp_res_imm_vld  : std_logic_vector(TX_MFB_DATA'length/8 -1 downto 0);
+    signal meta_comp_res_reg_vld  : std_logic_vector(TX_MFB_DATA'length/8 -1 downto 0);
+    signal meta_comp_res_imm_diff : std_logic_vector(TX_MFB_DATA'length/8 -1 downto 0);
+    signal meta_comp_res_reg_diff : std_logic_vector(TX_MFB_DATA'length/8 -1 downto 0);
 
     signal meta_pattern_match_cntr_incr    : std_logic;
     signal meta_pattern_mismatch_cntr_incr : std_logic;
@@ -507,15 +507,8 @@ architecture FULL of TX_DMA_DEBUG_CORE is
     signal gen_mfb_dst_rdy : std_logic;
 
     -- =============================================================================================
-    -- Reset FSM
+    -- Debug signals
     -- =============================================================================================
-    signal rst_fsm_trigg : std_logic;
-    type rst_fsm_state_t is (IDLE, RESET_COUNTING);
-    signal rst_pst  : rst_fsm_state_t := IDLE;
-    signal rst_nst  : rst_fsm_state_t := IDLE;
-    signal rst_cntr_pst : unsigned(9 downto 0);
-    signal rst_cntr_nst : unsigned(9 downto 0);
-
     attribute mark_debug : string;
 
     signal aux_sig_mfb_meta_chan_int                  : std_logic_vector(log2(CHANNELS) -1 downto 0);
@@ -555,77 +548,88 @@ begin
         report "ERROR: TX DMA Debug core: MI_WIDTH ("&to_string(MI_WIDTH)&") must be 32b!"
         severity failure;
 
-    mi_async_i : entity work.MI_ASYNC
-        generic map(
-            DEVICE => DEVICE
-            )
-        port map(
-            -- Master interface
-            CLK_M     => MI_CLK,
-            RESET_M   => MI_RESET,
-
-            MI_M_DWR  => MI_DWR,
-            MI_M_ADDR => MI_ADDR,
-            MI_M_RD   => MI_RD,
-            MI_M_WR   => MI_WR,
-            MI_M_BE   => MI_BE,
-            MI_M_DRD  => MI_DRD,
-            MI_M_ARDY => MI_ARDY,
-            MI_M_DRDY => MI_DRDY,
-
-            -- Slave interface
-            CLK_S     => CLK,
-            RESET_S   => RESET,
-
-            MI_S_DWR  => mi_sync_dwr,
-            MI_S_ADDR => mi_sync_addr,
-            MI_S_RD   => mi_sync_rd,
-            MI_S_WR   => mi_sync_wr,
-            MI_S_BE   => mi_sync_be,
-            MI_S_DRD  => mi_sync_drd,
-            MI_S_ARDY => mi_sync_ardy,
-            MI_S_DRDY => mi_sync_drdy
-            );
-
-        mi_gen_spl_i : entity work.MI_SPLITTER_PLUS_GEN
+    mi_async_g: if (not MI_SAME_CLK) generate
+        mi_async_i : entity work.MI_ASYNC
             generic map(
-                ADDR_WIDTH   => MI_WIDTH,
-                DATA_WIDTH   => MI_WIDTH,
-                META_WIDTH   => 0,
-                PORTS        => MI_SPLIT_PORTS,
-                PIPE_OUT     => (others => TRUE),
-                PIPE_TYPE    => "SHREG",
-                PIPE_OUTREG  => TRUE,
-
-                ADDR_BASES  => MI_SPLIT_PORTS,
-                ADDR_MASK   => MI_SPLIT_ADDR_MASK,
-                ADDR_BASE   => MI_SPLIT_BASES,
-
-                DEVICE       => DEVICE
+                DEVICE => DEVICE
                 )
             port map(
-                CLK   => CLK,
-                RESET => RESET,
+                -- Master interface
+                CLK_M     => MI_CLK,
+                RESET_M   => MI_RESET,
 
-                RX_DWR  => mi_sync_dwr,
-                RX_MWR  => (others => '0'),
-                RX_ADDR => mi_sync_addr,
-                RX_BE   => mi_sync_be,
-                RX_RD   => mi_sync_rd,
-                RX_WR   => mi_sync_wr,
-                RX_ARDY => mi_sync_ardy,
-                RX_DRD  => mi_sync_drd,
-                RX_DRDY => mi_sync_drdy,
+                MI_M_DWR  => MI_DWR,
+                MI_M_ADDR => MI_ADDR,
+                MI_M_RD   => MI_RD,
+                MI_M_WR   => MI_WR,
+                MI_M_BE   => MI_BE,
+                MI_M_DRD  => MI_DRD,
+                MI_M_ARDY => MI_ARDY,
+                MI_M_DRDY => MI_DRDY,
 
-                TX_DWR  => mi_split_dwr,
-                TX_MWR  => open,
-                TX_ADDR => mi_split_addr,
-                TX_BE   => mi_split_be,
-                TX_RD   => mi_split_rd,
-                TX_WR   => mi_split_wr,
-                TX_ARDY => mi_split_ardy,
-                TX_DRD  => mi_split_drd,
-                TX_DRDY => mi_split_drdy);
+                -- Slave interface
+                CLK_S     => CLK,
+                RESET_S   => RESET,
+
+                MI_S_DWR  => mi_sync_dwr,
+                MI_S_ADDR => mi_sync_addr,
+                MI_S_RD   => mi_sync_rd,
+                MI_S_WR   => mi_sync_wr,
+                MI_S_BE   => mi_sync_be,
+                MI_S_DRD  => mi_sync_drd,
+                MI_S_ARDY => mi_sync_ardy,
+                MI_S_DRDY => mi_sync_drdy
+                );
+    else generate
+        mi_sync_dwr  <= MI_DWR;
+        mi_sync_addr <= MI_ADDR;
+        mi_sync_rd   <= MI_RD;
+        mi_sync_wr   <= MI_WR;
+        mi_sync_be   <= MI_BE;
+        MI_DRD       <= mi_sync_drd;
+        MI_ARDY      <= mi_sync_ardy;
+        MI_DRDY      <= mi_sync_drdy;
+    end generate;
+
+    mi_gen_spl_i : entity work.MI_SPLITTER_PLUS_GEN
+        generic map(
+            ADDR_WIDTH   => MI_WIDTH,
+            DATA_WIDTH   => MI_WIDTH,
+            META_WIDTH   => 0,
+            PORTS        => MI_SPLIT_PORTS,
+            PIPE_OUT     => (others => TRUE),
+            PIPE_TYPE    => "SHREG",
+            PIPE_OUTREG  => TRUE,
+
+            ADDR_BASES  => MI_SPLIT_PORTS,
+            ADDR_MASK   => MI_SPLIT_ADDR_MASK,
+            ADDR_BASE   => MI_SPLIT_BASES,
+
+            DEVICE       => DEVICE
+            )
+        port map(
+            CLK   => CLK,
+            RESET => RESET,
+
+            RX_DWR  => mi_sync_dwr,
+            RX_MWR  => (others => '0'),
+            RX_ADDR => mi_sync_addr,
+            RX_BE   => mi_sync_be,
+            RX_RD   => mi_sync_rd,
+            RX_WR   => mi_sync_wr,
+            RX_ARDY => mi_sync_ardy,
+            RX_DRD  => mi_sync_drd,
+            RX_DRDY => mi_sync_drdy,
+
+            TX_DWR  => mi_split_dwr,
+            TX_MWR  => open,
+            TX_ADDR => mi_split_addr,
+            TX_BE   => mi_split_be,
+            TX_RD   => mi_split_rd,
+            TX_WR   => mi_split_wr,
+            TX_ARDY => mi_split_ardy,
+            TX_DRD  => mi_split_drd,
+            TX_DRDY => mi_split_drdy);
 
     -- =====================================================================
     --  MI reading interface
@@ -1054,7 +1058,7 @@ begin
     end process;
 
     -- The comparison needs to be done by bytes because the packet can be ended with byte accuracy.
-    comp_arr_g : for i in 0 to 31 generate
+    comp_arr_g : for i in 0 to (aux_sig_mfb_data'length/8 -1) generate
         comp_res_imm(i) <= '1' when (pattern_copy_val(i*8 + 7 downto i*8) = aux_sig_mfb_data(i*8 + 7 downto i*8)) else '0';
         comp_res_reg(i) <= '1' when (comp_val_stored(i*8 + 7 downto i*8) = aux_sig_mfb_data(i*8 + 7 downto i*8))  else '0';
     end generate;
@@ -1069,7 +1073,7 @@ begin
     comp_res_reg_diff <= comp_res_reg_vld xor aux_sig_mfb_item_vld;
 
     -- This copies the pattern over whole word
-    patter_copy_val_g : for i in 0 to 7 generate
+    patter_copy_val_g : for i in 0 to (aux_sig_mfb_data'length/32 -1) generate
         pattern_copy_val(i*32 + 31 downto i*32) <= aux_sig_mfb_data(31 downto 0);
     end generate;
 
@@ -1132,7 +1136,7 @@ begin
     end process;
 
     -- The comparison needs to be done by bytes because the packet can be ended with byte accuracy.
-    meta_comp_arr_g : for i in 0 to 31 generate
+    meta_comp_arr_g : for i in 0 to (aux_sig_mfb_data'length/8 -1) generate
         meta_comp_res_imm(i) <= '1' when (meta_pattern_copy_val(i*8 + 7 downto i*8) = aux_sig_mfb_data(i*8 + 7 downto i*8)) else '0';
         meta_comp_res_reg(i) <= '1' when (meta_comp_val_stored(i*8 + 7 downto i*8) = aux_sig_mfb_data(i*8 + 7 downto i*8))  else '0';
     end generate;
@@ -1151,7 +1155,7 @@ begin
     size_hash_8b <= std_logic_vector(size_hash_16b(7 downto 0));
 
     -- This copies the pattern over whole word
-    meta_patter_copy_val_g : for i in 0 to 7 generate
+    meta_patter_copy_val_g : for i in 0 to (aux_sig_mfb_data'length/32 -1) generate
         meta_pattern_copy_val(i*32 + 31 downto i*32) <= std_logic_vector(resize(unsigned(aux_sig_mfb_meta_hdr_meta), 24)) & size_hash_8b;
     end generate;
 
@@ -1275,46 +1279,4 @@ begin
             TX_MFB_EOF_POS  => TX_MFB_EOF_POS,
             TX_MFB_SRC_RDY  => TX_MFB_SRC_RDY,
             TX_MFB_DST_RDY  => TX_MFB_DST_RDY);
-
-    -- =============================================================================================
-    -- Resetting FSM
-    -- =============================================================================================
-    rst_fsm_trigg <= '1' when (mi_split_wr(0) = '1' and isStrobeAddr(mi_reg_addrI) and unsigned(mi_split_dwr(0)) = 4) else '0';
-
-    reset_fsm_state_reg : process (CLK) is
-    begin
-        if (rising_edge(CLK)) then
-            if (RESET = '1') then
-                rst_pst      <= IDLE;
-                rst_cntr_pst <= (others => '0');
-            else
-                rst_pst      <= rst_nst;
-                rst_cntr_pst <= rst_cntr_nst;
-            end if;
-        end if;
-    end process;
-
-    reset_fsm_nst_logic : process (all) is
-    begin
-        rst_nst      <= rst_pst;
-        rst_cntr_nst <= rst_cntr_pst;
-
-        FORCE_RESET <= '0';
-
-        case rst_pst is
-            when IDLE =>
-
-                if (rst_fsm_trigg = '1') then
-                    rst_nst <= RESET_COUNTING;
-                end if;
-
-            when RESET_COUNTING =>
-                FORCE_RESET  <= '1';
-                rst_cntr_nst <= rst_cntr_pst + 1;
-
-                if (rst_cntr_pst = 1023) then
-                    rst_nst <= IDLE;
-                end if;
-        end case;
-    end process;
 end architecture;

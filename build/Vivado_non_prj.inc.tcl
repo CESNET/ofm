@@ -32,6 +32,31 @@ source $OFM_PATH/build/scripts/vivado/msg_filter/tcl_msg_filters.tcl
 #                     Procedures and functions
 # ---------------------------------------------------------------------
 
+# Procedure ParseDirective
+# If the directive passed from the user already contains '-directive' switch
+# then parse it as it is. However, when the directive only contains the name
+# of the directive, then prepend '-directive' keyword before that. This is
+# to allow user to choose either one specified directive or pass the combination
+# of switches of his choice.
+proc ParseDirective {switch_list} {
+
+    # puts "ParseDirective switches: $switch_list"
+    # Check if the string DOES NOT contain switch-like patterns and
+    # is longer than 0
+    if {
+        (![regexp {\-(\S+)\s+(?:\S+)} $switch_list match sw value])
+        && [string length $switch_list] > 0
+    } {
+        # String does not contain switch-like patterns, add a default switch
+        puts "Switch list DOES NOT contain switch-like patterns"
+        return [list "-directive" $switch_list]
+    }
+
+    # String contains switch-like patterns, parse it as it is
+    puts "Switch list DOES contain switch-like patterns"
+    return $switch_list
+}
+
 # -----------------------------------------------------------------------------
 # Procedure EvalFile
 # Add file to the project
@@ -43,16 +68,34 @@ proc EvalFile {FNAME OPT} {
     set FEXT [file extension $FNAME]
 
     if {$opt(TYPE) == ""} {
-        add_files -norecurse $FNAME
-        if {$opt(LIBRARY) != "work"} {
-            set_property LIBRARY $opt(LIBRARY) [get_files $FNAME]
+        if { $FEXT == ".vhd" } {
+            # VHDL file
+            read_vhdl -library $opt(LIBRARY) -vhdl2008 $FNAME
+            puts "INFO: Library $opt(LIBRARY): File added: $FNAME"
+        } elseif { $FEXT == ".v" } {
+            # Verilog file
+            read_verilog -library $opt(LIBRARY) $FNAME
+            puts "INFO: Library $opt(LIBRARY): File added: $FNAME"
+        } elseif { $FEXT == ".sv" } {
+            # System Verilog file
+            read_verilog -library $opt(LIBRARY) -sv $FNAME
+            puts "INFO: Library $opt(LIBRARY): File added: $FNAME"
+        } elseif { $FEXT == ".edif" } {
+            # EDIF file
+            read_edif $FNAME
+            puts "INFO: EDIF file added: $FNAME"
+        } elseif { $FEXT == ".dcp" } {
+            # DCP file
+            read_checkpoint $FNAME
+            puts "INFO: DCP file added: $FNAME"
+        } else {
+            # Not yet supported file type
+            puts "WARNING: Adding $FEXT files to the project is not yet supported."
+            puts "WARNING: File was not added: $FNAME!"
         }
-        set vhdlfiles [get_files -quiet -filter {FILE_TYPE == VHDL} $FNAME]
-        if {$vhdlfiles ne ""} {set_property FILE_TYPE {VHDL 2008} $vhdlfiles}
-        puts "Library $opt(LIBRARY): File added: $FNAME"
     } elseif {$opt(TYPE) == "CONSTR_VIVADO"} {
         puts "Constraints file added: $FNAME"
-        add_files -fileset constrs_1 -norecurse $FNAME
+        read_xdc $FNAME
 
         if {[info exists opt(SCOPED_TO_REF)]} {
             puts "- file scoped to ref: $opt(SCOPED_TO_REF)"
@@ -67,15 +110,14 @@ proc EvalFile {FNAME OPT} {
             set_property USED_IN $opt(USED_IN) [get_files [file tail $FNAME]]
         }
     } elseif {$opt(TYPE) == "VIVADO_IP_XACT"} {
-        add_files -norecurse $FNAME
+        read_ip $FNAME
         puts "IP added: $FNAME"
+        generate_target all [get_files $FNAME]
     } elseif {$opt(TYPE) == "VIVADO_BD"} {
-        add_files -norecurse $FNAME
+        read_bd $FNAME
         puts "BD added: $FNAME"
         generate_target all [get_files $FNAME] -force
-        upgrade_ip [get_ips *] -quiet
     }
-
 
     foreach {param_name param_value} $OPT {
         if {$param_name == "VIVADO_SET_PROPERTY"} {
@@ -92,47 +134,6 @@ proc EvalComp {ENTITY ENTITY_BASE ARCHGRP} {
 
     if {[file exists $ENTITY_VFILE]} {
         source $ENTITY_VFILE
-    }
-}
-
-# ---------------------------------------------------------------------
-# Procedure SetupDesign - creates a new project with the name defined in MODULE
-# parameter. If the project already exists, it removes the project including
-# all its implementations. It sets the type of FPGA chip, for the synthesis is
-# performed and finaly it sets the name of the output edif file defined in
-# OUTPUT parameter.
-#
-proc SetupDesign {synth_flags} {
-    # HACK for toplevel TCL files which doesn't use nb_main
-    global NB_MAIN_CALLED
-    if {![info exist NB_MAIN_CALLED]} {
-        set NB_MAIN_CALLED 1
-        nb_main
-    }
-
-    upvar 1 $synth_flags SYNTH_FLAGS
-
-    puts "Using FPGA part: $SYNTH_FLAGS(FPGA)"
-
-    # Create and open a new project with name specified by variable OUTPUT
-    create_project -part $SYNTH_FLAGS(FPGA) -force $SYNTH_FLAGS(OUTPUT)
-
-    # Define default target language
-    set_param project.enableVHDL2008 1
-    set_property target_language VHDL [current_project]
-    set_property enable_vhdl_2008 1 [current_project]
-
-    # Manual compile order (automatic is buggy in Vivado)
-    set_property source_mgmt_mode DisplayOnly [current_project]
-
-    # Apply user settings
-    foreach i $SYNTH_FLAGS(SETUP_FLAGS) {
-        if { $i == "USE_XPM_LIBRARIES" } {
-            set_property XPM_LIBRARIES {XPM_CDC XPM_MEMORY XPM_FIFO} [current_project]
-        } elseif { $i == "COMPILE_ORDER_AUTO" } {
-            set_property source_mgmt_mode All [current_project]
-        }
-        # TODO: Implement when needed
     }
 }
 
@@ -178,6 +179,8 @@ proc SynthetizeDesign {synth_flags} {
     # Define auxiliary variables
     upvar 1 $synth_flags SYNTH_FLAGS
 
+    parray SYNTH_FLAGS
+
     SynthesizeDesignSetup SYNTH_FLAGS
     # Skip actual implementation if one of the variables is set to 1/true
     if {$SYNTH_FLAGS(PROJ_ONLY)} {return}
@@ -188,96 +191,79 @@ proc SynthesizeDesignSetup {synth_flags} {
     # Define auxiliary variables
     upvar 1 $synth_flags SYNTH_FLAGS
 
-    PrintLabel "Synthesis Properties Setting"
+    lappend MOREOPT
 
-    # Define top level module (if defined)
-    if { [info exist SYNTH_FLAGS(MODULE)] } {
-        set_property top $SYNTH_FLAGS(MODULE) [current_fileset]
-    }
+    PrintLabel "Synthesis Properties Setting"
 
     # Set VHDL assert
     puts "VHDL assert enabled!"
-    set_property -name {STEPS.SYNTH_DESIGN.ARGS.ASSERT} -value True -objects [get_runs synth_1]
-
-    # VHDL standard settings (VHDL-2008 support, backward compatibility)
-    if { [info exist SYNTH_FLAGS(VHDL2008)] } {
-        puts "VHDL-2008 standard support set to: $SYNTH_FLAGS(VHDL2008)"
-        if { !$SYNTH_FLAGS(VHDL2008) } {
-            set_property FILE_TYPE {VHDL} [get_files -quiet -filter {FILE_TYPE == {VHDL 2008}}]
-        }
-    }
+    lappend MOREOPT "-assert"
 
     # Set fanout limit
     if {[info exist SYNTH_FLAGS(FANOUT_LIMIT)] } {
         puts "Fanout limit set to: $SYNTH_FLAGS(FANOUT_LIMIT)"
-        set_property -name {STEPS.SYNTH_DESIGN.ARGS.FANOUT_LIMIT} \
-            -value $SYNTH_FLAGS(FANOUT_LIMIT) -objects [get_runs synth_1]
+        lappend MOREOPT "-control_set_opt_threshold" $SYNTH_FLAGS(FANOUT_LIMIT)
     }
 
     # Set resource sharing
     if {[info exist SYNTH_FLAGS(RESOURCE_SHARING)] } {
         puts "Resource sharing set to: $SYNTH_FLAGS(RESOURCE_SHARING)"
-        set_property -name {STEPS.SYNTH_DESIGN.ARGS.RESOURCE_SHARING} \
-            -value $SYNTH_FLAGS(RESOURCE_SHARING) -objects [get_runs synth_1]
+        lappend MOREOPT "-resource_sharing" $SYNTH_DESIGN(RESOURCE_SHARING)
     }
 
     # Set the number of BUFGs
     if {[info exist SYNTH_FLAGS(BUFG)] } {
         puts "The number of BUFGs set to: $SYNTH_FLAGS(BUFG)"
-        set_property -name {STEPS.SYNTH_DESIGN.ARGS.BUFG} \
-            -value $SYNTH_FLAGS(BUFG) -objects [get_runs synth_1]
+        lappend MOREOPT "-bufg" $SYNTH_DESIGN(BUFG)
+
     }
 
     # Set synthesis directive
     if {[info exist SYNTH_FLAGS(SYNTH_DIRECTIVE)] } {
         puts "Synthesis directive set to: $SYNTH_FLAGS(SYNTH_DIRECTIVE)"
-        set_property -name {STEPS.SYNTH_DESIGN.ARGS.DIRECTIVE} \
-            -value $SYNTH_FLAGS(SYNTH_DIRECTIVE) -objects [get_runs synth_1]
+        lappend MOREOPT {*}[ParseDirective "$SYNTH_FLAGS(SYNTH_DIRECTIVE)"]
     }
 
     # Set LUT combining
     if {[info exist SYNTH_FLAGS(NO_LUT_COMBINE)] } {
         puts "LUT combining disabled: $SYNTH_FLAGS(NO_LUT_COMBINE)"
-        set_property -name {STEPS.SYNTH_DESIGN.ARGS.NO_LC} \
-            -value $SYNTH_FLAGS(NO_LUT_COMBINE) -objects [get_runs synth_1]
+        lappend MOREOPT "-no_lc"
     }
 
     # Set retiming
     if {[info exist SYNTH_FLAGS(RETIMING)] } {
         puts "Retiming enabled: $SYNTH_FLAGS(RETIMING)"
-        set_property -name {STEPS.SYNTH_DESIGN.ARGS.RETIMING} \
-            -value $SYNTH_FLAGS(RETIMING) -objects [get_runs synth_1]
+        if {$SYNTH_FLAGS(RETIMING)} {
+            lappend MOREOPT "-retiming"
+        } else {
+            lappend MOREOPT "-no_retiming"
+        }
     }
 
     # Set rebuild
     if {[info exist SYNTH_FLAGS(FLATTEN_HIERARCHY)] } {
-        puts "set flattening mode: $SYNTH_FLAGS(FLATTEN_HIERARCHY)"
-        set_property -name {STEPS.SYNTH_DESIGN.ARGS.FLATTEN_HIERARCHY} \
-            -value $SYNTH_FLAGS(FLATTEN_HIERARCHY) -objects [get_runs synth_1]
+        puts "FLATTEN_HIERARCHY set to: $SYNTH_FLAGS(FLATTEN_HIERARCHY)"
+        lappend MOREOPT "-flatten_hierarchy" $SYNTH_FLAGS(FLATTEN_HIERARCHY)
     }
 
     # Set build generics of toplevel entity
     if {[info exist SYNTH_FLAGS(USER_GENERICS)]} {
-        set MOREOPT ""
         foreach g $SYNTH_FLAGS(USER_GENERICS) {
-            append MOREOPT "-generic " [lindex $g 0] "=" [lindex $g 1] " "
+            lappend MOREOPT "-generic" [lindex $g 0] "=" [lindex $g 1]
         }
-        puts "User-defined generics: $MOREOPT"
-        set_property -name {STEPS.SYNTH_DESIGN.ARGS.MORE OPTIONS} \
-            -value $MOREOPT -objects [get_runs synth_1]
+        puts "User-defined generics: $SYNTH_FLAGS(USER_GENERICS)"
     }
 
     # Set Out-of-context mode
     if {[info exist SYNTH_FLAGS(OOC_MODE)]} {
         if {$SYNTH_FLAGS(OOC_MODE) == "1"} {
-            set MOREOPT [get_property -name {STEPS.SYNTH_DESIGN.ARGS.MORE OPTIONS} \
-                -object [get_runs synth_1]]
-            append MOREOPT "-mode out_of_context "
+            lappend MOREOPT "-mode out_of_context"
             puts "Out-of-context mode set"
-            set_property -name {STEPS.SYNTH_DESIGN.ARGS.MORE OPTIONS} \
-                -value $MOREOPT -objects [get_runs synth_1]
         }
     }
+
+    set SYNTH_FLAGS(MOREOPT) $MOREOPT
+    puts "Parsed synthesis options: $MOREOPT"
 
     # Set assertion severity level
     if {[info exist SYNTH_FLAGS(ASSERT_SEVERITY)]} {
@@ -287,16 +273,15 @@ proc SynthesizeDesignSetup {synth_flags} {
         set_msg_config -id {Synth 8-63} -severity WARNING -new_severity ERROR
     }
 
-    # Set severity of 'multi-driven net on pin ...'
-    set_msg_config -id {Synth 8-6858} -severity WARNING -new_severity ERROR
-    set_msg_config -id {Synth 8-6859} -severity WARNING -new_severity ERROR
     # Set severity of 'sensitivity list mistake'
     set_msg_config -id {Synth 8-614} -severity WARNING -new_severity ERROR
 
     if {$SYNTH_FLAGS(UPGRADE_IP)} {
         PrintLabel "Upgrading IP cores"
         foreach ip [get_ips] {
+            puts "Upgrading and synthesizing IP: $ip"
             upgrade_ip $ip
+            synth_ip $ip
         }
     }
 }
@@ -306,9 +291,12 @@ proc SynthesizeDesignRun {synth_flags} {
     upvar 1 $synth_flags SYNTH_FLAGS
 
     PrintLabel "Synthesize"
-    launch_runs synth_1
-    wait_on_run synth_1
-    open_run synth_1
+    synth_design -top $SYNTH_FLAGS(MODULE) {*}$SYNTH_FLAGS(MOREOPT)
+
+    # Export to file
+    if {$SYNTH_FLAGS(WRITE_SYNTH_DCP)} {
+        write_checkpoint -force "$SYNTH_FLAGS(OUTPUT)_synth"
+    }
 
     PrintLabel "Report timing"
     set_delay_model -interconnect estimated
@@ -328,11 +316,6 @@ proc SynthesizeDesignRun {synth_flags} {
     if {$SYNTH_FLAGS(WRITE_VHDL)} {
         write_vhdl -mode funcsim -force "$SYNTH_FLAGS(OUTPUT).vhd"
     }
-
-    # Export to file
-    if {[info exist SYNTH_FLAGS(WRITE_EDIF)] } {
-        write_edif -force $SYNTH_FLAGS(OUTPUT)
-    }
 }
 
 # -----------------------------------------------------------------------------
@@ -344,118 +327,87 @@ proc ImplementDesign {synth_flags} {
     # Define auxiliary variables
     upvar 1 $synth_flags SYNTH_FLAGS
 
-    ImplementDesignSetup SYNTH_FLAGS
     # Skip actual implementation if one of the variables is set to 1/true
     if {$SYNTH_FLAGS(PROJ_ONLY) || $SYNTH_FLAGS(SYNTH_ONLY)} {return}
     ImplementDesignRun SYNTH_FLAGS
-}
-
-proc ImplementDesignSetup {synth_flags} {
-    # Define auxiliary variables
-    upvar 1 $synth_flags SYNTH_FLAGS
-
-    PrintLabel "Implementation Properties Setting"
-    # Run script wbs_pre.tcl before writing the bitstream
-    global OFM_PATH
-    set_property STEPS.WRITE_BITSTREAM.TCL.PRE [file normalize $OFM_PATH/build/misc/vivado_wbs_pre.tcl] [get_runs impl_1]
-
-    if {[info exist SYNTH_FLAGS(SOPT_DIRECTIVE)] } {
-        puts "Implementation optimization directive set to: $SYNTH_FLAGS(SOPT_DIRECTIVE)"
-        # opt_design (See Xilinx UG904)
-        set_property -name {STEPS.OPT_DESIGN.ARGS.IS_ENABLED} \
-            -value {true}        -objects [get_runs impl_1]
-        set_property -name {STEPS.OPT_DESIGN.ARGS.VERBOSE}    \
-            -value $SYNTH_FLAGS(SOPT_VERBOSE)   -objects [get_runs impl_1]
-        set_property -name {STEPS.OPT_DESIGN.ARGS.DIRECTIVE}  \
-            -value $SYNTH_FLAGS(SOPT_DIRECTIVE) -objects [get_runs impl_1]
-    }
-
-    # backward compatibility (run power_opt_design by default)
-    if {![info exist SYNTH_FLAGS(POWER_OPT_DESIGN)] } {
-        set SYNTH_FLAGS(POWER_OPT_DESIGN) true
-    }
-
-    # power_opt_design
-    puts "Run Power Opt Design: $SYNTH_FLAGS(POWER_OPT_DESIGN)"
-    set_property -name {STEPS.POWER_OPT_DESIGN.ARGS.IS_ENABLED} \
-        -value $SYNTH_FLAGS(POWER_OPT_DESIGN) -objects [get_runs impl_1]
-    set_property -name {STEPS.POWER_OPT_DESIGN.ARGS.MORE OPTIONS} \
-        -value {-verbose} -objects [get_runs impl_1]
-
-    if {[info exist SYNTH_FLAGS(PLACE_DIRECTIVE)] } {
-        puts "Placer optimization directive set to: $SYNTH_FLAGS(PLACE_DIRECTIVE)"
-        # place_design (See Xilinx UG904)
-        set_property -name {STEPS.PLACE_DESIGN.ARGS.DIRECTIVE}    \
-            -value $SYNTH_FLAGS(PLACE_DIRECTIVE) -objects [get_runs impl_1]
-        set_property -name {STEPS.PLACE_DESIGN.ARGS.MORE OPTIONS} \
-            -value {-verbose}              -objects [get_runs impl_1]
-    }
-
-    # backward compatibility (run post_place_power_opt_design by default)
-    if {![info exist SYNTH_FLAGS(PPLACE_POWER_OPT_DESIGN)] } {
-        set SYNTH_FLAGS(PPLACE_POWER_OPT_DESIGN) true
-    }
-
-    # post_place_power_opt_design
-    # (currently commented out becase power_opt_design is already enabled before
-    #  placement)
-#    puts "Run Post-place Power Opt Design: $SYNTH_FLAGS(PPLACE_POWER_OPT_DESIGN)"
-#    set_property -name {STEPS.POST_PLACE_POWER_OPT_DESIGN.ARGS.IS_ENABLED} \
-#        -value $SYNTH_FLAGS(PPLACE_POWER_OPT_DESIGN) -objects [get_runs impl_1]
-#    set_property -name {STEPS.POST_PLACE_POWER_OPT_DESIGN.ARGS.MORE OPTIONS} \
-#        -value {-verbose} -objects [get_runs impl_1]
-
-    if {[info exist SYNTH_FLAGS(PPLACE_PHYS_OPT_DIRECTIVE)] } {
-        puts "Post-place physical optimization directive set to: $SYNTH_FLAGS(PPLACE_PHYS_OPT_DIRECTIVE)"
-        # phys_opt_design (See Xilinx UG904)
-        set_property -name {STEPS.PHYS_OPT_DESIGN.ARGS.IS_ENABLED}   \
-            -value {true}              -objects [get_runs impl_1]
-        set_property -name {STEPS.PHYS_OPT_DESIGN.ARGS.DIRECTIVE}    \
-            -value $SYNTH_FLAGS(PPLACE_PHYS_OPT_DIRECTIVE) -objects [get_runs impl_1]
-        set_property -name {STEPS.PHYS_OPT_DESIGN.ARGS.MORE OPTIONS} \
-            -value {-verbose}          -objects [get_runs impl_1]
-    }
-
-    if {[info exist SYNTH_FLAGS(ROUTE_DIRECTIVE)] } {
-        puts "Router optimization directive set to: $SYNTH_FLAGS(ROUTE_DIRECTIVE)"
-        # route_design (See Xilinx UG904)
-        set_property -name {STEPS.ROUTE_DESIGN.ARGS.DIRECTIVE}    \
-            -value $SYNTH_FLAGS(ROUTE_DIRECTIVE)  -objects [get_runs impl_1]
-        set_property -name {STEPS.ROUTE_DESIGN.ARGS.MORE OPTIONS} \
-            -value {-verbose} -objects [get_runs impl_1]
-    }
-
-    if {[info exist SYNTH_FLAGS(PROUTE_PHYS_OPT_DIRECTIVE)] } {
-        puts "Post-route physical optimization directive set to: $SYNTH_FLAGS(PROUTE_PHYS_OPT_DIRECTIVE)"
-        # phys_opt_design (See Xilinx UG904)
-        set_property -name {STEPS.POST_ROUTE_PHYS_OPT_DESIGN.ARGS.IS_ENABLED}   \
-            -value {true}              -objects [get_runs impl_1]
-        set_property -name {STEPS.POST_ROUTE_PHYS_OPT_DESIGN.ARGS.DIRECTIVE}    \
-            -value $SYNTH_FLAGS(PROUTE_PHYS_OPT_DIRECTIVE) -objects [get_runs impl_1]
-        set_property -name {STEPS.POST_ROUTE_PHYS_OPT_DESIGN.ARGS.MORE OPTIONS} \
-            -value {-verbose}          -objects [get_runs impl_1]
-    }
-
-    # Incremental synthesis
-    if {[info exist SYNTH_FLAGS(DCP)] } {
-        puts "Incremental compile checkpoint: $SYNTH_FLAGS(DCP)"
-        set_property incremental_checkpoint $SYNTH_FLAGS(DCP) [get_runs impl_1]
-    }
 }
 
 proc ImplementDesignRun {synth_flags} {
     # Define auxiliary variables
     upvar 1 $synth_flags SYNTH_FLAGS
 
-    PrintLabel "Implement"
+    PrintLabel "Implementation"
 
-    launch_runs impl_1
-    wait_on_run impl_1
-    open_run impl_1
+    # opt_design
+    PrintLabel "Post-synthesis Optimization"
+    puts "Optimization directive set to: $SYNTH_FLAGS(SOPT_DIRECTIVE)"
+    opt_design -verbose {*}[ParseDirective $SYNTH_FLAGS(SOPT_DIRECTIVE)]
+
+    if {$SYNTH_FLAGS(WRITE_SOPT_DCP)} {
+        write_checkpoint -force "$SYNTH_FLAGS(OUTPUT)_opt"
+    }
+
+    # power_opt_design
+    if {$SYNTH_FLAGS(POWER_OPT_EN)} {
+        PrintLabel "Post-synthesis Power Optimization"
+        power_opt_design -verbose
+
+        if {$SYNTH_FLAGS(WRITE_POWER_OPT_DCP)} {
+            write_checkpoint -force "$SYNTH_FLAGS(OUTPUT)_power_opt"
+        }
+    }
+    # place_design
+    PrintLabel "Place Design"
+    puts "Placer optimization directive set to: $SYNTH_FLAGS(PLACE_DIRECTIVE)"
+    place_design -verbose {*}[ParseDirective $SYNTH_FLAGS(PLACE_DIRECTIVE)]
+
+    if {$SYNTH_FLAGS(WRITE_PLACE_DCP)} {
+        write_checkpoint -force "$SYNTH_FLAGS(OUTPUT)_place"
+    }
+
+    # Post-placement power_opt_design
+    if {$SYNTH_FLAGS(PPLACE_POWER_OPT_EN)} {
+        PrintLabel "Post-placement Power Optimization"
+        power_opt_design -verbose
+
+        if {$SYNTH_FLAGS(WRITE_PPLACE_POWER_OPT_DCP)} {
+            write_checkpoint -force "$SYNTH_FLAGS(OUTPUT)_pplace_power_opt"
+        }
+    }
+
+    # Post-placement physical optimization
+    if {[info exist SYNTH_FLAGS(PPLACE_PHYS_OPT_DIRECTIVE)]} {
+        PrintLabel "Post-placement Physical Optimization"
+        puts "Post-place physical optimization directive set to: $SYNTH_FLAGS(PPLACE_PHYS_OPT_DIRECTIVE)"
+        phys_opt_design -verbose {*}[ParseDirective $SYNTH_FLAGS(PPLACE_PHYS_OPT_DIRECTIVE)]
+
+        if {$SYNTH_FLAGS(WRITE_PPLACE_PHYS_OPT_DCP)} {
+            write_checkpoint -force "$SYNTH_FLAGS(OUTPUT)_pplace_phys_opt"
+        }
+    }
+
+    # route_design
+    PrintLabel "Route Design"
+    puts "Router directive set to: $SYNTH_FLAGS(ROUTE_DIRECTIVE)"
+    route_design -verbose {*}[ParseDirective $SYNTH_FLAGS(ROUTE_DIRECTIVE)]
+
+    if {$SYNTH_FLAGS(WRITE_ROUTE_DCP)} {
+        write_checkpoint -force "$SYNTH_FLAGS(OUTPUT)_route"
+    }
+
+    # Post-routing physical optimization
+    if {[info exist SYNTH_FLAGS(PROUTE_PHYS_OPT_DIRECTIVE)]} {
+        PrintLabel "Post-route Physical Optimization"
+        puts "Post-route physical optimization directive set to: $SYNTH_FLAGS(PROUTE_PHYS_OPT_DIRECTIVE)"
+        phys_opt_design -verbose {*}[ParseDirective $SYNTH_FLAGS(PROUTE_PHYS_OPT_DIRECTIVE)]
+
+        if {$SYNTH_FLAGS(WRITE_PROUTE_PHYS_OPT_DCP)} {
+            write_checkpoint -force "$SYNTH_FLAGS(OUTPUT)_proute_phys_opt"
+        }
+    }
 
     PrintLabel "Report Timing"
     set_delay_model -interconnect actual
-
     report_timing_summary -delay_type min_max -report_unconstrained -check_timing_verbose -max_paths 10 -input_pins -name timing_1 -file $SYNTH_FLAGS(OUTPUT)_par.tim
 
     PrintLabel "Report Utilization"
@@ -467,14 +419,6 @@ proc ImplementDesignRun {synth_flags} {
 
     PrintLabel "Report DRC"
     report_drc -file $SYNTH_FLAGS(OUTPUT)_par.drc
-
-    if {[info exist SYNTH_FLAGS(DCP)] } {
-        PrintLabel "Report Incremental Reuse"
-        report_incremental_reuse -file $SYNTH_FLAGS(OUTPUT)_par.reuse
-    }
-
-    # Write checkpoint for future reuse
-    write_checkpoint -force $SYNTH_FLAGS(OUTPUT).dcp
 }
 
 # ---------------------------------------------------------------------
@@ -574,8 +518,14 @@ proc SynthesizeProject {synth_flags hierarchy} {
     upvar 1 $synth_flags SYNTH_FLAGS
     upvar 1 $hierarchy HIERARCHY
 
-    # synthesis setting
-    SetupDesign SYNTH_FLAGS
+    global NB_MAIN_CALLED
+    if {![info exist NB_MAIN_CALLED]} {
+        set NB_MAIN_CALLED 1
+        nb_main
+    }
+
+    puts "Using FPGA part: $SYNTH_FLAGS(FPGA)"
+    set_part $SYNTH_FLAGS(FPGA)
 
     # add input files
     AddInputFiles SYNTH_FLAGS HIERARCHY
@@ -671,20 +621,6 @@ proc get_all_msg_lines { FILENAME } {
     return $MSG_LINES
 }
 
-# -----------------------------------------------------------------------------
-# isRealSynth: DEPRECATED
-# Returns true if the Synthesis process is executed in this tcl session
-#
-proc isRealSynth { } {
-    global env
-    global SYNTH_FLAGS
-
-    if {$SYNTH_FLAGS(PROJ_ONLY)} {
-        return false
-    }
-    return true
-}
-
 proc nb_sanitize_vars {synth_flags hierarchy} {
     # Define auxiliary variables
     upvar 1 $synth_flags SYNTH_FLAGS
@@ -696,6 +632,8 @@ proc nb_sanitize_vars {synth_flags hierarchy} {
     lappend HIERARCHY(MOD)
     lappend HIERARCHY(TOP_LEVEL)
 
+    lappend SYNTH_FLAGS(MOREOPT)
+    # The below one is unused in non-project mode
     lappend SYNTH_FLAGS(SETUP_FLAGS)
     lappend SYNTH_FLAGS(USER_GENERICS)
     lappend SYNTH_FLAGS(CONSTR)
@@ -709,7 +647,10 @@ proc nb_sanitize_vars {synth_flags hierarchy} {
         regexp {Vivado v([0-9\.]+) } [exec vivado -version] void SYNTH_FLAGS(TOOL_VERSION)
     }
 
+    # ==============================================================
     # Set default values
+    # ==============================================================
+    # Project general settings
     if {![info exists SYNTH_FLAGS(PROJ_ONLY)]} {
         set SYNTH_FLAGS(PROJ_ONLY) false
     }
@@ -719,14 +660,67 @@ proc nb_sanitize_vars {synth_flags hierarchy} {
     if {![info exists SYNTH_FLAGS(PHASE_SAVE)]} {
         set SYNTH_FLAGS(PHASE_SAVE) true
     }
-    if {![info exist SYNTH_FLAGS(WRITE_VHDL)]} {
-        set SYNTH_FLAGS(WRITE_VHDL) false
-    }
     if {![info exist SYNTH_FLAGS(UPGRADE_IP)] } {
         set SYNTH_FLAGS(UPGRADE_IP) true
     }
-    if {![info exist SYNTH_FLAGS(SOPT_VERBOSE)] } {
-        set SYNTH_FLAGS(SOPT_VERBOSE) false
+
+    # Synthesis settings
+    if {![info exist SYNTH_FLAGS(WRITE_SYNTH_DCP)]} {
+        set SYNTH_FLAGS(WRITE_SYNTH_DCP) false
+    }
+    if {![info exist SYNTH_FLAGS(WRITE_VHDL)]} {
+        set SYNTH_FLAGS(WRITE_VHDL) false
+    }
+
+    # Implementation settings
+    # Optimization
+    if {![info exist SYNTH_FLAGS(SOPT_DIRECTIVE)]} {
+        set SYNTH_FLAGS(SOPT_DIRECTIVE) ""
+    }
+    if {![info exist SYNTH_FLAGS(WRITE_SOPT_DCP)]} {
+        set SYNTH_FLAGS(WRITE_SOPT_DCP) false
+    }
+
+    # Power optimization
+    if {![info exist SYNTH_FLAGS(POWER_OPT_EN)]} {
+        set SYNTH_FLAGS(POWER_OPT_EN) false
+    }
+    if {![info exist SYNTH_FLAGS(WRITE_POWER_OPT_DCP)]} {
+        set SYNTH_FLAGS(WRITE_POWER_OPT_DCP) false
+    }
+
+    # Placement
+    if {![info exist SYNTH_FLAGS(PLACE_DIRECTIVE)]} {
+        set SYNTH_FLAGS(PLACE_DIRECTIVE) ""
+    }
+    if {![info exist SYNTH_FLAGS(WRITE_PLACE_DCP)]} {
+        set SYNTH_FLAGS(WRITE_PLACE_DCP) false
+    }
+
+    # Post-placement power optimization
+    if {![info exist SYNTH_FLAGS(PPLACE_POWER_OPT_EN)]} {
+        set SYNTH_FLAGS(PPLACE_POWER_OPT_EN) false
+    }
+    if {![info exist SYNTH_FLAGS(WRITE_PPLACE_POWER_OPT_DCP)]} {
+        set SYNTH_FLAGS(WRITE_PPLACE_POWER_OPT_DCP) false
+    }
+
+    # Post-placement physical optimization
+    if {![info exist SYNTH_FLAGS(WRITE_PPLACE_PHYS_OPT_DCP)]} {
+        set SYNTH_FLAGS(WRITE_PPLACE_PHYS_OPT_DCP) false
+    }
+
+    # Route design
+    if {![info exist SYNTH_FLAGS(ROUTE_DIRECTIVE)]} {
+        set SYNTH_FLAGS(ROUTE_DIRECTIVE) ""
+    }
+    if {![info exist SYNTH_FLAGS(WRITE_ROUTE_DCP)]} {
+        set SYNTH_FLAGS(WRITE_ROUTE_DCP) false
+    }
+
+    # Post-route physical optimization
+    if {![info exist SYNTH_FLAGS(WRITE_PROUTE_PHYS_OPT_DCP)]} {
+        set SYNTH_FLAGS(WRITE_PROUTE_PHYS_OPT_DCP) false
     }
 }
 

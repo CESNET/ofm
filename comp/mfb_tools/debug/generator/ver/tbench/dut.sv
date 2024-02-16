@@ -14,10 +14,15 @@ module DUT (
 );
 
     MFB_GENERATOR_MI32 #(
-        .REGIONS     (MFB_REGIONS),
-        .REGION_SIZE (MFB_REGION_SIZE),
-        .BLOCK_SIZE  (MFB_BLOCK_SIZE),
-        .ITEM_WIDTH  (MFB_ITEM_WIDTH)
+        .REGIONS        (MFB_REGIONS),
+        .REGION_SIZE    (MFB_REGION_SIZE),
+        .BLOCK_SIZE     (MFB_BLOCK_SIZE),
+        .ITEM_WIDTH     (MFB_ITEM_WIDTH),
+        .LENGTH_WIDTH   (LENGTH_WIDTH),
+        .CHANNELS_WIDTH (CHANNELS_WIDTH),
+        .PKT_CNT_WIDTH  (PKT_CNT_WIDTH),
+        .USE_PACP_ARCH  (USE_PACP_ARCH),
+        .DEVICE         (DEVICE)
     ) VHDL_DUT_U (
         .CLK             (CLK),
         .RST             (RESET),
@@ -32,7 +37,7 @@ module DUT (
         .MI_DRDY         (MI32.DRDY),
         // -----------------------
         .TX_MFB_DATA     (TX.DATA),
-        //.TX_MFB_META     (TX.META),
+        .TX_MFB_META     (),
         .TX_MFB_SOF_POS  (TX.SOF_POS),
         .TX_MFB_EOF_POS  (TX.EOF_POS),
         .TX_MFB_SOF      (TX.SOF),

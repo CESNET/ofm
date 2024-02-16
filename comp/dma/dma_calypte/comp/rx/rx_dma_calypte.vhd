@@ -10,6 +10,7 @@ use ieee.numeric_std.all;
 
 use work.math_pack.all;
 use work.type_pack.all;
+use work.pcie_meta_pack.all;
 
 entity RX_DMA_CALYPTE is
 
@@ -21,12 +22,12 @@ entity RX_DMA_CALYPTE is
 
         -- User Logic MFB configuration
         USER_RX_MFB_REGIONS     : natural := 1;
-        USER_RX_MFB_REGION_SIZE : natural := 4;
+        USER_RX_MFB_REGION_SIZE : natural := 8;
         USER_RX_MFB_BLOCK_SIZE  : natural := 8;
         USER_RX_MFB_ITEM_WIDTH  : natural := 8;
 
         -- PCIe MFB configuration
-        PCIE_UP_MFB_REGIONS     : natural := 1;
+        PCIE_UP_MFB_REGIONS     : natural := 2;
         PCIE_UP_MFB_REGION_SIZE : natural := 1;
         PCIE_UP_MFB_BLOCK_SIZE  : natural := 8;
         PCIE_UP_MFB_ITEM_WIDTH  : natural := 32;
@@ -38,13 +39,13 @@ entity RX_DMA_CALYPTE is
         -- * Defines width of signals used for these values in DMA Module
         -- * Affects logic complexity
         -- * Maximum value: 32 (restricted by size of pointer MI registers)
-        POINTER_WIDTH : natural := 16;
+        POINTER_WIDTH  : natural := 16;
 
         -- Width of RAM address
-        SW_ADDR_WIDTH : natural := 64;
+        SW_ADDR_WIDTH  : natural := 64;
 
         -- Actual width of packet and byte counters
-        CNTRS_WIDTH : natural := 64;
+        CNTRS_WIDTH    : natural := 64;
 
         HDR_META_WIDTH : natural := 24;
 
@@ -92,6 +93,7 @@ entity RX_DMA_CALYPTE is
         -- MFB output interface
         -- =========================================================================================================
         PCIE_UP_MFB_DATA    : out std_logic_vector(PCIE_UP_MFB_REGIONS*PCIE_UP_MFB_REGION_SIZE*PCIE_UP_MFB_BLOCK_SIZE*PCIE_UP_MFB_ITEM_WIDTH-1 downto 0);
+        PCIE_UP_MFB_META    : out std_logic_vector(PCIE_UP_MFB_REGIONS*PCIE_RQ_META_WIDTH - 1 downto 0);
         PCIE_UP_MFB_SOF     : out std_logic_vector(PCIE_UP_MFB_REGIONS - 1 downto 0);
         PCIE_UP_MFB_EOF     : out std_logic_vector(PCIE_UP_MFB_REGIONS - 1 downto 0);
         PCIE_UP_MFB_SOF_POS : out std_logic_vector(PCIE_UP_MFB_REGIONS*max(1, log2(PCIE_UP_MFB_REGION_SIZE))-1 downto 0);
@@ -405,7 +407,9 @@ begin
             TX_ITEM_WIDTH  => PCIE_UP_MFB_ITEM_WIDTH,
 
             CHANNELS     => CHANNELS,
-            PKT_SIZE_MAX => PKT_SIZE_MAX)
+            PKT_SIZE_MAX => PKT_SIZE_MAX,
+            DEVICE       => DEVICE
+        )
         port map (
             CLK => CLK,
             RST => RESET,
@@ -417,6 +421,7 @@ begin
             RX_MFB_DST_RDY => trbuf_fifo_tx_dst_rdy,
 
             TX_MFB_DATA    => PCIE_UP_MFB_DATA,
+            TX_MFB_META    => PCIE_UP_MFB_META,
             TX_MFB_SOF     => PCIE_UP_MFB_SOF,
             TX_MFB_EOF     => PCIE_UP_MFB_EOF,
             TX_MFB_SOF_POS => PCIE_UP_MFB_SOF_POS,

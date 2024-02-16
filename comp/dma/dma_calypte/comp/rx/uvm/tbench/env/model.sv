@@ -12,8 +12,8 @@ class model_packet extends uvm_logic_vector_array::sequence_item#(32);
     int unsigned channel;
     int unsigned part;
     int unsigned part_num;
-    logic [32-1 :0] hdr[4];
-    logic [35-1 :0] meta;
+    logic [32-1 :0]  hdr[4];
+    logic [168-1 :0] meta;
 
     function new(string name = "model_packet");
         super.new(name);
@@ -61,13 +61,15 @@ class model_accept#(CHANNELS) extends uvm_subscriber#(uvm_mvb::sequence_item#(1,
     endfunction
 endclass
 
-//model
 class model #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_component;
     `uvm_component_param_utils(uvm_dma_ll::model #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE))
 
+    //UVM PROBE - model input
+    uvm_probe::cbs_simple #(1)                  uvm_probe_discard;
+    uvm_probe::cbs_simple #($clog2(CHANNELS))   uvm_probe_channel;
+
     localparam USER_META_WIDTH = 24 + $clog2(PKT_SIZE_MAX+1) + $clog2(CHANNELS);
     localparam IS_INTEL_DEV    = (DEVICE == "STRATIX10" || DEVICE == "AGILEX");
-
     uvm_tlm_analysis_fifo #(uvm_byte_array::sequence_item)                     analysis_imp_rx;
     uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(USER_META_WIDTH)) analysis_imp_rx_meta;
     model_accept#(CHANNELS)                                                    analysis_dma;
@@ -96,8 +98,7 @@ class model #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_component;
         analysis_imp_rx       = new("analysis_imp_rx", this);
         analysis_imp_rx_meta  = new("analysis_imp_rx_meta", this);
         analysis_port_tx      = new("analysis_port_tx", this);
-        if (IS_INTEL_DEV)
-            analysis_port_tx_meta = new("analysis_port_tx_meta", this);
+        analysis_port_tx_meta = new("analysis_port_tx_meta", this);
 
         for (int unsigned it = 0; it < CHANNELS; it++) begin
             m_data[it]       = new();
@@ -116,7 +117,7 @@ class model #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_component;
         end
     endfunction
 
-    function void get_pcie_header(int unsigned packet_size, logic [64-1:0] addr, output logic[32-1 : 0] header[], output logic[35-1 : 0] meta);
+    function void get_pcie_header(int unsigned packet_size, logic [64-1:0] addr, output logic[32-1 : 0] header[], output logic[168-1 : 0] meta);
         logic [2-1:0]  at       = 0;
         logic [1-1:0]  ecrc     = 0;
         logic [3-1:0]  attr     = 0;
@@ -138,33 +139,33 @@ class model #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_component;
         // FBE
         logic [4-1 : 0] fbe = '1;
         // LBE
-        logic [4-1 : 0] lbe = 4 - (packet_size % 4);
-        // Address
-        logic [64-1 : 0] global_id = '0;
-        // BAR
-        logic [3-1 : 0] bar = 3'b001;
-        // TLP Prefix
-        logic [3-1 : 0] tlp_pref = 6'd26;
-        // Intel request type (MEM write)
-        logic [8-1:0]   intel_rq_type  = 8'b01100000;
-        logic [11-1:0]  dword_count = (packet_size + 3)/4; //size in dwords
-        logic [128-1:0] out_hdr;
+        logic [4-1 : 0] lbe = 2**(4-(packet_size % 4)) - 1;
+        logic [64-1 : 0] intel_addr = '0;
+        logic [8-1:0]    intel_rq_type;
+        logic [11-1:0]   dword_count = (packet_size + 3)/4; //size in dwords
+        logic [128-1:0]  out_hdr;
 
-        if (IS_INTEL_DEV) begin
-            // Intel HDR:
+        meta = '0;
+
+        if (IS_INTEL_DEV) begin // Intel P/R-Tile
             // Address resolve
             if (|addr[64-1 : 32]) begin
-                global_id = {addr[32-1 : 2], addr[2-1 : 0], addr[64-1 : 32]};
-            end else
-                global_id = {32'h0000, addr[2-1 : 0], addr[32-1 : 2]};
-            // TLP PREFIX
-            meta[32-1 : 0]  = tlp_pref;
-            // // BAR
-            meta[35-1 : 32] = bar;
-            out_hdr = {global_id, cm_id, tag, lbe, fbe, intel_rq_type, rq_type, tag_9, tc, tag_8, attr[2], ln, th, td, poisoned, attr[1 : 0], at, dword_count};
-        end else begin
-            meta = '0;
+                intel_addr = {addr[32-1 : 2], 2'b0, addr[64-1 : 32]};
+                intel_rq_type = 8'b01100000; // Memory Write - 4DW header
+            end else begin
+                intel_addr = {32'h0000, addr[32-1 : 2], 2'b0};
+                intel_rq_type = 8'b01000000; // Memory Write - 3DW header
+            end
+
+            out_hdr = {intel_addr, cm_id, tag, lbe, fbe, intel_rq_type, tag_9, tc, tag_8, attr[2], ln, th, td, poisoned, attr[1 : 0], at, dword_count[10-1 : 0]};
+
+            meta[128-1 : 0]  = out_hdr; // TLP HEADER
+            meta[160-1 : 128] = '0; // TLP PREFIX
+        end else begin // Xilinx FPGA
             out_hdr = {ecrc, attr, tc, rq_id_enabled, cm_id, tag, rq_id, poisoned, rq_type, dword_count, addr[64-1:2], at};
+
+            meta[164-1 : 160] = fbe;
+            meta[168-1 : 164] = lbe;
         end
         header = {<<32{out_hdr}};
     endfunction
@@ -189,7 +190,7 @@ class model #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_component;
 
         model_packet               packet_output;
         logic[32-1 : 0]            pcie_hdr_tmp[4];
-        logic[35-1 : 0]            pcie_meta_tmp;
+        logic[168-1 : 0]           pcie_meta_tmp;
         int unsigned               it;
         logic[32-1 : 0]            packet_end[];
         logic[32-1 : 0]            pcie_packet[];
@@ -197,6 +198,8 @@ class model #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_component;
         int unsigned               packet_pointer_start;
         int unsigned               parts;
         logic [64-1:0]             addr;
+
+        string dbg_msg;
 
         packet_pointer_start = m_data[channel].data_ptr;
         pcie_packet = new[packet.size()/4];
@@ -206,6 +209,7 @@ class model #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_component;
         parts = (packet.size() + 127)/128;
         //SEND PARTS OF PACKETS EXCEPT LAST PART
         for (it = 0; it < (parts-1); it++) begin
+            packet_meta   = uvm_logic_vector::sequence_item#(META_WIDTH)::type_id::create("packet_meta");
             packet_output = model_packet::type_id::create("packet_output");
             packet_output.packet_num   = packets;
             packet_output.data_packet  = 1;
@@ -214,22 +218,25 @@ class model #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_component;
             packet_output.part         = it+1;
             packet_output.start_time   = start_time;
 
+            // dbg_msg = packet_output.convert2string();
+            // `uvm_info(this.get_full_name(), dbg_msg,  UVM_MEDIUM);
             addr = m_regmodel.channel[channel].data_base.get() + (m_data[channel].data_ptr*128);
             m_data[channel].data_ptr = (m_data[channel].data_ptr + 1) & m_regmodel.channel[channel].data_mask.get();
             get_pcie_header(128, addr, pcie_hdr_tmp, pcie_meta_tmp);
             if (IS_INTEL_DEV) begin
-                packet_meta        = uvm_logic_vector::sequence_item#(META_WIDTH)::type_id::create("packet_meta");
                 packet_output.data = pcie_packet[it*(128/4) +: 128/4];
-                packet_output.hdr  = pcie_hdr_tmp;
-                packet_output.meta = pcie_meta_tmp;
-                packet_meta.data   = {pcie_meta_tmp, pcie_hdr_tmp};
-                analysis_port_tx_meta.write(packet_meta);
-            end else
+            end else begin
                 packet_output.data = {pcie_hdr_tmp, pcie_packet[it*(128/4) +: 128/4]};
+            end
+            packet_output.hdr  = pcie_hdr_tmp;
+            packet_output.meta = pcie_meta_tmp;
+            packet_meta.data = pcie_meta_tmp;
             analysis_port_tx.write(packet_output);
+            analysis_port_tx_meta.write(packet_meta);
         end
 
         //SEND LAST PART OF PACKET
+        packet_meta   = uvm_logic_vector::sequence_item#(META_WIDTH)::type_id::create("packet_meta");
         packet_output = model_packet::type_id::create("packet_output");
         packet_output.packet_num   = packets;
         packet_output.data_packet  = 1;
@@ -241,20 +248,20 @@ class model #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_component;
         get_data(pcie_packet, it*(128/4), packet.size()/4, packet_end);
         addr = m_regmodel.channel[channel].data_base.get() + (m_data[channel].data_ptr*128);
         m_data[channel].data_ptr = (m_data[channel].data_ptr + 1) & m_regmodel.channel[channel].data_mask.get();
-        //get_pcie_header(packet_end.size(), addr, pcie_hdr_tmp);
         get_pcie_header(128, addr, pcie_hdr_tmp, pcie_meta_tmp);
         if (IS_INTEL_DEV) begin
-            packet_meta        = uvm_logic_vector::sequence_item#(META_WIDTH)::type_id::create("packet_meta");
             packet_output.data = pcie_packet[it*(128/4) +: 128/4];
-            packet_output.hdr  = pcie_hdr_tmp;
-            packet_output.meta = pcie_meta_tmp;
-            packet_meta.data   = {pcie_meta_tmp, pcie_hdr_tmp};
-            analysis_port_tx_meta.write(packet_meta);
-        end else
-            packet_output.data = {pcie_hdr_tmp, packet_end};
+        end else begin
+            packet_output.data = {pcie_hdr_tmp, pcie_packet[it*(128/4) +: 128/4]};
+        end
+        packet_output.hdr  = pcie_hdr_tmp;
+        packet_output.meta = pcie_meta_tmp;
+        packet_meta.data = pcie_meta_tmp;
         analysis_port_tx.write(packet_output);
-
+        analysis_port_tx_meta.write(packet_meta);
+      
         //SEND DMA HEADER
+        packet_meta   = uvm_logic_vector::sequence_item#(META_WIDTH)::type_id::create("packet_meta");
         packet_output = model_packet::type_id::create("packet_output");
         packet_output.packet_num   = packets;
         packet_output.data_packet  = 0;
@@ -268,15 +275,15 @@ class model #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_component;
         m_data[channel].hdr_ptr = (m_data[channel].hdr_ptr + 1) & m_regmodel.channel[channel].hdr_mask.get();
         get_pcie_header(8, addr, pcie_hdr_tmp, pcie_meta_tmp);
         if (IS_INTEL_DEV) begin
-            packet_meta        = uvm_logic_vector::sequence_item#(META_WIDTH)::type_id::create("packet_meta");
-            packet_output.data = pcie_packet[it*(128/4) +: 128/4];
-            packet_output.hdr  = pcie_hdr_tmp;
-            packet_output.meta = pcie_meta_tmp;
-            packet_meta.data   = {pcie_meta_tmp, pcie_hdr_tmp};
-            analysis_port_tx_meta.write(packet_meta);
-        end else
+            packet_output.data = packet_hdr;
+        end else begin
             packet_output.data = {pcie_hdr_tmp, packet_hdr};
+        end
+        packet_output.hdr  = pcie_hdr_tmp;
+        packet_output.meta = pcie_meta_tmp;
+        packet_meta.data = pcie_meta_tmp;
         analysis_port_tx.write(packet_output);
+        analysis_port_tx_meta.write(packet_meta);
     endtask
 
     task get_input();
@@ -292,7 +299,16 @@ class model #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_component;
     endtask
 
     function void build_phase(uvm_phase phase);
-        analysis_dma = model_accept#(CHANNELS)::type_id::create("analysis_dma", this);;
+        analysis_dma = model_accept#(CHANNELS)::type_id::create("analysis_dma", this);
+
+        //UVM PROBE
+        uvm_probe_discard = uvm_probe::cbs_simple #(1)::type_id::create("uvm_probe_discard", this);
+        uvm_probe_channel = uvm_probe::cbs_simple #($clog2(CHANNELS))::type_id::create("uvm_probe_channel", this);
+
+        uvm_probe::pool::get_global_pool().get({ "probe_event_component_", "testbench.DUT_U.VHDL_DUT_U", ".probe_discard" }).add_callback(uvm_probe_discard);
+        uvm_probe::pool::get_global_pool().get({ "probe_event_component_", "testbench.DUT_U.VHDL_DUT_U", ".probe_channel" }).add_callback(uvm_probe_channel);
+
+
     endfunction
 
     task run_phase(uvm_phase phase);
@@ -304,6 +320,10 @@ class model #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_component;
         logic [$clog2(CHANNELS)]      dma_channel;
         packet_info                   info;
 
+        //UVM PROBE
+        logic                         pkt_drop;
+        logic [$clog2(CHANNELS)]      pkt_channel;
+
         fork
             get_input();
         join_none
@@ -313,55 +333,48 @@ class model #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_component;
             wait (input_meta.size() != 0);
             info = input_meta.pop_front();
 
-            compare      = info.run[0];
-            soft_compare = info.run[1];
+            uvm_probe_discard.get({pkt_drop});
+            uvm_probe_channel.get({pkt_channel});
+
+            // // DEBUG
+            // $display("PROBE_DROP:    %d", pkt_drop);
+            // $display("PROBE_CHANNEL: %d", pkt_channel);
 
             //get packet
             analysis_imp_rx.get(tr);
             packets++;
             if (tr.data.size() != info.packet_size) begin
-                string msg;
-                $swrite(msg, "\n\tVerification FAILED! Packet size in meta %0d isn't same as correct packet size %0d", info.packet_size, tr.data.size());
-                `uvm_fatal(this.get_full_name(), msg);
+                string err_msg = $sformatf("\n\tVerification FAILED! Packet size in meta %0d isn't same as correct packet size %0d", info.packet_size, tr.data.size());
+                `uvm_fatal(this.get_full_name(), err_msg);
             end
 
             //Check if packet have been discared of send when starting or stopping channel
             wait (analysis_dma.fifo.size() != 0);
 
             {dma_channel, dma_discard} = analysis_dma.fifo.pop_front();
-            info.run[0]     = (m_regmodel.channel[info.channel].status.get() & 32'h1 ) | (m_regmodel.channel[info.channel].control.get() & 32'h1);
-            info.run[1]     = (m_regmodel.channel[info.channel].status.get() & 32'h1 ) ^ (m_regmodel.channel[info.channel].control.get() & 32'h1);
 
             if (dma_channel != info.channel) begin
                 `uvm_fatal(this.get_full_name(),  $sformatf("\n\tChannel send from DMA HDR MANAGER %0d isn't same as received packet channel %0d. Time %0dns", dma_channel, info.channel, info.input_time/1ns));
             end
 
-            $swrite(msg, "%s\n\tINPUT TIME: %d\n", msg, info.input_time/1ns);
-            $swrite(msg, "%s\tPACKET NUMBER: %d\n", msg, packets);
-            $swrite(msg, "%s\tDISCARD: %h\n", msg, dma_discard);
-            $swrite(msg, "%s\tDISCARD CHANNEL: %h\n", msg, dma_channel);
-            $swrite(msg, "%s\tCHANNEL: %h\n", msg, info.channel);
-            $swrite(msg, "%s\tPACKET: %s\n", msg, tr.convert2string());
-            $swrite(msg, "%s\tCOMPARE: %d\n", msg, compare);
-            $swrite(msg, "%s\tSOFT COMPARE: %d\n", msg, soft_compare);
+            // msg = "";
+            // msg = {msg, $sformatf("\n\tINPUT TIME: %0dns\n", info.input_time/1ns)};
+            // msg = {msg, $sformatf("\tPACKET NUMBER: %0d\n", packets)};
+            // msg = {msg, $sformatf("\tDISCARD: %h\n", dma_discard)};
+            // msg = {msg, $sformatf("\tDISCARD CHANNEL: %h\n", dma_channel)};
+            // msg = {msg, $sformatf("\tCHANNEL: %h\n", info.channel)};
+            // msg = {msg, $sformatf("\tPACKET: %s\n", tr.convert2string())};
+            // `uvm_info(this.get_full_name(), msg,  UVM_MEDIUM);
 
-            `uvm_info(this.get_full_name(), msg,  UVM_MEDIUM);
-
-            //check if should be processed
-            if (compare) begin
-                if (soft_compare == 0 && dma_discard == 1) begin
-                    string msg;
-                    $swrite(msg, "\n\tReceive time %0dns\n\tPacket num %0d sended on channel %0d have been discarded but channel %0d is running:\n%s", info.input_time/1ns, packets,  info.channel, info.channel, tr.convert2string());
-                    `uvm_error(this.get_full_name(), msg);
-                end
-
-                if (soft_compare == 0 || (soft_compare == 1 && dma_discard == 0)) begin
-                    packets_processed++;
-                    //channel run
-                    $swrite(msg, "\n\tRX transaction channel %0d meta %h pakcet size %0d\n%s", info.channel, info.meta, info.packet_size, tr.convert2string());
-                    `uvm_info(this.get_full_name(), msg,  UVM_MEDIUM);
-                    packet_send(tr.data, info.input_time, info.channel, info.meta);
-                end
+            // Check whether packet is accepted or not
+            if (pkt_drop) begin
+                $swrite(msg, "\n\t\nPacket Dropped:\n RX CHANNEL: %0d\n META: %h\n PACKET SIZE: %0d\n%s", info.channel, info.meta, info.packet_size, tr.convert2string());
+                `uvm_info(this.get_full_name(), msg,  UVM_MEDIUM);
+            end else begin
+                packets_processed++;
+                $swrite(msg, "\n\t\nPacket Accepted:\n RX CHANNEL: %0d\n META: %h\n PACKET SIZE: %0d\n%s", info.channel, info.meta, info.packet_size, tr.convert2string());
+                `uvm_info(this.get_full_name(), msg,  UVM_MEDIUM);
+                packet_send(tr.data, info.input_time, info.channel, info.meta);
             end
         end
     endtask
