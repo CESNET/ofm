@@ -126,6 +126,20 @@ class driver#(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends u
         uvm_reg_field_cb::add(this.m_regmodel.control.dma_enable, cbs);
     endfunction
 
+    task wait_for_free_space(int unsigned space, uvm_reg hw_reg, logic[16-1:0] sw_addr, logic[16-1:0] mask);
+        int unsigned   free_space;
+        logic [16-1:0] hw_ptr;
+
+        //free space
+        ptr_read(hw_reg, hw_ptr);
+        free_space = (hw_ptr-1 - sw_addr) & mask;
+        while(free_space < space) begin
+            #(200ns)
+            ptr_read(hw_reg, hw_ptr);
+            free_space = (hw_ptr-1 - sw_addr) & mask;
+        end
+    endtask
+
     function pcie_info create_pcie_req(logic [64-1 : 0] pcie_addr, logic [11-1 : 0] pcie_len, logic [4-1:0] fbe, logic [4-1:0] lbe, logic[ITEM_WIDTH-1:0] data[]);
         pcie_info ret;
         logic [PCIE_HDR_SIZE-1:0] pcie_hdr;
@@ -182,15 +196,16 @@ class driver#(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends u
         pcie_info pcie_transaction;
         int unsigned data_index;
         int unsigned pcie_len;
-        int unsigned free_space;
         logic [ITEM_WIDTH-1 : 0]  data[];
 
         logic [4-1:0]             fbe;
         logic [4-1:0]             lbe;
 
-        logic [16-1 : 0] hw_ptr;
+        int unsigned pcie_trans_cnt;
+        string debug_msg;
 
         data_index = 0;
+        pcie_trans_cnt = 0;
         //////////////////////////////////
         // DATA SEND
 
@@ -226,13 +241,7 @@ class driver#(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends u
             pcie_transaction = create_pcie_req(pcie_addr, pcie_len, fbe, lbe, data);
 
             //free space
-            ptr_read(m_regmodel.hw_data_pointer, hw_ptr);
-            free_space = (hw_ptr-1 - ptr.data_addr) & ptr.data_mask;
-            while(free_space < pcie_len*(ITEM_WIDTH/8)) begin
-                #(200ns)
-                ptr_read(m_regmodel.hw_data_pointer, hw_ptr);
-                free_space = (hw_ptr-1 - ptr.data_addr) & ptr.data_mask;
-            end
+            wait_for_free_space(pcie_len*(ITEM_WIDTH/8), m_regmodel.hw_data_pointer, ptr.data_addr, ptr.data_mask);
 
             //free space
             ptr.data_addr += pcie_len*(ITEM_WIDTH/8);
@@ -242,17 +251,24 @@ class driver#(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends u
             data_export.put(channel, pcie_transaction.meta, pcie_transaction.data);
         end
 
+        //Allign pointer to PACKET ALLIGMENT
+        if ((ptr.data_addr % PACKET_ALIGNMENT) != 0) begin
+            const int unsigned size_to_allign = (PACKET_ALIGNMENT-(ptr.data_addr % PACKET_ALIGNMENT));
+            wait_for_free_space(size_to_allign, m_regmodel.hw_data_pointer, ptr.data_addr, ptr.data_mask);
+
+            ptr.data_addr += size_to_allign;
+            ptr.data_addr %= ptr.data_mask;
+        end
+
         //actualize sdp_pointer
         ptr_write(m_regmodel.sw_data_pointer, ptr.data_addr);
     endtask
 
     task send_header(logic [16-1:0] packet_ptr);
         pcie_info pcie_transaction;
-        int unsigned              free_space;
         int unsigned              pcie_len;
         logic [4-1:0]             fbe;
         logic [4-1:0]             lbe;
-        logic [16-1 : 0]          hw_ptr;
         logic [DMA_HDR_SIZE-1:0]  dma_hdr;
         logic [64-1 : 0]          pcie_addr;
 
@@ -274,14 +290,7 @@ class driver#(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends u
         pcie_addr[(DATA_ADDR_W+$clog2(CHANNELS)+1)] = 1'b1;
         pcie_transaction = create_pcie_req(pcie_addr, pcie_len, fbe, lbe, {dma_hdr[31 : 0], dma_hdr[63 : 32]});
 
-        ptr_read(m_regmodel.hw_hdr_pointer, hw_ptr);
-        free_space = (hw_ptr-1 - ptr.hdr_addr) & ptr.hdr_mask;
-        while(free_space  == 0) begin
-            #(200ns)
-            ptr_read(m_regmodel.hw_hdr_pointer, hw_ptr);
-            free_space = (hw_ptr-1 - ptr.hdr_addr) & ptr.hdr_mask;
-        end
-
+        wait_for_free_space(1, m_regmodel.hw_hdr_pointer, ptr.hdr_addr, ptr.hdr_mask);
         //move hdr pointer
         ptr.hdr_addr += 1;
         ptr.hdr_addr &= ptr.hdr_mask;
@@ -301,10 +310,6 @@ class driver#(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends u
             ptr_read(m_regmodel.data_mask, ptr.data_mask);
             ptr_read(m_regmodel.hdr_mask , ptr.hdr_mask);
             //align start of packet to PACKET_ALIGMENT
-            if ((ptr.data_addr % PACKET_ALIGNMENT) != 0) begin
-                ptr.data_addr += (PACKET_ALIGNMENT-(ptr.data_addr % PACKET_ALIGNMENT));
-                ptr.data_addr %= ptr.data_mask;
-            end
             packet_ptr = ptr.data_addr;
 
             send_data();
