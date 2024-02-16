@@ -240,12 +240,25 @@ class driver#(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends u
             pcie_addr[(DATA_ADDR_W+$clog2(CHANNELS)+1)] = 1'b0;
             pcie_transaction = create_pcie_req(pcie_addr, pcie_len, fbe, lbe, data);
 
+            debug_msg = "\n";
+            debug_msg = {debug_msg, "-----------------------------------------------\n"};
+            debug_msg = {debug_msg, $sformatf("PCIe DATA TRANSACTION %0d on channel %0d\n", pcie_trans_cnt, channel)};
+            debug_msg = {debug_msg, "-----------------------------------------------\n"};
+            debug_msg = {debug_msg, $sformatf("\tdata_addr 0x%h(%0d)\n", ptr.data_addr, ptr.data_addr)};
+            debug_msg = {debug_msg, $sformatf("\tpcie_addr 0x%h(%0d)\n", pcie_addr, pcie_addr)};
+            debug_msg = {debug_msg, $sformatf("\tpcie_len  %0d dwords\n", pcie_len)};
+            debug_msg = {debug_msg, $sformatf("\tfbe %h fbe %h\n", fbe, lbe)};
+            debug_msg = {debug_msg, $sformatf("\tpcie_len  %0d dwords\n", pcie_len)};
+            debug_msg = {debug_msg, $sformatf("\t%p", data)};
+            `uvm_info(this.get_full_name(), debug_msg, UVM_NONE);
+
             //free space
             wait_for_free_space(pcie_len*(ITEM_WIDTH/8), m_regmodel.hw_data_pointer, ptr.data_addr, ptr.data_mask);
 
             //free space
             ptr.data_addr += pcie_len*(ITEM_WIDTH/8);
             ptr.data_addr &= ptr.data_mask;
+            pcie_trans_cnt++;
 
             //SEND DATA
             data_export.put(channel, pcie_transaction.meta, pcie_transaction.data);
@@ -271,6 +284,7 @@ class driver#(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends u
         logic [4-1:0]             lbe;
         logic [DMA_HDR_SIZE-1:0]  dma_hdr;
         logic [64-1 : 0]          pcie_addr;
+            string debug_msg;
 
         //////////////////////////////////
         // DMA HEADER
@@ -290,6 +304,19 @@ class driver#(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends u
         pcie_addr[(DATA_ADDR_W+$clog2(CHANNELS)+1)] = 1'b1;
         pcie_transaction = create_pcie_req(pcie_addr, pcie_len, fbe, lbe, {dma_hdr[31 : 0], dma_hdr[63 : 32]});
 
+        debug_msg = "\n";
+        debug_msg = {debug_msg, "-----------------------------------------------\n"};
+        debug_msg = {debug_msg, $sformatf("PCIe HEADER TRANSACTION on channel %0d\n", channel)};
+        debug_msg = {debug_msg, "-----------------------------------------------\n"};
+        debug_msg = {debug_msg, $sformatf("\theader_addr 0x%h(%0d)\n", pcie_addr[DATA_ADDR_W-1 : 0], pcie_addr[DATA_ADDR_W-1 : 0])};
+        debug_msg = {debug_msg, $sformatf("\theader_num  0x%h(%0d)\n", ptr.hdr_addr, ptr.hdr_addr)};
+        debug_msg = {debug_msg, $sformatf("\tpcie_len  %0d dwords\n", pcie_len)};
+        debug_msg = {debug_msg, $sformatf("\tfbe %h fbe %h\n", fbe, lbe)};
+        debug_msg = {debug_msg, $sformatf("\tpacket size    %0dB\n", req.packet.size())};
+        debug_msg = {debug_msg, $sformatf("\tpacket pointer %0dB\n", packet_ptr)};
+        debug_msg = {debug_msg, $sformatf("\tmeta %h\n", req.meta)};
+        `uvm_info(this.get_full_name(), debug_msg, UVM_NONE);
+
         wait_for_free_space(1, m_regmodel.hw_hdr_pointer, ptr.hdr_addr, ptr.hdr_mask);
         //move hdr pointer
         ptr.hdr_addr += 1;
@@ -305,10 +332,21 @@ class driver#(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends u
     task run_phase(uvm_phase phase);
         forever begin
             logic [16-1:0] packet_ptr;
+            string debug_msg;
+
             seq_item_port.get_next_item(req);
+
+            debug_msg = "\n";
+            debug_msg = {debug_msg, "==========================================================\n"};
+            debug_msg = {debug_msg, $sformatf("Send packet to channle %0d\n", channel)};
+            debug_msg = {debug_msg, "==========================================================\n"};
+            debug_msg = {debug_msg, req.convert2string()};
+            `uvm_info(this.get_full_name(), debug_msg, UVM_NONE);
 
             ptr_read(m_regmodel.data_mask, ptr.data_mask);
             ptr_read(m_regmodel.hdr_mask , ptr.hdr_mask);
+
+
             //align start of packet to PACKET_ALIGMENT
             packet_ptr = ptr.data_addr;
 
