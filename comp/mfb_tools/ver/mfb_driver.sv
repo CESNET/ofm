@@ -199,7 +199,7 @@ class MfbDriver #(REGIONS = 4, REGION_SIZE = 8, BLOCK_SIZE = 8, ITEM_WIDTH = 8, 
             $cast(tr, transaction);
             while(sof[offset / REGION_ITEMS]) // two SOFs not allowed in the same region
                 moveEmptyBlock();
-            while(eof[(offset + tr.data.size - 1) / REGION_ITEMS]) // two EOFs not allowed in the same region
+            while(((offset + tr.data.size - 1) / REGION_ITEMS < REGIONS) && (eof[(offset + tr.data.size - 1) / REGION_ITEMS])) // two EOFs not allowed in the same region
                 moveEmptyBlock();
             if(SOF_CTRL)
                 while(((offset / REGION_ITEMS) != tr.sof) || (((offset % REGION_ITEMS) / BLOCK_SIZE) != tr.sof_pos)) // find correct SOF AND find correct SOF position
