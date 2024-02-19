@@ -7,6 +7,7 @@
 
 # 1. base - base address on MI bus
 # 2. name - instantion name inside device tree hierarchy
+# 3. probes - number of probes connected to the master
 proc dts_streaming_debug {base name probes} {
     set    ret ""
     set    size [expr 64*$probes]
