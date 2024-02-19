@@ -20,3 +20,4 @@ set COMPONENTS [list \
 # Source files for implemented component
 set MOD "$MOD $ENTITY_BASE/event_counter.vhd"
 set MOD "$MOD $ENTITY_BASE/event_counter_mi_wrapper.vhd"
+set MOD "$MOD $ENTITY_BASE/DevTree.tcl"
