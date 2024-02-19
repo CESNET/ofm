@@ -116,10 +116,10 @@ begin
             s_shake_tx_next(ii)    <= (others => s_shake_tx_dst_rdy(ii));
 
         else generate
-            s_shake_tx_data    <= RX_DATA;
-            s_shake_tx_vld     <= RX_VLD;
-            s_shake_tx_src_rdy <= RX_SRC_RDY;
-            RX_DST_RDY         <= s_shake_tx_dst_rdy;
+            s_shake_tx_data(ii)    <= RX_DATA(ii);
+            s_shake_tx_vld(ii)     <= RX_VLD(ii);
+            s_shake_tx_src_rdy(ii) <= RX_SRC_RDY(ii);
+            RX_DST_RDY(ii)         <= s_shake_tx_dst_rdy(ii);
 
         end generate;
     end generate;
