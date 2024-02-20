@@ -44,6 +44,7 @@ package test;
     parameter PCIE_LEN_MIN = 1;
     parameter PCIE_LEN_MAX = 256;
     // Simulation parameters
+    // TODO: Pokus se to smazat!!!
     parameter DEBUG        = 1;
 
     parameter TRANSACTION_COUNT = 100000;

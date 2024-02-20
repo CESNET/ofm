@@ -7,7 +7,7 @@
 class env #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, CHANNELS, PKT_SIZE_MAX, DATA_ADDR_W, DEVICE) extends uvm_env;
     `uvm_component_param_utils(uvm_dma_ll_rx::env #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, CHANNELS, PKT_SIZE_MAX, DATA_ADDR_W, DEVICE));
 
-    sequencer#(ITEM_WIDTH, sv_pcie_meta_pack::PCIE_CQ_META_WIDTH)  m_sequencer[CHANNELS];
+    sequencer                                                         m_sequencer[CHANNELS];
     driver #(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE) m_driver[CHANNELS];
     //low level
 
@@ -15,8 +15,8 @@ class env #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, CHANNELS, PKT_SIZE_MAX
     uvm_reset::sync_cbs reset_sync;
     uvm_logic_vector_array_mfb::env_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, sv_pcie_meta_pack::PCIE_CQ_META_WIDTH) m_env_rx;
 
-    local driver_sync#(sv_pcie_meta_pack::PCIE_CQ_META_WIDTH, ITEM_WIDTH) data_export;
-    local uvm_dma_regs::regmodel #(CHANNELS)                               m_regmodel;
+    local driver_sync#(ITEM_WIDTH, sv_pcie_meta_pack::PCIE_CQ_META_WIDTH) data_export;
+    local uvm_dma_regs::regmodel #(CHANNELS)                              m_regmodel;
     local config_item m_config;
 
     // Constructor of environment.
@@ -54,7 +54,7 @@ class env #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, CHANNELS, PKT_SIZE_MAX
             string i_string = $sformatf("%0d", chan);
 
             if (m_config.active == UVM_ACTIVE) begin
-                m_sequencer[chan] = sequencer#(ITEM_WIDTH, sv_pcie_meta_pack::PCIE_CQ_META_WIDTH)::type_id::create({"m_sequencer_", i_string}, this);
+                m_sequencer[chan] = sequencer::type_id::create({"m_sequencer_", i_string}, this);
                 m_driver[chan]    = driver#(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE)::type_id::create({"m_driver_", i_string}, this);
                 m_driver[chan].channel = chan;
             end else begin

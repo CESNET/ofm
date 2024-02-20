@@ -7,8 +7,11 @@
 // This low level sequence define bus functionality
 
 
-class sequence_item#(ITEM_WIDTH, META_WIDTH) extends uvm_sequence_item;
-    `uvm_object_param_utils(uvm_dma_ll_rx::sequence_item#(ITEM_WIDTH, META_WIDTH))
+class sequence_item extends uvm_sequence_item;
+    `uvm_object_param_utils(uvm_dma_ll_rx::sequence_item)
+
+    localparam ITEM_WIDTH = 8;
+    localparam META_WIDTH = 24;
 
     rand logic [ITEM_WIDTH-1:0] packet[];
     rand logic [META_WIDTH-1:0] meta;
@@ -20,7 +23,7 @@ class sequence_item#(ITEM_WIDTH, META_WIDTH) extends uvm_sequence_item;
 
     // Properly copy all transaction attributes.
     function void do_copy(uvm_object rhs);
-        sequence_item #(ITEM_WIDTH, META_WIDTH) rhs_;
+        sequence_item rhs_;
 
         if(!$cast(rhs_, rhs)) begin
             `uvm_fatal( "do_copy:", "Failed to cast transaction object.")
@@ -34,7 +37,7 @@ class sequence_item#(ITEM_WIDTH, META_WIDTH) extends uvm_sequence_item;
 
     // Properly compare all transaction attributes representing output pins.
     function bit do_compare(uvm_object rhs, uvm_comparer comparer);
-        sequence_item #(ITEM_WIDTH, META_WIDTH) rhs_;
+        sequence_item rhs_;
         bit ret;
 
         if(!$cast(rhs_, rhs)) begin

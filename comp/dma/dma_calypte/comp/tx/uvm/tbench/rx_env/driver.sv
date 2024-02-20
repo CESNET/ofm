@@ -36,7 +36,7 @@ endclass
 
 
 
-class driver_sync#(META_WIDTH, ITEM_WIDTH);
+class driver_sync#(ITEM_WIDTH, META_WIDTH);
 
     local semaphore sem;
     //local uvm_logic_vector::sequence_item#(META_WIDTH)       pcie_meta[$];
@@ -74,7 +74,7 @@ class driver_sync#(META_WIDTH, ITEM_WIDTH);
 endclass
 
 
-class driver#(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends uvm_driver#(sequence_item#(ITEM_WIDTH, sv_pcie_meta_pack::PCIE_CQ_META_WIDTH));
+class driver#(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends uvm_driver#(sequence_item);
     `uvm_component_param_utils(uvm_dma_ll_rx::driver#(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE))
 
     localparam PCIE_HDR_SIZE = 128;
@@ -82,7 +82,7 @@ class driver#(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends u
     localparam PACKET_ALIGNMENT = 32;
 
 
-    driver_sync#(sv_pcie_meta_pack::PCIE_CQ_META_WIDTH, ITEM_WIDTH) data_export;
+    driver_sync#(ITEM_WIDTH, sv_pcie_meta_pack::PCIE_CQ_META_WIDTH) data_export;
 
     local uvm_dma_regs::reg_channel m_regmodel;
     local driver_data               ptr;
@@ -115,6 +115,52 @@ class driver#(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends u
         register.write(status, data);
     endtask
 
+    function int unsigned encode_fbe(logic [4-1 : 0] be);
+        int unsigned ret;
+        casex (be)
+            4'b0000 : ret = 0;
+            4'bxxx1 : ret = 0;
+            4'bxx10 : ret = 1;
+            4'bx100 : ret = 2;
+            4'b1000 : ret = 3;
+        endcase
+        return ret;
+    endfunction
+
+    function int unsigned encode_lbe(logic [4-1 : 0] be);
+        int unsigned ret;
+        casex (be)
+            4'b0000 : ret = 4;
+            4'b1xxx : ret = 4;
+            4'b01xx : ret = 3;
+            4'b001x : ret = 2;
+            4'b0001 : ret = 1;
+        endcase
+        return ret;
+    endfunction
+
+    function logic[4-1 : 0] decode_lbe(logic [1 : 0] ib);
+        logic[4-1 : 0] be;
+        case (ib)
+            2'b00 : be = 4'b1111;
+            2'b01 : be = 4'b0001;
+            2'b10 : be = 4'b0011;
+            2'b11 : be = 4'b0111;
+        endcase
+        return be;
+    endfunction
+
+    function string print_data(logic [ITEM_WIDTH-1 : 0] data[]);
+        string ret = $sformatf("\nData size %0d", data.size());
+        for (int unsigned it = 0; it < data.size(); it++) begin
+            if (it % 8 == 0) begin
+                ret = {ret, $sformatf("\n\t%h", data[it])};
+            end else begin
+                ret = {ret, $sformatf(" %h", data[it])};
+            end
+        end
+        return ret;
+    endfunction
 
     function void regmodel_set(uvm_dma_regs::reg_channel m_regmodel);
         status_cbs cbs;
@@ -194,51 +240,91 @@ class driver#(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends u
 
     task send_data();
         pcie_info pcie_transaction;
-        int unsigned data_index;
+        int unsigned packet_index;
         int unsigned pcie_len;
         logic [ITEM_WIDTH-1 : 0]  data[];
 
-        logic [4-1:0]             fbe;
-        logic [4-1:0]             lbe;
+        logic [ITEM_WIDTH/8-1:0]  fbe;
+        logic [ITEM_WIDTH/8-1:0]  lbe = '0; //fbe is negative last fbe
+        logic [ITEM_WIDTH/8-1:0]  send_lbe = '0; // if pcie transaction have one dword then lbe is set to zero
 
+        const int unsigned packet_len = (req.packet.size()+(ITEM_WIDTH/8-1))/(ITEM_WIDTH/8); //len in dwords
         int unsigned pcie_trans_cnt;
         string debug_msg;
 
-        data_index = 0;
+        packet_index = 0;
         pcie_trans_cnt = 0;
         //////////////////////////////////
         // DATA SEND
 
-        while (data_index < req.packet.size()) begin
+        while (packet_index < req.packet.size()) begin
+            int unsigned data_index;
             logic [64-1 : 0] pcie_addr;
+            string debug_msg;
+            int unsigned rand_ret;
 
             //GENERATE RANDOM SIZE OF BLOCKS
-            pcie_len = 256; //$urandom_range(256, 1);
-            //if (pcie_len == 1) begin
-            //    prev_lbe = pkt_be.lbe & pkt_be.fbe;
-            //end else begin
-            //    prev_lbe = pkt_be.lbe;
-            //end
-
-            if (req.packet.size() < (data_index + pcie_len)) begin
-                pcie_len = (req.packet.size() - data_index);
+            //pcie_len = 256; //$urandom_range(256, 1);
+            //pcie_len = $urandom_range(256, 1);
+            rand_ret = std::randomize(pcie_len) with {pcie_len dist {[1:63] :/ 5, [64:127] :/ 10,  [128:256] :/ 20, 256 :/ 65}; };
+            if (rand_ret == 0) begin
+                pcie_len = 256;
             end
 
+            //lbe =
+            fbe = (lbe == '1) ? '1 : ~lbe;
+            if (packet_len <= (packet_index/(ITEM_WIDTH/8) + pcie_len)) begin
+                pcie_len = packet_len - packet_index/(ITEM_WIDTH/8);
+                lbe      = decode_lbe(req.packet.size() % ((ITEM_WIDTH/8)));
+            end else begin
+                assert(std::randomize(lbe) with {
+                        if (pcie_len == 1){$countones(lbe & fbe) > 0;}
+                        lbe inside {4'b1111, 4'b0111, 4'b0011, 4'b0001}; }
+                    ) else `uvm_fatal(this.get_full_name(), "\n\tCannot randomize lbe");
+            end
 
+            // COPY DATA TO TEMPORALY VARIABLE
             data = new[pcie_len];
-            for (int unsigned it = 0; it < pcie_len; it++) begin
-                data[it] = req.packet[data_index + it];
-            end
-            data_index += pcie_len;
+            data_index = 0;
+            void'(std::randomize(data[0]));
+            if (pcie_len > 1) begin
+                void'(std::randomize(data[pcie_len-1]));
+                //pealing FBE
+                for (int unsigned jt = this.encode_fbe(fbe); jt < ITEM_WIDTH/8; jt++) begin
+                    data[0][(jt+1)*8-1 -: 8] = req.packet[packet_index + data_index];
+                    data_index++;
+                end
 
-            fbe = '1;
-            lbe = '1;
+                //Except first and last PCI WORD
+                for (int unsigned it = 1; it < pcie_len-1; it++) begin
+                    data[it] = { << 8 {req.packet[packet_index + data_index +: ITEM_WIDTH/8]}};
+                    data_index += ITEM_WIDTH/8;
+                end
+
+                //pealing LBE
+                for (int unsigned jt = 0; jt < this.encode_lbe(lbe); jt++) begin
+                    data[pcie_len-1][(jt+1)*8-1 -: 8] = req.packet[packet_index + data_index];
+                    data_index++;
+                end
+                send_lbe = lbe;
+            end else begin
+                for (int unsigned jt = this.encode_fbe(fbe); jt < this.encode_lbe(lbe); jt++) begin
+                    data[0][(jt+1)*8-1 -: 8] = req.packet[packet_index + data_index];
+                    data_index++;
+                end
+                fbe &= lbe;
+                send_lbe = 0;
+            end
+            packet_index += data_index;
+
+            //std::randomize(lbe) with {lbe inside {4'b1000, 4'b1100, 4'b1010, 4'b1110, 4'b1001, 4'b1101, 4'b1011, 4'b1111, 4'b0100, 4'b0110, 4'b0101, 4'b0111, 4'b0010, 4'b0011, 4'b0001}; };
+            //lbe = ;
 
             pcie_addr = '0;
-            pcie_addr[DATA_ADDR_W-1 : 0] = ptr.data_addr;
+            pcie_addr[DATA_ADDR_W-1 : 0] = ptr.data_addr; // Address is in bytes
             pcie_addr[(DATA_ADDR_W+1+$clog2(CHANNELS))-1 : DATA_ADDR_W+1] = channel;
             pcie_addr[(DATA_ADDR_W+$clog2(CHANNELS)+1)] = 1'b0;
-            pcie_transaction = create_pcie_req(pcie_addr, pcie_len, fbe, lbe, data);
+            pcie_transaction = create_pcie_req(pcie_addr, pcie_len, fbe, send_lbe, data);
 
             debug_msg = "\n";
             debug_msg = {debug_msg, "-----------------------------------------------\n"};
@@ -247,16 +333,16 @@ class driver#(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends u
             debug_msg = {debug_msg, $sformatf("\tdata_addr 0x%h(%0d)\n", ptr.data_addr, ptr.data_addr)};
             debug_msg = {debug_msg, $sformatf("\tpcie_addr 0x%h(%0d)\n", pcie_addr, pcie_addr)};
             debug_msg = {debug_msg, $sformatf("\tpcie_len  %0d dwords\n", pcie_len)};
-            debug_msg = {debug_msg, $sformatf("\tfbe %h fbe %h\n", fbe, lbe)};
+            debug_msg = {debug_msg, $sformatf("\tfbe %h lbe %h\n", fbe, lbe)};
             debug_msg = {debug_msg, $sformatf("\tpcie_len  %0d dwords\n", pcie_len)};
-            debug_msg = {debug_msg, $sformatf("\t%p", data)};
-            `uvm_info(this.get_full_name(), debug_msg, UVM_NONE);
+            debug_msg = {debug_msg, print_data(data)};
+            `uvm_info(this.get_full_name(), debug_msg, UVM_HIGH);
 
             //free space
             wait_for_free_space(pcie_len*(ITEM_WIDTH/8), m_regmodel.hw_data_pointer, ptr.data_addr, ptr.data_mask);
 
             //free space
-            ptr.data_addr += pcie_len*(ITEM_WIDTH/8);
+            ptr.data_addr += data_index;
             ptr.data_addr &= ptr.data_mask;
             pcie_trans_cnt++;
 
@@ -284,7 +370,7 @@ class driver#(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends u
         logic [4-1:0]             lbe;
         logic [DMA_HDR_SIZE-1:0]  dma_hdr;
         logic [64-1 : 0]          pcie_addr;
-            string debug_msg;
+        string debug_msg;
 
         //////////////////////////////////
         // DMA HEADER
@@ -293,13 +379,13 @@ class driver#(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends u
         pcie_len              = 2;
 
         // DMA HDR Filling
-        dma_hdr[15 : 0]  = req.packet.size()*4;
+        dma_hdr[15 : 0]  = req.packet.size();
         dma_hdr[31 : 16] = packet_ptr;
         dma_hdr[39 : 32] = '0;
         dma_hdr[63 : 40] = req.meta;
 
         pcie_addr = '0;
-        pcie_addr[DATA_ADDR_W-1 : 0] = ptr.hdr_addr*2*(ITEM_WIDTH/8);
+        pcie_addr[DATA_ADDR_W-1 : 0] = ptr.hdr_addr*2*(ITEM_WIDTH/8); //Address is in DMA headers (64B)
         pcie_addr[(DATA_ADDR_W+1+$clog2(CHANNELS))-1 : DATA_ADDR_W+1] = channel;
         pcie_addr[(DATA_ADDR_W+$clog2(CHANNELS)+1)] = 1'b1;
         pcie_transaction = create_pcie_req(pcie_addr, pcie_len, fbe, lbe, {dma_hdr[31 : 0], dma_hdr[63 : 32]});
@@ -315,7 +401,7 @@ class driver#(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends u
         debug_msg = {debug_msg, $sformatf("\tpacket size    %0dB\n", req.packet.size())};
         debug_msg = {debug_msg, $sformatf("\tpacket pointer %0dB\n", packet_ptr)};
         debug_msg = {debug_msg, $sformatf("\tmeta %h\n", req.meta)};
-        `uvm_info(this.get_full_name(), debug_msg, UVM_NONE);
+        `uvm_info(this.get_full_name(), debug_msg, UVM_HIGH);
 
         wait_for_free_space(1, m_regmodel.hw_hdr_pointer, ptr.hdr_addr, ptr.hdr_mask);
         //move hdr pointer
@@ -341,11 +427,10 @@ class driver#(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends u
             debug_msg = {debug_msg, $sformatf("Send packet to channle %0d\n", channel)};
             debug_msg = {debug_msg, "==========================================================\n"};
             debug_msg = {debug_msg, req.convert2string()};
-            `uvm_info(this.get_full_name(), debug_msg, UVM_NONE);
+            `uvm_info(this.get_full_name(), debug_msg, UVM_FULL);
 
             ptr_read(m_regmodel.data_mask, ptr.data_mask);
             ptr_read(m_regmodel.hdr_mask , ptr.hdr_mask);
-
 
             //align start of packet to PACKET_ALIGMENT
             packet_ptr = ptr.data_addr;

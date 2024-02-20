@@ -14,7 +14,7 @@ class env #(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE
 
     localparam USER_META_WIDTH = 24 + $clog2(PKT_SIZE_MAX+1) + $clog2(CHANNELS);
 
-    sequencer#(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE, USER_TX_MFB_ITEM_WIDTH, PCIE_CQ_MFB_ITEM_WIDTH,
+    sequencer#(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE, USER_TX_MFB_ITEM_WIDTH, 
               CHANNELS, PKT_SIZE_MAX) m_sequencer;
 
     uvm_reset::agent m_reset;
@@ -69,7 +69,7 @@ class env #(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE
                            DATA_PTR_WIDTH, DEBUG)::type_id::create("sc", this);
 
         m_sequencer = sequencer#(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE, USER_TX_MFB_ITEM_WIDTH,
-                                 PCIE_CQ_MFB_ITEM_WIDTH, CHANNELS, PKT_SIZE_MAX)::type_id::create("m_sequencer", this);
+                                 CHANNELS, PKT_SIZE_MAX)::type_id::create("m_sequencer", this);
 
         m_config_tx                = new;
         m_config_tx.active         = UVM_ACTIVE;
