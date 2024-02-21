@@ -4,11 +4,11 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause
 
-class env #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, CHANNELS, PKT_SIZE_MAX, DATA_ADDR_W, DEVICE) extends uvm_env;
-    `uvm_component_param_utils(uvm_dma_ll_rx::env #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, CHANNELS, PKT_SIZE_MAX, DATA_ADDR_W, DEVICE));
+class env #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, CHANNELS, PCIE_MTU, DATA_ADDR_W, DEVICE) extends uvm_env;
+    `uvm_component_param_utils(uvm_dma_ll_rx::env #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, CHANNELS, PCIE_MTU, DATA_ADDR_W, DEVICE));
 
     sequencer                                                         m_sequencer[CHANNELS];
-    driver #(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE) m_driver[CHANNELS];
+    driver #(CHANNELS, PCIE_MTU, ITEM_WIDTH, DATA_ADDR_W, DEVICE) m_driver[CHANNELS];
     //low level
 
     //implement later
@@ -55,7 +55,7 @@ class env #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, CHANNELS, PKT_SIZE_MAX
 
             if (m_config.active == UVM_ACTIVE) begin
                 m_sequencer[chan] = sequencer::type_id::create({"m_sequencer_", i_string}, this);
-                m_driver[chan]    = driver#(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE)::type_id::create({"m_driver_", i_string}, this);
+                m_driver[chan]    = driver#(CHANNELS, PCIE_MTU, ITEM_WIDTH, DATA_ADDR_W, DEVICE)::type_id::create({"m_driver_", i_string}, this);
                 m_driver[chan].channel = chan;
             end else begin
                 m_sequencer[chan] = null;

@@ -41,12 +41,9 @@ package test;
     // Max size bytes of DMA frame
     parameter PKT_SIZE_MAX       = 2**11;
     // Parameters that set min and max size of PCIE transaction
-    parameter PCIE_LEN_MIN = 1;
     parameter PCIE_LEN_MAX = 256;
     // Simulation parameters
     // TODO: Pokus se to smazat!!!
-    parameter DEBUG        = 1;
-
     parameter TRANSACTION_COUNT = 100000;
 
     parameter CLK_PERIOD = 4ns;

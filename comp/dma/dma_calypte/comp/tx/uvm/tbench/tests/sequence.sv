@@ -4,8 +4,8 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
-class virt_seq#(USR_REGIONS, USR_REGION_SIZE, USR_BLOCK_SIZE, USR_ITEM_WIDTH, CHANNELS, PKT_SIZE_MAX, PCIE_LEN_MIN, PCIE_LEN_MAX) extends uvm_sequence;
-    `uvm_object_param_utils(test::virt_seq#(USR_REGIONS, USR_REGION_SIZE, USR_BLOCK_SIZE, USR_ITEM_WIDTH, CHANNELS, PKT_SIZE_MAX, PCIE_LEN_MIN, PCIE_LEN_MAX))
+class virt_seq#(USR_REGIONS, USR_REGION_SIZE, USR_BLOCK_SIZE, USR_ITEM_WIDTH, CHANNELS, PKT_SIZE_MAX) extends uvm_sequence;
+    `uvm_object_param_utils(test::virt_seq#(USR_REGIONS, USR_REGION_SIZE, USR_BLOCK_SIZE, USR_ITEM_WIDTH, CHANNELS, PKT_SIZE_MAX))
     `uvm_declare_p_sequencer(uvm_dma_ll::sequencer#(USR_REGIONS, USR_REGION_SIZE, USR_BLOCK_SIZE, USR_ITEM_WIDTH, CHANNELS, PKT_SIZE_MAX))
 
     localparam USER_META_WIDTH = 24 + $clog2(PKT_SIZE_MAX+1) + $clog2(CHANNELS);
@@ -28,6 +28,7 @@ class virt_seq#(USR_REGIONS, USR_REGION_SIZE, USR_BLOCK_SIZE, USR_ITEM_WIDTH, CH
 
         for (int unsigned it = 0; it < CHANNELS; it++) begin
             m_channel[it] = uvm_dma_ll::sequence_simple::type_id::create($sformatf("channel_%0d", it));
+            m_channel[it].packet_size_max = PKT_SIZE_MAX;
         end
 
         m_pcie_lib = uvm_mfb::sequence_lib_tx#(USR_REGIONS, USR_REGION_SIZE, USR_BLOCK_SIZE, USR_ITEM_WIDTH, USER_META_WIDTH)::type_id::create("m_pcie_lib");

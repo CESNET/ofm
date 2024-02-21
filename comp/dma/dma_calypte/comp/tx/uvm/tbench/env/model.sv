@@ -24,10 +24,9 @@ class discard #(CHANNELS) extends uvm_component;
 endclass
 
 //model
-class model #(CHANNELS, PKT_SIZE_MAX, DEVICE, USR_ITEM_WIDTH, USER_META_WIDTH, CQ_ITEM_WIDTH, DATA_ADDR_W,
-              DEBUG) extends uvm_component;
-    `uvm_component_param_utils(uvm_dma_ll::model #(CHANNELS, PKT_SIZE_MAX, DEVICE, USR_ITEM_WIDTH, USER_META_WIDTH,
-                                                   CQ_ITEM_WIDTH, DATA_ADDR_W, DEBUG))
+class model #(CHANNELS, USR_ITEM_WIDTH, USER_META_WIDTH, CQ_ITEM_WIDTH, DATA_ADDR_W) extends uvm_component;
+    `uvm_component_param_utils(uvm_dma_ll::model #(CHANNELS, USR_ITEM_WIDTH, USER_META_WIDTH,
+                                                   CQ_ITEM_WIDTH, DATA_ADDR_W))
 
     uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item#(CQ_ITEM_WIDTH))                            analysis_imp_rx;
     uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(sv_pcie_meta_pack::PCIE_CQ_META_WIDTH))          analysis_imp_rx_meta;

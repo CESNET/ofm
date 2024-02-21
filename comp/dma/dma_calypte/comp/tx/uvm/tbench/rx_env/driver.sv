@@ -74,8 +74,8 @@ class driver_sync#(ITEM_WIDTH, META_WIDTH);
 endclass
 
 
-class driver#(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends uvm_driver#(sequence_item);
-    `uvm_component_param_utils(uvm_dma_ll_rx::driver#(CHANNELS, PKT_SIZE_MAX, ITEM_WIDTH, DATA_ADDR_W, DEVICE))
+class driver#(CHANNELS, PCIE_MTU, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends uvm_driver#(sequence_item);
+    `uvm_component_param_utils(uvm_dma_ll_rx::driver#(CHANNELS, PCIE_MTU, ITEM_WIDTH, DATA_ADDR_W, DEVICE))
 
     localparam PCIE_HDR_SIZE = 128;
     localparam DMA_HDR_SIZE  = 64;

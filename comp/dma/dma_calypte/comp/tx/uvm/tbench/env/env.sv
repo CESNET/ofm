@@ -7,10 +7,10 @@
 // Environment for functional verification of encode.
 // This environment containts two mii agents.
 class env #(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE, USER_TX_MFB_ITEM_WIDTH, PCIE_CQ_MFB_REGIONS,
-            PCIE_CQ_MFB_REGION_SIZE, PCIE_CQ_MFB_BLOCK_SIZE, PCIE_CQ_MFB_ITEM_WIDTH, CHANNELS, PKT_SIZE_MAX, MI_WIDTH, DEVICE, DEBUG, DATA_PTR_WIDTH) extends uvm_env;
+            PCIE_CQ_MFB_REGION_SIZE, PCIE_CQ_MFB_BLOCK_SIZE, PCIE_CQ_MFB_ITEM_WIDTH, PCIE_MTU, CHANNELS, PKT_SIZE_MAX, MI_WIDTH, DEVICE, DATA_PTR_WIDTH) extends uvm_env;
     `uvm_component_param_utils(uvm_dma_ll::env #(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE, USER_TX_MFB_ITEM_WIDTH,
-                                                 PCIE_CQ_MFB_REGIONS, PCIE_CQ_MFB_REGION_SIZE, PCIE_CQ_MFB_BLOCK_SIZE, PCIE_CQ_MFB_ITEM_WIDTH,
-                                                 CHANNELS, PKT_SIZE_MAX, MI_WIDTH, DEVICE, DEBUG, DATA_PTR_WIDTH));
+                                                 PCIE_CQ_MFB_REGIONS, PCIE_CQ_MFB_REGION_SIZE, PCIE_CQ_MFB_BLOCK_SIZE, PCIE_CQ_MFB_ITEM_WIDTH, PCIE_MTU,
+                                                 CHANNELS, PKT_SIZE_MAX, MI_WIDTH, DEVICE, DATA_PTR_WIDTH));
 
     localparam USER_META_WIDTH = 24 + $clog2(PKT_SIZE_MAX+1) + $clog2(CHANNELS);
 
@@ -19,7 +19,7 @@ class env #(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE
 
     uvm_reset::agent m_reset;
     uvm_dma_ll_rx::env #(PCIE_CQ_MFB_REGIONS, PCIE_CQ_MFB_REGION_SIZE, PCIE_CQ_MFB_BLOCK_SIZE, PCIE_CQ_MFB_ITEM_WIDTH, CHANNELS,
-                         PKT_SIZE_MAX, DATA_PTR_WIDTH, DEVICE)                                                         m_env_rx;
+                         PCIE_MTU, DATA_PTR_WIDTH, DEVICE)                                                         m_env_rx;
     uvm_logic_vector_array_mfb::env_tx #(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE,
                                          USER_TX_MFB_ITEM_WIDTH, USER_META_WIDTH)                                      m_env_tx;
     uvm_logic_vector_mvb::env_tx #(1, 1)                                                                               m_dma;
@@ -27,8 +27,8 @@ class env #(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE
 
     //uvm_dma_ll_info::watchdog #(CHANNELS) m_watch_dog;
 
-    scoreboard #(CHANNELS, PKT_SIZE_MAX, DEVICE, USER_TX_MFB_ITEM_WIDTH, USER_META_WIDTH, PCIE_CQ_MFB_ITEM_WIDTH,
-                 DATA_PTR_WIDTH, DEBUG) sc;
+    scoreboard #(CHANNELS, USER_TX_MFB_ITEM_WIDTH, USER_META_WIDTH, PCIE_CQ_MFB_ITEM_WIDTH,
+                 DATA_PTR_WIDTH) sc;
 
     // Constructor of environment.
     function new(string name, uvm_component parent);
@@ -56,7 +56,7 @@ class env #(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE
         m_config_rx.interface_name = "vif_rx";
         uvm_config_db #(uvm_dma_ll_rx::config_item)::set(this, "m_env_rx", "m_config", m_config_rx);
         m_env_rx = uvm_dma_ll_rx::env #(PCIE_CQ_MFB_REGIONS, PCIE_CQ_MFB_REGION_SIZE, PCIE_CQ_MFB_BLOCK_SIZE, PCIE_CQ_MFB_ITEM_WIDTH,
-                                        CHANNELS, PKT_SIZE_MAX, DATA_PTR_WIDTH, DEVICE)::type_id::create("m_env_rx", this);
+                                        CHANNELS, PCIE_MTU, DATA_PTR_WIDTH, DEVICE)::type_id::create("m_env_rx", this);
 
         m_mi_config                      = new();
         m_mi_config.addr_base            = 'h0;
@@ -65,8 +65,8 @@ class env #(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE
         uvm_config_db#(uvm_mi::regmodel_config)::set(this, "m_regmodel", "m_config", m_mi_config);
         m_regmodel = uvm_mi::regmodel#(uvm_dma_regs::regmodel#(CHANNELS), MI_WIDTH, MI_WIDTH)::type_id::create("m_regmodel", this);
 
-        sc  = scoreboard #(CHANNELS, PKT_SIZE_MAX, DEVICE, USER_TX_MFB_ITEM_WIDTH, USER_META_WIDTH, PCIE_CQ_MFB_ITEM_WIDTH,
-                           DATA_PTR_WIDTH, DEBUG)::type_id::create("sc", this);
+        sc  = scoreboard #(CHANNELS, USER_TX_MFB_ITEM_WIDTH, USER_META_WIDTH, PCIE_CQ_MFB_ITEM_WIDTH,
+                           DATA_PTR_WIDTH)::type_id::create("sc", this);
 
         m_sequencer = sequencer#(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE, USER_TX_MFB_ITEM_WIDTH,
                                  CHANNELS, PKT_SIZE_MAX)::type_id::create("m_sequencer", this);
