@@ -35,14 +35,34 @@ class sequence_simple extends uvm_sequence#(uvm_dma_ll_rx::sequence_item);
         end
 
         while(state == null || !state.stopped()) begin
+            int unsigned wait_fork;
             int unsigned it;
             int unsigned transaction_count;
             int unsigned stop_time;
 
             std::randomize(transaction_count) with {transaction_count dist {[1:100] :/ 10, [100:1000] :/ 20, [1000:5000] :/ 60, [5000:50000] :/ 10}; };
             std::randomize(stop_time) with {stop_time dist {[1: 10] :/ 10, [10:100] :/ 40, [1000:5000] :/ 5}; };
+
             //SLEEP TIME
-            #(stop_time*100ns);
+            wait_fork = 1;
+            fork
+                begin
+                    #(stop_time*100ns);
+                    wait_fork = 0;
+                end
+                begin
+                    if ($urandom_range(10) == 0) begin
+                        int unsigned packets_max = $urandom_range(5000, 100);
+                        int unsigned packets     = 0;
+
+                        while(wait_fork == 1 && packets < packets_max) begin
+                            start_item(req);
+                            assert(req.randomize() with {req.packet.size() inside {[packet_size_min:packet_size_max-1]};}) else `uvm_fatal(m_sequencer.get_full_name(), "\n\tCannot randomize packet");
+                            finish_item(req);
+                        end
+                    end
+                end
+            join
 
             start.start(null);
 
