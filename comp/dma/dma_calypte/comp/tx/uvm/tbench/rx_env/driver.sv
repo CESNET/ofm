@@ -267,7 +267,7 @@ class driver#(CHANNELS, PCIE_MTU, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends uvm_d
             //GENERATE RANDOM SIZE OF BLOCKS
             //pcie_len = 256; //$urandom_range(256, 1);
             //pcie_len = $urandom_range(256, 1);
-            rand_ret = std::randomize(pcie_len) with {pcie_len dist {[1:63] :/ 5, [64:127] :/ 10,  [128:256] :/ 20, 256 :/ 65}; };
+            rand_ret = std::randomize(pcie_len) with {pcie_len dist {[1:63] :/ 5, [64:PCIE_MTU/2-1] :/ 10,  [PCIE_MTU/2:PCIE_MTU-1] :/ 20, PCIE_MTU :/ 65}; };
             if (rand_ret == 0) begin
                 pcie_len = 256;
             end
