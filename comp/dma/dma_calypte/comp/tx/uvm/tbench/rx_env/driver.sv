@@ -345,10 +345,14 @@ class driver#(CHANNELS, PCIE_MTU, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends uvm_d
             ptr.data_addr += data_index;
             ptr.data_addr &= ptr.data_mask;
             pcie_trans_cnt++;
-
-            //SEND DATA
-            data_export.put(channel, pcie_transaction.meta, pcie_transaction.data);
         end
+
+        //SHUFLE AND SEND DATA
+        pcie_transactions.shuffle();
+        for (int unsigned it = 0; it < pcie_transactions.size(); it++) begin
+            data_export.put(channel, pcie_transactions[it].meta, pcie_transactions[it].data);
+        end
+
 
         //Allign pointer to PACKET ALLIGMENT
         if ((ptr.data_addr % PACKET_ALIGNMENT) != 0) begin
@@ -356,7 +360,7 @@ class driver#(CHANNELS, PCIE_MTU, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends uvm_d
             wait_for_free_space(size_to_allign, m_regmodel.hw_data_pointer, ptr.data_addr, ptr.data_mask);
 
             ptr.data_addr += size_to_allign;
-            ptr.data_addr %= ptr.data_mask;
+            ptr.data_addr &= ptr.data_mask;
         end
 
         //actualize sdp_pointer
