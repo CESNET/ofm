@@ -49,12 +49,20 @@ class virt_seq#(USR_REGIONS, USR_REGION_SIZE, USR_BLOCK_SIZE, USR_ITEM_WIDTH, CH
     endtask
 
     virtual task run_channels();
+       uvm_common::sequence_cfg_transactions seq_cfg; 
+
+        seq_cfg = new();
+        seq_cfg.transactions_min = 20000;
+        seq_cfg.transactions_max = 200000;
+        seq_cfg.randomize();
         #(200ns);
 
         for (int unsigned it = 0; it < CHANNELS; it++) begin
             fork
                 automatic int unsigned index = it;
                 begin
+                    uvm_config_db#(uvm_common::sequence_cfg)::set(p_sequencer.m_packet[index], "", "state", seq_cfg);
+
                     m_channel[index].randomize();
                     m_channel[index].start(p_sequencer.m_packet[index]);
                     done[index] = 1;
