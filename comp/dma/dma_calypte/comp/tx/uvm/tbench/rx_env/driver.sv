@@ -115,40 +115,72 @@ class driver#(CHANNELS, PCIE_MTU, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends uvm_d
         register.write(status, data);
     endtask
 
-    function int unsigned encode_fbe(logic [4-1 : 0] be);
-        int unsigned ret;
-        casex (be)
+    function int unsigned encode_fbe(logic [ITEM_WIDTH/8-1 : 0] be);
+        int unsigned it = 0;
+
+        if (be != 0) begin
+            while (it < ITEM_WIDTH/8 && be[it] == 0) begin
+                it++;
+            end
+        end
+        /*casex (be)
             4'b0000 : ret = 0;
             4'bxxx1 : ret = 0;
             4'bxx10 : ret = 1;
             4'bx100 : ret = 2;
             4'b1000 : ret = 3;
-        endcase
-        return ret;
+        endcase*/
+        return it;
     endfunction
 
-    function int unsigned encode_lbe(logic [4-1 : 0] be);
-        int unsigned ret;
-        casex (be)
+    function int unsigned encode_lbe(logic [ITEM_WIDTH/8-1 : 0] be);
+        int unsigned it  = ITEM_WIDTH/8;
+
+        if (be != 0) begin
+            while (it > 0 && be[it-1] == 0) begin
+                it--;
+            end;
+        end
+        /*casex (be)
             4'b0000 : ret = 4;
             4'b1xxx : ret = 4;
             4'b01xx : ret = 3;
             4'b001x : ret = 2;
             4'b0001 : ret = 1;
-        endcase
-        return ret;
+        endcase*/
+        return it;
     endfunction
 
-    function logic[4-1 : 0] decode_lbe(logic [1 : 0] ib);
-        logic[4-1 : 0] be;
-        case (ib)
-            2'b00 : be = 4'b1111;
-            2'b01 : be = 4'b0001;
-            2'b10 : be = 4'b0011;
-            2'b11 : be = 4'b0111;
-        endcase
+    function logic[ITEM_WIDTH/8-1 : 0] decode_lbe(int unsigned mod);
+        logic[ITEM_WIDTH/8-1 : 0] be = 0;
+
+        if (mod != 0) begin
+            for (int unsigned it = 0; it < mod; it++) begin
+                be[it] = 1'b1;
+            end
+        end else begin
+            be = '1;
+        end
         return be;
     endfunction
+
+
+    function logic [ITEM_WIDTH/8-1 : 0] lbe_to_fbe(logic [ITEM_WIDTH/8-1 : 0] lbe);
+        logic [ITEM_WIDTH/8-1 : 0] fbe = 0;
+
+        if (lbe[ITEM_WIDTH/8-1] != 1'b1) begin
+            int unsigned it = ITEM_WIDTH/8;
+            while (it > 0 && lbe[it-1] == 1'b0) begin
+                fbe[it-1] = 1'b1;
+                it--;
+            end
+        end else begin
+            fbe = '1;
+        end
+
+        return fbe;
+    endfunction
+
 
     function string print_data(logic [ITEM_WIDTH-1 : 0] data[]);
         string ret = $sformatf("\nData size %0d", data.size());
@@ -273,15 +305,20 @@ class driver#(CHANNELS, PCIE_MTU, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends uvm_d
             end
 
             //lbe =
-            fbe = (lbe == '1) ? '1 : ~lbe;
+            fbe = lbe_to_fbe(lbe);
             if (packet_len <= (packet_index/(ITEM_WIDTH/8) + pcie_len)) begin
                 pcie_len = packet_len - packet_index/(ITEM_WIDTH/8);
                 lbe      = decode_lbe(req.packet.size() % ((ITEM_WIDTH/8)));
             end else begin
                 assert(std::randomize(lbe) with {
-                        if (pcie_len == 1){$countones(lbe & fbe) > 0;}
-                        lbe inside {4'b1111, 4'b0111, 4'b0011, 4'b0001}; }
-                    ) else `uvm_fatal(this.get_full_name(), "\n\tCannot randomize lbe");
+                        if (pcie_len == 1){
+                            $countones(lbe & fbe) > 0;
+                            lbe inside {4'b1111, 4'b0111, 4'b0011, 4'b0001};
+                        } else {
+                            //lbe inside {4'b1111, 4'b0111, 4'b0011, 4'b0001};
+                            lbe inside {4'b1000, 4'b1100, 4'b1010, 4'b1110, 4'b1001, 4'b1101, 4'b1011, 4'b1111, 4'b0100, 4'b0110, 4'b0101, 4'b0111, 4'b0010, 4'b0011, 4'b0001};
+                        }
+                    }) else `uvm_fatal(this.get_full_name(), "\n\tCannot randomize lbe");
             end
 
             // COPY DATA TO TEMPORALY VARIABLE
@@ -331,7 +368,7 @@ class driver#(CHANNELS, PCIE_MTU, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends uvm_d
             debug_msg = {debug_msg, $sformatf("\tdata_addr 0x%h(%0d)\n", ptr.data_addr, ptr.data_addr)};
             debug_msg = {debug_msg, $sformatf("\tpcie_addr 0x%h(%0d)\n", pcie_addr, pcie_addr)};
             debug_msg = {debug_msg, $sformatf("\tpcie_len  %0d dwords\n", pcie_len)};
-            debug_msg = {debug_msg, $sformatf("\tfbe %h lbe %h\n", fbe, lbe)};
+            debug_msg = {debug_msg, $sformatf("\tfbe %b lbe %b\n", fbe, lbe)};
             debug_msg = {debug_msg, $sformatf("\tpcie_len  %0d dwords\n", pcie_len)};
             debug_msg = {debug_msg, print_data(data)};
             `uvm_info(this.get_full_name(), debug_msg, UVM_HIGH);
