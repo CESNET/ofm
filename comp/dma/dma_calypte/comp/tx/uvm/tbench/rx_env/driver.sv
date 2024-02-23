@@ -239,7 +239,7 @@ class driver#(CHANNELS, PCIE_MTU, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends uvm_d
 
 
     task send_data();
-        pcie_info pcie_transaction;
+        pcie_info pcie_transactions[$];
         int unsigned packet_index;
         int unsigned pcie_len;
         logic [ITEM_WIDTH-1 : 0]  data[];
@@ -254,6 +254,7 @@ class driver#(CHANNELS, PCIE_MTU, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends uvm_d
 
         packet_index = 0;
         pcie_trans_cnt = 0;
+        pcie_transactions.delete();
         //////////////////////////////////
         // DATA SEND
 
@@ -317,14 +318,11 @@ class driver#(CHANNELS, PCIE_MTU, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends uvm_d
             end
             packet_index += data_index;
 
-            //std::randomize(lbe) with {lbe inside {4'b1000, 4'b1100, 4'b1010, 4'b1110, 4'b1001, 4'b1101, 4'b1011, 4'b1111, 4'b0100, 4'b0110, 4'b0101, 4'b0111, 4'b0010, 4'b0011, 4'b0001}; };
-            //lbe = ;
-
             pcie_addr = '0;
             pcie_addr[DATA_ADDR_W-1 : 0] = ptr.data_addr; // Address is in bytes
             pcie_addr[(DATA_ADDR_W+1+$clog2(CHANNELS))-1 : DATA_ADDR_W+1] = channel;
             pcie_addr[(DATA_ADDR_W+$clog2(CHANNELS)+1)] = 1'b0;
-            pcie_transaction = create_pcie_req(pcie_addr, pcie_len, fbe, send_lbe, data);
+            pcie_transactions.push_back(create_pcie_req(pcie_addr, pcie_len, fbe, send_lbe, data));
 
             debug_msg = "\n";
             debug_msg = {debug_msg, "-----------------------------------------------\n"};
