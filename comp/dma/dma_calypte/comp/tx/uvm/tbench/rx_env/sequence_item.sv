@@ -62,8 +62,10 @@ class sequence_item extends uvm_sequence_item;
 
         ret = $sformatf("%s\n\tdma_rx_ll_rx::sequence_item meta %h size %0d", super.convert2string(), meta, packet.size());
         for (int unsigned it = 0; it < packet.size(); it++) begin
-            if (it % (region_width) == 0) begin
+            if (it % (region_width*4) == 0) begin
                 ret = {ret, $sformatf("\n\t\t%x", packet[it])};
+            end else if (it % (region_width) == 0) begin
+                ret = {ret, $sformatf("    %x", packet[it])};
             end else begin
                 ret = {ret, $sformatf(" %x", packet[it])};
             end
