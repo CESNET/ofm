@@ -23,6 +23,8 @@ package uvm_logic_vector_array;
     `include "monitor.sv"
     `include "agent.sv"
 
+    `include "meter.sv"
+
 endpackage
 
 `endif
