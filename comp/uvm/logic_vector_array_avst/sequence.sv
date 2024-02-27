@@ -535,11 +535,30 @@ class sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH,
     // subclass can redefine and change run sequences
     // can be useful in specific tests
     virtual function void init_sequence(config_sequence param_cfg = null);
-        super.init_sequence(param_cfg);
+        uvm_common::sequence_library::init_sequence(param_cfg);
         this.add_sequence(uvm_logic_vector_array_avst::sequence_full_speed_pcie_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH, READY_LATENCY)::get_type());
         this.add_sequence(uvm_logic_vector_array_avst::seqv_no_inframe_gap_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH, READY_LATENCY)::get_type());
         this.add_sequence(uvm_logic_vector_array_avst::sequence_stop_pcie_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH, READY_LATENCY)::get_type());
         this.add_sequence(uvm_logic_vector_array_avst::sequence_burst_pcie_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH, READY_LATENCY)::get_type());
     endfunction
 endclass
+
+class sequence_lib_rx_speed#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH, READY_LATENCY) extends sequence_lib_rx#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH, READY_LATENCY);
+  `uvm_object_param_utils(    uvm_logic_vector_array_avst::sequence_lib_rx_speed#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH, READY_LATENCY))
+  `uvm_sequence_library_utils(uvm_logic_vector_array_avst::sequence_lib_rx_speed#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH, READY_LATENCY))
+
+  function new(string name = "sequence_lib_rx_speed");
+    super.new(name);
+    init_sequence_library();
+  endfunction
+
+    // subclass can redefine and change run sequences
+    // can be useful in specific tests
+    virtual function void init_sequence(config_sequence param_cfg = null);
+        uvm_common::sequence_library::init_sequence(param_cfg);
+        this.add_sequence(uvm_logic_vector_array_avst::sequence_full_speed_pcie_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH, READY_LATENCY)::get_type());
+    endfunction
+endclass
+
+
 
