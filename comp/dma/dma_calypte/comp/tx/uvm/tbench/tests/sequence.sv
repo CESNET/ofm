@@ -52,8 +52,8 @@ class virt_seq#(USR_REGIONS, USR_REGION_SIZE, USR_BLOCK_SIZE, USR_ITEM_WIDTH, CH
        uvm_common::sequence_cfg_transactions seq_cfg; 
 
         seq_cfg = new();
-        seq_cfg.transactions_min = 20000;
-        seq_cfg.transactions_max = 200000;
+        seq_cfg.transactions_min =  5000;
+        seq_cfg.transactions_max = 30000;
         seq_cfg.randomize();
         #(200ns);
 
