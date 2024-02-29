@@ -18,6 +18,8 @@ entity RX_DMA_TRANS_BUFFER is
     generic (
         -- The amount of data which needs to be buffered in bytes
         BUFFERED_DATA_SIZE : integer := 128;
+        -- Adds a skid buffer on the output
+        REG_OUT_EN         : boolean := TRUE;
 
         -- =========================================================================================
         -- MFB bus parameters
@@ -26,8 +28,7 @@ entity RX_DMA_TRANS_BUFFER is
         -- =========================================================================================
         RX_REGION_SIZE : integer := 1;
         RX_BLOCK_SIZE  : integer := 4*8;
-        RX_ITEM_WIDTH  : integer := 8
-        );
+        RX_ITEM_WIDTH  : integer := 8);
 
     port (
         CLK : in std_logic;
@@ -65,16 +66,20 @@ architecture FULL of RX_DMA_TRANS_BUFFER is
 
     constant BUFFER_DEPTH : positive := BUFFERED_DATA_SIZE/(RX_REGION_SIZE*RX_BLOCK_SIZE);
 
+    type packing_fsm_state_t is (S_IDLE, S_PACKING, S_WAIT);
+    signal packing_fsm_pst : packing_fsm_state_t := S_IDLE;
+    signal packing_fsm_nst : packing_fsm_state_t := S_IDLE;
+
     -- NOTE: SOF_POS is not used internally because each output packet has this set to 0, e.g. it is aligned to the
     -- LSB of the output word. EOF_POS does not have a register but it is recalculated according to the currently
     -- buffered word's index.
-    signal rx_data_reg_pst : slv_array_t((BUFFER_DEPTH - 1) downto 0)(RX_MFB_DATA'range);
-    signal rx_sof_reg_pst  : std_logic_vector((BUFFER_DEPTH - 1) downto 0);
-    signal rx_eof_reg_pst  : std_logic_vector((BUFFER_DEPTH - 1) downto 0);
+    signal rx_mfb_data_reg_pst : slv_array_t((BUFFER_DEPTH - 1) downto 0)(RX_MFB_DATA'range);
+    signal rx_mfb_sof_reg_pst  : std_logic_vector((BUFFER_DEPTH - 1) downto 0);
+    signal rx_mfb_eof_reg_pst  : std_logic_vector((BUFFER_DEPTH - 1) downto 0);
 
-    signal rx_data_reg_nst : slv_array_t((BUFFER_DEPTH - 1) downto 0)(RX_MFB_DATA'range);
-    signal rx_sof_reg_nst  : std_logic_vector((BUFFER_DEPTH - 1) downto 0);
-    signal rx_eof_reg_nst  : std_logic_vector((BUFFER_DEPTH - 1) downto 0);
+    signal rx_mfb_data_reg_nst : slv_array_t((BUFFER_DEPTH - 1) downto 0)(RX_MFB_DATA'range);
+    signal rx_mfb_sof_reg_nst  : std_logic_vector((BUFFER_DEPTH - 1) downto 0);
+    signal rx_mfb_eof_reg_nst  : std_logic_vector((BUFFER_DEPTH - 1) downto 0);
 
     signal recalc_eof_pos_pst : unsigned(TX_MFB_EOF_POS'range);
     signal recalc_eof_pos_nst : unsigned(TX_MFB_EOF_POS'range);
@@ -82,9 +87,14 @@ architecture FULL of RX_DMA_TRANS_BUFFER is
     signal segment_ptr_pst : unsigned(log2(BUFFER_DEPTH) -1 downto 0);
     signal segment_ptr_nst : unsigned(log2(BUFFER_DEPTH) -1 downto 0);
 
-    signal buff_tx_src_rdy_pst : std_logic;
-    signal buff_tx_src_rdy_nst : std_logic;
+    signal buff_tx_mfb_src_rdy_pst : std_logic;
+    signal buff_tx_mfb_src_rdy_nst : std_logic;
 
+    -- The FIFO stores MFB data, SOF, EOF and EOF_POS that was calculated from the state machine.
+    constant FIFO_TX_DATA_WIDTH : natural := TX_MFB_DATA'length + 1 + 1 + recalc_eof_pos_nst'length;
+
+    signal fifo_rx_mfb_dst_rdy   : std_logic;
+    signal fifo_tx_mfb_data      : std_logic_vector(FIFO_TX_DATA_WIDTH -1 downto 0);
 begin
 
     assert (RX_REGION_SIZE = 1 and (RX_BLOCK_SIZE = 4*8 or RX_BLOCK_SIZE = 8*8) and RX_ITEM_WIDTH = 8)
@@ -100,25 +110,22 @@ begin
         if (rising_edge(CLK)) then
             if (RST = '1') then
 
+                packing_fsm_pst <= S_IDLE;
                 segment_ptr_pst <= (others => '0');
 
-                buff_tx_src_rdy_pst <= '0';
+                buff_tx_mfb_src_rdy_pst <= '0';
+            else
 
-                rx_sof_reg_pst <= (others => '0');
-                rx_eof_reg_pst <= (others => '0');
-
-            elsif (TX_MFB_DST_RDY = '1') then
-
+                packing_fsm_pst <= packing_fsm_nst;
                 segment_ptr_pst <= segment_ptr_nst;
 
-                buff_tx_src_rdy_pst <= buff_tx_src_rdy_nst;
-
-                rx_data_reg_pst <= rx_data_reg_nst;
-                rx_sof_reg_pst  <= rx_sof_reg_nst;
-                rx_eof_reg_pst  <= rx_eof_reg_nst;
+                rx_mfb_data_reg_pst <= rx_mfb_data_reg_nst;
+                rx_mfb_sof_reg_pst  <= rx_mfb_sof_reg_nst;
+                rx_mfb_eof_reg_pst  <= rx_mfb_eof_reg_nst;
 
                 recalc_eof_pos_pst <= recalc_eof_pos_nst;
 
+                buff_tx_mfb_src_rdy_pst <= buff_tx_mfb_src_rdy_nst;
             end if;
         end if;
     end process;
@@ -127,66 +134,157 @@ begin
     -- The process also handles the situation when the EOF occurs in the middle of the buffer.
     fsm_output_logic_p : process (all) is
     begin
-
+        packing_fsm_nst <= packing_fsm_pst;
         segment_ptr_nst <= segment_ptr_pst;
 
-        buff_tx_src_rdy_nst <= '0';
-        RX_MFB_DST_RDY      <= TX_MFB_DST_RDY;
-
-        rx_data_reg_nst <= rx_data_reg_pst;
-        rx_sof_reg_nst  <= rx_sof_reg_pst;
-        rx_eof_reg_nst  <= rx_eof_reg_pst;
+        rx_mfb_data_reg_nst <= rx_mfb_data_reg_pst;
+        rx_mfb_sof_reg_nst  <= rx_mfb_sof_reg_pst;
+        rx_mfb_eof_reg_nst  <= rx_mfb_eof_reg_pst;
 
         recalc_eof_pos_nst <= recalc_eof_pos_pst;
 
-        -- waits until valid word occurs on the input
-        if (RX_MFB_SRC_RDY = '1') then
+        RX_MFB_DST_RDY          <= '1';
+        buff_tx_mfb_src_rdy_nst <= buff_tx_mfb_src_rdy_pst;
 
-            segment_ptr_nst <= segment_ptr_pst + 1;
+        case packing_fsm_pst is
+            when S_IDLE =>
 
-            -- assign MFB data to the specific register determined by the segment_ptr_pst pointer
-            rx_data_reg_nst(to_integer(segment_ptr_pst)) <= RX_MFB_DATA;
-            rx_sof_reg_nst(to_integer(segment_ptr_pst))  <= RX_MFB_SOF;
-            rx_eof_reg_nst(to_integer(segment_ptr_pst))  <= RX_MFB_EOF;
+                -- NOTE: Does not apply if the incoming packets can have size lower than the width
+                -- of the input data bus.
+                if (RX_MFB_SRC_RDY = '1') then
+                    packing_fsm_nst <= S_PACKING;
 
-            if (RX_MFB_EOF = '1' and segment_ptr_pst < (BUFFER_DEPTH - 1)) then
+                    rx_mfb_data_reg_nst(to_integer(segment_ptr_pst)) <= RX_MFB_DATA;
+                    rx_mfb_sof_reg_nst(to_integer(segment_ptr_pst))  <= RX_MFB_SOF;
+                    rx_mfb_eof_reg_nst(to_integer(segment_ptr_pst))  <= RX_MFB_EOF;
 
-                segment_ptr_nst <= (others => '0');
+                    segment_ptr_nst <= segment_ptr_pst + 1;
 
-                -- if buffer is not full, then deassert the remaining SOF/EOF bits in the rest of the words so the
-                -- would not cause bugs in the future
-                for i in 0 to (BUFFER_DEPTH - 1) loop
+                    if (RX_MFB_EOF = '1' and segment_ptr_pst < (BUFFER_DEPTH - 1)) then
 
-                    if (i > segment_ptr_pst and segment_ptr_pst < (BUFFER_DEPTH - 1)) then
-                        rx_sof_reg_nst(i) <= '0';
-                        rx_eof_reg_nst(i) <= '0';
+                        packing_fsm_nst <= S_WAIT;
+
+                        segment_ptr_nst <= (others => '0');
+
+                        -- if buffer is not full, then deassert the remaining SOF/EOF bits in the rest of the words so
+                        -- the would not cause bugs in the future
+                        for i in 0 to (BUFFER_DEPTH - 1) loop
+                            if (i > segment_ptr_pst and segment_ptr_pst < (BUFFER_DEPTH - 1)) then
+                                rx_mfb_sof_reg_nst(i) <= '0';
+                                rx_mfb_eof_reg_nst(i) <= '0';
+                            end if;
+                        end loop;
+
+                        recalc_eof_pos_nst      <= segment_ptr_pst & unsigned(RX_MFB_EOF_POS);
+                        buff_tx_mfb_src_rdy_nst <= '1';
                     end if;
-                end loop;
+                end if;
 
-                recalc_eof_pos_nst  <= segment_ptr_pst & unsigned(RX_MFB_EOF_POS);
-                buff_tx_src_rdy_nst <= '1';
+            when S_PACKING =>
 
-            elsif (RX_MFB_EOF = '1' and segment_ptr_pst = (BUFFER_DEPTH - 1)) then
+                if (RX_MFB_SRC_RDY = '1') then
 
-                recalc_eof_pos_nst  <= segment_ptr_pst & unsigned(RX_MFB_EOF_POS);
-                buff_tx_src_rdy_nst <= '1';
+                    rx_mfb_data_reg_nst(to_integer(segment_ptr_pst)) <= RX_MFB_DATA;
+                    rx_mfb_sof_reg_nst(to_integer(segment_ptr_pst))  <= RX_MFB_SOF;
+                    rx_mfb_eof_reg_nst(to_integer(segment_ptr_pst))  <= RX_MFB_EOF;
 
-            elsif (RX_MFB_EOF = '0' and segment_ptr_pst = (BUFFER_DEPTH - 1)) then
+                    segment_ptr_nst <= segment_ptr_pst + 1;
 
-                buff_tx_src_rdy_nst <= '1';
+                    if (RX_MFB_EOF = '1' and segment_ptr_pst < (BUFFER_DEPTH - 1)) then
 
-            end if;
+                        packing_fsm_nst <= S_WAIT;
 
-        end if;
+                        segment_ptr_nst <= (others => '0');
+
+                        -- if buffer is not full, then deassert the remaining SOF/EOF bits in the rest of the words so
+                        -- the would not cause bugs in the future
+                        for i in 0 to (BUFFER_DEPTH - 1) loop
+                            if (i > segment_ptr_pst and segment_ptr_pst < (BUFFER_DEPTH - 1)) then
+                                rx_mfb_sof_reg_nst(i) <= '0';
+                                rx_mfb_eof_reg_nst(i) <= '0';
+                            end if;
+                        end loop;
+
+                        recalc_eof_pos_nst      <= segment_ptr_pst & unsigned(RX_MFB_EOF_POS);
+                        buff_tx_mfb_src_rdy_nst <= '1';
+
+                    elsif (RX_MFB_EOF = '1' and segment_ptr_pst = (BUFFER_DEPTH - 1)) then
+
+                        packing_fsm_nst <= S_WAIT;
+
+                        recalc_eof_pos_nst      <= segment_ptr_pst & unsigned(RX_MFB_EOF_POS);
+                        buff_tx_mfb_src_rdy_nst <= '1';
+
+                    elsif (RX_MFB_EOF = '0' and segment_ptr_pst = (BUFFER_DEPTH - 1)) then
+                        packing_fsm_nst <= S_WAIT;
+
+                        buff_tx_mfb_src_rdy_nst <= '1';
+                    end if;
+                end if;
+
+            when S_WAIT =>
+
+                RX_MFB_DST_RDY <= fifo_rx_mfb_dst_rdy;
+
+                if (fifo_rx_mfb_dst_rdy = '1') then
+
+                    buff_tx_mfb_src_rdy_nst <= '0';
+
+                    if (RX_MFB_SRC_RDY = '1') then
+                        packing_fsm_nst <= S_PACKING;
+
+                        rx_mfb_data_reg_nst(to_integer(segment_ptr_pst)) <= RX_MFB_DATA;
+                        rx_mfb_sof_reg_nst(to_integer(segment_ptr_pst))  <= RX_MFB_SOF;
+                        rx_mfb_eof_reg_nst(to_integer(segment_ptr_pst))  <= RX_MFB_EOF;
+
+                        segment_ptr_nst <= segment_ptr_pst + 1;
+
+                        if (RX_MFB_EOF = '1' and segment_ptr_pst < (BUFFER_DEPTH - 1)) then
+
+                            packing_fsm_nst <= S_WAIT;
+
+                            segment_ptr_nst <= (others => '0');
+
+                            -- if buffer is not full, then deassert the remaining SOF/EOF bits in the rest of the words so
+                            -- the would not cause bugs in the future
+                            for i in 0 to (BUFFER_DEPTH - 1) loop
+                                if (i > segment_ptr_pst and segment_ptr_pst < (BUFFER_DEPTH - 1)) then
+                                    rx_mfb_sof_reg_nst(i) <= '0';
+                                    rx_mfb_eof_reg_nst(i) <= '0';
+                                end if;
+                            end loop;
+
+                            recalc_eof_pos_nst      <= segment_ptr_pst & unsigned(RX_MFB_EOF_POS);
+                            buff_tx_mfb_src_rdy_nst <= '1';
+                        end if;
+                    else
+                        packing_fsm_nst <= S_IDLE;
+                    end if;
+                end if;
+            when others => null;
+        end case;
     end process;
 
+    reg_fifo_i : entity work.REG_FIFO
+        generic map (
+            DATA_WIDTH => FIFO_TX_DATA_WIDTH,
+            ITEMS      => 1,
+            FAKE_FIFO  => not REG_OUT_EN)
+        port map (
+            CLK => CLK,
+            RST => RST,
 
-    TX_MFB_DATA    <= slv_array_ser(rx_data_reg_pst);
-    -- if SOF occurs, it should always be in the first register
-    TX_MFB_SOF     <= rx_sof_reg_pst(rx_sof_reg_pst'low);
-    TX_MFB_EOF     <= or rx_eof_reg_pst;
+            RX_DATA    => slv_array_ser(rx_mfb_data_reg_pst) & rx_mfb_sof_reg_pst(0) & (or rx_mfb_eof_reg_pst) & std_logic_vector(recalc_eof_pos_pst),
+            RX_SRC_RDY => buff_tx_mfb_src_rdy_pst,
+            RX_DST_RDY => fifo_rx_mfb_dst_rdy,
+
+            TX_DATA    => fifo_tx_mfb_data,
+            TX_SRC_RDY => TX_MFB_SRC_RDY,
+            TX_DST_RDY => TX_MFB_DST_RDY);
+
+    TX_MFB_DATA    <= fifo_tx_mfb_data(FIFO_TX_DATA_WIDTH -1 downto 1 + 1 + recalc_eof_pos_nst'length);
+    TX_MFB_SOF     <= fifo_tx_mfb_data(1 + 1 + recalc_eof_pos_nst'length -1);
+    TX_MFB_EOF     <= fifo_tx_mfb_data(1 + recalc_eof_pos_nst'length -1);
     TX_MFB_SOF_POS <= (others => '0');
-    TX_MFB_EOF_POS <= std_logic_vector(recalc_eof_pos_pst);
-    TX_MFB_SRC_RDY <= buff_tx_src_rdy_pst;
-
+    TX_MFB_EOF_POS <= fifo_tx_mfb_data(recalc_eof_pos_nst'length -1 downto 0);
 end architecture;

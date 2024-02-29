@@ -54,7 +54,8 @@ entity RX_DMA_CALYPTE is
         -- * Maximum allowed value is 2**16 - 1
         PKT_SIZE_MAX : natural := 2**16 - 1;
 
-        TRBUF_FIFO_EN           : boolean := FALSE
+        TRBUF_FIFO_EN           : boolean := FALSE;
+        TRBUF_REG_EN            : boolean := FALSE
         );
 
     port (
@@ -515,7 +516,8 @@ begin
                 RX_BLOCK_SIZE  => MFB_BLOCK_SIZE_INBUF2TRBUF,
                 RX_ITEM_WIDTH  => MFB_ITEM_WIDTH_INBUF2TRBUF,
 
-                BUFFERED_DATA_SIZE => BUFFERED_DATA_SIZE)
+                BUFFERED_DATA_SIZE => BUFFERED_DATA_SIZE,
+                REG_OUT_EN         => TRBUF_REG_EN)
             port map (
                 CLK => CLK,
                 RST => RESET,

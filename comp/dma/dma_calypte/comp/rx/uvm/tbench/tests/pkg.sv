@@ -31,6 +31,7 @@ package test;
     parameter CNTRS_WIDTH    = 64;
     parameter PKT_SIZE_MAX   = 2**16-1;
     parameter OPT_BUFF       = 1'b0;
+    parameter TRBUF_REG_EN   = 1'b1;
 
     parameter DEVICE = "ULTRASCALE";
     parameter TRANSACTION_COUNT = 100000;
