@@ -243,11 +243,30 @@ class sequence_lib_tx#(ITEMS, ITEM_WIDTH) extends uvm_common::sequence_library#(
     // subclass can redefine and change run sequences
     // can be useful in specific tests
     virtual function void init_sequence(config_sequence param_cfg = null);
-        super.init_sequence(param_cfg);
+        uvm_common::sequence_library::init_sequence(param_cfg);
         this.add_sequence(sequence_simple_tx#(ITEMS, ITEM_WIDTH)::get_type());
         this.add_sequence(sequence_full_speed_tx#(ITEMS, ITEM_WIDTH)::get_type());
         this.add_sequence(sequence_stop_tx#(ITEMS, ITEM_WIDTH)::get_type());
     endfunction
 endclass
+
+
+class sequence_lib_tx_speed#(ITEMS, ITEM_WIDTH) extends sequence_lib_tx#(ITEMS, ITEM_WIDTH);
+  `uvm_object_param_utils(    uvm_mvb::sequence_lib_tx_speed#(ITEMS, ITEM_WIDTH))
+  `uvm_sequence_library_utils(uvm_mvb::sequence_lib_tx_speed#(ITEMS, ITEM_WIDTH))
+
+    function new(string name = "sequence_lib_tx_speed");
+        super.new(name);
+        init_sequence_library();
+    endfunction
+
+    // subclass can redefine and change run sequences
+    // can be useful in specific tests
+    virtual function void init_sequence(config_sequence param_cfg = null);
+        uvm_common::sequence_library::init_sequence(param_cfg);
+        this.add_sequence(uvm_mvb::sequence_full_speed_tx#(ITEMS, ITEM_WIDTH)::get_type());
+    endfunction
+endclass
+
 
 `endif
