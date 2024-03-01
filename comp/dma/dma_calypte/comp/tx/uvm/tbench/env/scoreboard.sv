@@ -85,8 +85,8 @@ class stats;
     endfunction
 endclass
 
-class compare #(ITEM_WIDTH, USER_META_WIDTH, DEBUG, CHANNELS) extends uvm_component;
-    `uvm_component_utils(uvm_dma_ll::compare #(ITEM_WIDTH, USER_META_WIDTH, DEBUG, CHANNELS))
+class compare #(ITEM_WIDTH, USER_META_WIDTH, CHANNELS) extends uvm_component;
+    `uvm_component_utils(uvm_dma_ll::compare #(ITEM_WIDTH, USER_META_WIDTH, CHANNELS))
 
     uvm_tlm_analysis_fifo #(uvm_common::model_item #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))) model_mfb;
     uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(USER_META_WIDTH))                            model_meta;
@@ -130,22 +130,15 @@ class compare #(ITEM_WIDTH, USER_META_WIDTH, DEBUG, CHANNELS) extends uvm_compon
                     uvm_logic_vector::sequence_item#(USER_META_WIDTH)  tr_model_meta);
 
         string msg;
-        logic [ITEM_WIDTH-1 : 0] bad_tr[$];
         int unsigned             bad_tr_pos[$];
-        logic [ITEM_WIDTH-1 : 0] correct_tr[$];
 
-        if (DEBUG) begin
-            foreach(tr_dut_mfb.data[it]) begin
-                if (tr_dut_mfb.data[it] != tr_model_mfb.data[it]) begin
-                    bad_tr.push_back(tr_dut_mfb.data[it]);
-                    bad_tr_pos.push_back(it);
-                    correct_tr.push_back(tr_model_mfb.data[it]);
-                end
+        foreach(tr_dut_mfb.data[it]) begin
+            if (it < tr_model_mfb.data.size() && tr_dut_mfb.data[it] != tr_model_mfb.data[it]) begin
+                bad_tr_pos.push_back(it);
             end
-
-            $displayh("WRONG BYTES: %p CORRECT BYTES: %p\n", bad_tr, correct_tr);
-            $display("WRONG BYTES POS: %p\n", bad_tr_pos);
         end
+
+        $display("WRONG BYTES POS: %p\n", bad_tr_pos);
 
         $swrite(msg, "%s\n\nDATA COMPARISON CHANNEL %d", msg, tr_model_meta.data[$clog2(CHANNELS)+24-1 : 24]);
         $swrite(msg, "%s\n=============================================================================================================================\n", msg);
@@ -171,9 +164,7 @@ class compare #(ITEM_WIDTH, USER_META_WIDTH, DEBUG, CHANNELS) extends uvm_compon
         uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)                           tr_dut_mfb_fifo[CHANNELS][$];
         uvm_logic_vector::sequence_item#(USER_META_WIDTH)                            tr_dut_meta_fifo[CHANNELS][$];
 
-        logic [ITEM_WIDTH-1 : 0]       bad_tr[$];
         int unsigned                   bad_tr_pos[$];
-        logic [ITEM_WIDTH-1 : 0]       correct_tr[$];
         logic [$clog2(CHANNELS)-1 : 0] model_channel;
         logic [$clog2(CHANNELS)-1 : 0] dut_channel;
         string                       debug_msg;
@@ -235,11 +226,10 @@ class compare #(ITEM_WIDTH, USER_META_WIDTH, DEBUG, CHANNELS) extends uvm_compon
 
 endclass
 
-class scoreboard #(CHANNELS, PKT_SIZE_MAX, DEVICE, USR_ITEM_WIDTH, USER_META_WIDTH, CQ_ITEM_WIDTH,
-                   DATA_ADDR_W, DEBUG) extends uvm_scoreboard;
-    `uvm_component_param_utils(uvm_dma_ll::scoreboard #(CHANNELS, PKT_SIZE_MAX, DEVICE, USR_ITEM_WIDTH,
-                                                        USER_META_WIDTH, CQ_ITEM_WIDTH, DATA_ADDR_W,
-                                                        DEBUG))
+class scoreboard #(CHANNELS, USR_ITEM_WIDTH, USER_META_WIDTH, CQ_ITEM_WIDTH,
+                   DATA_ADDR_W) extends uvm_scoreboard;
+    `uvm_component_param_utils(uvm_dma_ll::scoreboard #(CHANNELS, USR_ITEM_WIDTH,
+                                                        USER_META_WIDTH, CQ_ITEM_WIDTH, DATA_ADDR_W))
 
     //INPUT TO DUT
     uvm_analysis_export #(uvm_logic_vector_array::sequence_item#(CQ_ITEM_WIDTH))                   analysis_export_rx_packet;
@@ -250,11 +240,11 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, DEVICE, USR_ITEM_WIDTH, USER_META_WID
     uvm_analysis_export #(uvm_logic_vector::sequence_item#(USER_META_WIDTH))      analysis_export_tx_meta;
     //OUTPUT TO SCOREBOARD
 
-    model #(CHANNELS, PKT_SIZE_MAX, DEVICE, USR_ITEM_WIDTH, USER_META_WIDTH, CQ_ITEM_WIDTH,
-            DATA_ADDR_W, DEBUG) m_model;
+    model #(CHANNELS, USR_ITEM_WIDTH, USER_META_WIDTH, CQ_ITEM_WIDTH,
+            DATA_ADDR_W) m_model;
 
     local uvm_dma_regs::regmodel#(CHANNELS) m_regmodel;
-    uvm_dma_ll::compare #(USR_ITEM_WIDTH, USER_META_WIDTH, DEBUG, CHANNELS) tr_compare;
+    uvm_dma_ll::compare #(USR_ITEM_WIDTH, USER_META_WIDTH, CHANNELS) tr_compare;
 
     local int unsigned compared;
     local int unsigned errors;
@@ -309,8 +299,8 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, DEVICE, USR_ITEM_WIDTH, USER_META_WID
 
     //build phase
     function void build_phase(uvm_phase phase);
-        m_model = model #(CHANNELS, PKT_SIZE_MAX, DEVICE, USR_ITEM_WIDTH, USER_META_WIDTH, CQ_ITEM_WIDTH, DATA_ADDR_W, DEBUG)::type_id::create("m_model", this);
-        tr_compare = uvm_dma_ll::compare#(USR_ITEM_WIDTH, USER_META_WIDTH, DEBUG, CHANNELS)::type_id::create("tr_compare", this);
+        m_model = model #(CHANNELS, USR_ITEM_WIDTH, USER_META_WIDTH, CQ_ITEM_WIDTH, DATA_ADDR_W)::type_id::create("m_model", this);
+        tr_compare = uvm_dma_ll::compare#(USR_ITEM_WIDTH, USER_META_WIDTH, CHANNELS)::type_id::create("tr_compare", this);
     endfunction
 
     function void connect_phase(uvm_phase phase);

@@ -5,17 +5,16 @@
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
 
-class virt_seq_full_speed#(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE, USER_TX_MFB_ITEM_WIDTH, PCIE_CQ_MFB_ITEM_WIDTH,
-                           CHANNELS, PKT_SIZE_MAX, PCIE_LEN_MIN, PCIE_LEN_MAX) extends virt_seq#(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE,
+class virt_seq_full_speed#(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE, USER_TX_MFB_ITEM_WIDTH,
+                           CHANNELS, PKT_SIZE_MAX) extends virt_seq#(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE,
                                                                                                  USER_TX_MFB_BLOCK_SIZE, USER_TX_MFB_ITEM_WIDTH,
-                                                                                                 PCIE_CQ_MFB_ITEM_WIDTH, CHANNELS, PKT_SIZE_MAX,
-                                                                                                 PCIE_LEN_MIN, PCIE_LEN_MAX);
+                                                                                                  CHANNELS, PKT_SIZE_MAX);
 
     `uvm_object_param_utils(test::virt_seq_full_speed#(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE, USER_TX_MFB_ITEM_WIDTH,
-                                                       PCIE_CQ_MFB_ITEM_WIDTH, CHANNELS, PKT_SIZE_MAX, PCIE_LEN_MIN, PCIE_LEN_MAX))
+                                                        CHANNELS, PKT_SIZE_MAX))
 
     `uvm_declare_p_sequencer(uvm_dma_ll::sequencer#(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE, USER_TX_MFB_ITEM_WIDTH,
-                                                    PCIE_CQ_MFB_ITEM_WIDTH, CHANNELS, PKT_SIZE_MAX))
+                                                    CHANNELS, PKT_SIZE_MAX))
 
     localparam USER_META_WIDTH = 24 + $clog2(PKT_SIZE_MAX+1) + $clog2(CHANNELS);
 
@@ -23,8 +22,8 @@ class virt_seq_full_speed#(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX
         super.new(name);
     endfunction
 
-    virtual function void init(uvm_dma_regs::regmodel#(CHANNELS) m_regmodel, uvm_dma_ll_info::watchdog #(CHANNELS) m_watch_dog, uvm_phase phase);
-        super.init(m_regmodel, m_watch_dog, phase);
+    virtual function void init();
+        super.init();
         m_pcie = uvm_mfb::sequence_full_speed_tx#(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE, USER_TX_MFB_ITEM_WIDTH, USER_META_WIDTH)::type_id::create("m_pcie_lib");
     endfunction
 endclass
@@ -56,8 +55,8 @@ class speed extends base;
 
 
     uvm_dma_ll::env #(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE, USER_TX_MFB_ITEM_WIDTH,
-                      PCIE_CQ_MFB_REGIONS, PCIE_CQ_MFB_REGION_SIZE, PCIE_CQ_MFB_BLOCK_SIZE, PCIE_CQ_MFB_ITEM_WIDTH,
-                      CHANNELS, PKT_SIZE_MAX, MI_WIDTH, DEVICE, DEBUG, DATA_POINTER_WIDTH) m_env;
+                      PCIE_CQ_MFB_REGIONS, PCIE_CQ_MFB_REGION_SIZE, PCIE_CQ_MFB_BLOCK_SIZE, PCIE_CQ_MFB_ITEM_WIDTH, PCIE_LEN_MAX,
+                      CHANNELS, PKT_SIZE_MAX, MI_WIDTH, DEVICE, DATA_POINTER_WIDTH) m_env;
     bit            timeout;
     uvm_reg_data_t dma_cnt          [CHANNELS];
     uvm_reg_data_t byte_cnt         [CHANNELS];
@@ -83,23 +82,23 @@ class speed extends base;
         uvm_logic_vector_array_mfb::sequence_lib_rx#(PCIE_CQ_MFB_REGIONS, PCIE_CQ_MFB_REGION_SIZE, PCIE_CQ_MFB_BLOCK_SIZE, PCIE_CQ_MFB_ITEM_WIDTH, sv_pcie_meta_pack::PCIE_CQ_META_WIDTH)::type_id::set_inst_override(mfb_rx_speed#(PCIE_CQ_MFB_REGIONS, PCIE_CQ_MFB_REGION_SIZE, PCIE_CQ_MFB_BLOCK_SIZE, PCIE_CQ_MFB_ITEM_WIDTH, sv_pcie_meta_pack::PCIE_CQ_META_WIDTH)::get_type(), {this.get_full_name(), ".m_env.m_env_rx.*"});
 
         m_env = uvm_dma_ll::env #(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE, USER_TX_MFB_ITEM_WIDTH,
-                                  PCIE_CQ_MFB_REGIONS, PCIE_CQ_MFB_REGION_SIZE, PCIE_CQ_MFB_BLOCK_SIZE, PCIE_CQ_MFB_ITEM_WIDTH,
-                                  CHANNELS, PKT_SIZE_MAX, MI_WIDTH, DEVICE, DEBUG, DATA_POINTER_WIDTH)::type_id::create("m_env", this);
+                                  PCIE_CQ_MFB_REGIONS, PCIE_CQ_MFB_REGION_SIZE, PCIE_CQ_MFB_BLOCK_SIZE, PCIE_CQ_MFB_ITEM_WIDTH, PCIE_LEN_MAX,
+                                  CHANNELS, PKT_SIZE_MAX, MI_WIDTH, DEVICE, DATA_POINTER_WIDTH)::type_id::create("m_env", this);
     endfunction
 
     // ------------------------------------------------------------------------
     // Create environment and Run sequences o their sequencers
     virtual task run_phase(uvm_phase phase);
         virt_seq_full_speed#(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE, USER_TX_MFB_ITEM_WIDTH,
-                             PCIE_CQ_MFB_ITEM_WIDTH, CHANNELS, PKT_SIZE_MAX, PCIE_LEN_MIN, PCIE_LEN_MAX) m_vseq;
+                             CHANNELS, PKT_SIZE_MAX) m_vseq;
 
         //CREATE SEQUENCES
-        m_vseq = virt_seq_full_speed#(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE, USER_TX_MFB_ITEM_WIDTH, PCIE_CQ_MFB_ITEM_WIDTH, CHANNELS, PKT_SIZE_MAX, PCIE_LEN_MIN, PCIE_LEN_MAX)::type_id::create("m_vseq");
+        m_vseq = virt_seq_full_speed#(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE, USER_TX_MFB_ITEM_WIDTH, CHANNELS, PKT_SIZE_MAX)::type_id::create("m_vseq");
 
         //RISE OBJECTION
         phase.raise_objection(this);
 
-        m_vseq.init(m_env.m_regmodel.m_regmodel, m_env.m_watch_dog, phase);
+        m_vseq.init();
         m_vseq.randomize();
         m_vseq.start(m_env.m_sequencer);
 

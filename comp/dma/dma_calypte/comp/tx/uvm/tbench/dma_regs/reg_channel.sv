@@ -1,8 +1,8 @@
-//-- reg_channel.sv: Registre model for one channel 
+//-- reg_channel.sv: Registre model for one channel
 //-- Copyright (C) 2022 CESNET z. s. p. o.
 //-- Author(s): Daniel Kriz <danielkriz@cesnet.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 class reg_channel extends uvm_reg_block;
     `uvm_object_utils(uvm_dma_regs::reg_channel)

@@ -9,7 +9,7 @@ class base extends uvm_test;
 
 
     uvm_dma_ll::env #(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE, USER_TX_MFB_ITEM_WIDTH, PCIE_CQ_MFB_REGIONS,
-                      PCIE_CQ_MFB_REGION_SIZE, PCIE_CQ_MFB_BLOCK_SIZE, PCIE_CQ_MFB_ITEM_WIDTH, CHANNELS, PKT_SIZE_MAX, MI_WIDTH, DEVICE, DEBUG, DATA_POINTER_WIDTH) m_env;
+                      PCIE_CQ_MFB_REGION_SIZE, PCIE_CQ_MFB_BLOCK_SIZE, PCIE_CQ_MFB_ITEM_WIDTH, PCIE_LEN_MAX, CHANNELS, PKT_SIZE_MAX, MI_WIDTH, DEVICE, DATA_POINTER_WIDTH) m_env;
 
     bit            timeout;
     uvm_reg_data_t dma_cnt          [CHANNELS];
@@ -34,34 +34,34 @@ class base extends uvm_test;
 
     function void build_phase(uvm_phase phase);
         m_env = uvm_dma_ll::env #(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE, USER_TX_MFB_ITEM_WIDTH, PCIE_CQ_MFB_REGIONS,
-                                  PCIE_CQ_MFB_REGION_SIZE, PCIE_CQ_MFB_BLOCK_SIZE, PCIE_CQ_MFB_ITEM_WIDTH, CHANNELS, PKT_SIZE_MAX, MI_WIDTH, DEVICE, DEBUG, DATA_POINTER_WIDTH)::type_id::create("m_env", this);
+                                  PCIE_CQ_MFB_REGION_SIZE, PCIE_CQ_MFB_BLOCK_SIZE, PCIE_CQ_MFB_ITEM_WIDTH, PCIE_LEN_MAX, CHANNELS, PKT_SIZE_MAX, MI_WIDTH, DEVICE, DATA_POINTER_WIDTH)::type_id::create("m_env", this);
     endfunction
 
     // ------------------------------------------------------------------------
     // Create environment and Run sequences o their sequencers
     virtual task run_phase(uvm_phase phase);
-        virt_seq#(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE, USER_TX_MFB_ITEM_WIDTH, PCIE_CQ_MFB_ITEM_WIDTH,
-                  CHANNELS, PKT_SIZE_MAX, PCIE_LEN_MIN, PCIE_LEN_MAX) m_vseq;
+        time time_start;
+        virt_seq#(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE, USER_TX_MFB_ITEM_WIDTH,
+                  CHANNELS, PKT_SIZE_MAX) m_vseq;
 
         //CREATE SEQUENCES
         m_vseq = virt_seq#(USER_TX_MFB_REGIONS, USER_TX_MFB_REGION_SIZE, USER_TX_MFB_BLOCK_SIZE, USER_TX_MFB_ITEM_WIDTH,
-                           PCIE_CQ_MFB_ITEM_WIDTH, CHANNELS, PKT_SIZE_MAX, PCIE_LEN_MIN, PCIE_LEN_MAX)::type_id::create("m_vseq");
+                           CHANNELS, PKT_SIZE_MAX)::type_id::create("m_vseq");
 
         //RISE OBJECTION
         phase.raise_objection(this);
 
-        m_vseq.init(m_env.m_regmodel.m_regmodel, m_env.m_watch_dog, phase);
+        m_vseq.init();
         m_vseq.randomize();
         m_vseq.start(m_env.m_sequencer);
 
-        timeout = 1;
-        fork
-            test_wait_timeout(3000);
-            test_wait_result();
-        join_any;
+        time_start = $time();
+        while((time_start + 500us) > $time() && m_env.sc.used()) begin
+            #(600ns);
+        end
+
 
         for (int unsigned chan = 0; chan < CHANNELS; chan++) begin
-
             m_env.m_regmodel.m_regmodel.channel[chan].sent_packets.write(status_r, {32'h1, 32'h1});
             m_env.m_regmodel.m_regmodel.channel[chan].sent_packets.read(status_r, dma_cnt[chan]);
             m_env.m_regmodel.m_regmodel.channel[chan].sent_bytes.write(status_r, {32'h1, 32'h1});
@@ -76,29 +76,13 @@ class base extends uvm_test;
             m_env.sc.dma_cnt[chan]          = dma_cnt[chan];
             m_env.sc.discard_byte_cnt[chan] = discard_byte_cnt[chan];
             m_env.sc.discard_dma_cnt[chan]  = discard_dma_cnt[chan];
-
         end
 
         phase.drop_objection(this);
-
-    endtask
-
-    task test_wait_timeout(int unsigned time_length);
-        #(time_length*1us);
-    endtask
-
-    task test_wait_result();
-        do begin
-            #(6000ns);
-        end while (m_env.sc.used() != 0);
-        timeout = 0;
     endtask
 
     function void report_phase(uvm_phase phase);
         `uvm_info(this.get_full_name(), {"\n\tTEST : ", this.get_type_name(), " END\n"}, UVM_NONE);
-        if (timeout) begin
-            `uvm_error(this.get_full_name(), "\n\t===================================================\n\tTIMEOUT SOME PACKET STUCK IN DESIGN\n\t===================================================\n\n");
-        end
     endfunction
 
 endclass

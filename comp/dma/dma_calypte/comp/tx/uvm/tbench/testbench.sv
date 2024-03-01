@@ -12,7 +12,6 @@ module testbench;
 
     //TESTS
     typedef test::base base;
-
     typedef test::speed speed;
 
     localparam USER_META_WIDTH = 24 + $clog2(PKT_SIZE_MAX+1) + $clog2(CHANNELS);

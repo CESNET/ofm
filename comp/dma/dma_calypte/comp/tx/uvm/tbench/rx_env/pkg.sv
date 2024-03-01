@@ -14,9 +14,9 @@ package uvm_dma_ll_rx;
     import uvm_pkg::*;
 
     `include "config.sv"
+    `include "sequence_item.sv"
     `include "sequencer.sv"
     `include "sequence.sv"
-    `include "channel_binder.sv"
     `include "driver.sv"
     `include "env.sv"
 
