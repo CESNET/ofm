@@ -77,7 +77,7 @@ nvc-sim: $(MOD)
 	nvc --std=2008 -a --relaxed $(filter %.vhd,$(MOD))
 	nvc -M 4G -e  $(TOP_LEVEL_ENT_LC)
 	MODULE=$(COCOTB_MODULE) TOPLEVEL=$(TOP_LEVEL_ENT_LC) TOPLEVEL_LANG=vhdl $(NETCOPE_ENV) COCOTB_RESOLVE_X=ZEROS \
-	nvc -M 4G -r $(TOP_LEVEL_ENT_LC) --load $(shell cocotb-config --lib-name-path vhpi nvc)
+	nvc -M 4G -r $(TOP_LEVEL_ENT_LC) --ieee-warnings=off --load $(shell cocotb-config --lib-name-path vhpi nvc)
 
 else
 .PHONY: $(GEN_MK_NAME)
