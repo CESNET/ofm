@@ -39,7 +39,7 @@ set SIM_MODULE $SYNTH_FLAGS(MODULE)
 
 # Cocotb environment variables
 set env(MODULE) $env(COCOTB_MODULE)
-set env(TOPLEVEL) work.$SYNTH_FLAGS(MODULE)
+set env(TOPLEVEL) work.[string tolower $SYNTH_FLAGS(MODULE)]
 set env(TOPLEVEL_LANG) vhdl
 set env(COCOTB_RESOLVE_X) "ZEROS"
 
