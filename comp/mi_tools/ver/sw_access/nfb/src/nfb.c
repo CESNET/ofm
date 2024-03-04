@@ -186,10 +186,10 @@ void nfb_bus_close(struct nfb_bus * bus)
 
 struct nfb_comp *nfb_comp_open(const struct nfb_device *dev, int fdt_offset)
 {
-	return nfb_comp_open_ext(dev, fdt_offset, 0, NFB_COMP_READWRITE);
+	return nfb_comp_open_ext(dev, fdt_offset, 0);
 }
 
-struct nfb_comp *nfb_comp_open_ext(const struct nfb_device *dev, int fdt_offset, int user_size, enum nfb_comp_access access)
+struct nfb_comp *nfb_comp_open_ext(const struct nfb_device *dev, int fdt_offset, int user_size)
 {
 	int proplen;
 	const fdt32_t *prop;
@@ -280,15 +280,28 @@ ssize_t nfb_comp_read(const struct nfb_comp *comp, void *buf, size_t nbyte, off_
 
 ssize_t nfb_comp_write(const struct nfb_comp *comp, const void *buf, size_t nbyte, off_t offset)
 {
+	size_t round_nbyte;
+	uint32_t last;
 	if (offset + nbyte > comp->size)
 		return -1;
-	if ((offset & 3) || (nbyte & 3))
+	if (offset & 3)
 		return -1;
-	for(int o=0; o<nbyte; o+=4)
+	round_nbyte = nbyte & 0xfffffffc;
+	for(int o=0; o<round_nbyte; o+=4)
 #ifdef NFB_IFC
 		dpi_write32(comp->dev->path, comp->base + offset + o, *((uint32_t*)(buf+o)));
 #else
 		dpiwrite(comp->dev->fd, comp->base + offset + o, *((uint32_t*)(buf+o)));
 #endif
+	if(round_nbyte < nbyte) {
+		last = 0;
+		for(int i=round_nbyte; i<nbyte; i++)
+			last += ((uint32_t)((unsigned char *)buf)[i]) << (8*(i-round_nbyte));
+#ifdef NFB_IFC
+		dpi_write32(comp->dev->path, comp->base + offset + round_nbyte, last);
+#else
+		dpiwrite(comp->dev->fd, comp->base + offset + round_nbyte, last);
+#endif
+	}
 	return nbyte;
 }

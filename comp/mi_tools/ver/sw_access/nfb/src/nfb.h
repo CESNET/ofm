@@ -53,8 +53,6 @@ struct nfb_comp {
 	struct nfb_bus * bus;           /*!< Component's bus */
 	off_t base;                     /*!< Component's offset in the bus address space */
 	size_t size;                    /*!< Component's size in the bus address space */
-
-	enum nfb_comp_access access;    /*!< Access mode component was opened with */
 };
 
 

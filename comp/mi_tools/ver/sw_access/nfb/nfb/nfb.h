@@ -21,7 +21,8 @@
 
 /* ~~~~[ DEFINES ]~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-#define NFB_PATH_DEV(n)		("DeviceTree-dut" __STRING(n) ".dtb")
+#define NFB_PATH_DEV(n)      ("DeviceTree-dut" __STRING(n) ".dtb")
+#define NFB_DEFAULT_DEV_PATH ("DeviceTree-dut0.dtb")
 
 /* ~~~~[ TYPES ]~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
@@ -35,11 +36,6 @@ struct nfb_device;
  */
 struct nfb_comp;
 
-
-enum nfb_comp_access {
-	NFB_COMP_READONLY = 0,
-	NFB_COMP_READWRITE
-};
 
 /* ~~~~[ PROTOTYPES ]~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
@@ -98,21 +94,44 @@ int nfb_comp_find(const struct nfb_device *dev, const char *compatible, unsigned
 
 /* ~~~~[ COMPONENTS ]~~~~ */
 
+/*!
+ * \brief Get component from the user data pointer
+ * \param[in] ptr         User data pointer
+ * \return
+ *    Component handle
+ *
+ * This function doesn't check validity of input pointer.
+ */
 struct nfb_comp *nfb_user_to_comp(void *ptr);
-void *nfb_comp_to_user(struct nfb_comp *ptr);
 
 /*!
- * \brief nfb_comp_open_ext  Open component specified by \p offset
+ * \brief Get pointer to the user data space allocated in \ref nfb_comp_open_ext
+ * \param[in] comp        Component handle
+ * \return
+ *    Pointer to user data space
+ */
+void *nfb_comp_to_user(struct nfb_comp *comp);
+
+/*!
+ * \brief Open component specified by \p offset
  * \param[in] dev         NFB device handle
  * \param[in] fdt_offset  FDT offset of the component
- * \param[in] user_size   Size of user space allocated in component
- * \param[in] access      Requested access level to the component
  * \return
  *   - Component handle on success
  *   - NULL on error (errno is set)
  */
 struct nfb_comp *nfb_comp_open(const struct nfb_device *dev, int fdt_offset);
-struct nfb_comp *nfb_comp_open_ext(const struct nfb_device *dev, int fdt_offset, int user_size, enum nfb_comp_access access);
+
+/*!
+ * \brief Open component specified by \p offset
+ * \param[in] dev         NFB device handle
+ * \param[in] fdt_offset  FDT offset of the component
+ * \param[in] user_size   Size of user space allocated in component
+ * \return
+ *   - Component handle on success
+ *   - NULL on error (errno is set)
+ */
+struct nfb_comp *nfb_comp_open_ext(const struct nfb_device *dev, int fdt_offset, int user_size);
 
 /*!
  * \brief nfb_comp_close  Close component
