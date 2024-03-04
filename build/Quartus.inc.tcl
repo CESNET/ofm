@@ -56,7 +56,7 @@ proc EvalFile {FNAME OPT} {
             # Verilog file
             set_global_assignment -name VERILOG_FILE $FNAME {*}$LIB_PARAM
             puts "INFO: Library $opt(LIBRARY): File added: $FNAME"
-        } elseif { $FEXT == ".sv" } {
+        } elseif { $FEXT == ".sv" || $FEXT == ".svp" } {
             # System Verilog file
             set_global_assignment -name SYSTEMVERILOG_FILE $FNAME {*}$LIB_PARAM
             puts "INFO: Library $opt(LIBRARY): File added: $FNAME"
