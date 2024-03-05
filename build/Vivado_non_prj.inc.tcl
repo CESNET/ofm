@@ -76,7 +76,7 @@ proc EvalFile {FNAME OPT} {
             # Verilog file
             read_verilog -library $opt(LIBRARY) $FNAME
             puts "INFO: Library $opt(LIBRARY): File added: $FNAME"
-        } elseif { $FEXT == ".sv" } {
+        } elseif { $FEXT == ".sv" || $FEXT == ".svp" } {
             # System Verilog file
             read_verilog -library $opt(LIBRARY) -sv $FNAME
             puts "INFO: Library $opt(LIBRARY): File added: $FNAME"
