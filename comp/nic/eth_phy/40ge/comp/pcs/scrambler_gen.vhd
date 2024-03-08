@@ -44,7 +44,7 @@ use IEEE.numeric_std.all;
 
 entity scrambler_gen is
     generic (
-        WIDTH : natural range 58 to 1024 := 256;
+        WIDTH : natural := 256;
         OREG  : boolean := false
     );
     port (
