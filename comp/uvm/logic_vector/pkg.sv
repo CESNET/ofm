@@ -14,6 +14,7 @@ package uvm_logic_vector;
 
     `include "config.sv"
     `include "sequence_item.sv"
+    `include "meter.sv"
     `include "sequencer.sv"
     `include "sequence.sv"
     `include "monitor.sv"

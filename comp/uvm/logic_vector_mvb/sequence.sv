@@ -433,6 +433,28 @@ class sequence_lib_rx#(ITEMS, ITEM_WIDTH) extends uvm_common::sequence_library#(
     endfunction
 endclass
 
+// Used for full speed tests
+class sequence_lib_speed_rx#(ITEMS, ITEM_WIDTH) extends sequence_lib_rx#(ITEMS, ITEM_WIDTH);
+    `uvm_object_param_utils(uvm_logic_vector_mvb::sequence_lib_speed_rx#(ITEMS, ITEM_WIDTH))
+    `uvm_sequence_library_utils(uvm_logic_vector_mvb::sequence_lib_speed_rx#(ITEMS, ITEM_WIDTH))
+  
+    function new(string name = "");
+        super.new(name);
+        init_sequence_library();
+    endfunction
+
+    // subclass can redefine and change run sequences
+    // can be useful in specific tests
+    virtual function void init_sequence(config_sequence param_cfg = null);
+        if (param_cfg == null) begin
+            this.cfg = new();
+        end else begin
+            this.cfg = param_cfg;
+        end
+        this.add_sequence(sequence_full_speed_rx#(ITEMS, ITEM_WIDTH)::get_type());
+    endfunction
+  endclass
+
 //////////////////////////////////////
 // PLS DONT PUT IT INTO SEQUENCE LIBRARY. 
 class sequence_simple_rx #(ITEMS, ITEM_WIDTH) extends sequence_simple_rx_base #(ITEMS, ITEM_WIDTH);
