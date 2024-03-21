@@ -68,16 +68,21 @@ class MemLogger(DataLogger):
         stats["latency_to_first"] = (ctrlo >> self._BIT_LATENCY_TO_FIRST) & 1
 
         # Cnters
-        stats["wr_ticks"]       = self.load_cnter(0)
-        stats["rd_ticks"]       = self.load_cnter(1)
-        stats["total_ticks"]    = self.load_cnter(2)
-        stats["wr_req_cnt"]     = self.load_cnter(3)
-        stats["wr_req_words"]   = self.load_cnter(4)
-        stats["rd_req_cnt"]     = self.load_cnter(5)
-        stats["rd_req_words"]   = self.load_cnter(6)
-        stats["rd_resp_words"]  = self.load_cnter(7)
-        stats["err_zero_burst"] = self.load_cnter(8)
-        stats["err_simult_rw"]  = self.load_cnter(9)
+        stats["wait"]           = self.load_cnter(0)
+        stats["request_hold"]   = self.load_cnter(1)
+        stats["rdy_hold_write"] = self.load_cnter(2)
+        stats["rdy_hold_read"]  = self.load_cnter(3)
+
+        stats["wr_ticks"]       = self.load_cnter(4)
+        stats["rd_ticks"]       = self.load_cnter(5)
+        stats["total_ticks"]    = self.load_cnter(6)
+        stats["wr_req_cnt"]     = self.load_cnter(7)
+        stats["wr_req_words"]   = self.load_cnter(8)
+        stats["rd_req_cnt"]     = self.load_cnter(9)
+        stats["rd_req_words"]   = self.load_cnter(10)
+        stats["rd_resp_words"]  = self.load_cnter(11)
+        stats["err_zero_burst"] = self.load_cnter(12)
+        stats["err_simult_rw"]  = self.load_cnter(13)
 
         # Values
         stats["latency"]        = self.load_value(0)
@@ -133,6 +138,12 @@ class MemLogger(DataLogger):
         res += self.line_to_str("read requests    ", stats['rd_req_cnt'])
         res += self.line_to_str("  requested words", stats['rd_req_words'])
         res += self.line_to_str("  received words ", stats['rd_resp_words'])
+        res += f"Handshakes:\n"
+        res += self.line_to_str("  avmm rdy hold      ", stats['rdy_hold_read'] + stats['rdy_hold_write'])
+        res += self.line_to_str("  avmm rdy hold (rd) ", stats['rdy_hold_read'])
+        res += self.line_to_str("  avmm rdy hold (wr) ", stats['rdy_hold_write'])
+        res += self.line_to_str("  no request         ", stats["request_hold"])
+        res += self.line_to_str("  wait               ", stats["wait"])
         res += f"Flow:\n"
         res += self.line_to_str("  write", stats['wr_flow_gbs'],      "Gb/s")
         res += self.line_to_str("  read ", stats['rd_flow_gbs'],      "Gb/s")
