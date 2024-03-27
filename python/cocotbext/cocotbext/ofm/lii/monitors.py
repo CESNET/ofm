@@ -26,6 +26,8 @@ class LIIMonitor(BusMonitor):
         clkedge = RisingEdge(self.clock)
         frame = b""
         in_frame = False
+        is_sof = False
+        sof_pos = 0
 
         while True:
             await clkedge
@@ -34,8 +36,6 @@ class LIIMonitor(BusMonitor):
                 continue
 
             if self.bus.rdy.value == 0:
-                #if in_frame:
-                #    raise LIIProtocolError("Invalid gap inside frame on LII bus!")
                 continue
 
             db_val = self.bus.db.value
@@ -43,21 +43,32 @@ class LIIMonitor(BusMonitor):
             d_val.big_endian = False
             d_bytes = d_val.buff
 
-            if self.bus.sof.value == 1:
-                if in_frame:
-                    raise LIIProtocolError("Duplicate start-of-frame received on LII bus!")
-
-                in_frame = True
-                frame = b""
+            is_sof = False
+            sof_pos = 0
+            for ii in range(len(self.bus.sof.value)):
+                print(self.bus.sof.value[len(self.bus.sof.value)-1-ii])
+                if self.bus.sof.value[len(self.bus.sof.value)-1-ii] == 1:
+                    is_sof = True
+                    sof_pos = ii*8
 
             if self.bus.eof.value == 1:
                 if not in_frame:
                     raise LIIProtocolError("Duplicate end-of-frame received on LII bus!")
                 in_frame = False
                 frame += d_bytes[:db_val]
+                #print("end frame: " + frame.hex())
 
                 self._recv(frame)
                 self.frame_cnt += 1
-                continue
             
-            frame += d_bytes
+            if is_sof:
+                if in_frame:
+                    raise LIIProtocolError("Duplicate start-of-frame received on LII bus!")
+
+                in_frame = True
+                frame = b""
+                frame = d_bytes[sof_pos:]
+                #print("start frame: " + frame.hex())
+            else:
+                frame += d_bytes
+                #print("mid frame: " + frame.hex())           
