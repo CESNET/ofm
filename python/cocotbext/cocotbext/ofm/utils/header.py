@@ -13,6 +13,9 @@ class SerializableHeader(object):
         for i in self.items:
             setattr(self, i[0], 0)
 
+    def __str__(self):
+        return f"{[(item[0], getattr(self, item[0])) for item in self.items]}"
+
     def serialize(self):
         names, widths = list(zip(*self.items)) if self.items else ([], [])
         return concat(list(zip([getattr(self, name) for name in names], widths)))
