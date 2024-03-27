@@ -1,4 +1,8 @@
-"Axi4-Stream agents for Integrated Block for PCI Express on Xilinx US+ devices"
+"Agents for Integrated Block for PCI Express"
 
+# Xilinx US+ devices
 from .Axi4SCompleter import Axi4SCompleter
 from .Axi4SRequester import Axi4SRequester
+
+# Intel S10/Agi devices (with P-Tile)
+from .AvstCompleter import AvstCompleter
