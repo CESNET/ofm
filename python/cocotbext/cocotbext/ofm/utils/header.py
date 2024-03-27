@@ -6,6 +6,15 @@ def concat(values):
     return ret
 
 
+def deconcat(values=[0,0]):
+    vector = values[0]
+    ret = []
+    for width in values[1:]:
+        ret.append(vector & (2**width - 1))
+        vector >>= width
+    return ret
+
+
 class SerializableHeader(object):
     items = []
 
