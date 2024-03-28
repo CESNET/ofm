@@ -28,6 +28,16 @@ def get_mfb_params(signal_data, signal_sof_pos, signal_eof_pos, signal_sof, para
         block_size = params_dic["block_size"]
         item_width = params_dic["item_width"]
 
+        dw = regions*region_size*block_size*item_width
+
+        if regions != len(signal_sof):
+            signal_sof.log.error("MFB parameters do not correspond to signals length!")
+            raise Exception()
+
+        if dw != len(signal_data):
+            signal_data.log.error("MFB parameters do not correspond to signals length!")
+            raise Exception()
+
     #print(regions)
     #print(region_size)
     #print(block_size)
