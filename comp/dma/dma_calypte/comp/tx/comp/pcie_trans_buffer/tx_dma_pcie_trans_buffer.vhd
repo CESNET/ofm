@@ -164,20 +164,22 @@ begin
     pcie_mfb_sof_inp_reg    (0) <= PCIE_MFB_SOF;
     pcie_mfb_src_rdy_inp_reg(0) <= PCIE_MFB_SRC_RDY;
 
-    input_shift_reg_g: for i in 0 to INP_REG_NUM - 1 generate
-        input_shift_reg_p: process(CLK) is
-        begin    
-            if rising_edge(CLK) then
-                if RESET = '1' then
-                    pcie_mfb_src_rdy_inp_reg(i + 1) <= '0';
-                else
-                    pcie_mfb_data_inp_reg   (i + 1) <= pcie_mfb_data_inp_reg   (i);
-                    pcie_mfb_meta_inp_reg   (i + 1) <= pcie_mfb_meta_inp_reg   (i);
-                    pcie_mfb_sof_inp_reg    (i + 1) <= pcie_mfb_sof_inp_reg    (i);
-                    pcie_mfb_src_rdy_inp_reg(i + 1) <= pcie_mfb_src_rdy_inp_reg(i);
+    inp_shift_reg_mult_g: if (INP_REG_NUM > 0) generate
+        input_shift_reg_g: for i in 0 to (INP_REG_NUM - 1) generate
+            input_shift_reg_p: process(CLK) is
+            begin
+                if rising_edge(CLK) then
+                    if RESET = '1' then
+                        pcie_mfb_src_rdy_inp_reg(i + 1) <= '0';
+                    else
+                        pcie_mfb_data_inp_reg   (i + 1) <= pcie_mfb_data_inp_reg   (i);
+                        pcie_mfb_meta_inp_reg   (i + 1) <= pcie_mfb_meta_inp_reg   (i);
+                        pcie_mfb_sof_inp_reg    (i + 1) <= pcie_mfb_sof_inp_reg    (i);
+                        pcie_mfb_src_rdy_inp_reg(i + 1) <= pcie_mfb_src_rdy_inp_reg(i);
+                    end if;
                 end if;
-            end if;
-        end process;
+            end process;
+        end generate;
     end generate;
 
     -- Meta array
