@@ -26,7 +26,7 @@ class MFBMonitor(BusMonitor):
         self._sof_pos_arr = [0] * self._regions
         self._eof_pos_arr = [0] * self._regions
 
-    def _is_valid_word(sefl, signal_src_rdy, signal_dst_rdy):
+    def _is_valid_word(self, signal_src_rdy, signal_dst_rdy):
         if signal_dst_rdy is None:
             return (signal_src_rdy.value == 1)
         else:
