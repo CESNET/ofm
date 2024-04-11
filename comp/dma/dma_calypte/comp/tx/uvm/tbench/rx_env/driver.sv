@@ -168,9 +168,10 @@ class driver#(CHANNELS, PCIE_MTU, ITEM_WIDTH, DATA_ADDR_W, DEVICE) extends uvm_d
     function logic [ITEM_WIDTH/8-1 : 0] lbe_to_fbe(logic [ITEM_WIDTH/8-1 : 0] lbe);
         logic [ITEM_WIDTH/8-1 : 0] fbe = 0;
 
-        if (lbe[ITEM_WIDTH/8-1] != 1'b1) begin
-            int unsigned it = ITEM_WIDTH/8;
-            while (it > 0 && lbe[it-1] == 1'b0) begin
+        if (lbe[MFB_ITEM_WIDTH/8-1] != 1'b1) begin
+            int unsigned it = MFB_ITEM_WIDTH/8;
+
+            while (it > 0 ? (lbe[it-1] == 0) : 0) begin
                 fbe[it-1] = 1'b1;
                 it--;
             end
