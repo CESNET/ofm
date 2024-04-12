@@ -384,7 +384,7 @@ begin
     SW_RST      <= mi_ctrl_reg(CTRL_RST_BIT);
 
     rst_done_g : if (VALUE_CNT > 0) generate
-        rst_done_intern <= or rst_done_vec;
+        rst_done_intern <= and rst_done_vec;
     end generate;
     rst_done2_g : if (VALUE_CNT = 0) generate
         rst_done_intern <= '1';

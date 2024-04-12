@@ -320,16 +320,20 @@ begin
         stat_p("CNTER_WIDTH       ", 5, 0);
          
         echo("Cnters:");
-        stat_p("  write ticks       ", 13, 0);
-        stat_p("  read  ticks       ", 13, 1);
-        stat_p("  total ticks       ", 13, 2);
-        stat_p("  wr req cnt        ", 13, 3);
-        stat_p("  wr req words      ", 13, 4);
-        stat_p("  rd req cnt        ", 13, 5);
-        stat_p("  rd req words      ", 13, 6);
-        stat_p("  rd resp words     ", 13, 7);
-        stat_p("  err zero burst    ", 13, 8);
-        stat_p("  err simult r/w    ", 13, 9);
+        stat_p("  write ticks          ", 13, 0);
+        stat_p("  read  ticks          ", 13, 1);
+        stat_p("  total ticks          ", 13, 2);
+        stat_p("  wr req cnt           ", 13, 3);
+        stat_p("  wr req words         ", 13, 4);
+        stat_p("  rd req cnt           ", 13, 5);
+        stat_p("  rd req words         ", 13, 6);
+        stat_p("  rd resp words        ", 13, 7);
+        stat_p("  err zero burst       ", 13, 8);
+        stat_p("  err simult r/w       ", 13, 9);
+        stat_p("  rdy hold read ticks  ", 13, 10);
+        stat_p("  rdy hold write ticks ", 13, 11);
+        stat_p("  no rd/wr req ticks   ", 13, 12);
+        stat_p("  wait ticks           ", 13, 13);
 
         echo("Values:");
         for i in 0 to 2 - 1 loop

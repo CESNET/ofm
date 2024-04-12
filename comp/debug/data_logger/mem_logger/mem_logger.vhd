@@ -15,16 +15,21 @@
 -- 0:                   latency to first read word
 --
 -- Counters
--- 0:   write ticks (ticks from the first write   to the last)
--- 1:   read  ticks (ticks from the first read    to the last)
--- 2:   total ticks (ticks from the first request to the last)
--- 3:   write req cnt
--- 4:   write req words
--- 5:   read req  cnt
--- 6:   read req  words
--- 7:   read resp words
--- 8:   err - zero burst
--- 9:   err - simult read write
+-- 0:  rdy hold ticks during read vld
+-- 1:  rdy hold ticks during write vld
+-- 2:  no read/write request ticks
+-- 3:  no read/write request and not ready ticks
+-- 4:   write ticks (ticks from the first write   to the last)
+-- 5:   read  ticks (ticks from the first read    to the last)
+-- 6:   total ticks (ticks from the first request to the last)
+-- 7:   write req cnt
+-- 8:   write req words
+-- 9:   read req  cnt
+-- 10:   read req  words
+-- 11:   read resp words
+-- 12:   err - zero burst
+-- 13:   err - simult read write
+
 --
 -- Values
 -- 0:   latency
@@ -43,7 +48,7 @@ generic (
     MEM_DATA_WIDTH          : integer := 512;
     MEM_ADDR_WIDTH          : integer := 26;
     MEM_BURST_COUNT_WIDTH   : integer := 7;
-    MEM_FREQ_KHZ            : integer := 266660;
+    MEM_FREQ_KHZ            : integer := 300000;
 
     MI_DATA_WIDTH           : integer := 32;
     MI_ADDR_WIDTH           : integer := 32;
@@ -51,19 +56,27 @@ generic (
     -- Specify read latency histogram precision
     HISTOGRAM_BOXES         : integer := 255;
     -- Specify maximum paraller read requests
-    MAX_PARALEL_READS       : integer := 64;
+    MAX_PARALEL_READS       : integer := 128;
     -- Specify read latency ticks count width
-    LATENCY_TICKS_WIDTH     : integer := 11;
-    DEVICE                  : string  := "ULTRASCALE"
+    LATENCY_TICKS_WIDTH     : integer := 12;
+
+    MEM_ASYNC               : boolean := true;
+
+    DEVICE                  : string  := "AGILEX"
 );
 port(    
     CLK                     : in  std_logic;
+    -- Synchronous to CLK
     RST                     : in  std_logic;
+    -- Synchronous to CLK 
     RST_DONE                : out std_logic;
 
     -- ================================
     -- Memory interface
     -- ================================
+
+    MEM_CLK                 : in  std_logic := '0';
+    MEM_RST                 : in  std_logic := '0';
 
     MEM_READY               : in  std_logic;
     MEM_READ                : in  std_logic;
@@ -77,6 +90,7 @@ port(
     -- ==========================
     -- MI bus interface
     -- ==========================
+    -- Synchronous to CLK
 
     MI_DWR                  : in  std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
     MI_ADDR                 : in  std_logic_vector(MI_ADDR_WIDTH - 1 downto 0);
@@ -97,7 +111,7 @@ architecture FULL of MEM_LOGGER is
     -- Constants --
     ---------------
 
-    constant CNTER_CNT          : integer := 10;
+    constant CNTER_CNT          : integer := 14;
     constant VALUE_CNT          : integer := 2;
     constant CTRLO_WIDTH        : integer := 1;
     constant CTRLI_WIDTH        : integer := 4 * MI_DATA_WIDTH;
@@ -122,6 +136,26 @@ architecture FULL of MEM_LOGGER is
     constant BURST_MAX          : std_logic_vector(MEM_BURST_COUNT_WIDTH - 1 downto 0) := (others => '1');
     constant BURST_MIN          : std_logic_vector(MEM_BURST_COUNT_WIDTH - 1 downto 0) := std_logic_vector(to_unsigned(1, MEM_BURST_COUNT_WIDTH));
 
+
+    -----------------------
+    -- Inteternal clocks --
+    -----------------------
+
+    signal mem_clk_int          : std_logic;
+    signal mem_rst_int          : std_logic; 
+
+    
+    signal rst_done_int         : std_logic;
+
+    signal mi_dwr_int                  : std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
+    signal mi_addr_int                 : std_logic_vector(MI_ADDR_WIDTH - 1 downto 0);
+    signal mi_be_int                   : std_logic_vector(MI_DATA_WIDTH / 8 - 1 downto 0);
+    signal mi_rd_int                   : std_logic;
+    signal mi_wr_int                   : std_logic;
+    signal mi_ardy_int                 : std_logic;
+    signal mi_drd_int                  : std_logic_vector(MI_DATA_WIDTH - 1 downto 0) := (others => '0');
+    signal mi_drdy_int                 : std_logic;
+
     -------------
     -- Signals --
     -------------
@@ -142,6 +176,11 @@ architecture FULL of MEM_LOGGER is
     signal rd_req               : std_logic;
     signal rd_resp              : std_logic;
     signal wr_req_invalid       : std_logic;
+
+    signal read_rdy_hold        : std_logic;
+    signal write_rdy_hold       : std_logic;
+    signal read_write_hold      : std_logic;
+    signal wait_cycle           : std_logic;
 
     signal wr_start             : std_logic;
     signal wr_running           : std_logic;
@@ -173,6 +212,75 @@ architecture FULL of MEM_LOGGER is
 
 begin
 
+    mem_async_g : if MEM_ASYNC generate
+        mem_clk_int     <= MEM_CLK;
+        mem_rst_int     <= MEM_RST;
+
+        -- Reset done synchronization
+        rst_done_async_i : entity work.ASYNC_OPEN_LOOP
+        generic map (
+            IN_REG      => true,
+            TWO_REG     => true
+        ) port map (
+            ACLK        => mem_clk_int,
+            ARST        => mem_rst_int,
+            ADATAIN     => rst_done_int,
+
+            BCLK        => CLK,
+            BRST        => RST,
+            BDATAOUT    => RST_DONE
+        );
+
+        mi_async_i : entity work.MI_ASYNC
+        generic map (
+            DATA_WIDTH  => MI_DATA_WIDTH,
+            ADDR_WIDTH  => MI_ADDR_WIDTH,
+            META_WIDTH  => 0,
+            RAM_TYPE    => "LUT",
+            RESET_LOGIC => true,
+            DEVICE      => DEVICE
+        ) port map (
+            CLK_M       => CLK,
+            RESET_M     => RST,
+            MI_M_DWR    => MI_DWR,
+            MI_M_MWR    => (others => '0'),
+            MI_M_ADDR   => MI_ADDR,
+            MI_M_RD     => MI_RD,
+            MI_M_WR     => MI_WR,
+            MI_M_BE     => MI_BE,
+            MI_M_DRD    => MI_DRD,
+            MI_M_ARDY   => MI_ARDY,
+            MI_M_DRDY   => MI_DRDY,
+
+            CLK_S       => mem_clk_int,
+            RESET_S     => mem_rst_int,
+            MI_S_DWR    => mi_dwr_int,
+            MI_S_MWR    => open,
+            MI_S_ADDR   => mi_addr_int,
+            MI_S_RD     => mi_rd_int,
+            MI_S_WR     => mi_wr_int,
+            MI_S_BE     => mi_be_int,
+            MI_S_DRD    => mi_drd_int,
+            MI_S_ARDY   => mi_ardy_int,
+            MI_S_DRDY   => mi_drdy_int
+        );
+
+    else generate
+        mem_clk_int     <= CLK;
+        mem_rst_int     <= RST;
+        RST_DONE        <= rst_done_int;
+
+        mi_dwr_int  <= MI_DWR;
+        mi_addr_int <= MI_ADDR;
+        mi_be_int   <= MI_BE;
+        mi_rd_int   <= MI_RD;
+        mi_wr_int   <= MI_WR;
+
+        MI_ARDY     <= mi_ardy_int;
+        MI_DRD      <= mi_drd_int;
+        MI_DRDY     <= mi_drdy_int;
+    end generate;
+
     -------------------------
     -- Component instances --
     -------------------------
@@ -194,9 +302,9 @@ begin
         CTRLO_DEFAULT       => CTRLO_DEFAULT
     )
     port map (    
-        CLK                 => CLK        ,
-        RST                 => RST        ,
-        RST_DONE            => RST_DONE   ,
+        CLK                 => mem_clk_int    ,
+        RST                 => mem_rst_int    ,
+        RST_DONE            => rst_done_int   ,
         SW_RST              => sw_rst     ,
 
         CTRLO               => ctrlo,
@@ -216,7 +324,12 @@ begin
             wr_start,
             not first_write or not first_read or wr_req or rd_req,
             not first_read  or rd_req,
-            not first_write or wr_req     -- Start counting from the first write
+            not first_write or wr_req,    -- Start counting from the first write
+
+            not first_read and read_rdy_hold,
+            not first_write and write_rdy_hold,
+            (not first_read or not first_write) and read_write_hold,
+            (not first_read or not first_write) and wait_cycle
         ),
         CNTERS_DIFF         => cnters_diff,
         CNTERS_SUBMIT       => cnters_submit,
@@ -229,14 +342,14 @@ begin
             latency
         ),
 
-        MI_DWR              => MI_DWR     ,
-        MI_ADDR             => MI_ADDR    ,
-        MI_BE               => MI_BE      ,
-        MI_RD               => MI_RD      ,
-        MI_WR               => MI_WR      ,
-        MI_ARDY             => MI_ARDY    ,
-        MI_DRD              => MI_DRD     ,
-        MI_DRDY             => MI_DRDY
+        MI_DWR              => mi_dwr_int ,
+        MI_ADDR             => mi_addr_int,
+        MI_BE               => mi_be_int  ,
+        MI_RD               => mi_rd_int  ,
+        MI_WR               => mi_wr_int  ,
+        MI_ARDY             => mi_ardy_int,
+        MI_DRD              => mi_drd_int ,
+        MI_DRDY             => mi_drdy_int
     );
 
     -- Save read burst
@@ -247,7 +360,7 @@ begin
         DEVICE      => DEVICE
     )
     port map (
-        CLK         => CLK,
+        CLK         => mem_clk_int,
         RESET       => rst_intern,
     
         DI          => burst_count,
@@ -266,7 +379,7 @@ begin
         DEVICE                  => DEVICE
     )
     port map (
-        CLK                     => CLK,
+        CLK                     => mem_clk_int,
         RST                     => rst_intern,
 
         START_EVENT             => rd_req,
@@ -282,13 +395,18 @@ begin
     -- Combinational logic --
     -------------------------
 
-    rst_intern      <= RST or sw_rst;
+    rst_intern      <= mem_rst_int or sw_rst;
 
     wr_req          <= write and ready and not wr_req_invalid;
     rd_req          <= read  and ready;
     rd_resp         <= read_data_valid;
     -- Burst count = 0 is invalid
     wr_req_invalid  <= ((write and not wr_running) or read) and ready and not (or burst_count);
+
+    read_rdy_hold       <= read and not ready;
+    write_rdy_hold      <= write and not wr_req_invalid and not ready;
+    read_write_hold     <= not read and not write and ready;
+    wait_cycle          <= not read and not write and not ready;
 
     wr_start    <= wr_req and not wr_running;
     wr_done     <= '1' when ((wr_req = '1' and wr_burst_reg = BURST_MIN and wr_running = '1') or burst_one = '1') else 
@@ -303,9 +421,14 @@ begin
                    '0';
 
     cnters_diff(6)(MEM_BURST_COUNT_WIDTH - 1 downto 0)  <= burst_count;
-    cnters_submit(0)    <= wr_req;
-    cnters_submit(1)    <= rd_req;
-    cnters_submit(2)    <= wr_req or rd_req;
+    cnters_submit(0)    <= read_rdy_hold;
+    cnters_submit(1)    <= write_rdy_hold;
+    cnters_submit(2)    <= read_write_hold;
+    cnters_submit(3)    <= wait_cycle;
+    
+    cnters_submit(4)    <= wr_req;
+    cnters_submit(5)    <= rd_req;
+    cnters_submit(6)    <= wr_req or rd_req;
 
     latency_to_first    <= ctrlo(0);
     latency_end         <= rd_done when (latency_to_first = '0') else 
@@ -315,9 +438,9 @@ begin
     -- Registers --
     ---------------
 
-    input_reg_p : process(CLK)
+    input_reg_p : process(mem_clk_int)
     begin
-        if (rising_edge(CLK)) then
+        if (rising_edge(mem_clk_int)) then
             ready               <= MEM_READY          ;
             read                <= MEM_READ           ;
             write               <= MEM_WRITE          ;
@@ -329,9 +452,9 @@ begin
         end if;
     end process;
 
-    wr_burst_reg_p : process(CLK)
+    wr_burst_reg_p : process(mem_clk_int)
     begin
-        if (rising_edge(CLK)) then
+        if (rising_edge(mem_clk_int)) then
             if (wr_start = '1') then
                 -- First write word
                 wr_burst_reg    <= std_logic_vector(unsigned(burst_count) - 1);
@@ -341,9 +464,9 @@ begin
         end if;
     end process;
 
-    wr_runnung_p : process(CLK)
+    wr_runnung_p : process(mem_clk_int)
     begin
-        if (rising_edge(CLK)) then
+        if (rising_edge(mem_clk_int)) then
             if (rst_intern = '1' or wr_done = '1' or burst_one = '1') then
                 wr_running  <= '0';
             elsif (wr_req = '1') then
@@ -352,9 +475,9 @@ begin
         end if;
     end process;
 
-    rd_burst_reg_p : process(CLK)
+    rd_burst_reg_p : process(mem_clk_int)
     begin
-        if (rising_edge(CLK)) then
+        if (rising_edge(mem_clk_int)) then
             if (rd_start = '1') then
                 -- First write word
                 rd_burst_reg    <= std_logic_vector(unsigned(rd_burst) - 1);
@@ -364,9 +487,9 @@ begin
         end if;
     end process;
 
-    rd_runnung_p : process(CLK)
+    rd_runnung_p : process(mem_clk_int)
     begin
-        if (rising_edge(CLK)) then
+        if (rising_edge(mem_clk_int)) then
             if (rst_intern = '1' or rd_done = '1' or rd_burst_one = '1') then
                 rd_running  <= '0';
             elsif (rd_resp = '1') then
@@ -375,9 +498,9 @@ begin
         end if;
     end process;
 
-    first_write_p : process(CLK)
+    first_write_p : process(mem_clk_int)
     begin
-        if (rising_edge(CLK)) then
+        if (rising_edge(mem_clk_int)) then
             if (rst_intern = '1') then
                 first_write <= '1';
             elsif (wr_req = '1') then
@@ -386,9 +509,9 @@ begin
         end if;
     end process;
 
-    first_read_p : process(CLK)
+    first_read_p : process(mem_clk_int)
     begin
-        if (rising_edge(CLK)) then
+        if (rising_edge(mem_clk_int)) then
             if (rst_intern = '1') then
                 first_read <= '1';
             elsif (rd_req = '1') then
