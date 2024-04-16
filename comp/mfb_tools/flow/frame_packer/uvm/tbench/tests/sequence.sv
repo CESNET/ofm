@@ -45,8 +45,8 @@ class virt_sequence#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDT
         m_mfb_data_seq.init_sequence();
         m_mfb_data_seq.cfg = new();
         m_mfb_data_seq.cfg.array_size_set(FRAME_SIZE_MIN, FRAME_SIZE_MAX);
-        m_mfb_data_seq.min_random_count = 100;
-        m_mfb_data_seq.max_random_count = 200;
+        m_mfb_data_seq.min_random_count = 5;
+        m_mfb_data_seq.max_random_count = 8;
 
 
         m_info_seq.init_sequence();

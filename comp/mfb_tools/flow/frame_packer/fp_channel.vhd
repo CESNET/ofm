@@ -21,6 +21,7 @@ entity FP_CHANNEL is
         MUX_WIDTH           : natural := 2;
         FIFO_DEPTH          : natural := 32;
         TIMEOUT_CLK_NO      : natural := 32;
+        RX_PKT_SIZE_MIN     : natural := 2**13;
         RX_PKT_SIZE_MAX     : natural := 2**10;
 
         DEVICE              : string  := "AGILEX"
@@ -362,7 +363,7 @@ begin
             MFB_ITEM_WIDTH      => MFB_ITEM_WIDTH,
             FIFO_DEPTH          => FIFO_DEPTH,
             TIMEOUT_CLK_NO      => 2*TIMEOUT_CLK_NO,
-            SPKT_SIZE_MIN       =>  2**13,
+            SPKT_SIZE_MIN       => RX_PKT_SIZE_MIN,
             SPKT_SIZE_MAX       => RX_PKT_SIZE_MAX,
             DEVICE              => DEVICE
         )

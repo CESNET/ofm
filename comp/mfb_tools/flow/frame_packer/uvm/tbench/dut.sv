@@ -143,7 +143,9 @@ module DUT (
         .RX_CHANNELS            (RX_CHANNELS),
         .HDR_META_WIDTH         (HDR_META_WIDTH),
         .USR_RX_PKT_SIZE_MAX    (USR_RX_PKT_SIZE_MAX),
-        .USR_RX_PKT_SIZE_MIN    (USR_RX_PKT_SIZE_MIN)
+        .USR_RX_PKT_SIZE_MIN    (USR_RX_PKT_SIZE_MIN),
+        .SPKT_SIZE_MIN          (SPKT_SIZE_MIN),
+        .TIMEOUT_CLK_NO         (TIMEOUT_CLK_NO)
 
     ) VHDL_DUT_U (
 

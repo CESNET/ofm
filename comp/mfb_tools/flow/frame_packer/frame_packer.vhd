@@ -22,8 +22,17 @@ entity FRAME_PACKER is
         --Application core generics:
         RX_CHANNELS         : natural := 16;
         HDR_META_WIDTH      : natural := 12;
+        -- Input packets
         USR_RX_PKT_SIZE_MIN : natural := 64;
         USR_RX_PKT_SIZE_MAX : natural := 2**10;
+
+        -- The length of Super-Packet [Bytes] the component is trying to reach
+        -- Should be power of two
+        SPKT_SIZE_MIN       : natural := 2**13;
+        -- Timeout counter - Should be power of 2 (4096 is a optimal value)
+        -- How long does the timeout counter wait before it sends an incomplete Super-Packet
+        TIMEOUT_CLK_NO      : natural := 4096;
+
         DEVICE              : string := "AGILEX"
     );
     port(
@@ -92,7 +101,7 @@ architecture FULL of FRAME_PACKER is
     -- Output MVB FIFO (Added due to synchronization issues)
     constant MVB_FIFO_ITEMS             : natural := 512;
     -- Timeout duration - for more channels its better to set this to higher value
-    constant TIMEOUT_CLK_NO             : natural := 1024;
+    -- constant TIMEOUT_CLK_NO             : natural := 1024;
 
     ------------------------------------------------------------
     --                  SUBTYPE DECLARATION                   --
@@ -479,6 +488,7 @@ begin
                 FIFO_DEPTH          => FIFO_DEPTH,
                 TIMEOUT_CLK_NO      => TIMEOUT_CLK_NO,
                 DEVICE              => DEVICE,
+                RX_PKT_SIZE_MIN     => SPKT_SIZE_MIN,
                 RX_PKT_SIZE_MAX     => USR_RX_PKT_SIZE_MAX
             )
             port map(
