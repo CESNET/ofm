@@ -16,9 +16,9 @@ entity MVB_DEMUX2 is
     generic (
         MVB_ITEMS       : natural := 1;
         DATA_WIDTH      : natural := 64;
-        DATA_DEMUX      : boolean := False;
+        VERSION         : string := "register";
 
-        DEVICE          : string  := "7SERIES"
+        OUTPUT_REG      : boolean := False
     );
     port (
         -- Clock signal
@@ -61,8 +61,8 @@ begin
         MVB_ITEMS   => MVB_ITEMS,
         DATA_WIDTH  => DATA_WIDTH,
         DEMUX_WIDTH => 2,
-        DATA_DEMUX  => DATA_DEMUX,
-        DEVICE      => DEVICE
+        VERSION     => VERSION,
+        OUTPUT_REG  => OUTPUT_REG
     ) port map (
         CLK         => CLK,
         RESET       => RESET,
