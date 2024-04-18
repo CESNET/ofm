@@ -33,3 +33,11 @@ set NumericStdNoWarnings 1
 config wave -signalnamewidth 1
 nb_sim_run
 
+if {$SIM_FLAGS(CODE_COVERAGE)} {
+    file delete actual.ucdb final.ucdb
+    file delete -force -- cov_html/
+
+    coverage save -instance /testbench/DUT_U -assert -directive -cvg -code bcefst -verbose actual.ucdb
+    vcover merge final.ucdb final.ucdb actual.ucdb
+    vcover report -html -output cov_html -details -threshL 50 -threshH 90 final.ucdb
+}
