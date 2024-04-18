@@ -1,8 +1,9 @@
-//-- registers.sv: register model
-//-- Copyright (C) 2022 CESNET z. s. p. o.
-//-- Author(s): Daniel Kriz <danielkriz@cesnet.cz>
+// registers.sv: Definitions for single registers
+// Copyright (C) 2024 CESNET z. s. p. o.
+// Author(s): Daniel Kriz <danielkriz@cesnet.cz>
+//            Vladislav Válek <valekv@cesnet.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause
+// SPDX-License-Identifier: BSD-3-Clause
 
 class control_register extends uvm_reg;
     `uvm_object_utils(uvm_tx_dma_calypte_regs::control_register)

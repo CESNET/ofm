@@ -1,8 +1,9 @@
-//-- regmodel.sv: register model
-//-- Copyright (C) 2022 CESNET z. s. p. o.
-//-- Author(s): Daniel Kriz <danielkriz@cesnet.cz>
+// regmodel.sv: Register model for all channels
+// Copyright (C) 2024 CESNET z. s. p. o.
+// Author(s): Daniel Kriz <danielkriz@cesnet.cz>
+//            Vladislav Valek <valekv@cesnet.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause
+// SPDX-License-Identifier: BSD-3-Clause
 
 class regmodel_top #(int unsigned CHANNELS) extends uvm_reg_block;
     `uvm_object_param_utils(uvm_tx_dma_calypte_regs::regmodel_top #(CHANNELS))

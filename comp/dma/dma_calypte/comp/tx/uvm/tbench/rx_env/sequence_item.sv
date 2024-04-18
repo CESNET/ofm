@@ -1,11 +1,9 @@
-//-- sequence.sv
-//-- Copyright (C) 2024 CESNET z. s. p. o.
-//-- Author(s): Radek Iša <isa@cesnet.cz>
+// sequence.sv
+// Copyright (C) 2024 CESNET z. s. p. o.
+// Author(s): Radek Iša <isa@cesnet.cz>
+//            Vladislav Valek <valekv@cesnet.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause
-
-// This low level sequence define bus functionality
-
+// SPDX-License-Identifier: BSD-3-Clause
 
 class sequence_item extends uvm_sequence_item;
     `uvm_object_param_utils(uvm_tx_dma_calypte_cq::sequence_item)

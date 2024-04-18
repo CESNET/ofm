@@ -1,8 +1,9 @@
-//-- reg_channel.sv: Registre model for one channel
-//-- Copyright (C) 2022 CESNET z. s. p. o.
-//-- Author(s): Daniel Kriz <danielkriz@cesnet.cz>
+// reg_channel.sv: Register model for one channel
+// Copyright (C) 2022-2024 CESNET z. s. p. o.
+// Author(s): Daniel Kriz <danielkriz@cesnet.cz>
+//            Vladislav Valek <valekv@cesnet.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause
+// SPDX-License-Identifier: BSD-3-Clause
 
 class regmodel_channel extends uvm_reg_block;
     `uvm_object_utils(uvm_tx_dma_calypte_regs::regmodel_channel)

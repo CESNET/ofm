@@ -1,8 +1,9 @@
-//-- pkg.sv: Package for environment
-//-- Copyright (C) 2022 CESNET z. s. p. o.
-//-- Author(s): Daniel Kriz <danielkriz@cesnet.cz>
+// pkg.sv: Package for register model
+// Copyright (C) 2024 CESNET z. s. p. o.
+// Author(s): Daniel Kriz <danielkriz@cesnet.cz>
+//            Vladislav Valek <valekv@cesnet.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause
+// SPDX-License-Identifier: BSD-3-Clause
 
 `ifndef TX_DMA_CALYPTE_REGS_SV
 `define TX_DMA_CALYPTE_REGS_SV

@@ -1,8 +1,9 @@
-//-- scoreboard.sv: Scoreboard for verification
-//-- Copyright (C) 2022 CESNET z. s. p. o.
-//-- Author(s): Daniel Kriz <danielkriz@cesnet.cz>
+// scoreboard.sv: Scoreboard for verification
+// Copyright (C) 2022-2024 CESNET z. s. p. o.
+// Author(s): Daniel Kriz <danielkriz@cesnet.cz>
+//            Vladislav Valek <valekv@cesnet.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause
+// SPDX-License-Identifier: BSD-3-Clause
 
 class data_comparer #(int unsigned ITEM_WIDTH) extends uvm_common::comparer_ordered #(uvm_logic_vector_array::sequence_item #(ITEM_WIDTH));
     `uvm_component_param_utils(uvm_tx_dma_calypte::data_comparer #(ITEM_WIDTH))

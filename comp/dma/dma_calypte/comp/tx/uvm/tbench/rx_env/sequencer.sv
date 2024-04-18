@@ -1,8 +1,9 @@
-//-- sequencer.sv
-//-- Copyright (C) 2022 CESNET z. s. p. o.
-//-- Author(s): Radek Iša <isa@cesnet.cz>
+// sequencer.sv
+// Copyright (C) 2022-2024 CESNET z. s. p. o.
+// Author(s): Radek Iša <isa@cesnet.cz>
+//            Vladislav Valek <valekv@cesnet.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause
+// SPDX-License-Identifier: BSD-3-Clause
 
 class sequencer extends uvm_sequencer #(sequence_item);
     `uvm_component_param_utils(uvm_tx_dma_calypte_cq::sequencer);

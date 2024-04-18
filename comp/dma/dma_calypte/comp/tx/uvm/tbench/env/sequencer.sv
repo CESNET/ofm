@@ -1,8 +1,9 @@
-//-- sequencer.sv: Virtual sequencer
-//-- Copyright (C) 2022 CESNET z. s. p. o.
-//-- Author(s): Daniel Kriz <danielkriz@cesnet.cz>
+// sequencer.sv: Virtual sequencer
+// Copyright (C) 2024 CESNET z. s. p. o.
+// Author(s): Daniel Kriz <danielkriz@cesnet.cz>
+//            Vladislav Válek <valekv@cesnet.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause
+// SPDX-License-Identifier: BSD-3-Clause
 
 class sequencer #(
     int unsigned USR_MFB_REGIONS,

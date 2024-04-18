@@ -1,8 +1,9 @@
-//-- sequence.sv: Virtual sequencer
-//-- Copyright (C) 2022 CESNET z. s. p. o.
-//-- Author(s): Radek Iša <isa@cesnet.cz>
+// sequence.sv: Virtual sequence
+// Copyright (C) 2024 CESNET z. s. p. o.
+// Author(s): Radek Iša <isa@cesnet.cz>
+//            Vladislav Válek <valekv@cesnet.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause
+// SPDX-License-Identifier: BSD-3-Clause
 
 class sequence_simple extends uvm_sequence#(uvm_tx_dma_calypte_cq::sequence_item);
     `uvm_object_param_utils(uvm_tx_dma_calypte::sequence_simple)

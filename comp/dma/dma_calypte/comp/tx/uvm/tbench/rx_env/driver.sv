@@ -1,8 +1,9 @@
-//-- driver.sv
-//-- Copyright (C) 2024 CESNET z. s. p. o.
-//-- Author(s):Radek Iša <isa@cesnet.cz>
+// driver.sv
+// Copyright (C) 2024 CESNET z. s. p. o.
+// Author(s):Radek Iša <isa@cesnet.cz>
+//           Vladislav Valek <valekv@cesnet.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause
+// SPDX-License-Identifier: BSD-3-Clause
 
 class driver_data;
     logic [16-1 : 0] hdr_addr;

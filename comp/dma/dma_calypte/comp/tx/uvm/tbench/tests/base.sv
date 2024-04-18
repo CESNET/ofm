@@ -1,8 +1,9 @@
-//-- base.sv: Basic test
-//-- Copyright (C) 2021 CESNET z. s. p. o.
-//-- Author(s): Daniel Kriz <danielkriz@cesnet.cz>
+// base.sv: Basic test
+// Copyright (C) 2021-2024 CESNET z. s. p. o.
+// Author(s): Daniel Kriz <danielkriz@cesnet.cz>
+//            Vladislav Válek <valekv@cesnet.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause
+// SPDX-License-Identifier: BSD-3-Clause
 
 class base extends uvm_test;
     typedef uvm_component_registry#(test::base, "test::base") type_id;

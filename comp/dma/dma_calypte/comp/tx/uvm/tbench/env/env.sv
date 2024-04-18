@@ -1,4 +1,4 @@
-// env.sv: Verification environment
+// env.sv: Main verification environment
 // Copyright (C) 2022-2024 CESNET z. s. p. o.
 // Author(s): Daniel Kriz <danielkriz@cesnet.cz>
 //            Vladislav Valek <valekv@cesnet.cz>
