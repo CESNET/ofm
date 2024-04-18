@@ -14,27 +14,6 @@ use work.math_pack.all;
 use work.type_pack.all;
 use work.pcie_meta_pack.all;
 
--- .. WARNING::
---    The Completer Completion interface is not supported yet. Calypte Controller
---    supports only Memory Write PCIe transactions.
---
--- This is the transmitting part of the DMA Calypte core. TX direction behaves
--- similarly to the RX DMA Calypte. Data buffers are provided in the hardware to
--- which the data can be stored. The frames are output on the *USR_TX_* side and
--- PCI Express transactions are accepted on the *PCIE_CQ_* side. Output frame
--- can constist out of multiple PCIe transactions. Each such frame is delimited
--- by the DMA header which provides the size of the frame as well as the channel
--- to which the frame is designated and an address of the first byte of the
--- frame. PCIe transactions can be send on the unsorted series of adresses. The
--- DMA header then serves as delimiting block where, after its acceptance,
--- the frame on the output is read continuously from the address of the first
--- byte. The block scheme of the TX DMA Calypte controller is provided in the
--- following figure:
---
--- .. figure:: img/tx_calypte_block-tx_dma_calypte_top.svg
---     :align: center
---     :scale: 100%
---
 entity TX_DMA_CALYPTE is
     generic (
         DEVICE : string := "ULTRASCALE";

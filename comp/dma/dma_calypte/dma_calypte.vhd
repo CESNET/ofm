@@ -12,14 +12,6 @@ use work.math_pack.all;
 use work.type_pack.all;
 use work.pcie_meta_pack.all;
 
--- This core provides simple DMA functionality for both RX and TX directions.
--- The design was primary focused on the lowest latency possible for the
--- transaction from the input of the DMA core to reach its output. The block scheme
--- as well as its connection to the NDK design is provided in the following figure:
---
--- .. figure:: img/tx_calypte_block-dma_whole_block.svg
---     :align: center
---     :scale: 100%
 entity DMA_CALYPTE is
     generic(
         -- ==========================================================================================
