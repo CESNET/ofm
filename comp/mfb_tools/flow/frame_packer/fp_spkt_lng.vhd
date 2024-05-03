@@ -135,6 +135,8 @@ begin
         new_length_v     := pkt_lng_sum + length_reg_q;
         current_length_v := pkt_lng_sum;
 
+        length_reg_d    <= length_reg_q;
+
         -- Compare new_length_v with the upper limit of SuperPacket
         -- In other words if new_length >= 8192
         if (or (new_length_v(new_length_v'high downto log2(SPKT_SIZE_MIN)))) = '1' then
