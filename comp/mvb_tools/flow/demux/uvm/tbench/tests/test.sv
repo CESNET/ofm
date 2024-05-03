@@ -1,17 +1,18 @@
-//-- test.sv: Verification test 
-//-- Copyright (C) 2023 CESNET z. s. p. o.
-//-- Author:   Oliver Gurka <xgurka00@stud.fit.vutbr.cz>
+// test.sv: Verification test
+// Copyright (C) 2023-2024 CESNET z. s. p. o.
+// Author: Oliver Gurka <xgurka00@stud.fit.vutbr.cz>
+//         Vladislav Valek <valekv@cesnet.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+// SPDX-License-Identifier: BSD-3-Clause
 
 
 class ex_test extends uvm_test;
     `uvm_component_utils(test::ex_test);
 
     bit timeout;
-    uvm_mvb_demux::env #(ITEMS, ITEM_WIDTH, RX_MVB_CNT)             m_env;
-    uvm_mvb::sequence_lib_tx#(ITEMS, ITEM_WIDTH)   h_seq_tx[RX_MVB_CNT - 1 : 0];
-    uvm_mvb::sequence_full_speed_tx #(ITEMS, ITEM_WIDTH + $clog2(RX_MVB_CNT)) h_seq_uvm_tx;
+    uvm_mvb_demux::env #(ITEMS, ITEM_WIDTH, TX_PORTS)             m_env;
+    uvm_mvb::sequence_lib_tx#(ITEMS, ITEM_WIDTH)   h_seq_tx[TX_PORTS - 1 : 0];
+    uvm_mvb::sequence_full_speed_tx #(ITEMS, ITEM_WIDTH + $clog2(TX_PORTS)) h_seq_uvm_tx;
 
     // ------------------------------------------------------------------------
     // Functions
@@ -20,7 +21,7 @@ class ex_test extends uvm_test;
     endfunction
 
     function void build_phase(uvm_phase phase);
-        m_env = uvm_mvb_demux::env #(ITEMS, ITEM_WIDTH, RX_MVB_CNT)::type_id::create("m_env", this);
+        m_env = uvm_mvb_demux::env #(ITEMS, ITEM_WIDTH, TX_PORTS)::type_id::create("m_env", this);
     endfunction
 
     task test_wait_timeout(int unsigned time_length);
@@ -37,11 +38,11 @@ class ex_test extends uvm_test;
     // ------------------------------------------------------------------------
     // Create environment and Run sequences o their sequencers
     task run_seq_rx(uvm_phase phase);
-        virt_sequence#(ITEM_WIDTH, RX_MVB_CNT) m_vseq;
+        virt_sequence#(ITEM_WIDTH, TX_PORTS) m_vseq;
 
         phase.raise_objection(this, "Start of rx sequence");
 
-        m_vseq            = virt_sequence#(ITEM_WIDTH, RX_MVB_CNT)::type_id::create("m_vseq");
+        m_vseq            = virt_sequence#(ITEM_WIDTH, TX_PORTS)::type_id::create("m_vseq");
 
         for (int unsigned run = 0; run < RUNS; run++) begin
             assert(m_vseq.randomize());
@@ -65,7 +66,7 @@ class ex_test extends uvm_test;
     endtask
 
     task run_seq_tx(uvm_phase phase);
-        for (int port = 0; port < RX_MVB_CNT; port++) begin
+        for (int port = 0; port < TX_PORTS; port++) begin
             fork
                 automatic int index = port;
                 run_seq_port_tx(phase, index);
@@ -75,7 +76,7 @@ class ex_test extends uvm_test;
 
     virtual task run_phase(uvm_phase phase);
 
-        for (int it = 0; it < RX_MVB_CNT; it++) begin
+        for (int it = 0; it < TX_PORTS; it++) begin
             h_seq_tx[it] = uvm_mvb::sequence_lib_tx #(ITEMS, ITEM_WIDTH)::type_id::create("h_seq_tx");
             h_seq_tx[it].init_sequence();
             h_seq_tx[it].cfg.probability_set(60, 100);

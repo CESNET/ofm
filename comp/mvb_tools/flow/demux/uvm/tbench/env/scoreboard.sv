@@ -1,18 +1,19 @@
-//-- scoreboard.sv: Scoreboard for verification
-//-- Copyright (C) 2023 CESNET z. s. p. o.
-//-- Author:   Oliver Gurka <xgurka00@stud.fit.vutbr.cz>
+// scoreboard.sv: Scoreboard for verification
+// Copyright (C) 2023-2024 CESNET z. s. p. o.
+// Author: Oliver Gurka <xgurka00@stud.fit.vutbr.cz>
+//         Vladislav Valek <valekv@cesnet.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause
+// SPDX-License-Identifier: BSD-3-Clause
 
-class scoreboard #(ITEM_WIDTH, TX_MVB_CNT) extends uvm_scoreboard;
+class scoreboard #(ITEM_WIDTH, TX_PORTS) extends uvm_scoreboard;
 
-    `uvm_component_utils(uvm_mvb_demux::scoreboard #(ITEM_WIDTH, TX_MVB_CNT))
+    `uvm_component_utils(uvm_mvb_demux::scoreboard #(ITEM_WIDTH, TX_PORTS))
     // Analysis components.
-    uvm_common::subscriber #(uvm_logic_vector::sequence_item#(ITEM_WIDTH + $clog2(TX_MVB_CNT))) analysis_imp_mvb_rx;
-    uvm_analysis_export #(uvm_logic_vector::sequence_item#(ITEM_WIDTH)) analysis_imp_mvb_tx[TX_MVB_CNT - 1 : 0];
+    uvm_common::subscriber #(uvm_logic_vector::sequence_item#(ITEM_WIDTH + $clog2(TX_PORTS))) analysis_imp_mvb_rx;
+    uvm_analysis_export #(uvm_logic_vector::sequence_item#(ITEM_WIDTH)) analysis_imp_mvb_tx[TX_PORTS - 1 : 0];
 
-    uvm_common::comparer_ordered #(uvm_logic_vector::sequence_item #(ITEM_WIDTH)) port_cmp[TX_MVB_CNT - 1 : 0];
-    model#(ITEM_WIDTH, TX_MVB_CNT) m_model;
+    uvm_common::comparer_ordered #(uvm_logic_vector::sequence_item #(ITEM_WIDTH)) port_cmp[TX_PORTS - 1 : 0];
+    model#(ITEM_WIDTH, TX_PORTS) m_model;
 
     // Contructor of scoreboard.
     function new(string name, uvm_component parent);
@@ -22,7 +23,7 @@ class scoreboard #(ITEM_WIDTH, TX_MVB_CNT) extends uvm_scoreboard;
     function int unsigned used();
         int unsigned ret = 0;
 
-        for (int i = 0; i < TX_MVB_CNT; i++) begin
+        for (int i = 0; i < TX_PORTS; i++) begin
             ret |= this.port_cmp[i].used();
             ret |= this.port_cmp[i].errors != 0;
         end
@@ -30,10 +31,10 @@ class scoreboard #(ITEM_WIDTH, TX_MVB_CNT) extends uvm_scoreboard;
     endfunction // used
 
     function void build_phase(uvm_phase phase);
-        m_model = model #(ITEM_WIDTH, TX_MVB_CNT)::type_id::create("m_model", this);
-        analysis_imp_mvb_rx = uvm_common::subscriber #(uvm_logic_vector::sequence_item#(ITEM_WIDTH + $clog2(TX_MVB_CNT)))::type_id::create("analysis_imp_rx", this);
+        m_model = model #(ITEM_WIDTH, TX_PORTS)::type_id::create("m_model", this);
+        analysis_imp_mvb_rx = uvm_common::subscriber #(uvm_logic_vector::sequence_item#(ITEM_WIDTH + $clog2(TX_PORTS)))::type_id::create("analysis_imp_rx", this);
 
-        for (int port = 0; port < TX_MVB_CNT; port ++) begin
+        for (int port = 0; port < TX_PORTS; port ++) begin
             port_cmp[port] = uvm_common::comparer_ordered #(uvm_logic_vector::sequence_item #(ITEM_WIDTH))::type_id::create($sformatf("port_comparer_%0d", port), this);
             analysis_imp_mvb_tx[port] = new($sformatf("analysis_imp_tx_%0d", port), this);
         end
@@ -42,7 +43,7 @@ class scoreboard #(ITEM_WIDTH, TX_MVB_CNT) extends uvm_scoreboard;
     function void connect_phase(uvm_phase phase);
         analysis_imp_mvb_rx.port.connect(m_model.model_mvb_in.analysis_export);
 
-        for (int port = 0; port < TX_MVB_CNT; port++) begin
+        for (int port = 0; port < TX_PORTS; port++) begin
             m_model.model_mvb_out[port].connect(port_cmp[port].analysis_imp_model);
             analysis_imp_mvb_tx[port].connect(port_cmp[port].analysis_imp_dut);
         end
@@ -53,7 +54,7 @@ class scoreboard #(ITEM_WIDTH, TX_MVB_CNT) extends uvm_scoreboard;
         int unsigned compared = 0;
         int unsigned errors   = 0;
 
-        for (int port = 0; port < TX_MVB_CNT; port++) begin
+        for (int port = 0; port < TX_PORTS; port++) begin
             compared = compared + port_cmp[port].compared;
             errors = errors + port_cmp[port].errors;
         end

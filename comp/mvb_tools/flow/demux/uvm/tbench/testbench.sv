@@ -1,8 +1,9 @@
-//-- tbench.sv: Testbench
-//-- Copyright (C) 2023 CESNET z. s. p. o.
-//-- Author:   Oliver Gurka <xgurka00@stud.fit.vutbr.cz>
+// tbench.sv: Testbench
+// Copyright (C) 2023-2024 CESNET z. s. p. o.
+// Author: Oliver Gurka <xgurka00@stud.fit.vutbr.cz>
+//         Vladislav Valek <valekv@cesnet.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause
+// SPDX-License-Identifier: BSD-3-Clause
 
 import uvm_pkg::*;
 `include "uvm_macros.svh"
@@ -18,8 +19,8 @@ module testbench;
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // Interfaces
     reset_if  reset(CLK);
-    mvb_if #(ITEMS, ITEM_WIDTH) mvb_rd [RX_MVB_CNT - 1 : 0] (CLK);
-    mvb_if #(ITEMS, ITEM_WIDTH + $clog2(RX_MVB_CNT)) mvb_wr(CLK);
+    mvb_if #(ITEMS, ITEM_WIDTH) mvb_rd [TX_PORTS - 1 : 0] (CLK);
+    mvb_if #(ITEMS, ITEM_WIDTH + $clog2(TX_PORTS)) mvb_wr(CLK);
 
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // Define clock period
@@ -30,15 +31,15 @@ module testbench;
     initial begin
         uvm_root m_root;
 
-        automatic virtual mvb_if #(ITEMS, ITEM_WIDTH) v_mvb_rd[RX_MVB_CNT - 1 : 0] = mvb_rd;
+        automatic virtual mvb_if #(ITEMS, ITEM_WIDTH) v_mvb_rd[TX_PORTS - 1 : 0] = mvb_rd;
 
         // Configuration of database
-        for (int i = 0; i < RX_MVB_CNT; i++) begin
+        for (int i = 0; i < TX_PORTS; i++) begin
             uvm_config_db #(virtual mvb_if #(ITEMS, ITEM_WIDTH))::set(null, "", $sformatf("tx_vif_%0d", i), v_mvb_rd[i]);
         end
 
         uvm_config_db #(virtual reset_if)::set(null, "", "vif_reset", reset);
-        uvm_config_db #(virtual mvb_if #(ITEMS, ITEM_WIDTH + $clog2(RX_MVB_CNT)))::set(null, "", "rx_vif", mvb_wr);
+        uvm_config_db #(virtual mvb_if #(ITEMS, ITEM_WIDTH + $clog2(TX_PORTS)))::set(null, "", "rx_vif", mvb_wr);
 
         m_root = uvm_root::get();
         m_root.finish_on_completion = 0;
@@ -62,7 +63,7 @@ module testbench;
 
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // Properties
-    for (genvar i = 0; i < RX_MVB_CNT; i++) begin
+    for (genvar i = 0; i < TX_PORTS; i++) begin
         mvb_property #(
             .ITEMS       (ITEMS),
             .ITEM_WIDTH  (ITEM_WIDTH)
