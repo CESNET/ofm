@@ -44,12 +44,9 @@ if {$SIM_FLAGS(CODE_COVERAGE)} {
     #file delete -force -- cov_html/
     coverage configure -2stepexclusion off 
 
-    coverage exclude -clear -ftrans state {st_LOAD_LNG -> st_FIRST_PAC -> st_LOAD_LNG}              -du fp_fifo_ctrl
-    coverage exclude -clear -ftrans state {st_LOAD_LNG -> st_FIRST_PAC -> st_PASS}                  -du fp_fifo_ctrl
-    coverage exclude -clear -ftrans state {st_LOAD_LNG -> st_FIRST_PAC -> st_PASS -> st_LOAD_LNG}   -du fp_fifo_ctrl
-    coverage exclude -clear -ftrans state {st_FIRST_PAC -> st_LOAD_LNG -> st_FIRST_PAC}             -du fp_fifo_ctrl
-    coverage exclude -clear -ftrans state {st_FIRST_PAC -> st_PASS -> st_LOAD_LNG -> st_FIRST_PAC}  -du fp_fifo_ctrl
-    coverage exclude -clear -ftrans state {st_PASS -> st_LOAD_LNG -> st_FIRST_PAC -> st_PASS}       -du fp_fifo_ctrl
+    coverage exclude -du fp_fifo_ctrl -fstate state st_LOAD_LNG
+    coverage exclude -du fp_fifo_ctrl -fstate state st_FIRST_PAC
+    coverage exclude -du fp_fifo_ctrl -fstate state st_PASS
 
     # Exclude files that are not part of the Frame Packer
     coverage exclude -src $FIRMWARE_BASE/comp/base/pkg/math_pack.vhd
@@ -62,7 +59,7 @@ if {$SIM_FLAGS(CODE_COVERAGE)} {
     coverage exclude -src $FIRMWARE_BASE/comp/base/logic/barrel_shifter/barrel_shifter_gen.vhd
     coverage exclude -src $FIRMWARE_BASE/comp/base/logic/n_one/n_one_logic.vhd
     coverage exclude -src $FIRMWARE_BASE/comp/base/logic/n_one/n_one_core.vhd
-	coverage exclude -src $FIRMWARE_BASE/comp/base/logic/n_one/n_one.vhd
+    coverage exclude -src $FIRMWARE_BASE/comp/base/logic/n_one/n_one.vhd
     coverage exclude -src $FIRMWARE_BASE/comp/base/logic/n_one/n_one_ent.vhd
     coverage exclude -src $FIRMWARE_BASE/comp/base/fifo/fifox/fifox.vhd
     coverage exclude -src $FIRMWARE_BASE/comp/base/fifo/fifo/fifo.vhd  
@@ -86,30 +83,29 @@ if {$SIM_FLAGS(CODE_COVERAGE)} {
     coverage exclude -src $FIRMWARE_BASE/comp/debug/streaming_debug/streaming_debug_probe.vhd
 
     #Toggle Disable
-    coverage exclude -du fp_aux_gen   -togglenode TX_MFB_DST_RDY
-    coverage exclude -du fp_aux_gen   -togglenode RX_MFB_DST_RDY
-    coverage exclude -du frame_packer -togglenode aux_rx_dst_rdy
-    coverage exclude -du frame_packer -togglenode aux_tx_mfb_dst_rdy
-    coverage exclude -du frame_packer -togglenode TX_MVB_DISCARD
-    coverage exclude -du fp_bs_calc   -togglenode RX_SOF_POS_UNS
-    coverage exclude -du fp_channel   -togglenode spkt_tx_eof_num
-    coverage exclude -du fp_fifo_ctrl -togglenode block_counter
-    coverage exclude -du fp_fifo_ctrl -togglenode pkts_read
-    coverage exclude -du fp_fifo_ctrl -togglenode SPKT_RX_EOF_NUM
-    coverage exclude -du fp_data_sel  -togglenode TX_META
-    coverage exclude -du fp_spkt_lng  -togglenode eof_cnt
-    coverage exclude -du fp_spkt_lng  -togglenode rx_fifox_pkt_num
-    coverage exclude -du fp_spkt_lng  -togglenode spkt_eof_num
-    coverage exclude -du fp_spkt_lng  -togglenode TX_SPKT_EOF_NUM
+    coverage exclude -du fp_aux_gen      -togglenode TX_MFB_DST_RDY
+    coverage exclude -du fp_aux_gen      -togglenode RX_MFB_DST_RDY
+    coverage exclude -du frame_packer    -togglenode aux_rx_dst_rdy
+    coverage exclude -du frame_packer    -togglenode aux_tx_mfb_dst_rdy
+    coverage exclude -du frame_packer    -togglenode TX_MVB_DISCARD
+    coverage exclude -du fp_bs_calc      -togglenode RX_SOF_POS_UNS
+    coverage exclude -du fp_channel      -togglenode spkt_tx_eof_num
+    coverage exclude -du fp_fifo_ctrl    -togglenode block_counter
+    coverage exclude -du fp_fifo_ctrl    -togglenode pkts_read
+    coverage exclude -du fp_fifo_ctrl    -togglenode SPKT_RX_EOF_NUM
+    coverage exclude -du fp_fifo_ctrl    -togglenode pkts_to_read
+    coverage exclude -du fp_data_sel     -togglenode TX_META
+    coverage exclude -du fp_data_sel     -togglenode sel_out(7)
+    coverage exclude -du fp_data_sel     -togglenode sel_out_n(7)
+    coverage exclude -du fp_data_sel     -togglenode sel_one_hot(7)
+    coverage exclude -du fp_spkt_lng     -togglenode eof_cnt
+    coverage exclude -du fp_spkt_lng     -togglenode rx_fifox_pkt_num
+    coverage exclude -du fp_spkt_lng     -togglenode spkt_eof_num
+    coverage exclude -du fp_spkt_lng     -togglenode TX_SPKT_EOF_NUM
+    coverage exclude -du fp_timeout_ext  -togglenode tmp_enable
 
     coverage exclude -src $FIRMWARE_BASE/comp/mfb_tools/flow/frame_packer/frame_packer.vhd -line 307 -code e
     coverage exclude -src $FIRMWARE_BASE/comp/mfb_tools/flow/frame_packer/fp_channel.vhd   -line 150 -code e
-
-
-
-    
-    
-
 
     coverage save -instance /testbench/DUT_U -assert -directive -cvg -code bcefst -verbose actual.ucdb
     vcover merge final.ucdb final.ucdb actual.ucdb
