@@ -14,13 +14,13 @@ use work.type_pack.all;
 entity FRAME_PACKER is
     generic(
         --MFB generics
-        MFB_REGIONS         : natural := 1;
+        MFB_REGIONS         : natural := 4;
         MFB_REGION_SIZE     : natural := 8;
         MFB_BLOCK_SIZE      : natural := 8;
         MFB_ITEM_WIDTH      : natural := 8;
 
         --Application core generics:
-        RX_CHANNELS         : natural := 16;
+        RX_CHANNELS         : natural := 8;
         HDR_META_WIDTH      : natural := 12;
         -- Input packets
         USR_RX_PKT_SIZE_MIN : natural := 64;
@@ -208,7 +208,7 @@ architecture FULL of FRAME_PACKER is
     signal ver_src_rdy                  : std_logic_vector(RX_CHANNELS - 1 downto 0);
     signal ver_dst_rdy                  : std_logic_vector(RX_CHANNELS - 1 downto 0);
 
-    signal debug_pkt_num                : slv_array_t(RX_CHANNELS - 1 downto 0)(max(1, log2(USR_RX_PKT_SIZE_MAX/(MFB_REGION_SIZE*MFB_BLOCK_SIZE))) - 1 downto 0); 
+    signal debug_pkt_num                : slv_array_t(RX_CHANNELS - 1 downto 0)(max(1, log2(FIFO_DEPTH)) - 1 downto 0); 
     signal debug_pkt_num_src_rdy        : std_logic_vector(RX_CHANNELS - 1 downto 0);
 
     signal debug_eof                    : slv_array_t(RX_CHANNELS - 1 downto 0)(MFB_REGIONS - 1 downto 0);
@@ -629,6 +629,7 @@ begin
                 MFB_BLOCK_SIZE  => MFB_BLOCK_SIZE,
                 MFB_ITEM_WIDTH  => MFB_ITEM_WIDTH,
 
+                FIFO_DEPTH          => FIFO_DEPTH,
                 USR_RX_PKT_SIZE_MAX => USR_RX_PKT_SIZE_MAX,
                 USR_RX_PKT_SIZE_MIN => USR_RX_PKT_SIZE_MIN
             )

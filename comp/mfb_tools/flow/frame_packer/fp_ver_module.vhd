@@ -19,6 +19,7 @@ entity FP_VER_MOD is
         MFB_BLOCK_SIZE  : natural := 8;
         MFB_ITEM_WIDTH  : natural := 8;
 
+        FIFO_DEPTH          :natural := 512;
         USR_RX_PKT_SIZE_MAX :natural := 64;
         USR_RX_PKT_SIZE_MIN :natural := 2**10
     );
@@ -28,7 +29,7 @@ entity FP_VER_MOD is
         --FIFO read enable
         RX_READ_EN  : in std_logic;
 
-        RX_PKT_NUM          : in std_logic_vector(max(1, log2(USR_RX_PKT_SIZE_MAX/(MFB_REGION_SIZE*MFB_BLOCK_SIZE))) - 1 downto 0); 
+        RX_PKT_NUM          : in std_logic_vector(max(1, log2(FIFO_DEPTH)) - 1 downto 0); 
         RX_PKT_NUM_SRC_RDY  : in std_logic;
 
         --End of packets at FRAME_SHIFTER input

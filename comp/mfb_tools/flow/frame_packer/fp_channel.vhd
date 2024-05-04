@@ -31,7 +31,7 @@ entity FP_CHANNEL is
         RST : in std_logic;
 
         -- Verification probe
-        DEBUG_PKT_NUM           : out std_logic_vector(max(1, log2(RX_PKT_SIZE_MAX/(MFB_REGION_SIZE*MFB_BLOCK_SIZE))) - 1 downto 0);
+        DEBUG_PKT_NUM           : out std_logic_vector(max(1, log2(FIFO_DEPTH)) - 1 downto 0);
         DEBUG_PKT_NUM_SRC_RDY   : out std_logic;
         DEBUG_EOF               : out std_logic_vector(MFB_REGIONS - 1 downto 0);
         DEBUG_EOF_SRC_RDY       : out std_logic;
@@ -76,7 +76,7 @@ architecture FULL of FP_CHANNEL is
     constant BLOCK_WIDTH            : natural := MFB_BLOCK_SIZE*MFB_ITEM_WIDTH;
     constant BLOCK_WIDTH_EOF_ITEM   : natural := max(1, log2(MFB_ITEM_WIDTH));
     constant BUFFER_DEPTH           : natural := 8;
-    constant EOF_NUM_LEN            : natural := max(1, log2(RX_PKT_SIZE_MAX/(MFB_REGION_SIZE*MFB_BLOCK_SIZE)));
+    constant EOF_NUM_LEN            : natural := max(1, log2(FIFO_DEPTH));
     constant LNG_WIDTH              : natural := max(1, log2(RX_PKT_SIZE_MAX+1));
 
     ------------------------------------------------------------

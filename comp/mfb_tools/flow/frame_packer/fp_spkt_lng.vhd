@@ -35,7 +35,7 @@ entity FP_SPKT_LNG is
         RX_PKT_SRC_RDY     : in  std_logic;
         RX_PKT_LENGTH      : in  slv_array_t(MFB_REGIONS - 1 downto 0)(log2(SPKT_SIZE_MAX+1)  - 1 downto 0);
 
-        TX_SPKT_EOF_NUM     : out std_logic_vector(max(1, log2(SPKT_SIZE_MAX/(MFB_REGION_SIZE*MFB_BLOCK_SIZE))) - 1 downto 0);
+        TX_SPKT_EOF_NUM     : out std_logic_vector(max(1, log2(FIFO_DEPTH)) - 1 downto 0);
         TX_SPKT_LENGTH      : out std_logic_vector(log2(SPKT_SIZE_MAX+ 1)  - 1 downto 0);
         TX_SPKT_SRC_RDY     : out std_logic;
         TX_SPKT_DST_RDY     : in  std_logic
@@ -43,7 +43,7 @@ entity FP_SPKT_LNG is
 end entity;
 
 architecture FULL of FP_SPKT_LNG is
-    constant EOF_NUM_LEN   : natural := max(1, log2(SPKT_SIZE_MAX/(MFB_REGION_SIZE*MFB_BLOCK_SIZE)));
+    constant EOF_NUM_LEN   : natural := max(1, log2(FIFO_DEPTH));
 
     signal pkt_lng_sum        : unsigned(log2(SPKT_SIZE_MAX+ 1)  - 1 downto 0);
     signal length_reg_d       : unsigned(log2(SPKT_SIZE_MAX+ 1)  - 1 downto 0);
@@ -70,7 +70,7 @@ architecture FULL of FP_SPKT_LNG is
 
     -- Enable
     signal rd_en              : std_logic;
-    signal eof_cnt            : unsigned(max(1, log2(SPKT_SIZE_MAX/(MFB_REGION_SIZE*MFB_BLOCK_SIZE))) - 1 downto 0);
+    signal eof_cnt            : unsigned(max(1, log2(FIFO_DEPTH)) - 1 downto 0);
 
 begin
 
@@ -256,7 +256,7 @@ begin
 
     -- Highest bit indicates whether the SP is ready or not (1 = not ready, 0 = ready)
     process(all)
-        variable sp_completed_cnt_v : unsigned(max(1, log2(SPKT_SIZE_MAX/(MFB_REGION_SIZE*MFB_BLOCK_SIZE))) downto 0);
+        variable sp_completed_cnt_v : unsigned(max(1, log2(FIFO_DEPTH)) downto 0);
     begin
         sp_completed_cnt_v := ('0' & eof_cnt) - unsigned(tx_fifox_data(EOF_NUM_LEN - 1 downto 0));
 
