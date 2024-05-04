@@ -208,7 +208,7 @@ architecture FULL of FRAME_PACKER is
     signal ver_src_rdy                  : std_logic_vector(RX_CHANNELS - 1 downto 0);
     signal ver_dst_rdy                  : std_logic_vector(RX_CHANNELS - 1 downto 0);
 
-    signal debug_pkt_num                : slv_array_t(RX_CHANNELS - 1 downto 0)(max(1, log2(FIFO_DEPTH)) - 1 downto 0); 
+    signal debug_pkt_num                : slv_array_t(RX_CHANNELS - 1 downto 0)(max(1, log2(MFB_REGIONS*FIFO_DEPTH)) - 1 downto 0); 
     signal debug_pkt_num_src_rdy        : std_logic_vector(RX_CHANNELS - 1 downto 0);
 
     signal debug_eof                    : slv_array_t(RX_CHANNELS - 1 downto 0)(MFB_REGIONS - 1 downto 0);

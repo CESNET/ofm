@@ -29,7 +29,7 @@ entity FP_VER_MOD is
         --FIFO read enable
         RX_READ_EN  : in std_logic;
 
-        RX_PKT_NUM          : in std_logic_vector(max(1, log2(FIFO_DEPTH)) - 1 downto 0); 
+        RX_PKT_NUM          : in std_logic_vector(max(1, log2(MFB_REGIONS*FIFO_DEPTH)) - 1 downto 0); 
         RX_PKT_NUM_SRC_RDY  : in std_logic;
 
         --End of packets at FRAME_SHIFTER input

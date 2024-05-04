@@ -35,7 +35,7 @@ entity FP_FIFO_CTRL is
 
         -- Instructions for FIFO_CTRL 
         -- Number of packets that make up the SuperPacket
-        SPKT_RX_EOF_NUM     : in  std_logic_vector(max(1, log2(FIFO_DEPTH)) - 1 downto 0);
+        SPKT_RX_EOF_NUM     : in  std_logic_vector(max(1, log2(MFB_REGIONS*FIFO_DEPTH)) - 1 downto 0);
         -- Length of the SuperPacket
         SPKT_RX_LENGTH      : in  std_logic_vector(log2(RX_PKT_SIZE_MAX+ 1) - 1 downto 0);
         SPKT_RX_SRC_RDY     : in  std_logic;
@@ -65,8 +65,8 @@ architecture FULL of FP_FIFO_CTRL is
 
     signal pkt_read         : std_logic;
     signal load_en          : std_logic;
-    signal pkts_to_read     : unsigned(max(1, log2(FIFO_DEPTH)) - 1 downto 0);
-    signal pkt_underflow    : unsigned(max(1, log2(FIFO_DEPTH)) - 1 downto 0);
+    signal pkts_to_read     : unsigned(max(1, log2(MFB_REGIONS*FIFO_DEPTH)) - 1 downto 0);
+    signal pkt_underflow    : unsigned(max(1, log2(MFB_REGIONS*FIFO_DEPTH)) - 1 downto 0);
 
     signal block_counter    : std_logic;
 
@@ -74,7 +74,7 @@ architecture FULL of FP_FIFO_CTRL is
     signal pkt_cont         : std_logic_vector(MFB_REGIONS downto 0);
     signal pkt_last         : std_logic;
 
-    signal pkts_read        : unsigned(max(1, log2(FIFO_DEPTH)) - 1 downto 0);
+    signal pkts_read        : unsigned(max(1, log2(MFB_REGIONS*FIFO_DEPTH)) - 1 downto 0);
 
     signal new_sof          : std_logic_vector(MFB_REGIONS     downto 0);
     signal sof_mask         : std_logic_vector(MFB_REGIONS - 1 downto 0);
@@ -160,7 +160,7 @@ begin
 
     -- EOF mask
     eof_mask_p: process(all)
-        variable eof_cnt_v  : unsigned(max(1, log2(FIFO_DEPTH)) - 1 downto 0);
+        variable eof_cnt_v  : unsigned(max(1, log2(MFB_REGIONS*FIFO_DEPTH)) - 1 downto 0);
         variable index      : integer range 0 to 4;
     begin
         eof_mask     <= (others => '0');
