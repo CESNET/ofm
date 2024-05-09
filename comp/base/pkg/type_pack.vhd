@@ -94,6 +94,13 @@ package type_pack is
   function sum(v :   i_array_t) return integer;
   function sum(v :   n_array_t) return integer;
 
+  -- Make and absolute value from a signed vector.
+  function absolute    (v : signed) return signed;
+  -- Same as function "absolute" with a conversion to unsigned at the end.
+  function absolute2uns(v : signed) return unsigned;
+  -- Same as function "absolute2uns" with a conversion to std_logic_vector at the end.
+  function absolute2slv(v : signed) return std_logic_vector;
+
   pure function resize(in_val : std_logic_vector; in_size : natural) return std_logic_vector;
 
 end type_pack;
@@ -164,6 +171,24 @@ package body type_pack is
         s := s + v(i);
      end loop;
      return s;
+  end;
+
+  function absolute(v : signed) return signed is
+  begin
+     if (v(v'high) = '0') then
+        return v; -- no change when it is positive
+     end if;
+     return -v;
+  end;
+
+  function absolute2uns(v : signed) return unsigned is
+  begin
+     return unsigned(absolute(v));
+  end;
+
+  function absolute2slv(v : signed) return std_logic_vector is
+  begin
+     return std_logic_vector(absolute2uns(v));
   end;
 
   function conv_bit_vector(v : natural; l : natural) return bit_vector is
