@@ -58,7 +58,7 @@ async def run_test(dut, pkt_count=10000, frame_size_min=60, frame_size_max=512):
     while (tb.stream_out.frame_cnt < pkt_count):
         if (tb.stream_out.frame_cnt // 1000) > last_num:
             last_num = tb.stream_out.frame_cnt // 1000
-            print("Number of transactions processed: %d/%d" % (tb.stream_out.frame_cnt, pkt_count))
+            cocotb.log.info("Number of transactions processed: %d/%d" % (tb.stream_out.frame_cnt, pkt_count))
         await ClockCycles(dut.CLK, 100)
     
     await ClockCycles(dut.CLK, 100)
