@@ -40,7 +40,7 @@ class scoreboard #(ITEM_WIDTH, TX_PORTS) extends uvm_scoreboard;
 
         for (int port = 0; port < TX_PORTS; port ++) begin
             port_cmp[port] = uvm_common::comparer_ordered #(uvm_logic_vector::sequence_item #(ITEM_WIDTH))::type_id::create($sformatf("port_cmp_%0d", port), this);
-            port_cmp[port].model_tr_timeout_set(128ns);
+            port_cmp[port].model_tr_timeout_set(10us);
         end
 
         m_model = model #(ITEM_WIDTH, TX_PORTS)::type_id::create("m_model", this);
