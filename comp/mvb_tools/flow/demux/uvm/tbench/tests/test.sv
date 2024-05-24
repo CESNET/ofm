@@ -31,11 +31,8 @@ class ex_test extends uvm_test;
 
         m_vseq = virt_sequence#(ITEM_WIDTH, TX_PORTS)::type_id::create("m_vseq");
 
-        // for (int unsigned run = 0; run < RUNS; run++) begin
-        repeat (RUNS) begin
-            assert(m_vseq.randomize());
-            m_vseq.start(m_env.m_virt_sqcr);
-        end
+        assert(m_vseq.randomize());
+        m_vseq.start(m_env.m_virt_sqcr);
 
         begin
             time time_start = $time();

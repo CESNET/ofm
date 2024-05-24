@@ -41,6 +41,8 @@ class virt_sequence#(ITEM_WIDTH, TX_PORTS) extends uvm_sequence;
 
         #(100ns)
 
-        run_mfb();
+        repeat (RUNS) begin
+            run_mfb();
+        end
     endtask
 endclass
