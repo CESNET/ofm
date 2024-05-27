@@ -136,6 +136,8 @@ proc SetupDesign {synth_flags} {
     # Manual compile order (automatic is buggy in Vivado)
     set_property source_mgmt_mode DisplayOnly [current_project]
 
+    set_param messaging.defaultLimit 3000
+
     # Apply user settings
     foreach i $SYNTH_FLAGS(SETUP_FLAGS) {
         if { $i == "USE_XPM_LIBRARIES" } {
