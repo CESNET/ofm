@@ -6,7 +6,7 @@
 
 
 set PIPE      "$OFM_PATH/comp/base/logic/pipe_dsp"
-set PKG_BASE2 "$COMP_BASE/base/pkg"
+set PKG_BASE2 "$OFM_PATH/comp/base/pkg"
 
 set COMPONENTS [ list \
                   [ list "PIPE_DSP"              $PIPE                  "STRUCTUAL"  ] \
