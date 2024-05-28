@@ -116,9 +116,8 @@ class sequence_item extends uvm_sequence_item;
     function string convert2string();
         string ret;
 
-        $swrite(ret, "\tLength : %d\n\tType : %b\n\tFirstIB : %b\n\tlastIB : %b\n\ttag : %b\n\tunitid : %b\n\tglobal :
-                     %b\n\tvfid : %b\n\tpasid : %b\n\tpasidvld : %b\n\trelaxed : %b\n", 
-                     length, type_ide, firstib, lastib, tag, unitid, global_id, vfid, pasid, pasidvld, relaxed);
+        ret = $sformatf("\tLength : %d\n\tType : %b\n\tFirstIB : %0d\n\tlastIB : %0d\n\ttag : %0d(0x%h)\n\tunitid : 0x%h\n\tglobal : 0x%h\n\tvfid : 0x%h\n\tpasid : 0x%h\n\tpasidvld : %b\n\trelaxed : %b\n",
+                     length, type_ide, firstib, lastib, tag, tag, unitid, global_id, vfid, pasid, pasidvld, relaxed);
 
         return ret;
     endfunction

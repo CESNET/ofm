@@ -6,7 +6,7 @@
 
 class virt_sequencer extends uvm_sequencer;
 
-    `uvm_component_utils(virt_sequencer)
+    `uvm_component_utils(uvm_ptc::virt_sequencer)
 
     uvm_dma_up::sequencer m_packet;
     //uvm_reset::sequencer  m_reset;
