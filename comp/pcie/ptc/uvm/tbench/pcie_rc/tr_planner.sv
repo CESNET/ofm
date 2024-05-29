@@ -18,8 +18,6 @@ class tr_planner #(ITEM_WIDTH, RQ_TUSER_WIDTH, PCIE_DOWNHDR_WIDTH, RCB_SIZE, CLK
     uvm_logic_vector::sequence_item #(PCIE_DOWNHDR_WIDTH) logic_array[$];
     uvm_logic_vector_array::sequence_item #(32)           byte_array[$];
     uvm_logic_vector::sequence_item#(ITEM_WIDTH)          headers[$];
-    uvm_logic_vector_array::sequence_item#(32)            data_comps[$];
-    uvm_logic_vector::sequence_item#(PCIE_DOWNHDR_WIDTH)  meta_comps[$];
     int unsigned mvb_cnt = 0;
     int unsigned mfb_cnt = 0;
 
@@ -33,7 +31,8 @@ class tr_planner #(ITEM_WIDTH, RQ_TUSER_WIDTH, PCIE_DOWNHDR_WIDTH, RCB_SIZE, CLK
         uvm_ptc_info_rc::sequence_item #(DEVICE)   hdr;
     } pcie_info;
 
-    task split (uvm_ptc_info_rc::sequence_item #(DEVICE) pcie_tr, uvm_logic_vector_array::sequence_item#(32) pcie_data);
+    task split (uvm_ptc_info_rc::sequence_item #(DEVICE) pcie_tr);
+        uvm_logic_vector_array::sequence_item#(32) pcie_data;
         int unsigned                 rcbs;
         int unsigned                 index;
         int unsigned                 l;
@@ -56,6 +55,10 @@ class tr_planner #(ITEM_WIDTH, RQ_TUSER_WIDTH, PCIE_DOWNHDR_WIDTH, RCB_SIZE, CLK
         index   = 0;
         byte_count = length*4 - lbe - address[1:0];
 
+        pcie_data = uvm_logic_vector_array::sequence_item #(32)::type_id::create("frame");
+        assert(pcie_data.randomize() with {pcie_data.data.size() == pcie_tr.len; });
+
+
         while (length) begin
             comp_hdr  = uvm_logic_vector::sequence_item#(PCIE_DOWNHDR_WIDTH)::type_id::create("comp_hdr");
             comp_data = uvm_logic_vector_array::sequence_item#(32)::type_id::create("comp_data");
@@ -74,7 +77,7 @@ class tr_planner #(ITEM_WIDTH, RQ_TUSER_WIDTH, PCIE_DOWNHDR_WIDTH, RCB_SIZE, CLK
             end
 
             if (DEVICE == "STRATIX10" || DEVICE == "AGILEX") begin
-                comp_hdr.data = {pcie_tr.req_id, pcie_tr.tag, 1'b0, address, completer_id, complete_st, bcm, byte_count, 
+                comp_hdr.data = {pcie_tr.req_id, pcie_tr.tag, 1'b0, address, completer_id, complete_st, bcm, byte_count,
                                  8'b01001010, pcie_tr.tag_9, pcie_tr.tc, pcie_tr.tag_8, pcie_tr.padd_0,
                                  pcie_tr.td, pcie_tr.ep, pcie_tr.relaxed, pcie_tr.snoop, pcie_tr.at, comp_length};
 
@@ -113,7 +116,7 @@ class tr_planner #(ITEM_WIDTH, RQ_TUSER_WIDTH, PCIE_DOWNHDR_WIDTH, RCB_SIZE, CLK
                 end
 
             end else begin
-                if (length - comp_length == 0) 
+                if (length - comp_length == 0)
                     completed = 1'b1;
                 else
                     completed = 1'b0;
@@ -189,20 +192,20 @@ class tr_planner #(ITEM_WIDTH, RQ_TUSER_WIDTH, PCIE_DOWNHDR_WIDTH, RCB_SIZE, CLK
         return ret;
     endfunction
 
-    function uvm_logic_vector_array::sequence_item#(32) gen_data (uvm_logic_vector::sequence_item#(ITEM_WIDTH) req);
+    //function uvm_logic_vector_array::sequence_item#(32) gen_data (uvm_logic_vector::sequence_item#(ITEM_WIDTH) req);
 
-        uvm_logic_vector_array::sequence_item#(32) frame;
-        frame = uvm_logic_vector_array::sequence_item #(32)::type_id::create("frame");
+    //    uvm_logic_vector_array::sequence_item#(32) frame;
+    //    frame = uvm_logic_vector_array::sequence_item #(32)::type_id::create("frame");
 
-        if (DEVICE == "STRATIX10" || DEVICE == "AGILEX") begin
-            assert(frame.randomize() with {frame.data.size() == int'(req.data[10-1 : 0]); });
-        end else begin
-            assert(frame.randomize() with {frame.data.size() == int'(req.data[75-1 : 64]); });
-        end
+    //    if (DEVICE == "STRATIX10" || DEVICE == "AGILEX") begin
+    //        assert(frame.randomize() with {frame.data.size() == int'(req.data[10-1 : 0]); });
+    //    end else begin
+    //        assert(frame.randomize() with {frame.data.size() == int'(req.data[75-1 : 64]); });
+    //    end
 
-        return frame;
+    //    return frame;
 
-    endfunction
+    //endfunction
 
     function uvm_ptc_info_rc::sequence_item #(DEVICE) gen_hdr (uvm_logic_vector::sequence_item#(ITEM_WIDTH) req);
 
@@ -268,17 +271,24 @@ class tr_planner #(ITEM_WIDTH, RQ_TUSER_WIDTH, PCIE_DOWNHDR_WIDTH, RCB_SIZE, CLK
         pcie_info pcie_tr;
 
         forever begin
+            int unsigned item_index;
             wait_time = $urandom_range(20, 0);
 
             #(wait_time*(2*CLK_PERIOD));
             wait(headers.size() != 0);
 
+            /* TODO: enable this and delete next block
+            item_index = $urandom_range(headers.size());
+            header = headers[item_index];
+            headers.delete(item_index);
+            */
+
             headers.shuffle();
             header = headers.pop_front();
 
             pcie_tr.hdr  = gen_hdr(header);
-            pcie_tr.data = gen_data(header);
-            split(pcie_tr.hdr, pcie_tr.data);
+            //pcie_tr.data = gen_data(header);
+            split(pcie_tr.hdr);
         end
     endtask
 

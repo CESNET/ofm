@@ -14,7 +14,7 @@ class sync_tag extends uvm_component;
         super.new(name, parent);
     endfunction
 
-    function fill_array();
+    function void fill_array();
         for (int unsigned it = 0; it < 256; it++) begin
             list_of_tags[it] = it;
             tag_cnt++;

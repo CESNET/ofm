@@ -23,10 +23,12 @@ endclass
 virtual class model #(MFB_ITEM_WIDTH, MI_DATA_WIDTH, MI_ADDR_WIDTH) extends uvm_component;
     `uvm_component_param_utils(uvm_mtc::model #(MFB_ITEM_WIDTH, MI_DATA_WIDTH, MI_ADDR_WIDTH))
 
+    //REQUEST (PCIE -> MI)
     uvm_tlm_analysis_fifo #(uvm_common::model_item #(uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH)))                  analysis_imp_cq_data;
     uvm_tlm_analysis_fifo #(uvm_common::model_item #(uvm_logic_vector::sequence_item#(sv_pcie_meta_pack::PCIE_CQ_META_WIDTH))) analysis_imp_cq_meta;
     uvm_analysis_port     #(uvm_common::model_item #(uvm_mi::sequence_item_request #(MI_DATA_WIDTH, MI_ADDR_WIDTH, 0)))        analysis_port_mi_data;
 
+    //RESPONSE (MI -> PCIE)
     uvm_tlm_analysis_fifo #(uvm_common::model_item #(uvm_mi::sequence_item_response #(MI_DATA_WIDTH)))                         analysis_imp_cc_mi;
     uvm_analysis_port     #(uvm_common::model_item #(uvm_logic_vector::sequence_item#(sv_pcie_meta_pack::PCIE_CC_META_WIDTH))) analysis_port_cc_meta;
     uvm_analysis_port     #(uvm_common::model_item #(uvm_mtc::cc_mtc_item#(MFB_ITEM_WIDTH)))                                   analysis_port_cc;
@@ -182,7 +184,6 @@ virtual class model #(MFB_ITEM_WIDTH, MI_DATA_WIDTH, MI_ADDR_WIDTH) extends uvm_
     task run_responses();
         logic [MFB_ITEM_WIDTH-1:0] data_fifo[$];
 
-        data_fifo = {};
         forever begin
             logic [7-1 : 0]  low_addr;
             logic [13-1 : 0] byte_cnt;
@@ -196,6 +197,7 @@ virtual class model #(MFB_ITEM_WIDTH, MI_DATA_WIDTH, MI_ADDR_WIDTH) extends uvm_
             wait(request_rd.size() != 0);
             info = request_rd.pop_front();
 
+            data_fifo = {};
             if (!(info.tr_type == uvm_pcie_hdr::TYPE_ERR)) begin
                 for (int unsigned it = 0; it < info.dw_cnt; it++) begin
                     do begin
@@ -237,7 +239,6 @@ virtual class model #(MFB_ITEM_WIDTH, MI_DATA_WIDTH, MI_ADDR_WIDTH) extends uvm_
 
             pcie_cc_cnt++;
             write_responses(info, low_addr, byte_cnt, comp_st, bus_num, data_fifo);
-            data_fifo.delete();
         end
     endtask
 
