@@ -72,13 +72,17 @@ module testbench;
         .vif        (rx_mvb_vif)
     );
 
-    for (genvar i = 0; i < TX_PORTS; i++) begin
-        mvb_property #(
-            .ITEMS      (ITEMS),
-            .ITEM_WIDTH (ITEM_WIDTH)
-        ) property_rd (
-            .RESET      (reset_vif.RESET),
-            .vif        (tx_mvb_vif[i])
-        );
-    end
+    generate
+        if (DEMUX_VERSION != "logic") begin
+            for (genvar i = 0; i < TX_PORTS; i++) begin
+                mvb_property #(
+                    .ITEMS      (ITEMS),
+                    .ITEM_WIDTH (ITEM_WIDTH)
+                ) property_rd (
+                    .RESET      (reset_vif.RESET),
+                    .vif        (tx_mvb_vif[i])
+                );
+            end
+        end
+    endgenerate
 endmodule
