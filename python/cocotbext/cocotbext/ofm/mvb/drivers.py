@@ -1,6 +1,6 @@
 # drivers.py: MVBDriver
 # Copyright (C) 2024 CESNET z. s. p. o.
-# Author(s): Ondřej Schwarz <OndrejSchwarz@cesnet.cz>
+# Author(s): Ondřej Schwarz <Ondrej.Schwarz@cesnet.cz>
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
