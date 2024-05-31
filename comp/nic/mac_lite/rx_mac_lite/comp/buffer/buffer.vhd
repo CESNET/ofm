@@ -124,8 +124,8 @@ architecture FULL of RX_MAC_LITE_BUFFER is
     signal s_dbuf_full          : std_logic;
     signal s_dbuf_discard       : std_logic_vector(REGIONS-1 downto 0);
     signal s_dbuf_ovf_err_reg   : std_logic;
-    signal s_dbuf_afull     : std_logic;
-    signal s_dbuf_afull_reg : std_logic;
+    signal s_dbuf_afull_reg     : std_logic;
+    signal s_dbuf_status        : std_logic_vector(log2(DFIFO_ITEMS) downto 0);
 
     signal s_mbuf_din           : std_logic_vector(REGIONS*MBUF_WIDTH-1 downto 0);
     signal s_mbuf_vld           : std_logic_vector(REGIONS-1 downto 0);
@@ -331,7 +331,6 @@ begin
         MFB_BLOCK_SIZE  => BLOCK_SIZE,
         MFB_ITEM_WIDTH  => ITEM_WIDTH,
         FIFO_ITEMS      => DFIFO_ITEMS,
-        AFULL_OFFSET    => 8,
         DEVICE          => DEVICE
     )
     port map(
@@ -346,10 +345,8 @@ begin
         RX_SRC_RDY       => s_rx_src_rdy_reg,
         RX_DST_RDY       => s_dbuf_rdy,
         RX_DISCARD       => s_dbuf_discard,
-        RX_AFULL         => s_dbuf_afull,
-
-        --RX_FORCE_DISCARD => s_dbuf_force_discard,
-        --STATUS           => open,
+        RX_AFULL         => open,
+        RX_STATUS        => s_dbuf_status,
 
         TX_CLK           => TX_CLK,
         TX_RESET         => TX_RESET,
@@ -384,8 +381,10 @@ begin
         if (rising_edge(RX_CLK)) then
             if (RX_RESET = '1') then
                 s_dbuf_afull_reg <= '0';
-            else
-                s_dbuf_afull_reg <= s_dbuf_afull;
+            elsif (unsigned(s_dbuf_status) >= (DFIFO_ITEMS - 8)) then
+                s_dbuf_afull_reg <= '1';
+            elsif (unsigned(s_dbuf_status) < (DFIFO_ITEMS/2)) then
+                s_dbuf_afull_reg <= '0';
             end if;
         end if;
     end process;
