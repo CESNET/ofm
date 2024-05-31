@@ -6,19 +6,23 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 class scoreboard #(ITEM_WIDTH, TX_PORTS) extends uvm_scoreboard;
-
     `uvm_component_utils(uvm_mvb_demux::scoreboard #(ITEM_WIDTH, TX_PORTS))
-    // Analysis components.
-    uvm_common::subscriber #(uvm_logic_vector::sequence_item#(ITEM_WIDTH + $clog2(TX_PORTS))) analysis_imp_mvb_rx;
-    uvm_analysis_export #(uvm_logic_vector::sequence_item#(ITEM_WIDTH)) analysis_imp_mvb_tx[TX_PORTS - 1 : 0];
 
-    uvm_common::comparer_ordered #(uvm_logic_vector::sequence_item #(ITEM_WIDTH)) port_cmp[TX_PORTS - 1 : 0];
+    // Analysis components.
+    uvm_common::subscriber #(uvm_logic_vector::sequence_item#(ITEM_WIDTH + $clog2(TX_PORTS)))  rx_mvb_analysis_imp;
+    uvm_analysis_export    #(uvm_logic_vector::sequence_item#(ITEM_WIDTH))                     tx_mvb_analysis_exp [TX_PORTS -1 : 0];
+
+    uvm_common::comparer_ordered #(uvm_logic_vector::sequence_item #(ITEM_WIDTH)) port_cmp[TX_PORTS -1 : 0];
+
     model#(ITEM_WIDTH, TX_PORTS) m_model;
 
-    // Contructor of scoreboard.
     function new(string name, uvm_component parent);
         super.new(name, parent);
-    endfunction // new
+
+        for (int port = 0; port < TX_PORTS; port ++) begin
+            tx_mvb_analysis_exp[port] = new($sformatf("tx_mvb_analysis_exp_%0d", port), this);
+        end
+    endfunction
 
     function int unsigned used();
         int unsigned ret = 0;
@@ -27,27 +31,29 @@ class scoreboard #(ITEM_WIDTH, TX_PORTS) extends uvm_scoreboard;
             ret |= this.port_cmp[i].used();
             ret |= this.port_cmp[i].errors != 0;
         end
+
         return ret;
-    endfunction // used
+    endfunction
 
     function void build_phase(uvm_phase phase);
-        m_model = model #(ITEM_WIDTH, TX_PORTS)::type_id::create("m_model", this);
-        analysis_imp_mvb_rx = uvm_common::subscriber #(uvm_logic_vector::sequence_item#(ITEM_WIDTH + $clog2(TX_PORTS)))::type_id::create("analysis_imp_rx", this);
+        rx_mvb_analysis_imp = uvm_common::subscriber #(uvm_logic_vector::sequence_item#(ITEM_WIDTH + $clog2(TX_PORTS)))::type_id::create("rx_mvb_analysis_imp", this);
 
         for (int port = 0; port < TX_PORTS; port ++) begin
-            port_cmp[port] = uvm_common::comparer_ordered #(uvm_logic_vector::sequence_item #(ITEM_WIDTH))::type_id::create($sformatf("port_comparer_%0d", port), this);
-            analysis_imp_mvb_tx[port] = new($sformatf("analysis_imp_tx_%0d", port), this);
+            port_cmp[port] = uvm_common::comparer_ordered #(uvm_logic_vector::sequence_item #(ITEM_WIDTH))::type_id::create($sformatf("port_cmp_%0d", port), this);
+            port_cmp[port].model_tr_timeout_set(128ns);
         end
+
+        m_model = model #(ITEM_WIDTH, TX_PORTS)::type_id::create("m_model", this);
     endfunction
 
     function void connect_phase(uvm_phase phase);
-        analysis_imp_mvb_rx.port.connect(m_model.model_mvb_in.analysis_export);
+        rx_mvb_analysis_imp.port.connect(m_model.rx_mvb_analysis_fifo.analysis_export);
 
         for (int port = 0; port < TX_PORTS; port++) begin
-            m_model.model_mvb_out[port].connect(port_cmp[port].analysis_imp_model);
-            analysis_imp_mvb_tx[port].connect(port_cmp[port].analysis_imp_dut);
+            tx_mvb_analysis_exp[port]        .connect(port_cmp[port].analysis_imp_dut);
+            m_model.tx_mvb_analysis_imp[port].connect(port_cmp[port].analysis_imp_model);
         end
-    endfunction // connect_phase
+    endfunction
 
     function void report_phase(uvm_phase phase);
         string msg = "\n";
@@ -56,7 +62,7 @@ class scoreboard #(ITEM_WIDTH, TX_PORTS) extends uvm_scoreboard;
 
         for (int port = 0; port < TX_PORTS; port++) begin
             compared = compared + port_cmp[port].compared;
-            errors = errors + port_cmp[port].errors;
+            errors   = errors   + port_cmp[port].errors;
         end
 
         $swrite(msg, "%s\tDATA Compared/errors: %0d/%0d\n", msg, compared, errors);
@@ -67,5 +73,4 @@ class scoreboard #(ITEM_WIDTH, TX_PORTS) extends uvm_scoreboard;
             `uvm_info(get_type_name(), $sformatf("%s\n\n\t---------------------------------------\n\t----     VERIFICATION FAIL      ----\n\t---------------------------------------", msg), UVM_NONE)
         end
     endfunction
-
 endclass

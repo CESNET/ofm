@@ -21,11 +21,10 @@ package test;
     parameter OUTPUT_REG_EN = 1;
 
     parameter CLK_PERIOD    = 4ns;
-    parameter RESET_CLKS    = 10;
     parameter RUNS          = 15;
 
     `include "sequence.sv"
     `include "test.sv"
-    
+ 
 endpackage
 `endif

@@ -14,36 +14,33 @@ class virt_sequence#(ITEM_WIDTH, TX_PORTS) extends uvm_sequence;
         super.new(name);
     endfunction
 
-    uvm_reset::sequence_start                      m_reset;
-    uvm_logic_vector::sequence_simple#(ITEM_WIDTH + $clog2(TX_PORTS)) m_logic_vector_sq;
+    uvm_reset::sequence_start                                          m_reset_seq;
+    uvm_logic_vector::sequence_simple#(ITEM_WIDTH + $clog2(TX_PORTS))  m_logic_vector_seq;
 
     virtual function void init();
-
-        m_reset           = uvm_reset::sequence_start::type_id::create("m_reset");
-        m_logic_vector_sq = uvm_logic_vector::sequence_simple#(ITEM_WIDTH + $clog2(TX_PORTS))::type_id::create("m_logic_vector_sq");
-
+        m_reset_seq        = uvm_reset::sequence_start::type_id::create("m_reset_seq");
+        m_logic_vector_seq = uvm_logic_vector::sequence_simple#(ITEM_WIDTH + $clog2(TX_PORTS))::type_id::create("m_logic_vector_seq");
     endfunction
 
     virtual task run_reset();
-
-        m_reset.randomize();
-        m_reset.start(p_sequencer.m_reset);
-
-    endtask
-
-    task body();
-
-        init();
-
-        #(10ns)
-
-        run_mfb();
-
+        m_reset_seq.randomize();
+        m_reset_seq.start(p_sequencer.m_reset_sqcr);
     endtask
 
     virtual task run_mfb();
-        m_logic_vector_sq.randomize();
-        m_logic_vector_sq.start(p_sequencer.m_logic_vector_scr);
+        m_logic_vector_seq.randomize();
+        m_logic_vector_seq.start(p_sequencer.m_logic_vector_sqcr);
     endtask
 
+    task body();
+        init();
+
+        fork
+            run_reset();
+        join_none
+
+        #(100ns)
+
+        run_mfb();
+    endtask
 endclass

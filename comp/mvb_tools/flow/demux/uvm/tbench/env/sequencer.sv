@@ -9,8 +9,8 @@
 class virt_sequencer#(ITEM_WIDTH, TX_PORTS) extends uvm_sequencer;
     `uvm_component_param_utils(uvm_mvb_demux::virt_sequencer#(ITEM_WIDTH, TX_PORTS))
 
-    uvm_reset::sequencer                     m_reset;
-    uvm_logic_vector::sequencer#(ITEM_WIDTH + $clog2(TX_PORTS)) m_logic_vector_scr;
+    uvm_reset       ::sequencer                                  m_reset_sqcr;
+    uvm_logic_vector::sequencer#(ITEM_WIDTH + $clog2(TX_PORTS))  m_logic_vector_sqcr;
 
     function new(string name = "virt_sequencer", uvm_component parent);
         super.new(name, parent);
