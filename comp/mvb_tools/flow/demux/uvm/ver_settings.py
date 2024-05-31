@@ -17,7 +17,6 @@ SETTINGS = {
     "bus_comb_2" : {
         "TX_PORTS"      : "8",
         "ITEM_WIDTH"    : "32",
-        "DEMUX_VERSION" : "\\\"logic\\\"",
     },
     "bus_comb_3" : {
         "TX_PORTS"      : "4",
@@ -29,14 +28,24 @@ SETTINGS = {
     "items_comb_2" : {
         "ITEMS"         : "16"
     },
+    "logic_variant" : {
+        "DEMUX_VERSION" : "\\\"logic\\\"",
+        "OUTPUT_REG_EN" : "0"
+    },
     "_combinations_" : (
     (), # Works the same as '("default",),' as the "default" is applied in every combination
 
-    ("bus_comb_1", "items_comb_1",),
+    ("bus_comb_1", "items_comb_1"),
     ("bus_comb_1", "items_comb_2"),
-    ("bus_comb_2",),
+    ("bus_comb_2",                 "logic_variant"),
     ("bus_comb_2", "items_comb_1"),
     ("bus_comb_2", "items_comb_2"),
+    ("bus_comb_3", "items_comb_2", "logic_variant")
 
+    # ("bus_comb_1", "items_comb_1", "logic_variant"),
+    # ("bus_comb_1", "items_comb_2", "logic_variant"),
+    # ("bus_comb_2"                , "logic_variant"),
+    # ("bus_comb_2", "items_comb_1", "logic_variant"),
+    # ("bus_comb_2", "items_comb_2", "logic_variant"),
     ),
 }
