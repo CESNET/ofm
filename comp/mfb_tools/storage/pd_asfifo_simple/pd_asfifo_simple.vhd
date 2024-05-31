@@ -56,6 +56,8 @@ entity MFB_PD_ASFIFO_SIMPLE is
         RX_DISCARD    : in  std_logic_vector(MFB_REGIONS-1 downto 0);
         -- Almost full flag
         RX_AFULL      : out std_logic;
+        -- FIFO status
+        RX_STATUS     : out std_logic_vector(log2(FIFO_ITEMS) downto 0);
 
         -- ==================
         -- TX MFB interface
@@ -156,7 +158,7 @@ begin
         RX_SRC_RDY => RX_SRC_RDY,
         RX_DST_RDY => RX_DST_RDY,
         RX_AFULL   => RX_AFULL,
-        RX_STATUS  => open,
+        RX_STATUS  => RX_STATUS,
 
         TX_CLK     => TX_CLK,
         TX_RESET   => TX_RESET,
