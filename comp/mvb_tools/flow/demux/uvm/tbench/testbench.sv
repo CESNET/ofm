@@ -32,6 +32,8 @@ module testbench;
         uvm_root m_root;
         automatic virtual mvb_if #(ITEMS, ITEM_WIDTH) v_tx_mvb_vif [TX_PORTS -1 : 0] = tx_mvb_vif;
 
+        $timeformat(-9, 5, " ns",10);
+
         uvm_config_db #(virtual reset_if)                                        ::set(null, "", "reset_vif"  , reset_vif);
         uvm_config_db #(virtual mvb_if #(ITEMS, ITEM_WIDTH + $clog2(TX_PORTS)))  ::set(null, "", "rx_mvb_vif" , rx_mvb_vif);
 
