@@ -28,13 +28,11 @@ def get_mvb_params(items, params_dic):
     cDelays["ivgEn_wt"] = (ivgDisable_wt, ivgEnable_wt)
     cDelays["ivg"] = range(ivgLow, ivgHigh)
 
-    if mode == 0:
-        delays_fill = None
-    elif mode == 1:
-        delays_fill = 0
-    elif mode == 2:
-        delays_fill = random.randrange(0,256)
-    elif mode == 3:
-        delays_fill = 88 #88=X in ascii
+    delays_fill = {
+	0: None,
+	1: 0,
+	2: random.randrange(0, 256),
+	3: ord('X'),
+    }[mode]
 
     return cDelays, mode, delays_fill
