@@ -15,7 +15,7 @@ import string
 class MVBDriver(BusDriver):
     _signals = ["data", "vld", "src_rdy", "dst_rdy"]
 
-    def __init__(self, entity, name, clock, array_idx=None, mvb_params=None):
+    def __init__(self, entity, name, clock, array_idx=None, mvb_params={}):
         BusDriver.__init__(self, entity, name, clock, array_idx=array_idx)
         self._item_cnt = 0
         self._vld_item_cnt = 0
