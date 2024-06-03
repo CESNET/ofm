@@ -6,7 +6,7 @@
 
 import random
 
-def get_mvb_params(items, params_dic):
+def get_mvb_params(items, params_dic) -> (dict, int, int):
     cDelays = dict()
     
     mode = params_dic.get("mode", 1)

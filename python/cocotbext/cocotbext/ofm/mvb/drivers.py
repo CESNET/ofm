@@ -15,7 +15,7 @@ import string
 class MVBDriver(BusDriver):
     _signals = ["data", "vld", "src_rdy", "dst_rdy"]
 
-    def __init__(self, entity, name, clock, array_idx=None, mvb_params={}):
+    def __init__(self, entity, name, clock, array_idx=None, mvb_params={}) -> None:
         BusDriver.__init__(self, entity, name, clock, array_idx=array_idx)
         self._item_cnt = 0
         self._vld_item_cnt = 0
@@ -30,7 +30,7 @@ class MVBDriver(BusDriver):
         #random empty spaces
         self._cDelays, self._mode, self._delays_fill = get_mvb_params(self._items, mvb_params)
 
-    def _fillEmptyWord(self): 
+    def _fillEmptyWord(self) -> None: 
         for i in range(self._word_width):
             if self._mode == 1 or self._mode == 3:
                 self._data[i] = self._delays_fill
@@ -38,24 +38,24 @@ class MVBDriver(BusDriver):
                 self._data[i] = random.randrange(0,256)
         self._vld = 0
 
-    def _clearControlSignals(self):
+    def _clearControlSignals(self) -> None:
         self._data = bytearray(self._word_width)
         self._vld = 0
         self._src_rdy = 0
 
-    async def _moveItem(self):
+    async def _moveItem(self) -> None:
         self._item_offset += 1
 
         if self._item_offset == self._items:
             await self._moveWord()
             self._item_offset = 0
 
-    def _writeWord(self):
+    def _writeWord(self) -> None:
         self.bus.data.value = int.from_bytes(self._data, 'little')
         self.bus.vld.value = self._vld
         self.bus.src_rdy.value = self._src_rdy
 
-    async def _moveWord(self):
+    async def _moveWord(self) -> None:
         re = RisingEdge(self.clock)
 
         if (self._src_rdy):  
@@ -79,7 +79,7 @@ class MVBDriver(BusDriver):
 
         self._clearControlSignals()
        
-    async def _sendData(self, data):            
+    async def _sendData(self, data) -> None:            
         self.log.debug(f"ITEM {self._vld_item_cnt}:")
         self.log.debug(f"recieved item: {data}")
 
@@ -113,7 +113,7 @@ class MVBDriver(BusDriver):
                 self._item_cnt += 1
                 await self._moveItem()
 
-    async def _send_thread(self):
+    async def _send_thread(self) -> None:
         while True:
             while not self._sendQ:
                 self._pending.clear()
