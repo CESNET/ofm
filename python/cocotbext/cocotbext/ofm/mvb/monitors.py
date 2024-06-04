@@ -14,7 +14,7 @@ class MVBProtocolError(Exception):
 class MVBMonitor(BusMonitor):
     _signals = ["data", "vld", "src_rdy", "dst_rdy"]
 
-    def __init__(self, entity, name, clock, array_idx=None):
+    def __init__(self, entity, name, clock, array_idx=None) -> None:
         BusMonitor.__init__(self, entity, name, clock, array_idx=array_idx)
         self.item_cnt = 0
         self.clock = clock
@@ -23,13 +23,13 @@ class MVBMonitor(BusMonitor):
         self._item_width = int(self._word_width/self._items)
 
 
-    def _is_valid_word(self, signal_src_rdy, signal_dst_rdy):
+    def _is_valid_word(self, signal_src_rdy, signal_dst_rdy) -> bool:
         if signal_dst_rdy is None:
             return (signal_src_rdy.value == 1)
         else:
             return (signal_src_rdy.value == 1) and (signal_dst_rdy.value == 1)
 
-    async def _monitor_recv(self):
+    async def _monitor_recv(self) -> None:
         """Watch the pins and reconstruct transactions."""
 
         # Avoid spurious object creation by recycling
