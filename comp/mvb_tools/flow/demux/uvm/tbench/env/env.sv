@@ -1,80 +1,85 @@
 // env.sv: Verification environment
-// Copyright (C) 2023 CESNET z. s. p. o.
-// Author:   Oliver Gurka <xgurka00@stud.fit.vutbr.cz>
+// Copyright (C) 2023-2024 CESNET z. s. p. o.
+// Author: Oliver Gurka <xgurka00@stud.fit.vutbr.cz>
+//         Vladislav Valek <valekv@cesnet.cz>
 
 // SPDX-License-Identifier: BSD-3-Clause
 
-class env #(ITEMS, ITEM_WIDTH, TX_MVB_CNT) extends uvm_env;
+class env #(ITEMS, ITEM_WIDTH, TX_PORTS) extends uvm_env;
+    `uvm_component_param_utils(uvm_mvb_demux::env #(ITEMS, ITEM_WIDTH, TX_PORTS));
 
-    `uvm_component_param_utils(uvm_mvb_demux::env #(ITEMS, ITEM_WIDTH, TX_MVB_CNT));
+    uvm_reset::agent                                                      m_reset_agent;
+    uvm_logic_vector_mvb::env_rx #(ITEMS, ITEM_WIDTH + $clog2(TX_PORTS))  m_rx_mvb_env;
+    uvm_logic_vector_mvb::env_tx #(ITEMS, ITEM_WIDTH)                     m_tx_mvb_env [TX_PORTS -1 : 0];
 
-    uvm_logic_vector_mvb::env_rx #(ITEMS, ITEM_WIDTH + $clog2(TX_MVB_CNT)) rx_env;
-    uvm_logic_vector_mvb::config_item                 cfg_rx;
-    uvm_logic_vector_mvb::env_tx #(ITEMS, ITEM_WIDTH) tx_env[TX_MVB_CNT - 1 : 0];
-    uvm_logic_vector_mvb::config_item                 cfg_tx[TX_MVB_CNT - 1 : 0];
+    uvm_reset::config_item             m_reset_config;
+    uvm_logic_vector_mvb::config_item  m_rx_mvb_config;
+    uvm_logic_vector_mvb::config_item  m_tx_mvb_config [TX_PORTS -1 : 0];
 
-    uvm_mvb_demux::virt_sequencer#(ITEM_WIDTH, TX_MVB_CNT) vscr;
-    uvm_reset::agent         m_reset;
-    uvm_reset::config_item   m_config_reset;
+    uvm_mvb_demux::virt_sequencer #(ITEM_WIDTH, TX_PORTS) m_virt_sqcr;
 
-    scoreboard #(ITEM_WIDTH, TX_MVB_CNT) m_scoreboard;
+    scoreboard #(ITEM_WIDTH, TX_PORTS) m_scoreboard;
 
-    uvm_mvb::coverage #(ITEMS, ITEM_WIDTH + $clog2(TX_MVB_CNT)) m_cover_rx;
-    uvm_mvb::coverage #(ITEMS, ITEM_WIDTH) m_cover_tx;
+    uvm_mvb::coverage #(ITEMS, ITEM_WIDTH + $clog2(TX_PORTS))  m_rx_mvb_cover;
+    uvm_mvb::coverage #(ITEMS, ITEM_WIDTH)                     m_tx_mvb_cover;
 
-    // Constructor of environment.
     function new(string name, uvm_component parent);
         super.new(name, parent);
     endfunction
 
-    // Create base components of environment.
+    // Initialize components of the environment.
     function void build_phase(uvm_phase phase);
+        m_reset_config                = new;
+        m_reset_config.active         = UVM_ACTIVE;
+        m_reset_config.interface_name = "reset_vif";
+        uvm_config_db #(uvm_reset::config_item)::set(this, "m_reset_agent", "m_config", m_reset_config);
+        m_reset_agent = uvm_reset::agent::type_id::create("m_reset_agent", this);
 
-        m_cover_rx            = new("m_cover_rx");
-        m_cover_tx            = new("m_cover_tx");
-        cfg_rx                = new;
+        m_rx_mvb_config                = new;
+        m_rx_mvb_config.active         = UVM_ACTIVE;
+        m_rx_mvb_config.interface_name = "rx_mvb_vif";
+        uvm_config_db #(uvm_logic_vector_mvb::config_item)::set(this, "m_rx_mvb_env", "m_config", m_rx_mvb_config);
+        m_rx_mvb_env = uvm_logic_vector_mvb::env_rx #(ITEMS, ITEM_WIDTH + $clog2(TX_PORTS))::type_id::create("m_rx_mvb_env", this);
 
-        cfg_rx.active         = UVM_ACTIVE;
-        cfg_rx.interface_name = "rx_vif";
-
-        for (int i = 0; i < TX_MVB_CNT; i++) begin
-            cfg_tx[i]                = new;
-            cfg_tx[i].active         = UVM_ACTIVE;
-            cfg_tx[i].interface_name = $sformatf("tx_vif_%0d", i);
-            uvm_config_db #(uvm_logic_vector_mvb::config_item)::set(this, $sformatf("tx_env_%0d", i), "m_config", cfg_tx[i]);
-            tx_env[i] = uvm_logic_vector_mvb::env_tx #(ITEMS, ITEM_WIDTH)::type_id::create($sformatf("tx_env_%0d", i), this);
+        for (int i = 0; i < TX_PORTS; i++) begin
+            m_tx_mvb_config[i]                = new;
+            m_tx_mvb_config[i].active         = UVM_ACTIVE;
+            m_tx_mvb_config[i].interface_name = $sformatf("tx_mvb_vif_%0d", i);
+            uvm_config_db #(uvm_logic_vector_mvb::config_item)::set(this, $sformatf("m_tx_mvb_env_%0d", i), "m_config" , m_tx_mvb_config[i]);
+            m_tx_mvb_env[i] = uvm_logic_vector_mvb::env_tx #(ITEMS, ITEM_WIDTH)::type_id::create($sformatf("m_tx_mvb_env_%0d", i), this);
         end
 
-        m_config_reset                = new;
-        m_config_reset.active         = UVM_ACTIVE;
-        m_config_reset.interface_name = "vif_reset";
+        m_virt_sqcr = uvm_mvb_demux::virt_sequencer#(ITEM_WIDTH, TX_PORTS)::type_id::create("m_virt_sqcr",this);
 
-        uvm_config_db #(uvm_reset::config_item)::set(this, "m_reset", "m_config", m_config_reset);
-        m_reset = uvm_reset::agent::type_id::create("m_reset", this);
+        m_scoreboard  = scoreboard #(ITEM_WIDTH, TX_PORTS)::type_id::create("m_scoreboard", this);
 
-        uvm_config_db #(uvm_logic_vector_mvb::config_item)::set(this, "rx_env", "m_config", cfg_rx);
-        rx_env = uvm_logic_vector_mvb::env_rx #(ITEMS, ITEM_WIDTH + $clog2(TX_MVB_CNT))::type_id::create("rx_env", this);
-
-        m_scoreboard  = scoreboard #(ITEM_WIDTH, TX_MVB_CNT)::type_id::create("m_scoreboard", this);
-        vscr   = uvm_mvb_demux::virt_sequencer#(ITEM_WIDTH, TX_MVB_CNT)::type_id::create("vscr",this);
+        m_rx_mvb_cover = uvm_mvb::coverage #(ITEMS, ITEM_WIDTH + $clog2(TX_PORTS))::type_id::create("m_rx_mvb_cover", this);
+        m_tx_mvb_cover = uvm_mvb::coverage #(ITEMS, ITEM_WIDTH)::type_id::create("m_tx_mvb_cover", this);
     endfunction
 
     // Connect agent's ports with ports from scoreboard.
     function void connect_phase(uvm_phase phase);
 
-        rx_env.analysis_port.connect(m_scoreboard.analysis_imp_mvb_rx.analysis_export);
-
-        for (int i = 0; i < TX_MVB_CNT; i++) begin
-            m_reset.sync_connect(tx_env[i].reset_sync);
-            tx_env[i].m_mvb_agent.analysis_port.connect(m_cover_tx.analysis_export);
-            tx_env[i].analysis_port.connect(m_scoreboard.analysis_imp_mvb_tx[i]);
+        // Connect reset
+        m_reset_agent     .sync_connect(m_rx_mvb_env.reset_sync);
+        for (int i = 0; i < TX_PORTS; i++) begin
+            m_reset_agent .sync_connect(m_tx_mvb_env[i].reset_sync);
         end
 
-        m_reset.sync_connect(rx_env.reset_sync);
-        rx_env.m_mvb_agent.analysis_port.connect(m_cover_rx.analysis_export);
+        // Connect ports
+        m_rx_mvb_env.analysis_port        .connect(m_scoreboard.rx_mvb_analysis_imp.analysis_export);
+        for (int i = 0; i < TX_PORTS; i++) begin
+            m_tx_mvb_env[i].analysis_port .connect(m_scoreboard.tx_mvb_analysis_exp[i]);
+        end
 
-        vscr.m_reset                = m_reset.m_sequencer;
-        vscr.m_logic_vector_scr     = rx_env.m_sequencer;
+        // Connect coverages
+        m_rx_mvb_env.m_mvb_agent        .analysis_port.connect(m_rx_mvb_cover.analysis_export);
+        for (int i = 0; i < TX_PORTS; i++) begin
+            m_tx_mvb_env[i].m_mvb_agent .analysis_port.connect(m_tx_mvb_cover.analysis_export);
+        end
 
+        // Connect sequencers to the virtual sequencer
+        m_virt_sqcr.m_reset_sqcr        = m_reset_agent.m_sequencer;
+        m_virt_sqcr.m_logic_vector_sqcr = m_rx_mvb_env.m_sequencer;
     endfunction
 endclass
