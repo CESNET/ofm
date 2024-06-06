@@ -497,7 +497,7 @@ begin
     fifox_multi_i : entity work.FIFOX_MULTI
     generic map(
         DATA_WIDTH          => FIFOXM_DATA_WIDTH,
-        ITEMS               => 64               , -- number of ITEMS must be GREATER than UGEN_F_ITEMS (= 32) in CrossbarX
+        ITEMS               => 256              , -- number of ITEMS must be GREATER than UGEN_F_ITEMS (= 32) in CrossbarX
         WRITE_PORTS         => MFB_REGIONS      ,
         READ_PORTS          => MFB_REGIONS      ,
         RAM_TYPE            => "AUTO"           ,
