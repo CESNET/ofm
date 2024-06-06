@@ -12,7 +12,7 @@ use work.math_pack.all;
 use work.type_pack.all;
 
 -- The FRAME_PACKER module is used to create Super-Packets. The incoming packets are aligned to the
--- BLOCKs so that the space between them is minimal (ranges from 0 to 7 bytes per each packet). The
+-- BLOCKs so that the space between them is minimal (ranges from 0 to 7 items per each packet). The
 -- size of the Super-Packet is set by the parameter SPKT_SIZE_MIN. This value is used for length
 -- comparison, so the super-packet size should be around this length. The timeout is set by the
 -- parameter TIMEOUT_CLK_NO, e.g. in number of clock cycles. In the worst case, the latency is 
@@ -21,7 +21,7 @@ use work.type_pack.all;
 -- set by the constant value FIFO_DEPTH and is set by deafult to 512 (Best BRAM optimization for Intel). 
 -- Warning! There is a possible bug when sending the combination of small and large packets. In 400G 
 -- version this could result in sending a packet larger than USR_PKT_SIZE_MAX.
-
+--
 entity FRAME_PACKER is
     generic(
         -- Number of regions for incoming and outgoing packets. Note that the 4 region version is not resource optimized and will most likely not fit in the FPGA.
