@@ -1,10 +1,12 @@
+from typing import Any
+
 import cocotb
-from cocotb_bus.drivers import BusDriver
-from cocotb.triggers import ClockCycles, FallingEdge, First, RisingEdge
-from cocotb.result import TestFailure
+from cocotb.triggers import Event
 
 import copy
-import operator
+
+from ..base.drivers import BusDriver
+from ..base.transaction import IdleTransaction
 
 
 class AvstEthDriver(BusDriver):
@@ -12,9 +14,8 @@ class AvstEthDriver(BusDriver):
     # _optional_signals = ["status_valid", "status_data", "pause", "pfc"]
 
     def __init__(self, entity, name, clock, array_idx=None):
-        BusDriver.__init__(self, entity, name, clock, array_idx=array_idx)
-        self.clock = clock
-        self._re = RisingEdge(self.clock)
+        super().__init__(entity, name, clock, array_idx=array_idx)
+
         self._bus_width = len(self.bus.data) // 8
         self._bus_segments = len(self.bus.valid)
         self._bus_segment_width = self._bus_width // self._bus_segments
@@ -41,11 +42,37 @@ class AvstEthDriver(BusDriver):
         self.bus.error.value = self._err
 
     async def write_packet(self, data, sync=True):
-        data = copy.copy(data)
-        datalen = len(data)
+        """
+        deprecated::
+            Use the Bus.append() instead.
+        """
 
-        if sync:
-            await self._re
+        e = Event()
+        if isinstance(data, list):
+            data = bytes(data)
+        self.append(data, event=e)
+        await e.wait()
+
+    async def _send_thread(self):
+        await self._clk_re
+
+        while True:
+            if self._sendQ:
+                transaction, callback, event, kwargs = self._sendQ.popleft()
+            else:
+                transaction, callback, event, kwargs = self._idle_tr, None, None, {}
+            await self._send(transaction, callback=callback, event=event, sync=False, **kwargs)
+
+    async def _driver_send(self, transaction: Any, sync: bool = True, **kwargs: Any) -> None:
+        clk_re = self._clk_re
+        if isinstance(transaction, IdleTransaction):
+            await clk_re
+            self.clear_control_signals()
+            self._idle_gen.put(transaction, items=self._bus_width)
+            return
+
+        data = copy.copy(transaction)
+        datalen = len(data)
 
         while data:
             self._vld = 1
@@ -67,7 +94,6 @@ class AvstEthDriver(BusDriver):
 
             data = data[self._bus_width:]
 
-            if sync:
-                self.propagate_control_signals()
-                await self._re
-                self.clear_control_signals()
+            self.propagate_control_signals()
+            await clk_re
+            self.clear_control_signals()
