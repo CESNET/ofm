@@ -19,6 +19,11 @@ class AvstEthDriver(BusDriver):
         self._bus_width = len(self.bus.data) // 8
         self._bus_segments = len(self.bus.valid)
         self._bus_segment_width = self._bus_width // self._bus_segments
+
+        self._cfg_update(
+            bits_per_word = len(self.bus.data),
+        )
+
         self.clear_control_signals()
 
     def clear_control_signals(self):
@@ -55,12 +60,23 @@ class AvstEthDriver(BusDriver):
 
     async def _send_thread(self):
         await self._clk_re
+        if self._cfg.get("clk_freq") is None:
+            await self._measure_clkfreq(self._clk_re)
 
         while True:
             if self._sendQ:
                 transaction, callback, event, kwargs = self._sendQ.popleft()
             else:
                 transaction, callback, event, kwargs = self._idle_tr, None, None, {}
+
+            while True:
+                idle_count = self._idle_gen.get(transaction) // self._bus_width
+                if idle_count == 0:
+                    break
+
+                for _ in range(idle_count):
+                    await self._send(self._idle_tr, callback=None, event=event, sync=False, **kwargs)
+
             await self._send(transaction, callback=callback, event=event, sync=False, **kwargs)
 
     async def _driver_send(self, transaction: Any, sync: bool = True, **kwargs: Any) -> None:
@@ -74,6 +90,10 @@ class AvstEthDriver(BusDriver):
         data = copy.copy(transaction)
         datalen = len(data)
 
+        items = self._bus_width
+        end = False
+        empty_items = 0
+
         while data:
             self._vld = 1
 
@@ -82,12 +102,16 @@ class AvstEthDriver(BusDriver):
 
             # TODO: ability to send 2 packets in one word
             if len(data) <= self._bus_width:
-                if len(data) <= self._bus_segment_width:
+                end = True
+                items = len(data)
+                empty_items = self._bus_width - items
+
+                if items <= self._bus_segment_width:
                     self._eop = 1
-                    self._emp = self._bus_segment_width - len(data)
+                    self._emp = self._bus_segment_width - items
                 else:
                     self._eop = 2
-                    self._emp = self._bus_width - len(data)
+                    self._emp = empty_items
                 data += [0] * (self._bus_width - len(data)) # fill the rest of the word with 0s
 
             self.bus.data.value = int.from_bytes(data[0:self._bus_width], byteorder="big")
@@ -97,3 +121,7 @@ class AvstEthDriver(BusDriver):
             self.propagate_control_signals()
             await clk_re
             self.clear_control_signals()
+
+            self._idle_gen.put(transaction, items=items, end=end)
+            if empty_items:
+                self._idle_gen.put(self._idle_tr, items=empty_items)
