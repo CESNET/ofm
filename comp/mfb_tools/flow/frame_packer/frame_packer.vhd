@@ -11,35 +11,52 @@ use IEEE.numeric_std.all;
 use work.math_pack.all;
 use work.type_pack.all;
 
+-- The FRAME_PACKER module is used to create Super-Packets. The incoming packets are aligned to the
+-- BLOCKs so that the space between them is minimal (ranges from 0 to 7 bytes per each packet). The
+-- size of the Super-Packet is set by the parameter SPKT_SIZE_MIN. This value is used for length
+-- comparison, so the super-packet size should be around this length. The timeout is set by the
+-- parameter TIMEOUT_CLK_NO, e.g. in number of clock cycles. In the worst case, the latency is 
+-- 2*TIMEOUT_CLK_NO due to the internal arrangement. The TX_MVB_HDR_META and TX_MVB_DISCARD are 
+-- included here for compatibility, but are not currently used. The depth of each channel FIFO is 
+-- set by the constant value FIFO_DEPTH and is set by deafult to 512 (Best BRAM optimization for Intel). 
+-- Warning! There is a possible bug when sending the combination of small and large packets. In 400G 
+-- version this could result in sending a packet larger than USR_PKT_SIZE_MAX.
+
 entity FRAME_PACKER is
     generic(
-        --MFB generics
+        -- Number of regions for incoming and outgoing packets. Note that the 4 region version is not resource optimized and will most likely not fit in the FPGA.
         MFB_REGIONS         : natural := 4;
+        -- Number of blocks in each region for incoming and outgoing packets. Only this configuration was tested.
         MFB_REGION_SIZE     : natural := 8;
+        -- Number of items in each block for incoming and outgoing packets. Only this configuration was tested.
         MFB_BLOCK_SIZE      : natural := 8;
+        -- Length of each item in bits for incoming and outgoing packets. Only this configuration was tested.
         MFB_ITEM_WIDTH      : natural := 8;
-
-        --Application core generics:
+        -- Number of virtual lanes. This number should be a power of 2. Note that each channel is created as a standalone unit (resource usage is exponentially dependent on this parameter).
         RX_CHANNELS         : natural := 8;
+        -- Header meta is not currently used.
         HDR_META_WIDTH      : natural := 12;
-        -- Input packets
+        -- Minimal size in bytes of the incoming packets (also minimal size of Super-Packet).
         USR_RX_PKT_SIZE_MIN : natural := 64;
-        USR_RX_PKT_SIZE_MAX : natural := 2**10;
-
-        -- The length of Super-Packet [Bytes] the component is trying to reach
-        -- Should be power of two
+        -- Maximal size in bytes of the incoming packets (also maximal size of Super-Packet).
+        USR_RX_PKT_SIZE_MAX : natural := 2**14;
+        -- The size of the Super-Packet (in bytes) the component is trying to reach. Should be power of 2.
         SPKT_SIZE_MIN       : natural := 2**13;
-        -- Timeout counter - Should be power of 2 (4096 is a optimal value)
-        -- How long does the timeout counter wait before it sends an incomplete Super-Packet
+        -- Timeout in clock cycles. Should be power of 2.
         TIMEOUT_CLK_NO      : natural := 4096;
-
+        -- Optimization for FIFOs
         DEVICE              : string := "AGILEX"
     );
     port(
+        -- =========================================================================
+        -- Clock and Resets inputs
+        -- =========================================================================
         CLK : in std_logic;
         RST : in std_logic;
 
-        -- RX_MFB interface
+        -- =========================================================================
+        -- RX MFB+MVB interface (regular packets)
+        -- =========================================================================
         RX_MFB_DATA     : in  std_logic_vector(MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH-1 downto 0);
         RX_MFB_SOF      : in  std_logic_vector(MFB_REGIONS-1 downto 0);
         RX_MFB_EOF      : in  std_logic_vector(MFB_REGIONS-1 downto 0);
@@ -47,13 +64,18 @@ entity FRAME_PACKER is
         RX_MFB_EOF_POS  : in  std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE))-1 downto 0);
         RX_MFB_SRC_RDY  : in  std_logic;
         RX_MFB_DST_RDY  : out std_logic;
-        -- RX_MVB interface
+
+        -- Length of the regular packets
         RX_MVB_LEN      : in  std_logic_vector(MFB_REGIONS*log2(USR_RX_PKT_SIZE_MAX+1) - 1 downto 0);
+        -- Channel ID of each regular packet
         RX_MVB_CHANNEL  : in  std_logic_vector(MFB_REGIONS*max(1,log2(RX_CHANNELS))-1 downto 0);
         RX_MVB_VLD      : in  std_logic_vector(MFB_REGIONS-1 downto 0);
         RX_MVB_SRC_RDY  : in  std_logic;
         RX_MVB_DST_RDY  : out std_logic;
-        -- TX_MFB interface
+
+        -- =========================================================================
+        --  TX MFB+MVB interface (Super-Packets)
+        -- =========================================================================
         TX_MFB_DATA     : out std_logic_vector(MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH-1 downto 0);
         TX_MFB_SOF      : out std_logic_vector(MFB_REGIONS-1 downto 0);
         TX_MFB_EOF      : out std_logic_vector(MFB_REGIONS-1 downto 0);
@@ -61,11 +83,14 @@ entity FRAME_PACKER is
         TX_MFB_EOF_POS  : out std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE))-1 downto 0);
         TX_MFB_SRC_RDY  : out std_logic;
         TX_MFB_DST_RDY  : in  std_logic;
-        -- TX MVB interface
+
+        -- Length of the Super-Packet
         TX_MVB_LEN      : out std_logic_vector(MFB_REGIONS*log2(USR_RX_PKT_SIZE_MAX+1)-1 downto 0);
+        -- Not used
         TX_MVB_HDR_META : out std_logic_vector(MFB_REGIONS*HDR_META_WIDTH-1 downto 0);
+        -- Not used
         TX_MVB_DISCARD  : out std_logic_vector(MFB_REGIONS-1 downto 0);
-        -- Usefull ports
+        -- Channel ID of each Super-Packet
         TX_MVB_CHANNEL  : out std_logic_vector(MFB_REGIONS*max(1,log2(RX_CHANNELS))-1 downto 0);
         TX_MVB_VLD      : out std_logic_vector(MFB_REGIONS-1 downto 0);
         TX_MVB_SRC_RDY  : out std_logic;
@@ -85,23 +110,14 @@ architecture FULL of FRAME_PACKER is
     constant MVB_ITEM_WIDTH             : natural := MVB_LEN_WIDTH + MVB_HDR_META_WIDTH + MVB_CHANNEL_WIDTH + MVB_DISCARD_WIDTH;
     constant WORD_SIZE                  : natural := (MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH)/8;
     
-    -- +10 - SuperPacket did not into FIFO
+    -- Depth of FIFO in each channel
     constant FIFO_DEPTH                 : natural := max(512, ((USR_RX_PKT_SIZE_MAX/WORD_SIZE)*2));
 
-    -- +1 is there, bcs I did not count dst_rdy would appear in '0'
-    -- Note: For packets in range 64 - 2**14 bytes is the funcitonal combination: (USR_RX_PKT_SIZE_MAX/WORD_SIZE)/2
-    constant MIN_PKT_SIZE               : natural := 1;--(USR_RX_PKT_SIZE_MAX/WORD_SIZE)*2;-- FIFO_DEPTH/2;  -- (USR_RX_PKT_SIZE_MAX/WORD_SIZE)+2;
-    
-    -- constant FIFO_DEPTH                 : natural := 30;
-    constant BLOCK_WIDTH                : natural := MFB_BLOCK_SIZE*MFB_ITEM_WIDTH;
-    constant SOF_WIDTH                  : natural := max(1,log2(MFB_REGION_SIZE));
-    constant EOF_WIDTH                  : natural := max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE));
     -- Equal to the number of possible packets in MFB word
     constant MUX_WIDTH                  : natural := MFB_REGIONS + 1;
-    -- Output MVB FIFO (Added due to synchronization issues)
+
+    -- Output MVB FIFO
     constant MVB_FIFO_ITEMS             : natural := 512;
-    -- Timeout duration - for more channels its better to set this to higher value
-    -- constant TIMEOUT_CLK_NO             : natural := 1024;
 
     ------------------------------------------------------------
     --                  SUBTYPE DECLARATION                   --
