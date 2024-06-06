@@ -167,8 +167,11 @@ architecture FULL of CROSSBARX_STREAM is
     -- MUST be a power of 2
     -- (4 -> ~150 Gb/s, 8 -> ~400 Gb/s)
     constant NUM_OF_PKTS      : natural := 4;
-    constant RX_BUF_WORDS     : natural := PKT_MTU*MFB_ITEM_WIDTH/MFB_DATA_WIDTH*NUM_OF_PKTS;
-    constant TX_BUF_WORDS     : natural := PKT_MTU*MFB_ITEM_WIDTH/MFB_DATA_WIDTH*NUM_OF_PKTS;
+
+    constant BUF_WORDSL       : natural := log2(PKT_MTU*MFB_ITEM_WIDTH/MFB_DATA_WIDTH*NUM_OF_PKTS*2-1);
+    constant RX_BUF_WORDS     : natural := 2**BUF_WORDSL;
+    constant TX_BUF_WORDS     : natural := 2**BUF_WORDSL;
+
     constant ROW_WIDTH        : natural := MFB_BLOCK_SIZE*MFB_ITEM_WIDTH;
     constant BUF_ROWS         : natural := MFB_REGIONS*MFB_REGION_SIZE;
 
