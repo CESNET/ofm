@@ -30,6 +30,17 @@ source $OFM_PATH/build/targets.tcl
 # -----------------------------------------------------------------------------
 
 # -----------------------------------------------------------------------------
+# Procedure qsys_script_ip_with_params
+# Add or adjust existing tcl generated IP core in the project
+#
+proc qsys_script_with_params {script params} {
+    set project_name [file dirname $script]/proj_[string map {. _} [file rootname [file tail $script]]]
+    set cmd "foreach {name value} {$params} { set \$name \$value }"
+    exec qsys-script --new-quartus-project=$project_name --cmd=$cmd --script=$script 2>>qsys_log.txt
+    exec find [file dirname $script] \( -name "*.qpf" -o -name "*.qsf" -o -name "DNI" -o -name "qdb" \) | xargs rm -rf
+}
+
+# -----------------------------------------------------------------------------
 # Procedure EvalFile
 # Add file to the project
 #
@@ -99,6 +110,26 @@ proc EvalFile {FNAME OPT} {
         # IP file
         set_global_assignment -name IP_FILE $FNAME
         puts "INFO: IP file added: $FNAME"
+    } elseif {$opt(TYPE) == "QUARTUS_TCL"} {
+        if {[info exists opt(PHASE)] && "ADD_FILES" in $opt(PHASE)} {
+            puts "Running script: $FNAME"
+
+            set vars ""
+            if {[info exists opt(VARS)]} {
+                set vars $opt(VARS)
+            }
+
+            qsys_script_with_params $FNAME $vars
+
+            if {"IP_TEMPLATE_GEN" in $opt(PHASE)} {
+                set ip_build_dir [file normalize $opt(IP_BUILD_DIR)]
+                foreach ipfile [glob -nocomplain *.ip] {
+                    exec mv $ipfile $ip_build_dir
+                    set_global_assignment -name IP_FILE "$ip_build_dir/$ipfile"
+                    puts "INFO: IP file added: $ip_build_dir/$ipfile"
+                }
+            }
+        }
     }
 }
 

@@ -74,6 +74,16 @@ proc EvalFile {FNAME OPT} {
         puts "BD added: $FNAME"
         generate_target all [get_files $FNAME] -force
         upgrade_ip [get_ips *] -quiet
+    } elseif {$opt(TYPE) == "VIVADO_TCL"} {
+        if {[info exists opt(PHASE)] && "ADD_FILES" in $opt(PHASE)} {
+            puts "Running script: $FNAME"
+
+            set vars ""
+            if {[info exists opt(VARS)]} {
+                set vars $opt(VARS)
+            }
+            source_with_vars $FNAME $vars
+        }
     }
 
 
@@ -88,6 +98,7 @@ proc EvalFile {FNAME OPT} {
 # Call component's local Vivado_presynth.tcl
 # (used for local constraints application before synthesis)
 proc EvalComp {ENTITY ENTITY_BASE ARCHGRP} {
+    # Vivado_presynth: DEPRECATED
     set ENTITY_VFILE "$ENTITY_BASE/Vivado_presynth.tcl"
 
     if {[file exists $ENTITY_VFILE]} {
