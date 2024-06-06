@@ -59,7 +59,11 @@ proc sim_post_run {} {
 #    quit
 }
 
-proc rst {{do_run 1}} {
+proc rst {args} {
+    array set data [list -do_run 1 -run -a {*}$args]
+    set do_run $data(-do_run)
+    set run_args $data(-run)
+
     upvar SIM_FLAGS SIM_FLAGS VSIM_FLAGS VSIM_FLAGS USE_COCOTB USE_COCOTB
     exec make -f $SIM_FLAGS(MAKEFILE_NAME)
 
@@ -75,7 +79,7 @@ proc rst {{do_run 1}} {
     }
 
     if {$do_run} {
-        run -a
+        run {*}$run_args
 
         if {[llength [info commands sim_post_run]]} {
             sim_post_run
