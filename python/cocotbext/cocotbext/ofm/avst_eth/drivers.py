@@ -3,8 +3,6 @@ from typing import Any
 import cocotb
 from cocotb.triggers import Event
 
-import copy
-
 from ..base.drivers import BusDriver
 from ..base.transaction import IdleTransaction
 
@@ -86,19 +84,21 @@ class AvstEthDriver(BusDriver):
             self.clear_control_signals()
             self._idle_gen.put(transaction, items=self._bus_width)
             return
+        elif isinstance(transaction, bytes):
+            data = memoryview(transaction)
+        else:
+            raise NotImplemented
 
-        data = copy.copy(transaction)
-        datalen = len(data)
+        assert len(data)
 
         items = self._bus_width
         end = False
         empty_items = 0
 
+        self._sop = 1
+
         while data:
             self._vld = 1
-
-            if len(data) == datalen:
-                self._sop = 1
 
             # TODO: ability to send 2 packets in one word
             if len(data) <= self._bus_width:
@@ -112,11 +112,9 @@ class AvstEthDriver(BusDriver):
                 else:
                     self._eop = 2
                     self._emp = empty_items
-                data += [0] * (self._bus_width - len(data)) # fill the rest of the word with 0s
 
-            self.bus.data.value = int.from_bytes(data[0:self._bus_width], byteorder="big")
-
-            data = data[self._bus_width:]
+            self.bus.data.value = int.from_bytes(data[0:items], byteorder="big") << (empty_items) * 8
+            data = data[items:]
 
             self.propagate_control_signals()
             await clk_re
