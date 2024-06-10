@@ -20,7 +20,7 @@ entity TCAM2 is
         DATA_WIDTH         : integer := 36;
 
         -- TCAM2 storage capacity
-        --     for XILINX (7SERIES, ULTRASCALE) optimal is a multiple of 1*(2^RS)
+        --     for XILINX (7SERIES, ULTRASCALE) optimal is a multiple of 2*L*(2^RS), where L is number of LUTRAMs in each SLICEM
         --     for INTEL (ARRIA10, STRATIX10) optimal is a multiple of 16*(2^RS), if memory fragmentation is not enabled, otherwise a multiple of 32*(2^RS)
         ITEMS              : integer := 16;
 
@@ -49,6 +49,7 @@ entity TCAM2 is
         USE_UNMATCHABLE    : boolean := false;
 
         -- set as true to use the entire Intel MLAB data width (20 instead of 16), but TCAM rows are addressed discontinuously (rows 21-32 are unused)
+        -- set as true to use the entire Xilinx SLICEM data width (14 instead of 8 on ULTRASCALE, 6 instead of 4), but TCAM rows are addressed discontinuously
         USE_FRAGMENTED_MEM : boolean := false;
 
         -- FPGA device
@@ -97,8 +98,9 @@ architecture FULL of TCAM2 is
 
     -- Optimal parameters by FPGA device
     constant INTEL_DATA_WIDTH    : integer := tsel(USE_FRAGMENTED_MEM, 20, 16);
-    constant MEMORY_ADDR_WIDTH   : integer := tsel(IS_XILINX, 6, 5);
-    constant MEMORY_DATA_WIDTH   : integer := tsel(IS_XILINX, 1, INTEL_DATA_WIDTH);
+    constant XILINX_DATA_WIDTH    : integer := tsel(DEVICE = "ULTRASCALE", tsel(USE_FRAGMENTED_MEM, 14, 8), tsel(USE_FRAGMENTED_MEM, 6, 4));
+    constant MEMORY_ADDR_WIDTH   : integer := 5;
+    constant MEMORY_DATA_WIDTH   : integer := tsel(IS_XILINX, XILINX_DATA_WIDTH, INTEL_DATA_WIDTH);
     constant ALIGNED_DATA_WIDTH  : integer := 2**log2(MEMORY_DATA_WIDTH);
 
     -- Setting TCAM2 resources parameters
@@ -231,11 +233,6 @@ begin
         report "TCAM2 only supports XILINX or INTEL FPGAs!"
         severity failure;
 
-    -- MEMORY_DATA_WIDTH must be power of two
-    assert ((2**(log2(MEMORY_DATA_WIDTH))) = MEMORY_DATA_WIDTH or (IS_INTEL and USE_FRAGMENTED_MEM and MEMORY_DATA_WIDTH=20))
-        report "MEMORY_DATA_WIDTH must be power of two or equal to 20 for INTEL and USE_FRAGMENTED_MEM!"
-        severity failure;
-
     -- tcam waits for match or write
     input_tcam_idle <= m_rdy and wr_rdy;
 
@@ -294,6 +291,9 @@ begin
         mem_colums_g : for c in 0 to COLUMNS-1 generate
 
             memory_xilinx_g : if IS_XILINX generate
+                -- write data block (backup other records and add new)
+                mem_wr_data_block(c)(r) <= (mem_match_vector(c)(r) and not mem_wr_bit_en_reg) or ((MEMORY_DATA_WIDTH-1 downto 0 => mem_wr_data_reg(c)) and mem_wr_bit_en_reg);
+
                 -- Xilinx Single Port RAM
                 sp_distmem_i : entity work.GEN_LUTRAM
                 generic map (
@@ -301,15 +301,15 @@ begin
                     ITEMS              => 2**MEMORY_ADDR_WIDTH,
                     RD_PORTS           => 1,
                     RD_LATENCY         => 1,
-                    WRITE_USE_RD_ADDR0 => True,
+                    WRITE_USE_RD_ADDR0 => False,
                     MLAB_CONSTR_RDW_DC => False,
                     DEVICE             => DEVICE
                 )
                 port map (
                     CLK        => CLK,
-                    WR_EN      => mem_wr_en(r),
-                    WR_ADDR    => mem_addr_arr(c),
-                    WR_DATA(0) => mem_wr_data(c),
+                    WR_EN      => mem_wr_en_reg(r),
+                    WR_ADDR    => mem_wr_addr_reg,
+                    WR_DATA    => mem_wr_data_block(c)(r),
                     RD_ADDR    => mem_addr_arr(c),
                     RD_DATA    => mem_match_vector(c)(r)
                 );
