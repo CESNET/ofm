@@ -85,6 +85,8 @@ begin
             ram_block_type                     => "M20K",
             rdcontrol_reg_b                    => INTEL_PORTB_CLK,
             read_during_write_mode_mixed_ports => INTEL_RDWMMP_CONF,
+            read_during_write_mode_port_a      => INTEL_RDWMMP_CONF,
+            read_during_write_mode_port_b      => INTEL_RDWMMP_CONF,
             widthad_a                          => ADDR_WIDTH,
             widthad_b                          => ADDR_WIDTH,
             width_a                            => DATA_WIDTH,
