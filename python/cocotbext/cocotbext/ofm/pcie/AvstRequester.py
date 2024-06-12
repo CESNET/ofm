@@ -109,7 +109,7 @@ class AvstRequester:
             while len(data) > self._avst_width:
                 data_word = concat(list(zip(data[:self._avst_width], [8]*self._avst_width)))
                 await self._rc.write_rc({"DATA": data_word, "HDR": rc_hdr, "SOP": sop, "EOP": eop, "EMPTY": empty, "PREFIX": 0, "BAR_RANGE": 0}, sync=False)
-                rc_hdr = header_empty
+                rc_hdr = header_empty.serialize()
                 sop = 0
                 data = data[self._avst_width:]
 
