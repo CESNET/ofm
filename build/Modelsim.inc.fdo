@@ -78,6 +78,8 @@ proc CompileMod {FNAME OPT} {
     # Skip unknown file types
     if {$opt(TYPE) != ""} {
         return
+    } elseif {$FEXT in [list ".qsys" ".hex"]} {
+        return
     }
 
     set COVER_PARAMS [list ]
