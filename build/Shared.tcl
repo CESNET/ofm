@@ -290,8 +290,16 @@ proc ApplyToMods {MODULE COMMAND FILES {TYPE ""}} {
         set fname [ofm_replace_comp_path [SimplPath $fname false]]
         set fname [SimplPath $fname]
 
+        # Override type
+        set local_type $TYPE
+        foreach {param_name param_value} $params {
+            if {$param_name == "TYPE"} {
+                set local_type $param_value
+            }
+        }
+
         # Backward compatibility
-        set type [DeduceType $fname $TYPE]
+        set type [DeduceType $fname $local_type]
         lappend params "TYPE" $type
 
         set f [concat $fname $params]
@@ -486,4 +494,11 @@ proc source_with_args {file args} {
   set ::argv $argv
   set ::argc $argc
   return -code $code $return
+}
+
+proc source_with_vars {file vars} {
+    foreach {name value} $vars {
+        set $name $value
+    }
+    source $file
 }

@@ -21,9 +21,9 @@ proc    VhdlPkgIntArr {name size} {
 			if {$size == 1} {
 				append value "others => " $array(0)
 			} else {
-				for {set index 0} {$index < $size} {incr index} {
+				for {set index [expr $size-1]} {$index >= 0} {incr index -1} {
 					append value $array($index)
-					if {$index < $size-1} { 
+					if {$index > 0} {
 						append value ", "
 					}
 				}

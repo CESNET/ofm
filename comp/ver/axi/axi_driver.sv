@@ -129,7 +129,7 @@ class Axi4SDriver #(DATA_WIDTH, USER_WIDTH, ITEM_WIDTH = 8) extends Driver;
 			keep[j / ITEM_BYTES] = 1;
 		end
 
-		if (j + ITEM_BYTES * WORD_ITEMS * cycle >= tr.data.size - 1)
+		if (j + ITEM_BYTES * WORD_ITEMS * cycle >= tr.data.size)
 			finished = 1;
 
 		vif.cb.TDATA <= data;

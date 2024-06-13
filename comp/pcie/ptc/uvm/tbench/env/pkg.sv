@@ -8,7 +8,7 @@
 `define PTC_ENV_SV
 
 package uvm_ptc;
-    
+
     `include "uvm_macros.svh"
     import uvm_pkg::*;
 

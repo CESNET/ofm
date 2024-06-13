@@ -6,12 +6,24 @@ def concat(values):
     return ret
 
 
+def deconcat(values=[0,0]):
+    vector = values[0]
+    ret = []
+    for width in values[1:]:
+        ret.append(vector & (2**width - 1))
+        vector >>= width
+    return ret
+
+
 class SerializableHeader(object):
     items = []
 
     def __init__(self):
         for i in self.items:
             setattr(self, i[0], 0)
+
+    def __str__(self):
+        return f"{[(item[0], getattr(self, item[0])) for item in self.items]}"
 
     def serialize(self):
         names, widths = list(zip(*self.items)) if self.items else ([], [])

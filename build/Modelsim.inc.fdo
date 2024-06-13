@@ -78,6 +78,8 @@ proc CompileMod {FNAME OPT} {
     # Skip unknown file types
     if {$opt(TYPE) != ""} {
         return
+    } elseif {$FEXT in [list ".qsys" ".hex"]} {
+        return
     }
 
     set COVER_PARAMS [list ]
@@ -105,6 +107,8 @@ proc CompileMod {FNAME OPT} {
     # Source compiling
     if {$FEXT in [list .v .vh]} {
         set CMD [list vlog -vmake {*}$COVER_PARAMS -timescale "1ps/1ps" {*}$VLOG_PARAM -work $LIB]
+    } elseif {$FEXT in [list .qsys .hex]} {
+        return
     } elseif {$FEXT in [list .sv .svp]} {
         regsub "/\[^/\]+\$" $FNAME "/" DIR
         set CMD [list vlog -vmake {*}$COVER_PARAMS_SV -sv -timescale "1ps/1ps" {*}$VLOG_PARAM -work $LIB +incdir+$DIR {*}$SIM_FLAGS(VLOG_SV_FLAGS) {*}$opt(VLOG_SV_FLAGS)]
