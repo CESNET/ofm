@@ -49,7 +49,7 @@ virtual class comparer_base#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) extends uvm
         super.new(name, parent);
         dut_tr_timeout      = 10s;
         model_tr_timeout    = 0ns;
-        compared_tr_timeout = 50us;
+        compared_tr_timeout = 50ms;
         analysis_imp_model  = new("analysis_imp_model", this);
         analysis_imp_dut    = new("analysis_imp_dut"  , this);
     endfunction
@@ -97,7 +97,7 @@ virtual class comparer_base#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) extends uvm
     task print_info();
         forever begin
             #(compared_tr_timeout)
-            `uvm_info(this.get_full_name(), $sformatf("Time : %0dns%s", $time()/1ns, info()), UVM_LOW);
+            `uvm_info(this.get_full_name(), $sformatf("\n\tTime : %0dns%s", $time()/1ns, info()), UVM_LOW);
         end
     endtask
 
