@@ -18,6 +18,7 @@ package uvm_mfb;
     `include "sequence.sv"
     `include "driver.sv"
     `include "monitor.sv"
+    `include "statistic.sv"
     `include "agent.sv"
     //`include "coverage.sv"
 endpackage

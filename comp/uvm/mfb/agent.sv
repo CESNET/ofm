@@ -14,12 +14,13 @@ class agent_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) exten
     // ------------------------------------------------------------------------
     // Variables
     uvm_analysis_port #(sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)) analysis_port;
+    sequencer       #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) m_sequencer;
 
     // ------------------------------------------------------------------------
     // Agent's base components
-    sequencer       #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) m_sequencer;
     driver_rx       #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) m_driver;
     monitor         #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) m_monitor;
+    statistic       #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) m_stat;
     config_item                                                                 m_config;
 
     // ------------------------------------------------------------------------
@@ -45,7 +46,8 @@ class agent_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) exten
         end
 
         // Create monitor
-        m_monitor   = monitor #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::type_id::create("m_monitor", this);
+        m_monitor   = monitor  #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::type_id::create("m_monitor", this);
+        m_stat      = statistic#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::type_id::create("m_stat", this);
     endfunction
 
     virtual function uvm_active_passive_enum get_is_active();
@@ -75,6 +77,7 @@ class agent_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) exten
         // Connect monitor
         m_monitor.vif = vif;
         analysis_port = m_monitor.analysis_port;
+        analysis_port.connect(m_stat.analysis_export);
     endfunction
 
 endclass
@@ -95,6 +98,7 @@ class agent_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) exten
     sequencer       #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) m_sequencer;
     driver_tx       #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) m_driver;
     monitor         #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) m_monitor;
+    statistic       #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) m_stat;
     config_item                                                                 m_config;
 
     // ------------------------------------------------------------------------
@@ -120,6 +124,7 @@ class agent_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) exten
         end
 
         // Create monitor
+        m_stat      = statistic #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::type_id::create("m_stat", this);
         m_monitor   = monitor #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)::type_id::create("m_monitor", this);
     endfunction
 
@@ -142,6 +147,7 @@ class agent_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) exten
         // Connect driver if the agent is active
         m_monitor.vif = vif;
         analysis_port = m_monitor.analysis_port;
+        analysis_port.connect(m_stat.analysis_export);
 
         // Connect monitor
         if(get_is_active() == UVM_ACTIVE) begin
