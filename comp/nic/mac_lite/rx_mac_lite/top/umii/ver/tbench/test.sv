@@ -98,6 +98,8 @@ program TEST (
 
 
     task disableTestEnvironment();
+        generator.setDisabled();
+        mii_driver.setDisabled();
         wait(!mii_driver.busy);
         do begin
             wait(!mfb_monitor.busy && !mvb_monitor.busy);
@@ -106,7 +108,6 @@ program TEST (
                 #(100*TX_CLK_PERIOD) disable StayIdleWait0;
             join
         end while(mfb_monitor.busy || mvb_monitor.busy);
-        mii_driver.setDisabled();
         mfb_monitor.setDisabled();
         mfb_responder.setDisabled();
         mvb_monitor.setDisabled();
