@@ -6,11 +6,9 @@
 
 
 set PIPE      "$OFM_PATH/comp/base/logic/pipe_dsp"
-set PKG_BASE2 "$COMP_BASE/base/pkg"
 
 set COMPONENTS [ list \
                   [ list "PIPE_DSP"              $PIPE                  "STRUCTUAL"  ] \
-                  [ list "VCOMP"                 $PKG_BASE2 "VCOMPONENTS"] \
                ]
 
 set PACKAGES "$PACKAGES $OFM_PATH/comp/base/pkg/math_pack.vhd"
