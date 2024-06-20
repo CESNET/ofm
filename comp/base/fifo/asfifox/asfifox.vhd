@@ -159,6 +159,10 @@ architecture behavioral of ASFIFOX is
     constant ADDR_WIDTH     : natural := MEM_ADDR_WIDTH+1;
     constant AFULL_CAPACITY : natural := ITEMS - ALMOST_FULL_OFFSET; 
 
+    signal arst                : std_logic;
+    signal rd_arst             : std_logic;
+    signal wr_arst             : std_logic;
+
     signal write_allow         : std_logic;
     signal read_request        : std_logic;
     signal read_allow          : std_logic;
@@ -206,6 +210,28 @@ architecture behavioral of ASFIFOX is
 
 begin
 
+    arst <= RD_RST or WR_RST;
+
+    wr_arst_i : entity work.ASYNC_RESET
+    generic map(
+       TWO_REG => false
+    ) 
+    port map(
+       CLK        => WR_CLK,
+       ASYNC_RST  => arst,
+       OUT_RST(0) => wr_arst
+    );
+
+    rd_arst_i : entity work.ASYNC_RESET
+    generic map(
+       TWO_REG => false
+    ) 
+    port map(
+       CLK        => RD_CLK,
+       ASYNC_RST  => arst,
+       OUT_RST(0) => rd_arst
+    );
+
     fwft_mode_on_g : if FWFT_MODE generate
         read_request <= RD_EN or not rd_data_vld;
     end generate;
@@ -235,7 +261,7 @@ begin
             WR_DIN      => WR_DATA,
 
             RD_CLK      => RD_CLK,
-            RD_RST      => RD_RST,
+            RD_RST      => rd_arst,
             RD_CE       => read_request,
             RD_REG_CE   => read_request,
             RD_ADDR     => rd_addr_mem,
@@ -327,12 +353,12 @@ begin
         ram_dout_reg <= lutram_dout_reg;
     end generate;
 
-    ram_vld_reg_p : process (RD_CLK)
+    ram_vld_reg_p : process (RD_CLK, rd_arst)
     begin
-        if (rising_edge(RD_CLK)) then
-            if (RD_RST = '1') then
-                ram_vld_reg <= '0';
-            elsif (read_request = '1') then
+        if (rd_arst = '1') then
+            ram_vld_reg <= '0';
+        elsif (rising_edge(RD_CLK)) then
+            if (read_request = '1') then
                 ram_vld_reg <= ram_vld;
             end if;
         end if;
@@ -348,12 +374,12 @@ begin
             end if;
         end process;
 
-        ram_vld_reg2_p : process (RD_CLK)
+        ram_vld_reg2_p : process (RD_CLK, rd_arst)
         begin
-            if (rising_edge(RD_CLK)) then
-                if (RD_RST = '1') then
-                    ram_vld_reg2 <= '0';
-                elsif (read_request = '1') then
+            if (rd_arst = '1') then
+                ram_vld_reg2 <= '0';
+            elsif (rising_edge(RD_CLK)) then
+                if (read_request = '1') then
                     ram_vld_reg2 <= ram_vld_reg;
                 end if;
             end if;
@@ -377,14 +403,12 @@ begin
     --  WRITE ADDRESS LOGIC
     -- =========================================================================
 
-    wr_addr_cnt_p : process (WR_CLK)
+    wr_addr_cnt_p : process (WR_CLK, wr_arst)
     begin
-        if (rising_edge(WR_CLK)) then
-            if (WR_RST = '1') then
-                wr_addr_cnt <= (others => '0');
-            else
-                wr_addr_cnt <= wr_addr_cnt_next;
-            end if;
+        if (wr_arst = '1') then
+            wr_addr_cnt <= (others => '0');
+        elsif (rising_edge(WR_CLK)) then
+            wr_addr_cnt <= wr_addr_cnt_next;
         end if;
     end process;
 
@@ -407,15 +431,16 @@ begin
 
     wr_addr_gray_synced_i : entity work.ASYNC_OPEN_LOOP_SMD
     generic map(
-        DATA_WIDTH => ADDR_WIDTH    
+        DATA_WIDTH => ADDR_WIDTH,
+        ASYNC_RST  => True
     )  
     port map(
         ACLK     => WR_CLK,
-        ARST     => WR_RST,
+        ARST     => wr_arst,
         ADATAIN  => wr_addr_gray,
 
         BCLK     => RD_CLK,
-        BRST     => RD_RST,
+        BRST     => rd_arst,
         BDATAOUT => wr_addr_gray_synced 
     );
 
@@ -429,14 +454,12 @@ begin
         wr_addr_synced(i) <= wr_addr_synced(i+1) xor wr_addr_gray_synced(i);
     end generate;
 
-    wr_addr_synced_reg_p : process (RD_CLK)
+    wr_addr_synced_reg_p : process (RD_CLK, rd_arst)
     begin
-        if (rising_edge(RD_CLK)) then
-            if (RD_RST = '1') then
-                wr_addr_synced_reg <= (others => '0');
-            else
-                wr_addr_synced_reg <= wr_addr_synced;
-            end if;
+        if (rd_arst = '1') then
+            wr_addr_synced_reg <= (others => '0');
+        elsif (rising_edge(RD_CLK)) then
+            wr_addr_synced_reg <= wr_addr_synced;
         end if;
     end process;
 
@@ -444,12 +467,12 @@ begin
     --  READ ADDRESS LOGIC
     -- =========================================================================
 
-    rd_addr_cnt_p : process (RD_CLK)
+    rd_addr_cnt_p : process (RD_CLK, rd_arst)
     begin
-        if (rising_edge(RD_CLK)) then
-            if (RD_RST = '1') then
-                rd_addr_cnt <= (others => '0');
-            elsif (read_allow = '1') then
+        if (rd_arst = '1') then
+            rd_addr_cnt <= (others => '0');
+        elsif (rising_edge(RD_CLK)) then
+            if (read_allow = '1') then
                 rd_addr_cnt <= rd_addr_cnt_next;
             end if;
         end if;
@@ -457,12 +480,12 @@ begin
 
     rd_addr_cnt_next <= rd_addr_cnt + 1;
 
-    rd_addr_cnt_mem_p : process (RD_CLK)
+    rd_addr_cnt_mem_p : process (RD_CLK, rd_arst)
     begin
-        if (rising_edge(RD_CLK)) then
-            if (RD_RST = '1') then
-                rd_addr_cnt_mem <= (others => '0');
-            elsif (read_allow = '1') then
+        if (rd_arst = '1') then
+            rd_addr_cnt_mem <= (others => '0');
+        elsif (rising_edge(RD_CLK)) then
+            if (read_allow = '1') then
                 rd_addr_cnt_mem <= rd_addr_cnt_mem + 1;
             end if;
         end if;
@@ -486,15 +509,16 @@ begin
 
     rd_addr_gray_synced_i : entity work.ASYNC_OPEN_LOOP_SMD
     generic map(
-        DATA_WIDTH => ADDR_WIDTH    
+        DATA_WIDTH => ADDR_WIDTH,
+        ASYNC_RST  => True
     )  
     port map(
         ACLK     => RD_CLK,
-        ARST     => RD_RST,
+        ARST     => rd_arst,
         ADATAIN  => rd_addr_gray,
 
         BCLK     => WR_CLK,
-        BRST     => WR_RST,
+        BRST     => wr_arst,
         BDATAOUT => rd_addr_gray_synced 
     );
 
@@ -508,14 +532,12 @@ begin
         rd_addr_synced(i) <= rd_addr_synced(i+1) xor rd_addr_gray_synced(i);
     end generate;
 
-    rd_addr_synced_reg_p : process (WR_CLK)
+    rd_addr_synced_reg_p : process (WR_CLK, wr_arst)
     begin
-        if (rising_edge(WR_CLK)) then
-            if (WR_RST = '1') then
-                rd_addr_synced_reg <= (others => '0');
-            else
-                rd_addr_synced_reg <= rd_addr_synced;
-            end if;
+        if (wr_arst = '1') then
+            rd_addr_synced_reg <= (others => '0');
+        elsif (rising_edge(WR_CLK)) then
+            rd_addr_synced_reg <= rd_addr_synced;
         end if;
     end process;
 
@@ -532,14 +554,12 @@ begin
     full_flag       <= not full_msb_equal and full_addr_equal;
 
     -- full flag register
-    process (WR_CLK)
+    process (WR_CLK, wr_arst)
     begin
-        if (rising_edge(WR_CLK)) then
-            if (WR_RST = '1') then
-                full_flag_reg <= '1';
-            else
-                full_flag_reg <= full_flag;
-            end if;   
+        if (wr_arst = '1') then
+            full_flag_reg <= '1';
+        elsif (rising_edge(WR_CLK)) then
+            full_flag_reg <= full_flag; 
         end if;
     end process;
 
