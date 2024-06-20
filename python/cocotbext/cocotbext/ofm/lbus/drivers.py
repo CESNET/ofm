@@ -1,7 +1,10 @@
+from typing import Any
+
 import cocotb
-from cocotb_bus.drivers import BusDriver
-from cocotb.triggers import ClockCycles, FallingEdge, First, RisingEdge
-from cocotb.result import TestFailure
+from cocotb.triggers import Event
+
+from ..base.drivers import BusDriver
+from ..base.transaction import IdleTransaction
 
 import copy
 import operator
@@ -14,9 +17,13 @@ class LBusDriver(BusDriver):
     _signals = ["data", "ena", "sop", "eop", "err", "mty"]
 
     def __init__(self, entity, name, clock, array_idx=None):
-        BusDriver.__init__(self, entity, name, clock, array_idx=array_idx)
-        self.clock = clock
+        super().__init__(entity, name, clock, array_idx=array_idx)
         self._segments = len(self.bus.data)
+        self._bytes_per_item = len(self.bus.data[0]) // 8
+
+        self._cfg_update(
+            bits_per_word = self._bytes_per_item * 8 * self._segments
+        )
         self._next_segment = 0
         self.clear_control_signals()
 
@@ -41,14 +48,63 @@ class LBusDriver(BusDriver):
         for i in range(self._segments):
             self.bus.mty[i].value = self._mty[i]
 
-    @cocotb.coroutine
     async def write_packet(self, data, sync=True):
-        orig_data = data
-        data = copy.copy(data)
-        datalen = len(data)
+        """
+        deprecated::
+            Use the Bus.append() instead.
+        """
 
-        if sync:
-            await RisingEdge(self.clock)
+        e = Event()
+        if isinstance(data, list):
+            data = bytes(data)
+        self.append(data, event=e)
+        await e.wait()
+
+    async def _send_thread(self):
+        await self._clk_re
+        if self._cfg.get("clk_freq") is None:
+            await self._measure_clkfreq(self._clk_re)
+
+        while True:
+            if self._sendQ:
+                transaction, callback, event, kwargs = self._sendQ.popleft()
+            else:
+                transaction, callback, event, kwargs = self._idle_tr, None, None, {}
+
+            while True:
+                idle_count = self._idle_gen.get(transaction) // self._bytes_per_item
+
+                if idle_count == 0:
+                    break
+                for _ in range(idle_count):
+                    await self._send(self._idle_tr, callback=None, event=event, sync=False, **kwargs)
+
+            await self._send(transaction, callback=callback, event=event, sync=False, **kwargs)
+
+    async def _driver_send(self, transaction: Any, sync: bool = True, **kwargs: Any) -> None:
+        clk_re = self._clk_re
+
+        if isinstance(transaction, IdleTransaction):
+            self._idle_gen.put(transaction, items=self._bytes_per_item)
+            self._next_segment = (self._next_segment + 1) % self._segments
+            if self._next_segment == 0:
+                await clk_re
+                self.clear_control_signals()
+            return
+        #elif isinstance(transaction, list):
+        #    data = memoryview(bytes(transaction))
+        elif isinstance(transaction, bytes):
+            data = memoryview(transaction)
+        else:
+            raise NotImplemented
+
+        assert len(data)
+
+        orig_data = data
+        datalen = len(data)
+        bpi = self._bytes_per_item
+        empty_items = 0
+        nbytes = bpi
 
         while data:
             i = self._next_segment
@@ -57,17 +113,23 @@ class LBusDriver(BusDriver):
             if len(data) == datalen:
                 self._sop |= 1 << i
 
-            if len(data) <= 16:
+            if len(data) <= bpi:
+                empty_items = bpi - len(data)
+                self._mty[i] = empty_items
+
                 self._eop |= 1 << i
-                self._mty[i] = 16 - len(data)
-                data += [0] * (16 - len(data))
+                nbytes = len(data)
 
-            self.bus.data[i].value = int.from_bytes(data[0:16], byteorder="big")
+            self.bus.data[i].value = int.from_bytes(data[0:nbytes], byteorder="big") << (empty_items * 8)
 
-            data = data[16:]
+            data = data[nbytes:]
             self._next_segment = (self._next_segment + 1) % self._segments
 
-            if self._next_segment == 0 or (not data and sync):
-                self.propagate_control_signals()
-                await RisingEdge(self.clock)
+            self.propagate_control_signals()
+            if self._next_segment == 0:
+                await clk_re
                 self.clear_control_signals()
+
+            self._idle_gen.put(transaction, items=nbytes, end=(len(data) == 0))
+            if empty_items:
+                self._idle_gen.put(self._idle_tr, items=empty_items)

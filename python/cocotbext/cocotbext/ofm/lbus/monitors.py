@@ -12,7 +12,6 @@ class LBusMonitor(BusMonitor):
 
         BusMonitor.__init__(self, *args, **kwargs)
 
-    @cocotb.coroutine
     async def _monitor_recv(self):
         clk_redge = RisingEdge(self.clock)
 
