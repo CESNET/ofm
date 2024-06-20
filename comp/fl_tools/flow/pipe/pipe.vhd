@@ -12,8 +12,6 @@
 
 library IEEE;
 use IEEE.std_logic_1164.all;
-use IEEE.std_logic_arith.all;
-use IEEE.std_logic_unsigned.all;
 
 use work.math_pack.all;
 
@@ -57,7 +55,7 @@ entity FL_PIPE is
       RX_SRC_RDY_N   : in  std_logic;
       RX_DST_RDY_N   : out std_logic;
       RX_DATA        : in  std_logic_vector(DATA_WIDTH-1 downto 0);
-      RX_REM         : in  std_logic_vector(abs(log2(DATA_WIDTH/8)-1) downto 0);
+      RX_REM         : in  std_logic_vector(tsel(DATA_WIDTH >= 8, log2(DATA_WIDTH/8) -1, -1) downto 0);
  
       -- ================
       -- Output interface
@@ -70,7 +68,7 @@ entity FL_PIPE is
       TX_SRC_RDY_N   : out std_logic;
       TX_DST_RDY_N   : in  std_logic;
       TX_DATA        : out std_logic_vector(DATA_WIDTH-1 downto 0);
-      TX_REM         : out std_logic_vector(abs(log2(DATA_WIDTH/8)-1) downto 0);
+      TX_REM         : out std_logic_vector(tsel(DATA_WIDTH >= 8, log2(DATA_WIDTH/8) -1, -1) downto 0);
          
       -- ==================
       -- Debuging interface
@@ -96,17 +94,8 @@ end entity FL_PIPE;
 -- ----------------------------------------------------------------------------
 architecture fl_pipe_arch of FL_PIPE is
 
-   -- function added by xvozen00 (with change on lines 75 - added 'abs')
-   -- to replace log2(DATA_WIDTH/8) and handle DATA_WIDTH = 8
-   function REM_WIDTH
-      return integer is
-   begin
-      if ((DATA_WIDTH/8) <= 1) then return 2;
-      else return log2(DATA_WIDTH/8);
-      end if;
-   end function;
-
-   constant PIPE_WIDTH        : integer := DATA_WIDTH+REM_WIDTH+4;
+   constant REM_WIDTH         : natural := TX_REM'length;
+   constant PIPE_WIDTH        : natural := DATA_WIDTH + REM_WIDTH + 4;
 
    signal pipe_in_data        : std_logic_vector(PIPE_WIDTH-1 downto 0);
    signal pipe_in_src_rdy     : std_logic;
