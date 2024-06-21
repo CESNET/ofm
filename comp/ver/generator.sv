@@ -72,8 +72,9 @@
      * internally in the out_chan property.
      */
     function new(string inst, int stream_id = -1, tTransMbx transMbx = null);
-      if (transMbx == null)  
-        this.transMbx = new(1);             // Create own mailbox
+      if (transMbx == null)
+        // NOTE: since we have drivers that can start multiple transactions at the same time, we need to have big enough stack of ready transactions in the mailbox, 100 should be enough for all cases
+        this.transMbx = new(100);        // Create own mailbox
       else
         this.transMbx = transMbx;        // Use created mailbox
     
