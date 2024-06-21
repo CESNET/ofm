@@ -42,9 +42,12 @@ generic(
     TS_FORMAT             : natural := 0;
     -- Number of Items in the Input MFB_FIFOX (main buffer).
     FIFO_DEPTH            : natural := 2048;
-    -- Almost Full Offset of the input MFB_FIFOX.
-    -- States the number of Items it can accept after Almost Full is asserted.
-    FIFO_AF_OFFSET        : natural := 10;
+    -- Almost Full Offset of the Input MFB_FIFOX.
+    -- Pauses the appropriate DMA channel when the amount of stored Items reaches this value.
+    FIFO_AF_OFFSET        : natural := 1000;
+    -- Almost Empty Offset of the input MFB_FIFOX.
+    -- Unpauses (resumes) the appropriate DMA channel when the amount of stored Items drops under this value.
+    FIFO_AE_OFFSET        : natural := 1000;
 
     -- FPGA device name: ULTRASCALE, STRATIX10, AGILEX, ...
     DEVICE                : string := "STRATIX10"
@@ -217,7 +220,7 @@ begin
         RAM_TYPE            => "AUTO"           ,
         DEVICE              => DEVICE           ,
         ALMOST_FULL_OFFSET  => FIFO_AF_OFFSET   ,
-        ALMOST_EMPTY_OFFSET => FIFO_AF_OFFSET/2
+        ALMOST_EMPTY_OFFSET => FIFO_AE_OFFSET
     )
     port map(
         CLK => CLK,

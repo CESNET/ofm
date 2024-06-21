@@ -88,8 +88,11 @@ generic(
     -- Number of Items in the Packet Delayer's RX FIFO (the main buffer).
     BUFFER_SIZE           : natural := 2048;
     -- Almost Full Offset of the main buffer in Packet Delayers.
-    -- States the number of data words it can accept after Almost Full is asserted.
-    BUFFER_AF_OFFSET      : natural := 10;
+    -- Packet Delayers pause the appropriate DMA channel when Almost Full is asserted.
+    BUFFER_AF_OFFSET      : natural := 1000;
+    -- Almost Empty Offset of the main buffer in Packet Delayers.
+    -- Packet Delayers unpause (resume) the appropriate DMA channel when Almost Empty is asserted.
+    BUFFER_AE_OFFSET      : natural := 1000;
     -- The number of Queues (DMA Channels).
     QUEUES                : natural := 1;
     -- The number of selected Queues (DMA Channels) for timestamp limiting.
@@ -469,6 +472,7 @@ begin
                 TS_FORMAT       => TIMESTAMP_FORMAT,
                 FIFO_DEPTH      => BUFFER_SIZE     ,
                 FIFO_AF_OFFSET  => BUFFER_AF_OFFSET,
+                FIFO_AE_OFFSET  => BUFFER_AE_OFFSET,
                 DEVICE          => DEVICE
             )
             port map(
