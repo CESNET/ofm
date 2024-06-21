@@ -14,7 +14,9 @@ use ieee.std_logic_1164.all;
 entity ASYNC_OPEN_LOOP_SMD is
     Generic (
         -- Data width of grey code data signal in bits
-        DATA_WIDTH : natural := 8
+        DATA_WIDTH : natural := 8;
+        -- Use asynchronous reset in flop-flops
+        ASYNC_RST  : boolean := False
     );    
     Port (
         -- Clock domain A (source)
@@ -37,6 +39,11 @@ architecture FULL of ASYNC_OPEN_LOOP_SMD is
     signal sync2_reg : std_logic_vector(DATA_WIDTH-1 downto 0) := (others=>'0');
     signal sync3_reg : std_logic_vector(DATA_WIDTH-1 downto 0) := (others=>'0');
 
+    signal arst_async : std_logic := '0';
+    signal brst_async : std_logic := '0';
+    signal arst_sync  : std_logic := '0';
+    signal brst_sync  : std_logic := '0';
+
     -- Xilinx attributes
     attribute shreg_extract                : string;
     attribute shreg_extract of sync1_reg   : signal is "no";
@@ -54,12 +61,26 @@ architecture FULL of ASYNC_OPEN_LOOP_SMD is
     attribute ALTERA_ATTRIBUTE of sync3_reg : signal is "-name ADV_NETLIST_OPT_ALLOWED NEVER_ALLOW; -name DONT_MERGE_REGISTER ON; -name PRESERVE_REGISTER ON";
 
 begin
+
+    reset_g: if ASYNC_RST generate
+        arst_async <= ARST;
+        brst_async <= BRST;
+        arst_sync  <= '0';
+        brst_sync  <= '0';
+    else generate
+        arst_async <= '0';
+        brst_async <= '0';
+        arst_sync  <= ARST;
+        brst_sync  <= BRST;
+    end generate;
      
     -- input register of clock domain A
-    process (ACLK)
+    process (ACLK, arst_async)
     begin
-        if (rising_edge(ACLK)) then
-            if (ARST = '1') then
+        if (arst_async = '1') then
+            input_reg <= (others=>'0');
+        elsif (rising_edge(ACLK)) then
+            if (arst_sync = '1') then
                 input_reg <= (others=>'0');
             else
                 input_reg <= ADATAIN;
@@ -68,10 +89,14 @@ begin
     end process;
    
     -- three synchronization registers of clock domain B
-    process (BCLK)
+    process (BCLK, brst_async)
     begin
-        if (rising_edge(BCLK)) then
-            if (BRST = '1') then
+        if (brst_async = '1') then
+            sync1_reg <= (others=>'0');
+            sync2_reg <= (others=>'0');
+            sync3_reg <= (others=>'0');
+        elsif (rising_edge(BCLK)) then
+            if (brst_sync = '1') then
                 sync1_reg <= (others=>'0');
                 sync2_reg <= (others=>'0');
                 sync3_reg <= (others=>'0');
