@@ -38,6 +38,10 @@ package type_pack is
   function slv_array_to_deser(slv_array: std_logic_vector; ITEMS_X: integer; DATA_WIDTH: integer) return slv_array_t;
   function slv_array_to_deser(slv_array: std_logic_vector; ITEMS_X: integer) return slv_array_t;
 
+  -- Utility function designed to extract a specific range of bits from each element within slv_array_t.
+  -- This function returns a new array where each element is a sliced portion of the original array's elements.
+  function slv_array_slice (arr: slv_array_t; hi, lo: natural) return slv_array_t;
+
   -- Array of std_array_t
   -- type slv_array_2d_t is array (natural range <>) of slv_array_t
   type slv_array_2d_t is array (natural range <>) of slv_array_t;
@@ -280,6 +284,15 @@ package body type_pack is
    function slv_array_deser(slv_array: std_logic_vector; ITEMS_X: integer) return slv_array_t is
    begin
       return slv_array_downto_deser(slv_array,ITEMS_X);
+   end function;
+
+   function slv_array_slice (arr: slv_array_t; hi, lo: natural) return slv_array_t is
+      variable ret    : slv_array_t(arr'range)(hi-lo downto 0);
+   begin
+      for i in arr'range loop
+          ret(i) := arr(i)(hi downto lo);
+      end loop;
+      return ret;
    end function;
 
    function slv_array_2d_ser(slv_array_2d: slv_array_2d_t; ITEMS_X: integer; ITEMS_Y: integer; DATA_WIDTH: integer) return std_logic_vector is

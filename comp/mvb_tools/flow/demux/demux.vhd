@@ -28,7 +28,13 @@ entity GEN_MVB_DEMUX is
         
         VERSION         : string := "register";
 
-        OUTPUT_REG      : boolean := False
+        OUTPUT_REG      : boolean := False;
+
+        -- Input register. This component will
+        -- break, when connected to output of MVB_MERGE,
+        -- since it can RX_VLD signal before transmission.
+        -- In that case, enable this input register.
+        INPUT_REG       : boolean := false
     );
     port (
         -- Clock signal
@@ -70,9 +76,12 @@ architecture behavioral of GEN_MVB_DEMUX is
 
     signal rx_data_arr          : slv_array_t(MVB_ITEMS - 1 downto 0)(DATA_WIDTH - 1 downto 0);
     signal rx_sel_arr           : slv_array_t(MVB_ITEMS - 1 downto 0)(SEL_WIDTH - 1 downto 0);
+    signal rx_vld_int           : std_logic_vector(MVB_ITEMS - 1 downto 0);
+    signal rx_srdy_int          : std_logic;
     signal rx_sel_dec_arr       : slv_array_t(MVB_ITEMS - 1 downto 0)(DEMUX_WIDTH - 1 downto 0);
 
     signal fork_rx_data_arr     : slv_array_t(MVB_ITEMS - 1 downto 0)(DATA_WIDTH + DEMUX_WIDTH - 1 downto 0);
+    signal fork_rx_dst_rdy      : std_logic;
     signal fork_tx_data         : std_logic_vector(DEMUX_WIDTH * MVB_ITEMS * (DATA_WIDTH + DEMUX_WIDTH) - 1 downto 0);
     signal fork_tx_data_arr     : slv_array_t(DEMUX_WIDTH - 1 downto 0)(MVB_ITEMS * (DATA_WIDTH + DEMUX_WIDTH) - 1 downto 0);
     signal fork_tx_vld          : std_logic_vector(DEMUX_WIDTH * MVB_ITEMS - 1 downto 0);
@@ -84,9 +93,28 @@ architecture behavioral of GEN_MVB_DEMUX is
     signal tx_vld_arr           : slv_array_t(DEMUX_WIDTH - 1 downto 0)(MVB_ITEMS - 1 downto 0);
 
 begin
+    RX_DST_RDY <= fork_rx_dst_rdy;
 
-    rx_sel_arr  <= slv_array_deser(RX_SEL, MVB_ITEMS);
-    rx_data_arr <= slv_array_deser(RX_DATA, MVB_ITEMS);
+    in_reg_g : if INPUT_REG generate
+        process (CLK)
+        begin
+            if rising_edge(CLK) then
+                if RESET = '1' then
+                    rx_srdy_int <= '0';
+                elsif fork_rx_dst_rdy = '1' then
+                    rx_sel_arr  <= slv_array_deser(RX_SEL, MVB_ITEMS);
+                    rx_data_arr <= slv_array_deser(RX_DATA, MVB_ITEMS);
+                    rx_vld_int  <= RX_VLD;
+                    rx_srdy_int <= RX_SRC_RDY;
+                end if;
+            end if;
+        end process;
+    else generate
+        rx_sel_arr  <= slv_array_deser(RX_SEL, MVB_ITEMS);
+        rx_data_arr <= slv_array_deser(RX_DATA, MVB_ITEMS);
+        rx_vld_int  <= RX_VLD;
+        rx_srdy_int <= RX_SRC_RDY;
+    end generate;
     
     dec_g  : for i in 0 to MVB_ITEMS - 1 generate
         dec_i : entity work.DEC1FN
@@ -115,9 +143,9 @@ begin
         RESET           => RESET,
 
         RX_DATA         => slv_array_ser(fork_rx_data_arr),
-        RX_VLD          => RX_VLD,
-        RX_SRC_RDY      => RX_SRC_RDY,
-        RX_DST_RDY      => RX_DST_RDY,
+        RX_VLD          => rx_vld_int,
+        RX_SRC_RDY      => rx_srdy_int,
+        RX_DST_RDY      => fork_rx_dst_rdy,
 
         TX_DATA         => fork_tx_data,
         TX_VLD          => fork_tx_vld,
