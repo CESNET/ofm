@@ -148,19 +148,23 @@ if (args.setting==None):
             imp_util = makefile_path+"/*.fit.rpt"
             imp_time = makefile_path+"/*.sta.rpt"
             system("cp -rf "+syn_util+" "+res_dir_name+"/")
-            system("cp -rf "+imp_util+" "+res_dir_name+"/")
-            system("cp -rf "+imp_time+" "+res_dir_name+"/")
+            if args.implement:
+                system("cp -rf "+imp_util+" "+res_dir_name+"/")
+                system("cp -rf "+imp_time+" "+res_dir_name+"/")
         if (args.vivado):
             # backup Vivado timing and resouces reports
             runs_dir = makefile_path+"/*.runs"
             syn      = runs_dir+"/synth_1"
             imp      = runs_dir+"/impl_1"
             syn_util = syn+"/*_utilization_synth.rpt"
+            syn_time = makefile_path + "/*_synth.tim"
             imp_util = imp+"/*_utilization_placed.rpt"
             imp_time = imp+"/*_timing_summary_routed.rpt"
             system("cp -rf "+syn_util+" "+res_dir_name+"/")
-            system("cp -rf "+imp_util+" "+res_dir_name+"/")
-            system("cp -rf "+imp_time+" "+res_dir_name+"/")
+            system("cp -rf "+syn_time+" "+res_dir_name+"/")
+            if args.implement:
+                system("cp -rf "+imp_util+" "+res_dir_name+"/")
+                system("cp -rf "+imp_time+" "+res_dir_name+"/")
         if (args.save_whole_project):
             # backup whole project
             system("cp -rf "+makefile_path+"/* "+res_dir_name+"/")
