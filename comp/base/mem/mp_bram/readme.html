@@ -1,28 +1,27 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Multi-port BRAM &mdash; Open FPGA Modules Docs  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme_overrides.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme_overrides.css?v=b530091d" />
 
   
   <!--[if lt IE 9]>
     <script src="../../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-        <script src="../../../../_static/jquery.js"></script>
-        <script src="../../../../_static/underscore.js"></script>
-        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../../../_static/doctools.js"></script>
-        <script src="../../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
-    <link rel="next" title="FIFO components" href="../../../../fifo.html" />
+    <link rel="next" title="Live value table memory" href="../lvt_mem/readme.html" />
     <link rel="prev" title="Simple dual-port BRAM" href="../sdp_bram/readme.html" /> 
 </head>
 
@@ -38,7 +37,7 @@
             Open FPGA Modules Docs
           </a>
               <div class="version">
-                Git branch: main, <br> Git hash: a6c260d7
+                Git branch: main, <br> Git hash: 68900723
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -61,6 +60,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../sdp_bram/readme.html">Simple dual-port BRAM</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../sdp_bram/readme.html#simple-dual-port-bram-with-byte-enable">Simple dual-port BRAM with Byte Enable</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Multi-port BRAM</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../lvt_mem/readme.html">Live value table memory</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../memory.html#references">References</a></li>
 </ul>
 </li>
@@ -114,10 +114,10 @@
            <div itemprop="articleBody">
              
   <section id="multi-port-bram">
-<span id="mp-bram"></span><h1>Multi-port BRAM<a class="headerlink" href="#multi-port-bram" title="Permalink to this heading"></a></h1>
+<span id="mp-bram"></span><h1>Multi-port BRAM<a class="headerlink" href="#multi-port-bram" title="Link to this heading"></a></h1>
 <dl class="vhdl autoentity">
 <dt class="sig sig-object vhdl" id="vhdl-entity-mp_bram">
-<span class="k"><span class="pre">ENTITY</span> </span><span class="sig-name descname"><span class="pre">MP_BRAM</span></span><span class="k"> <span class="pre">IS</span></span><a class="headerlink" href="#vhdl-entity-mp_bram" title="Permalink to this definition"></a></dt>
+<span class="k"><span class="pre">ENTITY</span> </span><span class="sig-name descname"><span class="pre">MP_BRAM</span></span><span class="k"> <span class="pre">IS</span></span><a class="headerlink" href="#vhdl-entity-mp_bram" title="Link to this definition"></a></dt>
 <dd><p>Multi-port BRAM. Currently supports only one write port. This will change in future.
 Amount of read ports is not restricted.</p>
 <span class="sig-name descname">Generics</span><table class="docutils align-default">
@@ -283,7 +283,7 @@ implementation according to the FPGA used. Supported values are:</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="../sdp_bram/readme.html" class="btn btn-neutral float-left" title="Simple dual-port BRAM" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../../../../fifo.html" class="btn btn-neutral float-right" title="FIFO components" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../lvt_mem/readme.html" class="btn btn-neutral float-right" title="Live value table memory" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
