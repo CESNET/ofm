@@ -113,7 +113,7 @@ begin
         report "SDP_BRAM: Illegal value of parameter DEVICE '" & DEVICE & "'; allowed devices are: SIM, 7SERIES, ULTRASCALE, STRATIX10, ARRIA10, AGILEX!"
         severity failure;
 
-    assert ((BLOCK_WIDTH = 8) or (BLOCK_WIDTH = 9))
+        assert (not  BLOCK_ENABLE or (BLOCK_ENABLE and ((BLOCK_WIDTH = 8) or (BLOCK_WIDTH = 9))))
         report "SDP_BRAM: Illegal value of BLOCK_WIDTH parameter, allowed values are: 8, 9!"
         severity failure;
 
