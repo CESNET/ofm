@@ -1,11 +1,11 @@
-// sequence.sv: Generated packet sequence that uses FlowTest ft-generator (https://github.com/CESNET/FlowTest/tree/main/tools/ft-generator)
+// sequence_flowtest.sv: Generated packet sequence that uses FlowTest ft-generator (https://github.com/CESNET/FlowTest/tree/main/tools/ft-generator)
 // Copyright (C) 2024 CESNET z. s. p. o.
 // Author(s): Yaroslav Marushchenko <xmarus09@stud.fit.vutbr.cz>
 
 // SPDX-License-Identifier: BSD-3-Clause
 
-class sequence_flowtest #(ITEM_WIDTH) extends uvm_common::sequence_base #(uvm_logic_vector_array::config_sequence, uvm_logic_vector_array::sequence_item #(ITEM_WIDTH));
-    `uvm_object_param_utils(uvm_sequence_flowtest::sequence_flowtest #(ITEM_WIDTH))
+class sequence_flowtest #(ITEM_WIDTH) extends uvm_common::sequence_base #(config_sequence, uvm_logic_vector_array::sequence_item #(ITEM_WIDTH));
+    `uvm_object_param_utils(uvm_packet_generators::sequence_flowtest #(ITEM_WIDTH))
     `uvm_declare_p_sequencer(uvm_logic_vector_array::sequencer #(ITEM_WIDTH));
 
     // Packet size configuration options
@@ -123,6 +123,20 @@ class sequence_flowtest #(ITEM_WIDTH) extends uvm_common::sequence_base #(uvm_lo
         cfg = new();
     endfunction
 
+    function void configure();
+        foreach (cfg.ipv4_addresses[i]) begin
+            ipv4 = new[ipv4.size()+1](ipv4);
+            ipv4[ipv4.size()-1].address = cfg.ipv4_addresses[i];
+            ipv4[ipv4.size()-1].mask = 32;
+        end
+
+        foreach (cfg.ipv6_addresses[i]) begin
+            ipv6 = new[ipv6.size()+1](ipv6);
+            ipv6[ipv6.size()-1].address = cfg.ipv6_addresses[i];
+            ipv6[ipv6.size()-1].mask = 128;
+        end
+    endfunction
+
     function string get_ipv4_addresses();
         string ipv4_addresses = "";
         string ipv4_address;
@@ -235,18 +249,14 @@ class sequence_flowtest #(ITEM_WIDTH) extends uvm_common::sequence_base #(uvm_lo
         end
     endfunction
 
-    function void post_randomize();
-        
+    function void generate_tools_configuration();
         if (generated_config) begin
             generate_config();
         end
-
         if (generated_profile) begin
             generate_profile();
         end
-
     endfunction
-
 
     // Sequence main body
     task body;
@@ -261,6 +271,9 @@ class sequence_flowtest #(ITEM_WIDTH) extends uvm_common::sequence_base #(uvm_lo
 
         string generator_parameters;
         string generator_execute_command;
+
+        configure();
+        generate_tools_configuration();
 
         reader = new();
         if (!uvm_config_db #(string)::get(p_sequencer, "", "output_filepath", output_filepath)) begin
