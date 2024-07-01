@@ -6,6 +6,7 @@
 
 set GEN_REG_ARRAY_BASE  "$OFM_PATH/comp/base/mem/gen_reg_array"
 set GEN_LUTRAM_BASE     "$OFM_PATH/comp/base/mem/gen_lutram"
+set GEN_LUTRAM_BASE     "$OFM_PATH/comp/base/mem/sdp_bram"
 set GEN_MUX_BASE        "$OFM_PATH/comp/base/logic/mux"
 
 lappend PACKAGES  "$OFM_PATH/comp/base/pkg/type_pack.vhd"

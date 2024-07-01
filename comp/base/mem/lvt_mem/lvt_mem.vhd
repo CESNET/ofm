@@ -31,6 +31,9 @@ entity LVT_MEM is
         RD_LATENCY  : natural := 1;
         -- Read during write behaviour: "NEW_DATA" or "DONT_CARE".
         RDW_BEHAV   : string  := "NEW_DATA";
+        -- Underlying memory type: "BRAM" or "LUT".
+        -- When using BRAM, RD_LATENCY must be set to 1.
+        MEM_TYPE    : string  := "BRAM";
         DEVICE      : string  := "AGILEX"
     );
     port (
@@ -69,6 +72,10 @@ architecture FULL of LVT_MEM is
     signal lut_rd_data_arr  : slv_array_2d_t(WRITE_PORTS-1 downto 0)(READ_PORTS-1 downto 0)(DATA_WIDTH-1 downto 0);
 begin
 
+    assert not (MEM_TYPE = "BRAM") or RD_LATENCY = 1
+        report "[LVT MEM]: When using BRAM in LVT MEM, one must use read latency of 1!"
+        severity error;
+    
     lvt_i: entity work.GEN_REG_ARRAY
     generic map (
         DATA_WIDTH  => WR_PORT_IND_W,
@@ -92,24 +99,58 @@ begin
     wr_lutram_g : for wr_i in 0 to WRITE_PORTS-1 generate
         signal lut_rd_data  : std_logic_vector(READ_PORTS*DATA_WIDTH-1 downto 0);
     begin
-        lut_i : entity work.GEN_LUTRAM
-        generic map (
-            DATA_WIDTH          => DATA_WIDTH,
-            ITEMS               => ITEMS,
-            RD_PORTS            => READ_PORTS,
-            RD_LATENCY          => RD_LATENCY,
-            WRITE_USE_RD_ADDR0  => false,
-            MLAB_CONSTR_RDW_DC  => false,
-            DEVICE              => DEVICE
-        ) port map (
-            CLK                 => CLK,
-            WR_EN               => WR_EN(wr_i),
-            WR_ADDR             => WR_ADDR(wr_i),
-            WR_DATA             => WR_DATA(wr_i),
-            RD_ADDR             => slv_array_ser(RD_ADDR),
-            RD_DATA             => lut_rd_data
-        );
-        lut_rd_data_arr(wr_i) <= slv_array_deser(lut_rd_data, READ_PORTS);
+        lut_g : if MEM_TYPE = "LUT" generate
+            lut_i : entity work.GEN_LUTRAM
+            generic map (
+                DATA_WIDTH          => DATA_WIDTH,
+                ITEMS               => ITEMS,
+                RD_PORTS            => READ_PORTS,
+                RD_LATENCY          => RD_LATENCY,
+                WRITE_USE_RD_ADDR0  => false,
+                MLAB_CONSTR_RDW_DC  => false,
+                DEVICE              => DEVICE
+            ) port map (
+                CLK                 => CLK,
+                WR_EN               => WR_EN(wr_i),
+                WR_ADDR             => WR_ADDR(wr_i),
+                WR_DATA             => WR_DATA(wr_i),
+                RD_ADDR             => slv_array_ser(RD_ADDR),
+                RD_DATA             => lut_rd_data
+            );
+            lut_rd_data_arr(wr_i) <= slv_array_deser(lut_rd_data, READ_PORTS);
+
+        else generate
+            bram_g : for rd_i in 0 to READ_PORTS-1 generate
+                bram_i : entity work.SDP_BRAM
+                generic map (
+                    DATA_WIDTH      => DATA_WIDTH,
+                    ITEMS           => ITEMS,
+                    BLOCK_ENABLE    => false,
+                    BLOCK_WIDTH     => 8,
+                    COMMON_CLOCK    => true,
+                    OUTPUT_REG      => false,
+                    METADATA_WIDTH  => 0,
+                    DEVICE          => DEVICE
+                ) port map (
+                    WR_CLK          => CLK,
+                    WR_RST          => RESET,
+                    WR_EN           => WR_EN(wr_i),
+                    WR_BE           => (others => '1'),
+                    WR_ADDR         => WR_ADDR(wr_i),
+                    WR_DATA         => WR_DATA(wr_i),
+
+                    RD_CLK          => CLK,
+                    RD_RST          => RESET,
+                    RD_EN           => '1',
+                    RD_PIPE_EN      => '1',
+                    RD_META_IN      => (others => '0'),
+                    RD_ADDR         => RD_ADDR(rd_i),
+                    RD_DATA         => lut_rd_data_arr(wr_i)(rd_i),
+                    RD_META_OUT     => open,
+                    RD_DATA_VLD     => open
+                );
+            end generate;    
+        end generate;
     end generate;
 
     rd_mux_g : for rd_i in 0 to READ_PORTS-1 generate
