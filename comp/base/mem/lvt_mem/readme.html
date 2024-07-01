@@ -37,7 +37,7 @@
             Open FPGA Modules Docs
           </a>
               <div class="version">
-                Git branch: main, <br> Git hash: 76a903fe
+                Git branch: main, <br> Git hash: 830b167e
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -163,7 +163,13 @@ result in undefined behaviour.</p>
 <td><p>“NEW_DATA”</p></td>
 <td><p>Read during write behaviour: “NEW_DATA” or “DONT_CARE”.</p></td>
 </tr>
-<tr class="row-even" id="vhdl-gengeneric-lvt_mem-device"><td><p>DEVICE</p></td>
+<tr class="row-even" id="vhdl-gengeneric-lvt_mem-mem_type"><td><p>MEM_TYPE</p></td>
+<td><p>string</p></td>
+<td><p>“BRAM”</p></td>
+<td><p>Underlying memory type: “BRAM” or “LUT”.
+When using BRAM, RD_LATENCY must be set to 1.</p></td>
+</tr>
+<tr class="row-odd" id="vhdl-gengeneric-lvt_mem-device"><td><p>DEVICE</p></td>
 <td><p>string</p></td>
 <td><p>“AGILEX”</p></td>
 <td></td>
