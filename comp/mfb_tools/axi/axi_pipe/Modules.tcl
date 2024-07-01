@@ -8,6 +8,6 @@ set PIPE_BASE   "$OFM_PATH/comp/base/misc/pipe"
 
 lappend COMPONENTS [list "PIPE"    $PIPE_BASE     "FULL"]
 
-set PACKAGES "$PACKAGES $OFM_PATH/comp/base/pkg/math_pack.vhd"
+lappend PACKAGES "$OFM_PATH/comp/base/pkg/math_pack.vhd"
 
-set MOD "$MOD $ENTITY_BASE/axi_pipe.vhd"
+lappend MOD "$ENTITY_BASE/axi_pipe.vhd"
