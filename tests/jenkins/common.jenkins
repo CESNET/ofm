@@ -107,7 +107,7 @@ def commonPrekladMultiVerRun(COMPONENTS, ofm_path = pwd()) {
             timeout(time: 4, unit: 'HOURS') {
                 stage("$name") {
                     dir("$path") {
-                        sh "${toolsel} && python3 $multi_ver $fdo $pkg $settings"
+                        sh "${toolsel} && python3 $multi_ver $fdo $pkg $settings -p \"$name\""
                     }
                 }
             }
