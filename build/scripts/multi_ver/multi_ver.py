@@ -109,7 +109,7 @@ parser.add_argument("-s","--setting", nargs="+", help="Name of a specific settin
 parser.add_argument("-d","--dry-run", action="store_true", help="(Used together with '-s') Only sets the requested setting to test package without starting the verification")
 parser.add_argument("-c","--command-line", action="store_true", help="(Used together with '-s') Starts ModelSim with parameter '-c' for command line run")
 parser.add_argument("-r","--run-percantage", action="store", help="(Used without '-s') Randomly reduces number of performed combination to the given percantage ('100' for running all combinations)")
-parser.add_argument("-n","--test-name", action="store", help="(Used with '-s') select name of test. Some file will be saved with this suffix", default="test_default")
+parser.add_argument("-n","--test-name", action="store", help="(Used with '-s') select name of test. Some file will be saved with this suffix")
 parser.add_argument("--coverage", action="store_true", help="Generate and save code coverarge to <test_name>.ucdb file")
 
 args = parser.parse_args()
@@ -174,7 +174,8 @@ elif ("_combinations_run_percentage_" in SETTINGS.keys()):
 #Print current directory where verification is running
 print(os.getcwd())
 
-if (args.setting==None):
+
+if (args.setting==None and args.test_name == None):
     ##########
     # Run all settings
     ##########
@@ -204,17 +205,24 @@ else:
     # Run selected setting
     ##########
 
-    SETTING = create_setting_from_combination(SETTINGS,args.setting)
+    if (args.test_name != None):
+        test_name = args.test_name
+        test_setings = COMBINATIONS[args.test_name]
+    if (args.setting   != None):
+        test_name = "test_setings"
+        test_setings = args.setting
 
+    SETTING = create_setting_from_combination(SETTINGS, test_setings)
     env = apply_setting(args.test_pkg_file,SETTING,PKG_MOD_SED)
 
+
     if (not args.dry_run):
-        print("Running combination: "+" ".join(args.setting))
-        result = run_modelsim(args.fdo_file, args.test_name, True, (not args.command_line), coverage=args.coverage, env=env)
+        print("Running combination: "+" ".join(test_setings))
+        result = run_modelsim(args.fdo_file, test_name, True, (not args.command_line), coverage=args.coverage, env=env)
         if (result == 0): # detect failure
-            print("Run SUCCEEDED ("+" ".join(args.setting)+")")
+            print("Run SUCCEEDED ("+" ".join(test_setings)+")")
         else:
-            print("Run FAILED ("+" ".join(args.setting)+")")
+            print("Run FAILED ("+" ".join(test_setings)+")")
             FAIL = True
 
     print("Done")
