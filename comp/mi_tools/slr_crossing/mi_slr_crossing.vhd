@@ -16,7 +16,8 @@ entity MI_SLR_CROSSING is
     ADDR_WIDTH     : integer := 32;
     META_WIDTH     : integer := 2;
     USE_OUTREG     : boolean:= true;
-    FAKE_CROSSING  : boolean:= false
+    FAKE_CROSSING  : boolean:= false;
+    DEVICE         : string := "7SERIES"
   );
   port(
     CLK         : in std_logic;
@@ -82,7 +83,8 @@ begin
         DATA_WIDTH => DATA_WIDTH,
         ADDR_WIDTH => ADDR_WIDTH,
         META_WIDTH => META_WIDTH,
-        USE_OUTREG => USE_OUTREG
+        USE_OUTREG => USE_OUTREG,
+        DEVICE     => DEVICE
       ) port map (
         CLK                  => CLK,
         RESET                => OUT_RESET,

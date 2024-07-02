@@ -13,7 +13,8 @@ entity MI_SLR_CROSSING_DST is
     DATA_WIDTH     : integer := 32;
     ADDR_WIDTH     : integer := 32;
     META_WIDTH     : integer := 2;
-    USE_OUTREG      : boolean := true
+    USE_OUTREG     : boolean := true;
+    DEVICE         : string := "7SERIES"
   );
   port(
     CLK              : in std_logic;
@@ -49,7 +50,8 @@ begin
   req_destination_endpoint : entity work.SLR_CROSSING_DST
     generic map (
       DATA_WIDTH => META_WIDTH+DATA_WIDTH+ADDR_WIDTH+DATA_WIDTH/8+1,
-      USE_OUTREG => USE_OUTREG
+      USE_OUTREG => USE_OUTREG,
+      DEVICE => DEVICE
     ) port map (
       CLK              => CLK,
       RESET            => RESET,
