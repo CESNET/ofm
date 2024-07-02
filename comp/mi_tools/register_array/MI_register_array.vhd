@@ -37,7 +37,8 @@ entity MI_REGISTER_ARRAY is
       --! registers generic data (array)
       --! range must be (1 to NUM_REGS)
       --! sample connections in /sim/testbench.vhd
-      GENER_REGS : REG_TYPE_ARRAY 
+      GENER_REGS : REG_TYPE_ARRAY;
+      DEVICE     : string := "7SERIES"
    );
    port (
       --! Clock input
@@ -108,7 +109,8 @@ begin
       DATA_WIDTH  => MI_WIDTH,
       ADDR_WIDTH  => MI_ADDR_WIDTH,
       USE_OUTREG  => MI_PIPE,
-      FAKE_PIPE   => not MI_PIPE
+      FAKE_PIPE   => not MI_PIPE,
+      DEVICE      => DEVICE
    )
    port map (
       -- Common interface -----------------------------------------------------
