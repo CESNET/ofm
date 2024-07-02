@@ -110,6 +110,7 @@ parser.add_argument("-d","--dry-run", action="store_true", help="(Used together 
 parser.add_argument("-c","--command-line", action="store_true", help="(Used together with '-s') Starts ModelSim with parameter '-c' for command line run")
 parser.add_argument("-r","--run-percantage", action="store", help="(Used without '-s') Randomly reduces number of performed combination to the given percantage ('100' for running all combinations)")
 parser.add_argument("-n","--test-name", action="store", help="(Used with '-s') select name of test. Some file will be saved with this suffix")
+parser.add_argument("-p","--prefix-name", action="store", help="this create prefix for test_name to prevent rewrite older files", default="")
 parser.add_argument("--coverage", action="store_true", help="Generate and save code coverarge to <test_name>.ucdb file")
 
 args = parser.parse_args()
@@ -174,6 +175,11 @@ elif ("_combinations_run_percentage_" in SETTINGS.keys()):
 #Print current directory where verification is running
 print(os.getcwd())
 
+#Set text_name_prefix and REPLACE SPACE WITH UNDERSCORE.
+test_name_prefix = "";
+if (args.prefix_name != None and args.prefix_name != ""):
+    test_name_prefix = args.prefix_name.replace(" ","_") + "_"
+
 
 if (args.setting==None and args.test_name == None):
     ##########
@@ -188,11 +194,11 @@ if (args.setting==None and args.test_name == None):
 
         comb_name = " ".join(comb)
         print(f"Running combination: {key} ({comb_name})")
-        result = run_modelsim(args.fdo_file, key, coverage=args.coverage, env=env)
+        result = run_modelsim(args.fdo_file, f'{test_name_prefix}{key}', coverage=args.coverage, env=env)
         if (result == 0): # detect failure
-            print(f"Run SUCCEEDED ({key})")
+            print(f"Run SUCCEEDED ({test_name_prefix}{key})")
         else:
-            print(f"Run FAILED ({key})")
+            print(f"Run FAILED ({test_name_prefix}{key})")
             FAIL = True
 
         # backup transcript
@@ -218,7 +224,7 @@ else:
 
     if (not args.dry_run):
         print("Running combination: "+" ".join(test_setings))
-        result = run_modelsim(args.fdo_file, test_name, True, (not args.command_line), coverage=args.coverage, env=env)
+        result = run_modelsim(args.fdo_file, f'{test_name_prefix}{test_name}', True, (not args.command_line), coverage=args.coverage, env=env)
         if (result == 0): # detect failure
             print("Run SUCCEEDED ("+" ".join(test_setings)+")")
         else:
