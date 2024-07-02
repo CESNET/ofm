@@ -21,6 +21,9 @@ def commonPrekladVerRun(COMPONENTS) {
     properties([pipelineTriggers([pollSCM('H H(0-2) * * *')])])
 
     def failed = []
+    //load new fpga_version and set default simulator
+    def toolsel = ". fpga_version.sh && fpga_sim -d"
+
     // run verification of every component
     for(c in COMPONENTS) {
         // parse
@@ -32,7 +35,7 @@ def commonPrekladVerRun(COMPONENTS) {
             timeout(time: 4, unit: 'HOURS') {
                 stage("$name") {
                     dir("$path") {
-                        sh "vsim -c -do \"do $script; quit -f\" | grep -E \"(Verification finished successfully)|(VERIFICATION SUCCESS)\""
+                        sh "${toolsel} && vsim -c -do \"do $script; quit -f\" | grep -E \"(Verification finished successfully)|(VERIFICATION SUCCESS)\""
                         // "quit -f" added to ensure termination of vsim execution in all cases
                         // grep used to detect successfull run, each verification should have the following line before the last $stop:
                         //    $write("Verification finished successfully!\n");
@@ -85,6 +88,9 @@ def commonPrekladMultiVerRun(COMPONENTS, ofm_path = pwd()) {
     properties([pipelineTriggers([pollSCM('H H(0-2) * * *')])])
 
     def failed = []
+    //load new fpga_version and set default simulator
+    def toolsel = ". fpga_version.sh && fpga_sim -d"
+
     // run verification of every component
     for(c in COMPONENTS) {
         // parse
@@ -101,7 +107,7 @@ def commonPrekladMultiVerRun(COMPONENTS, ofm_path = pwd()) {
             timeout(time: 4, unit: 'HOURS') {
                 stage("$name") {
                     dir("$path") {
-                        sh "python3 $multi_ver $fdo $pkg $settings"
+                        sh "${toolsel} && python3 $multi_ver $fdo $pkg $settings"
                     }
                 }
             }
