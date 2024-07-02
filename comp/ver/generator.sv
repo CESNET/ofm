@@ -104,6 +104,7 @@
      */
     task setDisabled();
       this.enabled = 0;
+      wait (transMbx.num() == 0);
     endtask : setDisabled
     
 
@@ -121,8 +122,11 @@
           transMbx.put(trans);                  // Put transaction to mailbox
           data_id=data_id+1;                    // Increment instance counter
         end;
-      end else
+      end else begin
         $write("The blueprint transaction in generator must be set\n");
+      end
+
+      wait (transMbx.num() == 0);
       enabled = 0;
     endtask : run
     
