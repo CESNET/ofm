@@ -90,7 +90,7 @@ class AvstCompleter:
 
         data_word = concat(list(zip(data[:len(data)], [8]*len(data))))
         eop = 1
-        empty = self._avst_width - len(data) if len(data) > 0 else 0
+        empty = self._avst_width - len(data) // 4 if len(data) > 0 else 0
         await self._cq.write_cq({"DATA": data_word, "HDR": header, "SOP": sop, "EOP": eop, "EMPTY": empty, "PREFIX": 0, "BAR_RANGE": 0}, sync=sync)
 
 
