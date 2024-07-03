@@ -76,18 +76,20 @@ program TEST (
         for (int i = 0; i < PORTS; i++) begin
             tx_agent[i].setEnabled();
         end
-        tx_generator.setEnabled();
         rx_agent.setEnabled();
-        rx_generator.setEnabled(TRANSACTION_COUNT);
     endtask
 
     task disableTestEnvironment();
         rx_generator.setDisabled();
+        fork
+            //be carefull. you cannot disabled tx generator when RX is not running
+            tx_generator.setDisabled();
+        join_none;
+
         rx_agent.setDisabled();
         for (int i = 0; i < PORTS; i++) begin
             tx_agent[i].setDisabled();
         end
-        tx_generator.setDisabled();
         sc.setDisable();
     endtask
 
@@ -96,6 +98,8 @@ program TEST (
         setBlueprint();
         enableTestEnvironment();
         resetDesign();
+        tx_generator.setEnabled();
+        rx_generator.setEnabled(TRANSACTION_COUNT);
         wait(!rx_generator.enabled);
         disableTestEnvironment();
     endtask
