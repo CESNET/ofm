@@ -67,7 +67,11 @@ class QueueNdp:
 
     async def start(self):
         upd = memoryview(self._ram._mem)[self._upd_base:self._upd_base+8]
-        await e(self._ctrl.start)(self._dsc_base, self._hdr_base, self._upd_base, upd, self._desc_cnt, self._desc_cnt)
+        try:
+            await e(self._ctrl.start)(self._dsc_base, self._hdr_base, self._upd_base, upd, self._desc_cnt, self._desc_cnt)
+        except Exception as ex:
+            await e(self._ctrl.stop)(force=True)
+            await e(self._ctrl.start)(self._dsc_base, self._hdr_base, self._upd_base, upd, self._desc_cnt, self._desc_cnt)
 
         self._dsc_free = self._ctrl.mdp
 
