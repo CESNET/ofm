@@ -360,9 +360,11 @@ begin
         TX_DST_RDY       => TX_MFB_DST_RDY
     );
 
-    process (RX_CLK)
+    process (RX_CLK, TX_RESET)
     begin
-        if (rising_edge(RX_CLK)) then
+        if (TX_RESET = '1') then
+            s_dbuf_ovf_err_reg <= '0';
+        elsif (rising_edge(RX_CLK)) then
             if (s_dbuf_rdy = '0' and s_rx_src_rdy_reg = '1') then
                 s_dbuf_ovf_err_reg <= '1';
             end if;
@@ -380,10 +382,10 @@ begin
     begin
         if (rising_edge(RX_CLK)) then
             if (RX_RESET = '1') then
-                s_dbuf_afull_reg <= '0';
+                s_dbuf_afull_reg <= '1';
             elsif (unsigned(s_dbuf_status) >= (DFIFO_ITEMS - 8)) then
                 s_dbuf_afull_reg <= '1';
-            elsif (unsigned(s_dbuf_status) < (DFIFO_ITEMS/2)) then
+            elsif ((unsigned(s_dbuf_status) < (DFIFO_ITEMS/2)) and s_dbuf_rdy = '1') then
                 s_dbuf_afull_reg <= '0';
             end if;
         end if;
@@ -444,7 +446,7 @@ begin
                 s_mbuf_afull <= '1';
             elsif (unsigned(s_mbuf_status) >= (MFIFO_ITEMS-6)) then
                 s_mbuf_afull <= '1';
-            elsif (unsigned(s_mbuf_status) < (MFIFO_ITEMS-MFIFO_ITEMS/4)) then
+            elsif ((unsigned(s_mbuf_status) < (MFIFO_ITEMS-MFIFO_ITEMS/4)) and s_mbuf_dst_rdy = '1') then
                 s_mbuf_afull <= '0';
             end if;
         end if;
