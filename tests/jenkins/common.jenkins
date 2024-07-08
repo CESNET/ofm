@@ -21,33 +21,39 @@ def commonPrekladVerRun(COMPONENTS) {
     properties([pipelineTriggers([pollSCM('H H(0-2) * * *')])])
 
     def failed = []
+    //load new fpga_version and set default simulator
+    def toolsel  = "set +x\n"
+        toolsel += "source fpga_version.sh\n"
+        toolsel += "fpga_sim -d\n"
+        toolsel += "set -x\n"
+
     // run verification of every component
-    withEnv(["PATH+VSIM=/usr/local/fpga/Modeltech/linux_x86_64", 'LM_LICENSE_FILE=1717@license.liberouter.org']) {
-        for(c in COMPONENTS) {
-            // parse
-            def name = c[0]
-            def path = c[1]
-            def script = c[2]
-            // exec vsim
-            try { // try-catch is a hack to continue even after the first failed verification
-                timeout(time: 4, unit: 'HOURS') {
-                    stage("$name") {
-                        dir("$path") {
-                            sh "vsim -c -do \"do $script; quit -f\" | grep -E \"(Verification finished successfully)|(VERIFICATION SUCCESS)\""
-                            // "quit -f" added to ensure termination of vsim execution in all cases
-                            // grep used to detect successfull run, each verification should have the following line before the last $stop:
-                            //    $write("Verification finished successfully!\n");
-                        }
+    for(c in COMPONENTS) {
+        // parse
+        def name = c[0]
+        def path = c[1]
+        def script = c[2]
+        // exec vsim
+        try { // try-catch is a hack to continue even after the first failed verification
+            timeout(time: 4, unit: 'HOURS') {
+                stage("$name") {
+                    dir("$path") {
+                        def command = "vsim -c -do \"do $script; quit -f\" | grep -E \"(Verification finished successfully)|(VERIFICATION SUCCESS)\"\n"
+                        // "quit -f" added to ensure termination of vsim execution in all cases
+                        // grep used to detect successfull run, each verification should have the following line before the last $stop:
+                        //    $write("Verification finished successfully!\n");
+                        //
+                        sh "${toolsel}${command}"
                     }
                 }
-            } catch(err) {
-                currentBuild.result = 'FAILURE' // still propagate failure status to Jenkins
-                failed.add("$name")
-            } finally { // collect interesting files
-                archiveArtifacts "$path/transcript" // verification log
-                if(currentBuild.result == "FAILURE") {
-                    archiveArtifacts "$path/vsim.wlf" // generated vaweform, use vsim -view vsim.wlf
-                }
+            }
+        } catch(err) {
+            currentBuild.result = 'FAILURE' // still propagate failure status to Jenkins
+            failed.add("$name")
+        } finally { // collect interesting files
+            archiveArtifacts "$path/transcript" // verification log
+            if(currentBuild.result == "FAILURE") {
+                archiveArtifacts "$path/vsim.wlf" // generated vaweform, use vsim -view vsim.wlf
             }
         }
     }
@@ -87,35 +93,40 @@ def commonPrekladMultiVerRun(COMPONENTS, ofm_path = pwd()) {
     properties([pipelineTriggers([pollSCM('H H(0-2) * * *')])])
 
     def failed = []
+    //load new fpga_version and set default simulator
+    def toolsel  = "set +x\n"
+        toolsel += "source fpga_version.sh\n"
+        toolsel += "fpga_sim -d\n"
+        toolsel += "set -x\n"
+
     // run verification of every component
-    withEnv(["PATH+VSIM=/usr/local/fpga/Modeltech/linux_x86_64", 'LM_LICENSE_FILE=1717@license.liberouter.org']) {
-        for(c in COMPONENTS) {
-            // parse
-            def name      = c[0]
-            def path      = c[1]
-            def fdo       = c[2]
-            def pkg       = c[3]
-            def settings  = c[4]
-            //def repo_root = pwd()
-            //def multi_ver = "$repo_root/build/scripts/multi_ver/multi_ver.py"
-            def multi_ver = "$ofm_path/build/scripts/multi_ver/multi_ver.py"
-            // exec vsim
-            try { // try-catch is a hack to continue even after the first failed verification
-                timeout(time: 4, unit: 'HOURS') {
-                    stage("$name") {
-                        dir("$path") {
-                            sh "python3 $multi_ver $fdo $pkg $settings"
-                        }
+    for(c in COMPONENTS) {
+        // parse
+        def name      = c[0]
+        def path      = c[1]
+        def fdo       = c[2]
+        def pkg       = c[3]
+        def settings  = c[4]
+        //def repo_root = pwd()
+        //def multi_ver = "$repo_root/build/scripts/multi_ver/multi_ver.py"
+        def multi_ver = "$ofm_path/build/scripts/multi_ver/multi_ver.py"
+        // exec vsim
+        try { // try-catch is a hack to continue even after the first failed verification
+            timeout(time: 4, unit: 'HOURS') {
+                stage("$name") {
+                    dir("$path") {
+                        def command = "python3 $multi_ver $fdo $pkg $settings -p \"$name\""
+                        sh "${toolsel}${command}"
                     }
                 }
-            } catch(err) {
-                currentBuild.result = 'FAILURE' // still propagate failure status to Jenkins
-                failed.add("$name")
-            } finally { // collect interesting files
-                archiveArtifacts "$path/transcript*" // verification log
-                if(currentBuild.result == "FAILURE") {
-                    archiveArtifacts "$path/vsim.wlf"   // generated vaweform, use vsim -view vsim.wlf
-                }
+            }
+        } catch(err) {
+            currentBuild.result = 'FAILURE' // still propagate failure status to Jenkins
+            failed.add("$name")
+        } finally { // collect interesting files
+            archiveArtifacts "$path/transcript*" // verification log
+            if(currentBuild.result == "FAILURE") {
+                archiveArtifacts "$path/vsim.wlf"   // generated vaweform, use vsim -view vsim.wlf
             }
         }
     }
