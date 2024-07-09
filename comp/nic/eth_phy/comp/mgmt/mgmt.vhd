@@ -6,10 +6,10 @@
 -- SPDX-License-Identifier: BSD-3-Clause
 --
 -- NOTES:
--- Address space is similar to standard MDIO register mapping, while the lower 
+-- Address space is similar to standard MDIO register mapping, while the lower
 -- 16 address bits are register number, upper 5 bits are device (1=PMA, 3=PCS)
 -- Detailed address space:
--- PMA:  
+-- PMA:
 -- MI address  upper 16b  &  lower 16b
 -- 0x10000    PMA status1 & control1
 -- 0x10004    PMA device identifier 2 & 1
@@ -36,10 +36,10 @@
 -- 1.1700 - 1709 PRBS Rx error counters, lane 0 through lane 9 45.2.1.99
 --  Vendor specific PMA controls:
 -- 0x18000 -- PMA specific control
--- 0x18004 -- PMA specific status 
--- 0x18008 -- RS-FEC RX & TX enable 
+-- 0x18004 -- PMA specific status
+-- 0x18008 -- RS-FEC RX & TX enable
 -- 0x18020 -- PMA TX swing (TX differential driver swing)
--- 0x18024 -- PMA TX preemphasis control - precursor 
+-- 0x18024 -- PMA TX preemphasis control - precursor
 -- 0x18028 -- PMA TX preemphasis control - postcursor
 -- 0x18010: DRP data
 -- 0x18014: DRP address
@@ -63,7 +63,7 @@ entity mgmt is
       PMA_LANES : natural range 0 to 10 := 4;
       -- Current PMA/PCS speed. Replaces SPEEDxx when not zero
       SPEED     : natural := 0;
-      -- Speed capabilities, see 802.3 table 45-6. Replaces GBASExx_ABLE when not zero.   
+      -- Speed capabilities, see 802.3 table 45-6. Replaces GBASExx_ABLE when not zero.
       SPEED_CAP : std_logic_vector(15 downto 0) := X"0000";
       -- Speed is 100G when '1'
       SPEED100G     : std_logic := '0';
@@ -81,8 +81,8 @@ entity mgmt is
       RSFEC_EN_INIT : std_logic := '0';
       -- PMA_CONTROL power-up and reset defaults
       PMA_CONTROL_INIT    : std_logic_vector(31 downto 0) := (others => '0');
-      PMA_PRECURSOR_INIT  : std_logic_vector(31 downto 0) := (others => '0');  
-      PMA_POSTCURSOR_INIT : std_logic_vector(31 downto 0) := (others => '0'); 
+      PMA_PRECURSOR_INIT  : std_logic_vector(31 downto 0) := (others => '0');
+      PMA_POSTCURSOR_INIT : std_logic_vector(31 downto 0) := (others => '0');
       PMA_DRIVE_INIT      : std_logic_vector(31 downto 0) := (others => '0');
       -- Width of the DRP data
       DRP_DWIDTH          : natural := 16;
@@ -93,7 +93,7 @@ entity mgmt is
       DEVICE : string  := "ULTRASCALE"
    );
    port (
-      RESET       : in  std_logic; 
+      RESET       : in  std_logic;
       -- =====================================================================
       -- MI32 interface
       -- =====================================================================
@@ -141,7 +141,7 @@ entity mgmt is
       SCR_BYPASS    : out std_logic_vector(1 downto 0);
       -- Reset the PCS block
       PCS_RESET     : out std_logic;
-      -- PCS loopback enable 
+      -- PCS loopback enable
       PCS_LPBCK     : out std_logic;
       -- Lane align
       ALGN_LOCKED   : in  std_logic;
@@ -201,7 +201,7 @@ entity mgmt is
       FEC_AM_LOCK   :  in  std_logic_vector(4-1 downto 0) := (others => '0');
       FEC_HI_SER    :  in  std_logic := '0';
       FEC_ALGN_STAT :  in  std_logic := '0';
-      -- 1.206:     RS-FEC lane mapping 
+      -- 1.206:     RS-FEC lane mapping
       FEC_LANE_MAP  :  in  std_logic_vector(7 downto 0) := (others => '0');
       -- 1.210-207: Symbol error conters for lane 0-3
       FEC_SYM_ERR       :  in  std_logic_vector(4*32-1 downto 0) := (others => '0');
@@ -215,11 +215,11 @@ entity mgmt is
       FEC_UNCOR_ERR     :  in  std_logic_vector(32-1 downto 0) := (others => '0');
       -- Clear the counter
       FEC_UNCOR_ERR_CLR :  out std_logic;
-      -- 1.230-249: RS-FEC BIP error counters, lane 0 to 19 
+      -- 1.230-249: RS-FEC BIP error counters, lane 0 to 19
       FEC_TX_BIP        :  in  std_logic_vector(16*20-1 downto 0) := (others => '0');
       -- 1.250-269: RS-FEC PCS lane mapping, lane 0 to 19
       FEC_TX_LANE_MAP   :  in  std_logic_vector(16*20-1 downto 0) := (others => '0');
-      -- 1.280-281: RS-FEC PCS alignment status 1 through 4 
+      -- 1.280-281: RS-FEC PCS alignment status 1 through 4
       FEC_TX_BLK_LOCK   :  in  std_logic_vector(20-1 downto 0) := (others => '0');
       -- 1.282-283: RS-FEC PCS alignment status 3 through 4
       FEC_TX_ALGN_STAT  :  in  std_logic_vector(20-1 downto 0) := (others => '0');
@@ -246,14 +246,14 @@ signal mi_drd_i     : std_logic_vector(31 downto 0);
 signal pma_mode     : std_logic_vector(2 downto 0);
 signal pma_fault    : std_logic;
 signal pma_rxl_stat : std_logic;
-signal pma_rst      : std_logic := '0'; 
+signal pma_rst      : std_logic := '0';
 signal pcs_fault    : std_logic;
 signal pcs_fault_l  : std_logic;
 signal pcs_rxl_stat : std_logic;
 signal pcs_rxl_stat_l : std_logic;
-signal pcs_rst      : std_logic := '0'; 
-signal pcs_lpbk     : std_logic := '0'; 
-signal pcs_low_pwr  : std_logic := '0'; 
+signal pcs_rst      : std_logic := '0';
+signal pcs_lpbk     : std_logic := '0';
+signal pcs_low_pwr  : std_logic := '0';
 signal pcs_blk_lock_g : std_logic;
 signal pcs_blk_lock_l : std_logic; -- latched version
 signal pcs_hi_ber   : std_logic;
@@ -263,40 +263,40 @@ signal ber_count_r  : std_logic_vector(21 downto 0);
 signal blk_err_cntr_r : std_logic_vector(21 downto 0);
 signal ber_count_l    : std_logic_vector(15 downto 0);
 signal blk_err_cntr_l : std_logic_vector(13 downto 0);
-signal tx_fault     : std_logic; -- latching 
-signal rx_fault     : std_logic; -- latching 
-signal low_pwr      : std_logic := '0';  
-signal pma_rem_lpbk : std_logic := '0'; 
-signal pma_loc_lpbk : std_logic := '0'; 
-signal tx_dis       : std_logic_vector(9 downto 0) := (others => '0'); 
+signal tx_fault     : std_logic; -- latching
+signal rx_fault     : std_logic; -- latching
+signal low_pwr      : std_logic := '0';
+signal pma_rem_lpbk : std_logic := '0';
+signal pma_loc_lpbk : std_logic := '0';
+signal tx_dis       : std_logic_vector(9 downto 0) := (others => '0');
 signal tx_dis_g     : std_logic; -- global PMD TX disable
-signal rx_sig_det   : std_logic_vector(9 downto 0); 
+signal rx_sig_det   : std_logic_vector(9 downto 0);
 signal rx_sig_det_g : std_logic; -- global signal detect
 signal bip_ercntr_r : std_logic_vector(20*16-1 downto 0);
 signal lane_map_i   : std_logic_vector(20*5-1 downto 0);
 signal lane_align_i : std_logic_vector(20-1 downto 0);
-signal scr_bypass_r : std_logic_vector(1 downto 0); -- 
+signal scr_bypass_r : std_logic_vector(1 downto 0); --
 signal r333_rd      : std_logic; -- register rx.yy read
 signal r333_rd_r    : std_logic; -- register rx.yy read registred
 signal r301_rd      : std_logic; -- register rx.yy read
 signal r301_rd_r    : std_logic; -- register rx.yy read registred
 signal r308_rd      : std_logic; -- register rx.yy read
 signal r308_rd_r    : std_logic; -- register rx.yy read registred
-signal r3200_rd     : std_logic_vector(19 downto 0); -- register r3.200..219 read 
+signal r3200_rd     : std_logic_vector(19 downto 0); -- register r3.200..219 read
 signal r3200_rd_r   : std_logic_vector(19 downto 0); -- register r3.200..219 read
-signal r1201_rd     : std_logic; -- register rx.yyy read 
-signal r1203_rd     : std_logic; -- register rx.yyy read 
-signal r1205_rd     : std_logic; -- register rx.yyy read 
-signal r1211_rd     : std_logic; -- register rx.yyy read    
-signal r1213_rd     : std_logic; -- register rx.yyy read 
-signal r1215_rd     : std_logic; -- register rx.yyy read    
-signal r1217_rd     : std_logic; -- register rx.yyy read 
+signal r1201_rd     : std_logic; -- register rx.yyy read
+signal r1203_rd     : std_logic; -- register rx.yyy read
+signal r1205_rd     : std_logic; -- register rx.yyy read
+signal r1211_rd     : std_logic; -- register rx.yyy read
+signal r1213_rd     : std_logic; -- register rx.yyy read
+signal r1215_rd     : std_logic; -- register rx.yyy read
+signal r1217_rd     : std_logic; -- register rx.yyy read
 signal r1201_rd_r   : std_logic; -- register rx.yyy read registred
 signal r1203_rd_r   : std_logic; -- register rx.yyy read registred
 signal r1205_rd_r   : std_logic; -- register rx.yyy read registred
-signal r1211_rd_r   : std_logic; -- register rx.yyy read registred   
+signal r1211_rd_r   : std_logic; -- register rx.yyy read registred
 signal r1213_rd_r   : std_logic; -- register rx.yyy read registred
-signal r1215_rd_r   : std_logic; -- register rx.yyy read registred   
+signal r1215_rd_r   : std_logic; -- register rx.yyy read registred
 signal r1217_rd_r   : std_logic; -- register rx.yyy read registred
 -- reset signals
 signal async_rst_mi                : std_logic;
@@ -320,12 +320,12 @@ signal pma_postcursor_r            : std_logic_vector(PMA_CONTROL'range) := PMA_
 signal pma_drive_r                 : std_logic_vector(PMA_CONTROL'range) := PMA_DRIVE_INIT;
 -- RS-FEC control/status
 signal fec_tx_en_r                 : std_logic := '1'; -- TX FEC enable
-signal fec_rx_en_r                 : std_logic := '1'; -- RX FEC enable 
+signal fec_rx_en_r                 : std_logic := '1'; -- RX FEC enable
 signal fec_en_r                    : std_logic := RSFEC_EN_INIT; -- RX FEC enable
-signal fec_ind_bypass_r            : std_logic; -- FEC bypass indication 
+signal fec_ind_bypass_r            : std_logic; -- FEC bypass indication
 signal fec_cor_bypass_r            : std_logic; -- FEC bypass correction
-signal FEC_AM_LOCK_sync            : std_logic_vector(FEC_AM_LOCK'range); 
-signal FEC_HI_SER_sync             : std_logic; 
+signal FEC_AM_LOCK_sync            : std_logic_vector(FEC_AM_LOCK'range);
+signal FEC_HI_SER_sync             : std_logic;
 signal fec_hi_ser_l                : std_logic; -- High SER latched
 signal FEC_ALGN_STAT_sync          : std_logic;
 signal FEC_LANE_MAP_sync           : std_logic_vector(FEC_LANE_MAP'range);
@@ -360,7 +360,7 @@ alias SPEED_CAP_50G  : std_logic is speed_cap_int(3);
 alias SPEED_CAP_100G : std_logic is speed_cap_int(9);
 alias SPEED_CAP_200G : std_logic is speed_cap_int(12);
 alias SPEED_CAP_400G : std_logic is speed_cap_int(15);
-          
+
 function AND_REDUCE (D : in std_logic_vector) return std_logic is
 variable tmp : std_logic;
 begin
@@ -383,16 +383,16 @@ end function OR_REDUCE;
 
 begin
 
-speed_int <= SPEED when SPEED /= 0 else 
+speed_int <= SPEED when SPEED /= 0 else
              100   when SPEED100G = '1' else
              10    when SPEED10G  = '1' else
              40;
-             
--- PMA speed capabilities - IEEE 802.3 Table 45-6               
+
+-- PMA speed capabilities - IEEE 802.3 Table 45-6
 -- Bit 0: 10G, Bit 3: 50G, Bit 8: 40G, Bit 9: 100G, Bit 11: 25G, Bit 12: 200G, Bit 15: 400G
 speed_cap_int <= SPEED_CAP when (SPEED_CAP /= X"0000") else
-                 "000000" & GBASE100_ABLE & GBASE40_ABLE & "0000000" & SPEED10G;              
-             
+                 "000000" & GBASE100_ABLE & GBASE40_ABLE & "0000000" & SPEED10G;
+
 fec_pcs_algn_stat <= and_reduce(FEC_TX_BLK_LOCK_sync) and and_reduce(FEC_TX_ALGN_STAT_sync);
 
 -- SYNCHRONIZATION RESET SIGNALS
@@ -481,7 +481,7 @@ port map(
    BRST     => '0',
    BDATAOUT => sync_algn_locked
 );
- 
+
 GEN_LA_CROSS: for i in 0 to LANE_ALIGN'high generate
    CROSS_LA: entity work.ASYNC_OPEN_LOOP
    generic map(IN_REG  => false, TWO_REG => true)
@@ -613,7 +613,7 @@ GEN_PCSCTRL_CROSS: for i in PCS_CONTROL_I'range generate
    );
 end generate;
 
-GEN_RSFEC_STATS: if (RSFEC_ABLE = '1') generate 
+GEN_RSFEC_STATS: if (RSFEC_ABLE = '1') generate
 
 GEN_FEC_AM_LOCK_CROSS: for i in FEC_AM_LOCK'range generate
    FEC_AM_LOCK_CROSS: entity work.ASYNC_OPEN_LOOP
@@ -767,7 +767,7 @@ begin
    r301_rd  <= '0';
    r308_rd  <= '0';
    r1201_rd <= '0';
-   r1203_rd <= '0'; 
+   r1203_rd <= '0';
    r1205_rd <= '0';
    r1211_rd <= '0';
    r1213_rd <= '0';
@@ -782,7 +782,7 @@ begin
       case mi_addr_masked(8 downto 2) is
           when "0000000" => -- PMA status1 & control 1        11    10:7      6:2          1             0
              mi_drd_i(15 downto  0) <= pma_rst & "010" & low_pwr & "0000" & "10000" & pma_rem_lpbk & pma_loc_lpbk; -- r1.0
-             case speed_int is 
+             case speed_int is
                 when 400 => mi_drd_i(5 downto  2)  <= "1001";
                 when 200 => mi_drd_i(5 downto  2)  <= "1000";
                 when 100 => mi_drd_i(5 downto  2)  <= "0011";
@@ -790,7 +790,7 @@ begin
                 when 40  => mi_drd_i(5 downto  2)  <= "0010";
                 when 25  => mi_drd_i(5 downto  2)  <= "0100";
                 when others  => mi_drd_i(5 downto  2)  <= "0000"; -- 10G
-             end case;  
+             end case;
              mi_drd_i(31 downto 16) <= X"00" & pma_fault & "0000" & pma_rxl_stat & "10";                                      -- r1.1
           when "0000001" => -- PMA device identifier
              mi_drd_i(15 downto  0) <= X"18EC"; -- r1.2
@@ -802,7 +802,7 @@ begin
              mi_drd_i(15 downto 0)  <= X"0000"; -- Devices in package -- r1.6
              --
              mi_drd_i(31 downto 22) <= "0000000000"; -- r1.7.15:6
-             case speed_int is 
+             case speed_int is
                 when 400 =>
                    mi_drd_i(16+6 downto 16+3) <= "1011"; -- r1.7.6:3
                    mi_drd_i(16+2 downto 16+0) <= pma_mode; -- r1.7.2:0
@@ -849,21 +849,22 @@ begin
                    else
                       mi_drd_i(16+2 downto 16+0) <= "001";
                    end if;
-                when  40 =>
+               when  40 =>
                    mi_drd_i(16+5 downto 16+3) <= "100"; -- r1.7.5:3
-                   mi_drd_i(16+2) <= '0';  -- r1.7.2              
+                   mi_drd_i(16+2) <= '0';  -- r1.7.2
                    mi_drd_i(16+1) <= '1'; -- -SR4 and -LR4 only
-                   mi_drd_i(16+0) <= pma_mode(0); -- SR4 or -LR4                
-                when  25 =>
+                   mi_drd_i(16+0) <= pma_mode(0); -- SR4 or -LR4
+               when  25 =>
                    mi_drd_i(16+5 downto 16+3) <= "111"; -- r1.7.5:3
-                   mi_drd_i(16+2) <= '0';  -- r1.7.2              
-                   mi_drd_i(16+1) <= RSFEC_ABLE and pma_mode(1); -- SR 
+                   mi_drd_i(16+2) <= '0';  -- r1.7.2
+                   mi_drd_i(16+1) <= RSFEC_ABLE and pma_mode(1); -- SR
                    mi_drd_i(16+0) <= '0'; -- KR modes not supported
-                when  others => -- 10
+               when  others => -- 10
                    mi_drd_i(16+5 downto 16+3) <= "000"; -- r1.7.5:3
-                   mi_drd_i(16+2) <= '1';  -- r1.7.2              
-                   mi_drd_i(16+1) <= '1';  -- r1.7.1 - LR and SR supported
-                   mi_drd_i(16+0) <= pma_mode(0); -- SR or -LR
+                   mi_drd_i(16+2) <= '1';  -- r1.7.2
+                   if pma_mode(1 downto 0) /= "00" then -- 10GBASE-LX4 (0x04) not supported
+                      mi_drd_i(16+1 downto 16+0) <= pma_mode(1 downto 0); -- SR or -LR or -ER
+                   end if;
              end case;
           when "0000100" => -- PMA transmit disable & status 2 -- 0x...C
              mi_drd_i(15 downto 0)  <= "1011" & tx_fault & rx_fault & "0100000001"; -- Status 2 - r1.8
@@ -889,7 +890,7 @@ begin
              -- 25G: Enable extended capabilities in 1.19
              if (SPEED_CAP_25G = '1') then
                 mi_drd_i(16+12) <= '1';
-             end if;             
+             end if;
           when "0000110" => -- 10G-EPON PMA/PMD P2MP ability register  & 40G/100G PMA/PMD extended ability register
              --- TBD:
              mi_drd_i(15 downto  0)  <= X"0000";  -- 10G-EPON PMA/PMD P2MP ability register r1.12
@@ -973,14 +974,14 @@ begin
              mi_drd_i(31 downto 16) <= X"0000"; -- r1.27 -- PMD transmitt disable extension
 
           -- RS-FEC ---------------------------------------------------------------------------
-          when "1100100" => -- 0x190 
+          when "1100100" => -- 0x190
              mi_drd_i(15 downto 0)  <= X"000" & "0" & fec_en_r & fec_ind_bypass_r & fec_cor_bypass_r; -- 1.200 RS-FEC control reg
              mi_drd_i(31 downto 16) <= fec_pcs_algn_stat & fec_algn_stat_sync & "00" & fec_am_lock_sync & "00000" & fec_hi_ser_sync & '1' & '1'; -- 1.201 RS-FEC status  reg
              r1201_rd <= MI_RD and (MI_BE(3) or MI_BE(2));
-          when "1100101" => -- 0x194 
+          when "1100101" => -- 0x194
              mi_drd_i(15 downto 0)  <= fec_cor_err_sync(15 downto  0); -- 1.202,203: RS-FEC corrected codewords counter
              mi_drd_i(31 downto 16) <= fec_cor_err_sync(31 downto 16);
-             r1203_rd <= MI_RD and (MI_BE(3) or MI_BE(2)); 
+             r1203_rd <= MI_RD and (MI_BE(3) or MI_BE(2));
           when "1100110" => -- 0x198
              mi_drd_i(15 downto 0)  <= fec_uncor_err_sync(15 downto  0); -- 1.204,205: RS-FEC uncorrected codewords counter
              mi_drd_i(31 downto 16) <= fec_uncor_err_sync(31 downto 16);
@@ -988,52 +989,52 @@ begin
           when "1100111" => -- 0x19C
              mi_drd_i(15 downto 0)  <= X"00" & fec_lane_map_sync; -- 1.206: RS-FEC lane mapping register
              -- mi_drd_i(31 downto 16) <= X"0000"; -- Reserved
-          when "1101001" => -- 0x1A4 
+          when "1101001" => -- 0x1A4
              mi_drd_i(15 downto 0)  <= fec_sym_err_sync(1*16-1 downto 0*16); -- 1.210 RS-FEC symbol error counter, lane 0
              mi_drd_i(31 downto 16) <= fec_sym_err_sync(2*16-1 downto 1*16); -- 1.211 RS-FEC symbol error counter, lane 0
-             r1211_rd <= MI_RD and (MI_BE(3) or MI_BE(2));                              
-          when "1101010" => -- 0x1A8 
+             r1211_rd <= MI_RD and (MI_BE(3) or MI_BE(2));
+          when "1101010" => -- 0x1A8
              mi_drd_i(15 downto 0)  <= fec_sym_err_sync(3*16-1 downto 2*16); -- 1.212 RS-FEC symbol error counter, lane 1
              mi_drd_i(31 downto 16) <= fec_sym_err_sync(4*16-1 downto 3*16); -- 1.213 RS-FEC symbol error counter, lane 1
-             r1213_rd <= MI_RD and (MI_BE(3) or MI_BE(2));                                              
-          when "1101011" => -- 0x1AC 
+             r1213_rd <= MI_RD and (MI_BE(3) or MI_BE(2));
+          when "1101011" => -- 0x1AC
              mi_drd_i(15 downto 0)  <= fec_sym_err_sync(5*16-1 downto 4*16); -- 1.214 RS-FEC symbol error counter, lane 2
              mi_drd_i(31 downto 16) <= fec_sym_err_sync(6*16-1 downto 5*16); -- 1.215 RS-FEC symbol error counter, lane 2
-             r1215_rd <= MI_RD and (MI_BE(3) or MI_BE(2));                              
-          when "1101100" => -- 0x1B0 
+             r1215_rd <= MI_RD and (MI_BE(3) or MI_BE(2));
+          when "1101100" => -- 0x1B0
              mi_drd_i(15 downto 0)  <= fec_sym_err_sync(7*16-1 downto 6*16); -- 1.214 RS-FEC symbol error counter, lane 3
              mi_drd_i(31 downto 16) <= fec_sym_err_sync(8*16-1 downto 7*16); -- 1.215 RS-FEC symbol error counter, lane 3
-             r1217_rd <= MI_RD and (MI_BE(3) or MI_BE(2));                              
-          -- TODO: 
+             r1217_rd <= MI_RD and (MI_BE(3) or MI_BE(2));
+          -- TODO:
              -- 1.230-249: RS-FEC BIP error counter, lane 0 to 19  -- Allways zero for integrated RS-FEC
              -- 1.250-269: RS-FEC PCS lane mapping, lane 0 to 19   -- 0...20 for integrated RS-FEC
              -- 1.280-283: RS-FEC PCS alignment status 1 through 4 -- All locked for integrated RS-FEC
-             --                signal FEC_TX_BIP_sync         
+             --                signal FEC_TX_BIP_sync
              --                signal FEC_TX_LANE_MAP_sync
-             --                signal FEC_TX_BLK_LOCK_sync    
-             --                signal FEC_TX_ALGN_STAT_sync                                                     
-          when others => 
+             --                signal FEC_TX_BLK_LOCK_sync
+             --                signal FEC_TX_ALGN_STAT_sync
+          when others =>
                 mi_drd_i <= (others => '0');
-                
-                
+
+
           -- TODO:
           -- 1.1500    Test pattern ability 45.2.1.95
           -- 1.1501    PRBS pattern testing control 45.2.1.96
           -- 1.1510    Square wave testing control 45.2.1.97
           -- 1.1600 - 1609 PRBS Tx error counters, lane 0 through lane 9 45.2.1.98
           -- 1.1700 - 1709 PRBS Rx error counters, lane 0 through lane 9 45.2.1.99
-         end case;          
+         end case;
 
 
-   elsif mi_addr_masked(19 downto 15) = "00011" then -- select PMA vendor specific registers 
+   elsif mi_addr_masked(19 downto 15) = "00011" then -- select PMA vendor specific registers
       case mi_addr_masked(5 downto 2) is
          when "0000" => -- 0x8000 - vendor specific PMA control register
-            mi_drd_i <= pma_control_r;    
+            mi_drd_i <= pma_control_r;
          when "0001" =>  -- 0x8004
             mi_drd_i(pma_status_sync'range) <= pma_status_sync;
          when "0010" =>  -- 0x8008
             mi_drd_i(1 downto 0) <= fec_tx_en_r & fec_rx_en_r;  -- 0x8008
-         -- DRP control registers              
+         -- DRP control registers
          when "0100" => -- 0x8010: DRP data
             mi_drd_i(drpdo_r'range) <= drpdo_r;
          when "0101" => -- 0x8014: DRP address
@@ -1041,13 +1042,13 @@ begin
          when "0110" => -- 0x8018: DRP control
             mi_drd_i(31) <= drpbusy;
          when "1000" => -- 0x8020
-            mi_drd_i <= pma_drive_r;                     
+            mi_drd_i <= pma_drive_r;
          when "1001" => -- 0x8024
             mi_drd_i <= pma_precursor_r;
          when "1010" => -- 0x8028
-            mi_drd_i <= pma_postcursor_r;            
-         when others => 
-      end case;   
+            mi_drd_i <= pma_postcursor_r;
+         when others =>
+      end case;
    end if;
    -------------------------------------------------------------------------
    --- PCS registers -------------------------------------------------------
@@ -1106,9 +1107,9 @@ begin
                mi_drd_i(16+1 downto 16+0) <= SPEED_CAP_400G & SPEED_CAP_200G;
                r308_rd <= MI_RD and (MI_BE(1) or MI_BE(0));
             when "00111" =>  -- 0x001C
-               mi_drd_i(15 downto  0) <= X"0000"; -- 3.14 PCS package identifier 
-               mi_drd_i(31 downto 16) <= X"0000"; -- 3.15 PCS package identifier 
-            when "01100" => -- 0x0030: 3.24 - 10GBASE-X PCS status & test control 
+               mi_drd_i(15 downto  0) <= X"0000"; -- 3.14 PCS package identifier
+               mi_drd_i(31 downto 16) <= X"0000"; -- 3.15 PCS package identifier
+            when "01100" => -- 0x0030: 3.24 - 10GBASE-X PCS status & test control
                mi_drd_i(15 downto  0) <= X"0000";
                mi_drd_i(31 downto 16) <= X"0000";
             when "10000" => -- 0x0040: 3.32, 3.33 GBASE-R and GBASE-T PCS status 1 & 2 -- 0x...40
@@ -1125,77 +1126,77 @@ begin
                mi_drd_i(15 downto  0) <= X"0000";
                mi_drd_i(31 downto 16) <= X"0000";
             when "10100" => -- 3.40, 10GBASE-R PCS test pattern seed B -- 0x...50
-               mi_drd_i(15 downto  0) <= X"0000"; 
-               mi_drd_i(31 downto 16) <= X"0000"; 
+               mi_drd_i(15 downto  0) <= X"0000";
+               mi_drd_i(31 downto 16) <= X"0000";
             when "10101" => -- 0x...54
-               mi_drd_i(15 downto  0) <= X"0000"; -- 3.42  10GBASE-R PCS test pattern control      
+               mi_drd_i(15 downto  0) <= X"0000"; -- 3.42  10GBASE-R PCS test pattern control
                mi_drd_i(31 downto 16) <= X"0000"; -- 3.43  10GBASE-R PCS test pattern error counter
             when "10110" => -- 0x...58
                mi_drd_i(15 downto  0) <= ber_count_l; -- 3.44  BER high order counter(21:6)
                mi_drd_i(31 downto 16) <= "10" & blk_err_cntr_l; -- 3.45  Errored blocks high order counter
             when "11001" => -- 3.50, 3.51 Multi-lane BASE-R PCS block lock status 1 through 4 -- 0x...64
                mi_drd_i(15 downto  0) <= "000" & pcs_blk_lock_g & X"0" & pcs_blk_lock(7 downto 0);
-               mi_drd_i(31 downto 16) <= X"0" & pcs_blk_lock(19 downto 8); 
+               mi_drd_i(31 downto 16) <= X"0" & pcs_blk_lock(19 downto 8);
             when "11010" => -- 3.52, 3.53 Multi-lane BASE-R PCS alignment status 1 through 4 -- 0x...68
                mi_drd_i(15 downto  0) <= X"00" & lane_align_i(7 downto 0); -- aligned flags for each lane
                mi_drd_i(31 downto 16) <= X"0" & lane_align_i(19 downto 8); -- aligned flags for each lane
-            when others => 
+            when others =>
                mi_drd_i <= (others => '0');
          end case;
       elsif mi_addr_masked(9 downto 7) = "011" then -- xxx200 -- 0x...190
          case mi_addr_masked(5 downto 2) is
             -- BIP error counters, lanes 0 through 19
-            when "0100" => 
+            when "0100" =>
                mi_drd_i(15 downto  0) <= bip_ercntr_r(1*16-1 downto 0*16); -- 3.200 BIP error counters, lane 0
                mi_drd_i(31 downto 16) <= bip_ercntr_r(2*16-1 downto 1*16); -- 3.201 BIP error counters, lane 1
-               r3200_rd(0) <= MI_RD and (MI_BE(0) or MI_BE(1)); 
+               r3200_rd(0) <= MI_RD and (MI_BE(0) or MI_BE(1));
                r3200_rd(1) <= MI_RD and (MI_BE(2) or MI_BE(3));
-            when "0101" => 
+            when "0101" =>
                mi_drd_i(15 downto  0) <= bip_ercntr_r(3*16-1 downto 2*16); -- 3.202 BIP error counters, lane 2
-               mi_drd_i(31 downto 16) <= bip_ercntr_r(4*16-1 downto 3*16); -- 3.203 BIP error counters, lane 3               
-               r3200_rd(2) <= MI_RD and (MI_BE(0) or MI_BE(1)); 
+               mi_drd_i(31 downto 16) <= bip_ercntr_r(4*16-1 downto 3*16); -- 3.203 BIP error counters, lane 3
+               r3200_rd(2) <= MI_RD and (MI_BE(0) or MI_BE(1));
                r3200_rd(3) <= MI_RD and (MI_BE(2) or MI_BE(3));
             when "0110" =>
                mi_drd_i(15 downto  0) <= bip_ercntr_r(5*16-1 downto 4*16); -- 3.204 BIP error counters, lane 4
                mi_drd_i(31 downto 16) <= bip_ercntr_r(6*16-1 downto 5*16); -- 3.205 BIP error counters, lane 5
-               r3200_rd(4) <= MI_RD and (MI_BE(0) or MI_BE(1)); 
+               r3200_rd(4) <= MI_RD and (MI_BE(0) or MI_BE(1));
                r3200_rd(5) <= MI_RD and (MI_BE(2) or MI_BE(3));
             when "0111" =>
                mi_drd_i(15 downto  0) <= bip_ercntr_r(7*16-1 downto 6*16); -- 3.206 BIP error counters, lane 6
                mi_drd_i(31 downto 16) <= bip_ercntr_r(8*16-1 downto 7*16); -- 3.207 BIP error counters, lane 7
-               r3200_rd(6) <= MI_RD and (MI_BE(0) or MI_BE(1)); 
+               r3200_rd(6) <= MI_RD and (MI_BE(0) or MI_BE(1));
                r3200_rd(7) <= MI_RD and (MI_BE(2) or MI_BE(3));
             when "1000" =>
                mi_drd_i(15 downto  0) <= bip_ercntr_r(9*16-1  downto 8*16); -- 3.208 BIP error counters, lane 8
                mi_drd_i(31 downto 16) <= bip_ercntr_r(10*16-1 downto 9*16); -- 3.209 BIP error counters, lane 9
-               r3200_rd(8) <= MI_RD and (MI_BE(0) or MI_BE(1)); 
+               r3200_rd(8) <= MI_RD and (MI_BE(0) or MI_BE(1));
                r3200_rd(9) <= MI_RD and (MI_BE(2) or MI_BE(3));
             when "1001" =>
                mi_drd_i(15 downto  0) <= bip_ercntr_r(11*16-1 downto 10*16); -- 3.210 BIP error counters, lane 10
                mi_drd_i(31 downto 16) <= bip_ercntr_r(12*16-1 downto 11*16); -- 3.211 BIP error counters, lane 11
-               r3200_rd(10) <= MI_RD and (MI_BE(0) or MI_BE(1)); 
+               r3200_rd(10) <= MI_RD and (MI_BE(0) or MI_BE(1));
                r3200_rd(11) <= MI_RD and (MI_BE(2) or MI_BE(3));
             when "1010" =>
                mi_drd_i(15 downto  0) <= bip_ercntr_r(13*16-1 downto 12*16); -- 3.212 BIP error counters, lane 12
                mi_drd_i(31 downto 16) <= bip_ercntr_r(14*16-1 downto 13*16); -- 3.213 BIP error counters, lane 13
-               r3200_rd(12) <= MI_RD and (MI_BE(0) or MI_BE(1)); 
+               r3200_rd(12) <= MI_RD and (MI_BE(0) or MI_BE(1));
                r3200_rd(13) <= MI_RD and (MI_BE(2) or MI_BE(3));
             when "1011" =>
                mi_drd_i(15 downto  0) <= bip_ercntr_r(15*16-1 downto 14*16); -- 3.214 BIP error counters, lane 14
                mi_drd_i(31 downto 16) <= bip_ercntr_r(16*16-1 downto 15*16); -- 3.215 BIP error counters, lane 15
-               r3200_rd(14) <= MI_RD and (MI_BE(0) or MI_BE(1)); 
+               r3200_rd(14) <= MI_RD and (MI_BE(0) or MI_BE(1));
                r3200_rd(15) <= MI_RD and (MI_BE(2) or MI_BE(3));
             when "1100" =>
                mi_drd_i(15 downto  0) <= bip_ercntr_r(17*16-1 downto 16*16); -- 3.216 BIP error counters, lane 16
                mi_drd_i(31 downto 16) <= bip_ercntr_r(18*16-1 downto 17*16); -- 3.217 BIP error counters, lane 17
-               r3200_rd(16) <= MI_RD and (MI_BE(0) or MI_BE(1)); 
+               r3200_rd(16) <= MI_RD and (MI_BE(0) or MI_BE(1));
                r3200_rd(17) <= MI_RD and (MI_BE(2) or MI_BE(3));
             when "1101" =>
                mi_drd_i(15 downto  0) <= bip_ercntr_r(19*16-1 downto 18*16); -- 3.218 BIP error counters, lane 18
                mi_drd_i(31 downto 16) <= bip_ercntr_r(20*16-1 downto 19*16); -- 3.219 BIP error counters, lane 19
-               r3200_rd(18) <= MI_RD and (MI_BE(0) or MI_BE(1)); 
+               r3200_rd(18) <= MI_RD and (MI_BE(0) or MI_BE(1));
                r3200_rd(19) <= MI_RD and (MI_BE(2) or MI_BE(3));
-            when others => 
+            when others =>
                mi_drd_i <= (others => '0');
          end case;
       elsif mi_addr_masked(9 downto 7) = "110" then  -- 0x...320
@@ -1230,7 +1231,7 @@ begin
             when "10001" => -- 3.418 PCS lane mapping registers, lanes 0 through 19
                mi_drd_i(15 downto  0) <= "00000000000" & lane_map_i(19*5-1 downto 18*5);
                mi_drd_i(31 downto 16) <= "00000000000" & lane_map_i(20*5-1 downto 19*5);
-            when others => 
+            when others =>
                mi_drd_i <= (others => '0');
          end case;
       end if;
@@ -1246,14 +1247,14 @@ begin
       r301_rd_r  <= r301_rd;
       r308_rd_r  <= r308_rd;
       r333_rd_r  <= r333_rd;
-      r1201_rd_r <= r1201_rd;    
+      r1201_rd_r <= r1201_rd;
       r1203_rd_r <= r1203_rd;
-      r1205_rd_r <= r1205_rd;       
-      r1211_rd_r <= r1211_rd;    
-      r1213_rd_r <= r1213_rd;   
-      r1215_rd_r <= r1215_rd;      
+      r1205_rd_r <= r1205_rd;
+      r1211_rd_r <= r1211_rd;
+      r1213_rd_r <= r1213_rd;
+      r1215_rd_r <= r1215_rd;
       r1217_rd_r <= r1217_rd;
-                  
+
       for i in 0 to 19 loop
          r3200_rd_r(i) <= r3200_rd(i);
       end loop;
@@ -1269,7 +1270,7 @@ begin
       PMA_RETUNE <= '0';
       drpen_i    <= '0';
       drpwe_r    <= '0';
-      if async_rst_mi = '1' then 
+      if async_rst_mi = '1' then
          case speed_int is -- default PMA modes
             when 400 => -- 400GBASE-SR8 TBD: -CR8 mode would be better, however it is not defined in ieee yet
                pma_mode <= "111";
@@ -1310,18 +1311,18 @@ begin
          pma_control_r<= PMA_CONTROL_INIT;
          pma_precursor_r  <= PMA_PRECURSOR_INIT;
          pma_postcursor_r <= PMA_POSTCURSOR_INIT;
-         pma_drive_r      <= PMA_DRIVE_INIT;         
+         pma_drive_r      <= PMA_DRIVE_INIT;
       else
       --- PMA registers -------------------------------------------------------
       if (mi_addr_masked(19 downto 16) = X"1") and (MI_WR = '1') then -- select PMA (device 0x1)
          -- 0x8000 : Vendor specific control registers
-         if mi_addr_masked(15) = '1' then 
+         if mi_addr_masked(15) = '1' then
             case mi_addr_masked(5 downto 2) is
                when "0001" => -- 0x8004 - vendor specific PMA control register
                   pma_control_r <= MI_DWR(PMA_CONTROL'range);
                   PMA_RETUNE    <= MI_DWR(31);
                when "0010" =>  -- FEC enable register
-                  fec_rx_en_r <=  MI_DWR(0);            
+                  fec_rx_en_r <=  MI_DWR(0);
                   fec_tx_en_r <=  MI_DWR(1);
                -- DRP control registers
                when "0100" => -- 0x8010: DRP data
@@ -1333,12 +1334,12 @@ begin
                   drpsel_r <= MI_DWR(drpsel_r'high+4 downto 4);
                   drpwe_r  <= MI_DWR(0);
                when "1000" => -- 0x8020
-                  pma_drive_r      <= MI_DWR;                     
+                  pma_drive_r      <= MI_DWR;
                when "1001" => -- 0x8024
                   pma_precursor_r  <= MI_DWR;
                when "1010" => -- 0x8028
-                  pma_postcursor_r <= MI_DWR;               
-               when others => null; 
+                  pma_postcursor_r <= MI_DWR;
+               when others => null;
             end case;
          -- 0x0000 : IEEE standard PMA registers
          elsif mi_addr_masked(9 downto 7) = "000" then
@@ -1356,7 +1357,7 @@ begin
                      pma_mode  <= MI_DWR(18 downto 16);
                      fec_en_r  <= MI_DWR(18);
                   end if;
-               when "00100" => -- PMA transmit disable 
+               when "00100" => -- PMA transmit disable
                   if (MI_BE(2) = '1') then
                      tx_dis_g <= MI_DWR(16);
                      tx_dis   <= MI_DWR(26 downto 17);
@@ -1371,7 +1372,7 @@ begin
                   -- 25G RS-FEC enable
                   fec_en_r         <= MI_DWR(2);
                end if;
-            end if;         
+            end if;
          end if;
       --- PCS registers -------------------------------------------------------
       elsif (mi_addr_masked(19 downto 16) = X"3") and (MI_WR = '1') then -- select PCS (device 0x3)
@@ -1386,7 +1387,7 @@ begin
             end case;
          elsif mi_addr_masked(9 downto 7) = "000" then
             case mi_addr_masked(6 downto 2) is -- 3.0 -- 3.0 PCS control 1
-               when "00000" => 
+               when "00000" =>
                   if (MI_BE(0) = '1') then
                      scr_bypass_r <= MI_DWR(1 downto 0);
                      pcs_lpbk     <= MI_DWR(14);
@@ -1413,7 +1414,7 @@ begin
       if (r333_rd = '1') and (MI_RD = '1') then
          ber_count_l    <= ber_count_r(21 downto 6);
          blk_err_cntr_l <= blk_err_cntr_r(21 downto 8);
-      end if; 
+      end if;
    end if;
 end process;
 
@@ -1444,14 +1445,14 @@ begin
          pcs_fault_l <= '1';
       elsif (r308_rd_r) = '1' then
          pcs_fault_l <= '0';
-      end if;      
-      
+      end if;
+
       if fec_hi_ser_sync = '1' then
          fec_hi_ser_l <= '1';
       elsif (r1201_rd_r) = '1' then
          fec_hi_ser_l <= '0';
       end if;
-           
+
    end if;
 end process;
 
@@ -1466,15 +1467,15 @@ PMA_LOPWR      <= low_pwr;
 PMA_TX_DIS     <= tx_dis(PMA_TX_DIS'range) when tx_dis_g = '0' else
                  (others => '1');
 PMA_CONTROL    <= pma_control_r;
-PMA_PRECURSOR  <= pma_precursor_r;   
+PMA_PRECURSOR  <= pma_precursor_r;
 PMA_POSTCURSOR <= pma_postcursor_r;
-PMA_DRIVE      <= pma_drive_r;                  
+PMA_DRIVE      <= pma_drive_r;
 
--- Extend ouput CLR pulses to be used in slower clock domains 
+-- Extend ouput CLR pulses to be used in slower clock domains
 GEN_EXT_BER_CLR: for i in BIP_ERR_CLR'range generate
    EXT_BIP_ERR_CLR: entity work.PULSE_EXTEND port map (CLK => MI_CLK, I => r3200_rd_r(i), O => BIP_ERR_CLR(i));
 end generate;
-EXT_BER_CLR: entity work.PULSE_EXTEND port map (CLK => MI_CLK, I => r333_rd_r, O => BER_COUNT_CLR);    
+EXT_BER_CLR: entity work.PULSE_EXTEND port map (CLK => MI_CLK, I => r333_rd_r, O => BER_COUNT_CLR);
 EXT_BLK_CLR: entity work.PULSE_EXTEND port map (CLK => MI_CLK, I => r333_rd_r, O => BLK_ERR_CLR);
 EXT_FEC_SYM_ERR_CLR0:   entity work.PULSE_EXTEND port map (CLK => MI_CLK, I => r1211_rd_r, O => FEC_SYM_ERR_CLR(0));
 EXT_FEC_SYM_ERR_CLR1:   entity work.PULSE_EXTEND port map (CLK => MI_CLK, I => r1213_rd_r, O => FEC_SYM_ERR_CLR(1));
@@ -1483,7 +1484,7 @@ EXT_FEC_SYM_ERR_CLR3:   entity work.PULSE_EXTEND port map (CLK => MI_CLK, I => r
 EXT_FEC_COR_ERR_CLR:    entity work.PULSE_EXTEND port map (CLK => MI_CLK, I => r1203_rd_r, O => FEC_COR_ERR_CLR);
 EXT_FEC_UNCOR_ERR_CLR:  entity work.PULSE_EXTEND port map (CLK => MI_CLK, I => r1205_rd_r, O => FEC_UNCOR_ERR_CLR);
 
--- RS-FEC control outputs 
+-- RS-FEC control outputs
 FEC_TX_EN  <= fec_en_r and fec_tx_en_r;
 FEC_RX_EN  <= fec_en_r and fec_rx_en_r;
 FEC_COR_EN <= not fec_cor_bypass_r;
