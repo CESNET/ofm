@@ -40,6 +40,8 @@ module testbench;
     initial begin
         uvm_root m_root;
 
+        $timeformat(-9, 0, " ns",10);
+
         // Configuration of database
         uvm_config_db#(virtual reset_if)                                                                                                                                     ::set(null, "", "reset_vif",             reset_vif);
         uvm_config_db#(virtual mfb_if #(PCIE_CQ_MFB_REGIONS, PCIE_CQ_MFB_REGION_SIZE, PCIE_CQ_MFB_BLOCK_SIZE, PCIE_CQ_MFB_ITEM_WIDTH, sv_pcie_meta_pack::PCIE_CQ_META_WIDTH))::set(null, "", "cq_mfb_vif",            cq_mfb_vif);
