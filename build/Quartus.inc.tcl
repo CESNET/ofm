@@ -34,8 +34,9 @@ source $OFM_PATH/build/targets.tcl
 # Add or adjust existing tcl generated IP core in the project
 #
 proc qsys_script_with_params {script params} {
-    set project_name [file dirname $script]/proj_[string map {. _} [file rootname [file tail $script]]]
+    set project_name [file dirname $script]/[string map {. _} [file rootname [file tail $script]]]
     set cmd "foreach {name value} {$params} { set \$name \$value }"
+    exec find [file dirname $script] \( -name "*.qpf" -o -name "*.qsf" -o -name "DNI" -o -name "qdb" \) | xargs rm -rf
     exec qsys-script --new-quartus-project=$project_name --cmd=$cmd --script=$script 2>>qsys_log.txt
     exec find [file dirname $script] \( -name "*.qpf" -o -name "*.qsf" -o -name "DNI" -o -name "qdb" \) | xargs rm -rf
 }
