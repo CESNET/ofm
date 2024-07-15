@@ -6,8 +6,8 @@
 
 import random
 
-def get_mvb_params(items:int, params_dic:dict) -> (dict, int, int):
-    """Gets mvb parameters and if none are set, sets default values.
+def random_delays_config(items:int, params_dic:dict) -> (dict, int, int):
+    """Generate configuration of random delay generator based on passed dictionary. If no dictionary was passed, configuratoin is generated with default parameters.
 
         Args:
             items: number of MVB items.
@@ -15,8 +15,8 @@ def get_mvb_params(items:int, params_dic:dict) -> (dict, int, int):
 
         Returns:
             cDelays: settings of random delays.
-            mode: decides with what are the random delays supposed to be filled with.
-            delays_fill: with what are random delays to be filled with.
+            mode: fill delay with: mode 0 - previous transaction, mode 1 - 0, mode 2 - random integer from 0-256, mode 3 - with ascii value of X
+            delays_fill: the character, with which the delays will be filled with.
 
     """
 

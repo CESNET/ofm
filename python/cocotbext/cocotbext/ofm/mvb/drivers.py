@@ -7,7 +7,7 @@
 import cocotb 
 from cocotbext.ofm.base.drivers import BusDriver
 from cocotb.triggers import RisingEdge
-from cocotbext.ofm.mvb.utils import get_mvb_params
+from cocotbext.ofm.mvb.utils import random_delays_config
 
 import random
 import string
@@ -38,7 +38,7 @@ class MVBDriver(BusDriver):
         self._clear_control_signals()
         self.bus.src_rdy.value = 0
 
-        self._cDelays, self._mode, self._delays_fill = get_mvb_params(self._items, mvb_params)
+        self._cDelays, self._mode, self._delays_fill = random_delays_config(self._items, mvb_params)
         """Randomized empty spaces"""
 
     def _clear_control_signals(self) -> None:
