@@ -28,8 +28,8 @@ class MVBMonitor(BusMonitor):
         super().__init__(entity, name, clock, array_idx=array_idx)
         self.item_cnt = 0
         self._items = len(self.bus.vld)
-        self._word_width = int(len(self.bus.data)/8) #width in bytes
-        self._item_width = int(self._word_width/self._items)
+        self._word_width = len(self.bus.data) // 8 #width in bytes
+        self._item_width = self._word_width // self._items
 
     def _is_valid_word(self, signal_src_rdy, signal_dst_rdy) -> bool:
         """Checks if the recieved word is valid transaction."""

@@ -32,8 +32,8 @@ class MVBDriver(BusDriver):
         self._item_cnt = 0
         self._vld_item_cnt = 0
         self._items = len(self.bus.vld)
-        self._word_width = int(len(self.bus.data)/8) #word width in bytes
-        self._item_width = int(self._word_width/self._items) #item width in bytes
+        self._word_width = len(self.bus.data) // 8
+        self._item_width = self._word_width // self._items
         self._item_offset = 0
         self._clear_control_signals()
         self.bus.src_rdy.value = 0
