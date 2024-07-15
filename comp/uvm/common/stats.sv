@@ -31,7 +31,11 @@ class stats;
         avg_local = sum/values;
         avg = avg_local;
 
-        std_dev = (1.0/(values-1)*(sum2 - values*(avg_local**2)))**0.5;
+        if (values > 1) begin
+            std_dev = (1.0/(values-1)*(sum2 - values*(avg_local**2)))**0.5;
+        end else begin
+            std_dev = 0;
+        end
     endfunction
 
     function void reset();
