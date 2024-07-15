@@ -15,13 +15,11 @@ class MVBMonitor(BusMonitor):
     _signals = ["data", "vld", "src_rdy", "dst_rdy"]
 
     def __init__(self, entity, name, clock, array_idx=None) -> None:
-        BusMonitor.__init__(self, entity, name, clock, array_idx=array_idx)
+        super().__init__(entity, name, clock, array_idx=array_idx)
         self.item_cnt = 0
-        self.clock = clock
         self._items = len(self.bus.vld)
         self._word_width = int(len(self.bus.data)/8) #width in bytes
         self._item_width = int(self._word_width/self._items)
-
 
     def _is_valid_word(self, signal_src_rdy, signal_dst_rdy) -> bool:
         if signal_dst_rdy is None:
@@ -33,10 +31,10 @@ class MVBMonitor(BusMonitor):
         """Watch the pins and reconstruct transactions."""
 
         # Avoid spurious object creation by recycling
-        clkedge = RisingEdge(self.clock)
-        
+        clk_re = RisingEdge(self.clock)
+
         while True:
-            await clkedge
+            await clk_re
 
             if self.in_reset:
                 continue

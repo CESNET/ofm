@@ -16,10 +16,9 @@ class MVBDriver(BusDriver):
     _signals = ["data", "vld", "src_rdy", "dst_rdy"]
 
     def __init__(self, entity, name, clock, array_idx=None, mvb_params={}) -> None:
-        BusDriver.__init__(self, entity, name, clock, array_idx=array_idx)
+        super().__init__(entity, name, clock, array_idx=array_idx)
         self._item_cnt = 0
         self._vld_item_cnt = 0
-        self.clock = clock
         self._items = len(self.bus.vld)
         self._word_width = int(len(self.bus.data)/8) #word width in bytes
         self._item_width = int(self._word_width/self._items) #item width in bytes
@@ -66,7 +65,7 @@ class MVBDriver(BusDriver):
             self.bus.src_rdy.value = 0
  
         while True:
-            await re
+            await self._clk_re
             if self.bus.dst_rdy.value == 1:
                 break
      
