@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
 */
 
-virtual class fifo #(type ITEM_TYPE) extends uvm_component;
+class fifo #(type ITEM_TYPE) extends uvm_component;
     `uvm_component_param_utils(uvm_common::fifo#(ITEM_TYPE))
 
     protected ITEM_TYPE queue[$];
@@ -17,7 +17,7 @@ virtual class fifo #(type ITEM_TYPE) extends uvm_component;
         super.new(name, parent);
     endfunction
 
-    protected function void push_back(ITEM_TYPE item);
+    function void push_back(ITEM_TYPE item);
         queue.push_back(item);
     endfunction
 
