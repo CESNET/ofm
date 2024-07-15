@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import cocotb 
-from cocotb_bus.drivers import BusDriver
+from cocotbext.ofm.base.drivers import BusDriver
 from cocotb.triggers import RisingEdge
 from cocotbext.ofm.mvb.utils import get_mvb_params
 
