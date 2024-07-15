@@ -13,6 +13,18 @@ import random
 import string
 
 class MVBDriver(BusDriver):
+    """Driver intender for the MVB bus used for sending transactions to the bus.
+
+    Atributes:
+       _item_cnt(int): number of items sent.
+       _vld_item_cnt(int): number of valid items sent (without items containing random spaces).
+       _items(int): number of MVB items.
+       _word_width(int): width of MVB word in bytes.
+       _item_width(int): width of MVB item in bytes.
+       _item_offset(int): offset of MVB item in context of MVB word.
+
+    """
+
     _signals = ["data", "vld", "src_rdy", "dst_rdy"]
 
     def __init__(self, entity, name, clock, array_idx=None, mvb_params={}) -> None:
@@ -23,13 +35,29 @@ class MVBDriver(BusDriver):
         self._word_width = int(len(self.bus.data)/8) #word width in bytes
         self._item_width = int(self._word_width/self._items) #item width in bytes
         self._item_offset = 0
-        self._clearControlSignals()
+        self._clear_control_signals()
         self.bus.src_rdy.value = 0
 
-        #random empty spaces
         self._cDelays, self._mode, self._delays_fill = get_mvb_params(self._items, mvb_params)
+        """Randomized empty spaces"""
 
-    def _fillEmptyWord(self) -> None: 
+    def _clear_control_signals(self) -> None:
+        """Sets control signals to default values without sending them to the MVB bus."""
+
+        self._data = bytearray(self._word_width)
+        self._vld = 0
+        self._src_rdy = 0
+
+    def _propagate_control_signals(self) -> None:
+        """Sends value of control signals to the MVB bus."""
+
+        self.bus.data.value = int.from_bytes(self._data, 'little')
+        self.bus.vld.value = self._vld
+        self.bus.src_rdy.value = self._src_rdy
+
+    def _fill_empty_word(self) -> None:
+        """Fills MVB word with invalid data."""
+
         for i in range(self._word_width):
             if self._mode == 1 or self._mode == 3:
                 self._data[i] = self._delays_fill
@@ -37,66 +65,66 @@ class MVBDriver(BusDriver):
                 self._data[i] = random.randrange(0,256)
         self._vld = 0
 
-    def _clearControlSignals(self) -> None:
-        self._data = bytearray(self._word_width)
-        self._vld = 0
-        self._src_rdy = 0
+    async def _move_item(self) -> None:
+        """Moves MVB item in context of MVB word and if the word is full, it is fowarded to the _move_word function."""
 
-    async def _moveItem(self) -> None:
         self._item_offset += 1
 
         if self._item_offset == self._items:
-            await self._moveWord()
+            await self._move_word()
             self._item_offset = 0
 
-    def _writeWord(self) -> None:
-        self.bus.data.value = int.from_bytes(self._data, 'little')
-        self.bus.vld.value = self._vld
-        self.bus.src_rdy.value = self._src_rdy
-
-    async def _moveWord(self) -> None:
-        re = RisingEdge(self.clock)
+    async def _move_word(self) -> None:
+        """Sends MVB word to the MVB bus if possible and clears the word."""
 
         if (self._src_rdy):  
-            self._writeWord()
- 
+            self._propagate_control_signals()
+
         else:
-            self._clearControlSignals()
+            self._clear_control_signals()
             self.bus.src_rdy.value = 0
- 
+
+        #TODO when Utils are merged, replace with await_signal_sync
         while True:
             await self._clk_re
             if self.bus.dst_rdy.value == 1:
                 break
-     
+
         if random.choices((0,1), weights=self._cDelays["wordDelayEn_wt"], k=1)[0]:
             for i in self._cDelays["wordDelay"]:
-                self._fillEmptyWord()
+                self._fill_empty_word()
                 self._src_rdy = 1
                 self._item_cnt += self._items
-                self._writeWord()
+                self._propagate_control_signals()
 
-        self._clearControlSignals()
-       
-    async def _sendData(self, data) -> None:            
+        self._clear_control_signals()
+
+    async def _send_data(self, data:bytes) -> None:
+        """Prepares and sends transaction to the MVB bus.
+
+           Args:
+               data - data to be sent to the MVB bus.
+               
+        """
+
         self.log.debug(f"ITEM {self._vld_item_cnt}:")
         self.log.debug(f"recieved item: {data}")
 
         self._data[self._item_offset*self._item_width:(self._item_offset+1)*self._item_width] = data   
-        
+
         self.log.debug(f"word: {self._data}")
-       
+
         self._vld += 1<<(self._item_cnt%self._items)
-        
+
         self.log.debug(f"item vld: {1<<(self._item_cnt%self._items)}")
         self.log.debug(f"word vld: {self._vld}")
 
         self._src_rdy = 1
-        
+
         self._item_cnt += 1
         self._vld_item_cnt += 1
 
-        await self._moveItem()
+        await self._move_item()
 
         if random.choices((0,1), weights=self._cDelays["ivgEn_wt"], k=1)[0]:
             for i in self._cDelays["ivg"]:
@@ -107,12 +135,14 @@ class MVBDriver(BusDriver):
                         self._data[self._item_offset*self._item_width+i] = self._delays_fill
                 else:
                     self._data[self._item_offset*self._item_width:(self._item_offset+1)*self._item_width] = data
-                
+
                 self._src_rdy = 1
                 self._item_cnt += 1
-                await self._moveItem()
+                await self._move_item()
 
     async def _send_thread(self) -> None:
+        """Function used with cocotb testbench."""
+
         while True:
             while not self._sendQ:
                 self._pending.clear()
@@ -121,12 +151,12 @@ class MVBDriver(BusDriver):
             while self._sendQ:
                 transaction, callback, event, kwargs = self._sendQ.popleft()
                 assert len(transaction) == self._item_width
-                await self._sendData(transaction)
+                await self._send_data(transaction)
                 if event:
                     event.set()
                 if callback:
                     callback(transaction)
-            
-            await self._moveWord()
-            await self._moveWord()
+
+            await self._move_word()
+            await self._move_word()
 

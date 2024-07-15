@@ -6,13 +6,26 @@
 
 import random
 
-def get_mvb_params(items, params_dic) -> (dict, int, int):
+def get_mvb_params(items:int, params_dic:dict) -> (dict, int, int):
+    """Gets mvb parameters and if none are set, sets default values.
+
+        Args:
+            items: number of MVB items.
+            params_dic: dictionary with MVB parameters.
+
+        Returns:
+            cDelays: settings of random delays.
+            mode: decides with what are the random delays supposed to be filled with.
+            delays_fill: with what are random delays to be filled with.
+
+    """
+
     cDelays = dict()
-    
+
     mode = params_dic.get("mode", 1)
         
     #parameters for whole invalid words
-    wordDelayEnable_wt = params_dic.get("wordDelayEnable_wt", 10) 
+    wordDelayEnable_wt = params_dic.get("wordDelayEnable_wt", 10)
     wordDelayDisable_wt= params_dic.get("wordDelayDisable_wt", 90)
     wordDelayLow = params_dic.get("wordDelayLow", 0)
     wordDelayHigh = params_dic.get("wordDelayHigh", 50)
