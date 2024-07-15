@@ -472,6 +472,9 @@ proc ImplementDesignRun {synth_flags} {
     PrintLabel "Report Utilization"
     report_utilization -file $SYNTH_FLAGS(OUTPUT)_par.util
 
+    PrintLabel "Report Power"
+    report_power -file $SYNTH_FLAGS(OUTPUT)_par.pow
+
     # Load user DRC
     global OFM_PATH
     source $OFM_PATH/build/scripts/vivado/user_drc/load.tcl

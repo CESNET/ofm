@@ -342,6 +342,9 @@ proc ImplementDesignRun {synth_flags} {
 
     PrintLabel "Report Timing"
     execute_module -tool sta
+
+    PrintLabel "Report Power"
+    execute_module -tool pow
 }
 
 # -----------------------------------------------------------------------------

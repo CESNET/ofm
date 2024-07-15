@@ -86,7 +86,7 @@ endif
 # Built-in cleanup
 clean_build:
 	-@$(RM) *.edf *.bit *.mcs *.nfw *.edn \
-		*_synth.tim *_synth.util *.jou *.xpr *.log *_par.tim *_par.util *.prj \
+		*_synth.tim *_synth.util *.jou *.xpr *.log *_par.tim *_par.util *_par.pow *.prj \
                 messages-* *_synth.drc *_par.drc
 	-@$(RM) -r *.dcp *.prm
 	-@$(RM) -r *.data *.runs *.cache *.filter *.hw *.sim .Xil *.ip_user_files
