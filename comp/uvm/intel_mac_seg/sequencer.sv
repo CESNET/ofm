@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
 */
 
-class sequencer #(SEGMENTS) extends uvm_sequencer #(sequence_item #(SEGMENTS));
+class sequencer #(int unsigned SEGMENTS) extends uvm_sequencer #(sequence_item #(SEGMENTS));
     `uvm_component_param_utils(uvm_intel_mac_seg::sequencer #(SEGMENTS))
 
     uvm_reset::sync_terminate reset_sync;

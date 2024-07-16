@@ -4,7 +4,7 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
-class monitor #(DATA_WIDTH) extends uvm_monitor;
+class monitor #(int unsigned DATA_WIDTH) extends uvm_monitor;
 
     `uvm_component_param_utils(uvm_logic_vector::monitor#(DATA_WIDTH))
 

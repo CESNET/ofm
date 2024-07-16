@@ -11,7 +11,7 @@
 `ifndef RX_ENV_SV
 `define RX_ENV_SV
 
-class env_rx #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH) extends uvm_env;
+class env_rx #(int unsigned DATA_WIDTH, logic FAST_SOF, logic DIC_EN, int unsigned VERBOSITY, int unsigned META_WIDTH, int unsigned LOGIC_WIDTH, int unsigned SOF_WIDTH) extends uvm_env;
 
     `uvm_component_param_utils(uvm_byte_array_lii::env_rx #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH));
 
@@ -129,7 +129,7 @@ class env_rx #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH,
 
 endclass
 
-class env_tx #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH) extends uvm_env;
+class env_tx #(int unsigned DATA_WIDTH, logic FAST_SOF, logic DIC_EN, int unsigned VERBOSITY, int unsigned META_WIDTH, int unsigned LOGIC_WIDTH, int unsigned SOF_WIDTH) extends uvm_env;
 
     `uvm_component_param_utils(uvm_byte_array_lii::env_tx #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH));
 
@@ -239,7 +239,7 @@ class env_tx #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH,
 
 endclass
 
-class env_eth_phy_rx #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH, MEAS, SOF_WIDTH) extends uvm_env;
+class env_eth_phy_rx #(int unsigned DATA_WIDTH, logic FAST_SOF, logic DIC_EN, int unsigned VERBOSITY, int unsigned META_WIDTH, int unsigned LOGIC_WIDTH, MEAS, int unsigned SOF_WIDTH) extends uvm_env;
 
     `uvm_component_param_utils(uvm_byte_array_lii::env_eth_phy_rx #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH, MEAS, SOF_WIDTH));
 

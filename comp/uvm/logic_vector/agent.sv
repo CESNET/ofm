@@ -5,7 +5,7 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
-class agent #(DATA_WIDTH) extends uvm_agent;
+class agent #(int unsigned DATA_WIDTH) extends uvm_agent;
 
     // registration of component tools
     `uvm_component_param_utils(uvm_logic_vector::agent #(DATA_WIDTH))

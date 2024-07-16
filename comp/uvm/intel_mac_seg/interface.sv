@@ -5,7 +5,7 @@
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
 // Definition of mvb interface.
-interface intel_mac_seg_if #(SEGMENTS) (input logic CLK);
+interface intel_mac_seg_if #(int unsigned SEGMENTS) (input logic CLK);
 
     // ------------------------------------------------------------------------
     // Bus structure of mvb

@@ -35,7 +35,7 @@ class dut_item #(type ITEM_TYPE);
 endclass
 
 
-virtual class comparer_base#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) extends uvm_component;
+virtual class comparer_base #(type MODEL_ITEM, type DUT_ITEM = MODEL_ITEM) extends uvm_component;
 
     typedef comparer_base#(MODEL_ITEM, DUT_ITEM) this_type;
     uvm_analysis_imp_model#(model_item#(MODEL_ITEM), this_type) analysis_imp_model;

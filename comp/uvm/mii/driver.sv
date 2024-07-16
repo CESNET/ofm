@@ -11,7 +11,7 @@
 `ifndef MII_DRIVER_SV
 `define MII_DRIVER_SV
 
-class driver_rx #(CHANNELS, WIDTH) extends uvm_driver #(sequence_item #(CHANNELS, WIDTH));
+class driver_rx #(int unsigned CHANNELS, int unsigned WIDTH) extends uvm_driver #(sequence_item #(CHANNELS, WIDTH));
 
     // ------------------------------------------------------------------------
     // Register component to database
@@ -54,7 +54,7 @@ class driver_rx #(CHANNELS, WIDTH) extends uvm_driver #(sequence_item #(CHANNELS
 
 endclass
 
-class driver_tx #(CHANNELS, WIDTH) extends uvm_driver #(sequence_item #(CHANNELS, WIDTH));
+class driver_tx #(int unsigned CHANNELS, int unsigned WIDTH) extends uvm_driver #(sequence_item #(CHANNELS, WIDTH));
 
     // ------------------------------------------------------------------------
     // Register component to database

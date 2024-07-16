@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
 */
 
-class data_buffer #(CHANNELS, CHANNEL_WIDTH) extends uvm_object;
+class data_buffer #(int unsigned CHANNELS, int unsigned CHANNEL_WIDTH) extends uvm_object;
 
     `uvm_object_param_utils(uvm_byte_array_mii::data_buffer #(CHANNELS, CHANNEL_WIDTH))
 

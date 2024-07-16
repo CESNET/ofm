@@ -11,7 +11,7 @@
 `ifndef PMA_SEQUENCE_ITEM_SV
 `define PMA_SEQUENCE_ITEM_SV
 // This class represents transaction which contains values of output signals for eth phy
-class sequence_item #(DATA_WIDTH) extends uvm_sequence_item;
+class sequence_item #(int unsigned DATA_WIDTH) extends uvm_sequence_item;
 
     // registration of object tools
     `uvm_object_param_utils(uvm_pma::sequence_item #(DATA_WIDTH))

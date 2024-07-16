@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
 */
 
-class monitor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_monitor;
+class monitor #(int unsigned DATA_WIDTH, int unsigned ADDR_WIDTH, int unsigned META_WIDTH = 0) extends uvm_monitor;
 
     `uvm_component_param_utils(uvm_mi::monitor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
 

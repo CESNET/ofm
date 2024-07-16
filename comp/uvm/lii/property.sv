@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
 */
 
-module lii_property #(FAST_SOF, RESET_ENABLE, DATA_WIDTH)
+module lii_property #(logic FAST_SOF, logic RESET_ENABLE, int unsigned DATA_WIDTH)
     (
         input RESET,
         lii_if vif

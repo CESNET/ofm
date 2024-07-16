@@ -11,7 +11,7 @@
 `ifndef LII_SEQUENCE_ITEM_SV
 `define LII_SEQUENCE_ITEM_SV
 // This class represents transaction which contains values of output signals for eth phy
-class sequence_item #(DATA_WIDTH, META_WIDTH, SOF_WIDTH) extends uvm_sequence_item;
+class sequence_item #(int unsigned DATA_WIDTH, int unsigned META_WIDTH, int unsigned SOF_WIDTH) extends uvm_sequence_item;
 
     // registration of object tools
     `uvm_object_param_utils(uvm_lii::sequence_item #(DATA_WIDTH, META_WIDTH, SOF_WIDTH))

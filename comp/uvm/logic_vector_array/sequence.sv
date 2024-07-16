@@ -10,7 +10,7 @@
 
 
 // Reusable high level sequence. Contains transaction, which has only data part.
-class sequence_simple#(ITEM_WIDTH) extends uvm_common::sequence_base#(config_sequence, sequence_item#(ITEM_WIDTH));
+class sequence_simple #(int unsigned ITEM_WIDTH) extends uvm_common::sequence_base#(config_sequence, sequence_item#(ITEM_WIDTH));
     `uvm_object_param_utils(uvm_logic_vector_array::sequence_simple#(ITEM_WIDTH))
     `m_uvm_get_type_name_func(uvm_logic_vector_array::sequence_simple);
     `uvm_declare_p_sequencer(uvm_logic_vector_array::sequencer#(ITEM_WIDTH));
@@ -51,7 +51,7 @@ endclass
 
 // High level sequence with same size.
 
-class sequence_simple_const#(ITEM_WIDTH) extends uvm_common::sequence_base#(config_sequence, sequence_item#(ITEM_WIDTH));
+class sequence_simple_const #(int unsigned ITEM_WIDTH) extends uvm_common::sequence_base#(config_sequence, sequence_item#(ITEM_WIDTH));
     `uvm_object_param_utils(uvm_logic_vector_array::sequence_simple_const#(ITEM_WIDTH))
     `m_uvm_get_type_name_func(uvm_logic_vector_array::sequence_simple_const);
     `uvm_declare_p_sequencer(uvm_logic_vector_array::sequencer#(ITEM_WIDTH));
@@ -97,7 +97,7 @@ endclass
 
 // High level sequence with Gaussian distribution.
 
-class sequence_simple_gauss#(ITEM_WIDTH) extends uvm_common::sequence_base#(config_sequence, sequence_item#(ITEM_WIDTH));
+class sequence_simple_gauss #(int unsigned ITEM_WIDTH) extends uvm_common::sequence_base#(config_sequence, sequence_item#(ITEM_WIDTH));
     `uvm_object_param_utils(uvm_logic_vector_array::sequence_simple_gauss#(ITEM_WIDTH))
     `m_uvm_get_type_name_func(uvm_logic_vector_array::sequence_simple_gauss);
     `uvm_declare_p_sequencer(uvm_logic_vector_array::sequencer#(ITEM_WIDTH));
@@ -160,7 +160,7 @@ endclass
 
 // High level sequence with increment size.
 
-class sequence_simple_inc#(ITEM_WIDTH) extends uvm_common::sequence_base#(config_sequence, sequence_item#(ITEM_WIDTH));
+class sequence_simple_inc #(int unsigned ITEM_WIDTH) extends uvm_common::sequence_base#(config_sequence, sequence_item#(ITEM_WIDTH));
     `uvm_object_param_utils(uvm_logic_vector_array::sequence_simple_inc#(ITEM_WIDTH))
     `m_uvm_get_type_name_func(uvm_logic_vector_array::sequence_simple_inc);
     `uvm_declare_p_sequencer(uvm_logic_vector_array::sequencer#(ITEM_WIDTH));
@@ -210,7 +210,7 @@ endclass
 
 // High level sequence with decrement size.
 
-class sequence_simple_dec#(ITEM_WIDTH) extends uvm_common::sequence_base#(config_sequence, sequence_item#(ITEM_WIDTH));
+class sequence_simple_dec #(int unsigned ITEM_WIDTH) extends uvm_common::sequence_base#(config_sequence, sequence_item#(ITEM_WIDTH));
     `uvm_object_param_utils(uvm_logic_vector_array::sequence_simple_dec#(ITEM_WIDTH))
     `m_uvm_get_type_name_func(uvm_logic_vector_array::sequence_simple_dec);
     `uvm_declare_p_sequencer(uvm_logic_vector_array::sequencer#(ITEM_WIDTH));
@@ -260,7 +260,7 @@ class sequence_simple_dec#(ITEM_WIDTH) extends uvm_common::sequence_base#(config
 endclass
 
 // High level sequence which is used for measuring
-class sequence_simple_meas#(ITEM_WIDTH) extends uvm_common::sequence_base#(sequence_item#(ITEM_WIDTH));
+class sequence_simple_meas #(int unsigned ITEM_WIDTH) extends uvm_common::sequence_base#(sequence_item#(ITEM_WIDTH));
     `uvm_object_param_utils(uvm_logic_vector_array::sequence_simple_meas#(ITEM_WIDTH));
     `m_uvm_get_type_name_func(uvm_logic_vector_array::sequence_simple_meas);
     `uvm_declare_p_sequencer(uvm_logic_vector_array::sequencer#(ITEM_WIDTH));
@@ -311,7 +311,7 @@ endclass
 
 /////////////////////////////////////////////////////////////////////////
 // SEQUENCE LIBRARY
-class sequence_lib#(ITEM_WIDTH) extends uvm_common::sequence_library#(config_sequence, sequence_item#(ITEM_WIDTH));
+class sequence_lib #(int unsigned ITEM_WIDTH) extends uvm_common::sequence_library#(config_sequence, sequence_item#(ITEM_WIDTH));
   `uvm_object_param_utils(uvm_logic_vector_array::sequence_lib#(ITEM_WIDTH))
   `uvm_sequence_library_utils(uvm_logic_vector_array::sequence_lib#(ITEM_WIDTH))
 

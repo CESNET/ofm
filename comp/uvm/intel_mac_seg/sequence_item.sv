@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
 */
 
-class sequence_item #(SEGMENTS)extends uvm_sequence_item;
+class sequence_item #(int unsigned SEGMENTS) extends uvm_sequence_item;
     `uvm_object_param_utils(uvm_intel_mac_seg::sequence_item#(SEGMENTS));
 
     rand logic [64-1:0] data[SEGMENTS];

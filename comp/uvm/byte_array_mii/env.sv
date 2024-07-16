@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
 */
 
-class env_rx #(CHANNELS, CHANNEL_WIDTH) extends uvm_env;
+class env_rx #(int unsigned CHANNELS, int unsigned CHANNEL_WIDTH) extends uvm_env;
     `uvm_component_param_utils(uvm_byte_array_mii::env_rx #(CHANNELS, CHANNEL_WIDTH))
 
     // High level agent 
@@ -87,7 +87,7 @@ class env_rx #(CHANNELS, CHANNEL_WIDTH) extends uvm_env;
     endtask
 endclass
 
-class env_tx #(CHANNELS, CHANNEL_WIDTH) extends uvm_env;
+class env_tx #(int unsigned CHANNELS, int unsigned CHANNEL_WIDTH) extends uvm_env;
     `uvm_component_param_utils(uvm_byte_array_mii::env_tx #(CHANNELS, CHANNEL_WIDTH))
 
     // High level agent 

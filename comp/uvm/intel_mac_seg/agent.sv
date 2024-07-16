@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
 */
 
-class agent_rx #(SEGMENTS) extends uvm_agent;
+class agent_rx #(int unsigned SEGMENTS) extends uvm_agent;
     `uvm_component_param_utils(uvm_intel_mac_seg::agent_rx#(SEGMENTS))
 
     // ------------------------------------------------------------------------
@@ -75,7 +75,7 @@ class agent_rx #(SEGMENTS) extends uvm_agent;
 endclass
 
 
-class agent_tx #(SEGMENTS) extends uvm_agent;
+class agent_tx #(int unsigned SEGMENTS) extends uvm_agent;
     `uvm_component_param_utils(uvm_intel_mac_seg::agent_tx#(SEGMENTS))
 
     // ------------------------------------------------------------------------

@@ -9,7 +9,7 @@
 */
 
 
-class env_rx#(SEGMENTS) extends uvm_env;
+class env_rx #(int unsigned SEGMENTS) extends uvm_env;
     `uvm_component_param_utils(uvm_logic_vector_array_intel_mac_seg::env_rx#(SEGMENTS))
 
     // fcs_error, tr.error, tr.status_data
@@ -115,7 +115,7 @@ class env_rx#(SEGMENTS) extends uvm_env;
 endclass
 
 
-class env_tx#(SEGMENTS) extends uvm_env;
+class env_tx #(int unsigned SEGMENTS) extends uvm_env;
     `uvm_component_param_utils(uvm_logic_vector_array_intel_mac_seg::env_tx#(SEGMENTS))
 
     // fcs_error, tr.error, tr.status_data

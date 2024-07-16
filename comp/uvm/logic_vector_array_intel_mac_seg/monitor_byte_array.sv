@@ -9,7 +9,7 @@
 */
 
 
-class monitor_byte_array#(SEGMENTS) extends uvm_logic_vector_array::monitor#(8);
+class monitor_byte_array #(int unsigned SEGMENTS) extends uvm_logic_vector_array::monitor#(8);
     `uvm_component_param_utils(uvm_logic_vector_array_intel_mac_seg::monitor_byte_array#(SEGMENTS))
 
     localparam ITEM_WIDTH = 8;

@@ -9,7 +9,7 @@
 */
 
 // Definition of mvb monitor
-class monitor#(SEGMENTS) extends uvm_monitor;
+class monitor #(int unsigned SEGMENTS) extends uvm_monitor;
     `uvm_component_param_utils(uvm_intel_mac_seg::monitor#(SEGMENTS))
 
     // ------------------------------------------------------------------------

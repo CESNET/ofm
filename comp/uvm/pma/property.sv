@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
 */
 
-module pma_property #(DATA_WIDTH) (
+module pma_property #(int unsigned DATA_WIDTH) (
     input RESET,
     pma_if vif
 );

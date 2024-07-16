@@ -8,7 +8,7 @@
 `define MVB_DRIVER
 
 // Driver of mvb rx interface
-class driver_rx #(ITEMS, ITEM_WIDTH) extends uvm_driver #(sequence_item #(ITEMS, ITEM_WIDTH));
+class driver_rx #(int unsigned ITEMS, int unsigned ITEM_WIDTH) extends uvm_driver #(sequence_item #(ITEMS, ITEM_WIDTH));
 
     // ------------------------------------------------------------------------
     // Register component to database
@@ -61,7 +61,7 @@ class driver_rx #(ITEMS, ITEM_WIDTH) extends uvm_driver #(sequence_item #(ITEMS,
 endclass
 
 // Driver of mvb tx interface
-class driver_tx #(ITEMS, ITEM_WIDTH) extends uvm_driver #(sequence_item #(ITEMS, ITEM_WIDTH));
+class driver_tx #(int unsigned ITEMS, int unsigned ITEM_WIDTH) extends uvm_driver #(sequence_item #(ITEMS, ITEM_WIDTH));
 
     // ------------------------------------------------------------------------
     // Register component to database

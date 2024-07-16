@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
 */
 
-class sequence_rx_burst #(CHANNELS, CHANNEL_WIDTH) extends uvm_byte_array_mii::sequence_rx_base #(CHANNELS, CHANNEL_WIDTH);
+class sequence_rx_burst #(int unsigned CHANNELS, int unsigned CHANNEL_WIDTH) extends uvm_byte_array_mii::sequence_rx_base #(CHANNELS, CHANNEL_WIDTH);
     `uvm_object_param_utils(uvm_byte_array_mii::sequence_rx_burst #(CHANNELS, CHANNEL_WIDTH))
     `uvm_declare_p_sequencer(uvm_mii::sequencer #(CHANNELS, CHANNEL_WIDTH))
 
@@ -24,7 +24,7 @@ class sequence_rx_burst #(CHANNELS, CHANNEL_WIDTH) extends uvm_byte_array_mii::s
     endfunction: new
 endclass
 
-class sequence_rx_avg #(CHANNELS, CHANNEL_WIDTH) extends uvm_byte_array_mii::sequence_rx_base #(CHANNELS, CHANNEL_WIDTH);
+class sequence_rx_avg #(int unsigned CHANNELS, int unsigned CHANNEL_WIDTH) extends uvm_byte_array_mii::sequence_rx_base #(CHANNELS, CHANNEL_WIDTH);
     `uvm_object_param_utils(uvm_byte_array_mii::sequence_rx_avg #(CHANNELS, CHANNEL_WIDTH))
     `uvm_declare_p_sequencer(uvm_mii::sequencer #(CHANNELS, CHANNEL_WIDTH))
 
@@ -40,7 +40,7 @@ class sequence_rx_avg #(CHANNELS, CHANNEL_WIDTH) extends uvm_byte_array_mii::seq
     endfunction: new
 endclass
 
-class sequence_rx_slow #(CHANNELS, CHANNEL_WIDTH) extends uvm_byte_array_mii::sequence_rx_base #(CHANNELS, CHANNEL_WIDTH);
+class sequence_rx_slow #(int unsigned CHANNELS, int unsigned CHANNEL_WIDTH) extends uvm_byte_array_mii::sequence_rx_base #(CHANNELS, CHANNEL_WIDTH);
     `uvm_object_param_utils(uvm_byte_array_mii::sequence_rx_slow #(CHANNELS, CHANNEL_WIDTH))
     `uvm_declare_p_sequencer(uvm_mii::sequencer #(CHANNELS, CHANNEL_WIDTH))
 

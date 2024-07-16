@@ -12,7 +12,7 @@
 `define LII_DRIVER
 
 // Driver of LII interface
-class driver_rx #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH) extends uvm_driver #(sequence_item #(DATA_WIDTH, META_WIDTH, SOF_WIDTH));
+class driver_rx #(int unsigned DATA_WIDTH, logic FAST_SOF, int unsigned META_WIDTH, int unsigned SOF_WIDTH) extends uvm_driver #(sequence_item #(DATA_WIDTH, META_WIDTH, SOF_WIDTH));
 
     // Register component to database.
     `uvm_component_param_utils(uvm_lii::driver_rx #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH))
@@ -72,7 +72,7 @@ endclass
 
 
 // Driver of LII TX interface
-class driver_tx #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH) extends uvm_driver #(sequence_item #(DATA_WIDTH, META_WIDTH, SOF_WIDTH));
+class driver_tx #(int unsigned DATA_WIDTH, logic FAST_SOF, int unsigned META_WIDTH, int unsigned SOF_WIDTH) extends uvm_driver #(sequence_item #(DATA_WIDTH, META_WIDTH, SOF_WIDTH));
 
     // ------------------------------------------------------------------------
     // Register component to database
@@ -121,7 +121,7 @@ class driver_tx #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH) extends uvm_drive
 endclass
 
 // Driver of LII ETH PHZ interface
-class driver_rx_eth_phy #(DATA_WIDTH, FAST_SOF, META_WIDTH, MEAS, SOF_WIDTH) extends uvm_driver #(sequence_item #(DATA_WIDTH, META_WIDTH, SOF_WIDTH));
+class driver_rx_eth_phy #(int unsigned DATA_WIDTH, logic FAST_SOF, int unsigned META_WIDTH, logic MEAS, int unsigned SOF_WIDTH) extends uvm_driver #(sequence_item #(DATA_WIDTH, META_WIDTH, SOF_WIDTH));
 
     // Register component to database.
     `uvm_component_param_utils(uvm_lii::driver_rx_eth_phy #(DATA_WIDTH, FAST_SOF, META_WIDTH, MEAS, SOF_WIDTH))

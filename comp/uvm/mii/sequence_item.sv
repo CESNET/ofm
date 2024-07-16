@@ -11,7 +11,7 @@
 `ifndef MII_SEQUENCE_ITEM_SV
 `define MII_SEQUENCE_ITEM_SV
 
-class sequence_item #(CHANNELS, WIDTH) extends uvm_sequence_item;
+class sequence_item #(int unsigned CHANNELS, int unsigned WIDTH) extends uvm_sequence_item;
     `uvm_object_param_utils(uvm_mii::sequence_item #(CHANNELS, WIDTH))
 
     localparam BYTES = WIDTH >> 3;

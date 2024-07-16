@@ -12,7 +12,7 @@
 `define MI_INTERFACE
 
 
-interface mi_if #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) (input logic CLK);
+interface mi_if #(int unsigned DATA_WIDTH, int unsigned ADDR_WIDTH, int unsigned META_WIDTH = 0) (input logic CLK);
 
     //COMMON INTERFACE
     wire logic [ADDR_WIDTH-1:0] ADDR;

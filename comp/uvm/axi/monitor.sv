@@ -5,7 +5,7 @@
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
 // Definition of AXI monitor
-class monitor #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends uvm_monitor;
+class monitor #(int unsigned DATA_WIDTH, int unsigned TUSER_WIDTH, int unsigned REGIONS) extends uvm_monitor;
 
     // ------------------------------------------------------------------------
     // Registration of agent to databaze

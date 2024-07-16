@@ -41,7 +41,7 @@ class ce_generator_base extends uvm_object;
 endclass: ce_generator_base
 
 // Generates CE randomly with maximum difference of total count of log. '1' and log. '0'
-class ce_generator_random #(MAX_DELTA) extends uvm_byte_array_mii::ce_generator_base;
+class ce_generator_random #(int unsigned MAX_DELTA) extends uvm_byte_array_mii::ce_generator_base;
     `uvm_object_utils(uvm_byte_array_mii::ce_generator_random #(MAX_DELTA));
 
     //  Constructor: new

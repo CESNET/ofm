@@ -5,7 +5,7 @@
 //-- SPDX-License-Identifier: BSD-3-Clause
 
 // Definition of mfb environment
-class env_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends uvm_env;
+class env_rx #(int unsigned REGIONS, int unsigned REGION_SIZE, int unsigned BLOCK_SIZE, int unsigned META_WIDTH) extends uvm_env;
     `uvm_component_param_utils(uvm_byte_array_mfb::env_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH));
 
     localparam  ITEM_WIDTH = 8;
@@ -116,7 +116,7 @@ class env_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends uvm_env;
 endclass
 
 
-class env_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends uvm_env;
+class env_tx #(int unsigned REGIONS, int unsigned REGION_SIZE, int unsigned BLOCK_SIZE, int unsigned META_WIDTH) extends uvm_env;
     `uvm_component_param_utils(uvm_byte_array_mfb::env_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH));
 
     localparam  ITEM_WIDTH = 8;

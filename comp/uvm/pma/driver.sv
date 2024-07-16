@@ -12,7 +12,7 @@
 `define PMA_DRIVER
 
 // Driver of PMA interface
-class driver #(DATA_WIDTH) extends uvm_driver #(sequence_item #(DATA_WIDTH));
+class driver #(int unsigned DATA_WIDTH) extends uvm_driver #(sequence_item #(DATA_WIDTH));
 
     // Register component to database.
     `uvm_component_param_utils(uvm_pma::driver #(DATA_WIDTH))

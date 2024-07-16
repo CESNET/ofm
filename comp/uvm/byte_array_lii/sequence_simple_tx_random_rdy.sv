@@ -11,7 +11,7 @@
 //MAC
 
 // Sequence which generate random rdy
-class sequence_simple_tx_random_rdy #(DATA_WIDTH, META_WIDTH, SOF_WIDTH) extends uvm_sequence #(uvm_lii::sequence_item #(DATA_WIDTH, META_WIDTH, SOF_WIDTH));
+class sequence_simple_tx_random_rdy #(int unsigned DATA_WIDTH, int unsigned META_WIDTH, int unsigned SOF_WIDTH) extends uvm_sequence #(uvm_lii::sequence_item #(DATA_WIDTH, META_WIDTH, SOF_WIDTH));
 
     // ------------------------------------------------------------------------
     // Registration of agent to databaze

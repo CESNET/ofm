@@ -5,7 +5,7 @@
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
 // Definition of mfb monitor
-class meter #(ITEM_WIDTH) extends uvm_subscriber#(sequence_item #(ITEM_WIDTH));
+class meter #(int unsigned ITEM_WIDTH) extends uvm_subscriber#(sequence_item #(ITEM_WIDTH));
     `uvm_component_param_utils(uvm_logic_vector_array::meter #(ITEM_WIDTH))
 
     localparam KOEF = ITEM_WIDTH;

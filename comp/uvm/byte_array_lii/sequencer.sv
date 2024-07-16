@@ -11,7 +11,7 @@
 `ifndef LII_SEQUENCER_SV
 `define LII_SEQUENCER_SV
 
-class sequencer #(LOGIC_WIDTH) extends uvm_sequencer;
+class sequencer #(int unsigned LOGIC_WIDTH) extends uvm_sequencer;
 
     `uvm_component_param_utils(uvm_byte_array_lii::sequencer #(LOGIC_WIDTH))
 

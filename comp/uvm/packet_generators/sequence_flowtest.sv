@@ -4,7 +4,7 @@
 
 // SPDX-License-Identifier: BSD-3-Clause
 
-class sequence_flowtest #(ITEM_WIDTH) extends uvm_common::sequence_base #(config_sequence, uvm_logic_vector_array::sequence_item #(ITEM_WIDTH));
+class sequence_flowtest #(int unsigned ITEM_WIDTH) extends uvm_common::sequence_base #(config_sequence, uvm_logic_vector_array::sequence_item #(ITEM_WIDTH));
     `uvm_object_param_utils(uvm_packet_generators::sequence_flowtest #(ITEM_WIDTH))
     `uvm_declare_p_sequencer(uvm_logic_vector_array::sequencer #(ITEM_WIDTH));
 

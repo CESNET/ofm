@@ -17,7 +17,7 @@ import crc32_ethernet_pkg::*;
 // In this sequence is link status randomize
 // There is also logic vector sequence item for generation of error signals
 // In the end of the packet is generate CRC and last chunk of data
-class sequence_simple_rx_random_link_status #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH) extends sequence_simple #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH);
+class sequence_simple_rx_random_link_status #(int unsigned DATA_WIDTH, logic FAST_SOF, int unsigned META_WIDTH, int unsigned LOGIC_WIDTH, int unsigned SOF_WIDTH) extends sequence_simple #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH);
 
     `uvm_object_param_utils(uvm_byte_array_lii::sequence_simple_rx_random_link_status #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH))
 

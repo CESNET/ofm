@@ -12,7 +12,7 @@
 `define LOGIC_VECTOR_ARRAY_SEQUENCE_ITEM_SV
 
 // This class represents high level transaction, which can be reusable for other components.
-class sequence_item #(ITEM_WIDTH) extends uvm_sequence_item;
+class sequence_item #(int unsigned ITEM_WIDTH) extends uvm_sequence_item;
 
     // Registration of object tools.
     `uvm_object_utils(uvm_logic_vector_array::sequence_item #(ITEM_WIDTH))

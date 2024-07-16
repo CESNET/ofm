@@ -5,7 +5,7 @@
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
 // Reusable high level sequence. Contains transaction, which has only data part
-class sequence_simple #(DATA_WIDTH) extends uvm_common::sequence_base #(config_sequence, sequence_item #(DATA_WIDTH));
+class sequence_simple #(int unsigned DATA_WIDTH) extends uvm_common::sequence_base #(config_sequence, sequence_item #(DATA_WIDTH));
 
     `uvm_object_param_utils(uvm_logic_vector::sequence_simple#(DATA_WIDTH));
     `m_uvm_get_type_name_func(uvm_logic_vector::sequence_simple);
@@ -46,7 +46,7 @@ class sequence_simple #(DATA_WIDTH) extends uvm_common::sequence_base #(config_s
 
 endclass
 
-class sequence_endless #(DATA_WIDTH) extends uvm_common::sequence_base #(config_sequence, sequence_item #(DATA_WIDTH));
+class sequence_endless #(int unsigned DATA_WIDTH) extends uvm_common::sequence_base #(config_sequence, sequence_item #(DATA_WIDTH));
     `uvm_object_param_utils(uvm_logic_vector::sequence_endless#(DATA_WIDTH))
     `m_uvm_get_type_name_func(uvm_logic_vector::sequence_endless);
 

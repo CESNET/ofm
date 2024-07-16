@@ -9,7 +9,7 @@
 */
 
 
-class driver_rx #(SEGMENTS) extends uvm_driver #(sequence_item #(SEGMENTS));
+class driver_rx #(int unsigned SEGMENTS) extends uvm_driver #(sequence_item #(SEGMENTS));
     `uvm_component_param_utils(uvm_intel_mac_seg::driver_rx #(SEGMENTS))
 
     // Virtual interface of rx driver
@@ -57,7 +57,7 @@ class driver_rx #(SEGMENTS) extends uvm_driver #(sequence_item #(SEGMENTS));
 endclass
 
 
-class driver_tx #(SEGMENTS) extends uvm_driver #(sequence_item #(SEGMENTS));
+class driver_tx #(int unsigned SEGMENTS) extends uvm_driver #(sequence_item #(SEGMENTS));
     `uvm_component_param_utils(uvm_intel_mac_seg::driver_tx #(SEGMENTS))
 
     // Virtual interface of rx driver

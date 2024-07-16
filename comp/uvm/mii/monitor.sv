@@ -11,7 +11,7 @@
 `ifndef MII_MONITOR_SV
 `define MII_MONITOR_SV
 
-class monitor #(CHANNELS, WIDTH) extends uvm_monitor;
+class monitor #(int unsigned CHANNELS, int unsigned WIDTH) extends uvm_monitor;
 
     // ------------------------------------------------------------------------
     // Registration of monitor to databaze

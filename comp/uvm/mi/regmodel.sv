@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
 */
 
-class reg2bus#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_env;
+class reg2bus #(int unsigned DATA_WIDTH, int unsigned ADDR_WIDTH, int unsigned META_WIDTH = 0) extends uvm_env;
     `uvm_component_param_utils(uvm_mi::reg2bus#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
 
     uvm_reg_predictor #(reg2bus_class)                      predictor;
@@ -46,7 +46,7 @@ class regmodel_config;
 endclass
 
 
-class regmodel#(type REG_TYPE, int unsigned DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_env;
+class regmodel #(type REG_TYPE, int unsigned DATA_WIDTH, int unsigned ADDR_WIDTH, int unsigned META_WIDTH = 0) extends uvm_env;
     `uvm_component_param_utils(uvm_mi::regmodel#(REG_TYPE, DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
 
     regmodel_config                                   m_config;

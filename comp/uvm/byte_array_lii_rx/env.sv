@@ -11,7 +11,7 @@
 `ifndef RX_ENV_SV
 `define RX_ENV_SV
 
-class env #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH) extends uvm_env;
+class env #(int unsigned DATA_WIDTH, logic FAST_SOF, logic DIC_EN, int unsigned VERBOSITY, int unsigned META_WIDTH, int unsigned LOGIC_WIDTH, int unsigned SOF_WIDTH) extends uvm_env;
 
     `uvm_component_param_utils(uvm_byte_array_lii_rx::env #(DATA_WIDTH, FAST_SOF, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH));
 
