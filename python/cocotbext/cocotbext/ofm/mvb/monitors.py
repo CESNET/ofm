@@ -12,35 +12,45 @@ class MVBProtocolError(Exception):
     pass
 
 class MVBMonitor(BusMonitor):
+    """Master monitor intended for monitoring the MVB bus.
+
+    Atributes:
+        item_cnt(int): number of MVB transaction proccessed.
+        _items(int): number of MVB items.
+        _word_width(int): width of MVB word in bytes.
+        _item_width(int): width of MVB item in bytes.
+
+    """
+
     _signals = ["data", "vld", "src_rdy", "dst_rdy"]
 
     def __init__(self, entity, name, clock, array_idx=None) -> None:
-        BusMonitor.__init__(self, entity, name, clock, array_idx=array_idx)
+        super().__init__(entity, name, clock, array_idx=array_idx)
         self.item_cnt = 0
-        self.clock = clock
         self._items = len(self.bus.vld)
-        self._word_width = int(len(self.bus.data)/8) #width in bytes
-        self._item_width = int(self._word_width/self._items)
-
+        self._word_width = len(self.bus.data) // 8 #width in bytes
+        self._item_width = self._word_width // self._items
 
     def _is_valid_word(self, signal_src_rdy, signal_dst_rdy) -> bool:
+        """Checks if the recieved word is valid transaction."""
+
         if signal_dst_rdy is None:
             return (signal_src_rdy.value == 1)
         else:
             return (signal_src_rdy.value == 1) and (signal_dst_rdy.value == 1)
 
     async def _monitor_recv(self) -> None:
-        """Watch the pins and reconstruct transactions."""
+        """Recieve function used with cocotb testbench."""
 
         # Avoid spurious object creation by recycling
-        clkedge = RisingEdge(self.clock)
-        
+        clk_re = RisingEdge(self.clock)
+
         while True:
-            await clkedge
+            await clk_re
 
             if self.in_reset:
                 continue
-            
+
             if self._is_valid_word(self.bus.src_rdy, self.bus.dst_rdy):
                 data_val = self.bus.data.value
                 data_val.big_endian = False

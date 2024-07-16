@@ -6,13 +6,26 @@
 
 import random
 
-def get_mvb_params(items, params_dic) -> (dict, int, int):
+def random_delays_config(items:int, params_dic:dict) -> (dict, int, int):
+    """Generate configuration of random delay generator based on passed dictionary. If no dictionary was passed, configuratoin is generated with default parameters.
+
+        Args:
+            items: number of MVB items.
+            params_dic: dictionary with MVB parameters.
+
+        Returns:
+            cDelays: settings of random delays.
+            mode: fill delay with: mode 0 - previous transaction, mode 1 - 0, mode 2 - random integer from 0-256, mode 3 - with ascii value of X
+            delays_fill: the character, with which the delays will be filled with.
+
+    """
+
     cDelays = dict()
-    
+
     mode = params_dic.get("mode", 1)
         
     #parameters for whole invalid words
-    wordDelayEnable_wt = params_dic.get("wordDelayEnable_wt", 10) 
+    wordDelayEnable_wt = params_dic.get("wordDelayEnable_wt", 10)
     wordDelayDisable_wt= params_dic.get("wordDelayDisable_wt", 90)
     wordDelayLow = params_dic.get("wordDelayLow", 0)
     wordDelayHigh = params_dic.get("wordDelayHigh", 50)
