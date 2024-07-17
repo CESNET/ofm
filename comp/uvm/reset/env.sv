@@ -11,7 +11,7 @@
 
 
 
-class env#(RESETS) extends uvm_env;
+class env #(int unsigned RESETS) extends uvm_env;
     `uvm_component_param_utils(uvm_reset::env#(RESETS));
 
     //high level

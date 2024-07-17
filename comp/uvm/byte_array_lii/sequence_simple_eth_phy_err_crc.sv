@@ -15,7 +15,7 @@
 // So it can be used in TX MAC as an input sequence
 // In this sequence is link status set to logic 1 all the time, beacause TX MAC does not has any link status
 // There is also logic vector sequence item for generation of error signals
-class sequence_simple_eth_phy_err_crc #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH) extends sequence_simple #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH);
+class sequence_simple_eth_phy_err_crc #(int unsigned DATA_WIDTH, logic FAST_SOF, int unsigned META_WIDTH, int unsigned LOGIC_WIDTH, int unsigned SOF_WIDTH) extends sequence_simple #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH);
 
     `uvm_object_param_utils(uvm_byte_array_lii::sequence_simple_eth_phy_err_crc #(DATA_WIDTH, FAST_SOF, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH))
 

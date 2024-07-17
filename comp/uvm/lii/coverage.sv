@@ -4,7 +4,7 @@
 //--
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
-class coverage #(DATA_WIDTH, META_WIDTH, SOF_WIDTH) extends uvm_subscriber#(sequence_item #(DATA_WIDTH, META_WIDTH, SOF_WIDTH));
+class coverage #(int unsigned DATA_WIDTH, int unsigned META_WIDTH, int unsigned SOF_WIDTH) extends uvm_subscriber#(sequence_item #(DATA_WIDTH, META_WIDTH, SOF_WIDTH));
 
     sequence_item #(DATA_WIDTH, META_WIDTH, SOF_WIDTH) seq_item;
 

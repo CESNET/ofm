@@ -10,7 +10,7 @@
 
 //////////////////////////////////////////////////
 // BASE CLASS CONTAINING COMMON FUNCTIONS
-class sequence_simple_rx_base #(SEGMENTS) extends uvm_intel_mac_seg::sequence_simple_rx #(SEGMENTS);
+class sequence_simple_rx_base #(int unsigned SEGMENTS) extends uvm_intel_mac_seg::sequence_simple_rx #(SEGMENTS);
    `uvm_object_param_utils(uvm_logic_vector_array_intel_mac_seg::sequence_simple_rx_base#(SEGMENTS))
    `uvm_declare_p_sequencer(uvm_intel_mac_seg::sequencer#(SEGMENTS));
    localparam LOGIC_WIDTH = 6;
@@ -156,7 +156,7 @@ class sequence_simple_rx_base #(SEGMENTS) extends uvm_intel_mac_seg::sequence_si
 
 endclass
 
-class sequence_simple_rx #(SEGMENTS) extends sequence_simple_rx_base #(SEGMENTS);
+class sequence_simple_rx #(int unsigned SEGMENTS) extends sequence_simple_rx_base #(SEGMENTS);
     `uvm_object_param_utils(uvm_logic_vector_array_intel_mac_seg::sequence_simple_rx#(SEGMENTS))
     uvm_common::rand_length   rdy_length;
 
@@ -203,7 +203,7 @@ class sequence_simple_rx #(SEGMENTS) extends sequence_simple_rx_base #(SEGMENTS)
     endtask
 endclass
 
-class sequence_sop_pos_rx #(SEGMENTS) extends sequence_simple_rx_base #(SEGMENTS);
+class sequence_sop_pos_rx #(int unsigned SEGMENTS) extends sequence_simple_rx_base #(SEGMENTS);
     `uvm_object_param_utils(uvm_logic_vector_array_intel_mac_seg::sequence_sop_pos_rx #(SEGMENTS))
 
     uvm_common::rand_length   rdy_length;
@@ -258,7 +258,7 @@ class sequence_sop_pos_rx #(SEGMENTS) extends sequence_simple_rx_base #(SEGMENTS
 endclass
 
 
-class sequence_max_rx #(SEGMENTS) extends sequence_simple_rx_base #(SEGMENTS);
+class sequence_max_rx #(int unsigned SEGMENTS) extends sequence_simple_rx_base #(SEGMENTS);
     `uvm_object_param_utils(uvm_logic_vector_array_intel_mac_seg::sequence_max_rx#(SEGMENTS))
 
     function new (string name = "req");
@@ -311,7 +311,7 @@ endclass
 ///////////////////////////////////////////////////////////////
 // SEQUENCE LIBRARY
 ///////////////////////////////////////////////////////////////
-class sequence_lib_rx#(SEGMENTS) extends uvm_sequence_library#(uvm_intel_mac_seg::sequence_item #(SEGMENTS));
+class sequence_lib_rx #(int unsigned SEGMENTS) extends uvm_sequence_library#(uvm_intel_mac_seg::sequence_item #(SEGMENTS));
   `uvm_object_param_utils(uvm_logic_vector_array_intel_mac_seg::sequence_lib_rx#(SEGMENTS))
   `uvm_sequence_library_utils(uvm_logic_vector_array_intel_mac_seg::sequence_lib_rx#(SEGMENTS))
   function new(string name = "");

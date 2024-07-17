@@ -10,7 +10,7 @@
 */
 
 // Definition of LII interface.
-interface lii_if_rx #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH) (input logic CLK, RESET);
+interface lii_if_rx #(int unsigned DATA_WIDTH, logic FAST_SOF, int unsigned META_WIDTH, int unsigned SOF_WIDTH) (input logic CLK, RESET);
 
     // Variables
     localparam BYTES_VLD_LENGTH = $clog2(DATA_WIDTH/8)+1;

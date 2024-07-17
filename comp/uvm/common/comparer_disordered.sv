@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
 */
 
-virtual class comparer_base_disordered#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) extends comparer_base#(MODEL_ITEM, DUT_ITEM);
+virtual class comparer_base_disordered #(type MODEL_ITEM, type DUT_ITEM = MODEL_ITEM) extends comparer_base#(MODEL_ITEM, DUT_ITEM);
 
     int unsigned dut_sends;
     model_item#(MODEL_ITEM) model_items[$];

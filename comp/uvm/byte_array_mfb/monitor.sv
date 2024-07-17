@@ -4,7 +4,7 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause
 
-class monitor_byte_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends uvm_byte_array::monitor;
+class monitor_byte_array #(int unsigned REGIONS, int unsigned REGION_SIZE, int unsigned BLOCK_SIZE, int unsigned META_WIDTH) extends uvm_byte_array::monitor;
     `uvm_component_param_utils(uvm_byte_array_mfb::monitor_byte_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH))
 
     localparam ITEM_WIDTH = 8;
@@ -95,7 +95,7 @@ class monitor_byte_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends
     endfunction
 endclass
 
-class monitor_logic_vector #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH) extends uvm_logic_vector::monitor#(META_WIDTH);
+class monitor_logic_vector #(int unsigned REGIONS, int unsigned REGION_SIZE, int unsigned BLOCK_SIZE, int unsigned META_WIDTH) extends uvm_logic_vector::monitor#(META_WIDTH);
     `uvm_component_param_utils(uvm_byte_array_mfb::monitor_logic_vector #(REGIONS, REGION_SIZE, BLOCK_SIZE, META_WIDTH))
 
     localparam ITEM_WIDTH = 8;

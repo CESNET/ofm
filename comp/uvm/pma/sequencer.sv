@@ -11,7 +11,7 @@
 `ifndef PMA_SEQUENCER_SV
 `define PMA_SEQUENCER_SV
 
-class sequencer #(DATA_WIDTH) extends uvm_sequencer #(sequence_item #(DATA_WIDTH));
+class sequencer #(int unsigned DATA_WIDTH) extends uvm_sequencer #(sequence_item #(DATA_WIDTH));
 
     `uvm_component_param_utils(uvm_pma::sequencer #(DATA_WIDTH))
 

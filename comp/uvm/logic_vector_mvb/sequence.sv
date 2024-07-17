@@ -5,7 +5,7 @@
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
 
-class sequence_simple_rx_base #(ITEMS, ITEM_WIDTH) extends  uvm_common::sequence_base #(config_sequence, uvm_mvb::sequence_item #(ITEMS, ITEM_WIDTH));
+class sequence_simple_rx_base #(int unsigned ITEMS, int unsigned ITEM_WIDTH) extends uvm_common::sequence_base #(config_sequence, uvm_mvb::sequence_item #(ITEMS, ITEM_WIDTH));
     `uvm_object_param_utils(uvm_logic_vector_mvb::sequence_simple_rx_base #(ITEMS, ITEM_WIDTH))
     `uvm_declare_p_sequencer(uvm_mvb::sequencer #(ITEMS, ITEM_WIDTH))
 
@@ -96,7 +96,7 @@ class sequence_simple_rx_base #(ITEMS, ITEM_WIDTH) extends  uvm_common::sequence
 
 endclass
 
-class sequence_rand_rx #(ITEMS, ITEM_WIDTH) extends sequence_simple_rx_base #(ITEMS, ITEM_WIDTH);
+class sequence_rand_rx #(int unsigned ITEMS, int unsigned ITEM_WIDTH) extends sequence_simple_rx_base #(ITEMS, ITEM_WIDTH);
     `uvm_object_param_utils(uvm_logic_vector_mvb::sequence_rand_rx #(ITEMS, ITEM_WIDTH))
 
     // coeficient is used because we want to use more random distributors
@@ -146,7 +146,7 @@ class sequence_rand_rx #(ITEMS, ITEM_WIDTH) extends sequence_simple_rx_base #(IT
 endclass
 
 
-class sequence_burst_rx #(ITEMS, ITEM_WIDTH) extends sequence_simple_rx_base #(ITEMS, ITEM_WIDTH);
+class sequence_burst_rx #(int unsigned ITEMS, int unsigned ITEM_WIDTH) extends sequence_simple_rx_base #(ITEMS, ITEM_WIDTH);
     `uvm_object_param_utils(uvm_logic_vector_mvb::sequence_burst_rx #(ITEMS, ITEM_WIDTH))
 
     uvm_common::rand_length   rand_burst_length;
@@ -242,7 +242,7 @@ class sequence_burst_rx #(ITEMS, ITEM_WIDTH) extends sequence_simple_rx_base #(I
 endclass
 
 
-class sequence_full_speed_rx #(ITEMS, ITEM_WIDTH) extends sequence_simple_rx_base #(ITEMS, ITEM_WIDTH);
+class sequence_full_speed_rx #(int unsigned ITEMS, int unsigned ITEM_WIDTH) extends sequence_simple_rx_base #(ITEMS, ITEM_WIDTH);
 
     `uvm_object_param_utils(uvm_logic_vector_mvb::sequence_full_speed_rx #(ITEMS, ITEM_WIDTH))
 
@@ -283,7 +283,7 @@ class sequence_full_speed_rx #(ITEMS, ITEM_WIDTH) extends sequence_simple_rx_bas
 endclass
 
 
-class sequence_stop_rx #(ITEMS, ITEM_WIDTH) extends sequence_simple_rx_base #(ITEMS, ITEM_WIDTH);
+class sequence_stop_rx #(int unsigned ITEMS, int unsigned ITEM_WIDTH) extends sequence_simple_rx_base #(ITEMS, ITEM_WIDTH);
 
     `uvm_object_param_utils(uvm_logic_vector_mvb::sequence_stop_rx #(ITEMS, ITEM_WIDTH))
 
@@ -363,7 +363,7 @@ class sequence_const_space_rx #(ITEMS, ITEM_WIDTH) extends sequence_simple_rx_ba
 endclass
 
 
-class sequence_const_possition_rx #(ITEMS, ITEM_WIDTH) extends sequence_simple_rx_base #(ITEMS, ITEM_WIDTH);
+class sequence_const_possition_rx #(int unsigned ITEMS, int unsigned ITEM_WIDTH) extends sequence_simple_rx_base #(ITEMS, ITEM_WIDTH);
     `uvm_object_param_utils(uvm_logic_vector_mvb::sequence_const_possition_rx #(ITEMS, ITEM_WIDTH))
 
     rand logic [ITEMS-1:0] pos_valid = 1'b1;
@@ -411,7 +411,7 @@ endclass
 
 //////////////////////////////////////
 // TX LIBRARY
-class sequence_lib_rx#(ITEMS, ITEM_WIDTH) extends uvm_common::sequence_library#(config_sequence, uvm_mvb::sequence_item#(ITEMS, ITEM_WIDTH));
+class sequence_lib_rx #(int unsigned ITEMS, int unsigned ITEM_WIDTH) extends uvm_common::sequence_library#(config_sequence, uvm_mvb::sequence_item#(ITEMS, ITEM_WIDTH));
   `uvm_object_param_utils(uvm_logic_vector_mvb::sequence_lib_rx#(ITEMS, ITEM_WIDTH))
   `uvm_sequence_library_utils(uvm_logic_vector_mvb::sequence_lib_rx#(ITEMS, ITEM_WIDTH))
 
@@ -434,7 +434,7 @@ class sequence_lib_rx#(ITEMS, ITEM_WIDTH) extends uvm_common::sequence_library#(
 endclass
 
 // Used for full speed tests
-class sequence_lib_speed_rx#(ITEMS, ITEM_WIDTH) extends sequence_lib_rx#(ITEMS, ITEM_WIDTH);
+class sequence_lib_speed_rx #(int unsigned ITEMS, int unsigned ITEM_WIDTH) extends sequence_lib_rx#(ITEMS, ITEM_WIDTH);
     `uvm_object_param_utils(uvm_logic_vector_mvb::sequence_lib_speed_rx#(ITEMS, ITEM_WIDTH))
     `uvm_sequence_library_utils(uvm_logic_vector_mvb::sequence_lib_speed_rx#(ITEMS, ITEM_WIDTH))
   
@@ -457,7 +457,7 @@ class sequence_lib_speed_rx#(ITEMS, ITEM_WIDTH) extends sequence_lib_rx#(ITEMS, 
 
 //////////////////////////////////////
 // PLS DONT PUT IT INTO SEQUENCE LIBRARY. 
-class sequence_simple_rx #(ITEMS, ITEM_WIDTH) extends sequence_simple_rx_base #(ITEMS, ITEM_WIDTH);
+class sequence_simple_rx #(int unsigned ITEMS, int unsigned ITEM_WIDTH) extends sequence_simple_rx_base #(ITEMS, ITEM_WIDTH);
 
     `uvm_object_param_utils(uvm_logic_vector_mvb::sequence_simple_rx #(ITEMS, ITEM_WIDTH))
 

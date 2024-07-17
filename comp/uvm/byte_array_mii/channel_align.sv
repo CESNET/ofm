@@ -10,7 +10,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
 */
 
-class channel_align #(CHANNEL_WIDTH) extends uvm_object;
+class channel_align #(int unsigned CHANNEL_WIDTH) extends uvm_object;
 
     `uvm_object_param_utils(uvm_byte_array_mii::channel_align #(CHANNEL_WIDTH))
 

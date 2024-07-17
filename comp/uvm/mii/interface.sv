@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
 */
 
-interface mii_if #(CHANNELS, WIDTH) (input logic CLK);
+interface mii_if #(int unsigned CHANNELS, int unsigned WIDTH) (input logic CLK);
     
     initial BYTES_ONLY : assert ((WIDTH & 7) == 0);
 

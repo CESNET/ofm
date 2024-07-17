@@ -9,7 +9,7 @@
  */
 
 
-class agent_slave#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_agent;
+class agent_slave #(int unsigned DATA_WIDTH, int unsigned ADDR_WIDTH, int unsigned META_WIDTH = 0) extends uvm_agent;
     `uvm_component_param_utils(uvm_mi::agent_slave #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
 
 
@@ -62,7 +62,7 @@ class agent_slave#(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_agent;
 endclass
 
 // Slave agent is connected to slave DUT port. Master agent is connected to master DUT port.
-class agent_master #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_agent;
+class agent_master #(int unsigned DATA_WIDTH, int unsigned ADDR_WIDTH, int unsigned META_WIDTH = 0) extends uvm_agent;
     // Registration of agent to databaze.
     `uvm_component_param_utils(agent_master #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
 

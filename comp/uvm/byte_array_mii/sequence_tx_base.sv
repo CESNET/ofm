@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
 */
 
-class sequence_tx_base #(CHANNELS, CHANNEL_WIDTH) extends uvm_sequence #(uvm_mii::sequence_item #(CHANNELS, CHANNEL_WIDTH));
+class sequence_tx_base #(int unsigned CHANNELS, int unsigned CHANNEL_WIDTH) extends uvm_sequence #(uvm_mii::sequence_item #(CHANNELS, CHANNEL_WIDTH));
     `uvm_object_param_utils(uvm_byte_array_mii::sequence_tx_base #(CHANNELS, CHANNEL_WIDTH))
     `uvm_declare_p_sequencer(uvm_mii::sequencer #(CHANNELS, CHANNEL_WIDTH))
 

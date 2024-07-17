@@ -9,7 +9,7 @@
 */
 
 // Definition of MII interface.
-interface pma_if #(DATA_WIDTH) (input logic CLK, RESET);
+interface pma_if #(int unsigned DATA_WIDTH) (input logic CLK, RESET);
 
     // Bus structure of PMA.
     wire logic [DATA_WIDTH-1 : 0] DATA; // Data

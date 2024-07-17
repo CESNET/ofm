@@ -4,7 +4,7 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause
 
-class monitor_logic_vector_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH, READY_LATENCY) extends uvm_logic_vector_array::monitor #(ITEM_WIDTH);
+class monitor_logic_vector_array #(int unsigned REGIONS, int unsigned REGION_SIZE, int unsigned BLOCK_SIZE, int unsigned ITEM_WIDTH, int unsigned META_WIDTH, int unsigned READY_LATENCY) extends uvm_logic_vector_array::monitor #(ITEM_WIDTH);
     `uvm_component_param_utils(uvm_logic_vector_array_avst::monitor_logic_vector_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH, READY_LATENCY))
 
     // Analysis port
@@ -97,7 +97,7 @@ class monitor_logic_vector_array #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH,
     endfunction
 endclass
 
-class monitor_logic_vector #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH, READY_LATENCY) extends uvm_logic_vector::monitor#(META_WIDTH);
+class monitor_logic_vector #(int unsigned REGIONS, int unsigned REGION_SIZE, int unsigned BLOCK_SIZE, int unsigned ITEM_WIDTH, int unsigned META_WIDTH, int unsigned READY_LATENCY) extends uvm_logic_vector::monitor#(META_WIDTH);
     `uvm_component_param_utils(uvm_logic_vector_array_avst::monitor_logic_vector #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH, READY_LATENCY))
 
     typedef monitor_logic_vector #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH, READY_LATENCY) this_type;

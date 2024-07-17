@@ -8,7 +8,7 @@
 import uvm_pkg::*;
 
 
-module mvb_property #(ITEMS, ITEM_WIDTH)
+module mvb_property #(int unsigned ITEMS, int unsigned ITEM_WIDTH)
     (
         input RESET,
         mvb_if vif

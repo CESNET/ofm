@@ -12,7 +12,7 @@
 `define PMA_AGENT_SV
 
 // This is PMA agent, which declares basic components.
-class agent #(DATA_WIDTH) extends uvm_agent;
+class agent #(int unsigned DATA_WIDTH) extends uvm_agent;
 
     // Registration of agent to databaze.
     `uvm_component_param_utils(uvm_pma::agent #(DATA_WIDTH))

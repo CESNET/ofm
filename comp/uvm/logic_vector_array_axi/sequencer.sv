@@ -4,7 +4,7 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
-class sequencer_rx #(ITEM_WIDTH) extends uvm_sequencer;
+class sequencer_rx #(int unsigned ITEM_WIDTH) extends uvm_sequencer;
     `uvm_component_param_utils(uvm_logic_vector_array_axi::sequencer_rx #(ITEM_WIDTH));
 
     uvm_logic_vector_array::sequencer #(ITEM_WIDTH) m_data;

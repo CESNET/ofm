@@ -5,7 +5,7 @@
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
 // Driver of AXI rx interface
-class driver_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends uvm_driver #(sequence_item #(DATA_WIDTH, TUSER_WIDTH, REGIONS));
+class driver_rx #(int unsigned DATA_WIDTH, int unsigned TUSER_WIDTH, int unsigned REGIONS) extends uvm_driver #(sequence_item #(DATA_WIDTH, TUSER_WIDTH, REGIONS));
 
     // ------------------------------------------------------------------------
     // Register component to database
@@ -62,7 +62,7 @@ class driver_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends uvm_driver #(sequenc
 endclass
 
 // Driver of AXI tx interface
-class driver_tx #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends uvm_driver #(sequence_item #(DATA_WIDTH, TUSER_WIDTH, REGIONS));
+class driver_tx #(int unsigned DATA_WIDTH, int unsigned TUSER_WIDTH, int unsigned REGIONS) extends uvm_driver #(sequence_item #(DATA_WIDTH, TUSER_WIDTH, REGIONS));
     `uvm_component_param_utils(uvm_axi::driver_tx #(DATA_WIDTH, TUSER_WIDTH, REGIONS))
 
     // ------------------------------------------------------------------------

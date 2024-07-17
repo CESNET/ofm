@@ -12,7 +12,7 @@
 import uvm_pkg::*;
 
 
-module mfb_property #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) 
+module mfb_property #(int unsigned REGIONS, int unsigned REGION_SIZE, int unsigned BLOCK_SIZE, int unsigned ITEM_WIDTH, int unsigned META_WIDTH) 
     (
         input RESET,
         mfb_if vif

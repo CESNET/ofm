@@ -8,7 +8,7 @@
 `define MVB_AGENT_SV
 
 // This is mvb rx agent, which declares basic components.
-class agent_rx #(ITEMS, ITEM_WIDTH) extends uvm_agent;
+class agent_rx #(int unsigned ITEMS, int unsigned ITEM_WIDTH) extends uvm_agent;
     `uvm_component_param_utils(uvm_mvb::agent_rx #(ITEMS, ITEM_WIDTH))
 
     // ------------------------------------------------------------------------
@@ -83,7 +83,7 @@ class agent_rx #(ITEMS, ITEM_WIDTH) extends uvm_agent;
 endclass
 
 // This is mvb tx agent, which declares basic components.
-class agent_tx #(ITEMS, ITEM_WIDTH) extends uvm_agent;
+class agent_tx #(int unsigned ITEMS, int unsigned ITEM_WIDTH) extends uvm_agent;
     `uvm_component_param_utils(uvm_mvb::agent_tx #(ITEMS, ITEM_WIDTH))
 
     // ------------------------------------------------------------------------

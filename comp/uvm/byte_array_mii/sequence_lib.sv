@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
 */
 
-class sequence_lib_rx #(CHANNELS, CHANNEL_WIDTH) extends uvm_sequence_library #(uvm_mii::sequence_item #(CHANNELS, CHANNEL_WIDTH));
+class sequence_lib_rx #(int unsigned CHANNELS, int unsigned CHANNEL_WIDTH) extends uvm_sequence_library #(uvm_mii::sequence_item #(CHANNELS, CHANNEL_WIDTH));
     `uvm_object_param_utils(uvm_byte_array_mii::sequence_lib_rx #(CHANNELS, CHANNEL_WIDTH))
     `uvm_sequence_library_utils(uvm_byte_array_mii::sequence_lib_rx #(CHANNELS, CHANNEL_WIDTH))
 
@@ -25,7 +25,7 @@ class sequence_lib_rx #(CHANNELS, CHANNEL_WIDTH) extends uvm_sequence_library #(
 
 endclass
 
-class sequence_lib_tx #(CHANNELS, CHANNEL_WIDTH) extends uvm_sequence_library #(uvm_mii::sequence_item #(CHANNELS, CHANNEL_WIDTH));
+class sequence_lib_tx #(int unsigned CHANNELS, int unsigned CHANNEL_WIDTH) extends uvm_sequence_library #(uvm_mii::sequence_item #(CHANNELS, CHANNEL_WIDTH));
     `uvm_object_param_utils(uvm_byte_array_mii::sequence_lib_tx #(CHANNELS, CHANNEL_WIDTH))
     `uvm_sequence_library_utils(uvm_byte_array_mii::sequence_lib_tx #(CHANNELS, CHANNEL_WIDTH))
 

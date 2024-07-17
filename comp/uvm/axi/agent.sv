@@ -5,7 +5,7 @@
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
 // This is AXI rx agent, which declares basic components.
-class agent_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends uvm_agent;
+class agent_rx #(int unsigned DATA_WIDTH, int unsigned TUSER_WIDTH, int unsigned REGIONS) extends uvm_agent;
 
     // ------------------------------------------------------------------------
     // Registration of agent to databaze
@@ -78,7 +78,7 @@ class agent_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends uvm_agent;
 endclass
 
 // This is AXI tx agent, which declares basic components.
-class agent_tx #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends uvm_agent;
+class agent_tx #(int unsigned DATA_WIDTH, int unsigned TUSER_WIDTH, int unsigned REGIONS) extends uvm_agent;
 
     // ------------------------------------------------------------------------
     // Registration of agent to databaze

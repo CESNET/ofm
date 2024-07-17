@@ -4,7 +4,7 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
-class sequence_simple_tx #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends uvm_common::sequence_base #(config_sequence, uvm_axi::sequence_item #(DATA_WIDTH, TUSER_WIDTH, REGIONS));
+class sequence_simple_tx #(int unsigned DATA_WIDTH, int unsigned TUSER_WIDTH, int unsigned REGIONS) extends uvm_common::sequence_base #(config_sequence, uvm_axi::sequence_item #(DATA_WIDTH, TUSER_WIDTH, REGIONS));
     `uvm_object_param_utils(uvm_axi::sequence_simple_tx #(DATA_WIDTH, TUSER_WIDTH, REGIONS))
 
     // ------------------------------------------------------------------------
@@ -55,7 +55,7 @@ class sequence_simple_tx #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends uvm_common:
     endtask
 endclass
 
-class sequence_full_speed_tx #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends uvm_common::sequence_base #(config_sequence, sequence_item #(DATA_WIDTH, TUSER_WIDTH, REGIONS));
+class sequence_full_speed_tx #(int unsigned DATA_WIDTH, int unsigned TUSER_WIDTH, int unsigned REGIONS) extends uvm_common::sequence_base #(config_sequence, sequence_item #(DATA_WIDTH, TUSER_WIDTH, REGIONS));
     `uvm_object_param_utils(uvm_axi::sequence_full_speed_tx #(DATA_WIDTH, TUSER_WIDTH, REGIONS))
 
     // ------------------------------------------------------------------------
@@ -101,7 +101,7 @@ class sequence_full_speed_tx #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends uvm_com
     endtask
 endclass
 
-class sequence_stop_tx #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends uvm_common::sequence_base #(config_sequence, sequence_item #(DATA_WIDTH, TUSER_WIDTH, REGIONS));
+class sequence_stop_tx #(int unsigned DATA_WIDTH, int unsigned TUSER_WIDTH, int unsigned REGIONS) extends uvm_common::sequence_base #(config_sequence, sequence_item #(DATA_WIDTH, TUSER_WIDTH, REGIONS));
     `uvm_object_param_utils(uvm_axi::sequence_stop_tx #(DATA_WIDTH, TUSER_WIDTH, REGIONS))
 
     // ------------------------------------------------------------------------
@@ -150,7 +150,7 @@ endclass
 
 /////////////////////////////////////////////////////////////////////////
 // SEQUENCE LIBRARY RX
-class sequence_lib_tx#(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends uvm_common::sequence_library#(config_sequence, uvm_axi::sequence_item #(DATA_WIDTH, TUSER_WIDTH, REGIONS));
+class sequence_lib_tx #(int unsigned DATA_WIDTH, int unsigned TUSER_WIDTH, int unsigned REGIONS) extends uvm_common::sequence_library#(config_sequence, uvm_axi::sequence_item #(DATA_WIDTH, TUSER_WIDTH, REGIONS));
   `uvm_object_param_utils(uvm_axi::sequence_lib_tx#(DATA_WIDTH, TUSER_WIDTH, REGIONS))
   `uvm_sequence_library_utils(uvm_axi::sequence_lib_tx#(DATA_WIDTH, TUSER_WIDTH, REGIONS))
 

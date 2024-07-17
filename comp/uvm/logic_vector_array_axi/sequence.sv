@@ -6,7 +6,7 @@
 
 
 // This low level sequence define bus functionality
-class sequence_simple_rx_base #(DATA_WIDTH, TUSER_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING) extends uvm_common::sequence_base#(config_sequence, uvm_axi::sequence_item #(DATA_WIDTH, TUSER_WIDTH, REGIONS));
+class sequence_simple_rx_base #(int unsigned DATA_WIDTH, int unsigned TUSER_WIDTH, int unsigned REGIONS, int unsigned BLOCK_SIZE, logic STRADDLING) extends uvm_common::sequence_base#(config_sequence, uvm_axi::sequence_item #(DATA_WIDTH, TUSER_WIDTH, REGIONS));
     `uvm_object_param_utils(uvm_logic_vector_array_axi::sequence_simple_rx_base#(DATA_WIDTH, TUSER_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING))
     `uvm_declare_p_sequencer(uvm_axi::sequencer#(DATA_WIDTH, TUSER_WIDTH, REGIONS));
 
@@ -130,7 +130,7 @@ class sequence_simple_rx_base #(DATA_WIDTH, TUSER_WIDTH, REGIONS, BLOCK_SIZE, ST
     endtask
 endclass
 
-class sequence_simple_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING) extends sequence_simple_rx_base #(DATA_WIDTH, TUSER_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING);
+class sequence_simple_rx #(int unsigned DATA_WIDTH, int unsigned TUSER_WIDTH, int unsigned REGIONS, int unsigned BLOCK_SIZE, logic STRADDLING) extends sequence_simple_rx_base #(DATA_WIDTH, TUSER_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING);
     `uvm_object_param_utils(uvm_logic_vector_array_axi::sequence_simple_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING))
     uvm_common::rand_length   rdy_length;
     uvm_common::rand_rdy      rdy_rdy;
@@ -335,7 +335,7 @@ class sequence_simple_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS, BLOCK_SIZE, STRADDL
 endclass
 
 
-class sequence_full_speed_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING) extends sequence_simple_rx_base #(DATA_WIDTH, TUSER_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING);
+class sequence_full_speed_rx #(int unsigned DATA_WIDTH, int unsigned TUSER_WIDTH, int unsigned REGIONS, int unsigned BLOCK_SIZE, logic STRADDLING) extends sequence_simple_rx_base #(DATA_WIDTH, TUSER_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING);
     `uvm_object_param_utils(uvm_logic_vector_array_axi::sequence_full_speed_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING))
     uvm_common::rand_length   rdy_length;
     uvm_common::rand_rdy      rdy_rdy;
@@ -529,7 +529,7 @@ class sequence_full_speed_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS, BLOCK_SIZE, STR
     endtask
 endclass
 
-class sequence_stop_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING) extends sequence_simple_rx_base #(DATA_WIDTH, TUSER_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING);
+class sequence_stop_rx #(int unsigned DATA_WIDTH, int unsigned TUSER_WIDTH, int unsigned REGIONS, int unsigned BLOCK_SIZE, logic STRADDLING) extends sequence_simple_rx_base #(DATA_WIDTH, TUSER_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING);
     `uvm_object_param_utils(uvm_logic_vector_array_axi::sequence_stop_rx #(DATA_WIDTH, TUSER_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING))
 
     constraint c_hl_transations_stop {
@@ -581,7 +581,7 @@ endclass
 // /////////////////////////////////////////////////////////////////////////
 // // SEQUENCE LIBRARY RX
 
-class sequence_lib_rx#(DATA_WIDTH, TUSER_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING) extends uvm_common::sequence_library#(config_sequence, uvm_axi::sequence_item #(DATA_WIDTH, TUSER_WIDTH, REGIONS));
+class sequence_lib_rx #(int unsigned DATA_WIDTH, int unsigned TUSER_WIDTH, int unsigned REGIONS, int unsigned BLOCK_SIZE, logic STRADDLING) extends uvm_common::sequence_library#(config_sequence, uvm_axi::sequence_item #(DATA_WIDTH, TUSER_WIDTH, REGIONS));
   `uvm_object_param_utils(uvm_logic_vector_array_axi::sequence_lib_rx#(DATA_WIDTH, TUSER_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING))
   `uvm_sequence_library_utils(uvm_logic_vector_array_axi::sequence_lib_rx#(DATA_WIDTH, TUSER_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING))
 

@@ -12,7 +12,7 @@
 `define LII_AGENT_SV
 
 // This is LII agent, which declares basic components.
-class agent #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH) extends uvm_agent;
+class agent #(int unsigned DATA_WIDTH, logic FAST_SOF, int unsigned META_WIDTH, int unsigned SOF_WIDTH) extends uvm_agent;
 
     // Registration of agent to databaze.
     `uvm_component_param_utils(uvm_lii_rx::agent #(DATA_WIDTH, FAST_SOF, META_WIDTH, SOF_WIDTH))

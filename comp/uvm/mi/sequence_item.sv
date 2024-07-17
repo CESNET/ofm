@@ -11,7 +11,7 @@
 ////////////////////////////////////////////////////////////////////////
 // MI REQUEST
 ////////////////////////////////////////////////////////////////////////
-class sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends uvm_sequence_item;
+class sequence_item_request #(int unsigned DATA_WIDTH, int unsigned ADDR_WIDTH, int unsigned META_WIDTH = 0) extends uvm_sequence_item;
 
     // registration of object tools
     `uvm_object_param_utils(uvm_mi::sequence_item_request #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH))
@@ -104,7 +104,7 @@ endclass
 ////////////////////////////////////////////////////////////////////////
 // MI RESPONSE
 ////////////////////////////////////////////////////////////////////////
-class sequence_item_response #(DATA_WIDTH) extends uvm_sequence_item;
+class sequence_item_response #(int unsigned DATA_WIDTH) extends uvm_sequence_item;
 
     // registration of object tools
     `uvm_object_param_utils(uvm_mi::sequence_item_response#(DATA_WIDTH))

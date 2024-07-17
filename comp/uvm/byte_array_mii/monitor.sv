@@ -11,7 +11,7 @@
 `ifndef BYTE_ARRAY_MII_MONITOR_SV
 `define BYTE_ARRAY_MII_MONITOR_SV
 
-class monitor #(CHANNELS, CHANNEL_WIDTH) extends uvm_byte_array::monitor;
+class monitor #(int unsigned CHANNELS, int unsigned CHANNEL_WIDTH) extends uvm_byte_array::monitor;
     `uvm_component_param_utils(uvm_byte_array_mii::monitor #(CHANNELS, CHANNEL_WIDTH))
 
     localparam BYTES = CHANNEL_WIDTH >> 3;

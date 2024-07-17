@@ -9,7 +9,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
 */
 
-class comparer_fifo #(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM);
+class comparer_fifo #(type MODEL_ITEM, type DUT_ITEM = MODEL_ITEM);
 
     protected model_item#(MODEL_ITEM) model_items[$];
     protected dut_item#(DUT_ITEM) model_items_last;
@@ -55,7 +55,7 @@ class comparer_fifo #(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM);
 endclass
 
 
-virtual class comparer_base_tagged#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) extends comparer_base#(MODEL_ITEM, DUT_ITEM);
+virtual class comparer_base_tagged #(type MODEL_ITEM, type DUT_ITEM = MODEL_ITEM) extends comparer_base#(MODEL_ITEM, DUT_ITEM);
 
     int unsigned             model_accept;
     comparer_fifo #(MODEL_ITEM, DUT_ITEM) model_items[string];

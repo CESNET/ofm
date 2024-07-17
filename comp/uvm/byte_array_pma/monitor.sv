@@ -11,7 +11,7 @@
 `ifndef TEST_MONITOR_SV
 `define TEST_MONITOR_SV
 
-class monitor #(DATA_WIDTH) extends uvm_byte_array::monitor;
+class monitor #(int unsigned DATA_WIDTH) extends uvm_byte_array::monitor;
 
     `uvm_component_param_utils(uvm_byte_array_pma::monitor #(DATA_WIDTH))
     

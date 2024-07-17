@@ -10,7 +10,7 @@
 
 
 // Reusable high level sequence. Contains transaction, which has only data part.
-class sequence_search#(ITEM_WIDTH) extends uvm_common::sequence_base#(config_sequence, uvm_logic_vector_array::sequence_item#(ITEM_WIDTH));
+class sequence_search #(int unsigned ITEM_WIDTH) extends uvm_common::sequence_base#(config_sequence, uvm_logic_vector_array::sequence_item#(ITEM_WIDTH));
     `uvm_object_param_utils(uvm_packet_generators::sequence_search#(ITEM_WIDTH))
     `uvm_declare_p_sequencer(uvm_logic_vector_array::sequencer#(ITEM_WIDTH));
 

@@ -12,7 +12,7 @@
 `define PMA_MONITOR_SV
 
 // Definition of MII monitor
-class monitor #(DATA_WIDTH) extends uvm_monitor;
+class monitor #(int unsigned DATA_WIDTH) extends uvm_monitor;
 
     `uvm_component_param_utils(uvm_pma::monitor #(DATA_WIDTH))
 

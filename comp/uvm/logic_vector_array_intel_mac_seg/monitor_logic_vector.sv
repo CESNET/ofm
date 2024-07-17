@@ -9,7 +9,7 @@
 */
 
 
-class monitor_logic_vector#(WIDTH, SEGMENTS) extends uvm_logic_vector::monitor #(WIDTH);
+class monitor_logic_vector #(int unsigned WIDTH, int unsigned SEGMENTS) extends uvm_logic_vector::monitor #(WIDTH);
     `uvm_component_param_utils(uvm_logic_vector_array_intel_mac_seg::monitor_logic_vector#(WIDTH, SEGMENTS))
 
     uvm_analysis_imp #(uvm_intel_mac_seg::sequence_item #(SEGMENTS), monitor_logic_vector#(WIDTH, SEGMENTS)) analysis_export;

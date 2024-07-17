@@ -5,7 +5,7 @@
 //-- SPDX-License-Identifier: BSD-3-Clause
 
 // Definition of mvb environment
-class env_rx #(ITEMS, ITEM_WIDTH) extends uvm_env;
+class env_rx #(int unsigned ITEMS, int unsigned ITEM_WIDTH) extends uvm_env;
     `uvm_component_param_utils(uvm_logic_vector_mvb::env_rx #(ITEMS, ITEM_WIDTH));
 
     // ------------------------------------------------------------------------
@@ -101,7 +101,7 @@ class env_rx #(ITEMS, ITEM_WIDTH) extends uvm_env;
 endclass
 
 
-class env_tx #(ITEMS, ITEM_WIDTH) extends uvm_env;
+class env_tx #(int unsigned ITEMS, int unsigned ITEM_WIDTH) extends uvm_env;
     `uvm_component_param_utils(uvm_logic_vector_mvb::env_tx #(ITEMS, ITEM_WIDTH));
 
     //Access component

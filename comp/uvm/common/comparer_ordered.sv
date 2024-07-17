@@ -11,7 +11,7 @@
 
 /////////////////////////////////////////////
 // Ordered checker. All data is compared chronologicaly.
-virtual class comparer_base_ordered#(type MODEL_ITEM, DUT_ITEM = MODEL_ITEM) extends comparer_base#(MODEL_ITEM, DUT_ITEM);
+virtual class comparer_base_ordered #(type MODEL_ITEM, type DUT_ITEM = MODEL_ITEM) extends comparer_base#(MODEL_ITEM, DUT_ITEM);
 
     int unsigned dut_sends;
     model_item#(MODEL_ITEM) model_items[$];

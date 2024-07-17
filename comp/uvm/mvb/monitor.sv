@@ -8,7 +8,7 @@
 `define MVB_MONITOR_SV
 
 // Definition of mvb monitor
-class monitor #(ITEMS, ITEM_WIDTH) extends uvm_monitor;
+class monitor #(int unsigned ITEMS, int unsigned ITEM_WIDTH) extends uvm_monitor;
 
     // ------------------------------------------------------------------------
     // Registration of agent to databaze

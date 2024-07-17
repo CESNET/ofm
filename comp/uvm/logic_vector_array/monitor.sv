@@ -11,7 +11,7 @@
 `ifndef LOGIC_VECTOR_ARRAY_MONITOR_SV
 `define LOGIC_VECTOR_ARRAY_MONITOR_SV
 
-class monitor #(ITEM_WIDTH) extends uvm_monitor;
+class monitor #(int unsigned ITEM_WIDTH) extends uvm_monitor;
 
     `uvm_component_utils(uvm_logic_vector_array::monitor #(ITEM_WIDTH))
 

@@ -5,7 +5,7 @@
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
 // Definition of axi environment
-class env_rx #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING) extends uvm_env;
+class env_rx #(int unsigned DATA_WIDTH, int unsigned TUSER_WIDTH, int unsigned ITEM_WIDTH, int unsigned REGIONS, int unsigned BLOCK_SIZE, int unsigned STRADDLING) extends uvm_env;
     `uvm_component_param_utils(uvm_logic_vector_array_axi::env_rx #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING));
 
     // ------------------------------------------------------------------------
@@ -110,7 +110,7 @@ class env_rx #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS, BLOCK_SIZE, STRADDL
 endclass
 
 
-class env_tx #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING) extends uvm_env;
+class env_tx #(int unsigned DATA_WIDTH, int unsigned TUSER_WIDTH, int unsigned ITEM_WIDTH, int unsigned REGIONS, int unsigned BLOCK_SIZE, int unsigned STRADDLING) extends uvm_env;
     `uvm_component_param_utils(uvm_logic_vector_array_axi::env_tx #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING));
 
     //Access component

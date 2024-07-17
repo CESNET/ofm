@@ -10,7 +10,7 @@
 */
 
 // This low level sequence define how can data looks like.
-class sequence_simple #(DATA_WIDTH) extends uvm_sequence #(uvm_pma::sequence_item #(DATA_WIDTH));
+class sequence_simple #(int unsigned DATA_WIDTH) extends uvm_sequence #(uvm_pma::sequence_item #(DATA_WIDTH));
 
     `uvm_object_param_utils(uvm_byte_array_pma::sequence_simple #(DATA_WIDTH))
     `uvm_declare_p_sequencer(uvm_pma::sequencer #(DATA_WIDTH))

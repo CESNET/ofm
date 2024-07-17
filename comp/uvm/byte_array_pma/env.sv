@@ -12,7 +12,7 @@
 `ifndef RX_ENV_SV
 `define RX_ENV_SV
 
-class env #(DATA_WIDTH) extends uvm_env;
+class env #(int unsigned DATA_WIDTH) extends uvm_env;
 
     `uvm_component_param_utils(uvm_byte_array_pma::env #(DATA_WIDTH));
 

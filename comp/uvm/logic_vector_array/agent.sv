@@ -11,7 +11,7 @@
 `ifndef LOGIC_VECTOR_ARRAY_AGENT_SV
 `define LOGIC_VECTOR_ARRAY_AGENT_SV
 
-class agent #(ITEM_WIDTH) extends uvm_agent;
+class agent #(int unsigned ITEM_WIDTH) extends uvm_agent;
 
     // registration of component tools
     `uvm_component_utils(uvm_logic_vector_array::agent #(ITEM_WIDTH))

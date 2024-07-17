@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
 */
 
-class env_config_item#(RESETS) extends uvm_object;
+class env_config_item #(int unsigned RESETS) extends uvm_object;
 
     ////////////////
     // configuration variables

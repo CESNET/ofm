@@ -4,7 +4,7 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
-class monitor #(ITEMS, ITEM_WIDTH) extends uvm_logic_vector::monitor#(ITEM_WIDTH);
+class monitor #(int unsigned ITEMS, int unsigned ITEM_WIDTH) extends uvm_logic_vector::monitor#(ITEM_WIDTH);
     `uvm_component_param_utils(uvm_logic_vector_mvb::monitor #(ITEMS, ITEM_WIDTH))
 
     // Analysis port

@@ -4,7 +4,7 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
-class sequencer #(DATA_WIDTH, TUSER_WIDTH, REGIONS) extends uvm_sequencer #(uvm_axi::sequence_item #(DATA_WIDTH, TUSER_WIDTH, REGIONS));
+class sequencer #(int unsigned DATA_WIDTH, int unsigned TUSER_WIDTH, int unsigned REGIONS) extends uvm_sequencer #(uvm_axi::sequence_item #(DATA_WIDTH, TUSER_WIDTH, REGIONS));
     // ------------------------------------------------------------------------
     // Registration of agent to databaze
     `uvm_component_param_utils(uvm_axi::sequencer #(DATA_WIDTH, TUSER_WIDTH, REGIONS))

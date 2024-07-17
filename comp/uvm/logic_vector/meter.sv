@@ -4,7 +4,7 @@
 
 // SPDX-License-Identifier: BSD-3-Clause 
 
-class meter #(ITEM_WIDTH) extends uvm_subscriber#(sequence_item #(ITEM_WIDTH));
+class meter #(int unsigned ITEM_WIDTH) extends uvm_subscriber#(sequence_item #(ITEM_WIDTH));
     `uvm_component_param_utils(uvm_logic_vector::meter #(ITEM_WIDTH))
 
     // ------------------------------------------------------------------------

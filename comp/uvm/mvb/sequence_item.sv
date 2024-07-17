@@ -7,7 +7,7 @@
 `ifndef MVB_SEQUENCE_ITEM_SV
 `define MVB_SEQUENCE_ITEM_SV
 
-class sequence_item #(ITEMS, ITEM_WIDTH) extends uvm_sequence_item;
+class sequence_item #(int unsigned ITEMS, int unsigned ITEM_WIDTH) extends uvm_sequence_item;
 
     // ------------------------------------------------------------------------
     // Registration of object tools

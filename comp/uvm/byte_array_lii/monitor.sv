@@ -11,7 +11,7 @@
 `ifndef TEST_MONITOR_SV
 `define TEST_MONITOR_SV
 
-class monitor_byte_array #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH, SOF_WIDTH) extends uvm_byte_array::monitor;
+class monitor_byte_array #(int unsigned DATA_WIDTH, logic DIC_EN, int unsigned VERBOSITY, int unsigned META_WIDTH, int unsigned SOF_WIDTH) extends uvm_byte_array::monitor;
 
     `uvm_component_param_utils(uvm_byte_array_lii::monitor_byte_array #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH, SOF_WIDTH))
     
@@ -272,7 +272,7 @@ class monitor_byte_array #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH, SOF_WIDTH)
 
 endclass
 
-class monitor_logic_vector #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH) extends uvm_logic_vector::monitor #(LOGIC_WIDTH);
+class monitor_logic_vector #(int unsigned DATA_WIDTH, logic DIC_EN, int unsigned VERBOSITY, int unsigned META_WIDTH, int unsigned LOGIC_WIDTH, int unsigned SOF_WIDTH) extends uvm_logic_vector::monitor #(LOGIC_WIDTH);
 
     `uvm_component_param_utils(uvm_byte_array_lii::monitor_logic_vector #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH, LOGIC_WIDTH, SOF_WIDTH))
 

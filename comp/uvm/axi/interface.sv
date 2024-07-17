@@ -5,7 +5,7 @@
 //-- SPDX-License-Identifier: BSD-3-Clause 
 
 // Definition of AXI interface.
-interface axi_if #(DATA_WIDTH, TUSER_WIDTH) (input logic CLK);
+interface axi_if #(int unsigned DATA_WIDTH, int unsigned TUSER_WIDTH) (input logic CLK);
     // initial VALID_PARAMETERS : assert(REGIONS > 0 && REGION_SIZE > 0 && BLOCK_SIZE > 0 && ITEM_WIDTH > 0);
 
     // ------------------------------------------------------------------------

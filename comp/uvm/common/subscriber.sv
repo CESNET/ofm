@@ -15,7 +15,7 @@
 
 ////////////////////////////////////////////////
 // change item to model_item which carry input time of transactions
-virtual class subscriber_base#(type SEQ_ITEM, OUTPUT_ITEM) extends uvm_subscriber#(SEQ_ITEM);
+virtual class subscriber_base #(type SEQ_ITEM, type OUTPUT_ITEM) extends uvm_subscriber#(SEQ_ITEM);
    `uvm_component_param_utils(uvm_common::subscriber_base#(SEQ_ITEM, OUTPUT_ITEM))
 
     uvm_analysis_port#(model_item#(OUTPUT_ITEM)) port;
@@ -40,7 +40,7 @@ endclass
 
 ////////////////////////////////////////////////
 // subscriber add time to item 
-class subscriber#(type SEQ_ITEM) extends subscriber_base#(SEQ_ITEM, SEQ_ITEM);
+class subscriber #(type SEQ_ITEM) extends subscriber_base#(SEQ_ITEM, SEQ_ITEM);
    `uvm_component_param_utils(uvm_common::subscriber#(SEQ_ITEM))
 
    int unsigned received;

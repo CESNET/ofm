@@ -12,7 +12,7 @@
 `define MII_AGENT_SV
 
 // This is MII agent, which declares basic components.
-class agent_rx #(CHANNELS, WIDTH) extends uvm_agent;
+class agent_rx #(int unsigned CHANNELS, int unsigned WIDTH) extends uvm_agent;
     `uvm_component_param_utils(uvm_mii::agent_rx #(CHANNELS, WIDTH))
 
     // ------------------------------------------------------------------------
@@ -84,7 +84,7 @@ class agent_rx #(CHANNELS, WIDTH) extends uvm_agent;
 endclass
 
 // This is MII agent, which declares basic components.
-class agent_tx #(CHANNELS, WIDTH) extends uvm_agent;
+class agent_tx #(int unsigned CHANNELS, int unsigned WIDTH) extends uvm_agent;
     `uvm_component_param_utils(uvm_mii::agent_tx #(CHANNELS, WIDTH))
 
     // ------------------------------------------------------------------------

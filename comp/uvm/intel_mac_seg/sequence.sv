@@ -9,7 +9,7 @@
 */
 
 
-class sequence_simple_rx #(SEGMENTS) extends uvm_sequence #(sequence_item #(SEGMENTS));
+class sequence_simple_rx #(int unsigned SEGMENTS) extends uvm_sequence #(sequence_item #(SEGMENTS));
     `uvm_object_param_utils(uvm_intel_mac_seg::sequence_simple_rx #(SEGMENTS))
 
     // ------------------------------------------------------------------------
@@ -65,7 +65,7 @@ class sequence_simple_rx #(SEGMENTS) extends uvm_sequence #(sequence_item #(SEGM
 endclass
 
 
-class sequence_simple_tx #(SEGMENTS) extends uvm_sequence #(sequence_item #(SEGMENTS));
+class sequence_simple_tx #(int unsigned SEGMENTS) extends uvm_sequence #(sequence_item #(SEGMENTS));
     `uvm_object_param_utils(uvm_intel_mac_seg::sequence_simple_tx #(SEGMENTS))
 
     // ------------------------------------------------------------------------
