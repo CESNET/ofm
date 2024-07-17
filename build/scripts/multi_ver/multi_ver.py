@@ -72,7 +72,7 @@ def run_modelsim(fdo_file, test_name, manual=False, gui=False, coverage=False, e
         command += "quit -f;"
 
     params =  ""
-    params += f" -logfile {logfile_name} "
+    params += f" -logfile \"{logfile_name}\" "
     params += "" if gui else " -c "
 
     if coverage:
