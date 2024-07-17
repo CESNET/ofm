@@ -43,5 +43,4 @@ Library of commonly used agents and enviroments in UVM verification
     axi/readme
     logic_vector_array_axi/readme
     packet_generators/ft_gen_sequence/readme
-
-
+    avmm/readme
