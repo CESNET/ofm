@@ -20,6 +20,7 @@ class agent_rx #(int unsigned SEGMENTS) extends uvm_agent;
     sequencer       #(SEGMENTS) m_sequencer;
     driver_rx       #(SEGMENTS) m_driver;
     monitor         #(SEGMENTS) m_monitor;
+    statistic       #(SEGMENTS) m_stats;
     config_item                 m_config;
 
     // ------------------------------------------------------------------------
@@ -45,6 +46,7 @@ class agent_rx #(int unsigned SEGMENTS) extends uvm_agent;
         end
 
         // Create monitor
+        m_stats     = statistic#(SEGMENTS)::type_id::create("m_stats", this);
         m_monitor   = monitor #(SEGMENTS)::type_id::create("m_monitor", this);
     endfunction
 
@@ -71,6 +73,7 @@ class agent_rx #(int unsigned SEGMENTS) extends uvm_agent;
         // Connect monitor
         m_monitor.vif = vif;
         analysis_port = m_monitor.analysis_port;
+        analysis_port.connect(m_stats.analysis_export);
     endfunction
 endclass
 
@@ -87,6 +90,7 @@ class agent_tx #(int unsigned SEGMENTS) extends uvm_agent;
     sequencer       #(SEGMENTS) m_sequencer;
     driver_tx       #(SEGMENTS) m_driver;
     monitor         #(SEGMENTS) m_monitor;
+    statistic       #(SEGMENTS) m_stats;
     config_item                 m_config;
 
     // ------------------------------------------------------------------------
@@ -112,6 +116,7 @@ class agent_tx #(int unsigned SEGMENTS) extends uvm_agent;
         end
 
         // Create monitor
+        m_stats     = statistic#(SEGMENTS)::type_id::create("m_stats", this);
         m_monitor   = monitor #(SEGMENTS)::type_id::create("m_monitor", this);
     endfunction
 
@@ -138,6 +143,7 @@ class agent_tx #(int unsigned SEGMENTS) extends uvm_agent;
         // Connect monitor
         m_monitor.vif = vif;
         analysis_port = m_monitor.analysis_port;
+        analysis_port.connect(m_stats.analysis_export);
     endfunction
 endclass
 
