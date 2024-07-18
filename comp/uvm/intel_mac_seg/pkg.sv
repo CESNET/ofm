@@ -16,6 +16,7 @@ package uvm_intel_mac_seg;
     `include "sequencer.sv"
     `include "driver.sv"
     `include "monitor.sv"
+    `include "statistic.sv"
     `include "config.sv"
     `include "agent.sv"
 
