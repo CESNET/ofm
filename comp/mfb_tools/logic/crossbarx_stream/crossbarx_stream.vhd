@@ -58,6 +58,11 @@ generic(
     -- Maximum packet size in MFB ITEMS.
     PKT_MTU               : natural := 1024;
 
+    -- Number of maximum sized packets in Input and Output buffer
+    -- MUST be a power of 2
+    -- (4 -> ~150 Gb/s, 8 -> ~400 Gb/s)
+    NUM_OF_PKTS           : natural := 4;
+
     -- Maximum number of Transaction waiting for data transfer.
     -- Setting this value too low will lead to lower throughput,
     -- which should trigger a simulation assert warning in component CrossbarX.
@@ -163,10 +168,6 @@ architecture FULL of CROSSBARX_STREAM is
 
     constant MFB_REGION_WIDTH : natural := MFB_REGION_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH;
     constant MFB_DATA_WIDTH   : natural := MFB_REGIONS*MFB_REGION_WIDTH;
-    -- Number of maximum sized packets in Input and Output buffer
-    -- MUST be a power of 2
-    -- (4 -> ~150 Gb/s, 8 -> ~400 Gb/s)
-    constant NUM_OF_PKTS      : natural := 4;
 
     constant BUF_WORDSL       : natural := log2(PKT_MTU*MFB_ITEM_WIDTH/MFB_DATA_WIDTH*NUM_OF_PKTS*2-1);
     constant RX_BUF_WORDS     : natural := 2**BUF_WORDSL;
