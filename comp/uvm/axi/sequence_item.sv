@@ -4,7 +4,7 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause
 
-class sequence_item #(int unsigned DATA_WIDTH, int unsigned TUSER_WIDTH, int unsigned REGIONS) extends uvm_sequence_item;
+class sequence_item #(int unsigned DATA_WIDTH, int unsigned TUSER_WIDTH, int unsigned REGIONS) extends uvm_common::sequence_item;
 
     // ------------------------------------------------------------------------
     // Registration of object tools

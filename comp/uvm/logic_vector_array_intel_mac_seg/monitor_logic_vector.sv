@@ -48,6 +48,7 @@ class monitor_logic_vector #(int unsigned WIDTH, int unsigned SEGMENTS) extends 
                 state = NO_FRAME;
                 hl_tr = uvm_logic_vector::sequence_item#(WIDTH)::type_id::create("hl_tr", this);
                 hl_tr.data = {tr.fcs_error[it], tr.error[it], tr.status_data[it]};
+                hl_tr.start[this.get_full_name()] = $time();
                 analysis_port.write(hl_tr);
             end
         end

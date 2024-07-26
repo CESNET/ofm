@@ -42,6 +42,7 @@ class monitor #(int unsigned DATA_WIDTH) extends uvm_monitor;
                 tr.hdr_vld    = vif.monitor_cb.HDR_VLD;
                 tr.block_lock = vif.monitor_cb.BLOCK_LOCK;
                 // Write transaction to analysis port.
+                tr.start[this.get_full_name()] = $time();
                 analysis_port.write(tr);
             end
         end

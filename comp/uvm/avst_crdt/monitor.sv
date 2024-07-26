@@ -33,6 +33,7 @@ class monitor #(int unsigned UPDATE_CNT_WIDTH) extends uvm_monitor;
             item.update     = vif.monitor_cb.UPDATE;
             item.update_cnt = vif.monitor_cb.UPDATE_CNT;
             // Write sequence item to analysis port
+            item.start[this.get_full_name()] = $time();
             analysis_port.write(item);
         end
     endtask

@@ -75,6 +75,7 @@ class monitor_logic_vector_array #(int unsigned DATA_WIDTH, int unsigned TUSER_W
                 data.push_back(tr.tdata[index][(it+1)*ITEM_WIDTH-1 -: ITEM_WIDTH]);
             end
             hi_tr.data = data;
+            hi_tr.start[this.get_full_name()] = $time();
             analysis_port.write(hi_tr);
         end
     endfunction
@@ -110,6 +111,7 @@ class monitor_logic_vector_array #(int unsigned DATA_WIDTH, int unsigned TUSER_W
                     if (last[it]) begin
                         hi_tr      = uvm_logic_vector_array::sequence_item #(ITEM_WIDTH)::type_id::create("hi_tr");
                         hi_tr.data = data;
+                        hi_tr.start[this.get_full_name()] = $time();
                         analysis_port.write(hi_tr);
                         hi_tr = null;
                         data.delete();
@@ -129,6 +131,7 @@ class monitor_logic_vector_array #(int unsigned DATA_WIDTH, int unsigned TUSER_W
                         inframe = 1'b0;
                         hi_tr      = uvm_logic_vector_array::sequence_item #(ITEM_WIDTH)::type_id::create("hi_tr");
                         hi_tr.data = data;
+                        hi_tr.start[this.get_full_name()] = $time();
                         analysis_port.write(hi_tr);
                         hi_tr = null;
                         data.delete();
@@ -254,6 +257,7 @@ class monitor_logic_vector_array #(int unsigned DATA_WIDTH, int unsigned TUSER_W
                                 `uvm_error(this.get_full_name(), "\n\tEOF has been set before frame heve been started. SOF havent been set before this EOF")
                             end else begin
                                 hi_tr.data = data;
+                                hi_tr.start[this.get_full_name()] = $time();
                                 analysis_port.write(hi_tr);
                                 inframe = 1'b0;
                                 hi_tr    = null;
@@ -292,6 +296,7 @@ class monitor_logic_vector #(int unsigned DATA_WIDTH, int unsigned TUSER_WIDTH, 
                 if (tr.tlast && meta_behav == config_item::META_EOF) begin
                     hi_tr      = uvm_logic_vector::sequence_item#(TUSER_WIDTH)::type_id::create("hi_tr");
                     hi_tr.data = tr.tuser;
+                    hi_tr.start[this.get_full_name()] = $time();
                     analysis_port.write(hi_tr);
                 end
             end
@@ -300,6 +305,7 @@ class monitor_logic_vector #(int unsigned DATA_WIDTH, int unsigned TUSER_WIDTH, 
                     if ((tr.tuser[it + EOF_BASE_POS] == 1'b1) && meta_behav == config_item::META_EOF) begin
                         hi_tr      = uvm_logic_vector::sequence_item#(TUSER_WIDTH)::type_id::create("hi_tr");
                         hi_tr.data = tr.tuser;
+                        hi_tr.start[this.get_full_name()] = $time();
                         analysis_port.write(hi_tr);
                     end
                 end

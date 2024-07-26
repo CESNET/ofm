@@ -86,6 +86,7 @@ class monitor_logic_vector_array #(int unsigned REGIONS, int unsigned REGION_SIZ
                     end else begin
                         inframe = 1'b0;
                         hi_tr.data = data;
+                        hi_tr.start[this.get_full_name()] = $time();
                         analysis_port.write(hi_tr);
                         hi_tr = null;
                     end
@@ -146,11 +147,13 @@ class monitor_logic_vector #(int unsigned REGIONS, int unsigned REGION_SIZE, int
                     inframe = 1'b1;
                     hi_tr = uvm_logic_vector::sequence_item#(META_WIDTH)::type_id::create("hi_tr");
                     hi_tr.data = tr.meta[it];
+                    hi_tr.start[this.get_full_name()] = $time();
                     analysis_port.write(hi_tr);
                 end else if (tr.eop[it] && meta_behav == config_item::META_EOF) begin
                     inframe = 1'b0;
                     hi_tr = uvm_logic_vector::sequence_item#(META_WIDTH)::type_id::create("hi_tr");
                     hi_tr.data = tr.meta[it];
+                    hi_tr.start[this.get_full_name()] = $time();
                     analysis_port.write(hi_tr);
                 end
         end

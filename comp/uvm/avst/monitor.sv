@@ -57,6 +57,7 @@ class monitor #(int unsigned REGIONS, int unsigned REGION_SIZE, int unsigned BLO
             end
 
             // Write sequence item to analysis port.
+            si.start[this.get_full_name()] = $time();
             analysis_port.write(si);
         end
     endtask

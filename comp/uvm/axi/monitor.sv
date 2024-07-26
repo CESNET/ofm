@@ -60,6 +60,7 @@ class monitor #(int unsigned DATA_WIDTH, int unsigned TUSER_WIDTH, int unsigned 
             si.tready = vif.monitor_cb.TREADY;
 
             // Write sequence item to analysis port.
+            si.start[this.get_full_name()] = $time();
             analysis_port.write(si);
         end
     endtask

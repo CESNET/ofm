@@ -48,6 +48,7 @@ class monitor #(int unsigned ADDRESS_WIDTH, int unsigned DATA_WIDTH, int unsigne
             request.writedata  = vif.monitor_cb.WRITEDATA;
             request.burstcount = vif.monitor_cb.BURSTCOUNT;
             // Write sequence item to analysis port
+            request.start[this.get_full_name()] = $time();
             analysis_port_request.write(request);
 
             // Send response
@@ -55,6 +56,7 @@ class monitor #(int unsigned ADDRESS_WIDTH, int unsigned DATA_WIDTH, int unsigne
             response.readdata      = vif.monitor_cb.READDATA;
             response.readdatavalid = vif.monitor_cb.READDATAVALID;
             // Write sequence item to analysis port
+            response.start[this.get_full_name()] = $time();
             analysis_port_response.write(response);
         end
     endtask

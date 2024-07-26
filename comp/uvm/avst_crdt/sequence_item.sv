@@ -4,7 +4,7 @@
 
 // SPDX-License-Identifier: BSD-3-Clause
 
-class sequence_item #(int unsigned UPDATE_CNT_WIDTH) extends uvm_sequence_item;
+class sequence_item #(int unsigned UPDATE_CNT_WIDTH) extends uvm_common::sequence_item;
     `uvm_object_param_utils(uvm_avst_crdt::sequence_item #(UPDATE_CNT_WIDTH))
 
     // ------------------------------- //

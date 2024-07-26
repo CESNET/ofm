@@ -26,6 +26,7 @@ package uvm_common;
     `include "sync.sv"
 
     `include "sequence_cfg.sv"
+    `include "sequence_item.sv"
     `include "sequence.sv"
     `include "sequence_library.sv"
 

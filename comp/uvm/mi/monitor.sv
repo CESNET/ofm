@@ -38,6 +38,7 @@ class monitor #(int unsigned DATA_WIDTH, int unsigned ADDR_WIDTH, int unsigned M
 
             @(vif.monitor_cb);
             //send request
+            request.start[this.get_full_name()] = $time();
             request.addr = vif.monitor_cb.ADDR;
             request.be   = vif.monitor_cb.BE;
             request.wr   = vif.monitor_cb.WR;
@@ -48,6 +49,7 @@ class monitor #(int unsigned DATA_WIDTH, int unsigned ADDR_WIDTH, int unsigned M
             analysis_port_rq.write(request);
 
             //send response
+            response.start[this.get_full_name()] = $time();
             response.drd  = vif.monitor_cb.DRD;
             response.ardy = vif.monitor_cb.ARDY;
             response.drdy = vif.monitor_cb.DRDY;
