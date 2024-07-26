@@ -305,6 +305,7 @@ program TEST (
     // -------------------------------------
     // STOP TESTING
     // -------------------------------------
+    $write("Verification finished successfully!\n");
     $stop();       // Stop testing
   end
 

@@ -27,7 +27,7 @@ FL_SLR_CROSSING #(
   .DATA_WIDTH(DATA_WIDTH)
 ) VHDL_DUT_U (
   .CLK               (CLK),
-  .RESET             (RESET),
+  .RX_RESET          (RESET),
 
   .RX_DATA       (RX.DATA),
   .RX_DREM       (RX.DREM),
@@ -37,6 +37,8 @@ FL_SLR_CROSSING #(
   .RX_EOP_N      (RX.EOP_N),
   .RX_SRC_RDY_N  (RX.SRC_RDY_N),
   .RX_DST_RDY_N  (RX.DST_RDY_N),
+
+  .TX_RESET      (RESET),
 
   .TX_DATA       (TX.DATA),
   .TX_DREM       (TX.DREM),

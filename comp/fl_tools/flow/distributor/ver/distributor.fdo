@@ -8,7 +8,7 @@
 #
 
 # For whole design testing
-set FIRMWARE_BASE         "../../../../../.."
+set FIRMWARE_BASE         "../../../../.."
 set FL_TOOLS_BASE         "../../.."
 
 set FL_DUT_BASE           "$FL_TOOLS_BASE/flow/distributor"

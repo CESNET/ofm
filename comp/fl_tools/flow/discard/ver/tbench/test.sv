@@ -219,9 +219,9 @@ program TEST (
    * Function reads values in frame counter registers via MI32.          
    */
   task readFrameCounters();
-    Mi32Transaction mi32Transaction = new();
-    Mi32Driver      mi32Driver      = new("Mi32 Driver", null, MI);
-    Mi32Monitor     mi32Monitor     = new("Mi32 Monitor", MI);
+    automatic Mi32Transaction mi32Transaction = new();
+    automatic Mi32Driver      mi32Driver      = new("Mi32 Driver", null, MI);
+    automatic Mi32Monitor     mi32Monitor     = new("Mi32 Monitor", MI);
     bit [63:0] droppedFrames[CHANNELS];    // Dropped Frames Counter
     bit [63:0] passedFrames[CHANNELS];     // Passed Frames Counter
     bit [63:0] droppedLength[CHANNELS];    // Length of Dropped Frames Counter
@@ -408,6 +408,7 @@ program TEST (
     // -------------------------------------
     // STOP TESTING
     // -------------------------------------
+    $write("Verification finished successfully!\n");
     $stop();       // Stop testing
   end
 
