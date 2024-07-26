@@ -9,7 +9,7 @@
 
 # For whole design testing
 # TODO: MAIN/FIRMWARE/TRUNK/COMP/BASE
-set FIRMWARE_BASE         "../../../../../.."
+set FIRMWARE_BASE         "../../../../.."
 set FL_TOOLS_BASE         "../../.."
 
 # TODO: ADRESA KOMPONENTY V SVN, TREBA ZMENIT PODLA KONKRETNEHO UMIESTNENIA                                        

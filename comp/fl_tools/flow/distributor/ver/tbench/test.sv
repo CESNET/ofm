@@ -135,7 +135,9 @@ program TEST (
   // Disable test Enviroment
   task disableTestEnvironment();
     bit busy;
-    int i = 0;
+    int i;
+
+    i = 0;
 
     // Disable drivers
     #(1000*CLK_PERIOD);
@@ -209,6 +211,7 @@ program TEST (
     // STOP TESTING
     // -------------------------------------
  
+    $write("Verification finished successfully!\n");
     $stop();       // Stop testing
   end
 

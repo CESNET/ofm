@@ -347,6 +347,7 @@ program TEST (
     test4();
     
     // stop test
+    $write("Verification finished successfully!\n");
     $stop();
   end
 

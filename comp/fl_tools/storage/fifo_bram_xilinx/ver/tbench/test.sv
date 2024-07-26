@@ -179,6 +179,7 @@ program TEST (
         test3();
         test4();
         test5();
+        $write("Verification finished successfully!\n");
         $stop();
     end
 

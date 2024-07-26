@@ -8,7 +8,7 @@
 #
 
 # For whole design testing
-set FIRMWARE_BASE         "../../../../../.."
+set FIRMWARE_BASE         "../../../../.."
 set FL_TOOLS_BASE         "../../.."
 
 set FL_DUT_BASE           "$FL_TOOLS_BASE/flow/switch"
@@ -29,7 +29,8 @@ source "$FIRMWARE_BASE/build/Modelsim.inc.fdo"
 
 # Suppress warnings from arithm library
 puts "Std Arith Warnings - Disabled"
-set  StdArithNoWarnings 1
+set StdArithNoWarnings 1
+set NumericStdNoWarnings 1
 
 # File with signals
 nb_sim_run

@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 
-set FIRMWARE_BASE         "../../../../../.."
+set FIRMWARE_BASE         "../../../../.."
 
 set DUT_BASE              ".."
 set DUT_VER_BASE          "."

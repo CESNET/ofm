@@ -137,6 +137,7 @@ program TEST (
     test1();
     resetDesign();
     test2();
+    $write("Verification finished successfully!\n");
     $stop();
   end
 
