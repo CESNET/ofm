@@ -37,7 +37,7 @@ package uvm_common;
     `include "comparer_base.sv"
     `include "comparer_tagged.sv"
     `include "comparer_ordered.sv"
-    `include "comparer_disordered.sv"
+    `include "comparer_unordered.sv"
     `include "comparer.sv"
 
     `include "stats.sv"

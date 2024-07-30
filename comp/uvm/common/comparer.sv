@@ -28,8 +28,8 @@ class comparer_ordered #(type CLASS_TYPE) extends uvm_common::comparer_base_orde
     endfunction
 endclass
 
-class comparer_disordered #(type CLASS_TYPE) extends uvm_common::comparer_base_disordered#(CLASS_TYPE, CLASS_TYPE);
-    `uvm_component_param_utils(uvm_common::comparer_disordered#(CLASS_TYPE))
+class comparer_unordered #(type CLASS_TYPE) extends uvm_common::comparer_base_unordered#(CLASS_TYPE, CLASS_TYPE);
+    `uvm_component_param_utils(uvm_common::comparer_unordered#(CLASS_TYPE))
 
     function new(string name, uvm_component parent = null);
         super.new(name, parent);
