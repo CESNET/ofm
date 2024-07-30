@@ -102,10 +102,12 @@ class model #(RX_MFB_ITEM_W, RX_MVB_ITEM_W, USERMETA_W, MOD_W) extends uvm_compo
             tr_output_data = uvm_logic_vector_array::sequence_item #(RX_MFB_ITEM_W)::type_id::create("tr_output_data", this);
             tr_output_data.data = new[mfb_new_size];
 
-            //for (int i = mod_sof_trim; i < (mfb_new_size + mod_sof_trim-mod_sof_extend); i++) begin
-            //    logic [RX_MFB_ITEM_W-1:0] tmp;
-            for (int i = mod_sof_trim; i < mfb_orig_size; i++) begin
-                tr_output_data.data[i-mod_sof_trim+mod_sof_extend] = tr_input_data.data[i];
+            for (int unsigned it = 0; it < mfb_new_size; it++) begin
+                if (it < mod_sof_extend || (it + mod_sof_trim) >= tr_input_data.data.size()) begin
+                    tr_output_data.data[it] = 'X;
+                end else begin
+                    tr_output_data.data[it] = tr_input_data.data[it + mod_sof_trim - mod_sof_extend];
+                end
             end
             tr_output_meta.data  = tr_input_mvb.data[USERMETA_W-1 -: USERMETA_W];
             tr_output_data.start = tr_input_mvb.start;
