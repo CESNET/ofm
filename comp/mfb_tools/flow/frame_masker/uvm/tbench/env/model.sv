@@ -10,10 +10,10 @@ class model #(MFB_REGIONS, MFB_ITEM_WIDTH, MFB_META_WIDTH) extends uvm_component
 
     localparam string DUT_PATH = "testbench.DUT_U.VHDL_DUT_U";
 
-    uvm_tlm_analysis_fifo #(uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))) input_data;
-    uvm_tlm_analysis_fifo #(uvm_common::model_item #(uvm_logic_vector::sequence_item #(MFB_META_WIDTH)))       input_meta;
-    uvm_analysis_port     #(uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))) out_data;
-    uvm_analysis_port     #(uvm_common::model_item #(uvm_logic_vector::sequence_item #(MFB_META_WIDTH)))       out_meta;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) input_data;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(MFB_META_WIDTH))       input_meta;
+    uvm_analysis_port     #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) out_data;
+    uvm_analysis_port     #(uvm_logic_vector::sequence_item #(MFB_META_WIDTH))       out_meta;
 
     protected frame_masker::probe_cbs#(MFB_REGIONS)                                                            discards;
 
@@ -37,8 +37,8 @@ class model #(MFB_REGIONS, MFB_ITEM_WIDTH, MFB_META_WIDTH) extends uvm_component
 
 
     task run_mask_packets();
-        uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) input_data_tr;
-        logic                                                                             discard;
+        uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH) input_data_tr;
+        logic                                                   discard;
 
         forever begin
 
@@ -68,8 +68,8 @@ class model #(MFB_REGIONS, MFB_ITEM_WIDTH, MFB_META_WIDTH) extends uvm_component
 
 
     task run_mask_meta();
-        uvm_common::model_item #(uvm_logic_vector::sequence_item #(MFB_META_WIDTH)) input_meta_tr;
-        logic                                                                       discard;
+        uvm_logic_vector::sequence_item #(MFB_META_WIDTH) input_meta_tr;
+        logic                                             discard;
 
         forever begin
 

@@ -94,7 +94,7 @@ class env #(DATA_WIDTH, STATUS_WIDTH, ITEMS, ALMOST_FULL_OFFSET, ALMOST_EMPTY_OF
         m_reset.sync_connect(m_env_mvb_status.reset_sync);
 
         // RX environments connection
-        m_env_mvb_rx.analysis_port.connect(sc.analysis_imp_mvb_rx.analysis_export);
+        m_env_mvb_rx.analysis_port.connect(sc.analysis_imp_mvb_rx);
 
         // TX environments connection
         m_env_mvb_tx.analysis_port    .connect(sc.analysis_imp_mvb_tx    );

@@ -4,7 +4,7 @@
 
 // SPDX-License-Identifier: BSD-3-Clause
 
-class chsum_calc_item#(MVB_DATA_WIDTH, MFB_META_WIDTH);
+class chsum_calc_item#(MVB_DATA_WIDTH, MFB_META_WIDTH) extends uvm_common::sequence_item;
 
     logic                                             bypass;
     logic[MFB_META_WIDTH-1 : 0]                       meta;
@@ -24,16 +24,16 @@ endclass
 class model #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY, MFB_META_WIDTH) extends uvm_component;
     `uvm_component_param_utils(uvm_checksum_calculator::model #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY, MFB_META_WIDTH))
 
-    uvm_common::fifo #(uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))) input_data;
-    uvm_common::fifo #(uvm_common::model_item #(uvm_logic_vector::sequence_item #(META_WIDTH)))           input_meta;
-    uvm_analysis_port #(uvm_common::model_item #(chsum_calc_item#(MVB_DATA_WIDTH, MFB_META_WIDTH)))                       out_checksum;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) input_data;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(META_WIDTH))           input_meta;
+    uvm_analysis_port #(chsum_calc_item#(MVB_DATA_WIDTH, MFB_META_WIDTH))        out_checksum;
 
     function new(string name = "model", uvm_component parent = null);
         super.new(name, parent);
 
         out_checksum = new("out_checksum", this);
-        input_data   = null;
-        input_meta   = null;
+        input_data   = new("input_data", this);
+        input_meta   = new("input_meta", this);
 
     endfunction
 
@@ -90,9 +90,9 @@ class model #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_W
 
     task run_phase(uvm_phase phase);
 
-        uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) tr_input_mfb;
-        uvm_common::model_item #(uvm_logic_vector::sequence_item #(META_WIDTH))           tr_input_meta;
-        uvm_common::model_item #(chsum_calc_item#(MVB_DATA_WIDTH, MFB_META_WIDTH))        tr_out_chsum;
+        uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH) tr_input_mfb;
+        uvm_logic_vector::sequence_item #(META_WIDTH)           tr_input_meta;
+        chsum_calc_item#(MVB_DATA_WIDTH, MFB_META_WIDTH)        tr_out_chsum;
         uvm_logic_vector::sequence_item #(1)                    chsum_en;
         uvm_logic_vector::sequence_item #(1)                    bypass;
         uvm_logic_vector_array::sequence_item #(16)             checksum_data;
@@ -112,23 +112,22 @@ class model #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_W
                 `uvm_info(this.get_full_name(), tr_input_mfb.convert2string() ,UVM_NONE)
             end
 
-            tr_out_chsum              = uvm_common::model_item #(chsum_calc_item#(MVB_DATA_WIDTH, MFB_META_WIDTH))::type_id::create("tr_out_chsum");
-            tr_out_chsum.item         = new();
-            tr_out_chsum.item.data_tr = uvm_logic_vector::sequence_item #(MVB_DATA_WIDTH)::type_id::create("tr_out_chsum.item.data_tr");
+            tr_out_chsum              = new;
+            tr_out_chsum.data_tr = uvm_logic_vector::sequence_item #(MVB_DATA_WIDTH)::type_id::create("tr_out_chsum.item.data_tr");
             tr_out_chsum.time_array_add(tr_input_mfb.start);
 
             chsum_en    = uvm_logic_vector::sequence_item #(1)::type_id::create("chsum_en");
             bypass      = uvm_logic_vector::sequence_item #(1)::type_id::create("bypass");
 
-            offset                 = tr_input_meta.item.data[OFFSET_WIDTH-1  : 0];
-            length                 = tr_input_meta.item.data[OFFSET_WIDTH+LENGTH_WIDTH-1  : OFFSET_WIDTH];
-            chsum_en.data          = tr_input_meta.item.data[OFFSET_WIDTH+LENGTH_WIDTH+1-1  : OFFSET_WIDTH+LENGTH_WIDTH];
-            tr_out_chsum.item.meta = tr_input_meta.item.data[META_WIDTH-1  : OFFSET_WIDTH+LENGTH_WIDTH+1];
+            offset                 = tr_input_meta.data[OFFSET_WIDTH-1  : 0];
+            length                 = tr_input_meta.data[OFFSET_WIDTH+LENGTH_WIDTH-1  : OFFSET_WIDTH];
+            chsum_en.data          = tr_input_meta.data[OFFSET_WIDTH+LENGTH_WIDTH+1-1  : OFFSET_WIDTH+LENGTH_WIDTH];
+            tr_out_chsum.meta = tr_input_meta.data[META_WIDTH-1  : OFFSET_WIDTH+LENGTH_WIDTH+1];
 
-            checksum_data     = prepare_checksum_data(tr_input_mfb.item, offset, length);
-            tr_out_chsum.item.data_tr.data = checksum_calc(checksum_data);
+            checksum_data     = prepare_checksum_data(tr_input_mfb, offset, length);
+            tr_out_chsum.data_tr.data = checksum_calc(checksum_data);
 
-            tr_out_chsum.item.bypass    = !chsum_en.data;
+            tr_out_chsum.bypass    = !chsum_en.data;
 
             if (VERBOSITY >= 1) begin
                 `uvm_info(this.get_full_name(), tr_out_chsum.convert2string() ,UVM_NONE)

@@ -9,8 +9,8 @@ class model #(MVB_ITEM_WIDTH, MFB_ITEM_WIDTH, RX_CHANNELS) extends uvm_component
     `uvm_component_param_utils(uvm_framepacker::model#(MVB_ITEM_WIDTH, MFB_ITEM_WIDTH, RX_CHANNELS))
 
     //Model I/O
-    uvm_tlm_analysis_fifo #(uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)))  data_in;
-    uvm_analysis_port #(uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)))      data_out;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))  data_in;
+    uvm_analysis_port #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))      data_out;
 
     //TODO: Add these signals for a channel recognition
     uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(MVB_ITEM_WIDTH))        meta_in;
@@ -48,12 +48,9 @@ class model #(MVB_ITEM_WIDTH, MFB_ITEM_WIDTH, RX_CHANNELS) extends uvm_component
 
         uvm_logic_vector::sequence_item #(MVB_ITEM_WIDTH) tr_mvb_in;
 
-        uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) tr_mfb_in;
-        uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) tr_mfb_out;
-        uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) tr_mfb_tmp;
-
-        //DEBUG
-        uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) debug_fifo_state;
+        uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH) tr_mfb_in;
+        uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH) tr_mfb_out;
+        uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH) tr_mfb_tmp;
 
         // EOF of SUPERPACKET
         uvm_logic_vector::sequence_item #(2) tr_last;
@@ -80,40 +77,29 @@ class model #(MVB_ITEM_WIDTH, MFB_ITEM_WIDTH, RX_CHANNELS) extends uvm_component
             meta_in.get(tr_mvb_in);
             channel = tr_mvb_in.data[$clog2(RX_CHANNELS):1];
 
-            $swrite(msg, "\nCHANNEL        %0d
-                          \nMY_MODEL_IN:   %0s
-                          \n", channel, tr_mfb_in.convert2string());
+            $swrite(msg, "\nCHANNEL %0d\nMY_MODEL_IN:   %0s\n", channel, tr_mfb_in.convert2string());
             `uvm_info(this.get_full_name(), msg, UVM_MEDIUM);
 
             analysis_export_flow_ctrl[channel].get(tr_last);
 
-            tr_mfb_out      = uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))::type_id::create("tr_mfb_out");
-            tr_mfb_out.item = uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)::type_id::create("tr_mfb_out");
+            tr_mfb_out = uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)::type_id::create("tr_mfb_out");
             tr_mfb_out.tag  = $sformatf("CHANNEL %0d", channel);
-            tr_mfb_tmp      = uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))::type_id::create("tr_mfb_tmp");
-            tr_mfb_tmp.item = uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)::type_id::create("tr_mfb_tmp");
-
-            debug_fifo_state        = uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))::type_id::create("debug_fifo_state");
-            debug_fifo_state.item   = uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)::type_id::create("debug_fifo_state");
+            tr_mfb_tmp = uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)::type_id::create("tr_mfb_tmp");
 
             //Number of bytes in packet with block ceiling
             //TODO: Make it generic
-            tr_mfb_tmp.item.data = new[$ceil(((real'(tr_mfb_in.item.data.size()))/real'(8)))*8];
-            for (int unsigned i = 0; i < tr_mfb_in.item.data.size(); i++)begin
-                tr_mfb_tmp.item.data[i] = tr_mfb_in.item.data[i];
+            tr_mfb_tmp.data = new[$ceil(((real'(tr_mfb_in.data.size()))/real'(8)))*8];
+            for (int unsigned i = 0; i < tr_mfb_in.data.size(); i++)begin
+                tr_mfb_tmp.data[i] = tr_mfb_in.data[i];
             end
 
-            $swrite(msg, "\nCHANNEL     %0d
-                          \nEOF:        %0d
-                          \nLAST:       %0d
-                          \nMODEL_IN:   %0s
-                          \n", channel, tr_last.data[0], tr_last.data[1], tr_mfb_tmp.convert2string());
+            $swrite(msg, "\nCHANNEL     %0d\nEOF:        %0d\nLAST:       %0d\nMODEL_IN:   %0s\n", channel, tr_last.data[0], tr_last.data[1], tr_mfb_tmp.convert2string());
             `uvm_info(this.get_full_name(), msg, UVM_MEDIUM);
 
 
             //SUPERPACKET assemble
-            for (int unsigned i = 0; i < tr_mfb_tmp.item.data.size(); i++) begin
-                sp_fifo[int'(channel)].push_back(tr_mfb_tmp.item.data[i]);
+            for (int unsigned i = 0; i < tr_mfb_tmp.data.size(); i++) begin
+                sp_fifo[int'(channel)].push_back(tr_mfb_tmp.data[i]);
             end
 
             // // DEBUG
@@ -123,16 +109,16 @@ class model #(MVB_ITEM_WIDTH, MFB_ITEM_WIDTH, RX_CHANNELS) extends uvm_component
 
             if (tr_last.data[1] == 1) begin
                 sp_num_cnt++;
-                tr_mfb_out.item.data = sp_fifo[int'(channel)];
+                tr_mfb_out.data = sp_fifo[int'(channel)];
 
                 //DEBUG
-                $swrite(msg, "\n**************************************************************************
-                              \nTIME:               %0t ps
-                              \nCHANNEL             %0d
-                              \nSUPERPACKET_NO:     %0d
-                              \nSUPERPACKET_SIZE:   %0d bytes
-                              \n**************************************************************************\n
-                              ", $time, channel, sp_num_cnt, sp_fifo[int'(channel)].size());
+                $swrite(msg, {"\n**************************************************************************",
+                              "\nTIME:               %0t ps",
+                              "\nCHANNEL             %0d",
+                              "\nSUPERPACKET_NO:     %0d",
+                              "\nSUPERPACKET_SIZE:   %0d bytes",
+                              "\n**************************************************************************\n"}
+                              , $time, channel, sp_num_cnt, sp_fifo[int'(channel)].size());
                 //`uvm_info(this.get_full_name(), msg, UVM_MEDIUM);
 
                 sp_fifo[int'(channel)].delete();

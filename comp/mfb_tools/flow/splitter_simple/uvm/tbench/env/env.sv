@@ -10,7 +10,7 @@ class env #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH,  META_WIDTH, SPLITTER_
 
     uvm_reset::agent                                                           m_reset;
     uvm_logic_vector_array_mfb::env_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, $clog2(SPLITTER_OUTPUTS) +META_WIDTH) m_env_rx;
-    uvm_logic_vector_array_mfb::env_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) m_env_tx[SPLITTER_OUTPUTS];
+    uvm_logic_vector_array_mfb::env_tx #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)                           m_env_tx[SPLITTER_OUTPUTS];
 
     scoreboard #(ITEM_WIDTH, META_WIDTH, SPLITTER_OUTPUTS) sc;
 

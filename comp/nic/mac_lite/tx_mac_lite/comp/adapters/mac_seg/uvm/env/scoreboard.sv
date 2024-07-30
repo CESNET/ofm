@@ -20,7 +20,7 @@ class scoreboard extends uvm_scoreboard;
     uvm_analysis_export #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))                 analysis_export_tx_packet;
     uvm_analysis_export #(uvm_logic_vector::sequence_item#(LOGIC_WIDTH)) analysis_export_tx_error;
     //output fifos
-    uvm_tlm_analysis_fifo #(uvm_common::model_item#(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)))    model_fifo_packet;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))  model_fifo_packet;
     uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(LOGIC_WIDTH)) model_fifo_error;
     uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)) dut_fifo_packet;
     uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(LOGIC_WIDTH)) dut_fifo_error;
@@ -29,10 +29,6 @@ class scoreboard extends uvm_scoreboard;
     //statistic
     int unsigned compared;
     int unsigned errors;
-
-    //ADD time to sequence
-    uvm_common::subscriber#(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))  model_input;
-
 
     function new(string name, uvm_component parent = null);
         super.new(name, parent);
@@ -50,15 +46,13 @@ class scoreboard extends uvm_scoreboard;
     endfunction
 
     function void build_phase(uvm_phase phase);
-        model_input = uvm_common::subscriber#(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))::type_id::create("model_input", this);
         m_model     = model::type_id::create("m_model", this);
     endfunction
 
     //recive packet
     //recive packet
     function void connect_phase(uvm_phase phase);
-        analysis_export_rx_packet.connect(model_input.analysis_export);
-        model_input.port.connect(m_model.rx_packet.analysis_export);
+        analysis_export_rx_packet.connect(m_model.rx_packet.analysis_export);
         analysis_export_rx_error.connect(m_model.rx_error.analysis_export);
         analysis_export_tx_packet.connect(dut_fifo_packet.analysis_export);
         analysis_export_tx_error.connect(dut_fifo_error.analysis_export);
@@ -68,7 +62,7 @@ class scoreboard extends uvm_scoreboard;
     endfunction
 
     task run_phase(uvm_phase phase);
-        uvm_common::model_item#(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)) tr_model_packet;
+        uvm_logic_vector_array::sequence_item#(ITEM_WIDTH) tr_model_packet;
         uvm_logic_vector::sequence_item#(LOGIC_WIDTH) tr_model_error;
         uvm_logic_vector_array::sequence_item#(ITEM_WIDTH) tr_dut_packet;
         uvm_logic_vector::sequence_item#(LOGIC_WIDTH) tr_dut_error;
@@ -82,17 +76,17 @@ class scoreboard extends uvm_scoreboard;
             compared++;
             if (($time() - tr_model_packet.time_last()) >= 10us) begin
                 string msg;
-                $sformat(msg, "\n\tDelay %0dns is too long\n\tinput time %0dns output time %0dns\n%s", ($time() - tr_model_packet.time_last())/1ns, tr_model_packet.time_last()/1ns, $time()/1ns, tr_model_packet.item.convert2string());
+                $sformat(msg, "\n\tDelay %0dns is too long\n\tinput time %0dns output time %0dns\n%s", ($time() - tr_model_packet.time_last())/1ns, tr_model_packet.time_last()/1ns, $time()/1ns, tr_model_packet.convert2string());
                 `uvm_error(this.get_full_name(), msg);
             end
 
-            if (tr_model_packet.item.compare(tr_dut_packet) == 0 || tr_model_error.compare(tr_dut_error) == 0) begin
+            if (tr_model_packet.compare(tr_dut_packet) == 0 || tr_model_error.compare(tr_dut_error) == 0) begin
             //if (tr_model_packet.compare(tr_dut_packet) == 0 || tr_model_error.data != tr_dut_error.data) begin
                 string str = "";
                 errors++;
                 $swrite(str, "\n\tError num %0d Packet num %0d", errors, compared);
                 $swrite(str, "%s\n\tInput time %0dns", str, tr_model_packet.time_last()/1ns);
-                $swrite(str, "%s\n\tPACKET FROM DUT\n\t%s\n\tEXPECTED PACKET\n\t%s",str, tr_dut_packet.convert2string(), tr_model_packet.item.convert2string());
+                $swrite(str, "%s\n\tPACKET FROM DUT\n\t%s\n\tEXPECTED PACKET\n\t%s",str, tr_dut_packet.convert2string(), tr_model_packet.convert2string());
                 $swrite(str, "%s\n\tERROR FROM DUT\n\t%b\n\tEXPECTED ERROR\n\t%b",str, tr_dut_error.data, tr_model_error.data);
                `uvm_error(this.get_full_name(), str);
             end

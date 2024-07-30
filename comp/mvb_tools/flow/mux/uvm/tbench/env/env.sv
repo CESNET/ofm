@@ -74,12 +74,12 @@ class env #(ITEMS, ITEM_WIDTH, RX_MVB_CNT) extends uvm_env;
     function void connect_phase(uvm_phase phase);
 
         tx_env.m_mvb_agent.analysis_port.connect(m_scoreboard.analysis_imp_mvb_tx);
-        rx_sel_env.analysis_port.connect(m_scoreboard.analysis_imp_mvb_sel_rx.analysis_export);
+        rx_sel_env.analysis_port.connect(m_scoreboard.analysis_imp_mvb_sel_rx);
 
         for (int port = 0; port < RX_MVB_CNT; port++) begin
             m_reset.sync_connect(rx_env[port].reset_sync);
             rx_env[port].m_mvb_agent.analysis_port.connect(m_cover_rx.analysis_export);
-            rx_env[port].m_mvb_agent.analysis_port.connect(m_scoreboard.analysis_imp_mvb_rx[port].analysis_export);
+            rx_env[port].m_mvb_agent.analysis_port.connect(m_scoreboard.analysis_imp_mvb_rx[port]);
         end
 
         m_reset.sync_connect(tx_env.reset_sync);

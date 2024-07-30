@@ -88,10 +88,10 @@ endclass
 class compare #(ITEM_WIDTH, USER_META_WIDTH, CHANNELS) extends uvm_component;
     `uvm_component_utils(uvm_dma_ll::compare #(ITEM_WIDTH, USER_META_WIDTH, CHANNELS))
 
-    uvm_tlm_analysis_fifo #(uvm_common::model_item #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))) model_mfb;
-    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(USER_META_WIDTH))                            model_meta;
-    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))                           dut_mfb;
-    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(USER_META_WIDTH))                            dut_meta;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)) model_mfb;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(USER_META_WIDTH))  model_meta;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)) dut_mfb;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(USER_META_WIDTH))  dut_meta;
 
     int unsigned errors;
     int unsigned compared;
@@ -149,9 +149,9 @@ class compare #(ITEM_WIDTH, USER_META_WIDTH, CHANNELS) extends uvm_component;
 
 
     task run_phase(uvm_phase phase);
-        uvm_common::model_item #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)) tr_model_mfb;
+        uvm_logic_vector_array::sequence_item#(ITEM_WIDTH) tr_model_mfb;
         uvm_logic_vector::sequence_item#(USER_META_WIDTH)                            tr_model_meta;
-        uvm_common::model_item #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)) tr_dut_mfb;
+        uvm_logic_vector_array::sequence_item#(ITEM_WIDTH) tr_dut_mfb;
         uvm_logic_vector::sequence_item#(USER_META_WIDTH)                            tr_dut_meta;
 
         uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)                           tr_dut_mfb_comp;
@@ -170,19 +170,19 @@ class compare #(ITEM_WIDTH, USER_META_WIDTH, CHANNELS) extends uvm_component;
         string                       debug_msg;
 
         forever begin
-            tr_dut_mfb = uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(ITEM_WIDTH))::type_id::create("tr_dut_mfb");
+            tr_dut_mfb = uvm_logic_vector_array::sequence_item #(ITEM_WIDTH)::type_id::create("tr_dut_mfb");
             model_mfb.get(tr_model_mfb);
             model_meta.get(tr_model_meta);
-            dut_mfb.get(tr_dut_mfb.item);
+            dut_mfb.get(tr_dut_mfb);
             tr_dut_mfb.time_add("dut mfb out", $time());
             dut_meta.get(tr_dut_meta);
 
             model_channel = tr_model_meta.data[$clog2(CHANNELS)+24-1 : 24];
             dut_channel = tr_dut_meta.data[$clog2(CHANNELS)+24-1 : 24];
 
-            tr_model_mfb_fifo[int'(model_channel)].push_back(tr_model_mfb.item);
+            tr_model_mfb_fifo[int'(model_channel)].push_back(tr_model_mfb);
             tr_model_meta_fifo[int'(model_channel)].push_back(tr_model_meta);
-            tr_dut_mfb_fifo[int'(dut_channel)].push_back(tr_dut_mfb.item);
+            tr_dut_mfb_fifo[int'(dut_channel)].push_back(tr_dut_mfb);
             tr_dut_meta_fifo[int'(dut_channel)].push_back(tr_dut_meta);
 
             compared++;
@@ -214,7 +214,7 @@ class compare #(ITEM_WIDTH, USER_META_WIDTH, CHANNELS) extends uvm_component;
             $swrite(debug_msg, "%SDUT TRANSACTION %0d COMPARED!\n", debug_msg, compared);
             $swrite(debug_msg, "%s================================================================================= \n", debug_msg);
             $swrite(debug_msg, "%sCHANNEL : %0d\n", debug_msg, dut_channel);
-            $swrite(debug_msg, "%sDATA    : %s\n", debug_msg, tr_dut_mfb.item.convert2string());
+            $swrite(debug_msg, "%sDATA    : %s\n", debug_msg, tr_dut_mfb.convert2string());
             `uvm_info(this.get_full_name(),        debug_msg, UVM_MEDIUM)
 
             //count stats

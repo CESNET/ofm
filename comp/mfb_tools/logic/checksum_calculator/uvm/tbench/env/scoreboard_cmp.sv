@@ -15,28 +15,28 @@ class chsum_calc_cmp #(MVB_DATA_WIDTH, MFB_META_WIDTH) extends uvm_common::compa
         super.new(name, parent);
     endfunction
 
-    virtual function int unsigned compare(uvm_common::model_item #(MODEL_ITEM) tr_model, uvm_common::dut_item #(DUT_ITEM) tr_dut);
+    virtual function int unsigned compare(MODEL_ITEM tr_model, DUT_ITEM tr_dut);
         int unsigned                                      ret;
 
         `uvm_info(get_type_name(), message(tr_model, tr_dut), UVM_HIGH)
 
         tr_dut_data      = uvm_logic_vector::sequence_item #(MVB_DATA_WIDTH)::type_id::create("tr_dut_data");
-        tr_dut_data.data = tr_dut.in_item.data[MVB_DATA_WIDTH-1 : 0];
-        bypass_dut       = tr_dut.in_item.data[MVB_DATA_WIDTH];
-        meta_dut         = tr_dut.in_item.data[MVB_DATA_WIDTH+1+MFB_META_WIDTH-1 : MVB_DATA_WIDTH];
+        tr_dut_data.data = tr_dut.data[MVB_DATA_WIDTH-1 : 0];
+        bypass_dut       = tr_dut.data[MVB_DATA_WIDTH];
+        meta_dut         = tr_dut.data[MVB_DATA_WIDTH+1+MFB_META_WIDTH-1 : MVB_DATA_WIDTH];
 
-        if (tr_model.item.bypass) begin
+        if (tr_model.bypass) begin
             ret = 1;
         end else begin
-            ret |= tr_model.item.data_tr.compare(tr_dut_data);
-            ret |= bypass_dut === tr_model.item.bypass;
-            ret |= meta_dut   === tr_model.item.meta;
+            ret |= tr_model.data_tr.compare(tr_dut_data);
+            ret |= bypass_dut === tr_model.bypass;
+            ret |= meta_dut   === tr_model.meta;
         end
 
         return ret;
     endfunction
 
-    virtual function string message(uvm_common::model_item#(MODEL_ITEM) tr_model, uvm_common::dut_item #(DUT_ITEM) tr_dut);
+    virtual function string message(MODEL_ITEM tr_model, DUT_ITEM tr_dut);
         string msg = "\n";
         $swrite(msg, "%s\n\tDUT PACKET %s\n\n" , msg, tr_dut_data.convert2string());
         $swrite(msg, "%s\n\tDUT BYPASS %h\n\n" , msg, bypass_dut);

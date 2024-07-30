@@ -9,37 +9,12 @@
  * SPDX-License-Identifier: BSD-3-Clause
 */
 
-class dut_item #(type ITEM_TYPE);
-    int unsigned in_id;
-    time      in_time;
-    ITEM_TYPE in_item;
-
-    function new (int unsigned id = 0, time t = 0ns, ITEM_TYPE item = null);
-        in_id   = id;
-        in_time = t;
-        in_item = item;
-    endfunction
-
-    function string convert2string_time();
-        string msg = "";
-        msg = {msg, $sformatf("\n\tINPUT TIME : %0.2fns", in_time/1ns)};
-        return msg;
-    endfunction
-
-    function string convert2string();
-        string msg = "";
-
-        msg = {msg, $sformatf("%s\n\tDATA :\n%s", this.convert2string_time(), in_item.convert2string())};
-        return msg;
-    endfunction
-endclass
-
 
 virtual class comparer_base #(type MODEL_ITEM, type DUT_ITEM = MODEL_ITEM) extends uvm_component;
 
-    typedef comparer_base#(MODEL_ITEM, DUT_ITEM) this_type;
-    uvm_analysis_imp_model#(model_item#(MODEL_ITEM), this_type) analysis_imp_model;
-    uvm_analysis_imp_dut  #(DUT_ITEM, this_type)                analysis_imp_dut;
+    typedef comparer_base#(MODEL_ITEM, DUT_ITEM)   this_type;
+    uvm_analysis_imp_model#(MODEL_ITEM, this_type) analysis_imp_model;
+    uvm_analysis_imp_dut  #(DUT_ITEM, this_type)   analysis_imp_dut;
 
     protected time compared_tr_timeout;
     protected time dut_tr_timeout;
@@ -70,7 +45,7 @@ virtual class comparer_base #(type MODEL_ITEM, type DUT_ITEM = MODEL_ITEM) exten
     pure virtual function void flush();
     pure virtual function int unsigned used();
 
-    virtual function void write_model(model_item#(MODEL_ITEM) tr);
+    virtual function void write_model(MODEL_ITEM tr);
         `uvm_fatal(this.get_full_name(), "WRITE MODEL FUNCTION IS NOT IMPLEMENTED");
     endfunction
 
@@ -78,9 +53,15 @@ virtual class comparer_base #(type MODEL_ITEM, type DUT_ITEM = MODEL_ITEM) exten
         `uvm_fatal(this.get_full_name(), "WRITE DUT FUNCTION IS NOT IMPLEMENTED");
     endfunction
 
-    pure virtual function int unsigned compare(model_item#(MODEL_ITEM) tr_model, dut_item #(DUT_ITEM) tr_dut);
-    pure virtual function string message(model_item#(MODEL_ITEM) tr_model, dut_item #(DUT_ITEM) tr_dut);
+    pure virtual function int unsigned compare(MODEL_ITEM tr_model, DUT_ITEM tr_dut);
 
+    virtual function string model_item2string(MODEL_ITEM tr);
+        return tr.convert2string();
+    endfunction
+
+    virtual function string dut_item2string(DUT_ITEM   tr);
+        return tr.convert2string();
+    endfunction
 
     pure virtual task run_model_delay_check();
     pure virtual task run_dut_delay_check();

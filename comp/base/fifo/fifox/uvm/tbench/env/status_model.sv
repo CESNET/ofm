@@ -11,7 +11,7 @@ class status_model #(STATUS_WIDTH, ITEMS, ALMOST_FULL_OFFSET, ALMOST_EMPTY_OFFSE
     uvm_probe::cbs_simple #(2) wr_and_rd_en_in;
 
     // Model outputs
-    uvm_analysis_port #(uvm_common::model_item #(uvm_logic_vector::sequence_item #(STATUS_WIDTH+2))) model_out;
+    uvm_analysis_port #(uvm_logic_vector::sequence_item #(STATUS_WIDTH+2)) model_out;
 
     function new(string name = "status_model", uvm_component parent = null);
         super.new(name, parent);
@@ -30,7 +30,7 @@ class status_model #(STATUS_WIDTH, ITEMS, ALMOST_FULL_OFFSET, ALMOST_EMPTY_OFFSE
 
     task run_phase(uvm_phase phase);
 
-        uvm_common::model_item #(uvm_logic_vector::sequence_item #(STATUS_WIDTH+2)) tr_out;
+        uvm_logic_vector::sequence_item #(STATUS_WIDTH+2) tr_out;
 
         int unsigned status = 0;
 
@@ -47,9 +47,9 @@ class status_model #(STATUS_WIDTH, ITEMS, ALMOST_FULL_OFFSET, ALMOST_EMPTY_OFFSE
             afull  = (status >= ITEMS - ALMOST_FULL_OFFSET) ? 1 : 0;
             aempty = (status <= ALMOST_EMPTY_OFFSET)        ? 1 : 0;
 
-            tr_out = uvm_common::model_item #(uvm_logic_vector::sequence_item #(STATUS_WIDTH+2))::type_id::create("tr_out");
-            tr_out.item = uvm_logic_vector::sequence_item #(STATUS_WIDTH+2)::type_id::create("tr_out.item");
-            tr_out.item.data = { logic_status, afull, aempty };
+            tr_out = uvm_logic_vector::sequence_item #(STATUS_WIDTH+2)::type_id::create("tr_out", this);
+            tr_out.data = { logic_status, afull, aempty };
+            tr_out.start[this.get_full_name()] = $time();
             model_out.write(tr_out);
 
             wr_and_rd_en_in.get({ wr_en, rd_en });

@@ -30,7 +30,7 @@ class model #(CHANNELS, USR_ITEM_WIDTH, USER_META_WIDTH, CQ_ITEM_WIDTH, DATA_ADD
 
     uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item#(CQ_ITEM_WIDTH))                            analysis_imp_rx;
     uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(sv_pcie_meta_pack::PCIE_CQ_META_WIDTH))          analysis_imp_rx_meta;
-    uvm_analysis_port     #(uvm_common::model_item #(uvm_logic_vector_array::sequence_item#(USR_ITEM_WIDTH))) analysis_port_tx;
+    uvm_analysis_port     #(uvm_logic_vector_array::sequence_item#(USR_ITEM_WIDTH))                            analysis_port_tx;
     uvm_analysis_port     #(uvm_logic_vector::sequence_item#(USER_META_WIDTH))                                analysis_port_meta_tx;
     local uvm_dma_regs::regmodel#(CHANNELS)                                                                   m_regmodel;
 
@@ -109,7 +109,7 @@ class model #(CHANNELS, USR_ITEM_WIDTH, USER_META_WIDTH, CQ_ITEM_WIDTH, DATA_ADD
         uvm_logic_vector_array::sequence_item#(CQ_ITEM_WIDTH)                            in_data_tr;
         uvm_logic_vector_array::sequence_item#(CQ_ITEM_WIDTH)                            data_tr[CHANNELS];
         uvm_logic_vector_array::sequence_item#(USR_ITEM_WIDTH)                           pcie_data_tr[CHANNELS];
-        uvm_common::model_item #(uvm_logic_vector_array::sequence_item#(USR_ITEM_WIDTH)) out_data_tr;
+        uvm_logic_vector_array::sequence_item#(USR_ITEM_WIDTH)                           out_data_tr;
         uvm_logic_vector::sequence_item#(sv_pcie_meta_pack::PCIE_CQ_META_WIDTH)          meta_tr;
         uvm_logic_vector::sequence_item#(USER_META_WIDTH)                                out_meta_tr;
 
@@ -134,9 +134,8 @@ class model #(CHANNELS, USR_ITEM_WIDTH, USER_META_WIDTH, CQ_ITEM_WIDTH, DATA_ADD
                 data_tr[chan]      = uvm_logic_vector_array::sequence_item #(CQ_ITEM_WIDTH)::type_id::create({"data_tr_", i_string});
             end
 
-            out_data_tr      = uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(USR_ITEM_WIDTH))::type_id::create("out_data_tr");
-            out_data_tr.item = uvm_logic_vector_array::sequence_item #(USR_ITEM_WIDTH)::type_id::create("out_data_tr_item");
-            out_meta_tr      = uvm_logic_vector::sequence_item #(USER_META_WIDTH)::type_id::create("out_meta_tr");
+            out_data_tr = uvm_logic_vector_array::sequence_item #(USR_ITEM_WIDTH)::type_id::create("out_data_tr", this);
+            out_meta_tr = uvm_logic_vector::sequence_item #(USER_META_WIDTH)::type_id::create("out_meta_tr");
 
             debug_msg = "\n";
             $swrite(debug_msg, "%s================ MODEL - WAIT FOR DATA ==================== \n", debug_msg);
@@ -248,7 +247,7 @@ class model #(CHANNELS, USR_ITEM_WIDTH, USER_META_WIDTH, CQ_ITEM_WIDTH, DATA_ADD
                     dma_hdr.dma_meta      = in_data_tr.data[5][31 : 8];
                     out_meta_tr.data      = {dma_hdr.dma_size, m_pcie_info.channel, dma_hdr.dma_meta};
 
-                    out_data_tr.item.data = new[dma_hdr.dma_size];
+                    out_data_tr.data = new[dma_hdr.dma_size];
 
                     debug_msg = "\n";
                     $swrite(debug_msg, "%sCHANNEL              : %0d\n", debug_msg, int'(m_pcie_info.channel));
@@ -262,13 +261,13 @@ class model #(CHANNELS, USR_ITEM_WIDTH, USER_META_WIDTH, CQ_ITEM_WIDTH, DATA_ADD
 
                     data_index = 0;
                     for (int unsigned it = dma_hdr.frame_pointer; it < dma_hdr.frame_pointer+dma_hdr.dma_size; it++) begin
-                        out_data_tr.item.data[data_index] = dma_memory[int'(m_pcie_info.channel)][it];
+                        out_data_tr.data[data_index] = dma_memory[int'(m_pcie_info.channel)][it];
                         data_index++;
                     end
 
-                    if (out_data_tr.item.data.size() != dma_hdr.dma_size) begin
+                    if (out_data_tr.data.size() != dma_hdr.dma_size) begin
                         debug_msg = "";
-                        $swrite(debug_msg, "%s\nSize of transaction %d and size in HDR %d does not fit\n", debug_msg, out_data_tr.item.data.size(), dma_hdr.dma_size);
+                        $swrite(debug_msg, "%s\nSize of transaction %d and size in HDR %d does not fit\n", debug_msg, out_data_tr.data.size(), dma_hdr.dma_size);
                         `uvm_error(this.get_full_name(), debug_msg);
                     end
 

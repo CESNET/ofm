@@ -86,9 +86,9 @@ class env #(RX_MFB_REGIONS, RX_MFB_REGION_S, RX_MFB_BLOCK_S, RX_MFB_ITEM_W, TX_M
     // Connect agent's ports with ports from the scoreboard.
     function void connect_phase(uvm_phase phase);
 
-        m_env_rx.analysis_port_data.connect(sc.analysis_imp_mfb_data.analysis_export);
-        m_env_rx.analysis_port_meta.connect(sc.analysis_imp_mfb_meta.analysis_export);
-        m_env_rx_mvb.analysis_port.connect(sc.analysis_imp_mvb_data.analysis_export);
+        m_env_rx.analysis_port_data.connect(sc.analysis_imp_mfb_data);
+        m_env_rx.analysis_port_meta.connect(sc.analysis_imp_mfb_meta);
+        m_env_rx_mvb.analysis_port.connect(sc.analysis_imp_mvb_data);
 
         m_env_tx.analysis_port_data.connect(sc.out_data);
         m_env_tx_mvb.analysis_port.connect(sc.out_meta);

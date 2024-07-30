@@ -12,19 +12,17 @@ class comparer_superpacket #(type CLASS_TYPE) extends uvm_common::comparer_taged
         super.new(name, parent);
     endfunction
 
-    virtual function int unsigned compare(uvm_common::model_item #(MODEL_ITEM) tr_model, uvm_common::dut_item #(DUT_ITEM) tr_dut);
+    virtual function int unsigned compare(MODEL_ITEM tr_model, DUT_ITEM tr_dut);
         int unsigned ret = 1;
-        string msg = "";
-        if (tr_model.item.data.size() < tr_dut.in_item.data.size()) return 0;
-        for (int unsigned it = 0; it < tr_model.item.size(); it++) begin
-            if (!$isunknown(tr_model.item.data[it]) && tr_model.item.data[it] !== tr_dut.in_item.data[it]) begin
+        if (tr_model.data.size() < tr_dut.data.size()) return 0;
+        for (int unsigned it = 0; it < tr_model.size(); it++) begin
+            if (!$isunknown(tr_model.data[it]) && tr_model.data[it] !== tr_dut.data[it]) begin
                 return 0;
             end
         end
         // $swrite(msg, "\n======= COMPARE: Transaction %0d =======", compared);
         // `uvm_info(this.get_full_name(), msg, UVM_MEDIUM);
-        msg = message(tr_model, tr_dut);
-        `uvm_info(this.get_full_name(), msg, UVM_MEDIUM);
+        `uvm_info(this.get_full_name(), {"\nMODEL ITEM : ", model_item2string(tr_model), "\nDUT ITEM : ", dut_item2string(tr_dut)}, UVM_MEDIUM);
         return ret;
     endfunction
 

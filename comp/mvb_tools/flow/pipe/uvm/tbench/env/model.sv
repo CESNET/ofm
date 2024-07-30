@@ -8,10 +8,10 @@ class model #(ITEM_WIDTH) extends uvm_component;
     `uvm_component_param_utils(uvm_pipe::model #(ITEM_WIDTH))
 
     // Model inputs
-    uvm_tlm_analysis_fifo #(uvm_common::model_item #(uvm_logic_vector::sequence_item #(ITEM_WIDTH))) model_mvb_in;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(ITEM_WIDTH)) model_mvb_in;
 
     // Model outputs
-    uvm_analysis_port #(uvm_common::model_item #(uvm_logic_vector::sequence_item #(ITEM_WIDTH))) model_mvb_out;
+    uvm_analysis_port #(uvm_logic_vector::sequence_item #(ITEM_WIDTH)) model_mvb_out;
 
     function new(string name = "model", uvm_component parent = null);
         super.new(name, parent);
@@ -23,8 +23,8 @@ class model #(ITEM_WIDTH) extends uvm_component;
 
     task run_phase(uvm_phase phase);
 
-        uvm_common::model_item #(uvm_logic_vector::sequence_item #(ITEM_WIDTH)) tr_mvb_in;
-        uvm_common::model_item #(uvm_logic_vector::sequence_item #(ITEM_WIDTH)) tr_mvb_out;
+        uvm_logic_vector::sequence_item #(ITEM_WIDTH) tr_mvb_in;
+        uvm_logic_vector::sequence_item #(ITEM_WIDTH) tr_mvb_out;
 
         forever begin
 

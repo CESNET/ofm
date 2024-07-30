@@ -46,10 +46,10 @@ endclass
 class model #(MFB_ITEM_WIDTH, MFB_META_WIDTH, MFB_REGIONS, DUT_PATH) extends uvm_component;
     `uvm_component_param_utils(uvm_rx_mac_lite_buffer::model #(MFB_ITEM_WIDTH, MFB_META_WIDTH, MFB_REGIONS, DUT_PATH))
 
-    uvm_tlm_analysis_fifo #(uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))) input_mfb_data;
-    uvm_tlm_analysis_fifo #(uvm_common::model_item #(uvm_logic_vector::sequence_item #(MFB_META_WIDTH)))       input_mfb_meta;
-    uvm_analysis_port #(uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)))     out_mfb_data;
-    uvm_analysis_port #(uvm_common::model_item #(uvm_logic_vector::sequence_item #(MFB_META_WIDTH)))           out_mvb_data;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) input_mfb_data;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(MFB_META_WIDTH))       input_mfb_meta;
+    uvm_analysis_port #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))     out_mfb_data;
+    uvm_analysis_port #(uvm_logic_vector::sequence_item #(MFB_META_WIDTH))           out_mvb_data;
 
     // Protected variable
     protected drop_cbs#(MFB_REGIONS) drop_sync;
@@ -88,7 +88,7 @@ class model #(MFB_ITEM_WIDTH, MFB_META_WIDTH, MFB_REGIONS, DUT_PATH) extends uvm
     endfunction
 
     task run_meta();
-       uvm_common::model_item #(uvm_logic_vector::sequence_item #(MFB_META_WIDTH)) tr_input;
+       uvm_logic_vector::sequence_item #(MFB_META_WIDTH) tr_input;
 
         forever begin
             logic err;
@@ -114,7 +114,7 @@ class model #(MFB_ITEM_WIDTH, MFB_META_WIDTH, MFB_REGIONS, DUT_PATH) extends uvm
     endtask
 
     task run_data();
-        uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) tr_input;
+        uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH) tr_input;
 
         forever begin
             logic drop;

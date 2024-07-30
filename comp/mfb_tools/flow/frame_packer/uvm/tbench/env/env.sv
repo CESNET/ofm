@@ -152,12 +152,12 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MVB_IT
 
         //MVB data contain information about channel
         //Connect RX environment
-        mfb_rx_env.analysis_port_data.connect(m_scoreboard.analysis_imp_mfb_rx_data.analysis_export);
+        mfb_rx_env.analysis_port_data.connect(m_scoreboard.analysis_imp_mfb_rx_data);
         mvb_rx_env.analysis_port.connect(m_scoreboard.analysis_imp_mvb_rx);
 
         //Connect TX environment
         //Meter
-        mfb_tx_env.analysis_port_data.connect(m_scoreboard.analysis_imp_mfb_tx_data.analysis_export);
+        mfb_tx_env.analysis_port_data.connect(m_scoreboard.analysis_imp_mfb_tx_data);
 
         //Model
         mfb_tx_env.analysis_port_data.connect(m_scoreboard.data_cmp.analysis_imp_dut);

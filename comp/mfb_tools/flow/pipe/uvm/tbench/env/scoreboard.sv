@@ -10,8 +10,8 @@ class scoreboard #(ITEM_WIDTH, META_WIDTH) extends uvm_scoreboard;
 
     // Analysis components //
     //Model
-    uvm_common::subscriber #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))    analysis_imp_mfb_rx_data;
-    uvm_common::subscriber #(uvm_logic_vector::sequence_item#(META_WIDTH))          analysis_imp_mfb_rx_meta;
+    uvm_analysis_export #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))    analysis_imp_mfb_rx_data;
+    uvm_analysis_export #(uvm_logic_vector::sequence_item#(META_WIDTH))          analysis_imp_mfb_rx_meta;
 
     //Comparer
     uvm_common::comparer_ordered #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))  data_cmp;
@@ -22,6 +22,9 @@ class scoreboard #(ITEM_WIDTH, META_WIDTH) extends uvm_scoreboard;
     // Contructor of scoreboard.
     function new(string name, uvm_component parent);
         super.new(name, parent);
+
+        analysis_imp_mfb_rx_data = new("analysis_imp_mfb_rx_data", this);
+        analysis_imp_mfb_rx_meta = new("analysis_imp_mfb_rx_meta", this);
     endfunction
 
     function int unsigned success();
@@ -43,9 +46,6 @@ class scoreboard #(ITEM_WIDTH, META_WIDTH) extends uvm_scoreboard;
     function void build_phase(uvm_phase phase);
         m_model = model #(ITEM_WIDTH, META_WIDTH)::type_id::create("m_model", this);
 
-        analysis_imp_mfb_rx_data = uvm_common::subscriber #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))::type_id::create("analysis_imp_mfb_rx_data", this);
-        analysis_imp_mfb_rx_meta = uvm_common::subscriber #(uvm_logic_vector::sequence_item#(META_WIDTH))::type_id::create("analysis_imp_mfb_rx_meta", this);
-
         data_cmp = uvm_common::comparer_ordered #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))::type_id::create("data_cmp", this);
         meta_cmp = uvm_common::comparer_ordered #(uvm_logic_vector::sequence_item#(META_WIDTH))::type_id::create("meta_cmp", this);
         data_cmp.model_tr_timeout_set(10ns);
@@ -54,8 +54,8 @@ class scoreboard #(ITEM_WIDTH, META_WIDTH) extends uvm_scoreboard;
 
     function void connect_phase(uvm_phase phase);
         //Input of model
-        analysis_imp_mfb_rx_data.port.connect(m_model.data_in.analysis_export);
-        analysis_imp_mfb_rx_meta.port.connect(m_model.meta_in.analysis_export);
+        analysis_imp_mfb_rx_data.connect(m_model.data_in.analysis_export);
+        analysis_imp_mfb_rx_meta.connect(m_model.meta_in.analysis_export);
 
         //Connect model output to comparer
         m_model.data_out.connect(data_cmp.analysis_imp_model);

@@ -58,7 +58,7 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, RQ_TDA
     function void connect_phase(uvm_phase phase);
 
         mfb_cq_env.analysis_port_data.connect(m_scoreboard.analysis_imp_mfb_cq);
-        axi_cq_env.analysis_port_data.connect(m_scoreboard.analysis_imp_axi_cq.analysis_export);
+        axi_cq_env.analysis_port_data.connect(m_scoreboard.analysis_imp_axi_cq);
 
         m_reset.sync_connect(mfb_cq_env.reset_sync);
         m_reset.sync_connect(axi_cq_env.reset_sync);

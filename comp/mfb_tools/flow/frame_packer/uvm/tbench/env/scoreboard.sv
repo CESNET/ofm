@@ -13,10 +13,9 @@ class scoreboard #(MVB_ITEM_WIDTH, MFB_ITEM_WIDTH, RX_CHANNELS, USR_RX_PKT_SIZE_
     // uvm_analysis_export #(uvm_logic_vector::sequence_item#(MVB_ITEM_WIDTH)) analysis_imp_mvb_tx;
 
     //Model Data - SmallPackets
-    uvm_common::subscriber #(uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH))        analysis_imp_mfb_rx_data;
-
+    uvm_analysis_export #(uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH))        analysis_imp_mfb_rx_data;
     //DUT Data - SuperPackets
-    uvm_common::subscriber #(uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH))        analysis_imp_mfb_tx_data;
+    uvm_analysis_export #(uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH))        analysis_imp_mfb_tx_data;
 
     // uvm_common::subscriber #()
 
@@ -40,6 +39,8 @@ class scoreboard #(MVB_ITEM_WIDTH, MFB_ITEM_WIDTH, RX_CHANNELS, USR_RX_PKT_SIZE_
         analysis_imp_mvb_rx = new("analysis_imp_mvb_rx", this);
         analysis_imp_mvb_tx = new("analysis_imp_mvb_tx", this);
 
+        analysis_imp_mfb_rx_data = new("analysis_imp_mfb_rx_data", this);
+        analysis_imp_mfb_tx_data = new("analysis_imp_mfb_tx_data", this);
     endfunction
 
     function int unsigned success();
@@ -58,10 +59,6 @@ class scoreboard #(MVB_ITEM_WIDTH, MFB_ITEM_WIDTH, RX_CHANNELS, USR_RX_PKT_SIZE_
     function void build_phase(uvm_phase phase);
         m_model = model #(MVB_ITEM_WIDTH, MFB_ITEM_WIDTH, RX_CHANNELS)::type_id::create("m_model", this);
         m_meter = meter #(MVB_ITEM_WIDTH, MFB_ITEM_WIDTH, RX_CHANNELS, USR_RX_PKT_SIZE_MAX)::type_id::create("m_meter", this);
-
-        analysis_imp_mfb_rx_data = uvm_common::subscriber #(uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH))::type_id::create("analysis_imp_mfb_rx_data", this);
-        analysis_imp_mfb_tx_data = uvm_common::subscriber # (uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH))::type_id::create("analysis_imp_mfb_tx_data", this);
-
         //data_cmp = uvm_common::comparer_ordered #(uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH))::type_id::create("data_cmp", this);
 
         data_cmp = uvm_framepacker::comparer_superpacket #(uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH))::type_id::create("data_cmp", this);
@@ -71,15 +68,15 @@ class scoreboard #(MVB_ITEM_WIDTH, MFB_ITEM_WIDTH, RX_CHANNELS, USR_RX_PKT_SIZE_
 
     function void connect_phase(uvm_phase phase);
         //Input of model
-        analysis_imp_mfb_rx_data.port.connect(m_model.data_in.analysis_export);
+        analysis_imp_mfb_rx_data.connect(m_model.data_in.analysis_export);
         analysis_imp_mvb_rx.connect(m_model.meta_in.analysis_export);
 
         //Speed-meter
-        analysis_imp_mfb_rx_data.port.connect(m_meter.rx_data_in.analysis_export);
-        analysis_imp_mfb_tx_data.port.connect(m_meter.tx_data_in.analysis_export);
+        analysis_imp_mfb_rx_data.connect(m_meter.rx_data_in.analysis_export);
+        analysis_imp_mfb_tx_data.connect(m_meter.tx_data_in.analysis_export);
 
         //MVB
-        analysis_imp_mfb_tx_data.port.connect(m_meter.mfb_control_data.analysis_export);
+        analysis_imp_mfb_tx_data.connect(m_meter.mfb_control_data.analysis_export);
         analysis_imp_mvb_tx.connect(m_meter.meta_in.analysis_export);
 
         //Connect model output to comparer

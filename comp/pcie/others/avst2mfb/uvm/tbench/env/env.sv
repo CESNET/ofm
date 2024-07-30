@@ -70,8 +70,8 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_W
 
         mfb_tx_env.analysis_port_data.connect(m_scoreboard.analysis_imp_mfb_data);
         mfb_tx_env.analysis_port_meta.connect(m_scoreboard.analysis_imp_mfb_meta);
-        avst_env.analysis_port_data.connect(m_scoreboard.analysis_imp_avst_data.analysis_export);
-        avst_env.analysis_port_meta.connect(m_scoreboard.analysis_imp_avst_meta.analysis_export);
+        avst_env.analysis_port_data.connect(m_scoreboard.analysis_imp_avst_data);
+        avst_env.analysis_port_meta.connect(m_scoreboard.analysis_imp_avst_meta);
 
         m_reset.sync_connect(mfb_tx_env.reset_sync);
         m_reset.sync_connect(avst_env.reset_sync);

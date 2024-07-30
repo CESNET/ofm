@@ -8,11 +8,11 @@
 class model #(RX_MFB_ITEM_W, RX_MVB_ITEM_W, USERMETA_W, MOD_W) extends uvm_component;
     `uvm_component_param_utils(uvm_mfb_crossbarx_stream2::model #(RX_MFB_ITEM_W, RX_MVB_ITEM_W, USERMETA_W, MOD_W))
 
-    uvm_tlm_analysis_fifo #(uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(RX_MFB_ITEM_W)))   input_data;
-    uvm_tlm_analysis_fifo #(uvm_common::model_item #(uvm_logic_vector::sequence_item #(USERMETA_W)))            input_meta;
-    uvm_tlm_analysis_fifo #(uvm_common::model_item #(uvm_logic_vector::sequence_item #(RX_MVB_ITEM_W)))         input_mvb;
-    uvm_analysis_port #(uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(RX_MFB_ITEM_W)))       out_data;
-    uvm_analysis_port #(uvm_common::model_item #(uvm_logic_vector::sequence_item #(USERMETA_W)))                out_meta;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item #(RX_MFB_ITEM_W))   input_data;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(USERMETA_W))            input_meta;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(RX_MVB_ITEM_W))         input_mvb;
+    uvm_analysis_port #(uvm_logic_vector_array::sequence_item #(RX_MFB_ITEM_W))       out_data;
+    uvm_analysis_port #(uvm_logic_vector::sequence_item #(USERMETA_W))                out_meta;
 
     protected int unsigned transactions;
 
@@ -30,11 +30,11 @@ class model #(RX_MFB_ITEM_W, RX_MVB_ITEM_W, USERMETA_W, MOD_W) extends uvm_compo
 
     task run_phase(uvm_phase phase);
 
-        uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(RX_MFB_ITEM_W)) tr_input_data;
-        uvm_common::model_item #(uvm_logic_vector::sequence_item #(USERMETA_W))          tr_input_meta;
-        uvm_common::model_item #(uvm_logic_vector::sequence_item #(RX_MVB_ITEM_W))       tr_input_mvb;
-        uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(RX_MFB_ITEM_W)) tr_output_data;
-        uvm_common::model_item #(uvm_logic_vector::sequence_item #(USERMETA_W))          tr_output_meta;
+        uvm_logic_vector_array::sequence_item #(RX_MFB_ITEM_W) tr_input_data;
+        uvm_logic_vector::sequence_item #(USERMETA_W)          tr_input_meta;
+        uvm_logic_vector::sequence_item #(RX_MVB_ITEM_W)       tr_input_mvb;
+        uvm_logic_vector_array::sequence_item #(RX_MFB_ITEM_W) tr_output_data;
+        uvm_logic_vector::sequence_item #(USERMETA_W)          tr_output_meta;
 
         string str = "";
         logic mod_discard;
@@ -55,21 +55,18 @@ class model #(RX_MFB_ITEM_W, RX_MVB_ITEM_W, USERMETA_W, MOD_W) extends uvm_compo
             //input_meta.get(tr_input_meta);
             input_mvb.get(tr_input_mvb);
 
-            tr_output_data      = uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(RX_MFB_ITEM_W))::type_id::create("tr_output_data");
-            tr_output_data.item = uvm_logic_vector_array::sequence_item #(RX_MFB_ITEM_W)::type_id::create("tr_output_data_item");
-            tr_output_meta      = uvm_common::model_item #(uvm_logic_vector::sequence_item #(USERMETA_W))::type_id::create("tr_output_data");
-            tr_output_meta.item = uvm_logic_vector::sequence_item #(USERMETA_W)::type_id::create("tr_output_data_item");
 
             // send usermeta to output
-            tr_output_meta.item.data = tr_input_mvb.item.data[USERMETA_W-1 -: USERMETA_W];
+            tr_output_meta = uvm_logic_vector::sequence_item #(USERMETA_W)::type_id::create("tr_output_meta", this);
+            tr_output_meta.data = tr_input_mvb.data[USERMETA_W-1 -: USERMETA_W];
             // get mod instructions
-            mod_discard  = tr_input_mvb.item.data[USERMETA_W];
-            mod_sof_size = tr_input_mvb.item.data[USERMETA_W+1+MOD_W-1 -: MOD_W];
-            mod_sof_en   = tr_input_mvb.item.data[USERMETA_W+1+MOD_W];
-            mod_sof_type = tr_input_mvb.item.data[USERMETA_W+MOD_W+2];
-            mod_eof_size = tr_input_mvb.item.data[USERMETA_W+MOD_W+3+MOD_W-1 -: MOD_W];
-            mod_eof_en   = tr_input_mvb.item.data[USERMETA_W+MOD_W+3+MOD_W];
-            mod_eof_type = tr_input_mvb.item.data[USERMETA_W+MOD_W+3+MOD_W+1];
+            mod_discard  = tr_input_mvb.data[USERMETA_W];
+            mod_sof_size = tr_input_mvb.data[USERMETA_W+1+MOD_W-1 -: MOD_W];
+            mod_sof_en   = tr_input_mvb.data[USERMETA_W+1+MOD_W];
+            mod_sof_type = tr_input_mvb.data[USERMETA_W+MOD_W+2];
+            mod_eof_size = tr_input_mvb.data[USERMETA_W+MOD_W+3+MOD_W-1 -: MOD_W];
+            mod_eof_en   = tr_input_mvb.data[USERMETA_W+MOD_W+3+MOD_W];
+            mod_eof_type = tr_input_mvb.data[USERMETA_W+MOD_W+3+MOD_W+1];
 
             if (mod_sof_en == 0) begin
                 mod_sof_size = 0;
@@ -79,7 +76,7 @@ class model #(RX_MFB_ITEM_W, RX_MVB_ITEM_W, USERMETA_W, MOD_W) extends uvm_compo
                 mod_eof_size = 0;
             end
 
-            mfb_orig_size = tr_input_data.item.data.size();
+            mfb_orig_size = tr_input_data.data.size();
             mod_sof_trim = 0;
             mod_sof_extend = 0;
 
@@ -102,13 +99,17 @@ class model #(RX_MFB_ITEM_W, RX_MVB_ITEM_W, USERMETA_W, MOD_W) extends uvm_compo
                 mod_sof_trim = mod_sof_size;
             end
 
-            tr_output_data.item = new();
-            tr_output_data.item.data = new[mfb_new_size];
+            tr_output_data = uvm_logic_vector_array::sequence_item #(RX_MFB_ITEM_W)::type_id::create("tr_output_data", this);
+            tr_output_data.data = new[mfb_new_size];
 
+            //for (int i = mod_sof_trim; i < (mfb_new_size + mod_sof_trim-mod_sof_extend); i++) begin
+            //    logic [RX_MFB_ITEM_W-1:0] tmp;
             for (int i = mod_sof_trim; i < mfb_orig_size; i++) begin
-                tr_output_data.item.data[i-mod_sof_trim+mod_sof_extend] = tr_input_data.item.data[i];
+                tr_output_data.data[i-mod_sof_trim+mod_sof_extend] = tr_input_data.data[i];
             end
-            tr_output_meta.item.data = tr_input_mvb.item.data[USERMETA_W-1 -: USERMETA_W];
+            tr_output_meta.data  = tr_input_mvb.data[USERMETA_W-1 -: USERMETA_W];
+            tr_output_data.start = tr_input_mvb.start;
+            tr_output_data.time_array_add(tr_input_data.start);
 
             if (mod_discard == 0) begin
                 out_data.write(tr_output_data);
@@ -126,10 +127,10 @@ class model #(RX_MFB_ITEM_W, RX_MVB_ITEM_W, USERMETA_W, MOD_W) extends uvm_compo
             $swrite(str, "%s\nNEW size: %0d", str, mfb_new_size);
             $swrite(str, "%s\nsof_extend: %0d", str, mod_sof_extend);
             $swrite(str, "%s\nsof_trim: %0d", str, mod_sof_trim);
-            `uvm_info(this.get_full_name(), str, UVM_MEDIUM)
-            `uvm_info(this.get_full_name(), tr_input_data.convert2string(), UVM_MEDIUM)
-            `uvm_info(this.get_full_name(), tr_output_data.convert2string(), UVM_MEDIUM)
-            `uvm_info(this.get_full_name(), tr_output_meta.convert2string(), UVM_MEDIUM)
+            `uvm_info(this.get_full_name(), str, UVM_MEDIUM);
+            `uvm_info(this.get_full_name(), tr_input_data.convert2string(), UVM_MEDIUM);
+            `uvm_info(this.get_full_name(), tr_output_data.convert2string(), UVM_MEDIUM);
+            `uvm_info(this.get_full_name(), tr_output_meta.convert2string(), UVM_MEDIUM);
 
         end
 

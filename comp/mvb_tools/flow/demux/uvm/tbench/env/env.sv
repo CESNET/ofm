@@ -67,7 +67,7 @@ class env #(ITEMS, ITEM_WIDTH, TX_PORTS) extends uvm_env;
         end
 
         // Connect ports
-        m_rx_mvb_env.analysis_port        .connect(m_scoreboard.rx_mvb_analysis_imp.analysis_export);
+        m_rx_mvb_env.analysis_port        .connect(m_scoreboard.rx_mvb_analysis_imp);
         for (int i = 0; i < TX_PORTS; i++) begin
             m_tx_mvb_env[i].analysis_port .connect(m_scoreboard.tx_mvb_analysis_exp[i]);
         end

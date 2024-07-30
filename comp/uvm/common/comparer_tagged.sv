@@ -11,10 +11,10 @@
 
 class comparer_fifo #(type MODEL_ITEM, type DUT_ITEM = MODEL_ITEM);
 
-    protected model_item#(MODEL_ITEM) model_items[$];
-    protected dut_item#(DUT_ITEM) model_items_last;
-    int unsigned            compared;
-    int unsigned            errors;
+    protected MODEL_ITEM model_items[$];
+    protected DUT_ITEM model_items_last;
+    int unsigned       compared;
+    int unsigned       errors;
 
     function new();
         compared = 0;
@@ -22,22 +22,22 @@ class comparer_fifo #(type MODEL_ITEM, type DUT_ITEM = MODEL_ITEM);
         model_items_last = new();
     endfunction
 
-    function void push_back(model_item#(MODEL_ITEM) item);
+    function void push_back(MODEL_ITEM item);
         model_items.push_back(item);
     endfunction
 
-    function model_item#(MODEL_ITEM) get(int unsigned index);
+    function MODEL_ITEM get(int unsigned index);
         if (model_items.size() == 0) begin
             return null;
         end
         return model_items[index];
     endfunction
 
-    function dut_item #(DUT_ITEM) dut_last();
+    function DUT_ITEM dut_last();
         return model_items_last;
     endfunction
 
-    function void dut_last_set(dut_item #(DUT_ITEM) tr);
+    function void dut_last_set(DUT_ITEM tr);
         model_items_last = tr;
     endfunction
 
@@ -61,7 +61,7 @@ virtual class comparer_base_tagged #(type MODEL_ITEM, type DUT_ITEM = MODEL_ITEM
     comparer_fifo #(MODEL_ITEM, DUT_ITEM) model_items[string];
     int unsigned             dut_errors;
     int unsigned             dut_accept;
-    dut_item #(DUT_ITEM) dut_items[$];
+    DUT_ITEM dut_items[$];
 
 
     function new(string name, uvm_component parent = null);
@@ -112,7 +112,7 @@ virtual class comparer_base_tagged #(type MODEL_ITEM, type DUT_ITEM = MODEL_ITEM
         return ret;
    endfunction
 
-    virtual function void write_model(model_item#(MODEL_ITEM) tr);
+    virtual function void write_model(MODEL_ITEM tr);
         int unsigned w_end = 0;
         int unsigned it    = 0;
 
@@ -129,20 +129,20 @@ virtual class comparer_base_tagged #(type MODEL_ITEM, type DUT_ITEM = MODEL_ITEM
             if (w_end == 0) begin
                 it++;
             end else begin
-                dut_item#(DUT_ITEM) dut_last;
-                `uvm_info(this.get_full_name(), $sformatf("\n\tTransaction Match DUT(%0d) Model(%0d) output time %0dns\n\t%s\n%s\n",
-                    dut_items[it].in_id, model_accept, dut_items[it].in_time/1ns, tr.convert2string_time(),
-                    this.message(tr, dut_items[it])), UVM_DEBUG);
+                DUT_ITEM dut_last;
+                `uvm_info(this.get_full_name(), $sformatf("\n\tTransaction Match DUT(%0d) Model(%0d) output time %0dns\nMODEL ITEM : %s\nDUT ITEM : %s",
+                    dut_items[it].get_transaction_id(), model_accept, dut_items[it].time_last()/1ns,
+                    model_item2string(tr), dut_item2string(dut_items[it])), UVM_DEBUG);
 
                 dut_last = model_items[tr.tag].dut_last();
-                if (dut_last.in_time > dut_items[it].in_time) begin
+                if (dut_last.time_last() > dut_items[it].time_last()) begin
 
                     string msg;
                     msg = $sformatf("\n\tSome transaction %0d what have output time %0dns have been outruned by transaction %0d  with otput time %0dns\n\ttag %s\nOutrun transaction\n%s\nOutruned transaction\n%s\n",
-                            dut_last.in_id, dut_last.in_time/1ns, dut_items[it].in_id,
-                            dut_items[it].in_time/1ns, tr.tag,
-                            dut_last.in_item.convert2string(),
-                            dut_items[it].in_item.convert2string());
+                            dut_last.get_transaction_id(), dut_last.time_last()/1ns, dut_items[it].get_transaction_id(),
+                            dut_items[it].time_last()/1ns, tr.tag,
+                            dut_last.convert2string(),
+                            dut_items[it].convert2string());
                     `uvm_error(this.get_full_name(), msg);
                 end
 
@@ -158,12 +158,11 @@ virtual class comparer_base_tagged #(type MODEL_ITEM, type DUT_ITEM = MODEL_ITEM
     endfunction
 
     virtual function void write_dut(DUT_ITEM tr);
-        dut_item #(DUT_ITEM) dut_item;
         int unsigned w_end = 0;
         int unsigned it    = 0;
         int unsigned index_valid;
         string index;
-        model_item#(MODEL_ITEM) model_tr;
+        MODEL_ITEM model_tr;
 
         dut_accept += 1;
         `uvm_info(this.get_full_name(), $sformatf("\n\tGet DUT transactions %0d in time %0dns\n%s\n", dut_accept, $time()/1ns, tr.convert2string()), UVM_FULL);
@@ -174,38 +173,36 @@ virtual class comparer_base_tagged #(type MODEL_ITEM, type DUT_ITEM = MODEL_ITEM
             model_tr    = model_items[index].get(0);
         end
 
-        dut_item = new(dut_accept, $time(), tr);
-        while (index_valid != 0 && (model_tr == null || compare(model_tr, dut_item) == 0)) begin
+        while (index_valid != 0 && (model_tr == null || compare(model_tr, tr) == 0)) begin
             index_valid = model_items.next(index);
             model_tr    = model_items[index].get(0);
         end
 
         if (index_valid != 0) begin
             comparer_fifo #(MODEL_ITEM, DUT_ITEM) cmp_fifo = model_items[index];
-            model_item#(MODEL_ITEM)               model_item = cmp_fifo.get(0);
+            MODEL_ITEM               model_item = cmp_fifo.get(0);
 
             cmp_fifo.compared++;
 
-            `uvm_info(this.get_full_name(), $sformatf("\n\tTransaction Match DUT %0d output time %0dns\n\t%s\n%s\n",
-                dut_accept, $time()/1ns, model_item.convert2string_time(),
-                this.message(model_item, dut_item)), UVM_DEBUG);
+            `uvm_info(this.get_full_name(), $sformatf("\n\tTransaction Match DUT %0d output time %0dns\nMODEL ITEM : %s\nDUT ITEM : %s\n",
+                dut_accept, $time()/1ns, model_item2string(model_item), dut_item2string(tr)), UVM_DEBUG);
 
-            cmp_fifo.dut_last_set(dut_item);
+            cmp_fifo.dut_last_set(tr);
             cmp_fifo.delete(0);
         end else begin
-            dut_items.push_back(dut_item);
+            dut_items.push_back(tr);
         end
     endfunction
 
-    function string dut_tr_get(model_item#(MODEL_ITEM) tr, time tr_time);
+    function string dut_tr_get(MODEL_ITEM tr, time tr_time);
         string msg = "";
         for (int unsigned it = 0; it < dut_items.size(); it++) begin
-            msg = {msg, $sformatf("\n\nOutput time %0dns (%0dns) \n%s", dut_items[it].in_time/1ns, (dut_items[it].in_time - tr_time)/1ns, this.message(tr, dut_items[it]))};
+            msg = {msg, $sformatf("\n\nOutput time %0dns (%0dns) \nMODEL ITEM : %s\nDUT ITEM %s\n", dut_items[it].time_last()/1ns, (dut_items[it].time_last() - tr_time)/1ns, model_item2string(tr), dut_item2string(dut_items[it]))};
         end
         return msg;
     endfunction
 
-    function string model_tr_get(dut_item #(DUT_ITEM) tr);
+    function string model_tr_get(DUT_ITEM tr);
         int unsigned index_valid;
         string index;
         string msg = "";
@@ -213,8 +210,8 @@ virtual class comparer_base_tagged #(type MODEL_ITEM, type DUT_ITEM = MODEL_ITEM
         index_valid = model_items.first(index);
         while (index_valid != 0) begin
             for (int unsigned it = 0; it < model_items[index].size(); it++) begin
-                model_item#(MODEL_ITEM) tmp_item = model_items[index].get(it);
-                msg = {msg, $sformatf("\n\nTag %s\n%s\n%s", index, tmp_item.convert2string_time(), this.message(tmp_item, tr))};
+                MODEL_ITEM tmp_item = model_items[index].get(it);
+                msg = {msg, $sformatf("\n\nTag %s\nMODEL ITEM : %s\nDUT ITEM : %s\n", index, model_item2string(tmp_item), dut_item2string(tr))};
             end
             //next index
             index_valid = model_items.next(index);
@@ -246,7 +243,7 @@ virtual class comparer_base_tagged #(type MODEL_ITEM, type DUT_ITEM = MODEL_ITEM
 
                 if (delay >= dut_tr_timeout) begin
                     comparer_fifo #(MODEL_ITEM, DUT_ITEM) cmp_fifo = model_items[index];
-                    model_item#(MODEL_ITEM)               model_tr = cmp_fifo.get(0);
+                    MODEL_ITEM               model_tr = cmp_fifo.get(0);
 
                     cmp_fifo.errors++;
                     `uvm_error(this.get_full_name(), $sformatf("\n\tTransaction from DUT is delayed %0dns. Probably stuck.\n\tErrors/Compared %0d/%0d\n%s\n\nDUT transactions:\n%s",
@@ -270,12 +267,12 @@ virtual class comparer_base_tagged #(type MODEL_ITEM, type DUT_ITEM = MODEL_ITEM
         time delay;
         forever begin
             wait(dut_items.size() > 0);
-            delay = $time() - dut_items[0].in_time;
+            delay = $time() - dut_items[0].time_last();
             if (delay >= model_tr_timeout) begin
                  dut_errors++;
                 `uvm_error(this.get_full_name(), $sformatf("\n\tTransaction %0d from DUT is unexpected.\n\tErrors %0d Output time %0dns. Delay %0dns. Probably unexpected transaction.\n%s\n\n%s",
-                                                           dut_items[0].in_id, dut_errors, dut_items[0].in_time/1ns, delay/1ns,
-                                                           dut_items[0].in_item.convert2string(), this.model_tr_get(dut_items[0])));
+                                                           dut_items[0].get_transaction_id(), dut_errors, dut_items[0].time_last()/1ns, delay/1ns,
+                                                           dut_items[0].convert2string(), this.model_tr_get(dut_items[0])));
                 dut_items.delete(0);
             end else begin
                 #(model_tr_timeout - delay);

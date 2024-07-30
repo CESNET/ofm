@@ -63,7 +63,7 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, CC_TDA
     // Connect agent's ports with ports from scoreboard.
     function void connect_phase(uvm_phase phase);
 
-        mfb_cc_env.analysis_port_data.connect(m_scoreboard.analysis_imp_mfb_cc.analysis_export);
+        mfb_cc_env.analysis_port_data.connect(m_scoreboard.analysis_imp_mfb_cc);
         axi_cc_env.analysis_port_data.connect(m_scoreboard.analysis_imp_axi_cc);
 
         m_reset.sync_connect(mfb_cc_env.reset_sync);

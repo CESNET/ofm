@@ -8,8 +8,8 @@ class scoreboard #(ITEM_WIDTH) extends uvm_scoreboard;
 
     `uvm_component_utils(uvm_cq_mfb2axi::scoreboard #(ITEM_WIDTH))
     // Analysis components.
-    uvm_common::subscriber #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)) analysis_imp_axi_cq;
-    uvm_analysis_export #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))    analysis_imp_mfb_cq;
+    uvm_analysis_export #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)) analysis_imp_axi_cq;
+    uvm_analysis_export #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)) analysis_imp_mfb_cq;
 
     uvm_common::comparer_ordered #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)) data_cmp;
 
@@ -19,6 +19,7 @@ class scoreboard #(ITEM_WIDTH) extends uvm_scoreboard;
     function new(string name, uvm_component parent);
         super.new(name, parent);
         analysis_imp_mfb_cq = new("analysis_imp_mfb_cq", this);
+        analysis_imp_axi_cq = new("analysis_imp_axi_cq", this);
     endfunction
 
     function int unsigned used();
@@ -30,15 +31,12 @@ class scoreboard #(ITEM_WIDTH) extends uvm_scoreboard;
 
     function void build_phase(uvm_phase phase);
         m_model = uvm_pcie_mfb2avst::model #(ITEM_WIDTH, 0)::type_id::create("m_model", this);
-
-        analysis_imp_axi_cq = uvm_common::subscriber #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))::type_id::create("analysis_imp_axi_cq", this);
-
         data_cmp = uvm_common::comparer_ordered #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))::type_id::create("data_cmp", this);
 
     endfunction
 
     function void connect_phase(uvm_phase phase);
-        analysis_imp_axi_cq.port.connect(m_model.data_in.analysis_export);
+        analysis_imp_axi_cq.connect(m_model.data_in.analysis_export);
         m_model.data_out.connect(data_cmp.analysis_imp_model);
         analysis_imp_mfb_cq.connect(data_cmp.analysis_imp_dut);
     endfunction

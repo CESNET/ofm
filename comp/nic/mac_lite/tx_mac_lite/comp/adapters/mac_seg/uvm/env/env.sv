@@ -27,7 +27,7 @@ class env#(SEGMENTS, REGIONS, REGION_SIZE) extends uvm_env;
 
     function void build_phase(uvm_phase phase);
         //create configuration
-        uvm_reset::config_item                    m_reset_cfg;
+        uvm_reset::config_item                            m_reset_cfg;
         uvm_logic_vector_array_intel_mac_seg::config_item m_env_tx_cfg;
         uvm_logic_vector_array_mfb::config_item           m_env_rx_cfg;
 

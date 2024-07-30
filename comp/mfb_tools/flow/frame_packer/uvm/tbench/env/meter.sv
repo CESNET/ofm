@@ -87,10 +87,10 @@ endclass
 class meter #(MVB_ITEM_WIDTH, MFB_ITEM_WIDTH, RX_CHANNELS, USR_RX_PKT_SIZE_MAX) extends uvm_component;
     `uvm_component_param_utils(uvm_framepacker::meter#(MVB_ITEM_WIDTH, MFB_ITEM_WIDTH, RX_CHANNELS, USR_RX_PKT_SIZE_MAX))
 
-    uvm_tlm_analysis_fifo #(uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)))  rx_data_in;
-    uvm_tlm_analysis_fifo #(uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)))  tx_data_in;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))  rx_data_in;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))  tx_data_in;
 
-    uvm_tlm_analysis_fifo #(uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)))  mfb_control_data;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))  mfb_control_data;
     uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(MVB_ITEM_WIDTH))        meta_in;
 
     local stats  m_input_speed;
@@ -131,7 +131,7 @@ class meter #(MVB_ITEM_WIDTH, MFB_ITEM_WIDTH, RX_CHANNELS, USR_RX_PKT_SIZE_MAX) 
         time         speed_start_time  = 0ns;
 
 
-        uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) tr_rx_mfb_in;
+        uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH) tr_rx_mfb_in;
         forever begin
             time speed_meter_duration;
             time time_act;
@@ -140,9 +140,9 @@ class meter #(MVB_ITEM_WIDTH, MFB_ITEM_WIDTH, RX_CHANNELS, USR_RX_PKT_SIZE_MAX) 
             time_act = $time();
 
             // Length statistics
-            m_input_length.next_val(tr_rx_mfb_in.item.data.size());
+            m_input_length.next_val(tr_rx_mfb_in.data.size());
 
-            speed_packet_size += tr_rx_mfb_in.item.data.size();
+            speed_packet_size += tr_rx_mfb_in.data.size();
             speed_meter_duration = time_act - speed_start_time;
             if (speed_meter_duration >= 10us) begin
                 real speed;
@@ -162,7 +162,7 @@ class meter #(MVB_ITEM_WIDTH, MFB_ITEM_WIDTH, RX_CHANNELS, USR_RX_PKT_SIZE_MAX) 
         int unsigned speed_packet_size = 0;
         time         speed_start_time  = 0ns;
 
-        uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) tr_tx_mfb_in;
+        uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH) tr_tx_mfb_in;
         forever begin
             time time_act;
             time speed_meter_duration;
@@ -171,16 +171,15 @@ class meter #(MVB_ITEM_WIDTH, MFB_ITEM_WIDTH, RX_CHANNELS, USR_RX_PKT_SIZE_MAX) 
             time_act = $time();
 
             // Length statistics
-            m_output_length.next_val(tr_tx_mfb_in.item.data.size());
+            m_output_length.next_val(tr_tx_mfb_in.data.size());
 
             //debug
-            $swrite(msg, "\nOUTPUT_TIME:     %0d
-                          \nOUTPUT_PACKET:   %0s
-
-                          \n",time_act/1us ,tr_tx_mfb_in.convert2string());
+            $swrite(msg, {"\nOUTPUT_TIME:     %0d",
+                          "\nOUTPUT_PACKET:   %0s\n"}
+                          ,time_act/1us ,tr_tx_mfb_in.convert2string());
             //`uvm_info(this.get_full_name(), msg, UVM_NONE);
 
-            speed_packet_size += tr_tx_mfb_in.item.data.size();
+            speed_packet_size += tr_tx_mfb_in.data.size();
             speed_meter_duration = time_act - speed_start_time;
             if (speed_meter_duration >= 2us) begin
                 real speed;
@@ -205,7 +204,7 @@ class meter #(MVB_ITEM_WIDTH, MFB_ITEM_WIDTH, RX_CHANNELS, USR_RX_PKT_SIZE_MAX) 
 
 
         uvm_logic_vector::sequence_item #(MVB_ITEM_WIDTH) tr_mvb_in;
-        uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) tr_tx_mfb_in;
+        uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH) tr_tx_mfb_in;
 
         forever begin
             mfb_control_data.get(tr_tx_mfb_in);
@@ -221,17 +220,17 @@ class meter #(MVB_ITEM_WIDTH, MFB_ITEM_WIDTH, RX_CHANNELS, USR_RX_PKT_SIZE_MAX) 
 
             // MVB_ITEM_WIDTH = 15 + 12 + 4 + 1 = 32
 
-            if (tr_tx_mfb_in.item.data.size() == pkt_len) begin
-                $swrite(msg,"\nCHANNEL      %0d
-                             \nPKT_LEN      %0d
-                             \n", tr_mvb_in, channel, pkt_len);
+            if (tr_tx_mfb_in.data.size() == pkt_len) begin
+                $swrite(msg,{"\nCHANNEL      %0d",
+                             "\nPKT_LEN      %0d\n"}
+                             , tr_mvb_in, channel, pkt_len);
                 //`uvm_info(this.get_full_name(), msg, UVM_NONE);
             end else begin
-                $swrite(msg,"\nWHOLE_MVB    %0b
-                             \nCHANNEL      %0d
-                             \nPKT_LEN      %0d
-                             \nPKT_ITSELF   %0s
-                             \n", tr_mvb_in.data[MVB_ITEM_WIDTH - 1 : 12 + $clog2(RX_CHANNELS) + 1], channel, pkt_len, tr_tx_mfb_in.convert2string());
+                $swrite(msg,{"\nWHOLE_MVB    %0b",
+                             "\nCHANNEL      %0d",
+                             "\nPKT_LEN      %0d",
+                             "\nPKT_ITSELF   %0s\n"}
+                             , tr_mvb_in.data[MVB_ITEM_WIDTH - 1 : 12 + $clog2(RX_CHANNELS) + 1], channel, pkt_len, tr_tx_mfb_in.convert2string());
                 `uvm_error(this.get_full_name(), msg);
             end
 

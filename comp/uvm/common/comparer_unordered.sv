@@ -97,7 +97,7 @@ virtual class comparer_base_unordered #(type MODEL_ITEM, type DUT_ITEM = MODEL_I
 
         msg = {msg, "\nMODEL ITEMS : "};
         for (int unsigned it = 0; it < model_items.size(); it++) begin
-            msg = {msg, "\n", dut_item2string(tr)};
+            msg = {msg, "\n", model_item2string(model_items[it])};
         end
         return msg;
     endfunction

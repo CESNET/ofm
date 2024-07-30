@@ -8,8 +8,8 @@ class scoreboard #(MVB_ITEM_WIDTH, RX_STREAMS) extends uvm_scoreboard;
     `uvm_component_utils(uvm_mvb_merge_streams_ordered::scoreboard #(MVB_ITEM_WIDTH, RX_STREAMS))
 
     // Analysis components.
-    uvm_common::subscriber #(uvm_logic_vector::sequence_item #(MVB_ITEM_WIDTH))      rx_mvb_analysis_imp [RX_STREAMS -1 : 0];
-    uvm_common::subscriber #(uvm_logic_vector::sequence_item #($clog2(RX_STREAMS)))  rx_sel_mvb_analysis_imp;
+    uvm_analysis_export #(uvm_logic_vector::sequence_item #(MVB_ITEM_WIDTH))      rx_mvb_analysis_imp [RX_STREAMS -1 : 0];
+    uvm_analysis_export #(uvm_logic_vector::sequence_item #($clog2(RX_STREAMS)))  rx_sel_mvb_analysis_imp;
     uvm_analysis_export    #(uvm_logic_vector::sequence_item #(MVB_ITEM_WIDTH))      tx_mvb_analysis_exp;
 
     // Comparer instance
@@ -23,14 +23,15 @@ class scoreboard #(MVB_ITEM_WIDTH, RX_STREAMS) extends uvm_scoreboard;
         super.new(name, parent);
 
         tx_mvb_analysis_exp = new("tx_mvb_analysis_exp", this);
+
+        for (int port = 0; port < RX_STREAMS; port++) begin
+            rx_mvb_analysis_imp[port]  = new($sformatf("rx_mvb_analysis_imp_%0d", port), this);
+        end
+        rx_sel_mvb_analysis_imp        = new("rx_sel_mvb_analysis_imp", this);
+
     endfunction
 
     function void build_phase(uvm_phase phase);
-        for (int port = 0; port < RX_STREAMS; port++) begin
-            rx_mvb_analysis_imp[port]  = uvm_common::subscriber #(uvm_logic_vector::sequence_item #(MVB_ITEM_WIDTH))    ::type_id::create($sformatf("rx_mvb_analysis_imp_%0d", port), this);
-        end
-        rx_sel_mvb_analysis_imp        = uvm_common::subscriber #(uvm_logic_vector::sequence_item #($clog2(RX_STREAMS)))::type_id::create("rx_sel_mvb_analysis_imp", this);
-
         cmp     = uvm_common::comparer_ordered #(uvm_logic_vector::sequence_item #(MVB_ITEM_WIDTH))::type_id::create("cmp", this);
         cmp.model_tr_timeout_set(128ns);
 
@@ -40,9 +41,9 @@ class scoreboard #(MVB_ITEM_WIDTH, RX_STREAMS) extends uvm_scoreboard;
     function void connect_phase(uvm_phase phase);
         // Connects input data to the input of the model
         for (int port = 0; port < RX_STREAMS; port++) begin
-            rx_mvb_analysis_imp[port].port.connect(m_model.rx_mvb_analysis_fifo[port].analysis_export);
+            rx_mvb_analysis_imp[port].connect(m_model.rx_mvb_analysis_fifo[port].analysis_export);
         end
-        rx_sel_mvb_analysis_imp      .port.connect(m_model.rx_sel_mvb_analysis_fifo  .analysis_export);
+        rx_sel_mvb_analysis_imp      .connect(m_model.rx_sel_mvb_analysis_fifo  .analysis_export);
 
         // Connects output data of the DUT
         tx_mvb_analysis_exp.connect(cmp.analysis_imp_dut);
