@@ -16,7 +16,7 @@ class chsum_calc_cmp #(MVB_DATA_WIDTH, MFB_META_WIDTH) extends uvm_common::compa
     endfunction
 
     virtual function int unsigned compare(MODEL_ITEM tr_model, DUT_ITEM tr_dut);
-        int unsigned                                      ret;
+        int unsigned                                      ret = 1;
 
         `uvm_info(get_type_name(), message(tr_model, tr_dut), UVM_HIGH)
 
@@ -28,9 +28,10 @@ class chsum_calc_cmp #(MVB_DATA_WIDTH, MFB_META_WIDTH) extends uvm_common::compa
         if (tr_model.bypass) begin
             ret = 1;
         end else begin
-            ret |= tr_model.data_tr.compare(tr_dut_data);
-            ret |= bypass_dut === tr_model.bypass;
-            ret |= meta_dut   === tr_model.meta;
+            //|= is different that  &=. Be carefull when use what.
+            ret &= tr_dut_data.data === tr_model.data_tr.data;
+            ret &= bypass_dut       === tr_model.bypass;
+            ret &= meta_dut         === tr_model.meta;
         end
 
         return ret;
