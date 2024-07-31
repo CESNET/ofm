@@ -21,7 +21,8 @@ class chsum_calc_cmp #(MVB_DATA_WIDTH, MFB_META_WIDTH) extends uvm_common::compa
         {meta_dut, bypass_dut, data_dut} = tr_dut.data;
 
         if (tr_model.bypass) begin
-            ret = 1;
+            ret &= (bypass_dut      === 1);
+            ret &= meta_dut         === tr_model.meta;
         end else begin
             //|= is different that  &=. Be carefull when use what.
             ret &= data_dut    === tr_model.data;
