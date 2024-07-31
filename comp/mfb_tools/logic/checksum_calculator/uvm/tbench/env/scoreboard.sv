@@ -25,8 +25,8 @@ class scoreboard #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LEN
     endfunction
 
     function int unsigned success();
-        int unsigned ret = 0;
-        ret |= data_cmp.success();
+        int unsigned ret = 1;
+        ret &= data_cmp.success();
         return ret;
     endfunction
 
