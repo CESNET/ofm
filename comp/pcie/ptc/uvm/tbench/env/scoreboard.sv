@@ -41,9 +41,9 @@ class up_catch extends uvm_component;
                 up_mfb_cnt++;
             end
 
-            $swrite(debug_msg, "%s\n\t GEN UP MVB TR NUMBER: %d: %s\n", debug_msg, up_mvb_cnt, tr_up_mvb_gen.convert2string());
+            debug_msg = {debug_msg, $sformatf("\n\t GEN UP MVB TR NUMBER: %d: %s\n",  up_mvb_cnt, tr_up_mvb_gen.convert2string())};
             if (tr_up_mfb_gen != null) begin
-                $swrite(debug_msg, "%s\n\t GEN UP MFB TR NUMBER: %d: %s\n", debug_msg, up_mfb_cnt, tr_up_mfb_gen.convert2string());
+                debug_msg = {debug_msg, $sformatf("\n\t GEN UP MFB TR NUMBER: %d: %s\n",  up_mfb_cnt, tr_up_mfb_gen.convert2string())};
             end
             `uvm_info(this.get_full_name(), debug_msg ,UVM_FULL);
 
@@ -55,11 +55,11 @@ class up_catch extends uvm_component;
                 end else begin
                     dut_up_mfb_array[tr_up_mvb_gen.data[sv_dma_bus_pack::DMA_REQUEST_UNITID_O-1 : sv_dma_bus_pack::DMA_REQUEST_TAG_O]] = tr_up_mfb_gen;
                     dut_up_mvb_array[tr_up_mvb_gen.data[sv_dma_bus_pack::DMA_REQUEST_UNITID_O-1 : sv_dma_bus_pack::DMA_REQUEST_TAG_O]] = tr_up_mvb_gen;
-                    $swrite(debug_msg, "\n\t =============== RQ DUT CATCH =============== \n");
-                    $swrite(debug_msg, "%s\t Transaction NUMBER   : %0d\n", debug_msg, up_mvb_cnt);
-                    $swrite(debug_msg, "%s\t Transaction LENGTH   : %0d\n", debug_msg, tr_up_mvb_gen.data[sv_dma_bus_pack::DMA_REQUEST_TYPE_O-1 : sv_dma_bus_pack::DMA_REQUEST_LENGTH_O]);
-                    $swrite(debug_msg, "%s\t Transaction WRITE    : 0x%h\n", debug_msg, tr_up_mvb_gen.data[sv_dma_bus_pack::DMA_REQUEST_FIRSTIB_O-1 : sv_dma_bus_pack::DMA_REQUEST_TYPE_O]);
-                    $swrite(debug_msg, "%s\t Transaction PCIE TAG : 0x%h\n", debug_msg, tr_up_mvb_gen.data[sv_dma_bus_pack::DMA_REQUEST_UNITID_O-1 : sv_dma_bus_pack::DMA_REQUEST_TAG_O]);
+                    debug_msg = $sformatf( "\n\t =============== RQ DUT CATCH =============== \n");
+                    debug_msg = {debug_msg, $sformatf("\t Transaction NUMBER   : %0d\n",  up_mvb_cnt)};
+                    debug_msg = {debug_msg, $sformatf("\t Transaction LENGTH   : %0d\n",  tr_up_mvb_gen.data[sv_dma_bus_pack::DMA_REQUEST_TYPE_O-1 : sv_dma_bus_pack::DMA_REQUEST_LENGTH_O])};
+                    debug_msg = {debug_msg, $sformatf("\t Transaction WRITE    : 0x%h\n",  tr_up_mvb_gen.data[sv_dma_bus_pack::DMA_REQUEST_FIRSTIB_O-1 : sv_dma_bus_pack::DMA_REQUEST_TYPE_O])};
+                    debug_msg = {debug_msg, $sformatf("\t Transaction PCIE TAG : 0x%h\n",  tr_up_mvb_gen.data[sv_dma_bus_pack::DMA_REQUEST_UNITID_O-1 : sv_dma_bus_pack::DMA_REQUEST_TAG_O])};
                     `uvm_info(this.get_full_name(), debug_msg ,UVM_MEDIUM);
                 end
             end
@@ -114,10 +114,10 @@ class rc_compare extends uvm_component;
 
             down_cnt++;
 
-            $swrite(debug_msg, "%s\n\t Model MFB DOWN TR NUMBER %d: %p\n", debug_msg, down_cnt, tr_model.data);
-            $swrite(debug_msg, "%s\n\t Model MVB DOWN TR NUMBER %d: %h\n", debug_msg, down_cnt, tr_model.meta);
-            $swrite(debug_msg, "%s\n\t DUT MFB DOWN TR NUMBER   %d: %s\n", debug_msg, down_cnt, tr_dut_mfb.convert2string());
-            $swrite(debug_msg, "%s\n\t DUT MVB DOWN TR NUMBER   %d: %s\n", debug_msg, down_cnt, tr_dut_mvb.convert2string());
+            debug_msg = {debug_msg, $sformatf("\n\t Model MFB DOWN TR NUMBER %d: %p\n",  down_cnt, tr_model.data)};
+            debug_msg = {debug_msg, $sformatf("\n\t Model MVB DOWN TR NUMBER %d: %h\n",  down_cnt, tr_model.meta)};
+            debug_msg = {debug_msg, $sformatf("\n\t DUT MFB DOWN TR NUMBER   %d: %s\n",  down_cnt, tr_dut_mfb.convert2string())};
+            debug_msg = {debug_msg, $sformatf("\n\t DUT MVB DOWN TR NUMBER   %d: %s\n",  down_cnt, tr_dut_mvb.convert2string())};
             `uvm_info(this.get_full_name(), debug_msg ,UVM_FULL);
 
             if (dut_down_mfb_array.exists(tr_dut_mvb.data[20-1 : 12])) begin
@@ -143,23 +143,23 @@ class rc_compare extends uvm_component;
     task comp(uvm_logic_vector::sequence_item#(sv_dma_bus_pack::DMA_DOWNHDR_WIDTH) mvb, uvm_logic_vector_array::sequence_item#(32) dut_mfb, uvm_logic_vector_array::sequence_item#(32) model_mfb);
         string msg;
 
-        $swrite(msg, "%s\n\t =============== DOWN COMPARE =============== \n", msg);
-        $swrite(msg, "%s\t Transaction NUMBER : %0d\n", msg, down_cnt);
-        $swrite(msg, "%s\t Transaction LENGTH : %0d\n", msg, mvb.data[10-1 : 0]);
-        $swrite(msg, "%s\t Transaction TAG    : 0x%h\n", msg, mvb.data[20-1 : 12]);
+        msg = {msg, $sformatf("\n\t =============== DOWN COMPARE =============== \n")};
+        msg = {msg, $sformatf("\t Transaction NUMBER : %0d\n",  down_cnt)};
+        msg = {msg, $sformatf("\t Transaction LENGTH : %0d\n",  mvb.data[10-1 : 0])};
+        msg = {msg, $sformatf("\t Transaction TAG    : 0x%h\n",  mvb.data[20-1 : 12])};
         `uvm_info(this.get_full_name(), msg ,UVM_MEDIUM);
 
         if (catch_up.dut_up_mvb_array.exists(mvb.data[20-1 : 12])) begin
 
-            $swrite(msg, "\n\t TAG    [dut, model]: 0x%h, 0x%h \n", mvb.data[20-1 : 12], catch_up.dut_up_mvb_array[mvb.data[20-1 : 12]].data[sv_dma_bus_pack::DMA_REQUEST_UNITID_O-1 : sv_dma_bus_pack::DMA_REQUEST_TAG_O]);
-            $swrite(msg, "%s\t LENGTH [dut, model]: %0d, %0d \n", msg, mvb.data[10-1 : 0], catch_up.dut_up_mvb_array[mvb.data[20-1 : 12]].data[sv_dma_bus_pack::DMA_REQUEST_LENGTH_W-1 : 0]);
+            msg = $sformatf( "\n\t TAG    [dut, model]: 0x%h, 0x%h \n", mvb.data[20-1 : 12], catch_up.dut_up_mvb_array[mvb.data[20-1 : 12]].data[sv_dma_bus_pack::DMA_REQUEST_UNITID_O-1 : sv_dma_bus_pack::DMA_REQUEST_TAG_O]);
+            msg = {msg, $sformatf("\t LENGTH [dut, model]: %0d, %0d \n",  mvb.data[10-1 : 0], catch_up.dut_up_mvb_array[mvb.data[20-1 : 12]].data[sv_dma_bus_pack::DMA_REQUEST_LENGTH_W-1 : 0])};
             `uvm_info(this.get_full_name(), msg ,UVM_FULL);
 
             if (model_mfb.compare(dut_mfb) == 0) begin
                 string msg_1;
 
-                $swrite(msg_1, "\n\t Transaction number: %d\n\t", down_cnt);
-                $swrite(msg_1, "\tCheck MFB failed.\n\tModel data %s\n\tDUT data %s\n", model_mfb.convert2string(), dut_mfb.convert2string());
+                msg_1 = $sformatf( "\n\t Transaction number: %d\n\t", down_cnt);
+                msg_1 = $sformatf( "\tCheck MFB failed.\n\tModel data %s\n\tDUT data %s\n", model_mfb.convert2string(), dut_mfb.convert2string());
                 `uvm_error(this.get_full_name(), msg_1);
                 errors++;
             end
@@ -167,11 +167,11 @@ class rc_compare extends uvm_component;
             if (mvb.data[10-1 : 0] != dut_mfb.size() || mvb.data[10-1 : 0] != model_mfb.size()) begin
                 string msg_1;
 
-                $swrite(msg_1, "\n\tTransaction number: %0d\n", down_cnt);
-                $swrite(msg_1, "%s\t\tCheck of MFB data size and header size failed!\n", msg_1);
-                $swrite(msg_1, "%s\tDUT HDR LENGTH   : %0d\n",  msg_1, mvb.data[10-1 : 0]);
-                $swrite(msg_1, "%s\tDUT MFB LENGTH   : %0d\n",  msg_1, dut_mfb.size());
-                $swrite(msg_1, "%s\tMODEL MFB LENGTH : %0d\n",  msg_1, model_mfb.size());
+                msg_1 = $sformatf( "\n\tTransaction number: %0d\n", down_cnt);
+                msg_1 = {msg_1, $sformatf("\t\tCheck of MFB data size and header size failed!\n")};
+                msg_1 = {msg_1, $sformatf("\tDUT HDR LENGTH   : %0d\n",  mvb.data[10-1 : 0])};
+                msg_1 = {msg_1, $sformatf("\tDUT MFB LENGTH   : %0d\n",  dut_mfb.size())};
+                msg_1 = {msg_1, $sformatf("\tMODEL MFB LENGTH : %0d\n",  model_mfb.size())};
                 `uvm_error(this.get_full_name(), msg_1);
                 errors++;
             end
@@ -179,8 +179,8 @@ class rc_compare extends uvm_component;
             if (catch_up.dut_up_mvb_array[mvb.data[20-1 : 12]].data[sv_dma_bus_pack::DMA_REQUEST_UNITID_O-1 : sv_dma_bus_pack::DMA_REQUEST_TAG_O] != mvb.data[20-1 : 12]) begin
                 string msg_1;
 
-                $swrite(msg_1, "\n\t Transaction number: %d\n\t", down_cnt);
-                $swrite(msg_1, "\tCheck TAG failed.\n\tModel tag %h\n\tDUT TAG %h\n", catch_up.dut_up_mvb_array[mvb.data[20-1 : 12]].data[sv_dma_bus_pack::DMA_REQUEST_UNITID_O-1 : sv_dma_bus_pack::DMA_REQUEST_TAG_O], mvb.data[20-1 : 12]);
+                msg_1 = $sformatf( "\n\t Transaction number: %d\n\t", down_cnt);
+                msg_1 = $sformatf( "\tCheck TAG failed.\n\tModel tag %h\n\tDUT TAG %h\n", catch_up.dut_up_mvb_array[mvb.data[20-1 : 12]].data[sv_dma_bus_pack::DMA_REQUEST_UNITID_O-1 : sv_dma_bus_pack::DMA_REQUEST_TAG_O], mvb.data[20-1 : 12]);
                 `uvm_error(this.get_full_name(), msg_1);
                 errors++;
             end
@@ -191,8 +191,8 @@ class rc_compare extends uvm_component;
                 if (catch_up.dut_up_mvb_array[mvb.data[20-1 : 12]].data[sv_dma_bus_pack::DMA_REQUEST_LENGTH_W-1 : 0] != whole_len) begin
                     string msg_1;
 
-                    $swrite(msg_1, "\n\t Transaction number: %d\n\t", down_cnt);
-                    $swrite(msg_1, "\tCheck LENGTH failed.\n\tModel LENGTH %d\n\tDUT LENGTH %d\n", catch_up.dut_up_mvb_array[mvb.data[20-1 : 12]].data[sv_dma_bus_pack::DMA_REQUEST_LENGTH_W-1 : 0], mvb.data[10-1 : 0]);
+                    msg_1 = $sformatf( "\n\t Transaction number: %d\n\t", down_cnt);
+                    msg_1 = $sformatf( "\tCheck LENGTH failed.\n\tModel LENGTH %d\n\tDUT LENGTH %d\n", catch_up.dut_up_mvb_array[mvb.data[20-1 : 12]].data[sv_dma_bus_pack::DMA_REQUEST_LENGTH_W-1 : 0], mvb.data[10-1 : 0]);
                     `uvm_error(this.get_full_name(), msg_1);
                     errors++;
                 end
@@ -256,10 +256,10 @@ class compare #(PCIE_UPHDR_WIDTH, PCIE_PREFIX_WIDTH) extends uvm_component;
             tr_model_up_mvb = uvm_logic_vector::sequence_item #(PCIE_UPHDR_WIDTH)::type_id::create();
             tr_model_up_mvb.data = tr_model.meta;
 
-            $swrite(debug_msg, "%s\n\t Model RQ DATA TR:   %s\n", debug_msg, tr_model_up_mfb.convert2string());
-            $swrite(debug_msg, "%s\n\t Model RQ HEADER TR: %s\n", debug_msg, tr_model_up_mvb.convert2string());
-            $swrite(debug_msg, "%s\n\t DUT RQ DATA TR:     %s\n", debug_msg, tr_dut_rq_mfb.convert2string());
-            $swrite(debug_msg, "%s\n\t DUT RQ HEADER TR:   %s\n", debug_msg, tr_dut_rq_mvb.convert2string());
+            debug_msg = {debug_msg, $sformatf("\n\t Model RQ DATA TR:   %s\n",  tr_model_up_mfb.convert2string())};
+            debug_msg = {debug_msg, $sformatf("\n\t Model RQ HEADER TR: %s\n",  tr_model_up_mvb.convert2string())};
+            debug_msg = {debug_msg, $sformatf("\n\t DUT RQ DATA TR:     %s\n",  tr_dut_rq_mfb.convert2string())};
+            debug_msg = {debug_msg, $sformatf("\n\t DUT RQ HEADER TR:   %s\n",  tr_dut_rq_mvb.convert2string())};
             `uvm_info(this.get_full_name(), debug_msg ,UVM_DEBUG);
 
             compared++;
@@ -267,7 +267,7 @@ class compare #(PCIE_UPHDR_WIDTH, PCIE_PREFIX_WIDTH) extends uvm_component;
                 string msg;
 
                 errors++;
-                $swrite(msg, "\n\tCheck MVB or MFB packet failed.\n\tModel MFB %s\n\tDUT MFB %s\n\n\tModel MVB\n%s\n\tDUT MVB\n%s\n COMPARED %d\n", tr_model_up_mfb.convert2string(),
+                msg = $sformatf("\n\tCheck MVB or MFB packet failed.\n\tModel MFB %s\n\tDUT MFB %s\n\n\tModel MVB\n%s\n\tDUT MVB\n%s\n COMPARED %d\n", tr_model_up_mfb.convert2string(),
                 tr_dut_rq_mfb.convert2string(), tr_model_up_mvb.convert2string(), tr_dut_rq_mvb.convert2string(), compared);
                 `uvm_error(this.get_full_name(), msg);
             end
@@ -500,11 +500,11 @@ class scoreboard #(META_WIDTH, MFB_DOWN_REGIONS, MFB_UP_REGIONS, DMA_MVB_UP_ITEM
 
             total_cnt++;
 
-            $swrite(debug_msg, "\n\t =============== RQ SCOREBOARD DATA =============== \n");
-            $swrite(debug_msg, "%s\t Model AXI RQ TR: %p\n",    debug_msg, tr_model_up.data);
-            $swrite(debug_msg, "%s\t Model RQ HEADER TR: %h\n", debug_msg, tr_model_up.meta);
-            $swrite(debug_msg, "%s\t DUT AXI RQ TR: %s\n",      debug_msg, tr_dut_rq_mfb.convert2string());
-            $swrite(debug_msg, "%s\t DUT RQ HEADER TR: %s\n",   debug_msg, tr_dut_rq_mvb.convert2string());
+            debug_msg = $sformatf( "\n\t =============== RQ SCOREBOARD DATA =============== \n");
+            debug_msg = {debug_msg, $sformatf("\t Model AXI RQ TR: %p\n",  tr_model_up.data)};
+            debug_msg = {debug_msg, $sformatf("\t Model RQ HEADER TR: %h\n",  tr_model_up.meta)};
+            debug_msg = {debug_msg, $sformatf("\t DUT AXI RQ TR: %s\n",  tr_dut_rq_mfb.convert2string())};
+            debug_msg = {debug_msg, $sformatf("\t DUT RQ HEADER TR: %s\n",  tr_dut_rq_mvb.convert2string())};
             `uvm_info(this.get_full_name(), debug_msg ,UVM_MEDIUM);
 
             if (DEVICE == "STRATIX10" || DEVICE == "AGILEX") begin
@@ -539,11 +539,11 @@ class scoreboard #(META_WIDTH, MFB_DOWN_REGIONS, MFB_UP_REGIONS, DMA_MVB_UP_ITEM
                 len_dut = int'(tr_dut_rq_mvb.data[75-1 : 64]);
             end
 
-            $swrite(debug_msg, "\n\t =============== RQ SCOREBOARD INFO - PORT %0d =============== \n", port_dut);
-            $swrite(debug_msg, "%s\t DUT TR NUMBER : %0d\n", debug_msg, total_cnt);
-            $swrite(debug_msg, "%s\t DUT TR LENGTH : %0d\n", debug_msg, len_dut);
-            $swrite(debug_msg, "%s\t DUT TR WRITE  : 0x%h\n", debug_msg, type_n_dut);
-            $swrite(debug_msg, "%s\t DUT TR TAG    : 0x%h\n", debug_msg, tag_dut);
+            debug_msg = $sformatf( "\n\t =============== RQ SCOREBOARD INFO - PORT %0d =============== \n", port_dut);
+            debug_msg = {debug_msg, $sformatf("\t DUT TR NUMBER : %0d\n",  total_cnt)};
+            debug_msg = {debug_msg, $sformatf("\t DUT TR LENGTH : %0d\n",  len_dut)};
+            debug_msg = {debug_msg, $sformatf("\t DUT TR WRITE  : 0x%h\n",  type_n_dut)};
+            debug_msg = {debug_msg, $sformatf("\t DUT TR TAG    : 0x%h\n",  tag_dut)};
             `uvm_info(this.get_full_name(), debug_msg ,UVM_MEDIUM);
 
             if (type_n_model == 1'b1) begin
@@ -569,19 +569,19 @@ class scoreboard #(META_WIDTH, MFB_DOWN_REGIONS, MFB_UP_REGIONS, DMA_MVB_UP_ITEM
        string msg = "";
 
        for (int unsigned it = 0; it < DMA_PORTS; it++) begin
-            $swrite(msg, "%s\n\t OUT OUTPUT [%0d] compared %0d errors %0d",                msg, it, out_compare[it].compared, out_compare[it].errors);
-            $swrite(msg, "%s\n\t ANSWER OUTPUT [%0d] compared %0d errors %0d",             msg, it, answer_compare[it].compared, answer_compare[it].errors);
-            $swrite(msg, "%s\n\t RQ TR TABLE [%0d] size %0d UP TR TABLE [%0d] size %0d\n", msg, it, out_compare[it].rq_mvb_tr_table.size(), it,  out_compare[it].tr_table.size());
-            $swrite(msg, "%s\n\t model_down_mfb_out[%0d] USED [%0d]",                      msg, it, model_down_mfb_out[it].used());
-            $swrite(msg, "%s\n\t model_down_mvb_out[%0d] USED [%0d]\n",                    msg, it, model_down_mvb_out[it].used());
+            msg = {msg, $sformatf("\n\t OUT OUTPUT [%0d] compared %0d errors %0d",  it, out_compare[it].compared, out_compare[it].errors)};
+            msg = {msg, $sformatf("\n\t ANSWER OUTPUT [%0d] compared %0d errors %0d",  it, answer_compare[it].compared, answer_compare[it].errors)};
+            msg = {msg, $sformatf("\n\t RQ TR TABLE [%0d] size %0d UP TR TABLE [%0d] size %0d\n",  it, out_compare[it].rq_mvb_tr_table.size(), it,  out_compare[it].tr_table.size())};
+            msg = {msg, $sformatf("\n\t model_down_mfb_out[%0d] USED [%0d]",  it, model_down_mfb_out[it].used())};
+            msg = {msg, $sformatf("\n\t model_down_mvb_out[%0d] USED [%0d]\n",  it, model_down_mvb_out[it].used())};
        end
-            $swrite(msg, "%s\n\t dut_rq_mfb_out USED [%0d]",        msg, dut_rq_mfb_out.used());
-            $swrite(msg, "%s\n\t dut_rq_mvb_out USED [%0d]",        msg, dut_rq_mvb_out.used());
-            $swrite(msg, "%s\n\t dut_rc_mfb_out USED [%0d]",        msg, dut_rc_mfb_out.used());
-            $swrite(msg, "%s\n\t dut_rc_meta_out USED [%0d]",       msg, dut_rc_meta_out.used());
-            $swrite(msg, "%s\n\t model_up USED [%0d]",      msg, model_up.used());
-            $swrite(msg, "%s\n\t dut_rq_axi_meta_out USED [%0d]\n", msg, dut_rq_axi_meta_out.used());
-            $swrite(msg, "%s\n\t Final USED [%0d]",                 msg, this.used());
+            msg = {msg, $sformatf("\n\t dut_rq_mfb_out USED [%0d]",  dut_rq_mfb_out.used())};
+            msg = {msg, $sformatf("\n\t dut_rq_mvb_out USED [%0d]",  dut_rq_mvb_out.used())};
+            msg = {msg, $sformatf("\n\t dut_rc_mfb_out USED [%0d]",  dut_rc_mfb_out.used())};
+            msg = {msg, $sformatf("\n\t dut_rc_meta_out USED [%0d]",  dut_rc_meta_out.used())};
+            msg = {msg, $sformatf("\n\t model_up USED [%0d]",  model_up.used())};
+            msg = {msg, $sformatf("\n\t dut_rq_axi_meta_out USED [%0d]\n",  dut_rq_axi_meta_out.used())};
+            msg = {msg, $sformatf("\n\t Final USED [%0d]",  this.used())};
 
        if (this.error_cnt() == 0 && this.used() == 0) begin
            `uvm_info(get_type_name(), {msg, "\n\n\t---------------------------------------\n\t----     VERIFICATION SUCCESS      ----\n\t---------------------------------------"}, UVM_NONE)

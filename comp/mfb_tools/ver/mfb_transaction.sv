@@ -74,17 +74,17 @@ class MfbTransaction #(ITEM_WIDTH = 8, META_WIDTH = 1) extends Transaction;
         $cast(tr, to);
         if(data != tr.data) begin
             if(data.size != tr.data.size)
-                $swrite(diff, "size of data does not match");
+                diff = "size of data does not match";
             else
                 for(int j=0; j < data.size; j++)
                     if(data[j] != tr.data[j]) begin
-                        $swrite(diff, "Items #%1d does not match", j);
+                        diff = $sformatf("Items #%1d does not match", j);
                         break;
                     end
             return 0;
         end else begin
             if((check_meta == 1'b1 || tr.check_meta == 1'b1) && meta != tr.meta) begin
-                $swrite(diff, "Metadata does not match");
+                diff = "Metadata does not match";
                 return 0;
             end
             else begin

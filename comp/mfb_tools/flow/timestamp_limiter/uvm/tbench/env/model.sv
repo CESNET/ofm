@@ -12,7 +12,7 @@ class ts_limiter_item#(MFB_ITEM_WIDTH, TIMESTAMP_WIDTH) extends uvm_common::sequ
     function string convert2string();
         string msg;
 
-        $swrite(msg, "\n\ttimestamp %0d", timestamp);
+        msg = $sformatf( "\n\ttimestamp %0d", timestamp);
         return msg;
     endfunction
 
@@ -49,16 +49,16 @@ class model #(MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTAMP_WI
             input_meta.get(tr_input_meta);
 
             msg = "";
-            $swrite(msg, "%s INPUT TS %h\n",   msg, tr_input_meta.data[TIMESTAMP_WIDTH-1 : 0]);
-            $swrite(msg, "%s INPUT META %h\n", msg, tr_input_meta.data[RX_MFB_META_WIDTH-1 : TIMESTAMP_WIDTH+$clog2(QUEUES)]);
-            $swrite(msg, "%s %s\n", msg, tr_input_meta.convert2string());
+            msg = {msg, $sformatf(" INPUT TS %h\n",  tr_input_meta.data[TIMESTAMP_WIDTH-1 : 0])};
+            msg = {msg, $sformatf(" INPUT META %h\n",  tr_input_meta.data[RX_MFB_META_WIDTH-1 : TIMESTAMP_WIDTH+$clog2(QUEUES)])};
+            msg = {msg, $sformatf(" %s\n",  tr_input_meta.convert2string())};
 
             tr_output_meta = uvm_logic_vector::sequence_item #(TX_MFB_META_WIDTH)::type_id::create("tr_output_data_item");
             tr_output_meta.time_array_add(tr_input_meta.start);
 
             tr_output_meta.data = tr_input_meta.data[RX_MFB_META_WIDTH-1 : TIMESTAMP_WIDTH+$clog2(QUEUES)];
-            $swrite(msg, "%s OUTPUT META\n", msg);
-            $swrite(msg, "%s %s\n", msg, tr_output_meta.convert2string());
+            msg = {msg, $sformatf(" OUTPUT META\n")};
+            msg = {msg, $sformatf(" %s\n",  tr_output_meta.convert2string())};
             `uvm_info(get_type_name(), msg, UVM_MEDIUM)
 
             tr_output_meta.tag = "TS_LIMITER_META";
@@ -88,8 +88,8 @@ class model #(MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTAMP_WI
 
             tr_output_data = new();
 
-            $swrite(msg, "%s INPUT DATA\n", msg);
-            $swrite(msg, "%s %s\n", msg, tr_input_data.convert2string());
+            msg = {msg, $sformatf(" INPUT DATA\n")};
+            msg = {msg, $sformatf(" %s\n",  tr_input_data.convert2string())};
 
             tr_output_data.time_array_add(tr_input_data.start);
             tr_output_data.time_array_add(tr_input_meta.start);
@@ -104,7 +104,7 @@ class model #(MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTAMP_WI
 
             if (QUEUES != 1) begin
                 mfb_queue = tr_input_meta.data[TIMESTAMP_WIDTH+$clog2(QUEUES)-1 : TIMESTAMP_WIDTH];
-                $swrite(msg, "%s INPUT QUEUE %d\n", msg, mfb_queue);
+                msg = {msg, $sformatf(" INPUT QUEUE %d\n",  mfb_queue)};
             end
 
             queue_str.itoa(int'(mfb_queue));

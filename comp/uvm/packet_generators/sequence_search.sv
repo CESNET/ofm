@@ -116,9 +116,9 @@ class sequence_search #(int unsigned ITEM_WIDTH) extends uvm_common::sequence_ba
         end
         for(int unsigned it = 0; it < weight.size(); it++) begin
             if (it != 0) begin
-                $swrite(ret, "%s, \"%s\" : %0d", ret, proto[it], weight[it]);
+                ret = {ret, $sformatf(", \"%s\" : %0d",  proto[it], weight[it])};
             end else begin
-                $swrite(ret, "\"%s\" : %0d", proto[it], weight[it]);
+                ret = $sformatf("\"%s\" : %0d", proto[it], weight[it]);
             end
         end
         return {"{", ret ,"}"};
@@ -213,7 +213,7 @@ class sequence_search #(int unsigned ITEM_WIDTH) extends uvm_common::sequence_ba
         `uvm_info(get_full_name(), $sformatf("\n\tsequence_search is running\n\t\tpcap_name%s", pcap_file), UVM_DEBUG);
 
         this.configure(config_json);
-        $swrite(pkt_gen_params, "-a %s -f \"%s\" -p %0d -c %s -s %0d", algorithm == 0 ? "rand" : "dfs",  pcap_file, transaction_count, config_json, pkt_gen_seed);
+        pkt_gen_params = $sformatf("-a %s -f \"%s\" -p %0d -c %s -s %0d", algorithm == 0 ? "rand" : "dfs",  pcap_file, transaction_count, config_json, pkt_gen_seed);
         if($system({PKT_GEN_PATH, " ", pkt_gen_params, " >> pkt_gen_out"}) != 0) begin
             `uvm_fatal(p_sequencer.get_full_name(), $sformatf("\n\t Cannot run command %s", {PKT_GEN_PATH, " ", pkt_gen_params}))
         end

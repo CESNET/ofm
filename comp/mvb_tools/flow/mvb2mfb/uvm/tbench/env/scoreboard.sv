@@ -70,8 +70,8 @@ class scoreboard #(MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, MFB_META_WIDTH) extends uvm_s
     function void report_phase(uvm_phase phase);
         string msg = "\n";
 
-        $swrite(msg, "%s\n\DATA info %s", msg, data_cmp.info());
-        $swrite(msg, "%s\n\tMETA info %s", msg, meta_cmp.info());
+        msg = {msg, $sformatf("\n\DATA info %s",  data_cmp.info())};
+        msg = {msg, $sformatf("\n\tMETA info %s",  meta_cmp.info())};
 
         if (this.success() && this.used() == 0) begin
             `uvm_info(get_type_name(), {msg, "\n\n\t---------------------------------------\n\t----     VERIFICATION SUCCESS      ----\n\t---------------------------------------"}, UVM_NONE)

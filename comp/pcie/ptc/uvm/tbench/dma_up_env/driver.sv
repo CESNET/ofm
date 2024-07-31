@@ -120,27 +120,27 @@ class driver#(DMA_PORTS) extends uvm_component;
 
             header_new.data = {relaxed, pasidvld, pasid, vfid, global_id, unitid, tag, lastib, firstib, type_ide, packet_size};
 
-            $swrite(debug_msg, "%s\n\t =============== UP DRIVER - PORT %d =============== \n", debug_msg, port);
+            debug_msg = {debug_msg, $sformatf("\n\t =============== UP DRIVER - PORT %d =============== \n",  port)};
             if (type_ide == 1'b0) begin
-                $swrite(debug_msg, "%s\t Generated RQ MVB read request number %d: %s\n", debug_msg, read_cnt, header_new.convert2string());
+                debug_msg = {debug_msg, $sformatf("\t Generated RQ MVB read request number %d: %s\n",  read_cnt, header_new.convert2string())};
             end
             if (type_ide == 1'b1) begin
-                $swrite(debug_msg, "%s\t Generated RQ MVB write request number %d: %s\n", debug_msg, write_cnt, header_new.convert2string());
-                $swrite(debug_msg, "%s\t Generated RQ write MFB: %s\n", debug_msg, frame_new.convert2string());
+                debug_msg = {debug_msg, $sformatf("\t Generated RQ MVB write request number %d: %s\n",  write_cnt, header_new.convert2string())};
+                debug_msg = {debug_msg, $sformatf("\t Generated RQ write MFB: %s\n",  frame_new.convert2string())};
             end
 
-            $swrite(debug_msg, "%s\t Deparsed RQ MVB TR port %d:\n", debug_msg, port);
+            debug_msg = {debug_msg, $sformatf("\t Deparsed RQ MVB TR port %d:\n",  port)};
 
-            $swrite(debug_msg, "%s\n\t PACKET SIZE:      %0d", debug_msg, packet_size);
-            $swrite(debug_msg, "%s\n\t TAG:              0x%h", debug_msg, tag);
-            $swrite(debug_msg, "%s\n\t TYPE ID:          0x%h", debug_msg, type_ide);
-            $swrite(debug_msg, "%s\n\t RELAXED:          0x%h", debug_msg, relaxed);
-            $swrite(debug_msg, "%s\n\t PASIDVLD:         0x%h", debug_msg, pasidvld);
-            $swrite(debug_msg, "%s\n\t PASID:            0x%h", debug_msg, pasid);
-            $swrite(debug_msg, "%s\n\t VFID:             0x%h", debug_msg, vfid);
-            $swrite(debug_msg, "%s\n\t GLOBAL ID:        0x%h", debug_msg, global_id);
-            $swrite(debug_msg, "%s\n\t UNITID:           0x%h", debug_msg, unitid);
-            $swrite(debug_msg, "%s\n\t LASTIB:           0x%h\n", debug_msg, lastib);
+            debug_msg = {debug_msg, $sformatf("\n\t PACKET SIZE:      %0d",  packet_size)};
+            debug_msg = {debug_msg, $sformatf("\n\t TAG:              0x%h",  tag)};
+            debug_msg = {debug_msg, $sformatf("\n\t TYPE ID:          0x%h",  type_ide)};
+            debug_msg = {debug_msg, $sformatf("\n\t RELAXED:          0x%h",  relaxed)};
+            debug_msg = {debug_msg, $sformatf("\n\t PASIDVLD:         0x%h",  pasidvld)};
+            debug_msg = {debug_msg, $sformatf("\n\t PASID:            0x%h",  pasid)};
+            debug_msg = {debug_msg, $sformatf("\n\t VFID:             0x%h",  vfid)};
+            debug_msg = {debug_msg, $sformatf("\n\t GLOBAL ID:        0x%h",  global_id)};
+            debug_msg = {debug_msg, $sformatf("\n\t UNITID:           0x%h",  unitid)};
+            debug_msg = {debug_msg, $sformatf("\n\t LASTIB:           0x%h\n",  lastib)};
 
             `uvm_info(this.get_full_name(), debug_msg ,UVM_MEDIUM);
 

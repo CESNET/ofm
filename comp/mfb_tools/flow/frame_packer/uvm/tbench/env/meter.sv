@@ -174,7 +174,7 @@ class meter #(MVB_ITEM_WIDTH, MFB_ITEM_WIDTH, RX_CHANNELS, USR_RX_PKT_SIZE_MAX) 
             m_output_length.next_val(tr_tx_mfb_in.data.size());
 
             //debug
-            $swrite(msg, {"\nOUTPUT_TIME:     %0d",
+            msg = $sformatf({"\nOUTPUT_TIME:     %0d",
                           "\nOUTPUT_PACKET:   %0s\n"}
                           ,time_act/1us ,tr_tx_mfb_in.convert2string());
             //`uvm_info(this.get_full_name(), msg, UVM_NONE);
@@ -221,12 +221,12 @@ class meter #(MVB_ITEM_WIDTH, MFB_ITEM_WIDTH, RX_CHANNELS, USR_RX_PKT_SIZE_MAX) 
             // MVB_ITEM_WIDTH = 15 + 12 + 4 + 1 = 32
 
             if (tr_tx_mfb_in.data.size() == pkt_len) begin
-                $swrite(msg,{"\nCHANNEL      %0d",
+                msg = $sformatf({"\nCHANNEL      %0d",
                              "\nPKT_LEN      %0d\n"}
                              , tr_mvb_in, channel, pkt_len);
                 //`uvm_info(this.get_full_name(), msg, UVM_NONE);
             end else begin
-                $swrite(msg,{"\nWHOLE_MVB    %0b",
+                msg = $sformatf({"\nWHOLE_MVB    %0b",
                              "\nCHANNEL      %0d",
                              "\nPKT_LEN      %0d",
                              "\nPKT_ITSELF   %0s\n"}

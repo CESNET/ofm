@@ -13,8 +13,8 @@ class chsum_calc_item#(MVB_DATA_WIDTH, MFB_META_WIDTH) extends uvm_common::seque
     function string convert2string();
         string msg;
 
-        $swrite(msg, "%s\n\tbypass %b\n", msg, bypass);
-        $swrite(msg, "%s\n\tDATA: %s", msg, data_tr.convert2string());
+        msg = {msg, $sformatf("\n\tbypass %b\n",  bypass)};
+        msg = {msg, $sformatf("\n\tDATA: %s",  data_tr.convert2string())};
         return msg;
     endfunction
 

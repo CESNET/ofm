@@ -103,8 +103,6 @@ class driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITE
         if (sp_st.next == 1'b1 && end_of_packet[3-1 : 0] > 0) begin
             end_of_packet += align;
         end
-        // $swrite(debug_msg, "%sheader %h\n", debug_msg, sp_st.hdr);
-        // $swrite(debug_msg, "%sPKT %s\n", debug_msg, pkt.convert2string());
 
         for (int i = 0; i < end_of_packet; i++) begin
             if (i < HEADER_SIZE/MFB_ITEM_WIDTH) begin
@@ -119,7 +117,7 @@ class driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITE
             act_size++;
         end
         tmp_data.data = tmp_data_fifo;
-        $swrite(debug_msg, "%sPACKET %s\n", debug_msg, tmp_data.convert2string());
+        debug_msg = {debug_msg, $sformatf("PACKET %s\n",  tmp_data.convert2string())};
 
         if (sp_st.next == 1'b0 && end_of_packet[3-1 : 0]) begin
             for (int i = 0; i < align; i++) begin
@@ -128,8 +126,8 @@ class driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITE
         end
 
         if (act_size == size_of_sp.sp_size && VERBOSITY >= 3) begin
-            $swrite(msg, "%s\tSIZE OF FIFO %d\n", msg, data_fifo.size());
-            $swrite(msg, "%s\tSIZE OF SP %d\n", msg, size_of_sp.sp_size);
+            msg = {msg, $sformatf("\tSIZE OF FIFO %d\n",  data_fifo.size())};
+            msg = {msg, $sformatf("\tSIZE OF SP %d\n",  size_of_sp.sp_size)};
             `uvm_info(this.get_full_name(), msg ,UVM_FULL)
         end
     endfunction
@@ -165,7 +163,7 @@ class driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITE
             done = 1'b0;
             chsum_overflow = 0;
             debug_msg = "\n";
-            $swrite(debug_msg, "%s\n ================ SUPERPACKET %d IN DRIVER =============== \n", debug_msg, sp_cnt+1);
+            debug_msg = {debug_msg, $sformatf("\n ================ SUPERPACKET %d IN DRIVER =============== \n",  sp_cnt+1)};
             while (done != 1'b1) begin
                 seq_item_port_byte_array.get_next_item(byte_array_req);
                 pkt_cnt++;
@@ -192,22 +190,22 @@ class driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITE
                 end
 
                 sp_st = fill_header(info_req, 1'b1);
-                $swrite(debug_msg, "%sCHSUM HDR: \n", debug_msg);
-                $swrite(debug_msg, "%sPAYLOAD LEN %d\n", debug_msg, sp_st.hdr[16      -1 : 0     ]);
-                $swrite(debug_msg, "%sL2 LEN %d\n"     , debug_msg, sp_st.hdr[16+7    -1 : 16    ]);
-                $swrite(debug_msg, "%sL3 LEN %d\n"     , debug_msg, sp_st.hdr[16+7+9  -1 : 16+7  ]);
-                $swrite(debug_msg, "%sFLAG   %b\n"     , debug_msg, sp_st.hdr[16+7+9+3-1 : 16+7+9]);
+                debug_msg = {debug_msg, $sformatf("CHSUM HDR: \n")};
+                debug_msg = {debug_msg, $sformatf("PAYLOAD LEN %d\n",  sp_st.hdr[16      -1 : 0     ])};
+                debug_msg = {debug_msg, $sformatf("L2 LEN %d\n",  sp_st.hdr[16+7    -1 : 16    ])};
+                debug_msg = {debug_msg, $sformatf("L3 LEN %d\n",  sp_st.hdr[16+7+9  -1 : 16+7  ])};
+                debug_msg = {debug_msg, $sformatf("FLAG   %b\n",  sp_st.hdr[16+7+9+3-1 : 16+7+9])};
 
                 len_with_hdr = byte_array_new.size() + HEADER_SIZE/MFB_ITEM_WIDTH;
                 if (VERBOSITY >= 3) begin
-                    $swrite(msg, "%s\n ================ DEBUG IN DRIVER =============== \n", msg);
-                    $swrite(msg, "%s\tlen with hdr %d\n", msg, len_with_hdr);
-                    $swrite(msg, "%s\tact_size %d\n", msg, act_size);
-                    $swrite(msg, "%s\tMIN DATA SIZE %d\n", msg, MIN_DATA_SIZE);
-                    $swrite(msg, "%s\tHEADER_SIZE/MFB_ITEM_WIDTH %d\n", msg, HEADER_SIZE/MFB_ITEM_WIDTH);
-                    $swrite(msg, "%s\tsize_of_sp.sp_size %d\n", msg, size_of_sp.sp_size);
-                    $swrite(msg, "%s\tALIGN %d\n", msg, MFB_BLOCK_SIZE-len_with_hdr[3-1 : 0]);
-                    $swrite(msg, "%s\tSOLUTION %d\n", msg, signed'((size_of_sp.sp_size - (act_size + len_with_hdr + HEADER_SIZE/MFB_ITEM_WIDTH + MIN_DATA_SIZE + (MFB_BLOCK_SIZE - int'(len_with_hdr[3-1 : 0]) )))));
+                    msg = {msg, $sformatf("\n ================ DEBUG IN DRIVER =============== \n")};
+                    msg = {msg, $sformatf("\tlen with hdr %d\n",  len_with_hdr)};
+                    msg = {msg, $sformatf("\tact_size %d\n",  act_size)};
+                    msg = {msg, $sformatf("\tMIN DATA SIZE %d\n",  MIN_DATA_SIZE)};
+                    msg = {msg, $sformatf("\tHEADER_SIZE/MFB_ITEM_WIDTH %d\n",  HEADER_SIZE/MFB_ITEM_WIDTH)};
+                    msg = {msg, $sformatf("\tsize_of_sp.sp_size %d\n",  size_of_sp.sp_size)};
+                    msg = {msg, $sformatf("\tALIGN %d\n",  MFB_BLOCK_SIZE-len_with_hdr[3-1 : 0])};
+                    msg = {msg, $sformatf("\tSOLUTION %d\n",  signed'((size_of_sp.sp_size - (act_size + len_with_hdr + HEADER_SIZE/MFB_ITEM_WIDTH + MIN_DATA_SIZE + (MFB_BLOCK_SIZE - int'(len_with_hdr[3-1 : 0]) )))))};
                     `uvm_info(this.get_full_name(), msg ,UVM_FULL)
                 end
 
@@ -233,7 +231,7 @@ class driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITE
                     if (byte_array_out.size() > size_of_sp.sp_size + sup_align) begin
                         `uvm_fatal(this.get_full_name(), "Data length is too long.");
                     end
-                    // $swrite(debug_msg, "%sSUPERPACKET %s\n", debug_msg, byte_array_out.convert2string());
+                    // debug_msg = {debug_msg, $sformatf("SUPERPACKET %s\n",  byte_array_out.convert2string())};
                     // $write("SP LEN %d\n", byte_array_out.size());
                     byte_array_export.put(byte_array_out);
                     sp_cnt++;
@@ -242,7 +240,7 @@ class driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITE
                     byte_array_out = null;
                     state = FIRST;
                     seq_item_port_sp_size.item_done();
-                    $swrite(debug_msg, "%s\n ====================================== \n", debug_msg);
+                    debug_msg = {debug_msg, $sformatf("\n ====================================== \n")};
                     `uvm_info(this.get_full_name(), debug_msg ,UVM_FULL)
                 end
                 end_of_packet = 0;
@@ -259,9 +257,9 @@ class driver#(HEADER_SIZE, VERBOSITY, PKT_MTU, MIN_SIZE, MFB_BLOCK_SIZE, MFB_ITE
     function void report_phase(uvm_phase phase);
         string msg = "";
 
-        $swrite(msg, "%s\n\tNumber of packets in SP statistic:\n", msg);
+        msg = {msg, $sformatf("\n\tNumber of packets in SP statistic:\n")};
         for (int unsigned it = 0; it < OFF_PIPE_STAGES; it++) begin
-            $swrite(msg, "%s\tCounter number %d: %d\n", msg, it, pkt_cnt_stat[it]);
+            msg = {msg, $sformatf("\tCounter number %d: %d\n",  it, pkt_cnt_stat[it])};
         end
         `uvm_info(this.get_full_name(), msg ,UVM_FULL)
     endfunction

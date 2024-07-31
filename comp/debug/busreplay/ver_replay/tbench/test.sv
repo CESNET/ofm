@@ -41,7 +41,7 @@ program TEST (
     task configDesign();
         int ret;
         string params;
-        $swrite(params, "-w %s", "dump.txt"); // EDIT THIS: change file path!
+        params = $sformatf("-w %s", "dump.txt"); // EDIT THIS: change file path!
         dpiwait(0, 1); // synchronization
         dpicall("busreplay", params, ret);
     endtask

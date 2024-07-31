@@ -112,16 +112,16 @@ class compare #(ITEM_WIDTH, USER_META_WIDTH, CHANNELS) extends uvm_component;
 
         string msg;
 
-        $swrite(msg, "%s\n\nMETA COMPARISON CHANNEL %d", msg, tr_model_meta.data[$clog2(CHANNELS)+24-1 : 24]);
-        $swrite(msg, "%s\n===============================================\n", msg);
-        $swrite(msg, "%s\n Comparison failed at meta number %d! \n\tModel meta:\n%s\n\tDUT meta:\n%s\n", msg, compared, tr_model_meta.convert2string(), tr_dut_meta.convert2string());
-        $swrite(msg, "%s\n DMA MODEL META %h", msg, tr_model_meta.data[23 : 0]);
-        $swrite(msg, "%s\n DMA MODEL CHANNEL %d", msg, tr_model_meta.data[$clog2(CHANNELS)+24-1 : 24]);
-        $swrite(msg, "%s\n DMA MODEL SIZE %d\n", msg, tr_model_meta.data[USER_META_WIDTH-1 : $clog2(CHANNELS)+24]);
-        $swrite(msg, "%s\n DMA DUT META %h", msg, tr_dut_meta.data[23 : 0]);
-        $swrite(msg, "%s\n DMA DUT CHANNEL %d", msg, tr_dut_meta.data[$clog2(CHANNELS)+24-1 : 24]);
-        $swrite(msg, "%s\n DMA DUT SIZE %d\n", msg, tr_dut_meta.data[USER_META_WIDTH-1 : $clog2(CHANNELS)+24]);
-        $swrite(msg, "%s\n===============================================\n", msg);
+        msg = {msg, $sformatf("\n\nMETA COMPARISON CHANNEL %d",  tr_model_meta.data[$clog2(CHANNELS)+24-1 : 24])};
+        msg = {msg, $sformatf("\n===============================================\n")};
+        msg = {msg, $sformatf("\n Comparison failed at meta number %d! \n\tModel meta:\n%s\n\tDUT meta:\n%s\n",  compared, tr_model_meta.convert2string(), tr_dut_meta.convert2string())};
+        msg = {msg, $sformatf("\n DMA MODEL META %h",  tr_model_meta.data[23 : 0])};
+        msg = {msg, $sformatf("\n DMA MODEL CHANNEL %d",  tr_model_meta.data[$clog2(CHANNELS)+24-1 : 24])};
+        msg = {msg, $sformatf("\n DMA MODEL SIZE %d\n",  tr_model_meta.data[USER_META_WIDTH-1 : $clog2(CHANNELS)+24])};
+        msg = {msg, $sformatf("\n DMA DUT META %h",  tr_dut_meta.data[23 : 0])};
+        msg = {msg, $sformatf("\n DMA DUT CHANNEL %d",  tr_dut_meta.data[$clog2(CHANNELS)+24-1 : 24])};
+        msg = {msg, $sformatf("\n DMA DUT SIZE %d\n",  tr_dut_meta.data[USER_META_WIDTH-1 : $clog2(CHANNELS)+24])};
+        msg = {msg, $sformatf("\n===============================================\n")};
         `uvm_error(this.get_full_name(), msg);
     endtask
 
@@ -140,10 +140,10 @@ class compare #(ITEM_WIDTH, USER_META_WIDTH, CHANNELS) extends uvm_component;
 
         $display("WRONG BYTES POS: %p\n", bad_tr_pos);
 
-        $swrite(msg, "%s\n\nDATA COMPARISON CHANNEL %d", msg, tr_model_meta.data[$clog2(CHANNELS)+24-1 : 24]);
-        $swrite(msg, "%s\n=============================================================================================================================\n", msg);
-        $swrite(msg, "%s\n\t Comparison failed at data number %d! \n\tModel data:\n%s\n\tDUT data:\n%s\n", msg, compared, tr_model_mfb.convert2string(), tr_dut_mfb.convert2string());
-        $swrite(msg, "%s\n=============================================================================================================================\n", msg);
+        msg = {msg, $sformatf("\n\nDATA COMPARISON CHANNEL %d",  tr_model_meta.data[$clog2(CHANNELS)+24-1 : 24])};
+        msg = {msg, $sformatf("\n=============================================================================================================================\n")};
+        msg = {msg, $sformatf("\n\t Comparison failed at data number %d! \n\tModel data:\n%s\n\tDUT data:\n%s\n",  compared, tr_model_mfb.convert2string(), tr_dut_mfb.convert2string())};
+        msg = {msg, $sformatf("\n=============================================================================================================================\n")};
         `uvm_error(this.get_full_name(), msg);
     endtask
 
@@ -210,11 +210,11 @@ class compare #(ITEM_WIDTH, USER_META_WIDTH, CHANNELS) extends uvm_component;
             end
 
             debug_msg = "\n";
-            $swrite(debug_msg, "%s================================================================================= \n", debug_msg);
-            $swrite(debug_msg, "%SDUT TRANSACTION %0d COMPARED!\n", debug_msg, compared);
-            $swrite(debug_msg, "%s================================================================================= \n", debug_msg);
-            $swrite(debug_msg, "%sCHANNEL : %0d\n", debug_msg, dut_channel);
-            $swrite(debug_msg, "%sDATA    : %s\n", debug_msg, tr_dut_mfb.convert2string());
+            debug_msg = {debug_msg, $sformatf("================================================================================= \n")};
+            debug_msg = {debug_msg, $sformatf("DUT TRANSACTION %0d COMPARED!\n", compared)};
+            debug_msg = {debug_msg, $sformatf("================================================================================= \n")};
+            debug_msg = {debug_msg, $sformatf("CHANNEL : %0d\n",  dut_channel)};
+            debug_msg = {debug_msg, $sformatf("DATA    : %s\n",  tr_dut_mfb.convert2string())};
             `uvm_info(this.get_full_name(),        debug_msg, UVM_MEDIUM)
 
             //count stats
@@ -391,68 +391,68 @@ class scoreboard #(CHANNELS, USR_ITEM_WIDTH, USER_META_WIDTH, CQ_ITEM_WIDTH,
 
         if (this.get_report_verbosity_level() >= UVM_LOW) begin
             m_delay.count(min, max, avg, std_dev, median, modus);
-            $swrite(msg, "%s\n\tDelay statistic (SOF to SOF) => min : %0dns, max : %0dns, average : %0dns, standard deviation : %0dns, median : %0dns, modus : %0dns", msg, min, max, avg, std_dev, median, modus);
+            msg = {msg, $sformatf("\n\tDelay statistic (SOF to SOF) => min : %0dns, max : %0dns, average : %0dns, standard deviation : %0dns, median : %0dns, modus : %0dns",  min, max, avg, std_dev, median, modus)};
             m_input_speed.count(min, max, avg, std_dev, median, modus);
-            $swrite(msg, "%s\n\tSpeed input  statistic (PCIE RX)  => min : %0dGb/s, max : %0dGb/s, average : %0dGb/s, standard deviation : %0dG/s, median : %0dG/s", msg, min*8, max*8, avg*8, std_dev*8, median*8);
+            msg = {msg, $sformatf("\n\tSpeed input  statistic (PCIE RX)  => min : %0dGb/s, max : %0dGb/s, average : %0dGb/s, standard deviation : %0dG/s, median : %0dG/s",  min*8, max*8, avg*8, std_dev*8, median*8)};
             m_output_speed.count(min, max, avg, std_dev, median, modus);
-            $swrite(msg, "%s\n\tSpeed output statistic (MFB TX) => min : %0dGb/s, max : %0dGb/s, average : %0dGb/s, standard deviation : %0dG/s, median : %0dG/s", msg, min*8, max*8, avg*8, std_dev*8, median*8);
+            msg = {msg, $sformatf("\n\tSpeed output statistic (MFB TX) => min : %0dGb/s, max : %0dGb/s, average : %0dGb/s, standard deviation : %0dG/s, median : %0dG/s",  min*8, max*8, avg*8, std_dev*8, median*8)};
         end
 
         if (errors == 0 && this.used() == 0) begin
 
 
-            $swrite(msg, "%s================================================================================= \n", msg);
-            $swrite(msg, "%s\nEXPORT USED                        \n", msg                                             );
-            $swrite(msg, "%s================================================================================= \n", msg);
-            $swrite(msg, "%sMODEL_MFB.USED  %d\n", msg, tr_compare.model_mfb.used()                                   );
-            $swrite(msg, "%sMODEL_META.USED %d\n", msg, tr_compare.model_meta.used()                                  );
-            $swrite(msg, "%sDUT_MFB.USED    %d\n", msg, tr_compare.dut_mfb.used()                                     );
-            $swrite(msg, "%sDUT_META.USED   %d\n", msg, tr_compare.dut_meta.used()                                    );
-            $swrite(msg, "%s================================================================================= \n", msg);
+            msg = {msg, $sformatf("================================================================================= \n")};
+            msg = {msg, $sformatf("\nEXPORT USED                        \n")};
+            msg = {msg, $sformatf("================================================================================= \n")};
+            msg = {msg, $sformatf("MODEL_MFB.USED  %d\n",  tr_compare.model_mfb.used()                                   )};
+            msg = {msg, $sformatf("MODEL_META.USED %d\n",  tr_compare.model_meta.used()                                  )};
+            msg = {msg, $sformatf("DUT_MFB.USED    %d\n",  tr_compare.dut_mfb.used()                                     )};
+            msg = {msg, $sformatf("DUT_META.USED   %d\n",  tr_compare.dut_meta.used()                                    )};
+            msg = {msg, $sformatf("================================================================================= \n")};
 
             for (int chan = 0; chan < CHANNELS; chan++) begin
 
                 if (byte_cnt[chan] != m_model.cnt_reg[chan].byte_cnt &&
                     dma_cnt[chan]  != m_model.cnt_reg[chan].dma_cnt) begin
                     string msg_1;
-                    $swrite(msg_1, "%sMODEL BYTE COUNT %d and DUT BYTE COUNT %d\n", msg_1, byte_cnt[chan], m_model.cnt_reg[chan].byte_cnt);
-                    $swrite(msg_1, "%sMODEL BYTE COUNT %d and DUT BYTE COUNT %d\n", msg_1, dma_cnt[chan], m_model.cnt_reg[chan].dma_cnt);
+                    msg_1 = {msg_1, $sformatf("MODEL BYTE COUNT %d and DUT BYTE COUNT %d\n",  byte_cnt[chan], m_model.cnt_reg[chan].byte_cnt)};
+                    msg_1 = {msg_1, $sformatf("MODEL BYTE COUNT %d and DUT BYTE COUNT %d\n",  dma_cnt[chan], m_model.cnt_reg[chan].dma_cnt)};
                     `uvm_error(this.get_full_name(), msg_1);
                 end
 
                 if (discard_byte_cnt[chan] != m_model.cnt_reg[chan].discard_byte_cnt &&
                     discard_dma_cnt[chan]  != m_model.cnt_reg[chan].discard_dma_cnt) begin
                     string msg_1;
-                    $swrite(msg_1, "%sMODEL DISCARD BYTE COUNT %d and DUT DISCARD BYTE COUNT %d\n", msg_1, discard_byte_cnt[chan], m_model.cnt_reg[chan].discard_byte_cnt);
-                    $swrite(msg_1, "%sMODEL DISCARD BYTE COUNT %d and DUT DISCARD BYTE COUNT %d\n", msg_1, discard_dma_cnt[chan], m_model.cnt_reg[chan].discard_dma_cnt);
+                    msg_1 = {msg_1, $sformatf("MODEL DISCARD BYTE COUNT %d and DUT DISCARD BYTE COUNT %d\n",  discard_byte_cnt[chan], m_model.cnt_reg[chan].discard_byte_cnt)};
+                    msg_1 = {msg_1, $sformatf("MODEL DISCARD BYTE COUNT %d and DUT DISCARD BYTE COUNT %d\n",  discard_dma_cnt[chan], m_model.cnt_reg[chan].discard_dma_cnt)};
                     `uvm_error(this.get_full_name(), msg_1);
                 end
 
 
-                $swrite(msg, "%s================================================================================= \n", msg);
-                $swrite(msg, "%s\nMODEL COUNTERS STATISTICS\n", msg                                                       );
-                $swrite(msg, "%s================================================================================= \n", msg);
-                $swrite(msg, "%sDMA_CNT            %d\n", msg, m_model.cnt_reg[chan].dma_cnt                        );
-                $swrite(msg, "%sBYTE_CNT           %d\n", msg, m_model.cnt_reg[chan].byte_cnt                       );
-                $swrite(msg, "%sDISCARD_DMA_CNT    %d\n", msg, m_model.cnt_reg[chan].discard_dma_cnt                );
-                $swrite(msg, "%sDISCARD_BYTE_CNT   %d\n", msg, m_model.cnt_reg[chan].discard_byte_cnt               );
-                $swrite(msg, "%s================================================================================= \n", msg);
-                $swrite(msg, "%s\nDUT COUNTERS STATISTICS\n", msg                                                         );
-                $swrite(msg, "%s================================================================================= \n", msg);
-                $swrite(msg, "%sDMA_CNT            %d\n", msg, dma_cnt[chan]                                        );
-                $swrite(msg, "%sBYTE_CNT           %d\n", msg, byte_cnt[chan]                                       );
-                $swrite(msg, "%sDISCARD_DMA_CNT    %d\n", msg, discard_dma_cnt[chan]                                );
-                $swrite(msg, "%sDISCARD_BYTE_CNT   %d\n", msg, discard_byte_cnt[chan]                               );
-                $swrite(msg, "%s================================================================================= \n", msg);
+                msg = {msg, $sformatf("================================================================================= \n")};
+                msg = {msg, $sformatf("\nMODEL COUNTERS STATISTICS\n")};
+                msg = {msg, $sformatf("================================================================================= \n")};
+                msg = {msg, $sformatf("DMA_CNT            %d\n",  m_model.cnt_reg[chan].dma_cnt                        )};
+                msg = {msg, $sformatf("BYTE_CNT           %d\n",  m_model.cnt_reg[chan].byte_cnt                       )};
+                msg = {msg, $sformatf("DISCARD_DMA_CNT    %d\n",  m_model.cnt_reg[chan].discard_dma_cnt                )};
+                msg = {msg, $sformatf("DISCARD_BYTE_CNT   %d\n",  m_model.cnt_reg[chan].discard_byte_cnt               )};
+                msg = {msg, $sformatf("================================================================================= \n")};
+                msg = {msg, $sformatf("\nDUT COUNTERS STATISTICS\n")};
+                msg = {msg, $sformatf("================================================================================= \n")};
+                msg = {msg, $sformatf("DMA_CNT            %d\n",  dma_cnt[chan]                                        )};
+                msg = {msg, $sformatf("BYTE_CNT           %d\n",  byte_cnt[chan]                                       )};
+                msg = {msg, $sformatf("DISCARD_DMA_CNT    %d\n",  discard_dma_cnt[chan]                                )};
+                msg = {msg, $sformatf("DISCARD_BYTE_CNT   %d\n",  discard_byte_cnt[chan]                               )};
+                msg = {msg, $sformatf("================================================================================= \n")};
 
             end
 
-            $swrite(msg, "%sCompared packets: %0d", msg, compared);
+            msg = {msg, $sformatf("Compared packets: %0d",  compared)};
             `uvm_info(get_type_name(), {msg, "\n\n\t---------------------------------------\n\t----     VERIFICATION SUCCESS      ----\n\t---------------------------------------"}, UVM_NONE)
         end else begin
             string msg = "";
 
-            $swrite(msg, "%sCompared packets: %0d errors %0d", msg, compared, errors);
+            msg = {msg, $sformatf("Compared packets: %0d errors %0d",  compared, errors)};
             `uvm_info(get_type_name(), {msg, "\n\n\t---------------------------------------\n\t----     VERIFICATION FAILED       ----\n\t---------------------------------------"}, UVM_NONE)
         end
 

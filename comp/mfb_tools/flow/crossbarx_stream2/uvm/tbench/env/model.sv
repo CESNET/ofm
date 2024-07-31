@@ -119,16 +119,16 @@ class model #(RX_MFB_ITEM_W, RX_MVB_ITEM_W, USERMETA_W, MOD_W) extends uvm_compo
             end
 
             transactions++;
-            $swrite(str, "\n======= MODEL: Transaction %0d =======", transactions);
-            $swrite(str, "%s\nDISCARD: %0b", str, mod_discard);
-            $swrite(str, "%s\nMOD SOF size: %0d", str, mod_sof_size);
-            $swrite(str, "%s\nMOD SOF type: %0b", str, mod_sof_type);
-            $swrite(str, "%s\nMOD EOF size: %0d", str, mod_eof_size);
-            $swrite(str, "%s\nMOD EOF type: %0b", str, mod_eof_type);
-            $swrite(str, "%s\nORIG size: %0d", str, mfb_orig_size);
-            $swrite(str, "%s\nNEW size: %0d", str, mfb_new_size);
-            $swrite(str, "%s\nsof_extend: %0d", str, mod_sof_extend);
-            $swrite(str, "%s\nsof_trim: %0d", str, mod_sof_trim);
+            str = $sformatf( "\n======= MODEL: Transaction %0d =======", transactions);
+            str = {str, $sformatf("\nDISCARD: %0b",  mod_discard)};
+            str = {str, $sformatf("\nMOD SOF size: %0d",  mod_sof_size)};
+            str = {str, $sformatf("\nMOD SOF type: %0b",  mod_sof_type)};
+            str = {str, $sformatf("\nMOD EOF size: %0d",  mod_eof_size)};
+            str = {str, $sformatf("\nMOD EOF type: %0b",  mod_eof_type)};
+            str = {str, $sformatf("\nORIG size: %0d",  mfb_orig_size)};
+            str = {str, $sformatf("\nNEW size: %0d",  mfb_new_size)};
+            str = {str, $sformatf("\nsof_extend: %0d",  mod_sof_extend)};
+            str = {str, $sformatf("\nsof_trim: %0d",  mod_sof_trim)};
             `uvm_info(this.get_full_name(), str, UVM_MEDIUM);
             `uvm_info(this.get_full_name(), tr_input_data.convert2string(), UVM_MEDIUM);
             `uvm_info(this.get_full_name(), tr_output_data.convert2string(), UVM_MEDIUM);

@@ -86,11 +86,11 @@ class MyTransaction #(ITEM_WIDTH = 8) extends Transaction;
 
         if (data != tr.data) begin
             if (data.size != tr.data.size) begin
-                $swrite(diff, "data size does not match");
+                diff = $sformatf( "data size does not match");
             end else begin
                 for (int j=0; j < data.size; j++) begin
                 if (data[j] != tr.data[j]) begin
-                    $swrite(diff, "Items #%1d does not match", j);
+                    diff = $sformatf( "Items #%1d does not match", j);
                     break;
                 end
                 end
@@ -99,42 +99,42 @@ class MyTransaction #(ITEM_WIDTH = 8) extends Transaction;
         end
 
         if (adapter_error != tr.adapter_error) begin
-            $swrite(diff, "Adapter Error flag does not match");
+            diff = "Adapter Error flag does not match";
             return 0;
         end
 
         if (maxtu_error != tr.maxtu_error) begin
-            $swrite(diff, "MaxTU Error flag does not match");
+            diff = "MaxTU Error flag does not match";
             return 0;
         end
 
         if (mintu_error != tr.mintu_error) begin
-            $swrite(diff, "MinTU Error flag does not match");
+            diff = "MinTU Error flag does not match";
             return 0;
         end
 
         if (crc_error != tr.crc_error) begin
-            $swrite(diff, "CRC Error flag does not match");
+            diff = "CRC Error flag does not match";
             return 0;
         end
 
         if (mac_error != tr.mac_error) begin
-            $swrite(diff, "MAC Error flag does not match");
+            diff = "MAC Error flag does not match";
             return 0;
         end
 
         if (mac_bcast != tr.mac_bcast) begin
-            $swrite(diff, "MAC BROADCAST flag does not match");
+            diff = "MAC BROADCAST flag does not match";
             return 0;
         end
 
         if (mac_mcast != tr.mac_mcast) begin
-            $swrite(diff, "MAC MULTICAST flag does not match");
+            diff = "MAC MULTICAST flag does not match";
             return 0;
         end
 
         if ((mac_index != tr.mac_index) && mac_type == 1) begin
-            $swrite(diff, "MAC index does not match");
+            diff = "MAC index does not match";
             return 0;
         end
 

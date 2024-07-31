@@ -137,7 +137,7 @@ class NppRxSoftware #(int pChannels, int DMA_TYPE) extends NppSoftware #(pChanne
          transaction = new;
          getTransaction(transaction);
          channel = transaction.channel;
-         $swrite(label, "Monitor%0d", channel);
+         label = $sformatf( "Monitor%0d", channel);
          #(0);
          if(enabled) begin
             $cast(to, transaction);

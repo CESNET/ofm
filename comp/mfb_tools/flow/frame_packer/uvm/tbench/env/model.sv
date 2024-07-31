@@ -66,18 +66,18 @@ class model #(MVB_ITEM_WIDTH, MFB_ITEM_WIDTH, RX_CHANNELS) extends uvm_component
 
         forever begin
             // Get input packet
-            $swrite(msg, "\nWaiting for data ...");
+            msg = $sformatf( "\nWaiting for data ...");
             `uvm_info(this.get_full_name(), msg, UVM_MEDIUM);
 
             data_in.get(tr_mfb_in);
 
-            $swrite(msg, "\nWaiting for Channel ...");
+            msg = $sformatf( "\nWaiting for Channel ...");
             `uvm_info(this.get_full_name(), msg, UVM_MEDIUM);
             // ... and its channel
             meta_in.get(tr_mvb_in);
             channel = tr_mvb_in.data[$clog2(RX_CHANNELS):1];
 
-            $swrite(msg, "\nCHANNEL %0d\nMY_MODEL_IN:   %0s\n", channel, tr_mfb_in.convert2string());
+            msg = $sformatf( "\nCHANNEL %0d\nMY_MODEL_IN:   %0s\n", channel, tr_mfb_in.convert2string());
             `uvm_info(this.get_full_name(), msg, UVM_MEDIUM);
 
             analysis_export_flow_ctrl[channel].get(tr_last);
@@ -93,7 +93,7 @@ class model #(MVB_ITEM_WIDTH, MFB_ITEM_WIDTH, RX_CHANNELS) extends uvm_component
                 tr_mfb_tmp.data[i] = tr_mfb_in.data[i];
             end
 
-            $swrite(msg, "\nCHANNEL     %0d\nEOF:        %0d\nLAST:       %0d\nMODEL_IN:   %0s\n", channel, tr_last.data[0], tr_last.data[1], tr_mfb_tmp.convert2string());
+            msg = $sformatf( "\nCHANNEL     %0d\nEOF:        %0d\nLAST:       %0d\nMODEL_IN:   %0s\n", channel, tr_last.data[0], tr_last.data[1], tr_mfb_tmp.convert2string());
             `uvm_info(this.get_full_name(), msg, UVM_MEDIUM);
 
 
@@ -112,7 +112,7 @@ class model #(MVB_ITEM_WIDTH, MFB_ITEM_WIDTH, RX_CHANNELS) extends uvm_component
                 tr_mfb_out.data = sp_fifo[int'(channel)];
 
                 //DEBUG
-                $swrite(msg, {"\n**************************************************************************",
+                msg = $sformatf({"\n**************************************************************************",
                               "\nTIME:               %0t ps",
                               "\nCHANNEL             %0d",
                               "\nSUPERPACKET_NO:     %0d",

@@ -66,7 +66,7 @@ class scoreboard #(ITEM_WIDTH, TX_PORTS) extends uvm_scoreboard;
             errors   = errors   + port_cmp[port].errors;
         end
 
-        $swrite(msg, "%s\tDATA Compared/errors: %0d/%0d\n", msg, compared, errors);
+        msg = {msg, $sformatf("\tDATA Compared/errors: %0d/%0d\n",  compared, errors)};
 
         if (this.used() == 0) begin
             `uvm_info(get_type_name(), $sformatf("%s\n\n\t---------------------------------------\n\t----     VERIFICATION SUCCESS      ----\n\t---------------------------------------", msg), UVM_NONE)

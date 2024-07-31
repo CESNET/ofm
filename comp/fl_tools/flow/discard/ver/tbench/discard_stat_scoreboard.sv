@@ -99,7 +99,7 @@ import math_pkg::*;
        string driverLabel;
 
        for(i=0; i < pChannels; i++) begin
-         $swrite(driverLabel, "Driver %0d", i);
+         driverLabel = $sformatf( "Driver %0d", i);
          if (driverLabel == inst) break;
        end
 
@@ -162,11 +162,11 @@ import math_pkg::*;
       string tableLabel;
 
       for(i=0; i< pChannels; i++) begin
-        $swrite(monitorLabel, "Monitor %0d", i);
+        monitorLabel = $sformatf("Monitor %0d", i);
         if (monitorLabel == inst) break;
       end
 
-      $swrite(tableLabel, "%s %0d", this.inst, i);
+      tableLabel = $sformatf("%s %0d", this.inst, i);
 
       sc_table[i].remove(transaction, status);
       if (status==0)begin
@@ -235,7 +235,7 @@ import math_pkg::*;
     task display();
       for (int i=0; i<pChannels; i++) begin
         string tableLabel;
-        $swrite(tableLabel, "%s %0d", inst, i);
+        tableLabel = {tableLabel, $sformatf(" %0d",  i)};
         scoreTable[i].display(.inst(tableLabel));
       end
     endtask

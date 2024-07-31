@@ -117,7 +117,7 @@ class FrameLinkUPTransaction extends Transaction;
    virtual function bit compareHeader(input FrameLinkUPTransaction tr, output string diff, input int kind = -1);
       for (int j = 0; j < header.size; j++)
          if (header[j] != tr.header[j]) begin
-            $swrite(diff, "SZE header: byte %0d does not match", j);
+            diff = $sformatf( "SZE header: byte %0d does not match", j);
             return 0;
          end
       return 1;
@@ -129,7 +129,7 @@ class FrameLinkUPTransaction extends Transaction;
    virtual function bit compareData(input FrameLinkUPTransaction tr, output string diff, input int kind = -1);
       for (int j = 0; j < data.size; j++)
          if (data[j] != tr.data[j]) begin
-            $swrite(diff, "Data: byte %0d does not match", j);
+            diff = $sformatf( "Data: byte %0d does not match", j);
             return 0;
          end
       return 1;
@@ -144,7 +144,7 @@ class FrameLinkUPTransaction extends Transaction;
 
       // Header size
       if (header.size != tr.header.size) begin
-         $swrite(diff, "Header size does not match");
+         diff = "Header size does not match";
          return 0;
       end
 
@@ -154,7 +154,7 @@ class FrameLinkUPTransaction extends Transaction;
 
       // Data size
       if (data.size != tr.data.size) begin
-         $swrite(diff, "Data size does not match");
+         diff = "Data size does not match";
          return 0;
       end
 
@@ -164,7 +164,7 @@ class FrameLinkUPTransaction extends Transaction;
 
       // Channel
       if (channel != tr.channel) begin
-         $swrite(diff, "Channel does not match");
+         diff = "Channel does not match";
          return 0;
       end
 

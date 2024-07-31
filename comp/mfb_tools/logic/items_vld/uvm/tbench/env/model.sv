@@ -33,7 +33,7 @@ class model #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_W
         uvm_logic_vector::sequence_item #(1)              out_mvb_end_tr;
         string msg = "";
 
-        $swrite(msg, "%s\n\tMFB PKT COUNT %d", msg, pkt_cnt);
+        msg = {msg, $sformatf("\n\tMFB PKT COUNT %d",  pkt_cnt)};
         `uvm_info(this.get_full_name(), msg ,UVM_FULL)
 
         for (int unsigned it = offset; it < offset+length; it++) begin
@@ -77,9 +77,9 @@ class model #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_W
             `uvm_info(this.get_full_name(), tr_input_meta.convert2string() ,UVM_FULL) // useless
 
             {enable, length, offset} = tr_input_meta.data[OFFSET_WIDTH+LENGTH_WIDTH : 0];
-            $swrite(msg, "\n%s\nOFFSET %d\n", msg, offset);
-            $swrite(msg, "\n%sLENGTH %d\n", msg, length);
-            $swrite(msg, "\n%sENABLE %d\n", msg, enable);
+            msg = $sformatf( "\n%s\nOFFSET %d\n", msg, offset);
+            msg = $sformatf( "\n%sLENGTH %d\n", msg, length);
+            msg = $sformatf( "\n%sENABLE %d\n", msg, enable);
             `uvm_info(this.get_full_name(), msg ,UVM_HIGH)
             if (enable) begin
                 extract_valid_data(tr_input_mfb, offset, length);

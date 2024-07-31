@@ -48,7 +48,7 @@ class scoreboard #(ITEMS, ITEM_WIDTH, RX_MVB_CNT) extends uvm_scoreboard;
 
     virtual function void report_phase(uvm_phase phase);
         string msg = "\n";
-        $swrite(msg, "%sCompared/errors: %0d/%0d \n", msg, comparer.compared, comparer.errors);
+        msg = {msg, $sformatf("Compared/errors: %0d/%0d \n",  comparer.compared, comparer.errors)};
 
         if (comparer.errors == 0 && comparer.used() == 0) begin
             `uvm_info(get_type_name(), $sformatf("%s\n\n\t---------------------------------------\n\t----     VERIFICATION SUCCESS      ----\n\t---------------------------------------", msg), UVM_NONE)

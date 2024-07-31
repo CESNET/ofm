@@ -105,14 +105,14 @@ import math_pkg::*;
 
       for(i=0; i< pFlows; i++) begin
         string monitorLabel;
-        $swrite(monitorLabel, "Monitor %0d", i);
+        monitorLabel = $sformatf( "Monitor %0d", i);
         if (monitorLabel == inst) break;
       end
 
       //transaction.display(inst);
       sc_table[i].remove(transaction, status);
       if (status==0)begin
-         $swrite(tableLabel, "TX%0d", i);
+         tableLabel = $sformatf( "TX%0d", i);
          $write("Unknown transaction received from monitor %d\n", inst);
          transaction.display();
          sc_table[i].display(.inst(tableLabel));
@@ -153,7 +153,7 @@ import math_pkg::*;
       string tableLabel;
 
       foreach(this.scoreTable[i]) begin
-        $swrite(tableLabel, "TX%0d", i);
+        tableLabel = $sformatf( "TX%0d", i);
         scoreTable[i].display(.inst(tableLabel));
       end
     endtask

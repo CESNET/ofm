@@ -368,11 +368,11 @@ class model #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_component;
 
             // Check whether packet is accepted or not
             if (pkt_drop) begin
-                $swrite(msg, "\n\t\nPacket Dropped:\n RX CHANNEL: %0d\n META: %h\n PACKET SIZE: %0d\n%s", info.channel, info.meta, info.packet_size, tr.convert2string());
+                 msg = $sformatf("\n\t\nPacket Dropped:\n RX CHANNEL: %0d\n META: %h\n PACKET SIZE: %0d\n%s", info.channel, info.meta, info.packet_size, tr.convert2string());
                 `uvm_info(this.get_full_name(), msg,  UVM_MEDIUM);
             end else begin
                 packets_processed++;
-                $swrite(msg, "\n\t\nPacket Accepted:\n RX CHANNEL: %0d\n META: %h\n PACKET SIZE: %0d\n%s", info.channel, info.meta, info.packet_size, tr.convert2string());
+                msg = $sformatf("\n\t\nPacket Accepted:\n RX CHANNEL: %0d\n META: %h\n PACKET SIZE: %0d\n%s", info.channel, info.meta, info.packet_size, tr.convert2string());
                 `uvm_info(this.get_full_name(), msg,  UVM_MEDIUM);
                 packet_send(tr.data, info.input_time, info.channel, info.meta);
             end

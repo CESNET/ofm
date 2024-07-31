@@ -44,8 +44,8 @@ class mi_cmp_rq #(MI_DATA_WIDTH, type CLASS_TYPE) extends uvm_common::comparer_o
 
     virtual function string message(MODEL_ITEM tr_model, DUT_ITEM tr_dut);
         string msg = "";
-        $swrite(msg, "%s\n\tDUT PACKET %s\n\n",   msg, tr_dut.convert2string());
-        $swrite(msg, "%s\n\tMODEL PACKET%s\n\n",  msg, tr_model.convert2string());
+        msg = {msg, $sformatf("\n\tDUT PACKET %s\n\n",  tr_dut.convert2string())};
+        msg = {msg, $sformatf("\n\tMODEL PACKET%s\n\n",  tr_model.convert2string())};
         return msg;
     endfunction
 
@@ -70,8 +70,8 @@ class mi_cmp_rs #(MFB_ITEM_WIDTH) extends uvm_common::comparer_base_ordered#(uvm
         if ((tag_sync.list_of_tags.exists(tr_model.tag))) begin
             string msg;
             tag_sync.print_all();
-            $swrite(msg, "%sTAG %0d EXISTS\n", msg, tr_model.tag);
-            $swrite(msg, "%sNUMBER %d\n", msg, compared);
+            msg = {msg, $sformatf("TAG %0d EXISTS\n",  tr_model.tag)};
+            msg = {msg, $sformatf("NUMBER %d\n",  compared)};
             `uvm_error(this.get_full_name(), msg);
         end
         tag_sync.add_element(tr_model.tag);
@@ -81,8 +81,8 @@ class mi_cmp_rs #(MFB_ITEM_WIDTH) extends uvm_common::comparer_base_ordered#(uvm
 
     virtual function string message(MODEL_ITEM tr_model, DUT_ITEM tr_dut);
         string msg = "";
-        $swrite(msg, "%s\n\tDUT PACKET %s\n\n",   msg, tr_dut.convert2string());
-        $swrite(msg, "%s\n\tMODEL PACKET%s\n\n",  msg, tr_model.convert2string());
+        msg = {msg, $sformatf("\n\tDUT PACKET %s\n\n",  tr_dut.convert2string())};
+        msg = {msg, $sformatf("\n\tMODEL PACKET%s\n\n",  tr_model.convert2string())};
         return msg;
     endfunction
 

@@ -151,9 +151,9 @@ class logic_vector_array_sequence#(ITEM_WIDTH, string DEVICE, string ENDPOINT_TY
 
             tr_cnt++;
 
-            $swrite(msg, "\n\t =============== Driver CQ DATA =============== \n");
-            $swrite(msg, "%s\nTransaction number: %0d\n", msg, tr_cnt);
-            $swrite(msg, "%s\nDriver CQ Response Data %s\n", msg, req.convert2string());
+            msg = "\n\t =============== Driver CQ DATA =============== \n";
+            msg = {msg, $sformatf("\nTransaction number: %0d\n",  tr_cnt)};
+            msg = {msg, $sformatf("\nDriver CQ Response Data %s\n",  req.convert2string())};
             `uvm_info(this.get_full_name(), msg, UVM_FULL)
 
             finish_item(req);

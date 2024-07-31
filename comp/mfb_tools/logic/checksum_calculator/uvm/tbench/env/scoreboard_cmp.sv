@@ -38,10 +38,10 @@ class chsum_calc_cmp #(MVB_DATA_WIDTH, MFB_META_WIDTH) extends uvm_common::compa
 
     virtual function string message(MODEL_ITEM tr_model, DUT_ITEM tr_dut);
         string msg = "\n";
-        $swrite(msg, "%s\n\tDUT PACKET %s\n\n" , msg, tr_dut_data.convert2string());
-        $swrite(msg, "%s\n\tDUT BYPASS %h\n\n" , msg, bypass_dut);
-        $swrite(msg, "%s\n\tDUT META   %h\n\n" , msg, meta_dut);
-        $swrite(msg, "%s\n\tMODEL PACKET%s\n\n", msg, tr_model.convert2string());
+        msg = {msg, $sformatf("\n\tDUT PACKET %s\n\n",  tr_dut_data.convert2string())};
+        msg = {msg, $sformatf("\n\tDUT BYPASS %h\n\n",  bypass_dut)};
+        msg = {msg, $sformatf("\n\tDUT META   %h\n\n",  meta_dut)};
+        msg = {msg, $sformatf("\n\tMODEL PACKET%s\n\n",  tr_model.convert2string())};
         return msg;
     endfunction
 endclass

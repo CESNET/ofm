@@ -20,8 +20,6 @@ class comparer_superpacket #(type CLASS_TYPE) extends uvm_common::comparer_taged
                 return 0;
             end
         end
-        // $swrite(msg, "\n======= COMPARE: Transaction %0d =======", compared);
-        // `uvm_info(this.get_full_name(), msg, UVM_MEDIUM);
         `uvm_info(this.get_full_name(), {"\nMODEL ITEM : ", model_item2string(tr_model), "\nDUT ITEM : ", dut_item2string(tr_dut)}, UVM_MEDIUM);
         return ret;
     endfunction

@@ -60,7 +60,7 @@ class sequence_item extends uvm_sequence_item;
     function string convert2string();
         string ret;
 
-        $swrite(ret, "\tChannel : %0d\n\tMeta : %h\n", channel, meta);
+        ret = $sformatf("\tChannel : %0d\n\tMeta : %h\n", channel, meta);
 
         return ret;
     endfunction

@@ -211,54 +211,54 @@ class FrameLinkUEditTransaction #() extends Transaction;
       if (data.size != tr.data.size)
       begin
          same = 0;
-         $swrite(diff, "packetSize does not match");
+         diff = $sformatf( "packetSize does not match");
       end
 
       for (integer j=0; j < data.size; j++)
          if (data[j] != tr.data[j])
          begin
             same = 0;
-            $swrite(diff, "data[%0d] does not match", j);
+            diff = $sformatf( "data[%0d] does not match", j);
          end
 
       for (integer j=0; j < 6; j++)
           if(dstData[j] != tr.dstData[j])
           begin
              same = 0;
-             $swrite(diff, "dst  data[%0d] does not match", j);
+             diff = $sformatf( "dst  data[%0d] does not match", j);
           end
 
       for (integer j=0; j < 6; j++)
           if(srcData[j] != tr.srcData[j])
           begin
              same = 0;
-             $swrite(diff, "src data[%0d] does not match", j);
+             diff = $sformatf( "src data[%0d] does not match", j);
           end
 
       for (integer j=0; j < 6;j++)
           if(dstMask[j] != tr.dstMask[j])
           begin
              same = 0;
-             $swrite(diff, "dst mask [%0d] does not match", j);
+             diff = $sformatf( "dst mask [%0d] does not match", j);
           end
 
       for (integer j=0; j < 6;j++)
           if(srcMask[j] != tr.srcMask[j])
           begin
              same = 0;
-             $swrite(diff, "src mask [%0d] does not match", j);
+             diff = $sformatf( "src mask [%0d] does not match", j);
           end
 
       if(dstW != tr.dstW)
       begin
          same = 0;
-         $swrite(diff, "dst write command does not match");
+         diff = $sformatf( "dst write command does not match");
       end
 
       if(srcW != tr.srcW)
       begin
          same = 0;
-         $swrite(diff, "src write command does not match");
+         diff = $sformatf( "src write command does not match");
       end
 
       compare = same;

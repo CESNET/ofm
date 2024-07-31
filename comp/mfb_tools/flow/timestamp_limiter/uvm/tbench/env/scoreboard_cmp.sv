@@ -33,8 +33,8 @@ class delayer_cmp #(MFB_ITEM_WIDTH, TIMESTAMP_WIDTH) extends uvm_common::compare
             dut_ts = tr_dut_second.time_last() - tr_dut_first.time_last();
             times2cmp.push_back(tr_dut_second);
 
-            // $swrite(msg, "%sDUT TS %0.2f\n", msg, (dut_ts/1ns));
-            // $swrite(msg, "%sSIZE OF TR %0d\n", msg, tr_model.item.data_tr.size());
+            // msg = {msg, $sformatf("DUT TS %0.2f\n",  (dut_ts/1ns))};
+            // msg = {msg, $sformatf("SIZE OF TR %0d\n",  tr_model.item.data_tr.size())};
             $fwrite(fd,"%0.2f, %0.2f, %d, %0.2f, \n", dut_ts/1ns, tr_model.timestamp, tr_model.data_tr.size(), tr_model.time_last()/1ns);
             ts_stats.next_val(abs(signed'(tr_model.timestamp - dut_ts/1ns)));
         end
@@ -44,10 +44,10 @@ class delayer_cmp #(MFB_ITEM_WIDTH, TIMESTAMP_WIDTH) extends uvm_common::compare
 
     virtual function string message(MODEL_ITEM tr_model, DUT_ITEM tr_dut);
         string msg = "\n";
-        $swrite(msg, "%s\n\tDUT PACKET %s\n\n" , msg, tr_dut.convert2string());
-        $swrite(msg, "%s\n\tMODEL PACKET%s\n\n", msg, tr_model.data_tr.convert2string());
-        // $swrite(msg, "%str_dut.in_time %0.2f\n" , msg, tr_dut.in_time/1ns);
-        $swrite(msg, "%str_model timestamp %0.2f\n"  , msg, tr_model.timestamp);
+        msg = {msg, $sformatf("\n\tDUT PACKET %s\n\n",  tr_dut.convert2string())};
+        msg = {msg, $sformatf("\n\tMODEL PACKET%s\n\n",  tr_model.data_tr.convert2string())};
+        // msg = {msg, $sformatf("tr_dut.in_time %0.2f\n",  tr_dut.in_time/1ns)};
+        msg = {msg, $sformatf("tr_model timestamp %0.2f\n",  tr_model.timestamp)};
         return msg;
     endfunction
 

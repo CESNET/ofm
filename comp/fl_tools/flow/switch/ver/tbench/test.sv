@@ -91,9 +91,9 @@ program TEST (
       string responderLabel;
       string coverageLabel;
 
-      $swrite(monitorLabel, "Monitor %0d", i);
-      $swrite(responderLabel, "Responder %0d", i);
-      $swrite(coverageLabel, "TX Coverage %0d", i);
+      monitorLabel = $sformatf( "Monitor %0d", i);
+      responderLabel = $sformatf( "Responder %0d", i);
+      coverageLabel = $sformatf( "TX Coverage %0d", i);
       flMonitor[i]   = new (monitorLabel, vMONITOR[i]);
       flResponder[i] = new (responderLabel, vTX[i]);
 

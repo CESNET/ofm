@@ -98,15 +98,15 @@ class scoreboard #(SH_CNT_MAX, SH_INVALID_CNT_MAX, SLIP_WAIT_TIME) extends uvm_s
             compared++;
             if (tr_model.compare(tr_dut) == 0) begin
                 errors++;
-                $swrite(msg, "%s\n---Transactions does not match---\n\tMODEL Transaction\n%s\n\n\tDUT Transaction\n%s\n", msg, tr_model.convert2string(), tr_dut.convert2string());
+                msg = {msg, $sformatf("\n---Transactions does not match---\n\tMODEL Transaction\n%s\n\n\tDUT Transaction\n%s\n",  tr_model.convert2string(), tr_dut.convert2string())};
             end
         end
     endtask
 
     virtual function void report_phase(uvm_phase phase);
-        $swrite(msg, "%s\nCompared/errors: %0d/%0d \n", msg, compared, errors);
-        $swrite(msg, "%sCount of items inside fifo: %d \n", msg, rx_fifo.used());
-        $swrite(msg, "%sErrors : %d \n", msg, errors);
+        msg = {msg, $sformatf("\nCompared/errors: %0d/%0d \n",  compared, errors)};
+        msg = {msg, $sformatf("Count of items inside fifo: %d \n",  rx_fifo.used())};
+        msg = {msg, $sformatf("Errors : %d \n",  errors)};
 
         if (errors == 0 && this.used() == 0) begin
             `uvm_info(get_type_name(), $sformatf("%s\n\n\t---------------------------------------\n\t----     VERIFICATION SUCCESS      ----\n\t---------------------------------------", msg), UVM_NONE)

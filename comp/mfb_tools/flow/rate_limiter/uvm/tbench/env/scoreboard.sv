@@ -198,7 +198,7 @@ class scoreboard#(MFB_ITEM_WIDTH, MFB_META_WIDTH, INTERVAL_COUNT, SHAPING_TYPE, 
 
             if (tr_dut_in.compare(tr_dut_out) == 0 || tr_dut_in_meta.compare(tr_dut_out_meta) == 0) begin
                 string msg;
-                $swrite(msg, "\n\tCheck packet failed.\n\n\tInput packet\n%s\n%s\n\n\tOutput packet\n%s\n%s", tr_dut_in_meta.convert2string(), tr_dut_in.convert2string(), tr_dut_out_meta.convert2string(), tr_dut_out.convert2string());
+                msg = $sformatf( "\n\tCheck packet failed.\n\n\tInput packet\n%s\n%s\n\n\tOutput packet\n%s\n%s", tr_dut_in_meta.convert2string(), tr_dut_in.convert2string(), tr_dut_out_meta.convert2string(), tr_dut_out.convert2string());
                 `uvm_error(this.get_full_name(), msg);
             end
         end

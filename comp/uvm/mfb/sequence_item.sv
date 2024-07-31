@@ -90,7 +90,7 @@ class sequence_item #(int unsigned REGIONS, int unsigned REGION_SIZE, int unsign
         );
 
         for (int unsigned it = 0; it < REGIONS; it++) begin
-            $swrite(output_string, "%s\n\t-- id %0d\n\tEOF %b EOF_POS %0d\n\tSOF %b SOF_POS %0d\n\tDATA %h\n\tMETA %h\n",output_string, it, eof[it], eof_pos[it], sof[it], sof_pos[it], data[it], meta[it]);
+            output_string = {output_string, $sformatf("\n\t-- id %0d\n\tEOF %b EOF_POS %0d\n\tSOF %b SOF_POS %0d\n\tDATA %h\n\tMETA %h\n",  it, eof[it], eof_pos[it], sof[it], sof_pos[it], data[it], meta[it])};
         end
 
         return output_string;

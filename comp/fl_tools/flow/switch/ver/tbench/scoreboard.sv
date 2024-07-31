@@ -81,7 +81,8 @@ import sv_fl_pkg::*;
         if (mark[i]==1) sc_table[i].add(transaction);
 
       `ifdef DEBUG
-        $swrite(trLabel,"Output interfaces bitmap: %b", mark);
+
+        trLabel = $sformatf("Output interfaces bitmap: %b", mark);
         transaction.display(trLabel);
       `endif
     endtask
@@ -116,13 +117,13 @@ import sv_fl_pkg::*;
 
       for(i=0; i< pFlows; i++) begin
         string monitorLabel;
-        $swrite(monitorLabel, "Monitor %0d", i);
+        monitorLabel = $sformatf( "Monitor %0d", i);
         if (monitorLabel == inst) break;
       end
 
       sc_table[i].remove(transaction, status);
       if (status==0)begin
-         $swrite(tableLabel, "TX%0d", i);
+         tableLabel = $sformatf( "TX%0d", i);
          $write("Unknown transaction received from monitor %d\n", inst);
          transaction.display();
          sc_table[i].display(.inst(tableLabel));
