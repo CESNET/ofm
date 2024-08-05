@@ -187,7 +187,7 @@ class DataLogger(nfb.BaseComp):
         
         slices = math.ceil(self.config["CTRLO_WIDTH"] / self.mi_width)
         for i in range(0, slices):
-            if self.last_slice != 0:
+            if self.last_slice != i:
                 self._comp.write32(self._REG_SLICE, i)
                 self.last_slice = i
 
