@@ -38,6 +38,18 @@ module TX_DMA_CALYPTE_PROPERTY #(
         START = 1'b0;
     end
 
+    // This property checks that DST_RDY does not drop on the PCIE_CQ interface
+    property cq_mfb_dst_rdy_drop;
+        @(posedge cq_mfb.CLK)
+        disable iff(RESET || START)
+        !$fell(cq_mfb.DST_RDY)
+    endproperty
+
+    assert property (cq_mfb_dst_rdy_drop)
+        else begin
+            `uvm_error(module_name, "\n\tCQ_MFB interface: DST_RDY dropped to 0, data loss can occur!");
+        end
+
     mfb_property #(
         .REGIONS     (PCIE_CQ_MFB_REGIONS),
         .REGION_SIZE (PCIE_CQ_MFB_REGION_SIZE),
