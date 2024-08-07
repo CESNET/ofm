@@ -39,6 +39,9 @@ class MVBMonitor(BusMonitor):
         else:
             return (signal_src_rdy.value == 1) and (signal_dst_rdy.value == 1)
 
+    def recieve_data(self, data, offset):
+        self._recv(data[offset*self._item_width:(offset+1)*self._item_width])
+
     async def _monitor_recv(self) -> None:
         """Recieve function used with cocotb testbench."""
 
@@ -65,6 +68,6 @@ class MVBMonitor(BusMonitor):
                         self.log.debug(f"word: {data_bytes}")
                         self.log.debug(f"item vld: {vld[self._items-offset-1]}")
                         self.log.debug(f"word vld: {vld}")
-                        self._recv(data_bytes[offset*self._item_width:(offset+1)*self._item_width])
+                        self.recieve_data(data_bytes, offset)
 
                         self.item_cnt += 1
