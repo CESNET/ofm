@@ -96,7 +96,6 @@ architecture FULL of MVB_MERGE_STREAMS_ORDERED is
     signal rx_sel_strm_src_rdy  : std_logic_vector(RX_STREAMS - 1 downto 0);
     signal rx_sel_strm_dst_rdy  : std_logic_vector(RX_STREAMS - 1 downto 0);
 
-    signal rx_strm_word_rdy     : slv_array_t(RX_STREAMS-1 downto 0)(TX_ITEMS-1 downto 0);
     signal rx_strm_rdy          : std_logic_vector(RX_STREAMS-1 downto 0);
 
     signal strm_rd_data         : slv_array_t(RX_STREAMS-1 downto 0)(TX_ITEMS*MVB_ITEM_WIDTH-1 downto 0);
@@ -154,6 +153,9 @@ begin
     sel_shake_tx_dst_rdy <= (and rx_strm_rdy) and TX_DST_RDY;
 
     rx_g : for i in 0 to RX_STREAMS - 1 generate
+        signal rx_strm_word_rdy : std_logic_vector(TX_ITEMS-1 downto 0);
+    begin
+
         rx_sel_arr(i) <= sel_shake_tx_data;
 
         vld_g : for x in 0 to TX_ITEMS - 1 generate
@@ -179,9 +181,9 @@ begin
         );
 
         -- Word requested => word ready
-        rx_strm_word_rdy(i) <= not rx_sel_strm_pos_vld(i) or fifox_multi_src_rdy(i);
+        rx_strm_word_rdy <= not rx_sel_strm_pos_vld(i) or fifox_multi_src_rdy(i);
         -- All words ready
-        rx_strm_rdy(i) <= and (rx_strm_word_rdy(i));
+        rx_strm_rdy(i) <= and (rx_strm_word_rdy);
 
         fifox_multi_rd(i) <= rx_sel_strm_pos_vld(i) when (and rx_strm_rdy) = '1' and TX_DST_RDY = '1' else (others => '0');
 
@@ -275,5 +277,4 @@ begin
     end process;
 
     TX_SRC_RDY <= or TX_VLD;
-
 end architecture;
