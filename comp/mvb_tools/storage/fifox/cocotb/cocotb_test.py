@@ -42,7 +42,7 @@ class testbench():
 
     async def reset(self):
         self.dut.RESET.value = 1
-        await ClockCycles(self.dut.CLK, 2)
+        await ClockCycles(self.dut.CLK, 10)
         self.dut.RESET.value = 0
         await RisingEdge(self.dut.CLK)
 
