@@ -36,7 +36,7 @@ package test;
     parameter FRAME_SIZE_MAX          = 128;
     //MVB interface
     parameter MVB_ITEMS               = MFB_REGIONS;
-    parameter MVB_ITEM_WIDTH          = $clog2(USR_RX_PKT_SIZE_MAX+1) + HDR_META_WIDTH + $clog2(RX_CHANNELS) + 1;
+    //parameter MVB_ITEM_WIDTH          = $clog2(USR_RX_PKT_SIZE_MAX+1) + HDR_META_WIDTH + $clog2(RX_CHANNELS) + 1;
 
     //Number of sequences
     //parameter SEQ_MIN   = 10;

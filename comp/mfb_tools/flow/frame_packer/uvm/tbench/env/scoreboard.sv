@@ -4,33 +4,24 @@
 
 // SPDX-License-Identifier: BSD-3-Clause
 
-class scoreboard #(MVB_ITEM_WIDTH, MFB_ITEM_WIDTH, RX_CHANNELS, USR_RX_PKT_SIZE_MAX) extends uvm_scoreboard;
+class scoreboard #(RX_CHANNELS, PKT_MTU, META_WIDTH,  MFB_ITEM_WIDTH) extends uvm_scoreboard;
 
-    `uvm_component_utils(uvm_framepacker::scoreboard #(MVB_ITEM_WIDTH, MFB_ITEM_WIDTH, RX_CHANNELS, USR_RX_PKT_SIZE_MAX))
+    `uvm_component_utils(uvm_framepacker::scoreboard #(RX_CHANNELS, PKT_MTU, META_WIDTH,  MFB_ITEM_WIDTH))
 
-    //Anylysis components
-    uvm_analysis_export #(uvm_logic_vector::sequence_item#(MVB_ITEM_WIDTH)) analysis_imp_mvb_rx;
-    // uvm_analysis_export #(uvm_logic_vector::sequence_item#(MVB_ITEM_WIDTH)) analysis_imp_mvb_tx;
+    // RX
+    uvm_analysis_export #(uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH))                   analysis_imp_mfb_rx_data;
+    uvm_analysis_export #(uvm_logic_vector::sequence_item#($clog2(RX_CHANNELS) + $clog2(PKT_MTU+1))) analysis_imp_mvb_rx;
 
-    //Model Data - SmallPackets
-    uvm_analysis_export #(uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH))        analysis_imp_mfb_rx_data;
-    //DUT Data - SuperPackets
-    uvm_analysis_export #(uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH))        analysis_imp_mfb_tx_data;
-
-    // uvm_common::subscriber #()
-
-    //MVB
-    uvm_analysis_export #(uvm_logic_vector::sequence_item #(MVB_ITEM_WIDTH))                analysis_imp_mvb_tx;
+    // TX
+    uvm_analysis_export #(uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH))  analysis_imp_mfb_tx_data;
+    uvm_analysis_export #(uvm_logic_vector::sequence_item #($clog2(RX_CHANNELS) + $clog2(PKT_MTU+1) + META_WIDTH + 1))       analysis_imp_mvb_tx;
 
     //Comparer
-    //uvm_common::comparer_ordered #(uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH))  data_cmp;
+    uvm_framepacker::comparer_meta #(RX_CHANNELS, PKT_MTU, META_WIDTH)  meta_cmp;
     uvm_framepacker::comparer_superpacket #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) data_cmp;
 
-    //Speed-meter
-    meter #(MVB_ITEM_WIDTH, MFB_ITEM_WIDTH, RX_CHANNELS, USR_RX_PKT_SIZE_MAX) m_meter;
-
     //Model
-    model #(MVB_ITEM_WIDTH, MFB_ITEM_WIDTH, RX_CHANNELS) m_model;
+    model #(RX_CHANNELS, PKT_MTU, META_WIDTH,  MFB_ITEM_WIDTH) m_model;
 
     // Contructor
     function new(string name, uvm_component parent);
@@ -44,26 +35,29 @@ class scoreboard #(MVB_ITEM_WIDTH, MFB_ITEM_WIDTH, RX_CHANNELS, USR_RX_PKT_SIZE_
     endfunction
 
     function int unsigned success();
-        int unsigned ret = 0;
-        ret |= data_cmp.success();
+        int unsigned ret = 1;
+        ret &= data_cmp.success();
+        ret &= meta_cmp.success();
         return ret;
     endfunction
 
     function int unsigned used();
         int unsigned ret = 0;
+        ret |= meta_cmp.used();
         ret |= data_cmp.used();
         ret |= m_model.used();
         return ret;
     endfunction
 
     function void build_phase(uvm_phase phase);
-        m_model = model #(MVB_ITEM_WIDTH, MFB_ITEM_WIDTH, RX_CHANNELS)::type_id::create("m_model", this);
-        m_meter = meter #(MVB_ITEM_WIDTH, MFB_ITEM_WIDTH, RX_CHANNELS, USR_RX_PKT_SIZE_MAX)::type_id::create("m_meter", this);
+        m_model = model #(RX_CHANNELS, PKT_MTU, META_WIDTH,  MFB_ITEM_WIDTH)::type_id::create("m_model", this);
         //data_cmp = uvm_common::comparer_ordered #(uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH))::type_id::create("data_cmp", this);
 
         data_cmp = uvm_framepacker::comparer_superpacket #(uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH))::type_id::create("data_cmp", this);
         data_cmp.model_tr_timeout_set(500us);
 
+        meta_cmp = uvm_framepacker::comparer_meta #(RX_CHANNELS, PKT_MTU, META_WIDTH)::type_id::create("meta_cmp", this);
+        meta_cmp.model_tr_timeout_set(500us);
     endfunction
 
     function void connect_phase(uvm_phase phase);
@@ -71,18 +65,12 @@ class scoreboard #(MVB_ITEM_WIDTH, MFB_ITEM_WIDTH, RX_CHANNELS, USR_RX_PKT_SIZE_
         analysis_imp_mfb_rx_data.connect(m_model.data_in.analysis_export);
         analysis_imp_mvb_rx.connect(m_model.meta_in.analysis_export);
 
-        //Speed-meter
-        analysis_imp_mfb_rx_data.connect(m_meter.rx_data_in.analysis_export);
-        analysis_imp_mfb_tx_data.connect(m_meter.tx_data_in.analysis_export);
-
-        //MVB
-        analysis_imp_mfb_tx_data.connect(m_meter.mfb_control_data.analysis_export);
-        analysis_imp_mvb_tx.connect(m_meter.meta_in.analysis_export);
-
         //Connect model output to comparer
         m_model.data_out.connect(data_cmp.analysis_imp_model);
+        analysis_imp_mfb_tx_data.connect(data_cmp.analysis_imp_dut);
 
-
+        m_model.meta_out.connect(meta_cmp.analysis_imp_model);
+        analysis_imp_mvb_tx.connect(meta_cmp.analysis_imp_dut);
     endfunction
 
     virtual function void report_phase(uvm_phase phase);

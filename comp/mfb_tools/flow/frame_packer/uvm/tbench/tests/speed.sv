@@ -4,18 +4,18 @@
 
 // SPDX-License-Identifier: BSD-3-Clause
 
-class virt_seq_full_speed #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, RX_CHANNELS, FRAME_SIZE_MIN, FRAME_SIZE_MAX) extends virt_sequence #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, RX_CHANNELS, FRAME_SIZE_MIN, FRAME_SIZE_MAX);
-    `uvm_object_param_utils (test::virt_seq_full_speed #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, RX_CHANNELS, FRAME_SIZE_MIN, FRAME_SIZE_MAX))
-    uvm_framepacker::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, SPACE_SIZE_MIN_RX, SPACE_SIZE_MAX_RX, SPACE_SIZE_MIN_TX, SPACE_SIZE_MAX_TX, RX_CHANNELS, USR_RX_PKT_SIZE_MAX, HDR_META_WIDTH) m_env;
+class virt_seq_full_speed #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, RX_CHANNELS, PKT_MTU) extends virt_sequence #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, RX_CHANNELS, PKT_MTU);
+    `uvm_object_param_utils (test::virt_seq_full_speed #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, RX_CHANNELS, PKT_MTU))
+    uvm_framepacker::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, SPACE_SIZE_MIN_RX, SPACE_SIZE_MAX_RX, SPACE_SIZE_MIN_TX, SPACE_SIZE_MAX_TX, RX_CHANNELS, USR_RX_PKT_SIZE_MAX, HDR_META_WIDTH) m_env;
 
     function new (string name = "virt_seq_full_speed");
         super.new(name);
     endfunction
 
-    virtual function void init(uvm_phase phase);
-        super.init(phase);
+    virtual function void init(int unsigned frame_size_min, int unsigned frame_size_max);
+        super.init(frame_size_min, frame_size_max);
         m_mfb_rdy_seq = uvm_mfb::sequence_full_speed_tx #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, 0)::type_id::create("m_mfb_rdy_seq");
-        m_mvb_rdy_seq = uvm_mvb::sequence_full_speed_tx #(MFB_REGIONS, MVB_ITEM_WIDTH)::type_id::create("m_mvb_rdy_seq");
+        m_mvb_rdy_seq = uvm_mvb::sequence_full_speed_tx #(MFB_REGIONS, $clog2(RX_CHANNELS) + $clog2(PKT_MTU+1) + HDR_META_WIDTH + 1)::type_id::create("m_mvb_rdy_seq");
     endfunction
 
 endclass
@@ -43,7 +43,7 @@ class speed extends uvm_test;
      typedef uvm_component_registry #(test::speed, "test::speed") type_id;
 
     // declare the Environment reference variable
-    uvm_framepacker::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, SPACE_SIZE_MIN_RX, SPACE_SIZE_MAX_RX, SPACE_SIZE_MIN_TX, SPACE_SIZE_MAX_TX, RX_CHANNELS, USR_RX_PKT_SIZE_MAX, HDR_META_WIDTH) m_env;
+    uvm_framepacker::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, SPACE_SIZE_MIN_RX, SPACE_SIZE_MAX_RX, SPACE_SIZE_MIN_TX, SPACE_SIZE_MAX_TX, RX_CHANNELS, USR_RX_PKT_SIZE_MAX, HDR_META_WIDTH) m_env;
     int unsigned timeout;
 
     // ------------------------------------------------------------------------
@@ -65,22 +65,22 @@ class speed extends uvm_test;
     function void build_phase(uvm_phase phase);
         uvm_logic_vector_array_mfb::sequence_lib_rx #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH)::type_id::set_inst_override(uvm_logic_vector_array_mfb::sequence_lib_rx_speed #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH)::get_type(),
         {this.get_full_name(), ".m_env.mfb_rx_env.*"});
-        uvm_logic_vector_mvb::sequence_lib_rx#(MFB_REGIONS, MVB_ITEM_WIDTH)::type_id::set_inst_override(mvb_rx_speed#(MFB_REGIONS, MVB_ITEM_WIDTH)::get_type(),
+        uvm_logic_vector_mvb::sequence_lib_rx#(MFB_REGIONS, $clog2(RX_CHANNELS) + $clog2(USR_RX_PKT_SIZE_MAX+1))::type_id::set_inst_override(mvb_rx_speed#(MFB_REGIONS, $clog2(RX_CHANNELS) + $clog2(USR_RX_PKT_SIZE_MAX+1))::get_type(),
         {this.get_full_name(), ".m_env.mvb_rx_env.*"});
 
         // Initializing the reference to the environment
-        m_env = uvm_framepacker::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, SPACE_SIZE_MIN_RX, SPACE_SIZE_MAX_RX, SPACE_SIZE_MIN_TX, SPACE_SIZE_MAX_TX, RX_CHANNELS, USR_RX_PKT_SIZE_MAX, HDR_META_WIDTH)::type_id::create("m_env", this);
+        m_env = uvm_framepacker::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, SPACE_SIZE_MIN_RX, SPACE_SIZE_MAX_RX, SPACE_SIZE_MIN_TX, SPACE_SIZE_MAX_TX, RX_CHANNELS, USR_RX_PKT_SIZE_MAX, HDR_META_WIDTH)::type_id::create("m_env", this);
     endfunction
 
     // ------------------------------------------------------------------------
     // Create environment and Run sequences on their sequencers
     virtual task run_phase(uvm_phase phase);
-        virt_seq_full_speed #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, RX_CHANNELS, FRAME_SIZE_MIN, FRAME_SIZE_MAX) m_vseq;
-        m_vseq = virt_seq_full_speed #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, RX_CHANNELS, FRAME_SIZE_MIN, FRAME_SIZE_MAX)::type_id::create("m_vseq");
+        virt_seq_full_speed #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, RX_CHANNELS, USR_RX_PKT_SIZE_MAX) m_vseq;
+        m_vseq = virt_seq_full_speed #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, RX_CHANNELS, USR_RX_PKT_SIZE_MAX)::type_id::create("m_vseq");
 
         phase.raise_objection(this);
 
-        m_vseq.init(phase);
+        m_vseq.init(FRAME_SIZE_MIN, FRAME_SIZE_MAX);
 
         //RUN MFB RX SEQUENCE
         m_vseq.randomize();

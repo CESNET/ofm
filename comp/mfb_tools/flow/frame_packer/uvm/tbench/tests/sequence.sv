@@ -5,9 +5,9 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 
-class virt_sequence#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, RX_CHANNELS, FRAME_SIZE_MIN, FRAME_SIZE_MAX) extends uvm_sequence;
-    `uvm_object_param_utils(test::virt_sequence#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, RX_CHANNELS, FRAME_SIZE_MIN, FRAME_SIZE_MAX))
-    `uvm_declare_p_sequencer(uvm_framepacker::virt_sequencer#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, USR_RX_PKT_SIZE_MAX, RX_CHANNELS, HDR_META_WIDTH))
+class virt_sequence#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, RX_CHANNELS, PKT_MTU) extends uvm_sequence;
+    `uvm_object_param_utils(test::virt_sequence#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, RX_CHANNELS, PKT_MTU))
+    `uvm_declare_p_sequencer(uvm_framepacker::virt_sequencer#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, PKT_MTU, RX_CHANNELS, HDR_META_WIDTH))
 
     function new (string name = "virt_sequence");
         super.new(name);
@@ -16,26 +16,23 @@ class virt_sequence#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDT
     //RX
     uvm_reset::sequence_start                             m_reset;
     uvm_logic_vector_array::sequence_lib#(MFB_ITEM_WIDTH) m_mfb_data_seq;
-    uvm_framepacker::sequence_mvb_data#(MVB_ITEM_WIDTH)   m_mvb_data_seq;
 
     //TX DST_RDY handle
-    uvm_meta::sequence_lib #(USR_RX_PKT_SIZE_MAX, RX_CHANNELS, HDR_META_WIDTH)                 m_info_seq;
-    uvm_mfb::sequence_lib_tx#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, 0) m_mfb_tx_seq;
-    uvm_mvb::sequence_lib_tx#(MFB_REGIONS, MVB_ITEM_WIDTH)                                     m_mvb_tx_seq;
-
+    uvm_meta::sequence_lib #(PKT_MTU, RX_CHANNELS, HDR_META_WIDTH)                 m_info_seq;
     uvm_sequence#(uvm_mfb::sequence_item#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, 0)) m_mfb_rdy_seq;
-    uvm_sequence#(uvm_mvb::sequence_item#(MFB_REGIONS, MVB_ITEM_WIDTH))                                     m_mvb_rdy_seq;
+    uvm_sequence#(uvm_mvb::sequence_item#(MFB_REGIONS, $clog2(RX_CHANNELS) + $clog2(PKT_MTU+1) + HDR_META_WIDTH + 1))  m_mvb_rdy_seq;
 
-    uvm_phase phase;
+    virtual function void init(int unsigned frame_size_min, int unsigned frame_size_max);
+        uvm_mfb::sequence_lib_tx#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, 0) m_mfb_tx_seq;
+        uvm_mvb::sequence_lib_tx#(MFB_REGIONS, $clog2(RX_CHANNELS) + $clog2(PKT_MTU+1) + HDR_META_WIDTH + 1) m_mvb_tx_seq;
 
-    virtual function void init(uvm_phase phase);
 
         m_reset         = uvm_reset::sequence_start::type_id::create("m_reset");
         m_mfb_data_seq  = uvm_logic_vector_array::sequence_lib#(MFB_ITEM_WIDTH)::type_id::create("m_mfb_data_seq");
         m_mfb_tx_seq    = uvm_mfb::sequence_lib_tx #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, 0)::type_id::create("m_mfb_tx_seq");
-        m_mvb_tx_seq    = uvm_mvb::sequence_lib_tx #(MFB_REGIONS, MVB_ITEM_WIDTH)::type_id::create("m_mvb_tx_seq");
+        m_mvb_tx_seq    = uvm_mvb::sequence_lib_tx #(MFB_REGIONS, $clog2(RX_CHANNELS) + $clog2(PKT_MTU+1) + HDR_META_WIDTH + 1)::type_id::create("m_mvb_tx_seq");
 
-        m_info_seq      = uvm_meta::sequence_lib #(USR_RX_PKT_SIZE_MAX, RX_CHANNELS, HDR_META_WIDTH)::type_id::create("m_info_seq");
+        m_info_seq      = uvm_meta::sequence_lib #(PKT_MTU, RX_CHANNELS, HDR_META_WIDTH)::type_id::create("m_info_seq");
 
         m_mfb_tx_seq.init_sequence();
         m_mfb_tx_seq.min_random_count = 2000;
@@ -44,7 +41,7 @@ class virt_sequence#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDT
 
         m_mfb_data_seq.init_sequence();
         m_mfb_data_seq.cfg = new();
-        m_mfb_data_seq.cfg.array_size_set(FRAME_SIZE_MIN, FRAME_SIZE_MAX);
+        m_mfb_data_seq.cfg.array_size_set(frame_size_min, frame_size_max);
         m_mfb_data_seq.min_random_count = 5;
         m_mfb_data_seq.max_random_count = 8;
 
@@ -57,9 +54,6 @@ class virt_sequence#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDT
         m_mvb_tx_seq.min_random_count = 200000;
         m_mvb_tx_seq.max_random_count = 500000;
         m_mvb_rdy_seq = m_mvb_tx_seq;
-
-        this.phase = phase;
-
     endfunction
 
     task run_mfb_seq_tx();
