@@ -45,3 +45,4 @@ Library of commonly used agents and enviroments in UVM verification
     packet_generators/flowtest/readme
     avmm/readme
     avst_crdt/readme
+    probe/readme
