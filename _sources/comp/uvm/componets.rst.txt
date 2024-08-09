@@ -44,3 +44,4 @@ Library of commonly used agents and enviroments in UVM verification
     logic_vector_array_axi/readme
     packet_generators/flowtest/readme
     avmm/readme
+    avst_crdt/readme

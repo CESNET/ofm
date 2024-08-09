@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Intel MAC SEG &mdash; Open FPGA Modules Docs  documentation</title>
+  <title>AVST CRDT Agent &mdash; Open FPGA Modules Docs  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme_overrides.css?v=b530091d" />
 
@@ -21,8 +21,8 @@
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="next" title="AXI Agent" href="../axi/readme.html" />
-    <link rel="prev" title="PMA agent" href="../pma/readme.html" /> 
+    <link rel="next" title="Packages" href="../../base/pkg/readme.html" />
+    <link rel="prev" title="AVMM Agent" href="../avmm/readme.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -90,17 +90,17 @@
 <li class="toctree-l3"><a class="reference internal" href="../mfb/readme.html">MFB Agent</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../mi/readme.html">MI agent</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pma/readme.html">PMA agent</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Intel MAC SEG</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#sequence-item">Sequence item</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#sequence">Sequence</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#config">Config</a></li>
-</ul>
-</li>
+<li class="toctree-l3"><a class="reference internal" href="../intel_mac_seg/readme.html">Intel MAC SEG</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../axi/readme.html">AXI Agent</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../logic_vector_array_axi/readme.html">logic_vector_array_axi environment</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../packet_generators/flowtest/readme.html">FlowTest Sequence</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../avmm/readme.html">AVMM Agent</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../avst_crdt/readme.html">AVST CRDT Agent</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">AVST CRDT Agent</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#agents">Agents</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sequence-item">Sequence Item</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sequences">Sequences</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -127,9 +127,9 @@
       <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../../ver.html">UVM Verification</a></li>
           <li class="breadcrumb-item"><a href="../componets.html">Components</a></li>
-      <li class="breadcrumb-item active">Intel MAC SEG</li>
+      <li class="breadcrumb-item active">AVST CRDT Agent</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../../../_sources/comp/uvm/intel_mac_seg/readme.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../../../_sources/comp/uvm/avst_crdt/readme.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -137,41 +137,43 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="intel-mac-seg">
-<span id="uvm-intel-mac-seg"></span><h1>Intel MAC SEG<a class="headerlink" href="#intel-mac-seg" title="Link to this heading"></a></h1>
-<p>This agent is a low-level agent that is responsible for communication through Intel MAC SEG. It is commonly used for ethernet communication.
-The <strong>intel_mac_seg_if</strong> interface has one parameter, <strong>SEGMENTS</strong>, which represents a number of segments. There are two agents for Rx and Tx communication.
-The component is commonly used with the uvm_logic_vector_array when the <strong>uvm_logic_vector_array::sequence_item</strong> has to be converted to the <strong>uvm_intel_mac_seg::sequence_item</strong>.</p>
+  <section id="avst-crdt-agent">
+<h1>AVST CRDT Agent<a class="headerlink" href="#avst-crdt-agent" title="Link to this heading"></a></h1>
+<p>This agent is a low-level agent that is responsible for communication through the <a class="reference external" href="https://www.intel.com/content/www/us/en/docs/programmable/683501/24-2-11-3-0/credit-control.html">Intel Credit Control interface</a>.
+This package, <strong>uvm_avst_crdt</strong>, contains 2 generic and 4 predefined agents. The RX agent sends credits to the DUT. The TX agent is responsible for the correct initialization.</p>
+<section id="agents">
+<h2>Agents<a class="headerlink" href="#agents" title="Link to this heading"></a></h2>
+<p>The package contains RX and TX agents that can be parameterized with the <strong>UPDATE_CNT_WIDTH</strong> parameter.
+The generic agents are configured with one parameter:</p>
+<ul class="simple">
+<li><p>UPDATE_CNT_WIDTH</p></li>
+</ul>
+<p>Moreover, the package contains 4 agents with predefined parameter values:</p>
+<ul class="simple">
+<li><p><em>agent_rx_hdr</em> with <strong>UPDATE_CNT_WIDTH = 2</strong>.</p></li>
+<li><p><em>agent_rx_data</em> with <strong>UPDATE_CNT_WIDTH = 4</strong>.</p></li>
+<li><p><em>agent_tx_hdr</em> with <strong>UPDATE_CNT_WIDTH = 2</strong>.</p></li>
+<li><p><em>agent_tx_data</em> with <strong>UPDATE_CNT_WIDTH = 4</strong>.</p></li>
+</ul>
+</section>
 <section id="sequence-item">
-<h2>Sequence item<a class="headerlink" href="#sequence-item" title="Link to this heading"></a></h2>
-<blockquote>
-<div><ul class="simple">
-<li><p>rand logic [64-1:0] data[SEGMENTS];</p></li>
-<li><p>rand logic          inframe[SEGMENTS];</p></li>
-<li><p>rand logic [3-1:0]  eop_empty[SEGMENTS];</p></li>
-<li><p>rand logic          fcs_error[SEGMENTS];</p></li>
-<li><p>rand logic [2-1:0]  error[SEGMENTS];</p></li>
-<li><p>rand logic [3-1:0]  status_data[SEGMENTS];</p></li>
-<li><p>rand logic          valid;</p></li>
-<li><p>rand logic          ready;</p></li>
-</ul>
-</div></blockquote>
+<h2>Sequence Item<a class="headerlink" href="#sequence-item" title="Link to this heading"></a></h2>
+<p>The following table shows properties in the <em>sequence_item</em> class.</p>
+<div class="highlight-systemverilog notranslate"><div class="highlight"><pre><span></span><span class="k">rand</span><span class="w"> </span><span class="kt">logic</span><span class="w">                          </span><span class="n">init</span><span class="p">;</span>
+<span class="k">rand</span><span class="w"> </span><span class="kt">logic</span><span class="w">                          </span><span class="n">init_ack</span><span class="p">;</span>
+<span class="k">rand</span><span class="w"> </span><span class="kt">logic</span><span class="w">                          </span><span class="n">update</span><span class="p">;</span>
+<span class="k">rand</span><span class="w"> </span><span class="kt">logic</span><span class="w"> </span><span class="p">[</span><span class="n">UPDATE_CNT_WIDTH</span><span class="o">-</span><span class="mi">1</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="n">update_cnt</span><span class="p">;</span>
+</pre></div>
+</div>
 </section>
-<section id="sequence">
-<h2>Sequence<a class="headerlink" href="#sequence" title="Link to this heading"></a></h2>
-<p>There are two sequences. The one for RX is not commonly used. It doesn’t generate truly valid frames. Better is to use the <strong>uvm_logic_vector_array_intel_mac_seg::env</strong>
-environment. The Tx one generates a ready signal for the Tx agent.</p>
-</section>
-<section id="config">
-<h2>Config<a class="headerlink" href="#config" title="Link to this heading"></a></h2>
-<p>The config contains two variables. The <strong>active</strong> decides whether the agent drives the interface or only observes the interface.
-The <strong>interface_name</strong> variable represents the name under which is interface stored in a database.</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>uvm_active_passive_enum active;</p></li>
-<li><p>string interface_name;</p></li>
+<section id="sequences">
+<h2>Sequences<a class="headerlink" href="#sequences" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><em>sequence_rx</em> is a common credit-generating sequence.</p></li>
+<li><p><em>sequence_rx_initializing</em> is responsible for correct initialization on the RX side.</p></li>
+<li><p><em>sequence_tx_ack</em> is responsible for correct initialization on the TX side.</p></li>
 </ul>
-</div></blockquote>
+<p>All these sequences have predefined <em>_hdr</em> and <em>_data</em> variants, just like agents do.</p>
 </section>
 </section>
 
@@ -179,8 +181,8 @@ The <strong>interface_name</strong> variable represents the name under which is 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../pma/readme.html" class="btn btn-neutral float-left" title="PMA agent" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../axi/readme.html" class="btn btn-neutral float-right" title="AXI Agent" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../avmm/readme.html" class="btn btn-neutral float-left" title="AVMM Agent" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../base/pkg/readme.html" class="btn btn-neutral float-right" title="Packages" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
