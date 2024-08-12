@@ -15,7 +15,7 @@ class scoreboard #(DATA_WIDTH, STATUS_WIDTH, ITEMS, ALMOST_FULL_OFFSET, ALMOST_E
 
     // Comparer instance
     uvm_common::comparer_ordered #(uvm_logic_vector::sequence_item #(DATA_WIDTH)) cmp;
-    status_comparer #(uvm_logic_vector::sequence_item #(STATUS_WIDTH+2)) status_cmp;
+    status_comparer #(STATUS_WIDTH) status_cmp;
 
     // Model instance
     uvm_pipe::model #(DATA_WIDTH) m_pipe_model;
@@ -48,7 +48,7 @@ class scoreboard #(DATA_WIDTH, STATUS_WIDTH, ITEMS, ALMOST_FULL_OFFSET, ALMOST_E
         cmp = uvm_common::comparer_ordered #(uvm_logic_vector::sequence_item #(DATA_WIDTH))::type_id::create("cmp", this);
         cmp.model_tr_timeout_set(200us);
 
-        status_cmp = status_comparer #(uvm_logic_vector::sequence_item #(STATUS_WIDTH+2))::type_id::create("status_cmp", this);
+        status_cmp = status_comparer #(STATUS_WIDTH)::type_id::create("status_cmp", this);
         status_cmp.model_tr_timeout_set(200us);
 
         m_pipe_model = uvm_pipe::model #(DATA_WIDTH)::type_id::create("m_pipe_model", this);

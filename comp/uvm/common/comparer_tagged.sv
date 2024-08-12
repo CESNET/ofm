@@ -299,7 +299,7 @@ virtual class comparer_base_tagged #(type MODEL_ITEM, type DUT_ITEM = MODEL_ITEM
 
         if (data == 1) begin
             for (int unsigned it = 0; it < dut_items.size(); it++) begin
-                msg = {msg, $sformatf("\n\tDUT transaction : %0d", it), dut_items[it].convert2string()};
+                msg = {msg, $sformatf("\n\tDUT transaction : %0d", it), dut_item2string(dut_items[it])};
             end
         end
         return msg;
