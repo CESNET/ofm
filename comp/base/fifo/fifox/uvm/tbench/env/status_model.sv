@@ -43,6 +43,10 @@ class status_model #(STATUS_WIDTH, ITEMS, ALMOST_FULL_OFFSET, ALMOST_EMPTY_OFFSE
 
         forever begin
 
+            wr_and_rd_en_in.get({ wr_en, rd_en });
+            if (wr_en) status++;
+            if (rd_en) status--;
+
             logic_status = status;
             afull  = (status >= ITEMS - ALMOST_FULL_OFFSET) ? 1 : 0;
             aempty = (status <= ALMOST_EMPTY_OFFSET)        ? 1 : 0;
@@ -51,11 +55,6 @@ class status_model #(STATUS_WIDTH, ITEMS, ALMOST_FULL_OFFSET, ALMOST_EMPTY_OFFSE
             tr_out.data = { logic_status, afull, aempty };
             tr_out.start[this.get_full_name()] = $time();
             model_out.write(tr_out);
-
-            wr_and_rd_en_in.get({ wr_en, rd_en });
-            if (wr_en) status++;
-            if (rd_en) status--;
-
         end
 
     endtask
