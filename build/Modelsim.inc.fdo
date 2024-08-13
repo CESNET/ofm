@@ -427,7 +427,24 @@ proc nb_sim_parse_parameters {sim_flags} {
     echo "============================"
 }
 
-proc nb_sim_main {{user_sim_flags SIM_FLAGS}} {
+proc nb_sim_expand_generics {{vsim_flags VSIM_FLAGS} {sim_flags SIM_FLAGS}} {
+    upvar 1 $vsim_flags VSIM_FLAGS
+    upvar 1 $sim_flags SIM_FLAGS
+
+    if {[file exists "./tmp/generics.fdo"]} {
+        source "./tmp/generics.fdo"
+        puts "HARP: Found file with entity parameters settings."
+    } else {
+        return
+    }
+
+    foreach {key value} [array get SIM_GENERICS] {
+        puts "$key=$value"
+        lappend VSIM_FLAGS "-g$SIM_FLAGS(SIM_MODULE)/$key=$value"
+    }
+}
+
+proc nb_sim_main {{user_sim_flags SIM_FLAGS} {sim_generics SIM_GENERICS}} {
     # Let VSIM_FLAGS variable to be accessible in top level stack frame for running vsim by hand
     upvar 1 VSIM_FLAGS VSIM_FLAGS
 
@@ -448,7 +465,10 @@ proc nb_sim_main {{user_sim_flags SIM_FLAGS}} {
 
     nb_vsim_prepare
     nb_vsim_compile_project SIM_FLAGS HIERARCHY
+
     nb_vsim_set_flags VSIM_FLAGS SIM_FLAGS
+    nb_sim_expand_generics VSIM_FLAGS SIM_FLAGS
+
 
     # Run simulation
     if {!$SIM_FLAGS(VSIM_MANUAL_START)} {
