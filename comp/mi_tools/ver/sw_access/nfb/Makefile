@@ -17,7 +17,7 @@ QUOTE="
 
 TARGET = nfb
 SRCS = \
-    src/nfb.c
+	src/nfb.c
 
 
 OBJS = $(SRCS:%.c=%.o)
