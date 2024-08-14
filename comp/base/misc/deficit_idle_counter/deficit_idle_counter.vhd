@@ -40,7 +40,7 @@ port(
     -- =====================================================================
     -- The Clock is only used for internal DIC register.
     -- The inner RX-to-TX logic is purely asynchronous.
-    
+
     CLK   : in  std_logic;
     RESET : in  std_logic;
 
@@ -110,7 +110,7 @@ begin
         if (rising_edge(CLK)) then
 
             dic := dic_reg;
-            
+
             if (TX_PKT_DST_RDY='1' and RX_PKT_SRC_RDY='1') then
                 for i in 0 to PKTS-1 loop
                     if (RX_PKT_VLD(i)='1') then

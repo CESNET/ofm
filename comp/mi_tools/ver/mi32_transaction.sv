@@ -10,7 +10,7 @@
  *
  * TODO:
  *
- */ 
+ */
 
   // --------------------------------------------------------------------------
   // -- Mi32 Transaction Class
@@ -19,12 +19,12 @@
    * generation.
    */
   class Mi32Transaction extends Transaction;
-      
+
      // -- Public Class Atributes --
      // Randomization parameters
      logic [31:0] maxAddress = '1;
      logic [31:0] minAddress = '0;
-   
+
      // Randomized transaction parameters
      rand logic [31:0]  address;
      rand logic [31:0]  data;
@@ -39,7 +39,7 @@
 
 
     // -- Public Class Methods --
-  
+
     /*
      * Displays the current value of the transaction or data described by this
      * instance in a human-readable format on the standard output. Each line of
@@ -53,23 +53,23 @@
          $write("-- %s\n",prefix);
          $write("---------------------------------------------------------\n");
        end
-       
+
        if (rw == 0) // read request
          $write("Read from address: %08x data: %08x BE: %0x\n", address, data, be);
        else // write request
          $write("Write to address: %08x data: %08x BE: %0x\n", address, data, be);
 
     endfunction : display
- 
 
-  
-     //-- Copy ----------------------------------------------------------------- 
+
+
+     //-- Copy -----------------------------------------------------------------
      // Copy constructor
      virtual function Transaction copy(Transaction to = null);
        Mi32Transaction tr;
        if (to == null)
          tr = new();
-       else 
+       else
          $cast(tr, to);
 
        tr.maxAddress    = maxAddress;
@@ -80,19 +80,19 @@
 
        copy = tr;
        endfunction: copy
-       
- 	   
+
+
      // -- Compare --------------------------------------------------------------
      /* Compares the current value of the object instance with the current value
       * of the specified object instance, according to the specified kind.
       * Returns TRUE (i.e., non-zero) if the value is identical. If the value is
-      * different, FALSE is returned and a descriptive text of the first 
-      * difference found is returned in the specified stringvariable. The kind 
-      * argument may be used to implement different comparison functions (e.g., 
-      * full compare, comparison of rand properties only, comparison of all 
+      * different, FALSE is returned and a descriptive text of the first
+      * difference found is returned in the specified stringvariable. The kind
+      * argument may be used to implement different comparison functions (e.g.,
+      * full compare, comparison of rand properties only, comparison of all
       * properties physically implemented in a protocol and so on.)
-      */      
-     virtual function bit compare(input Transaction to, 
+      */
+     virtual function bit compare(input Transaction to,
                                   output string diff, input int kind = -1);
        bit same = 1; // Suppose that are same
        logic [31:0] wideBe;
@@ -100,8 +100,8 @@
 
        if (! $cast(tr, to))
           $display("Cast error\n");
-       
-       if (address != tr.address) 
+
+       if (address != tr.address)
        begin
          same = 0;
          diff = "addresses does not match";
@@ -128,7 +128,7 @@
        end
 
        compare = same;
-     endfunction: compare 
+     endfunction: compare
 
    endclass: Mi32Transaction
 

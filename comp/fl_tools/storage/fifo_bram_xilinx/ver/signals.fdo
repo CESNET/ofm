@@ -18,6 +18,6 @@ proc tx {NAME PATH} {
 }
 
 proc ctrl {NAME PATH} {
-    add wave -divider "$NAME"      
+    add wave -divider "$NAME"
      add_wave "-noupdate  -hex"       $PATH/FRAME_RDY
 }

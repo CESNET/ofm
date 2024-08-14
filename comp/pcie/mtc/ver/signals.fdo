@@ -25,6 +25,6 @@ proc uut_internals { PATH GROUP } {
 }
 
 proc all { PATH GROUP } {
-    add wave -divider $GROUP     
+    add wave -divider $GROUP
     add_wave "$GROUP -noupdate -hex"   $PATH/*
  }

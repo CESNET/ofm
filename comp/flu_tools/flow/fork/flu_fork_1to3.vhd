@@ -1,13 +1,13 @@
 --
 -- flu_fork_1to3.vhd: Three port wrapper for fork component for Frame Link Unaligned
 -- Copyright (C) 2012 CESNET
--- Author: Lukas Kekely <kekely@cesnet.cz> 
+-- Author: Lukas Kekely <kekely@cesnet.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --
 -- $Id$
 --
--- TODO: 
+-- TODO:
 --
 --
 library IEEE;
@@ -38,7 +38,7 @@ entity FLU_FORK_1TO3 is
       RX_SOP        : in std_logic;
       RX_EOP        : in std_logic;
       RX_SRC_RDY    : in std_logic;
-      RX_DST_RDY    : out std_logic; 
+      RX_DST_RDY    : out std_logic;
 
       -- Frame Link Unaligned output interfaces
       -- Interface 0
@@ -58,7 +58,7 @@ entity FLU_FORK_1TO3 is
       TX1_EOP        : out std_logic;
       TX1_SRC_RDY    : out std_logic;
       TX1_DST_RDY    : in std_logic;
-      
+
       -- Interface 2
       TX2_DATA       : out std_logic_vector(DATA_WIDTH-1 downto 0);
       TX2_SOP_POS    : out std_logic_vector(SOP_POS_WIDTH-1 downto 0);
@@ -118,9 +118,9 @@ begin
       TX_SRC_RDY(2)    => TX2_SRC_RDY,
       TX_DST_RDY(0)    => TX0_DST_RDY,
       TX_DST_RDY(1)    => TX1_DST_RDY,
-      TX_DST_RDY(2)    => TX2_DST_RDY    
+      TX_DST_RDY(2)    => TX2_DST_RDY
      );
-     
+
      -- Interface 0
      TX0_DATA    <= data((0+1)*DATA_WIDTH-1 downto 0*DATA_WIDTH);
      TX0_SOP_POS <= sop_pos((0+1)*SOP_POS_WIDTH-1 downto 0*SOP_POS_WIDTH);
@@ -133,5 +133,5 @@ begin
      TX2_DATA    <= data((2+1)*DATA_WIDTH-1 downto 2*DATA_WIDTH);
      TX2_SOP_POS <= sop_pos((2+1)*SOP_POS_WIDTH-1 downto 2*SOP_POS_WIDTH);
      TX2_EOP_POS <= eop_pos((2+1)*EOP_POS_WIDTH-1 downto 2*EOP_POS_WIDTH);
-     
+
 end architecture FLU_FORK_1TO3_ARCH;

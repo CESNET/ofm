@@ -40,7 +40,7 @@ generic(
     -- 2) Output buffer
     -- Set True when RX_CLK has the same period as TX_CLK.
     OBUF_META_EQ_OUTPUT   : boolean := false;
-    -- Set True when not using CLK2 or CLK_ARB and 
+    -- Set True when not using CLK2 or CLK_ARB and
     -- RX_CLK has the same period as TX_CLK.
     OBUF_INPUT_EQ_OUTPUT  : boolean := false;
 
@@ -121,7 +121,7 @@ port(
     RX_MFB_DST_RDY : out std_logic;
 
     -- =====================================================================
-    --  TX MFB STREAM 
+    --  TX MFB STREAM
     -- =====================================================================
 
     TX_MFB_DATA    : out std_logic_vector(MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH-1 downto 0);
@@ -188,7 +188,7 @@ architecture FULL of CROSSBARX_STREAM is
     --  Packet length calculation
     -- =====================================================================
     constant FR_LEN_META_WIDTH : natural := MFB_META_WIDTH + 1;
-    
+
     signal rx_mfb_meta_arr     : slv_array_t     (MFB_REGIONS-1 downto 0)(MFB_META_WIDTH-1 downto 0);
     signal rx_mfb_discard_vld  : std_logic_vector(MFB_REGIONS-1 downto 0);
 
@@ -301,7 +301,7 @@ architecture FULL of CROSSBARX_STREAM is
     --  RX Buffer
     -- =====================================================================
     constant RX_BUF_COMMON_CLK : boolean := not (CX_USE_CLK2 or CX_USE_CLK_ARB);
-    
+
     signal rx_buf_wr_addr      : slv_array_t     (BUF_ROWS-1 downto 0)(log2(RX_BUF_WORDS)-1 downto 0);
     signal rx_buf_wr_data      : slv_array_t     (BUF_ROWS-1 downto 0)(ROW_WIDTH-1 downto 0);
     signal rx_buf_wr_en        : std_logic_vector(BUF_ROWS-1 downto 0);
@@ -992,7 +992,7 @@ begin
     crox_dst_rdy_g : for i in 0 to MFB_REGIONS-1 generate
         crox_comp_dst_rdy(0)(i) <= dst_rdy1_asfifox and dst_rdy0_remapped(i);
     end generate;
-    
+
     -- =====================================================================
     -- ASFIFOX - because CX and RX_HDR interface of Output buffer run on on different clocks
     -- =====================================================================
@@ -1069,7 +1069,7 @@ begin
     --         for i in BUF_ROWS-1 downto 0 loop
     --             if (tx_buf_wr_en(i) = '1') then
     --                 report "Write data to " & to_string(i) & " Buf row of Output buffer: " &
-    --                        to_hstring(unsigned(tx_buf_wr_data(i))) & 
+    --                        to_hstring(unsigned(tx_buf_wr_data(i))) &
     --                        " with item enable: " &
     --                        to_hstring(unsigned(tx_buf_wr_ie(i)))
     --                 severity note;

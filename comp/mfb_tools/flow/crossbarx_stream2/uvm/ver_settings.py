@@ -31,7 +31,7 @@ SETTINGS = {
         "MOD_W"             : "7",
     },
 
-    "_combinations_" : (  
+    "_combinations_" : (
     (), # Works the same as '("default",),' as the "default" is applied in every combination
     ("region_comb_1",),
     ("region_comb_2",),

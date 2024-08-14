@@ -13,12 +13,12 @@ set PACKAGES   "$PACKAGES  $MATH_PKG/math_pack.vhd"
 
 set MOD "$MOD $ENTITY_BASE/flu_qdr_ent.vhd"
 
-  
+
 # Setup architecture
 set MOD "$MOD $ENTITY_BASE/flu_qdr_arch.vhd"
 
 # Components
 set COMPONENTS [list \
       [list "FLU_ADAPTER" $OFM_PATH/comp/flu_tools/qdr/flu_adapter "FULL"] \
-      [list "QDR_BRAM" $OFM_PATH/comp/flu_tools/qdr/flu_adapter/comp/qdr_bram "FULL"] 
+      [list "QDR_BRAM" $OFM_PATH/comp/flu_tools/qdr/flu_adapter/comp/qdr_bram "FULL"]
 ]

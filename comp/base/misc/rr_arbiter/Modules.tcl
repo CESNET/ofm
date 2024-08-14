@@ -10,8 +10,8 @@
 
 if { $ARCHGRP == "FULL" } {
   set COMMON_BASE    "$ENTITY_BASE/../"
-   
+
   set MOD "$MOD $ENTITY_BASE/rr_arbiter_unit.vhd"
   set MOD "$MOD $ENTITY_BASE/rr_arbiter.vhd"
-  
+
 }

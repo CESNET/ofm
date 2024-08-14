@@ -14,7 +14,7 @@ use work.type_pack.all;
 -- TODO: If the sequence where 16 384 B and 64 B packets arrive, it is possible
 -- to generate packets of size greater than MTU.
 
--- Note: 4 region of this component is not able to send packet by packet 
+-- Note: 4 region of this component is not able to send packet by packet
 -- For simplicity, the lowest resolution is MFB word
 entity FP_DATA_SEL is
     generic(
@@ -32,7 +32,7 @@ entity FP_DATA_SEL is
         -- Data from temporary register and pre-register
         RX_TMP_REG_DATA : in  std_logic_vector(MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH-1 downto 0);
         RX_CURRENT_DATA : in  std_logic_vector(MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH-1 downto 0);
-        -- Points to the free block cell 
+        -- Points to the free block cell
         RX_TMP_PTR      : in  unsigned(max(1,log2(MFB_REGIONS*MFB_REGION_SIZE))-1 downto 0);
         -- External timeout indicating that there is a last part of packet in the Temporary register
         RX_SRC_RDY      : in  std_logic;
@@ -91,11 +91,11 @@ begin
         port map(
             DI  => sel_one_hot,
             DO  => sel_out_n
-        );    
+        );
 
     sel_reg_p: process(all)
     begin
-        if rising_edge(CLK) then 
+        if rising_edge(CLK) then
             sel_out <= not sel_out_n;
         end if;
     end process;
@@ -132,7 +132,7 @@ begin
     TX_SOF_POS      <= RX_SOF_POS;
     TX_EOF_POS      <= RX_EOF_POS;
     TX_SRC_RDY      <= RX_SRC_RDY;
-    
+
     -- Length per region - Valid with SOF
     lng_per_region_g: for r in 0 to MFB_REGIONS - 1 generate
         TX_PKT_LNG(r)      <= RX_PKT_LNG(r) when TX_SOF(r) = '1' else (others => '0');

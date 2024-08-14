@@ -2,7 +2,7 @@
 # Copyright (C) 2023 CESNET z. s. p. o.
 # Author(s): Tomas Hak <xhakto01@vut.cz>
 
-# SPDX-License-Identifier: BSD-3-Clause 
+# SPDX-License-Identifier: BSD-3-Clause
 
 # Set paths
 set SV_UVM_BASE "$OFM_PATH/comp/uvm"

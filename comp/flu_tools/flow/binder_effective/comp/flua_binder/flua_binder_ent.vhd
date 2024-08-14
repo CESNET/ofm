@@ -5,7 +5,7 @@
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --
--- TODO: 
+-- TODO:
 --
 --
 
@@ -36,7 +36,7 @@ entity FLUA_BINDER is
       OUT_PIPE_EN          : boolean := false;
       -- Use output register of input pipe
       OUT_PIPE_OUTREG      : boolean := false;
-      
+
       --! Enable/Disable header (which can be assigned to input FLU frame)
       --!   0 - Disable Header function
       --!   1 - Enable Header function
@@ -57,7 +57,7 @@ entity FLUA_BINDER is
    port(
        -- -------------------------------------------------
        -- \name Common interface
-       -- -------------------------------------------------  
+       -- -------------------------------------------------
       RESET          : in  std_logic;
       CLK            : in  std_logic;
 
@@ -65,7 +65,7 @@ entity FLUA_BINDER is
       -- \name Frame Link Unaligned input interface
       -- --------------------------------------------------
       -- RX Lane 0
-      RX_HDR_DATA0  : in std_logic_vector(HDR_WIDTH-1 downto 0);  
+      RX_HDR_DATA0  : in std_logic_vector(HDR_WIDTH-1 downto 0);
       RX_DATA0      : in std_logic_vector(DATA_WIDTH-1 downto 0);
       RX_SOP_POS0   : in std_logic_vector(SOP_POS_WIDTH-1 downto 0);
       RX_EOP_POS0   : in std_logic_vector(log2(DATA_WIDTH/8)-1 downto 0);
@@ -85,7 +85,7 @@ entity FLUA_BINDER is
       RX_SRC_RDY1   : in std_logic;
       RX_DST_RDY1   : out std_logic;
       ID1           : in std_logic_vector(ID_WIDTH-1 downto 0);
-      
+
       -- --------------------------------------------------
       -- \name Frame Link Unaligned output interface
       -- --------------------------------------------------

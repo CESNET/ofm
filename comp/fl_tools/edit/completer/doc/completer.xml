@@ -56,7 +56,7 @@
     <!-- Port description -->
     <port_map>
 
-        <divider>Common signals</divider>        
+        <divider>Common signals</divider>
         <port  name="CLK" dir="in" width="1">
             Global FPGA clock
         </port>
@@ -251,24 +251,24 @@
                 <th>BRAMs (% of C6X BRAMs)</th>
             </tr>
             <tr>
-                <th>128 (bytes)</th> 
-                <th>32 (bits)</th> 
-                <th>32 (bits)</th> 
-                <th>false</th> 
+                <th>128 (bytes)</th>
+                <th>32 (bits)</th>
+                <th>32 (bits)</th>
+                <th>false</th>
                 <td>61 (0 %)</td>
                 <td>2 (0 %)</td>
             </tr>
             <tr>
-                <th>64 (bytes)</th> 
-                <th>16 (bits)</th> 
-                <th>32 (bits)</th> 
-                <th>true</th> 
+                <th>64 (bytes)</th>
+                <th>16 (bits)</th>
+                <th>32 (bits)</th>
+                <th>true</th>
                 <td>26 (0 %)</td>
                 <td>1 (0 %)</td>
             </tr>
         <nazev>Chip utilization</nazev>
-        </tab> 
-    
+        </tab>
+
         <tab sloupce="ccccc">
             <tr>
                 <th>DATA_SIZE</th>
@@ -278,22 +278,22 @@
                 <th>Max.frequency by XST</th>
             </tr>
             <tr>
-                <th>128 (bytes)</th> 
-                <th>32 (bits)</th> 
-                <th>32 (bits)</th> 
-                <th>false</th> 
+                <th>128 (bytes)</th>
+                <th>32 (bits)</th>
+                <th>32 (bits)</th>
+                <th>false</th>
                 <td>203 MHz</td>
             </tr>
             <tr>
-                <th>64 (bytes)</th> 
-                <th>16 (bits)</th> 
-                <th>32 (bits)</th> 
-                <th>true</th> 
+                <th>64 (bytes)</th>
+                <th>16 (bits)</th>
+                <th>32 (bits)</th>
+                <th>true</th>
                 <td>264 MHz</td>
             </tr>
         <nazev>Maximal frequency</nazev>
         </tab>
-    </p> 
+    </p>
 
 </body>
 

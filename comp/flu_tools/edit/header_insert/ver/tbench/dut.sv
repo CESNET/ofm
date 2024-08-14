@@ -1,12 +1,12 @@
 /*
  * DUT.sv: Design under test
  * Copyright (C) 2013 CESNET
- * Author: Lukas Kekely <kekely@cesnet.cz> 
+ * Author: Lukas Kekely <kekely@cesnet.cz>
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
- 
+
 // ----------------------------------------------------------------------------
 //                        Module declaration
 // ----------------------------------------------------------------------------
@@ -23,7 +23,7 @@ module DUT (
 // -------------------- Module body -------------------------------------------
 HINS #(
      .DATA_WIDTH    (DATA_WIDTH),
-     .SOP_POS_WIDTH (SOP_POS_WIDTH), 
+     .SOP_POS_WIDTH (SOP_POS_WIDTH),
      .HDR_WIDTH    (HDR_WIDTH)
    )
 
@@ -40,7 +40,7 @@ HINS #(
      .RX_EOP      (RX.EOP),
      .RX_SRC_RDY  (RX.SRC_RDY),
      .RX_DST_RDY  (RX.DST_RDY),
-     
+
      .HDR_DATA    (HDR.DATA),
      .HDR_READY   (HDR.SRC_RDY),
      .HDR_NEXT    (HDR.DST_RDY),

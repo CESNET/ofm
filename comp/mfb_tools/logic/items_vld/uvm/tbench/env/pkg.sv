@@ -9,7 +9,7 @@
 `define ITEMS_VALID_ENV_SV
 
 package uvm_items_valid;
-    
+
     `include "uvm_macros.svh"
     import uvm_pkg::*;
 

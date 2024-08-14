@@ -37,7 +37,7 @@ class ce_generator_base extends uvm_object;
     virtual function bit get_ce();
         `uvm_fatal(get_name(), "Cannot use base class for clock enable generation!\n")
     endfunction
-    
+
 endclass: ce_generator_base
 
 // Generates CE randomly with maximum difference of total count of log. '1' and log. '0'
@@ -72,7 +72,7 @@ class ce_generator_random #(int unsigned MAX_DELTA) extends uvm_byte_array_mii::
             `uvm_fatal(get_name(), "Clock enable generator failed!\n")
         end
     endfunction
-    
+
 endclass: ce_generator_random
 
 // Generates alternating clock enable
@@ -90,7 +90,7 @@ class ce_generator_alternate extends uvm_byte_array_mii::ce_generator_base;
         this.clock_enable = ~this.clock_enable;
         return this.clock_enable;
     endfunction
-    
+
 endclass: ce_generator_alternate
 
 // Generates CE = '1'
@@ -107,5 +107,5 @@ class ce_generator_one extends uvm_byte_array_mii::ce_generator_base;
     function bit get_ce();
         return this.clock_enable;
     endfunction
-    
+
 endclass: ce_generator_one

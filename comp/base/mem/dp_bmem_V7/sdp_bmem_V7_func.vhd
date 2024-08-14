@@ -15,23 +15,23 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 
 Package SDP_BMEM_V7_PKG is
-   
+
    -- -------------------------------------------
-   -- Function prototypes 
+   -- Function prototypes
    -- -------------------------------------------
    --Next three functions are returning values wich could be found
-   --in Xilinx 7 series libraries guide for HDL designs; sectionb 
+   --in Xilinx 7 series libraries guide for HDL designs; sectionb
    --about BRAM_TDP_MACRO
-  
+
    --Returns portion of data per BRAM
    function GET_SDP_BMEM_DATA_WIDTH_PORTION(BRAM_TYPE:integer;DATA_WIDTH:integer) return integer;
 
    --Returns BRAM address width with respect to selected BRAM type and data width
    function GET_SDP_BMEM_ADDR_WIDTH(BRAM_TYPE:integer;DATA_WIDTH:integer) return integer;
-   
+
    --Returns BRAM write enable width with respect to selected BRAM type and data width
    function GET_SDP_BMEM_WE_WIDTH(BRAM_TYPE:integer;DATA_WIDTH:integer) return integer;
-   
+
    --Returns number of BRAMs which are needed for keeping of one word with
    --respect to selected BRAM type and DATA width
    function GET_SDP_BMEM_ON_WORD(BRAM_TYPE:integer;DATA_WIDTH:integer) return integer;
@@ -112,11 +112,11 @@ Package body SDP_BMEM_V7_PKG is
          return 9;
       end if;
    end GET_SDP_BMEM_ADDR_WIDTH;
-   
+
    --Returns BRAM depth with respect to selected BRAM type and data width
    function GET_SDP_BMEM_WE_WIDTH(BRAM_TYPE:integer;DATA_WIDTH:integer) return integer is
    begin
-      
+
       --Return the BRAM WE width with respect to DATA width and BRAM type
       if(DATA_WIDTH > 0 and DATA_WIDTH <= 9)then
          return 1;
@@ -144,7 +144,7 @@ Package body SDP_BMEM_V7_PKG is
          --Maximal BRAM width is 72
          rest := DATA_WIDTH mod 72;
       end if;
-     
+
       --Get a number of BRAMs, which will be totaly used
       if(BRAM_TYPE = 18)then
          intCount := DATA_WIDTH/36;
@@ -159,10 +159,10 @@ Package body SDP_BMEM_V7_PKG is
       else
          --We have to correct a used number of BRAMS. We need one more BRAM
          --because rest is not null
-         return intCount+1; 
+         return intCount+1;
       end if;
    end GET_SDP_BMEM_ON_WORD;
-   
+
    --Returns a number of BRAM rows
    function GET_SDP_BMEM_ROW_COUNT(BRAM_TYPE:integer;DATA_WIDTH:integer;ADDRESS_WIDTH:integer) return integer is
       variable bmem_addr_width : integer;

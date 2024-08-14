@@ -23,7 +23,7 @@ use work.math_pack.all;
 -- ----------------------------------------------------------------------------
 architecture LB_ROOT_ARCH of LB_ROOT is
 
-     -- IB2ADC Map   
+     -- IB2ADC Map
      signal ib_endpoint_wr_req_addr      : std_logic_vector(log2(LIMIT)-1 downto 0);
      signal ib_endpoint_wr_req_data      : std_logic_vector(63 downto 0);
      signal ib_endpoint_wr_req_be        : std_logic_vector(7 downto 0);
@@ -111,8 +111,8 @@ IB_ENDPOINT_U: entity work.IB_ENDPOINT_CORE
       IB_UP_EOP_N        => INTERNAL_BUS.UP.EOP_N,
       IB_UP_SRC_RDY_N    => INTERNAL_BUS.UP.SRC_RDY_N,
       IB_UP_DST_RDY_N    => INTERNAL_BUS.UP.DST_RDY_N,
-  
-      -- Write Interface   
+
+      -- Write Interface
       WR_ADDR            => ib_endpoint_wr_req_addr,
       WR_DATA            => ib_endpoint_wr_req_data,
       WR_BE              => ib_endpoint_wr_req_be,
@@ -137,12 +137,12 @@ IB_ENDPOINT_U: entity work.IB_ENDPOINT_CORE
       RD_WR_ABORT        => lb_abort,
 
       -- Master Interface Input
-      BM_GLOBAL_ADDR     => X"0000000000000000", 
-      BM_LOCAL_ADDR      => X"00000000", 
-      BM_LENGTH          => X"000", 
+      BM_GLOBAL_ADDR     => X"0000000000000000",
+      BM_LOCAL_ADDR      => X"00000000",
+      BM_LENGTH          => X"000",
       BM_TAG             => X"0000",
       BM_TRANS_TYPE      => "00",
-      BM_REQ             => '0', 
+      BM_REQ             => '0',
       BM_ACK             => open,
 
       -- Master Output interface
@@ -160,8 +160,8 @@ LB_ROOT_BUFFER_U : entity work.LB_ROOT_BUFFER
       -- Common Interface
       CLK                => IB_CLK,
       RESET              => abort_reset,
-            
-      -- Write Interface   
+
+      -- Write Interface
       ADDR_WR            => ib_endpoint_wr_req_addr,
       DWR                => ib_endpoint_wr_req_data,
       BE_WR              => ib_endpoint_wr_req_be,
@@ -206,7 +206,7 @@ LB_ROOT_CORE_U : entity work.LB_ROOT_CORE
       -- Common Interface
       CLK             => IB_CLK,
       RESET           => reset_pipe,
-      -- Buffer Interface   
+      -- Buffer Interface
       BUFFER_ADDR     => core_addr,
       BUFFER_SOF      => core_sof,
       BUFFER_EOF      => core_eof,
@@ -244,5 +244,5 @@ lb_drd             <= LOCAL_BUS.DRD;
 lb_rdy             <= not LOCAL_BUS.RDY_N;
 lb_err             <= not LOCAL_BUS.ERR_N;
 LOCAL_BUS.ABORT_N  <= not lb_abort;
-  
+
 end architecture LB_ROOT_ARCH;

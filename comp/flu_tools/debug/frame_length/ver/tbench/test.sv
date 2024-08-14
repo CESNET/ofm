@@ -32,7 +32,7 @@ program TEST (
   WordLinkMonitor #(16)    fluMonitor;
   WordLinkResponder #(16)  fluResponder;
   Scoreboard                            scoreboard;
-  
+
   // --------------------------------------------------------------------------
   // Create Test Environment
   task createGeneratorEnvironment(int packet_size_max = GENERATOR_FLU_PACKET_SIZE_MAX, int packet_size_min = GENERATOR_FLU_PACKET_SIZE_MIN);
@@ -41,9 +41,9 @@ program TEST (
      fluBlueprint.packetSizeMax = packet_size_max;
      fluBlueprint.packetSizeMin = packet_size_min;
      generator.blueprint        = fluBlueprint;
-  endtask: createGeneratorEnvironment    
+  endtask: createGeneratorEnvironment
 
-  task createEnvironment();    
+  task createEnvironment();
     fluDriver  = new ("Driver", generator.transMbx, RX);
      fluDriver.insideTxDelayEn_wt       = DRIVER_INSIDE_DELAYEN_WT;
      fluDriver.insideTxDelayDisable_wt  = DRIVER_INSIDE_DELAYDIS_WT;

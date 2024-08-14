@@ -37,7 +37,7 @@ SETTINGS = {
     "four_slices" : {
         "LUT_WIDTH"        : "128",
     },
-    "_combinations_" : (  
+    "_combinations_" : (
     (), # Works the same as '("default",),' as the "default" is applied in every combination
 
     ("reg_variant",),

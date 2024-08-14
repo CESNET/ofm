@@ -29,7 +29,7 @@ entity LB_ENDPOINT_100 is
    port(
       -- Common Interface
       RESET         : in std_logic;
-      
+
       -- Local Bus Interface
       LB_CLK        : in std_logic;
       LB_DWR        : in std_logic_vector(15 downto 0);
@@ -51,7 +51,7 @@ entity LB_ENDPOINT_100 is
       MI32_BE       : out std_logic_vector(3  downto 0);           -- Byte Enable
       MI32_DRD      : in  std_logic_vector(31 downto 0);           -- Output Data
       MI32_ARDY     : in  std_logic;                               -- Address Ready
-      MI32_DRDY     : in  std_logic                                -- Data Ready   
+      MI32_DRDY     : in  std_logic                                -- Data Ready
   );
 end entity LB_ENDPOINT_100;
 -- ----------------------------------------------------------------------------
@@ -71,7 +71,7 @@ architecture LB_ENDPOINT_100_ARCH of LB_ENDPOINT_100 is
     signal addr_cnt            : std_logic_vector(31 downto 0);
     signal addr_cnt_en         : std_logic;
     signal addr_match_reg      : std_logic;
-    
+
     -- User component signals generation
     signal wr_reg              : std_logic;
     signal in_cnt              : std_logic;
@@ -82,7 +82,7 @@ architecture LB_ENDPOINT_100_ARCH of LB_ENDPOINT_100 is
     signal drd_high_reg        : std_logic_vector(15 downto 0);
     signal drdy_pipe           : std_logic;
     signal ardy_pipe           : std_logic;
-    
+
     -- Buffer signals
     signal shr_dwr             : std_logic_vector(15 downto 0);
     signal shr_be              : std_logic_vector(1 downto 0);
@@ -97,13 +97,13 @@ architecture LB_ENDPOINT_100_ARCH of LB_ENDPOINT_100 is
 begin
 -- ----------------------------------------------------------------------------
 -- RESET GENERATION
--- ----------------------------------------------------------------------------   
--- LB2ADC RESET generation   
+-- ----------------------------------------------------------------------------
+-- LB2ADC RESET generation
 lb_endpoint_reset <= RESET or not LB_ABORT_N;
 
 -- ----------------------------------------------------------------------------
 -- ARDY GENERATION (solve problem when ardy is always '1')
--- ----------------------------------------------------------------------------   
+-- ----------------------------------------------------------------------------
 mi32_ardy_aux <= MI32_ARDY and (mi32_rd_out or mi32_wr_out);
 
 
@@ -222,7 +222,7 @@ end process;
 
 -- ----------------------------------------------------------------------------
 -- ENDPOINT WITH NO WRITE BUFFER
--- ----------------------------------------------------------------------------   
+-- ----------------------------------------------------------------------------
 BUFFER_NOT_EN_GEN : if (not BUFFER_EN) generate
 
 -- register wr_reg ------------------------------------------------------------
@@ -306,7 +306,7 @@ LB_ENDPOINT_BUFFER_U : entity work.LB_ENDPOINT_BUFFER
       BE_IN         => LB_BE,
       WR_IN         => LB_WR_N,
       RD_IN         => LB_RD_N,
-    
+
       --Output Interface
       DATA_OUT      => shr_dwr,
       BE_OUT        => shr_be,

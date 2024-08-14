@@ -41,12 +41,12 @@ architecture full of FL_DEC_FSM is
 
    -- ------------------ Types declaration ------------------------------------
    type t_state is ( S_HEADER, S_PAYLOAD, S_FOOTER );
-   
+
    -- ------------------ Signals declaration ----------------------------------
    signal present_state, next_state : t_state;
 
 begin
-   
+
    -- --------------- Sync logic -------------------------------------------
    sync_logic  : process( RESET, CLK)
    begin
@@ -73,7 +73,7 @@ begin
          else
             next_state <= S_HEADER;
          end if;
-      
+
       -- ---------------------------------------------
       when S_PAYLOAD =>
          if (EOF = '1') then
@@ -110,13 +110,13 @@ begin
    -- ------------------ Output logic -----------------------------------------
    output_logic: process( present_state )
    begin
-   
+
       -- ---------------------------------------------
       -- Initial values
       PART           <= "00";
 
       case (present_state) is
-      
+
       -- ---------------------------------------------
       when S_HEADER =>
          PART        <= "00";

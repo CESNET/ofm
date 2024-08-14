@@ -57,13 +57,13 @@ class scoreboard #(ITEM_WIDTH) extends uvm_scoreboard;
 
         // Processed data from the output of the DUT connected to the analysis fifo
         analysis_imp_mvb_tx.connect(cmp.analysis_imp_dut);
-        
+
     endfunction
 
     function void report_phase(uvm_phase phase);
         string msg = "\n";
 
-        if (this.success() && this.used() == 0) begin 
+        if (this.success() && this.used() == 0) begin
             `uvm_info(get_type_name(), {msg, "\n\n\t---------------------------------------\n\t----     VERIFICATION SUCCESS      ----\n\t---------------------------------------"}, UVM_NONE)
         end else begin
             `uvm_info(get_type_name(), {msg, "\n\n\t---------------------------------------\n\t----     VERIFICATION FAILED       ----\n\t---------------------------------------"}, UVM_NONE)

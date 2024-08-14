@@ -99,5 +99,5 @@ class driver_tx #(int unsigned UPDATE_CNT_WIDTH) extends uvm_driver #(sequence_i
             end
         end
     endtask
-    
+
 endclass

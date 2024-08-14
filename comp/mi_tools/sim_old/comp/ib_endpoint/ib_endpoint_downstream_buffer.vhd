@@ -89,7 +89,7 @@ FIFO_BRAM_U : entity work.FIFO_BRAM
       RESET          => IB_RESET,
 
       -- Write interface
-      WR             => fifo_wr, 
+      WR             => fifo_wr,
       DI             => fifo_data_in,
       FULL           => open,
       LSTBLK         => fifo_lstblk,

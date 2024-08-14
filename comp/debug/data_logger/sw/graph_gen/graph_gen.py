@@ -20,7 +20,7 @@ class GraphGen:
             for file in os.listdir(self.folder):
                 for e in self.output:
                     if file.endswith(e):
-                        os.remove(self.folder + file) 
+                        os.remove(self.folder + file)
 
     def init_plots(self, rows=1, cols=1, title=None, **kwargs):
         self.fig, self.ax = plt.subplots(rows, cols, figsize=self.ratio, **kwargs)
@@ -73,10 +73,10 @@ class GraphGen:
         if min is not None:
             data[data <= min] = np.nan
 
-        im = ax.imshow(data, 
-            extent=limits, 
-            aspect='auto', 
-            norm=log, 
+        im = ax.imshow(data,
+            extent=limits,
+            aspect='auto',
+            norm=log,
             cmap=cmap,
             origin='lower',
             interpolation=ip,
@@ -94,7 +94,7 @@ class GraphGen:
 
     def plt(self):
         return plt
-    
+
     def axis(self, index=None):
         return self.indexToAx(index)
 

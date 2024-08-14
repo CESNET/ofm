@@ -50,21 +50,21 @@ entity SDP_BRAM_INTEL is
         -- Block enable of written data, used only when BLOCK_ENABLE = True.
         WR_BE       : in  std_logic_vector(max((DATA_WIDTH/BLOCK_WIDTH),1)-1 downto 0);
         -- Write address.
-        WR_ADDR     : in  std_logic_vector(log2(ITEMS)-1 downto 0); 
+        WR_ADDR     : in  std_logic_vector(log2(ITEMS)-1 downto 0);
         -- Write data input.
         WR_DATA     : in  std_logic_vector(DATA_WIDTH-1 downto 0);
 
         -- =====================================================================
         -- READ PORT
         -- =====================================================================
-        -- Clock signal for read port when parameter COMMON_CLOCK = False. 
+        -- Clock signal for read port when parameter COMMON_CLOCK = False.
         -- Unused when COMMON_CLOCK = True.
         RD_CLK      : in  std_logic;
         -- Reset signal synchronous with RD_CLK. Used only when parameter
         -- COMMON_CLOCK = False for resetting valid bit of read data.
         RD_RST      : in  std_logic;
         -- Clock enable of read port.
-        RD_PIPE_EN  : in  std_logic; 
+        RD_PIPE_EN  : in  std_logic;
         -- Read address.
         RD_ADDR     : in  std_logic_vector(log2(ITEMS)-1 downto 0);
         -- Read data output.

@@ -1,7 +1,7 @@
 /*
  * file       : rand_length.sv
  * Copyright (C) 2021 CESNET z. s. p. o.
- * description: length randomization 
+ * description: length randomization
  * date       : 2021
  * author     : Radek Iša <isa@cesnet.cz>
  *

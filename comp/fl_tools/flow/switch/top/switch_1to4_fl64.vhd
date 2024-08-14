@@ -23,7 +23,7 @@ entity switch_1to4_fl64 is
       IFC_BYTE_OFFSET : integer;
       -- Switch information nibble offset: 0 - low; 1 - high
       IFC_NIBBLE_OFFSET : integer
-   ); 
+   );
    port(
 
       CLK            : in std_logic;
@@ -31,7 +31,7 @@ entity switch_1to4_fl64 is
 
       -- input interface
       RX             : inout t_fl64;
-      
+
       -- output interfaces
       TX0            : inout t_fl64;
       TX1            : inout t_fl64;
@@ -66,7 +66,7 @@ begin
       RX_DST_RDY_N   => RX.DST_RDY_N,
       RX_DATA        => RX.DATA,
       RX_REM         => RX.DREM,
-      
+
       -- output interfaces
       TX0_SOF_N      => TX0.SOF_N,
       TX0_SOP_N      => TX0.SOP_N,
@@ -76,7 +76,7 @@ begin
       TX0_DST_RDY_N  => TX0.DST_RDY_N,
       TX0_DATA       => TX0.DATA,
       TX0_REM        => TX0.DREM,
-      
+
       TX1_SOF_N      => TX1.SOF_N,
       TX1_SOP_N      => TX1.SOP_N,
       TX1_EOP_N      => TX1.EOP_N,
@@ -85,7 +85,7 @@ begin
       TX1_DST_RDY_N  => TX1.DST_RDY_N,
       TX1_DATA       => TX1.DATA,
       TX1_REM        => TX1.DREM,
-      
+
       TX2_SOF_N      => TX2.SOF_N,
       TX2_SOP_N      => TX2.SOP_N,
       TX2_EOP_N      => TX2.EOP_N,
@@ -94,7 +94,7 @@ begin
       TX2_DST_RDY_N  => TX2.DST_RDY_N,
       TX2_DATA       => TX2.DATA,
       TX2_REM        => TX2.DREM,
-      
+
       TX3_SOF_N      => TX3.SOF_N,
       TX3_SOP_N      => TX3.SOP_N,
       TX3_EOP_N      => TX3.EOP_N,
@@ -103,7 +103,7 @@ begin
       TX3_DST_RDY_N  => TX3.DST_RDY_N,
       TX3_DATA       => TX3.DATA,
       TX3_REM        => TX3.DREM
-   ); 
+   );
 
-end architecture full; 
+end architecture full;
 

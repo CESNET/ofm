@@ -1,11 +1,11 @@
-//-- property.sv: Properties for mfb bus 
+//-- property.sv: Properties for mfb bus
 //-- Copyright (C) 2021 CESNET z. s. p. o.
 //-- Author(s): Radek Iša <isa@cesnet.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 
-module mac_tx_property #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) 
+module mac_tx_property #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)
     (
         input RESET,
         mfb_if mfb_vif

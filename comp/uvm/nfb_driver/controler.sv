@@ -21,7 +21,7 @@ class controler extends uvm_sequence;
     protected int  unsigned port;
     protected string        dev_name;
     protected byte unsigned dtb[];
-    protected bit           stop; 
+    protected bit           stop;
 
     function new (string name = "controler");
         super.new(name);
@@ -52,7 +52,7 @@ class controler extends uvm_sequence;
 
     task serve(time wait_time = 100ns);
         int unsigned cmd;
-        chandle      cmd_ptr; 
+        chandle      cmd_ptr;
 
         if (mq_id == null) begin
             `uvm_fatal("nfb_driver", "\n\tBefore you call server function you have to create grpc server");

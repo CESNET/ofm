@@ -5,7 +5,7 @@
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --
--- TODO: 
+-- TODO:
 --
 --
 
@@ -29,7 +29,7 @@ entity FLUA_BINDER_FSM is
    port(
        -- -------------------------------------------------
        -- \name Common interface
-       -- -------------------------------------------------  
+       -- -------------------------------------------------
       RESET          : in  std_logic;
       CLK            : in  std_logic;
 
@@ -48,7 +48,7 @@ entity FLUA_BINDER_FSM is
       --! EOP* signals from Lane 0
       EOP0           : in std_logic;
       EOP_POS_BLK0   : in std_logic_vector(SOP_POS_WIDTH-1 downto 0);
-      
+
       --! EOP* Signals from Lane 1
       EOP1           : in std_logic;
       EOP_POS_BLK1   : in std_logic_vector(SOP_POS_WIDTH-1 downto 0);
@@ -164,7 +164,7 @@ begin
                -- Lane 1 is ready and we are not transfering short packet
                next_state <= WORD_TRANS;
             end if;
-        
+
          when WORD_TRANS =>
             if(reg_active_lane = '0')then
                -- Active transfered line is 0
@@ -199,7 +199,7 @@ begin
 
       --! Destinations are ready by default
       DST_RDY0    <= '1';
-      DST_RDY1    <= '1'; 
+      DST_RDY1    <= '1';
 
       --! Default control values
       active_lane_en <= '0';
@@ -235,9 +235,9 @@ begin
                --Send the short packet on lane 0
                DST_RDY0 <= DST_RDY;
                ACT_LANE0 <= '1';
-               
+
                if(lane1_data_ready = '1')then
-                  --Switch the lane, because we have new 
+                  --Switch the lane, because we have new
                   --available data
                   active_lane_en <= '1';
                   active_lane <= '1';
@@ -252,9 +252,9 @@ begin
                -- second line, switch
                DST_RDY1 <= DST_RDY;
                ACT_LANE1 <= '1';
-               
+
                if(lane0_data_ready = '1')then
-                  --Switch the lane, because we have new 
+                  --Switch the lane, because we have new
                   --available data
                   active_lane_en <= '1';
                   active_lane <= '0';
@@ -295,7 +295,7 @@ begin
             -- In this state, we can mix two chanels together or continue in sending of the
             -- frame.
             if(reg_active_lane = '0')then
-               -- Copy destination ready signal 
+               -- Copy destination ready signal
                DST_RDY0 <= DST_RDY;
                -- Activate output lane 0
                ACT_LANE0 <= '1';
@@ -342,11 +342,11 @@ begin
                end if;
 
             else
-               -- Copy destination ready signal 
+               -- Copy destination ready signal
                DST_RDY1 <= DST_RDY;
                -- Activate output lane 0
                ACT_LANE1 <= '1';
-               
+
                if(lane1_short_packet = '1')then
                   -- We want to transfer a short packet on lane 0
                   if(lane0_data_ready = '1')then
@@ -388,7 +388,7 @@ begin
                   end if;
                end if;
             end if;
-         
+
          when others => null;
       end case;
    end process;

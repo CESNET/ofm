@@ -66,7 +66,7 @@ use work.math_pack.all;
 --   - Generator address offsets -> see entity of subcomponent MFB_GENERATOR_MI32
 --
 -- .. warning::
--- 
+--
 --   Only switch mux selection registers when there is no data on the input!
 --
 entity GEN_LOOP_SWITCH is
@@ -565,7 +565,7 @@ not_fake_switch_gen : if (not FAKE_SWITCH) generate
         ADDR_WIDTH => 32,
         DATA_WIDTH => 32,
         PORTS      => MI_SPLIT_PORTS,
-        --            TX player, RX player, TX gen, RX gen, speed meter, local MUXes 
+        --            TX player, RX player, TX gen, RX gen, speed meter, local MUXes
         ADDR_BASE  => MI_SPLIT_ADDR_BASE,
         PIPE_OUT   => (MI_SPLIT_PORTS-1 downto 0 => MI_PIPE_EN),
         DEVICE     => DEVICE

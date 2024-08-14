@@ -327,7 +327,7 @@ begin
     reg1_lr_first_one_pr : process (CLK)
     begin
         if (rising_edge(CLK)) then
-            
+
             reg1_lr_uinstr_vld <= (others => '0');
             reg1_lr_first_oneI <= (others => 0);
             for i in 0 to BUF_B_ROWS-1 loop

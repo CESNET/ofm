@@ -1,13 +1,13 @@
 --
 -- binder_plus_ent.vhd: Binder 2-1 component for Frame Link Unaligned Plus
 -- Copyright (C) 2014 CESNET
--- Author: Lukas Kekely <kekely@cesnet.cz> 
+-- Author: Lukas Kekely <kekely@cesnet.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --
 -- $Id$
 --
--- TODO: 
+-- TODO:
 --
 --
 library IEEE;
@@ -41,7 +41,7 @@ entity FLU_PLUS_BINDER_2TO1 is
       RX0_EOP       : in std_logic;
       RX0_SRC_RDY   : in std_logic;
       RX0_DST_RDY   : out std_logic;
-      
+
       -- Frame Link Unaligned input interface
       RX1_DATA      : in std_logic_vector(DATA_WIDTH-1 downto 0);
       RX1_CHANNEL   : in std_logic_vector(CHANNEL_WIDTH-1 downto 0);
@@ -50,7 +50,7 @@ entity FLU_PLUS_BINDER_2TO1 is
       RX1_SOP       : in std_logic;
       RX1_EOP       : in std_logic;
       RX1_SRC_RDY   : in std_logic;
-      RX1_DST_RDY   : out std_logic;  
+      RX1_DST_RDY   : out std_logic;
 
       -- Frame Link Unaligned concentrated interface
       TX_DATA       : out std_logic_vector(DATA_WIDTH-1 downto 0);
@@ -60,7 +60,7 @@ entity FLU_PLUS_BINDER_2TO1 is
       TX_SOP        : out std_logic;
       TX_EOP        : out std_logic;
       TX_SRC_RDY    : out std_logic;
-      TX_DST_RDY    : in std_logic 
+      TX_DST_RDY    : in std_logic
    );
 end entity;
 
@@ -77,8 +77,8 @@ architecture ARCH of FLU_PLUS_BINDER_2TO1 is
    signal sop     : std_logic_vector(INPUT_PORTS-1 downto 0);
    signal eop     : std_logic_vector(INPUT_PORTS-1 downto 0);
    signal src_rdy : std_logic_vector(INPUT_PORTS-1 downto 0);
-   signal dst_rdy : std_logic_vector(INPUT_PORTS-1 downto 0); 
-   
+   signal dst_rdy : std_logic_vector(INPUT_PORTS-1 downto 0);
+
 begin
   flu_binder: entity work.FLU_PLUS_BINDER
   generic map(
@@ -110,9 +110,9 @@ begin
       TX_SOP        => TX_SOP,
       TX_EOP        => TX_EOP,
       TX_SRC_RDY    => TX_SRC_RDY,
-      TX_DST_RDY    => TX_DST_RDY  
+      TX_DST_RDY    => TX_DST_RDY
    );
-   
+
    data        <= RX1_DATA    & RX0_DATA;
    channel     <= RX1_CHANNEL & RX0_CHANNEL;
    sop_pos     <= RX1_SOP_POS & RX0_SOP_POS;
@@ -120,7 +120,7 @@ begin
    sop         <= RX1_SOP     & RX0_SOP;
    eop         <= RX1_EOP     & RX0_EOP;
    src_rdy     <= RX1_SRC_RDY & RX0_SRC_RDY;
-   RX1_DST_RDY <= dst_rdy(1); 
+   RX1_DST_RDY <= dst_rdy(1);
    RX0_DST_RDY <= dst_rdy(0);
 
 end architecture;

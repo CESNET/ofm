@@ -28,7 +28,7 @@ entity TOP_VER is
     MI_ARDY        : out std_logic;
     MI_DRDY        : out std_logic
   );
-end entity; 
+end entity;
 
 
 

@@ -90,7 +90,7 @@ entity IB_ENDPOINT_UPSTREAM_FSM_MASTER is
    );
 end entity IB_ENDPOINT_UPSTREAM_FSM_MASTER;
 
-  
+
 -- ----------------------------------------------------------------------------
 --                      Architecture declaration
 -- ----------------------------------------------------------------------------
@@ -124,7 +124,7 @@ IB_ENDPOINT_UPSTREAM_PRIORITY_DEC_U : entity work.IB_ENDPOINT_UPSTREAM_PRIORITY_
       OUT_RD_RQ             => out_rd_req,
       OUT_BM_RQ             => out_bm_req,
       OUT_RD_ACK            => out_rd_ack,
-      OUT_BM_ACK            => out_bm_ack 
+      OUT_BM_ACK            => out_bm_ack
       );
 
 
@@ -143,7 +143,7 @@ clk_d: process(CLK, RESET)
 state_trans: process(present_state, out_rd_req, out_bm_req, BM_TRANS_TYPE, DST_RDY, RD_EOF, RD_SRC_RDY)
   begin
     case present_state is
-      
+
 
       -- ST_IDLE
       when st_idle =>
@@ -191,7 +191,7 @@ state_trans: process(present_state, out_rd_req, out_bm_req, BM_TRANS_TYPE, DST_R
          else
             next_state <= st_bm_hdr;
          end if;
-         
+
       -- ST_DATA_SLAVE
       when st_data_slave =>
          -- When Last data readed
@@ -229,11 +229,11 @@ output_logic: process(present_state, out_rd_req, out_bm_req, BM_TRANS_TYPE, DST_
    BM_READ_ACK        <= '0';
 
    case present_state is
-      
+
       -- ST_IDLE
       when st_idle =>
          RD_DST_RDY <= '0';
-      
+
          if (out_rd_req = '1') then -- Slave read completition
             out_rd_ack        <= '1'; -- Ack for read fsm
          elsif (out_bm_req = '1' and BM_TRANS_TYPE(0) = '1') then -- Master L2GW, L2LW

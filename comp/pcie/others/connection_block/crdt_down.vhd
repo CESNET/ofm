@@ -49,7 +49,7 @@ architecture FULL of CB_RTILE_CRDT_DOWN is
     -- Counter decrement should be faster than increment.
     constant CRDT_PH_CNT_W : natural := 10;
     constant CRDT_PD_CNT_W : natural := 14;
-    
+
     signal tlp_code         : slv_array_t(REGIONS-1 downto 0)(6-1 downto 0);
     signal crdt_pd_inc      : u_array_t(REGIONS-1 downto 0)(8-1 downto 0);
     signal crdt_status      : slv_array_t(REGIONS-1 downto 0)(6-1 downto 0);
@@ -134,7 +134,7 @@ begin
 
             process(CLK)
             begin
-                if (rising_edge(CLK)) then 
+                if (rising_edge(CLK)) then
                     crdt_ph_cnt(i) <= crdt_ph_cnt(i) - crdt_ph_cnt_dec(i) + crdt_ph_cnt_inc(i);
                     if (RESET = '1') then
                         crdt_ph_cnt(i) <= (others => '0');
@@ -166,7 +166,7 @@ begin
 
             process(CLK)
             begin
-                if (rising_edge(CLK)) then 
+                if (rising_edge(CLK)) then
                     crdt_pd_cnt(i) <= crdt_pd_cnt(i) - crdt_pd_cnt_dec(i) + crdt_pd_cnt_inc(i);
                     if (RESET = '1') then
                         crdt_pd_cnt(i) <= (others => '0');
@@ -197,7 +197,7 @@ begin
         end generate;
 
         dbg_err_cnt_overflow <= or cnt_last_bit;
-        
+
         process(CLK)
         begin
             if (rising_edge(CLK)) then
@@ -210,7 +210,7 @@ begin
             end if;
         end process;
 
-        assert (dbg_err_cnt_overflow_reg /= '1') 
+        assert (dbg_err_cnt_overflow_reg /= '1')
             report "CB_RTILE_CRDT_DOWN: some credit counter overflow!"
             severity failure;
     end generate;

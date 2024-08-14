@@ -71,7 +71,7 @@ SETTINGS = {
     "tx_regions_comb_2" : {
         "TX_REGIONS"         : "4",
     },
-    "_combinations_" : (  
+    "_combinations_" : (
     (), # Works the same as '("default",),' as the "default" is applied in every combination
     ("bus_comb_1",),
     ("bus_comb_2",),

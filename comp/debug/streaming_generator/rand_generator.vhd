@@ -1,5 +1,5 @@
 --! \file:   rand_generator.vhd
---! \brief:  Generated random values 
+--! \brief:  Generated random values
 --! \Author: Mario Kuka <xkukam00@stud.fit.vutbr.cz>
 --! \date 2014
 --!
@@ -16,12 +16,12 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 entity RAND_GENERATOR is
    generic (
-      --! Data width of input/output value 
-      DATA_WIDTH  : integer :=  32 
+      --! Data width of input/output value
+      DATA_WIDTH  : integer :=  32
    );
    port (
       CLK         : in std_logic;
-      RAND_OUT    : out std_logic_vector (DATA_WIDTH-1 downto 0)   --output vector           
+      RAND_OUT    : out std_logic_vector (DATA_WIDTH-1 downto 0)   --output vector
     );
 end RAND_GENERATOR;
 
@@ -31,7 +31,7 @@ begin
       variable rand_temp : std_logic_vector(DATA_WIDTH-1 downto 0):=(DATA_WIDTH-1 => '1',others => '0');
       variable temp      : std_logic := '0';
    begin
-      --! generating random value 
+      --! generating random value
       if (CLK'event) and (CLK='1') then
          temp := rand_temp(DATA_WIDTH-1) xor rand_temp(DATA_WIDTH-2);
          rand_temp(DATA_WIDTH-1 downto 1) := rand_temp(DATA_WIDTH-2 downto 0);

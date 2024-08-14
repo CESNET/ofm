@@ -58,7 +58,7 @@ signal reg_rx_chan     : std_logic_vector(log2(CHANNELS) - 1 downto 0);
 
 begin
 
-   assert CHANNELS > 1 
+   assert CHANNELS > 1
       report "FL_DISCARD: CHANNELS must be > 1!"
       severity ERROR;
 
@@ -76,7 +76,7 @@ begin
 
 
    -- Create number of all BYTES in the target (constant)
-   max_free   <= '1' & zeros(STATUS_WIDTH-2 downto 0) & 
+   max_free   <= '1' & zeros(STATUS_WIDTH-2 downto 0) &
                    zeros(log2(DATA_WIDTH/8)-1 downto 0);
 
    -- Severe logic duplication before pipelining register
@@ -84,45 +84,45 @@ begin
 
       -- Create number of non-free BYTES (not WORDS) by shifting
       status_mux_bytes(i)
-         <= STATUS((i+1)*STATUS_WIDTH-1 downto i*STATUS_WIDTH) 
+         <= STATUS((i+1)*STATUS_WIDTH-1 downto i*STATUS_WIDTH)
             & zeros(log2(DATA_WIDTH/8)-1 downto 0);
 
       -- Compute number of free bytes in the target (substract)
       free(i) <= max_free - status_mux_bytes(i);
 
       latency1_gen : if OUTPUT_REG = false generate
-         -- Substract one WORD, because STATUS input will be delayed for 
-         -- one cycle 
+         -- Substract one WORD, because STATUS input will be delayed for
+         -- one cycle
          -- (But only if number overflow wouldn't occur)
-         free_mux_sub_p : process(free) 
-         begin 
-            if free(i) > conv_std_logic_vector(DATA_WIDTH/8, STATUS_WIDTH_B) then 
-               free_sub(i) 
-                  <= free(i) - DATA_WIDTH/8; 
+         free_mux_sub_p : process(free)
+         begin
+            if free(i) > conv_std_logic_vector(DATA_WIDTH/8, STATUS_WIDTH_B) then
+               free_sub(i)
+                  <= free(i) - DATA_WIDTH/8;
             else -- Overflow would occur -> pretend there's no space left
-               free_sub(i) <= zeros(STATUS_WIDTH_B-1 downto 0); 
-            end if; 
-         end process; 
+               free_sub(i) <= zeros(STATUS_WIDTH_B-1 downto 0);
+            end if;
+         end process;
       end generate;
 
       latency2_gen : if OUTPUT_REG = true generate
-         -- Substract two WORDS, because STATUS input will be delayed for 
+         -- Substract two WORDS, because STATUS input will be delayed for
          -- one cycle, and FrameLink will be delayed also for one cycle
          -- (But only if number overflow wouldn't occur)
-         free_mux_sub_p : process(free) 
-         begin 
-            if free(i) > conv_std_logic_vector(2*DATA_WIDTH/8, STATUS_WIDTH_B) then 
-               free_sub(i) 
-                  <= free(i) - 2*DATA_WIDTH/8; 
+         free_mux_sub_p : process(free)
+         begin
+            if free(i) > conv_std_logic_vector(2*DATA_WIDTH/8, STATUS_WIDTH_B) then
+               free_sub(i)
+                  <= free(i) - 2*DATA_WIDTH/8;
             else -- Overflow would occur -> pretend there's no space left
-               free_sub(i) <= zeros(STATUS_WIDTH_B-1 downto 0); 
-            end if; 
-         end process; 
+               free_sub(i) <= zeros(STATUS_WIDTH_B-1 downto 0);
+            end if;
+         end process;
       end generate;
 
       -- Widen to 17bit width
       status_n16 : if STATUS_WIDTH_B < 17 generate
-         free_len((i+1)*17-1 downto i*17) 
+         free_len((i+1)*17-1 downto i*17)
             <= zeros(16 downto STATUS_WIDTH_B) & free_sub(i);
       end generate;
       status_16 : if STATUS_WIDTH_B = 17 generate
@@ -213,7 +213,7 @@ end generate;
    -- This signal finally decides whether each word should, or should not be
    -- forwarded.
    pass_frame <= (cmp_ok and cmp_en) -- First frame word
-                  or 
+                  or
                  (reg_cmp_ok(0) and not cmp_en); -- Other frame words
 
 GEN_OUTPUT_REG: if OUTPUT_REG = true generate
@@ -238,7 +238,7 @@ GEN_OUTPUT_REG: if OUTPUT_REG = true generate
             reg_rx_eop_n <= RX_EOP_N;
             reg_rx_sof_n <= RX_SOF_N;
             reg_rx_eof_n <= RX_EOF_N;
-            reg_rx_src_rdy_n <= RX_SRC_RDY_N or 
+            reg_rx_src_rdy_n <= RX_SRC_RDY_N or
                                 (not pass_frame) or
                                 (STAT_CLEARING);
          end if;
@@ -247,7 +247,7 @@ GEN_OUTPUT_REG: if OUTPUT_REG = true generate
 
    -- RX_CHAN to TX_CHAN route through
    TX_CHAN <= reg_rx_chan;
-   
+
    TX_SRC_RDY_N <= reg_rx_src_rdy_n;
 
    -- Rest of output signals (route through)
@@ -264,7 +264,7 @@ GEN_NOT_OUTPUT_REG: if OUTPUT_REG = false generate
 
    -- RX_CHAN to TX_CHAN route through
    TX_CHAN <= RX_CHAN;
-   
+
    TX_SRC_RDY_N <= RX_SRC_RDY_N or (not pass_frame) or (STAT_CLEARING);
 
    -- Rest of output signals (route through)

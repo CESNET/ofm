@@ -50,7 +50,7 @@ entity TAG_SEQUENCER is
       --* Completition buffer is empty
       EMPTY          : out std_logic;
 
-      --* Sibling Tag Sequencer wants to send USR_OP_DONE 
+      --* Sibling Tag Sequencer wants to send USR_OP_DONE
       --* (set to 0 if you don't know what that is)
       SIBLING_PAUSE_IN : in  std_logic;
 
@@ -234,7 +234,7 @@ begin
 
    USR_OP_TAG <= tag_dob;
 
-   start_ptr_en <= (not pend_dob) and (not sig_empty) and 
+   start_ptr_en <= (not pend_dob) and (not sig_empty) and
                    (not SIBLING_PAUSE_IN);
 
    SIBLING_PAUSE_OUT <= (not pend_dob) and (not sig_empty);

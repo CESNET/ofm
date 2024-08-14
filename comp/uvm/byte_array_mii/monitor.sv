@@ -21,7 +21,7 @@ class monitor #(int unsigned CHANNELS, int unsigned CHANNEL_WIDTH) extends uvm_b
     uvm_byte_array::sequence_item hl_tr; // high level transaction
 
     local byte unsigned data[$];
-    
+
     typedef enum {INIT, IDLE, PREAMBLE, DATA} state_t;
     state_t state;
 
@@ -38,7 +38,7 @@ class monitor #(int unsigned CHANNELS, int unsigned CHANNEL_WIDTH) extends uvm_b
     // Creates new instance of this class.
     function new (string name, uvm_component parent);
         super.new(name, parent);
-        
+
         WHOLE_BYTES : assert((CHANNEL_WIDTH & 7) == 0);
         analysis_export = new("analysis_export", this);
         state = INIT;
@@ -69,7 +69,7 @@ class monitor #(int unsigned CHANNELS, int unsigned CHANNEL_WIDTH) extends uvm_b
                         `uvm_fatal(get_full_name(), "uvm_byte_array_mii::monitor - Failed to initialize MII line!\n")
                     end
                 end
-            IDLE : 
+            IDLE :
                 begin
                     if (current_control == 1'b1) begin
                         if (current_byte == 8'hFB) begin
@@ -155,7 +155,7 @@ class monitor #(int unsigned CHANNELS, int unsigned CHANNEL_WIDTH) extends uvm_b
         hl_tr.data = this.data;
         analysis_port.write(hl_tr);
     endfunction
-    
+
     virtual function void write(uvm_mii::sequence_item #(CHANNELS, CHANNEL_WIDTH) tr);
         byte unsigned channel_data[] = {<<8{{<<CHANNEL_WIDTH{tr.data}}}};
         logic channel_control[] = {<<1{{<<BYTES{tr.control}}}};
@@ -163,8 +163,8 @@ class monitor #(int unsigned CHANNELS, int unsigned CHANNEL_WIDTH) extends uvm_b
         if (tr.clk_en != 1) begin
             return;
         end
-        
-        for (int i = 0; i < CHANNELS * BYTES; i++) begin    
+
+        for (int i = 0; i < CHANNELS * BYTES; i++) begin
             current_byte = channel_data[i];
             current_control = channel_control[i];
             byte_lane_id = i % BYTES;

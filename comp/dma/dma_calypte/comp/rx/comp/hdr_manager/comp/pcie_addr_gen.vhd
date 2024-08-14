@@ -52,7 +52,7 @@ entity PCIE_ADDR_GEN is
         POINTER_UPDATE_EN   : out std_logic;
 
         -- =====================================================================
-        -- RESET ADDRESS MANAGER 
+        -- RESET ADDRESS MANAGER
         -- =====================================================================
         -- if one bit of this signal is set, the coresponding channel's HW address is reset
         CHANNEL_RESET : in  std_logic_vector(CHANNELS-1 downto 0);
@@ -78,7 +78,7 @@ entity PCIE_ADDR_GEN is
         OUT_DISC      : out std_logic;
         OUT_LAST      : out std_logic;
         OUT_FIRST     : out std_logic;
-        -- this signal have two clock delay. If you want to stop receiving new 
+        -- this signal have two clock delay. If you want to stop receiving new
         OUT_DST_RDY   : in std_logic
     );
 

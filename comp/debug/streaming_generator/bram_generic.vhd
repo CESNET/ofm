@@ -52,7 +52,7 @@ entity BRAM_GENERATOR is
       --! Address B
       ADDRB  : in    std_logic_vector(log2(ITEMS)-1 downto 0);
       --! Data B out
-      DOB    : out   std_logic_vector(32*div_roundup(DATA_WIDTH, 32)-1 downto 0)   
+      DOB    : out   std_logic_vector(32*div_roundup(DATA_WIDTH, 32)-1 downto 0)
    );
 end BRAM_GENERATOR;
 
@@ -64,13 +64,13 @@ architecture full of BRAM_GENERATOR is
    signal wr_rd_pom   : std_logic_vector(1 downto 0);
    signal demux_out   : std_logic_vector(2*div_roundup(DATA_WIDTH, 32)-1 downto 0);
    --! output multiplexer
-   signal mux_in      : std_logic_vector(32*div_roundup(DATA_WIDTH, 32)-1 downto 0);  
+   signal mux_in      : std_logic_vector(32*div_roundup(DATA_WIDTH, 32)-1 downto 0);
    signal mux_out     : std_logic_vector(31 downto 0);
    --! address BRAM
    signal addr_bram   : std_logic_vector(log2(ITEMS)-1 downto 0);
    --! adsress demux, mux
    signal addr_mux    : std_logic_vector(max(1,log2(div_roundup(DATA_WIDTH, 32))) - 1 downto  0);
-begin  
+begin
    addr_pom  <= ADDRA(log2(ITEMS_All)-1 downto 0) - 16;
    addr_bram <= addr_pom(log2(ITEMS)-1 downto 0);
 
@@ -92,7 +92,7 @@ begin
             DEMUX_WIDTH => div_roundup(DATA_WIDTH, 32)
          )
          port map(
-            DATA_IN  => wr_rd_pom, 
+            DATA_IN  => wr_rd_pom,
             SEL      => addr_mux,
             DATA_OUT => demux_out
          );
@@ -106,7 +106,7 @@ begin
    --! multiplexer logic - BRAM 32 bit words
    GEN_MUX_inst : entity work.GEN_MUX
    generic map (
-      DATA_WIDTH => 32, 
+      DATA_WIDTH => 32,
       MUX_WIDTH  => div_roundup(DATA_WIDTH, 32)
    )
    port map(
@@ -123,11 +123,11 @@ begin
          --! Input data width
          DATA_WIDTH => 32,
          --! Address bus width
-         ADDRESS_WIDTH  => log2(ITEMS) 
+         ADDRESS_WIDTH  => log2(ITEMS)
       )
       port map(
          --! Reset only if output_reg
-         RSTA => RESET, 
+         RSTA => RESET,
          --! \name Interface A
          --! Clock A
          CLKA  => CLK,
@@ -149,7 +149,7 @@ begin
          --! \name Interface B
          --! Clock B
          RSTB => RESET,
-         --! 
+         --!
          CLKB   => CLK,
          --! Pipe enable
          PIPE_ENB => '1',

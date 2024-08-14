@@ -28,8 +28,8 @@ architecture behavioral of testbench is
 
    signal clk : std_logic;
    signal reset : std_logic;
-   signal mi32 : mi32_t;   
- 
+   signal mi32 : mi32_t;
+
    constant SOP_POS_WIDTH   : integer := 3;
    constant DATA_WIDTH      : integer := 512;
 
@@ -52,7 +52,7 @@ architecture behavioral of testbench is
    signal IFC_DST_RDY : std_logic;
 
 
-   subtype hdr_size_range  is natural range 23+64 downto 16+64; 
+   subtype hdr_size_range  is natural range 23+64 downto 16+64;
    subtype ifc_range       is natural range 39+64 downto 32+64;
 
 begin
@@ -82,32 +82,32 @@ begin
    -- -------------------------------------------------------------------------
    --                              UUT
    -- -------------------------------------------------------------------------
-   
+
    uut: entity work.TX_DMA_EXTRACTOR
    generic map (
       SOP_POS_WIDTH => SOP_POS_WIDTH,
       DATA_WIDTH    => DATA_WIDTH
    )
    port map (
-      RESET         => reset,      
-      CLK           => clk,        
-      RX_DATA       => RX_DATA,        
-      RX_SOP_POS    => RX_SOP_POS,   
-      RX_EOP_POS    => RX_EOP_POS,   
-      RX_SOP        => RX_SOP,       
-      RX_EOP        => RX_EOP,       
-      RX_SRC_RDY    => RX_SRC_RDY,   
-      RX_DST_RDY    => RX_DST_RDY,   
-      TX_DATA       => TX_DATA,      
-      TX_SOP_POS    => TX_SOP_POS,   
-      TX_EOP_POS    => TX_EOP_POS,   
-      TX_SOP        => TX_SOP,       
-      TX_EOP        => TX_EOP,       
-      TX_SRC_RDY    => TX_SRC_RDY,   
-      TX_DST_RDY    => TX_DST_RDY,   
-      IFC           => IFC,          
-      IFC_SRC_RDY   => IFC_SRC_RDY,  
-      IFC_DST_RDY   => IFC_DST_RDY  
+      RESET         => reset,
+      CLK           => clk,
+      RX_DATA       => RX_DATA,
+      RX_SOP_POS    => RX_SOP_POS,
+      RX_EOP_POS    => RX_EOP_POS,
+      RX_SOP        => RX_SOP,
+      RX_EOP        => RX_EOP,
+      RX_SRC_RDY    => RX_SRC_RDY,
+      RX_DST_RDY    => RX_DST_RDY,
+      TX_DATA       => TX_DATA,
+      TX_SOP_POS    => TX_SOP_POS,
+      TX_EOP_POS    => TX_EOP_POS,
+      TX_SOP        => TX_SOP,
+      TX_EOP        => TX_EOP,
+      TX_SRC_RDY    => TX_SRC_RDY,
+      TX_DST_RDY    => TX_DST_RDY,
+      IFC           => IFC,
+      IFC_SRC_RDY   => IFC_SRC_RDY,
+      IFC_DST_RDY   => IFC_DST_RDY
    );
 
    -- -------------------------------------------------------------------------
@@ -120,79 +120,79 @@ begin
       RX_DATA     <= (others => '0');
       RX_SOP_POS  <= (others => '0');
       RX_EOP_POS  <= (others => '0');
-      RX_SOP      <= '0'; 
+      RX_SOP      <= '0';
       RX_EOP      <= '0';
       RX_SRC_RDY  <= '0';
-      TX_DST_RDY  <= '1'; 
+      TX_DST_RDY  <= '1';
       IFC_DST_RDY <= '1';
       wait for reset_time;
-      -- test som increment  
-      RX_SOP <= '1'; 
+      -- test som increment
+      RX_SOP <= '1';
       RX_EOP <= '1';
       RX_SRC_RDY <= '1';
-      RX_EOP_POS <= (others => '1'); 
+      RX_EOP_POS <= (others => '1');
       wait for clk_per;
-      RX_SOP <= '0'; 
+      RX_SOP <= '0';
       RX_EOP <= '0';
       RX_SRC_RDY <= '0';
       wait for clk_per * 5;
-       
-      -- test accuracy of IFC output 
-      RX_DATA(ifc_range) <= std_logic_vector(to_unsigned(10, 8)); 
-      RX_DATA(hdr_size_range) <= std_logic_vector(to_unsigned(1, 8)); 
-      RX_SOP <= '1'; 
-      RX_SOP_POS <= std_logic_vector(to_unsigned(1, RX_SOP_POS'length)); 
+
+      -- test accuracy of IFC output
+      RX_DATA(ifc_range) <= std_logic_vector(to_unsigned(10, 8));
+      RX_DATA(hdr_size_range) <= std_logic_vector(to_unsigned(1, 8));
+      RX_SOP <= '1';
+      RX_SOP_POS <= std_logic_vector(to_unsigned(1, RX_SOP_POS'length));
       RX_EOP <= '1';
       RX_SRC_RDY <= '1';
-      RX_EOP_POS <= (others => '1'); 
+      RX_EOP_POS <= (others => '1');
       wait for clk_per;
-      RX_DATA(hdr_size_range) <= std_logic_vector(to_unsigned(0, 8)); 
-      RX_SOP <= '1'; 
-      RX_SOP_POS <= std_logic_vector(to_unsigned(1, RX_SOP_POS'length)); 
+      RX_DATA(hdr_size_range) <= std_logic_vector(to_unsigned(0, 8));
+      RX_SOP <= '1';
+      RX_SOP_POS <= std_logic_vector(to_unsigned(1, RX_SOP_POS'length));
       RX_EOP <= '1';
       RX_SRC_RDY <= '1';
-      RX_EOP_POS <= (others => '1'); 
+      RX_EOP_POS <= (others => '1');
       wait for clk_per;
-      RX_SOP <= '0'; 
+      RX_SOP <= '0';
       RX_EOP <= '0';
       RX_SRC_RDY <= '0';
       wait for clk_per * 5;
-     
-      -- test all flu sop pos positions 
-      for I in 0 to 7 loop 
+
+      -- test all flu sop pos positions
+      for I in 0 to 7 loop
         RX_SOP <= '1';
-        RX_SOP_POS <= std_logic_vector(to_unsigned(I, RX_SOP_POS'length)); 
+        RX_SOP_POS <= std_logic_vector(to_unsigned(I, RX_SOP_POS'length));
         RX_EOP <= '0';
         RX_SRC_RDY <= '1';
         wait for clk_per;
-        RX_SOP <= '0'; 
+        RX_SOP <= '0';
         RX_EOP <= '1';
         RX_SRC_RDY <= '1';
-        RX_EOP_POS <= (others => '1'); 
+        RX_EOP_POS <= (others => '1');
         wait for clk_per;
       end loop;
-      RX_SOP <= '0'; 
+      RX_SOP <= '0';
       RX_EOP <= '0';
       RX_SRC_RDY <= '0';
       wait for clk_per * 5;
 
       -- test output fifo overflow
       IFC_DST_RDY <= '0';
-      for I in 0 to 63 loop 
+      for I in 0 to 63 loop
         RX_SOP <= '1';
-        RX_SOP_POS <= std_logic_vector(to_unsigned(0, RX_SOP_POS'length)); 
+        RX_SOP_POS <= std_logic_vector(to_unsigned(0, RX_SOP_POS'length));
         RX_EOP <= '1';
-        RX_EOP_POS <= (others => '1'); 
+        RX_EOP_POS <= (others => '1');
         RX_SRC_RDY <= '1';
         wait for clk_per;
       end loop;
-      RX_SOP <= '0'; 
+      RX_SOP <= '0';
       RX_EOP <= '0';
       RX_SRC_RDY <= '0';
       wait for clk_per * 5;
- 
+
       IFC_DST_RDY <= '1';
-      RX_SOP <= '0'; 
+      RX_SOP <= '0';
       RX_EOP <= '0';
       RX_SRC_RDY <= '0';
       wait for clk_per;

@@ -3,7 +3,7 @@
  * Author(s): Radek Iša <isa@cesnet.cz>
  * SPDX-License-Identifier: BSD-3-Clause
  */
- 
+
 // ----------------------------------------------------------------------------
 //                        Module declaration
 // ----------------------------------------------------------------------------
@@ -20,7 +20,7 @@ module DUT (
 );
 
 // -------------------- Module body -------------------------------------------
-mi_async 
+mi_async
   VHDL_DUT_U  (
 
     // MI32 interface

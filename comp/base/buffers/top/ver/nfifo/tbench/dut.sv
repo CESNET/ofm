@@ -10,7 +10,7 @@
  * TODO:
  *
  */
- 
+
 // ----------------------------------------------------------------------------
 //                        Module declaration
 // ----------------------------------------------------------------------------
@@ -36,17 +36,17 @@ NFIFO #(
 
    VHDL_DUT_U (
     // Common Interface
-    
+
     //vyber signalov
     .CLK               (CLK),
     .RESET             (RESET),
- 
+
     // Write interface
     .DATA_IN            (FW.DATA_IN),
     .WR_BLK_ADDR        (FW.BLOCK_ADDR),
     .WRITE              (FW.WRITE),
     .FULL               (FW.FULL),
-    
+
     // Read interface
     .DATA_OUT           (FR.DATA_OUT),
     .DATA_VLD           (FR.DATA_VLD),
@@ -54,8 +54,8 @@ NFIFO #(
     .READ               (FR.READ),
     .PIPE_EN            (FR.PIPE_EN),
     .EMPTY              (FR.EMPTY),
-    
-    .STATUS             (FR.STATUS)    
+
+    .STATUS             (FR.STATUS)
     );
 
 endmodule : DUT

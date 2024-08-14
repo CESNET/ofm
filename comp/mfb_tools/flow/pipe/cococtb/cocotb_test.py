@@ -1,4 +1,4 @@
-# cocotb_test.py: 
+# cocotb_test.py:
 # Copyright (C) 2024 CESNET z. s. p. o.
 # Author(s): David Beneš <xbenes52@vutbr.cz>
 #
@@ -59,7 +59,7 @@ async def run_test(dut, pkt_count=10000, frame_size_min=60, frame_size_max=512):
             last_num = tb.TX_MFB.frame_cnt // 1000
             cocotb.log.info("Number of transactions processed: %d/%d" % (tb.TX_MFB.frame_cnt, pkt_count))
         await ClockCycles(dut.CLK, 100)
-    
+
     await ClockCycles(dut.CLK, 100)
     # print("RX: %d/%d" % (tb.RX_MFB.frame_cnt, pkt_count))
     # print("TX: %d/%d" % (tb.TX_MFB.frame_cnt, pkt_count))

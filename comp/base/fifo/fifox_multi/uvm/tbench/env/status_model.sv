@@ -6,7 +6,7 @@
 
 class status_model #(ITEMS, WRITE_PORTS, READ_PORTS, ALMOST_FULL_OFFSET, ALMOST_EMPTY_OFFSET) extends uvm_component;
     `uvm_component_param_utils(uvm_fifox_multi::status_model #(ITEMS, WRITE_PORTS, READ_PORTS, ALMOST_FULL_OFFSET, ALMOST_EMPTY_OFFSET))
-    
+
     // Model inputs
     uvm_probe::cbs_simple #(1+$clog2(WRITE_PORTS+1)+$clog2(READ_PORTS+1)) status_in;
 
@@ -17,7 +17,7 @@ class status_model #(ITEMS, WRITE_PORTS, READ_PORTS, ALMOST_FULL_OFFSET, ALMOST_
         super.new(name, parent);
 
         model_out = new("model_out", this);
-        
+
     endfunction
 
     function void build_phase(uvm_phase phase);

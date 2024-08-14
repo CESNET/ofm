@@ -1,9 +1,9 @@
 --
 -- barrel_shifter_gen.vhd: Barrel shifter with generic data width and generic block size
 --                         NOTE: barel_shifter.vhd is shifter with 8bit blocks
---                               barel_bit_rotator.vhd is shifter with 1bit blocks 
+--                               barel_bit_rotator.vhd is shifter with 1bit blocks
 -- Copyright (C) 2017 CESNET
--- Author(s): Lukas Kekely <kekely@cesnet.cz> 
+-- Author(s): Lukas Kekely <kekely@cesnet.cz>
 --            Vaclav Hummel <xhumme00@cesnet.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
@@ -28,7 +28,7 @@ entity BARREL_SHIFTER_GEN is
       -- size of one block in bits
       BLOCK_SIZE  : integer := 64;
       -- set true to shift left, false to shift right
-      SHIFT_LEFT  : boolean := false 
+      SHIFT_LEFT  : boolean := false
    );
    port (
       DATA_IN     : in  std_logic_vector(BLOCKS*BLOCK_SIZE-1 downto 0);
@@ -87,6 +87,6 @@ begin
    end generate;
 
    DATA_OUT <= slv_array_ser(mux_out, BLOCKS, BLOCK_SIZE);
-   
-   
+
+
 end barrel_shifter_arch;

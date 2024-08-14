@@ -45,7 +45,7 @@ architecture behavioral of sh_fifo_fsm is
    -- don't change state order! optimized generation of empty and full signals
 
    signal present_state, next_state : t_state := S_EMPTY;
-  
+
 begin -------------------------------------------------------------------------
 
    -- -------------------------------------------------------------------------

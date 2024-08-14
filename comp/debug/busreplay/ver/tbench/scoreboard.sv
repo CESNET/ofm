@@ -77,5 +77,5 @@ class Scoreboard;
     task display();
         scoreTable.display();
     endtask
-  
+
 endclass : Scoreboard

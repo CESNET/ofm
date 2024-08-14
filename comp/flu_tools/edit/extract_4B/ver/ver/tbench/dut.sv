@@ -6,7 +6,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
- 
+
 // ----------------------------------------------------------------------------
 //                        Module declaration
 // ----------------------------------------------------------------------------
@@ -22,7 +22,7 @@ module DUT (
 // -------------------- Module body -------------------------------------------
 EXTRACT_4B_VER #(
      .DATA_WIDTH    (DATA_WIDTH),
-     .SOP_POS_WIDTH (SOP_POS_WIDTH), 
+     .SOP_POS_WIDTH (SOP_POS_WIDTH),
      .OFFSET_WIDTH  (OFFSET_WIDTH)
    )
 
@@ -39,7 +39,7 @@ EXTRACT_4B_VER #(
      .RX_EOP      (RX.EOP),
      .RX_SRC_RDY  (RX.SRC_RDY),
      .RX_DST_RDY  (RX.DST_RDY),
-     
+
      .OFFSET      (RX.OFFSET),
 
       // Read Port

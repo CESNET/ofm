@@ -1,6 +1,6 @@
 -- fifo_ent.vhd: Multi-Value Bus with implementation on FIFOX
 -- Copyright (C) 2018 CESNET z. s. p. o.
--- Author: Michal Szabo <xszabo11@vutbr.cz> 
+-- Author: Michal Szabo <xszabo11@vutbr.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --

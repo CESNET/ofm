@@ -7,7 +7,7 @@
 
 proc mi {NAME PATH} {
   add_wave "-noupdate -hex"        $PATH/MI/*
-}  
+}
 
 proc others {NAME PATH} {
   add_wave "-noupdate -hex -label memory"        $PATH/memory

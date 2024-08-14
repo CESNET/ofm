@@ -16,7 +16,7 @@ use work.type_pack.all;
 entity PTC_MFB2PCIE_AXI is
    generic(
       -- =======================================================================
-      -- MFB BUS CONFIGURATION: 
+      -- MFB BUS CONFIGURATION:
       -- =======================================================================
       -- Supported configurations are: (2,1,8,32), (1,1,8,32)
       MFB_REGIONS      : natural := 2;
@@ -24,7 +24,7 @@ entity PTC_MFB2PCIE_AXI is
       MFB_BLOCK_SIZE   : natural := 8;
       MFB_ITEM_WIDTH   : natural := 32;
       -- =======================================================================
-      -- AXI BUS CONFIGURATION: 
+      -- AXI BUS CONFIGURATION:
       -- =======================================================================
       -- RQ_USER_WIDTH = 137 for Gen3x16 PCIe - with straddling!
       -- RQ_USER_WIDTH = 62  for Gen3x8 PCIe - without straddling!

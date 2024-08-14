@@ -2,7 +2,7 @@
 //-- Copyright (C) 2022 CESNET z. s. p. o.
 //-- Author(s): Daniel Kříž <xkrizd01@vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 class virt_seq #(MRRS, MIN_READ_REQ_SIZE, MPS, MIN_WRITE_REQ_SIZE) extends uvm_sequence;
 

@@ -7,7 +7,7 @@
 --
 -- $Id$
 --
--- TODO: 
+-- TODO:
 --
 --
 library IEEE;
@@ -70,7 +70,7 @@ entity FL_FORK_1TO4 is
       TX2_EOP_N       : out std_logic;
       TX2_SRC_RDY_N   : out std_logic;
       TX2_DST_RDY_N   : in  std_logic;
-      
+
       -- Interface 3
       TX3_DATA        : out std_logic_vector(DATA_WIDTH-1 downto 0);
       TX3_REM         : out std_logic_vector(log2(DATA_WIDTH/8)-1 downto 0);
@@ -124,13 +124,13 @@ begin
 
       -- Frame link concentrated interface
       TX_DATA=>TX_DATA,
-      TX_REM=>TX_REM,      
-      TX_SOF_N=>TX_SOF_N,       
-      TX_EOF_N=>TX_EOF_N,       
-      TX_SOP_N=>TX_SOP_N,       
-      TX_EOP_N=>TX_EOP_N,       
+      TX_REM=>TX_REM,
+      TX_SOF_N=>TX_SOF_N,
+      TX_EOF_N=>TX_EOF_N,
+      TX_SOP_N=>TX_SOP_N,
+      TX_EOP_N=>TX_EOP_N,
       TX_SRC_RDY_N=>TX_SRC_RDY_N,
-      TX_DST_RDY_N=>TX_DST_RDY_N   
+      TX_DST_RDY_N=>TX_DST_RDY_N
      );
 
 -- signal mapping for output port 0

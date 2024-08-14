@@ -9,10 +9,10 @@
    <features>
       <item>Generate mi32 read and write requests</item>
       <item>Usefull for component simulation</item>
-      <item>Log outcoming and incoming transactions</item> 
+      <item>Log outcoming and incoming transactions</item>
       <item>Functions for generating requests</item>
    </features>
-   
+
 
    <description>
       Easy use component for creating mi32 read and write requests. Read and
@@ -20,13 +20,13 @@
       This component also support loging incoming and outcoming transaction
       in user readable file.
    </description>
-   
+
    <interface>
       <generic_map>
          <generic name="UPSTREAM_LOG_FILE" type="string" default="">
 			   Specify path to file where upstream transaction is loged.
          </generic>
-         
+
 		   <generic name="DOWNSTREAM_LOG_FILE" type="string" default="">
 			   Specify path to file where downstream transaction is loged.
          </generic>
@@ -34,45 +34,45 @@
          <generic name="BASE_ADDR" type="std_logic_vector(31:0)" default="0x00000000">
 			   Specify Endpoint base address.
          </generic>
-         
+
 		   <generic name="ADDR_WIDTH" type="integer" default="2147483647">
 			   Specify addess width
          </generic>
-                  
+
 		   <generic name="FREQUENCY" type="integer" default="LOCAL_BUS_FREQUENCY">
 			   Specify user component frequency
          </generic>
-                  
+
 		   <generic name="BUFFER_EN" type="boolean" default="false">
 			   Enable or Disable endpoint buffer
          </generic>
       </generic_map>
-      
+
       <port_map>
          <divider>Common Interface</divider>
-         
+
          <port name="IB_CLK" dir="in" width="1">
             Internal Bus Clock.
          </port>
-           
+
          <port name="IB_RESET" dir="in" width="1">
             Internal Bus Reset.
          </port>
 
          <divider>User Component Interface</divider>
-         
+
          <port name="CLK" dir="in" width="1">
             User component CLK
-         </port> 
-         
+         </port>
+
          <port name="MI32" dir="inout" width="t_mi32">
             MI32 interface
-         </port> 
+         </port>
 
      <divider>Simulation Interface</divider>
 
          <port name="STATUS" dir="out" width="t_ib_status">
-            Status interface - Readed data is also send to this interface  
+            Status interface - Readed data is also send to this interface
          </port>
 
          <port name="CTRL" dir="in" width="t_ib_ctrl">
@@ -84,20 +84,20 @@
          </port>
 
          <port name="BUSY" dir="out" width="1">
-            IB_SIM is BUSY (sending or waiting for some read transaction)            
+            IB_SIM is BUSY (sending or waiting for some read transaction)
          </port>
       </port_map>
    </interface>
-  
+
    <body>
-      
+
 <!-- Here is description in standard Satrapa format-->
 <h2>Informations</h2>
    <p>
       When you want to use MI32_SIM component ib_sim_oper package must be included <br/>
       <i>use work.ib_sim_oper.all; -- Internal Bus Simulation Package</i>
    </p>
-   
+
    <p>
       Simulation interface of mi32_sim must be connected to folowing signal names:<br/>
       STATUS             => ib_sim_status <br/>
@@ -110,8 +110,8 @@
    <p>
    This procedure must be placed to your testbench file. Using this procedure is
    MI32_SIM gets BUS operations.
-         
-   <pre>	    
+
+   <pre>
    procedure ib_op(ctrl : in t_ib_ctrl) is
    begin
       wait until (IB_CLK'event and IB_CLK='1' and ib_sim_busy = '0');
@@ -123,7 +123,7 @@
    </pre>
    </p>
 
-   
+
 <h2>Supported commands for MI32_SIM</h2>
    <p>
    Result of this five functions can be used as a parametr for
@@ -141,7 +141,7 @@
                           read_wait   : in boolean:=false)                -- Wait for completition transaction
                      return t_ib_ctrl;
    </pre>
-   
+
    <b><i>Send Local Read Transaction (Readed data is saved to file)</i></b>
    <pre>
    function ib_local_read_file(src_addr    : in std_logic_vector(31 downto 0); -- Address from where are data readed
@@ -162,7 +162,7 @@
                            data       : in std_logic_vector(63 downto 0))  -- Data to be writen
                      return t_ib_ctrl;
    </pre>
-   
+
    <b><i>Send Local Write Transaction (Write data from file)</i></b>
    <pre>
    function ib_local_write_file(dst_addr   : in std_logic_vector(31 downto 0); -- Destination address of write transaction
@@ -251,5 +251,5 @@
          use IEEE.std_logic_textio.all;
       </pre>
    </p>
-</body>  
+</body>
 </source>

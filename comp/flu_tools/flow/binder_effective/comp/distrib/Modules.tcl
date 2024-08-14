@@ -9,7 +9,7 @@ set FLU_BASE            "$OFM_PATH/comp/flu_tools"
 
 set PACKAGES            "$OFM_PATH/comp/base/pkg/math_pack.vhd"
 
-set COMPONENTS [list  [list "FLU_DISTRIBUTOR"    "$FLU_BASE/flow/distributor"       "FULL" ] ]   
+set COMPONENTS [list  [list "FLU_DISTRIBUTOR"    "$FLU_BASE/flow/distributor"       "FULL" ] ]
 
 set MOD "$MOD $ENTITY_BASE/distrib_ent.vhd"
 set MOD "$MOD $ENTITY_BASE/distrib_arch.vhd"

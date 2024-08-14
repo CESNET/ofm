@@ -29,7 +29,7 @@ class drop_cbs #(REGIONS) extends uvm_event_callback;
 
         $cast(c_data, data);
         {pkt_eof, pkt_drop} = c_data.data;
-        
+
         for (int unsigned it = 0; it < REGIONS; it++) begin
             if (pkt_eof[it] == 1) begin
                 queue.push_back(pkt_drop[it]);

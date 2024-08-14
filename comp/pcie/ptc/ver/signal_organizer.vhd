@@ -10,7 +10,7 @@
 library IEEE;
 
 use ieee.std_logic_1164.all;
-use ieee.numeric_std.all; 
+use ieee.numeric_std.all;
 use work.math_pack.all;
 use work.type_pack.all;
 use work.dma_bus_pack.all; -- contains definitions for MVB header fields
@@ -210,7 +210,7 @@ architecture behavioral of signal_organizer is
       end loop;
       return r;
    end function;
-   ---- 
+   ----
 
    ----
    type org_dma_down_mvb_t is record
@@ -254,7 +254,7 @@ architecture behavioral of signal_organizer is
       end loop;
       return r;
    end function;
-   ---- 
+   ----
 
    ----
    type org_pcie_up_mvb_t is record
@@ -298,7 +298,7 @@ architecture behavioral of signal_organizer is
 
       return r;
    end function;
-   ---- 
+   ----
 
    ----
    type org_pcie_down_mvb_t is record
@@ -341,14 +341,14 @@ architecture behavioral of signal_organizer is
 
       return r;
    end function;
-   ---- 
+   ----
 
    ----
    type org_up_mfb_t is record
       data      : slv_array_t(MFB_UP_REGIONS-1 downto 0)(MFB_UP_DATA_WIDTH/MFB_UP_REGIONS-1 downto 0);
       sof       : std_logic_vector(MFB_UP_REGIONS-1 downto 0);
       sof_pos   : i_array_t(MFB_UP_REGIONS-1 downto 0); -- item pointer
-      eof       : std_logic_vector(MFB_UP_REGIONS-1 downto 0); 
+      eof       : std_logic_vector(MFB_UP_REGIONS-1 downto 0);
       eof_pos   : i_array_t(MFB_UP_REGIONS-1 downto 0); -- item pointer
 
       src_rdy   : std_logic;
@@ -382,14 +382,14 @@ architecture behavioral of signal_organizer is
       end loop;
       return r;
    end function;
-   ---- 
+   ----
 
    ----
    type org_dma_up_mfb_t is record
       data      : slv_array_t(DMA_MFB_UP_REGIONS-1 downto 0)(DMA_MFB_UP_DATA_WIDTH/DMA_MFB_UP_REGIONS-1 downto 0);
       sof       : std_logic_vector(DMA_MFB_UP_REGIONS-1 downto 0);
       sof_pos   : i_array_t(DMA_MFB_UP_REGIONS-1 downto 0); -- item pointer
-      eof       : std_logic_vector(DMA_MFB_UP_REGIONS-1 downto 0); 
+      eof       : std_logic_vector(DMA_MFB_UP_REGIONS-1 downto 0);
       eof_pos   : i_array_t(DMA_MFB_UP_REGIONS-1 downto 0); -- item pointer
 
       src_rdy   : std_logic;
@@ -423,14 +423,14 @@ architecture behavioral of signal_organizer is
       end loop;
       return r;
    end function;
-   ---- 
+   ----
 
    ----
    type org_down_mfb_t is record
       data      : slv_array_t(MFB_DOWN_REGIONS-1 downto 0)(MFB_DOWN_DATA_WIDTH/MFB_DOWN_REGIONS-1 downto 0);
       sof       : std_logic_vector(MFB_DOWN_REGIONS-1 downto 0);
       sof_pos   : i_array_t(MFB_DOWN_REGIONS-1 downto 0); -- item pointer
-      eof       : std_logic_vector(MFB_DOWN_REGIONS-1 downto 0); 
+      eof       : std_logic_vector(MFB_DOWN_REGIONS-1 downto 0);
       eof_pos   : i_array_t(MFB_DOWN_REGIONS-1 downto 0); -- item pointer
 
       src_rdy   : std_logic;
@@ -464,14 +464,14 @@ architecture behavioral of signal_organizer is
       end loop;
       return r;
    end function;
-   ---- 
+   ----
 
    ----
    type org_dma_down_mfb_t is record
       data      : slv_array_t(DMA_MFB_DOWN_REGIONS-1 downto 0)(DMA_MFB_DOWN_DATA_WIDTH/DMA_MFB_DOWN_REGIONS-1 downto 0);
       sof       : std_logic_vector(DMA_MFB_DOWN_REGIONS-1 downto 0);
       sof_pos   : i_array_t(DMA_MFB_DOWN_REGIONS-1 downto 0); -- item pointer
-      eof       : std_logic_vector(DMA_MFB_DOWN_REGIONS-1 downto 0); 
+      eof       : std_logic_vector(DMA_MFB_DOWN_REGIONS-1 downto 0);
       eof_pos   : i_array_t(DMA_MFB_DOWN_REGIONS-1 downto 0); -- item pointer
 
       src_rdy   : std_logic;
@@ -505,9 +505,9 @@ architecture behavioral of signal_organizer is
       end loop;
       return r;
    end function;
-   ---- 
+   ----
 
-   ---- 
+   ----
    type org_tagm_rel_t is record
       pcie_tag : i_array_t(MVB_DOWN_ITEMS-1 downto 0);
       low_addr : i_array_t(MVB_DOWN_ITEMS-1 downto 0);
@@ -533,13 +533,13 @@ architecture behavioral of signal_organizer is
 
       return r;
    end function;
-   ---- 
+   ----
 
    -------------------------------------------------------------------------------------
 
    signal org_UP_MVB : org_dma_up_mvb_array_t(DMA_PORTS-1 downto 0);
    signal org_UP_MFB : org_dma_up_mfb_array_t(DMA_PORTS-1 downto 0);
-   
+
    signal org_up_mvb_asfifo_out          : org_dma_up_mvb_array_t(DMA_PORTS-1 downto 0);
    signal org_up_mfb_asfifo_out          : org_dma_up_mfb_array_t(DMA_PORTS-1 downto 0);
    signal org_up_mfb_trans_out           : org_up_mfb_array_t    (DMA_PORTS-1 downto 0);
@@ -603,7 +603,7 @@ begin
                                <<signal ^.uut.UP_MFB_DST_RDY : std_logic_vector(DMA_PORTS-1 downto 0)>>
                               );
 
-   -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+   -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
    org_up_mvb_asfifo_out <= org_dma_up_mvb_array_deser
                               (
@@ -705,7 +705,7 @@ begin
                                <<signal ^.uut.up_mfb_hdr_merge_out_dst_rdy : std_logic>>
                               );
 
-   -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+   -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
    org_RQ <= org_rq_deser
                               (
@@ -717,7 +717,7 @@ begin
                                <<signal ^.uut.RQ_TVALID    : std_logic>>
                               );
 
-   -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+   -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
    org_RQ_MVB <= org_pcie_up_mvb_deser
                               (
@@ -727,7 +727,7 @@ begin
                                <<signal ^.uut.RQ_MFB_DST_RDY  : std_logic>>
                               );
 
-   -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+   -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
    org_RQ_MFB <= org_up_mfb_deser
                               (
@@ -740,7 +740,7 @@ begin
                                <<signal ^.uut.RQ_MFB_DST_RDY : std_logic>>
                               );
 
-   -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+   -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
    org_RC_MVB <= org_pcie_down_mvb_deser
                               (
@@ -750,7 +750,7 @@ begin
                                <<signal ^.uut.RC_MFB_DST_RDY  : std_logic>>
                               );
 
-   -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+   -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
    org_RC_MFB <= org_down_mfb_deser
                               (
@@ -763,7 +763,7 @@ begin
                                <<signal ^.uut.RC_MFB_DST_RDY : std_logic>>
                               );
 
-   -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+   -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
    org_RC <= org_rc_deser
                               (
@@ -773,7 +773,7 @@ begin
                                <<signal ^.uut.RC_TREADY    : std_logic>>
                               );
 
-   -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+   -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
    org_down_mfb_get_items_in      <= org_down_mfb_deser
                               (
@@ -895,7 +895,7 @@ begin
                                <<signal ^.uut.down_mfb_asfifo_in_dst_rdy : std_logic_vector(DMA_PORTS-1 downto 0)>>
                               );
 
-   -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+   -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
    org_DOWN_MVB <= org_dma_down_mvb_array_deser
                               (

@@ -10,7 +10,7 @@ use IEEE.std_logic_1164.all;
 use IEEE.std_logic_arith.all;
 use IEEE.std_logic_unsigned.all;
 
-entity STREAMING_DEBUG_PROBE is 
+entity STREAMING_DEBUG_PROBE is
   port(
     -- ===============
     -- Input interface
@@ -20,7 +20,7 @@ entity STREAMING_DEBUG_PROBE is
     RX_DST_RDY     : out std_logic;
     RX_SOP         : in  std_logic := '0';
     RX_EOP         : in  std_logic := '0';
- 
+
     -- ================
     -- Output interface
     -- ================
@@ -29,7 +29,7 @@ entity STREAMING_DEBUG_PROBE is
     TX_DST_RDY     : in  std_logic;
     TX_SOP         : out std_logic := '0';
     TX_EOP         : out std_logic := '0';
-         
+
     -- ==================
     -- Debuging interface
     -- ==================
@@ -49,15 +49,15 @@ entity STREAMING_DEBUG_PROBE is
   );
 end entity;
 
-architecture full of STREAMING_DEBUG_PROBE is 
+architecture full of STREAMING_DEBUG_PROBE is
 begin
   TX_SRC_RDY      <= not DEBUG_DROP and not DEBUG_BLOCK and RX_SRC_RDY;
   RX_DST_RDY      <= DEBUG_DROP or (not DEBUG_BLOCK and TX_DST_RDY);
   DEBUG_SRC_RDY   <= not DEBUG_BLOCK and RX_SRC_RDY;
-  DEBUG_DST_RDY   <= DEBUG_DROP or (not DEBUG_BLOCK and TX_DST_RDY); 
+  DEBUG_DST_RDY   <= DEBUG_DROP or (not DEBUG_BLOCK and TX_DST_RDY);
   TX_SOP          <= RX_SOP;
   TX_EOP          <= RX_EOP;
   DEBUG_SOP       <= RX_SOP;
-  DEBUG_EOP       <= RX_EOP; 
+  DEBUG_EOP       <= RX_EOP;
 end architecture;
 

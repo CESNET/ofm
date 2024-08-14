@@ -13,15 +13,15 @@ import pickle
 import nfb
 
 # Implementation of dummy handlers for reading/writing of MI32 transactions.
-# These handlers are not required and are used for testing purposes only. 
-# The real implementation should call the csbus or appropriate tool. 
+# These handlers are not required and are used for testing purposes only.
+# The real implementation should call the csbus or appropriate tool.
 # Notice that real handles has to match with the provided prototypes.
 memory = None
 mfb    = {"WORD": {},"VLD" : 0, "SOF_POS" : 0, "EOF_POS" : 0}
 
 def write32(addr,data):
     """
-    Write the 32-bit transaction. The function throws the instance of 
+    Write the 32-bit transaction. The function throws the instance of
     IOError class when the write operation fails.
 
     Parametrs:
@@ -30,7 +30,7 @@ def write32(addr,data):
     """
     global memory
     global mfb
-    print("Data write: 0x%05X ==> 0x%02X" % (addr,data)) 
+    print("Data write: 0x%05X ==> 0x%02X" % (addr,data))
     if addr >= PlayerConfigurator.DATA_OFFSET:
         # We are writting data, append them into the list of MI32 transactions
         mfb["WORD"][addr] = data
@@ -43,7 +43,7 @@ def write32(addr,data):
         if (data & 0x1):
             # Write data and reset the structure
             memory.append(mfb)
-            mfb = {"WORD": {},"VLD" : 0, "SOF_POS" : 0, "EOF_POS" : 0}  
+            mfb = {"WORD": {},"VLD" : 0, "SOF_POS" : 0, "EOF_POS" : 0}
     elif addr == PlayerConfigurator.SOF_POS_OFFSET:
         # Writting of shared sof_pos
         mfb["SOF_POS"] = data
@@ -59,20 +59,20 @@ def write32(addr,data):
             #f.close()
             print("All data were written into memory")
         elif data == PlayerConfigurator.CMD_STORE_EN:
-            # Output dictionary with mapping data (this contains the representation of 
+            # Output dictionary with mapping data (this contains the representation of
             # recorder fifo memory)
             memory = []
             # Helping variables
-            mfb = {"WORD": {},"VLD" : 0, "SOF_POS" : 0, "EOF_POS" : 0}  
+            mfb = {"WORD": {},"VLD" : 0, "SOF_POS" : 0, "EOF_POS" : 0}
             print("All memory structures were initialized.")
     else:
         # Just print information about the write operation
-        print("Data write: 0x%05X ==> 0x%02X" % (addr,data)) 
+        print("Data write: 0x%05X ==> 0x%02X" % (addr,data))
 
 def read32(addr):
     """
     Read the 32-bit transaction. The function returns 32-bit number.
-    The function throws the instance of IOError class when the 
+    The function throws the instance of IOError class when the
     read operation fails
     """
     pass
@@ -81,7 +81,7 @@ def read32(addr):
 class PlayerConfigurator(object):
     """
     This class implements the configuration process of the frame player component via a 32bit configuration
-    interface. This class can be runned from this script (you have to just implement the read/write handlers) 
+    interface. This class can be runned from this script (you have to just implement the read/write handlers)
     or  you can use it in your own projects where the appropriate read/write operations are passed.
     """
     # Constants for the address space and commands
@@ -90,12 +90,12 @@ class PlayerConfigurator(object):
     SOF_POS_OFFSET = 0x0C
     EOF_POS_OFFSET = 0x10
     CTRL_OFFSET    = 0x04
-    
+
     # Commands
     CMD_STORE_EN   = 0x1
     CMD_STORE_DIS  = 0x2
     CMD_STORE_RPT  = 0xB
- 
+
     def __init__(self,regions,region_size,block_size,item_width,fifo_depth,write_handler,read_handler,pcap,base = 0x0):
         """
         Initilization of the player configurator class. The class should be initialized
@@ -105,7 +105,7 @@ class PlayerConfigurator(object):
             - regions       - the number of MFB regions
             - region_size   - the width of one region
             - block_size    - size of one block
-            - item_width    - number of items in a block 
+            - item_width    - number of items in a block
             - fifo_depth    - number of items which can be stored in a FIFO memory
             - write_handler - handler on the write function (capable to write a 32-bit transaction)
             - read_handler  - handler on the read function (capable to read a 32-bit transaction)
@@ -141,7 +141,7 @@ class PlayerConfigurator(object):
         #print("SOF_POS width " + str(self.sof_elem_width))
         #print("EOF_POS width " + str(self.eof_elem_width))
         self.words_cnt = 0
-   
+
     def configure(self,repeate_en=False):
         """
         The main function for the configuration of the frame_player component
@@ -157,7 +157,7 @@ class PlayerConfigurator(object):
             self.writeh(self.base+self.CTRL_OFFSET,self.CMD_STORE_RPT)
         else:
             self.writeh(self.base+self.CTRL_OFFSET,self.CMD_STORE_DIS)
-  
+
     def _reset_mfb_struct(self):
         """
         Method for resetting of MFB stuff.
@@ -169,7 +169,7 @@ class PlayerConfigurator(object):
             "EOF"       : [False  for i in range(0,self.regions)],
             "EOF_POS"   : [0      for i in range(0,self.regions)]
         }
- 
+
     def _generate(self):
         """
         Generate the configuration stream for the MFB player component. This component reads a packet
@@ -179,7 +179,7 @@ class PlayerConfigurator(object):
         # stream.
         packets = scapy.rdpcap(self.pcap)
         # Prepare the MFB stuff
-        mfb = self._reset_mfb_struct() 
+        mfb = self._reset_mfb_struct()
         reg = 0
         # Helping variables
         fifo_ptr      = 0
@@ -199,7 +199,7 @@ class PlayerConfigurator(object):
             pkt_cnt += 1
             #content = map(ord,bytes(packet))
             content = bytes(packet)
-            # Now we need to split a frame into blocks. Therefore, we need to create an n-tuples where 
+            # Now we need to split a frame into blocks. Therefore, we need to create an n-tuples where
             # n is the number of items in one block
             block_elements = self.block_size * self.item_width/8
             # print(block_elements)
@@ -224,7 +224,7 @@ class PlayerConfigurator(object):
                 first = True if segment == 0 else False
                 last  = True if segment == (len(block_list)-1) else False
                 # Check if the MFB word is completed. The MFB is considered to be completed iff:
-                #   * 1) All regions and slots are filled 
+                #   * 1) All regions and slots are filled
                 #   * 2) All regions are filled and start of new frame is detected. In such situation we
                 #        need to fill the remaining place with zeros.
                 if ((reg+1) == self.regions and len(mfb["WORD"][-1]) == self.region_size) or ((reg+1) == self.regions and (first and mfb["SOF"][reg])) :
@@ -248,19 +248,19 @@ class PlayerConfigurator(object):
                     # print("MFB new region")
                 # Add blocks into the MFB region and also deal with the sop/eop signalization
                 if first:
-                    # Remember the start block 
+                    # Remember the start block
                     #print("MFB block SOF")
                     mfb["SOF"][reg] = True
                     mfb["SOF_POS"][reg] = len(mfb["WORD"][reg])
                 if last:
-                    # Remember the last item. The block element is built from 
+                    # Remember the last item. The block element is built from
                     # independet items.
                     #print("MFB block EOF")
-                    mfb["EOF"][reg] = True 
+                    mfb["EOF"][reg] = True
                     eop_pos = len(mfb["WORD"][reg])*self.block_size + len(block)-1
                     mfb["EOF_POS"][reg] = eop_pos
                 # Append the data block extend the data before appending
-                self._fill_zeros(block,block_elements) 
+                self._fill_zeros(block,block_elements)
                 mfb["WORD"][reg].append(block)
                 segment += 1
                 mfb_blk += 1
@@ -285,7 +285,7 @@ class PlayerConfigurator(object):
                 # Inverse the item list
                 for item in block[::-1]:
                     mfb_bus = (mfb_bus << 8) | item
-        # Split the serialized transaction into independent write transactions. Generate the 
+        # Split the serialized transaction into independent write transactions. Generate the
         # write transactions for the MFB
         data_offset = self.DATA_OFFSET
         for i in range(0,self.mi32_transactions):
@@ -323,12 +323,12 @@ class PlayerConfigurator(object):
         vld_sig = (sof << (self.regions+1)) | (eof << 1) | 0x1
         self.writeh(self.base+self.VLD_OFFSET,int(vld_sig))
         self.words_cnt += 1
- 
+
     def _split(self,data,n):
         """
         This function splits a list elements into chunks of length n. Unused place
         is filled with zeros.
-    
+
         Parameters:
             - data - data to split (it is typically a list)
             - n  - legth of the stride
@@ -351,7 +351,7 @@ class PlayerConfigurator(object):
         if len(data) < n:
             # We need to fill data
             data.extend([0] * (int(n)-len(data)))
-    
+
     def _fill_mfb_word(self,mfb,n):
         """
         Iterate over the MFB bus and fill remaining blocks with zeros.
@@ -361,12 +361,12 @@ class PlayerConfigurator(object):
             - n        - length of the stride
         """
         for region in mfb["WORD"]:
-            # Check if the region contains the required number of blocks. Before that, 
+            # Check if the region contains the required number of blocks. Before that,
             # extend the last know block with zeros
             if len(region) > 0:
                 self._fill_zeros(region[-1],n)
             if len(region) < self.region_size:
-                # We need to add more regions 
+                # We need to add more regions
                 region.extend([[0] * int(n)] * (self.region_size - len(region)))
 
 

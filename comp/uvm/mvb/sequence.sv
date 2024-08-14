@@ -2,12 +2,12 @@
 //-- Copyright (C) 2021 CESNET z. s. p. o.
 //-- Author(s): Tomáš Beneš <xbenes55@stud.fit.vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 `ifndef MVB_SEQUENCE_SV
 `define MVB_SEQUENCE_SV
 
-// This low level sequence define bus functionality 
+// This low level sequence define bus functionality
 class sequence_simple_rx #(int unsigned ITEMS, int unsigned ITEM_WIDTH) extends uvm_sequence #(uvm_mvb::sequence_item #(ITEMS, ITEM_WIDTH));
     `uvm_object_param_utils(uvm_mvb::sequence_simple_rx #(ITEMS, ITEM_WIDTH))
 

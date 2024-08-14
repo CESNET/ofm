@@ -106,7 +106,7 @@ begin
         MI_DRD             => MI_DRD,
         MI_ARDY            => MI_ARDY,
         MI_DRDY            => MI_DRDY,
-        
+
         AVMM_ADDRESS       => mc_addr,
         AVMM_WRITE         => mc_wr,
         AVMM_READ          => mc_rd,

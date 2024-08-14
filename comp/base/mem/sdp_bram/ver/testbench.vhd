@@ -46,10 +46,10 @@ architecture full of testbench is
 
     signal wr_en       : std_logic;
     signal wr_be       : std_logic_vector(max((DATA_WIDTH/BLOCK_WIDTH),1)-1 downto 0);
-    signal wr_addr     : std_logic_vector(log2(ITEMS)-1 downto 0); 
+    signal wr_addr     : std_logic_vector(log2(ITEMS)-1 downto 0);
     signal wr_data     : std_logic_vector(DATA_WIDTH-1 downto 0);
     signal rd_en       : std_logic;
-    signal rd_pipe_en  : std_logic; 
+    signal rd_pipe_en  : std_logic;
     signal rd_addr     : std_logic_vector(log2(ITEMS)-1 downto 0);
     signal rd_data     : std_logic_vector(DATA_WIDTH-1 downto 0);
     signal rd_data_vld : std_logic;
@@ -98,7 +98,7 @@ begin
         WR_BE       => wr_be      ,
         WR_ADDR     => wr_addr    ,
         WR_DATA     => wr_data    ,
-                                  
+
         RD_CLK      => rclk       ,
         RD_RST      => rreset     ,
         RD_EN       => rd_en      ,
@@ -240,7 +240,7 @@ begin
                     end if;
                 end loop;
             end if;
-            
+
             if (wreset='1') then
                 model_mem_block_vld <= (others => (others => '0'));
             end if;

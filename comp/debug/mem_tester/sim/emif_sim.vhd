@@ -27,13 +27,13 @@ port(
     CLK                     : in    std_logic;
     RST                     : in    std_logic;
 
-    AMM_READY               : out   std_logic;                                          
-    AMM_READ                : in    std_logic;                   
+    AMM_READY               : out   std_logic;
+    AMM_READ                : in    std_logic;
     AMM_WRITE               : in    std_logic;
     AMM_ADDRESS             : in    std_logic_vector(AMM_ADDR_WIDTH - 1           downto 0);
-    AMM_READ_DATA           : out   std_logic_vector(AMM_DATA_WIDTH - 1           downto 0);                    
-    AMM_WRITE_DATA          : in    std_logic_vector(AMM_DATA_WIDTH - 1           downto 0);  
-    AMM_BURST_COUNT         : in    std_logic_vector(AMM_BURST_COUNT_WIDTH - 1    downto 0);    
+    AMM_READ_DATA           : out   std_logic_vector(AMM_DATA_WIDTH - 1           downto 0);
+    AMM_WRITE_DATA          : in    std_logic_vector(AMM_DATA_WIDTH - 1           downto 0);
+    AMM_BURST_COUNT         : in    std_logic_vector(AMM_BURST_COUNT_WIDTH - 1    downto 0);
     AMM_READ_DATA_VALID     : out   std_logic;
 
     -- =====================
@@ -43,7 +43,7 @@ port(
     -- =====================
 
     EMIF_RST_REQ            : in    std_logic;
-    EMIF_RST_DONE           : out   std_logic;    
+    EMIF_RST_DONE           : out   std_logic;
     EMIF_ECC_ISR            : out   std_logic;
     EMIF_CAL_SUCCESS        : out   std_logic;
     EMIF_CAL_FAIL           : out   std_logic;
@@ -58,19 +58,19 @@ port(
 end entity;
 
 architecture FULL of EMIF_SIM is
-    constant MEM_INIT_TIME                  : time := CLK_PERIOD * 4;   
+    constant MEM_INIT_TIME                  : time := CLK_PERIOD * 4;
     -- Max random CLK cycles cnt of AMM READY being at 0
     constant NOT_READY_MAX_DELAY            : integer := 20;
     -- Max random period of asserting AMM READY to 0 for random time
-    constant NOT_READY_MAX_PERIOD           : integer := 20;     
+    constant NOT_READY_MAX_PERIOD           : integer := 20;
 
     constant NOT_VALID_MAX_DELAY            : integer := 100;
-    constant NOT_VALID_MAX_DELAY_CHANCE     : real := 0.1;     
+    constant NOT_VALID_MAX_DELAY_CHANCE     : real := 0.1;
 
-    constant MEM_READ_TIME                  : time := CLK_PERIOD * 4;   
+    constant MEM_READ_TIME                  : time := CLK_PERIOD * 4;
 
     type States is (
-        INIT, 
+        INIT,
         DATA_WRITE,
         DATA_READ,
         WAITING_READ,
@@ -102,7 +102,7 @@ begin
 
     ready <= '1' when (mem_init = '0' and error_occured = '0' and emif_random_wait = '0')
              else '0';
-   
+
     AMM_READY <= ready;
     EMIF_ECC_ISR <= '0';
 
@@ -141,12 +141,12 @@ begin
         variable write_addr         : integer;
 
     begin
-        wait until (ready = '1' and AMM_WRITE = '1' and rising_edge(CLK)); 
+        wait until (ready = '1' and AMM_WRITE = '1' and rising_edge(CLK));
         for b in 0 to (to_integer(unsigned(AMM_BURST_COUNT)) - 1) loop
-            if (b = 0) then 
+            if (b = 0) then
                 write_start_addr    := to_integer(unsigned(AMM_ADDRESS));
             else
-                wait until (ready = '1' and AMM_WRITE = '1' and rising_edge(CLK)); 
+                wait until (ready = '1' and AMM_WRITE = '1' and rising_edge(CLK));
             end if;
 
             write_addr              := write_start_addr + b;
@@ -162,10 +162,10 @@ begin
 
     init_p : process
     begin
-        --wait until (falling_edge(RST)); 
-        wait until (falling_edge(RST)           and EMIF_RST_REQ = '0') or 
+        --wait until (falling_edge(RST));
+        wait until (falling_edge(RST)           and EMIF_RST_REQ = '0') or
                    (falling_edge(EMIF_RST_REQ)  and RST = '0')          or
-                   (falling_edge(EMIF_RST_REQ)  and falling_edge(RST));            
+                   (falling_edge(EMIF_RST_REQ)  and falling_edge(RST));
 
         EMIF_RST_DONE <= '0';
         mem_init <= '1';
@@ -185,10 +185,10 @@ begin
         wait until rising_edge(CLK);
         wait until rising_edge(CLK);
 
-        assert EMIF_RST_REQ = '1' 
+        assert EMIF_RST_REQ = '1'
             report "EMIF user reset request has to be at least 2 CLK cycles at '1'!"
             severity error;
-        
+
         wait until EMIF_RST_REQ = '0' and rising_edge(CLK);
     end process;
 
@@ -196,7 +196,7 @@ begin
     begin
         EMIF_CAL_SUCCESS    <= '0';
         EMIF_CAL_FAIL       <= '0';
- 
+
         wait until falling_edge(mem_init);
 
         EMIF_CAL_SUCCESS    <= '1';
@@ -207,13 +207,13 @@ begin
     -- Memory access simulation --
     ------------------------------
 
-    read_p : process 
+    read_p : process
         variable last_readed_data_time : time := 0 ns;
 
         variable seed_1, seed_2     : positive;
         variable r                  : real;
         variable wait_clk_cycles    : integer;
-    begin            
+    begin
         wait until rising_edge(CLK);
 
         if (RST = '1') then
@@ -222,7 +222,7 @@ begin
             for burst in 0 to (to_integer(unsigned(AMM_BURST_COUNT)) - 1) loop
 
                 if (last_readed_data_time < now) then
-                    last_readed_data_time := now + MEM_READ_TIME + burst * CLK_PERIOD + CLK_PERIOD / 4;   
+                    last_readed_data_time := now + MEM_READ_TIME + burst * CLK_PERIOD + CLK_PERIOD / 4;
                     -- CLK_PERIOD / 4 <- to avoid bad timing
                 end if;
 

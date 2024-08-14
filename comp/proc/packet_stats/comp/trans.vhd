@@ -34,7 +34,7 @@ entity TRANS_STATS is
       IN_ADD_PACKET     : in  std_logic;
       IN_SRC_RDY        : in  std_logic;
       IN_DST_RDY        : out std_logic;
-      
+
       OUT_CNT_ADDRESS   : out std_logic_vector(ADDRESS_WIDTH-1 downto 0);
       OUT_PACKET_LENGTH : out std_logic_vector(PACKET_LENGTH_WD-1 downto 0);
       OUT_ADD_PACKET    : out std_logic;
@@ -58,7 +58,7 @@ begin
       OUT_ADD_PACKET <= '0';
       OUT_RST_COUNTERS <= '0';
       if(RM_REQ = '1') then
-         if(RM_RD_ENABLE = '1') then 
+         if(RM_RD_ENABLE = '1') then
             OUT_ADD_PACKET <= '1';
          else
             OUT_ADD_PACKET <= '0';

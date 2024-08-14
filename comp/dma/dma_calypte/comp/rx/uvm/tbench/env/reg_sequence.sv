@@ -1,8 +1,8 @@
-//-- reg_sequence: register sequence 
+//-- reg_sequence: register sequence
 //-- Copyright (C) 2022 CESNET z. s. p. o.
 //-- Author(s): Radek Iša <isa@cesnet.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 
 class start_channel extends uvm_sequence;

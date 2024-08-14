@@ -77,7 +77,7 @@ class scoreboard #(RX_MFB_ITEM_W, RX_MVB_ITEM_W, USERMETA_W, MOD_W) extends uvm_
     function void report_phase(uvm_phase phase);
         string msg = "\n";
 
-        if (this.success() && this.used() == 0) begin 
+        if (this.success() && this.used() == 0) begin
             `uvm_info(get_type_name(), {msg, "\n\n\t---------------------------------------\n\t----     VERIFICATION SUCCESS      ----\n\t---------------------------------------"}, UVM_NONE)
         end else begin
             `uvm_info(get_type_name(), {msg, "\n\n\t---------------------------------------\n\t----     VERIFICATION FAILED       ----\n\t---------------------------------------"}, UVM_NONE)

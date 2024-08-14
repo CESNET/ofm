@@ -14,7 +14,7 @@ set COMPONENTS [ list \
    [ list "SV_COMMON"        $OFM_PATH/comp/ver            "FULL" ] \
    [ list "SV_AXI"           $OFM_PATH/comp/ver/pcie       "FULL" ] \
    [ list "MI"               $OFM_PATH/comp/mi_tools/ver "UNIFIED" ] \
-] 
+]
 
 set MOD "$MOD $ENTITY_BASE/tbench/test_pkg.sv"
 set MOD "$MOD $ENTITY_BASE/tbench/dut.sv"

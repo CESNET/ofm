@@ -50,7 +50,7 @@ entity fl_distributor_ifsel is
       TX_EOP_N    : out std_logic;
       TX_SOF_N    : out std_logic;
       TX_EOF_N    : out std_logic;
-   
+
       TX_INTERFACE : out std_logic_vector(log2(INTERFACES_COUNT)-1 downto 0)
    );
 end entity;

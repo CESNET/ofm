@@ -28,7 +28,7 @@ entity BUF_STATUS_ALMOST_FULL is
     MULTI_WRITE : boolean := false;
     -- indicates that more than one item can be read in one cycle
     MULTI_READ  : boolean := false;
-    -- number of free items when fifo is declared ALMOST_FULL 
+    -- number of free items when fifo is declared ALMOST_FULL
     FREE_ITEMS  : integer := 1
   );
 

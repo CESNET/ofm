@@ -15,15 +15,15 @@
 //                        Package declaration
 // ----------------------------------------------------------------------------
 package test_pkg;
-   
+
     import sv_common_pkg::TRUE, sv_common_pkg::FALSE;
-    import math_pkg::*;       // log2() 
-   
+    import math_pkg::*;       // log2()
+
    // Include this file if you want to use C plus plus Scoreboard
    // `include "dpi/dpi_scoreboard.sv"
 
    // DUT GENERICS
-   parameter DATA_WIDTH    = 512; 
+   parameter DATA_WIDTH    = 512;
    parameter SOP_POS_WIDTH = 3;
    parameter PORTS         = 8;
 
@@ -53,7 +53,7 @@ package test_pkg;
    parameter GENERATOR0_FLU_PACKET_COUNT    = 1;                  // pocet paketov vo frame
    int       GENERATOR0_FLU_PACKET_SIZE_MAX = 256;                // maximalna velkost paketov
    int       GENERATOR0_FLU_PACKET_SIZE_MIN = 60;                 // minimalna velkost paketov
- 
+
    // TRANSACTION FORMAT (HEADER GENERATOR)
    int GENERATOR_FL_PACKET_SIZE_MIN = HDR_WIDTH/8;
    int GENERATOR_FL_PAKCET_SIZE_MAX = HDR_WIDTH/8;
@@ -74,11 +74,11 @@ package test_pkg;
    parameter DRIVER0_START_POS_HIGH     = 2**SOP_POS_WIDTH-1;
 
    // MONITOR0 PARAMETERS
-   parameter MONITOR0_DELAYEN_WT         = 1;                     // vaha delay enable medzi transakciami 
+   parameter MONITOR0_DELAYEN_WT         = 1;                     // vaha delay enable medzi transakciami
    parameter MONITOR0_DELAYDIS_WT        = 1;                     // vaha delay disable medzi transakciami
    parameter MONITOR0_DELAYLOW           = 0;                     // spodna hranica delay medzi transakciami
    parameter MONITOR0_DELAYHIGH          = 3;                     // horna hranica delay medzi transakciami
-   parameter MONITOR0_INSIDE_DELAYEN_WT  = 0;                     // vaha delay enable v transakcii 
+   parameter MONITOR0_INSIDE_DELAYEN_WT  = 0;                     // vaha delay enable v transakcii
    parameter MONITOR0_INSIDE_DELAYDIS_WT = 3;                     // vaha delay disable v transakcii
    parameter MONITOR0_INSIDE_DELAYLOW    = 0;                     // spodna hranica delay v transakcii
    parameter MONITOR0_INSIDE_DELAYHIGH   = 3;                     // horna hranica delay v transakcii
@@ -97,15 +97,15 @@ package test_pkg;
   parameter DRIVER_HDR_START_POS_HIGH           = 0;
 
   // MONITOR PARAMETERS
-  parameter MONITOR_HDR_DELAYEN_WT         = 1;                     // vaha delay enable medzi transakciami 
+  parameter MONITOR_HDR_DELAYEN_WT         = 1;                     // vaha delay enable medzi transakciami
   parameter MONITOR_HDR_DELAYDIS_WT        = 1;                     // vaha delay disable medzi transakciami
   parameter MONITOR_HDR_DELAYLOW           = 0;                     // spodna hranica delay medzi transakciami
   parameter MONITOR_HDR_DELAYHIGH          = 3;                     // horna hranica delay medzi transakciami
-  parameter MONITOR_HDR_INSIDE_DELAYEN_WT  = 0;                     // vaha delay enable v transakcii 
+  parameter MONITOR_HDR_INSIDE_DELAYEN_WT  = 0;                     // vaha delay enable v transakcii
   parameter MONITOR_HDR_INSIDE_DELAYDIS_WT = 3;                     // vaha delay disable v transakcii
   parameter MONITOR_HDR_INSIDE_DELAYLOW    = 0;                     // spodna hranica delay v transakcii
   parameter MONITOR_HDR_INSIDE_DELAYHIGH   = 3;                     // horna hranica delay v transakcii
-    
+
    // Include this file if you want to use standard SystemVerilog Scoreboard
    `include "scoreboard.sv"
 

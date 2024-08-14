@@ -16,8 +16,8 @@ use IEEE.std_logic_1164.all;
 use work.math_pack.all;
 
 -- ----------------------------------------------------------------------------
---                               ENTITY DECLARATION 
--- ---------------------------------------------------------------------------- 
+--                               ENTITY DECLARATION
+-- ----------------------------------------------------------------------------
 
 entity FL_PIPE is
    generic(
@@ -34,7 +34,7 @@ entity FL_PIPE is
       FAKE_PIPE      : boolean:= false;
       -- Only for PIPE_TYPE = "SHREG"!
       RESET_BY_INIT  : boolean:= false
-   );   
+   );
    port(
       -- ================
       -- Common interface
@@ -43,7 +43,7 @@ entity FL_PIPE is
       CLK            : in std_logic;
       -- NOTE: also starts debug counters
       RESET          : in std_logic;
-      
+
       -- ================
       -- Input interface
       -- ================
@@ -56,7 +56,7 @@ entity FL_PIPE is
       RX_DST_RDY_N   : out std_logic;
       RX_DATA        : in  std_logic_vector(DATA_WIDTH-1 downto 0);
       RX_REM         : in  std_logic_vector(tsel(DATA_WIDTH >= 8, log2(DATA_WIDTH/8) -1, -1) downto 0);
- 
+
       -- ================
       -- Output interface
       -- ================
@@ -69,7 +69,7 @@ entity FL_PIPE is
       TX_DST_RDY_N   : in  std_logic;
       TX_DATA        : out std_logic_vector(DATA_WIDTH-1 downto 0);
       TX_REM         : out std_logic_vector(tsel(DATA_WIDTH >= 8, log2(DATA_WIDTH/8) -1, -1) downto 0);
-         
+
       -- ==================
       -- Debuging interface
       -- ==================
@@ -90,7 +90,7 @@ entity FL_PIPE is
 end entity FL_PIPE;
 
 -- ----------------------------------------------------------------------------
---                            ARCHITECTURE DECLARATION 
+--                            ARCHITECTURE DECLARATION
 -- ----------------------------------------------------------------------------
 architecture fl_pipe_arch of FL_PIPE is
 
@@ -104,12 +104,12 @@ architecture fl_pipe_arch of FL_PIPE is
    signal pipe_out_data       : std_logic_vector(PIPE_WIDTH-1 downto 0);
    signal pipe_out_src_rdy    : std_logic;
    signal pipe_out_dst_rdy    : std_logic;
-   
+
    signal sig_rx_src_rdy_n    : std_logic;
    signal sig_rx_dst_rdy_n    : std_logic;
    signal sig_rx_sof_n        : std_logic;
    signal sig_rx_eof_n        : std_logic;
-   
+
 begin
    pipe_in_data      <= sig_rx_sof_n & RX_SOP_N & RX_EOP_N & sig_rx_eof_n & RX_REM & RX_DATA;
    pipe_in_src_rdy   <= not sig_rx_src_rdy_n;
@@ -120,7 +120,7 @@ begin
    TX_EOP_N          <= pipe_out_data(DATA_WIDTH+REM_WIDTH+1);
    TX_EOF_N          <= pipe_out_data(DATA_WIDTH+REM_WIDTH+0);
    TX_DATA           <= pipe_out_data(DATA_WIDTH-1 downto 0);
-   TX_REM            <= pipe_out_data(DATA_WIDTH+REM_WIDTH-1 
+   TX_REM            <= pipe_out_data(DATA_WIDTH+REM_WIDTH-1
                         downto DATA_WIDTH);
    TX_SRC_RDY_N      <= not pipe_out_src_rdy;
    pipe_out_dst_rdy  <= not TX_DST_RDY_N;
@@ -139,7 +139,7 @@ begin
    port map(
       CLK         => CLK,
       RESET       => RESET,
-      
+
       IN_DATA      => pipe_in_data,
       IN_SRC_RDY   => pipe_in_src_rdy,
       IN_DST_RDY   => pipe_in_dst_rdy,
@@ -148,7 +148,7 @@ begin
       OUT_SRC_RDY  => pipe_out_src_rdy,
       OUT_DST_RDY  => pipe_out_dst_rdy
    );
-   
+
    -- -------------------------------------------------------------------------
    --                                 DEBUG                                  --
    -- -------------------------------------------------------------------------

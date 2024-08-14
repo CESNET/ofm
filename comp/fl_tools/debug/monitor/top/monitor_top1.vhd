@@ -27,7 +27,7 @@ entity FL_MONITOR_TOP1 is
       FL_WIDTH    : integer;
       -- Monitored word width in bits
       WORD_WIDTH  : integer;
-      -- Monitored word position - Counts the i'th word (with WORD_WIDTH 
+      -- Monitored word position - Counts the i'th word (with WORD_WIDTH
       -- width) starting from 0
       WORD_POS    : integer
    );
@@ -63,7 +63,7 @@ begin
          FL_WIDTH => FL_WIDTH,
          -- Monitored word width in bits
          WORD_WIDTH => WORD_WIDTH,
-         -- Monitored word position - Counts the i'th word (with WORD_WIDTH 
+         -- Monitored word position - Counts the i'th word (with WORD_WIDTH
          -- width) starting from 0
          WORD_POS => WORD_POS
       )
@@ -73,7 +73,7 @@ begin
          CLK       => CLK,
          -- This will set default monitored data after RESET
          DEFAULT_DATA => DEFAULT_DATA,
-   
+
          -- Framelink interface of transmitting component
          SOF_N     => RX_SOF_N,
          SOP_N     => RX_SOP_N,
@@ -84,7 +84,7 @@ begin
          DST_RDY_N => RX_DST_RDY_N,
          DATA      => RX_DATA,
          DREM      => RX_DREM,
-   
+
          -- Memory interface
          ADC_RD    => MI.RD,
          ADC_WR    => MI.WR,

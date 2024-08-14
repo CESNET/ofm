@@ -289,7 +289,7 @@ begin
         DIN      => tx_mfb_lng_undersized,
         DIN_MASK => (others => '1'),
         DIN_VLD  => '1'            ,
-        
+
         DOUT     => discarded_pkts,
         DOUT_VLD => open
     );
@@ -438,7 +438,7 @@ begin
     mfb_reg_out_p : process (CLK)
     begin
         if (rising_edge(CLK)) then
-            OUT_MFB_DATA    <= reg2_mac_data;    
+            OUT_MFB_DATA    <= reg2_mac_data;
             OUT_MFB_SOF     <= sig1_mfb_sof;
             OUT_MFB_SOF_POS <= slv_array_ser(sig1_mfb_sof_pos_arr);
             OUT_MFB_EOF     <= sig1_mfb_eof;

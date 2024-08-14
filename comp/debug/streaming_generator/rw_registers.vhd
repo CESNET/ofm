@@ -21,15 +21,15 @@ use UNISIM.vcomponents.all;
 entity RW_REGISTER is
    port (
       CLK         : in  std_logic;
-      --! MI32 BE signal 
+      --! MI32 BE signal
       BE          : in  std_logic_vector(3 downto 0);
-      --! input data 
+      --! input data
       DATA        : in  std_logic_vector(31 downto 0);
       --! enbale signal
       ENABLE      : in  std_logic;
-      --! reset signal 
+      --! reset signal
       RESET       : in  std_logic;
-      --! output data 
+      --! output data
       P           : out std_logic_vector(31 downto 0)
    );
 end RW_REGISTER;
@@ -37,7 +37,7 @@ end RW_REGISTER;
 --! architecture of CMP_DECODE
 architecture full of RW_REGISTER is
 begin
-   --! 4 * 8 bit rgistes  
+   --! 4 * 8 bit rgistes
    GEN_REG : for I in 0 to 3 generate
    begin
       gen_regs: process(CLK)
@@ -45,7 +45,7 @@ begin
          if(CLK'event) and (CLK='1') then
             if (RESET = '1') then
                P(7+(8*I) downto 0+(8*I)) <= (others => '0');
-            elsif (ENABLE = '1' and BE(I) = '1') then 
+            elsif (ENABLE = '1' and BE(I) = '1') then
                P(7+(8*I) downto 0+(8*I)) <= DATA(7+(8*I) downto 0+(8*I));
             end if;
          end if;

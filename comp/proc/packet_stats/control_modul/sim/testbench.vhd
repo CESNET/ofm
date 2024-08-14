@@ -27,7 +27,7 @@ architecture behavioral of testbench is
    constant NUM_PACKETS_WD    : integer := 48;
    constant ADDRESS_WIDTH     : integer := 10;
    constant CNT_WIDTH         : integer := 10;
-   
+
    signal CLK              : std_logic;
    signal RESET            : std_logic;
 
@@ -38,7 +38,7 @@ architecture behavioral of testbench is
       SRC_RDY           : std_logic;
       DST_RDY           : std_logic;
    end record;
-   
+
    type mi_t is record
       MI32_ADDR         : std_logic_vector(31 downto 0);
       MI32_WR           : std_logic;
@@ -49,14 +49,14 @@ architecture behavioral of testbench is
       MI32_ARDY         : std_logic;
       MI32_BE           : std_logic_vector(3 downto 0);
    end record;
-   
+
    type tr_num_t is record
       ADD_TR            : std_logic;
       ADD_RDY           : std_logic;
       RM_TR             : std_logic;
       RM_RDY            : std_logic;
    end record;
-   
+
    type flt_t is record
       FILTER_ADDR       : std_logic_vector(ADDRESS_WIDTH-1 downto 0);
       FILTER_RM         : std_logic;
@@ -68,12 +68,12 @@ architecture behavioral of testbench is
    signal tr_num_i   : tr_num_t;
    signal flt_i      : flt_t;
    signal flt_pac_i  : flt_pac_t;
-   
+
    signal mi_o       : mi_t;
    signal tr_num_o   : tr_num_t;
    signal flt_o      : flt_t;
    signal flt_pac_o  : flt_pac_t;
-   
+
    procedure init (
       signal mi : out mi_t;
       signal tr_num : out tr_num_t;
@@ -81,25 +81,25 @@ architecture behavioral of testbench is
       signal flt : out flt_t
    )is
    begin
-      mi.MI32_ADDR      <= (others => '0'); 
-      mi.MI32_WR        <= '0'; 
-      mi.MI32_DWR       <= (others => '0'); 
-      mi.MI32_RD        <= '0'; 
+      mi.MI32_ADDR      <= (others => '0');
+      mi.MI32_WR        <= '0';
+      mi.MI32_DWR       <= (others => '0');
+      mi.MI32_RD        <= '0';
       mi.MI32_BE        <= (others => '0');
 
-      tr_num.ADD_TR     <= '0'; 
-      tr_num.ADD_RDY    <= '0'; 
-      tr_num.RM_TR      <= '0'; 
-      tr_num.RM_RDY     <= '0'; 
-      
-      flt.FILTER_ADDR   <= (others => '0'); 
-      flt.FILTER_RM     <= '0'; 
+      tr_num.ADD_TR     <= '0';
+      tr_num.ADD_RDY    <= '0';
+      tr_num.RM_TR      <= '0';
+      tr_num.RM_RDY     <= '0';
+
+      flt.FILTER_ADDR   <= (others => '0');
+      flt.FILTER_RM     <= '0';
       flt.FILTER_RM_ALL <= '0';
 
-      flt_pac.CNT_ADDRESS   <= (others => '0'); 
+      flt_pac.CNT_ADDRESS   <= (others => '0');
       flt_pac.PACKET_LENGTH <= (others => '0');
-      flt_pac.ADD_PACKET    <= '0'; 
-      flt_pac.SRC_RDY       <= '1'; 
+      flt_pac.ADD_PACKET    <= '0';
+      flt_pac.SRC_RDY       <= '1';
 	   wait for reset_time;
       wait for clkper;
    end procedure;
@@ -116,7 +116,7 @@ architecture behavioral of testbench is
          tr_num.ADD_RDY <= '0';
       end loop;
    end procedure;
-   
+
    procedure tr_remove (
       signal tr_num : out tr_num_t;
       num : in integer
@@ -141,7 +141,7 @@ architecture behavioral of testbench is
    begin
       for I in 0 to num-1 loop
          flt_in.FILTER_ADDR <= conv_std_logic_vector(addr, ADDRESS_WIDTH);
-         if(rm_all = true) then 
+         if(rm_all = true) then
             flt_in.FILTER_RM_ALL <= '1';
          else
             flt_in.FILTER_RM_ALL <= '0';
@@ -155,7 +155,7 @@ architecture behavioral of testbench is
          flt_in.FILTER_RM <= '0';
       end loop;
    end procedure;
-   
+
    procedure test_tr_num (
       signal tr_num : out tr_num_t
    )is
@@ -166,12 +166,12 @@ architecture behavioral of testbench is
       tr_remove(tr_num, 2);
       tr_add(tr_num, 9);
       wait for 2*clkper;
-      tr_num.RM_TR   <= '1';  
-      tr_num.RM_RDY  <= '1';  
-      tr_num.ADD_TR  <= '1';   
+      tr_num.RM_TR   <= '1';
+      tr_num.RM_RDY  <= '1';
+      tr_num.ADD_TR  <= '1';
       tr_num.ADD_RDY <= '1';
       wait for clkper;
-      tr_num.RM_RDY  <= '0';  
+      tr_num.RM_RDY  <= '0';
       tr_num.ADD_RDY <= '0';
       tr_remove(tr_num, 22);
    end procedure;
@@ -247,16 +247,16 @@ architecture behavioral of testbench is
    ) is
    begin
       for I in 0 to num-1 loop
-	      flt_pac_in.CNT_ADDRESS   <= conv_std_logic_vector(address, ADDRESS_WIDTH);     
-	      flt_pac_in.PACKET_LENGTH <= conv_std_logic_vector(length, PACKET_LENGTH_WD);     
-	      flt_pac_in.ADD_PACKET    <= '1';     
-	      flt_pac_in.SRC_RDY       <= '1';   
+	      flt_pac_in.CNT_ADDRESS   <= conv_std_logic_vector(address, ADDRESS_WIDTH);
+	      flt_pac_in.PACKET_LENGTH <= conv_std_logic_vector(length, PACKET_LENGTH_WD);
+	      flt_pac_in.ADD_PACKET    <= '1';
+	      flt_pac_in.SRC_RDY       <= '1';
 
 	      while flt_pac_out.DST_RDY = '0' loop
             wait for clkper;
          end loop;
          wait for clkper;
-         flt_pac_in.SRC_RDY      <= '0';  
+         flt_pac_in.SRC_RDY      <= '0';
 	   end loop;
    end procedure;
 
@@ -266,39 +266,39 @@ begin
    generic map (
       EN_DSP            => EN_DSP,
       PACKET_LENGTH_WD  => PACKET_LENGTH_WD,
-      NUM_BYTES_WD      => NUM_BYTES_WD, 
-      NUM_PACKETS_WD    => NUM_PACKETS_WD, 
+      NUM_BYTES_WD      => NUM_BYTES_WD,
+      NUM_PACKETS_WD    => NUM_PACKETS_WD,
       ADDRESS_WIDTH     => ADDRESS_WIDTH,
       CNT_WIDTH         => CNT_WIDTH
    )
    port map (
-      CLK               => CLK, 
+      CLK               => CLK,
       RESET             => RESET,
-      MI32_ADDR         => mi_i.MI32_ADDR, 
-      MI32_WR           => mi_i.MI32_WR, 
-      MI32_DWR          => mi_i.MI32_DWR , 
-      MI32_RD           => mi_i.MI32_RD, 
-      MI32_DRD          => mi_o.MI32_DRD , 
-      MI32_DRDY         => mi_o.MI32_DRDY, 
-      MI32_ARDY         => mi_o.MI32_ARDY, 
-      MI32_BE           => mi_i.MI32_BE, 
-      ADD_TR            => tr_num_i.ADD_TR, 
-      ADD_RDY           => tr_num_i.ADD_RDY, 
-      RM_TR             => tr_num_i.RM_TR, 
-      RM_RDY            => tr_num_i.RM_RDY, 
-      FILTER_ADDR       => flt_i.FILTER_ADDR, 
-      FILTER_RM         => flt_i.FILTER_RM, 
-      FILTER_RM_ALL     => flt_i.FILTER_RM_ALL, 
-      FILTER_NEXT       => flt_o.FILTER_NEXT, 
-      CNT_ADDRESS       => flt_pac_i.CNT_ADDRESS,   
-      PACKET_LENGTH     => flt_pac_i.PACKET_LENGTH, 
-      ADD_PACKET        => flt_pac_i.ADD_PACKET, 
-      SRC_RDY           => flt_pac_i.SRC_RDY, 
-      DST_RDY           => flt_pac_o.DST_RDY      
+      MI32_ADDR         => mi_i.MI32_ADDR,
+      MI32_WR           => mi_i.MI32_WR,
+      MI32_DWR          => mi_i.MI32_DWR ,
+      MI32_RD           => mi_i.MI32_RD,
+      MI32_DRD          => mi_o.MI32_DRD ,
+      MI32_DRDY         => mi_o.MI32_DRDY,
+      MI32_ARDY         => mi_o.MI32_ARDY,
+      MI32_BE           => mi_i.MI32_BE,
+      ADD_TR            => tr_num_i.ADD_TR,
+      ADD_RDY           => tr_num_i.ADD_RDY,
+      RM_TR             => tr_num_i.RM_TR,
+      RM_RDY            => tr_num_i.RM_RDY,
+      FILTER_ADDR       => flt_i.FILTER_ADDR,
+      FILTER_RM         => flt_i.FILTER_RM,
+      FILTER_RM_ALL     => flt_i.FILTER_RM_ALL,
+      FILTER_NEXT       => flt_o.FILTER_NEXT,
+      CNT_ADDRESS       => flt_pac_i.CNT_ADDRESS,
+      PACKET_LENGTH     => flt_pac_i.PACKET_LENGTH,
+      ADD_PACKET        => flt_pac_i.ADD_PACKET,
+      SRC_RDY           => flt_pac_i.SRC_RDY,
+      DST_RDY           => flt_pac_o.DST_RDY
    );
 
    --Generate clock
-   clk_gen_p : process 
+   clk_gen_p : process
    begin
       CLK <= '1';
       wait for clkper/2;
@@ -315,7 +315,7 @@ begin
    wait;
    end process;
 
-   -- Simulating input flow 
+   -- Simulating input flow
    input_flow : process
    begin
       init(mi_i, tr_num_i, flt_pac_i, flt_i);

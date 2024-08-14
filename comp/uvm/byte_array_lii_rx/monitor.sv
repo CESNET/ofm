@@ -15,7 +15,7 @@
 class monitor_byte_array #(int unsigned DATA_WIDTH, logic DIC_EN, int unsigned VERBOSITY, int unsigned META_WIDTH, int unsigned SOF_WIDTH) extends uvm_byte_array::monitor;
 
     `uvm_component_param_utils(uvm_byte_array_lii_rx::monitor_byte_array #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH, SOF_WIDTH))
-    
+
     // Analysis port
     uvm_analysis_imp #(uvm_lii_rx::sequence_item #(DATA_WIDTH, META_WIDTH, SOF_WIDTH), monitor_byte_array #(DATA_WIDTH, DIC_EN, VERBOSITY, META_WIDTH, SOF_WIDTH)) analysis_export;
     uvm_byte_array::sequence_item h_tr;
@@ -280,7 +280,7 @@ class monitor_logic_vector #(int unsigned DATA_WIDTH, logic DIC_EN, int unsigned
             if (|tr.sof) begin
                 inframe  = 1'b1;
                 err_trig = 1'b0;
-                was_sof  = 1'b1; 
+                was_sof  = 1'b1;
             end
 
             if (inframe == 1'b1) begin

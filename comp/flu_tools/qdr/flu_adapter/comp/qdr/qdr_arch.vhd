@@ -54,7 +54,7 @@ architecture FULL of QDR is
    signal mux_wrin_di     : std_logic_vector(2*DATA_WIDTH*QDR_NUMBER-1 downto 0);
    signal mux_wrin_sel    : std_logic;
    signal mux_wrin_do     : std_logic_vector(DATA_WIDTH*QDR_NUMBER-1 downto 0);
-   
+
    --! Signals for DATA_OUT FIFO
    signal reg_data_out : std_logic_vector(DATA_WIDTH*QDR_NUMBER-1 downto 0);
    signal reg_data_out_we : std_logic_vector(QDR_NUMBER-1 downto 0);
@@ -93,7 +93,7 @@ begin
    fifo_rdin_di <= QDR_RX_RD_ADDR;
    fifo_rdin_wr <= (not fifo_rdin_full) and QDR_RX_RD_SRC_RDY;
    QDR_RX_RD_DST_RDY <= (not fifo_rdin_full);
-   
+
    fifo_rdin: entity work.ASFIFO_BRAM_XILINX
    generic map (
       DEVICE => "7SERIES",
@@ -107,7 +107,7 @@ begin
       CLK_WR => APP_CLK,
       RST_WR => APP_RST,
       DI => fifo_rdin_di,
-      WR => fifo_rdin_wr, 
+      WR => fifo_rdin_wr,
       AFULL => open,
       FULL => fifo_rdin_full,
 
@@ -177,7 +177,7 @@ begin
       CLK_WR => APP_CLK,
       RST_WR => APP_RST,
       DI => fifo_wrin_di,
-      WR => fifo_wrin_wr, 
+      WR => fifo_wrin_wr,
       AFULL => open,
       FULL => fifo_wrin_full,
 
@@ -191,7 +191,7 @@ begin
    );
 
    fifo_wrin_rd <= mux_wrin_sel;
-   
+
    mux_wrin_di <= fifo_wrin_do(2*DATA_WIDTH*QDR_NUMBER-1 downto 0);
 
    mux_wrin_do <= mux_wrin_di(DATA_WIDTH*QDR_NUMBER-1 downto 0) when (mux_wrin_sel = '0')
@@ -238,7 +238,7 @@ begin
             end if;
          end if;
       end process;
-      
+
       --! reg_data_out_we multiplexor
       reg_data_out_we(i) <= USER_RD_VALID(i) when (reg_data_out_we_sel(i) = '0') else '0';
 
@@ -276,12 +276,12 @@ begin
       );
 
       fifo_out_rd(i) <= (not fifo_out_empty_s) and QDR_TX_DST_RDY;
-      
+
       QDR_TX_DATA(DATA_WIDTH*(QDR_NUMBER+i+1)-1 downto DATA_WIDTH*(QDR_NUMBER+i))
-      <= fifo_out_do((DATA_WIDTH)*(i*2+1+1)-1 downto (DATA_WIDTH)*(i*2+1)); 
+      <= fifo_out_do((DATA_WIDTH)*(i*2+1+1)-1 downto (DATA_WIDTH)*(i*2+1));
 
       QDR_TX_DATA(DATA_WIDTH*(i+1)-1 downto DATA_WIDTH*(i))
-      <= fifo_out_do((DATA_WIDTH)*(i*2+1)-1 downto (DATA_WIDTH)*(i*2)); 
+      <= fifo_out_do((DATA_WIDTH)*(i*2+1)-1 downto (DATA_WIDTH)*(i*2));
 
       --! reg_data_out_we multiplexor selection signal
       reg_data_out_we_selp: process(QDR_CLK)

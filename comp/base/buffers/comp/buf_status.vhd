@@ -59,12 +59,12 @@ architecture behavioral of BUF_STATUS is
   signal empty_int     : std_logic;
   signal full_int      : std_logic;
 
-  signal reg_empty     : std_logic := '1'; 
+  signal reg_empty     : std_logic := '1';
   signal reg_full      : std_logic := '0';
   signal reg_status    : std_logic_vector(log2(ITEMS+1)-1 downto 0) := (others => '0');
 -- ----------------------------------------------------------------------------
 begin
-  
+
   STATUS <= reg_status;
   EMPTY  <= reg_empty;
   FULL   <= reg_full;

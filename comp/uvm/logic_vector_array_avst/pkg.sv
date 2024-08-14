@@ -1,4 +1,4 @@
-//-- pkg.sv: Package for environment that includes high level byte array and low level mfb agent 
+//-- pkg.sv: Package for environment that includes high level byte array and low level mfb agent
 //-- Copyright (C) 2023 CESNET z. s. p. o.
 //-- Author(s): Daniel Kriz <danielkriz@cesnet.cz>
 

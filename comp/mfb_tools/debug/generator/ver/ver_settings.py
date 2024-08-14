@@ -42,7 +42,7 @@ SETTINGS = {
         "MFB_BLOCK_SIZE"         : "8",
         "MFB_ITEM_WIDTH"         : "8",
     },
-    "_combinations_" : (  
+    "_combinations_" : (
     (), # Works the same as '("default",),' as the "default" is applied in every combination
     (                 "use_pacp_arch",),
     # ("region_comb_1",),

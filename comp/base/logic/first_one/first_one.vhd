@@ -3,7 +3,7 @@
 --! \file
 --! \brief Generic fist one detector.
 --! \author Vaclav Hummel <xhumme00@stud.fit.vutbr.cz>
---! \date 2016 
+--! \date 2016
 --!
 --! \section License
 --!
@@ -39,6 +39,6 @@ begin
    --! First one detector without priority
    --! Other implementations possible...
    DO <= (DI) and ((not DI) + 1);
-  
+
 end architecture;
 

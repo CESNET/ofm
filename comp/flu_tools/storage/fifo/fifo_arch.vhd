@@ -1,6 +1,6 @@
 -- fifo_arch_full.vhd: Frame Link protocol generic FIFO (full archiecture)
 -- Copyright (C) 2012 CESNET
--- Author: Lukas Kekely <kekely@cesnet.cz> 
+-- Author: Lukas Kekely <kekely@cesnet.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --
@@ -136,7 +136,7 @@ end process;
 sig_sop_rd  <= sig_data_rd(MEM_WIDTH-1);
 sig_frame_rdy <= '0' when (cnt_frame = 0) or (cnt_frame = 1) else
                  '1';
-   
+
 RX_DST_RDY  <= not(sig_full or RESET);
 TX_SRC_RDY  <= sig_tx_src_rdy;
 

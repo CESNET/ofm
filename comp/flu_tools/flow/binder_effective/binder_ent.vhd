@@ -21,17 +21,17 @@ entity FLU_BINDER_EFF is
    generic(
       --! FLU configuration (DATA_WIDTH and SOP_POS_WIDTH bus)
       DATA_WIDTH    : integer:= 512;
-      SOP_POS_WIDTH : integer:= 3; 	
+      SOP_POS_WIDTH : integer:= 3;
 
       --! Number of input ports
-      --! \brief Warning, only powers of two are allowed as 
+      --! \brief Warning, only powers of two are allowed as
       --! input port count. Minimal input ports are 2.
       INPUT_PORTS   : integer:= 8;
-   
+
       --! Logarithm base
       --! \brief Number of inputs of one stage multiplexer. These multiplexers
       --! create a RR selection tree. Therefore, number of stages is computed as
-      --! RR_TREE_DEPTH = log2(INPUT_PORTS)/log2(DIVISION_RATIO) 
+      --! RR_TREE_DEPTH = log2(INPUT_PORTS)/log2(DIVISION_RATIO)
       --! The result of this equation has to be an integer!
       --! Default value is 2
       DIVISION_RATIO : integer := 2;
@@ -59,7 +59,7 @@ entity FLU_BINDER_EFF is
       --!   '0' - input flow is alligned
       --!   '1' - input FLU flow is not alligned
       ALIGN_MAP      : integer := 255; --11111111
-      
+
       --! Enable/Disable header (which can be assigned to input FLU frame)
       --!   0 - Disable Header function
       --!   1 - Enable Header function
@@ -72,9 +72,9 @@ entity FLU_BINDER_EFF is
       --! Enable/disable the reservation of 128 bit gap
       --! NOTICE: If you enable this functionality, you should be sure
       --! that the minimal packet length is of the frame is 60 bytes.
-      --! This generic is tightly bounded with usage in network module and 
-      --! the FSM needs to be optimized for that usage. This generic can 
-      --! be used with DATA_WIDTH equals to 256 and 512 bits, because the 
+      --! This generic is tightly bounded with usage in network module and
+      --! the FSM needs to be optimized for that usage. This generic can
+      --! be used with DATA_WIDTH equals to 256 and 512 bits, because the
       --! author wants to keep the solution as simple as possible.
       --!   0 - Disable insertion of the 128 bit gap between FLU frames
       --!   1 - Enable insertion of the 128 bit gap between FLU frames
@@ -106,7 +106,7 @@ entity FLU_BINDER_EFF is
       RX_SOP        : in std_logic_vector(INPUT_PORTS-1 downto 0);
       RX_EOP        : in std_logic_vector(INPUT_PORTS-1 downto 0);
       RX_SRC_RDY    : in std_logic_vector(INPUT_PORTS-1 downto 0);
-      RX_DST_RDY    : out std_logic_vector(INPUT_PORTS-1 downto 0); 
+      RX_DST_RDY    : out std_logic_vector(INPUT_PORTS-1 downto 0);
 
       --! \name Header input interface
       RX_HDR_DATA       : in std_logic_vector(INPUT_PORTS*HDR_WIDTH-1 downto 0);
@@ -129,7 +129,7 @@ entity FLU_BINDER_EFF is
 
       --! \name Debug
       --! Information about source Interface (valid when TX_SOP = '1')
-      --! log2(INPUT_PORTS) MSB bits contains the port, last bit contains information about 
+      --! log2(INPUT_PORTS) MSB bits contains the port, last bit contains information about
       --! used line in internal infrastructure
       SELECTED_FROM  : out std_logic_vector(log2(INPUT_PORTS) downto 0);
       --! Information abou internal distribution interface (one bit on interface)

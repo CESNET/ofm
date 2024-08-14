@@ -7,7 +7,7 @@
 library IEEE;
 
 use ieee.std_logic_1164.all;
-use ieee.numeric_std.all; 
+use ieee.numeric_std.all;
 use ieee.math_real.all;
 use work.math_pack.all;
 use work.type_pack.all;
@@ -175,7 +175,7 @@ architecture behavioral of testbench is
 
    -- UP MVB interface
    shared variable up_mvb_i : mvb_i_arr_t(DMA_PORTS-1 downto 0)
-                             (data (MVB_UP_ITEMS*DMA_UPHDR_WIDTH-1 downto 0), vld (MVB_UP_ITEMS-1 downto 0)) := (others => 
+                             (data (MVB_UP_ITEMS*DMA_UPHDR_WIDTH-1 downto 0), vld (MVB_UP_ITEMS-1 downto 0)) := (others =>
                              (data    => (others => '0'),
                               vld     => (others => '0'),
                               src_rdy => '0',
@@ -187,7 +187,7 @@ architecture behavioral of testbench is
                               sof     (DMA_MFB_UP_REGIONS-1 downto 0),
                               eof     (DMA_MFB_UP_REGIONS-1 downto 0),
                               sof_pos (DMA_MFB_UP_REGIONS*MFB_UP_SOF_POS_WIDTH-1 downto 0),
-                              eof_pos (DMA_MFB_UP_REGIONS*MFB_UP_EOF_POS_WIDTH-1 downto 0)) := (others => 
+                              eof_pos (DMA_MFB_UP_REGIONS*MFB_UP_EOF_POS_WIDTH-1 downto 0)) := (others =>
                              (data    => (others => '0'),
                               sof     => (others => '0'),
                               eof     => (others => '0'),
@@ -348,7 +348,7 @@ architecture behavioral of testbench is
 
    -- DOWN MVB interface
    shared variable down_mvb_i : mvb_i_arr_t(DMA_PORTS-1 downto 0)
-                             (data (MVB_DOWN_ITEMS*DMA_DOWNHDR_WIDTH-1 downto 0), vld (MVB_DOWN_ITEMS-1 downto 0)) := (others => 
+                             (data (MVB_DOWN_ITEMS*DMA_DOWNHDR_WIDTH-1 downto 0), vld (MVB_DOWN_ITEMS-1 downto 0)) := (others =>
                              (data    => (others => '0'),
                               vld     => (others => '0'),
                               src_rdy => '0',
@@ -360,7 +360,7 @@ architecture behavioral of testbench is
                               sof     (DMA_MFB_DOWN_REGIONS-1 downto 0),
                               eof     (DMA_MFB_DOWN_REGIONS-1 downto 0),
                               sof_pos (DMA_MFB_DOWN_REGIONS*MFB_DOWN_SOF_POS_WIDTH-1 downto 0),
-                              eof_pos (DMA_MFB_DOWN_REGIONS*MFB_DOWN_EOF_POS_WIDTH-1 downto 0)) := (others => 
+                              eof_pos (DMA_MFB_DOWN_REGIONS*MFB_DOWN_EOF_POS_WIDTH-1 downto 0)) := (others =>
                              (data    => (others => '0'),
                               sof     => (others => '0'),
                               eof     => (others => '0'),
@@ -760,17 +760,17 @@ begin
             else
                mvb_mfb_trans_new_rand(trans,seed1,seed2,d,dma_idtag_free(d),UP_WRITE_LEN_MIN,UP_WRITE_LEN_MAX,'0',UP_GAP_CHANCE,UP_GAP_LEN_MIN,UP_GAP_LEN_MAX,'0');
             end if;
-   
+
       --      write(l,string'("New generated transaction:"));writeline(output,l);
       --      mvb_mfb_trans_print(trans);
-   
+
             -- Set top bits of address to DMA_PORT, so that the port can by deduced from the transaction's header
             trans.address := to_unsigned(d,log2(DMA_PORTS)) & enlarge_left(trans.address,-log2(DMA_PORTS));
-   
+
             trans_ser := mvb_mfb_trans_ser(trans);
 
             slv_fifo_put(up_mvb_mfb_gen_fifo(d),trans_ser);
-   
+
             up_trans_cntr := up_trans_cntr+1;
             if (up_trans_cntr=UP_TRANSACTIONS) then
                wait; -- Stop generating
@@ -813,11 +813,11 @@ begin
          up_mfb_i(p).eof_pos := s_up_mfb_eof_pos(p);
          up_mfb_i(p).src_rdy := s_up_mfb_src_rdy(p);
          up_mfb_i(p).dst_rdy := s_up_mfb_dst_rdy(p);
-         
+
          new_trans_send_vld := (others => '0');
-   
+
          post_new_up_mvb_mfb_word(up_mvb_mfb_gen_fifo(p),up_mvb_i(p),up_mfb_i(p),new_trans_send,new_trans_send_vld);
-   
+
          for i in 0 to MVB_UP_ITEMS-1 loop
             exit when (new_trans_send_vld(i)='0');
 
@@ -830,7 +830,7 @@ begin
                trans_up_send_cntr := trans_up_send_cntr+1;
                mvb_mfb_trans_print(new_trans_send(i));
             end if;
-   
+
             -- add to statistics
             if (new_trans_send(i).payload='1') then
                stat_up_trans_wr_cntr := stat_up_trans_wr_cntr+1;
@@ -853,19 +853,19 @@ begin
                   stat_up_trans_rd_len_max := new_trans_send(i).length;
                end if;
             end if;
-   
+
             if (up_send_trans_fifo(p).full='1') then
                report "Full UP send transaction FIFO!" severity failure; -- FIFO full situation will be fixed, if it arises in the future
             else
                slv_fifo_put(up_send_trans_fifo(p),mvb_mfb_trans_ser(new_trans_send(i)));
             end if;
-   
+
             if (new_trans_send(i).payload='0') then
                id_vec  := std_logic_vector(to_unsigned(new_trans_send(i).id ,DMA_ID_WIDTH));
                tag_vec := std_logic_vector(to_unsigned(new_trans_send(i).tag,DMA_TAG_WIDTH));
-   
+
                idtag_vec := id_vec & tag_vec;
-   
+
                if (up_idtag_fifo(p).full='1') then
                   report "Full ID Tag FIFO!" severity failure; -- FIFO full situation will be fixed, if it arises in the future
                else
@@ -873,7 +873,7 @@ begin
                end if;
             end if;
          end loop;
-   
+
          -- set MVB interface
          s_up_mvb_data   (p) <= up_mvb_i(p).data   ;
          s_up_mvb_vld    (p) <= up_mvb_i(p).vld    ;
@@ -1001,7 +1001,7 @@ begin
          if (FULL_PRINT) then
             write(l,string'("PCIe Tag " & integer'image(new_tags(i)) & " assigned"));writeline(output,l);
          end if;
-         
+
          if (pcie_tag_ass_fifo.full='1') then
             report "Full PCIe Tag assign FIFO!" severity failure; -- FIFO full situation will be fixed, if it arises in the future
          else
@@ -1407,7 +1407,7 @@ begin
          down_mfb_i(p).eof_pos := s_down_mfb_eof_pos(p);
          down_mfb_i(p).src_rdy := s_down_mfb_src_rdy(p);
          down_mfb_i(p).dst_rdy := s_down_mfb_dst_rdy(p);
-      
+
          randint(seed1,seed2,0,99,X);
          if (X<DOWN_NOT_DST_RDY_CHANCE) then
             -- don't accept anything

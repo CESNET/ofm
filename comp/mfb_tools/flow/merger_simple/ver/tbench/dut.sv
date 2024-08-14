@@ -31,7 +31,7 @@ module DUT (
     ) VHDL_DUT_U (
         .CLK         (CLK),
         .RST         (RESET),
-        
+
         .RX_MFB0_DATA    (RX0.DATA),
         .RX_MFB0_SOF_POS (RX0.SOF_POS),
         .RX_MFB0_EOF_POS (RX0.EOF_POS),

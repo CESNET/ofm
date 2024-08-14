@@ -1,8 +1,8 @@
-//-- pkg.sv: package with all tests 
+//-- pkg.sv: package with all tests
 //-- Copyright (C) 2022 CESNET z. s. p. o.
 //-- Author(s): Radek Iša <isa@cesnet.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 `ifndef SPLITTER_SIMPLE_TEST_SV
 `define SPLITTER_SIMPLE_TEST_SV

@@ -32,13 +32,13 @@ entity fl2flu is
       -- use output pipe
       OUT_PIPE_EN          : boolean := false;
       -- use output register of input pipe
-      OUT_PIPE_OUTREG      : boolean := false 
-   );   
+      OUT_PIPE_OUTREG      : boolean := false
+   );
    port(
-      -- common interface 
+      -- common interface
       CLK            : in std_logic;
-      RESET          : in std_logic; 
-      
+      RESET          : in std_logic;
+
       -- input interface (FL)
       RX_SOF_N       : in std_logic;
       RX_EOP_N       : in std_logic;
@@ -47,8 +47,8 @@ entity fl2flu is
       RX_SRC_RDY_N   : in std_logic;
       RX_DST_RDY_N   : out  std_logic;
       RX_DATA        : in std_logic_vector(DATA_WIDTH-1 downto 0);
-      RX_REM         : in std_logic_vector(abs(log2(DATA_WIDTH/8)-1) downto 0); 
-      
+      RX_REM         : in std_logic_vector(abs(log2(DATA_WIDTH/8)-1) downto 0);
+
       -- output interface (FLU)
       TX_DATA       : out std_logic_vector(DATA_WIDTH-1 downto 0);
       TX_SOP_POS    : out std_logic_vector(SOP_POS_WIDTH-1 downto 0);
@@ -56,7 +56,7 @@ entity fl2flu is
       TX_SOP        : out std_logic;
       TX_EOP        : out std_logic;
       TX_SRC_RDY    : out std_logic;
-      TX_DST_RDY    : in std_logic   
+      TX_DST_RDY    : in std_logic
      );
 end entity;
 
@@ -72,8 +72,8 @@ architecture full of fl2flu is
    signal in_pipe_rx_sof_n    : std_logic;
    signal in_pipe_rx_eof_n    : std_logic;
    signal in_pipe_rx_sop_n    : std_logic;
-   signal in_pipe_rx_eop_n    : std_logic; 
-   
+   signal in_pipe_rx_eop_n    : std_logic;
+
    -- Output pipeline
    signal out_pipe_data       : std_logic_vector(DATA_WIDTH-1 downto 0);
    signal out_pipe_sop_pos    : std_logic_vector(SOP_POS_WIDTH-1 downto 0);
@@ -81,7 +81,7 @@ architecture full of fl2flu is
    signal out_pipe_sop        : std_logic;
    signal out_pipe_eop        : std_logic;
    signal out_pipe_src_rdy    : std_logic;
-   signal out_pipe_dst_rdy    : std_logic;  
+   signal out_pipe_dst_rdy    : std_logic;
 begin
    -- connection and conversion
    out_pipe_data    <= in_pipe_rx_data;
@@ -91,8 +91,8 @@ begin
    out_pipe_eop     <= not in_pipe_rx_eof_n;
    out_pipe_src_rdy <= not in_pipe_rx_src_rdy_n;
    in_pipe_rx_dst_rdy_n <= not out_pipe_dst_rdy;
-   
-   
+
+
    -- -------------------------------------------------------------------------------
    -- PIPES
    -- -------------------------------------------------------------------------------
@@ -135,17 +135,17 @@ begin
       in_pipe_rx_sop_n     <= RX_SOP_N;
       in_pipe_rx_eop_n     <= RX_EOP_N;
       RX_DST_RDY_N         <= in_pipe_rx_dst_rdy_n;
-   end generate;    
-   
-   
+   end generate;
+
+
    -- Output Pipe (FLU)
    out_pipe_i : entity work.FLU_PIPE
    generic map(
       DATA_WIDTH     => DATA_WIDTH,
-      SOP_POS_WIDTH  => SOP_POS_WIDTH, 
+      SOP_POS_WIDTH  => SOP_POS_WIDTH,
       USE_OUTREG     => OUT_PIPE_OUTREG,
       FAKE_PIPE      => not OUT_PIPE_EN
-   )   
+   )
    port map(
       CLK            => CLK,
       RESET          => RESET,
@@ -166,4 +166,4 @@ begin
       TX_SRC_RDY    => TX_SRC_RDY,
       TX_DST_RDY    => TX_DST_RDY
    );
-end architecture; 
+end architecture;

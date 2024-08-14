@@ -1,7 +1,7 @@
 /*
  * file       : sequence_item.sv
  * Copyright (C) 2021 CESNET z. s. p. o.
- * description: RESET sequence item 
+ * description: RESET sequence item
  * date       : 2021
  * author     : Radek Iša <isa@cesnet.cz>
  *
@@ -33,7 +33,7 @@ class sequence_item extends uvm_sequence_item;
         ret = super.do_compare(rhs, comparer);
         $cast(c_rhs, rhs);
         ret &= (reset == c_rhs.reset);
-        return ret;      
+        return ret;
     endfunction
 
     function string convert2string();

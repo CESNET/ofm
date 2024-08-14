@@ -48,6 +48,6 @@ begin
    do_rot_g : for i in 0 to DATA_WIDTH-1 generate
       DO(DATA_WIDTH-1-i) <= do_rot(i);
    end generate;
-  
+
 end architecture;
 

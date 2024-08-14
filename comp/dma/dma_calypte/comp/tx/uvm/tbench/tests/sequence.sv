@@ -2,7 +2,7 @@
 //-- Copyright (C) 2022 CESNET z. s. p. o.
 //-- Author(s): Daniel Kriz <danielkriz@cesnet.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 class virt_seq#(USR_REGIONS, USR_REGION_SIZE, USR_BLOCK_SIZE, USR_ITEM_WIDTH, CHANNELS, PKT_SIZE_MAX) extends uvm_sequence;
     `uvm_object_param_utils(test::virt_seq#(USR_REGIONS, USR_REGION_SIZE, USR_BLOCK_SIZE, USR_ITEM_WIDTH, CHANNELS, PKT_SIZE_MAX))
@@ -49,7 +49,7 @@ class virt_seq#(USR_REGIONS, USR_REGION_SIZE, USR_BLOCK_SIZE, USR_ITEM_WIDTH, CH
     endtask
 
     virtual task run_channels();
-       uvm_common::sequence_cfg_transactions seq_cfg; 
+       uvm_common::sequence_cfg_transactions seq_cfg;
 
         seq_cfg = new();
         seq_cfg.transactions_min =  5000;

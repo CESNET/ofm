@@ -2,7 +2,7 @@
 //-- Copyright (C) 2022 CESNET z. s. p. o.
 //-- Author(s): Daniel Kříž <xkrizd01@vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 
 class sequence_simple_rx_base #(int unsigned ITEMS, int unsigned ITEM_WIDTH) extends uvm_common::sequence_base #(config_sequence, uvm_mvb::sequence_item #(ITEMS, ITEM_WIDTH));
@@ -437,7 +437,7 @@ endclass
 class sequence_lib_speed_rx #(int unsigned ITEMS, int unsigned ITEM_WIDTH) extends sequence_lib_rx#(ITEMS, ITEM_WIDTH);
     `uvm_object_param_utils(uvm_logic_vector_mvb::sequence_lib_speed_rx#(ITEMS, ITEM_WIDTH))
     `uvm_sequence_library_utils(uvm_logic_vector_mvb::sequence_lib_speed_rx#(ITEMS, ITEM_WIDTH))
-  
+
     function new(string name = "");
         super.new(name);
         init_sequence_library();
@@ -456,7 +456,7 @@ class sequence_lib_speed_rx #(int unsigned ITEMS, int unsigned ITEM_WIDTH) exten
   endclass
 
 //////////////////////////////////////
-// PLS DONT PUT IT INTO SEQUENCE LIBRARY. 
+// PLS DONT PUT IT INTO SEQUENCE LIBRARY.
 class sequence_simple_rx #(int unsigned ITEMS, int unsigned ITEM_WIDTH) extends sequence_simple_rx_base #(ITEMS, ITEM_WIDTH);
 
     `uvm_object_param_utils(uvm_logic_vector_mvb::sequence_simple_rx #(ITEMS, ITEM_WIDTH))

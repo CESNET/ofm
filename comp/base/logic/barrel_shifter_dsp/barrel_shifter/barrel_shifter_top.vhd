@@ -9,7 +9,7 @@
 -- TODO:
 --
 
-library IEEE;  
+library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.std_logic_arith.all;
 use IEEE.std_logic_unsigned.all;
@@ -38,7 +38,7 @@ architecture shift_arch of BARREL_SHIFTER_DSP is
 
 begin
    zeros <= (others => '0');
-   
+
    -- generate output registers
    GEN_OUTPUT_REGISTERS: if(REG_OUT = 1 and MAX_SHIFT >= 16) generate
       -- with DSP
@@ -67,16 +67,16 @@ begin
          process(CLK)
          begin
             if (CLK'event) and (CLK = '1') then
-               if (RESET = '1') then   
+               if (RESET = '1') then
                      DATA_OUT <= (others => '0');
                elsif (CE_OUT = '1') then
-                     DATA_OUT <= data_out_reg;  
+                     DATA_OUT <= data_out_reg;
                end if;
             end if;
          end process;
       end generate;
    end generate;
-   
+
    GEN_OUTPUT_REGISTERS_OFF: if(REG_OUT = 0 and MAX_SHIFT >= 16) generate
       DATA_OUT <= data_out_reg;
    end generate;
@@ -104,22 +104,22 @@ begin
                P           => num_shift_reg
             );
          end generate;
-         
+
          -- normal logic
          GEN_IN_REG_NORMAL: if(REGS_WITH_DSP = false) generate
             process(CLK)
             begin
                if (CLK'event) and (CLK = '1') then
-                  if (RESET = '1') then   
+                  if (RESET = '1') then
                      num_shift_reg <= (others => '0');
                   elsif (CE_OUT = '1') then
-                     num_shift_reg <= SHIFT_EXP;  
+                     num_shift_reg <= SHIFT_EXP;
                   end if;
                end if;
             end process;
          end generate;
       end generate;
-   
+
       GEN_IN_REGS_NUM_SHIFT_OFF: if(REG_IN = 0) generate
          num_shift_reg <= SHIFT_EXP;
       end generate;
@@ -147,16 +147,16 @@ begin
                P           => shift_number_reg
             );
          end generate;
-         
+
          -- normal logic
          GEN_IN_REG_NORMAL: if(REGS_WITH_DSP = false) generate
             process(CLK)
             begin
                if (CLK'event) and (CLK = '1') then
-                  if (RESET = '1') then   
+                  if (RESET = '1') then
                      shift_number_reg <= (others => '0');
                   elsif (CE_OUT = '1') then
-                     shift_number_reg <= SHIFT_BINARY;  
+                     shift_number_reg <= SHIFT_BINARY;
                   end if;
                end if;
             end process;
@@ -166,7 +166,7 @@ begin
       GEN_IN_REGS_NUM_SHIFT_OFF: if(REG_IN = 0) generate
          shift_number_reg <= SHIFT_BINARY;
       end generate;
-      
+
       -- convert format
       TO2N_inst: entity work.TO2N
             generic map (
@@ -182,7 +182,7 @@ begin
    GEN_DSP_SHIFTERS: for I in 0 to MAX_SHIFT_1 generate
    begin
       -- generate first shifter
-      GEN_FIRST: if(I = 0) generate 
+      GEN_FIRST: if(I = 0) generate
          GEN_DSP_SHIFTER_inst: entity work.GEN_DSP_SHIFTER(full)
          generic map (
             DATA_WIDTH => DATA_WIDTH,
@@ -201,27 +201,27 @@ begin
             CE_OUT      => '1'
          );
       end generate;
-      
+
       -- generate others shifters
       GEN_OTHERS: if(I /= 0) generate
          signal tmp_left_in : std_logic_vector(DATA_WIDTH - (I * 16) - 1 downto 0);
          signal tmp_left_out : std_logic_vector(DATA_WIDTH - (I * 16) - 1 downto 0);
       begin
-         
-         -- connect signals for left shift 
+
+         -- connect signals for left shift
          GEN_LEFT: if(SHIFT_LEFT = true) generate
             tmp_left_in <= tmp_out(I - 1)(DATA_WIDTH - 1 downto I * 16);
             tmp_out(I)((I * 16) - 1 downto 0) <= tmp_out(I - 1)((I * 16) - 1 downto 0);
             tmp_out(I)(DATA_WIDTH - 1 downto I * 16) <= tmp_left_out;
          end generate;
 
-         -- connect signals for right shift 
+         -- connect signals for right shift
          GEN_RIGHT: if(SHIFT_LEFT = false) generate
             tmp_left_in <= tmp_out(I - 1)(DATA_WIDTH - (I * 16) - 1 downto 0);
             tmp_out(I)(DATA_WIDTH - 1 downto DATA_WIDTH - (I * 16)) <= tmp_out(I - 1)(DATA_WIDTH - 1 downto DATA_WIDTH - (I * 16));
             tmp_out(I)(DATA_WIDTH - (I * 16) - 1 downto 0) <= tmp_left_out;
          end generate;
-         
+
          -- dsp shifter
          GEN_DSP_SHIFTER_inst: entity work.GEN_DSP_SHIFTER(full)
          generic map (
@@ -239,8 +239,8 @@ begin
             CE_IN       => '1',
             CE_OUT      => '1'
          );
-         
-         -- DSP comparator: compare NUM_SHIFT and null 
+
+         -- DSP comparator: compare NUM_SHIFT and null
          DSP_CMP_inst : entity work.CMP_DSP(structural)
          generic map (
             DATA_WIDTH   => 16,
@@ -256,8 +256,8 @@ begin
             CE_OUT      => '1',
             P           => tmp_cmp(I)
          );
-         
-         -- generate NUM_SHIFTER signal 
+
+         -- generate NUM_SHIFTER signal
          process (num_shift_reg(15 + ((I-1) * 16)), tmp_cmp(I)(1))
          begin
 
@@ -266,20 +266,20 @@ begin
             else
                tmp_shift(I - 1)(15) <= '1';
             end if;
-         end process; 
-         
+         end process;
+
          tmp_shift(I - 1)(14 downto 0) <= num_shift_reg(15 + ((I-1) * 16) - 1 downto ((I - 1) * 16));
       end generate;
    end generate;
-   
+
    GEN_DATA_FOR_LAST_SHIFTER: if(MAX_SHIFT_M = 0) generate
    begin
       tmp_shift(MAX_SHIFT_1) <= num_shift_reg(15 + (MAX_SHIFT_1 * 16) downto MAX_SHIFT_1 * 16);
-      data_out_reg <= tmp_out(MAX_SHIFT_1); 
+      data_out_reg <= tmp_out(MAX_SHIFT_1);
    end generate;
 
    GEN_SHIFT_MOD: if (MAX_SHIFT_M > 0) generate
-   begin      
+   begin
       --! generate one shifter when MAX_SHIFT < 16
       GEN_SHIFT_ONE: if(MAX_SHIFT < 16) generate
         signal tmp : std_logic_vector(15 downto 0);
@@ -316,14 +316,14 @@ begin
             tmp_out(MAX_SHIFT_D)((MAX_SHIFT_D * 16) - 1 downto 0) <= tmp_out(MAX_SHIFT_D - 1)((MAX_SHIFT_D * 16) - 1 downto 0);
             tmp_out(MAX_SHIFT_D)(DATA_WIDTH - 1 downto MAX_SHIFT_D * 16) <= tmp_left_out;
          end generate;
-         
+
          -- generate right shifter
          GEN_RIGHT_LAST: if(SHIFT_LEFT = false) generate
             tmp_left_in <= tmp_out(MAX_SHIFT_1)(DATA_WIDTH - (MAX_SHIFT_D * 16) - 1 downto 0);
             tmp_out(MAX_SHIFT_D)(DATA_WIDTH - 1 downto DATA_WIDTH - (MAX_SHIFT_D * 16)) <= tmp_out(MAX_SHIFT_D - 1)(DATA_WIDTH - 1 downto DATA_WIDTH - (MAX_SHIFT_D * 16));
             tmp_out(MAX_SHIFT_D)(DATA_WIDTH - (MAX_SHIFT_D * 16) - 1 downto 0) <= tmp_left_out;
          end generate;
-      
+
          -- connect shifter
          GEN_DSP_SHIFTER_inst: entity work.GEN_DSP_SHIFTER(full)
          generic map (
@@ -341,7 +341,7 @@ begin
             CE_IN       => '1',
             CE_OUT      => '1'
          );
-          
+
          DSP_CMP_inst : entity work.CMP_DSP(structural)
          generic map (
             DATA_WIDTH   => MAX_SHIFT_M,
@@ -369,7 +369,7 @@ begin
          tmp_shift(MAX_SHIFT_1)(14 downto 0) <= num_shift_reg(15 + (MAX_SHIFT_1 * 16) - 1 downto (MAX_SHIFT_1 * 16));
 
          tmp_shift(MAX_SHIFT_D) <= zeros(15 - MAX_SHIFT_M downto 0) & num_shift_reg(MAX_SHIFT - 1 downto MAX_SHIFT - MAX_SHIFT_M);
-         data_out_reg <= tmp_out(MAX_SHIFT_D); 
+         data_out_reg <= tmp_out(MAX_SHIFT_D);
       end generate;
    end generate;
 

@@ -74,7 +74,7 @@ port(
     AMM_ADDRESS             : out  std_logic_vector(AMM_ADDR_WIDTH - 1 downto 0);
     AMM_READ_DATA           : in   std_logic_vector(AMM_DATA_WIDTH - 1 downto 0);
     AMM_WRITE_DATA          : out  std_logic_vector(AMM_DATA_WIDTH - 1 downto 0);
-    -- Number of AMM words in one r/w transaction 
+    -- Number of AMM words in one r/w transaction
     AMM_BURST_COUNT         : out  std_logic_vector(AMM_BURST_COUNT_WIDTH - 1 downto 0);
     AMM_READ_DATA_VALID     : in   std_logic;
 
@@ -91,13 +91,13 @@ port(
     EMIF_RST_REQ            : out  std_logic;
     EMIF_RST_DONE           : in   std_logic;
     -- Interrupt to indicate whenever bit error occurred
-    EMIF_ECC_ISR            : in   std_logic; 
+    EMIF_ECC_ISR            : in   std_logic;
     -- Calibration successful
-    EMIF_CAL_SUCCESS        : in   std_logic; 
+    EMIF_CAL_SUCCESS        : in   std_logic;
     -- Calibration failed
-    EMIF_CAL_FAIL           : in   std_logic; 
+    EMIF_CAL_FAIL           : in   std_logic;
     -- Auto precharge request
-    EMIF_AUTO_PRECHARGE     : out  std_logic; 
+    EMIF_AUTO_PRECHARGE     : out  std_logic;
 
     -- =======================================================================
     --  MI bus interface
@@ -533,7 +533,7 @@ begin
         MI_DRDY                 => amm_gen_drdy,
 
         AMM_READY               => amm_muxed_ready(MUX_SLOT_AMM_GEN),
-        AMM_READ                => amm_muxed_read(MUX_SLOT_AMM_GEN), 
+        AMM_READ                => amm_muxed_read(MUX_SLOT_AMM_GEN),
         AMM_WRITE               => amm_muxed_write(MUX_SLOT_AMM_GEN),
         AMM_ADDRESS             => amm_muxed_address(MUX_SLOT_AMM_GEN),
         AMM_READ_DATA           => amm_muxed_read_data(MUX_SLOT_AMM_GEN),
@@ -547,12 +547,12 @@ begin
         generic map (
             MI_DATA_WIDTH           => MI_DATA_WIDTH,
             MI_ADDR_WIDTH           => MI_ADDR_USAGE,
-        
+
             AMM_DATA_WIDTH          => AMM_DATA_WIDTH,
             AMM_ADDR_WIDTH          => AMM_ADDR_WIDTH,
             AMM_BURST_COUNT_WIDTH   => AMM_BURST_COUNT_WIDTH,
             AMM_FREQ_KHZ            => AMM_FREQ_KHZ,
-        
+
             MI_ADDR_BASE            => AMM_PROBE_BASE,
             MI_ADDR_USED_BITS       => MI_ADDR_USED_BITS,
             HISTOGRAM_BOXES         => HISTOGRAM_BOXES,
@@ -561,7 +561,7 @@ begin
         port map (
             CLK                     => AMM_CLK,
             RST                     => total_rst,
-        
+
             MI_DWR                  => amm_probe_dwr ,
             MI_ADDR                 => amm_probe_addr,
             MI_BE                   => amm_probe_be  ,
@@ -570,7 +570,7 @@ begin
             MI_ARDY                 => amm_probe_ardy,
             MI_DRD                  => amm_probe_drd ,
             MI_DRDY                 => amm_probe_drdy,
-        
+
             AMM_READY               => AMM_READY          ,
             AMM_READ                => AMM_READ           ,
             AMM_WRITE               => AMM_WRITE          ,
@@ -609,7 +609,7 @@ begin
     amm_muxed_burst_count(MUX_SLOT_RANDOM) <= amm_intern_burst_count;
     amm_muxed_address    (MUX_SLOT_RANDOM) <= random_addr           ;
 
-    mux_sel <= 
+    mux_sel <=
         std_logic_vector(to_unsigned(MUX_SLOT_MAIN, mux_sel'length)) when (mi_manual_en = '0' and mi_random_addr_en = '0') else
         std_logic_vector(to_unsigned(MUX_SLOT_RANDOM, mux_sel'length)) when (mi_manual_en = '0' and mi_random_addr_en = '1') else
         std_logic_vector(to_unsigned(MUX_SLOT_AMM_GEN, mux_sel'length));
@@ -982,7 +982,7 @@ begin
             when INIT =>
                 if (rst_req_en = '0' and mi_manual_en = '0') then
                     if (run_test = '1') then
-                        if (REFR_REQ_BEFORE_TEST = true) then 
+                        if (REFR_REQ_BEFORE_TEST = true) then
                             next_state      <= PERFORM_REFRESH;
                         else
                             next_state      <= DATA_WRITE;
@@ -991,7 +991,7 @@ begin
                 end if;
 
             when PERFORM_REFRESH =>
-                if (REFR_ACK = '1') then 
+                if (REFR_ACK = '1') then
                     next_state      <= DATA_WRITE;
                 end if;
 

@@ -32,13 +32,13 @@ class MemLogger(DataLogger):
 
     def ticks_to_s(self, ticks):
         return ticks / (self.config["MEM_FREQ_KHZ"] * 1000.0)
-    
+
     def ticks_to_flow(self, words, ticks):
         s = self.ticks_to_s(ticks)
         if s == 0:
             return 0
         return (words * self.config["MEM_DATA_WIDTH"]) / s
-    
+
     # Remove leading and trailing zeros
     def trim_hist(self, data):
         res = {}
@@ -55,9 +55,9 @@ class MemLogger(DataLogger):
                 res = res_tmp.copy()
 
         return res
-    
+
     def latency_hist_step(self):
-        hist_max  = 2 ** self.config["VALUE_WIDTH"][0] 
+        hist_max  = 2 ** self.config["VALUE_WIDTH"][0]
         hist_step = hist_max / self.config["HIST_BOX_CNT"][0]
         return self.ticks_to_s(hist_step - 1) * 10**9
 
@@ -179,7 +179,7 @@ class MemLogger(DataLogger):
                 if v != 0:
                     res += self.line_to_str(f"    {prev:> 6.1f} -{hist_step * (i + 1):> 6.1f} ...", v)
                     prev = hist_step * (i + 1)
-       
+
         return res
 
     def config_to_str(self):
@@ -195,7 +195,7 @@ class MemLogger(DataLogger):
         res += f"HIST_BOX_WIDTH:     {self.config['HIST_BOX_WIDTH'][0]}\n"
         res += f"\n"
         return res
-    
+
     def print(self):
         print(self.config_to_str())
 
@@ -203,12 +203,12 @@ class MemLogger(DataLogger):
         print(self.stats_to_str(stats))
 
 def parseParams():
-    parser = argparse.ArgumentParser(description = 
+    parser = argparse.ArgumentParser(description =
         """mem_logger control script""",
     )
 
     access = parser.add_argument_group('card access arguments')
-    access.add_argument('-d', '--device', default=nfb.libnfb.Nfb.default_device, 
+    access.add_argument('-d', '--device', default=nfb.libnfb.Nfb.default_device,
                         metavar='device', help = """device with target FPGA card""")
     access.add_argument('-i', '--index',        type=int, metavar='index', default=0, help = """index inside DevTree""")
 

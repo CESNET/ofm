@@ -34,7 +34,7 @@ architecture FULL of testbench is
 
 begin
 
-    clk_gen : process 
+    clk_gen : process
     begin
         clk <= '1';
         wait for CLK_PERIOD / 2;
@@ -101,7 +101,7 @@ begin
         end loop;
 
         wr_en <= '0';
-        
+
         for i in 0 to ITEMS-1 loop
             rd_addr <= std_logic_vector(to_unsigned(i,log2(ITEMS)));
             wait for CLK_PERIOD;

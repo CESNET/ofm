@@ -7,7 +7,7 @@ SETTINGS = {
         "MI_WIDTH"          : "32",
         "TRANSACTION_COUNT" : "400000",
     },
-    "_combinations_" : (  
+    "_combinations_" : (
     (), # Works the same as '("default",),' as the "default" is applied in every combination
     ),
 }

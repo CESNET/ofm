@@ -13,6 +13,6 @@ set COMPONENTS [ list \
     [ list "I2C"       $IIC_BASE "FULL" ] \
     [ list "OPEN LOOP" $OL_BASE  "FULL" ] \
 ]
- 
+
 set MOD "$MOD $ENTITY_BASE/io_exp.vhd"
 

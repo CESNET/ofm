@@ -10,7 +10,7 @@
  * TODO:
  *
  */
- 
+
 
 // ----------------------------------------------------------------------------
 //                                 TESTBENCH
@@ -26,7 +26,7 @@ module testbench;
   iFrameLinkTx #(DATA_WIDTH, DREM_WIDTH) TX       (CLK, RESET);
   iFrameLinkFifo #(STATUS_WIDTH)         CTRL     (CLK, RESET);
 
-  
+
   //-- Clock generation -------------------------------------------------------
   always #(CLK_PERIOD/2) CLK = ~CLK;
 

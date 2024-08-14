@@ -14,11 +14,11 @@ module testbench;
   // -- Testbench wires and interfaces ----------------------------------------
   logic CLK = 0;
   logic RESET;
-  
+
   iMi #(RX_DATA_WIDTH, ADDR_WIDTH, META_WIDTH)  MASTER(CLK, RESET);
   iMi #(TX_DATA_WIDTH, ADDR_WIDTH, META_WIDTH)  SLAVE (CLK, RESET);
 
-  
+
   //-- Clock generation -------------------------------------------------------
   always #(CLK_PERIOD/2) CLK = ~CLK;
 

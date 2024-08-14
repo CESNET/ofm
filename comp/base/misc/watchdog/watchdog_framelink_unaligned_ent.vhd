@@ -39,11 +39,11 @@ entity WATCHDOG_FRAMELINK_UNALIGNED is
       COUNTER           : out std_logic_vector(COUNTER_WIDTH-1 downto 0);
       --!   if watchdog releases data or if it is locked
       LOCKED            : out std_logic;
-      
+
       -----------------------------------------
       ---     FrameLinkUnaligned signals    ---
       -----------------------------------------
-      
+
       --! input interface
       RX_DATA       : in std_logic_vector(DATA_WIDTH-1 downto 0);
       RX_SOP_POS    : in std_logic_vector(LOG2(DATA_WIDTH/8)-1 downto 0);
@@ -52,7 +52,7 @@ entity WATCHDOG_FRAMELINK_UNALIGNED is
       RX_EOP        : in std_logic;
       RX_SRC_RDY    : in std_logic;
       RX_DST_RDY    : out std_logic;
-      
+
       --! output interface
       TX_DATA       : out std_logic_vector(DATA_WIDTH-1 downto 0);
       TX_SOP_POS    : out std_logic_vector(LOG2(DATA_WIDTH/8)-1 downto 0);
@@ -61,5 +61,5 @@ entity WATCHDOG_FRAMELINK_UNALIGNED is
       TX_EOP        : out std_logic;
       TX_SRC_RDY    : out std_logic;
       TX_DST_RDY    : in std_logic
-   ); 
+   );
 end;

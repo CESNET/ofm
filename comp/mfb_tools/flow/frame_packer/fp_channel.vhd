@@ -55,7 +55,7 @@ entity FP_CHANNEL is
         RX_EOF_ONE_HOT  : in  slv_array_t(MFB_REGIONS downto 0)(MFB_REGIONS*MFB_REGION_SIZE - 1 downto 0);
 
         -- TX interface
-        TX_DATA         : out std_logic_vector(MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH-1 downto 0); 
+        TX_DATA         : out std_logic_vector(MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH-1 downto 0);
         TX_PKT_LNG      : out std_logic_vector(log2(RX_PKT_SIZE_MAX+ 1)  - 1 downto 0);
         TX_SOF          : out std_logic_vector(MFB_REGIONS-1 downto 0);
         TX_EOF          : out std_logic_vector(MFB_REGIONS-1 downto 0);
@@ -128,7 +128,7 @@ architecture FULL of FP_CHANNEL is
 
     -- FIFO
     signal fifo_tx_sof          : std_logic_vector(MFB_REGIONS - 1 downto 0);
-    signal fifo_tx_eof          : std_logic_vector(MFB_REGIONS - 1 downto 0);    
+    signal fifo_tx_eof          : std_logic_vector(MFB_REGIONS - 1 downto 0);
     signal fifo_tx_src_rdy      : std_logic;
     signal fifo_tx_dst_rdy      : std_logic;
 
@@ -166,7 +166,7 @@ begin
             MFB_REGION_SIZE => MFB_REGION_SIZE,
             MFB_BLOCK_SIZE  => MFB_BLOCK_SIZE,
             MFB_ITEM_WIDTH  => MFB_ITEM_WIDTH,
-    
+
             MUX_WIDTH       => MUX_WIDTH
         )
         port map(
@@ -198,18 +198,18 @@ begin
         );
     end generate;
 
-    
+
     pkt_lng_merge_blk_g: for blk in 0 to MFB_REGIONS*MFB_REGION_SIZE - 1 generate
         pkt_lng_merge_bs_g: for bs in 0 to MFB_REGIONS generate
             mux_in_pkt_lng_arr(blk)(bs)    <= RX_PKT_LNG(bs)((blk+1)*LNG_WIDTH-1 downto blk*LNG_WIDTH);
         end generate;
     end generate;
 
-    -- Packet Length 
+    -- Packet Length
     mux_pkt_lng_arr_g: for blk in 0 to MFB_REGIONS*MFB_REGION_SIZE - 1 generate
         mux_pkt_lng_i: entity work.GEN_MUX
             generic map(
-                DATA_WIDTH  => max(1, log2(RX_PKT_SIZE_MAX+1)), -- Packet length 
+                DATA_WIDTH  => max(1, log2(RX_PKT_SIZE_MAX+1)), -- Packet length
                 MUX_WIDTH   => MUX_WIDTH
             )
             port map(
@@ -259,7 +259,7 @@ begin
         port map(
             CLK => CLK,
             RST => RST,
-    
+
             RX_TMP_OVERFLOW         => RX_TMP_OVERFLOW,
             RX_TMP_PTR_UNS          => RX_TMP_PTR_UNS,
             RX_TMP_DATA_ARR         => mux_block_out,
@@ -299,10 +299,10 @@ begin
             RX_SOF_ONE_HOT_REG   => tmp_sof_one_hot,
             RX_EOF_ONE_HOT_REG   => tmp_eof_one_hot,
             RX_PKT_LNG_REG       => tmp_pkt_lng,
-    
+
             RX_OVERFLOW          => RX_TMP_OVERFLOW,
             RX_TMP_PTR           => RX_TMP_PTR_UNS,
-            
+
             TX_PKT_LNG           => ext_timeout_pkt_len,
             TX_SOF               => ext_timeout_sof,
             TX_EOF               => ext_timeout_eof,

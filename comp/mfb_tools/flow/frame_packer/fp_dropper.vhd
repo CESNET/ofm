@@ -43,7 +43,7 @@ entity FP_MFB_DROPPER is
         RX_DROP     : in  std_logic_vector(REGIONS-1 downto 0);
         -- =======================================================================
         -- CUSTOM PORTS - helps to work correctly within frame_packer
-        -- =======================================================================        
+        -- =======================================================================
         RX_PKT_CONT : in  std_logic;
         TX_PKT_CONT : out std_logic;
         RX_DROP_LV  : in  std_logic;
@@ -126,7 +126,7 @@ begin
                             (not s_sof(r) and not s_eof(r) and     s_inc_pkt(r));
     end generate;
 
-    -- Remove register 
+    -- Remove register
     s_inc_pkt(0)    <= RX_PKT_CONT;
     TX_PKT_CONT     <= s_inc_pkt(REGIONS);
 

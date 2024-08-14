@@ -15,7 +15,7 @@ use work.type_pack.all;
 entity MFB_AUXILIARY_SIGNALS is
    generic(
       -- =======================================================================
-      -- MFB BUS CONFIGURATION: 
+      -- MFB BUS CONFIGURATION:
       -- =======================================================================
       REGIONS       : natural := 4;
       REGION_SIZE   : natural := 8;
@@ -23,7 +23,7 @@ entity MFB_AUXILIARY_SIGNALS is
       ITEM_WIDTH    : natural := 8;
       META_WIDTH    : natural := 0;
       -- =======================================================================
-      -- AUXILIARY SIGNALS CONFIGURATION: 
+      -- AUXILIARY SIGNALS CONFIGURATION:
       -- =======================================================================
       REGION_AUX_EN : boolean := True;
       BLOCK_AUX_EN  : boolean := False;
@@ -137,7 +137,7 @@ begin
             if (RESET = '1') then
                s_incomplete_region(0) <= '0';
             elsif (RX_SRC_RDY = '1' and TX_DST_RDY = '1') then
-               s_incomplete_region(0) <= s_incomplete_region(REGIONS);  
+               s_incomplete_region(0) <= s_incomplete_region(REGIONS);
             end if;
          end if;
       end process;
@@ -198,7 +198,7 @@ begin
             if (RESET = '1') then
                s_incomplete_block(0) <= '0';
             elsif (RX_SRC_RDY = '1' and TX_DST_RDY = '1') then
-               s_incomplete_block(0) <= s_incomplete_block(WORD_BLOCKS);  
+               s_incomplete_block(0) <= s_incomplete_block(WORD_BLOCKS);
             end if;
          end if;
       end process;
@@ -257,7 +257,7 @@ begin
             if (RESET = '1') then
                s_incomplete_item(0) <= '0';
             elsif (RX_SRC_RDY = '1' and TX_DST_RDY = '1') then
-               s_incomplete_item(0) <= s_incomplete_item(WORD_ITEMS);  
+               s_incomplete_item(0) <= s_incomplete_item(WORD_ITEMS);
             end if;
          end if;
       end process;

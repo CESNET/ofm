@@ -36,7 +36,7 @@ entity SDP_BMEM is
       -- Output directly from BlockRams or throw register
       OUTPUT_REG      : boolean := true;
       -- Allow the output data register to be reset
-      RESET_DATA_PATH : boolean := true; 
+      RESET_DATA_PATH : boolean := true;
       -- debug prints
       DEBUG           : boolean := false
    );

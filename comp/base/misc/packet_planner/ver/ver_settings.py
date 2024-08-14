@@ -14,13 +14,13 @@ SETTINGS = {
         "SPACE_SIZE"                            : "2**14" ,
         "GAP_SIZE"                              : "12" ,
         "MINIMAL_GAP_SIZE"                      : "GAP_SIZE-4" ,
-        "ADRESS_ALIGNMENT"                      : "8" ,                                         
+        "ADRESS_ALIGNMENT"                      : "8" ,
         "FIFO_ITEMS"                            : "16" ,
         "FIFO_AFULL"                            : "FIFO_ITEMS\/2" ,
         "STREAM_OUTPUT_EN"                      : "1" ,
         "GLOBAL_OUTPUT_EN"                      : "1" ,
         "STREAM_OUTPUT_AFULL"                   : "0" ,
-        "GLOBAL_OUTPUT_AFULL"                   : "0" ,   
+        "GLOBAL_OUTPUT_AFULL"                   : "0" ,
     },
     "STREAM_EN" : {
         "STREAM_OUTPUT_EN"                      : "1" ,
@@ -34,7 +34,7 @@ SETTINGS = {
         "STREAM_OUTPUT_AFULL"                   : "1" ,
     },
     "GLOBAL_AFULL" : {
-        "GLOBAL_OUTPUT_AFULL"                   : "1" ,   
+        "GLOBAL_OUTPUT_AFULL"                   : "1" ,
     },
     "SMALL_PACKETS" : {
         "PACKET_SIZE"                           : "32" ,

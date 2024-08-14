@@ -8,7 +8,7 @@ class MIMasterDriverTB(MIMasterDriver):
 
     def __init__(self, entity, name, clock, array_idx=None) -> None:
         super().__init__(entity, name, clock, array_idx=array_idx)
-        
+
     async def _send_thread(self) -> None:
         """Function for generating a thread for testing with cocotb testbench."""
 
@@ -37,7 +37,7 @@ class MISlaveDriverTB(MISlaveDriver):
 
     def __init__(self, entity, name, clock, array_idx=None):
         super().__init__(entity, name, clock, array_idx=array_idx)
-        
+
     async def _send_thread(self) -> None:
         """Function for generating a thread for testing with cocotb testbench."""
 
@@ -48,7 +48,7 @@ class MISlaveDriverTB(MISlaveDriver):
 
             while self._sendQ:
                 transaction, callback, event, kwargs = self._sendQ.popleft()
-                
+
                 if transaction[0] == "wr":
                     pass
 
@@ -57,9 +57,9 @@ class MISlaveDriverTB(MISlaveDriver):
 
                 else:
                     raise RuntimeError("Invalid testcase")
-                
+
                 if event:
                     event.set()
                 if callback:
                     callback(transaction)
-             
+

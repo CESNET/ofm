@@ -55,12 +55,12 @@ architecture structural of i2c_slave_bit_ctrl is
    constant I2C_ACCEPT_BIT       : std_logic_vector(1 downto 0) := "01";
    constant I2C_REPLY_BIT        : std_logic_vector(1 downto 0) := "10";
 
-   type states is (idle, accept_wf0, accept_wf1, accept_bit, 
+   type states is (idle, accept_wf0, accept_wf1, accept_bit,
                    reply_wf0, reply_win0, reply_wf01, reply_wf010, reply_bit);
 	signal state, next_state : states;
 
    -- I2C Output register for each signal
-   signal reg_sda_oen         : std_logic; 
+   signal reg_sda_oen         : std_logic;
 	signal reg_sda_oen_in      : std_logic;
 
 	signal sSCL, sSDA          : std_logic; -- synchronized SCL and SDA inputs
@@ -192,7 +192,7 @@ begin
    end process;
 
 	--* FSM next state logic
-	next_state_logic : process (state, CMD, CMD_VLD, iCMD_RDY, 
+	next_state_logic : process (state, CMD, CMD_VLD, iCMD_RDY,
                                fSDA, fSCL)
 	begin
       next_state <= state; -- Default value
@@ -205,12 +205,12 @@ begin
                next_state <= reply_wf0;
             end if;
 
-         when accept_wf0 => 
+         when accept_wf0 =>
             if fSCL = '0' then
                next_state <= accept_wf1;
             end if;
 
-         when accept_wf1 => 
+         when accept_wf1 =>
             if fSCL = '1' then
                next_state <= accept_bit;
             end if;
@@ -218,12 +218,12 @@ begin
          when accept_bit =>
             next_state <= idle;
 
-         when reply_wf0 => 
+         when reply_wf0 =>
             if fSCL = '0' then
                next_state <= reply_wf01;
             end if;
 
-         when reply_wf01 => 
+         when reply_wf01 =>
             if fSCL = '1' then
                next_state <= reply_wf010;
             end if;
@@ -252,19 +252,19 @@ begin
          when idle =>
             iCMD_RDY <= '1';
 
-         when accept_wf0 => 
-         when accept_wf1 => 
+         when accept_wf0 =>
+         when accept_wf1 =>
          when accept_bit =>
             CMD_ACK <= '1';
 
-         when reply_wf0 => 
+         when reply_wf0 =>
          when reply_wf01 => -- Wait for SCL=1, already sending data
             reg_sda_oen_in <= reg_din;
          when reply_wf010 => -- Keep data while SCL=1
             reg_sda_oen_in <= reg_din;
-         when reply_bit => 
+         when reply_bit =>
             CMD_ACK <= '1';
-         when others => 
+         when others =>
       end case;
 
    end process;

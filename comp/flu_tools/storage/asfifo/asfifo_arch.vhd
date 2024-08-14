@@ -1,6 +1,6 @@
 -- asfifo_arch_full.vhd: Frame Link protocol generic ASFIFO (full archiecture)
 -- Copyright (C) 2012 CESNET
--- Author: Pavel Benacek <benacek@cesnet.cz> 
+-- Author: Pavel Benacek <benacek@cesnet.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --
@@ -41,18 +41,18 @@ begin
    sig_rd      <= TX_DST_RDY;
    --! Write signal generation
    sig_wr      <= RX_SRC_RDY and not sig_full;
-   
+
    --! Signal TX_SRC_RDY
    sig_tx_src_rdy <= sig_vld;
-   
+
    --! Data to write
    sig_data_wr <= RX_SOP & RX_EOP & RX_SOP_POS & RX_EOP_POS & RX_DATA;
- 
+
    DATA_ASFIFO_I:entity work.asfifo_bram
     generic map(
       -- ITEMS = Numer of items in FIFO
       -- !!!!!!!!!!! Must be (2^n)-1, n>=2 !!!!!!!!!!!!!!!!!!!!!!
-      ITEMS          => ITEMS,   
+      ITEMS          => ITEMS,
 
       -- Data Width
       DATA_WIDTH   => MEM_WIDTH,
@@ -85,7 +85,7 @@ begin
    --RX signal map
    --------------------------------------------------------
    RX_DST_RDY  <= not(sig_full or RX_RESET);
-   RX_STATUS   <= sig_status; 
+   RX_STATUS   <= sig_status;
 
    --------------------------------------------------------
    --TX signal map

@@ -9,7 +9,7 @@
 `define FRAME_MASKER_ENV_SV
 
 package frame_masker;
-    
+
     `include "uvm_macros.svh"
     import uvm_pkg::*;
 

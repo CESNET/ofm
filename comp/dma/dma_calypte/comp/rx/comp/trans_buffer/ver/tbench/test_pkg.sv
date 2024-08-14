@@ -5,7 +5,7 @@
 // SPDX-License-Identifier: BSD-3-CLause
 
 package test_pkg;
-   
+
     import math_pkg::*;
     `include "scoreboard.sv"
 

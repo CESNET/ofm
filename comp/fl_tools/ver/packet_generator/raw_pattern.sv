@@ -13,21 +13,21 @@
 
 /*
  * This structure containts pattern and it's probability.
- */ 
+ */
 typedef struct
 {
    string   pattern;
    int      probability;
    int      position; // 0 - any
                       // 1 - start
-                      // 2 - end 
+                      // 2 - end
                       // >2 - reserved (do nothing with the pattern)
 } TPattern;
 
 /*
  * This class implements RAWPattern protocol (unstructured data with patterns).
- * Class inherates from RAW abstract class. 
- */  
+ * Class inherates from RAW abstract class.
+ */
 class RAWPattern extends RAW;
    /*
     * Class atributes not affected by randomization:
@@ -42,9 +42,9 @@ class RAWPattern extends RAW;
          TPattern patterns [];
          int      patternCount;
          int      probabilitySum;
-   
+
    const int      arrayGrow = 5;
-  
+
    /*
     * Post randomization includes random pattern to random unstructured data.
     */
@@ -87,9 +87,9 @@ class RAWPattern extends RAW;
          else
             currentProbabilitySum = currentProbabilitySum + patterns[j].probability;
       end;
-      
+
    endfunction:  post_randomize
-  
+
    /*
     * Class constructor.
     */
@@ -105,7 +105,7 @@ class RAWPattern extends RAW;
       probabilitySum = 0;
       patterns = new[arrayGrow];
    endfunction: new
- 
+
    /*
     * Copy function.
     */
@@ -116,7 +116,7 @@ class RAWPattern extends RAW;
       protocol.patterns = patterns;
       protocol.patternCount = patternCount;
       protocol.probabilitySum = probabilitySum;
-        
+
       protocol.typ = typ;
       protocol.subtype = subtype;
       protocol.name = name;
@@ -126,10 +126,10 @@ class RAWPattern extends RAW;
       protocol.errorProbability = errorProbability;
       protocol.minMTU = minMTU;
       protocol.maxMTU = maxMTU;
-    
+
       return protocol;
    endfunction: copy
- 
+
    /*
     * Displays informations about protocol including upper layer protocols.
     */
@@ -138,7 +138,7 @@ class RAWPattern extends RAW;
       $display("Length: %d \n", dataB.size());
       $display("-----------------------\n\n");
    endfunction: display
- 
+
    /*
     * This function add pattern with it's probability to array of patters.
     * Parametrs:
@@ -151,12 +151,12 @@ class RAWPattern extends RAW;
       begin
          patterns = new[patterns.size + arrayGrow](patterns);
       end;
-     
+
       patternCount = patternCount + 1;
       patterns[patternCount - 1].pattern = pattern;
       patterns[patternCount - 1].probability = probability;
       patterns[patternCount - 1].position = position;
       probabilitySum = probabilitySum + probability;
    endfunction: addPattern
- 
+
 endclass: RAWPattern

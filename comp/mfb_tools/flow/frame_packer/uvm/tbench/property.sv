@@ -35,7 +35,7 @@ module framepacker_bus_properties #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE
     mfb_property_wr (
         .RESET          (reset.RESET),
         .vif            (mfb_wr_vif)
-    );  
+    );
 
     //MVB Properties
     mvb_property #(

@@ -76,7 +76,7 @@ begin
    port map(
       CLK           => clk,
       RST           => reset,
-   
+
       RX_SOF_POS    => rx_sof_pos,
       RX_EOF_POS    => rx_eof_pos,
       RX_SOF        => rx_sof,
@@ -177,7 +177,7 @@ begin
       rx_src_rdy <= '0';
 
       -- total clock 11
-      -- total bytes 338B 
+      -- total bytes 338B
 
       wait for 11*CLK_PER;
       wait until rising_edge(clk);

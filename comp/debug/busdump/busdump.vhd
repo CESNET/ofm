@@ -1,6 +1,6 @@
 -- busdump.vhd: Syntetisable pasive dumping of generic data bus into MI32 accessible memory
 -- Copyright (C) 2016 CESNET
--- Author: Lukas Kekely <kekely@cesnet.cz> 
+-- Author: Lukas Kekely <kekely@cesnet.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --

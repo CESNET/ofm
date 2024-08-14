@@ -87,7 +87,7 @@ port(
     RX_MFB_EOF     : in  std_logic_vector(MFB_REGIONS-1 downto 0);
     RX_MFB_SRC_RDY : in  std_logic;
     RX_MFB_DST_RDY : out std_logic;
-    
+
     -- =====================================================================
     --  TX inf
     -- =====================================================================
@@ -414,7 +414,7 @@ begin
         RAM_TYPE            => "AUTO"         ,
         DEVICE              => DEVICE         ,
         ALMOST_FULL_OFFSET  => 0              ,
-        ALMOST_EMPTY_OFFSET => 0          
+        ALMOST_EMPTY_OFFSET => 0
     )
     port map(
         CLK => CLK,

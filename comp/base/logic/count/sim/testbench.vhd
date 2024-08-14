@@ -30,7 +30,7 @@ architecture behavioral of testbench is
    signal MAX              : std_logic_vector(width-1 downto 0);
    signal ENABLE           : std_logic;
    signal P                : std_logic_vector(width-1 downto 0);
-   
+
 begin
 
    -- COUNT48
@@ -52,7 +52,7 @@ begin
 
 
    --Generate clock
-   clk_gen_p : process 
+   clk_gen_p : process
    begin
       CLK <= '1';
       wait for clkper/2;
@@ -70,13 +70,13 @@ begin
    wait;
    end process;
 
-   -- Simulating input flow 
+   -- Simulating input flow
    input_flow : process
    begin
-      
+
       ENABLE <= '0';
       --MAX <= (95 => '1', 46 => '1', others => '1');
-      --A <= (49 => '1', 46 => '1', others => '0'); 
+      --A <= (49 => '1', 46 => '1', others => '0');
       MAX <= (  50 => '1', 53 => '1', 46 => '1', 49 => '1', others => '0');
       A <= (   60 => '1', 53 => '0', 46 => '1', 49 => '0', others => '0');
       wait for reset_time;
@@ -97,13 +97,13 @@ begin
     --  A <= (1 => '1', others => '0');
       ENABLE <= '0';
       wait for 6*clkper;
-     
+
       ENABLE <= '1';
       wait for 2*clkper;
-    
+
       ENABLE <= '0';
       wait for 2*clkper;
-      
+
       ENABLE <= '1';
       wait;
 

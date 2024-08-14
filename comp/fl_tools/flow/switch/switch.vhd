@@ -21,9 +21,9 @@ use work.math_pack.all;
 -- ----------------------------------------------------------------------------
 
 --* This is the full implementation of the fl_switch_1toN entity.
---* It is divided to two pieces. 
+--* It is divided to two pieces.
 --*
---* The first solves situation when the searched IFNUM is located 
+--* The first solves situation when the searched IFNUM is located
 --* in the first word of every frame (when RX_SOF_N is active).
 --*
 --* The second solves other situations. It uses a FrameLink FIFO
@@ -47,7 +47,7 @@ architecture full of fl_switch_1toN is
 
 begin
 
-   assert (IFNUM_OFFSET mod DATA_WIDTH) + IF_COUNT < DATA_WIDTH 
+   assert (IFNUM_OFFSET mod DATA_WIDTH) + IF_COUNT < DATA_WIDTH
       report "IFNUM must fit into one FrameLink word!"  severity failure;
 
 -- extracts IFNUM from the RX_DATA signal
@@ -150,7 +150,7 @@ begin
    for i in 0 to IF_COUNT - 1 loop
       TX_DATA(i * DATA_WIDTH + DATA_WIDTH - 1 downto i * DATA_WIDTH) <= impl_tx_data;
       TX_REM (i * REM_WIDTH  + REM_WIDTH  - 1 downto i * REM_WIDTH)  <= impl_tx_rem;
-      
+
       TX_SOF_N(i) <= impl_tx_sof_n;
       TX_EOF_N(i) <= impl_tx_eof_n;
       TX_SOP_N(i) <= impl_tx_sop_n;

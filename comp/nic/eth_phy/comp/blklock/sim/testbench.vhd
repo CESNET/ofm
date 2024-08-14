@@ -19,7 +19,7 @@ architecture behavioral of TESTBENCH is
 
     signal clk            : std_logic := '0';
     signal rst            : std_logic := '0';
-    
+
     signal rx_header_in : std_logic_vector(1 downto 0) := "00";
     signal rx_header_valid : std_logic := '0';
     signal rx_lock_aquired : std_logic := '0';
@@ -30,7 +30,7 @@ architecture behavioral of TESTBENCH is
     signal tb3 : std_logic := '0';
 
 begin
-    
+
     clk_gen: process
     begin
        clk <= '1';
@@ -82,17 +82,17 @@ begin
             send_header("10", '1');
             send_header("01", '1');
         end loop;
-        
+
         wait for C_CLK_PER; -- wait for changes
         reset;
 
         -- slip test
-        for i in 1 to 8 loop 
+        for i in 1 to 8 loop
             send_header("10", '1');
         end loop;
         send_header("11", '1'); -- expect slip
         wait for C_CLK_PER*33;
-        
+
         for i in 1 to 34 loop
             send_header("10", '1');
             send_header("01", '1');
@@ -129,7 +129,7 @@ begin
         wait for C_CLK_PER*33;
 
         wait for C_CLK_PER;
-        
+
         -- General test
         for i in 1 to 128 loop
             send_header("10", '1');

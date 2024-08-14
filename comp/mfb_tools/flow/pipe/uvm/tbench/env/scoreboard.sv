@@ -12,7 +12,7 @@ class scoreboard #(ITEM_WIDTH, META_WIDTH) extends uvm_scoreboard;
     //Model
     uvm_common::subscriber #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))    analysis_imp_mfb_rx_data;
     uvm_common::subscriber #(uvm_logic_vector::sequence_item#(META_WIDTH))          analysis_imp_mfb_rx_meta;
-    
+
     //Comparer
     uvm_common::comparer_ordered #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))  data_cmp;
     uvm_common::comparer_ordered #(uvm_logic_vector::sequence_item#(META_WIDTH))        meta_cmp;
@@ -64,7 +64,7 @@ class scoreboard #(ITEM_WIDTH, META_WIDTH) extends uvm_scoreboard;
 
     virtual function void report_phase(uvm_phase phase);
 
-        if (this.success() && this.used() == 0) begin 
+        if (this.success() && this.used() == 0) begin
             `uvm_info(get_type_name(), $sformatf("\n\n\t---------------------------------------\n\t----     VERIFICATION SUCCESS      ----\n\t---------------------------------------"), UVM_NONE)
         end else begin
             `uvm_info(get_type_name(), $sformatf("\n\n\t---------------------------------------\n\t----     VERIFICATION FAIL      ----\n\t---------------------------------------"), UVM_NONE)

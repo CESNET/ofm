@@ -1,7 +1,7 @@
 --! cmp_decode.vhd
 --!
 --! \file
---! \brief CMP decoders mplemented 
+--! \brief CMP decoders mplemented
 --! \Author: Mario Kuka <xkukam00@stud.fit.vutbr.cz>
 --! \date 2014
 --!
@@ -24,7 +24,7 @@ entity CMP_DECODE is
       L_IN        : in  std_logic_vector(1 downto 0);
       --! input for comparatar with higher priority
       H_IN        : in  std_logic_vector(1 downto 0);
-      --! output data 
+      --! output data
       P           : out std_logic_vector(1 downto 0)
    );
 end CMP_DECODE;
@@ -32,10 +32,10 @@ end CMP_DECODE;
 --! architecture of CMP_DECODE
 architecture DECODE of CMP_DECODE is
    signal decode   : std_logic_vector(3 downto 0);
-begin  
+begin
    decode(1 downto 0) <= L_IN;
    decode(3 downto 2) <= H_IN;
-   
+
 WITH decode SELECT
    P <=  "00" WHEN "0000",
          "00" WHEN "0011",

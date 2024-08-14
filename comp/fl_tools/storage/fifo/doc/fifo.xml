@@ -54,11 +54,11 @@
    <port name="RX"       dir="inout" width="">
       Recieve interface (write to FIFO)
    </port>
-      
+
    <port name="TX"       dir="inout" width="">
       Transmit interface (read from FIFO)
    </port>
-  
+
    <divider>FIFO Control Interface</divider>
    <port name="LSTBLK"       dir="out" width="1">
       Last block detection
@@ -85,7 +85,7 @@
     Use entity FL_FIFO_FLxx for normal FIFO, where xx is data width (8, 16,
     32, 64 or 128 bits).
     </p>
-    
+
 <p>
    Both FrameLink interfaces have standard behavior. Output LSTBLK is asserted
    when N or less than N free items are in FIFO, where N is generic parameter.
@@ -100,13 +100,13 @@
    free items in the FIFO.
 </p>
 <p>
-   Because of output pipelining, signals LSTBLK, STATUS, EMPTY and FULL may be 
+   Because of output pipelining, signals LSTBLK, STATUS, EMPTY and FULL may be
    inaccurate by one or two items.
 </p>
 
     <h1>Implementation</h1>
 <p>
-   When using BRAM FIFO with DATA_WIDTH greater than 32 or Distributed FIFO, 
+   When using BRAM FIFO with DATA_WIDTH greater than 32 or Distributed FIFO,
    all four protocol control signals
    (SOP_N, EOP_N, SOF_N, EOF_N) are stored in the FIFO. Parity bits are used in
    case of BRAM FIFO. For BRAM_FIFO with DATA_WIDTH = 32, only 2 parity
@@ -130,14 +130,14 @@ bits-saving format. This is usefull when FrameLink must be stored is some
 kind of memory.
 </p>
 <p>
-FrameLink control signals are input to the FL_COMPRESS entity 
-(without DATA and DREM). 
+FrameLink control signals are input to the FL_COMPRESS entity
+(without DATA and DREM).
 Both SRC_RDY_N and DST_RDY_N are inputs, so that this module is completely
 passive on the FrameLink interface.
 </p>
 <p>
 Output wires FL_JUICE contains compressed framing signals according
-to the WIRES generic. The compression scheme is simple. 
+to the WIRES generic. The compression scheme is simple.
 In the most compressed version, only EOP_N signal is stored and
 all other framing signals will be restored in FL_DECOMPRESS.
 </p>
@@ -156,8 +156,8 @@ be the same as for FL_COMPRESS, and the FL_JUICE input should be
 connected to the FL_JUICE output of FL_COMPRESS, possibly after storage.
 </p>
 <p>
-If the PARTS generic is set to proper value, 
-(or it is set to 0 - autodetect and FRAME_PART input is connected to 
+If the PARTS generic is set to proper value,
+(or it is set to 0 - autodetect and FRAME_PART input is connected to
 FRAME_PART output of FL_COMPRESS), then framing signals are perfectly
 restored, with respect to the SRC_RDY_N and DST_RDY_N signals.
 </p>
@@ -170,7 +170,7 @@ Use DISCARD input to terminate current frame and start from scratch.
 	<p>
 
         <!--Resources usage and max. frequency by Precision-->
-	
+
 		<tab sloupce="cccC">
 			<tr>
 				<th>Entity and generic settings</th>
@@ -179,70 +179,70 @@ Use DISCARD input to terminate current frame and start from scratch.
             <th>Max. frequency</th>
 			</tr>
 			<tr>
-				<th>FL_FIFO_FL128, USE_BRAMS=false, ITEMS=32</th> 
+				<th>FL_FIFO_FL128, USE_BRAMS=false, ITEMS=32</th>
 				<td>656</td>
 				<td>0</td>
             <td>198 MHz</td>
 			</tr>
 			<tr>
-				<th>FL_FIFO_FL64, USE_BRAMS=false, ITEMS=32</th> 
+				<th>FL_FIFO_FL64, USE_BRAMS=false, ITEMS=32</th>
 				<td>358</td>
 				<td>0</td>
             <td>209 MHz</td>
 			</tr>
 			<tr>
-				<th>FL_FIFO_FL32, USE_BRAMS=false, ITEMS=32</th> 
+				<th>FL_FIFO_FL32, USE_BRAMS=false, ITEMS=32</th>
 				<td>207</td>
 				<td>0</td>
             <td>214 MHz</td>
 			</tr>
 			<tr>
-				<th>FL_FIFO_FL16, USE_BRAMS=false, ITEMS=32</th> 
+				<th>FL_FIFO_FL16, USE_BRAMS=false, ITEMS=32</th>
 				<td>129</td>
 				<td>0</td>
             <td>218 MHz</td>
 			</tr>
 			<tr>
-				<th>FL_FIFO_FL8, USE_BRAMS=false, ITEMS=32</th> 
+				<th>FL_FIFO_FL8, USE_BRAMS=false, ITEMS=32</th>
 				<td>85</td>
 				<td>0</td>
             <td>237 MHz</td>
 			</tr>
 
 			<tr>
-				<th>FL_FIFO_FL128, USE_BRAMS=true, ITEMS=1024</th> 
+				<th>FL_FIFO_FL128, USE_BRAMS=true, ITEMS=1024</th>
 				<td>104</td>
 				<td>8</td>
             <td>253 MHz</td>
 			</tr>
 			<tr>
-				<th>FL_FIFO_FL64, USE_BRAMS=true, ITEMS=1024</th> 
+				<th>FL_FIFO_FL64, USE_BRAMS=true, ITEMS=1024</th>
 				<td>66</td>
 				<td>4</td>
             <td>253 MHz</td>
 			</tr>
 			<tr>
-				<th>FL_FIFO_FL32, USE_BRAM=true, ITEMS=1024</th> 
+				<th>FL_FIFO_FL32, USE_BRAM=true, ITEMS=1024</th>
 				<td>46</td>
 				<td>2</td>
             <td>253 MHz</td>
 			</tr>
 			<tr>
-				<th>FL_FIFO_FL16, USE_BRAMS=true, ITEMS=1024</th> 
+				<th>FL_FIFO_FL16, USE_BRAMS=true, ITEMS=1024</th>
 				<td>39</td>
 				<td>1</td>
             <td>253 MHz</td>
 			</tr>
 			<tr>
-				<th>FL_FIFO_FL8, USE_BRAMS=true, ITEMS=1024</th> 
+				<th>FL_FIFO_FL8, USE_BRAMS=true, ITEMS=1024</th>
 				<td>34</td>
 				<td>1</td>
             <td>253 MHz</td>
 			</tr>
          <nazev>Resources and maximal frequency</nazev>
-		</tab> 
-	
-  </p> 
+		</tab>
+
+  </p>
 
 
 </body>

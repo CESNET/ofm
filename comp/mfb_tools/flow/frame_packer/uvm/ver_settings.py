@@ -9,7 +9,7 @@ SETTINGS = {
         "MFB_REGIONS"        : "4",
         "MFB_REGION_SIZE"    : "8",
         "MFB_BLOCK_SIZE"     : "8",
-        "MFB_ITEM_WIDTH"     : "8",       
+        "MFB_ITEM_WIDTH"     : "8",
 
         "RX_CHANNELS"        : "16",
 

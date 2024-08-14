@@ -109,7 +109,7 @@ begin
       TX_MVB_VLD     => TX_MVB_VLD,
       TX_MVB_SRC_RDY => TX_MVB_SRC_RDY,
       TX_MVB_DST_RDY => TX_MVB_DST_RDY,
-      
+
       TX_MFB_DATA    => TX_MFB_DATA,
       TX_MFB_SOF_POS => TX_MFB_SOF_POS,
       TX_MFB_EOF_POS => TX_MFB_EOF_POS,

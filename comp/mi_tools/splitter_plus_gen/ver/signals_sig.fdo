@@ -1,6 +1,6 @@
-# top_level_sig.fdo : Include file with signals 
+# top_level_sig.fdo : Include file with signals
 # Copyright (C) 2020 CESNET z. s. p. o.
-# Author: Daniel Kondys <xkondy00@vutbr.cz> 
+# Author: Daniel Kondys <xkondy00@vutbr.cz>
 #
 # SPDX-License-Identifier: BSD-3-Clause
 

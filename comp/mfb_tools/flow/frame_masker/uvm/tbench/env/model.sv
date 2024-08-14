@@ -72,7 +72,7 @@ class model #(MFB_REGIONS, MFB_ITEM_WIDTH, MFB_META_WIDTH) extends uvm_component
         logic                                                                       discard;
 
         forever begin
-            
+
             string msg = "\n";
 
             discards.get_discard_meta(discard);

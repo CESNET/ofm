@@ -14,5 +14,5 @@ architecture EMPTY of MULT_1E9 is
 begin
 
     DOUT <= (others => '0');
-   
+
 end architecture;

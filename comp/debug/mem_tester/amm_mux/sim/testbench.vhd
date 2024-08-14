@@ -49,7 +49,7 @@ architecture BEHAVIORAL Of TESTBENCH is
     signal slave_amm_burst_count        : slv_array_t(MUX_WIDTH - 1 downto 0)(AMM_BURST_COUNT_WIDTH - 1 downto 0);
 
 begin
-	
+
     ---------
     -- UUT --
     ---------

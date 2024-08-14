@@ -29,7 +29,7 @@ entity FP_MUX_CTRL is
     );
 end entity;
 
-architecture FULL of FP_MUX_CTRL is 
+architecture FULL of FP_MUX_CTRL is
 begin
     -- Check if there is a valid bit for the block - If yes, pass index of BS to the array
     mux_sel_p: process(all)
@@ -38,7 +38,7 @@ begin
         sel_arr_v  := (others => (others => '0'));
         bs_sel_l: for i in 0 to MFB_REGIONS loop
             input_sel_l: for j in 0 to MFB_REGIONS*MFB_REGION_SIZE - 1 loop
-                if RX_VLD_ARR(i)(j) = '1' then 
+                if RX_VLD_ARR(i)(j) = '1' then
                     sel_arr_v(j)   := std_logic_vector(to_unsigned(i, max(1, log2(MUX_WIDTH))));
                 end if;
             end loop;

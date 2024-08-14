@@ -6,7 +6,7 @@
 
 class memory_model #(int unsigned ADDRESS_WIDTH, int unsigned DATA_WIDTH, int unsigned BURST_WIDTH) extends uvm_component;
     `uvm_component_param_utils(uvm_avmm::memory_model #(ADDRESS_WIDTH, DATA_WIDTH, BURST_WIDTH))
-    
+
     localparam DATA_WIDTH_BYTES = DATA_WIDTH / 8;
 
     // Model input
@@ -25,7 +25,7 @@ class memory_model #(int unsigned ADDRESS_WIDTH, int unsigned DATA_WIDTH, int un
     // --------- //
     // Variables //
     // --------- //
-    
+
     protected int memory_file;
 
     request_item #(ADDRESS_WIDTH, DATA_WIDTH, BURST_WIDTH) current_request;

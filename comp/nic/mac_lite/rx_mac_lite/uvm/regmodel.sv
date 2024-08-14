@@ -1,5 +1,5 @@
 
-//-- regmodel.sv: register model of rx_mac_lite 
+//-- regmodel.sv: register model of rx_mac_lite
 //-- Copyright (C) 2024 CESNET z. s. p. o.
 //-- Author(s): Radek Iša <isa@cesnet.cz>
 

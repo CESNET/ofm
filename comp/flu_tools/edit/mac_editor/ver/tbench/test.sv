@@ -1,7 +1,7 @@
 /*
  * test.sv: Automatic test
  * Copyright (C) 2015 CESNET
- * Author: Pavel Benacek <benacek@cesnet.cz> 
+ * Author: Pavel Benacek <benacek@cesnet.cz>
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -25,24 +25,24 @@ program TEST (
   iFrameLinkUTx.tb       TX,
   iFrameLinkUTx.monitor  MONITOR
   );
-  
+
   // --------------------------------------------------------------------------
   //                       Variables declaration
   // --------------------------------------------------------------------------
-  
+
   // Transaction
   FrameLinkUEditTransaction #() fluEditBlueprint;
-  // Generator                            
+  // Generator
   Generator                fluEditGenerator;
-  // Driver                               
+  // Driver
   FrameLinkUEditDriver #(DATA_WIDTH, EOP_POS_WIDTH, SOP_POS_WIDTH)  fluEditDriver;
-  // Monitor      
-  FrameLinkUMonitor #(DATA_WIDTH, EOP_POS_WIDTH, SOP_POS_WIDTH)    fluMonitor; 
-  // Responder     
+  // Monitor
+  FrameLinkUMonitor #(DATA_WIDTH, EOP_POS_WIDTH, SOP_POS_WIDTH)    fluMonitor;
+  // Responder
   FrameLinkUResponder #(DATA_WIDTH, EOP_POS_WIDTH, SOP_POS_WIDTH)  fluResponder;
-  // Scoreboard  
-  Scoreboard              scoreboard; 
-  
+  // Scoreboard
+  Scoreboard              scoreboard;
+
   // --------------------------------------------------------------------------
   //                       Creating Environment tasks
   // --------------------------------------------------------------------------
@@ -55,9 +55,9 @@ program TEST (
       fluEditBlueprint.packetSizeMax = GENERATOR_FLU_PACKET_SIZE_MAX;
       fluEditBlueprint.packetSizeMin = GENERATOR_FLU_PACKET_SIZE_MIN;
       fluEditGenerator.blueprint     = fluEditBlueprint;
-    // Create driver    
+    // Create driver
     fluEditDriver  = new ("Driver", fluEditGenerator.transMbx, RX);
-      fluEditDriver.insideTxDelayEn_wt       = DRIVER_INSIDE_DELAYEN_WT; 
+      fluEditDriver.insideTxDelayEn_wt       = DRIVER_INSIDE_DELAYEN_WT;
       fluEditDriver.insideTxDelayDisable_wt  = DRIVER_INSIDE_DELAYDIS_WT;
       fluEditDriver.insideTxDelayLow         = DRIVER_INSIDE_DELAYLOW;
       fluEditDriver.insideTxDelayHigh        = DRIVER_INSIDE_DELAYHIGH;
@@ -67,14 +67,14 @@ program TEST (
     fluMonitor = new ("Monitor", MONITOR);
     // Create responder
     fluResponder = new ("Responder", TX);
-      fluResponder.rxDelayEn_wt            = MONITOR_DELAYEN_WT; 
+      fluResponder.rxDelayEn_wt            = MONITOR_DELAYEN_WT;
       fluResponder.rxDelayDisable_wt       = MONITOR_DELAYDIS_WT;
       fluResponder.rxDelayLow              = MONITOR_DELAYLOW;
       fluResponder.rxDelayHigh             = MONITOR_DELAYHIGH;
-      fluResponder.insideRxDelayEn_wt      = MONITOR_INSIDE_DELAYEN_WT; 
+      fluResponder.insideRxDelayEn_wt      = MONITOR_INSIDE_DELAYEN_WT;
       fluResponder.insideRxDelayDisable_wt = MONITOR_INSIDE_DELAYDIS_WT;
       fluResponder.insideRxDelayLow        = MONITOR_INSIDE_DELAYLOW;
-      fluResponder.insideRxDelayHigh       = MONITOR_INSIDE_DELAYHIGH;    
+      fluResponder.insideRxDelayHigh       = MONITOR_INSIDE_DELAYHIGH;
     // Create scoreboard and register callbacks to driver and monitors
     scoreboard = new;
       fluEditDriver.setCallbacks(scoreboard.driverCbs);
@@ -84,7 +84,7 @@ program TEST (
   // --------------------------------------------------------------------------
   //                       Test auxilarity procedures
   // --------------------------------------------------------------------------
-  
+
   // --------------------------------------------------------------------------
   // Resets design
   task resetDesign();
@@ -110,14 +110,14 @@ program TEST (
     while (i<100) begin
       if (fluEditDriver.busy || fluMonitor.busy)
         i = 0;
-      else 
+      else
         i++;
-      #(CLK_PERIOD); 
+      #(CLK_PERIOD);
     end
 
-    // Disable drivers  
-    fluEditDriver.setDisabled();     
-    // Disable monitors     
+    // Disable drivers
+    fluEditDriver.setDisabled();
+    // Disable monitors
     fluMonitor.setDisabled();
     fluResponder.setDisabled();
   endtask : disableTestEnvironment
@@ -135,7 +135,7 @@ program TEST (
     disableTestEnvironment();
     scoreboard.display();
   endtask: test1
-  
+
   // Generate very short packets
   task test2();
     $write("\n\n############ TEST CASE 2 ############\n\n");
@@ -152,17 +152,17 @@ program TEST (
     disableTestEnvironment();
     scoreboard.display();
   endtask: test2
-  
+
   // Classic length transactions, slow TX and fast RX
   task test3();
     $write("\n\n############ TEST CASE 3 ############\n\n");
     createEnvironment();
     // ////////////////////////////////
-    fluResponder.insideRxDelayEn_wt      = 4; 
+    fluResponder.insideRxDelayEn_wt      = 4;
     fluResponder.insideRxDelayDisable_wt = 2;
     fluResponder.insideRxDelayLow        = 4;
-    fluResponder.insideRxDelayHigh       = 10; 
-    fluEditDriver.insideTxDelayEn_wt       = 1; 
+    fluResponder.insideRxDelayHigh       = 10;
+    fluEditDriver.insideTxDelayEn_wt       = 1;
     fluEditDriver.insideTxDelayDisable_wt  = 10;
     fluEditDriver.insideTxDelayLow         = 0;
     fluEditDriver.insideTxDelayHigh        = 1;
@@ -172,7 +172,7 @@ program TEST (
     wait (fluEditGenerator.enabled == 0);
     disableTestEnvironment();
     scoreboard.display();
-  endtask: test3 
+  endtask: test3
 
 
   // Classic length transactions, no TX wait
@@ -180,7 +180,7 @@ program TEST (
     $write("\n\n############ TEST CASE 4 ############\n\n");
     createEnvironment();
     // ////////////////////////////////
-    fluResponder.rxDelayEn_wt            = 0; 
+    fluResponder.rxDelayEn_wt            = 0;
     fluResponder.rxDelayDisable_wt       = 10;
     fluResponder.rxDelayLow              = 0;
     fluResponder.rxDelayHigh             = 0;
@@ -197,11 +197,11 @@ program TEST (
     $write("\n\n############ TEST CASE 5 ############\n\n");
     createEnvironment();
     // ////////////////////////////////
-    fluResponder.insideRxDelayEn_wt      = 4; 
+    fluResponder.insideRxDelayEn_wt      = 4;
     fluResponder.insideRxDelayDisable_wt = 1;
     fluResponder.insideRxDelayLow        = 4;
-    fluResponder.insideRxDelayHigh       = 10; 
-    fluEditDriver.insideTxDelayEn_wt       = 1; 
+    fluResponder.insideRxDelayHigh       = 10;
+    fluEditDriver.insideTxDelayEn_wt       = 1;
     fluEditDriver.insideTxDelayDisable_wt  = 10;
     fluEditDriver.insideTxDelayLow         = 0;
     fluEditDriver.insideTxDelayHigh        = 1;
@@ -215,7 +215,7 @@ program TEST (
     wait (fluEditGenerator.enabled == 0);
     disableTestEnvironment();
     scoreboard.display();
-  endtask: test5  
+  endtask: test5
 
   // --------------------------------------------------------------------------
   //                           Main test part
@@ -234,7 +234,7 @@ program TEST (
     test3();
     test4();
     test5();
-        
+
     // -------------------------------------
     // STOP TESTING
     // -------------------------------------

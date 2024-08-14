@@ -10,10 +10,10 @@ SETTINGS = {
         "TS_META_WIDTH"         : "1" ,
         "TS_BEHAVIOUR"          : "0" ,
         "MAX_SAME_ID"           : "1" ,
-        "FIFOX_SHAKEDOWN_MODE"  : "0" ,    
+        "FIFOX_SHAKEDOWN_MODE"  : "0" ,
         "MAX_RX_TRANS"          : "2" ,
         "MAX_TX_TRANS"          : "2" ,
-        "MAX_ID_CONFS"          : "2" ,    
+        "MAX_ID_CONFS"          : "2" ,
     },
     "wide_transaction" : {
         "TS_ID_WIDTH"           : "8" ,

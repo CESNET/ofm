@@ -71,7 +71,7 @@ class agent #(int unsigned DATA_WIDTH) extends uvm_agent;
         // Driver.
         if(get_is_active() == UVM_ACTIVE) begin
             m_driver.vif = vif;
-            m_driver.seq_item_port.connect(m_sequencer.seq_item_export);    
+            m_driver.seq_item_port.connect(m_sequencer.seq_item_export);
         end
     endfunction
 

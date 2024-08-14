@@ -237,7 +237,7 @@ begin
                     -- Use the same address as the RX uInstruction
                     TX_UINSTR_B_COL <= RX_UINSTR_B_COL;
                     TX_UINSTR_B_ROW <= std_logic_vector(enlarge_right(unsigned(RX_UINSTR_B_ITEM),-log2(ROW_ITEMS)));
-                    
+
                     -- a_ie is determined by the address of the valid items in the first row in buffer B
                     TX_UINSTR_IE <= first_ie;
 

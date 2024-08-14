@@ -308,7 +308,7 @@ begin
     port map(
         CLK   => CLK  ,
         RESET => RESET,
-  
+
         DIN          => trans_shake_din ,
         DIN_VLD      => trans_vld       ,
         DIN_SRC_RDY  => trans_src_rdy   ,

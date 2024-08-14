@@ -95,7 +95,7 @@ architecture FULL of MVB_SHAKEDOWN is
     -- =====================================
     -- Shift register implemetation signals
     -- =====================================
-    
+
     signal item_sent_reg        : std_logic_vector(RX_ITEMS - 1 downto 0);
     signal item_sent_reg_set    : std_logic_vector(RX_ITEMS - 1 downto 0);
     signal item_sent_reg_reset  : std_logic_vector(RX_ITEMS - 1 downto 0);
@@ -228,7 +228,7 @@ begin
         eq_TX_DATA <= s_sh_dout_reg(ITEMS*ITEM_WIDTH-1 downto 0);
         eq_TX_VLD  <= s_sh_dout_vld_reg(ITEMS-1 downto 0);
     end generate;
-    
+
     -- Implement effective N to 1 MVB shakedown
     mux_shakedown_g : if (TX_ITEMS = 1 and USE_MUX_IMPL) generate
         signal rx_data_int      : std_logic_vector(RX_ITEMS * ITEM_WIDTH - 1 downto 0);
@@ -246,7 +246,7 @@ begin
                     rx_vld_int      <= RX_VLD;
                     rx_src_rdy_int  <= RX_SRC_RDY;
                 end if;
-                
+
                 if (RESET = '1') then
                     rx_src_rdy_int <= '0';
                 end if;

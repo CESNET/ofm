@@ -3,7 +3,7 @@
 # Author: Ivan Bryndza <xbrynd00@stud.feec.vutbr.cz>
 #
 # SPDX-License-Identifier: BSD-3-Clause
-# 
+#
 # $Id$
 #
 
@@ -19,7 +19,7 @@ proc blk_AXI2FLU_RX { } {
     add_wave "-noupdate -hex -label RX_TVALID" /$TB_PATH/RX_TVALID
     add_wave "-noupdate -hex -label RX_TREADY" /$TB_PATH/RX_TREADY
 
-    add wave -divider "In pipe signals" 
+    add wave -divider "In pipe signals"
     add_wave "-noupdate -hex -label in_pipe_tdata" /$AXI2FLU_PATH/in_pipe_tdata
     add_wave "-noupdate -hex -label in_pipe_tkeep" /$AXI2FLU_PATH/in_pipe_tkeep
     add_wave "-noupdate -hex -label in_pipe_tlast" /$AXI2FLU_PATH/in_pipe_tlast

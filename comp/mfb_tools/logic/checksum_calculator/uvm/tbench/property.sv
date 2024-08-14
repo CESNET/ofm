@@ -1,11 +1,11 @@
-//-- property.sv: Properties for mfb bus 
+//-- property.sv: Properties for mfb bus
 //-- Copyright (C) 2022 CESNET z. s. p. o.
 //-- Author(s): Daniel Kriz <xkrizd01@vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 
-module checksum_calculator_property #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH, MVB_DATA_WIDTH) 
+module checksum_calculator_property #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, META_WIDTH, MVB_DATA_WIDTH)
     (
         input RESET,
         mfb_if rx_mfb_vif,

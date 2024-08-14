@@ -70,11 +70,11 @@ port(
     RX_SOF_MASK : in  std_logic_vector(MFB_REGIONS-1 downto 0);
     RX_SRC_RDY  : in  std_logic;
     RX_DST_RDY  : out std_logic;
-    
+
     -- =====================================================================
     --  TX inf
     -- =====================================================================
-    
+
     TX_DATA     : out slv_array_t     (MFB_REGIONS-1 downto 0)(MFB_REGION_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH-1 downto 0);
     TX_META     : out slv_array_t     (MFB_REGIONS-1 downto 0)(MFB_META_WIDTH-1 downto 0);
     TX_OFFSET   : out u_array_t       (MFB_REGIONS-1 downto 0)(OFFSET_WIDTH-1 downto 0);

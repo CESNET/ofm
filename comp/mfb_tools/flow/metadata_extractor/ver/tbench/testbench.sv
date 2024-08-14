@@ -38,5 +38,5 @@ module testbench;
         .TX_MFB      (TX_MFB),
         .TX_MVB      (TX_MVB)
     );
-    
+
 endmodule

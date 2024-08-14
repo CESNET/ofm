@@ -1,4 +1,4 @@
-// dut.sv: Design under test 
+// dut.sv: Design under test
 // Copyright (C) 2023 CESNET z. s. p. o.
 // Author(s): Yaroslav Marushchenko <xmarus09@stud.fit.vutbr.cz>
 
@@ -28,7 +28,7 @@ module DUT (
     logic afull;
 
     FIFOX_MULTI_WRAPPER #(
-        
+
         .DATA_WIDTH          (DATA_WIDTH         ),
         .ITEMS               (ITEMS              ),
         .WRITE_PORTS         (WRITE_PORTS        ),

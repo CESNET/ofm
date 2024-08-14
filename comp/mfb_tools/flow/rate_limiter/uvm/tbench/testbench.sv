@@ -13,7 +13,7 @@ module testbench;
 
     // Signals
     logic CLK = 0;
-   
+
     // Interfaces
     reset_if reset(CLK);
     mi_if  #(MI_DATA_WIDTH, MI_ADDR_WIDTH) mi(CLK);

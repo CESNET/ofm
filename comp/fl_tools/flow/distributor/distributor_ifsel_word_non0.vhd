@@ -27,7 +27,7 @@ architecture inum_in_word_non0 of fl_distributor_ifsel is
    -- width needed for the INUM (number of interface)
    constant INUM_WIDTH : integer := log2(INTERFACES_COUNT);
 
-   -- width of the RX_REM signal 
+   -- width of the RX_REM signal
    constant REM_WIDTH : integer := log2(DATA_WIDTH/8);
 
 	constant INUM_FIFO_LEN : integer := (INUM_OFFSET / DATA_WIDTH) + 1;
@@ -81,7 +81,7 @@ cnt_total_dec <= is_writing;
 
 reg_inum_ce <= '1' when (is_reading = '1' and cnt_scan = INUM_POS_WORD)
                         or (RX_EOP_N = '0' and RX_REM = (REM_WIDTH-1 downto 0 => '1') ) else '0';
-fifo_write_en <= '1' when cnt_total > cnt_scan or 
+fifo_write_en <= '1' when cnt_total > cnt_scan or
                (cnt_scan = conv_std_logic_vector(INUM_FIFO_LEN, cnt_scan'length)) else '0';
 
 TX_DATA <= out_data;
@@ -145,7 +145,7 @@ out_fifo : entity work.FL_FIFO
    port map (
       CLK => CLK,
       RESET => RESET,
-      
+
       RX_DATA => RX_DATA,
       RX_REM => RX_REM,
       RX_SRC_RDY_N => fifo_rx_src_rdy_n,
@@ -167,7 +167,7 @@ out_fifo : entity work.FL_FIFO
       FULL => open,
       EMPTY => open,
       FRAME_RDY => open,
-      
+
       STATUS => open,
       LSTBLK => open
    );

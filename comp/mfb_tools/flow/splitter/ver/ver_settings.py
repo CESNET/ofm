@@ -68,7 +68,7 @@ SETTINGS = {
     "mvb_items_comb_1" : {
         "MVB_ITEMS"         : "1",
     },
-    "_combinations_" : (  
+    "_combinations_" : (
     (), # Works the same as '("default",),' as the "default" is applied in every combination
     ("region_comb_1","mvb_items_comb_1",),
     ("region_comb_2",),

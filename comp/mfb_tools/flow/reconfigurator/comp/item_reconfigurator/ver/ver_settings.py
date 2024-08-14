@@ -19,22 +19,22 @@ SETTINGS = {
         "FRAME_SIZE_MAX"   : "8*REGIONS*REGION_SIZE*RX_BLOCK_SIZE",
         "TRANSACTION_COUNT": "1000"                               ,
     },
-    "2_rx_items" : { # 
+    "2_rx_items" : { #
         "RX_BLOCK_SIZE"   : "2"                                   ,
     },
-    "2_tx_items" : { # 
+    "2_tx_items" : { #
         "TX_BLOCK_SIZE"   : "2"                                   ,
     },
-    "8_rx_items" : { # 
+    "8_rx_items" : { #
         "RX_BLOCK_SIZE"   : "8"                                   ,
     },
-    "8_tx_items" : { # 
+    "8_tx_items" : { #
         "TX_BLOCK_SIZE"   : "8"                                   ,
     },
-    "meta_mode_1" : { # 
+    "meta_mode_1" : { #
         "META_MODE"        : "1"                                  ,
     },
-#    "" : { # 
+#    "" : { #
 #    },
     "_combinations_" : (
     ("default",),

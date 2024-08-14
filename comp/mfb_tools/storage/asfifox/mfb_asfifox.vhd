@@ -44,7 +44,7 @@ entity MFB_ASFIFOX is
         -- Select memory implementation. Options:
         -- "LUT"  - effective for shallow FIFO (approx. ITEMS <= 64),
         -- "BRAM" - effective for deep FIFO (approx. ITEMS > 64).
-        RAM_TYPE            : string  := "BRAM"; 
+        RAM_TYPE            : string  := "BRAM";
         -- First Word Fall Through mode. If FWFT_MODE=True, valid data will be
         -- ready at the ASFIFOX output without RD_EN requests.
         FWFT_MODE           : boolean := True;
@@ -71,7 +71,7 @@ entity MFB_ASFIFOX is
 
         RX_CLK        : in  std_logic;
         RX_RESET      : in  std_logic;
-        
+
         RX_DATA       : in  std_logic_vector(MFB_REGIONS*MFB_REG_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH-1 downto 0);
         RX_META       : in  std_logic_vector(MFB_REGIONS*METADATA_WIDTH-1 downto 0) := (others => '0');
         RX_SOF        : in  std_logic_vector(MFB_REGIONS-1 downto 0);
@@ -149,7 +149,7 @@ begin
 
         RD_CLK    => TX_CLK    ,
         RD_RST    => TX_RESET  ,
-        
+
         RD_DATA   => do        ,
         RD_EN     => TX_DST_RDY,
         RD_EMPTY  => empty     ,

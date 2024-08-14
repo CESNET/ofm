@@ -141,7 +141,7 @@ architecture V7_DSP of CMP48 is
    --! signals
    signal zeros   : std_logic_vector(63 downto 0);
    signal carry   : std_logic_vector(3 downto 0);
-begin  
+begin
 
    zeros <= X"0000000000000000";
    P(1) <= carry(3);
@@ -155,10 +155,10 @@ begin
       USE_DPORT => TRUE,     -- Select D port usage (TRUE or FALSE)
       USE_MULT => "NONE",    -- Select multiplier usage ("MULTIPLY", "DYNAMIC", or "NONE")
       -- Pattern Detector Attributes: Pattern Detection Configuration
-      AUTORESET_PATDET => "NO_RESET",  -- "NO_RESET", "RESET_MATCH", "RESET_NOT_MATCH" 
+      AUTORESET_PATDET => "NO_RESET",  -- "NO_RESET", "RESET_MATCH", "RESET_NOT_MATCH"
       MASK => X"000000000000",         -- 48-bit mask value for pattern detect (1=ignore)
       PATTERN => X"000000000000",      -- 48-bit pattern match for pattern detect
-      SEL_MASK => "MASK",              -- "C", "MASK", "ROUNDING_MODE1", "ROUNDING_MODE2" 
+      SEL_MASK => "MASK",              -- "C", "MASK", "ROUNDING_MODE1", "ROUNDING_MODE2"
       SEL_PATTERN => "PATTERN",              -- Select pattern value ("PATTERN" or "C")
       USE_PATTERN_DETECT => "PATDET",  -- Enable pattern detect ("PATDET" or "NO_PATDET")
       -- Register Control Attributes: Pipeline Register Configuration

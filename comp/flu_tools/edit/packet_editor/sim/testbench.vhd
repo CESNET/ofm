@@ -61,7 +61,7 @@ begin
    )
    port map (
       CLK            => CLK,
-      RESET          => RESET, 
+      RESET          => RESET,
       NEW_DATA       => NEW_DATA,
       OFFSET         => OFFSET,
       EN_REPLACE     => EN_REPLACE,
@@ -84,7 +84,7 @@ begin
    );
 
    --Generate clock
-   clk_gen_p : process 
+   clk_gen_p : process
    begin
       CLK <= '1';
       wait for clkper/2;
@@ -101,7 +101,7 @@ begin
    wait;
    end process;
 
-   -- Simulating input flow 
+   -- Simulating input flow
    input_flow : process
    begin
       MASK        <= (others => '0');
@@ -119,7 +119,7 @@ begin
       wait for reset_time;
       wait for clkper;
       wait for 2 ns;
-      
+
       NEW_DATA    <= X"DDCCBBAA";
       MASK        <= "1101";
       RX_SRC_RDY  <= '1';
@@ -130,7 +130,7 @@ begin
       OFFSET      <= conv_std_logic_vector(15, OFFSET'LENGTH);
       RX_SOP      <= '1';
       wait for clkper;
-                            
+
       MASK <= (others => '0');
       NEW_DATA    <= (others => '1');
       OFFSET      <= (others => '1');
@@ -162,7 +162,7 @@ begin
       OFFSET      <= conv_std_logic_vector(0, OFFSET'LENGTH);
       RX_SOP      <= '1';
       RX_EOP      <= '1';
-      RX_DATA     <= X"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"; 
+      RX_DATA     <= X"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
       NEW_DATA    <= (others => '1');
       wait for clkper;
 
@@ -173,7 +173,7 @@ begin
       OFFSET      <= conv_std_logic_vector(0, OFFSET'LENGTH);
       RX_SOP      <= '1';
       RX_EOP      <= '1';
-      RX_DATA     <= X"CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"; 
+      RX_DATA     <= X"CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC";
       NEW_DATA    <= (others => '1');
       wait for clkper;
 
@@ -184,7 +184,7 @@ begin
       OFFSET      <= conv_std_logic_vector(15, OFFSET'LENGTH);
       RX_SOP      <= '1';
       RX_EOP      <= '1';
-      RX_DATA     <= X"BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"; 
+      RX_DATA     <= X"BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB";
       NEW_DATA    <= (others => '1');
       wait for clkper;
 
@@ -196,7 +196,7 @@ begin
       OFFSET      <= conv_std_logic_vector(32, OFFSET'LENGTH);
       RX_SOP      <= '1';
       RX_EOP      <= '1';
-      RX_DATA     <= X"EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"; 
+      RX_DATA     <= X"EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE";
       NEW_DATA    <= (others => '1');
 
       wait for clkper;
@@ -208,7 +208,7 @@ begin
       OFFSET      <= conv_std_logic_vector(32, OFFSET'LENGTH);
       RX_SOP      <= '1';
       RX_EOP      <= '1';
-      RX_DATA     <= X"55555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555"; 
+      RX_DATA     <= X"55555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555";
       NEW_DATA    <= (others => '1');
 
       wait for clkper;

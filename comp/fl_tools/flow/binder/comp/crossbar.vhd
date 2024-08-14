@@ -29,9 +29,9 @@ entity FLB_CROSSBAR is
       RX_EOF_N       : in  std_logic_vector(COUNT-1 downto 0);
       RX_SRC_RDY_N   : in  std_logic_vector(COUNT-1 downto 0);
       RX_DST_RDY_N   : out std_logic_vector(COUNT-1 downto 0);
-      RX_DATA        : in  std_logic_vector(COUNT*DATA_WIDTH-1 
+      RX_DATA        : in  std_logic_vector(COUNT*DATA_WIDTH-1
                            downto 0);
-      RX_REM         : in  std_logic_vector(COUNT*log2(DATA_WIDTH/8)-1 
+      RX_REM         : in  std_logic_vector(COUNT*log2(DATA_WIDTH/8)-1
                            downto 0);
 
       -- output FrameLink interface
@@ -55,7 +55,7 @@ end entity FLB_CROSSBAR;
 -- ----------------------------------------------------------------------------
 architecture full of FLB_CROSSBAR is
    -- ------------------ Signals declaration ----------------------------------
-   
+
 begin
    -- ------------------ Directly mapped signals ------------------------------
    -- SOF_N multiplexer
@@ -130,7 +130,7 @@ begin
          SEL         => IFC,
          DATA_OUT    => RX_DST_RDY_N
       );
-   
+
    -- DATA multiplexer
    MX_DATA : entity work.GEN_MUX
       generic map(

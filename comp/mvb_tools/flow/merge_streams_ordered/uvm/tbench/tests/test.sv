@@ -1,4 +1,4 @@
-// test.sv: Verification test 
+// test.sv: Verification test
 // Copyright (C) 2024 CESNET z. s. p. o.
 // Author(s): Vladislav Valek <valekv@cesnet.cz>
 

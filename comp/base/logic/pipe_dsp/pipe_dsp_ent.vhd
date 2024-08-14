@@ -16,11 +16,11 @@ use ieee.std_logic_1164.all;
 entity PIPE_DSP is
    generic (
       DATA_WIDTH  : integer := 48;
-      --! enable fake pipe 
+      --! enable fake pipe
       PIPE_EN     : boolean := true;
-      --! use DSP slice or normal registers 
+      --! use DSP slice or normal registers
       ENABLE_DSP  : boolean := true;
-      --! number of registers 
+      --! number of registers
       NUM_REGS    : integer := 1
    );
    port (

@@ -12,7 +12,7 @@ import dpi_test::*;
 
 
 module testbench();
- 
+
     initial begin
         $write("\nSystemVerilog calling C function:\n");
         func_c2sv(10);

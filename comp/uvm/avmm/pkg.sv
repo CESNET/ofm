@@ -8,7 +8,7 @@
 `define AVMM_PKG
 
 package uvm_avmm;
-    
+
     `include "uvm_macros.svh"
     import uvm_pkg::*;
 
@@ -16,7 +16,7 @@ package uvm_avmm;
         READ,
         WRITE
     } request_item_type_e;
-   
+
     `include "config.sv"
     `include "sequence_item.sv"
     `include "internal_items.sv"
@@ -29,7 +29,7 @@ package uvm_avmm;
     `include "coverage.sv"
     `include "statistics.sv"
     `include "agent.sv"
-    
+
 endpackage
 
 `endif

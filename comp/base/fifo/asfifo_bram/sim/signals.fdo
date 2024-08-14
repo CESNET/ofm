@@ -42,16 +42,16 @@ proc internal {NAME PATH} {
    add_wave "-noupdate -label wr_ptr" $PATH/wr_ptr
    add_wave "-noupdate -label sync_wr_ptr" $PATH/sync_wr_ptr
    add_wave "-noupdate -label wr_gray_next" $PATH/wr_gray_next
-   
+
    add_wave "-noupdate -label write_allow" $PATH/write_allow
    add_wave "-noupdate -label read_allow" $PATH/read_allow
-   
+
    add_wave "-noupdate -hex -color blue -label reg_mark_cnt_write_addr"  $PATH/wr_bin_mark
    add_wave "-noupdate -hex -color blue -label reg_mark_write_nextgray"  $PATH/wr_ptr_mark
 }
 
-proc mark {NAME PATH} {	
+proc mark {NAME PATH} {
    add wave -divider "$NAME"
-	add_wave "-noupdate -hex -color blue -label mark"     $PATH/mark	
-	add_wave "-noupdate -hex -color blue -label release"  $PATH/release	
+	add_wave "-noupdate -hex -color blue -label mark"     $PATH/mark
+	add_wave "-noupdate -hex -color blue -label release"  $PATH/release
 }

@@ -18,7 +18,7 @@ package test_pkg;
 
   // standard SystemVerilog Scoreboard
   `include "scoreboard.sv"
-  
+
   // -- FL_MULTIPLEXER GENERICS ----------------------------------------------
    // Number of Frame Link channels
   parameter CHANNELS       = 4;
@@ -37,7 +37,7 @@ package test_pkg;
   int       GENERATOR_PACKET_SIZE_MAX[] = '{64,1536,128};
    // Min size of packets
   int       GENERATOR_PACKET_SIZE_MIN[] = '{8,32,8};
-   
+
   // -- TEST PARAMETERS ------------------------------------------------------
    // Count of transactions to generate
   parameter TEST_TRANSACTION_COUNT     = 5000;
@@ -45,37 +45,37 @@ package test_pkg;
   // -- DRIVER PARAMETERS ---------------------------------------------------
    // FL data width
   parameter DRIVER_DATA_WIDTH         = DATA_WIDTH;
-   // FL REM width 
+   // FL REM width
   parameter DRIVER_DREM_WIDTH         = DREM_WIDTH;
-   // Delay enable/disable between transactions weight          
+   // Delay enable/disable between transactions weight
   parameter DRIVER_DELAYEN_WT         = 1;
-  parameter DRIVER_DELAYDIS_WT        = 10;  
-   // Delay between transactions limits                    
-  parameter DRIVER_DELAYLOW           = 0; 
-  parameter DRIVER_DELAYHIGH          = 7; 
-   // Delay enable/disalbe inside transaction weight          
+  parameter DRIVER_DELAYDIS_WT        = 10;
+   // Delay between transactions limits
+  parameter DRIVER_DELAYLOW           = 0;
+  parameter DRIVER_DELAYHIGH          = 7;
+   // Delay enable/disalbe inside transaction weight
   parameter DRIVER_INSIDE_DELAYEN_WT  = 1;
-  parameter DRIVER_INSIDE_DELAYDIS_WT = 50;  
-   // Delay inside transaction limits                    
-  parameter DRIVER_INSIDE_DELAYLOW    = 0; 
-  parameter DRIVER_INSIDE_DELAYHIGH   = 7;      
-                 
+  parameter DRIVER_INSIDE_DELAYDIS_WT = 50;
+   // Delay inside transaction limits
+  parameter DRIVER_INSIDE_DELAYLOW    = 0;
+  parameter DRIVER_INSIDE_DELAYHIGH   = 7;
+
   // -- MONITOR PARAMETERS --------------------------------------------------
    // FL data width
   parameter MONITOR_DATA_WIDTH         = DATA_WIDTH;
-   // FL REM width 
+   // FL REM width
   parameter MONITOR_DREM_WIDTH         = DREM_WIDTH;
-   // Delay enable/disable between transactions weight          
-  parameter MONITOR_DELAYEN_WT         = 1;  
-  parameter MONITOR_DELAYDIS_WT        = 10; 
-   // Delay between transactions limits                    
-  parameter MONITOR_DELAYLOW           = 0; 
-  parameter MONITOR_DELAYHIGH          = 7; 
-   // Delay enable/disalbe inside transaction weight          
-  parameter MONITOR_INSIDE_DELAYEN_WT  = 1; 
-  parameter MONITOR_INSIDE_DELAYDIS_WT = 50; 
-   // Delay inside transaction limits                    
-  parameter MONITOR_INSIDE_DELAYLOW    = 0; 
-  parameter MONITOR_INSIDE_DELAYHIGH   = 7;                     
+   // Delay enable/disable between transactions weight
+  parameter MONITOR_DELAYEN_WT         = 1;
+  parameter MONITOR_DELAYDIS_WT        = 10;
+   // Delay between transactions limits
+  parameter MONITOR_DELAYLOW           = 0;
+  parameter MONITOR_DELAYHIGH          = 7;
+   // Delay enable/disalbe inside transaction weight
+  parameter MONITOR_INSIDE_DELAYEN_WT  = 1;
+  parameter MONITOR_INSIDE_DELAYDIS_WT = 50;
+   // Delay inside transaction limits
+  parameter MONITOR_INSIDE_DELAYLOW    = 0;
+  parameter MONITOR_INSIDE_DELAYHIGH   = 7;
 
 endpackage

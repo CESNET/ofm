@@ -62,12 +62,12 @@ generic (
     -- Selects smarter DSPs arrangement for timestamp format conversion.
     -- Meanings of supported values: true = use multiplication in DSPs composed
     -- of adds and shifts; false = look at TS_MULT_USE_DSP
-    TS_MULT_SMART_DSP            : boolean := true; 
+    TS_MULT_SMART_DSP            : boolean := true;
     -- Selects whether to use DSPs for timestamp format conversion:
     -- Meanings of supported values: true = use multipliers in DSPs;
-    -- false = disable DSPs, use logic 
+    -- false = disable DSPs, use logic
     TS_MULT_USE_DSP              : boolean := true;
-    -- Width of PPS select signal: Used value must be in range from 1 to 16. 
+    -- Width of PPS select signal: Used value must be in range from 1 to 16.
     -- Should be greater or equal to base 2 logarithm from number of available
     -- PPS sources.
     PPS_SEL_WIDTH                : integer := 8;
@@ -96,7 +96,7 @@ port (
     -- MI bus: write request
     MI_WR         : in  std_logic;
     -- MI bus: byte enable, not supported in this component!
-    MI_BE         : in  std_logic_vector(3 downto 0); 
+    MI_BE         : in  std_logic_vector(3 downto 0);
     -- MI bus: data from slave to master (read data)
     MI_DRD        : out std_logic_vector(31 downto 0);
     -- MI bus: ready of slave module
@@ -107,7 +107,7 @@ port (
     -- =========================================================================
     --  PPS signal interface
     -- =========================================================================
-    
+
     -- Input PPS_N signal
     PPS_N         : in std_logic;
     -- Number of different PPS sources (on MI_CLK)
@@ -118,7 +118,7 @@ port (
     -- =========================================================================
     --  Main CLK signal interface
     -- =========================================================================
-    
+
     -- Input CLK signal (main clock)
     CLK           : in  std_logic;
     -- Synchronious reset with main clock
@@ -133,14 +133,14 @@ port (
     -- Number of different CLK sources (on MI_CLK)
     CLK_SRC       : in std_logic_vector(15 downto 0);
     -- Select CLK source (on MI_CLK)
-    CLK_SEL       : out std_logic_vector(max(CLK_SEL_WIDTH-1,0) downto 0);    
-    
+    CLK_SEL       : out std_logic_vector(max(CLK_SEL_WIDTH-1,0) downto 0);
+
     -- =========================================================================
     --  Output timestamp interface (on main CLK)
     -- =========================================================================
-    
+
     -- Timestamp in fractional (old) format: Fractional part of timestamp
-    -- represents number of xanoseconds (one xanosecond is 2^(-32) seconds).  
+    -- represents number of xanoseconds (one xanosecond is 2^(-32) seconds).
     TS  	 	    : out std_logic_vector(63 downto 0);
     -- Timestamp in nanosecond (new) format: Fractional part of timestamp
     -- represents number of nanoseconds (one nanosecond is 10^(-9) seconds).

@@ -8,7 +8,7 @@
 
 
 proc flu_qdr_ports { TB } {
-   
+
    add wave -divider ""
    add wave -divider "Synchronization"
    add_wave "-group { SYNC } -noupdate -hex -label SDM_CLK"                   $TB/app_clk
@@ -56,7 +56,7 @@ proc flu2qdr_ports { TB } {
 
    add wave -divider "Read requests"
    add_wave "-group { RR } -noupdate -hex -label QDR_TX_RD_ADDR"    $TB/qdr_tx_rd_addr
-   add_wave "-group { RR } -noupdate -hex -label QDR_TX_RD_SRC_RDY" $TB/qdr_tx_rd_src_rdy 
+   add_wave "-group { RR } -noupdate -hex -label QDR_TX_RD_SRC_RDY" $TB/qdr_tx_rd_src_rdy
    add_wave "-group { RR } -noupdate -hex -label QDR_TX_RD_DST_RDY" $TB/qdr_tx_rd_dst_rdy
 
    add wave -divider "Write requests"
@@ -134,7 +134,7 @@ proc qdr_ports { TB } {
    add_wave "-group { QC } -noupdate -hex -label CAL_DONE_S"    $TB/cal_done_s
    add_wave "-group { QC } -noupdate -hex -label CAL_DONE_REG1"    $TB/cal_done_reg1
    add_wave "-group { QC } -noupdate -hex -label CAL_DONE_REG2"    $TB/cal_done_reg2
-   
+
    add wave -divider "Read request FIFO"
    add_wave "-group { RRF } -noupdate -hex -label FIFO_RDIN_WR"    $TB/fifo_rdin_wr
    add_wave "-group { RRF } -noupdate -hex -label FIFO_RDIN_DI"    $TB/fifo_rdin_di
@@ -147,7 +147,7 @@ proc qdr_ports { TB } {
    add_wave "-group { RRFSM } -noupdate -label CURRENT_STATE"    $TB/current_staterd
    add_wave "-group { RRFSM } -noupdate -label NEXT_STATE"    $TB/next_staterd
    add_wave "-group { RRFSM } -noupdate -hex -label RD_ADDR_LSB"    $TB/rd_addr_lsb
-   
+
    add wave -divider "Write request FIFO"
    add_wave "-group { WRF } -noupdate -hex -label FIFO_WRIN_WR"    $TB/fifo_wrin_wr
    add_wave "-group { WRF } -noupdate -hex -label FIFO_WRIN_DI"    $TB/fifo_wrin_di

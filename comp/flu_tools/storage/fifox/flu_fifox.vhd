@@ -19,24 +19,24 @@ entity FLU_FIFOX is
       -- FIFO depth, number of data words
       ITEMS               : natural := 512;
       -- Select memory implementation. Options:
-      -- "LUT"   - effective when ITEMS <= 64 (on Intel FPGA <= 32), 
-      -- "BRAM"  - effective when ITEMS  > 64 (on Intel FPGA  > 32), 
-      -- "URAM"  - effective when ITEMS*DW >= 288000 
+      -- "LUT"   - effective when ITEMS <= 64 (on Intel FPGA <= 32),
+      -- "BRAM"  - effective when ITEMS  > 64 (on Intel FPGA  > 32),
+      -- "URAM"  - effective when ITEMS*DW >= 288000
       --           and DW >= 72 (URAM is only for Xilinx Ultrascale(+)),
       -- "SHIFT" - effective when ITEMS <= 16,
       -- "AUTO"  - effective implementation dependent on ITEMS and DEVICE.
       RAM_TYPE            : string  := "AUTO";
       -- Defines what architecture is FIFO implemented on Options:
-      -- "ULTRASCALE" (Xilinx) 
+      -- "ULTRASCALE" (Xilinx)
       -- "7SERIES"    (Xilinx)
       -- "ARRIA10"    (Intel)
       -- "STRATIX10"  (Intel)
       DEVICE              : string  := "ULTRASCALE";
       -- Determins how many data words left free when almost_full is triggered.
-      -- (ITEMS - ALMOST_FULL_OFFSET) 
+      -- (ITEMS - ALMOST_FULL_OFFSET)
       ALMOST_FULL_OFFSET  : natural := 1;
       -- Determins how many data words present when almost_empty is triggered.
-      -- (0 + ALMOST_EMPTY_OFFSET) 
+      -- (0 + ALMOST_EMPTY_OFFSET)
       ALMOST_EMPTY_OFFSET : natural := 1;
       SOP_POS_WIDTH       : integer := 2
   );

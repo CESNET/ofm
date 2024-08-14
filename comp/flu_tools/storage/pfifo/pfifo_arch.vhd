@@ -1,6 +1,6 @@
 -- pfifo_arch.vhd: Frame Link Unaligned protocol generic Packet Store-And-Forward FIFO
 -- Copyright (C) 2012 CESNET
--- Author: Pavel Benacek <benacek@cesnet.cz> 
+-- Author: Pavel Benacek <benacek@cesnet.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --
@@ -15,9 +15,9 @@ use ieee.std_logic_unsigned.all;
 -- library containing log2 and min functions
 use work.math_pack.all;
 
-architecture full of FLU_PFIFO is  
+architecture full of FLU_PFIFO is
    --Constant declaration ---------------------------------
-   --! Hight index of EOP_BLOCK 
+   --! Hight index of EOP_BLOCK
    constant EOP_BLOCK_HINDEX  : integer := log2(DATA_WIDTH/8) - 1;
    --! Low index of EOP_BLOCK
    constant EOP_BLOCK_LINDEX  : integer := log2(DATA_WIDTH/8) - SOP_POS_WIDTH;
@@ -26,36 +26,36 @@ architecture full of FLU_PFIFO is
    -- Store-and-forward fifo output
    -----------------------------------------------
    --! DATA signal
-   signal sig_pfifo_data      : std_logic_vector(DATA_WIDTH-1 downto 0); 
+   signal sig_pfifo_data      : std_logic_vector(DATA_WIDTH-1 downto 0);
    --! SOP_POS signal
    signal sig_pfifo_sop_pos   : std_logic_vector(SOP_POS_WIDTH-1 downto 0);
    --! EOP_POS signal
    signal sig_pfifo_eop_pos   : std_logic_vector(log2(DATA_WIDTH/8)-1 downto 0);
    --! SOP signal
-   signal sig_pfifo_sop       : std_logic; 
+   signal sig_pfifo_sop       : std_logic;
    --! EOP signal
-   signal sig_pfifo_eop       : std_logic; 
+   signal sig_pfifo_eop       : std_logic;
    --! SRC_RDY signal
-   signal sig_pfifo_src_rdy   : std_logic; 
+   signal sig_pfifo_src_rdy   : std_logic;
    --! DST_RDY signal
    signal sig_pfifo_dst_rdy   : std_logic;
-   
+
    -----------------------------------------------
    -- Asynchronous FIFO signals
    -----------------------------------------------
    --! DATA signal
-   signal sig_tx_data      : std_logic_vector(DATA_WIDTH-1 downto 0); 
+   signal sig_tx_data      : std_logic_vector(DATA_WIDTH-1 downto 0);
    --! SOP_POS signal
    signal sig_tx_sop_pos   : std_logic_vector(SOP_POS_WIDTH-1 downto 0);
    --! EOP_POS signal
    signal sig_tx_eop_pos   : std_logic_vector(log2(DATA_WIDTH/8)-1 downto 0);
    --! SOP signal
-   signal sig_tx_sop       : std_logic; 
+   signal sig_tx_sop       : std_logic;
    --! EOP signal
-   signal sig_tx_eop       : std_logic; 
+   signal sig_tx_eop       : std_logic;
    --! SRC_RDY signal
-   signal sig_tx_src_rdy   : std_logic; 
-   --! DST_RDY signal 
+   signal sig_tx_src_rdy   : std_logic;
+   --! DST_RDY signal
    signal sig_tx_dst_rdy   : std_logic;
    --! Packet count
    signal sig_tx_packet_count : std_logic_vector(log2(DFIFO_ITEMS+1)-1 downto 0);
@@ -64,17 +64,17 @@ architecture full of FLU_PFIFO is
    -- Output pipeline signals
    --------------------------------------------------------
    --! DATA signal
-   signal sig_pipe_data      : std_logic_vector(DATA_WIDTH-1 downto 0); 
+   signal sig_pipe_data      : std_logic_vector(DATA_WIDTH-1 downto 0);
    --! SOP_POS signal
    signal sig_pipe_sop_pos   : std_logic_vector(SOP_POS_WIDTH-1 downto 0);
    --! EOP_POS signal
    signal sig_pipe_eop_pos   : std_logic_vector(log2(DATA_WIDTH/8)-1 downto 0);
    --! SOP signal
-   signal sig_pipe_sop       : std_logic; 
+   signal sig_pipe_sop       : std_logic;
    --! EOP signal
-   signal sig_pipe_eop       : std_logic; 
+   signal sig_pipe_eop       : std_logic;
    --! SRC_RDY signal
-   signal sig_pipe_src_rdy   : std_logic; 
+   signal sig_pipe_src_rdy   : std_logic;
    --! DST_RDY signal
    signal sig_pipe_dst_rdy   : std_logic;
 
@@ -137,18 +137,18 @@ begin
       )
       port map(
          --! \name Resets and clocks
-         
+
          --! Input FLU clock
          RX_CLK         => RX_CLK,
-         --! Input FLU reset 
+         --! Input FLU reset
          RX_RESET       => RX_RESET,
          --! Output FLU clock
          TX_CLK         => TX_CLK,
-         --! Output FLU reset 
+         --! Output FLU reset
          TX_RESET       => TX_RESET,
-      
+
          --! \name Write interface
-         
+
          --! Write side data
          RX_DATA        => RX_DATA,
          --! Write side position of packet start inside word
@@ -165,9 +165,9 @@ begin
          RX_DST_RDY     => RX_DST_RDY,
          --! Write side status
          RX_STATUS      => open,
-         
+
          --! \name Read interface
-      
+
          --! Read side data
          TX_DATA        => sig_pfifo_data,
          --! Read side position of packet start inside word
@@ -184,7 +184,7 @@ begin
          TX_DST_RDY     => sig_pfifo_dst_rdy
       );
    end generate;
-   
+
    --! Asynchronous FIFO for clock domain cross (BRAM oriented)
    ASFIFO_BRAM_STAGE_ON:if DISABLE_ASFIFO = false and BRAM_ASFIFO = true generate
       FLU_ASFIFO_I:entity work.FLU_ASFIFO_BRAM_XILINX
@@ -199,7 +199,7 @@ begin
           --! \description Only powers of 512 supported.
           ITEMS            => HFIFO_ITEMS,
           --! \brief Target FPGA type.
-          --! \description Supported values are "VIRTEX5", "VIRTEX6" or "7SERIES". 
+          --! \description Supported values are "VIRTEX5", "VIRTEX6" or "7SERIES".
           DEVICE           => BRAM_DEVICE
         )
         port map(
@@ -222,7 +222,7 @@ begin
           RX_SRC_RDY       => RX_SRC_RDY,
           --! Write side destination ready
           RX_DST_RDY       => RX_DST_RDY,
-          
+
           --! \name Read interface
 
           --! Output FLU clock
@@ -256,7 +256,7 @@ begin
    end generate;
 
    --! Packet fifo without output register
-   PFIFO_CORE:entity work.FLU_PFIFO_CORE 
+   PFIFO_CORE:entity work.FLU_PFIFO_CORE
    generic map(
       --! Data width
       --! \brief Should be power of 2 and higher than 16
@@ -287,7 +287,7 @@ begin
       RX_SRC_RDY    => sig_pfifo_src_rdy,
       RX_DST_RDY    => sig_pfifo_dst_rdy,
       RX_STATUS     => RX_STATUS,
-      
+
       -----------------------------------------------------
       --! \name Frame Link Unaligned output interface
       -----------------------------------------------------
@@ -314,23 +314,23 @@ begin
       generic map(
          -- FrameLinkUnaligned Data Width
          DATA_WIDTH     => DATA_WIDTH,
-         SOP_POS_WIDTH  => SOP_POS_WIDTH, 
+         SOP_POS_WIDTH  => SOP_POS_WIDTH,
          USE_OUTREG     => false
-      )   
+      )
       port map(
-         -- Common interface 
+         -- Common interface
          CLK            => TX_CLK,
          RESET          => TX_RESET,
-         
+
          -- Input interface
-         RX_DATA       => sig_pipe_data, 
+         RX_DATA       => sig_pipe_data,
          RX_SOP_POS    => sig_pipe_sop_pos,
          RX_EOP_POS    => sig_pipe_eop_pos,
          RX_SOP        => sig_pipe_sop,
          RX_EOP        => sig_pipe_eop,
          RX_SRC_RDY    => sig_pipe_src_rdy,
          RX_DST_RDY    => sig_pipe_dst_rdy,
- 
+
          -- Output interface
          TX_DATA       => sig_tx_data,
          TX_SOP_POS    => sig_tx_sop_pos,
@@ -368,8 +368,8 @@ begin
    --! EOP output map
    TX_EOP      <= sig_tx_eop;
    --! SRC_RDY output map
-   TX_SRC_RDY  <= sig_tx_src_rdy; 
-   
+   TX_SRC_RDY  <= sig_tx_src_rdy;
+
    --! Packetou count output map
    PACKET_COUNT <= sig_tx_packet_count;
 

@@ -10,23 +10,23 @@
  * TODO:
  *
  */
- 
+
 
 // ----------------------------------------------------------------------------
 //                 FrameLink FIFO Control Interface declaration
 // ----------------------------------------------------------------------------
 
 // -- FrameLink FIFO Control Interface ----------------------------------------
-interface iFrameLinkFifo #(STATUS_WIDTH = 8) (input logic CLK, RESET);  
+interface iFrameLinkFifo #(STATUS_WIDTH = 8) (input logic CLK, RESET);
   // Control Interface
   logic LSTBLK                    ;   // Last block detection
   logic [STATUS_WIDTH-1:0] STATUS ;   // MSBs of exact number of free items in the FIFO
   logic EMPTY                     ;   // FIFO is empty
   logic FULL                      ;   // FIFO is full
   logic FRAME_RDY                 ;   // At least one whole frame is in the FIFO
-    
 
-  // Clocking blocks  
+
+  // Clocking blocks
   clocking ctrl_cb @(posedge CLK);
     input  LSTBLK, STATUS, EMPTY, FULL, FRAME_RDY;
   endclocking: ctrl_cb;
@@ -38,7 +38,7 @@ interface iFrameLinkFifo #(STATUS_WIDTH = 8) (input logic CLK, RESET);
                 output  FULL,
                 output  FRAME_RDY
                );
-  
+
   modport ctrl_tb (clocking ctrl_cb);
 
 endinterface : iFrameLinkFifo

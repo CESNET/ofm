@@ -1,8 +1,8 @@
-# 
-# Modules.tcl: 
+#
+# Modules.tcl:
 # Copyright (C) 2013 CESNET
 # Author(s): Stepan Friedl <friedl@cesnet.cz>
-# 
+#
 # SPDX-License-Identifier: BSD-3-Clause
 
 

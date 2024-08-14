@@ -10,32 +10,32 @@ proc rx {NAME PATH} {
 }
 
 proc tx {NAME PATH} {
-    add wave -divider "$NAME"      
+    add wave -divider "$NAME"
     add_wave "-group {$NAME} -noupdate  -hex"       $PATH/TX_*
 }
 
 proc mi {NAME PATH} {
-    add wave -divider "$NAME"      
+    add wave -divider "$NAME"
     add_wave "-group {$NAME} -noupdate  -hex"       $PATH/MI_*
 }
 
 proc tsu {NAME PATH} {
-    add wave -divider "$NAME"      
+    add wave -divider "$NAME"
     add_wave "-group {$NAME} -noupdate  -hex"       $PATH/TSU_*
 }
 
 proc link {NAME PATH} {
-    add wave -divider "$NAME"      
+    add wave -divider "$NAME"
     add_wave "-group {$NAME} -noupdate  -hex"       $PATH/LINK_UP
     add_wave "-group {$NAME} -noupdate  -hex"       $PATH/INCOMING_FRAME
 }
 
 proc int {NAME PATH} {
-    add wave -divider "$NAME"      
+    add wave -divider "$NAME"
     add_wave "-group {$NAME} -noupdate  -hex"       $PATH/s_*
 }
 
 proc all {NAME PATH} {
-    add wave -divider "$NAME"      
+    add wave -divider "$NAME"
     add_wave "-group {$NAME} -noupdate  -hex"       $PATH/*
 }

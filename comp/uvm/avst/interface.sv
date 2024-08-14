@@ -2,7 +2,7 @@
 //-- Copyright (C) 2023 CESNET z. s. p. o.
 //-- Author(s): Daniel Kriz <danielkriz@cesnet.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 // Definition of mfb interface.
 interface avst_if #(int unsigned REGIONS, int unsigned REGION_SIZE, int unsigned BLOCK_SIZE, int unsigned ITEM_WIDTH, int unsigned META_WIDTH) (input logic CLK);

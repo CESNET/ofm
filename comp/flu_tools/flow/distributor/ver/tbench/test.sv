@@ -15,7 +15,7 @@ import sv_common_pkg::*;
 import sv_flu_pkg::*;
 import test_pkg::*;
 
-`include "inum_driver.sv" 
+`include "inum_driver.sv"
 
 
 
@@ -33,11 +33,11 @@ program TEST (
    iFrameLinkUTx.tb TX[PORTS],
    iFrameLinkUTx.monitor MONITOR[PORTS]
   );
-  
+
   // --------------------------------------------------------------------------
   //                       Variables declaration
   // --------------------------------------------------------------------------
-  
+
   FrameLinkUTransaction                fluBlueprint;                             // Transaction
   FrameLinkUTransaction                inumBP;
   Generator                            generator;                               // Generator
@@ -47,10 +47,10 @@ program TEST (
   FrameLinkUMonitor #(DRIVER0_DATA_WIDTH, DRIVER0_EOP_WIDTH, DRIVER0_SOP_WIDTH)  fluMonitor[PORTS];     // Monitor
   FrameLinkUResponder #(DRIVER0_DATA_WIDTH, DRIVER0_EOP_WIDTH, DRIVER0_SOP_WIDTH) fluResponder[PORTS];  // Responder
   Scoreboard                           #(PORTS) scoreboard;                              // Scoreboard
-  
+
   virtual iFrameLinkUTx.tb      #(DRIVER0_DATA_WIDTH, DRIVER0_EOP_WIDTH, DRIVER0_SOP_WIDTH) vTX[PORTS];
-  virtual iFrameLinkUTx.monitor #(DRIVER0_DATA_WIDTH, DRIVER0_EOP_WIDTH, DRIVER0_SOP_WIDTH) vMONITOR[PORTS]; 
-  
+  virtual iFrameLinkUTx.monitor #(DRIVER0_DATA_WIDTH, DRIVER0_EOP_WIDTH, DRIVER0_SOP_WIDTH) vMONITOR[PORTS];
+
   // --------------------------------------------------------------------------
   //                       Creating Environment tasks
   // --------------------------------------------------------------------------
@@ -72,15 +72,15 @@ program TEST (
       inumBP.packetSizeMax = ports/8 +1;
       inumBP.packetSizeMin = ports/8 +1;
       ginum.blueprint = inumBP;
-  endtask: createGeneratorEnvironment    
+  endtask: createGeneratorEnvironment
 
-  task createEnvironment(); 
+  task createEnvironment();
     vTX      = TX;
-    vMONITOR = MONITOR; 
-     
-    // Create driver    
+    vMONITOR = MONITOR;
+
+    // Create driver
     fluDriver  = new ("Driver0", generator.transMbx, RX);
-      fluDriver.insideTxDelayEn_wt       = DRIVER0_INSIDE_DELAYEN_WT; 
+      fluDriver.insideTxDelayEn_wt       = DRIVER0_INSIDE_DELAYEN_WT;
       fluDriver.insideTxDelayDisable_wt  = DRIVER0_INSIDE_DELAYDIS_WT;
       fluDriver.insideTxDelayLow         = DRIVER0_INSIDE_DELAYLOW;
       fluDriver.insideTxDelayHigh        = DRIVER0_INSIDE_DELAYHIGH;
@@ -91,39 +91,39 @@ program TEST (
       iDriver.DelayDisable_wt = DRIVERI_DELAYDIS_WT;
       iDriver.DelayLow = DRIVERI_DELAYLOW;
       iDriver.DelayHigh = DRIVERI_DELAYHIGH;
-   
+
    // Create scoreboard
     scoreboard = new;
     fluDriver.setCallbacks(scoreboard.driverCbs);
-    iDriver.setCallbacks(scoreboard.driverCbs); 
-   
+    iDriver.setCallbacks(scoreboard.driverCbs);
+
    // Create and connect monitor and responder
     for(int i=0; i<PORTS; i++) begin
       string monitorLabel;
       string responderLabel;
-      
+
       $swrite(monitorLabel, "Monitor %0d", i);
       $swrite(responderLabel, "Responder %0d", i);
       fluMonitor[i]   = new (monitorLabel, vMONITOR[i]);
       fluResponder[i] = new (responderLabel, vTX[i]);
-      
-      fluResponder[i].rxDelayEn_wt            = MONITOR0_DELAYEN_WT; 
+
+      fluResponder[i].rxDelayEn_wt            = MONITOR0_DELAYEN_WT;
       fluResponder[i].rxDelayDisable_wt       = MONITOR0_DELAYDIS_WT;
       fluResponder[i].rxDelayLow              = MONITOR0_DELAYLOW;
       fluResponder[i].rxDelayHigh             = MONITOR0_DELAYHIGH;
-      fluResponder[i].insideRxDelayEn_wt      = MONITOR0_INSIDE_DELAYEN_WT; 
+      fluResponder[i].insideRxDelayEn_wt      = MONITOR0_INSIDE_DELAYEN_WT;
       fluResponder[i].insideRxDelayDisable_wt = MONITOR0_INSIDE_DELAYDIS_WT;
       fluResponder[i].insideRxDelayLow        = MONITOR0_INSIDE_DELAYLOW;
-      fluResponder[i].insideRxDelayHigh       = MONITOR0_INSIDE_DELAYHIGH;    
+      fluResponder[i].insideRxDelayHigh       = MONITOR0_INSIDE_DELAYHIGH;
       fluMonitor[i].setCallbacks(scoreboard.monitorCbs);
-    end; 
-    
+    end;
+
   endtask : createEnvironment
 
   // --------------------------------------------------------------------------
   //                       Test auxilarity procedures
   // --------------------------------------------------------------------------
-  
+
   // --------------------------------------------------------------------------
   // Resets design
   task resetDesign();
@@ -145,7 +145,7 @@ program TEST (
   // --------------------------------------------------------------------------
   // Disable test Environment
   task disableTestEnvironment();
-     #(1000*CLK_PERIOD); 
+     #(1000*CLK_PERIOD);
      fluDriver.setDisabled();
      iDriver.setDisabled();
      // Disable monitors
@@ -170,17 +170,17 @@ program TEST (
      generator.setEnabled(TRANSACTION_COUNT);
 
      // Pokud je generator aktivni nic nedelej
-     while (generator.enabled) begin 
+     while (generator.enabled) begin
        #(CLK_PERIOD);
      end
-     
+
      // Disable Test Enviroment
      disableTestEnvironment();
 
      // Display Scoreboard
      scoreboard.display();
   endtask: test1
-  
+
   // --------------------------------------------------------------------------
   // Test Case 2
   // Generate very short packets
@@ -208,7 +208,7 @@ program TEST (
      // Display Scoreboard
      scoreboard.display();
   endtask: test2
-  
+
   // --------------------------------------------------------------------------
   // Test Case 3
   // Classic length transactions, slow TX and fast RX  (full fifo)
@@ -218,20 +218,20 @@ program TEST (
     // create & enable environment
     createGeneratorEnvironment();
     createEnvironment();
-    
+
     // set delays
     for(int i=0; i<PORTS; i++) begin
-    fluResponder[i].rxDelayEn_wt            = 5; 
+    fluResponder[i].rxDelayEn_wt            = 5;
     fluResponder[i].rxDelayDisable_wt       = 1;
     fluResponder[i].rxDelayLow              = 0;
     fluResponder[i].rxDelayHigh             = 10;
-    fluResponder[i].insideRxDelayEn_wt      = 5; 
+    fluResponder[i].insideRxDelayEn_wt      = 5;
     fluResponder[i].insideRxDelayDisable_wt = 1;
     fluResponder[i].insideRxDelayLow        = 0;
     fluResponder[i].insideRxDelayHigh       = 10;
-    end 
-    
-    fluDriver.insideTxDelayEn_wt =0; 
+    end
+
+    fluDriver.insideTxDelayEn_wt =0;
 
     // Enable Test environment
     enableTestEnvironment();
@@ -239,7 +239,7 @@ program TEST (
     // Run generators
     ginum.setEnabled(TRANSACTION_COUNT);
     generator.setEnabled(TRANSACTION_COUNT);
-    
+
 
     // wait until all generators are disabled
     wait (generator.enabled == 0);
@@ -249,7 +249,7 @@ program TEST (
 
     // Display Scoreboard
     scoreboard.display();
-  endtask: test3 
+  endtask: test3
 
   // --------------------------------------------------------------------------
   // Test Case 4
@@ -260,11 +260,11 @@ program TEST (
     // create & enable environment
     createGeneratorEnvironment();
     createEnvironment();
-    
+
     // set zero delays
     for(int i=0; i<PORTS; i++) begin
-    fluResponder[i].rxDelayEn_wt        = 0; 
-    fluResponder[i].insideRxDelayEn_wt  = 0; 
+    fluResponder[i].rxDelayEn_wt        = 0;
+    fluResponder[i].insideRxDelayEn_wt  = 0;
     end
 
     // Enable Test environment
@@ -295,17 +295,17 @@ program TEST (
     // create & enable environment
     createGeneratorEnvironment();
     createEnvironment();
-    
+
     // set delays
     for(int i=0; i<PORTS; i++) begin
-    fluResponder[i].rxDelayEn_wt            = 5; 
+    fluResponder[i].rxDelayEn_wt            = 5;
     fluResponder[i].rxDelayDisable_wt       = 1;
     fluResponder[i].rxDelayLow              = 0;
     fluResponder[i].rxDelayHigh             = 4;
-    fluResponder[i].insideRxDelayEn_wt      = 5; 
+    fluResponder[i].insideRxDelayEn_wt      = 5;
     fluResponder[i].insideRxDelayDisable_wt = 1;
     fluResponder[i].insideRxDelayLow        = 0;
-    fluResponder[i].insideRxDelayHigh       = 4;    
+    fluResponder[i].insideRxDelayHigh       = 4;
     end
     // Enable Test environment
     enableTestEnvironment();
@@ -325,7 +325,7 @@ program TEST (
     // Display Scoreboard
     scoreboard.display();
   endtask: test5
-  
+
     // --------------------------------------------------------------------------
   // Test Case 6
   // Classic length transactions, fast RX and TX0, slow other TXs
@@ -335,29 +335,29 @@ program TEST (
     // create & enable environment
     createGeneratorEnvironment();
     createEnvironment();
-    
+
     // set delays
-    fluResponder[0].rxDelayEn_wt            = 1; 
+    fluResponder[0].rxDelayEn_wt            = 1;
     fluResponder[0].rxDelayDisable_wt       = 1;
     fluResponder[0].rxDelayLow              = 0;
     fluResponder[0].rxDelayHigh             = 1;
-    fluResponder[0].insideRxDelayEn_wt      = 1; 
+    fluResponder[0].insideRxDelayEn_wt      = 1;
     fluResponder[0].insideRxDelayDisable_wt = 1;
     fluResponder[0].insideRxDelayLow        = 0;
-    fluResponder[0].insideRxDelayHigh       = 1; 
+    fluResponder[0].insideRxDelayHigh       = 1;
     for(int i=1; i<PORTS; i++) begin
-    fluResponder[i].rxDelayEn_wt            = 5; 
+    fluResponder[i].rxDelayEn_wt            = 5;
     fluResponder[i].rxDelayDisable_wt       = 1;
     fluResponder[i].rxDelayLow              = 0;
     fluResponder[i].rxDelayHigh             = 10;
-    fluResponder[i].insideRxDelayEn_wt      = 5; 
+    fluResponder[i].insideRxDelayEn_wt      = 5;
     fluResponder[i].insideRxDelayDisable_wt = 1;
     fluResponder[i].insideRxDelayLow        = 0;
-    fluResponder[i].insideRxDelayHigh       = 10; 
+    fluResponder[i].insideRxDelayHigh       = 10;
     end
-    
+
     fluDriver.insideTxDelayEn_wt =0;
-    
+
     // Enable Test environment
     enableTestEnvironment();
 
@@ -375,8 +375,8 @@ program TEST (
 
     // Display Scoreboard
     scoreboard.display();
-  endtask: test6 
- 
+  endtask: test6
+
 
   // --------------------------------------------------------------------------
   //                           Main test part
@@ -392,14 +392,14 @@ program TEST (
     // TESTING
     // -------------------------------------
     test1();       // Run Test 1
-    
+
     test2();
     test3();
     test4();
     test5();
     test6();
     $write("Verification finished successfully!\n");
-    
+
     // -------------------------------------
     // STOP TESTING
     // -------------------------------------

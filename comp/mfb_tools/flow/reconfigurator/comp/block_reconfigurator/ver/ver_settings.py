@@ -19,26 +19,26 @@ SETTINGS = {
         "FRAME_SIZE_MAX"   : "8*REGIONS*RX_REGION_SIZE*RX_BLOCK_SIZE",
         "TRANSACTION_COUNT": "1000"                                  ,
     },
-    "2_rx_blocks" : { # 
+    "2_rx_blocks" : { #
         "RX_REGION_SIZE"   : "2"                                  ,
     },
-    "2_tx_blocks" : { # 
+    "2_tx_blocks" : { #
         "TX_REGION_SIZE"   : "2"                                  ,
     },
-    "8_rx_blocks" : { # 
+    "8_rx_blocks" : { #
         "RX_REGION_SIZE"   : "8"                                  ,
     },
-    "8_tx_blocks" : { # 
+    "8_tx_blocks" : { #
         "TX_REGION_SIZE"   : "8"                                  ,
     },
-    "meta_mode_1" : { # 
+    "meta_mode_1" : { #
         "META_MODE"        : "1"                                  ,
     },
-    "frame_align_1" : { # 
+    "frame_align_1" : { #
         "FRAME_ALIGN"      : "1"                                            ,
         "FRAME_SIZE_MIN"   : "RX_BLOCK_SIZE*RX_REGION_SIZE\\\/TX_REGION_SIZE+1",
     },
-#    "" : { # 
+#    "" : { #
 #    },
     "_combinations_" : (
     ("default",),

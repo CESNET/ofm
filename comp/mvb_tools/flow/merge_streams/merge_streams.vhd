@@ -101,17 +101,17 @@ begin
             port map(
                 CLK        => CLK,
                 RESET      => RESET,
-        
+
                 RX_DATA    => RX_DATA(ii),
                 RX_VLD     => RX_VLD(ii),
                 RX_SRC_RDY => RX_SRC_RDY(ii),
                 RX_DST_RDY => RX_DST_RDY(ii),
-        
+
                 TX_DATA    => s_shake_tx_data(ii),
                 TX_VLD     => s_shake_tx_vld(ii),
                 TX_NEXT    => s_shake_tx_next(ii)
             );
-    
+
             s_shake_tx_src_rdy(ii) <= or s_shake_tx_vld(ii);
             s_shake_tx_next(ii)    <= (others => s_shake_tx_dst_rdy(ii));
 

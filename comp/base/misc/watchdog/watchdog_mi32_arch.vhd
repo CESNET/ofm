@@ -37,11 +37,11 @@ begin
       port map(
          CLK            => CLK,
          RESET          => RESET,
-     
+
          DATA_IN        => DATA_IN,
          SRC_RDY_IN     => SRC_RDY_IN,
          DST_RDY_IN     => DST_RDY_IN,
-     
+
          DATA_OUT       => DATA_OUT,
          SRC_RDY_OUT    => SRC_RDY_OUT,
          DST_RDY_OUT    => DST_RDY_OUT,
@@ -49,7 +49,7 @@ begin
          COUNTER        => counter_mi32,
          LOCKED         => locked_mi32
       );
-      
+
    LOCKED <= locked_mi32;
    COUNTER <= counter_mi32;
    --------------------------
@@ -57,21 +57,21 @@ begin
    --------------------------
    ARDY <= '1';
    DRDY <= RD;
-      
+
    read_0 <= (31 downto 2 => '0') & locked_mi32 & reg_keep_alive;
    read_4 <= (31 downto counter_mi32'length => '0') & counter_mi32;
-   
+
    with ADDR(2) select
    DRD <= read_0 when '1',
           read_4 when '0',
           (DRD'range => '0')    when others;
-   
+
    --------------------------
    --! Write section
    --------------------------
-   
+
    we <= WR and BE(0) and ADDR(2);
-   
+
    reg_d_keep_alive : process(CLK)
    begin
       if (CLK'event) and (CLK='1') then
@@ -80,5 +80,5 @@ begin
          end if;
       end if;
    end process;
-   
+
 end mi32;

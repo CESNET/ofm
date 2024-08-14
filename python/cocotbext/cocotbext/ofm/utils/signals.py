@@ -4,9 +4,9 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-async def await_signal_sync(clk_re, signal, value:int = 1) -> None: 
-    """Synchronously waits until the value of the passed signal becomes passed value. 
-    
+async def await_signal_sync(clk_re, signal, value:int = 1) -> None:
+    """Synchronously waits until the value of the passed signal becomes passed value.
+
     Note:
         If the value of the signal is already set to passed value, function returns immediately.
 
@@ -21,7 +21,7 @@ async def await_signal_sync(clk_re, signal, value:int = 1) -> None:
         await clk_re
 
 def get_signal_value_in_bytes(signal, big_endian:bool = False) -> bytes:
-    """Get value of a OUT signals in bytes. 
+    """Get value of a OUT signals in bytes.
 
     Args:
         signal: cocotb.bus signal that is to be read.
@@ -29,7 +29,7 @@ def get_signal_value_in_bytes(signal, big_endian:bool = False) -> bytes:
 
     Returns:
         Signal value in bytes.
-            
+
     """
 
     sig_val = signal.value

@@ -2,7 +2,7 @@
 // Copyright (C) 2022 CESNET z. s. p. o.
 // Author(s): Daniel Kříž <xkrizd01@vutbr.cz>
 
-// SPDX-License-Identifier: BSD-3-Clause 
+// SPDX-License-Identifier: BSD-3-Clause
 
 
 import uvm_pkg::*;
@@ -15,7 +15,7 @@ module testbench;
     // Signals
     logic CLK = 0;
     logic RST = 0;
-   
+
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // Interfaces
     reset_if  reset(CLK);
@@ -53,7 +53,7 @@ module testbench;
         .mfb_rx     (mfb_rx),
         .axi_tx     (axi_tx)
     );
-    
+
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // Properties
 

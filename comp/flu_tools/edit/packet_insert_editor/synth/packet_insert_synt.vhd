@@ -9,7 +9,7 @@
 -- TODO:
 --
 
-library IEEE;  
+library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.std_logic_arith.all;
 use IEEE.std_logic_unsigned.all;
@@ -23,7 +23,7 @@ entity PACKET_INSERT_SYNT is
       SOP_POS_WIDTH 	: integer := 3;
       OFFSET_WIDTH   : integer := 9;
       INPUT_PIPE     : boolean := true
-   );  
+   );
    port(
       CLK            : in std_logic;
       RESET          : in std_logic;
@@ -46,10 +46,10 @@ entity PACKET_INSERT_SYNT is
       TX_EOP         : out std_logic;
       TX_SRC_RDY     : out std_logic;
       TX_DST_RDY     : in std_logic
-   ); 
+   );
 end entity;
 
-architecture full of PACKET_INSERT_SYNT is 
+architecture full of PACKET_INSERT_SYNT is
 
    signal REG_OFFSET        : std_logic_vector(OFFSET_WIDTH-1 downto 0);
    signal REG_EN_INSERT     : std_logic;
@@ -72,7 +72,7 @@ architecture full of PACKET_INSERT_SYNT is
    signal REG_TX_DST_RDY    : std_logic;
 
 begin
-   
+
    process(CLK)
    begin
       if (CLK'event) and (CLK='1') then
@@ -109,7 +109,7 @@ begin
    )
    port map (
       CLK            => CLK,
-      RESET          => RESET, 
+      RESET          => RESET,
       OFFSET         => REG_OFFSET,
       EN_INSERT      => REG_EN_INSERT,
       EN_REPLACE     => REG_EN_REPLACE,

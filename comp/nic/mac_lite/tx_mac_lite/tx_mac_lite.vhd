@@ -14,7 +14,7 @@ use work.type_pack.all;
 entity TX_MAC_LITE is
     generic(
         -- =====================================================================
-        -- MFB CONFIGURATION: 
+        -- MFB CONFIGURATION:
         -- =====================================================================
         -- TX MFB configuration, allows you to set the required output data width
         -- according to the selected Ethernet standard.
@@ -33,13 +33,13 @@ entity TX_MAC_LITE is
         -- for narrowing data width from 512b (RX) to 128b (TX).
         -- ---------------------------------------------------------------------
 
-        -- RX MFB: number of regions in word, by default same as TX 
+        -- RX MFB: number of regions in word, by default same as TX
         RX_REGIONS     : natural := TX_REGIONS;
-        -- RX MFB: number of blocks in region, by default same as TX 
+        -- RX MFB: number of blocks in region, by default same as TX
         RX_REGION_SIZE : natural := TX_REGION_SIZE;
-        -- RX MFB: number of items in block, by default same as TX 
+        -- RX MFB: number of items in block, by default same as TX
         RX_BLOCK_SIZE  : natural := TX_BLOCK_SIZE;
-        -- RX MFB: width of one item in bits, by default same as TX 
+        -- RX MFB: width of one item in bits, by default same as TX
         RX_ITEM_WIDTH  : natural := TX_ITEM_WIDTH;
 
         -- This generic determines the position of the logic that converts the
@@ -50,7 +50,7 @@ entity TX_MAC_LITE is
         RESIZE_ON_TX   : boolean := False;
 
         -- =====================================================================
-        -- OTHERS CONFIGURATION: 
+        -- OTHERS CONFIGURATION:
         -- =====================================================================
 
         -- Maximum allowed size of packet in bytes.
@@ -167,7 +167,7 @@ architecture FULL of TX_MAC_LITE is
         REGION_SIZE  : natural;
         BLOCK_SIZE   : natural;
         CRC_END_IMPL : string
-    ) 
+    )
     return natural is
     begin
         if (REGION_SIZE = 1 and BLOCK_SIZE = 1) then
@@ -183,7 +183,7 @@ architecture FULL of TX_MAC_LITE is
     constant MD_REGION_SIZE      : natural := tsel(RESIZE_ON_TX,RX_REGION_SIZE,TX_REGION_SIZE);
     constant MD_BLOCK_SIZE       : natural := tsel(RESIZE_ON_TX,RX_BLOCK_SIZE,TX_BLOCK_SIZE);
     constant MD_ITEM_WIDTH       : natural := tsel(RESIZE_ON_TX,RX_ITEM_WIDTH,TX_ITEM_WIDTH);
-    
+
     constant MD_DATA_W           : natural := MD_REGIONS*MD_REGION_SIZE*MD_BLOCK_SIZE*MD_ITEM_WIDTH;
     constant LEN_WIDTH           : natural := log2(PKT_MTU_BYTES+1);
     constant DFIFO_ITEMS         : natural := 2**log2(div_roundup((PKT_MTU_BYTES+1),(MD_DATA_W/8)));
@@ -358,10 +358,10 @@ begin
         LNG_WIDTH      => LEN_WIDTH,
         REG_BITMAP     => "111",
         IMPLEMENTATION => "parallel"
-    )             
-    port map(   
-        CLK          => RX_CLK, 
-        RESET        => RX_RESET,  
+    )
+    port map(
+        CLK          => RX_CLK,
+        RESET        => RX_RESET,
 
         RX_DATA      => rc_mfb_data,
         RX_META      => (others => '0'),
@@ -413,7 +413,7 @@ begin
     begin
         if rising_edge(RX_CLK) then
             if (RX_RESET = '1') then
-                fd_mfb_src_rdy <= '0';   
+                fd_mfb_src_rdy <= '0';
             elsif (fd_mfb_dst_rdy = '1') then
                 fd_mfb_src_rdy <= fl_mfb_src_rdy and crc_mfb_dst_rdy;
             end if;
@@ -434,11 +434,11 @@ begin
             BLOCK_SIZE     => MD_BLOCK_SIZE,
             ITEM_WIDTH     => MD_ITEM_WIDTH,
             CRC_END_IMPL   => CRC_END_IMPL
-        )             
-        port map(   
+        )
+        port map(
             -- CLOCK AND RESET
-            CLK           => RX_CLK, 
-            RESET         => RX_RESET,  
+            CLK           => RX_CLK,
+            RESET         => RX_RESET,
             -- INPUT MFB
             RX_DATA       => fl_mfb_data,
             RX_SOF_POS    => fl_mfb_sof_pos,
@@ -466,7 +466,7 @@ begin
             end if;
         end process;
 
-        assert (cd_fifo_overflow_dbg_reg /= '1') 
+        assert (cd_fifo_overflow_dbg_reg /= '1')
             report "TX_MAC_LITE: crc_discard_fifo_i overflow!"
             severity failure;
 
@@ -501,7 +501,7 @@ begin
             end if;
         end process;
 
-        assert (cd_fifo_underflow_dbg_reg /= '1') 
+        assert (cd_fifo_underflow_dbg_reg /= '1')
             report "TX_MAC_LITE: crc_discard_fifo_i underflow!"
             severity failure;
 
@@ -603,7 +603,7 @@ begin
             RX_MFB_EOF     => fd_mfb_eof,
             RX_MFB_SRC_RDY => fd_mfb_src_rdy,
             RX_MFB_DST_RDY => fd_mfb_dst_rdy,
-        
+
             TX_MFB_DATA    => sp_mfb_data,
             TX_MFB_SOF_POS => sp_mfb_sof_pos,
             TX_MFB_EOF_POS => sp_mfb_eof_pos,
@@ -766,7 +766,7 @@ begin
             if (TX_RESET = '1') then
                 tx_inc_frame(0) <= '0';
             elsif (TX_MFB_SRC_RDY = '1' and TX_MFB_DST_RDY = '1') then
-                tx_inc_frame(0) <= tx_inc_frame(TX_REGIONS);  
+                tx_inc_frame(0) <= tx_inc_frame(TX_REGIONS);
             end if;
         end if;
     end process;
@@ -780,7 +780,7 @@ begin
         end if;
     end process;
 
-    assert (tx_gap_inside_frame_dbg_reg /= '1') 
+    assert (tx_gap_inside_frame_dbg_reg /= '1')
         report "TX_MAC_LITE: Gap inside frame on TX MFB stream!"
         severity failure;
 
@@ -854,7 +854,7 @@ begin
         STAT_TOTAL_SENT_FRAMES      => stat_total_sent_frames,
         STAT_TOTAL_SENT_OCTECTS     => stat_total_sent_octects,
         STAT_TOTAL_DISCARDED_FRAMES => stat_total_discarded_frames,
-        
+
         CTRL_STROBE_CNT             => ctrl_strobe_cnt,
         CTRL_RESET_CNT              => ctrl_reset_cnt,
         CTRL_OBUF_EN                => ctrl_obuf_en

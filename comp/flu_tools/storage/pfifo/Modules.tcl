@@ -1,6 +1,6 @@
 # Modules.tcl: Local include Modules tcl script
 # Copyright (C) 2012 CESNET
-# Author: Pavel Benacek <benacek@cesnet.cz> 
+# Author: Pavel Benacek <benacek@cesnet.cz>
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
@@ -16,7 +16,7 @@ set MOD "$MOD $ENTITY_BASE/pfifo_core_arch.vhd"
 
 set MOD "$MOD $ENTITY_BASE/pfifo_ent.vhd"
 set MOD "$MOD $ENTITY_BASE/pfifo_arch.vhd"
- 
+
 # Subcomponents
 set COMPONENTS [list [list "PKG"                $MATH_PKG_BASE       "MATH"] \
                      [list "FLU_ASFIFO"         $FLU_ASFIFO_BASE     "FULL"] \

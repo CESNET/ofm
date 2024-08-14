@@ -49,18 +49,18 @@ architecture BEHAVIORAL Of TESTBENCH is
         return tmp;
     end function;
     constant SUM_WIDTH          : i_array_t(max(VALUE_CNT - 1, 0) downto 0) := add_arr(VALUE_WIDTH, SUM_EXTRA_WIDTH);
-    constant MAX_DATA_WIDTH     : integer := 
-        max(CTRLI_WIDTH, 
-        max(CTRLO_WIDTH, 
-        max(CNTER_WIDTH, 
-        max(max(VALUE_WIDTH),  
+    constant MAX_DATA_WIDTH     : integer :=
+        max(CTRLI_WIDTH,
+        max(CTRLO_WIDTH,
+        max(CNTER_WIDTH,
+        max(max(VALUE_WIDTH),
         max(max(SUM_WIDTH), max(HIST_BOX_WIDTH))
     ))));
-    constant MI_SLICES          : integer := div_roundup(MAX_DATA_WIDTH, MI_DATA_WIDTH); 
+    constant MI_SLICES          : integer := div_roundup(MAX_DATA_WIDTH, MI_DATA_WIDTH);
 
 
     constant CLK_PERIOD             : time := 4 ns;     -- 266.66 MHz
-    constant RST_TIME               : time := 40 ns;   
+    constant RST_TIME               : time := 40 ns;
 
     signal sim_done                 : std_logic := '0';
 
@@ -96,13 +96,13 @@ architecture BEHAVIORAL Of TESTBENCH is
     end procedure echo;
 
 begin
-	
+
     ---------
     -- UUT --
     ---------
-    
+
     uut : entity work.DATA_LOGGER
-    generic map (    
+    generic map (
         MI_DATA_WIDTH       => MI_DATA_WIDTH  ,
         MI_ADDR_WIDTH       => MI_ADDR_WIDTH  ,
         CNTER_CNT           => CNTER_CNT      ,
@@ -111,13 +111,13 @@ begin
         CTRLI_WIDTH         => CTRLI_WIDTH    ,
         CNTER_WIDTH         => CNTER_WIDTH    ,
         VALUE_WIDTH         => VALUE_WIDTH    ,
-        HIST_EN             => HIST_EN        ,  
+        HIST_EN             => HIST_EN        ,
         SUM_EXTRA_WIDTH     => SUM_EXTRA_WIDTH,
-        HIST_BOX_CNT        => HIST_BOX_CNT   ,  
+        HIST_BOX_CNT        => HIST_BOX_CNT   ,
         HIST_BOX_WIDTH      => HIST_BOX_WIDTH ,
         CTRLO_DEFAULT       => CTRLO_DEFAULT
     )
-    port map (    
+    port map (
         CLK                 => clk     ,
         RST                 => rst     ,
         RST_DONE            => rst_done,
@@ -141,11 +141,11 @@ begin
     );
 
     uut_test_no_interface : entity work.DATA_LOGGER
-    generic map (    
+    generic map (
         MI_DATA_WIDTH       => MI_DATA_WIDTH  ,
         MI_ADDR_WIDTH       => MI_ADDR_WIDTH
     )
-    port map (    
+    port map (
         CLK                 => clk     ,
         RST                 => rst     ,
 
@@ -161,14 +161,14 @@ begin
     mi_sim_i : entity work.MI_SIM
     generic map (
         MI_SIM_ID                 => 0
-    )                             
-    port map (                    
+    )
+    port map (
         CLK                       => clk,
         RESET                     => rst,
 
         MI32_DWR                  => mi_dwr,
         MI32_ADDR                 => mi_addr,
-        MI32_BE                   => mi_be, 
+        MI32_BE                   => mi_be,
         MI32_RD                   => mi_rd,
         MI32_WR                   => mi_wr,
         MI32_ARDY                 => mi_ardy,
@@ -177,7 +177,7 @@ begin
     );
 
     clk     <= not clk after CLK_PERIOD / 2 when sim_done /= '1' else '0';
-    
+
     test_p : process
         variable addr : std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
         variable data : std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
@@ -187,7 +187,7 @@ begin
         is
         begin
             addr := std_logic_vector(to_unsigned(addr_int, addr'length));
-            work.mi_sim_pkg.ReadData(addr, data, be, status(0), 0); 
+            work.mi_sim_pkg.ReadData(addr, data, be, status(0), 0);
             wait until rising_edge(clk);
 
             echo("Read " & integer'image(addr_int) & ": " & integer'image(to_integer(unsigned(data))));
@@ -199,7 +199,7 @@ begin
             addr := std_logic_vector(to_unsigned(addr_int, addr'length));
             data := std_logic_vector(to_unsigned(val, data'length));
             be   := (others => '1');
-            work.mi_sim_pkg.WriteData(addr, data, be, status(0), 0); 
+            work.mi_sim_pkg.WriteData(addr, data, be, status(0), 0);
             wait until rising_edge(clk);
 
             --echo("Write: " & integer'image(val));
@@ -217,7 +217,7 @@ begin
                 write_p(12, i);
 
                 addr := std_logic_vector(to_unsigned(20, addr'length));
-                work.mi_sim_pkg.ReadData(addr, data, be, status(0), 0); 
+                work.mi_sim_pkg.ReadData(addr, data, be, status(0), 0);
                 wait until rising_edge(clk);
                 echo("  " & integer'image(to_integer(unsigned(data))), false);
             end loop;
@@ -239,7 +239,7 @@ begin
                     write_p(12, i);
 
                     addr := std_logic_vector(to_unsigned(20, addr'length));
-                    work.mi_sim_pkg.ReadData(addr, data, be, status(0), 0); 
+                    work.mi_sim_pkg.ReadData(addr, data, be, status(0), 0);
                     wait until rising_edge(clk);
                     echo("  " & integer'image(to_integer(unsigned(data))), false);
                 end loop;
@@ -259,7 +259,7 @@ begin
         sim_done            <= '0';
 
         rst                 <= '1';
-        wait for RST_TIME;      
+        wait for RST_TIME;
         rst                 <= '0';
         wait until rising_edge(clk);
         wait until rst_done = '1';

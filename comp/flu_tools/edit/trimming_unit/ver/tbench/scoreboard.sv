@@ -14,7 +14,7 @@
 import sv_common_pkg::*;
 import sv_flu_pkg::*;
 import math_pkg::*;
-  
+
   // --------------------------------------------------------------------------
   // -- Frame Link Driver Callbacks
   // --------------------------------------------------------------------------
@@ -32,11 +32,11 @@ import math_pkg::*;
     // -------------------
 
     // -- Constructor ---------------------------------------------------------
-    // Create a class 
+    // Create a class
     function new (TransactionTable #(TR_TABLE_FIRST_ONLY) sc_table);
       this.sc_table = sc_table;
     endfunction
-    
+
     virtual task pre_tx(ref Transaction transaction, string inst);
       FrameLinkUTransaction T;
       FrameLinkUTransaction tr;
@@ -46,28 +46,28 @@ import math_pkg::*;
       int ones;
       int val;
       int zeros;
-      
+
       if("Driver0" == inst) begin
         T=new;
         $cast(tr,transaction);
         tr.copy(T);
         t.push_back(T);
       end;
-      
+
       if("DriverL" == inst) begin
-        $cast(tr,transaction);               
+        $cast(tr,transaction);
         if(tr.data[0]<10) begin // all ones
-          for (int j=0; j < width; j++) begin 
+          for (int j=0; j < width; j++) begin
             x[j]=1;
           end;
         end
         else if (tr.data[0]>180) begin // all zeros
-          for (int j=0; j < width; j++) begin 
+          for (int j=0; j < width; j++) begin
             x[j]=0;
           end;
         end
         else  // trimm length
-          for (int j=0; j < width; j++) begin 
+          for (int j=0; j < width; j++) begin
             x[j]=tr.data[j/8][j%8];
           end;
         /*if(tr.data[0]>200) xx=1; else xx=0;
@@ -75,12 +75,12 @@ import math_pkg::*;
           x[i]=xx;*/
         length.push_back(x);
       end;
-      
+
       if(t.size() && length.size()) begin
         x=length.pop_front();
         tr=t.pop_front();
         ones=1; zeros=1; val=0;
-        for(int i=width-1; i>=0; i--) begin 
+        for(int i=width-1; i>=0; i--) begin
           if(x[i]==0) ones=0;
           if(x[i]==1) zeros=0;
           val=val*2+x[i];
@@ -98,13 +98,13 @@ import math_pkg::*;
           sc_table.add(tr);
         end;
       end;
-      
+
       //transaction.display(inst);
     endtask
-    
+
     // ------------------------------------------------------------------------
-    // Function is called after is transaction sended 
-    
+    // Function is called after is transaction sended
+
     virtual task post_tx(Transaction transaction, string inst);
     endtask
 
@@ -115,37 +115,37 @@ import math_pkg::*;
   // -- Frame Link Monitor Callbacks
   // --------------------------------------------------------------------------
   class ScoreboardMonitorCbs #(int width = 12) extends MonitorCbs;
-    
+
     // ---------------------
     // -- Class Variables --
     // ---------------------
     TransactionTable #(TR_TABLE_FIRST_ONLY) sc_table;
-    
+
     // -- Constructor ---------------------------------------------------------
-    // Create a class 
+    // Create a class
     function new (TransactionTable #(TR_TABLE_FIRST_ONLY) sc_table);
       this.sc_table = sc_table;
     endfunction
-    
+
     // ------------------------------------------------------------------------
     // Function is called after is transaction received (scoreboard)
-    
+
     virtual task post_rx(Transaction transaction, string inst);
       bit status=0;
       //transaction.display(inst);
       sc_table.remove(transaction, status);
       if (status==0)begin
          $write("Unknown transaction received from monitor %d\n", inst);
-         transaction.display(); 
+         transaction.display();
          sc_table.display();
          $stop;
        end
     endtask
- 
+
   endclass : ScoreboardMonitorCbs
 
   // -- Constructor ---------------------------------------------------------
-  // Create a class 
+  // Create a class
   // --------------------------------------------------------------------------
   // -- Scoreboard
   // --------------------------------------------------------------------------
@@ -159,7 +159,7 @@ import math_pkg::*;
     ScoreboardDriverCbs  #(width) driverCbs;
 
     // -- Constructor ---------------------------------------------------------
-    // Create a class 
+    // Create a class
     function new ();
       this.scoreTable = new;
       this.monitorCbs = new(scoreTable);
@@ -167,9 +167,9 @@ import math_pkg::*;
     endfunction
 
     // -- Display -------------------------------------------------------------
-    // Create a class 
+    // Create a class
     task display();
       scoreTable.display(0);
     endtask
-  
-  endclass : Scoreboard   
+
+  endclass : Scoreboard

@@ -48,7 +48,7 @@ signal RX_SOP_N      : std_logic;
 signal RX_EOP_N      : std_logic;
 signal RX_SOF_N      : std_logic;
 signal RX_EOF_N      : std_logic;
-      
+
 -- Change between these four signals based on which of fifos are you about to simulate
 --signal TX_DATA       : std_logic_vector(63 downto 0);
 --signal TX_DATA       : std_logic_vector(15 downto 0);
@@ -134,7 +134,7 @@ begin
    RX_RESET <= '0';
    TX_RESET <= '0';
    wait for 4*clkper_rx;
-   
+
    -- Send frame
    RX_SRC_RDY_N <= '0';
    RX_DATA  <= conv_std_logic_vector(10, RX_DATA'length);

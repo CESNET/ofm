@@ -2,7 +2,7 @@
 //-- Copyright (C) 2020 CESNET z. s. p. o.
 //-- Author(s): Daniel Kříž <xkrizd01@vutbr.cz>
 //--
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 class coverage_rx #(int unsigned DATA_WIDTH, int unsigned META_WIDTH, int unsigned SOF_WIDTH) extends uvm_subscriber#(sequence_item #(DATA_WIDTH, META_WIDTH, SOF_WIDTH));
 

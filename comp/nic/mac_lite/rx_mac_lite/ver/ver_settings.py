@@ -96,7 +96,7 @@ SETTINGS = {
         "MI_CLK_PERIOD"     : "10ns",
     },
 
-    "_combinations_" : (  
+    "_combinations_" : (
     (), # Works the same as '("default",),' as the "default" is applied in every combination
     ("rx1024b",),
     ("rx512b","mac_check_disable",),

@@ -48,10 +48,10 @@ entity DMAFIFO_MUX_2TO1 is
       --! Read interface, all signals synchronous to CLK_RD
       CLK_RD         : in  std_logic;
       RST_RD         : in  std_logic;
-      TX_DATA        : out std_logic_vector(INPUT_DATA_WIDTH/2-1 downto 0); 
+      TX_DATA        : out std_logic_vector(INPUT_DATA_WIDTH/2-1 downto 0);
       TX_HDR         : out std_logic_vector(DMA_HDR_WIDTH-1 downto 0);
       TX_SRC_RDY     : out std_logic;
-      TX_DST_RDY     : in  std_logic; 
+      TX_DST_RDY     : in  std_logic;
       TX_SOP         : out std_logic;
       TX_EOP         : out std_logic
    );

@@ -1,7 +1,7 @@
 /*
  * file       : sequence.sv
  * Copyright (C) 2021 CESNET z. s. p. o.
- * description: RESET sequnece 
+ * description: RESET sequnece
  * date       : 2021
  * author     : Radek Iša <isa@cesnet.cz>
  *

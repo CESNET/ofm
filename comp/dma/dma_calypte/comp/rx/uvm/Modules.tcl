@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 # Set paths
-set UVM_PATH                  "$OFM_PATH/comp/uvm" 
+set UVM_PATH                  "$OFM_PATH/comp/uvm"
 set SV_MVB_PIPE_UVM_BASE      "$OFM_PATH/comp/mvb_tools/flow/pipe/uvm"
 
 

@@ -10,7 +10,7 @@
  * TODO:
  *
  */
- 
+
 // ----------------------------------------------------------------------------
 //                        Module declaration
 // ----------------------------------------------------------------------------
@@ -41,16 +41,16 @@ flu_asfifo #(
      .RX_RESET             (RX_RESET),
      .TX_CLK               (TX_CLK),
      .TX_RESET             (TX_RESET),
-     
+
     // Port 0
-     .RX_DATA     (RX.DATA),  
-     .RX_SOP_POS  (RX.SOP_POS), 
+     .RX_DATA     (RX.DATA),
+     .RX_SOP_POS  (RX.SOP_POS),
      .RX_EOP_POS  (RX.EOP_POS),
-     .RX_SOP      (RX.SOP),     
-     .RX_EOP      (RX.EOP),     
-     .RX_SRC_RDY  (RX.SRC_RDY), 
-     .RX_DST_RDY  (RX.DST_RDY), 
- 
+     .RX_SOP      (RX.SOP),
+     .RX_EOP      (RX.EOP),
+     .RX_SRC_RDY  (RX.SRC_RDY),
+     .RX_DST_RDY  (RX.DST_RDY),
+
     // Port 1
      .TX_DATA     (TX.DATA),
      .TX_SOP_POS  (TX.SOP_POS),

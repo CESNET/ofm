@@ -209,7 +209,7 @@ begin
         s_rx_pl_word_off_prev(r)   <= s_rx_pl_offset_ext(r)(LEN_WIDTH-1 downto log2(REGIONS*REGION_ITEMS));
         s_rx_pl_region_off_prev(r) <= s_rx_pl_offset_ext(r)(log2(REGIONS*REGION_ITEMS)-1 downto log2(REGION_ITEMS));
         s_rx_pl_block_off_prev(r)  <= s_rx_pl_offset_ext(r)(log2(REGION_ITEMS)-1 downto log2(BLOCK_SIZE));
-        
+
         s_rx_pl_word_ok(r)        <= '1' when (s_rx_pl_word_off(r) = s_rx_word_cnt(r)) else '0';
         s_rx_pl_region_ok(r)      <= '1' when (REGIONS = 1) or (s_rx_pl_region_off(r) = r) else '0';
         s_rx_pl_word_prev_ok(r)   <= '1' when (s_rx_pl_word_off_prev(r) = s_rx_word_cnt_prev(r)) else '0';
@@ -397,13 +397,13 @@ begin
                 v_count := v_count + 1;
                 end if;
             end loop;
-            
+
             if (v_count = 0) then
                 v_addr := 0;
             else
                 v_addr := v_count - 1;
             end if;
-            
+
             s_insert_move(i) <= std_logic_vector(to_unsigned(v_addr,log2(REGIONS*REGION_SIZE)));
         end process;
     end generate;

@@ -50,11 +50,11 @@ def signal_unpack(items, signal):
 
     if signal is None:
         return signal_arr
-    
+
     size = len(signal) // items
 
     for ii in range(items):
         bi = (items-ii-1) * size
         signal_arr[ii] = signal.value[bi:(bi+size-1)].integer
-        
+
     return signal_arr

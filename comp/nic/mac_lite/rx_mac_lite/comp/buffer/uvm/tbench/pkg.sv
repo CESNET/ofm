@@ -1,4 +1,4 @@
-// pkg.sv: parameter pkgs 
+// pkg.sv: parameter pkgs
 // Copyright (C) 2023 CESNET z. s. p. o.
 // Author(s): Jakub Cabal <cabal@cesnet.cz>
 

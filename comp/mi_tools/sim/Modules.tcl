@@ -7,12 +7,12 @@
 
 # -----------------------------------------------------------------------------
 
-  
-  
- 
+
+
+
   set PACKAGES "$PACKAGES $OFM_PATH/comp/base/pkg/math_pack.vhd"
 
   set MOD "$MOD $ENTITY_BASE/mi_sim_pkg.vhd"
   set MOD "$MOD $ENTITY_BASE/mi_sim.vhd"
-  
+
 # -----------------------------------------------------------------------------

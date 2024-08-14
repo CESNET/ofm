@@ -224,7 +224,7 @@ begin
       end if;
    end process;
 
-   assert (rx_mfb_ext_err_reg /= '1') 
+   assert (rx_mfb_ext_err_reg /= '1')
       report "PTC: Storage input shakedown FIFO dst_rdy fall error!"
       severity failure;
 
@@ -235,7 +235,7 @@ begin
    -- -------------------------------------------------------------------------
 
    input_mfb_fifoxm_input_gen : for i in 0 to MFB_REGIONS-1 generate
-      in_mfb_fifoxm_di(MFB_FIFOXM_ITEM_WIDTH*(i+1)-1 downto MFB_FIFOXM_ITEM_WIDTH*i) 
+      in_mfb_fifoxm_di(MFB_FIFOXM_ITEM_WIDTH*(i+1)-1 downto MFB_FIFOXM_ITEM_WIDTH*i)
          <= RX_MFB_DATA_ext   (MFB_REG_WIDTH*(i+1)-1 downto MFB_REG_WIDTH*i)
           & RX_MFB_SOF_POS_ext(SOF_POS_WIDTH*(i+1)-1 downto SOF_POS_WIDTH*i)
           & RX_MFB_EOF_POS_ext(EOF_POS_WIDTH*(i+1)-1 downto EOF_POS_WIDTH*i)
@@ -249,7 +249,7 @@ begin
    generic map (
       DATA_WIDTH          => MFB_FIFOXM_ITEM_WIDTH,
       ITEMS               => MAIN_FIFO_ITEMS*MFB_REGIONS,
-      
+
       WRITE_PORTS         => MFB_REGIONS,
       READ_PORTS          => MFB_REGIONS,
       RAM_TYPE            => "AUTO",
@@ -441,7 +441,7 @@ begin
       end if;
    end process;
 
-   assert (mvb_main_fifo_err_reg /= '1') 
+   assert (mvb_main_fifo_err_reg /= '1')
       report "PTC: Storage main MVB FIFO dst_rdy fall error!"
       severity failure;
 
@@ -460,7 +460,7 @@ begin
             items := items+1;
          end if;
       end loop;
-      
+
       mvb_items_vld_cnt <= items;
    end process;
 

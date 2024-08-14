@@ -16,7 +16,7 @@ lappend MOD "$ENTITY_BASE/fl_rxbuffer.vhd"
 # Full FrameLink RX Buffer
 if { $ARCHGRP == "FULL" } {
     lappend MOD "$ENTITY_BASE/fl_rxbuffer.vhd"
-   
+
     set COMPONENTS [list \
         [ list "PKG_MATH"    $OFM_PATH/comp/base/pkg       "MATH"] \
         [ list "FL_FIFO"     $FIFO_BASE                    "FULL"] \

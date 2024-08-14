@@ -78,7 +78,7 @@ begin
       clk <= '0';
       wait for CLKPER/2;
    end process;
-   
+
    --Reset generator
    reset_gen : process
    begin
@@ -101,10 +101,10 @@ begin
       port map(
           -- -------------------------------------------------
           -- \name Common interface
-          -- -------------------------------------------------  
+          -- -------------------------------------------------
          RESET          => reset,
          CLK            => clk,
-   
+
          -- --------------------------------------------------
          -- \name Frame Link Unaligned input interface
          -- --------------------------------------------------
@@ -115,7 +115,7 @@ begin
          RX_EOP         => rx_eop,
          RX_SRC_RDY     => rx_src_rdy,
          RX_DST_RDY     => rx_dst_rdy,
-   
+
          -- --------------------------------------------------
          -- \name Frame Link Unaligned output interface (lane 0)
          -- --------------------------------------------------
@@ -126,7 +126,7 @@ begin
          TX_EOP0        => tx_eop0,
          TX_SRC_RDY0    => tx_src_rdy0,
          TX_DST_RDY0    => tx_dst_rdy0,
-   
+
          -- --------------------------------------------------
          -- \name Frame Link Unaligned output interface (lane 1)
          -- --------------------------------------------------
@@ -141,7 +141,7 @@ begin
 
 	-----------------
 	--	Testbench	--
-	----------------- 
+	-----------------
    --MI32 simulatiuon
    tb:process
    begin
@@ -157,7 +157,7 @@ begin
       tx_dst_rdy1 <= '0';
 
       wait until reset = '0';
-    
+
       --1] One frame without waiting (both outputs ready
       tx_dst_rdy0 <= '1';
       tx_dst_rdy1 <= '1';
@@ -200,7 +200,7 @@ begin
       rx_sop      <= '0';
       rx_eop      <= '0';
       wait for 10*CLKPER;
-      
+
       --2] Transfer with shared word
          --First packet
       rx_data <= x"3333333333333333222222222222222211111111111111110000000000000000";
@@ -316,7 +316,7 @@ begin
 
 
 
-      wait; 
+      wait;
    end process;
 
 end architecture behavioral;

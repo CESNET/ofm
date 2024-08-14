@@ -194,7 +194,7 @@ begin
                   first_word <= '1';
                else
                   cnt_data <= cnt_data + 1;
-                  first_word <= '0';                  
+                  first_word <= '0';
                end if;
             end if;
          end if;

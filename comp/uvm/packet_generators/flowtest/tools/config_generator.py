@@ -18,7 +18,7 @@ from requests.structures import CaseInsensitiveDict
 class ConfigGenerator:
 
     ### PARAMETERS ###
-    
+
     # Layer parameters.
     LAYER_MAX_NUMBER = 4
     LAYER_TYPES = [
@@ -31,7 +31,7 @@ class ConfigGenerator:
 
     # Generated address numbers.
     # Disabled by default. It uses sequence-generated addresses that are passed in arguments.
-    GENERATED_IPv4_RANGE_MAX_NUMBER = 0 
+    GENERATED_IPv4_RANGE_MAX_NUMBER = 0
     GENERATED_IPv6_RANGE_MAX_NUMBER = 0
     GENERATED_MAC_RANGE_MAX_NUMBER = 0
 
@@ -94,7 +94,7 @@ class ConfigGenerator:
             type = layer_posible_typed[0]
 
         layer['type'] = type
-        
+
         if type == 'vlan':
             layer['id'] = random.randint(0, 4095)
         elif type == 'mpls':
@@ -270,7 +270,7 @@ class ConfigGenerator:
             config['max_flow_inter_packet_gap'] = self.MAX_FLOW_INTER_PACKET_GAP
 
         return config
-    
+
 ### MANDATORY ADDRESSES PROCESSING ###
 
 def extend_list_attribute(dictionary : dict, attribute : str, value: list) -> None:

@@ -31,7 +31,7 @@ entity IB_ENDPOINT_SHIFT_REG is
       EOP_IN       : in  std_logic;
       SRC_RDY_IN   : in  std_logic;
       DST_RDY_IN   : out std_logic;
-    
+
       --Output Interface
       DATA_OUT     : out std_logic_vector(63 downto 0);
       DATA_OUT_VLD : out std_logic;
@@ -70,7 +70,7 @@ trans_type  <= DATA_IN(15 downto C_IB_LENGTH_WIDTH);
 addr_dec_en <= SOP_IN and SRC_RDY_IN;
 
 aux_trans_type  <= trans_type(2 downto 0);
-aux_write_trans     <= '1' when addr_dec_en='1' and (aux_trans_type = C_IB_L2LW_TRANSACTION or 
+aux_write_trans     <= '1' when addr_dec_en='1' and (aux_trans_type = C_IB_L2LW_TRANSACTION or
                                 aux_trans_type = C_IB_RD_COMPL_TRANSACTION) else '0';
 
 aux_read_trans      <= '1' when addr_dec_en='1' and aux_trans_type = C_IB_L2LR_TRANSACTION else '0';

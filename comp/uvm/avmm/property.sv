@@ -1,4 +1,4 @@
-// property.sv: Properties for AVMM interface 
+// property.sv: Properties for AVMM interface
 // Copyright (C) 2024 CESNET z. s. p. o.
 // Author(s): Yaroslav Marushchenko <xmarus09@stud.fit.vutbr.cz>
 
@@ -10,7 +10,7 @@
 `include "uvm_macros.svh"
 import uvm_pkg::*;
 
-module avmm_property #(int unsigned ADDRESS_WIDTH, int unsigned DATA_WIDTH, int unsigned BURST_WIDTH) 
+module avmm_property #(int unsigned ADDRESS_WIDTH, int unsigned DATA_WIDTH, int unsigned BURST_WIDTH)
     (
         input RESET,
         avmm_if vif

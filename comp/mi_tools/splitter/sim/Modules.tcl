@@ -8,7 +8,7 @@
 # -----------------------------------------------------------------------------
 
 if { $ARCHGRP == "FULL" } {
-  
+
   set MEMORY_BASE "$OFM_PATH/comp/base/mem/sp_bmem"
   set MEMORY_BASE2 "$OFM_PATH/comp/base/mem/gen_lutram/compatibility"
 
@@ -16,9 +16,9 @@ if { $ARCHGRP == "FULL" } {
       [list "MEMORY"    $MEMORY_BASE     "FULL"] \
       [list "MEMORY2"   $MEMORY_BASE2    "FULL"] \
   ]
-  
+
   set MOD "$MOD $ENTITY_BASE/testbench.vhd"
-  
+
 }
 
 # -----------------------------------------------------------------------------

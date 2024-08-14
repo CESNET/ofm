@@ -1,6 +1,6 @@
 # Modules.tcl: Local include Modules tcl script
 # Copyright (C) 2012 CESNET
-# Author: Lukas Kekely <kekely@cesnet.cz> 
+# Author: Lukas Kekely <kekely@cesnet.cz>
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
@@ -13,7 +13,7 @@ set MOD "$MOD $ENTITY_BASE/fifo_ent.vhd"
 set MOD "$MOD $ENTITY_BASE/fifo_arch.vhd"
 set MOD "$MOD $ENTITY_BASE/fifo_plus_ent.vhd"
 set MOD "$MOD $ENTITY_BASE/fifo_plus_arch.vhd"
- 
+
 # Subcomponents
 set COMPONENTS [list [list "FIFO_S"      $FIFO_BASE      "BEHAV"] \
                      [list "PKG" $MATH_PKG_BASE "MATH"] \

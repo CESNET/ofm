@@ -53,7 +53,7 @@ entity IB_ENDPOINT_READ_FSM is
 
    -- Processing read transaction
    READ_TRANS       : in  std_logic;
-   
+
    -- ==========================
    -- Component status interface
    -- ==========================
@@ -102,7 +102,7 @@ entity IB_ENDPOINT_READ_FSM is
    );
 end entity IB_ENDPOINT_READ_FSM;
 
-  
+
 -- ----------------------------------------------------------------------------
 --                      Architecture declaration
 -- ----------------------------------------------------------------------------
@@ -155,7 +155,7 @@ state_trans: process(present_state, DATA_VLD, SOP, READ_TRANS, LAST_READ_REQ, RD
 
       when st_idle =>
          -- New Read Transaction
-         if (process_en ='1' and SOP = '1' and READ_TRANS = '1' and RD_COMPL_ACK='1') then  
+         if (process_en ='1' and SOP = '1' and READ_TRANS = '1' and RD_COMPL_ACK='1') then
            next_state <= st_sop; -- Dst ADDR
          else
            next_state <= st_idle; -- Idle
@@ -202,9 +202,9 @@ output_logic: process(present_state, DATA_VLD, SOP, READ_TRANS, LAST_READ_REQ, R
    RD_COMPL_REQ     <= '0';
    flag_set         <= '0';
    flag_reset       <= '0';
-    
+
    case present_state is
-     
+
       when st_init =>
 
       -- ST_IDLE
@@ -212,7 +212,7 @@ output_logic: process(present_state, DATA_VLD, SOP, READ_TRANS, LAST_READ_REQ, R
         IDLE            <= '1';
         RD_COMPL_REQ    <= process_en and DATA_VLD and SOP and READ_TRANS;
         flag_set        <= '1';
-        if (process_en ='1' and SOP = '1' and READ_TRANS = '1' and RD_COMPL_ACK = '1') then 
+        if (process_en ='1' and SOP = '1' and READ_TRANS = '1' and RD_COMPL_ACK = '1') then
           ADDR_WE         <= '1';
           LENGHT_WE       <= '1';
           TAG_WE          <= '1';

@@ -25,7 +25,7 @@ entity GEN_MVB_DEMUX is
         DATA_WIDTH      : natural := 64;
         -- TX interfaces count
         DEMUX_WIDTH     : natural := 2;
-        
+
         VERSION         : string := "register";
 
         OUTPUT_REG      : boolean := False;
@@ -115,7 +115,7 @@ begin
         rx_vld_int  <= RX_VLD;
         rx_srdy_int <= RX_SRC_RDY;
     end generate;
-    
+
     dec_g  : for i in 0 to MVB_ITEMS - 1 generate
         dec_i : entity work.DEC1FN
         generic map (

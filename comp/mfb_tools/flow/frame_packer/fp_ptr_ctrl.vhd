@@ -48,7 +48,7 @@ begin
                 ptr_reg <= (others => '0');
             elsif RX_SRC_RDY = '1' then
                 ptr_reg <= '0' & ptr_reg(ptr_reg'high -1 downto 0) + ptr_inc(MFB_REGIONS);
-            else 
+            else
                 ptr_reg(ptr_reg'high) <='0';
             end if;
          end if;

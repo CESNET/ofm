@@ -38,7 +38,7 @@ architecture full of CMP_SYNTH is
 
   signal ar,br : std_logic_vector(DATA_WIDTH-1 downto 0);
   signal eqr, cmpr, resetr : std_logic;
- 
+
 begin
 
   uut : entity work.GEN_CMP
@@ -58,7 +58,7 @@ begin
     EQ          => eqr,
     CMP         => cmpr
   );
-   
+
   reg : process(CLK)
   begin
     if CLK'event and CLK='1' then
@@ -69,5 +69,5 @@ begin
       CMP <= cmpr;
     end if;
   end process;
- 
+
 end architecture;

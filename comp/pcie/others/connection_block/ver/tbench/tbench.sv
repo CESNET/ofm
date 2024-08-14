@@ -1,4 +1,4 @@
-/* tbench.sv: top modul of functional verification connection_block 
+/* tbench.sv: top modul of functional verification connection_block
  * Copyright (C) 2020 CESNET
  * Author: Radek Iša <isa@cesnet.cz>
  *
@@ -30,7 +30,7 @@ module testbench;
     iMfbTx #(2, 1, 8, 32, 3+32+128) mi_mfb_tx(CLK, RESET);
 
     always #(2ns) CLK = ~CLK;
-   
+
     //set RESET TO ZERO
     initial begin
         RESET = 1;

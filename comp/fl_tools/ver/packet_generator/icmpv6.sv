@@ -10,11 +10,11 @@
  * TODO:
  *
  */
- 
+
 /*
  * This class implements ICMP subprotocol of IPv6 protocol. Class inherates
- * from Layer abstract class. 
- */ 
+ * from Layer abstract class.
+ */
 class ICMPv6 extends Layer;
    /*
     * Class atributes affected by randomization:
@@ -28,9 +28,9 @@ class ICMPv6 extends Layer;
    rand  bit   [7:0]    iType;
    rand  bit   [7:0]    code;
    rand  bit   [15:0]   checksum;
-   
+
    const int            headerSize = 4;
-   
+
    /*
     * Class constructor.
     */
@@ -43,16 +43,16 @@ class ICMPv6 extends Layer;
       previous = null;
       errorProbability = 0;
    endfunction: new
- 
+
    /*
     * Constraint for randomization. Sets value for type field. For further
     * information about this types see list of IANA ICMPv6 TYPE NUMBERS.
     */
-   constraint iTypec 
+   constraint iTypec
    {
       iType inside {[1:4], [100:101], [127:153], [200:201]};
    }
-  
+
    /*
     * Constraint for randomization. Sets value for code field according type
     * field. For further information about this codes see list of IANA ICMPv6
@@ -75,74 +75,74 @@ class ICMPv6 extends Layer;
       else
          code == 0;
    }
-  
+
    /*
     * Post randomization sets data length boundaries for upper layer protocol.
-    */  
+    */
    function void post_randomize();
       if (next != null)
       begin
          next.minMTU = (minMTU - headerSize > 0) ? minMTU - headerSize : 0;
          next.maxMTU = (maxMTU - headerSize > 0) ? maxMTU - headerSize : 0;
-         void'(next.randomize);    
+         void'(next.randomize);
       end
    endfunction:  post_randomize
-  
+
    /*
     * Returns array of bytes, which contains protocol header.
     */
    function data getHeader();
       data vysledek = new[headerSize];
-     
+
       vysledek[0] = iType;
-   
+
       vysledek[1] = code;
-   
+
       vysledek[2] = checksum[15:8];
       vysledek[3] = checksum[7:0];
-   
+
       return  vysledek;
    endfunction: getHeader
- 
-   
+
+
    /*
     * Returns array of bytes, which contains protocol footer.
-    */ 
+    */
    function data getFooter();
       data vystup;
       return vystup;
    endfunction: getFooter
- 
+
    /*
     * Returns class atribute by it's name in form of array of bytes.
     * Not implemented yet.
-    */     
+    */
    function data getAttributeByName(string name);
       data vystup;
       return vystup;
    endfunction: getAttributeByName
- 
+
    /*
-    * Returns array of bytes containing protocol and upper layers 
+    * Returns array of bytes containing protocol and upper layers
     * protocol data.
-    */ 
+    */
    function data getData();
       data header, payload,  vysledek;
-      
+
       header = getHeader();
       payload = next.getData();
-      
+
       vysledek = new [header.size() + payload.size()];
-      
+
       foreach (header[j])
          vysledek[j] = header[j];
-         
+
       foreach (payload[j])
          vysledek[header.size() + j] = payload[j];
-         
-      return vysledek; 
+
+      return vysledek;
    endfunction: getData
- 
+
    /*
     * Copy function.
     */
@@ -152,7 +152,7 @@ class ICMPv6 extends Layer;
       protocol.iType = iType;
       protocol.code = code;
       protocol.checksum = checksum;
-        
+
       protocol.typ = typ;
       protocol.subtype = subtype;
       protocol.name = name;
@@ -163,9 +163,9 @@ class ICMPv6 extends Layer;
       protocol.minMTU = minMTU;
       protocol.maxMTU = maxMTU;
 
-      return protocol;    
+      return protocol;
    endfunction: copy
- 
+
    /*
     * Check if upper layer protocol is compatibile with ICMP subprotocol.
     * This function is used by generator.
@@ -178,13 +178,13 @@ class ICMPv6 extends Layer;
     * Supported protocols:
     * RAW
     */
-   function bit checkType(string typ, string subtype ,string name);  
+   function bit checkType(string typ, string subtype ,string name);
       if (typ == "RAW")
          return 1'b1;
-     
+
       return 1'b0;
    endfunction: checkType
- 
+
    /*
     * Displays informations about protocol including upper layer protocols.
     */
@@ -196,20 +196,20 @@ class ICMPv6 extends Layer;
       if (next != null)
          next.display();
    endfunction: display
-      
+
    /*
-    * Returns length of protocol data plus all upper level protocols data 
+    * Returns length of protocol data plus all upper level protocols data
     * length.
     *
     * Parameters:
     * split - if set length of RAW protocol layer isn't returned, otherwise
     *         the length of RAW protocol layer is returned.
-    */  
+    */
    function int getLength(bit split);
       if (next != null)
          return headerSize + next.getLength(split);
       else
          return headerSize;
    endfunction: getLength
- 
+
 endclass: ICMPv6

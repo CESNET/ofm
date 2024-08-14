@@ -23,7 +23,7 @@ entity SP_BRAM_BEHAV is
       -- in same time and same port? Possible values are:
       -- "READ_FIRST"  - Default mode, works on Xilinx and Intel FPGAs.
       -- "WRITE_FIRST" - This mode is not fully supported on Intel FPGAs,
-      --               - RAM requires extra logic and PIPE_EN must be set to '1' 
+      --               - RAM requires extra logic and PIPE_EN must be set to '1'
       --               - else RAM will be implemented into logic on Intel FPGAs!
       RDW_MODE   : string := "READ_FIRST"
    );

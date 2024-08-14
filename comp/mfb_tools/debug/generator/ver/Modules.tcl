@@ -8,7 +8,7 @@
 set SV_BASE            "$OFM_PATH/comp/ver"
 set SV_MFB_BASE        "$OFM_PATH/comp/mfb_tools/ver"
 set SV_MI32_TOOLS_BASE "$OFM_PATH/comp/mi_tools/ver"
-  
+
 set COMPONENTS [list \
     [ list "SV_MFB"   $SV_MFB_BASE        "FULL"] \
     [ list "SV_MI32"  $SV_MI32_TOOLS_BASE "FULL"] \

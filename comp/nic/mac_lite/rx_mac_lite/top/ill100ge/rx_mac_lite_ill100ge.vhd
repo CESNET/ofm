@@ -27,7 +27,7 @@ entity RX_MAC_LITE_ILL100GE is
         ITEM_WIDTH      : natural := 8;
 
         -- =====================================================================
-        -- OTHERS CONFIGURATION: 
+        -- OTHERS CONFIGURATION:
         -- =====================================================================
         -- ID of this network port, it is inserted into the packet metadata.
         NETWORK_PORT_ID : natural := 0;

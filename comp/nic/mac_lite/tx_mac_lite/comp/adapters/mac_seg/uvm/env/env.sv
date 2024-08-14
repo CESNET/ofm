@@ -36,7 +36,7 @@ class env#(SEGMENTS, REGIONS, REGION_SIZE) extends uvm_env;
         m_reset_cfg.active = UVM_ACTIVE;
         m_reset_cfg.interface_name = "RESET_IF";
         uvm_config_db#(uvm_reset::config_item)::set(this, "m_reset", "m_config", m_reset_cfg);
-		m_reset = uvm_reset::agent::type_id::create("m_reset", this); 
+		m_reset = uvm_reset::agent::type_id::create("m_reset", this);
 
         m_env_tx_cfg = new();
         m_env_tx_cfg.active         = UVM_ACTIVE;

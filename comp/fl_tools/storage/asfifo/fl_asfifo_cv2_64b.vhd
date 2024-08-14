@@ -71,7 +71,7 @@ begin
       ALMOST_FULL_OFFSET => X"0080",  -- Sets almost full threshold
       ALMOST_EMPTY_OFFSET => X"0080", -- Sets the almost empty threshold
       DO_REG => 1,                    -- Enable output register (0 or 1)
-                                      -- Must be 1 if EN_SYN = FALSE 
+                                      -- Must be 1 if EN_SYN = FALSE
       EN_ECC_READ => FALSE,           -- Enable ECC decoder, TRUE or FALSE
       EN_ECC_WRITE => FALSE,          -- Enable ECC encoder, TRUE or FALSE
       EN_SYN => FALSE,                -- Specifies FIFO as Asynchronous (FALSE)

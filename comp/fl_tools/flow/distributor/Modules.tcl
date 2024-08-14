@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 # Base directories
-set FL_BASE             "$OFM_PATH/comp/fl_tools" 
+set FL_BASE             "$OFM_PATH/comp/fl_tools"
 set FL_FIFO_BASE        "$FL_BASE/storage/fifo"
 set DEC_BASE            "$OFM_PATH/comp/base/logic/dec1fn"
 
@@ -13,15 +13,15 @@ set PACKAGES            "$OFM_PATH/comp/base/pkg/math_pack.vhd"
 
 
 set MOD "$MOD $ENTITY_BASE/distributor_ent.vhd"
-set MOD "$MOD $FL_BASE/pkg/fl_pkg.vhd" 
+set MOD "$MOD $FL_BASE/pkg/fl_pkg.vhd"
 
 if { $ARCHGRP == "FULL" } {
 
     set COMPONENTS [list                                        \
         [list "FL_FIFO"  $FL_FIFO_BASE "FULL"]                  \
         [list "DEC"      $DEC_BASE     "FULL"]                  \
-    ] 
-    
+    ]
+
     set MOD "$MOD $ENTITY_BASE/distributor_out.vhd"
     set MOD "$MOD $ENTITY_BASE/distributor_ifsel_ent.vhd"
     set MOD "$MOD $ENTITY_BASE/inum_extract.vhd"
@@ -33,7 +33,7 @@ if { $ARCHGRP == "FULL" } {
 }
 
 if { $ARCHGRP == "EMPTY" } {
-    
+
     set MOD "$MOD $ENTITY_BASE/distributor_empty.vhd"
-    
+
 }

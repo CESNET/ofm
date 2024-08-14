@@ -23,10 +23,10 @@ class ScoreboardDriverCbs extends DriverCbs;
     function new (TransactionTable #(0) st);
         sc_table = st;
     endfunction
-    
+
     virtual task pre_tx(ref Transaction transaction, string inst);
     endtask
-    
+
     virtual task post_tx(Transaction transaction, string inst);
        sc_table.add(transaction);
     endtask
@@ -34,13 +34,13 @@ class ScoreboardDriverCbs extends DriverCbs;
 endclass
 
 class ScoreboardMonitorCbs extends MonitorCbs;
-    
+
     TransactionTable #(0) sc_table;
-    
+
     function new (TransactionTable #(0) st);
         this.sc_table = st;
     endfunction
-    
+
     virtual task post_rx(Transaction transaction, string inst);
         bit status=0;
         sc_table.remove(transaction, status);
@@ -71,5 +71,5 @@ class Scoreboard;
     task display();
       scoreTable.display();
     endtask
-  
+
 endclass

@@ -2,7 +2,7 @@
 //-- Copyright (C) 2021 CESNET z. s. p. o.
 //-- Author(s): Tomáš Beneš <xbenes55@stud.fit.vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 `ifndef SPLITTER_SIMPLE_TEST_SV
 `define SPLITTER_SIMPLE_TEST_SV
@@ -17,7 +17,7 @@ package test;
     parameter REGION_SIZE = 8;
     parameter BLOCK_SIZE  = 8;
     parameter ITEM_WIDTH  = 8;
-    parameter META_WIDTH  = 32; 
+    parameter META_WIDTH  = 32;
     parameter META_BEHAV  = 2;
 
     parameter DEVICE = "AGILEX";

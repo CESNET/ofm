@@ -43,7 +43,7 @@ class reg_counter extends uvm_reg;
 
         //Configure
         //rsvd.configure(  this, 8, 24, "RW", 0, 8'h00, 1, 1, 0);
-        //configure(uvm_reg parent, size, lsb_pos, access, volatile, reset, has_reset, is_rand, individually_accessible); 
+        //configure(uvm_reg parent, size, lsb_pos, access, volatile, reset, has_reset, is_rand, individually_accessible);
         value.configure(this, 32, 0, "RO", 1, 'h0, 1, 0, 0);
     endfunction
 endclass
@@ -74,7 +74,7 @@ class reg_error extends uvm_reg;
 
         //Configure
         //rsvd.configure(  this, 8, 24, "RW", 0, 8'h00, 1, 1, 0);
-        //configure(uvm_reg parent, size, lsb_pos, access, volatile, reset, has_reset, is_rand, individually_accessible); 
+        //configure(uvm_reg parent, size, lsb_pos, access, volatile, reset, has_reset, is_rand, individually_accessible);
         adapter_error.configure(this, 1, 0, "RW", 1, 'h0, 1, 0, 0);
         crc_error    .configure(this, 1, 1, "RW", 1, 'h0, 1, 0, 0);
         min_mtu_check.configure(this, 1, 2, "RW", 1, 'h0, 1, 0, 0);
@@ -113,7 +113,7 @@ class reg_status extends uvm_reg;
 
         //Configure
         //rsvd.configure(  this, 8, 24, "RW", 0, 8'h00, 1, 1, 0);
-        //configure(uvm_reg parent, size, lsb_pos, access, volatile, reset, has_reset, is_rand, individually_accessible); 
+        //configure(uvm_reg parent, size, lsb_pos, access, volatile, reset, has_reset, is_rand, individually_accessible);
         mfifo_ovf  .configure(this, 1,  0, "RW", 1, 'h0, 1, 0, 0);
         dfifo_ovf  .configure(this, 1,  1, "RW", 1, 'h0, 1, 0, 0);
         debug      .configure(this, 2,  2, "RW", 1, 'h0, 1, 0, 0);

@@ -28,14 +28,14 @@ program TEST (
   iFrameLinkTx.tb  TX,
   iFrameLinkTx.monitor MONITOR
   );
-  
+
   // --------------------------------------------------------------------------
   //                       Variables declaration
   // --------------------------------------------------------------------------
- 
+
   // AK MA KOMPONENTA VIAC DRIVEROV ALEBO MONITOROV TREBA ICH NA TOMTO MIESTE DEKLAROVAT A V TASKU
   // CREATEENVIRONMENT INSTANCIOVAT
-  
+
   FrameLinkTransaction                 flBlueprint;                             // Transaction
   Generator                            generator;                               // Generator
   FrameLinkDriver #(DRIVER0_DATA_WIDTH, DRIVER0_DREM_WIDTH)     flDriver;       // Driver
@@ -43,7 +43,7 @@ program TEST (
   FrameLinkResponder #(MONITOR0_DATA_WIDTH, MONITOR0_DREM_WIDTH)  flResponder;  // Responder
   Scoreboard                           scoreboard;                              // Scoreboard
   Coverage #(RX_DATA_WIDTH,RX_DREM_WIDTH,TX_DATA_WIDTH,TX_DREM_WIDTH) coverage; // Coverage
-  
+
   // --------------------------------------------------------------------------
   //                       Creating Environment tasks
   // --------------------------------------------------------------------------
@@ -61,16 +61,16 @@ program TEST (
       flBlueprint.packetSizeMax = packet_size_max;
       flBlueprint.packetSizeMin = packet_size_min;
       generator.blueprint       = flBlueprint;
-  endtask: createGeneratorEnvironment    
+  endtask: createGeneratorEnvironment
 
-  task createEnvironment();    
-    // Create driver    
+  task createEnvironment();
+    // Create driver
     flDriver  = new ("Driver0", generator.transMbx, RX);
-      flDriver.txDelayEn_wt             = DRIVER0_DELAYEN_WT; 
+      flDriver.txDelayEn_wt             = DRIVER0_DELAYEN_WT;
       flDriver.txDelayDisable_wt        = DRIVER0_DELAYDIS_WT;
       flDriver.txDelayLow               = DRIVER0_DELAYLOW;
       flDriver.txDelayHigh              = DRIVER0_DELAYHIGH;
-      flDriver.insideTxDelayEn_wt       = DRIVER0_INSIDE_DELAYEN_WT; 
+      flDriver.insideTxDelayEn_wt       = DRIVER0_INSIDE_DELAYEN_WT;
       flDriver.insideTxDelayDisable_wt  = DRIVER0_INSIDE_DELAYDIS_WT;
       flDriver.insideTxDelayLow         = DRIVER0_INSIDE_DELAYLOW;
       flDriver.insideTxDelayHigh        = DRIVER0_INSIDE_DELAYHIGH;
@@ -78,14 +78,14 @@ program TEST (
     flMonitor = new ("Monitor0", MONITOR);
     // Create responder
     flResponder = new ("Responder0", TX);
-      flResponder.rxDelayEn_wt            = MONITOR0_DELAYEN_WT; 
+      flResponder.rxDelayEn_wt            = MONITOR0_DELAYEN_WT;
       flResponder.rxDelayDisable_wt       = MONITOR0_DELAYDIS_WT;
       flResponder.rxDelayLow              = MONITOR0_DELAYLOW;
       flResponder.rxDelayHigh             = MONITOR0_DELAYHIGH;
-      flResponder.insideRxDelayEn_wt      = MONITOR0_INSIDE_DELAYEN_WT; 
+      flResponder.insideRxDelayEn_wt      = MONITOR0_INSIDE_DELAYEN_WT;
       flResponder.insideRxDelayDisable_wt = MONITOR0_INSIDE_DELAYDIS_WT;
       flResponder.insideRxDelayLow        = MONITOR0_INSIDE_DELAYLOW;
-      flResponder.insideRxDelayHigh       = MONITOR0_INSIDE_DELAYHIGH;    
+      flResponder.insideRxDelayHigh       = MONITOR0_INSIDE_DELAYHIGH;
     // Create scoreboard
     scoreboard = new;
     // Coverage class
@@ -102,14 +102,14 @@ program TEST (
   // --------------------------------------------------------------------------
   //                       Test auxilarity procedures
   // --------------------------------------------------------------------------
-  
+
   // --------------------------------------------------------------------------
   // Resets design
   task resetDesign();
     #(2*RX_CLK_PERIOD);               // wait before reset
     RX_RESET=1;                       // Init Reset variable
     TX_RESET=1;                       // Init Reset variable
-    #TX_RESET_TIME;     
+    #TX_RESET_TIME;
     RX_RESET = 0;     // Deactivate reset after reset_time
     TX_RESET = 0;     // Deactivate reset after reset_time
     #TX_RESET_TIME;
@@ -136,9 +136,9 @@ program TEST (
      while (i<100) begin
         if (flDriver.busy || flMonitor.busy)
            i = 0;
-        else 
+        else
            i++;
-        #(TX_CLK_PERIOD); 
+        #(TX_CLK_PERIOD);
      end
      flDriver.setDisabled();
      flMonitor.setDisabled();
@@ -161,8 +161,8 @@ program TEST (
      generator.setEnabled(TRANSACTION_COUNT);
 
      // wait until generator is disabled
-     wait (generator.enabled == 0); 
-    
+     wait (generator.enabled == 0);
+
      // Disable Test Enviroment
      disableTestEnvironment();
 
@@ -170,7 +170,7 @@ program TEST (
      scoreboard.display();
      coverage.display();
   endtask: test1
-  
+
   // --------------------------------------------------------------------------
   // Test Case 2
   // Generuje jednopaketove framy, ktore sa zmestia do jedneho slova driveru
@@ -231,10 +231,10 @@ program TEST (
     // create & enable environment
     createGeneratorEnvironment();
     createEnvironment();
-    
+
     // set zero delays
-    flResponder.rxDelayEn_wt        = 0; 
-    flResponder.insideRxDelayEn_wt  = 0; 
+    flResponder.rxDelayEn_wt        = 0;
+    flResponder.insideRxDelayEn_wt  = 0;
 
     // Enable Test environment
     enableTestEnvironment();
@@ -262,16 +262,16 @@ program TEST (
     // create & enable environment
     createGeneratorEnvironment();
     createEnvironment();
-    
+
     // set delays
-    flResponder.rxDelayEn_wt            = 5; 
+    flResponder.rxDelayEn_wt            = 5;
     flResponder.rxDelayDisable_wt       = 1;
     flResponder.rxDelayLow              = 0;
     flResponder.rxDelayHigh             = 4;
-    flResponder.insideRxDelayEn_wt      = 5; 
+    flResponder.insideRxDelayEn_wt      = 5;
     flResponder.insideRxDelayDisable_wt = 1;
     flResponder.insideRxDelayLow        = 0;
-    flResponder.insideRxDelayHigh       = 4;    
+    flResponder.insideRxDelayHigh       = 4;
 
     // Enable Test environment
     enableTestEnvironment();
@@ -310,12 +310,12 @@ program TEST (
 
     test1();       // Run Test 1
     resetDesign();
-    
+
     test2();
     test3();
     test4();
     test5();
-    
+
     // -------------------------------------
     // STOP TESTING
     // -------------------------------------

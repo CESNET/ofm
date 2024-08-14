@@ -39,7 +39,7 @@ architecture full of FLB_ALIGN_FRAME_FSM is
 
    -- ------------------ Types declaration ------------------------------------
    type t_state is ( BUSY, ALIGN_EOP );
-   
+
    -- ------------------ Signals declaration ----------------------------------
    signal present_state, next_state : t_state;
 
@@ -54,12 +54,12 @@ begin
          present_state <= next_state;
       end if;
    end process sync_logic;
-   
+
    -- ------------------ Next state logic -------------------------------------
    next_state_logic : process(present_state, DV, CNT_ROW_MAX, EOP, FIFO_FULL)
    begin
    case (present_state) is
-      
+
       -- ---------------------------------------------
       when BUSY =>
          if ( EOP = '1' and CNT_ROW_MAX = '0' and FIFO_FULL = '0' and DV = '1') then
@@ -82,11 +82,11 @@ begin
    -- ------------------ Output logic -----------------------------------------
    output_logic: process( present_state, DV, FIFO_FULL, EOP )
    begin
-   
+
       -- ---------------------------------------------
       -- Initial values
       INSERT_IDLE       <= '0';
-      
+
       case (present_state) is
 
       -- ---------------------------------------------

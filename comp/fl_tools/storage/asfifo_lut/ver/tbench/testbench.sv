@@ -10,7 +10,7 @@
  * TODO:
  *
  */
- 
+
 
 // ----------------------------------------------------------------------------
 //                                 TESTBENCH
@@ -20,7 +20,7 @@ import test_pkg::*; // Test constants
 module testbench;
 
   // -- Testbench wires and interfaces ----------------------------------------
-  // V PRIPADE VIACERYCH POUZITYCH INTERFACOV JE NUTNE DOPLNENIE ICH DEKLARACIE 
+  // V PRIPADE VIACERYCH POUZITYCH INTERFACOV JE NUTNE DOPLNENIE ICH DEKLARACIE
   // A TIEZ DO DESIGN UNDER TEST A TEST
   logic            RX_CLK   = 0;
   logic            RX_RESET;
@@ -29,7 +29,7 @@ module testbench;
   iFrameLinkRx #(RX_DATA_WIDTH, RX_DREM_WIDTH) RX  (RX_CLK, RX_RESET);
   iFrameLinkTx #(TX_DATA_WIDTH, TX_DREM_WIDTH) TX  (TX_CLK, TX_RESET);
 
-  
+
   //-- Clock generation -------------------------------------------------------
   always #(RX_CLK_PERIOD/2) RX_CLK = ~RX_CLK;
   always #(TX_CLK_PERIOD/2) TX_CLK = ~TX_CLK;

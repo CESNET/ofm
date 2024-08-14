@@ -17,7 +17,7 @@ use ieee.std_logic_arith.all;
 use ieee.std_logic_textio.all;
 use ieee.numeric_std.all;
 use std.textio.all;
-use work.fl_pkg.all; 
+use work.fl_pkg.all;
 use work.fl_bfm_pkg.all;
 use work.fl_bfm_rdy_pkg.all;
 
@@ -52,10 +52,10 @@ architecture TESTBENCH_arch of TESTBENCH is
      -- Frame Link Bus 32 (FL_SIM)
      signal FL_bus    : t_fl32;
      signal OUT_BUS   : t_fl32;
-   
-   
 
-     
+
+
+
 begin
 
 -- Reset generation -----------------------------------------------------------
@@ -66,7 +66,7 @@ begin
       reset <= '0';
       wait;
    end process reset_gen;
-   
+
 -- clk50 generator ------------------------------------------------------------
 clk50_gen : process
 begin
@@ -163,7 +163,7 @@ MONITOR_I: entity work.MONITOR
       RX_SOP_N=>OUT_BUS.SOP_N,
       RX_EOP_N=>OUT_BUS.EOP_N,
       RX_SRC_RDY_N=>OUT_BUS.SRC_RDY_N,
-      RX_DST_RDY_N=>OUT_BUS.DST_RDY_N      
+      RX_DST_RDY_N=>OUT_BUS.DST_RDY_N
      );
 
 tb : process

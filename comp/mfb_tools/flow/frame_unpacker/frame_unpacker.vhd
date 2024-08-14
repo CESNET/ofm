@@ -238,7 +238,7 @@ architecture FULL of FRAME_UNPACKER is
     signal tx_op_sof_mask            : slv_array_t     (UNPACKING_STAGES-1 downto 0)(MFB_REGIONS-1 downto 0);
     signal tx_op_src_rdy             : std_logic_vector(UNPACKING_STAGES-1 downto 0);
     signal tx_op_dst_rdy             : std_logic_vector(UNPACKING_STAGES-1 downto 0);
-    
+
     signal rx_sc_data                : slv_array_2d_t  (UNPACKING_STAGES-1 downto 0)(MFB_REGIONS-1 downto 0)(MFB_REGION_WIDTH-1 downto 0);
     signal rx_sc_meta                : slv_array_2d_t  (UNPACKING_STAGES-1 downto 0)(MFB_REGIONS-1 downto 0)(OP_META_WIDTH-1 downto 0);
     signal rx_sc_offset              : u_array_2d_t    (UNPACKING_STAGES-1 downto 0)(MFB_REGIONS-1 downto 0)(OFFSET_WIDTH_ITEMS-1 downto 0);
@@ -247,7 +247,7 @@ architecture FULL of FRAME_UNPACKER is
     signal rx_sc_sof_mask            : slv_array_t     (UNPACKING_STAGES-1 downto 0)(MFB_REGIONS-1 downto 0);
     signal rx_sc_src_rdy             : std_logic_vector(UNPACKING_STAGES-1 downto 0);
     signal rx_sc_dst_rdy             : std_logic_vector(UNPACKING_STAGES-1 downto 0);
-    
+
     signal tx_sc_data                : slv_array_2d_t  (UNPACKING_STAGES-1 downto 0)(MFB_REGIONS-1 downto 0)(MFB_REGION_WIDTH-1 downto 0);
     signal tx_sc_meta                : slv_array_2d_t  (UNPACKING_STAGES-1 downto 0)(MFB_REGIONS-1 downto 0)(OP_META_WIDTH-1 downto 0);
     signal tx_sc_offset              : u_array_2d_t    (UNPACKING_STAGES-1 downto 0)(MFB_REGIONS-1 downto 0)(OFFSET_WIDTH_ITEMS-1 downto 0);
@@ -395,7 +395,7 @@ architecture FULL of FRAME_UNPACKER is
     signal metains_indv_hdr_vld     : std_logic_vector(MFB_REGIONS-1 downto 0);
     signal metains_indv_hdr_src_rdy : std_logic;
     signal metains_indv_hdr_dst_rdy : std_logic;
-    
+
     -- Cutter
     signal cut_data        : std_logic_vector(MFB_WORD_WIDTH-1 downto 0);
     signal cut_meta        : std_logic_vector(MFB_REGIONS*MERGED_ITEMS_WIDTH-1 downto 0);
@@ -571,7 +571,7 @@ begin
     -- ----------------------------------------------
     rx_data_blocks        <= slv_array_deser(RX_MFB_DATA   , MFB_REGIONS*MFB_REGION_SIZE);
     rx_per_region_sof_pos <= slv_array_deser(RX_MFB_SOF_POS, MFB_REGIONS);
-    
+
     supkt_hdr_extract_g : for r in 0 to MFB_REGIONS-1 generate
         -- Create a global SOF POS
         rx_per_word_sof_pos(r) <= to_unsigned(r,log2(MFB_REGIONS)) & unsigned(rx_per_region_sof_pos(r));
@@ -712,7 +712,7 @@ begin
             RX_SOF_MASK => rx_op_sof_mask(s),
             RX_SRC_RDY  => rx_op_src_rdy (s),
             RX_DST_RDY  => rx_op_dst_rdy (s),
-            
+
             TX_DATA     => tx_op_data    (s),
             TX_META     => tx_op_meta    (s),
             TX_OFFSET   => tx_op_offset  (s),
@@ -753,7 +753,7 @@ begin
         rx_sc_dst_rdy(s) <= tx_sc_dst_rdy(s);
 
         sof_creator_g : for r in 0 to MFB_REGIONS-1 generate
-            
+
             sof_creator_i : entity work.SOF_CREATOR
             generic map(
                 MFB_REGIONS     => MFB_REGIONS       ,
@@ -771,7 +771,7 @@ begin
             port map(
                 CLK   => CLK,
                 RESET => RESET,
-    
+
                 RX_DATA     => rx_sc_data    (s)(r),
                 RX_META     => rx_sc_meta    (s)(r),
                 RX_OFFSET   => rx_sc_offset  (s)(r),
@@ -929,7 +929,7 @@ begin
         target_region(r) <= eof_offset(r)(OFFSET_WIDTH_ITEMS-log2(PKT_MAX_WORDS                            )-1 downto OFFSET_WIDTH_ITEMS-log2(PKT_MAX_WORDS*MFB_REGIONS                ));
         target_block (r) <= eof_offset(r)(OFFSET_WIDTH_ITEMS-log2(PKT_MAX_WORDS*MFB_REGIONS                )-1 downto OFFSET_WIDTH_ITEMS-log2(PKT_MAX_WORDS*MFB_REGIONS*MFB_REGION_SIZE));
         target_item  (r) <= eof_offset(r)(OFFSET_WIDTH_ITEMS-log2(PKT_MAX_WORDS*MFB_REGIONS*MFB_REGION_SIZE)-1 downto 0                                                                 );
-        
+
         -- EOF
         eof_from_offset_g : if MFB_REGIONS > 1 generate
             eof_from_offset(r) <= '1' when (last_word(r) = target_word(r)) and (r = target_region(r)) else '0';
@@ -954,7 +954,7 @@ begin
         target_region_presc(r) <= eof_offset_presc(r)(OFFSET_WIDTH_ITEMS-log2(PKT_MAX_WORDS                            )-1 downto OFFSET_WIDTH_ITEMS-log2(PKT_MAX_WORDS*MFB_REGIONS                ));
         target_block_presc (r) <= eof_offset_presc(r)(OFFSET_WIDTH_ITEMS-log2(PKT_MAX_WORDS*MFB_REGIONS                )-1 downto OFFSET_WIDTH_ITEMS-log2(PKT_MAX_WORDS*MFB_REGIONS*MFB_REGION_SIZE));
         target_item_presc  (r) <= eof_offset_presc(r)(OFFSET_WIDTH_ITEMS-log2(PKT_MAX_WORDS*MFB_REGIONS*MFB_REGION_SIZE)-1 downto 0                                                                 );
-        
+
         -- EOF
         eof_from_offset2_g : if MFB_REGIONS > 1 generate
             eof_from_offset_presc(r) <= '1' when (last_word(r) = target_word_presc(r)) and (r = target_region_presc(r)) else '0';

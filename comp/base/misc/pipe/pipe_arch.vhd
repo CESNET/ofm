@@ -25,8 +25,8 @@ architecture pipe_arch of PIPE is
    -- -------------------------------------------------------------------------
 
    type   fsm_states is (S_0, S_1, S_2, S_RESET);
-   signal present_state, next_state : fsm_states; 
-   
+   signal present_state, next_state : fsm_states;
+
    signal ce,addr        : std_logic;
    signal dout           : std_logic_vector(DATA_WIDTH-1 downto 0);
    signal reg_dout       : std_logic_vector(DATA_WIDTH-1 downto 0) := (others => '0');
@@ -35,7 +35,7 @@ architecture pipe_arch of PIPE is
    signal outreg_we      : std_logic;
    signal sig_in_src_rdy : std_logic;
    signal sig_in_dst_rdy : std_logic;
-      
+
 begin
 
 -- debuging probe connections
@@ -56,9 +56,9 @@ debug_probe : entity work.STREAMING_DEBUG_PROBE
       DEBUG_SOP      => open,
       DEBUG_EOP      => open
    );
-   
+
 NOT_FAKE_SHREG : if (FAKE_PIPE = false and PIPE_TYPE = "SHREG") generate
-   
+
    -- -------------------------------------------------------------------------
    --                               DATA PATH                                --
    -- -------------------------------------------------------------------------
@@ -78,20 +78,20 @@ NOT_FAKE_SHREG : if (FAKE_PIPE = false and PIPE_TYPE = "SHREG") generate
        DIN  => IN_DATA,
        DOUT => dout
      );
-   
+
    -- without output registers
    OUTREG_NO : if (USE_OUTREG = false) generate
-      
+
       outreg_we   <= OUT_DST_RDY;
-      
+
       OUT_DATA    <= dout;
       OUT_SRC_RDY <= dout_rdy;
-      
+
    end generate;
-   
+
    -- with output registers
    OUTREG_YES : if (USE_OUTREG = true) generate
-      
+
       reg_doutp: process(CLK)
       begin
          if (CLK'event and CLK = '1') then
@@ -100,7 +100,7 @@ NOT_FAKE_SHREG : if (FAKE_PIPE = false and PIPE_TYPE = "SHREG") generate
             end if;
          end if;
       end process;
-      
+
       reg_dout_rdyp: process(CLK)
       begin
          if (CLK'event and CLK = '1') then
@@ -111,19 +111,19 @@ NOT_FAKE_SHREG : if (FAKE_PIPE = false and PIPE_TYPE = "SHREG") generate
             end if;
          end if;
       end process;
-      
+
       outreg_we <= OUT_DST_RDY or not reg_dout_rdy;
-      
+
       OUT_DATA    <= reg_dout;
       OUT_SRC_RDY <= reg_dout_rdy;
-      
+
    end generate;
-   
-   
+
+
    -- -------------------------------------------------------------------------
    --                              CONTROL FSM                               --
    -- -------------------------------------------------------------------------
-   
+
    -- synchronize logic -------------------------------------------------------
    synchlogp : process(CLK)
    begin
@@ -147,14 +147,14 @@ NOT_FAKE_SHREG : if (FAKE_PIPE = false and PIPE_TYPE = "SHREG") generate
             if (sig_in_src_rdy = '1') then
                next_state <= S_1;
             end if;
-         
+
          when  S_1 =>
             if (sig_in_src_rdy = '1') and (outreg_we = '0') then
                next_state <= S_2;
             elsif (outreg_we = '1') and (sig_in_src_rdy = '0') then
                next_state <= S_0;
             end if;
-         
+
          when  S_2 =>
             if (outreg_we = '1') then
                next_state <= S_1;

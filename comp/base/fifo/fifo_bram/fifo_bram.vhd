@@ -41,7 +41,7 @@ entity fifo_bram is
       WR       : in  std_logic;
       DI       : in  std_logic_vector(DATA_WIDTH-1 downto 0);
       FULL     : out std_logic;
-      LSTBLK   : out std_logic;      
+      LSTBLK   : out std_logic;
       STATUS   : out std_logic_vector(log2(ITEMS) downto 0);
       -- Read interface
       RD       : in  std_logic;
@@ -67,16 +67,16 @@ architecture behavioral of fifo_bram is
 
    signal sig_rd                     : std_logic;
    signal sig_dv                     : std_logic;
-   
+
    signal reg_empty                  : std_logic;
    signal reg_full                   : std_logic;
-   signal reg_lstblk                 : std_logic;   
+   signal reg_lstblk                 : std_logic;
 
    signal cnt_write_addr             : std_logic_vector((FADDR+1) downto 0);
    signal cnt_read_addr              : std_logic_vector((FADDR+1) downto 0);
    signal reg_read_addr              : std_logic_vector((FADDR+1) downto 0);
    signal reg_write_addr             : std_logic_vector((FADDR+1) downto 0);
-	
+
 	signal cnt_write_addr_low         : std_logic_vector(FADDR downto 0);
 	signal cnt_write_addr_high        : std_logic;
 	signal cnt_write_addr_high_next   : std_logic;
@@ -152,7 +152,7 @@ begin
       end if;
    end if;
 end process;
-										
+
 process(cnt_write_addr_low)
 begin
 	if cnt_write_addr_low = conv_std_logic_vector(ITEMS-1, cnt_write_addr_low'length) then
@@ -161,17 +161,17 @@ begin
 		cnt_write_addr_load_enable <= '0';
 	end if;
 end process;
-										
+
 process(cnt_write_addr_high, cnt_write_addr_load_enable)
 begin
 	if cnt_write_addr_load_enable = '1' then
-		cnt_write_addr_high_next <= not cnt_write_addr_high; 
+		cnt_write_addr_high_next <= not cnt_write_addr_high;
 	else
 		cnt_write_addr_high_next <= cnt_write_addr_high;
 	end if;
 end process;
-	
--- cnt_write_addr_high counter	
+
+-- cnt_write_addr_high counter
 process(CLK)
 begin
    if CLK'event and CLK = '1' then
@@ -208,17 +208,17 @@ begin
 	else
 		cnt_read_addr_load_enable <= '0';
 	end if;
-end process;							
+end process;
 
 process(cnt_read_addr_high, cnt_read_addr_load_enable)
 begin
 	if cnt_read_addr_load_enable = '1' then
-		cnt_read_addr_high_next <= not cnt_read_addr_high; 
+		cnt_read_addr_high_next <= not cnt_read_addr_high;
 	else
 		cnt_read_addr_high_next <= cnt_read_addr_high;
 	end if;
 end process;
-									 
+
 process(CLK)
 begin
    if CLK'event and CLK = '1' then
@@ -321,7 +321,7 @@ begin
 		lstblk_plus_one <= '0';
 	end if;
 end process;
-						  
+
 process(cnt_diff, write_allow, read_allow)
 begin
 	if (cnt_diff = BLOCK_SIZE + 1 ) and (write_allow = '1') and (read_allow = '0') then

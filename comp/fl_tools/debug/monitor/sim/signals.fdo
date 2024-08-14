@@ -12,16 +12,16 @@ proc FL_MONITOR_RX { } {
     global FL_MONITOR_PATH
 
     add wave -divider "FL_MONITOR - RX interface"
-    add_wave "-noupdate -hex -label rx_data      " $FL_MONITOR_PATH/data      
-    add_wave "-noupdate -hex -label rx_rem       " $FL_MONITOR_PATH/rem       
-    add_wave "-noupdate -hex -label rx_src_rdy_n " $FL_MONITOR_PATH/src_rdy_n 
-    add_wave "-noupdate -hex -label rx_dst_rdy_n " $FL_MONITOR_PATH/dst_rdy_n 
-    add_wave "-noupdate -hex -label rx_sop_n     " $FL_MONITOR_PATH/sop_n     
-    add_wave "-noupdate -hex -label rx_eop_n     " $FL_MONITOR_PATH/eop_n     
-    add_wave "-noupdate -hex -label rx_sof_n     " $FL_MONITOR_PATH/sof_n     
-    add_wave "-noupdate -hex -label rx_eof_n     " $FL_MONITOR_PATH/eof_n     
+    add_wave "-noupdate -hex -label rx_data      " $FL_MONITOR_PATH/data
+    add_wave "-noupdate -hex -label rx_rem       " $FL_MONITOR_PATH/rem
+    add_wave "-noupdate -hex -label rx_src_rdy_n " $FL_MONITOR_PATH/src_rdy_n
+    add_wave "-noupdate -hex -label rx_dst_rdy_n " $FL_MONITOR_PATH/dst_rdy_n
+    add_wave "-noupdate -hex -label rx_sop_n     " $FL_MONITOR_PATH/sop_n
+    add_wave "-noupdate -hex -label rx_eop_n     " $FL_MONITOR_PATH/eop_n
+    add_wave "-noupdate -hex -label rx_sof_n     " $FL_MONITOR_PATH/sof_n
+    add_wave "-noupdate -hex -label rx_eof_n     " $FL_MONITOR_PATH/eof_n
 }
-                                              
+
 
 proc FL_MONITOR_INT { } {
     global FL_MONITOR_PATH

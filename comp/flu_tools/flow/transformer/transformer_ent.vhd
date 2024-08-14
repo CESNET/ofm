@@ -22,7 +22,7 @@ entity FLU_TRANSFORMER is
   port(
     CLK            : in  std_logic;
     RESET          : in  std_logic;
-    
+
     -- Frame Link Unaligned input interface
     RX_DATA       : in std_logic_vector(RX_DATA_WIDTH-1 downto 0);
     RX_SOP_POS    : in std_logic_vector(max(1,RX_SOP_POS_WIDTH)-1 downto 0);
@@ -31,7 +31,7 @@ entity FLU_TRANSFORMER is
     RX_EOP        : in std_logic;
     RX_SRC_RDY    : in std_logic;
     RX_DST_RDY    : out std_logic;
-    
+
     -- Frame Link Unaligned output interface
     TX_DATA       : out std_logic_vector(TX_DATA_WIDTH-1 downto 0);
     TX_SOP_POS    : out std_logic_vector(max(1,TX_SOP_POS_WIDTH)-1 downto 0);

@@ -41,15 +41,15 @@ architecture FULL of DMAFIFO_MUX_2TO1 is
    signal vld_h                     : std_logic;
    signal src_rdy_s                 : std_logic;
    signal wr                        : std_logic;
-   
-   --! Data 
-   signal data_out                  : std_logic_vector (INPUT_DATA_WIDTH-1 downto 0); 
+
+   --! Data
+   signal data_out                  : std_logic_vector (INPUT_DATA_WIDTH-1 downto 0);
    signal fifo_in                   : std_logic_vector (INPUT_DATA_WIDTH+DMA_HDR_WIDTH+2 downto 0);
    signal fifo_out                  : std_logic_vector (INPUT_DATA_WIDTH+DMA_HDR_WIDTH+2 downto 0);
    signal dwords                    : std_logic_vector (10 downto 0);
    signal last_dwords               : std_logic_vector (3 downto 0);
 
-begin 
+begin
    -------------------------------------------------------------------------------
    --                             Architecture body
    -------------------------------------------------------------------------------
@@ -63,28 +63,28 @@ begin
          FWFT_MODE           => true,
          OUTPUT_REG          => true,
          DEVICE              => DEVICE,
-         ALMOST_FULL_OFFSET  => ALMOST_FULL_OFFSET,  
+         ALMOST_FULL_OFFSET  => ALMOST_FULL_OFFSET,
          ALMOST_EMPTY_OFFSET => ALMOST_EMPTY_OFFSET
       )
       port map(
          WR_CLK    => CLK_WR,
          WR_RST    => RST_WR,
          WR_DATA   => fifo_in,
-   
+
          WR_EN     => wr,
-   
+
          WR_FULL   => full_sig,
          WR_AFULL  => afull_sig,
          WR_STATUS => open,
-   
+
          RD_CLK    => CLK_RD,
          RD_RST    => RST_RD,
          RD_DATA   => fifo_out,
-   
+
          RD_EN     => rd_en,
-   
+
          RD_EMPTY  => fifo_empty,
-   
+
          RD_AEMPTY => open,
          RD_STATUS => open
       );
@@ -109,7 +109,7 @@ begin
             end if;
          end if;
       end process;
-      
+
       fifo_empty <= not full_sig;
    end generate;
 
@@ -125,7 +125,7 @@ begin
       vld_h                <= '0';
       if (RX_SRC_RDY = '1' and full_s ='0' and (DIRECTION/="UP" or RX_HDR(DMA_REQUEST_TYPE) = DMA_TYPE_WRITE)) then
          vld_h             <= '1';
-         if (RX_EOP = '1') then       
+         if (RX_EOP = '1') then
             if (last_dwords < 9 and last_dwords /= "0000") then
                vld_h       <= '0';
             end if;
@@ -134,7 +134,7 @@ begin
    end process;
 
    ----------------------------------------------------------------------------
-   --                            OUTPUT Logic 
+   --                            OUTPUT Logic
    ----------------------------------------------------------------------------
 
    full_s           <= full_sig when USE_ALMOST_FULL = false else afull_sig;
@@ -143,7 +143,7 @@ begin
    TX_HDR           <= fifo_out(DMA_HDR_WIDTH+2 downto 3);
 
    ----------------------------------------------------------------------------
-   --                           CONTROL SIGNALS 
+   --                           CONTROL SIGNALS
    ----------------------------------------------------------------------------
    wr               <= '1' when full_s ='0' and RX_SRC_RDY ='1' else '0';
    src_rdy_s        <= not fifo_empty;
@@ -159,14 +159,14 @@ begin
       if (rising_edge (CLK_RD)) then
          if (RST_RD = '1' ) then
             present_state  <= LOW;
-         else 
+         else
             present_state  <= next_state;
          end if;
       end if;
    end process;
-   
+
    next_state_logic: process(present_state, fifo_out,fifo_empty,TX_DST_RDY)
-   begin         
+   begin
       next_state           <= present_state;
       case (present_state) is
          when LOW =>
@@ -182,9 +182,9 @@ begin
    end process;
 
    output_logic: process(present_state,data_out,src_rdy_s,TX_DST_RDY,fifo_out)
-   begin    
-      rd_en                <= '0'; 
-      TX_DATA              <= data_out (DATA_HALF_WIDTH-1 downto 0); 
+   begin
+      rd_en                <= '0';
+      TX_DATA              <= data_out (DATA_HALF_WIDTH-1 downto 0);
       TX_SOP               <= '0';
       TX_EOP               <= '0';
       case (present_state) is
@@ -192,7 +192,7 @@ begin
          when LOW =>
             TX_DATA        <= data_out (DATA_HALF_WIDTH-1 downto 0);
             TX_SOP         <= fifo_out(2);
-            if (fifo_out(0) = '0') then 
+            if (fifo_out(0) = '0') then
                TX_EOP      <= fifo_out(1);
                if (src_rdy_s ='1' and TX_DST_RDY ='1' ) then
                   rd_en    <= '1';

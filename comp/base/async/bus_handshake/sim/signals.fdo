@@ -3,7 +3,7 @@
 # Author: Jakub Cabal <jakubcabal@gmail.com>
 #
 # SPDX-License-Identifier: BSD-3-Clause
-# 
+#
 # $Id$
 #
 
@@ -30,7 +30,7 @@ proc blk_bus_handshake_ifc { } {
 
 proc blk_bus_handshake_internals { } {
     global bus_handshake_PATH
-    
+
     add wave -divider "Internal signals"
     add_wave "-noupdate      -label signal_aready" /$bus_handshake_PATH/signal_aready
     add_wave "-noupdate      -label a_en_next"     /$bus_handshake_PATH/a_en_next

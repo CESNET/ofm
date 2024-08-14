@@ -44,7 +44,7 @@ architecture behavioral of testbench is
    signal ADDRB      : std_logic_vector(ADDRESS_WIDTH-1 downto 0);
    signal DIB        : std_logic_vector(DATA_WIDTH-1 downto 0);
    signal DOB_DV     : std_logic;
-   signal DOB        : std_logic_vector(DATA_WIDTH-1 downto 0); 
+   signal DOB        : std_logic_vector(DATA_WIDTH-1 downto 0);
 begin
 
    --! BRAM_V7
@@ -109,7 +109,7 @@ begin
    );
 
    --Generate clock
-   clk_gen_p : process 
+   clk_gen_p : process
    begin
       CLK <= '1';
       wait for clkper/2;
@@ -126,7 +126,7 @@ begin
    wait;
    end process;
 
-   --! Simulating input flow 
+   --! Simulating input flow
    input_flow : process
    begin
       PIPE_ENA <= '1';
@@ -163,13 +163,13 @@ begin
       REB    <= '0';
       REA    <= '0';
       wait for clkper;
-      
+
       -- write on A , address -> X'802
       DIA    <= (36 =>'1', others => '0');
       ADDRA  <= (11 => '1', 1 => '1', others => '0');
       WEA    <= '1';
       wait for clkper;
-      
+
       -- read on A,B , address -> X'802
       WEA    <= '0';
       REA    <= '1';

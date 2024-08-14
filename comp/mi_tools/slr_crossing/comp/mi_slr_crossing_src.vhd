@@ -3,7 +3,7 @@
 -- Author(s): Lukas Kekely <kekely@cesnet.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
--- 
+--
 
 library IEEE;
 use IEEE.std_logic_1164.all;

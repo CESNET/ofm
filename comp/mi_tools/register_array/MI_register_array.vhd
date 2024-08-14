@@ -13,7 +13,7 @@ use IEEE.numeric_std.all;
 
 use work.math_pack.all;
 
---! register data type 
+--! register data type
 use work.REG_PACK.all;
 
 entity MI_REGISTER_ARRAY is
@@ -25,15 +25,15 @@ entity MI_REGISTER_ARRAY is
       --! MI pipe
       MI_PIPE        : boolean := true;
       --! addres first register in array
-      --! width must be (MI_ADDR_WIDTH-1 downto 0) 
+      --! width must be (MI_ADDR_WIDTH-1 downto 0)
       constant FIRST_ADDR  : std_logic_vector;
-      --! significant bits of the address 
+      --! significant bits of the address
       SIGN_BITS_ADDR : integer;
-      --! number of regiters  
+      --! number of regiters
       NUM_REGS       : integer := 1;
-      --! initialization values for registers, 
+      --! initialization values for registers,
       --! width must be (NUM_REGS*MI_WIDTH-1 downto 0)
-      constant INICIAL     : std_logic_vector;  
+      constant INICIAL     : std_logic_vector;
       --! registers generic data (array)
       --! range must be (1 to NUM_REGS)
       --! sample connections in /sim/testbench.vhd
@@ -49,7 +49,7 @@ entity MI_REGISTER_ARRAY is
       --! MI32 input interface -------------------------------------------------
       --! Input Data
       MI_DWR                        : in  std_logic_vector(MI_WIDTH-1 downto 0);
-      --! addres  
+      --! addres
       MI_ADDR                       : in  std_logic_vector(MI_ADDR_WIDTH-1 downto 0);
       --! Read Request
       MI_RD                         : in  std_logic;
@@ -64,15 +64,15 @@ entity MI_REGISTER_ARRAY is
       --! Data Ready
       MI_DRDY                       : out std_logic;
 
-      --! registers Data output              
+      --! registers Data output
       REG_DATA_OUT                  : out std_logic_vector((NUM_REGS*MI_WIDTH)-1 downto 0);
       --! MI_WR signals
       REG_WR_OUT                    : out std_logic_vector(NUM_REGS-1 downto 0);
       --! MI_RD signals
       REG_RD_OUT                    : out std_logic_vector(NUM_REGS-1 downto 0);
-      --! users data input 
+      --! users data input
       REG_DATA_IN                   : in std_logic_vector((NUM_REGS*MI_WIDTH)-1 downto 0);
-      --! users we signal 
+      --! users we signal
       REG_WE_IN                     : in std_logic_vector(NUM_REGS-1 downto 0);
       --! MI_ARDY signal from extern register
       REG_ARDY_IN                   : in std_logic_vector(NUM_REGS-1 downto 0)
@@ -102,7 +102,7 @@ begin
    assert (INICIAL'length = NUM_REGS*MI_WIDTH) report "range of signal INICIAL must be (NUM_REGS*MI_WIDTH-1 downto 0)" severity failure;
    assert (MI_ADDR'length >= SIGN_BITS_ADDR) report "SIGN_BITS_ADDR must be less or equal than MI_ADDR" severity failure;
    assert (GENER_REGS'length = NUM_REGS) report "SIGN_BITS_ADDR must be less or equal than MI_ADDR" severity failure;
-   
+
    --! generate mi pipe
    MI_PIPE_inst : entity work.MI_PIPE
    generic map (
@@ -116,7 +116,7 @@ begin
       -- Common interface -----------------------------------------------------
       CLK    => CLK,
       RESET  => RESET,
-      
+
       -- Input MI interface ---------------------------------------------------
       IN_DWR      => MI_DWR,
       IN_ADDR     => MI_ADDR,
@@ -126,7 +126,7 @@ begin
       IN_ARDY     => MI_ARDY,
       IN_DRD      => MI_DRD,
       IN_DRDY     => MI_DRDY,
-      
+
       -- Output MI interface --------------------------------------------------
       OUT_DWR     => mi_dwr_pipe,
       OUT_ADDR    => mi_addr_pipe,
@@ -137,8 +137,8 @@ begin
       OUT_DRD     => mi_drd_pipe,
       OUT_DRDY    => mi_drdy_pipe
    );
-   
-   --! decode addres 
+
+   --! decode addres
    process(mi_addr_pipe)
    begin
       dec_out <= (others => '0');
@@ -188,12 +188,12 @@ begin
 
    mi_drd_pipe <= mux_drd_out;
    mi_ardy_pipe <= mux_ardy_out(0);
-   mi_drdy_pipe <= mux_drdy_out(0); 
+   mi_drdy_pipe <= mux_drdy_out(0);
 
-   --! connect registers  
+   --! connect registers
    GEN_REGS: for I in 1 to NUM_REGS generate
    begin
-      MI_REG_inst : entity work.MI_REG     
+      MI_REG_inst : entity work.MI_REG
       generic map (
          --! Data width mi_data
          MI_WIDTH => MI_WIDTH,
@@ -201,13 +201,13 @@ begin
          DATA_WIDTH => GENER_REGS(I).DATA_WIDTH,
          --! inter/exter register
          INTER => GENER_REGS(I).INTER,
-         --! mi read enable 
+         --! mi read enable
          MI_RD_EN => GENER_REGS(I).MI_RD_EN,
-         --! mi write enable 
+         --! mi write enable
          MI_WR_EN => GENER_REGS(I).MI_WR_EN,
-         --! usr write port enable 
+         --! usr write port enable
          USR_WR_EN => GENER_REGS(I).USR_WR_EN,
-         --! reset enable 
+         --! reset enable
          RST_EN => GENER_REGS(I).RST_EN,
          --! be enable
          BE_EN => GENER_REGS(I).BE_EN,
@@ -223,7 +223,7 @@ begin
          --! Data output
          DATA_OUT => REG_DATA_OUT(MI_WIDTH-1+((I-1)*MI_WIDTH) downto (I-1)*MI_WIDTH),
          --! Enable from decoder
-         DEC_EN => dec_out(I-1),  
+         DEC_EN => dec_out(I-1),
 
          --! MI32 input interface -------------------------------------------------
          --! Input Data

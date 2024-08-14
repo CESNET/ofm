@@ -10,7 +10,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='logger_tools',
-    version='0.1.1',    
+    version='0.1.1',
     description='Package with data_logger tools',
     author='Lukáš Nevrkla',
     author_email='xnevrk03@stud.fit.vutbr.cz',

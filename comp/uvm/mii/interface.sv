@@ -9,7 +9,7 @@
 */
 
 interface mii_if #(int unsigned CHANNELS, int unsigned WIDTH) (input logic CLK);
-    
+
     initial BYTES_ONLY : assert ((WIDTH & 7) == 0);
 
     localparam BYTES = WIDTH >> 3;

@@ -28,7 +28,7 @@ architecture full of flu2fl is
    signal eop_reg          : std_logic;
    signal sop_pos_reg      : std_logic_vector(SOP_POS_WIDTH-1 downto 0);
    signal eop_pos_reg      : std_logic_vector(log2(DATA_WIDTH/8)-1 downto 0);
-   
+
    -- abstract signals declarations
    signal data_field       : std_logic_vector(DATA_WIDTH*2-1 downto 0);
    signal sop1             : std_logic_vector(log2(DATA_WIDTH/8) downto 0);
@@ -45,13 +45,13 @@ architecture full of flu2fl is
    signal detect_sop       : std_logic; -- inside input word
    signal end_sent         : std_logic;
    signal end_sending      : std_logic;
-   signal full             : std_logic; 
-   
+   signal full             : std_logic;
+
    -- sliding window end border
    signal offset           : std_logic_vector(log2(DATA_WIDTH/8)-1 downto 0);
    signal offset_we        : std_logic;
    signal offset_new       : std_logic_vector(log2(DATA_WIDTH/8)-1 downto 0);
-   
+
    -- Input pipeline
    signal in_data       : std_logic_vector(DATA_WIDTH-1 downto 0);
    signal in_sop_pos    : std_logic_vector(SOP_POS_WIDTH-1 downto 0);
@@ -60,7 +60,7 @@ architecture full of flu2fl is
    signal in_eop        : std_logic;
    signal in_src_rdy    : std_logic;
    signal in_dst_rdy    : std_logic;
-   
+
    -- Output pipeline
    signal out_data     : std_logic_vector(DATA_WIDTH-1 downto 0);
    signal out_drem     : std_logic_vector(log2(DATA_WIDTH/8)-1 downto 0);
@@ -69,7 +69,7 @@ architecture full of flu2fl is
    signal out_sof_n    : std_logic;
    signal out_eof_n    : std_logic;
    signal out_sop_n    : std_logic;
-   signal out_eop_n    : std_logic;  
+   signal out_eop_n    : std_logic;
 
 begin
    -- input registers
@@ -85,7 +85,7 @@ begin
          end if;
       end if;
    end process;
-   
+
    in_reg_data_i : process(CLK)
    begin
       if CLK'event and CLK = '1' then
@@ -96,7 +96,7 @@ begin
          end if;
       end if;
    end process;
-   
+
    -- offset register
    offset_reg_i : process(CLK)
    begin
@@ -104,11 +104,11 @@ begin
          if RESET = '1' then
             offset <= (log2(DATA_WIDTH/8)-1 downto 0 => '0');
          elsif offset_we = '1' then
-            offset <= offset_new; 
+            offset <= offset_new;
          end if;
       end if;
    end process;
-   
+
    -- abstract signals definitions
    data_field <= in_data & data_reg;
    sop1       <= '1' & in_sop_pos  & (log2(SOP_STEP/EOP_STEP)-1 downto 0 => '0');
@@ -124,20 +124,20 @@ begin
    end_sending <= not(out_eof_n or out_dst_rdy_n or out_src_rdy_n);
    eop_sel     <= eop2 when (eop2>=('0' & offset) and eop2_v='1') else eop1;
    eop_out     <= eop_sel(log2(DATA_WIDTH/8)-1 downto 0) - offset;
-   
+
    -- output signals (FL) mapping
    out_data   <= data_field(DATA_WIDTH+conv_integer(offset)*8-1 downto conv_integer(offset)*8);
    out_drem   <= (others => '1') when detect_eop='0' else eop_out;
-   out_eof_n  <= not detect_eop; 
+   out_eof_n  <= not detect_eop;
    out_eop_n  <= not detect_eop;
    out_sof_n  <= not (sop2_v and end_sent);
    out_sop_n  <= not (sop2_v and end_sent);
    in_dst_rdy    <= ((not out_dst_rdy_n) or not full) and (end_sent or not sop2_v);
    out_src_rdy_n <= not((in_src_rdy or detect_eop) and full and (not end_sent or sop2_v));
    offset_we     <= (end_sent and not (sop2_v and full)) or end_sending;
-   offset_new    <= sop1(log2(DATA_WIDTH/8)-1 downto 0) when sop1_v='1' else 
+   offset_new    <= sop1(log2(DATA_WIDTH/8)-1 downto 0) when sop1_v='1' else
                     sop2(log2(DATA_WIDTH/8)-1 downto 0);
-   
+
    end_sent_i : process(CLK)
    begin
       if CLK'event and CLK = '1' then
@@ -147,8 +147,8 @@ begin
             end_sent <= '0';
          end if;
       end if;
-   end process; 
-   
+   end process;
+
    full_i : process(CLK)
    begin
       if CLK'event and CLK = '1' then
@@ -160,20 +160,20 @@ begin
             full <= '0';
          end if;
       end if;
-   end process; 
-   
+   end process;
+
    -- -------------------------------------------------------------------------------
    -- PIPES
-   -- -------------------------------------------------------------------------------    
+   -- -------------------------------------------------------------------------------
    -- Input Pipe (FLU)
    in_pipe_i : entity work.FLU_PIPE
    generic map(
       DATA_WIDTH     => DATA_WIDTH,
-      SOP_POS_WIDTH  => SOP_POS_WIDTH, 
+      SOP_POS_WIDTH  => SOP_POS_WIDTH,
       USE_OUTREG     => IN_PIPE_OUTREG,
       PIPE_TYPE      => IN_PIPE_TYPE,
       FAKE_PIPE      => not IN_PIPE_EN
-   )   
+   )
    port map(
       CLK            => CLK,
       RESET          => RESET,
@@ -193,9 +193,9 @@ begin
       TX_EOP        => in_eop,
       TX_SRC_RDY    => in_src_rdy,
       TX_DST_RDY    => in_dst_rdy
-   ); 
-   
-   
+   );
+
+
    -- Output Pipe (FL)
    use_inpipe_gen : if OUT_PIPE_EN generate
    out_pipe_i : entity work.FL_PIPE

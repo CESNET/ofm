@@ -73,36 +73,36 @@ architecture behavioral of asfifo_bram_release is
    constant FADDR         : integer := LOG2(ITEMS);
 
    --! FIFO part signals
-   signal rd_addr         : std_logic_vector(FADDR-1 downto 0);     
+   signal rd_addr         : std_logic_vector(FADDR-1 downto 0);
    signal rd_bin          : std_logic_vector(FADDR downto 0) := (others=>'0');
    signal rd_ptr          : std_logic_vector(FADDR downto 0) := (others=>'0');
    signal sync_rd_ptr     : std_logic_vector(FADDR downto 0);
    signal sync_rd_ptr_bin : std_logic_vector(FADDR downto 0);
-   
+
    signal rd_bin_next     : std_logic_vector(FADDR downto 0);
    signal rd_gray_next    : std_logic_vector(FADDR downto 0);
-   
-   signal wr_addr         : std_logic_vector(FADDR-1 downto 0); 
+
+   signal wr_addr         : std_logic_vector(FADDR-1 downto 0);
    signal wr_bin          : std_logic_vector(FADDR downto 0) := (others=>'0');
    signal wr_ptr          : std_logic_vector(FADDR downto 0) := (others=>'0');
    signal sync_wr_ptr     : std_logic_vector(FADDR downto 0);
-   
+
    signal wr_bin_mark     : std_logic_vector(FADDR downto 0) := (others=>'0');
    signal wr_ptr_mark     : std_logic_vector(FADDR downto 0) := (others=>'0');
-   
+
    signal wr_bin_next     : std_logic_vector(FADDR downto 0);
    signal wr_gray_next    : std_logic_vector(FADDR downto 0);
-   
+
    signal empty_signal    : std_logic := '1';
    signal full_signal     : std_logic := '0';
 
    signal write_allow     : std_logic;
    signal read_allow      : std_logic;
-   
+
    signal sig_rd          : std_logic;
    signal sig_dv          : std_logic;
-   
-   signal status_signal      : std_logic_vector(FADDR downto 0) := (others=>'0');  
+
+   signal status_signal      : std_logic_vector(FADDR downto 0) := (others=>'0');
    signal status_signal_next : std_logic_vector(FADDR downto 0);
 
 begin
@@ -168,7 +168,7 @@ begin
             wr_bin_mark <= wr_bin;
             wr_ptr_mark <= wr_ptr;
          end if;
-      end if;   
+      end if;
    end process;
 
    --! -------------------------------------------------------------
@@ -186,19 +186,19 @@ begin
             rd_ptr <= rd_gray_next;
          end if;
       end if;
-   end process;   
-         
+   end process;
+
    rd_bin_next <= rd_bin + read_allow;
    rd_addr <= rd_bin(FADDR-1 downto 0);
 
    process (rd_bin_next)
-   begin         
+   begin
       --! binary to gray convertor
       rd_gray_next(FADDR) <= rd_bin_next(FADDR);
       for i in FADDR-1 downto 0 loop
          rd_gray_next(i) <= rd_bin_next(i+1) xor rd_bin_next(i);
       end loop;
-   end process; 
+   end process;
 
    --! empty flag generate
    process (CLK_RD)
@@ -208,11 +208,11 @@ begin
             empty_signal <= '1';
          elsif (rd_gray_next = sync_wr_ptr) then
             empty_signal <= '1';
-         else   
+         else
             empty_signal <= '0';
-         end if;   
+         end if;
       end if;
-   end process; 
+   end process;
 
    --! -------------------------------------------------------------
    --! Write pointer & full generation logic
@@ -231,20 +231,20 @@ begin
             wr_bin <= wr_bin_next;
             wr_ptr <= wr_gray_next;
          end if;
-      end if;   
-   end process;   
-         
+      end if;
+   end process;
+
    wr_bin_next <= wr_bin + write_allow;
    wr_addr <= wr_bin(FADDR-1 downto 0);
 
    process (wr_bin_next)
-   begin           
+   begin
       --! binary to gray convertor
       wr_gray_next(FADDR) <= wr_bin_next(FADDR);
       for i in FADDR-1 downto 0 loop
          wr_gray_next(i) <= wr_bin_next(i+1) xor wr_bin_next(i);
       end loop;
-   end process; 
+   end process;
 
    --! full flag generate
    process (CLK_WR)
@@ -254,11 +254,11 @@ begin
             full_signal <= '0';
          elsif (wr_gray_next = ( NOT sync_rd_ptr(FADDR downto FADDR-1) & sync_rd_ptr(FADDR-2 downto 0) )) then
             full_signal <= '1';
-         else   
+         else
             full_signal <= '0';
-         end if;   
+         end if;
       end if;
-   end process; 
+   end process;
 
    --! -------------------------------------------------------------
    --! ASYNC_OPEN_LOOP_SMD synchronization
@@ -267,15 +267,15 @@ begin
    --! ASYNC_OPEN_LOOP_SMD for read pointer
    ASYNC_OPEN_LOOP_SMD_RD: entity work.ASYNC_OPEN_LOOP_SMD
    generic map(
-      DATA_WIDTH => FADDR+1    
-   )  
+      DATA_WIDTH => FADDR+1
+   )
    port map(
       ACLK     => CLK_RD,
       BCLK     => CLK_WR,
       ARST     => RST_RD,
       BRST     => RST_WR,
-      ADATAIN  => rd_ptr,                
-      BDATAOUT => sync_rd_ptr 
+      ADATAIN  => rd_ptr,
+      BDATAOUT => sync_rd_ptr
    );
 
    wr_ptr_mark_sync_i : entity work.ASYNC_BUS_HANDSHAKE
@@ -301,14 +301,14 @@ begin
    --! -------------------------------------------------------------
 
    --! transformation to binary format
-   sync_rd_ptr_bin(FADDR) <= sync_rd_ptr(FADDR);		
-   sync_rd_ptr_bin_gen : for i in FADDR-1 downto 0 generate	
-      sync_rd_ptr_bin(i) <= sync_rd_ptr_bin(i+1) xor sync_rd_ptr(i);	
+   sync_rd_ptr_bin(FADDR) <= sync_rd_ptr(FADDR);
+   sync_rd_ptr_bin_gen : for i in FADDR-1 downto 0 generate
+      sync_rd_ptr_bin(i) <= sync_rd_ptr_bin(i+1) xor sync_rd_ptr(i);
    end generate;
-	
-   --! generate STATUS signal	
-   status_signal <= status_signal_next;		
-   status_signal_next <= wr_bin_next - sync_rd_ptr_bin;	
+
+   --! generate STATUS signal
+   status_signal <= status_signal_next;
+   status_signal_next <= wr_bin_next - sync_rd_ptr_bin;
    STATUS <= status_signal(FADDR-1 downto FADDR-STATUS_WIDTH); --! we use only few MSB bits
 
 end architecture behavioral;

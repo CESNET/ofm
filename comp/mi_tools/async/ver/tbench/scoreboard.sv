@@ -15,7 +15,7 @@ package Scoreboard;
         //response fifo => slave
         sv_mi_pkg::MiTransaction #(MI_WIDTH, MI_WIDTH, MI_META_WIDTH) fifo_rs[$];
         int unsigned                         cmp_rs;
- 
+
         function new ();
             cmp_rq = 0;
             cmp_rs = 0;
@@ -28,14 +28,14 @@ package Scoreboard;
 
             if (tr.tr_type == sv_mi_pkg::TR_RESPONSE) begin
                 cmp_rs++;
-                cmp(fifo_rs, tr); 
+                cmp(fifo_rs, tr);
             end
         endfunction
-    
+
         function void slave_send(sv_mi_pkg::MiTransaction #(MI_WIDTH, MI_WIDTH, MI_META_WIDTH) tr);
             if (tr.tr_type == sv_mi_pkg::TR_REQUEST) begin
                 cmp_rq++;
-                cmp(fifo_rq, tr); 
+                cmp(fifo_rq, tr);
             end
 
             if (tr.tr_type == sv_mi_pkg::TR_RESPONSE) begin
@@ -60,43 +60,43 @@ package Scoreboard;
             end
         endfunction
     endclass
-    
+
     // ----------------------------------------------------------------------------
     //                      Callback classes
     // ----------------------------------------------------------------------------
     class master_cbs #(MI_WIDTH, MI_META_WIDTH) extends  sv_common_pkg::MonitorCbs;
         Data #(MI_WIDTH, MI_META_WIDTH) data;
-    
+
         function new (Data #(MI_WIDTH, MI_META_WIDTH) data);
             this.data = data;
         endfunction
-    
+
         virtual task post_rx(sv_common_pkg::Transaction transaction, string inst);
             sv_mi_pkg::MiTransaction #(MI_WIDTH, MI_WIDTH, MI_META_WIDTH) tr;
-    
+
             tr = new();
             transaction.copy(tr);
             data.master_send(tr);
         endtask
     endclass
-    
+
     class slave_cbs #(MI_WIDTH, MI_META_WIDTH) extends  sv_common_pkg::MonitorCbs;
         Data #(MI_WIDTH, MI_META_WIDTH) data;
-    
+
         function new (Data #(MI_WIDTH, MI_META_WIDTH) data);
             this.data = data;
         endfunction
-    
+
         virtual task post_rx(sv_common_pkg::Transaction transaction, string inst);
             sv_mi_pkg::MiTransaction #(MI_WIDTH, MI_WIDTH, MI_META_WIDTH) tr;
-    
+
             tr = new();
             transaction.copy(tr);
             data.slave_send(tr);
         endtask
     endclass
-    
-    
+
+
     // ----------------------------------------------------------------------------
     //                        Scoreboard
     // ----------------------------------------------------------------------------
@@ -104,7 +104,7 @@ package Scoreboard;
         Data         #(MI_WIDTH, MI_META_WIDTH) data;
         master_cbs  #(MI_WIDTH, MI_META_WIDTH) master;
         slave_cbs   #(MI_WIDTH, MI_META_WIDTH) slave;
-    
+
         function new();
             data   = new();
             master = new(data);
@@ -117,7 +117,7 @@ package Scoreboard;
                 $write("-- %s\n", prefix);
                 $write("----------------------------------------------------------------------------\n");
             end
-            
+
             $write("\tRQ COUNTS %d\n\tRS COUNTS %d\n", data.cmp_rq, data.cmp_rs);
             if (data.fifo_rq.size() != 0 || data.fifo_rs.size() != 0 ) begin
                 $write("RQ RS STAY IN FIFO\n");

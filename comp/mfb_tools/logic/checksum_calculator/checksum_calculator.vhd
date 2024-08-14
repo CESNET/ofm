@@ -86,7 +86,7 @@ port(
 
     -- The calculated checksum.
     TX_MVB_DATA     : out std_logic_vector(MFB_REGIONS*16-1 downto 0);
-    TX_MVB_META     : out std_logic_vector(MFB_REGIONS*MFB_META_WIDTH-1 downto 0); 
+    TX_MVB_META     : out std_logic_vector(MFB_REGIONS*MFB_META_WIDTH-1 downto 0);
     -- Bypass checksum insertion (=> checksum caluculation is not desired).
     TX_CHSUM_BYPASS : out std_logic_vector(MFB_REGIONS-1 downto 0);
     TX_MVB_VLD      : out std_logic_vector(MFB_REGIONS-1 downto 0);

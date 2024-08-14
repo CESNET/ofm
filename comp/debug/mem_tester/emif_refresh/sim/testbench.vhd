@@ -24,12 +24,12 @@ architecture BEHAVIORAL Of TESTBENCH is
     constant AMM_BURST_COUNT_WIDTH  : integer := 2;
 
     constant REFRESH_PERIOD_WIDTH   : integer := 10;
-    constant REFRESH_PERIOD_TICKS   : std_logic_vector(REFRESH_PERIOD_WIDTH - 1 downto 0) 
+    constant REFRESH_PERIOD_TICKS   : std_logic_vector(REFRESH_PERIOD_WIDTH - 1 downto 0)
         := std_logic_vector(to_unsigned(100, REFRESH_PERIOD_WIDTH));
 
     constant AMM_CLK_PERIOD         : time := 4 ns;     -- 266.66 MHz
-    constant AMM_RST_INIT_TIME      : time := 40 ns;   
-       
+    constant AMM_RST_INIT_TIME      : time := 40 ns;
+
     signal amm_clk                  : std_logic;
     signal amm_rst                  : std_logic;
 
@@ -37,23 +37,23 @@ architecture BEHAVIORAL Of TESTBENCH is
     signal refresh                  : std_logic_vector(RANK_CNT - 1 downto 0);
 
     -- Avalon interface
-    signal amm_ready                : std_logic                      := '0';                                         
-    signal amm_read                 : std_logic                      := '0';             
-    signal amm_write                : std_logic                      := '0';             
-    signal amm_address              : std_logic_vector(AMM_ADDR_WIDTH - 1 downto 0)  := (others => '0'); 
-    signal amm_read_data            : std_logic_vector(AMM_DATA_WIDTH - 1 downto 0) := (others => '0');                    
-    signal amm_write_data           : std_logic_vector(AMM_DATA_WIDTH - 1 downto 0) := (others => '0'); 
-    signal amm_burst_count          : std_logic_vector(AMM_BURST_COUNT_WIDTH - 1 downto 0)   := (others => '0'); 
-    signal amm_read_data_valid      : std_logic                      := '0';                                         
+    signal amm_ready                : std_logic                      := '0';
+    signal amm_read                 : std_logic                      := '0';
+    signal amm_write                : std_logic                      := '0';
+    signal amm_address              : std_logic_vector(AMM_ADDR_WIDTH - 1 downto 0)  := (others => '0');
+    signal amm_read_data            : std_logic_vector(AMM_DATA_WIDTH - 1 downto 0) := (others => '0');
+    signal amm_write_data           : std_logic_vector(AMM_DATA_WIDTH - 1 downto 0) := (others => '0');
+    signal amm_burst_count          : std_logic_vector(AMM_BURST_COUNT_WIDTH - 1 downto 0)   := (others => '0');
+    signal amm_read_data_valid      : std_logic                      := '0';
 
 begin
-	
+
     ---------
     -- UUT --
     ---------
-    
+
     uut : entity work.EMIF_REFRESH
-    generic map (    
+    generic map (
         AMM_DATA_WIDTH          => AMM_DATA_WIDTH,
         AMM_ADDR_WIDTH          => AMM_ADDR_WIDTH,
         AMM_BURST_COUNT_WIDTH   => AMM_BURST_COUNT_WIDTH,
@@ -62,10 +62,10 @@ begin
         REFRESH_PERIOD_WIDTH    => REFRESH_PERIOD_WIDTH,
 
         RANK_CNT                => RANK_CNT,
-        REFRESH_REG_ADDR        => 44, 
+        REFRESH_REG_ADDR        => 44,
         DEVICE                  => DEVICE
     )
-    port map (    
+    port map (
         CLK                     => amm_clk,
         RST                     => amm_rst,
 
@@ -94,10 +94,10 @@ begin
         amm_clk <= '0';
         wait for AMM_CLK_PERIOD / 2;
     end process;
-   
+
     -- reset generators
     amm_reset_gen_p : process
-    begin 
+    begin
         if (sim_done = '1') then
             wait;
         end if;
@@ -105,11 +105,11 @@ begin
         amm_rst <= '1';
         wait for AMM_RST_INIT_TIME;
         amm_rst <= '0';
-        wait;        
+        wait;
     end process;
 
     resp_p : process
-    begin 
+    begin
         if (sim_done = '1') then
             wait;
         end if;
@@ -126,8 +126,8 @@ begin
         wait for AMM_CLK_PERIOD * 1;
     end process;
 
-    main_p : process 
-    begin 
+    main_p : process
+    begin
         sim_done    <= '0';
         refresh     <= (others => '0');
         wait until amm_rst = '0';

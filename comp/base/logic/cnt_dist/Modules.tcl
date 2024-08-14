@@ -3,7 +3,7 @@
 # Author: Martin Mikusek <martin.mikusek@liberouter.org>
 #
 # SPDX-License-Identifier: BSD-3-Clause
-# 
+#
 
 set DP_DISTMEM_BASE "$ENTITY_BASE/../../mem/gen_lutram/compatibility"
 
@@ -18,7 +18,7 @@ if { $ARCHGRP == "FULL" } {
    set MOD "$MOD $ENTITY_BASE/cnt_dist.vhd"
 }
 
-# Source file for empty component - empty architecture 
+# Source file for empty component - empty architecture
 if { $ARCHGRP == "EMPTY" } {
 }
 

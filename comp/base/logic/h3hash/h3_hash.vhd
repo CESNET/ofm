@@ -73,7 +73,7 @@ begin
         core_data_in <= (others => '0');
         core_data_in(DATA_WIDTH - 1 downto 0) <= DATA_IN;
     end process;
-    
+
     core_i : entity work.H3_CORE
     generic map (
         CONFIG      => h3_conf,
@@ -93,5 +93,5 @@ begin
     );
 
     DATA_OUT <= core_data_out(HASH_WIDTH - 1 downto 0);
-    
+
 end architecture;

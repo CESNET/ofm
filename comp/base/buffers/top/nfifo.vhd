@@ -276,7 +276,7 @@ GEN_BLOCKS: for j in 0 to FLOWS-1 generate
       end if;
     end if;
   end process;
-   
+
   gen_status_yes : if ((((FLOWS-UNUSED_EVEN*2) > j) and (j mod 2 = 0)) or
 		      (((FLOWS-UNUSED_ODD*2) > j) and (j mod 2 = 1))) generate
   blk_status_sigs : entity work.BUF_STATUS
@@ -284,7 +284,7 @@ GEN_BLOCKS: for j in 0 to FLOWS-1 generate
       ITEMS       => BLOCK_SIZE,
       MULTI_WRITE => false,
       MULTI_READ  => false
-    ) 
+    )
     port map (
       CLK      => CLK,
       RESET    => sig_init(j),
@@ -307,7 +307,7 @@ GEN_BLOCKS: for j in 0 to FLOWS-1 generate
       blk_empty(j) <= '1';
       blk_full(j) <= '1';
       blk_status(j) <= (others => '0');
-      
+
   end generate;
 
 
@@ -323,7 +323,7 @@ buf_mem_i : entity work.BUF_MEM
     DATA_WIDTH => DATA_WIDTH,
     ITEMS      => BLOCK_SIZE*FLOWS,
     OUTPUT_REG => OUTPUT_REG
-  ) 
+  )
   port map (
     CLK      => CLK,
     RESET    => RESET,

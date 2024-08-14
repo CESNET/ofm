@@ -153,7 +153,7 @@ begin
             fifoxm_di_arr(ii*MVB_BLOCKS+bb)(MVB_BLOCK_W+META_WIDTH+END_POS_W-1 downto MVB_BLOCK_W+META_WIDTH) <= std_logic_vector(to_unsigned(END_POS, END_POS_W) - 1); -- position of end in block
             fifoxm_di_arr(ii*MVB_BLOCKS+bb)(MVB_BLOCK_W+META_WIDTH+END_POS_W)                                 <= '1' when (bb = 0) else '0'; -- start block
             fifoxm_di_arr(ii*MVB_BLOCKS+bb)(MVB_BLOCK_W+META_WIDTH+END_POS_W+1)                               <= '1' when (bb = MVB_BLOCKS-1) else '0'; -- end block
-            
+
             fifoxm_wr(ii*MVB_BLOCKS+bb) <= RX_MVB_VLD(ii) and RX_MVB_SRC_RDY;
         end generate;
     end generate;
@@ -189,7 +189,7 @@ begin
         fifoxm_end_pos_arr(rr) <= fifoxm_do_arr(rr)(MVB_BLOCK_W+META_WIDTH+END_POS_W-1 downto MVB_BLOCK_W+META_WIDTH);
         fifoxm_start(rr)       <= fifoxm_do_arr(rr)(MVB_BLOCK_W+META_WIDTH+END_POS_W) and not fifoxm_empty(rr);
         fifoxm_end(rr)         <= fifoxm_do_arr(rr)(MVB_BLOCK_W+META_WIDTH+END_POS_W+1) and not fifoxm_empty(rr);
-        
+
         fifoxm_vld(rr) <= not fifoxm_empty(rr);
     end generate;
 

@@ -17,8 +17,8 @@ use ieee.std_logic_arith.all;
 use ieee.std_logic_textio.all;
 use ieee.numeric_std.all;
 use std.textio.all;
-use work.fl_pkg.all; 
-use work.fl_sim_oper.all; 
+use work.fl_pkg.all;
+use work.fl_sim_oper.all;
 
 -- ----------------------------------------------------------------------------
 --                        Entity declaration
@@ -53,13 +53,13 @@ architecture TESTBENCH_arch of TESTBENCH is
      signal FL_bus    : t_fl64;
      signal OUT_BUS0   : t_fl64;
      signal OUT_BUS1   : t_fl64;
-   
-     -- FL_SIM component ctrl      
+
+     -- FL_SIM component ctrl
      signal fl_sim_ctrl        : t_fl_ctrl;
      signal fl_sim_strobe      : std_logic;
      signal fl_sim_busy        : std_logic;
 
-     
+
 begin
 
 -- Reset generation -----------------------------------------------------------
@@ -70,7 +70,7 @@ begin
       reset <= '0';
       wait;
    end process reset_gen;
-   
+
 -- clk50 generator ------------------------------------------------------------
 clk50_gen : process
 begin
@@ -158,7 +158,7 @@ FL_FORK641TO2_U: entity work.FL_FORK_1TO2
       TX0_EOP_N=>OUT_BUS0.EOP_N,
       TX0_SOF_N=>OUT_BUS0.SOF_N,
       TX0_EOF_N=>OUT_BUS0.EOF_N,
-      
+
       TX1_DATA=>OUT_BUS1.DATA,
       TX1_REM=>OUT_BUS1.DREM,
       TX1_SRC_RDY_N=>OUT_BUS1.SRC_RDY_N,
@@ -181,7 +181,7 @@ begin
      pom:=pom+1;
     end if;
   end if;
-  if (pom rem 5) = 0 then 
+  if (pom rem 5) = 0 then
      OUT_BUS0.DST_RDY_N<='0';
    else
      OUT_BUS0.DST_RDY_N<='1';
@@ -198,7 +198,7 @@ begin
      pom:=pom+1;
     end if;
   end if;
-  if (pom rem 3) = 0 then 
+  if (pom rem 3) = 0 then
      OUT_BUS1.DST_RDY_N<='0';
    else
      OUT_BUS1.DST_RDY_N<='1';

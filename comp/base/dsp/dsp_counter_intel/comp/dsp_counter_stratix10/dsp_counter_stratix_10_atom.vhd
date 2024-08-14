@@ -69,7 +69,7 @@ begin
         clr0 <= RESET;
     end generate;
 
-    dsp_i: component fourteennm_mac 
+    dsp_i: component fourteennm_mac
 	generic map (
             ay_scan_in_width => COUNT_BY_WIDTH,           -- input width
             ax_width         => 1,                        -- the value is always 1, so signal ax is 1-bit wide and by assigning value (others => '1') it then has value of 1 in dec

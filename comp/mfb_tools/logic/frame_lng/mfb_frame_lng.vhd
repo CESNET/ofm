@@ -15,7 +15,7 @@ use work.type_pack.all;
 entity MFB_FRAME_LNG is
    generic(
       -- =======================================================================
-      -- MFB CONFIGURATION: 
+      -- MFB CONFIGURATION:
       -- =======================================================================
       REGIONS        : natural := 4;
       REGION_SIZE    : natural := 8;
@@ -24,7 +24,7 @@ entity MFB_FRAME_LNG is
       META_WIDTH     : natural := 8;
 
       -- =======================================================================
-      -- FRAME LENGHT CONFIGURATION: 
+      -- FRAME LENGHT CONFIGURATION:
       -- =======================================================================
       -- Minimum value of LNG_WIDTH is: log2(REGIONS*REGION_SIZE*BLOCK_SIZE+1)
       LNG_WIDTH      : natural := 14;
@@ -124,7 +124,7 @@ architecture FULL of MFB_FRAME_LNG is
    signal s_frame_lng        : uns_array_t(REGIONS-1 downto 0)(LNG_WIDTH_INT-1 downto 0);
    signal s_frame_lng_sat    : uns_array_t(REGIONS-1 downto 0)(LNG_WIDTH-1 downto 0);
    signal s_frame_lng_ovf    : std_logic_vector(REGIONS-1 downto 0);
-   
+
    signal s_reg2_data        : std_logic_vector(DATA_WIDTH-1 downto 0);
    signal s_reg2_meta        : std_logic_vector(REGIONS*META_WIDTH-1 downto 0);
    signal s_reg2_sof_pos     : std_logic_vector(REGIONS*SOF_POS_SIZE-1 downto 0);
@@ -139,7 +139,7 @@ architecture FULL of MFB_FRAME_LNG is
 
 begin
 
-   assert (LNG_WIDTH >= WORD_LNG_WIDTH) 
+   assert (LNG_WIDTH >= WORD_LNG_WIDTH)
       report "MFB_FRAME_LNG: Minimum value of LNG_WIDTH is: log2(REGIONS*REGION_SIZE*BLOCK_SIZE+1)!"
       severity failure;
 
@@ -195,7 +195,7 @@ begin
             s_sof_pos_uns(r) <= unsigned(s_sof_pos_arr(r)) & DOWN_ZEROS;
          else generate
             s_sof_pos_uns(r) <= unsigned(s_sof_pos_arr(r));
-         end generate; 
+         end generate;
       end generate;
       sof_pos_uns_rs1_g : if REGION_SIZE = 1 generate
          s_sof_pos_uns(r) <= (others => '0');
@@ -226,7 +226,7 @@ begin
          if (RESET = '1') then
             s_inc_frame(0) <= '0';
          elsif (s_reg0_src_rdy = '1' and TX_DST_RDY = '1') then
-            s_inc_frame(0) <= s_inc_frame(REGIONS);  
+            s_inc_frame(0) <= s_inc_frame(REGIONS);
          end if;
       end if;
    end process;

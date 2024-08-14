@@ -1,7 +1,7 @@
 /*
  * file       : pkg.sv
  * Copyright (C) 2022 CESNET z. s. p. o.
- * description: 
+ * description:
  * date       : 2022
  * author     : Oliver Gurka <xgurka00@stud.fit.vutbr.cz>
  *
@@ -13,13 +13,13 @@
 
 package uvm_blklock;
 
-    `include "uvm_macros.svh"           
-    import uvm_pkg::*;      
+    `include "uvm_macros.svh"
+    import uvm_pkg::*;
 
     `include "model.sv"
     `include "scoreboard.sv"
     `include "env.sv"
-    
+
 endpackage
 
 

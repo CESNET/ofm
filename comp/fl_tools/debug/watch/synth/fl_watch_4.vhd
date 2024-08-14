@@ -60,16 +60,16 @@ begin
    port map(
       CLK            => CLK,
       RESET          => RESET,
-                                 
+
       SOF_N          => SOF_N,
       EOF_N          => EOF_N,
       SOP_N          => SOP_N,
       EOP_N          => EOP_N,
       DST_RDY_N      => DST_RDY_N,
       SRC_RDY_N      => SRC_RDY_N,
-                                 
+
       FRAME_ERR      => FRAME_ERR,
-                                 
+
       MI_DWR	      => MI_DWR,
       MI_ADDR        => MI_ADDR,
       MI_RD	         => MI_RD,

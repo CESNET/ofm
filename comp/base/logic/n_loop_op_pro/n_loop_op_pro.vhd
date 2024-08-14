@@ -100,8 +100,8 @@ port (
 
    -- =====================================================
    -- Output interface for user operator units
-   -- 
-   -- (0 latency, operators must be combination logic only) 
+   --
+   -- (0 latency, operators must be combination logic only)
    -- =====================================================
 
    -- data after operations execution
@@ -124,15 +124,15 @@ architecture full of N_LOOP_OP_PRO is
    ---------------------------------------------------
    -- constants
    ---------------------------------------------------
-   
+
    constant RESET_VAL_VEC : std_logic_vector(DATA_WIDTH-1 downto 0) := std_logic_vector(to_unsigned(RESET_VAL,DATA_WIDTH));
-   
+
    ---------------------------------------------------
 
    ---------------------------------------------------
    -- memory interface
    ---------------------------------------------------
-   
+
    signal mem_in_we     : std_logic_vector(OPERATORS-1 downto 0);
    signal mem_in_addr   : slv_array_t(OPERATORS-1 downto 0)(log2(ITEMS)-1 downto 0);
    signal mem_in_data   : slv_array_t(OPERATORS-1 downto 0)(DATA_WIDTH-1 downto 0);
@@ -142,13 +142,13 @@ architecture full of N_LOOP_OP_PRO is
 
    signal read_addr_reg0: slv_array_t(0 to READ_PORTS-1)(log2(ITEMS)-1 downto 0);
    signal read_addr_reg1: slv_array_t(0 to READ_PORTS-1)(log2(ITEMS)-1 downto 0);
-   
+
    ---------------------------------------------------
 
    ---------------------------------------------------
    -- data registers
    ---------------------------------------------------
-   
+
    signal reg_1_op_in_src : slv_array_t(OPERATORS-1 downto 0)(OPERATORS-1 downto 0);
    signal reg_1_addr      : slv_array_t(0 to OPERATORS-1)(log2(ITEMS)-1 downto 0);
    signal reg_1_op        : slv_array_t(0 to OPERATORS-1)(0 to OPERATIONS-1);
@@ -163,19 +163,19 @@ architecture full of N_LOOP_OP_PRO is
    signal reg1_data       : slv_array_t(0 to OPERATORS-1)(DATA_WIDTH-1 downto 0);
    signal reg1_addr       : slv_array_t(0 to OPERATORS-1)(log2(ITEMS)-1 downto 0);
    signal reg1_vld        : std_logic_vector(0 to OPERATORS-1);
-   
+
    signal reg2_data       : slv_array_t(0 to OPERATORS-1)(DATA_WIDTH-1 downto 0);
    signal reg2_addr       : slv_array_t(0 to OPERATORS-1)(log2(ITEMS)-1 downto 0);
    signal reg2_vld        : std_logic_vector(0 to OPERATORS-1);
-   
+
    signal reg3_data       : slv_array_t(0 to OPERATORS-1)(DATA_WIDTH-1 downto 0);
    signal reg3_addr       : slv_array_t(0 to OPERATORS-1)(log2(ITEMS)-1 downto 0);
    signal reg3_vld        : std_logic_vector(0 to OPERATORS-1);
-   
+
    signal reg4_data       : slv_array_t(0 to OPERATORS-1)(DATA_WIDTH-1 downto 0);
    signal reg4_addr       : slv_array_t(0 to OPERATORS-1)(log2(ITEMS)-1 downto 0);
    signal reg4_vld        : std_logic_vector(0 to OPERATORS-1);
-   
+
    ---------------------------------------------------
 
    ---------------------------------------------------
@@ -212,7 +212,7 @@ begin
    ---------------------------------------------------
    -- MULTIPORT MEMORY FOR DATA
    ---------------------------------------------------
-   
+
    mem_i : entity work.NP_LUTRAM_PRO
    generic map(
     DATA_WIDTH => DATA_WIDTH,
@@ -239,7 +239,7 @@ begin
    ---------------------------------------------------
    -- DATA_READ
    ---------------------------------------------------
-   
+
    read_reg_pr : process (CLK)
    begin
       if (CLK'event and CLK='1') then
@@ -292,7 +292,7 @@ begin
          end loop;
 
       end loop;
-      
+
    end process;
 
    ---------------------------------------------------
@@ -300,7 +300,7 @@ begin
    ---------------------------------------------------
    -- reg-1 SETTING
    ---------------------------------------------------
-   
+
    reg_1_pr : process (RESET,CLK)
       variable ops : slv_array_t(0 to OPERATORS-1)(0 to OPERATIONS-1);
    begin
@@ -311,7 +311,7 @@ begin
 
             -- get operations
             ops(i) := OP_OPERATIONS(i);
-            
+
             -- join operations
             for e in i+1 to OPERATORS-1 loop
                if (OP_ITEM_SEL(i)=OP_ITEM_SEL(e)) then
@@ -398,14 +398,14 @@ begin
          end if;
       end if;
    end process;
-   
+
    ---------------------------------------------------
 
    ---------------------------------------------------
    -- OPERATOR INPUT GENERATIONS
    ---------------------------------------------------
-   
-   
+
+
    op_in_to_downto_gen : for i in 0 to OPERATORS-1 generate
       OP_IN_SEL(i) <= reg0_addr(i);
       OP_IN_OPS(i) <= reg0_op(i);
@@ -429,13 +429,13 @@ begin
          end if;
       end loop;
    end process;
-   
+
    ---------------------------------------------------
 
    ---------------------------------------------------
    -- reg1 SETTING
    ---------------------------------------------------
-   
+
    reg1_pr : process (RESET,CLK)
    begin
       if (CLK'event and CLK='1') then
@@ -462,7 +462,7 @@ begin
    ---------------------------------------------------
    -- reg2 SETTING
    ---------------------------------------------------
-   
+
    reg2_pr : process (RESET,CLK)
    begin
       if (CLK'event and CLK='1') then
@@ -484,7 +484,7 @@ begin
    ---------------------------------------------------
    -- reg3 SETTING
    ---------------------------------------------------
-   
+
    reg3_pr : process (RESET,CLK)
    begin
       if (CLK'event and CLK='1') then
@@ -506,7 +506,7 @@ begin
    ---------------------------------------------------
    -- reg4 SETTING
    ---------------------------------------------------
-   
+
    reg4_pr : process (RESET,CLK)
    begin
       if (CLK'event and CLK='1') then
@@ -534,7 +534,7 @@ begin
       mem_in_data(i) <= reg1_data(i);
       mem_in_addr(i) <= reg1_addr(i);
    end generate;
-   
+
    ---------------------------------------------------
 
    ---------------------------------------------------

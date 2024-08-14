@@ -16,7 +16,7 @@
 <todo>
 </todo>
 
-<description> 
+<description>
     This component performs detection of first one in input bit
     vector. The first one position is in one-hot and binary format.
 </description>
@@ -39,7 +39,7 @@
          Position of the first 'one' in BINARY coding
      </port>
      <port name="FIRST_ONE_PRESENT" dir="out" width="1">
-         Deasserted if no 'one' is present in input MASK 
+         Deasserted if no 'one' is present in input MASK
      </port>
  </port_map>
 
@@ -65,18 +65,18 @@
 				<th>BlockRams (+ % of C6X BRAMs)</th>
 			</tr>
 			<tr>
-				<th>DATA_WIDTH = 8</th> 
+				<th>DATA_WIDTH = 8</th>
 				<td>7(0%)</td>
 				<td>0(0%)</td>
 			</tr>
 			<tr>
-				<th>DATA_WIDTH = 16</th> 
+				<th>DATA_WIDTH = 16</th>
 				<td>17(0%)</td>
 				<td>0(0%)</td>
 			</tr>
 		<nazev>Chip utilization</nazev>
-		</tab> 
-	
+		</tab>
+
 		<tab sloupce="ccc">
 			<tr>
 				<th>Generic settings</th>
@@ -84,19 +84,19 @@
 				<th>Frequency tested in HW</th>
 			</tr>
 			<tr>
-				<th>DATA_WIDTH = 8</th> 
+				<th>DATA_WIDTH = 8</th>
 				<td>8.650 ns</td>
 				<td>50 MHz, 100 MHz</td>
 			</tr>
 			<tr>
-				<th>DATA_WIDTH = 16</th> 
+				<th>DATA_WIDTH = 16</th>
 				<td>11.429 ns</td>
                 <td>N/A</td>
 			</tr>
 		<nazev>Maximal frequency</nazev>
-		</tab> 
-	
-  </p> 
+		</tab>
+
+  </p>
 
 </body>
 

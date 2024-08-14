@@ -8,7 +8,7 @@ set PKG_BASE    "$OFM_PATH/comp/base/pkg"
 
 # Entities
 set MOD "$MOD $ENTITY_BASE/fl_fork.vhd"
-     
+
 # Wrappers for FL_FORK
 set MOD "$MOD $ENTITY_BASE/fl_fork_1to2.vhd"
 set MOD "$MOD $ENTITY_BASE/fl_fork_1to3.vhd"

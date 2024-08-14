@@ -69,7 +69,7 @@ begin
     end process;
 
 
-    main_p : process is 
+    main_p : process is
 
         procedure req_p (delay : in integer; paraler : in boolean := false)
         is
@@ -88,7 +88,7 @@ begin
             end if;
         end procedure;
 
-    begin 
+    begin
         sim_end     <= '0';
         start_event <= '0';
         end_event   <= '0';
@@ -104,8 +104,8 @@ begin
         -- Try couner overflow
         wait for CLK_PERIOD * 200;
         wait until rising_edge(clk);
-        
-        
+
+
         req_p(4);
         req_p(100);
         req_p(200);
@@ -130,14 +130,14 @@ begin
         wait for CLK_PERIOD * 10;
         wait until rising_edge(clk);
 
-        for i in 0 to 10 loop 
+        for i in 0 to 10 loop
             req_p(4, true);
         end loop;
 
         wait for CLK_PERIOD * 10;
         wait until rising_edge(clk);
 
-        for i in 0 to 10 loop 
+        for i in 0 to 10 loop
             req_p(i + 1, true);
         end loop;
 

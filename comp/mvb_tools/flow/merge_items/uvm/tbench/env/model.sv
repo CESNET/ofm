@@ -6,7 +6,7 @@
 
 class model #(RX0_ITEM_WIDTH, RX1_ITEM_WIDTH, TX_ITEM_WIDTH) extends uvm_component;
     `uvm_component_param_utils(merge_items::model #(RX0_ITEM_WIDTH, RX1_ITEM_WIDTH, TX_ITEM_WIDTH))
-    
+
     // Model inputs
     uvm_tlm_analysis_fifo #(uvm_common::model_item #(uvm_logic_vector::sequence_item #(RX0_ITEM_WIDTH))) model_mvb_in0;
     uvm_tlm_analysis_fifo #(uvm_common::model_item #(uvm_logic_vector::sequence_item #(RX1_ITEM_WIDTH))) model_mvb_in1;
@@ -20,7 +20,7 @@ class model #(RX0_ITEM_WIDTH, RX1_ITEM_WIDTH, TX_ITEM_WIDTH) extends uvm_compone
         model_mvb_in0 = new("model_mvb_in0", this);
         model_mvb_in1 = new("model_mvb_in1", this);
         model_mvb_out = new("model_mvb_out", this);
-        
+
     endfunction
 
     task run_phase(uvm_phase phase);
@@ -40,7 +40,7 @@ class model #(RX0_ITEM_WIDTH, RX1_ITEM_WIDTH, TX_ITEM_WIDTH) extends uvm_compone
             model_mvb_out.write(tr_mvb_out);
 
         end
-        
+
     endtask
 
 endclass

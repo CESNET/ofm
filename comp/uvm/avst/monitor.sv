@@ -2,7 +2,7 @@
 //-- Copyright (C) 2023 CESNET z. s. p. o.
 //-- Author(s): Daniel Kriz <danielkriz@cesnet.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 // Definition of mfb monitor
 class monitor #(int unsigned REGIONS, int unsigned REGION_SIZE, int unsigned BLOCK_SIZE, int unsigned ITEM_WIDTH, int unsigned META_WIDTH) extends uvm_monitor;
@@ -22,7 +22,7 @@ class monitor #(int unsigned REGIONS, int unsigned REGION_SIZE, int unsigned BLO
     // ------------------------------------------------------------------------
     // Reference to the virtual interface
     virtual avst_if #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH).monitor vif;
-    
+
     // ------------------------------------------------------------------------
     // Analysis port used to send transactions to all connected components.
     uvm_analysis_port #(sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)) analysis_port;

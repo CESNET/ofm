@@ -17,12 +17,12 @@ entity BUS_CAPTURE is
         -- The number of words you can capture.
         ITEMS      : natural := 512;
         -- Select memory implementation. Options:
-        -- "LUT"   - effective when ITEMS <= 64 (on Intel FPGA <= 32), 
-        -- "BRAM"  - effective when ITEMS  > 64 (on Intel FPGA  > 32), 
-        -- "URAM"  - effective when ITEMS*DATA_WIDTH >= 288000 
+        -- "LUT"   - effective when ITEMS <= 64 (on Intel FPGA <= 32),
+        -- "BRAM"  - effective when ITEMS  > 64 (on Intel FPGA  > 32),
+        -- "URAM"  - effective when ITEMS*DATA_WIDTH >= 288000
         --           and DATA_WIDTH >= 72 (URAM is only for Xilinx Ultrascale(+)),
         -- "AUTO"  - effective implementation dependent on ITEMS and DEVICE.
-        RAM_TYPE   : string  := "AUTO"; 
+        RAM_TYPE   : string  := "AUTO";
         -- Enabled output registers allow better timing for a few flip-flops.
         -- When OUTPUT_REG=True then read latency is 2 cycle else 1 cycle.
         OUTPUT_REG : boolean := True;

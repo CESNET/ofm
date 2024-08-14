@@ -71,5 +71,5 @@ begin
       ADDR     => mask_decoded
    );
 
-end architecture; 
+end architecture;
 

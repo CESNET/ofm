@@ -9,7 +9,7 @@ proc blk_FL_RXBUFFER { TB RXBUFFER } {
    add wave -divider "FL RX BUFFER"
    add_wave "-noupdate -hex -label clk" $TB/clk
    add_wave "-noupdate -hex -label reset" $TB/reset
-      
+
    add wave -divider "input interface"
    add_wave "-noupdate -hex -label rx_data -hex" $RXBUFFER/rx_data
    add_wave "-noupdate -hex -label rx_rem -hex" $RXBUFFER/rx_rem

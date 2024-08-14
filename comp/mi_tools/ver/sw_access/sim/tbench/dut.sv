@@ -3,8 +3,8 @@
  * \brief Design Under Test
  * \author Lukas Kekely <kekely@cesnet.cz>
  * \date 2015
- */  
- /* 
+ */
+ /*
  * Copyright (C) 2015 CESNET
  *
  * LICENSE TERMS
@@ -12,8 +12,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
- 
- import test_pkg::*; 
+
+ import test_pkg::*;
 
 module DUT (
   input logic  CLK,
@@ -38,7 +38,7 @@ VHDL_DUT_U (
   .MI_ARDY           (MI.ARDY),
   .MI_DRDY           (MI.DRDY)
 );
- 
+
 endmodule : DUT
 
 

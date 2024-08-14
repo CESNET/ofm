@@ -205,7 +205,7 @@ begin
     end process;
 
     -- MI32 common control logic -----------------------------------------------
-    
+
     process(CLK)
     begin
         if rising_edge(CLK) then

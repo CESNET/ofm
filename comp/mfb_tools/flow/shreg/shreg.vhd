@@ -63,7 +63,7 @@ begin
     RX_DST_RDY <= TX_DST_RDY;
 
     shreg_in <= RX_DATA & RX_SOF_POS & RX_EOF_POS & RX_SOF & RX_EOF;
-   
+
     shreg_i : entity work.SH_REG_BASE_STATIC
     generic map(
         NUM_BITS   => SHREG_DEPTH,

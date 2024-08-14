@@ -26,7 +26,7 @@ class ReportGen:
         dev         = "/dev/nfb0"
     ):
         self.graph_gen      = graph_gen
-        self.dev            = dev        
+        self.dev            = dev
 
         self.iterCnt         = 0
         self.currIter        = 0
@@ -99,7 +99,7 @@ class ReportGen:
         burst_lim   = int((2 ** burst_width - 1) * burst_scale)
         res = np.linspace(1, burst_lim, cnt)
         return [int(i) for i in res]
-    
+
 
 ########
 # MAIN #
@@ -132,15 +132,15 @@ def print_progress(progress, txt='Complete', prefix = 'Progress', decimals = 1, 
     bar = fill * filledLength + '-' * (length - filledLength)
     print(f'\r{prefix} |{bar}| {percent}% {txt:<30}', end = printEnd)
     # Print New Line on Complete
-    if iteration >= total: 
+    if iteration >= total:
         progress[2] = True
         print()
 
 def parseParams():
     parser = argparse.ArgumentParser(description ="""Report generator for mem_tester component""")
-    parser.add_argument('-d', '--device', default=nfb.libnfb.Nfb.default_device, 
+    parser.add_argument('-d', '--device', default=nfb.libnfb.Nfb.default_device,
                         metavar='device', help = """device with target FPGA card.""")
-    parser.add_argument('format', nargs='?', default='pdf', choices=['md', 'pdf'], 
+    parser.add_argument('format', nargs='?', default='pdf', choices=['md', 'pdf'],
                         help = """Format of the output report)""")
     args = parser.parse_args()
     return args
@@ -181,7 +181,7 @@ if __name__ == '__main__':
     test_params = {'burst_cnt': burst_seq[0]}
     progress    = [0, 12 * gen.tester_cnt, False]
     addr_scale  = 0.05
- 
+
     for index in range(0, gen.tester_cnt):
         ## Run tests ##
         print_progress(progress, 'full memory test')
@@ -190,36 +190,36 @@ if __name__ == '__main__':
         print_progress(progress, 'different burst counts')
         test_params = {'rand_addr': False, 'addr_lim_scale': addr_scale}
         gen.test('seq-burst', 'Test different burst lengths', index, test_params, 'burst_cnt', burst_seq)
-    
+
         print_progress(progress, 'different burst counts')
         test_params = {'rand_addr': True, 'addr_lim_scale': addr_scale}
         gen.test('rand-burst', 'Test different burst lengths', index, test_params, 'burst_cnt', burst_seq)
-    
+
         print_progress(progress, 'different burst counts')
         test_params = {'rand_addr': False, 'addr_lim_scale': addr_scale, 'only_one_simult_read': True}
         gen.test('seq-burst-one-simult', 'Test different burst lengths', index, test_params, 'burst_cnt', burst_seq)
-        
+
         print_progress(progress, 'different burst counts')
         test_params = {'rand_addr': True, 'addr_lim_scale': addr_scale, 'only_one_simult_read': True}
         gen.test('rand-burst-one-simult', 'Test different burst lengths', index, test_params, 'burst_cnt', burst_seq)
-        
-    
+
+
         ## Get data ##
-    
+
         print_progress(progress, 'processing data')
         with open(data_file, 'w') as f:
             f.write(json.dumps(gen.data, sort_keys=True, indent=4))
-    
+
         seq_data  = gen.data['seq-burst'][index]['stats']
         rand_data = gen.data['rand-burst'][index]['stats']
         seq_data_one_simult  = gen.data['seq-burst-one-simult'][index]['stats']
         rand_data_one_simult = gen.data['rand-burst-one-simult'][index]['stats']
-    
+
         ## Plot ##
-    
+
         mem_width = gen.mem_tester.mem_logger.config["MEM_DATA_WIDTH"] / 8
         burst_seq_b = [i * mem_width for i in burst_seq]
-    
+
         # Plot data flow
         print_progress(progress, 'generating graphs')
         graph_gen.init_plots()  #title="Data flow")
@@ -243,7 +243,7 @@ if __name__ == '__main__':
         graph_gen.set_xlabel("burst size [B]")
         graph_gen.set_ylabel("data flow [Gbps]")
         graph_gen.plot_save(f"{index}_flow")
-    
+
         # Plot latency histogram
         for type in ("seq", "rand", "seq_one_simult", "rand_one_simult"):
             print_progress(progress, 'generating graphs')
@@ -255,14 +255,14 @@ if __name__ == '__main__':
                 data = seq_data_one_simult
             elif type == "rand_one_simult":
                 data = rand_data_one_simult
-    
+
             # Prepare data
             hist = data["latency"]["hist_ns"]
             hist_arr = tools.dict_to_numpy(hist)
             offset = gen.mem_tester.mem_logger.latency_hist_step() / 2
             limits = (min(burst_seq_b), max(burst_seq_b), min(data['latency']['min_ns']) - offset, max(data['latency']['max_ns']) - offset)
-            hist_arr /= np.array(data["rd_req_cnt"]) 
-    
+            hist_arr /= np.array(data["rd_req_cnt"])
+
             graph_gen.init_plots()  #title="Read latency")
             graph_gen.basic_plot(burst_seq_b, [
                 data['latency']["min_ns"],
@@ -282,7 +282,7 @@ if __name__ == '__main__':
             #graph_gen.set_xlabel("latency [ns]")
             #graph_gen.set_ylabel("occurrence")
             #graph_gen.plot_save(f"{index}_latency_" + type + f'_zoom_{zoom_burst}')
-    
+
 
     ## Generate PDF ##
     print_progress(progress, 'generating report')
@@ -299,25 +299,25 @@ if __name__ == '__main__':
     pdf.heading(2, "Test conditions")
     header  = ['Parameter', 'Value']
     data    = []
-    data.append([f"device          ",   info['dev']       ])     
-    data.append([f"card name       ",   card              ]) 
-    data.append([f"project name    ",   proj              ]) 
-    data.append([f"build time      ",   build             ]) 
-    data.append([f"mem_tester count",   info['tester_cnt']])             
-    data.append([f"mem_logger count",   info['logger_cnt']])             
+    data.append([f"device          ",   info['dev']       ])
+    data.append([f"card name       ",   card              ])
+    data.append([f"project name    ",   proj              ])
+    data.append([f"build time      ",   build             ])
+    data.append([f"mem_tester count",   info['tester_cnt']])
+    data.append([f"mem_logger count",   info['logger_cnt']])
     pdf.table(header, data)
 
     header  = ['Interface', 'DATA WIDTH', 'ADDRESS WIDTH', 'BURST WIDTH', 'Frequency [MHz]']
     data    = []
     for i in range(info['logger_cnt']):
-        data.append([i, 
+        data.append([i,
             info['logger_config'][i]['MEM_DATA_WIDTH'],
             info['logger_config'][i]['MEM_ADDR_WIDTH'],
             info['logger_config'][i]['MEM_BURST_WIDTH'],
             info['logger_config'][i]['MEM_FREQ_KHZ'] / 10**3,
         ])
     pdf.table(header, data)
-    
+
     for index in range(0, gen.tester_cnt):
         pdf.heading(1, f"Test result on interface {index}")
         pdf.text(f"*test was performed on the whole memory address space with burst count {burst_seq[0]} ({burst_seq_b[0]} B)")

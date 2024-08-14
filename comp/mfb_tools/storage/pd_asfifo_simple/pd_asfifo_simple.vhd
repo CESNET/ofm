@@ -43,7 +43,7 @@ entity MFB_PD_ASFIFO_SIMPLE is
 
         RX_CLK        : in  std_logic;
         RX_RESET      : in  std_logic;
-        
+
         RX_DATA       : in  std_logic_vector(MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH-1 downto 0);
         RX_META       : in  std_logic_vector(MFB_REGIONS*MFB_META_WIDTH-1 downto 0) := (others => '0');
         RX_SOF        : in  std_logic_vector(MFB_REGIONS-1 downto 0);
@@ -234,8 +234,8 @@ begin
             end if;
         end if;
     end process;
- 
-    assert (dfifo_ovf_err_reg /= '1') 
+
+    assert (dfifo_ovf_err_reg /= '1')
        report "MFB_PD_ASFIFO_SIMPLE: Illegal write to full dfifo_i FIFO!"
        severity failure;
 

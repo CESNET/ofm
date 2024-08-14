@@ -1,6 +1,6 @@
 -- item_trans_ctrl.vhd: Multi-Value Bus item N to M transformer
 -- Copyright (C) 2016 CESNET z. s. p. o.
--- Author(s): Vaclav Hummel <xhumme00@stud.fit.vutbr.cz> 
+-- Author(s): Vaclav Hummel <xhumme00@stud.fit.vutbr.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --
@@ -23,7 +23,7 @@ entity MVB_ITEM_TRANS_CTRL is
       RX_CTRL        : in  std_logic_vector(ITEMS_IN*log2(ITEMS_OUT)-1 downto 0);
       RX_SRC_RDY     : in  std_logic;
       RX_DST_RDY     : out std_logic;
- 
+
       TX_DATA        : out std_logic_vector(ITEMS_OUT*ITEM_WIDTH-1 downto 0);
       TX_VLD         : out std_logic_vector(ITEMS_OUT-1 downto 0);
       TX_SRC_RDY     : out std_logic;

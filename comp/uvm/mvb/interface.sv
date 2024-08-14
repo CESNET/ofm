@@ -2,7 +2,7 @@
 //-- Copyright (C) 2021 CESNET z. s. p. o.
 //-- Author(s): Tomáš Beneš <xbenes55@stud.fit.vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 // Definition of mvb interface.
 interface mvb_if #(int unsigned ITEMS, int unsigned ITEM_WIDTH) (input logic CLK);

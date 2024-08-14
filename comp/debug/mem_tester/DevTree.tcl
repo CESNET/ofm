@@ -1,4 +1,4 @@
-# DevTree.tcl: Dev tree of mem-tester component 
+# DevTree.tcl: Dev tree of mem-tester component
 # Copyright (C) 2021 CESNET z. s. p. o.
 # Author(s): Lukas Nevrkla <xnevrk03@stud.fit.vutbr.cz>
 #

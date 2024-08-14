@@ -1,7 +1,7 @@
 -- qdr_bram_ent.vhd
 --!
 --! \file
---! \brief FLU_ADAPTER connected to 3 QDR composed of 2 BRAM 
+--! \brief FLU_ADAPTER connected to 3 QDR composed of 2 BRAM
 --! \author Vaclav Hummel <xhumme00@stud.fit.vutbr.cz>
 --! \date 2014
 --!

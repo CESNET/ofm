@@ -30,7 +30,7 @@ SRCS = \
 OBJS = $(SRCS:%.c=%.o)
 
 all: lib$(TARGET).$(DLL_SUFFIX)
-	
+
 clean:
 	rm -fR *.o *.$(DLL_SUFFIX) $(LIBCOMBO_INCLUDE)/*.o
 

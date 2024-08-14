@@ -26,7 +26,7 @@ int FlTransaction::compare(FlTransaction tr, int kind) {
           for (int i=0; i<getPacketCount(); i++) {
 		    if (getPacketSize(i) != tr.getPacketSize(i))
 			  resultSizes = 0;
-            
+
 		  }
 		} // packet count
 		else

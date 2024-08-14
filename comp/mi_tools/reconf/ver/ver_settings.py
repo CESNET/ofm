@@ -24,14 +24,14 @@ SETTINGS = {
     "rx_data_16" : {
         "RX_DATA_WIDTH"     : "16"    ,
     },
-    
+
     "tx_data_8" : {
         "TX_DATA_WIDTH"     : "8"     ,
     },
     "tx_data_16" : {
         "TX_DATA_WIDTH"     : "16"    ,
     },
-    
+
     "addr_5" : {
         "ADDR_WIDTH"        : "5"     ,
     },

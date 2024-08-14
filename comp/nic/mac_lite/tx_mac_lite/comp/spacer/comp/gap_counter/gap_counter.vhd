@@ -250,7 +250,7 @@ begin
                     tmp_b_ptr := tmp_b_ptr
                                 +resize_left(unsigned(reg0_trans_len(i)),tmp_b_ptr'length)
                                 +resize_left(unsigned(reg0_trans_gap(i)),tmp_b_ptr'length);
-                
+
                     -- save new TX Buffer pointer for next Transactions
                     -- (only take the last valid value)
                     if (reg0_trans_src_rdy='1' and i+1=reg0_first_nonvld_i) then

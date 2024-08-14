@@ -50,11 +50,11 @@ entity FL_PFIFO_FL8 is
       STATUS         : out std_logic_vector(STATUS_WIDTH-1 downto 0);
       FRAME_RDY      : out std_logic
    );
-end entity FL_PFIFO_FL8;      
+end entity FL_PFIFO_FL8;
 
 architecture full of FL_PFIFO_FL8 is
 begin
-   
+
    FL_FIFO_I: entity work.FL_PFIFO8
    generic map
    (
@@ -77,7 +77,7 @@ begin
       RX_EOP_N       => RX.EOP_N,
       RX_SOF_N       => RX.SOF_N,
       RX_EOF_N       => RX.EOF_N,
-      
+
       -- read interface
       TX_DATA        => TX.DATA,
       TX_SRC_RDY_N   => TX.SRC_RDY_N,

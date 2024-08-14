@@ -39,7 +39,7 @@ The bind command creates an instance of an interface directly in a component. Th
 .. code-block:: systemverilog
 
     // entity name : path to entity  probe_if #(DATA_WIDTH) ( trigger , data , CLOCK)
-    bind FIFOX : VHDL_DUT_U probe_inf #(2) probe_status((RESET === 1'b0), { wr_en, rd_en }, CLK); 
+    bind FIFOX : VHDL_DUT_U probe_inf #(2) probe_status((RESET === 1'b0), { wr_en, rd_en }, CLK);
 
 
 

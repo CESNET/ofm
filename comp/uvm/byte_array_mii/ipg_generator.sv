@@ -25,15 +25,15 @@ class ipg_gen extends uvm_object;
     //  Constructor: new
     function new(string name = "ipg_generator", int unsigned idle_count_min = 4096, int unsigned idle_count_max = 4*4096);
         super.new(name);
-        
+
         MIN_IPG : assert(idle_count_min >= MIN_IPG_SIZE);
         this.idle_count_min = idle_count_min;
         this.idle_count_max = idle_count_max;
     endfunction: new
 
     //  Group: Functions
-    
-    // Appends random count of IDLE character to message to created desired 
+
+    // Appends random count of IDLE character to message to created desired
     // inter packet gap (IPG)
     function void generate_ipg(ref byte unsigned data[$], ref logic control[$]);
         this.randomize();
@@ -43,5 +43,5 @@ class ipg_gen extends uvm_object;
             control.push_back(1'b1);
         end
     endfunction
-    
+
 endclass: ipg_gen

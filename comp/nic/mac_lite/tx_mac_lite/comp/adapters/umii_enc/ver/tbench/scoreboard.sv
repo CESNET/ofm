@@ -15,16 +15,16 @@ class ScoreboardDriverCbs extends DriverCbs;
     function new (TransactionTable #(1) st);
         sc_table = st;
     endfunction
-        
+
     virtual task pre_tx(ref Transaction transaction, string inst);
     endtask
-        
+
     virtual task post_tx(Transaction transaction, string inst);
         MiiTransaction miiTrans;
         MfbTransaction #(ITEM_WIDTH) mfbTrans;
 
         $cast(mfbTrans, transaction);
-        
+
         miiTrans = new;
         miiTrans.data = new[mfbTrans.data.size - 4](mfbTrans.data);
 
@@ -40,11 +40,11 @@ endclass
 class ScoreboardMonitorCbs extends MonitorCbs;
     TransactionTable #(1) sc_table;
     int cnt = 0;
-    
+
     function new (TransactionTable #(1) st);
         sc_table = st;
     endfunction
-    
+
     virtual task post_rx(Transaction transaction, string inst);
         bit status=0;
         cnt = cnt + 1;

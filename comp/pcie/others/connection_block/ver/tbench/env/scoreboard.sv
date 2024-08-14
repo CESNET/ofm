@@ -1,5 +1,5 @@
 /*
- * file       : scoreboard.sv 
+ * file       : scoreboard.sv
  * description: scoreboard and simple model of connection component
  * date       : 2020
  * author     : Radek Iša <isa@cesnet.cz>
@@ -25,7 +25,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Scoreboard. This scoreboard check if DUT behavioral is correct. Scoreboard
 // have to change endianity of header.
-class scoreboard extends uvm_scoreboard; 
+class scoreboard extends uvm_scoreboard;
     `uvm_component_utils(env::scoreboard)
 
     ////////////////////////////////
@@ -94,14 +94,14 @@ class scoreboard extends uvm_scoreboard;
            end else begin
                $sformat(error, "%s\n RX MI QUEUE SIZE %d\n", error, mi_to_pcie.size());
            end
-            
+
             `uvm_fatal(this.get_full_name(), {"\nAVALON TX:\n", tr.convert2string(), error , "\n"});
        end
     endfunction
 
     function void write_avalon_rx(packet::transaction #(ITEM_WIDTH, MFB_META_TX_WIDTH) tr);
          packet::transaction #(ITEM_WIDTH, MFB_META_TX_WIDTH) tr_clone;
-         logic [7:0] op_type; 
+         logic [7:0] op_type;
 
          $cast(tr_clone, tr.clone());
          op_type = tr_clone.meta[127:120];

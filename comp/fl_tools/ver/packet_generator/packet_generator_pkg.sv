@@ -9,7 +9,7 @@
  * TODO:
  */
 
-package packet_generator_pkg; 
+package packet_generator_pkg;
   `include "layer.sv"
   `include "ethernet_II.sv"
   `include "ethernet_II_dotq.sv"

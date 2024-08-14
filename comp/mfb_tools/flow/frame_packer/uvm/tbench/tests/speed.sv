@@ -1,4 +1,4 @@
-// speed.sv: Verification test 
+// speed.sv: Verification test
 // Copyright (C) 2024 CESNET z. s. p. o.
 // Author:   David Beneš <xbenes52@vutbr.cz>
 

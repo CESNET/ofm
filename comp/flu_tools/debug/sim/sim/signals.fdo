@@ -12,7 +12,7 @@
 #                       Signals of interfaces
 # -------------------------------------------------------------------
 proc flu_bfm {NAME PATH} {
-    add wave -divider "$NAME"       
+    add wave -divider "$NAME"
       add_wave "-noupdate -color yellow -label RESET" $PATH/RESET
       add_wave "-noupdate -color yellow -label CLK"   $PATH/CLK_100
       add_wave "-noupdate -hex -label TX_SOP"   $PATH/tx_sop

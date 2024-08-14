@@ -37,7 +37,7 @@ class sequence_tx_base #(int unsigned CHANNELS, int unsigned CHANNEL_WIDTH) exte
     // Constructor - creates new instance of this class
     function new(string name = "sequence");
         super.new(name);
-        
+
         WHOLE_BYTES : assert((CHANNEL_WIDTH & 7) == 0);
 
         if (!uvm_config_db #(uvm_byte_array_mii::ce_gen_config)::get(p_sequencer, "", "ce_gen_config", ce_gen_config)) begin
@@ -47,14 +47,14 @@ class sequence_tx_base #(int unsigned CHANNELS, int unsigned CHANNEL_WIDTH) exte
     endfunction: new
 
     // Generates transactions
-    task body;   
+    task body;
         INITIALIZED : assert(ce_gen != null);
         `uvm_info(get_name(), start_msg, UVM_DEBUG)
 
         for (int i = 0; i < hl_transactions; i++) begin
             req = uvm_mii::sequence_item #(CHANNELS, CHANNEL_WIDTH)::type_id::create("req");
             start_item(req);
-            req.clk_en = this.ce_gen.get_ce();  
+            req.clk_en = this.ce_gen.get_ce();
             finish_item(req);
         end
     endtask

@@ -7,8 +7,8 @@
 
 # -----------------------------------------------------------------------------
 
-set PKG_BASE         "$OFM_PATH/comp/base/pkg"                                                                                                                                 
-set MUX_BASE         "$OFM_PATH/comp/base/logic/mux"                                                                                                                           
+set PKG_BASE         "$OFM_PATH/comp/base/pkg"
+set MUX_BASE         "$OFM_PATH/comp/base/logic/mux"
 
 # barrel_bit_shifter entity:
 set MOD "$MOD $ENTITY_BASE/barrel_bit_shifter_ent.vhd"

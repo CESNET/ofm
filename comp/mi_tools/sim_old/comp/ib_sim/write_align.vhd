@@ -32,7 +32,7 @@ entity WRITE_ALIGN is
       ALIGN_REG       : in  std_logic_vector(2 downto 0);
       ALIGN_INIT      : in  std_logic;
       LENGTH          : in  std_logic_vector(C_IB_LENGTH_WIDTH-1 downto 0);
-     
+
       --Output Interface
       DWR             : out std_logic_vector(63 downto 0);
       BE_WR           : out std_logic_vector(7 downto 0);

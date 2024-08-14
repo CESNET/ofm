@@ -29,7 +29,7 @@ entity LB_ENDPOINT_NOREC is
    port(
       -- Common Interface
       RESET         : in std_logic;
-      
+
       -- Local Bus Interface
       LB_CLK        : in std_logic;
       LB_DWR        : in std_logic_vector(15 downto 0);
@@ -51,7 +51,7 @@ entity LB_ENDPOINT_NOREC is
       MI32_BE       : out std_logic_vector(3  downto 0);           -- Byte Enable
       MI32_DRD      : in  std_logic_vector(31 downto 0);           -- Output Data
       MI32_ARDY     : in  std_logic;                               -- Address Ready
-      MI32_DRDY     : in  std_logic                                -- Data Ready   
+      MI32_DRDY     : in  std_logic                                -- Data Ready
   );
 end entity LB_ENDPOINT_NOREC;
 -- ----------------------------------------------------------------------------
@@ -90,7 +90,7 @@ X50MHZ_U : if (FREQUENCY = (LOCAL_BUS_FREQUENCY/2)) generate
    port map(
       -- Common Interface
       RESET      => reset_pipe,
-      
+
       -- Local Bus Interface
       LB_CLK      => LB_CLK,
       LB_DWR      => LB_DWR,
@@ -128,7 +128,7 @@ X100MHZ_U: if (FREQUENCY = LOCAL_BUS_FREQUENCY) generate
    port map(
       -- Common Interface
       RESET      => reset_pipe,
-      
+
       -- Local Bus Interface
       LB_CLK      => LB_CLK,
       LB_DWR      => LB_DWR,

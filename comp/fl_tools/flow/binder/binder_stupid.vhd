@@ -23,7 +23,7 @@ entity FL_BINDER_STUPID is
       INPUT_COUNT    : integer;
       OUTPUT_WIDTH   : integer;
       FRAME_PARTS    : integer;
-      QUEUE_CHOOSING : T_BINDER_QUEUE_POLICY := round_robin 
+      QUEUE_CHOOSING : T_BINDER_QUEUE_POLICY := round_robin
    );
    port(
       CLK            : in  std_logic;
@@ -36,9 +36,9 @@ entity FL_BINDER_STUPID is
       RX_EOF_N       : in  std_logic_vector(INPUT_COUNT-1 downto 0);
       RX_SRC_RDY_N   : in  std_logic_vector(INPUT_COUNT-1 downto 0);
       RX_DST_RDY_N   : out std_logic_vector(INPUT_COUNT-1 downto 0);
-      RX_DATA        : in  std_logic_vector(INPUT_COUNT*INPUT_WIDTH-1 
+      RX_DATA        : in  std_logic_vector(INPUT_COUNT*INPUT_WIDTH-1
                                                           downto 0);
-      RX_REM         : in  std_logic_vector(INPUT_COUNT*log2(INPUT_WIDTH/8)-1 
+      RX_REM         : in  std_logic_vector(INPUT_COUNT*log2(INPUT_WIDTH/8)-1
                                                           downto 0);
 
       -- output FrameLink interface
@@ -68,9 +68,9 @@ architecture full of FL_BINDER_STUPID is
    signal in_rx_eof_n     : std_logic_vector(INPUT_COUNT-1 downto 0);
    signal in_rx_src_rdy_n : std_logic_vector(INPUT_COUNT-1 downto 0);
    signal in_rx_dst_rdy_n : std_logic_vector(INPUT_COUNT-1 downto 0);
-   signal in_rx_data      : std_logic_vector(INPUT_COUNT*INPUT_WIDTH-1 
+   signal in_rx_data      : std_logic_vector(INPUT_COUNT*INPUT_WIDTH-1
                                                               downto 0);
-   signal in_rx_rem       : std_logic_vector(INPUT_COUNT*log2(INPUT_WIDTH/8)-1 
+   signal in_rx_rem       : std_logic_vector(INPUT_COUNT*log2(INPUT_WIDTH/8)-1
                                                               downto 0);
 
    signal out_tx_sof_n      : std_logic;
@@ -105,12 +105,12 @@ begin
 -- ============================================================================
 --                               Assertions
 -- ============================================================================
-   assert (INPUT_WIDTH = OUTPUT_WIDTH)                                                   
-      report "INPUTs and OUTPUT have to have the same width"                                 
+   assert (INPUT_WIDTH = OUTPUT_WIDTH)
+      report "INPUTs and OUTPUT have to have the same width"
       severity failure;
 
 -- ============================================================================
---                              Mapped signals 
+--                              Mapped signals
 -- ============================================================================
    in_rx_sof_n       <= RX_SOF_N;
    in_rx_sop_n       <= RX_SOP_N;
@@ -141,7 +141,7 @@ begin
       for i in 0 to INPUT_COUNT-1 loop
          if (fc_frame_rdy(i) = '1') then
             fc_no_frame <= '0';
-         end if;   
+         end if;
       end loop;
    end process;
 
@@ -190,7 +190,7 @@ begin
 -- ============================================================================
 --                              Bind multiplexor
 -- ============================================================================
-   bind_mx: process(mx_ifc_sel, in_rx_sof_n, in_rx_sop_n, in_rx_eop_n, 
+   bind_mx: process(mx_ifc_sel, in_rx_sof_n, in_rx_sop_n, in_rx_eop_n,
          in_rx_eof_n, in_rx_src_rdy_n, mx_ifc_dst_rdy_n, in_rx_data, in_rx_rem)
    begin
       in_rx_dst_rdy_n   <= (others => '1');
@@ -202,7 +202,7 @@ begin
       mx_ifc_src_rdy_n   <= in_rx_src_rdy_n(conv_integer(mx_ifc_sel));
       in_rx_dst_rdy_n(conv_integer(mx_ifc_sel)) <= mx_ifc_dst_rdy_n;
    end process;
-   
+
    DATA_MUX : entity work.GEN_MUX
       generic map(
          DATA_WIDTH  => INPUT_WIDTH,
@@ -213,7 +213,7 @@ begin
          SEL         => mx_ifc_sel,
          DATA_OUT    => mx_ifc_data
       );
-        
+
    REM_MUX : entity work.GEN_MUX
       generic map(
          DATA_WIDTH  => mx_ifc_rem'length,

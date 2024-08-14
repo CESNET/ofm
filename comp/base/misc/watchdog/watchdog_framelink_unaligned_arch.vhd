@@ -35,30 +35,30 @@ begin
       port map(
          CLK            => CLK,
          RESET          => RESET,
-     
+
          DATA_IN        => data_in,
          SRC_RDY_IN     => RX_SRC_RDY,
          DST_RDY_IN     => RX_DST_RDY,
-     
+
          DATA_OUT       => data_out,
          SRC_RDY_OUT    => TX_SRC_RDY,
          DST_RDY_OUT    => TX_DST_RDY,
-         
+
          KEEP_ALIVE     => KEEP_ALIVE,
          COUNTER        => COUNTER,
          LOCKED         => LOCKED
       );
-      
+
    --! composition of DATA_IN
    data_in <= RX_EOP & RX_SOP & RX_EOP_POS & RX_SOP_POS & RX_DATA;
-   
+
    --! decomposition of DATA_OUT
    TX_EOP       <= data_out(data_out'high);
    TX_SOP       <= data_out(data_out'high -1);
-   TX_EOP_POS   <= data_out((data_out'high-2) downto 
+   TX_EOP_POS   <= data_out((data_out'high-2) downto
                    ((data_out'high-2) - (RX_EOP_POS'length-1)));
    TX_SOP_POS   <= data_out((RX_DATA'length + RX_SOP_POS'length -1) downto RX_DATA'length);
    TX_DATA      <= data_out(RX_DATA'range);
-   
-   
+
+
 end framelink;

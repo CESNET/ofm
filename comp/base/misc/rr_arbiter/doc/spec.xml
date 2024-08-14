@@ -96,13 +96,13 @@
         </h3>
 
         Unit is arbitrating all ports. The ports have the same priority
-        (round-robin). When ENABLE signal is asserted the ACK signal can be 
+        (round-robin). When ENABLE signal is asserted the ACK signal can be
         changed due to actual RQ signal.
 
         <br><br>
         note: ACK signal has always one bit asserted
 
-        
+
 </body>
 
 </source>

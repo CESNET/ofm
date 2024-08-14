@@ -2,7 +2,7 @@
 //-- Copyright (C) 2021 CESNET z. s. p. o.
 //-- Author(s): Tomáš Beneš <xbenes55@stud.fit.vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 
 class model #(LUT_WIDTH, REG_DEPTH, SLICE_WIDTH, SW_WIDTH, LUT_DEPTH) extends uvm_component;
@@ -41,7 +41,7 @@ class model #(LUT_WIDTH, REG_DEPTH, SLICE_WIDTH, SW_WIDTH, LUT_DEPTH) extends uv
             model_mvb_in.get(tr_mvb_in);
             for (int unsigned slice = 0; slice<(LUT_WIDTH/SW_WIDTH); slice++) begin
                 // In case of register, there is addres 0 and every slice is on address which is incremented with 2
-                if (LUT_DEPTH == 1) 
+                if (LUT_DEPTH == 1)
                     value_in = (tr_mvb_in.data/4)+(LUT_DEPTH*slice)*2;
                 else
                     value_in = (tr_mvb_in.data/4)+(LUT_DEPTH*slice);

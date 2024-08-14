@@ -25,11 +25,11 @@ architecture behavioral of testbench is
 
     signal clk   : std_logic;
     signal reset : std_logic;
-        
+
     constant DATA_WIDTH    : integer := 512;
     constant SOP_POS_WIDTH : integer := 3;
     constant CHANNEL_WIDTH : integer := 8;
-  
+
     signal RX_CHANNEL : std_logic_vector(CHANNEL_WIDTH-1 downto 0);
     signal RX_DATA    : std_logic_vector(DATA_WIDTH-1 downto 0);
     signal RX_SOP_POS : std_logic_vector(SOP_POS_WIDTH-1 downto 0);
@@ -38,8 +38,8 @@ architecture behavioral of testbench is
     signal RX_EOP     : std_logic;
     signal RX_SRC_RDY : std_logic;
     signal RX_DST_RDY : std_logic;
- 
-    signal TX_HDR     : std_logic_vector(8*8+CHANNEL_WIDTH-1 downto 0);         
+
+    signal TX_HDR     : std_logic_vector(8*8+CHANNEL_WIDTH-1 downto 0);
     signal TX_DATA    : std_logic_vector(DATA_WIDTH-1 downto 0);
     signal TX_SOP_POS : std_logic_vector(SOP_POS_WIDTH-1 downto 0);
     signal TX_EOP_POS : std_logic_vector(log2(DATA_WIDTH/8)-1 downto 0);
@@ -81,26 +81,26 @@ begin
         CHANNEL_WIDTH => CHANNEL_WIDTH
     )
     port map(
-        CLK         => clk,      
-        RESET       => reset,      
-        RX_CHANNEL  =>RX_CHANNEL, 
-        RX_DATA     =>RX_DATA, 
-        RX_SOP_POS  =>RX_SOP_POS, 
-        RX_EOP_POS  =>RX_EOP_POS, 
-        RX_SOP      =>RX_SOP, 
-        RX_EOP      =>RX_EOP, 
-        RX_SRC_RDY  =>RX_SRC_RDY, 
-        RX_DST_RDY  =>RX_DST_RDY, 
-        TX_HDR      =>TX_HDR,         
-        TX_DATA     =>TX_DATA, 
-        TX_SOP_POS  =>TX_SOP_POS, 
-        TX_EOP_POS  =>TX_EOP_POS, 
-        TX_SOP      =>TX_SOP, 
-        TX_EOP      =>TX_EOP, 
-        TX_SRC_RDY  =>TX_SRC_RDY, 
-        TX_DST_RDY  =>TX_DST_RDY 
+        CLK         => clk,
+        RESET       => reset,
+        RX_CHANNEL  =>RX_CHANNEL,
+        RX_DATA     =>RX_DATA,
+        RX_SOP_POS  =>RX_SOP_POS,
+        RX_EOP_POS  =>RX_EOP_POS,
+        RX_SOP      =>RX_SOP,
+        RX_EOP      =>RX_EOP,
+        RX_SRC_RDY  =>RX_SRC_RDY,
+        RX_DST_RDY  =>RX_DST_RDY,
+        TX_HDR      =>TX_HDR,
+        TX_DATA     =>TX_DATA,
+        TX_SOP_POS  =>TX_SOP_POS,
+        TX_EOP_POS  =>TX_EOP_POS,
+        TX_SOP      =>TX_SOP,
+        TX_EOP      =>TX_EOP,
+        TX_SRC_RDY  =>TX_SRC_RDY,
+        TX_DST_RDY  =>TX_DST_RDY
     );
- 
+
    -- -------------------------------------------------------------------------
    --                          Testbench process
    -- -------------------------------------------------------------------------
@@ -110,7 +110,7 @@ begin
         TX_DST_RDY <= '1';
         RX_SRC_RDY <= '0';
         RX_CHANNEL <= X"EE";
-        RX_EOP_POS <= (others => '1'); 
+        RX_EOP_POS <= (others => '1');
         RX_DATA(1*64-1 downto 0*64) <= X"1111111111111111";
         RX_DATA(2*64-1 downto 1*64) <= X"2222222222222222";
         RX_DATA(3*64-1 downto 2*64) <= X"3333333333333333";
@@ -120,31 +120,31 @@ begin
         RX_DATA(7*64-1 downto 6*64) <= X"7777777777777777";
         RX_DATA(8*64-1 downto 7*64) <= X"8888888888888888";
         wait for reset_time;
-   
+
         RX_SRC_RDY <= '1';
         RX_SOP_POS <= std_logic_vector(to_unsigned(0, SOP_POS_WIDTH));
         RX_SOP     <= '1';
         RX_EOP     <= '0';
         wait for clk_per;
-        
+
         RX_SRC_RDY <= '1';
         RX_SOP_POS <= std_logic_vector(to_unsigned(0, SOP_POS_WIDTH));
         RX_SOP     <= '0';
         RX_EOP     <= '1';
         wait for clk_per;
-        
+
         RX_SRC_RDY <= '0';
         RX_SOP_POS <= std_logic_vector(to_unsigned(0, SOP_POS_WIDTH));
         RX_SOP     <= '0';
         RX_EOP     <= '0';
         wait for clk_per;
-        
+
         RX_SRC_RDY <= '1';
         RX_SOP_POS <= std_logic_vector(to_unsigned(7, SOP_POS_WIDTH));
         RX_SOP     <= '1';
         RX_EOP     <= '0';
         wait for clk_per;
-        
+
         RX_SRC_RDY <= '0';
         RX_SOP_POS <= std_logic_vector(to_unsigned(7, SOP_POS_WIDTH));
         RX_DATA    <= (others => '0');
@@ -152,7 +152,7 @@ begin
         RX_SOP     <= '0';
         RX_EOP     <= '0';
         wait for clk_per;
-        
+
         RX_SRC_RDY <= '1';
         RX_SOP_POS <= std_logic_vector(to_unsigned(0, SOP_POS_WIDTH));
         RX_DATA    <= (others => '0');
@@ -160,7 +160,7 @@ begin
         RX_SOP     <= '0';
         RX_EOP     <= '1';
         wait for clk_per;
-        
+
         RX_SRC_RDY <= '0';
         RX_SOP_POS <= std_logic_vector(to_unsigned(0, SOP_POS_WIDTH));
         RX_SOP     <= '0';

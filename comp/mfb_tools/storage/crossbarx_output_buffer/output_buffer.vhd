@@ -73,7 +73,7 @@ generic(
     -- =====================
     -- Clock signal relations
     -- =====================
-    
+
     -- CLK_META is the same as CLK_OUT
     META_EQ_OUTPUT    : boolean := false;
     -- CLK_IN is the same as CLK_OUT
@@ -82,7 +82,7 @@ generic(
     -- =====================
     -- Derived aliases
     -- =====================
-    
+
     DATA_BLOCK_WIDTH  : natural := DATA_BLOCK_SIZE*DATA_ITEM_WIDTH;
     BUF_BYTES         : natural := BUF_WORDS*BUF_BLOCKS*DATA_BLOCK_SIZE
 );
@@ -115,7 +115,7 @@ port (
     -- =====================================================================
     -- Other components input interfaces
     --
-    -- Runs on CLK_OUT  
+    -- Runs on CLK_OUT
     -- =====================================================================
 
     RX_HDR_META      : in  slv_array_t     (MFB_REGIONS-1 downto 0)(HDR_META_WIDTH-1 downto 0);

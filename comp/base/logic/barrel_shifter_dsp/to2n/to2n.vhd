@@ -9,7 +9,7 @@
 -- TODO:
 --
 
-library IEEE;  
+library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.std_logic_arith.all;
 use IEEE.std_logic_unsigned.all;
@@ -17,7 +17,7 @@ use IEEE.std_logic_unsigned.all;
 use work.math_pack.all;
 
 -- convert binary to 2^N
-entity TO2N is 
+entity TO2N is
    generic (
       MAX_NUM : integer := 64
    );

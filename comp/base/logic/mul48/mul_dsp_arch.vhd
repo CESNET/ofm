@@ -18,19 +18,19 @@ architecture full of MUL_DSP is
    constant B_MOD_24 : integer := B_DATA_WIDTH mod 24;
    constant B_DIV_17 : integer := B_DATA_WIDTH / 17;
    constant B_DIV_24 : integer := B_DATA_WIDTH / 24;
-   constant FIRST_ALU_24 : integer := A_DATA_WIDTH+B_MOD_24+24+(24-(24*(1 mod (B_MOD_24+1)))); 
+   constant FIRST_ALU_24 : integer := A_DATA_WIDTH+B_MOD_24+24+(24-(24*(1 mod (B_MOD_24+1))));
    constant FIRST_ALU_17 : integer := A_DATA_WIDTH+B_MOD_17+17+(17-(17*(1 mod (B_MOD_17+1))));
-   constant A_CONST_24 : integer := B_DIV_24-1+(1 mod (B_MOD_24+1)); 
+   constant A_CONST_24 : integer := B_DIV_24-1+(1 mod (B_MOD_24+1));
    constant A_CONST_17 : integer := B_DIV_17-1+(1 mod (B_MOD_17+1));
-   constant FOR_NUM    : integer := (B_DIV_24) + (1 mod (B_MOD_24+1)) - 1; 
-   constant FOR_NUM_17 : integer := (B_DIV_17) + (1 mod (B_MOD_17+1)) - 1; 
-   
+   constant FOR_NUM    : integer := (B_DIV_24) + (1 mod (B_MOD_24+1)) - 1;
+   constant FOR_NUM_17 : integer := (B_DIV_17) + (1 mod (B_MOD_17+1)) - 1;
+
    signal zeros   : std_logic_vector(511 downto 0);
-   
-   signal mul1_A : std_logic_vector(24 downto 0); 
+
+   signal mul1_A : std_logic_vector(24 downto 0);
    signal mul1_B : std_logic_vector(17 downto 0);
    signal mul1_cout  : std_logic_vector(47 downto 0);
-   
+
    signal mul2_B : std_logic_vector(17 downto 0);
    signal mul2_out  : std_logic_vector(47 downto 0);
    signal mul2_pcin : std_logic_vector(47 downto 0);
@@ -39,10 +39,10 @@ begin
    assert (A_DATA_WIDTH < 25) report " A_DATA_WIDTH > 24bits !!! " severity failure;
 
    zeros <= (others => '0');
-  
+
    GNE_ONLY_ONE_MUL: if((A_DATA_WIDTH < 25 and B_DATA_WIDTH < 18)
                         OR
-                        (A_DATA_WIDTH < 18 and B_DATA_WIDTH < 25)) 
+                        (A_DATA_WIDTH < 18 and B_DATA_WIDTH < 25))
    generate
       signal only_one_A : std_logic_vector(24 downto 0);
       signal only_one_B : std_logic_vector(17 downto 0);
@@ -73,7 +73,7 @@ begin
          CE_IN       => CE,
          CE_OUT      => CE,
          P           => only_one_P,
-         PCIN        => (others => '0') 
+         PCIN        => (others => '0')
       );
 
       P <= only_one_P(A_DATA_WIDTH+B_DATA_WIDTH-1 downto 0);
@@ -81,7 +81,7 @@ begin
 
    GNE_NO_ONLY: if(not(A_DATA_WIDTH < 25 and B_DATA_WIDTH < 18)
                         and
-                        not(A_DATA_WIDTH < 18 and B_DATA_WIDTH < 25)) 
+                        not(A_DATA_WIDTH < 18 and B_DATA_WIDTH < 25))
    generate
       SPLIT_24: if(A_DATA_WIDTH < 18) generate
          type mul_out_t is array (0 to B_DIV_24+1) of std_logic_vector(47 downto 0);
@@ -89,17 +89,17 @@ begin
 
          type alu_out_t is array (0 to B_MOD_24) of std_logic_vector(A_DATA_WIDTH+B_DATA_WIDTH-1 downto 0);
          signal alu_out : alu_out_t;
-         
+
          signal oper_B : std_logic_vector(17 downto 0);
       begin
          oper_B <= zeros(17-A_DATA_WIDTH downto 0) & A;
-         
-         GEN_DSP_LVLS: for I in 0 to (B_DIV_24) + (1 mod (B_MOD_24+1)) - 1 generate 
+
+         GEN_DSP_LVLS: for I in 0 to (B_DIV_24) + (1 mod (B_MOD_24+1)) - 1 generate
          begin
-            ----------------------FIRST MUL----------------------------------------------------------   
+            ----------------------FIRST MUL----------------------------------------------------------
             GEN_FIRST_MUL: if(I = 0) generate
                signal first_mul_A : std_logic_vector(24 downto 0);
-            begin 
+            begin
                GEN_MOD: if(B_DATA_WIDTH mod 24 /= 0) generate
                   first_mul_A <= zeros(24-B_MOD_24 downto 0) & B(B_DATA_WIDTH-1 downto 24*(B_DIV_24));
                end generate;
@@ -121,11 +121,11 @@ begin
                   CE_IN       => CE,
                   CE_OUT      => CE,
                   P           => mul_out(I),
-                  PCIN        => (others => '0') 
+                  PCIN        => (others => '0')
                );
             end generate;
 
-            ----------------------SECOND MUL----------------------------------------------------------   
+            ----------------------SECOND MUL----------------------------------------------------------
             GEN_SECOND_MUL: if(I = 1) generate
                signal second_mul_A : std_logic_vector(24 downto 0);
                signal second_mul_pcin : std_logic_vector(47 downto 0);
@@ -139,11 +139,11 @@ begin
                   signal pipe_out   : std_logic_vector(18+25-1 downto 0);
                begin
                   second_mul_pcin <= mul_out(I-1)(23 downto 0) & zeros(23 downto 0);
-                 
-                  pipe_in  <= second_mul_A & oper_B; 
+
+                  pipe_in  <= second_mul_A & oper_B;
                   second_mul_A_pipe <= pipe_out(18+25-1 downto 18);
                   second_mul_B_pipe <= pipe_out(17 downto 0);
-                 
+
                   PIPE_inst: entity work.PIPE_DSP
                   generic map(
                      PIPE_EN     => true,
@@ -172,12 +172,12 @@ begin
                      CE_IN       => CE,
                      CE_OUT      => CE,
                      P           => mul_out(I),
-                     PCIN        => second_mul_pcin 
+                     PCIN        => second_mul_pcin
                   );
 
                   alu_out(0)(FIRST_ALU_24-1 downto 0) <= mul_out(I)(FIRST_ALU_24-1 downto 0);
                end generate;
-               
+
                GEN_NORMAL_ALU: if(FIRST_ALU_24 > 48) generate
                   signal first_alu_A : std_logic_vector(FIRST_ALU_24-1 downto 0);
                   signal first_alu_A_shift : std_logic_vector(FIRST_ALU_24-1 downto 0);
@@ -200,9 +200,9 @@ begin
                      CE_IN       => CE,
                      CE_OUT      => CE,
                      P           => mul_out(I),
-                     PCIN        => (others => '0') 
+                     PCIN        => (others => '0')
                   );
-                  
+
                   first_alu_A <= zeros(FIRST_ALU_24-1 downto 48) & mul_out(I-1);
                   first_alu_A_shift <=  first_alu_A(FIRST_ALU_24-24-1 downto 0) & zeros(23 downto 0);
                   first_alu_B <= zeros(FIRST_ALU_24-1 downto 48) & mul_out(I);
@@ -225,16 +225,16 @@ begin
                   );
                end generate;
             end generate;
-            
-            ----------------------OTHERS MULS----------------------------------------------------------   
+
+            ----------------------OTHERS MULS----------------------------------------------------------
             GEN_OTHERS: if(I > 1) generate
-               constant alu_width   : integer := FIRST_ALU_24+(24*(I-1)); 
+               constant alu_width   : integer := FIRST_ALU_24+(24*(I-1));
                constant alu_before  : integer := alu_width-24;
-      
+
                signal mul_A         : std_logic_vector(24 downto 0);
-               signal pipe_in       : std_logic_vector(25+18-1 downto 0); 
-               signal pipe_out      : std_logic_vector(25+18-1 downto 0); 
-               
+               signal pipe_in       : std_logic_vector(25+18-1 downto 0);
+               signal pipe_out      : std_logic_vector(25+18-1 downto 0);
+
                signal others_alu_A   : std_logic_vector(alu_width-1 downto 0);
                signal others_alu_A_shift : std_logic_vector(alu_width-1 downto 0);
                signal others_alu_B   : std_logic_vector(alu_width-1 downto 0);
@@ -270,9 +270,9 @@ begin
                   CE_IN       => CE,
                   CE_OUT      => CE,
                   P           => mul_out(I),
-                  PCIN        => (others => '0') 
+                  PCIN        => (others => '0')
                );
-               
+
                others_alu_A <= zeros(alu_width-1 downto alu_before) & alu_out(I-2)(alu_before-1 downto 0);
                others_alu_A_shift <=  others_alu_A(alu_width-24-1 downto 0) & zeros(23 downto 0);
                others_alu_B <= zeros(alu_width-1 downto 48) & mul_out(I);
@@ -294,7 +294,7 @@ begin
                   CARRY_IN    => '0',
                   P           => alu_out(I-1)(alu_width-1 downto 0)
                );
-            end generate;  
+            end generate;
          end generate;
          P <= alu_out((B_DIV_24)+(1 mod (B_MOD_24+1))-1-1)(A_DATA_WIDTH+B_DATA_WIDTH-1 downto 0);
       end generate;
@@ -306,17 +306,17 @@ begin
 
          type alu_out_t is array (0 to B_MOD_17) of std_logic_vector(A_DATA_WIDTH+B_DATA_WIDTH-1 downto 0);
          signal alu_out : alu_out_t;
-         
+
          signal oper_A : std_logic_vector(24 downto 0);
       begin
          oper_A <= zeros(24-A_DATA_WIDTH downto 0) & A;
-         
-         GEN_DSP_LVLS: for I in 0 to (B_DIV_17) + (1 mod (B_MOD_17+1)) - 1 generate 
+
+         GEN_DSP_LVLS: for I in 0 to (B_DIV_17) + (1 mod (B_MOD_17+1)) - 1 generate
          begin
-            ----------------------FIRST MUL----------------------------------------------------------   
+            ----------------------FIRST MUL----------------------------------------------------------
             GEN_FIRST_MUL: if(I = 0) generate
                signal first_mul_B : std_logic_vector(17 downto 0);
-            begin 
+            begin
                GEN_MOD: if(B_MOD_17 /= 0) generate
                   first_mul_B <= zeros(17-B_MOD_17 downto 0) & B(B_DATA_WIDTH-1 downto 17*(B_DIV_17));
                end generate;
@@ -338,11 +338,11 @@ begin
                   CE_IN       => CE,
                   CE_OUT      => CE,
                   P           => mul_out(I),
-                  PCIN        => (others => '0') 
+                  PCIN        => (others => '0')
                );
             end generate;
 
-            ----------------------SECOND MUL----------------------------------------------------------   
+            ----------------------SECOND MUL----------------------------------------------------------
             GEN_SECOND_MUL: if(I = 1) generate
                signal second_mul_B : std_logic_vector(17 downto 0);
                signal second_mul_pcin : std_logic_vector(47 downto 0);
@@ -356,11 +356,11 @@ begin
                   signal pipe_out   : std_logic_vector(18+25-1 downto 0);
                begin
                   second_mul_pcin <= mul_out(I-1)(23 downto 0) & zeros(23 downto 0);
-                 
-                  pipe_in  <= second_mul_B & oper_A; 
+
+                  pipe_in  <= second_mul_B & oper_A;
                   second_mul_B_pipe <= pipe_out(18+25-1 downto 25);
                   second_mul_A_pipe <= pipe_out(24 downto 0);
-                 
+
                   PIPE_inst: entity work.PIPE_DSP
                   generic map(
                      PIPE_EN     => true,
@@ -389,12 +389,12 @@ begin
                      CE_IN       => CE,
                      CE_OUT      => CE,
                      P           => mul_out(I),
-                     PCIN        => second_mul_pcin 
+                     PCIN        => second_mul_pcin
                   );
 
                   alu_out(0)(FIRST_ALU_17-1 downto 0) <= mul_out(I)(FIRST_ALU_17-1 downto 0);
                end generate;
-               
+
                GEN_NORMAL_ALU: if(FIRST_ALU_24 > 48) generate
                   signal first_alu_B : std_logic_vector(FIRST_ALU_17-1 downto 0);
                   signal first_alu_B_shift : std_logic_vector(FIRST_ALU_17-1 downto 0);
@@ -417,9 +417,9 @@ begin
                      CE_IN       => CE,
                      CE_OUT      => CE,
                      P           => mul_out(I),
-                     PCIN        => (others => '0') 
+                     PCIN        => (others => '0')
                   );
-                  
+
                   first_alu_B <= zeros(FIRST_ALU_17-1 downto 48) & mul_out(I-1);
                   first_alu_B_shift <=  first_alu_B(FIRST_ALU_17-17-1 downto 0) & zeros(16 downto 0);
                   first_alu_A <= zeros(FIRST_ALU_17-1 downto 48) & mul_out(I);
@@ -442,16 +442,16 @@ begin
                   );
                end generate;
             end generate;
-           
-            ----------------------OTHERS MULS----------------------------------------------------------   
+
+            ----------------------OTHERS MULS----------------------------------------------------------
             GEN_OTHERS: if(I > 1) generate
-               constant alu_width   : integer := FIRST_ALU_17+(17*(I-1)); 
+               constant alu_width   : integer := FIRST_ALU_17+(17*(I-1));
                constant alu_before  : integer := alu_width-17;
-      
+
                signal mul_B         : std_logic_vector(17 downto 0);
-               signal pipe_in       : std_logic_vector(25+18-1 downto 0); 
-               signal pipe_out      : std_logic_vector(25+18-1 downto 0); 
-               
+               signal pipe_in       : std_logic_vector(25+18-1 downto 0);
+               signal pipe_out      : std_logic_vector(25+18-1 downto 0);
+
                signal others_alu_B   : std_logic_vector(alu_width-1 downto 0);
                signal others_alu_B_shift : std_logic_vector(alu_width-1 downto 0);
                signal others_alu_A   : std_logic_vector(alu_width-1 downto 0);
@@ -487,9 +487,9 @@ begin
                   CE_IN       => CE,
                   CE_OUT      => CE,
                   P           => mul_out(I),
-                  PCIN        => (others => '0') 
+                  PCIN        => (others => '0')
                );
-               
+
                others_alu_B <= zeros(alu_width-1 downto alu_before) & alu_out(I-2)(alu_before-1 downto 0);
                others_alu_B_shift <=  others_alu_B(alu_width-17-1 downto 0) & zeros(16 downto 0);
                others_alu_A <= zeros(alu_width-1 downto 48) & mul_out(I);
@@ -511,7 +511,7 @@ begin
                   CARRY_IN    => '0',
                   P           => alu_out(I-1)(alu_width-1 downto 0)
                );
-            end generate;  
+            end generate;
          end generate;
          P <= alu_out((B_DIV_17)+(1 mod (B_MOD_17+1))-1-1)(A_DATA_WIDTH+B_DATA_WIDTH-1 downto 0);
       end generate;

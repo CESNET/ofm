@@ -129,7 +129,7 @@ virtual class comparer_base_tagged #(type MODEL_ITEM, type DUT_ITEM = MODEL_ITEM
             if (w_end == 0) begin
                 it++;
             end else begin
-                dut_item#(DUT_ITEM) dut_last;            
+                dut_item#(DUT_ITEM) dut_last;
                 `uvm_info(this.get_full_name(), $sformatf("\n\tTransaction Match DUT(%0d) Model(%0d) output time %0dns\n\t%s\n%s\n",
                     dut_items[it].in_id, model_accept, dut_items[it].in_time/1ns, tr.convert2string_time(),
                     this.message(tr, dut_items[it])), UVM_DEBUG);

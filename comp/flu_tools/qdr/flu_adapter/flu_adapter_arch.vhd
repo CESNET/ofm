@@ -30,23 +30,23 @@ architecture FULL of FLU_ADAPTER is
    --! \brief constant declaration
 
    --! \brief signal declaration
-   --! Input flu pipe output signals 
+   --! Input flu pipe output signals
    signal pipein_flu_tx_data             : std_logic_vector(511 downto 0);
    signal pipein_flu_tx_sop_pos          : std_logic_vector(2 downto 0);
-   signal pipein_flu_tx_eop_pos          : std_logic_vector(5 downto 0); 
-   signal pipein_flu_tx_sop              : std_logic; 
-   signal pipein_flu_tx_eop              : std_logic; 
-   signal pipein_flu_tx_src_rdy          : std_logic; 
-   signal pipein_flu_tx_dst_rdy          : std_logic; 
+   signal pipein_flu_tx_eop_pos          : std_logic_vector(5 downto 0);
+   signal pipein_flu_tx_sop              : std_logic;
+   signal pipein_flu_tx_eop              : std_logic;
+   signal pipein_flu_tx_src_rdy          : std_logic;
+   signal pipein_flu_tx_dst_rdy          : std_logic;
 
    --! Output flu pipe input signals
    signal pipeout_flu_rx_data            : std_logic_vector(511 downto 0);
-   signal pipeout_flu_rx_sop_pos         : std_logic_vector(2 downto 0); 
-   signal pipeout_flu_rx_eop_pos         : std_logic_vector(5 downto 0); 
-   signal pipeout_flu_rx_sop             : std_logic; 
-   signal pipeout_flu_rx_eop             : std_logic; 
-   signal pipeout_flu_rx_src_rdy         : std_logic; 
-   signal pipeout_flu_rx_dst_rdy         : std_logic; 
+   signal pipeout_flu_rx_sop_pos         : std_logic_vector(2 downto 0);
+   signal pipeout_flu_rx_eop_pos         : std_logic_vector(5 downto 0);
+   signal pipeout_flu_rx_sop             : std_logic;
+   signal pipeout_flu_rx_eop             : std_logic;
+   signal pipeout_flu_rx_src_rdy         : std_logic;
+   signal pipeout_flu_rx_dst_rdy         : std_logic;
 
    --! QDR read request pipe input/output signals
    signal piperd_in_data                 : std_logic_vector(ADDR_WIDTH-2 downto 0);
@@ -71,7 +71,7 @@ architecture FULL of FLU_ADAPTER is
    signal flu2qdr_qdr_tx_wr_data         : std_logic_vector(863 downto 0);
    signal flu2qdr_qdr_tx_wr_src_rdy      : std_logic;
    signal flu2qdr_qdr_tx_wr_dst_rdy      : std_logic;
- 
+
    --! QDR adapter request signals
    signal qdr_request_in_rd              : std_logic_vector(ADDR_WIDTH*2-1 downto 0);
    signal qdr_request_in_rd_vld          : std_logic_vector(2-1 downto 0);
@@ -236,7 +236,7 @@ begin
       FAKE_PIPE => false
    )
    port map (
-      -- Common interface 
+      -- Common interface
       CLK => APP_CLK,
       RESET => APP_RST,
 
@@ -276,7 +276,7 @@ begin
       FAKE_PIPE => false
    )
    port map (
-      -- Common interface 
+      -- Common interface
       CLK => APP_CLK,
       RESET => APP_RST,
 
@@ -333,7 +333,7 @@ begin
 
       --! FLU2QDR -> QDR adapter
       --! read request (address)
-      QDR_RX_RD_ADDR => piperd_out_data, 
+      QDR_RX_RD_ADDR => piperd_out_data,
       QDR_RX_RD_SRC_RDY => piperd_out_src_rdy,
       QDR_RX_RD_DST_RDY => piperd_out_dst_rdy,
 

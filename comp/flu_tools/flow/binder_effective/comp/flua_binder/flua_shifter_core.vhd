@@ -5,7 +5,7 @@
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --
--- TODO: 
+-- TODO:
 --
 --
 
@@ -37,7 +37,7 @@ entity FLUA_SHIFTER_CORE is
    port(
        -- -------------------------------------------------
        -- \name Common interface
-       -- -------------------------------------------------  
+       -- -------------------------------------------------
       RESET          : in  std_logic;
       CLK            : in  std_logic;
 
@@ -75,7 +75,7 @@ end entity;
 -- ----------------------------------------------------------------------------
 --                        Entity declaration
 -- ----------------------------------------------------------------------------
-architecture FULL of FLUA_SHIFTER_CORE is 
+architecture FULL of FLUA_SHIFTER_CORE is
    -- Constants declaration ---------------------------------------------------
    constant DATA_BLOCK_WIDTH     : integer := DATA_WIDTH/(2**SOP_POS_WIDTH);
    constant DATA_BLOCK_COUNT     : integer := 2**SOP_POS_WIDTH;
@@ -87,22 +87,22 @@ architecture FULL of FLUA_SHIFTER_CORE is
       --! Registers for FLUA flow
    signal reg_flua_data          : std_logic_vector(DATA_WIDTH-1 downto 0);
    signal reg_shift_val          : std_logic_vector(SOP_POS_WIDTH-1 downto 0);
-   
+
    --! Composition of data shifting bus
-   type t_shift_array is array(0 to 2**(SOP_POS_WIDTH+1)-2) 
+   type t_shift_array is array(0 to 2**(SOP_POS_WIDTH+1)-2)
       of std_logic_vector(DATA_WIDTH-1 downto 0);
    signal data_shift_bus      : t_shift_array;
-   
+
    --! Signal for storing of eop moved information. If active, EOP was moved
    --! to the next word.
-   signal eop_moved_en           : std_logic; 
+   signal eop_moved_en           : std_logic;
    signal reg_eop_moved_en       : std_logic;
    signal eop_pos_blk            : std_logic_vector(SOP_POS_WIDTH-1 downto 0);
    signal ext_eop_pos_blk        : std_logic_vector(SOP_POS_WIDTH downto 0);
    signal ext_reg_shift_val      : std_logic_vector(SOP_POS_WIDTH downto 0);
    signal sum_new_eop_pos        : std_logic_vector(SOP_POS_WIDTH downto 0);
    signal reg_short_packet_det   : std_logic;
-  
+
    --! Signals for computation of new eop_pos value
    signal new_eop_pos_blk        : std_logic_vector(SOP_POS_WIDTH-1 downto 0);
    signal new_eop_pos_blk_live   : std_logic_vector(SOP_POS_WIDTH-1 downto 0);
@@ -114,7 +114,7 @@ architecture FULL of FLUA_SHIFTER_CORE is
    --! Data shift value
    signal reg_data_shift_val     : std_logic_vector(SOP_POS_WIDTH downto 0);
    signal act_data_shift_val     : std_logic_vector(SOP_POS_WIDTH downto 0);
-   signal ext_data_shift_val     : std_logic_vector(SOP_POS_WIDTH downto 0); 
+   signal ext_data_shift_val     : std_logic_vector(SOP_POS_WIDTH downto 0);
 
 begin
 
@@ -125,7 +125,7 @@ begin
    end generate;
 
    GAP_RX_DST_RDY_GEN:if(FLU_GAP_EN = true)generate
-      --! Copy destination ready signal from the TX side, stop the transfer 
+      --! Copy destination ready signal from the TX side, stop the transfer
       --! if:
       --! * EOP is moved to the next bus word
       --! * Start of the new frame is detected
@@ -164,7 +164,7 @@ begin
          end if;
       end if;
    end process;
- 
+
    --! Input shift value register
    flua_shift_repg:process(CLK)
    begin
@@ -201,20 +201,20 @@ begin
       end generate;
 
       SHIFT_GEN:if(i /= 0)generate
-         data_shift_bus(i)(DATA_BLOCK_COUNT*DATA_BLOCK_WIDTH-1 downto i*DATA_BLOCK_WIDTH) 
+         data_shift_bus(i)(DATA_BLOCK_COUNT*DATA_BLOCK_WIDTH-1 downto i*DATA_BLOCK_WIDTH)
             <= RX_DATA((DATA_BLOCK_COUNT-i)*DATA_BLOCK_WIDTH-1 downto 0);
 
          -- Rest will be filled with zeros
          data_shift_bus(i)(i*DATA_BLOCK_WIDTH-1 downto 0) <= (others=>'0');
       end generate;
    end generate;
-   
-   --Generation of all shiftings in 
+
+   --Generation of all shiftings in
    SHIFT_IN_REG_WORD_GEN:for i in 0 to 2**SOP_POS_WIDTH-2 generate
-      data_shift_bus(2**SOP_POS_WIDTH+i) <= 
+      data_shift_bus(2**SOP_POS_WIDTH+i) <=
       RX_DATA(DATA_BLOCK_WIDTH*(DATA_BLOCK_COUNT-1-i)-1 downto 0)
       &
-      reg_flua_data(DATA_BLOCK_WIDTH*DATA_BLOCK_COUNT-1 
+      reg_flua_data(DATA_BLOCK_WIDTH*DATA_BLOCK_COUNT-1
                     downto
                     DATA_BLOCK_WIDTH*(DATA_BLOCK_COUNT-1-i));
    end generate;
@@ -224,7 +224,7 @@ begin
    begin
       if(CLK = '1' and CLK'event)then
          if(RESET = '1')then
-            reg_data_shift_val <= (others=>'0'); 
+            reg_data_shift_val <= (others=>'0');
          else
             if(RX_SRC_RDY = '1' and TX_DST_RDY = '1' and RX_SOP = '1' and SHIFT_VAL /= 0)then
                -- Compute new data shifting value
@@ -241,19 +241,19 @@ begin
 
    --! Selection of right Data shift
    GAP_ACT_DATA_SHIFT_VAL:if(FLU_GAP_EN = true)generate
-      act_data_shift_val <= 
-         ext_data_shift_val when(RX_SRC_RDY = '1' and RX_SOP = '1' and 
+      act_data_shift_val <=
+         ext_data_shift_val when(RX_SRC_RDY = '1' and RX_SOP = '1' and
                                  reg_eop_moved_en = '0' and reg_short_packet_det = '0')
          else reg_data_shift_val;
    end generate;
-   
+
    NO_GAP_ACT_DATA_SHIFT_VAL:if(FLU_GAP_EN = false)generate
-      act_data_shift_val <= 
-         ext_data_shift_val when(RX_SRC_RDY = '1' and RX_SOP = '1' and 
+      act_data_shift_val <=
+         ext_data_shift_val when(RX_SRC_RDY = '1' and RX_SOP = '1' and
                                  reg_eop_moved_en = '0')
          else reg_data_shift_val;
    end generate;
-   
+
    --! Selection of right shift block
    TX_DATA <= data_shift_bus(conv_integer(UNSIGNED(act_data_shift_val)));
 
@@ -313,7 +313,7 @@ begin
    new_eop_pos_blk_live <= eop_pos_blk + SHIFT_VAL;
 
    --! Composition of new EOP_POS value
-   new_eop_pos <= new_eop_pos_blk & 
+   new_eop_pos <= new_eop_pos_blk &
                   RX_EOP_POS(log2(DATA_WIDTH/8)-SOP_POS_WIDTH-1 downto 0);
       -- Live version of previous signal (information is available one clock earlier)
    new_eop_pos_live <= new_eop_pos_blk_live &
@@ -342,14 +342,14 @@ begin
                   (RX_SRC_RDY = '1' and RX_SOP = '0' and RX_EOP = '1' and eop_moved_en = '0')
                 ) else reg_eop_moved_en;
 
-      -- Deal with signalization of RX_SRC_RDY signal 
+      -- Deal with signalization of RX_SRC_RDY signal
       TX_SRC_RDY <= '1'  when(reg_eop_moved_en = '1')
                     else RX_SRC_RDY;
    end generate;
 
    GAP_OUTPUT_GEN:if(FLU_GAP_EN = true)generate
       --! Switch right EOP_POS value to output
-      TX_EOP_POS <= RX_EOP_POS when (RX_SOP = '1' and RX_EOP = '1' and RX_SRC_RDY = '1' and 
+      TX_EOP_POS <= RX_EOP_POS when (RX_SOP = '1' and RX_EOP = '1' and RX_SRC_RDY = '1' and
                                      reg_eop_moved_en = '0' and reg_short_packet_det = '0')else
                     reg_new_eop_pos when(reg_eop_moved_en = '1' and reg_short_packet_det = '0') else
                     reg_new_eop_pos_live when(reg_short_packet_det = '1')else
@@ -362,7 +362,7 @@ begin
                else '1' when(reg_short_packet_det = '1')
                else reg_eop_moved_en;
 
-      -- Deal with signalization of RX_SRC_RDY signal 
+      -- Deal with signalization of RX_SRC_RDY signal
       TX_SRC_RDY <= '1'  when(reg_eop_moved_en = '1' or reg_short_packet_det = '1')
                     else RX_SRC_RDY;
    end generate;

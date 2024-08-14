@@ -68,7 +68,7 @@ begin
    port map(
       --! Write interface
       CLK_WR   => clk_wr,
-      RST_WR   => reset, 
+      RST_WR   => reset,
       WR       => wr,
       DI       => di,
       FULL     => full,
@@ -77,7 +77,7 @@ begin
 
       --! Read interface
       CLK_RD   => clk_rd,
-      RST_RD   => reset, 
+      RST_RD   => reset,
       RD       => rd,
       DO       => do,
       DO_DV    => dv,
@@ -131,17 +131,17 @@ begin
    end process;
 
    tb_wr : process
-         
-   begin 
+
+   begin
       blkend <= '0';
       di <= (others => '0');
       wr <= '0';
-      
+
       wait until (rising_edge(clk_wr) and full='0');
       wr <= '1';
       for i in 1 to 5 loop
          di <= conv_std_logic_vector(i, di'length);
-         wait until (rising_edge(clk_wr) and full='0');      
+         wait until (rising_edge(clk_wr) and full='0');
       end loop;
          blkend <= '1';
          di <= conv_std_logic_vector(6, di'length);
@@ -149,12 +149,12 @@ begin
          blkend <= '0';
          wr <= '0';
       wait for 33 ns;
-      
+
       wait until (rising_edge(clk_wr) and full='0');
       wr <= '1';
       for i in 7 to 15 loop
          di <= conv_std_logic_vector(i, di'length);
-         wait until (rising_edge(clk_wr) and full='0');      
+         wait until (rising_edge(clk_wr) and full='0');
       end loop;
          blkend <= '1';
          di <= conv_std_logic_vector(16, di'length);
@@ -167,7 +167,7 @@ begin
       wr <= '1';
       for i in 17 to 27 loop
          di <= conv_std_logic_vector(i, di'length);
-         wait until (rising_edge(clk_wr) and full='0');    
+         wait until (rising_edge(clk_wr) and full='0');
       end loop;
          blkend <= '1';
          di <= conv_std_logic_vector(28, di'length);
@@ -175,12 +175,12 @@ begin
          blkend <= '0';
          wr <= '0';
       wait for 50 ns;
-      
+
       wait until (rising_edge(clk_wr) and full='0');
       wr <= '1';
       for i in 29 to 35 loop
          di <= conv_std_logic_vector(i, di'length);
-         wait until (rising_edge(clk_wr) and full='0');    
+         wait until (rising_edge(clk_wr) and full='0');
       end loop;
          blkend <= '1';
          di <= conv_std_logic_vector(36, di'length);

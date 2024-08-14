@@ -49,14 +49,14 @@ entity MFB_SPLITTER_SIMPLE_GEN is
         -- =====================================================================
         -- Clock and Reset
         -- =====================================================================
-    
+
         CLK            : in  std_logic;
         RESET          : in  std_logic;
 
         -- =====================================================================
         -- RX interface
         -- =====================================================================
-    
+
         -- One select bit for each stage (and for each region ofc), bit RX_MFB_SEL(0)(x) is for Stage 0, and so on.
         -- Expected to be valid with SOF!
         RX_MFB_SEL     : in  std_logic_vector(REGIONS*max(1,log2(SPLITTER_OUTPUTS))-1 downto 0);
@@ -73,7 +73,7 @@ entity MFB_SPLITTER_SIMPLE_GEN is
         -- =====================================================================
         -- TX interface
         -- =====================================================================
-    
+
         TX_MFB_DATA    : out slv_array_t     (SPLITTER_OUTPUTS-1 downto 0)(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
         -- Valid whenever, metadata is split by words
         TX_MFB_META    : out slv_array_t     (SPLITTER_OUTPUTS-1 downto 0)(REGIONS*META_WIDTH-1 downto 0) := (others => (others => '0'));

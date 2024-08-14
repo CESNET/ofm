@@ -60,7 +60,7 @@ begin
    );
 
    -- Generate clock
-   clk_gen_p : process 
+   clk_gen_p : process
    begin
       CLK <= '1';
       wait for clkper/2;
@@ -80,13 +80,13 @@ begin
    -- Verification of xor function for DO_1 (Registers not included)
    D_1 <= xor_reduce(DI(DATA_WIDTH-1 downto DATA_WIDTH/2) & DI(DATA_WIDTH/2-1 downto 0));
 
-   -- Simulating input flow 
+   -- Simulating input flow
    input_flow : process
    begin
 
       -- Initialize input interface
       DI <= (others => '0'); -- output 0
-      
+
       CEI   <= '1';
       CEO   <= '1';
 
@@ -117,14 +117,14 @@ begin
 
       DI <= X"ABCD26891111ABCD26891111ABCD26891111ABCD26891111ABCD26891111ABCD26891111ABCD26891111ABCD26891111"; -- output 0
       wait for clkper;
-     
+
       -- Data input for any DATA_WIDTH (Test of DO_2, DO_4)
       for I in 0 to DATA_WIDTH-1 loop
          DI <= (others => '0');
          DI(I) <= '1';
          wait for clkper;
 
-         report   "DO_1: "  & integer'image(conv_integer(DO_1)) & 
+         report   "DO_1: "  & integer'image(conv_integer(DO_1)) &
                   " DO_2: " & integer'image(conv_integer(DO_2(1))) &
                               integer'image(conv_integer(DO_2(0))) &
                   " DO_4: " & integer'image(conv_integer(DO_4(3))) &

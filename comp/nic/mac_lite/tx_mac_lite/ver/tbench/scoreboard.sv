@@ -20,7 +20,7 @@ class ScoreboardDriverCbs extends DriverCbs;
         this.sentFrames = 0;
         this.lencnt = 0;
     endfunction
-        
+
     virtual task pre_tx(ref Transaction transaction, string inst);
         if (VERBOSITY>0) begin
             $write("Transaction sent to driver %s\n", inst);
@@ -29,7 +29,7 @@ class ScoreboardDriverCbs extends DriverCbs;
             transaction.display();
         end
     endtask
-        
+
     virtual task post_tx(Transaction transaction, string inst);
         int len_fix;
         int len_with_crc;
@@ -66,11 +66,11 @@ endclass
 class ScoreboardMonitorCbs extends MonitorCbs;
     TransactionTable #(1) sc_table;
     int cnt = 0;
-    
+
     function new (TransactionTable #(1) st);
         this.sc_table = st;
     endfunction
-    
+
     virtual task post_rx(Transaction transaction, string inst);
         bit status=0;
         cnt = cnt + 1;
@@ -113,7 +113,7 @@ class Scoreboard;
         scoreTable.display(.inst(inst));
         $write("Total Processed Bytes by Model:\t\t %10d\n", this.driverCbs.lencnt);
     endtask
-    
+
     function longint getByteCounter();
         return this.driverCbs.lencnt;
     endfunction;

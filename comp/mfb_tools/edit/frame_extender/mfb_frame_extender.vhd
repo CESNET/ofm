@@ -16,7 +16,7 @@ use work.type_pack.all;
 -- to efficiently insert metadata into the framework.
 entity MFB_FRAME_EXTENDER is
 generic (
-    -- The number of MFB regions 
+    -- The number of MFB regions
     MFB_REGIONS     : natural := 4;
     -- MFB region size in blocks, must be power of two
     MFB_REGION_SIZE : natural := 8;
@@ -66,7 +66,7 @@ port (
     RX_MFB_EOF_POS         : in  std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE))-1 downto 0);
     RX_MFB_SRC_RDY         : in  std_logic;
     RX_MFB_DST_RDY         : out std_logic;
-    
+
     -- =========================================================================
     --  TX MFB interface
     -- =========================================================================
@@ -259,7 +259,7 @@ begin
         RX_EOF         => pkt_eof,
         RX_SRC_RDY     => pkt_src_rdy,
         RX_DST_RDY     => pkt_dst_rdy,
-    
+
         TX_INSERT_MOVE => ctrl_insert_move,
         TX_INSERT_MASK => ctrl_insert_mask,
         TX_INSERT_VLD  => ctrl_insert_vld,
@@ -286,7 +286,7 @@ begin
     port map(
         CLK                 => CLK,
         RESET               => RESET,
-    
+
         RX_CTRL_INSERT_MOVE => ctrl_insert_move,
         RX_CTRL_INSERT_MASK => ctrl_insert_mask,
         RX_CTRL_INSERT_VLD  => ctrl_insert_vld,

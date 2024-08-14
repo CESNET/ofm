@@ -13,7 +13,7 @@
 
 <description>
    <p>
-      This generic demultiplexer should help us to improve readability and 
+      This generic demultiplexer should help us to improve readability and
       reusability of our designs.
    </p>
 </description>
@@ -57,19 +57,19 @@
             <th>Max. HW frequency</th>
          </tr>
          <tr>
-            <th>16 outputs, 1b width</th> 
+            <th>16 outputs, 1b width</th>
             <td>9 (0.04%)</td>
             <td>0 (0.0%)</td>
             <td>100 MHz</td>
          </tr>
          <tr>
-            <th>4 outputs, 32b width</th> 
+            <th>4 outputs, 32b width</th>
             <td>64 (0.3%)</td>
             <td>0 (0.0%)</td>
             <td>100 MHz</td>
          </tr>
       <nazev>Chip utilization &amp; max design frequency</nazev>
-      </tab> 
+      </tab>
    </p>
 </body>
 

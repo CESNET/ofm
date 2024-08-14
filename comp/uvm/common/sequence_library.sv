@@ -1,7 +1,7 @@
 /*
  * file       :  sequence_library.sv
  * Copyright (C) 2021 CESNET z. s. p. o.
- * description: Iproved sequence library  
+ * description: Iproved sequence library
  * date       : 2021
  * author     : Radek Iša <isa@cesnet.cz>
  *

@@ -36,9 +36,9 @@ entity FL_BINDER_STUPID is
       RX_EOF_N       : in  std_logic_vector(INPUT_COUNT-1 downto 0);
       RX_SRC_RDY_N   : in  std_logic_vector(INPUT_COUNT-1 downto 0);
       RX_DST_RDY_N   : out std_logic_vector(INPUT_COUNT-1 downto 0);
-      RX_DATA        : in  std_logic_vector(INPUT_COUNT*INPUT_WIDTH-1 
+      RX_DATA        : in  std_logic_vector(INPUT_COUNT*INPUT_WIDTH-1
                                                                      downto 0);
-      RX_REM         : in  std_logic_vector(INPUT_COUNT*log2(INPUT_WIDTH/8)-1 
+      RX_REM         : in  std_logic_vector(INPUT_COUNT*log2(INPUT_WIDTH/8)-1
                                                                      downto 0);
 
       -- output FrameLink interface
@@ -91,7 +91,7 @@ begin
    end process;
 
 
-   hold_fl_proc : process(CLK) 
+   hold_fl_proc : process(CLK)
    begin
       if CLK'event and CLK = '1' then
          gengen: for i in 0 to INPUT_COUNT-1 loop
@@ -106,7 +106,7 @@ begin
       end if;
    end process;
 
-      
+
 
 
    start_num_proc : process(hold_fl,my_shift)

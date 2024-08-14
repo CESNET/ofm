@@ -1,7 +1,7 @@
 /*
  * file       : scoreboard.sv
  * Copyright (C) 2021 CESNET z. s. p. o.
- * description: scoreboard 
+ * description: scoreboard
  * date       : 2021
  * author     : Radek Iša <isa@cesnet.cz>
  *

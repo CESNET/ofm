@@ -24,7 +24,7 @@ entity MI_ASYNC is
         -- Meta word width in bits.
         META_WIDTH  : natural := 2;
         -- Select memory implementation. Options: "LUT" or "BRAM"
-        RAM_TYPE    : string  := "LUT"; 
+        RAM_TYPE    : string  := "LUT";
         -- RESET_LOGIC provides additional logic for safe asynchronous reset of the component
         -- when one or both of the sides are in reset state, without violating MI protocol
         RESET_LOGIC : boolean := true;
@@ -210,7 +210,7 @@ begin
         if (rising_edge(CLK_M)) then
             if (p_state = COMP_RESET or (RESET_M = '1' and not RESET_LOGIC)) then
                 drdy_status <= (others => '0');
-            elsif (fifo_out_empty = '1' and drdy_req = '1') then -- only read request 
+            elsif (fifo_out_empty = '1' and drdy_req = '1') then -- only read request
                 drdy_status <= drdy_status + 1;
             elsif ((fifo_out_empty = '0' and drdy_req = '0') or (p_state = SLAVE_RESET and drdy_status /= 0)) then -- only read response
                 drdy_status <= drdy_status - 1;

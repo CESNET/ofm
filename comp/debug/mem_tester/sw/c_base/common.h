@@ -58,7 +58,7 @@ enum TestType_e
             fprintf(stderr,  "\n");                     \
             goto toGo;                                  \
         }                                               \
-    }while(0)  
+    }while(0)
 
 #define SWAP(a, b)      \
     do{                 \
@@ -133,9 +133,9 @@ struct AMMProbeResults_s
     double      readFlow_bs;
     double      totalFlow_bs;
 
-    double      avgLatency_ns; 
-    double      minLatency_ns; 
-    double      maxLatency_ns; 
+    double      avgLatency_ns;
+    double      minLatency_ns;
+    double      maxLatency_ns;
 };
 
 struct TestParams_s
@@ -193,7 +193,7 @@ enum Registers_e
 
     REG_CNT
 };
- 
+
  // Bits
 enum CtrlIn_e
 {

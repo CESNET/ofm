@@ -19,14 +19,14 @@ package fl_watch_addr_pkg is
 
    -- Control register
    constant FL_WATCH_CTRL_OFFSET : std_logic_vector(31 downto 0) := X"00000000";
-   constant FL_WATCH_CTRL        : std_logic_vector(31 downto 0) := 
+   constant FL_WATCH_CTRL        : std_logic_vector(31 downto 0) :=
                                    FL_WATCH_BASE_ADDR + FL_WATCH_CTRL_OFFSET;
 
    -- Offset 0x4 is reserved for future use
 
    -- Offset of first frame counter
    constant FL_WATCH_FCNT0_OFFSET : std_logic_vector(31 downto 0) := X"00000008";
-   constant FL_WATCH_FCNT0        : std_logic_vector(31 downto 0) := 
+   constant FL_WATCH_FCNT0        : std_logic_vector(31 downto 0) :=
                                    FL_WATCH_BASE_ADDR + FL_WATCH_FCNT0_OFFSET;
 
    -- Other addresses are generic, see documentation for details.

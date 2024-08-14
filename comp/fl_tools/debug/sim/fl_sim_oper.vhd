@@ -36,17 +36,17 @@ package fl_sim_oper is
 -- read variable length string from input file
 procedure read_string(file in_file: TEXT;  --input file
                       out_string: out string;  --output string
-                      load_count: inout integer); --number of read characters 
+                      load_count: inout integer); --number of read characters
 -- convert character to upper case
 function to_upper(c:character) return character;
--- convert hexa character to std_logic_vector 
-procedure convert_character(data:inout std_logic_vector; -- output 4-bit number 
+-- convert hexa character to std_logic_vector
+procedure convert_character(data:inout std_logic_vector; -- output 4-bit number
                             c:character);  -- input hexa value in character
 -- load 32bit number from input string
 procedure load_32(data:inout std_logic_vector; -- 32bit number
                   s:string;  -- input string
                   i:inout integer; -- current position in string
-                  size:integer;  -- size of string 
+                  size:integer;  -- size of string
                   count: inout std_logic_vector); -- count of valid bytes in 32-bit number
 -- convert file name in string to t_fl_ctrl
 function fl_send32(file_name:string) return t_fl_ctrl;
@@ -80,8 +80,8 @@ begin
            exit;
         end if;
         load_count:=load_count+1;
-     end loop; 
-                     
+     end loop;
+
 end read_string;
 
 -- convert character to upper case
@@ -100,7 +100,7 @@ begin
   return output;
 end;
 
--- convert hexa character to std_logic_vector 
+-- convert hexa character to std_logic_vector
 procedure convert_character(data:inout std_logic_vector;c:character) is
 variable c_decoded:std_logic_vector(3 downto 0);
 variable lbound:integer;

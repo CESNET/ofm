@@ -26,7 +26,7 @@ entity WATCHDOG_FRAMELINK is
       --!   if TIMING is true, counter counts clock's periods, not data flowing
       TIMING            : boolean   := false
    );
-   
+
    port(
    -----------------------------------------
    ---        watchdog signals           ---
@@ -40,11 +40,11 @@ entity WATCHDOG_FRAMELINK is
       COUNTER           : out std_logic_vector(COUNTER_WIDTH-1 downto 0);
       --!   if watchdog releases data or if it is locked
       LOCKED            : out std_logic;
-      
+
       -----------------------------------------
       ---        FrameLink signals          ---
       -----------------------------------------
-      
+
       --! input interface
       RX_DATA             : in  std_logic_vector(DATA_WIDTH-1 downto 0);
       RX_REM              : in  std_logic_vector(LOG2(DATA_WIDTH/8)-1 downto 0);
@@ -54,7 +54,7 @@ entity WATCHDOG_FRAMELINK is
       RX_EOP_N            : in  std_logic;
       RX_SRC_RDY_IN       : in  std_logic;
       RX_DST_RDY_IN       : out std_logic;
-      
+
       --! output interface
       TX_DATA             : out std_logic_vector(DATA_WIDTH-1 downto 0);
       TX_REM              : out std_logic_vector(LOG2(DATA_WIDTH/8)-1 downto 0);
@@ -64,5 +64,5 @@ entity WATCHDOG_FRAMELINK is
       TX_EOP_N            : out std_logic;
       TX_SRC_RDY_OUT      : out std_logic;
       TX_DST_RDY_OUT      : in  std_logic
-   ); 
+   );
 end;

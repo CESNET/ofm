@@ -1,7 +1,7 @@
 --
 -- TESTBENCH.vhd: frame_spliter testbench
 -- Copyright (C) 2006 CESNET
--- Author(s):Jan Kastil <xkasti00@stud.fit.vutbr.cz> 
+-- Author(s):Jan Kastil <xkasti00@stud.fit.vutbr.cz>
 --           Vlastimil Kosar <xkosar02@stud.fit.vutbr.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
@@ -18,8 +18,8 @@ use ieee.std_logic_arith.all;
 use ieee.std_logic_textio.all;
 use ieee.numeric_std.all;
 use std.textio.all;
-use work.fl_pkg.all; 
-use work.fl_sim_oper.all; 
+use work.fl_pkg.all;
+use work.fl_sim_oper.all;
 
 -- ----------------------------------------------------------------------------
 --                        Entity declaration
@@ -56,15 +56,15 @@ architecture TESTBENCH_arch of TESTBENCH is
      signal fl_bus_out1       : t_fl64;
      signal fl_bus_out2       : t_fl64;
      signal fl_bus1           : t_fl64;
-   
-     -- FL_SIM component ctrl      
+
+     -- FL_SIM component ctrl
      signal fl_sim_ctrl        : t_fl_ctrl;
      signal fl_sim_strobe      : std_logic;
      signal fl_sim_busy        : std_logic;
      signal fl_sim_ctrl1        : t_fl_ctrl;
      signal fl_sim_strobe1      : std_logic;
      signal fl_sim_busy1        : std_logic;
-     
+
 begin
 
 -- Reset generation -----------------------------------------------------------
@@ -75,7 +75,7 @@ begin
       reset <= '0';
       wait;
    end process reset_gen;
-   
+
 -- clk50 generator ------------------------------------------------------------
 clk50_gen : process
 begin
@@ -151,7 +151,7 @@ end fl_op;
 
 begin
 -- ready to receive
-   
+
 FL_bus_out1.DST_RDY_N <= '0';
 FL_bus_out2.DST_RDY_N <= '0';
 -- Testbench
@@ -191,7 +191,7 @@ uut: entity work.Frame_spliter
       TX_EOP_N_OUT1 =>fl_bus_out1.eop_n,
       TX_SRC_RDY_N_OUT1 =>fl_bus_out1.src_rdy_n,
       TX_DST_RDY_N_OUT1 =>fl_bus_out1.dst_rdy_n,
-      
+
       TX_DATA_OUT2 => fl_bus_out2.data,
       TX_REM_OUT2 =>fl_bus_out2.drem,
       TX_SOF_N_OUT2 =>fl_bus_out2.sof_n,

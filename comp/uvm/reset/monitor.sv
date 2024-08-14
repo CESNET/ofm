@@ -1,7 +1,7 @@
 /*
  * file       : monitor.sv
  * Copyright (C) 2021 CESNET z. s. p. o.
- * description: RESET monitor 
+ * description: RESET monitor
  * date       : 2021
  * author     : Radek Iša <isa@cesnet.cz>
  *
@@ -55,7 +55,7 @@ class monitor extends uvm_monitor;
                 send_reset(reset_new);
             end
             item = sequence_item::type_id::create("item");
-            item.reset = reset_new; 
+            item.reset = reset_new;
             analysis_port.write(item);
 
             reset_prev = reset_new;

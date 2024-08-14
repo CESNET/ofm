@@ -40,7 +40,7 @@ entity MI2AXI4 is
         MI_DRD      : out std_logic_vector(MI_DATA_WIDTH-1 downto 0);
         MI_ARDY     : out std_logic;
         MI_DRDY     : out std_logic;
-        
+
         -- =====================================================================
         -- AXI4 interface (master)
         -- =====================================================================
@@ -57,7 +57,7 @@ entity MI2AXI4 is
         AXI_WVALID  : out std_logic;
         AXI_WREADY  : in  std_logic;
         AXI_BID     : in  std_logic_vector(8-1 downto 0);
-        AXI_BRESP   : in  std_logic_vector(2-1 downto 0);    
+        AXI_BRESP   : in  std_logic_vector(2-1 downto 0);
         AXI_BVALID  : in  std_logic;
         AXI_BREADY  : out std_logic;
         AXI_ARID    : out std_logic_vector(8-1 downto 0);
@@ -123,7 +123,7 @@ begin
                 AXI_AWADDR <= MI_ADDR and mi_mask and ADDR_MASK;
                 AXI_ARADDR <= MI_ADDR and mi_mask and ADDR_MASK;
             end if;
-            if (mi_wr_valid = '1') then  
+            if (mi_wr_valid = '1') then
                 AXI_WSTRB <= (others => '0');
                 AXI_WDATA <= (others => '0');
                 if (MI_ADDR(2) = '1' and AXI_DATA_WIDTH=64) then
@@ -177,7 +177,7 @@ begin
                 if (AXI_WREADY = '1') then
                     fsm_nstate <= st_write_resp;
                 end if;
-            
+
             when st_write_resp =>
                 if (AXI_BVALID = '1') then
                     fsm_nstate <= st_idle;
@@ -188,7 +188,7 @@ begin
                 if (AXI_ARREADY = '1') then
                     fsm_nstate <= st_read_resp;
                 end if;
-            
+
             when st_read_resp =>
                 if (AXI_RVALID = '1') then
                     MI_DRDY    <= '1';

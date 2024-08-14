@@ -24,7 +24,7 @@ use work.math_pack.all;
 --! General FLU_ADAPTER package
 use work.flu_adapter_pkg.all;
 
---\name FLU to QDR converter 
+--\name FLU to QDR converter
 entity FLU2QDR is
    generic (
       --! Width of read request

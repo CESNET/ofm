@@ -2,14 +2,14 @@
 # Copyright (C) 2014 CESNET
 # Author: Mario Kuka <xkukam00@stud.fit.vutbr.cz>
 # SPDX-License-Identifier: BSD-3-Clause
-# 
+#
 # $Id$
 #
 
 proc blk_ALU_DSP { } {
     global ALU_DSP_PATH
     add_wave "-noupdate -hex -label CE_IN" /$ALU_DSP_PATH/CE_IN
-    add_wave "-noupdate -hex -label CE_OUT" /$ALU_DSP_PATH/CE_OUT  
+    add_wave "-noupdate -hex -label CE_OUT" /$ALU_DSP_PATH/CE_OUT
     add_wave "-noupdate -hex -label ALUMODE" /$ALU_DSP_PATH/ALUMODE
     add_wave "-noupdate -hex -label A" /$ALU_DSP_PATH/A
     add_wave "-noupdate -hex -label B" /$ALU_DSP_PATH/B

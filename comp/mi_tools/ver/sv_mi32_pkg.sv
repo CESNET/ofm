@@ -14,7 +14,7 @@
 // Frame Link Interface
 `include "mi32_ifc.sv"
 
-package sv_mi32_pkg; 
+package sv_mi32_pkg;
 
   import sv_common_pkg::*; // Import SV common classes
 

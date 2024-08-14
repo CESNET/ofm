@@ -140,7 +140,7 @@ begin
       wait for clkper; wait until (CLK'event and CLK = '1');
       WEB    <= '0';
       wait for clkper; wait until (CLK'event and CLK = '1');
-      
+
       -- read from A, address 0
       REA   <= '1';
       wait for clkper; wait until (CLK'event and CLK = '1');
@@ -151,7 +151,7 @@ begin
       DIA   <= std_logic_vector(to_unsigned(18, DATA_WIDTH));
       WEA   <= '1';
       wait for clkper; wait until (CLK'event and CLK = '1');
-      
+
       WEA   <= '0';
       wait for 5*clkper; wait until (CLK'event and CLK = '1');
       REB   <= '1';
@@ -175,7 +175,7 @@ begin
       wait for clkper; wait until (CLK'event and CLK = '1');
       WEA <= '0';
       REB <= '0';
-      wait for clkper; wait until (CLK'event and CLK = '1');      
+      wait for clkper; wait until (CLK'event and CLK = '1');
       --! Port B write, port A read. Same address
       ADDRA <= std_logic_vector(to_unsigned(66, ADDRESS_WIDTH));
       ADDRB <= std_logic_vector(to_unsigned(66, ADDRESS_WIDTH));

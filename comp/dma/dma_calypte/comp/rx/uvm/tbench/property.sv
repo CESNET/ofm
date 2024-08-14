@@ -2,7 +2,7 @@
 //-- Copyright (C) 2022 CESNET z. s. p. o.
 //-- Author(s): Radek Iša <isa@cesnet.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 import uvm_pkg::*;
 `include "uvm_macros.svh"

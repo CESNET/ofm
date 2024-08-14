@@ -3,7 +3,7 @@
 --! @file
 --! \brief System monitor component for Virtex-7 FPGAs
 --! \author Lukas Kekely <kekely@cesnet.cz>
---! \date 2013 
+--! \date 2013
 --!
 --! @section License
 --!
@@ -19,9 +19,9 @@ use IEEE.std_logic_unsigned.all;
 --! Part of IEEE standard library.
 use IEEE.numeric_std.all;
 
---! Library containing SYSMON (XADC) component. 
+--! Library containing SYSMON (XADC) component.
 library unisim;
---! Library containing SYSMON (XADC) component. 
+--! Library containing SYSMON (XADC) component.
 use unisim.vcomponents.ALL;
 
 --! \brief Architecture implementing system monitor component for Virtex-7 FPGAs.
@@ -36,7 +36,7 @@ begin
   -- real sysmon generate
   sysmon_gen : if (SYSMON_EN) generate
     -- MI connection
-    MI_ARDY              <= MI_RD or MI_WR; 
+    MI_ARDY              <= MI_RD or MI_WR;
     MI_DRDY              <= sysmon_drdy and (not reg_sysmon_wen);
     MI_DRD(31 downto 16) <= (others => '0');
     reg_sysmon_wen_p : process(CLK)
@@ -47,8 +47,8 @@ begin
         end if;
       end if;
     end process;
-   
-   
+
+
     -- sysmon signals
     sysmon_den     <= MI_RD or MI_WR;
     sysmon_addr    <= BANK & MI_ADDR(6 downto 2);
@@ -56,11 +56,11 @@ begin
     alarm_reg : process(CLK)
     begin
       if CLK'event and CLK = '1' then
-        ALARM <= sysmon_alm(0) or sysmon_alm(1) or sysmon_alm(2) or sysmon_alm(3); -- sysmon_alm(7 downto 4) is not defined 
+        ALARM <= sysmon_alm(0) or sysmon_alm(1) or sysmon_alm(2) or sysmon_alm(3); -- sysmon_alm(7 downto 4) is not defined
       end if;
-    end process;    
-    
-    
+    end process;
+
+
     -- sysmon component
     XADC_INST : XADC
     generic map (
@@ -88,19 +88,19 @@ begin
       SIM_DEVICE => "7SERIES",
       SIM_MONITOR_FILE => "design.txt"
     ) port map (
-      RESET             => RESET,   
-      
-      DADDR(6 downto 0) => sysmon_addr, 
+      RESET             => RESET,
+
+      DADDR(6 downto 0) => sysmon_addr,
       DCLK              => CLK,
       DEN               => sysmon_den,
       DI(15 downto 0)   => MI_DWR(15 downto 0),
       DWE               => MI_WR,
       DO(15 downto 0)   => MI_DRD(15 downto 0),
       DRDY              => sysmon_drdy,
-     
+
       ALM(7 downto 0)   => sysmon_alm,
-      OT                => open,          
-     
+      OT                => open,
+
       VAUXN(15 downto 0)  => "0000000000000000",
       VAUXP(15 downto 0)  => "0000000000000000",
       CHANNEL             => open,
@@ -114,14 +114,14 @@ begin
       JTAGBUSY            => open,
       JTAGLOCKED          => open,
       JTAGMODIFIED        => open
-    ); 
+    );
   end generate;
-  
-  
+
+
   -- fake sysmon generate
   no_sysmon_gen : if (not SYSMON_EN) generate
     MI_DRD  <= (others => '0');
-    --! Register of MI_RD signal as MI_DRDY signal 
+    --! Register of MI_RD signal as MI_DRDY signal
     mi_drdy_reg : process(CLK)
     begin
       if CLK'event and CLK = '1' then
@@ -129,7 +129,7 @@ begin
       end if;
     end process;
     MI_ARDY <= MI_RD or MI_WR;
-    ALARM   <= '0'; 
+    ALARM   <= '0';
   end generate;
 
 end architecture;

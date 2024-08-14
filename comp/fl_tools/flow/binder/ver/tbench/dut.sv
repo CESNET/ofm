@@ -8,7 +8,7 @@
  * $Id$
  *
  */
- 
+
 // ----------------------------------------------------------------------------
 //                        Module declaration
 // ----------------------------------------------------------------------------
@@ -22,7 +22,7 @@ module DUT (
 );
 
 // Signals for DUT conection
-wire [(INPUT_COUNT*INPUT_WIDTH)-1:0] rx_data;  
+wire [(INPUT_COUNT*INPUT_WIDTH)-1:0] rx_data;
 wire [(INPUT_COUNT*INPUT_DREM_WIDTH)-1:0] rx_drem;
 wire [INPUT_COUNT-1:0] rx_sof_n;
 wire [INPUT_COUNT-1:0] rx_eof_n;
@@ -61,7 +61,7 @@ FL_BINDER #(
     // Common Interface
      .CLK               (CLK),
      .RESET             (RESET),
- 
+
     // RX ports
      .RX_DATA       (rx_data),
      .RX_REM        (rx_drem),

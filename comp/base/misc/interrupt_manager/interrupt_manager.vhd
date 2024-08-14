@@ -5,7 +5,7 @@
 -- SPDX-License-Identifier: BSD-3-Clause
 --
 -- $Id$
--- 
+--
 
 library IEEE;
 use IEEE.std_logic_1164.all;
@@ -28,7 +28,7 @@ entity INTERRUPT_MANAGER is
       --+ Common interface
       CLK            : in std_logic;
       RESET          : in std_logic;
-      
+
       --* Input interface Interrupt request
       INTERRUPT_IN   : in std_logic_vector(31 downto 0);
       --* Input interface Ready for next request

@@ -26,8 +26,8 @@ use work.math_pack.all;
 --* Component is intended to solve TX_SRC_RDY_N/TX_DST_RDY_N logic of fl_switch
 --* especially when at least one of the TX is not ready to receive data.
 --*
---* The unit waits for the TX_DST_RDY_N to be active. After data is successfully 
---* sent to TX, the internal state changes and blocks itself until all other 
+--* The unit waits for the TX_DST_RDY_N to be active. After data is successfully
+--* sent to TX, the internal state changes and blocks itself until all other
 --* tx_out components do the same. When REALOD signal comes (is activated) the
 --* component reads the IFNUM from the input and resets its state to send again
 --* (or to not send when IFNUM comes as zero).
@@ -40,7 +40,7 @@ port (
    IFNUM    : in  std_logic;
    EN_N     : in  std_logic;
    RELOAD   : in  std_logic;
-   
+
    TX_SRC_RDY_N   : out std_logic;
    TX_DST_RDY_N   : in  std_logic
 );

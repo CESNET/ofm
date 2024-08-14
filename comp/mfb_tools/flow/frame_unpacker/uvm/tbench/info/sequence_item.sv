@@ -76,7 +76,7 @@ class sequence_item #(MVB_ITEM_WIDTH, HEADER_SIZE) extends uvm_sequence_item;
     function string convert2string();
         string ret;
 
-        $swrite(ret, "\tlength : %h\n\tnext : %h\n\tmeta : %h\n\tsup_meta %h\n", 
+        $swrite(ret, "\tlength : %h\n\tnext : %h\n\tmeta : %h\n\tsup_meta %h\n",
                      length, next, meta, sup_meta);
 
         return ret;

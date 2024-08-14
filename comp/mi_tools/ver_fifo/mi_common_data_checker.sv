@@ -3,7 +3,7 @@
 //-- Author(s): Radek Iša <isa@cesnet.cz>
 //--            Tomáš Beneš <xbenes55@stud.fit.vutbr.cz>
 //--
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 // ----------------------------------------------------------------------------
 //                        Scoreboard data
@@ -28,14 +28,14 @@ class mi_common_data_checker #(MI_WIDTH, MI_META_WIDTH);
 
         if (tr.tr_type == sv_mi_pkg::TR_RESPONSE) begin
             cmp_rs++;
-            cmp(fifo_rs, tr); 
+            cmp(fifo_rs, tr);
         end
     endfunction
 
     function void slave_send(sv_mi_pkg::MiTransaction #(MI_WIDTH, MI_WIDTH, MI_META_WIDTH) tr);
         if (tr.tr_type == sv_mi_pkg::TR_REQUEST) begin
             cmp_rq++;
-            cmp(fifo_rq, tr); 
+            cmp(fifo_rq, tr);
         end
 
         if (tr.tr_type == sv_mi_pkg::TR_RESPONSE) begin

@@ -1,8 +1,8 @@
-//-- pkg.sv: package with all tests 
+//-- pkg.sv: package with all tests
 //-- Copyright (C) 2023 CESNET z. s. p. o.
 //-- Author(s): Daniel Kriz <danielkriz@cesnet.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 `ifndef MTC_TEST_SV
 `define MTC_TEST_SV

@@ -1,6 +1,6 @@
 # gui_msg_filters.tcl: definition of procedures for filtering Vivado messages
 #                      in GUI (according to UNITERESTING and MOST_INTERESTING
-#                      lists of message IDs) 
+#                      lists of message IDs)
 # Copyright (C) 2014 CESNET
 # Author: Jiri Matousek <xmatou06@stud.fit.vutbr.cz>
 #
@@ -27,13 +27,13 @@ source $OFM_PATH/build/Vivado.inc.tcl
 proc filter_uninteresting_msg { } {
 
    global OFM_PATH
- 
+
    # import UNINTERESTING and MOST_INTERESTING lists
    source $OFM_PATH/build/scripts/vivado/msg_filter/msg_filtering_rules.tcl
 
    # suppress all INFO messages
    set_msg_config -severity {INFO} -suppress
-   
+
    # suppress warning about resetting non-existing rules
    set_msg_config -id {Common 17-455} -suppress
    # reset suppression of WARNINGs, CRITICAL WARNINGs and ERRORs
@@ -62,15 +62,15 @@ proc show_most_interesting_msg { } {
 
    # suppress all INFO messages
    set_msg_config -severity {INFO} -suppress
-   
+
    # suppress warning about resetting non-existing rules
    set_msg_config -id {Common 17-455} -suppress
    # reset suppression of WARNINGs, CRITICAL WARNINGs and ERRORs
    reset_msg_config -severity {WARNING} -suppress
    reset_msg_config -severity {CRITICAL WARNING} -suppress
    reset_msg_config -severity {ERROR} -suppress
- 
-   # store list of all log files into LOGFILES variable 
+
+   # store list of all log files into LOGFILES variable
    set LOGFILES [get_all_log_files]
 
    # parse all log files to get a list of IDs of all messages in these files
@@ -91,7 +91,7 @@ proc show_most_interesting_msg { } {
          set IDS_UNIQUE [lreplace $IDS_UNIQUE $POS $POS]
       }
    }
- 
+
    # suppress all messages from the resulting list
    foreach ID $IDS_UNIQUE {
       set_msg_config -id $ID -suppress

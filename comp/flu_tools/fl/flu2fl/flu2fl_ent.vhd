@@ -40,12 +40,12 @@ entity flu2fl is
       OUT_PIPE_TYPE    : string  := "SHREG";
       -- use output register of input pipe, only for OUT_PIPE_TYPE = "SHREG"!
       OUT_PIPE_OUTREG  : boolean := false
-   );    
+   );
    port(
-      -- common interface 
+      -- common interface
       CLK            : in std_logic;
-      RESET          : in std_logic; 
-      
+      RESET          : in std_logic;
+
       -- input interface (FLU)
       RX_DATA       : in std_logic_vector(DATA_WIDTH-1 downto 0);
       RX_SOP_POS    : in std_logic_vector(SOP_POS_WIDTH-1 downto 0);
@@ -54,7 +54,7 @@ entity flu2fl is
       RX_EOP        : in std_logic;
       RX_SRC_RDY    : in std_logic;
       RX_DST_RDY    : out std_logic;
-        
+
       -- output interface (FL)
       TX_SOF_N       : out std_logic;
       TX_EOP_N       : out std_logic;
@@ -63,6 +63,6 @@ entity flu2fl is
       TX_SRC_RDY_N   : out std_logic;
       TX_DST_RDY_N   : in  std_logic;
       TX_DATA        : out std_logic_vector(DATA_WIDTH-1 downto 0);
-      TX_DREM        : out std_logic_vector(abs(log2(DATA_WIDTH/8)-1) downto 0) 
+      TX_DREM        : out std_logic_vector(abs(log2(DATA_WIDTH/8)-1) downto 0)
      );
-end entity; 
+end entity;

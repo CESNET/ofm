@@ -54,7 +54,7 @@ SETTINGS = {
         "BLOCK_SIZE"         : "8",
         "ITEM_WIDTH"         : "8",
     },
-    "_combinations_" : (  
+    "_combinations_" : (
     (), # Works the same as '("default",),' as the "default" is applied in every combination
     ),
 }

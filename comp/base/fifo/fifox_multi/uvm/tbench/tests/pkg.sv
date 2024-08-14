@@ -34,7 +34,7 @@ package test;
 
     `include "sequence.sv"
     `include "test.sv"
-    
+
 endpackage
 
 `endif

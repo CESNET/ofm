@@ -1,7 +1,7 @@
 /*
  * file       : agent.sv
  * Copyright (C) 2021 CESNET z. s. p. o.
- * description: Intel seq mac agent 
+ * description: Intel seq mac agent
  * date       : 2021
  * author     : Radek Iša <isa@cesnet.cz>
  *

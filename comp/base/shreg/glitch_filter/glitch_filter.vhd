@@ -57,7 +57,7 @@ begin
             if RESET = '1' then
                cnt_sample <= (others => '0');
             else
-               cnt_sample(FILTER_SAMPLING-1 downto 0) <= 
+               cnt_sample(FILTER_SAMPLING-1 downto 0) <=
                   cnt_sample(FILTER_SAMPLING-1 downto 0) + 1;
             end if;
          end if;

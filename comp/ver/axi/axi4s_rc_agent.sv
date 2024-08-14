@@ -169,10 +169,10 @@ class Axi4S_RC_agent #(DATA_WIDTH = 512, USER_WIDTH = 161, ITEM_WIDTH_IN = 8, ST
             vif.cb.TUSER[63:0] <= { << item_valid {valid} };
         end else begin
             vif.cb.TUSER[31:0] <= { << item_valid {valid} };
-        end 
+        end
         valid = '{ITEMS/4{4'h0}};
         vif.cb.TVALID <= src_rdy;
-        // TLAST is no more valid with ST_COUNT > 1 
+        // TLAST is no more valid with ST_COUNT > 1
         //vif.cb.TLAST <= eof;
 
         if(src_rdy) begin
@@ -273,7 +273,7 @@ class Axi4S_RC_agent #(DATA_WIDTH = 512, USER_WIDTH = 161, ITEM_WIDTH_IN = 8, ST
                     valid[(offset + it)/4]  = tr_valid[i/4];
                     i++;
                 end
-               
+
                 src_rdy = 1;
                 if(i >= tr.data.size()) begin
                     r = offset / REGION_ITEMS;

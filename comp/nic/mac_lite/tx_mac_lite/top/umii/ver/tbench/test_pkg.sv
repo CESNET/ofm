@@ -5,7 +5,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 package test_pkg;
-   
+
     import math_pkg::*;
 
     // MII configuration, allows you to set the required output data width
@@ -13,7 +13,7 @@ package test_pkg;
     parameter MII_DATA_WIDTH  = 1024;
     parameter MIIA_LANE_WIDTH = (MII_DATA_WIDTH==64) ? 32 : 64; //calculated automatically
     parameter MII_LANE_WIDTH  = MIIA_LANE_WIDTH;
-    
+
     parameter RX_INCLUDE_CRC  = 0;
     parameter RX_INCLUDE_IPG  = 0;
 

@@ -1,4 +1,4 @@
--- force_discard.vhd: 
+-- force_discard.vhd:
 -- Copyright (C) 2018 CESNET z. s. p. o.
 -- Author(s): Jakub Cabal <cabal@cesnet.cz>
 --
@@ -49,7 +49,7 @@ begin
    -- --------------------------------------------------------------------------
    --  FRAME STATE LOGIC
    -- --------------------------------------------------------------------------
-   
+
    inc_frame_g : for r in 0 to REGIONS-1 generate
       s_inc_frame(r+1) <= (IN_SOF(r) and not IN_EOF(r) and not s_inc_frame(r)) or
                           (IN_SOF(r) and IN_EOF(r) and s_inc_frame(r)) or
@@ -62,7 +62,7 @@ begin
          if (RESET = '1') then
             s_inc_frame(0) <= '0';
          elsif (IN_SRC_RDY = '1' and IN_DST_RDY = '1') then
-            s_inc_frame(0) <= s_inc_frame(REGIONS);  
+            s_inc_frame(0) <= s_inc_frame(REGIONS);
          end if;
       end if;
    end process;
@@ -86,7 +86,7 @@ begin
       end if;
    end process;
 
-   s_out_force_discard <= '1' WHEN (IN_FORCE_DISCARD = '1') ELSE 
+   s_out_force_discard <= '1' WHEN (IN_FORCE_DISCARD = '1') ELSE
                           '0' WHEN (s_word_with_ok_start = '1') ELSE s_force_discard_reg;
 
    OUT_FORCE_DISCARD <= s_out_force_discard;
@@ -107,7 +107,7 @@ begin
          if (RESET = '1') then
             s_fd_per_pkt(0) <= '0';
          elsif (IN_SRC_RDY = '1' and IN_DST_RDY = '1') then
-            s_fd_per_pkt(0) <= s_fd_per_pkt(REGIONS);  
+            s_fd_per_pkt(0) <= s_fd_per_pkt(REGIONS);
          end if;
       end if;
    end process;

@@ -161,7 +161,7 @@ U_DCM0: DCM
       CLK2X180 => dcm0_clk2x180,
       CLKFX    => dcm0_clk4x,
       CLKDV    => dcm0_clkdv,
-      LOCKED   => dcm0_lock 
+      LOCKED   => dcm0_lock
    );
 
 -- BUFG Instantiation

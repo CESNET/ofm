@@ -119,7 +119,7 @@ begin
         RD_ADDR    => TX_CH & rd_addr_ptr(tx_ch_int)(log2(ITEMS)-1 downto 0),
         RD_PIPE_EN => '1'
     );
-    
+
     tx_ch_int <= to_integer(unsigned(TX_CH));
     rx_ch_int <= to_integer(unsigned(RX_CH));
 

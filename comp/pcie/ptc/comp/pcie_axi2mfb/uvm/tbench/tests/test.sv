@@ -2,7 +2,7 @@
 // Copyright (C) 2022 CESNET z. s. p. o.
 // Author(s): Daniel Kříž <xkrizd01@vutbr.cz>
 
-// SPDX-License-Identifier: BSD-3-Clause 
+// SPDX-License-Identifier: BSD-3-Clause
 
 class ex_test extends uvm_test;
     `uvm_component_utils(test::ex_test);

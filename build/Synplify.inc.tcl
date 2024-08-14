@@ -133,7 +133,7 @@ proc SetupDesign {synth_flags} {
     project -new "$SYNTH_FLAGS(OUTPUT).prj"
     set_option -reporting_filename "$SYNTH_FLAGS(OUTPUT).ta"
     project -result_file "$SYNTH_FLAGS(OUTPUT).edf"
-    
+
     # Common project options
     impl -add synth1 -type fpga
     impl -active "synth1"
@@ -221,7 +221,7 @@ proc SynthesizeDesignSetup {synth_flags} {
 
 proc SynthesizeDesignRun {synth_flags} {
     upvar 1 $synth_flags SYNTH_FLAGS
-    
+
     PrintLabel "Synthesize"
     project -run
     file copy -force synth1/$SYNTH_FLAGS(OUTPUT).edf ./$SYNTH_FLAGS(OUTPUT).edf
@@ -246,7 +246,7 @@ proc nb_sanitize_vars {synth_flags hierarchy} {
     lappend SYNTH_FLAGS(NFW_FILES)
 
     set SYNTH_FLAGS(TOOL) "synplify"
-    
+
     # Set default values
     if {![info exists SYNTH_FLAGS(PROJ_ONLY)]} {
         set SYNTH_FLAGS(PROJ_ONLY) false

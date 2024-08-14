@@ -12,28 +12,28 @@ proc FL_SWITCH_RX { } {
     global FL_SWITCH_PATH
 
     add wave -divider "RX interface"
-    add_wave "-noupdate -hex -label rx_data      " $FL_SWITCH_PATH/rx_data      
-    add_wave "-noupdate -hex -label rx_rem       " $FL_SWITCH_PATH/rx_rem       
-    add_wave "-noupdate -hex -label rx_src_rdy_n " $FL_SWITCH_PATH/rx_src_rdy_n 
-    add_wave "-noupdate -hex -label rx_dst_rdy_n " $FL_SWITCH_PATH/rx_dst_rdy_n 
-    add_wave "-noupdate -hex -label rx_sop_n     " $FL_SWITCH_PATH/rx_sop_n     
-    add_wave "-noupdate -hex -label rx_eop_n     " $FL_SWITCH_PATH/rx_eop_n     
-    add_wave "-noupdate -hex -label rx_sof_n     " $FL_SWITCH_PATH/rx_sof_n     
-    add_wave "-noupdate -hex -label rx_eof_n     " $FL_SWITCH_PATH/rx_eof_n     
+    add_wave "-noupdate -hex -label rx_data      " $FL_SWITCH_PATH/rx_data
+    add_wave "-noupdate -hex -label rx_rem       " $FL_SWITCH_PATH/rx_rem
+    add_wave "-noupdate -hex -label rx_src_rdy_n " $FL_SWITCH_PATH/rx_src_rdy_n
+    add_wave "-noupdate -hex -label rx_dst_rdy_n " $FL_SWITCH_PATH/rx_dst_rdy_n
+    add_wave "-noupdate -hex -label rx_sop_n     " $FL_SWITCH_PATH/rx_sop_n
+    add_wave "-noupdate -hex -label rx_eop_n     " $FL_SWITCH_PATH/rx_eop_n
+    add_wave "-noupdate -hex -label rx_sof_n     " $FL_SWITCH_PATH/rx_sof_n
+    add_wave "-noupdate -hex -label rx_eof_n     " $FL_SWITCH_PATH/rx_eof_n
 }
-                                              
+
 proc FL_SWITCH_TX0 { } {
     global FL_SWITCH_PATH
 
     add wave -divider "TX0 interface"
-    add_wave "-noupdate -hex -label tx0_data      " $FL_SWITCH_PATH/tx0_data     
-    add_wave "-noupdate -hex -label tx0_rem       " $FL_SWITCH_PATH/tx0_rem       
+    add_wave "-noupdate -hex -label tx0_data      " $FL_SWITCH_PATH/tx0_data
+    add_wave "-noupdate -hex -label tx0_rem       " $FL_SWITCH_PATH/tx0_rem
     add_wave "-noupdate -hex -label tx0_src_rdy_n " $FL_SWITCH_PATH/tx0_src_rdy_n
     add_wave "-noupdate -hex -label tx0_dst_rdy_n " $FL_SWITCH_PATH/tx0_dst_rdy_n
-    add_wave "-noupdate -hex -label tx0_sop_n     " $FL_SWITCH_PATH/tx0_sop_n     
-    add_wave "-noupdate -hex -label tx0_eop_n     " $FL_SWITCH_PATH/tx0_eop_n     
-    add_wave "-noupdate -hex -label tx0_sof_n     " $FL_SWITCH_PATH/tx0_sof_n    
-    add_wave "-noupdate -hex -label tx0_eof_n     " $FL_SWITCH_PATH/tx0_eof_n    
+    add_wave "-noupdate -hex -label tx0_sop_n     " $FL_SWITCH_PATH/tx0_sop_n
+    add_wave "-noupdate -hex -label tx0_eop_n     " $FL_SWITCH_PATH/tx0_eop_n
+    add_wave "-noupdate -hex -label tx0_sof_n     " $FL_SWITCH_PATH/tx0_sof_n
+    add_wave "-noupdate -hex -label tx0_eof_n     " $FL_SWITCH_PATH/tx0_eof_n
 }
 
 
@@ -41,29 +41,29 @@ proc FL_SWITCH_TX1 { } {
     global FL_SWITCH_PATH
 
     add wave -divider "TX1 interface"
-    add_wave "-noupdate -hex -label tx1_data      " $FL_SWITCH_PATH/tx1_data     
-    add_wave "-noupdate -hex -label tx1_rem       " $FL_SWITCH_PATH/tx1_rem       
+    add_wave "-noupdate -hex -label tx1_data      " $FL_SWITCH_PATH/tx1_data
+    add_wave "-noupdate -hex -label tx1_rem       " $FL_SWITCH_PATH/tx1_rem
     add_wave "-noupdate -hex -label tx1_src_rdy_n " $FL_SWITCH_PATH/tx1_src_rdy_n
     add_wave "-noupdate -hex -label tx1_dst_rdy_n " $FL_SWITCH_PATH/tx1_dst_rdy_n
-    add_wave "-noupdate -hex -label tx1_sop_n     " $FL_SWITCH_PATH/tx1_sop_n     
-    add_wave "-noupdate -hex -label tx1_eop_n     " $FL_SWITCH_PATH/tx1_eop_n     
-    add_wave "-noupdate -hex -label tx1_sof_n     " $FL_SWITCH_PATH/tx1_sof_n    
-    add_wave "-noupdate -hex -label tx1_eof_n     " $FL_SWITCH_PATH/tx1_eof_n    
+    add_wave "-noupdate -hex -label tx1_sop_n     " $FL_SWITCH_PATH/tx1_sop_n
+    add_wave "-noupdate -hex -label tx1_eop_n     " $FL_SWITCH_PATH/tx1_eop_n
+    add_wave "-noupdate -hex -label tx1_sof_n     " $FL_SWITCH_PATH/tx1_sof_n
+    add_wave "-noupdate -hex -label tx1_eof_n     " $FL_SWITCH_PATH/tx1_eof_n
 }
-                                              
+
 
 proc FL_SWITCH_TX2 { } {
     global FL_SWITCH_PATH
 
     add wave -divider "TX2 interface"
-    add_wave "-noupdate -hex -label tx2_data      " $FL_SWITCH_PATH/tx2_data     
-    add_wave "-noupdate -hex -label tx2_rem       " $FL_SWITCH_PATH/tx2_rem       
+    add_wave "-noupdate -hex -label tx2_data      " $FL_SWITCH_PATH/tx2_data
+    add_wave "-noupdate -hex -label tx2_rem       " $FL_SWITCH_PATH/tx2_rem
     add_wave "-noupdate -hex -label tx2_src_rdy_n " $FL_SWITCH_PATH/tx2_src_rdy_n
     add_wave "-noupdate -hex -label tx2_dst_rdy_n " $FL_SWITCH_PATH/tx2_dst_rdy_n
-    add_wave "-noupdate -hex -label tx2_sop_n     " $FL_SWITCH_PATH/tx2_sop_n     
-    add_wave "-noupdate -hex -label tx2_eop_n     " $FL_SWITCH_PATH/tx2_eop_n     
-    add_wave "-noupdate -hex -label tx2_sof_n     " $FL_SWITCH_PATH/tx2_sof_n    
-    add_wave "-noupdate -hex -label tx2_eof_n     " $FL_SWITCH_PATH/tx2_eof_n    
+    add_wave "-noupdate -hex -label tx2_sop_n     " $FL_SWITCH_PATH/tx2_sop_n
+    add_wave "-noupdate -hex -label tx2_eop_n     " $FL_SWITCH_PATH/tx2_eop_n
+    add_wave "-noupdate -hex -label tx2_sof_n     " $FL_SWITCH_PATH/tx2_sof_n
+    add_wave "-noupdate -hex -label tx2_eof_n     " $FL_SWITCH_PATH/tx2_eof_n
 }
 
 
@@ -71,14 +71,14 @@ proc FL_SWITCH_TX3 { } {
     global FL_SWITCH_PATH
 
     add wave -divider "TX3 interface"
-    add_wave "-noupdate -hex -label tx3_data      " $FL_SWITCH_PATH/tx3_data     
-    add_wave "-noupdate -hex -label tx3_rem       " $FL_SWITCH_PATH/tx3_rem       
+    add_wave "-noupdate -hex -label tx3_data      " $FL_SWITCH_PATH/tx3_data
+    add_wave "-noupdate -hex -label tx3_rem       " $FL_SWITCH_PATH/tx3_rem
     add_wave "-noupdate -hex -label tx3_src_rdy_n " $FL_SWITCH_PATH/tx3_src_rdy_n
     add_wave "-noupdate -hex -label tx3_dst_rdy_n " $FL_SWITCH_PATH/tx3_dst_rdy_n
-    add_wave "-noupdate -hex -label tx3_sop_n     " $FL_SWITCH_PATH/tx3_sop_n     
-    add_wave "-noupdate -hex -label tx3_eop_n     " $FL_SWITCH_PATH/tx3_eop_n     
-    add_wave "-noupdate -hex -label tx3_sof_n     " $FL_SWITCH_PATH/tx3_sof_n    
-    add_wave "-noupdate -hex -label tx3_eof_n     " $FL_SWITCH_PATH/tx3_eof_n    
+    add_wave "-noupdate -hex -label tx3_sop_n     " $FL_SWITCH_PATH/tx3_sop_n
+    add_wave "-noupdate -hex -label tx3_eop_n     " $FL_SWITCH_PATH/tx3_eop_n
+    add_wave "-noupdate -hex -label tx3_sof_n     " $FL_SWITCH_PATH/tx3_sof_n
+    add_wave "-noupdate -hex -label tx3_eof_n     " $FL_SWITCH_PATH/tx3_eof_n
 }
 
 

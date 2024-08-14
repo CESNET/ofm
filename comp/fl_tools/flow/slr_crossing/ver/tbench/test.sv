@@ -32,7 +32,7 @@ program TEST (
   FrameLinkResponder #(DATA_WIDTH, DREM_WIDTH)  flResponder;
   Scoreboard                           scoreboard;
   Coverage #(DATA_WIDTH,DREM_WIDTH,DATA_WIDTH,DREM_WIDTH) coverage;
-  
+
   // --------------------------------------------------------------------------
   // Create Test Environment
   task createGeneratorEnvironment(int packet_count = GENERATOR_FL_PACKET_COUNT, int packet_size_max[] = GENERATOR_FL_PACKET_SIZE_MAX, int packet_size_min[] = GENERATOR_FL_PACKET_SIZE_MIN);
@@ -42,9 +42,9 @@ program TEST (
      flBlueprint.packetSizeMax = packet_size_max;
      flBlueprint.packetSizeMin = packet_size_min;
      generator.blueprint       = flBlueprint;
-  endtask: createGeneratorEnvironment    
+  endtask: createGeneratorEnvironment
 
-  task createEnvironment();    
+  task createEnvironment();
     flDriver  = new ("Driver", generator.transMbx, RX);
      flDriver.txDelayEn_wt             = DRIVER_DELAYEN_WT;
      flDriver.txDelayDisable_wt        = DRIVER_DELAYDIS_WT;
@@ -115,7 +115,7 @@ program TEST (
     scoreboard.display();
     coverage.display();
   endtask: test1
-  
+
   // --------------------------------------------------------------------------
   // Test Case 2
   task test2();

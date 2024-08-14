@@ -47,7 +47,7 @@ end entity;
 architecture behavioral of NP_LUTRAM_FIXED is
 
    -- Write logic
-   
+
    signal reg1_di_item     : std_logic_vector(DATA_WIDTH-1 downto 0);
    signal reg1_we_item     : std_logic;
    signal reg1_addra_item  : std_logic_vector(log2(ITEMS)-1 downto 0);
@@ -60,7 +60,7 @@ architecture behavioral of NP_LUTRAM_FIXED is
    signal reg2b_we     : std_logic;
    signal reg2b_addra  : std_logic_vector(log2(ITEMS)-1 downto 0);
 
-   signal cnt        : std_logic_vector(max(log2(WRITE_PORTS),1)-1 downto 0);   
+   signal cnt        : std_logic_vector(max(log2(WRITE_PORTS),1)-1 downto 0);
 
    -- Memory
    signal memi_addr  : std_logic_vector((READ_PORTS/WRITE_PORTS+1)*log2(ITEMS)-1 downto 0);

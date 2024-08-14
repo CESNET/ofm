@@ -73,12 +73,12 @@ architecture FULL of MFB_FRAME_EXTENDER_DATAMOVER is
     signal s_fifox_rd      : std_logic_vector(WORD_BLOCKS-1 downto 0);
     signal s_fifox_empty   : std_logic_vector(WORD_BLOCKS-1 downto 0);
     signal s_fifox_vld     : std_logic_vector(WORD_BLOCKS-1 downto 0);
- 
+
     signal s_rx_data_arr   : slv_array_t(WORD_BLOCKS-1 downto 0)(BLOCK_WIDTH-1 downto 0);
     signal s_last_addr     : unsigned(log2(WORD_BLOCKS)-1 downto 0);
     signal s_fifox_rdy     : std_logic;
     signal s_src_rdy       : std_logic;
- 
+
     signal s_mux_sel_reg0  : slv_array_t(WORD_BLOCKS-1 downto 0)(log2(WORD_BLOCKS)-1 downto 0);
     signal s_data_reg0     : std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
     signal s_usermeta_reg0 : std_logic_vector(REGIONS*USERMETA_WIDTH-1 downto 0);
@@ -87,9 +87,9 @@ architecture FULL of MFB_FRAME_EXTENDER_DATAMOVER is
     signal s_sof_reg0      : std_logic_vector(REGIONS-1 downto 0);
     signal s_eof_reg0      : std_logic_vector(REGIONS-1 downto 0);
     signal s_src_rdy_reg0  : std_logic;
- 
+
     signal s_muxed_data    : slv_array_t(WORD_BLOCKS-1 downto 0)(BLOCK_WIDTH-1 downto 0);
- 
+
     signal s_data_reg1     : std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
     signal s_usermeta_reg1 : std_logic_vector(REGIONS*USERMETA_WIDTH-1 downto 0);
     signal s_sof_pos_reg1  : std_logic_vector(REGIONS*max(1,log2(REGION_SIZE))-1 downto 0);
@@ -208,7 +208,7 @@ begin
    -- ==========================================================================
    --  0. LOGIC STAGE
    -- ==========================================================================
-    
+
    -- data block array, only for debug
    s_rx_data_arr <= slv_array_deser(s_fifox_data, WORD_BLOCKS, BLOCK_WIDTH);
 

@@ -6,7 +6,7 @@
 
 class model #(MVB_ITEM_WIDTH, RX_STREAMS) extends uvm_component;
     `uvm_component_param_utils(uvm_mvb_merge_streams_ordered::model #(MVB_ITEM_WIDTH, RX_STREAMS))
-    
+
     // Model inputs
     uvm_tlm_analysis_fifo #(uvm_common::model_item #(uvm_logic_vector::sequence_item #(MVB_ITEM_WIDTH)))      rx_mvb_analysis_fifo [RX_STREAMS -1 : 0];
     uvm_tlm_analysis_fifo #(uvm_common::model_item #(uvm_logic_vector::sequence_item #($clog2(RX_STREAMS))))  rx_sel_mvb_analysis_fifo;

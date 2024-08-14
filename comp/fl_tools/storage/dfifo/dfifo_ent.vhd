@@ -43,7 +43,7 @@ entity fl_dfifo is
       RX_SOF_N       : in  std_logic;
       RX_EOF_N       : in  std_logic;
       DISCARD        : in  std_logic;
-      
+
       -- read interface
       TX_DATA        : out std_logic_vector(DATA_WIDTH-1 downto 0);
       TX_REM         : out std_logic_vector(log2(DATA_WIDTH/8)-1 downto 0);

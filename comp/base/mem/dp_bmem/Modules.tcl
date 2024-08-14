@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 # Source files for all components
-set PACKAGES  "$OFM_PATH/comp/base/pkg/math_pack.vhd" 
+set PACKAGES  "$OFM_PATH/comp/base/pkg/math_pack.vhd"
 
 set MOD "$MOD $ENTITY_BASE/dp_bmem_ent.vhd"
 set MOD "$MOD $ENTITY_BASE/sdp_bmem_ent.vhd"

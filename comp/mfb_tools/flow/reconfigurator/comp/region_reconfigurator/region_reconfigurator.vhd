@@ -233,11 +233,11 @@ begin
     gen_arch_equal_gen : if (RX_REGIONS = TX_REGIONS) generate
         TX_DATA    <= RX_DATA;
         TX_META    <= RX_META;
-        TX_SOF     <= RX_SOF; 
+        TX_SOF     <= RX_SOF;
         TX_EOF     <= RX_EOF;
         TX_SOF_POS <= RX_SOF_POS;
         TX_EOF_POS <= RX_EOF_POS;
-        TX_SRC_RDY <= RX_SRC_RDY; 
+        TX_SRC_RDY <= RX_SRC_RDY;
         RX_DST_RDY <= TX_DST_RDY;
     end generate;
 
@@ -251,7 +251,7 @@ begin
 
         -- Propagate data and control
         TX_DATA    <= RX_DATA;
-        TX_SRC_RDY <= RX_SRC_RDY; 
+        TX_SRC_RDY <= RX_SRC_RDY;
         RX_DST_RDY <= TX_DST_RDY;
 
         -- Reorganize XOF_POSes and Metadata

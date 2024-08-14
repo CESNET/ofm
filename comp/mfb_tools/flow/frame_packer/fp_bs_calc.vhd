@@ -12,7 +12,7 @@ use work.math_pack.all;
 use work.type_pack.all;
 
 -- The purpose of this component is to generate select signal for each Barrel Shifter
-entity FP_BS_CALC is 
+entity FP_BS_CALC is
     generic(
         MFB_REGIONS         : natural := 1;
         MFB_REGION_SIZE     : natural := 8;
@@ -49,9 +49,9 @@ architecture FULL of FP_BS_CALC is
     signal ch_ptr_slv   : slv_array_t(RX_CHANNELS - 1 downto 0)(max(1,log2(MFB_REGIONS*MFB_REGION_SIZE)) - 1 downto 0);
     signal ch_ptr_std   : std_logic_vector(RX_CHANNELS*max(1,log2(MFB_REGIONS*MFB_REGION_SIZE)) - 1 downto 0);
     signal ch_ptr_mux   : std_logic_vector(max(1,log2(MFB_REGIONS*MFB_REGION_SIZE)) - 1 downto 0);
-    
+
 begin
-    -- u_array_t   => slv_array_t 
+    -- u_array_t   => slv_array_t
     uns_to_slv_g: for i in 0 to RX_CHANNELS - 1 generate
         sum_prev_slv(i)    <= std_logic_vector(RX_SUM_PREV_UNS(i));
     end generate;

@@ -186,11 +186,11 @@ begin
     gen_arch_equal_gen : if (RX_REGION_SIZE = TX_REGION_SIZE) generate
         TX_DATA    <= RX_DATA;
         TX_META    <= RX_META;
-        TX_SOF     <= RX_SOF; 
+        TX_SOF     <= RX_SOF;
         TX_EOF     <= RX_EOF;
         TX_SOF_POS <= RX_SOF_POS;
         TX_EOF_POS <= RX_EOF_POS;
-        TX_SRC_RDY <= RX_SRC_RDY; 
+        TX_SRC_RDY <= RX_SRC_RDY;
         RX_DST_RDY <= TX_DST_RDY;
     end generate;
 
@@ -204,9 +204,9 @@ begin
 
         TX_DATA    <= RX_DATA;
         TX_META    <= RX_META;
-        TX_SOF     <= RX_SOF; 
+        TX_SOF     <= RX_SOF;
         TX_EOF     <= RX_EOF;
-        TX_SRC_RDY <= RX_SRC_RDY; 
+        TX_SRC_RDY <= RX_SRC_RDY;
         RX_DST_RDY <= TX_DST_RDY;
 
         -- Simply add zero bits at the end of each XOF_POS

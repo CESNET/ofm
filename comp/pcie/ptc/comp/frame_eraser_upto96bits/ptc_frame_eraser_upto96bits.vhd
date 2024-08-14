@@ -15,7 +15,7 @@ use work.type_pack.all;
 entity PTC_FRAME_ERASER_UPTO96BITS is
    generic(
       -- =======================================================================
-      -- MFB DATA BUS CONFIGURATION: 
+      -- MFB DATA BUS CONFIGURATION:
       -- =======================================================================
       -- Supported configuration is only MFB(4,1,4,32) for PCIe on UltraScale+
       REGIONS      : natural := 4;
@@ -97,12 +97,12 @@ begin
          if (RESET = '1') then
             s_inc_prev_region(0) <= '0';
          elsif (s_src_rdy_masked = '1' and TX_DST_RDY = '1') then
-            s_inc_prev_region(0) <= s_inc_prev_region(REGIONS);  
+            s_inc_prev_region(0) <= s_inc_prev_region(REGIONS);
          end if;
       end if;
    end process;
 
-   is_frame_g : for r in 0 to REGIONS-1 generate  
+   is_frame_g : for r in 0 to REGIONS-1 generate
       -- compute incomplete frame in this region
       s_inc_prev_region(r+1) <= (s_sof_masked(r) and not s_eof_masked(r) and not s_inc_prev_region(r)) or
                                 (not s_sof_masked(r) and not s_eof_masked(r) and s_inc_prev_region(r));

@@ -1,7 +1,7 @@
 --
 -- pipe.vhd: FrameLinkUnaligned Pipeline
 -- Copyright (C) 2013 CESNET
--- Author(s): Lukas Kekely <kekely@cesnet.cz> 
+-- Author(s): Lukas Kekely <kekely@cesnet.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --
@@ -17,8 +17,8 @@ use IEEE.std_logic_unsigned.all;
 use work.math_pack.all;
 
 -- ----------------------------------------------------------------------------
---                               ENTITY DECLARATION 
--- ---------------------------------------------------------------------------- 
+--                               ENTITY DECLARATION
+-- ----------------------------------------------------------------------------
 
 entity FLU_PIPE is
    generic(
@@ -36,7 +36,7 @@ entity FLU_PIPE is
       FAKE_PIPE      : boolean:= false;
       -- Only for PIPE_TYPE = "SHREG"!
       RESET_BY_INIT  : boolean:= false
-   );   
+   );
    port(
       -- ================
       -- Common interface
@@ -45,7 +45,7 @@ entity FLU_PIPE is
       CLK            : in std_logic;
       -- NOTE: also starts debug counters
       RESET          : in std_logic;
-      
+
       -- ================
       -- Input interface
       -- ================
@@ -56,8 +56,8 @@ entity FLU_PIPE is
       RX_SOP        : in std_logic;
       RX_EOP        : in std_logic;
       RX_SRC_RDY    : in std_logic;
-      RX_DST_RDY    : out std_logic; 
- 
+      RX_DST_RDY    : out std_logic;
+
       -- ================
       -- Output interface
       -- ================
@@ -69,7 +69,7 @@ entity FLU_PIPE is
       TX_EOP        : out std_logic;
       TX_SRC_RDY    : out std_logic;
       TX_DST_RDY    : in std_logic;
-            
+
       -- ==================
       -- Debuging interface
       -- ==================
@@ -90,7 +90,7 @@ entity FLU_PIPE is
 end entity FLU_PIPE;
 
 -- ----------------------------------------------------------------------------
---                            ARCHITECTURE DECLARATION 
+--                            ARCHITECTURE DECLARATION
 -- ----------------------------------------------------------------------------
 architecture flu_pipe_arch of FLU_PIPE is
 
@@ -103,22 +103,22 @@ architecture flu_pipe_arch of FLU_PIPE is
    signal pipe_out_data       : std_logic_vector(PIPE_WIDTH-1 downto 0);
    signal pipe_out_src_rdy    : std_logic;
    signal pipe_out_dst_rdy    : std_logic;
-   
+
    signal reg_debug_sof_cnt     : std_logic_vector(63 downto 0);
    signal reg_debug_eof_cnt     : std_logic_vector(63 downto 0);
    signal debug_cnt_en          : std_logic;
-   
+
    signal sig_rx_sop          : std_logic;
    signal sig_rx_eop          : std_logic;
-   
+
 begin
-   pipe_in_data      <= RX_DATA & RX_SOP_POS & RX_EOP_POS & sig_rx_sop & sig_rx_eop ; 
-      
+   pipe_in_data      <= RX_DATA & RX_SOP_POS & RX_EOP_POS & sig_rx_sop & sig_rx_eop ;
+
    TX_DATA           <= pipe_out_data(PIPE_WIDTH-1 downto SOP_POS_WIDTH+log2(DATA_WIDTH/8)+2);
    TX_SOP_POS        <= pipe_out_data(SOP_POS_WIDTH+log2(DATA_WIDTH/8)+1 downto log2(DATA_WIDTH/8)+2);
    TX_EOP_POS        <= pipe_out_data(log2(DATA_WIDTH/8)+1 downto 2);
-   TX_SOP            <= pipe_out_data(1);   
-   TX_EOP            <= pipe_out_data(0);     
+   TX_SOP            <= pipe_out_data(1);
+   TX_EOP            <= pipe_out_data(0);
 
    TX_SRC_RDY        <= pipe_out_src_rdy;
    pipe_out_dst_rdy  <= TX_DST_RDY;
@@ -137,7 +137,7 @@ begin
    port map(
       CLK         => CLK,
       RESET       => RESET,
-      
+
       IN_DATA      => pipe_in_data,
       IN_SRC_RDY   => pipe_in_src_rdy,
       IN_DST_RDY   => pipe_in_dst_rdy,
@@ -146,7 +146,7 @@ begin
       OUT_SRC_RDY  => pipe_out_src_rdy,
       OUT_DST_RDY  => pipe_out_dst_rdy
    );
-   
+
    -- -------------------------------------------------------------------------
    --                                 DEBUG                                  --
    -- -------------------------------------------------------------------------

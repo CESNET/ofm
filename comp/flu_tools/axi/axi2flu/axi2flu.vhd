@@ -37,9 +37,9 @@ generic(
 
 port(
 
-   --! Common interface 
+   --! Common interface
    CLK            : in std_logic;
-   RESET          : in std_logic; 
+   RESET          : in std_logic;
 
    --! AXI input interface
    RX_TDATA      : in std_logic_vector(DATA_WIDTH-1 downto 0);
@@ -102,7 +102,7 @@ architecture full of axi2flu is
    --! Signal for detection if RX_TKEEP = (others=>'1')
    signal   whole_last  : std_logic;
 
-begin 
+begin
 
    --! Merging data into AXI pipe
    in_pipe_axi_data_in <= RX_TDATA & RX_TKEEP & RX_TLAST;
@@ -110,15 +110,15 @@ begin
    --! Input Pipe
    in_pipe_i : entity work.PIPE
    generic map(
-      DATA_WIDTH     => axi_pipe_width, 
+      DATA_WIDTH     => axi_pipe_width,
       USE_OUTREG     => IN_PIPE_OUTREG,
       FAKE_PIPE      => not IN_PIPE_EN
-   )   
+   )
    port map(
 
       CLK         => CLK,
-      RESET       => RESET, 
-      --! Input interface     
+      RESET       => RESET,
+      --! Input interface
       IN_DATA      => in_pipe_axi_data_in,
       IN_SRC_RDY   => RX_TVALID,
       IN_DST_RDY   => RX_TREADY,
@@ -138,13 +138,13 @@ begin
    in_pipe_tready   <= out_pipe_dst_rdy;
    out_pipe_eop     <= in_pipe_tlast;
    out_pipe_sop     <= out_sop;
-   out_pipe_sop_pos <= out_sop_pos(pos_width-1 downto pos_width-SOP_POS_WIDTH); 
+   out_pipe_sop_pos <= out_sop_pos(pos_width-1 downto pos_width-SOP_POS_WIDTH);
    out_pipe_eop_pos <= out_eop_pos;
 
    process(CLK,RESET)
    begin
       if (rising_edge(CLK)) then
-         if RESET='1' then 
+         if RESET='1' then
             reg_eop_int <= '1';
          else
             reg_eop_int <= eop_int;
@@ -170,7 +170,7 @@ begin
          eop_int  <= reg_eop_int;
       end if;
    end process;
-   
+
    --! Detection if RX_TKEEP = (others => '1')
    process(in_pipe_tkeep)
    begin
@@ -181,7 +181,7 @@ begin
          end if;
       end loop;
    end process;
-   --! out_sop='1' when in previous transaction has ended packet and doesn't start new 
+   --! out_sop='1' when in previous transaction has ended packet and doesn't start new
    --! or in current transaction ended packet and started new
    out_sop <= reg_eop_int or (in_pipe_tlast and in_pipe_tkeep(tkeep_width-1) and not whole_last);
 
@@ -222,10 +222,10 @@ begin
    out_pipe_i : entity work.FLU_PIPE
    generic map(
       DATA_WIDTH     => DATA_WIDTH,
-      SOP_POS_WIDTH  => SOP_POS_WIDTH, 
+      SOP_POS_WIDTH  => SOP_POS_WIDTH,
       USE_OUTREG     => OUT_PIPE_OUTREG,
       FAKE_PIPE      => not OUT_PIPE_EN
-   )   
+   )
    port map(
       CLK            => CLK,
       RESET          => RESET,

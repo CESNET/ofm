@@ -2,7 +2,7 @@
 /*
  * file       : pkg.sv
  * Copyright (C) 2023 CESNET z. s. p. o.
- * description: probe package 
+ * description: probe package
  * date       : 2023
  * author     : Radek Iša <isa@cesnet.ch>
  *

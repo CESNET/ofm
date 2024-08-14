@@ -5,7 +5,7 @@
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --
--- TODO: 
+-- TODO:
 --
 --
 
@@ -30,7 +30,7 @@ entity FLUA_BINDER_GAP_FSM is
    port(
        -- -------------------------------------------------
        -- \name Common interface
-       -- -------------------------------------------------  
+       -- -------------------------------------------------
       RESET          : in  std_logic;
       CLK            : in  std_logic;
 
@@ -51,7 +51,7 @@ entity FLUA_BINDER_GAP_FSM is
       --! EOP* signals from Lane 0
       EOP0           : in std_logic;
       EOP_POS_BLK0   : in std_logic_vector(SOP_POS_WIDTH-1 downto 0);
-      
+
       --! EOP* Signals from Lane 1
       EOP1           : in std_logic;
       EOP_POS_BLK1   : in std_logic_vector(SOP_POS_WIDTH-1 downto 0);
@@ -97,7 +97,7 @@ architecture FULL of FLUA_BINDER_GAP_FSM is
    constant BLK_WIDTH         : integer := DATA_WIDTH/(2**SOP_POS_WIDTH);
    --! The last eop block, which doesn't evoke shifting of the SOP block to the next
    --! bus word.
-   constant MAX_EOP_NO_SHIFT  : std_logic_vector(SOP_POS_WIDTH-1 downto 0) := 
+   constant MAX_EOP_NO_SHIFT  : std_logic_vector(SOP_POS_WIDTH-1 downto 0) :=
       conv_std_logic_vector((DATA_WIDTH/BLK_WIDTH - 128/BLK_WIDTH - 1) - 1,SOP_POS_WIDTH);
    -- Signal declarations -----------------------------------------------------
 
@@ -202,7 +202,7 @@ begin
             --   next_state <= DELAY;
             --end if;
             if((lane0_data_ready = '1' and DST_RDY = '1' and lane0_short_packet = '0' and
-               lane1_data_ready = '0') or 
+               lane1_data_ready = '0') or
                (lane0_data_ready = '1' and DST_RDY = '1' and lane0_short_packet = '0' and
                reg_active_lane = '0'))then
                -- Long packet is available, go to the word trans state
@@ -230,7 +230,7 @@ begin
             else
                -- Active transfered line is 1
                if((lane1_eop = '1' and DST_RDY = '1' and lane0_data_ready = '0') or
-                  (lane1_eop = '1' and DST_RDY = '1' and lane0_data_ready = '1' and 
+                  (lane1_eop = '1' and DST_RDY = '1' and lane0_data_ready = '1' and
                    EOP_POS_BLK1 > MAX_EOP_NO_SHIFT))then
                   -- No new data available (go to the initial state)
                   next_state <= DELAY;
@@ -239,13 +239,13 @@ begin
 
          when DELAY =>
             --This state is only a correction state during which we can receive new data
-            --which has to reflect the readed shift between frames. 
+            --which has to reflect the readed shift between frames.
             if(DST_RDY = '1' and lane0_data_ready = '0' and lane1_data_ready = '0')then
                -- No new data available - go to the wait for data state
                next_state <= WAIT_FOR_DATA;
-            elsif((DST_RDY = '1' and lane0_data_ready = '1' and lane0_short_packet = '0' 
-                     and lane1_data_ready = '0') or 
-                  (DST_RDY = '1' and lane0_data_ready = '1' and lane0_short_packet = '0' 
+            elsif((DST_RDY = '1' and lane0_data_ready = '1' and lane0_short_packet = '0'
+                     and lane1_data_ready = '0') or
+                  (DST_RDY = '1' and lane0_data_ready = '1' and lane0_short_packet = '0'
                      and reg_active_lane = '0') or
                   (DST_RDY = '1' and lane0_data_ready = '1' and lane0_short_packet = '1'
                      and reg_active_lane = '0' and NOT_NULL_SHIFT0 = '1') or
@@ -253,9 +253,9 @@ begin
                      and lane1_data_ready = '0' and NOT_NULL_SHIFT0 = '1'))then
                -- New long packet is available, go to the word transfer state
                next_state <= WORD_TRANS;
-            elsif((DST_RDY = '1' and lane1_data_ready = '1' and lane1_short_packet = '0' 
+            elsif((DST_RDY = '1' and lane1_data_ready = '1' and lane1_short_packet = '0'
                      and lane0_data_ready = '0') or
-                  (DST_RDY = '1' and lane1_data_ready = '1' and lane1_short_packet = '0' 
+                  (DST_RDY = '1' and lane1_data_ready = '1' and lane1_short_packet = '0'
                      and reg_active_lane = '1') or
                   (DST_RDY = '1' and lane1_data_ready = '1' and lane1_short_packet = '1'
                      and reg_active_lane = '1' and NOT_NULL_SHIFT1 = '1') or
@@ -288,7 +288,7 @@ begin
 
       --! Destinations are ready by default
       dst_rdy0_en    <= '1';
-      dst_rdy1_en    <= '1'; 
+      dst_rdy1_en    <= '1';
 
       --! Default control values
       active_lane_en <= '0';
@@ -298,17 +298,17 @@ begin
          when WAIT_FOR_DATA =>
             if((lane0_data_ready = '1' and lane1_data_ready = '0') or
                (lane0_data_ready = '1' and reg_active_lane = '0'))then
-               -- Lane 0 contains short packet, finish it 
+               -- Lane 0 contains short packet, finish it
                -- The active lane should be lane 0
                ACT_LANE0 <= '1';
                -- Prepare destination ready signal and switch the lane
                if(lane1_data_ready = '1')then
                   dst_rdy1_en <= '0';
                end if;
-               
+
                -- Set the active lane
                if(lane0_short_packet = '1')then
-                  -- Short packet taken from this interface, switch to different and 
+                  -- Short packet taken from this interface, switch to different and
                   -- remember shifting for next packet
                   active_lane <= '1';
                   reg_shift1_wr_en <= '1';
@@ -324,7 +324,7 @@ begin
                if(lane0_data_ready = '1')then
                   dst_rdy0_en <= '0';
                end if;
-               
+
                --Set the active lane
                if(lane1_short_packet = '1')then
                   -- Same as above, look at line if(lane0_short_packet = '1') ..
@@ -356,7 +356,7 @@ begin
                   end if;
 
                   --! Check if you have available data
-                  if(lane0_eop = '1' and EOP_POS_BLK0 <= MAX_EOP_NO_SHIFT and 
+                  if(lane0_eop = '1' and EOP_POS_BLK0 <= MAX_EOP_NO_SHIFT and
                      lane1_data_ready = '1')then
                      -- We can match the end of actual frame, gap and start of the new
                      -- frame into the same bus word (use default values of destination
@@ -377,7 +377,7 @@ begin
                      active_lane       <= '1';
                      active_lane_en    <= '1';
 
-                     -- Disable clearing of the shift registers if you need to 
+                     -- Disable clearing of the shift registers if you need to
                      -- store the the shifting value
                      if(lane1_data_ready = '1' or
                         (lane0_eop = '1' and EOP_POS_BLK0 > MAX_EOP_NO_SHIFT))then
@@ -393,7 +393,7 @@ begin
                   -- Clear shift register on lane 1
                   reg_shift1_clr <= '1';
                   reg_shift0_clr <= '1';
-                     
+
                   -- If data are available on lane1, wait on the end of the actual frame
                   if(lane0_data_ready = '1')then
                      dst_rdy0_en <= '0';
@@ -417,8 +417,8 @@ begin
                      reg_shift0_wr_en  <= '1';
                      reg_shift1_wr_en  <= '1';
                      active_lane_en    <= '1';
-                    
-                     -- Disable clearing of the shift registers if you need to 
+
+                     -- Disable clearing of the shift registers if you need to
                      -- store the the shifting value
                      if(lane0_data_ready = '1' or
                        (lane1_eop = '1' and EOP_POS_BLK1 > MAX_EOP_NO_SHIFT))then
@@ -432,7 +432,7 @@ begin
             when DELAY =>
                -- In this state, we have to check the data availability, because we need to
                -- shift incomming data to create gap.
-               -- In this state. Enable shifting of all lanes from registers (this helps to 
+               -- In this state. Enable shifting of all lanes from registers (this helps to
                -- final timing)
                SHIFT0 <= "10";
                SHIFT1 <= "10";
@@ -444,14 +444,14 @@ begin
                   reg_shift1_clr <= '1';
                elsif((lane0_data_ready = '1' and lane1_data_ready = '0') or
                      (lane0_data_ready = '1' and reg_active_lane = '0'))then
-                  -- Lane 0 contains new available data, active the lane 0, enable 
+                  -- Lane 0 contains new available data, active the lane 0, enable
                   -- destination ready for lane 0 only. Enable write into the shifting
                   -- register 1 and clear shifting register 0;
                   ACT_LANE0 <= '1';
                   if(lane1_data_ready = '1')then
                      dst_rdy1_en <= '0';
                   end if;
-                 
+
                   -- Set the active lane information
                   if(NOT_NULL_SHIFT0 = '0' and lane0_short_packet = '1')then
                      -- Short packet is using whole bus word, switch to different lane
@@ -467,13 +467,13 @@ begin
                elsif((lane1_data_ready = '1' and lane0_data_ready = '0') or
                      (lane1_data_ready = '1' and reg_active_lane = '1'))then
                   -- Check the lane 1 if you have available any data, active the lane 1,
-                  -- enable destination ready for lane 1 only. Enable write into the 
+                  -- enable destination ready for lane 1 only. Enable write into the
                   -- shifting register 0 and clear shifting register 1;
                   ACT_LANE1 <= '1';
                   if(lane0_data_ready = '1')then
                      dst_rdy0_en <= '0';
                   end if;
-                  
+
                   -- Set the active lane information
                   if(NOT_NULL_SHIFT1 = '0' and lane1_short_packet = '1')then
                      active_lane <= '0';
@@ -506,7 +506,7 @@ begin
    DST_RDY1 <= DST_RDY and dst_rdy1_en;
 
    --! Generatio of control register signals
-   SHIFT0_REG_EN     <= DST_RDY and reg_shift0_wr_en; 
+   SHIFT0_REG_EN     <= DST_RDY and reg_shift0_wr_en;
    SHIFT0_CLR_REG    <= DST_RDY and reg_shift0_clr;
    SHIFT1_REG_EN     <= DST_RDY and reg_shift1_wr_en;
    SHIFT1_CLR_REG    <= DST_RDY and reg_shift1_clr;

@@ -17,13 +17,13 @@ use ieee.std_logic_unsigned.all;
 architecture behavioral of stat_unit is
 
    -- ----------------------------------------------------
-   -- Input signals 	
+   -- Input signals
    -- -----------------------------------------------------
    --! Input stat. signals
    signal input_sop					      : std_logic;
    signal input_sop_tmp1               : std_logic;
    signal input_sop_tmp2               : std_logic;
-   
+
    signal input_eop                    : std_logic;
    signal input_eop_pos                : std_logic_vector(EOP_POS_WIDTH-1 downto 0);
    signal input_stat_payload_len	      : std_logic_vector(15 downto 0);
@@ -34,24 +34,24 @@ architecture behavioral of stat_unit is
    signal input_stat_len_below_min		: std_logic;
    signal input_stat_len_over_mtu		: std_logic;
    signal input_stat_dv	               : std_logic;
-   signal input_stat_frame_received    : std_logic; 
+   signal input_stat_frame_received    : std_logic;
    signal input_stat_frame_discarded   : std_logic;
-   signal input_stat_buffer_ovf        : std_logic; 
+   signal input_stat_buffer_ovf        : std_logic;
    signal input_stat_mcast             : std_logic;
    signal input_stat_bcast             : std_logic;
-   
+
    -- -----------------------------------------------------
-   -- Command register	and control signals	         
+   -- Command register	and control signals
    -- -----------------------------------------------------
    signal snapshot_en	      : std_logic_vector(6-1 downto 0);
-   signal stat_sampling_en	   : std_logic; 
-   signal last_snap_addr_en   : std_logic; 
-   signal snap_addr_sel_en	   : std_logic; 
+   signal stat_sampling_en	   : std_logic;
+   signal last_snap_addr_en   : std_logic;
+   signal snap_addr_sel_en	   : std_logic;
    attribute keep : string;
    attribute keep of snapshot_en : signal is "true";
-   
+
    -- -----------------------------------------------------
-   -- Packet shift	
+   -- Packet shift
    -- -----------------------------------------------------
    --! CLK shift engine
    signal packet_shift_tmp	   : std_logic_vector(63 downto 0);
@@ -61,17 +61,17 @@ architecture behavioral of stat_unit is
    signal sop_eop_en			   : std_logic;
    signal sop_eop_en2		   : std_logic;
    signal delay_reg_en	      : std_logic;
-   
+
    -- -----------------------------------------------------
-   -- Counters & control signals 
+   -- Counters & control signals
    -- -----------------------------------------------------
-   
+
    --! Signals for reset generating engine
    signal rd_reset_en                    : std_logic_vector(25 downto 0);
    signal reg_reset_en			           : std_logic;
    signal reset_vector                   : std_logic_vector(25 downto 0);
    signal cnt_last_read_delay_reset      : std_logic;
-   
+
    --! Counters & registers
    signal cnt_bad_mac_packets       : std_logic_vector(63 downto 0); --Bad mac packets
    signal cnt_frame_received        : std_logic_vector(63 downto 0); --Good frames
@@ -95,14 +95,14 @@ architecture behavioral of stat_unit is
    signal cnt_jabber_frames         : std_logic_vector(63 downto 0); --A number of jabber frames
    signal cnt_undersize_frames      : std_logic_vector(63 downto 0); --A number of frames below 64 Bytes
    --! Packet size histograms (with respect to RFC2819)
-   signal cnt_frames_64             : std_logic_vector(63 downto 0); 
+   signal cnt_frames_64             : std_logic_vector(63 downto 0);
    signal cnt_frames_65_127         : std_logic_vector(63 downto 0);
    signal cnt_frames_128_255        : std_logic_vector(63 downto 0);
    signal cnt_frames_256_511        : std_logic_vector(63 downto 0);
    signal cnt_frames_512_1023       : std_logic_vector(63 downto 0);
    signal cnt_frames_1024_1518      : std_logic_vector(63 downto 0);
    signal cnt_frames_over_1518      : std_logic_vector(63 downto 0);
-   
+
    --! Counter & register enable signals
    signal max_pkt_delay    : std_logic;
    signal min_pkt_delay    : std_logic;
@@ -157,7 +157,7 @@ architecture behavioral of stat_unit is
    signal cnt_add_frames_1024_1518  : std_logic_vector(63 downto 0);
    signal cnt_add_frames_over_1518  : std_logic_vector(63 downto 0);
    signal cnt_add_undersize_frames  : std_logic_vector(63 downto 0);
-   
+
    --Repaired stat payload len
    signal repaired_stat_payload_len	   : std_logic_vector(63 downto 0);
 
@@ -166,14 +166,14 @@ begin
 -- --------------------------------------------------------
 -- Map input
 -- --------------------------------------------------------
-   
+
 input_pipe:process(CLK)
 begin
    if(CLK = '1' and CLK'event)then
       if(RESET = '1')then
          input_sop_tmp1 <= '0';
          --input_eop <= '0';
-         input_stat_dv <= '0'; 
+         input_stat_dv <= '0';
       else --pipeline input signals
          input_sop_tmp1 <= SOP;
          --input_eop <= EOP;
@@ -195,7 +195,7 @@ begin
 end process;
 
    -- -----------------------------------------------------
-   -- Control signals	
+   -- Control signals
    -- -----------------------------------------------------
 
    --Position(bit):	||		Action:
@@ -221,7 +221,7 @@ end process;
    stat_sampling_en  <= input_stat_dv and START_EN;
 
    -- -----------------------------------------------------
-   -- Snapshot signal generation		
+   -- Snapshot signal generation
    -- -----------------------------------------------------
 
    --Waits for READ_EN (take snapshot) and release iff LAST_ADDR_EN is active
@@ -249,7 +249,7 @@ end process;
 
 delay_genp:if(DELAY_EN)generate
    -- -----------------------------------------------------
-   -- Byte delay 	
+   -- Byte delay
    -- -----------------------------------------------------
    delay_cntp : process(CLK)
    begin
@@ -260,7 +260,7 @@ delay_genp:if(DELAY_EN)generate
             if(EOP = '1' and SOP='0')then
                packet_shift_tmp <= conv_std_logic_vector((ETH_CLK_SIZE - conv_integer(EOP_POS) - 1),64); --unused place :)
 				elsif(EOP='1' and SOP='1')then
-					packet_shift_tmp <= conv_std_logic_vector(conv_integer(unsigned(SOP_ALIGN_SIZE))*4,64); --SOP byte offset 
+					packet_shift_tmp <= conv_std_logic_vector(conv_integer(unsigned(SOP_ALIGN_SIZE))*4,64); --SOP byte offset
             else
                packet_shift_tmp <= packet_shift_tmp + ETH_CLK_SIZE;  --everything is unused
             end if;
@@ -288,7 +288,7 @@ delay_genp:if(DELAY_EN)generate
 	sop_eop_shiftp:process(CLK)
 	begin
 		if(CLK='1' and CLK'event)then
-			sop_eop_shift <= packet_shift_tmp - conv_integer(input_eop_pos) - 1;	
+			sop_eop_shift <= packet_shift_tmp - conv_integer(input_eop_pos) - 1;
 		end if;
 	end process;
 
@@ -304,7 +304,7 @@ delay_genp:if(DELAY_EN)generate
 	shift_mux:process(sop_eop_en2,sop_eop_shift,sop_shift)
 	begin
 		if(sop_eop_en2 = '0')then
-			packet_shift <= sop_shift;		
+			packet_shift <= sop_shift;
 		else
 			packet_shift <= sop_eop_shift;
 		end if;
@@ -325,7 +325,7 @@ delay_genp:if(DELAY_EN)generate
    input_sop_muxp:process(input_sop_tmp1,input_sop_tmp2,sop_eop_en,sop_eop_en2)
    begin
       if(sop_eop_en='1' or sop_eop_en2='1')then
-         input_sop <= input_sop_tmp2; 
+         input_sop <= input_sop_tmp2;
       else
          input_sop <= input_sop_tmp1;
       end if;
@@ -333,7 +333,7 @@ delay_genp:if(DELAY_EN)generate
 
    ------------ DELAY STATS enable
    --enable delay write iff:
-   --	1] first pkt has been received 
+   --	1] first pkt has been received
 
    first_packet_recp:process(CLK)
    begin
@@ -347,20 +347,20 @@ delay_genp:if(DELAY_EN)generate
 		end if;
 	end if;
    end process;
-   
+
    -- --------------------------------------------------------
-   -- Min, Max delay regs     	
+   -- Min, Max delay regs
    -- --------------------------------------------------------
-   
+
    --Trigger signal generation
    max_pkt_delay <= '1' when(input_sop = '1' and reg_max_pkt_delay < packet_shift
                               and delay_reg_en = '1')
                      else '0';
-   
+
    min_pkt_delay <= '1' when(input_sop = '1' and reg_min_pkt_delay > packet_shift
                               and delay_reg_en = '1')
                     else '0';
-   
+
    max_delayp:process(CLK)
    begin
    	if(CLK = '1' and CLK'event)then
@@ -370,10 +370,10 @@ delay_genp:if(DELAY_EN)generate
    			if(max_pkt_delay = '1')then
    				reg_max_pkt_delay <= packet_shift;
    			end if;
-   		end if;	
+   		end if;
    	end if;
    end process;
-   
+
    min_delayp:process(CLK)
    begin
    	if(CLK = '1' and CLK'event)then
@@ -383,11 +383,11 @@ delay_genp:if(DELAY_EN)generate
    			if(min_pkt_delay = '1')then
    				reg_min_pkt_delay <= packet_shift;
    			end if;
-   		end if;	
+   		end if;
    	end if;
    end process;
-   
-   --snapshot register 
+
+   --snapshot register
    delay_snapshotp:process(CLK)
    begin
       if(CLK = '1' and CLK'event)then
@@ -403,26 +403,26 @@ delay_genp:if(DELAY_EN)generate
       OUT_MIN_DELAY <= (others=>'0');
       OUT_MAX_DELAY <= (others=>'0');
    end generate;
-   
+
    -- --------------------------------------------------------
-   -- Total trafic & Received & Discarded    
+   -- Total trafic & Received & Discarded
    -- --------------------------------------------------------
-   
+
    -- Trigger signal generation ------------------------------
-   total_frames <= '1' when(stat_sampling_en = '1' and (input_stat_frame_received = '1' or 
+   total_frames <= '1' when(stat_sampling_en = '1' and (input_stat_frame_received = '1' or
                            input_stat_frame_discarded = '1'))
                    else '0';
-   
+
    received_frames <= '1' when(stat_sampling_en = '1' and input_stat_frame_received = '1')
                      else '0';
-   
+
    discarded_frames <= '1' when(stat_sampling_en = '1' and input_stat_frame_discarded = '1')
                        else '0';
-   
-   buff_ovf_traff <= '1' when(stat_sampling_en = '1' and input_stat_buffer_ovf = '1' and 
+
+   buff_ovf_traff <= '1' when(stat_sampling_en = '1' and input_stat_buffer_ovf = '1' and
                               input_stat_frame_discarded = '1')
                      else '0';
-   
+
    -- Counters -----------------------------------------------
    cnt_traffg: if NOT CNT_DSP generate
 
@@ -433,12 +433,12 @@ delay_genp:if(DELAY_EN)generate
                cnt_total_packet_trfc <= (others=>'0');
             else
                if(total_frames = '1')then
-                  cnt_total_packet_trfc <= cnt_total_packet_trfc + 1;   
+                  cnt_total_packet_trfc <= cnt_total_packet_trfc + 1;
                end if;
             end if;
          end if;
       end process;
-      
+
       rec_packet_cntp:process(CLK)
       begin
          if(CLK = '1' and CLK'event)then
@@ -446,12 +446,12 @@ delay_genp:if(DELAY_EN)generate
                cnt_frame_received <= (others=>'0');
             else
                if(received_frames = '1')then
-                  cnt_frame_received <= cnt_frame_received + 1;   
+                  cnt_frame_received <= cnt_frame_received + 1;
                end if;
             end if;
          end if;
       end process;
-      
+
       discarded_frames_cntp:process(CLK)
       begin
          if(CLK = '1' and CLK'event)then
@@ -459,12 +459,12 @@ delay_genp:if(DELAY_EN)generate
                cnt_frame_discarded <= (others=>'0');
             else
                if(discarded_frames = '1')then
-                  cnt_frame_discarded <= cnt_frame_discarded + 1; 
+                  cnt_frame_discarded <= cnt_frame_discarded + 1;
                end if;
             end if;
          end if;
       end process;
-      
+
       buff_ovf_cntp:process(CLK)
       begin
          if(CLK = '1' and CLK'event)then
@@ -472,7 +472,7 @@ delay_genp:if(DELAY_EN)generate
                cnt_buff_ovf_traff <= (others=>'0');
             else
                if(buff_ovf_traff = '1')then
-                  cnt_buff_ovf_traff <= cnt_buff_ovf_traff + 1;   
+                  cnt_buff_ovf_traff <= cnt_buff_ovf_traff + 1;
                end if;
             end if;
          end if;
@@ -500,7 +500,7 @@ delay_genp:if(DELAY_EN)generate
 
 
       cnt_add_frame_received <= (63 downto 1 => '0') & received_frames;
-      
+
       cnt_frame_received_i : entity work.COUNT_DSP
       generic map (
          DATA_WIDTH => 64,
@@ -517,7 +517,7 @@ delay_genp:if(DELAY_EN)generate
 
 
       cnt_add_frame_discarded <= (63 downto 1 => '0') & discarded_frames;
-      
+
       cnt_frame_discarded_i : entity work.COUNT_DSP
       generic map (
          DATA_WIDTH => 64,
@@ -534,7 +534,7 @@ delay_genp:if(DELAY_EN)generate
 
 
       cnt_add_buff_ovf_traff <= (63 downto 1 => '0') & buff_ovf_traff;
-      
+
       cnt_buff_ovf_traff_i : entity work.COUNT_DSP
       generic map (
          DATA_WIDTH => 64,
@@ -550,7 +550,7 @@ delay_genp:if(DELAY_EN)generate
       );
 
    end generate;
-   
+
    -- snapshot register for CRC err & Rec. packets & len_(over|below)_mtu
    traff_snapshotp:process(CLK)
    begin
@@ -563,24 +563,24 @@ delay_genp:if(DELAY_EN)generate
          end if;
       end if;
    end process;
-   
+
    -- -------------------------------------------------------
-   -- CRC & MTU & MAC             
+   -- CRC & MTU & MAC
    -- -------------------------------------------------------
-   
+
    -- Trigger signal generation ------------------------------
    crc_err         <= '1' when(discarded_frames = '1' and input_stat_crc_check_failed = '1')
                       else '0';
-   
+
    bad_mac_err     <= '1' when(discarded_frames = '1' and input_stat_mac_check_failed = '1')
-                      else '0'; 
-   
+                      else '0';
+
    pkt_over_mtu    <= '1' when(discarded_frames = '1' and input_stat_len_over_mtu = '1')
-                      else '0'; 
-   
-   pkt_below_min   <= '1' when(discarded_frames = '1' and input_stat_len_below_min = '1') 
-                      else '0'; 
-   
+                      else '0';
+
+   pkt_below_min   <= '1' when(discarded_frames = '1' and input_stat_len_below_min = '1')
+                      else '0';
+
    -- Counters -----------------------------------------------
    cnt_crcg: if NOT CNT_DSP generate
 
@@ -592,13 +592,13 @@ delay_genp:if(DELAY_EN)generate
                   cnt_crc_packets <= (others=>'0');
                else
                   if(crc_err = '1')then
-                     cnt_crc_packets <= cnt_crc_packets + 1;   
+                     cnt_crc_packets <= cnt_crc_packets + 1;
                   end if;
                end if;
             end if;
          end process;
       end generate;
-      
+
       mac_genp:if(MAC_EN)generate
          mac_pckg_errp:process(CLK)
          begin
@@ -607,13 +607,13 @@ delay_genp:if(DELAY_EN)generate
                   cnt_bad_mac_packets <= (others=>'0');
                else
                   if(bad_mac_err = '1')then
-                     cnt_bad_mac_packets <= cnt_bad_mac_packets + 1; 
+                     cnt_bad_mac_packets <= cnt_bad_mac_packets + 1;
                   end if;
                end if;
             end if;
          end process;
       end generate;
-      
+
       mtu_genp:if(MTU_EN)generate
          pkt_over_mtup:process(CLK)
          begin
@@ -622,12 +622,12 @@ delay_genp:if(DELAY_EN)generate
                   cnt_pkt_over_mtu <= (others=>'0');
                else
                   if(pkt_over_mtu = '1')then
-                     cnt_pkt_over_mtu <= cnt_pkt_over_mtu + 1; 
+                     cnt_pkt_over_mtu <= cnt_pkt_over_mtu + 1;
                   end if;
                end if;
             end if;
          end process;
-         
+
          pkt_below_mtup:process(CLK)
          begin
             if(CLK = '1' and CLK'event)then
@@ -635,7 +635,7 @@ delay_genp:if(DELAY_EN)generate
                   cnt_pkt_below_min <= (others=>'0');
                else
                   if(pkt_below_min = '1')then
-                     cnt_pkt_below_min <= cnt_pkt_below_min + 1;  
+                     cnt_pkt_below_min <= cnt_pkt_below_min + 1;
                   end if;
                end if;
             end if;
@@ -694,7 +694,7 @@ delay_genp:if(DELAY_EN)generate
             P          => cnt_bad_mac_packets
          );
       end generate;
-      
+
       mtu_genp:if(MTU_EN)generate
          cnt_add_pkt_over_mtu <= (63 downto 1 => '0') & pkt_over_mtu;
 
@@ -711,7 +711,7 @@ delay_genp:if(DELAY_EN)generate
             MAX        => (others => '0'),
             P          => cnt_pkt_over_mtu
          );
-         
+
 
          cnt_add_pkt_below_min <= (63 downto 1 => '0') & pkt_below_min;
 
@@ -728,7 +728,7 @@ delay_genp:if(DELAY_EN)generate
             MAX        => (others => '0'),
             P          => cnt_pkt_below_min
          );
-      
+
       -- snapshot register for CRC err & Rec. packets & len_(over|below)_mtu
       mtu_crc_snapshotp:process(CLK)
       begin
@@ -753,34 +753,34 @@ delay_genp:if(DELAY_EN)generate
    end generate;
 
    -- --------------------------------------------------------
-   -- Packet  Min,Max,sum size 
+   -- Packet  Min,Max,sum size
    -- --------------------------------------------------------
-   
+
    --Trigger signal generation -------------------------------
       -- All processed packets(we are processing packet when the sampling of
       -- the input statistic is enabled)
-   sum_pkt_size   <= '1' when(total_frames = '1') 
-                     else '0'; 
-  
+   sum_pkt_size   <= '1' when(total_frames = '1')
+                     else '0';
+
    sum_pkt_size_ok <= '1' when(total_frames = '1' and input_stat_frame_received = '1')
                       else '0';
 
    min_size       <= '1' when(total_frames = '1' and reg_min_size > repaired_stat_payload_len)
                      else '0';
-   
+
    max_size       <= '1' when(total_frames = '1' and reg_max_size < repaired_stat_payload_len)
                      else '0';
-   
+
    -- Value preparation -------------------------------------
    --! Prepare paylod length (RFC defines frame length with CRC!)
    REMOVE_CRC_GEN:if(INBANDFCS = false)generate
-      repaired_stat_payload_len <= (X"000000000000" & input_stat_payload_len) + 4; 
+      repaired_stat_payload_len <= (X"000000000000" & input_stat_payload_len) + 4;
    end generate;
 
    NO_REMOVE_CRC_GEN:if(INBANDFCS = true)generate
-      repaired_stat_payload_len <= (X"000000000000" & input_stat_payload_len); 
+      repaired_stat_payload_len <= (X"000000000000" & input_stat_payload_len);
    end generate;
-   
+
    -- Counters -----------------------------------------------
    size_genp:if(SIZE_EN)generate
 
@@ -797,7 +797,7 @@ delay_genp:if(DELAY_EN)generate
                end if;
             end if;
          end process;
-         
+
          size_sump:process(CLK)
          begin
             if(CLK = '1' and CLK'event)then
@@ -812,7 +812,7 @@ delay_genp:if(DELAY_EN)generate
                end if;
             end if;
          end process;
-         
+
          ok_size_sump:process(CLK)
          begin
             if(CLK = '1' and CLK'event)then
@@ -827,7 +827,7 @@ delay_genp:if(DELAY_EN)generate
                end if;
             end if;
          end process;
-         
+
          min_pck_sizep:process(CLK)
          begin
             if(CLK = '1' and CLK'event)then
@@ -835,12 +835,12 @@ delay_genp:if(DELAY_EN)generate
                   reg_min_size <= (others=>'1');
                else
                   if(min_size = '1')then
-                     reg_min_size <= input_stat_payload_len;   
+                     reg_min_size <= input_stat_payload_len;
                   end if;
                end if;
             end if;
          end process;
-         
+
          max_pck_sizep:process(CLK)
          begin
             if(CLK = '1' and CLK'event)then
@@ -909,7 +909,7 @@ delay_genp:if(DELAY_EN)generate
             MAX        => (others => '0'),
             P          => cnt_sum_pkt_size_ok
          );
-         
+
          min_pck_sizep:process(CLK)
          begin
          	if(CLK = '1' and CLK'event)then
@@ -917,12 +917,12 @@ delay_genp:if(DELAY_EN)generate
          			reg_min_size <= (others=>'1');
          		else
          			if(min_size = '1')then
-         				reg_min_size <= input_stat_payload_len;	
+         				reg_min_size <= input_stat_payload_len;
          			end if;
          		end if;
          	end if;
          end process;
-         
+
          max_pck_sizep:process(CLK)
          begin
          	if(CLK = '1' and CLK'event)then
@@ -936,7 +936,7 @@ delay_genp:if(DELAY_EN)generate
          	end if;
          end process;
       end generate;
-      
+
       size_snapshotp:process(CLK)
       begin
          if(CLK = '1' and CLK'event)then
@@ -950,19 +950,19 @@ delay_genp:if(DELAY_EN)generate
          end if;
       end process;
    end generate;
-  
+
    no_size_genp:if(SIZE_EN = false)generate
-      OUT_MIN_SIZE   <= (others=>'0'); 
-      OUT_MAX_SIZE   <= (others=>'0'); 
-      OUT_SIZE_SUM   <= (others=>'0'); 
-      OUT_SIZE_SUM_OK      <= (others=>'0'); 
-      OUT_SIZE_SUM_COUNT   <= (others=>'0'); 
+      OUT_MIN_SIZE   <= (others=>'0');
+      OUT_MAX_SIZE   <= (others=>'0');
+      OUT_SIZE_SUM   <= (others=>'0');
+      OUT_SIZE_SUM_OK      <= (others=>'0');
+      OUT_SIZE_SUM_COUNT   <= (others=>'0');
    end generate;
 
    -- --------------------------------------------------------
-   -- Read to read delay   
+   -- Read to read delay
    -- --------------------------------------------------------
-   
+
    read_delay_genp:if(READ_DELAY_EN)generate
 
       cnt_delayg: if NOT CNT_DSP generate
@@ -1000,7 +1000,7 @@ delay_genp:if(DELAY_EN)generate
             P          => cnt_last_read_delay
          );
       end generate;
-         
+
       --read delay snapshot
       read_to_read_snapshot:process(CLK)
       begin
@@ -1016,19 +1016,19 @@ delay_genp:if(DELAY_EN)generate
    no_read_delay_genp:if(READ_DELAY_EN = false)generate
       OUT_LAST_READ_DELAY <= (others=>'0');
    end generate;
-   
+
    -- --------------------------------------------------------
    -- Multicast and broadcast counters
    -- --------------------------------------------------------
    -- Trigger signal generation ------------------------------
-   bcast_frames <=   '1' when(stat_sampling_en = '1' and input_stat_bcast = '1' and 
+   bcast_frames <=   '1' when(stat_sampling_en = '1' and input_stat_bcast = '1' and
                               input_stat_frame_received = '1')
                      else '0';
-   
+
    mcast_frames <=   '1' when(stat_sampling_en = '1' and input_stat_mcast = '1' and
                               input_stat_bcast = '0' and input_stat_frame_received = '1')
                      else '0';
-      
+
    bcast_gen:if(BCAST_MCAST_EN)generate
       -- Counters -----------------------------------------------
 
@@ -1045,7 +1045,7 @@ delay_genp:if(DELAY_EN)generate
                end if;
             end if;
          end process;
-         
+
          mcast_cntp:process(CLK)
          begin
             if(CLK = '1' and CLK'event)then
@@ -1076,7 +1076,7 @@ delay_genp:if(DELAY_EN)generate
             MAX        => (others => '0'),
             P          => cnt_bcast_frames
          );
-         
+
          cnt_add_mcast_frames <= (63 downto 1 => '0') & mcast_frames;
 
          cnt_mcast_frames_i : entity work.COUNT_DSP
@@ -1109,19 +1109,19 @@ delay_genp:if(DELAY_EN)generate
       OUT_MCAST_FRAMES <= (others=>'0');
       OUT_BCAST_FRAMES <= (others=>'0');
    end generate;
- 
+
    -- --------------------------------------------------------
    -- Multicast and broadcast counters
    -- --------------------------------------------------------
    -- Trigger signal generation ------------------------------
    fragment_frames <= '1' when(crc_err = '1' and input_stat_len_below_min = '1')
                       else '0';
-  
-   -- Jabber frame is a frame where the packet lenght is over 1518 bytes and it has a 
+
+   -- Jabber frame is a frame where the packet lenght is over 1518 bytes and it has a
    -- bad crc.
    jabber_frames  <= '1' when(crc_err = '1' and repaired_stat_payload_len > 1518)
                      else '0';
-      
+
    fragment_jabber_gen:if(FRAGMENT_JABBER_EN)generate
       -- Counters -----------------------------------------------
       cnt_jabberg: if NOT CNT_DSP generate
@@ -1137,7 +1137,7 @@ delay_genp:if(DELAY_EN)generate
                end if;
             end if;
          end process;
-         
+
          jabber_frames_cntp:process(CLK)
          begin
             if(CLK = '1' and CLK'event)then
@@ -1168,7 +1168,7 @@ delay_genp:if(DELAY_EN)generate
             MAX        => (others => '0'),
             P          => cnt_fragment_frames
          );
-         
+
 
          cnt_add_jabber_frames <= (63 downto 1 => '0') & jabber_frames;
 
@@ -1211,7 +1211,7 @@ delay_genp:if(DELAY_EN)generate
    undersize_frames  <= '1' when(stat_sampling_en = '1' and
                                 repaired_stat_payload_len < 64)
                         else '0';
-                                 
+
    undersize_gen: if UNDERSIZE_FRAMES_EN generate
       -- Generate the DSP version
       undersize_dsp: if CNT_DSP generate
@@ -1247,7 +1247,7 @@ delay_genp:if(DELAY_EN)generate
             end if;
          end process;
        end generate;
-        
+
        -- Snapshot register
       undersize_frames_snapshotp:process(CLK)
       begin
@@ -1276,34 +1276,34 @@ delay_genp:if(DELAY_EN)generate
 
    frames_65_127     <= '1' when(stat_sampling_en = '1' and
                                  repaired_stat_payload_len >=65 and
-                                 repaired_stat_payload_len <= 127) 
-                        else '0'; 
+                                 repaired_stat_payload_len <= 127)
+                        else '0';
 
    frames_128_255    <= '1' when(stat_sampling_en = '1' and
                                  repaired_stat_payload_len >= 128 and
-                                 repaired_stat_payload_len <= 255) 
-                        else '0'; 
+                                 repaired_stat_payload_len <= 255)
+                        else '0';
 
    frames_256_511    <= '1' when(stat_sampling_en = '1' and
                                  repaired_stat_payload_len >= 256 and
-                                 repaired_stat_payload_len <= 511) 
-                        else '0'; 
+                                 repaired_stat_payload_len <= 511)
+                        else '0';
 
    frames_512_1023   <= '1' when(stat_sampling_en = '1' and
                                  repaired_stat_payload_len >= 512 and
-                                 repaired_stat_payload_len <= 1023) 
-                        else '0'; 
+                                 repaired_stat_payload_len <= 1023)
+                        else '0';
 
    frames_1024_1518  <= '1' when(stat_sampling_en = '1' and
                                  repaired_stat_payload_len >= 1024 and
-                                 repaired_stat_payload_len <= 1518) 
-                        else '0'; 
+                                 repaired_stat_payload_len <= 1518)
+                        else '0';
 
    frames_over_1518  <= '1' when(stat_sampling_en = '1' and
                                  repaired_stat_payload_len > 1518)
                         else '0';
-      
-      
+
+
    payload_hist_gen:if(PAYLOAD_HISTOGRAM_EN)generate
       -- Counters --------------------------------------------
       cnt_size_histogramg: if NOT CNT_DSP generate
@@ -1332,7 +1332,7 @@ delay_genp:if(DELAY_EN)generate
                end if;
             end if;
          end process;
-         
+
          cnt_frames_128_255_cntp:process(CLK)
          begin
             if(CLK = '1' and CLK'event)then
@@ -1345,7 +1345,7 @@ delay_genp:if(DELAY_EN)generate
                end if;
             end if;
          end process;
-         
+
          cnt_frames_256_511_cntp:process(CLK)
          begin
             if(CLK = '1' and CLK'event)then
@@ -1358,7 +1358,7 @@ delay_genp:if(DELAY_EN)generate
                end if;
             end if;
          end process;
-         
+
          cnt_frames_512_1023_cntp:process(CLK)
          begin
             if(CLK = '1' and CLK'event)then
@@ -1371,7 +1371,7 @@ delay_genp:if(DELAY_EN)generate
                end if;
             end if;
          end process;
-         
+
          cnt_frames_1024_1518_cntp:process(CLK)
          begin
             if(CLK = '1' and CLK'event)then
@@ -1435,7 +1435,7 @@ delay_genp:if(DELAY_EN)generate
 
 
          cnt_add_frames_128_255 <= (63 downto 1 => '0') & frames_128_255;
-         
+
          cnt_frames_128_255_i : entity work.COUNT_DSP
          generic map (
             DATA_WIDTH => 64,
@@ -1452,7 +1452,7 @@ delay_genp:if(DELAY_EN)generate
 
 
          cnt_add_frames_256_511 <= (63 downto 1 => '0') & frames_256_511;
-         
+
          cnt_frames_256_511_i : entity work.COUNT_DSP
          generic map (
             DATA_WIDTH => 64,
@@ -1469,7 +1469,7 @@ delay_genp:if(DELAY_EN)generate
 
 
          cnt_add_frames_512_1023 <= (63 downto 1 => '0') & frames_512_1023;
-         
+
          cnt_frames_512_1023_i : entity work.COUNT_DSP
          generic map (
             DATA_WIDTH => 64,
@@ -1486,7 +1486,7 @@ delay_genp:if(DELAY_EN)generate
 
 
          cnt_add_frames_1024_1518 <= (63 downto 1 => '0') & frames_1024_1518;
-         
+
          cnt_frames_1024_1518_i : entity work.COUNT_DSP
          generic map (
             DATA_WIDTH => 64,
@@ -1503,7 +1503,7 @@ delay_genp:if(DELAY_EN)generate
 
 
          cnt_add_frames_over_1518 <= (63 downto 1 => '0') & frames_over_1518;
-         
+
          cnt_frames_over_1518_i : entity work.COUNT_DSP
          generic map (
             DATA_WIDTH => 64,
@@ -1536,12 +1536,12 @@ delay_genp:if(DELAY_EN)generate
    end generate;
 
    no_payload_hist_gen:if(PAYLOAD_HISTOGRAM_EN = false)generate
-      OUT_FRAMES_64          <= (others=>'0'); 
+      OUT_FRAMES_64          <= (others=>'0');
       OUT_FRAMES_65_127      <= (others=>'0');
       OUT_FRAMES_128_255     <= (others=>'0');
       OUT_FRAMES_256_511     <= (others=>'0');
       OUT_FRAMES_512_1023    <= (others=>'0');
-      OUT_FRAMES_1024_1518   <= (others=>'0'); 
+      OUT_FRAMES_1024_1518   <= (others=>'0');
       OUT_FRAMES_OVER_1518   <= (others=>'0');
    end generate;
 

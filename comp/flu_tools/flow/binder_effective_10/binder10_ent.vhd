@@ -7,7 +7,7 @@
 --
 -- $Id$
 --
--- TODO: 
+-- TODO:
 --
 --
 
@@ -25,12 +25,12 @@ entity FLUA_BINDER_10_EFF is
    generic(
       --! FLU configuration
       DATA_WIDTH    : integer:= 512;
-      SOP_POS_WIDTH : integer:= 3;      
+      SOP_POS_WIDTH : integer:= 3;
 
       --! Logarithm base
       --! \brief Number of inputs of one stage multiplexer. These multiplexers
       --! create a RR selection tree. Therefore, number of stages is computed as
-      --! log2(16)/log2(DIVISION_RATIO) 
+      --! log2(16)/log2(DIVISION_RATIO)
       --! The result of this equation has to be an integer!
       --! Possible values are: 2,4,16
       --! Warning: We want to use all mux inputs at each stage!
@@ -48,7 +48,7 @@ entity FLUA_BINDER_10_EFF is
       --!   '0' - don't use the DSP multiplexor
       --!   '1' - use the DSP multiplexor
       DSP_MAP        : std_logic_vector(3 downto 0) := "0000";
-      
+
       --! Enable/Disable header (which can be assigned to input FLU frame)
       --!   false - Disable Header function
       --!   true  - Enable Header function
@@ -65,14 +65,14 @@ entity FLUA_BINDER_10_EFF is
       --! Enable/disable the reservation of 128 bit gap
       --! NOTICE: If you enable this functionality, you should be sure
       --! that the minimal packet length is of the frame is 60 bytes.
-      --! This generic is tightly bounded with usage in network module and 
-      --! the FSM needs to be optimized for that usage. This generic can 
-      --! be used with DATA_WIDTH equals to 256 and 512 bits, because the 
+      --! This generic is tightly bounded with usage in network module and
+      --! the FSM needs to be optimized for that usage. This generic can
+      --! be used with DATA_WIDTH equals to 256 and 512 bits, because the
       --! author wants to keep the solution as simple as possible.
       --!   false - Disable insertion of the 128 bit gap between FLU frames
       --!   true  - Enable insertion of the 128 bit gap between FLU frames
       RESERVE_GAP_EN : boolean := false;
-      
+
       --! Enable/disable the debug interface (enabled by default)
       --! When disabled, output is not connected and some resources can be saved.
       --! Affected outputs are DISTRIBUTED_TO and SELECTED_FROM
@@ -92,7 +92,7 @@ entity FLUA_BINDER_10_EFF is
       RX_SOP         : in std_logic_vector(10-1 downto 0);
       RX_EOP         : in std_logic_vector(10-1 downto 0);
       RX_SRC_RDY     : in std_logic_vector(10-1 downto 0);
-      RX_DST_RDY     : out std_logic_vector(10-1 downto 0); 
+      RX_DST_RDY     : out std_logic_vector(10-1 downto 0);
 
       --! \name Header input interface
       RX_HDR_DATA    : in std_logic_vector(10*HDR_WIDTH-1 downto 0);
@@ -115,7 +115,7 @@ entity FLUA_BINDER_10_EFF is
 
       --! \name Debug
       --! Information about source Interface (valid when TX_SOP = '1')
-      --! 10 MSB bits contains the port, last bit contains information about 
+      --! 10 MSB bits contains the port, last bit contains information about
       --! used line in internal infrastructure
       SELECTED_FROM  : out std_logic_vector(10 downto 0);
       --! Information abou internal distribution interface (one bit on interface)

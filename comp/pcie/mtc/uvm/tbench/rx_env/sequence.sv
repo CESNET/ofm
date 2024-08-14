@@ -118,7 +118,7 @@ class logic_vector_array_sequence#(ITEM_WIDTH, string DEVICE, string ENDPOINT_TY
             rw = uvm_pcie_hdr::encode_type(cq_header_req.req_type, IS_INTEL_DEV);
             if (rw == uvm_pcie_hdr::TYPE_READ) begin
                 logic [sv_pcie_meta_pack::PCIE_META_REQ_HDR_W-1 : 0] hdr;
-               
+
                 hdr = gen_hdr(cq_header_req, IS_INTEL_DEV);
                 if (!IS_MFB_META_DEV) begin
                     req.data = new[sv_pcie_meta_pack::PCIE_META_REQ_HDR_W/ITEM_WIDTH];
@@ -137,7 +137,7 @@ class logic_vector_array_sequence#(ITEM_WIDTH, string DEVICE, string ENDPOINT_TY
                 end else begin
                     // Add PCIe HDR and data to array
                    logic [sv_pcie_meta_pack::PCIE_META_REQ_HDR_W-1 : 0] hdr;
-                   
+
                    hdr = gen_hdr(cq_header_req, IS_INTEL_DEV);
                    if (ENDPOINT_TYPE == "H_TILE" && cq_header_req.req_type[5] == 1'b0) begin
                         req.data = new[m_pcie_data.data.size()+sv_pcie_meta_pack::PCIE_META_REQ_HDR_W/ITEM_WIDTH-1];

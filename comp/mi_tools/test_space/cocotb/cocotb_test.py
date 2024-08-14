@@ -56,7 +56,7 @@ async def run_test(dut, pkt_count=1000, item_width_min=1, item_width_max=32):
         cocotb.log.debug(f"recieved transaction: {output.hex()}")
 
         assert output == transaction
-        
+
     cocotb.log.info(f"DONE")
 
     cocotb.log.info("\nREAD AND WRITE TEST\n")
@@ -66,11 +66,11 @@ async def run_test(dut, pkt_count=1000, item_width_min=1, item_width_max=32):
         await tb.stream_in.write(int.from_bytes(transaction[0:4], 'little'), transaction)
         output = await tb.stream_in.read(int.from_bytes(transaction[0:4], 'little'), len(transaction))
         cocotb.log.debug(f"recieved transaction: {output.hex()}")
-        
+
         assert output == transaction
-    
+
     cocotb.log.info(f"DONE")
-   
+
     cocotb.log.info("\nREAD64 AND WRITE64 TEST\n")
 
     for transaction in random_packets(8, 8, pkt_count):
@@ -80,7 +80,7 @@ async def run_test(dut, pkt_count=1000, item_width_min=1, item_width_max=32):
         cocotb.log.debug(f"recieved transaction: {output.hex()}")
 
         assert output == transaction
-    
+
     cocotb.log.info(f"DONE")
 
     raise tb.scoreboard.result

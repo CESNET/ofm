@@ -168,8 +168,8 @@ begin
         if (X<80) then
             tx_dst_rdy <= '1';
         end if;
-        
+
         wait for C_CLK_PER -1 ns;
     end process;
 
-end architecture behavioral; 
+end architecture behavioral;

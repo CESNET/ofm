@@ -1,7 +1,7 @@
 /*
  * flu_fifo_ctrl_checker.sv: FrameLink FIFO Control Interface Checker
  * Copyright (C) 2012 CESNET
- * Author: Lukas Kekely <kekely@cesnet.cz> 
+ * Author: Lukas Kekely <kekely@cesnet.cz>
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -10,25 +10,25 @@
  * TODO:
  *
  */
- 
+
   import math_pkg::*;
   // --------------------------------------------------------------------------
   // -- Frame Link Unaligned FIFO Checker Class
   // --------------------------------------------------------------------------
-  /* This class is responsible for checking correct setting of Control Interface 
-   * signals. Unit must be enabled by "setEnable()" function call. Monitoring 
+  /* This class is responsible for checking correct setting of Control Interface
+   * signals. Unit must be enabled by "setEnable()" function call. Monitoring
    * can be stoped by "setDisable()" function call.
    */
   class FrameLinkUFifoChecker #(int pDataWidth=256, pEopWidth=5, pSopWidth=2, pBlockSize=16,
                                pStatusWidth=8, pItems=512, pUseBrams=0);
-    
+
     // -- Private Class Atributes --
     string  inst;                            // Checker identification
     bit     enabled;                         // Checker is enabled
     virtual iFrameLinkURx.tb #(pDataWidth,pEopWidth,pSopWidth) rx;
     virtual iFrameLinkUTx.tb #(pDataWidth,pEopWidth,pSopWidth) tx;
     virtual iFrameLinkUFifo.ctrl_tb #(pStatusWidth)   ctrl;
-    
+
     // -- Public Class Methods --
 
     // -- Constructor ---------------------------------------------------------
@@ -37,29 +37,29 @@
                    virtual iFrameLinkUTx.tb #(pDataWidth,pEopWidth,pSopWidth) tx,
                    virtual iFrameLinkUFifo.ctrl_tb #(pStatusWidth)   ctrl
                    );
-      this.enabled     = 0;           // Monitor is disabled by default   
-      this.rx          = rx;          // Store pointer RX interface 
-      this.tx          = tx;          // Store pointer TX interface 
-      this.ctrl        = ctrl;        // Store pointer CTRL interface 
+      this.enabled     = 0;           // Monitor is disabled by default
+      this.rx          = rx;          // Store pointer RX interface
+      this.tx          = tx;          // Store pointer TX interface
+      this.ctrl        = ctrl;        // Store pointer CTRL interface
       this.inst        = inst;        // Store driver identifier
-      
+
     endfunction
 
     // -- Enable Checker ------------------------------------------------------
     // Enable checker and runs checkers process
     task setEnabled();
       enabled = 1; // Checker Enabling
-      fork         
+      fork
         run();     // Creating checker subprocess
       join_none;   // Don't wait for ending
     endtask : setEnabled
-        
+
     // -- Disable Checker -----------------------------------------------------
     // Disable checker
     task setDisabled();
       enabled = 0; // Disable checker
-    endtask : setDisabled 
-    
+    endtask : setDisabled
+
     // -- Run Checker ---------------------------------------------------------
     // Check correstness of Control Interface signals
     task run();
@@ -72,7 +72,7 @@
         else checkStatusSRAM(items, frames);
       end
     endtask : run
-    
+
     // -- Update Status -------------------------------------------------------
     // Update status according to Rx and Tx interfaces
     // Counts stored items and frames
@@ -86,7 +86,7 @@
         if (tx.cb.SOP) frames--;
         end
     endtask : updateStatus
-    
+
     // -- Check Status SRAM ---------------------------------------------------
     // Compare expected status with signals on Control Interface
     // (SelectiveRAM used)
@@ -95,36 +95,36 @@
       logic [pStatusWidth-1:0] status = (pItems-items)>>(log2(pItems)+1-pStatusWidth);
 
       // LSTBLK assertion
-      assert (((pItems-items<=pBlockSize) && ctrl.ctrl_cb.LSTBLK) || 
+      assert (((pItems-items<=pBlockSize) && ctrl.ctrl_cb.LSTBLK) ||
               ((pItems-items>pBlockSize) && !ctrl.ctrl_cb.LSTBLK))
       else $error("Error: Wrong LSTBLK signal\n");
-      
+
       // STATUS assertion
       assert (status==ctrl.ctrl_cb.STATUS)
       else $error("Error: Wrong STATUS signal\n");
-      
+
       // EMPTY assertion
-      assert (((items==0) && ctrl.ctrl_cb.EMPTY) || 
+      assert (((items==0) && ctrl.ctrl_cb.EMPTY) ||
               ((items!=0) && !ctrl.ctrl_cb.EMPTY))
       else $error("Error: Wrong EMPTY signal\n");
-      
+
       // FULL assertion
-      assert (((items==pItems) && ctrl.ctrl_cb.FULL) || 
+      assert (((items==pItems) && ctrl.ctrl_cb.FULL) ||
               ((items!=pItems) && !ctrl.ctrl_cb.FULL))
       else $error("Error: Wrong FULL signal\n");
-      
+
       // FRAME_RDY assertion
-      assert (((frames<=0) && !ctrl.ctrl_cb.FRAME_RDY) || 
+      assert (((frames<=0) && !ctrl.ctrl_cb.FRAME_RDY) ||
             ((frames>0) && ctrl.ctrl_cb.FRAME_RDY))
       else $error("Error: Wrong FRAME_RDY signal\n");
-      
+
     endtask : checkStatusSRAM
-    
+
     // -- Check Status BRAM ---------------------------------------------------
     // Compare expected status with signals on Control Interface
     // (BlockRAM used)
-    // Because of output pipelining, signals LSTBLK, STATUS, EMPTY and FULL may 
-    // be inaccurate by one or two items. 
+    // Because of output pipelining, signals LSTBLK, STATUS, EMPTY and FULL may
+    // be inaccurate by one or two items.
     task checkStatusBRAM(int items, frames);
       // MSBs of exact number of free items in the fifo
       logic [pStatusWidth-1:0] status0 = (pItems-items)>>(log2(pItems)+1-pStatusWidth);
@@ -132,30 +132,30 @@
       logic [pStatusWidth-1:0] status2 = (pItems-items+2)>>(log2(pItems)+1-pStatusWidth);
 
       // LSTBLK assertion
-      assert (((pItems-items<=pBlockSize || pItems-items+1<=pBlockSize || pItems-items+2<=pBlockSize) && ctrl.ctrl_cb.LSTBLK) || 
+      assert (((pItems-items<=pBlockSize || pItems-items+1<=pBlockSize || pItems-items+2<=pBlockSize) && ctrl.ctrl_cb.LSTBLK) ||
               ((pItems-items>pBlockSize || pItems-items+1>pBlockSize || pItems-items+2>pBlockSize) && !ctrl.ctrl_cb.LSTBLK))
       else $error("Error: Wrong LSTBLK signal\n");
-      
+
       // STATUS assertion
       assert (status0==ctrl.ctrl_cb.STATUS || status1==ctrl.ctrl_cb.STATUS ||
               status2==ctrl.ctrl_cb.STATUS)
       else $error("Error: Wrong STATUS signal\n");
-      
+
       // EMPTY assertion
-      assert (((items==0 || items==1 || items==2) && ctrl.ctrl_cb.EMPTY) || 
+      assert (((items==0 || items==1 || items==2) && ctrl.ctrl_cb.EMPTY) ||
               ((items!=0 || items!=1 || items!=2) && !ctrl.ctrl_cb.EMPTY))
       else $error("Error: Wrong EMPTY signal\n");
-      
+
       // FULL assertion
-      assert (((items==pItems || items-1==pItems || items-2==pItems) && ctrl.ctrl_cb.FULL) || 
+      assert (((items==pItems || items-1==pItems || items-2==pItems) && ctrl.ctrl_cb.FULL) ||
               ((items!=pItems || items-1!=pItems || items-2!=pItems) && !ctrl.ctrl_cb.FULL))
       else $error("Error: Wrong FULL signal\n");
-      
+
       // FRAME_RDY assertion
-      assert (((frames<=0) && !ctrl.ctrl_cb.FRAME_RDY) || 
+      assert (((frames<=0) && !ctrl.ctrl_cb.FRAME_RDY) ||
             ((frames>0) && ctrl.ctrl_cb.FRAME_RDY))
       else $error("Error: Wrong FRAME_RDY signal\n");
-      
+
     endtask : checkStatusBRAM
-        
-endclass : FrameLinkUFifoChecker    
+
+endclass : FrameLinkUFifoChecker

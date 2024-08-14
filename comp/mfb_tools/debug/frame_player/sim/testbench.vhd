@@ -56,8 +56,8 @@ architecture behavioral of testbench is
    signal mi32_rd       : std_logic;
    signal mi32_wr       : std_logic;
    signal mi32_ardy     : std_logic;
-   signal mi32_drd      : std_logic_vector(31 downto 0); 
-   signal mi32_drdy     : std_logic; 
+   signal mi32_drd      : std_logic_vector(31 downto 0);
+   signal mi32_drdy     : std_logic;
 
 -- ----------------------------------------------------------------------------
 --                            Architecture body

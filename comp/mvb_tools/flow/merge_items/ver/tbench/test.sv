@@ -102,5 +102,5 @@ program TEST (
         $write("Verification finished successfully!\n");
         $stop();
     end
-    
+
 endprogram

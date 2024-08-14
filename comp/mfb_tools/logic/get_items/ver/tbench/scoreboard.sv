@@ -38,7 +38,7 @@ class ScoreboardDriverCbs extends DriverCbs;
       end
       //$write("ex_tr: \n");
       //ex_tr.display();
-      
+
       sc_table.add(ex_tr);
    endtask
 

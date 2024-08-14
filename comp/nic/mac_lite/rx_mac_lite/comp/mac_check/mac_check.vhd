@@ -14,14 +14,14 @@ use work.type_pack.all;
 entity RX_MAC_LITE_MAC_CHECK is
     generic(
         -- =====================================================================
-        -- MFB CONFIGURATION: 
+        -- MFB CONFIGURATION:
         -- =====================================================================
         REGIONS     : natural := 4; -- any possitive value
         REGION_SIZE : natural := 8; -- must be power of 2
         BLOCK_SIZE  : natural := 8; -- must be power of 2
         ITEM_WIDTH  : natural := 8; -- must be power of 2
         -- =====================================================================
-        -- MAC CHECK CONFIGURATION: 
+        -- MAC CHECK CONFIGURATION:
         -- =====================================================================
         MAC_COUNT   : natural := 16; -- any possitive value, max is 16
         DEVICE      : string  := "STRATIX10"
@@ -134,7 +134,7 @@ begin
     -- -------------------------------------------------------------------------
     --  FRAME STATE LOGIC
     -- -------------------------------------------------------------------------
-    
+
     inc_frame_g : for r in 0 to REGIONS-1 generate
         s_inc_frame(r+1) <= (RX_SOF(r) and not RX_EOF(r) and not s_inc_frame(r)) or
                             (RX_SOF(r) and RX_EOF(r) and s_inc_frame(r)) or
@@ -147,7 +147,7 @@ begin
             if (RESET = '1') then
                 s_inc_frame(0) <= '0';
             elsif (RX_SRC_RDY = '1') then
-                s_inc_frame(0) <= s_inc_frame(REGIONS);  
+                s_inc_frame(0) <= s_inc_frame(REGIONS);
             end if;
         end if;
     end process;
@@ -359,7 +359,7 @@ begin
     begin
         if (rising_edge(CLK)) then
             if (s_src_rdy_reg3 = '1') then
-                s_mac_status_lva_reg <= s_mac_status_lva(REGIONS-1); 
+                s_mac_status_lva_reg <= s_mac_status_lva(REGIONS-1);
             end if;
         end if;
     end process;

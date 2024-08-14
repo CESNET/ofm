@@ -1,6 +1,6 @@
 -- barrel_shifter_gen.vhd: Barrel shifter with generic data width, generic block size and optional pipelining and output register
 -- Copyright (C) 2019 CESNET
--- Author(s): Jan Kubalek <xkubal11@stud.fit.vutbr.cz> 
+-- Author(s): Jan Kubalek <xkubal11@stud.fit.vutbr.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --
@@ -12,10 +12,10 @@ use work.math_pack.all;
 use work.type_pack.all;
 
 -- ----------------------------------------------------------------------------
---                  ENTITY DECLARATION -- Barrel shifter                     -- 
+--                  ENTITY DECLARATION -- Barrel shifter                     --
 -- ----------------------------------------------------------------------------
 
-entity BARREL_SHIFTER_GEN_PIPED is 
+entity BARREL_SHIFTER_GEN_PIPED is
 generic (
     -- input/output data width in BLOCKs
     BLOCKS       : integer := 256;
@@ -29,7 +29,7 @@ generic (
     INPUT_REG         : boolean := false;
     -- output register enable (adds additional 1 CLK latency)
     OUTPUT_REG        : boolean := false;
-    
+
     -- set true to shift left, false to shift right
     SHIFT_LEFT  : boolean := false ;
 
@@ -40,13 +40,13 @@ generic (
 port (
     CLK         : in  std_logic := '0'; -- unused when MUX_LATENCY==0 and OUTPUT_REG==INPUT_REG==false
     RESET       : in  std_logic := '0'; -- unused when MUX_LATENCY==0 and OUTPUT_REG==INPUT_REG==false
-   
+
     RX_DATA     : in  std_logic_vector(BLOCK_WIDTH*BLOCKS-1 downto 0);
     RX_SEL      : in  std_logic_vector(log2(BLOCKS)-1 downto 0);
     RX_METADATA : in  std_logic_vector(METADATA_WIDTH-1 downto 0) := (others => '0');
     RX_SRC_RDY  : in  std_logic := '1';
     RX_DST_RDY  : out std_logic;
-   
+
     TX_DATA     : out std_logic_vector(BLOCK_WIDTH*BLOCKS-1 downto 0);
     TX_METADATA : out std_logic_vector(METADATA_WIDTH-1 downto 0);
     TX_SRC_RDY  : out std_logic;
@@ -125,6 +125,6 @@ begin
 
     TX_DATA     <= slv_array_ser(mux_out, BLOCKS, BLOCK_WIDTH);
     TX_METADATA <= mux_meta_out(0);
-    TX_SRC_RDY  <= mux_out_src_rdy(0);   
-    
+    TX_SRC_RDY  <= mux_out_src_rdy(0);
+
 end full;

@@ -1,5 +1,5 @@
 #
-# top_level_sig.fdo : Include file with signals 
+# top_level_sig.fdo : Include file with signals
 # Copyright (C) 2008 CESNET
 # Author(s): Vaclav Bartos <xbarto11@stud.fit.vutbr.cz>
 #
@@ -15,7 +15,7 @@ add wave -divider "MI Splitter"
 
 add_wave "-noupdate -color yellow -label RESET" $PATH/RESET
 add_wave "-noupdate -color yellow -label CLK"   $PATH/CLK
- 
+
 add wave -divider "Input MI"
 
 add_wave "-noupdate -hex -label IN_DWR"          $PATH/IN_DWR
@@ -29,13 +29,13 @@ add_wave "-noupdate -hex -label IN_DRDY"         $PATH/IN_DRDY
 
 add wave -divider "Input MI - pipeline"
 
-add_wave "-noupdate -hex -label pipe_dwr"        $PATH/pipe_dwr 
+add_wave "-noupdate -hex -label pipe_dwr"        $PATH/pipe_dwr
 add_wave "-noupdate -hex -label pipe_addr"       $PATH/pipe_addr
-add_wave "-noupdate -hex -label pipe_rd"         $PATH/pipe_rd  
-add_wave "-noupdate -hex -label pipe_wr"         $PATH/pipe_wr  
+add_wave "-noupdate -hex -label pipe_rd"         $PATH/pipe_rd
+add_wave "-noupdate -hex -label pipe_wr"         $PATH/pipe_wr
 add_wave "-noupdate -hex -label pipe_ardy"       $PATH/pipe_ardy
-add_wave "-noupdate -hex -label pipe_be"         $PATH/pipe_be  
-add_wave "-noupdate -hex -label pipe_drd"        $PATH/pipe_drd 
+add_wave "-noupdate -hex -label pipe_be"         $PATH/pipe_be
+add_wave "-noupdate -hex -label pipe_drd"        $PATH/pipe_drd
 add_wave "-noupdate -hex -label pipe_drdy"       $PATH/pipe_drdy
 
 add wave -divider "Output MIs"

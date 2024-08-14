@@ -32,7 +32,7 @@ entity PIPE_TREE_ADDER is
       -- -- Output is the same width as input.
       -- -- Make sure its wide enough for the sum of all values.
       DATA_WIDTH : integer := 16;
-      
+
       -- Desired latency
       -- Ideal value is log2(ITEMS).
       -- LATENCY==0 -> asynchronous adder
@@ -85,7 +85,7 @@ architecture FULL of PIPE_TREE_ADDER is
       variable z : real;
       variable result : b_array_t(LEVELS_IDEAL+1-1 downto 1);
    begin
-      
+
       for x in 1 to LEVELS_IDEAL+1-1 loop
          y := real(x  )*real(LEVELS_REAL)/real(LEVELS_IDEAL);
          z := real(x-1)*real(LEVELS_REAL)/real(LEVELS_IDEAL);
@@ -97,7 +97,7 @@ architecture FULL of PIPE_TREE_ADDER is
    constant IS_REG_VEC : b_array_t(LEVELS_IDEAL+1-1 downto 1) := isRegGen;
 
    -- Signals
-   
+
    signal add_input : u_array_2d_t(LEVELS_IDEAL+1-1 downto 0)(CEIL_ITEMS-1 downto 0)(DATA_WIDTH-1 downto 0);
    signal out_reg   : u_array_t(OUT_REGS-1 downto 0)(DATA_WIDTH-1 downto 0);
 
@@ -131,7 +131,7 @@ begin
    l1_gen : if LATENCY/=0 generate
       -- adder tree
       adder_tree_gen : for i in 1 to LEVELS_IDEAL+1-1 generate
-        
+
          -- asynch adder
          asynch_adder_gen : if IS_REG_VEC(i)=false generate
             asynch_adder_pr  : process (add_input)
@@ -139,7 +139,7 @@ begin
                for e in 0 to CEIL_ITEMS/2-1 loop
                   add_input(i)(e) <= add_input(i-1)(e*2) + add_input(i-1)(e*2+1);
                end loop;
-            end process;            
+            end process;
          end generate;
 
          -- synch adder
@@ -155,9 +155,9 @@ begin
                      add_input(i) <= (others => (others => '0'));
                   end if;
                end if;
-            end process;            
+            end process;
          end generate;
-     
+
       end generate;
 
       -- output registers
@@ -172,7 +172,7 @@ begin
                      out_reg(i) <= out_reg(i-1);
                   end if;
                end loop;
-               
+
                if (RESET='1') then
                   out_reg <= (others => (others => '0'));
                end if;

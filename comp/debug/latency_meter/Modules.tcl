@@ -13,4 +13,3 @@ lappend PACKAGES "$OFM_PATH/comp/base/pkg/type_pack.vhd"
 lappend COMPONENTS [ list "FIFOX"       $FIFOX_BASE      "FULL" ]
 
 lappend MOD "$ENTITY_BASE/latency_meter.vhd"
-    

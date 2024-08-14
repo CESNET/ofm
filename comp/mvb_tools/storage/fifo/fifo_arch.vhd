@@ -1,6 +1,6 @@
 -- fifo_arch.vhd: Multi-Value Bus generic FIFO (full architecture)
 -- Copyright (C) 2016 CESNET z. s. p. o.
--- Author: Lukas Kekely <kekely@cesnet.cz> 
+-- Author: Lukas Kekely <kekely@cesnet.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --

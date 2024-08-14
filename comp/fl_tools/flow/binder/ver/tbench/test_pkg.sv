@@ -18,7 +18,7 @@ package test_pkg;
 
   // standard SystemVerilog Scoreboard
   `include "scoreboard.sv"
-  
+
   // FL_BINDER GENERICS
   parameter INPUT_COUNT       = 2;
   parameter INPUT_WIDTH       = 64;
@@ -59,11 +59,11 @@ package test_pkg;
   // MONITOR PARAMETERS
   parameter MONITOR_DATA_WIDTH         = OUTPUT_WIDTH;     // datova sirka monitoru
   parameter MONITOR_DREM_WIDTH         = OUTPUT_DREM_WIDTH;     // drem sirka monitoru
-  parameter MONITOR_DELAYEN_WT         = 0;                 // vaha delay enable medzi transakciami 
+  parameter MONITOR_DELAYEN_WT         = 0;                 // vaha delay enable medzi transakciami
   parameter MONITOR_DELAYDIS_WT        = 3;                 // vaha delay disable medzi transakciami
   parameter MONITOR_DELAYLOW           = 0;                 // spodna hranica delay medzi transakciami
   parameter MONITOR_DELAYHIGH          = 3;                 // horna hranica delay medzi transakciami
-  parameter MONITOR_INSIDE_DELAYEN_WT  = 0;                 // vaha delay enable v transakcii 
+  parameter MONITOR_INSIDE_DELAYEN_WT  = 0;                 // vaha delay enable v transakcii
   parameter MONITOR_INSIDE_DELAYDIS_WT = 3;                 // vaha delay disable v transakcii
   parameter MONITOR_INSIDE_DELAYLOW    = 0;                 // spodna hranica delay v transakcii
   parameter MONITOR_INSIDE_DELAYHIGH   = 3;                 // horna hranica delay v transakcii

@@ -29,7 +29,7 @@ entity LB_ROOT_CORE is
       CLK           : in  std_logic;
       RESET         : in  std_logic;
 
-      -- Buffer Interface   
+      -- Buffer Interface
       BUFFER_ADDR       : in  std_logic_vector(31 downto 0);
       BUFFER_SOF        : in  std_logic;
       BUFFER_EOF        : in  std_logic;
@@ -83,7 +83,7 @@ architecture LB_ROOT_CORE_ARCH of LB_ROOT_CORE is
     signal drd_reg                 : std_logic_vector(63 downto 0);
     signal drd_dec                 : std_logic_vector( 3 downto 0);
     signal drd_dec_sel             : std_logic_vector( 1 downto 0);
-    
+
     -- Counters
     signal init_counters           : std_logic;
     signal data_counters_init      : std_logic_vector(1 downto 0);
@@ -119,42 +119,42 @@ begin
 
 -- ----------------------------------------------------------------------------
 -- LOCAL BUS MAPING
--------------------------------------------------------------------------------   
+-------------------------------------------------------------------------------
 localbus_pipe: process(RESET, CLK)
 begin
    if (RESET = '1') then
-       lb_dwr_out     <= (others => '0'); 
+       lb_dwr_out     <= (others => '0');
        lb_be_out      <= (others => '0');
-       lb_ads_out     <= '0';           
-       aux_lb_rd_out  <= '0';              
-       aux_lb_wr_out  <= '0';   
+       lb_ads_out     <= '0';
+       aux_lb_rd_out  <= '0';
+       aux_lb_wr_out  <= '0';
        lb_abort_out   <= '0';
        lb_drd_in      <= (others => '0');
        lb_rdy_in      <= '0';
-       lb_err_in      <= '0';  
+       lb_err_in      <= '0';
    elsif (CLK'event AND CLK = '1') then
        lb_dwr_out    <= addr_data_mux;
        lb_be_out     <= be_mux;
-       lb_ads_out    <= fsm_ads;           
-       aux_lb_rd_out <= fsm_rd;              
-       aux_lb_wr_out <= fsm_wr;    
-       lb_abort_out  <= fsm_abort;         
+       lb_ads_out    <= fsm_ads;
+       aux_lb_rd_out <= fsm_rd;
+       aux_lb_wr_out <= fsm_wr;
+       lb_abort_out  <= fsm_abort;
        lb_drd_in     <= LB_DRD;
        lb_rdy_in     <= LB_RDY;
-       lb_err_in     <= LB_ERR;  
+       lb_err_in     <= LB_ERR;
    end if;
 end process;
 
 LB_DWR   <= lb_dwr_out;
 LB_BE    <= lb_be_out;
 LB_ADS   <= lb_ads_out;
-LB_RD    <= lb_rd_out;    
-LB_WR    <= lb_wr_out;   
+LB_RD    <= lb_rd_out;
+LB_WR    <= lb_wr_out;
 LB_ABORT <= lb_abort_out;
 
 -- ---------------------------------------------------------------------------
 -- DON'T SEND BE = 0  (when end of IB transaction have last four BE = 0)
--- --------------------------------------------------------------------------- 
+-- ---------------------------------------------------------------------------
 lb_rd_out <= '1' when (aux_lb_rd_out='1' and not (lb_be_out(0) ='0' and vld_cnt='0' and first_do_flag = '0')) else '0';
 lb_wr_out <= '1' when (aux_lb_wr_out='1' and not (lb_be_out(0) ='0' and vld_cnt='0' and first_do_flag = '0')) else '0';
 
@@ -184,7 +184,7 @@ end process;
 
 -- ---------------------------------------------------------------------------
 -- GENERATING ABORT (counters and logic)
------------------------------------------------------------------------------- 
+------------------------------------------------------------------------------
 -- Generate abort (will be used in the future)
 --gen_abort_flag <= '0';
 gen_abort_flag <= abort_cnt(ABORT_CNT_WIDTH) or lb_err_in;
@@ -208,7 +208,7 @@ end process;
 
 -- ---------------------------------------------------------------------------
 -- CORE FSM (Create and control transactions)
------------------------------------------------------------------------------- 
+------------------------------------------------------------------------------
 LB_ROOT_CORE_FSM_U : entity work.LB_ROOT_CORE_FSM
    generic map (
       ABORT_CNT_WIDTH     => ABORT_CNT_WIDTH
@@ -230,13 +230,13 @@ LB_ROOT_CORE_FSM_U : entity work.LB_ROOT_CORE_FSM
    DATA_OUT_CNT_CE        => data_out_cnt_ce,      -- Increment data_out_counter (select 16 bit item from 64 bit word)
    WAIT_FOR_ALL_RDY       => fsm_waiting_for_rdy,  -- FSM is waiting for all rdy signals
    READING_FLAG           => fsm_reading_flag,     -- Is set when reading operation
-   
+
    -- Core Status Interface
    GEN_ABORT_FLAG         => gen_abort_flag,       -- When signal is set FSM generate ABORT
    DATA_OUT_CNT           => data_out_cnt,         -- Status of data_out_counter
    PENDING_CNT            => pending_items_cnt,    -- Status of pending_items_counter
    LAST_REQ               => fsm_last_rq,          -- Is set when last rq is in pipeline
-   
+
    -- Local Bus Output Interface
    LB_ADS                 => fsm_ads,              -- Address Select
    LB_RD                  => fsm_rd,               -- Read
@@ -248,7 +248,7 @@ LB_ROOT_CORE_FSM_U : entity work.LB_ROOT_CORE_FSM
 
 -- ---------------------------------------------------------------------------
 -- PENDING ITEMS COUNTER (only 16 items can be send without rdy)
------------------------------------------------------------------------------- 
+------------------------------------------------------------------------------
 pending_items_cnt_up    <= (lb_wr_out or lb_rd_out) and not lb_rdy_in;
 pending_items_cnt_down  <= (not lb_rd_out and not lb_wr_out) and lb_rdy_in;
 
@@ -272,7 +272,7 @@ end process;
 
 -- ---------------------------------------------------------------------------
 -- READ AND WRITE PART (Multiplexors, 64 -> 16)
-------------------------------------------------------------------------------   
+------------------------------------------------------------------------------
 
 data_counters_init <= "10" when BUFFER_BE(3 downto 0) = "0000" else "00";
 
@@ -333,7 +333,7 @@ end process;
 
 -- ---------------------------------------------------------------------------
 -- DRD PART (Readed data from localbus)
-------------------------------------------------------------------------------   
+------------------------------------------------------------------------------
 BUFFER_DRD      <= drd_reg;
 -- fsm reading flag is used due to same fsm for RD and WR
 BUFFER_DRDY     <= (drdy_overflow or drdy_last) and fsm_reading_flag;
@@ -382,7 +382,7 @@ begin
       else
          drdy_overflow <= '0';
       end if;
-      
+
       if (lb_rdy_in = '1' and fsm_waiting_for_rdy='1' and pending_items_cnt=1) then
          drdy_last <= '1';
       else

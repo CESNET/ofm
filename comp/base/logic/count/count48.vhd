@@ -39,7 +39,7 @@ entity COUNT48 is
       --! Reset input
       RESET         : in  std_logic;
       RESET_OUT     : in  std_logic;
-      --! casrryin for cascade 
+      --! casrryin for cascade
       CAS_CARRY_IN  : in  std_logic;
       --! Data input
       A        : in  std_logic_vector(47 downto 0);
@@ -65,17 +65,17 @@ architecture V7_DSP of COUNT48 is
    --! select carry in
    signal carry_in_sel : std_logic_vector(2 downto 0);
 
-begin 
+begin
    gen_normal_carry_in : if (CARRY_SEL = 0) generate
       carry_in_sel <= "000";
-   end generate;   
-   
+   end generate;
+
    gen_cascade_carry_in : if (CARRY_SEL = 1) generate
       carry_in_sel <= "010";
-   end generate; 
-   
+   end generate;
+
    zeros <= X"0000000000000000";
-             
+
    reg_of : if (REG_IN = 0 OR REG_IN = 3) generate
       enable_p <= ENABLE;
    end generate;
@@ -103,10 +103,10 @@ dsp48e_g: if DEVICE_HAS_DSP48E generate
       USE_DPORT => FALSE, -- Select D port usage (TRUE or FALSE)
       USE_MULT => "NONE", -- Select multiplier usage ("MULTIPLY", "DYNAMIC", or "NONE")
       -- Pattern Detector Attributes: Pattern Detection Configuration
-      AUTORESET_PATDET => AUTO_RESET,  -- "NO_RESET", "RESET_MATCH", "RESET_NOT_MATCH" 
+      AUTORESET_PATDET => AUTO_RESET,  -- "NO_RESET", "RESET_MATCH", "RESET_NOT_MATCH"
       MASK => X"000000000000",         -- 48-bit mask value for pattern detect (1=ignore)
       PATTERN => X"000000000000",      -- 48-bit pattern match for pattern detect
-      SEL_MASK => "MASK",              -- "C", "MASK", "ROUNDING_MODE1", "ROUNDING_MODE2" 
+      SEL_MASK => "MASK",              -- "C", "MASK", "ROUNDING_MODE1", "ROUNDING_MODE2"
       SEL_PATTERN => "C",              -- Select pattern value ("PATTERN" or "C")
       USE_PATTERN_DETECT => "PATDET",  -- Enable pattern detect ("PATDET" or "NO_PATDET")
       -- Register Control Attributes: Pipeline Register Configuration

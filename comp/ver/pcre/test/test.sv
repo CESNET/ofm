@@ -18,7 +18,7 @@ import dpi_pcre::*;
 
 
 module testbench();
- 
+
     initial begin
         dpi_pcre_t pcre;
         string errMsg;

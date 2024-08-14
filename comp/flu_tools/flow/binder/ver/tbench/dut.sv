@@ -10,7 +10,7 @@
  * TODO:
  *
  */
- 
+
 // ----------------------------------------------------------------------------
 //                        Module declaration
 // ----------------------------------------------------------------------------
@@ -25,8 +25,8 @@ module DUT (
 
 // Signals for DUT conection
 wire [(PORTS*DATA_WIDTH)-1:0] rx_data;
-wire [(PORTS*SOP_POS_WIDTH)-1:0] rx_sop_pos; 
-wire [(PORTS*EOP_POS_WIDTH)-1:0] rx_eop_pos;   
+wire [(PORTS*SOP_POS_WIDTH)-1:0] rx_sop_pos;
+wire [(PORTS*EOP_POS_WIDTH)-1:0] rx_eop_pos;
 wire [PORTS-1:0] rx_sop;
 wire [PORTS-1:0] rx_eop;
 wire [PORTS-1:0] rx_src_rdy;
@@ -44,7 +44,7 @@ for (i=0; i<PORTS; i++) begin
   assign rx_src_rdy[i] = RX[i].SRC_RDY;
   assign RX[i].DST_RDY = rx_dst_rdy[i];
   end
-endgenerate 
+endgenerate
 
 // -------------------- Module body -------------------------------------------
 flu_binder #(
@@ -57,7 +57,7 @@ flu_binder #(
     // Common Interface
      .CLK               (CLK),
      .RESET             (RESET),
-     
+
     // Port 0
      .RX_DATA     (rx_data),
      .RX_SOP_POS  (rx_sop_pos),
@@ -66,7 +66,7 @@ flu_binder #(
      .RX_EOP      (rx_eop),
      .RX_SRC_RDY  (rx_src_rdy),
      .RX_DST_RDY  (rx_dst_rdy),
- 
+
     // Port 0
      .TX_DATA     (TX.DATA),
      .TX_SOP_POS  (TX.SOP_POS),

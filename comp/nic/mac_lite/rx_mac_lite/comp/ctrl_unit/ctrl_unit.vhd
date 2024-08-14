@@ -94,17 +94,17 @@ entity RX_MAC_LITE_CTRL_UNIT is
         -- Total number of discarded frames
         STAT_FRAMES_DISCARDED   : in  std_logic_vector(63 downto 0);
         -- Discarded frames due to buffer overflow
-        STAT_BUFFER_OVF         : in  std_logic_vector(63 downto 0); 
+        STAT_BUFFER_OVF         : in  std_logic_vector(63 downto 0);
         -- Total number of received bytes (include CRC bytes)
-        STAT_RX_BYTES           : in  std_logic_vector(63 downto 0); 
+        STAT_RX_BYTES           : in  std_logic_vector(63 downto 0);
         -- Total number of transmitted
         STAT_TX_BYTES           : in  std_logic_vector(63 downto 0);
         -- Total number of frames with bad CRC
         STAT_CRC_ERR            : in  std_logic_vector(63 downto 0);
         -- Total number of frames over MTU
-        STAT_OVER_MTU           : in  std_logic_vector(63 downto 0); 
+        STAT_OVER_MTU           : in  std_logic_vector(63 downto 0);
         -- Total number of frames below minimal length
-        STAT_BELOW_MIN          : in  std_logic_vector(63 downto 0); 
+        STAT_BELOW_MIN          : in  std_logic_vector(63 downto 0);
         -- Total amount of received broadcast frames
         STAT_BCAST_FRAMES       : in  std_logic_vector(63 downto 0);
         -- Total amount of received multicast frames
@@ -154,7 +154,7 @@ architecture FULL of RX_MAC_LITE_CTRL_UNIT is
     constant SM_CNT_BYTES_ADDR       : std_logic_vector(7 downto 2) := "010010"; -- 0x48
     constant SM_CNT_PACKETS_ADDR     : std_logic_vector(7 downto 2) := "010011"; -- 0x4C
     constant CAM_BASE_ADDR           : std_logic_vector(7 downto 2) := "100000"; -- 0x80
-    
+
     -- =====================================================================
     -- RFC2819 counter addresses
     -- =====================================================================
@@ -175,7 +175,7 @@ architecture FULL of RX_MAC_LITE_CTRL_UNIT is
     constant FRAMES_1024_1518_L_ADDR : std_logic_vector(7 downto 2) := "001101";
     constant FRAMES_OVER_1518_L_ADDR : std_logic_vector(7 downto 2) := "011100";
     constant FRAMES_UNDERSIZE_L_ADDR : std_logic_vector(7 downto 2) := "011110";
-   
+
     constant CRC_ERR_H_ADDR          : std_logic_vector(7 downto 2) := "001110";
     constant OVER_MTU_H_ADDR         : std_logic_vector(7 downto 2) := "001111";
     constant BELOW_MIN_H_ADDR        : std_logic_vector(7 downto 2) := "010000";
@@ -192,7 +192,7 @@ architecture FULL of RX_MAC_LITE_CTRL_UNIT is
     constant FRAMES_1024_1518_H_ADDR : std_logic_vector(7 downto 2) := "011011";
     constant FRAMES_OVER_1518_H_ADDR : std_logic_vector(7 downto 2) := "011101";
     constant FRAMES_UNDERSIZE_H_ADDR : std_logic_vector(7 downto 2) := "011111";
-    
+
     -- =====================================================================
     -- Command constants
     -- =====================================================================
@@ -347,7 +347,7 @@ begin
         -- Common interface
         CLK      => CLK,
         RESET    => RESET,
-        
+
         -- Input MI interface
         IN_DWR   => s_mi_sync_dwr,
         IN_ADDR  => s_mi_sync_addr,
@@ -357,7 +357,7 @@ begin
         IN_DRD   => s_mi_sync_drd,
         IN_ARDY  => s_mi_sync_ardy,
         IN_DRDY  => s_mi_sync_drdy,
-        
+
         -- Output MI interface
         OUT_DWR  => s_mi_dwr,
         OUT_ADDR => s_mi_addr,
@@ -419,7 +419,7 @@ begin
     CAM_WRITE_DATA(23 downto 16) <= s_reg_data_wr_l(31 downto 24);
     CAM_WRITE_DATA(15 downto 8)  <= s_reg_data_wr_h(7  downto 0);
     CAM_WRITE_DATA(7  downto 0)  <= s_reg_data_wr_h(15 downto 8);  -- MSB
-   
+
     -- Register storing cam_we value
     reg_cam_we_p : process(CLK)
     begin
@@ -658,7 +658,7 @@ begin
             when ERROR_MASK_ADDR =>
                 s_mx_ctrl_regs_out <= (31 downto 5 => '0') & s_reg_error_mask;
             when STATUS_ADDR =>
-                s_mx_ctrl_regs_out <= (31 downto 29 => '0') & s_reg_status;                
+                s_mx_ctrl_regs_out <= (31 downto 29 => '0') & s_reg_status;
             when MIN_FRAME_LEN_ADDR =>
                 s_mx_ctrl_regs_out <= (31 downto LEN_WIDTH => '0') & s_reg_min_frame_len;
             when MAX_FRAME_LEN_ADDR =>

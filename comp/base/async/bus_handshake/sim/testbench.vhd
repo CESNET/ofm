@@ -8,9 +8,9 @@
 --! $Id$
 --!
 
-library IEEE;	
-use IEEE.std_logic_1164.all;	
-use IEEE.std_logic_unsigned.all;	
+library IEEE;
+use IEEE.std_logic_1164.all;
+use IEEE.std_logic_unsigned.all;
 use IEEE.std_logic_arith.all;
 
 --! ----------------------------------------------------------------------------
@@ -42,9 +42,9 @@ architecture behavioral of testbench is
    uut : entity work.ASYNC_BUS_HANDSHAKE
    port map(
       ADATAIN  => adatain,
-      ASEND    => asend, 
+      ASEND    => asend,
       AREADY   => aready,
-      BDATAOUT => bdataout,     
+      BDATAOUT => bdataout,
       BLOAD    => bload,
       BVALID   => bvalid,
       ARST     => arst,
@@ -78,7 +78,7 @@ architecture behavioral of testbench is
       adatain <= (others => '0');
       asend   <= '0';
       bload   <= '0';
-   
+
       --! RESET FOR 10ns -------------------------------------------------------
       arst <= '1';
       brst <= '1';
@@ -86,7 +86,7 @@ architecture behavioral of testbench is
       arst <= '0';
       brst <= '0';
       --! ----------------------------------------------------------------------
-   
+
       wait until rising_edge(aclk) and aready='1';
       adatain <= "10101010101010101010101010101010";
       asend <= '1';
@@ -116,7 +116,7 @@ architecture behavioral of testbench is
       bload <= '1';
       wait until rising_edge(bclk);
       bload <= '0';
-   
+
       wait until rising_edge(aclk) and aready='1';
       adatain <= "10101010101010101010100000000111";
       asend <= '1';
@@ -126,7 +126,7 @@ architecture behavioral of testbench is
       bload <= '1';
       wait until rising_edge(bclk);
       bload <= '0';
-   
+
       wait until rising_edge(aclk) and aready='1';
       adatain <= "10101011111000010101010000101010";
       asend <= '1';
@@ -136,7 +136,7 @@ architecture behavioral of testbench is
       bload <= '1';
       wait until rising_edge(bclk);
       bload <= '0';
-   
+
       wait until rising_edge(aclk) and aready='1';
       adatain <= "00000000001110101010101010101010";
       asend <= '1';
@@ -146,7 +146,7 @@ architecture behavioral of testbench is
       bload <= '1';
       wait until rising_edge(bclk);
       bload <= '0';
-   
+
       wait until rising_edge(aclk) and aready='1';
       adatain <= "00000010111100010101000100111010";
       asend <= '1';
@@ -156,7 +156,7 @@ architecture behavioral of testbench is
       bload <= '1';
       wait until rising_edge(bclk);
       bload <= '0';
-   
+
       wait until rising_edge(aclk) and aready='1';
       adatain <= "00011011000110001111101011101010";
       asend <= '1';
@@ -166,7 +166,7 @@ architecture behavioral of testbench is
       bload <= '1';
       wait until rising_edge(bclk);
       bload <= '0';
-   
+
       wait until rising_edge(aclk) and aready='1';
       adatain <= (others => '1');
       asend <= '1';
@@ -176,7 +176,7 @@ architecture behavioral of testbench is
       bload <= '1';
       wait until rising_edge(bclk);
       bload <= '0';
-   
+
       wait until rising_edge(aclk) and aready='1';
       adatain <= (others => '0');
       asend <= '1';
@@ -187,7 +187,7 @@ architecture behavioral of testbench is
       wait until rising_edge(bclk);
       bload <= '0';
 
-      wait;  
+      wait;
    end process;
 
 end architecture behavioral;

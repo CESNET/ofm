@@ -35,7 +35,7 @@ architecture FULL of DP_BRAM_V7 is
    --! A number of rows of the BRAM
    constant ROW_NUMBER        : integer := GET_BMEM_ROW_COUNT(BRAM_TYPE,DATA_WIDTH,ADDRESS_WIDTH);
    --! A number of bits stored into one BRAM
-   constant BRAM_DATA_WIDTH   : integer := GET_BMEM_DATA_WIDTH_PORTION(BRAM_TYPE,DATA_WIDTH);  
+   constant BRAM_DATA_WIDTH   : integer := GET_BMEM_DATA_WIDTH_PORTION(BRAM_TYPE,DATA_WIDTH);
    --! A number of BRAMs on one word
    constant BRAM_ON_WORD      : integer := GET_BMEM_ON_WORD(BRAM_TYPE,DATA_WIDTH);
    --! Get width of the BMEM address bus
@@ -43,10 +43,10 @@ architecture FULL of DP_BRAM_V7 is
    --! A number of bits to address the row
    constant ROW_ADDRESS_WIDTH    : integer := log2(ROW_NUMBER);
    --! Size of WEA vector with respect to data width and bram type
-   constant BRAM_WE_WIDHT        : integer := GET_BMEM_WE_WIDTH(BRAM_TYPE,DATA_WIDTH); 
+   constant BRAM_WE_WIDHT        : integer := GET_BMEM_WE_WIDTH(BRAM_TYPE,DATA_WIDTH);
 
    -- -------------------------------------------
-   -- Data types 
+   -- Data types
    -- -------------------------------------------
 
    -- Type definitions for easiser data connection
@@ -111,16 +111,16 @@ architecture FULL of DP_BRAM_V7 is
    signal debug_item_vldB : std_logic := '1';
 
 begin
-   
+
    -- -------------------------------------------
-   -- Port A handling 
+   -- Port A handling
    -- -------------------------------------------
    -- Deal with addresses
    PORTA_ONE_ROW_GEN:if(ADDRESS_WIDTH <= BRAM_ADDRESS_WIDTH) generate
       --Our address space fits into one row memory. Crucial parameter is
-      --also data width (we have one row, we are addresing only the part 
+      --also data width (we have one row, we are addresing only the part
       --of the BRAM but we need more BRAMs to store and load the word)
-      
+
       --! BRAM address composition
       process(ADDRA)
       begin
@@ -138,7 +138,7 @@ begin
       --Our address space fits into memory with more ROWs. Crucial parameter is
       --also data width -> this width defines the BRAM address width. So, we
       --are able to count a number of rows of the final memory.
-   
+
       --! Set the address portion for the BRAM, rest is used as the row address
       portA_bram_address <= ADDRA(BRAM_ADDRESS_WIDTH-1 downto 0);
       portA_row_address <= ADDRA(ADDRESS_WIDTH-1 downto BRAM_ADDRESS_WIDTH);
@@ -146,7 +146,7 @@ begin
 
    --Deal with the output and pipeline signals
    PORTA_OUT_NO_REG_GEN:if(ENABLE_OUT_REG = false) generate
-      
+
       --! Deal with data output
       DOA      <= portA_data_out(conv_integer(UNSIGNED(reg_row_address_a))) when debug_item_vldA='1' else (others => 'U');
       DOA_DV   <= reg_data_a_vld;
@@ -161,7 +161,7 @@ begin
       begin
          if(CLKA = '1' and CLKA'event)then
             if(RSTA = '1')then
-               --Reset only the validity signal 
+               --Reset only the validity signal
                DOA_DV <= '0';
             else
                if(PIPE_ENA = '1')then
@@ -171,13 +171,13 @@ begin
                      DOA <= (others => 'U');
                   end if;
                   DOA_DV <= reg_data_a_vld;
-               end if;  
+               end if;
             end if;
          end if;
       end process;
 
       --! Use the PIPE_ENA signal from input
-      pipe_ena_in <= PIPE_ENA; 
+      pipe_ena_in <= PIPE_ENA;
    end generate;
 
    --! \brief Delay register for selected row
@@ -220,7 +220,7 @@ begin
 
          --Write is enabled
          if(WEA = '1')then
-            portA_we(conv_integer(UNSIGNED(portA_row_address))) <= (others=>'1'); 
+            portA_we(conv_integer(UNSIGNED(portA_row_address))) <= (others=>'1');
          end if;
       end if;
    end process;
@@ -231,9 +231,9 @@ begin
    -- Deal with addresses
    PORTB_ONE_ROW_GEN:if(ADDRESS_WIDTH <= BRAM_ADDRESS_WIDTH) generate
       --Our address space fits into one row memory. Crucial parameter is
-      --also data width (we have one row, we are addresing only the part 
+      --also data width (we have one row, we are addresing only the part
       --of the BRAM but we need more BRAMs to store and load the word)
-      
+
       --! BRAM address composition
       process(ADDRB)
       begin
@@ -251,7 +251,7 @@ begin
       --Our address space fits into memory with more ROWs. Crucial parameter is
       --also data width -> this width defines the BRAM address width. So, we
       --are able to count a number of rows of the final memory.
-   
+
       --! Set the address portion for the BRAM, rest is used as the row address
       portB_bram_address <= ADDRB(BRAM_ADDRESS_WIDTH-1 downto 0);
       portB_row_address <= ADDRB(ADDRESS_WIDTH-1 downto BRAM_ADDRESS_WIDTH);
@@ -259,7 +259,7 @@ begin
 
    --Deal with the output and pipeline signals
    PORTB_OUT_NO_REG_GEN:if(ENABLE_OUT_REG = false) generate
-      
+
       --! Deal with data output
       DOB      <= portB_data_out(conv_integer(UNSIGNED(reg_row_address_b))) when debug_item_vldB='1' else (others => 'U');
       DOB_DV   <= reg_data_b_vld;
@@ -274,7 +274,7 @@ begin
       begin
          if(CLKB = '1' and CLKB'event)then
             if(RSTB = '1')then
-               --Reset only the validity signal 
+               --Reset only the validity signal
                DOB_DV <= '0';
             else
                if(PIPE_ENB = '1')then
@@ -284,13 +284,13 @@ begin
                      DOB <= (others => 'U');
                   end if;
                   DOB_DV <= reg_data_b_vld;
-               end if;  
+               end if;
             end if;
          end if;
       end process;
 
       --! Use the PIPE_ENB signal from input
-      pipe_enb_in <= PIPE_ENB; 
+      pipe_enb_in <= PIPE_ENB;
    end generate;
 
    --! \brief Delay register for selected row
@@ -333,7 +333,7 @@ begin
 
          --Write is enabled
          if(WEB = '1')then
-            portB_we(conv_integer(UNSIGNED(portB_row_address))) <= (others=>'1'); 
+            portB_we(conv_integer(UNSIGNED(portB_row_address))) <= (others=>'1');
          end if;
       end if;
    end process;
@@ -378,26 +378,26 @@ begin
                DOA => portA_data_out(i)((j+1)*BRAM_DATA_WIDTH-1 downto BRAM_DATA_WIDTH*j),
                DOB => portB_data_out(i)((j+1)*BRAM_DATA_WIDTH-1 downto BRAM_DATA_WIDTH*j),
                -- Address input
-               ADDRA => portA_bram_address, 
-               ADDRB => portB_bram_address, 
+               ADDRA => portA_bram_address,
+               ADDRB => portB_bram_address,
                -- Clock
-               CLKA => CLKA, 
+               CLKA => CLKA,
                CLKB => CLKB,
                -- Input data
-               DIA => DIA((j+1)*BRAM_DATA_WIDTH-1 downto BRAM_DATA_WIDTH*j), 
+               DIA => DIA((j+1)*BRAM_DATA_WIDTH-1 downto BRAM_DATA_WIDTH*j),
                DIB => DIB((j+1)*BRAM_DATA_WIDTH-1 downto BRAM_DATA_WIDTH*j),
                -- Enable signal
                ENA => portA_en(i),
                ENB => portB_en(i),
                -- Output register enable
-               REGCEA => '1', 
-               REGCEB => '1', 
-               -- Reset port 
-               RSTA => RSTA, 
-               RSTB => RSTB, 
+               REGCEA => '1',
+               REGCEB => '1',
+               -- Reset port
+               RSTA => RSTA,
+               RSTB => RSTB,
                --Byte-wide write enable
-               WEA => portA_we(i), 
-               WEB => portB_we(i) 
+               WEA => portA_we(i),
+               WEB => portB_we(i)
             );
          end generate;
 
@@ -444,28 +444,28 @@ begin
             )
             port map (
                -- Output data
-               DOA => tmp_doa, 
-               DOB => tmp_dob, 
+               DOA => tmp_doa,
+               DOB => tmp_dob,
                -- Address input
-               ADDRA => portA_bram_address, 
-               ADDRB => portB_bram_address, 
+               ADDRA => portA_bram_address,
+               ADDRB => portB_bram_address,
                -- CLock
-               CLKA => CLKA, 
+               CLKA => CLKA,
                CLKB => CLKB,
                -- Input data
-               DIA => tmp_dia, 
-               DIB => tmp_dib, 
+               DIA => tmp_dia,
+               DIB => tmp_dib,
                --Enable signal
-               ENA => portA_en(i), 
-               ENB => portB_en(i), 
+               ENA => portA_en(i),
+               ENB => portB_en(i),
                -- Output register enable
-               REGCEA => '1', 
-               REGCEB => '1', 
+               REGCEA => '1',
+               REGCEB => '1',
                -- Reset port
-               RSTA => RSTA, 
+               RSTA => RSTA,
                RSTB => RSTB,
                -- Byte-wide write enable
-               WEA => portA_we(i), 
+               WEA => portA_we(i),
                WEB => portB_we(i)
             );
          end generate;

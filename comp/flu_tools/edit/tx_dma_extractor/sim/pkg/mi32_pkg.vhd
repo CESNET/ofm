@@ -29,90 +29,90 @@ package mi32_pkg is
    procedure mi32_init (
       signal mi32 : inout mi32_t
    );
-   
+
    procedure mi32_write (
       signal mi32 : inout mi32_t
    );
-   
+
    procedure mi32_write_be (
       signal mi32 : inout mi32_t
    );
-  
+
    procedure mi32_read (
       signal mi32 : inout mi32_t
    );
 end package;
 
-package body mi32_pkg is 
+package body mi32_pkg is
    procedure mi32_init (
       signal mi32 : inout mi32_t
-   ) is 
+   ) is
    begin
-      mi32.ADDR <= (others => '0'); 
-      mi32.WR   <= '0'; 
-      mi32.DWR  <= (others => '0'); 
-      mi32.RD   <= '0'; 
+      mi32.ADDR <= (others => '0');
+      mi32.WR   <= '0';
+      mi32.DWR  <= (others => '0');
+      mi32.RD   <= '0';
       mi32.BE   <= (others => '0');
    end procedure;
 
 
    procedure mi32_write (
       signal mi32 : inout mi32_t
-   ) is 
+   ) is
    begin
       mi32.WR <= '1';
       mi32.BE <= (others => '1');
       while mi32.ARDY = '0' loop
-         wait for per;  
-      end loop; 
-      wait for per;   
+         wait for per;
+      end loop;
+      wait for per;
       mi32.WR <= '0';
    end procedure;
-   
+
    procedure mi32_write_be (
       signal mi32 : inout mi32_t
-   ) is 
+   ) is
    begin
       mi32.WR <= '1';
       mi32.BE <= "0001";
       while mi32.ARDY = '0' loop
-         wait for per;   
-      end loop; 
-      wait for per; 
- 
+         wait for per;
+      end loop;
+      wait for per;
+
       mi32.WR <= '1';
       mi32.BE <= "0010";
       while mi32.ARDY = '0' loop
-         wait for per;   
-      end loop; 
-      wait for per;  
+         wait for per;
+      end loop;
+      wait for per;
 
       mi32.WR <= '1';
       mi32.BE <= "0100";
       while mi32.ARDY = '0' loop
-         wait for per;   
-      end loop; 
-      wait for per;  
+         wait for per;
+      end loop;
+      wait for per;
 
       mi32.WR <= '1';
       mi32.BE <= "1000";
       while mi32.ARDY = '0' loop
-         wait for per;   
-      end loop; 
-      wait for per;  
- 
+         wait for per;
+      end loop;
+      wait for per;
+
       mi32.WR <= '0';
    end procedure;
-  
+
    procedure mi32_read (
       signal mi32 : inout mi32_t
-   ) is 
+   ) is
    begin
       mi32.RD <= '1';
       while mi32.ARDY = '0' loop
-         wait for per;   
-      end loop; 
-      wait for per;   
+         wait for per;
+      end loop;
+      wait for per;
       mi32.RD <= '0';
    end procedure;
 end mi32_pkg;

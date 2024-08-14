@@ -64,7 +64,7 @@ begin
             in_lbus_data_rot(s)((i+1)*8-1 downto i*8) <= IN_LBUS_DATA(s)((BYTES-1-i+1)*8-1 downto (BYTES-1-i)*8);
         end generate;
     end generate;
-    
+
     in_lbus_data_ser <= slv_array_ser(in_lbus_data_rot);
 
     in_lbus_sop_vld <= IN_LBUS_SOP and IN_LBUS_ENA;

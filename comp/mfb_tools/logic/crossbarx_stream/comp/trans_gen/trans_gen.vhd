@@ -231,7 +231,7 @@ begin
         (tmp_meta, tmp_len) <= eof_shake_tx_data((i+1)*(META_WIDTH+log2(PKT_MTU+1))-1
                                               downto i*(META_WIDTH+log2(PKT_MTU+1)));
 
-        
+
         eof_shake_tx_meta   (i) <= tmp_meta;
         eof_shake_tx_len    (i) <= tmp_len;
     end generate;

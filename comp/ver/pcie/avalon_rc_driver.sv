@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2020 CESNET z. s. p. o.
- * SPDX-License-Identifier: BSD-3-Clause 
+ * SPDX-License-Identifier: BSD-3-Clause
 */
 
 class avalon_rc_driver extends sv_common_pkg::Driver;

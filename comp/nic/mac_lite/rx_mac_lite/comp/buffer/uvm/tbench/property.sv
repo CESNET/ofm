@@ -1,11 +1,11 @@
-// property.sv: Properties for mfb bus 
+// property.sv: Properties for mfb bus
 // Copyright (C) 2023 CESNET z. s. p. o.
 // Author(s): Jakub Cabal <cabal@cesnet.cz>
 
 // SPDX-License-Identifier: BSD-3-Clause
 
 
-module dut_property #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH) 
+module dut_property #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH)
     (
         input RX_RESET,
         input TX_RESET,

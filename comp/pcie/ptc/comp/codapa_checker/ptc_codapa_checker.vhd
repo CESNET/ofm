@@ -15,13 +15,13 @@ use work.type_pack.all;
 entity PTC_CODAPA_CHECKER is
     generic(
         -- =====================================================================
-        -- MVB HEADER BUS CONFIGURATION: 
+        -- MVB HEADER BUS CONFIGURATION:
         -- =====================================================================
         -- Supported configuration is only MVB(2,128)
         MVB_ITEMS          : natural := 2;
         MVB_ITEM_WIDTH     : natural := 128;
         -- =====================================================================
-        -- OTHER CONFIGURATION: 
+        -- OTHER CONFIGURATION:
         -- =====================================================================
         -- Width of PCIe transaction size signal. Set Log2 of maximum supported
         -- PCIe transaction size (HDR + payload) in dwords
@@ -185,7 +185,7 @@ begin
                 v_rx_payload_packets_cnt := v_rx_payload_packets_cnt+1;
             end if;
         end loop;
-        
+
         s_rx_payload_packets_cnt <= v_rx_payload_packets_cnt;
     end process;
 

@@ -6,7 +6,7 @@
 
 
 # packages:
-set PACKAGES "$PACKAGES $OFM_PATH/comp/base/pkg/math_pack.vhd" 
+set PACKAGES "$PACKAGES $OFM_PATH/comp/base/pkg/math_pack.vhd"
 
 # basic logic components:
 set LOGIC_BASE    "$OFM_PATH/comp/base/logic"

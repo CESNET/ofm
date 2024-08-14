@@ -67,7 +67,7 @@ architecture round_robin of FLB_OUTPUT is
    signal dv                 : std_logic;
    signal rx_dst_rdy_n_i     : std_logic;
    signal chosen_queue_empty : std_logic;
-  
+
 begin
    -- ------------------ Directly mapped signals ------------------------------
    cnt_next_ce       <= '1' when NO_FRAME = '1' else (not reg_ready);
@@ -96,7 +96,7 @@ begin
 
    -- register control signals
    reg_addr_we       <= fsm_next_queue;
-   reg_next_we       <= queue_chosen when NO_FRAME = '1' 
+   reg_next_we       <= queue_chosen when NO_FRAME = '1'
                         else (queue_chosen and (not reg_ready));
    reg_valid_we      <= fsm_set_valid;
    reg_valid_clr     <= fsm_clr_valid;
@@ -111,12 +111,12 @@ begin
       port map(
          CLK            => CLK,
          RESET          => RESET,
-   
+
          -- input signals
          EOF            => fsm_eof,
          QUEUE_RDY      => fsm_queue_rdy,
          EMPTY          => fsm_empty,
-   
+
          -- output signals
          SET_VALID      => fsm_set_valid,
          CLR_VALID      => fsm_clr_valid,
@@ -135,7 +135,7 @@ begin
          DI             => STATUS,
          EXTREM         => min_bus
       );
-   
+
    -- generic multiplexer mapping
    MIN_MUX : entity work.GEN_MUX
       generic map(
@@ -188,7 +188,7 @@ begin
    cnt_nextp: process (CLK)
    begin
       if CLK='1' and CLK'event then
-         if (RESET = '1') then 
+         if (RESET = '1') then
             cnt_next <= (others => '0');
          elsif cnt_next_ce = '1' then
             if (cmp_cnt_next_max = '1') then
@@ -261,5 +261,5 @@ begin
          reg_min_bus <= min_bus;
       end if;
    end process;
-   
+
 end architecture round_robin;

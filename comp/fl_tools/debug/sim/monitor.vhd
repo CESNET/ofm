@@ -8,7 +8,7 @@
 --
 -- $Id$
 --
--- TODO: 
+-- TODO:
 --
 --
 library IEEE;
@@ -50,7 +50,7 @@ entity MONITOR is
       RX_SOP_N       : in std_logic;
       RX_EOP_N       : in std_logic;
       RX_SRC_RDY_N   : in std_logic;
-      RX_DST_RDY_N   : out  std_logic  
+      RX_DST_RDY_N   : out  std_logic
      );
 end entity MONITOR;
 
@@ -148,7 +148,7 @@ FL_FIFO_LOG: entity work.FL_FIFO
       RX_EOP_N=>RX_EOP_N,
       RX_SOF_N=>RX_SOF_N,
       RX_EOF_N=>RX_EOF_N,
-      
+
       -- read interface
       TX_DATA=>INBUS_DATA,
       TX_REM=>INBUS_REM,
@@ -194,7 +194,7 @@ FL_FIFO_LOG8: entity work.FL_FIFO8
       RX_EOP_N=>RX_EOP_N,
       RX_SOF_N=>RX_SOF_N,
       RX_EOF_N=>RX_EOF_N,
-      
+
       -- read interface
       TX_DATA=>INBUS_DATA,
       TX_SRC_RDY_N=>INBUS_SRC_RDY_N,
@@ -213,7 +213,7 @@ FL_FIFO_LOG8: entity work.FL_FIFO8
    );
    INBUS_REM <= (others => '0');
 end generate;
-   
+
 -- FL TRANSFORMER
 FL_TRASFORMER_U: entity work.FL_TRANSFORMER
    generic map (

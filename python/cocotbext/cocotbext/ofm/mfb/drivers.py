@@ -136,7 +136,7 @@ class MFBDriver(BusDriver):
                     p = self._item_offset % self._region_items
                     self._eof[r] = 1
                     self._eof_pos[r] = p + len(data) - 1
-                    
+
                     # copy data block
                     self._data[self._item_offset: (self._item_offset + len(data))] = data[:self._block_size]
                     data = data[self._block_size:]

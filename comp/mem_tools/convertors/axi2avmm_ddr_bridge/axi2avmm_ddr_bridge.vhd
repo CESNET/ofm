@@ -47,8 +47,8 @@ entity AXI2AVMM_BRIDGE is
         DDR_S_AXI_AWSIZE        : out std_logic_vector(AXI_SIZE_WIDTH-1 downto 0);
         DDR_S_AXI_AWBURST       : out std_logic_vector(AXI_BURST_WIDTH-1 downto 0);
         DDR_S_AXI_AWVALID       : out std_logic;
-        DDR_S_AXI_AWREADY       : in  std_logic; 
-        -- Write Channel 
+        DDR_S_AXI_AWREADY       : in  std_logic;
+        -- Write Channel
         DDR_S_AXI_WDATA         : out std_logic_vector(AXI_DATA_WIDTH-1 downto 0);
         DDR_S_AXI_WSTRB         : out std_logic_vector(AXI_DATA_WIDTH/8-1 downto 0);
         DDR_S_AXI_WLAST         : out std_logic;
@@ -86,15 +86,15 @@ architecture FULL of AXI2AVMM_BRIDGE is
         st_waddr,
         st_write,
         st_read
-    );    
+    );
 
     -- Control logic (FSM)
     signal state, next_state: t_fsm_ddr := st_idle;
-    
+
     -- Transactions in burst
     signal word_cnt_d : unsigned(AMM_BURST_COUNT_WIDTH -1 downto 0);
     signal word_cnt_q : unsigned(AMM_BURST_COUNT_WIDTH -1 downto 0);
-    
+
 begin
     -- Specific for Data bus width 512 bits
     -- Address is cut by log2(Bytes in transfer) ... in our case by 6 bits (31 downto 6)
@@ -105,11 +105,11 @@ begin
     DDR_S_AXI_WSTRB     <= (others => '1');
 
     -- Number of transaction in one burst
-    -- Avalon is giving exact number 
+    -- Avalon is giving exact number
     DDR_S_AXI_AWLEN     <= std_logic_vector(resize((unsigned(AMM_BURST_COUNT) - 1), AXI_LEN_WIDTH));
     DDR_S_AXI_ARLEN     <= std_logic_vector(resize((unsigned(AMM_BURST_COUNT) - 1), AXI_LEN_WIDTH));
 
-    -- The data transfer for a sequence of read transactions with the same AxID value must be returned in the order 
+    -- The data transfer for a sequence of read transactions with the same AxID value must be returned in the order
     -- in which the master issued the addresses
     DDR_S_AXI_AWID      <= (others => '0');
     DDR_S_AXI_ARID      <= (others => '0');
@@ -159,30 +159,30 @@ begin
                     end if;
                 end if;
 
-                if AMM_READ = '1' then 
+                if AMM_READ = '1' then
                     DDR_S_AXI_ARVALID   <= '1';
-                    if DDR_S_AXI_ARREADY = '1' then 
+                    if DDR_S_AXI_ARREADY = '1' then
                         next_state          <= st_read;
                     end if;
                 end if;
 
-            when st_write_single_word => 
-                if (AMM_WRITE = '1') and (unsigned(AMM_BURST_COUNT) = 1) then 
+            when st_write_single_word =>
+                if (AMM_WRITE = '1') and (unsigned(AMM_BURST_COUNT) = 1) then
                     AMM_READY           <= '0';
                     DDR_S_AXI_AWVALID   <= '1';
                     DDR_S_AXI_WVALID    <= '1';
-                    if DDR_S_AXI_WREADY = '1' then 
+                    if DDR_S_AXI_WREADY = '1' then
                         AMM_READY   <= '1';
                         next_state  <= st_write_single_word;
                     end if;
-                else 
+                else
                     AMM_READY           <= '0';
                     next_state          <= st_idle;
                 end if;
 
 
-            when st_waddr       => 
-                if AMM_WRITE = '1' then 
+            when st_waddr       =>
+                if AMM_WRITE = '1' then
                     -- This state is sending first transaction in burst
                     AMM_READY           <= '0';
                     DDR_S_AXI_AWVALID   <= '1';
@@ -208,14 +208,14 @@ begin
                     next_state          <= st_waddr;
                 end if;
 
-                if DDR_S_AXI_WREADY = '0' then 
+                if DDR_S_AXI_WREADY = '0' then
                     AMM_READY           <= '0';
                     DDR_S_AXI_WLAST     <= '0';
                     word_cnt_d          <= word_cnt_q;
                     next_state          <= st_write;
                 end if;
 
-            when st_read        => 
+            when st_read        =>
                 AMM_READY           <= '0';
                 DDR_S_AXI_RREADY    <= '1';
                 word_cnt_d          <= word_cnt_q + 1;
@@ -225,16 +225,16 @@ begin
                     next_state          <= st_idle;
                 end if;
 
-                if DDR_S_AXI_RVALID = '0' then 
+                if DDR_S_AXI_RVALID = '0' then
                     word_cnt_d          <= word_cnt_q;
                     next_state          <= st_read;
                 end if;
 
-            when others         => 
+            when others         =>
                 AMM_READY   <= '0';
                 next_state  <= st_idle;
 
-        end case;               
+        end case;
     end process;
 
     --Write address
@@ -249,8 +249,8 @@ begin
     --Read address
     DDR_S_AXI_ARADDR((AMM_ADDR_WIDTH+log2(AMM_DATA_WIDTH/8))-1 downto log2(AMM_DATA_WIDTH/8)) <= AMM_ADDRESS;
 
-    --Read data 
+    --Read data
     AMM_READ_DATA_VALID             <= DDR_S_AXI_RVALID;
-    AMM_READ_DATA                   <= DDR_S_AXI_RDATA; 
+    AMM_READ_DATA                   <= DDR_S_AXI_RDATA;
 
 end architecture;

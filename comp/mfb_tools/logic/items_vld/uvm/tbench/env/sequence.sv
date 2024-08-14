@@ -23,7 +23,7 @@ class byte_array_sequence#(PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH, MFB_ITEM_WIDTH) 
 
             tr_export.get(info_req);
             tr_num++;
-            
+
             start_item(req);
             assert(req.randomize() with {req.data.size == info_req.payload_size; });
             finish_item(req);

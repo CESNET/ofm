@@ -2,7 +2,7 @@
 //-- Copyright (C) 2022 CESNET z. s. p. o.
 //-- Author(s): Daniel Kříž <xkrizd01@vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 import uvm_pkg::*;
 `include "uvm_macros.svh"
@@ -21,7 +21,7 @@ module testbench;
     logic CLK_DMA = 0;
     logic RST     = 0;
     logic RST_DMA = 0;
-   
+
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // Interfaces
     mfb_if #(DMA_MFB_UP_REGIONS, MFB_UP_REG_SIZE, MFB_UP_BLOCK_SIZE, MFB_UP_ITEM_WIDTH, 0)                          UP_MFB  [DMA_PORTS](CLK_DMA);
@@ -48,16 +48,16 @@ module testbench;
     always #(CLK_DMA_PERIOD) CLK_DMA = ~CLK_DMA;
 
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    // Initial reset 
+    // Initial reset
     initial begin
         RST     = 1;
-        #(RESET_CLKS*CLK_PERIOD) 
+        #(RESET_CLKS*CLK_PERIOD)
         RST     = 0;
     end
 
     initial begin
         RST_DMA = 1;
-        #(RESET_CLKS*CLK_DMA_PERIOD) 
+        #(RESET_CLKS*CLK_DMA_PERIOD)
         RST_DMA = 0;
     end
 
@@ -123,7 +123,7 @@ module testbench;
         .AXI_RQ        (AXI_RQ),
         .AXI_RC        (AXI_RC)
     );
-    
+
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // Properties
     ptc_property #(

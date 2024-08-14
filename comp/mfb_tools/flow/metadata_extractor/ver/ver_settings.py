@@ -82,7 +82,7 @@ SETTINGS = {
         "OUT_MVB_PIPE_EN"    : "0",
         "OUT_MFB_PIPE_EN"    : "1",
     },
-    "_combinations_" : (  
+    "_combinations_" : (
     (), # Works the same as '("default",),' as the "default" is applied in every combination
     ("region_comb_1",),
     ("region_comb_2",),

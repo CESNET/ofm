@@ -44,21 +44,21 @@ entity ALU48 is
       --! Clock enable for output pipeline registers
       CE_OUT   : in  std_logic;
 
-      --! control alu 
+      --! control alu
       --! operators (A [operator] B):
       --!     "0000" -> ADD (A + B + CARRY_IN)
       --!
-      --!     "0001" -> SUB (A - (B + CARRY_IN)) 
+      --!     "0001" -> SUB (A - (B + CARRY_IN))
       --!     (WARNING for SUB: when "DATA_WIDTH <= 48" or "DATA_WIDTH mod 48 = 0"
       --!      CARRY_OUT is inverted)
-      --!     
+      --!
       --!     "0010" -> NAND
       --!     "0011" -> AND
       --!     "0100" -> OR
       --!     "0101" -> NOR
       --!     "0110" -> XOR
       --!     "0111" -> XNOR
-      --! operators and negated data inputs:       
+      --! operators and negated data inputs:
       --!     "1000" -> B AND (NOT A)
       --!     "1001" -> (NOT B) AND A
       --!     "1010" -> B OR (NOT A)
@@ -90,7 +90,7 @@ architecture V7_DSP of ALU48 is
    signal out_carry     : std_logic_vector(3 downto 0);
    signal out_cas_carry : std_logic;
 
-begin 
+begin
    --! generate connection carryin
    --GEN_CARRY: if(SWITCH_CARRY = 0) generate
       carryinsel <= "000";
@@ -104,10 +104,10 @@ begin
    --   carry_cas  <= CARRY_IN;
    --   carry      <= '0';
    --end generate;
-   
+
    --! generate connection carryout
    --GEN_CARRY_OUT: if(SWITCH_CARRY_OUT = 0) generate
-      CARRY_OUT <= out_carry(3);      
+      CARRY_OUT <= out_carry(3);
    --end generate;
 
    ----! generate connection carryout cascade
@@ -117,7 +117,7 @@ begin
 
    WITH ALUMODE SELECT
       mode <= "0000" WHEN "0000",   -- +
-              "0011" WHEN "0001",   -- - 
+              "0011" WHEN "0001",   -- -
               "1110" WHEN "0010",   --NAND
               "1100" WHEN "0011",   --AND
               "1100" WHEN "0100",   --OR
@@ -129,13 +129,13 @@ begin
               "1101" WHEN "1010",   --X OR (NOT Z)
               "1111" WHEN "1011",   --(NOT X) OR Z
               "XXXX" WHEN OTHERS;
-    
+
    WITH ALUMODE SELECT
       op_mode <= "0111011" WHEN "0100",
                  "0111011" WHEN "0101",
                  "0111011" WHEN "1001",
                  "0111011" WHEN "1010",
-                 "0110011" WHEN OTHERS; 
+                 "0110011" WHEN OTHERS;
 
    zeros <= X"0000000000000000";
 
@@ -149,10 +149,10 @@ begin
          USE_DPORT => FALSE, -- Select D port usage (TRUE or FALSE)
          USE_MULT => "NONE", -- Select multiplier usage ("MULTIPLY", "DYNAMIC", or "NONE")
          -- Pattern Detector Attributes: Pattern Detection Configuration
-         AUTORESET_PATDET => "NO_RESET",   -- "NO_RESET", "RESET_MATCH", "RESET_NOT_MATCH" 
+         AUTORESET_PATDET => "NO_RESET",   -- "NO_RESET", "RESET_MATCH", "RESET_NOT_MATCH"
          MASK => X"3fffffffffff",          -- 48-bit mask value for pattern detect (1=ignore)
          PATTERN => X"000000000000",       -- 48-bit pattern match for pattern detect
-         SEL_MASK => "MASK",               -- "C", "MASK", "ROUNDING_MODE1", "ROUNDING_MODE2" 
+         SEL_MASK => "MASK",               -- "C", "MASK", "ROUNDING_MODE1", "ROUNDING_MODE2"
          SEL_PATTERN => "PATTERN",         -- Select pattern value ("PATTERN" or "C")
          USE_PATTERN_DETECT => "NO_PATDET",-- Enable pattern detect ("PATDET" or "NO_PATDET")
          -- Register Control Attributes: Pipeline Register Configuration
@@ -241,10 +241,10 @@ begin
          USE_DPORT => FALSE, -- Select D port usage (TRUE or FALSE)
          USE_MULT => "NONE", -- Select multiplier usage ("MULTIPLY", "DYNAMIC", or "NONE")
          -- Pattern Detector Attributes: Pattern Detection Configuration
-         AUTORESET_PATDET => "NO_RESET",   -- "NO_RESET", "RESET_MATCH", "RESET_NOT_MATCH" 
+         AUTORESET_PATDET => "NO_RESET",   -- "NO_RESET", "RESET_MATCH", "RESET_NOT_MATCH"
          MASK => X"3fffffffffff",          -- 48-bit mask value for pattern detect (1=ignore)
          PATTERN => X"000000000000",       -- 48-bit pattern match for pattern detect
-         SEL_MASK => "MASK",               -- "C", "MASK", "ROUNDING_MODE1", "ROUNDING_MODE2" 
+         SEL_MASK => "MASK",               -- "C", "MASK", "ROUNDING_MODE1", "ROUNDING_MODE2"
          SEL_PATTERN => "PATTERN",         -- Select pattern value ("PATTERN" or "C")
          USE_PATTERN_DETECT => "NO_PATDET",-- Enable pattern detect ("PATDET" or "NO_PATDET")
          -- Register Control Attributes: Pipeline Register Configuration
@@ -321,5 +321,5 @@ begin
          RSTM => RESET,         -- 1-bit input: Reset input for MREG
          RSTP => RESET          -- 1-bit input: Reset input for PREG
        );
-   end generate;          
+   end generate;
 end V7_DSP;

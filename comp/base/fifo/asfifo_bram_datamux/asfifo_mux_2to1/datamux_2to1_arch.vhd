@@ -34,7 +34,7 @@ architecture FULL of ASFIFO_MUX_2TO1 is
    --! Signals declaration
    signal rd_en    		            : std_logic;
    signal rd_h                      : std_logic;
-   signal data_out                  : std_logic_vector (INPUT_DATA_WIDTH-1 downto 0); 
+   signal data_out                  : std_logic_vector (INPUT_DATA_WIDTH-1 downto 0);
    signal fifo_out                  : std_logic_vector (INPUT_DATA_WIDTH downto 0);
    signal fifo_empty                : std_logic;
    signal fifo_dv                   : std_logic;
@@ -44,9 +44,9 @@ architecture FULL of ASFIFO_MUX_2TO1 is
 -- ----------------------------------------------------------------------------
 --                             Architecture body
 -- ----------------------------------------------------------------------------
-  
+
 begin -------------------------------------------------------------------------
-   
+
   asfifo : entity work.ASFIFO_BRAM_XILINX
    generic map(
       DEVICE                  => DEVICE,
@@ -88,14 +88,14 @@ begin -------------------------------------------------------------------------
    if (rising_edge (CLK_RD)) then
       if (RST_RD = '1') then
          present_state <= LOW;
-      elsif (RD ='1'and fifo_dv ='1') then 
+      elsif (RD ='1'and fifo_dv ='1') then
          present_state <= next_state;
-      else 
+      else
          present_state <= LOW;
       end if;
    end if ;
    end process;
-   
+
    -- -------------------------------------------------------------------------
    next_state_logic: process(present_state, rd_h)
    begin
@@ -106,8 +106,8 @@ begin -------------------------------------------------------------------------
           next_state <= HIGH;
           rd_en <= '0';
          else
-            next_state <= LOW;  
-            rd_en <= '1';  
+            next_state <= LOW;
+            rd_en <= '1';
          end if ;
 
       when HIGH =>
@@ -116,7 +116,7 @@ begin -------------------------------------------------------------------------
 
       when others =>
       	next_state <= LOW;
-         rd_en <= '0'; 
+         rd_en <= '0';
       -- - - - - - - - - - - - - - - - - - - - -
       end case;
    end process;
@@ -125,7 +125,7 @@ begin -------------------------------------------------------------------------
    -- -------------------------------------------------------------------------
    output_logic: process(present_state, data_out)
    begin
-    	 DO <= data_out (DATA_HALF_WIDTH-1 downto 0); 
+    	 DO <= data_out (DATA_HALF_WIDTH-1 downto 0);
       case (present_state) is
       when LOW =>                                       ---- lower part of word
      	 DO <= data_out (DATA_HALF_WIDTH-1 downto 0);

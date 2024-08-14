@@ -48,7 +48,7 @@ architecture full of FLB_OUTPUT_FSM is
 
    -- ------------------ Types declaration ------------------------------------
    type t_state is ( CHOOSE_QUEUE, FIRST_WORD, BUSY );
-   
+
    -- ------------------ Signals declaration ----------------------------------
    signal present_state, next_state : t_state;
 
@@ -64,12 +64,12 @@ begin
          present_state <= next_state;
       end if;
    end process sync_logic;
-   
+
    -- ------------------ Next state logic -------------------------------------
    next_state_logic : process(present_state, EOF, QUEUE_RDY, EMPTY)
    begin
    case (present_state) is
-   
+
       -- ---------------------------------------------
       when CHOOSE_QUEUE =>
          if (QUEUE_RDY = '1') then
@@ -106,7 +106,7 @@ begin
    -- ------------------ Output logic -----------------------------------------
    output_logic: process(present_state, QUEUE_RDY, EOF, EMPTY)
    begin
-   
+
       -- ---------------------------------------------
       -- Initial values
       SET_VALID      <= '0';
@@ -115,7 +115,7 @@ begin
       NEXT_QUEUE     <= '0';
 
       case (present_state) is
-      
+
       -- ---------------------------------------------
       when CHOOSE_QUEUE =>
          SET_VALID      <= QUEUE_RDY;
@@ -126,7 +126,7 @@ begin
       when BUSY =>
          NEXT_QUEUE     <= EOF and QUEUE_RDY and (not EMPTY);
          CLR_VALID      <= EOF and ((not QUEUE_RDY) or EMPTY);
-         
+
          if (QUEUE_CHOOSING = round_robin) then
             CLR_READY      <= EOF;
          else
@@ -138,7 +138,7 @@ begin
          NEXT_QUEUE     <= EOF and QUEUE_RDY and (not EMPTY);
          --CLR_VALID      <= EOF and ((not QUEUE_RDY) or EMPTY);
          CLR_VALID      <= (EOF and (not QUEUE_RDY)) or EMPTY;
-         
+
          if (QUEUE_CHOOSING = round_robin) then
             CLR_READY      <= EOF;
          else

@@ -55,14 +55,14 @@ begin
    --! Clock frequency divider for blink states
    clk_div_i: entity work.clk_div
       generic map (
-         CLK_PERIOD => CLK_PERIOD, 
+         CLK_PERIOD => CLK_PERIOD,
          PTRN_STEP_PERIOD => PTRN_STEP_PERIOD
       )
 
       port map (
-         CLK => CLK, 
-         RESET => RESET, 
-         
+         CLK => CLK,
+         RESET => RESET,
+
          STATE_CHANGE => state_change,
          PWM_YELLOW_SYNC => pwm_yellow_sync
       );
@@ -74,17 +74,17 @@ begin
             ON_VALUE => ON_VALUE,
             PTRN_LENGTH => PTRN_LENGTH
          )
-         
+
          port map (
             CLK => CLK,
-            RESET => RESET, 
+            RESET => RESET,
 
             STATE_CHANGE => state_change,
             PWM_YELLOW_SYNC => pwm_yellow_sync,
-            
+
             PTRN => PTRNS (2*(x+1)*PTRN_LENGTH-1 downto 2*x*PTRN_LENGTH),
 
-            LED_GREEN => LED_GREEN(x), 
+            LED_GREEN => LED_GREEN(x),
             LED_RED => LED_RED(x)
          );
    end generate;

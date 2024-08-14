@@ -46,8 +46,8 @@ architecture behavioral of testbench is
    signal clk      : std_logic;
    signal reset    : std_logic;
 
-   signal rx_data      : std_logic_vector(DATA_WIDTH - 1 downto 0); 
-   signal rx_rem       : std_logic_vector(log2(DATA_WIDTH/8) - 1 downto 0); 
+   signal rx_data      : std_logic_vector(DATA_WIDTH - 1 downto 0);
+   signal rx_rem       : std_logic_vector(log2(DATA_WIDTH/8) - 1 downto 0);
    signal rx_src_rdy_n : std_logic;
    signal rx_dst_rdy_n : std_logic;
    signal rx_sop_n     : std_logic;
@@ -55,8 +55,8 @@ architecture behavioral of testbench is
    signal rx_sof_n     : std_logic;
    signal rx_eof_n     : std_logic;
 
-   signal tx_data     : std_logic_vector(INTERFACES_COUNT*DATA_WIDTH - 1 downto 0); 
-   signal tx_rem      : std_logic_vector(INTERFACES_COUNT*log2(DATA_WIDTH/8) - 1 downto 0); 
+   signal tx_data     : std_logic_vector(INTERFACES_COUNT*DATA_WIDTH - 1 downto 0);
+   signal tx_rem      : std_logic_vector(INTERFACES_COUNT*log2(DATA_WIDTH/8) - 1 downto 0);
    signal tx_src_rdy_n: std_logic_vector(INTERFACES_COUNT-1 downto 0);
    signal tx_dst_rdy_n: std_logic_vector(INTERFACES_COUNT-1 downto 0);
    signal tx_sop_n    : std_logic_vector(INTERFACES_COUNT-1 downto 0);
@@ -69,7 +69,7 @@ architecture behavioral of testbench is
 -- ----------------------------------------------------------------------------
 begin
 
-   UUT: entity work.fl_distributor 
+   UUT: entity work.fl_distributor
       generic map (
          DATA_WIDTH     => DATA_WIDTH,
          INTERFACES_COUNT  => INTERFACES_COUNT,
@@ -81,8 +81,8 @@ begin
       port map (
          CLK          => CLK,
          RESET        => RESET,
-   
-         -- Write interface 
+
+         -- Write interface
          RX_DATA      => rx_data,
          RX_REM       => rx_rem,
          RX_SRC_RDY_N => rx_src_rdy_n,
@@ -91,7 +91,7 @@ begin
          RX_EOP_N     => rx_eop_n,
          RX_SOF_N     => rx_sof_n,
          RX_EOF_N     => rx_eof_n,
-         
+
          -- Read interface
          TX_DATA     => tx_data,
          TX_REM      => tx_rem,

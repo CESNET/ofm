@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
     long index              = 0;
     long refreshPeriod      = 0;
 
-    struct TestParams_s testParams = 
+    struct TestParams_s testParams =
     {
         .latencyToFirst     = false,
         .autoPrecharge      = false,
@@ -136,10 +136,10 @@ int main(int argc, char *argv[])
     int c;
     int optionIndex;    // Index of found long option
 
-    //while ((c = getopt(argc, argv, ARGUMENTS)) != -1) 
-    while ((c = getopt_long(argc, argv, ShortOptions, LongOptions, &optionIndex)) != -1) 
+    //while ((c = getopt(argc, argv, ARGUMENTS)) != -1)
+    while ((c = getopt_long(argc, argv, ShortOptions, LongOptions, &optionIndex)) != -1)
     {
-        switch (c) 
+        switch (c)
         {
             case 'd':
                 file = optarg;
@@ -180,7 +180,7 @@ int main(int argc, char *argv[])
                 manualWriteToBuff = true;
                 manualBurst = strtoul(optarg, NULL, 10);
                 if (optind >= argc)
-                { 
+                {
                     fprintf(stderr, "One missing argument for command -m\n");
                     return 1;
                 }
@@ -233,7 +233,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (printHelp) 
+    if (printHelp)
     {
         usage(argv[0]);
         return EXIT_SUCCESS;
@@ -291,7 +291,7 @@ int main(int argc, char *argv[])
                 printf("Running random indexing test ...\n");
             RunTest(&testParams);
         }
-        
+
         if ( ! testTypeMatch)
             fprintf(stderr, "%s is invalid test type\n", testParams.typeStr);
     }

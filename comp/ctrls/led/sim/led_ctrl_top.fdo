@@ -9,7 +9,7 @@
 
 # For whole design testing
 set FIRMWARE_BASE    "../../../.."
-set TB_FILE          "./testbench.vhd" 
+set TB_FILE          "./testbench.vhd"
 set SIG_FILE         "led_ctrl_top_sig.fdo"
 
 # Modules definition

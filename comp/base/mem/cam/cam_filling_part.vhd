@@ -26,7 +26,7 @@ entity cam_filling_part is
       CAM_ROW_WIDTH     : integer;
       -- Number of data rows (depth of the CAM)
       CAM_ROW_COUNT     : integer;
-      -- Width of address bus 
+      -- Width of address bus
       -- should be greater or equal to log2(CAM_ROW_COUNT)
       CAM_ADDR_WIDTH    : integer;
       -- Width of internal storage element
@@ -111,9 +111,9 @@ begin
       mask_in_ext(CAM_ROW_WIDTH-1 downto 0) <= MASK_IN;
       data_in_ext(CAM_ROW_WIDTH-1 downto 0) <= DATA_IN;
 
-      mask_in_ext(ELEM_COUNT*(ELEM_WIDTH-SEQUENCED_SEARCH)-1 downto CAM_ROW_WIDTH) 
+      mask_in_ext(ELEM_COUNT*(ELEM_WIDTH-SEQUENCED_SEARCH)-1 downto CAM_ROW_WIDTH)
          <= (others => '0'); -- Store zeros in unused bits mask->always matched
-      data_in_ext(ELEM_COUNT*(ELEM_WIDTH-SEQUENCED_SEARCH)-1 downto CAM_ROW_WIDTH) 
+      data_in_ext(ELEM_COUNT*(ELEM_WIDTH-SEQUENCED_SEARCH)-1 downto CAM_ROW_WIDTH)
          <= (others => '0'); -- Store zeros in unused bits (masked anyway)
    end generate;
 

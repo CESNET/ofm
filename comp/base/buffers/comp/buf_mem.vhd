@@ -140,7 +140,7 @@ LUT_MEM : if (LUT_MEMORY = true) generate
       DATA_VLD <= reg_dv;
       DATA_OUT <= reg_do;
     end generate;
-   
+
 end generate;
 
 end architecture;

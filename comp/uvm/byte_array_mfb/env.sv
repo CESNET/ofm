@@ -128,7 +128,7 @@ class env_tx #(int unsigned REGIONS, int unsigned REGION_SIZE, int unsigned BLOC
     uvm_reset::sync_cbs                                               reset_sync;
 
     // ------------------------------------------------------------------------
-    // Definition of agents 
+    // Definition of agents
     uvm_byte_array::agent m_byte_array_agent;
     uvm_byte_array::config_item byte_array_agent_cfg;
 

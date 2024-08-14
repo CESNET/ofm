@@ -30,7 +30,7 @@ class agent_rx #(int unsigned CHANNELS, int unsigned WIDTH) extends uvm_agent;
     // Constructor
     function new(string name, uvm_component parent);
         super.new(name, parent);
-        
+
         WHOLE_BYTES : assert((WIDTH & 7) == 0);
     endfunction
 
@@ -102,7 +102,7 @@ class agent_tx #(int unsigned CHANNELS, int unsigned WIDTH) extends uvm_agent;
     // Constructor
     function new(string name, uvm_component parent);
         super.new(name, parent);
-        
+
         WHOLE_BYTES : assert((WIDTH & 7) == 0);
     endfunction
 

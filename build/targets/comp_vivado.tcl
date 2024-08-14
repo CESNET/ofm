@@ -71,7 +71,7 @@ if {![info exists SYNTH_FLAGS(FPGA)]} {
     if {![info exists SYNTH_FLAGS(DEVICE)]} {
         set SYNTH_FLAGS(DEVICE) "ULTRASCALE"
     }
-    set SYNTH_FLAGS(FPGA) [string map { 
+    set SYNTH_FLAGS(FPGA) [string map {
             "VIRTEX7"       "xc7vh580thcg1931-2"
             "ULTRASCALE"    "xcvu7p-flvb2104-2-i"
         } $SYNTH_FLAGS(DEVICE)]

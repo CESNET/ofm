@@ -1,8 +1,8 @@
 //-- config.sv: Configuration object for whole mfb env
 //-- Copyright (C) 2021 CESNET z. s. p. o.
-//-- Author(s): Radek Iša <isa@cesnet.cz> 
+//-- Author(s): Radek Iša <isa@cesnet.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 class config_sequence extends uvm_object;
     `uvm_object_utils(uvm_logic_vector_array_mfb::config_sequence)
@@ -42,7 +42,7 @@ endclass
 class config_item extends uvm_object;
 
     typedef enum {META_SOF, META_EOF, META_NONE} meta_type;
-    // ------------------------------------------------------------------------ 
+    // ------------------------------------------------------------------------
     // configuration variables
     uvm_active_passive_enum active;
     string interface_name;

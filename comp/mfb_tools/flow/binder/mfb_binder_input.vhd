@@ -59,7 +59,7 @@ entity MFB_BINDER_INPUT is
    );
 end MFB_BINDER_INPUT;
 
-architecture behavioral of MFB_BINDER_INPUT is    
+architecture behavioral of MFB_BINDER_INPUT is
 
    constant REGION_WIDTH   : natural := REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH;
    constant SOF_POS_WIDTH  : natural := max(1,log2(REGION_SIZE));
@@ -94,14 +94,14 @@ architecture behavioral of MFB_BINDER_INPUT is
    signal s_din_reg_en        : std_logic_vector(REGIONS-1 downto 0);
    signal s_din_reg           : slv_array_t(REGIONS-1 downto 0)(RX_MFB_WIDTH-1 downto 0);
 
-   -- FIFO   
+   -- FIFO
    signal s_fifo_din          : std_logic_vector(FIFO_WIDTH-1 downto 0);
-   signal s_fifo_wr           : std_logic;  
+   signal s_fifo_wr           : std_logic;
    signal s_fifo_full         : std_logic;
    signal s_fifo_afull        : std_logic;
    signal s_fifo_dout         : std_logic_vector(FIFO_WIDTH-1 downto 0);
    signal s_fifo_dout_arr     : slv_array_t(REGIONS-1 downto 0)(RX_MFB_WIDTH-1 downto 0);
-   signal s_fifo_rd           : std_logic;   
+   signal s_fifo_rd           : std_logic;
    signal s_fifo_vld          : std_logic;
    signal s_fifo_empty        : std_logic;
    signal s_fifo_status       : std_logic_vector(log2(FIFO_DEPTH) downto 0);
@@ -122,7 +122,7 @@ begin
    s_sof_pos_block <= RX_SOF_POS & BLOCK_SIZE_GND;
    -- Checks if shared word is present
    s_rx_shared_word <= '1' when unsigned(s_sof_pos_block) > unsigned(RX_EOF_POS) else '0';
-  
+
    -- --------------------------------------------------------------------------
    -- CORRECT END LOGIC
    -- --------------------------------------------------------------------------
@@ -164,7 +164,7 @@ begin
    -- --------------------------------------------------------------------------
    -- IDLE COUNTER
    -- --------------------------------------------------------------------------
-   -- Forces an end on current input after not recieving any frames 
+   -- Forces an end on current input after not recieving any frames
    -- for defined number of counts
    s_idle_cnt_ce  <= not RX_SRC_RDY and not s_fifo_full;
    s_idle_cnt_max <= '1' when (to_integer(s_idle_cnt) = 7) else '0';
@@ -189,7 +189,7 @@ begin
 
    s_force_write_ready <= s_correct_end_reg and not s_region_cnt_zero and not RX_SRC_RDY;
    s_force_write <= s_force_write_ready and s_idle_cnt_max;
-   
+
    s_write <= (RX_SRC_RDY or s_force_write) and not s_fifo_full;
 
    write_demuxed_p : process (s_region_cnt,s_write)
@@ -241,17 +241,17 @@ begin
       ALMOST_EMPTY_OFFSET => 1
    )
    port map(
-      CLK    => CLK, 
+      CLK    => CLK,
       RESET  => RST,
       --  WRITE INTERFACE
-      DI     => s_fifo_din, 
-      WR     => s_fifo_wr, 
-      FULL   => s_fifo_full,  
+      DI     => s_fifo_din,
+      WR     => s_fifo_wr,
+      FULL   => s_fifo_full,
       AFULL  => s_fifo_afull,
       STATUS => s_fifo_status,
       --  READ INTERFACE
       DO     => s_fifo_dout,
-      RD     => s_fifo_rd,  
+      RD     => s_fifo_rd,
       EMPTY  => s_fifo_empty,
       AEMPTY => open
    );
@@ -288,22 +288,22 @@ begin
    -- FRAME STATE LOGIC
    -- --------------------------------------------------------------------------
    -- Checks present incomplete frames
-   incomplete_frame_g : for r in 0 to REGIONS-1 generate    
-      s_inc_frame(r+1) <= (s_mfb_fifo_sof(r) and not s_mfb_fifo_eof(r) and not s_inc_frame(r)) or    
-                          (s_mfb_fifo_sof(r) and s_mfb_fifo_eof(r) and s_inc_frame(r)) or    
-                          (not s_mfb_fifo_sof(r) and not s_mfb_fifo_eof(r) and s_inc_frame(r));    
-   end generate;       
+   incomplete_frame_g : for r in 0 to REGIONS-1 generate
+      s_inc_frame(r+1) <= (s_mfb_fifo_sof(r) and not s_mfb_fifo_eof(r) and not s_inc_frame(r)) or
+                          (s_mfb_fifo_sof(r) and s_mfb_fifo_eof(r) and s_inc_frame(r)) or
+                          (not s_mfb_fifo_sof(r) and not s_mfb_fifo_eof(r) and s_inc_frame(r));
+   end generate;
 
    -- INCOMPLETE FRAME
-   incomplete_frame_last_reg_p : process (CLK)    
-   begin    
-      if (rising_edge(CLK)) then    
-         if (RST = '1') then    
-            s_inc_frame(0) <= '0';    
-         elsif ((s_fifo_vld = '1') and (TX_DST_RDY = '1')) then    
-            s_inc_frame(0) <= s_inc_frame(REGIONS);      
-         end if;    
-      end if;    
+   incomplete_frame_last_reg_p : process (CLK)
+   begin
+      if (rising_edge(CLK)) then
+         if (RST = '1') then
+            s_inc_frame(0) <= '0';
+         elsif ((s_fifo_vld = '1') and (TX_DST_RDY = '1')) then
+            s_inc_frame(0) <= s_inc_frame(REGIONS);
+         end if;
+      end if;
    end process;
 
    TX_ONGOING_FRAME    <= s_inc_frame(0);

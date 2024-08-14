@@ -65,9 +65,9 @@ program TEST (
         match_responder = new("Match Responder", MATCH_OUT);
         match_responder.wordDelayEnable_wt  = 0;
         match_responder.wordDelayDisable_wt = 1;
-  
+
         scoreboard = new();
-  
+
         write_driver.setCallbacks(scoreboard.writeDriverCbs);
         read_driver.setCallbacks(scoreboard.readDriverCbs);
         match_driver.setCallbacks(scoreboard.matchDriverCbs);

@@ -2,7 +2,7 @@
 //-- Copyright (C) 2020 CESNET z. s. p. o.
 //-- Author(s): Tomáš Beneš <xbenes55@stud.fit.vutbr.cz>
 //--
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 //--
 //-- TODO - Implement BEHAVIOUR==1 functionality.
 
@@ -16,23 +16,23 @@ class ScoreboardRxTransDriverCbs extends DriverCbs;
 
     IdTable idTable;
 
-    //  Creating interface that manage waiting for TRANS_FIFO_AFULL to be 0. 
+    //  Creating interface that manage waiting for TRANS_FIFO_AFULL to be 0.
     protected virtual iAFull.tb vif;
-    
+
     function new (IdTable it, virtual iAFull af);
         this.idTable    =it;
         this.vif             =af;
     endfunction
-    
-    //  Take transaction from generator, add ID and send transaction to DUT. 
+
+    //  Take transaction from generator, add ID and send transaction to DUT.
     virtual task pre_tx(ref Transaction transaction, string inst);
         MvbTransaction #(META_WIDTH) incomingTransaction;
         MvbTransaction #(ITEM_WIDTH) editedTransaction=new();
         bit assignedID=0;
         int transID;
-        
+
         $cast(incomingTransaction,transaction);
-        
+
         //  Waiting for signal FIFO_AFULL from component to be 0.
         while(vif.cb.FIFO_AFULL==1)begin
             //  Checking if the FIFO_AFULL signal is 0 every rising edge of CLK signal.
@@ -73,15 +73,15 @@ class ScoreboardRxConfsMonitorCbs extends MonitorCbs;
         this.confsMbx           = cfmb;
         this.transactionMoved   = wm;
     endfunction
-    
+
     virtual task pre_tx(ref Transaction transaction, string inst);
 
     endtask
-    
+
     // -- Take transaction and passed them to confsMbx.. ----------------------
     //    Then trigger transactionMoved event
     virtual task post_rx(Transaction transaction, string inst);
-        
+
         confsMbx.put(transaction);
         //  Trigger event that notify implementation that some word was moved.
         ->transactionMoved;
@@ -90,9 +90,9 @@ class ScoreboardRxConfsMonitorCbs extends MonitorCbs;
 endclass
 
 class ScoreboardRxTransMonitorCbs extends MonitorCbs;
-    
+
     tTransMbx   transMbx;
-    
+
     event transactionMoved;
 
     function new (tTransMbx tmbx, event wm);
@@ -120,21 +120,21 @@ class ScoreboardRxTransMonitorCbs extends MonitorCbs;
 endclass
 
 class ScoreboardTxTransMonitorCbs extends MonitorCbs;
-    
+
     TransactionTable #(1)   sc_table;
-    IdTable                 idTable;  
+    IdTable                 idTable;
 
     function new (TransactionTable #(1) st, IdTable it);
         this.sc_table   = st;
         this.idTable    = it;
     endfunction
-    
+
     // -- Take transaction remove it from the scoreTable  ---------------------
     //    and decresed counter in idTable at the ID of this transaction.
     virtual task post_rx(Transaction transaction, string inst);
-        bit status=0; 
+        bit status=0;
         MvbTransaction #(ITEM_WIDTH) incomingTransaction;
-        
+
         $cast(incomingTransaction,transaction);
         idTable.subFromCounter(incomingTransaction.data[ID_WIDTH-1:0]);
 
@@ -171,16 +171,16 @@ class Scoreboard;
 
     event transactionMoved;
 
-    
+
     function setEnabled();
         conf.setEnabled();
     endfunction
-    
+
     function setDisabled();
         conf.setDisabled();
     endfunction
 
-    function new (tTransMbx cmbx, virtual iAFull.tb af);       
+    function new (tTransMbx cmbx, virtual iAFull.tb af);
         this.confsMbx = cmbx;
 
         vif=af;
@@ -208,5 +208,5 @@ class Scoreboard;
     task display();
         scoreTable.display(1,"Test case scoreboard - ");
     endtask
-  
+
 endclass

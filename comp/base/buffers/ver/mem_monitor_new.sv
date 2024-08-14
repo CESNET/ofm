@@ -10,22 +10,22 @@
  * TODO: Delays in PIPE_EN for (!pLutMem && pOutputReg) not supported
  *
  */
- 
+
   // --------------------------------------------------------------------------
   // -- Memory Monitor Class
   // --------------------------------------------------------------------------
-  /* This class is responsible for creating transaction objects from 
+  /* This class is responsible for creating transaction objects from
    * Fifo interface signals. After is transaction received it is sended
    * by callback to processing units (typicaly scoreboard) Unit must be enabled
    * by "setEnable()" function call. Monitoring can be stoped by "setDisable()"
    * function call.
    */
-  class MemMonitorNew #(int pDataWidth=64, pFlows=2, pBlSize=512, 
+  class MemMonitorNew #(int pDataWidth=64, pFlows=2, pBlSize=512,
                         pLutMem=0, pOutputReg = 0) extends Monitor;
-    
+
     // -- Private Class Atributes --
     virtual iMemRead.tb #(pDataWidth,pFlows,pBlSize) mem;
-    
+
     const int pStatusSize = $clog2(pBlSize+1);
     // Status for each flow
     bit [$clog2(pBlSize+1)/*pStatusSize*/-1:0] status[pFlows] = '{default: 0};
@@ -43,15 +43,15 @@
     // ----
     rand bit enReadDelay;   // Enable/Disable delays between transactions
       // Enable/Disable delays between transaction (weights)
-      int readDelayEn_wt             = 1; 
+      int readDelayEn_wt             = 1;
       int readDelayDisable_wt        = 3;
 
     rand bit enPipeDelay;   // Enable/Disable delays between transactions
       // Enable/Disable delays between transaction (weights)
-      int pipeDelayEn_wt             = 1; 
+      int pipeDelayEn_wt             = 1;
       int pipeDelayDisable_wt        = 3;
     // ----
-    
+
     constraint cDelays {
       block inside {
                     [0:pFlows-1]
@@ -65,7 +65,7 @@
                          1'b0 := pipeDelayDisable_wt
                        };
       }
-    
+
     // -- Public Class Methods --
 
     // -- Constructor ---------------------------------------------------------
@@ -74,19 +74,19 @@
                    );
       super.new(inst);
 
-      this.mem     = mem;     // Store pointer interface 
-      
+      this.mem     = mem;     // Store pointer interface
+
       this.mem.cb.REL_LEN_DV <= 0;
       this.mem.cb.REL_LEN    <= 0;
       this.mem.cb.READ       <= 0;
       this.mem.cb.PIPE_EN    <= 1;
-            
+
     endfunction: new
-    
+
     // -- Run Monitor ---------------------------------------------------------
     // Receive transactions and send them for processing by call back
     task run();
-      BufferTransaction transaction; 
+      BufferTransaction transaction;
 
       @(mem.cb);
 
@@ -155,7 +155,7 @@
         busy = 0;
       end
     endtask : run
-    
+
     // -- Receive Transaction -------------------------------------------------
     // It receives buffer transaction to tr object
     task receiveBufferTr(BufferTransaction transaction, int flow);
@@ -177,9 +177,9 @@
 
       // Call transaction postprocesing, if is available
       foreach (cbs[i]) cbs[i].post_rx(tr, inst);
-                
+
     endtask : receiveBufferTr
-   
+
     // -- Get Status ----------------------------------------------------------
     // Get and parse status values
     task getStatus();
@@ -216,31 +216,31 @@
       for (int j=0; j < $clog2(pBlSize+1); j++)
         mem.cb.REL_LEN[flow*$clog2(pBlSize+1)+j] <= status[flow][j];
     endtask : setRelLen
-    
+
     // -- Receive Transaction data --------------------------------------------
     // It receives data to tr object
     task receiveData(BufferTransaction tr, int flow);
-      logic [pDataWidth-1:0] dataToReceive = 0; 
+      logic [pDataWidth-1:0] dataToReceive = 0;
 
       // Add latency
       if (!pLutMem) @(mem.cb);
       if (pOutputReg) @(mem.cb);
 
-      waitForDataVld(); 
-      
+      waitForDataVld();
+
       // Receive data
       for (int i=0; i<pDataWidth; i++)
         dataToReceive[i]=mem.cb.DATA_OUT[i];
-           
+
       // --------- Store received data into transaction -------------
       tr.dataSize       = pDataWidth;
       tr.data           = new [pDataWidth];
       for (int i=0; i<pDataWidth; i++)
         tr.data[i]      = dataToReceive[i];
       tr.num_block_addr = flow;
-      
-    endtask: receiveData 
-         
+
+    endtask: receiveData
+
     // -- Wait for DATA_VLD ---------------------------------------------------
     // Wait for DATA_VLD signal
     task waitForDataVld();
@@ -248,4 +248,4 @@
         @(mem.cb);
     endtask : waitForDataVld
 
-  endclass : MemMonitorNew 
+  endclass : MemMonitorNew

@@ -35,7 +35,7 @@ architecture behavioral of testbench is
 
    -- Signals for verification of xor function
    signal D_8x12     : std_logic_vector(7 downto 0);
- 
+
 begin
    -- xor8x12 entity
    uut : entity work.xor8x12(VU_DSP)
@@ -54,7 +54,7 @@ begin
    );
 
    --Generate clock
-   clk_gen_p : process 
+   clk_gen_p : process
    begin
       CLK <= '1';
       wait for clkper/2;
@@ -81,7 +81,7 @@ begin
    D_8x12(6) <= xor_reduce(DI(5+36 downto 0+36) & DI(5+48+36 downto 0+48+36));
    D_8x12(7) <= xor_reduce(DI(5+42 downto 0+42) & DI(5+48+42 downto 0+48+42));
 
-   -- Simulating input flow 
+   -- Simulating input flow
    input_flow : process
    begin
 
@@ -92,14 +92,14 @@ begin
 
       wait for reset_time;
       wait for 10*clkper;
-      
+
       for I in 0 to 95 loop
          DI <= (others => '0');
          DI(I) <= '1';
          wait for clkper;
-         
-         report "DO_8x12: " & integer'image(conv_integer(DO_8x12)) & 
-                " Bit position: " & integer'image(I); 
+
+         report "DO_8x12: " & integer'image(conv_integer(DO_8x12)) &
+                " Bit position: " & integer'image(I);
       end loop;
 
       wait;

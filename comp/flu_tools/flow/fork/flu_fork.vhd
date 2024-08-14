@@ -1,13 +1,13 @@
 --
 -- flu_fork.vhd: Fork component for Frame Link Unaligned
 -- Copyright (C) 2012 CESNET
--- Author: Lukas Kekely <kekely@cesnet.cz> 
+-- Author: Lukas Kekely <kekely@cesnet.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --
 -- $Id$
 --
--- TODO: 
+-- TODO:
 --
 --
 
@@ -25,7 +25,7 @@ use work.math_pack.all;
 entity FLU_FORK is
    generic(
        DATA_WIDTH:    integer:=256;
-       SOP_POS_WIDTH: integer:=2; 	
+       SOP_POS_WIDTH: integer:=2;
        OUTPUT_PORTS:  integer:=2
    );
    port(
@@ -40,7 +40,7 @@ entity FLU_FORK is
       RX_SOP        : in std_logic;
       RX_EOP        : in std_logic;
       RX_SRC_RDY    : in std_logic;
-      RX_DST_RDY    : out std_logic; 
+      RX_DST_RDY    : out std_logic;
 
       -- Frame Link Unaligned concentrated interface
       TX_DATA       : out std_logic_vector(OUTPUT_PORTS*DATA_WIDTH-1 downto 0);
@@ -49,7 +49,7 @@ entity FLU_FORK is
       TX_SOP        : out std_logic_vector(OUTPUT_PORTS-1 downto 0);
       TX_EOP        : out std_logic_vector(OUTPUT_PORTS-1 downto 0);
       TX_SRC_RDY    : out std_logic_vector(OUTPUT_PORTS-1 downto 0);
-      TX_DST_RDY    : in std_logic_vector(OUTPUT_PORTS-1 downto 0) 
+      TX_DST_RDY    : in std_logic_vector(OUTPUT_PORTS-1 downto 0)
    );
 end entity FLU_FORK;
 
@@ -70,13 +70,13 @@ begin
   end generate divider;
 
   DST_RDY(0)<=TX_DST_RDY(0);
-    
+
   gen: for i in 1 to OUTPUT_PORTS-1 generate
   DST_RDY(i)<=DST_RDY(i-1) and TX_DST_RDY(i);
   end generate gen;
-  
+
   RX_DST_RDY<=DST_RDY(OUTPUT_PORTS-1);
-  
+
   gendst: for i in 0 to OUTPUT_PORTS-1 generate
   process(TX_DST_RDY, RX_SRC_RDY)
   variable andbit : std_logic := '1';
@@ -91,5 +91,5 @@ begin
     TX_SRC_RDY(i) <= andbit and RX_SRC_RDY;
   end process;
   end generate;
-  
+
 end architecture FLU_FORK_ARCH;

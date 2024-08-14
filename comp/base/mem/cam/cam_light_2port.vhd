@@ -30,14 +30,14 @@ entity CAM_2PORT is
       -- common interface
       CLK               : in std_logic;
       RESET             : in std_logic;
-      
+
       -- insert interface
       ADDR              : in std_logic_vector(log2(CAM_ROW_COUNT)-1 downto 0);
       DATA_IN           : in std_logic_vector(CAM_ROW_WIDTH-1 downto 0);
       WRITE_EN          : in std_logic;
       CLEAR             : in std_logic;
       CLEAR_ADDR        : in std_logic_vector(log2(CAM_ROW_COUNT)-1 downto 0);
-      
+
       -- search interface
       MATCH_DATA        : in std_logic_vector(CAM_ROW_WIDTH-1 downto 0);
       MATCH_EN          : in std_logic;
@@ -52,7 +52,7 @@ end entity CAM_2PORT;
 --                      Architecture declaration
 -- ----------------------------------------------------------------------------
 architecture light of CAM_2PORT is
-   signal reg_data            : std_logic_vector(CAM_ROW_COUNT*CAM_ROW_WIDTH-1 
+   signal reg_data            : std_logic_vector(CAM_ROW_COUNT*CAM_ROW_WIDTH-1
                                 downto 0);
    signal reg_data_we         : std_logic_vector(CAM_ROW_COUNT-1 downto 0);
    signal reg_valid           : std_logic_vector(CAM_ROW_COUNT-1 downto 0);
@@ -73,7 +73,7 @@ begin
    MATCH_BUS_VLD  <= reg_match_vld;
    MATCHED        <= reg_matched;
 
-   -- decode address 
+   -- decode address
    DEC1FN_WRITE : entity work.dec1fn_enable
       generic map (
          ITEMS       => CAM_ROW_COUNT
@@ -84,7 +84,7 @@ begin
          DO          => reg_data_we
       );
 
-   -- decode address 
+   -- decode address
    DEC1FN_CLEAR : entity work.dec1fn_enable
       generic map (
          ITEMS       => CAM_ROW_COUNT
@@ -94,7 +94,7 @@ begin
          ENABLE      => CLEAR,
          DO          => reg_valid_c
       );
-   
+
    GEN_REGS : for i in 0 to CAM_ROW_COUNT-1 generate
       -- register reg_data
       reg_datap: process(CLK)
@@ -122,7 +122,7 @@ begin
    end generate;
 
    GEN_CMPS : for i in 0 to CAM_ROW_COUNT-1 generate
-      cmp_matched(i) <= '1' when 
+      cmp_matched(i) <= '1' when
                         ((reg_data((i+1)*CAM_ROW_WIDTH-1 downto i*CAM_ROW_WIDTH)
                         = MATCH_DATA) and (reg_valid(i) = '1'))
                         else  '0';
@@ -169,7 +169,7 @@ begin
       variable or_int : std_logic;
    begin
       or_int := '0';
-      
+
       for k in 0 to CAM_ROW_COUNT-1 loop
          or_int := or_int or cmp_matched(k);
       end loop;

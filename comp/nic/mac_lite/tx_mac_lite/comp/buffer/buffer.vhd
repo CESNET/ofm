@@ -111,10 +111,10 @@ begin
         LNG_WIDTH       => LENGTH_WIDTH,
         REG_BITMAP      => "111",
         IMPLEMENTATION  => "parallel"
-    )             
-    port map(   
-        CLK          => RX_CLK, 
-        RESET        => RX_RESET,  
+    )
+    port map(
+        CLK          => RX_CLK,
+        RESET        => RX_RESET,
 
         RX_DATA      => RX_MFB_DATA,
         RX_META      => (others => '0'),
@@ -176,7 +176,7 @@ begin
 
         TX_CLK           => TX_CLK,
         TX_RESET         => TX_RESET,
-        
+
         TX_DATA          => TX_MFB_DATA,
         TX_SOF_POS       => TX_MFB_SOF_POS,
         TX_EOF_POS       => TX_MFB_EOF_POS,
@@ -193,7 +193,7 @@ begin
     st_asfifo_di <= fl_mfb_frame_len & fl_mfb_undersize & fl_mfb_eof;
     st_asfifo_wr <= (or fl_mfb_eof) and fl_mfb_src_rdy and fl_mfb_dst_rdy;
 
-    assert (not (st_asfifo_wr and st_asfifo_full)) 
+    assert (not (st_asfifo_wr and st_asfifo_full))
         report "TX_MAC_LITE_BUFFER: Write to full ST_ASFIFO!"
         severity error;
 

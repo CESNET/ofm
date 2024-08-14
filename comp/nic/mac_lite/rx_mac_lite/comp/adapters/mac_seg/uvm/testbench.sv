@@ -1,7 +1,7 @@
 /*
  * file       : testbench
  * Copyright (C) 2021 CESNET z. s. p. o.
- * description: testbench 
+ * description: testbench
  * date       : 2021
  * author     : Radek Iša <isa@cesnet.ch>
  *

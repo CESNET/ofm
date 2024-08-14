@@ -32,8 +32,8 @@ entity HBM_TESTER_GEN is
         CS_GEN_ADDR_MODE  : in  std_logic;
         CS_GEN_BL8_MODE   : in  std_logic;
         -- Generator run mode: "11" = RD and WR,
-        --                     "10" = only RD, 
-        --                     "01" = only WR, 
+        --                     "10" = only RD,
+        --                     "01" = only WR,
         --                     "00" = no requests
         CS_GEN_RUN_MODE   : in  std_logic_vector(1 downto 0);
         CS_GEN_RW_SWITCH  : in  std_logic;
@@ -110,7 +110,7 @@ begin
     -- -------------------------------------------------------------------------
     --  RUN CONTROL LOGIC
     -- -------------------------------------------------------------------------
-    
+
     -- gen_run is high up to correctly end of transmitting
     s_gen_run <= (s_gen_run_reg and CS_GEN_RUN_MODE(0)) or CS_GEN_RUN;
 
@@ -261,7 +261,7 @@ begin
     -- -------------------------------------------------------------------------
     --  OUTPUT HSI SIGNALS ASSIGNMENT
     -- -------------------------------------------------------------------------
-    
+
     wr_data_p : process (CS_GEN_WR_DEAD, s_data_cnt)
     begin
         if (CS_GEN_WR_DEAD = '1') then

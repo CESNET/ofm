@@ -36,7 +36,7 @@ architecture behavioral of FIFO_N1 is
    -- Pipeline 1 signals ------------------------------------------------------
    -- Sum of WE
    signal sum_we                  : std_logic_vector(log2(WRITE_PORTS+1)-1 downto 0);
-   
+
    -- N-one detector
    signal n_one_addrs          : slv_array_t(0 to WRITE_PORTS-1)(max(log2(WRITE_PORTS),1)-1 downto 0);
    signal n_one_addrs_vld      : std_logic_vector(WRITE_PORTS-1 downto 0);
@@ -72,7 +72,7 @@ architecture behavioral of FIFO_N1 is
    signal reg2_in_mux_out       : slv_array_t(0 to WRITE_PORTS-1)(DATA_WIDTH-1 downto 0);
    signal reg2_memory_we       : std_logic_vector(WRITE_PORTS-1 downto 0);
    signal cnt2_memory_sel          : std_logic_vector(max(log2(WRITE_PORTS),1)-1 downto 0);
-   
+
    -- Control registers
    signal reg2_vld               : std_logic;
    signal reg2_empty             : std_logic;
@@ -157,7 +157,7 @@ begin
       end loop;
       sum_we <= std_logic_vector(a);
    end process;
-   
+
    -- N-one detector
    n_oneg: for i in 0 to WRITE_PORTS-1 generate
       n_onei: entity work.N_ONE
@@ -178,7 +178,7 @@ begin
          --! --------------------------------------------------------------------------
          D => pipe0_data_we,
 
-         --! \name N one number 
+         --! \name N one number
          --! -------------------------------------------------------------------------
          N => std_logic_vector(to_unsigned(i, max(log2(WRITE_PORTS),1))),
 
@@ -340,7 +340,7 @@ begin
                cnt2_memory_sel <= memory_sel_sum_ov(max(log2(WRITE_PORTS),1)-1 downto 0);
             else
                cnt2_memory_sel <= memory_sel_sum(max(log2(WRITE_PORTS),1)-1 downto 0);
-            end if; 
+            end if;
          end if;
       end if;
    end process;
@@ -430,7 +430,7 @@ begin
    -- Write pointers
    cnt3_memory_wr_pointerg: for i in 0 to WRITE_PORTS-1 generate
       cnt3_memory_wr_pointerp: process(CLK)
-      begin 
+      begin
          if (CLK'event and CLK = '1') then
             if (RESET = '1') then
                cnt3_memory_wr_pointer(i) <= (others => '0');
@@ -466,7 +466,7 @@ begin
 
    -- Read pointer low
    cnt4_memory_rd_pointer_lowp: process(CLK)
-   begin 
+   begin
       if (CLK'event and CLK = '1') then
          if (RESET = '1') then
             cnt4_memory_rd_pointer_low <= (others => '0');
@@ -479,12 +479,12 @@ begin
          end if;
       end if;
    end process;
-   
+
    out_mux_sel <= cnt4_memory_rd_pointer_low;
 
    -- Read pointer high
    cnt4_memory_rd_pointer_highp: process(CLK)
-   begin 
+   begin
       if (CLK'event and CLK = '1') then
          if (RESET = '1') then
             cnt4_memory_rd_pointer_high <= (others => '0');
@@ -616,7 +616,7 @@ begin
    -- Write pointers
    cnt3_memory_wr_pointerg: for i in 0 to WRITE_PORTS-1 generate
       cnt3_memory_wr_pointerp: process(CLK)
-      begin 
+      begin
          if (CLK'event and CLK = '1') then
             if (RESET = '1') then
                cnt3_memory_wr_pointer(i) <= (others => '0');
@@ -639,7 +639,7 @@ begin
 
    -- Read pointer high
    cnt4_memory_rd_pointer_highp: process(CLK)
-   begin 
+   begin
       if (CLK'event and CLK = '1') then
          if (RESET = '1') then
             cnt4_memory_rd_pointer_high <= (others => '0');

@@ -103,7 +103,7 @@ class model #(MFB_ITEM_WIDTH, RX_MFB_META_WIDTH, TX_MFB_META_WIDTH, TIMESTAMP_WI
                 tr_output_data.item.timestamp = tr_input_meta.item.data[TIMESTAMP_WIDTH-1 : 0] - prev_ts;
                 prev_ts = tr_input_meta.item.data[TIMESTAMP_WIDTH-1 : 0];
             end
-            if (QUEUES != 1) begin 
+            if (QUEUES != 1) begin
                 mfb_queue = tr_input_meta.item.data[TIMESTAMP_WIDTH+$clog2(QUEUES)-1 : TIMESTAMP_WIDTH];
                 $swrite(msg, "%s INPUT QUEUE %d\n", msg, mfb_queue);
             end

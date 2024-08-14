@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
 */
 
-// This class Program convert write and read requenset to request for uvm_memory 
+// This class Program convert write and read requenset to request for uvm_memory
 
 class mi_sequence extends controler;
     `uvm_object_utils(nfb_driver::mi_sequence)

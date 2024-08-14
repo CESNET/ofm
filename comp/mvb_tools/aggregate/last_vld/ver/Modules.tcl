@@ -7,7 +7,7 @@
 
 
 set SV_MVB_BASE   "$ENTITY_BASE/../../../ver"
-  
+
 set COMPONENTS [list \
       [ list "SV_MVB"   $SV_MVB_BASE  "FULL"] \
 ]

@@ -5,7 +5,7 @@
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --
--- TODO: 
+-- TODO:
 --
 --
 
@@ -29,7 +29,7 @@ entity DISTRIB is
    port(
        -- -------------------------------------------------
        -- \name Common interface
-       -- -------------------------------------------------  
+       -- -------------------------------------------------
       RESET          : in  std_logic;
       CLK            : in  std_logic;
 
@@ -43,10 +43,10 @@ entity DISTRIB is
       RX_EOP        : in std_logic;
       RX_SRC_RDY    : in std_logic;
       RX_DST_RDY    : out std_logic;
-      
+
       -- Distributed to output (active when SOP = 1)
       DISTRIBUTED_TO : out std_logic;
-      
+
       -- --------------------------------------------------
       -- \name Frame Link Unaligned output interface (lane 0)
       -- --------------------------------------------------
@@ -67,6 +67,6 @@ entity DISTRIB is
       TX_SOP1       : out std_logic;
       TX_EOP1       : out std_logic;
       TX_SRC_RDY1   : out std_logic;
-      TX_DST_RDY1   : in std_logic 
+      TX_DST_RDY1   : in std_logic
    );
 end entity;

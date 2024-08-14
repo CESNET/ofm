@@ -17,7 +17,7 @@ class data_buffer #(int unsigned CHANNELS, int unsigned CHANNEL_WIDTH) extends u
 
     local byte unsigned data[$];
     local logic unsigned control[$];
-    
+
     function new(string name = "data_buffer");
         super.new(name);
     endfunction
@@ -33,7 +33,7 @@ class data_buffer #(int unsigned CHANNELS, int unsigned CHANNEL_WIDTH) extends u
         end
     endfunction
 
-    // Tries to get data from buffer, which can be sent to specified 
+    // Tries to get data from buffer, which can be sent to specified
     // MII interface, if returns '1' if successful
     function bit get(ref byte unsigned data[$], ref logic control[$]);
         QUEUE_EMPTY : assert(data.size() == 0 && control.size() == 0);
@@ -65,9 +65,9 @@ class data_buffer #(int unsigned CHANNELS, int unsigned CHANNEL_WIDTH) extends u
         int unsigned size = this.data.size();
         int unsigned bytes_overflowed = size % (CHANNELS * BYTES_IN_CHANNEL);
         int unsigned bytes_to_fill = (CHANNELS * BYTES_IN_CHANNEL) - bytes_overflowed;
-        
+
         QUEUE_EMPTY : assert(data.size() == 0 && control.size() == 0);
-        
+
         data = {data, this.data};
         control = {control, this.control};
 
@@ -75,7 +75,7 @@ class data_buffer #(int unsigned CHANNELS, int unsigned CHANNEL_WIDTH) extends u
             data.push_back(8'h07);
             control.push_back(1'b1);
         end
-        
+
         this.data.delete();
         this.control.delete();
     endfunction

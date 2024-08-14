@@ -27,7 +27,7 @@ SETTINGS = {
     "use_dst_rdy_0" : {
         "USE_DST_RDY"       : "0",
     },
-    "_combinations_" : (  
+    "_combinations_" : (
     (), # Works the same as '("default",),' as the "default" is applied in every combination
 
     ("use_dst_rdy_0",),

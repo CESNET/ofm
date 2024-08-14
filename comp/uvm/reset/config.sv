@@ -1,7 +1,7 @@
 /*
  * file       : config.sv
  * Copyright (C) 2021 CESNET z. s. p. o.
- * description: configuration object for RESET agent 
+ * description: configuration object for RESET agent
  * date       : 2021
  * author     : Radek Iša <isa@cesnet.cz>
  *

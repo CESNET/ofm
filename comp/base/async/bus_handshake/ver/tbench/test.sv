@@ -82,7 +82,7 @@ program TEST (
         //monitor.setDisabled();
         //responder.setDisabled();
     endtask
-   
+
     task test2();
         $write("\n\n############ TEST CASE 2 ############\n\n");
         //driver.wordDelayEnable_wt = 0;

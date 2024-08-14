@@ -3,8 +3,8 @@
  * \brief Testbench
  * \author Lukas Kekely <kekely@cesnet.cz>
  * \date 2018
- */  
- /* 
+ */
+ /*
  * Copyright (C) 2018 CESNET
  *
  * LICENSE TERMS

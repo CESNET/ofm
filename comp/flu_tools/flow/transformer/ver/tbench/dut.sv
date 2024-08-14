@@ -1,12 +1,12 @@
 /*
  * DUT.sv: Design under test
  * Copyright (C) 2013 CESNET
- * Author: Lukas Kekely <kekely@cesnet.cz> 
+ * Author: Lukas Kekely <kekely@cesnet.cz>
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
- 
+
 // ----------------------------------------------------------------------------
 //                        Module declaration
 // ----------------------------------------------------------------------------
@@ -22,7 +22,7 @@ module DUT (
 // -------------------- Module body -------------------------------------------
 FLU_TRANSFORMER #(
      .RX_DATA_WIDTH    (RX_DATA_WIDTH),
-     .RX_SOP_POS_WIDTH (RX_SOP_POS_WIDTH), 
+     .RX_SOP_POS_WIDTH (RX_SOP_POS_WIDTH),
      .TX_DATA_WIDTH    (TX_DATA_WIDTH),
      .TX_SOP_POS_WIDTH (TX_SOP_POS_WIDTH)
    )

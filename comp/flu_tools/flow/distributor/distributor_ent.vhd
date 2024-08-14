@@ -1,6 +1,6 @@
 -- distributor_ent.vhd: Frame Link Unaligned 1-n distributor entity.
 -- Copyright (C) 2012 CESNET
--- Author: Lukas Kekely <kekely@cesnet.cz>    
+-- Author: Lukas Kekely <kekely@cesnet.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --
@@ -25,7 +25,7 @@ use work.math_pack.all;
 entity flu_distributor is
    generic(
       DATA_WIDTH:    integer:=256;
-      SOP_POS_WIDTH: integer:=2; 	
+      SOP_POS_WIDTH: integer:=2;
       OUTPUT_PORTS:  integer:=2
    );
    port(
@@ -40,7 +40,7 @@ entity flu_distributor is
       RX_SOP        : in std_logic;
       RX_EOP        : in std_logic;
       RX_SRC_RDY    : in std_logic;
-      RX_DST_RDY    : out std_logic; 
+      RX_DST_RDY    : out std_logic;
 
       -- Frame Link Unaligned concentrated interface
       TX_DATA       : out std_logic_vector(OUTPUT_PORTS*DATA_WIDTH-1 downto 0);
@@ -50,11 +50,11 @@ entity flu_distributor is
       TX_EOP        : out std_logic_vector(OUTPUT_PORTS-1 downto 0);
       TX_SRC_RDY    : out std_logic_vector(OUTPUT_PORTS-1 downto 0);
       TX_DST_RDY    : in std_logic_vector(OUTPUT_PORTS-1 downto 0);
-      
+
       -- Distribution control interface
       INUM_MASK     : in std_logic_vector(OUTPUT_PORTS-1 downto 0);
       INUM_READY    : in std_logic;
-      INUM_NEXT     : out std_logic  
+      INUM_NEXT     : out std_logic
    );
 end entity flu_distributor;
 

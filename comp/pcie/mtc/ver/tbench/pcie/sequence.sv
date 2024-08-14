@@ -1,5 +1,5 @@
 /*
- * transaction.sv pcie competition transaction  
+ * transaction.sv pcie competition transaction
  * Copyright (C) 2020 CESNET z. s. p. o.
  * Author(s): Radek Iša <isa@cesnet.cz>
  * SPDX-License-Identifier: BSD-3-Clause
@@ -16,7 +16,7 @@ class seq_cfg;
 
     rand int unsigned data_size_max;
     rand int unsigned data_size_min;
- 
+
     constraint c1 {
         data_size_min >= 1;
         data_size_max <= mrrs;
@@ -25,7 +25,7 @@ class seq_cfg;
         data_size_min dist {[1:4] :/ 20, [5:128] :/ 10, [128:mrrs] :/ 5, mrrs :/ 1};
         data_size_max dist {[1:4] :/ 20, [5:128] :/ 10, [128:mrrs] :/ 5, mrrs :/ 1};
 
-        rand_count    dist {[1:10] :/ 5, [20:100] :/ 40, [128:256] :/ 5 }; 
+        rand_count    dist {[1:10] :/ 5, [20:100] :/ 40, [128:256] :/ 5 };
     }
 
     function new (int unsigned mrrs);
@@ -34,7 +34,7 @@ class seq_cfg;
 endclass
 
 class seq extends Transaction;
-    seq_cfg cfg; 
+    seq_cfg cfg;
 
     function new(seq_cfg cfg);
         this.cfg = cfg;

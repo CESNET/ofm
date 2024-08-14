@@ -99,11 +99,11 @@ architecture FULL of RX_MAC_LITE_CRC_CUTTER is
 
 begin
 
-    assert (ITEM_WIDTH = 8) 
+    assert (ITEM_WIDTH = 8)
         report "RX_MAC_LITE_CRC_CUTTER: ITEM_WIDTH must be 8, other values are not supported!!!"
         severity failure;
 
-    assert (BLOCK_SIZE >= 4) 
+    assert (BLOCK_SIZE >= 4)
         report "RX_MAC_LITE_CRC_CUTTER: BLOCK_SIZE must be >= 4 and power of two!!!"
         severity failure;
 
@@ -180,7 +180,7 @@ begin
             if (RESET = '1') then
                 s_move_eof_allowed(0) <= '0';
             elsif (s_reg1_src_rdy = '1') then
-                s_move_eof_allowed(0) <= s_move_eof_allowed(REGIONS);  
+                s_move_eof_allowed(0) <= s_move_eof_allowed(REGIONS);
             end if;
         end if;
     end process;
@@ -222,7 +222,7 @@ begin
                 s_new_eof_pos_arr(r) <= s_eof_pos_mca(r);
             else -- simple cuting - only changed EOF_POS
                 s_new_eof_pos_arr(r) <= std_logic_vector(unsigned(s_eof_pos_mca(r)) - 4);
-            end if;      
+            end if;
         end process;
     end generate;
 
@@ -231,7 +231,7 @@ begin
     -- -------------------------------------------------------------------------
     --  FRAME STATE LOGIC
     -- -------------------------------------------------------------------------
-    
+
     inc_frame2_g : for r in 0 to REGIONS-1 generate
         s_inc_frame(r+1) <= (s_reg1_sof(r) and not s_new_eof(r) and not s_inc_frame(r)) or
                             (s_reg1_sof(r) and s_new_eof(r) and s_inc_frame(r)) or
@@ -244,7 +244,7 @@ begin
             if (RESET = '1') then
                 s_inc_frame(0) <= '0';
             elsif (s_reg1_src_rdy = '1') then
-                s_inc_frame(0) <= s_inc_frame(REGIONS);  
+                s_inc_frame(0) <= s_inc_frame(REGIONS);
             end if;
         end if;
     end process;

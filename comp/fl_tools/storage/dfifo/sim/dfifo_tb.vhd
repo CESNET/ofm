@@ -62,7 +62,7 @@ signal rx_sop_n      : std_logic;
 signal rx_eop_n      : std_logic;
 signal rx_sof_n      : std_logic;
 signal rx_eof_n      : std_logic;
-      
+
 signal tx_data       : std_logic_vector(DATA_WIDTH-1 downto 0);
 signal tx_rem        : std_logic_vector(log2(DATA_WIDTH/8) - 1 downto 0);
 signal tx_src_rdy_n  : std_logic;
@@ -82,18 +82,18 @@ signal discard       : std_logic;
 begin
 
 -- Unit under test
-   fl_dfifo: entity work.fl_dfifo 
+   fl_dfifo: entity work.fl_dfifo
    generic map(
       ITEMS       => ITEMS,
       PARTS       => PARTS,
-      DATA_WIDTH  => DATA_WIDTH 
+      DATA_WIDTH  => DATA_WIDTH
    )
    port map(
       CLK         => CLK,
       RESET       => RESET,
-      
+
       -- write interface
-      RX_DATA        => rx_data, 
+      RX_DATA        => rx_data,
       RX_REM         => rx_rem,
       RX_SRC_RDY_N   => rx_src_rdy_n,
       RX_DST_RDY_N   => rx_dst_rdy_n,
@@ -102,7 +102,7 @@ begin
       RX_SOF_N       => rx_sof_n,
       RX_EOF_N       => rx_eof_n,
       DISCARD        => discard,
-      
+
       -- read interface
       TX_DATA        => tx_data,
       TX_REM         => tx_rem,
@@ -111,7 +111,7 @@ begin
       TX_SOP_N       => tx_sop_n,
       TX_EOP_N       => tx_eop_n,
       TX_SOF_N       => tx_sof_n,
-      TX_EOF_N       => tx_eof_n 
+      TX_EOF_N       => tx_eof_n
    );
 
    -- Framelink transmitter
@@ -155,7 +155,7 @@ begin
          RX_EOP_N     => tx_eop_n,
          RX_SRC_RDY_N => tx_src_rdy_n,
          RX_DST_RDY_N => tx_dst_rdy_n
-      );      
+      );
 
 -- Clock generation
    local_clock: process

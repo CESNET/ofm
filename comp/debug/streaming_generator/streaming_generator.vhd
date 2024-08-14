@@ -1,6 +1,6 @@
 --! \file:   streaming-generator.vhd
---! \brief:  The module is used to send test data in hardware.  Control via MI32. 
---!          Is it accessible control SW Tool (in preparation).    
+--! \brief:  The module is used to send test data in hardware.  Control via MI32.
+--!          Is it accessible control SW Tool (in preparation).
 --! \Author: Mario Kuka <xkukam00@stud.fit.vutbr.cz>
 --! \date 2014
 --!
@@ -43,7 +43,7 @@ entity STREAMING_GENERATOR is
       --! ready signals
       SRC_RDY  : out  std_logic;
       DST_RDY  : in  std_logic;
-       
+
       --! MI32 input interface -------------------------------------------------
       --! Input Data
       MI_DWR                        : in  std_logic_vector(31 downto 0);
@@ -77,9 +77,9 @@ architecture full of STREAMING_GENERATOR is
    signal addr_div  : std_logic_vector(29 downto 0);
    --! addr_div sub 16 - for address BRAM
    signal addr_bram : std_logic_vector(log2(ITEMS_ALL)-1 downto 0);
-   --! decode addr_div for address registers from MI_32 
+   --! decode addr_div for address registers from MI_32
    signal addr_dec  : std_logic_vector(4 downto 0);
-   
+
    --! multiplexed settings, configs registers for read with MI_32
    signal mux_data_in : std_logic_vector((32*7)-1 downto 0);
    signal mux_out     : std_logic_vector(31 downto 0);
@@ -106,7 +106,7 @@ architecture full of STREAMING_GENERATOR is
 
    --! control signal for generator
    signal cmd_run     :std_logic;
-   --! signal of generator - stop generate 
+   --! signal of generator - stop generate
    signal cmd_run_off :std_logic;
 
    --! signals from configs registers
@@ -115,7 +115,7 @@ architecture full of STREAMING_GENERATOR is
    signal config_pom_3 : std_logic_vector(31 downto 0);
    signal config_pom_4 : std_logic_vector(31 downto 0);
 
-begin  
+begin
    addr_bram <= addr_div(log2(ITEMS_ALL)-1 downto 0);
    --! CONFINGS DATA
    config_pom_1  <= mux_data_in(95+(0*32) downto 64+(0*32));
@@ -127,7 +127,7 @@ begin
    settings1(8) <= '0';
    settings1(15 downto 9)  <= (others => '0');
    settings1(31 downto 16) <= conv_std_logic_vector(CNT_WIDTH, 16);
-    
+
    settings2(15 downto 0)  <= conv_std_logic_vector(ITEMS, 16);
    settings2(31 downto 16) <= conv_std_logic_vector(DATA_WIDTH, 16);
 
@@ -138,7 +138,7 @@ begin
          if (RESET='1') then
             rd_reg(0) <= '0';
             rd_reg(1) <= '0';
-         else 
+         else
             rd_reg(0) <= MI_RD;
             rd_reg(1) <= rd_reg(0);
             be_reg(3 downto 0) <= MI_BE;
@@ -150,7 +150,7 @@ begin
 
    MI_DRDY <= rd_reg(1);
    addr_div(29 downto 0) <= MI_ADDR(31 downto 2);
-   
+
    --! read, write register or BRAM
    control_ardy: process(addr_bram, MI_WR, MI_RD, ardy)
    begin
@@ -160,7 +160,7 @@ begin
          MI_ARDY <= (MI_WR and ardy) or MI_RD;
       end if;
    end process;
-   
+
    --! decode for write registers (comads, configs 1,2,3...)
    WITH addr_div(2 downto 0) SELECT
       addr_dec <= "00001" WHEN "010",
@@ -170,7 +170,7 @@ begin
                   "10000" WHEN "110",
                   "00000" WHEN OTHERS;
 
-   --! generate registers with support MI_BE 
+   --! generate registers with support MI_BE
    GEN_REGS: for I in 0 to 3 generate
       signal regs_enable : std_logic;
       signal reg_out     : std_logic_vector(31 downto 0);
@@ -178,9 +178,9 @@ begin
 
       en_mem_regs: process(MI_WR, addr_dec(I), addr_bram)
       begin
-         if(addr_bram < 16) then  
+         if(addr_bram < 16) then
             regs_enable <= MI_WR and addr_dec(I);
-         else 
+         else
             regs_enable <= '0';
          end if;
       end process;
@@ -188,15 +188,15 @@ begin
       RW_RWGISTERS_inst : entity work.RW_REGISTER
       port map (
          CLK => CLK,
-         --! MI32 BE signal 
+         --! MI32 BE signal
          BE => MI_BE,
-         --! input data 
+         --! input data
          DATA  => MI_DWR,
          --! enbale signal
-         ENABLE => regs_enable, 
-         --! reset signal 
+         ENABLE => regs_enable,
+         --! reset signal
          RESET => RESET,
-         --! output data 
+         --! output data
          P => reg_out
       );
 
@@ -232,7 +232,7 @@ begin
    --! mux register
    GEN_MUX_inst : entity work.GEN_MUX
    generic map (
-      DATA_WIDTH => 32, 
+      DATA_WIDTH => 32,
       MUX_WIDTH  => 7   -- multiplexer width (number of inputs)
    )
    port map(
@@ -241,7 +241,7 @@ begin
       DATA_OUT   => mux_out
    );
 
-   --! mux REGISTER or BRAM 
+   --! mux REGISTER or BRAM
    mux_regs_bram: process(mux_reg_out, mux_drd_mem, addr_bram)
    begin
       if (addr_bram < 16) then
@@ -249,7 +249,7 @@ begin
       else
          mux_addr_out <= mux_drd_mem;
       end if;
-   end process;  
+   end process;
 
    control_miwr: process(MI_WR, addr_bram )
    begin
@@ -259,31 +259,31 @@ begin
          bram_wr <= '0';
       end if;
    end process;
- 
+
    --! write data to BRAM with support MI_BE
    CMP_WR_BRAM_inst : entity work.CMP_WR_BRAM
    port map(
       CLK  => CLK,
-      --! MI32 BE signal 
+      --! MI32 BE signal
       BE   => MI_BE,
       MI_WR  => bram_wr,
       --MI_RD       : in  std_logic;
-      --! input data 
+      --! input data
       MI_DATA  => MI_DWR,
       BRAM_DATA   => mux_drd_mem,
       --! enbale signal
       --ENABLE      : in  std_logic;
-      --! reset signal 
+      --! reset signal
       RESET   => RESET,
-      --! output data 
+      --! output data
       P  => dia,
       WR => wea,
       RD => rea,
       ARDY => ardy
    );
-   
-   --! generate BRAMs 
-   BRAM_GENERATOR_inst : entity work.BRAM_GENERATOR 
+
+   --! generate BRAMs
+   BRAM_GENERATOR_inst : entity work.BRAM_GENERATOR
    generic map (
       ITEMS      => ITEMS,
       --! Input data width
@@ -313,11 +313,11 @@ begin
       --! Address B
       ADDRB => bram_b_addr,
       --! Data B out
-      DOB   => bram_b_data   
+      DOB   => bram_b_data
    );
- 
+
   --! connect data output generator
-  GENERATOR_inst : entity work.GENERATOR 
+  GENERATOR_inst : entity work.GENERATOR
    generic map (
       DATA_WIDTH  => DATA_WIDTH,
       ITEMS       => ITEMS,
@@ -334,22 +334,22 @@ begin
       BRAM_DATA  => bram_b_data,
       BRAM_RD    => bram_b_rd,
       BRAM_ADDR  => bram_b_addr,
-      
+
       --! Data out
       DATA_OUT   => DATA,
-      
+
       --! ready signals
       SRC_RDY  => SRC_RDY,
       DST_RDY  => DST_RDY,
-       
+
       --! Config Data
       CONFIG_1  => config_pom_1,
       CONFIG_2  => config_pom_2,
       CONFIG_3  => config_pom_3,
       CONFIG_4  => config_pom_4,
-      
+
       --! Commands
       CMD_RUN      => mux_data_in(64+(4*32)),
       CMD_RUN_OFF  => cmd_run_off
-   ); 
+   );
 end full;

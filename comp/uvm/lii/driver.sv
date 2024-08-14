@@ -100,7 +100,7 @@ class driver_tx #(int unsigned DATA_WIDTH, logic FAST_SOF, int unsigned META_WID
                 // Assign values from requested sequence item to the interface
                 vif.driver_tx_cb.RDY <= req.rdy;
 
-                // Wait for the clocking block to write values to the registres 
+                // Wait for the clocking block to write values to the registres
                 @(vif.driver_tx_cb);
 
                 // Setup default data to the interface
@@ -109,7 +109,7 @@ class driver_tx #(int unsigned DATA_WIDTH, logic FAST_SOF, int unsigned META_WID
                 seq_item_port.item_done();
 
             end else begin
-                // Wait for the clocking block to write values to the registres 
+                // Wait for the clocking block to write values to the registres
                 @(vif.driver_tx_cb);
                 // Setup default data to the interface
                 vif.driver_tx_cb.RDY <= 1'b0;

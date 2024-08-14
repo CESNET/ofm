@@ -26,7 +26,7 @@ package test;
     parameter USERMETA_W      = 32;
     parameter MOD_W           = 7;
     parameter RX_MVB_ITEM_W   = USERMETA_W + MOD_W + MOD_W + 5;
-    
+
     parameter DEVICE          = "AGILEX";
 
     parameter FRAME_SIZE_MIN  = 4096;

@@ -29,7 +29,7 @@ entity LB_ENDPOINT_50 is
    port(
       -- Common Interface
       RESET         : in std_logic;
-      
+
       -- Local Bus Interface
       LB_CLK        : in std_logic;
       LB_DWR        : in std_logic_vector(15 downto 0);
@@ -51,7 +51,7 @@ entity LB_ENDPOINT_50 is
       MI32_BE       : out std_logic_vector(3  downto 0);           -- Byte Enable
       MI32_DRD      : in  std_logic_vector(31 downto 0);           -- Output Data
       MI32_ARDY     : in  std_logic;                               -- Address Ready
-      MI32_DRDY     : in  std_logic                                -- Data Ready   
+      MI32_DRDY     : in  std_logic                                -- Data Ready
 
   );
 end entity LB_ENDPOINT_50;
@@ -75,7 +75,7 @@ architecture LB_ENDPOINT_50_ARCH of LB_ENDPOINT_50 is
     signal addr_match_reg      : std_logic;
     signal addr_cnt50_we       : std_logic;
     signal addr_cnt50          : std_logic_vector(31 downto 0);
-    
+
     -- User component signals generation
     signal wr_reg              : std_logic;
     signal in_cnt              : std_logic;
@@ -83,7 +83,7 @@ architecture LB_ENDPOINT_50_ARCH of LB_ENDPOINT_50 is
     signal be_low_reg          : std_logic_vector(1 downto 0);
     signal drd_mux             : std_logic_vector(15 downto 0);
     signal drd_mux_sel         : std_logic_vector(1 downto 0);
-    
+
     -- Buffer signals
     signal shr_dwr     : std_logic_vector(15 downto 0);
     signal shr_be       : std_logic_vector(1 downto 0);
@@ -91,7 +91,7 @@ architecture LB_ENDPOINT_50_ARCH of LB_ENDPOINT_50 is
     signal shr_rd_n     : std_logic;
     signal shr_vld : std_logic;
     signal shr_read           : std_logic;
- 
+
     signal reg1_rd              : std_logic;
     signal reg1_wr              : std_logic;
     signal reg2_rd              : std_logic;
@@ -114,19 +114,19 @@ architecture LB_ENDPOINT_50_ARCH of LB_ENDPOINT_50 is
 begin
 -- ----------------------------------------------------------------------------
 -- RESET GENERATION
--- ----------------------------------------------------------------------------   
--- LB2ADC RESET generation   
+-- ----------------------------------------------------------------------------
+-- LB2ADC RESET generation
 lb_endpoint_reset <= RESET or not LB_ABORT_N;
 
 -- ----------------------------------------------------------------------------
 -- ARDY GENERATION (solve problem when ardy is always '1')
--- ----------------------------------------------------------------------------   
+-- ----------------------------------------------------------------------------
 mi32_ardy_aux <= MI32_ARDY and (mi32_rd_out or mi32_wr_out);
 
 
 -- ----------------------------------------------------------------------------
 -- ADDRESS DECODER
--- ----------------------------------------------------------------------------   
+-- ----------------------------------------------------------------------------
 aux_addr      <= LB_DWR & addr_reg(15 downto 0);
 addr_match    <= '1' when aux_addr(31 downto ADDR_WIDTH) = BASE_ADDR(31 downto ADDR_WIDTH) else '0';
 
@@ -161,7 +161,7 @@ end process;
 
 -- ----------------------------------------------------------------------------
 -- ADDRESS REGISTER AND ADDRESS COUNTER
--- ----------------------------------------------------------------------------   
+-- ----------------------------------------------------------------------------
 -- addr_reg -------------------------------------------------------------------
 addr_regp: process(lb_endpoint_reset, LB_CLK)
 begin
@@ -226,7 +226,7 @@ end process;
 
 -- ----------------------------------------------------------------------------
 -- ENDPOINT WITH NO WRITE BUFFER
--- ----------------------------------------------------------------------------   
+-- ----------------------------------------------------------------------------
 BUFFER_NOT_EN_GEN : if (not BUFFER_EN) generate
 
 -- register wr_reg ------------------------------------------------------------
@@ -365,7 +365,7 @@ LB_ENDPOINT_BUFFER_U : entity work.LB_ENDPOINT_BUFFER
       BE_IN         => LB_BE,
       WR_IN         => LB_WR_N,
       RD_IN         => LB_RD_N,
-    
+
       --Output Interface
       DATA_OUT      => shr_dwr,
       BE_OUT        => shr_be,

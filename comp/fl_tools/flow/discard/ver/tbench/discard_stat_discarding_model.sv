@@ -10,9 +10,9 @@
  * TODO:
  *
  */
- 
+
   import math_pkg::*;
-  
+
   // --------------------------------------------------------------------------
   // -- Frame Link Driver Callbacks
   // --------------------------------------------------------------------------
@@ -33,18 +33,18 @@
     // -------------------
 
     // -- Constructor ---------------------------------------------------------
-    // Create a class 
+    // Create a class
     function new();
     endfunction
-    
+
     // ------------------------------------------------------------------------
-    // Function is called before is transaction sended 
+    // Function is called before is transaction sended
     virtual task pre_tx(ref Transaction transaction, string inst);
        cbs[0].pre_tx(transaction, inst);
     endtask
 
     // ------------------------------------------------------------------------
-    // Function is called after is transaction sended 
+    // Function is called after is transaction sended
     virtual task post_tx(Transaction transaction, string inst);
        // Gets number of transaction table from instance name
        int i;
@@ -52,11 +52,11 @@
        FrameLinkTransaction tr;
 
        $cast(tr, transaction);
-       
+
        for(i=0; i < pChannels; i++) begin
          $swrite(driverLabel, "Driver %0d", i);
          if (driverLabel == inst) break;
-       end  
+       end
 
        if (discardFlag[i]) begin
          discardFlag[i] = 0;
@@ -67,11 +67,11 @@
          cbs[0].post_tx(transaction, inst);
          passedFrames[i]++;
          passedLength[i] += tr.data[0].size+tr.data[1].size;
-       end  
+       end
     endtask
 
     // ------------------------------------------------------------------------
-    // Function sets flag to discard actual frame 
+    // Function sets flag to discard actual frame
     function void setDiscardFlag(int channel);
        discardFlag[channel] = 1;
     endfunction
@@ -86,18 +86,18 @@
     endfunction
 
    endclass : DiscardStatDriverCbs
-  
+
   // --------------------------------------------------------------------------
   // -- Frame Link Discarding Model Class
   // --------------------------------------------------------------------------
-  /* This class is responsible for prediction of packet discarding. Unit must 
-   * be enabled by "setEnable()" function call. Monitoring can be stoped by 
+  /* This class is responsible for prediction of packet discarding. Unit must
+   * be enabled by "setEnable()" function call. Monitoring can be stoped by
    * "setDisable()" function call.
    */
-  class DiscardStatDiscardingModel #(int pDataWidth=32, pDremWidth=2, 
+  class DiscardStatDiscardingModel #(int pDataWidth=32, pDremWidth=2,
                                      pChannels=2, pStatusWidth=16,
                                      pOutputReg=0);
-    
+
     // -- Private Class Atributes --
     string    inst;                            // Checker identification
     bit       enabled;                         // Checker is enabled
@@ -124,37 +124,37 @@
                    virtual iDiscardStat.rx_tb #(pChannels,pStatusWidth) chan,
                    virtual iDiscardStat.stat_tb #(pChannels,pStatusWidth) stat
                    );
-      this.enabled     = 0;           // Model is disabled by default   
-      this.rx          = rx;          // Store pointer interface 
-      this.chan        = chan;        // Store pointer interface  
-      this.stat        = stat;        // Store pointer interface  
+      this.enabled     = 0;           // Model is disabled by default
+      this.rx          = rx;          // Store pointer interface
+      this.chan        = chan;        // Store pointer interface
+      this.stat        = stat;        // Store pointer interface
       this.inst        = inst;        // Store driver identifier
       this.discardStatCbs   = new();
-      
+
     endfunction
 
     // -- Set Callbacks -------------------------------------------------------
-    // Put callback object into List 
+    // Put callback object into List
     function void setCallbacks(DriverCbs cbs);
       discardStatCbs.cbs.push_back(cbs);
     endfunction : setCallbacks
-    
+
     // -- Enable Model --------------------------------------------------------
     // Enable model and runs model's process
     task setEnabled();
       enabled = 1; // Model Enabling
-      fork         
+      fork
         run();     // Creating model subprocess
         setStatus();     // Creating model subprocess
       join_none;   // Don't wait for ending
     endtask : setEnabled
-        
+
     // -- Disable Model -------------------------------------------------------
     // Disable checker
     task setDisabled();
       enabled = 0; // Disable model
-    endtask : setDisabled 
-    
+    endtask : setDisabled
+
     // -- Run Model -----------------------------------------------------------
     // Predict packet discarding
     task run();
@@ -165,7 +165,7 @@
       logic[15:0]             packetSize;
       int unsigned            maxStatus = 1<<(pStatusWidth+log2(pDataWidth/8)-1);
       int unsigned            statusPlusPacketSize;
-      
+
       $write("maxStatus:%0x\n",maxStatus);
 
       while (enabled) begin                   // Repeat in forever loop
@@ -191,18 +191,18 @@
           discardStatCbs.setDiscardFlag(channel);
           discardFlag[channel] = 1;
           $write("discarding\n");
-        end 
-        else 
+        end
+        else
           discardFlag[channel] = 0;
 
         wholeStatus = stat.stat_cb.STATUS;
         @(rx.cb);
       end
     endtask : run
-    
+
     // -- Wait for SOF -------------------------------------------------------
     // Wait for Start of Frame
-    task waitForSOFandGetStatus(inout logic[pChannels*pStatusWidth-1:0] 
+    task waitForSOFandGetStatus(inout logic[pChannels*pStatusWidth-1:0]
                                                                  wholeStatus);
       while (rx.cb.SOF_N || rx.cb.SRC_RDY_N || rx.cb.DST_RDY_N) begin
         wholeStatus = stat.stat_cb.STATUS;
@@ -253,4 +253,4 @@
       discardStatCbs.getStats(df,pf,dl,pl);
     endfunction
 
-endclass : DiscardStatDiscardingModel    
+endclass : DiscardStatDiscardingModel

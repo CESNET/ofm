@@ -59,5 +59,5 @@ module DUT (
         .TX_MASK         (mvb_rx.DATA   )
     );
 
-    
+
 endmodule

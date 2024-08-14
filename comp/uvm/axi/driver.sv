@@ -2,7 +2,7 @@
 //-- Copyright (C) 2022 CESNET z. s. p. o.
 //-- Author(s): Daniel Kříž <xkrizd01@vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 // Driver of AXI rx interface
 class driver_rx #(int unsigned DATA_WIDTH, int unsigned TUSER_WIDTH, int unsigned REGIONS) extends uvm_driver #(sequence_item #(DATA_WIDTH, TUSER_WIDTH, REGIONS));

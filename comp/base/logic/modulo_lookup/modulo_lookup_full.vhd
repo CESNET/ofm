@@ -24,10 +24,10 @@ use work.math_pack.all;
 architecture behavioral of MODULO_LOOKUP is
 
    -- Type & constant declaration ---------------------------------------------
-   
-   attribute ram_style : string;  
-   constant ITEMS : integer := 2**(OPERAND_WIDTH+MODULO_WIDTH);   
-   constant ADDR_WIDTH : integer := OPERAND_WIDTH+MODULO_WIDTH;  
+
+   attribute ram_style : string;
+   constant ITEMS : integer := 2**(OPERAND_WIDTH+MODULO_WIDTH);
+   constant ADDR_WIDTH : integer := OPERAND_WIDTH+MODULO_WIDTH;
    type t_mem is array(0 to ITEMS-1) of std_logic_vector(MODULO_WIDTH-1 downto 0);
 
 
@@ -49,28 +49,28 @@ architecture behavioral of MODULO_LOOKUP is
 
    -- Signal declaration ------------------------------------------------------
 
-   signal addr     : std_logic_vector(ADDR_WIDTH-1 downto 0);   
+   signal addr     : std_logic_vector(ADDR_WIDTH-1 downto 0);
    signal data     : std_logic_vector(MODULO_WIDTH-1 downto 0);
-   
+
    signal reg_data : std_logic_vector(MODULO_WIDTH-1 downto 0);
    signal reg_vld1 : std_logic;
    signal reg_vld2 : std_logic;
 
    signal memory : t_mem := INIT_MEM;
-   attribute ram_style of memory: signal is MEM_TYPE; 
- 
-   
+   attribute ram_style of memory: signal is MEM_TYPE;
+
+
 begin
- 
+
    addr <= OPERAND & MODULO;
-   
+
    rom_p: process(CLK)
    begin
       if (CLK'event and CLK = '1') then
          data <= memory(conv_integer(unsigned(addr)));
       end if;
    end process;
-   
+
    output_reg_gen: if (OUTPUT_REG = true) generate
       output_reg_p: process(CLK)
       begin
@@ -86,7 +86,7 @@ begin
             end if;
          end if;
       end process;
-   
+
       RESULT <= reg_data;
       OUT_VLD <= reg_vld2;
    end generate;
@@ -102,8 +102,8 @@ begin
             end if;
          end if;
       end process;
-      
+
       RESULT <= data;
    end generate;
-   
+
 end architecture;

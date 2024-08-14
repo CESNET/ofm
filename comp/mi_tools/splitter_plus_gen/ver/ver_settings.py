@@ -63,7 +63,7 @@ SETTINGS = {
     "meta_comb_2" : {
         "META_WIDTH"                                           : "1",
     },
-    "_combinations_" : (  
+    "_combinations_" : (
     (), # Works the same as '("default",),' as the "default" is applied in every combination
     ("number_of_ports_comb_1",),
     ("number_of_ports_comb_2",),

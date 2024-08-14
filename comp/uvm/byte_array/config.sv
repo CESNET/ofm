@@ -8,8 +8,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
 */
 
-`ifndef BYTE_ARRAY_CONFIG_SV 
-`define BYTE_ARRAY_CONFIG_SV 
+`ifndef BYTE_ARRAY_CONFIG_SV
+`define BYTE_ARRAY_CONFIG_SV
 
 class config_sequence extends uvm_object;
     // this configuration is aproximation

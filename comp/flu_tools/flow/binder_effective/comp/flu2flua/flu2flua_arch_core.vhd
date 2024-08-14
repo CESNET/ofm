@@ -1,11 +1,11 @@
 --
 -- flu2flua_arch.vhd: Component for conversion of FLU to Aligned FLU
 -- Copyright (C) 2014 CESNET
--- Author: Pavel Benacek <benacek@cesnet.cz> 
+-- Author: Pavel Benacek <benacek@cesnet.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --
--- TODO: 
+-- TODO:
 --
 --
 
@@ -26,7 +26,7 @@ entity FLU2FLUA_CORE is
       --! FLU protocol generics
       DATA_WIDTH    : integer:= 256;
       SOP_POS_WIDTH : integer:= 2;
-     
+
       -- Pipeline Config ------------------------
       -- Use input pipe
       IN_PIPE_EN           : boolean := false;
@@ -68,7 +68,7 @@ entity FLU2FLUA_CORE is
       RX_SOP        : in std_logic;
       RX_EOP        : in std_logic;
       RX_SRC_RDY    : in std_logic;
-      RX_DST_RDY    : out std_logic; 
+      RX_DST_RDY    : out std_logic;
 
       -- Distributed to output (active when SOP = 1)
       DISTRIBUTED_TO : out std_logic;
@@ -106,8 +106,8 @@ architecture FULL of FLU2FLUA_CORE is
    signal in_rx_sop           : std_logic;
    signal in_rx_eop           : std_logic;
    signal in_rx_src_rdy       : std_logic;
-   signal in_rx_dst_rdy       : std_logic; 
-   
+   signal in_rx_dst_rdy       : std_logic;
+
    --! Signal for distribute information
    signal distributed_to_out : std_logic;
 
@@ -118,7 +118,7 @@ architecture FULL of FLU2FLUA_CORE is
    signal flu2flua_rx_sop0       : std_logic;
    signal flu2flua_rx_eop0       : std_logic;
    signal flu2flua_rx_src_rdy0   : std_logic;
-   signal flu2flua_rx_dst_rdy0   : std_logic; 
+   signal flu2flua_rx_dst_rdy0   : std_logic;
 
    --! FLU Distrib -> FLU2FLUA signals (lane 1)
    signal flu2flua_rx_data1      : std_logic_vector(DATA_WIDTH-1 downto 0) := (others => '0');
@@ -127,7 +127,7 @@ architecture FULL of FLU2FLUA_CORE is
    signal flu2flua_rx_sop1       : std_logic;
    signal flu2flua_rx_eop1       : std_logic;
    signal flu2flua_rx_src_rdy1   : std_logic;
-   signal flu2flua_rx_dst_rdy1   : std_logic; 
+   signal flu2flua_rx_dst_rdy1   : std_logic;
 
 begin
    -- -------------------------------------------------------------------------
@@ -141,14 +141,14 @@ begin
    in_rx_eop      <= RX_EOP;
    in_rx_src_rdy  <= RX_SRC_RDY;
    RX_DST_RDY     <= in_rx_dst_rdy;
-   
+
    --! Information about frame distribution
    DISTRIBUTED_TO <= distributed_to_out;
 
    -- -------------------------------------------------------------------------
    -- FLU -> FLU Align logic
    -- -------------------------------------------------------------------------
-   
+
    RR_DISTRIB_GEN:if(ALIGN = true)generate
       --! FLU RR distribution
       DISTRIB_I:entity work.DISTRIB
@@ -160,10 +160,10 @@ begin
          port map(
              -- -------------------------------------------------
              -- \name Common interface
-             -- -------------------------------------------------  
+             -- -------------------------------------------------
             RESET          => RESET,
             CLK            => CLK,
-      
+
             -- --------------------------------------------------
             -- \name Frame Link Unaligned input interface
             -- --------------------------------------------------
@@ -174,10 +174,10 @@ begin
             RX_EOP         => in_rx_eop,
             RX_SRC_RDY     => in_rx_src_rdy,
             RX_DST_RDY     => in_rx_dst_rdy,
-            
+
             -- Distributed to output (active when SOP = 1)
             DISTRIBUTED_TO => distributed_to_out,
-      
+
             -- --------------------------------------------------
             -- \name Frame Link Unaligned output interface (lane 0)
             -- --------------------------------------------------
@@ -188,7 +188,7 @@ begin
             TX_EOP0        => flu2flua_rx_eop0,
             TX_SRC_RDY0    => flu2flua_rx_src_rdy0,
             TX_DST_RDY0    => flu2flua_rx_dst_rdy0,
-      
+
             -- --------------------------------------------------
             -- \name Frame Link Unaligned output interface (lane 1)
             -- --------------------------------------------------
@@ -198,7 +198,7 @@ begin
             TX_SOP1        => flu2flua_rx_sop1,
             TX_EOP1        => flu2flua_rx_eop1,
             TX_SRC_RDY1    => flu2flua_rx_src_rdy1,
-            TX_DST_RDY1    => flu2flua_rx_dst_rdy1  
+            TX_DST_RDY1    => flu2flua_rx_dst_rdy1
          );
    end generate;
 
@@ -228,7 +228,7 @@ begin
          --! FLU protocol generics
          DATA_WIDTH        => DATA_WIDTH,
          SOP_POS_WIDTH     => SOP_POS_WIDTH,
-        
+
          -- Pipeline Config ------------------------
          -- Use input pipe
          IN_PIPE_EN           => IN_PIPE_EN,
@@ -248,10 +248,10 @@ begin
       port map(
           -- -------------------------------------------------
           -- \name Common interface
-          -- -------------------------------------------------  
+          -- -------------------------------------------------
          RESET          => RESET,
          CLK            => CLK,
-   
+
          -- --------------------------------------------------
          -- \name Frame Link Unaligned input interface
          -- --------------------------------------------------
@@ -262,11 +262,11 @@ begin
          RX_EOP         => flu2flua_rx_eop0,
          RX_SRC_RDY     => flu2flua_rx_src_rdy0,
          RX_DST_RDY     => flu2flua_rx_dst_rdy0,
-   
+
          -- --------------------------------------------------
          -- \name Frame Link Unaligned output interface
          -- --------------------------------------------------
-         TX_DATA        => TX_DATA0, 
+         TX_DATA        => TX_DATA0,
          TX_SOP_POS     => TX_SOP_POS0,
          TX_EOP_POS     => TX_EOP_POS0,
          TX_SOP         => TX_SOP0,
@@ -287,7 +287,7 @@ begin
          --! FLU protocol generics
          DATA_WIDTH        => DATA_WIDTH,
          SOP_POS_WIDTH     => SOP_POS_WIDTH,
-        
+
          -- Pipeline Config ------------------------
          -- Use input pipe
          IN_PIPE_EN           => IN_PIPE_EN,
@@ -307,10 +307,10 @@ begin
       port map(
           -- -------------------------------------------------
           -- \name Common interface
-          -- -------------------------------------------------  
+          -- -------------------------------------------------
          RESET          => RESET,
          CLK            => CLK,
-   
+
          -- --------------------------------------------------
          -- \name Frame Link Unaligned input interface
          -- --------------------------------------------------
@@ -321,7 +321,7 @@ begin
          RX_EOP        => flu2flua_rx_eop1,
          RX_SRC_RDY    => flu2flua_rx_src_rdy1,
          RX_DST_RDY    => flu2flua_rx_dst_rdy1,
-   
+
          -- --------------------------------------------------
          -- \name Frame Link Unaligned output interface
          -- --------------------------------------------------
@@ -334,7 +334,7 @@ begin
          TX_DST_RDY     => TX_DST_RDY1
       );
 
-      --! Assign ID 
+      --! Assign ID
    ID1_OUT_GENP:if(ENABLE_DEBUG = 1)generate
          ID1 <= conv_std_logic_vector(ID1_VAL,ID_WIDTH);
    end generate;

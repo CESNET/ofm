@@ -1,4 +1,4 @@
-# latch_drc.tcl: definition of procedure for reporting LATCHes in the design 
+# latch_drc.tcl: definition of procedure for reporting LATCHes in the design
 # Copyright (C) 2014 CESNET
 # Author: Jan Kucera <xkucer73@stud.fit.vutbr.cz>
 #
@@ -13,7 +13,7 @@ proc latchCheck {} {
    # list to hold violations
    set vios {}
    # iterate through the objects to be checked
-   foreach latch [get_cells * -hierarchical -filter {PRIMITIVE_SUBGROUP == latch} -quiet] {      
+   foreach latch [get_cells * -hierarchical -filter {PRIMITIVE_SUBGROUP == latch} -quiet] {
       # define the message & file to report when violations are found
       set file_name [get_property FILE_NAME $latch]
       set line_number [get_property LINE_NUMBER $latch]

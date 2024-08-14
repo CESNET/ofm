@@ -168,7 +168,7 @@ if (args.setting==None):
         if (args.save_whole_project):
             # backup whole project
             system("cp -rf "+makefile_path+"/* "+res_dir_name+"/")
-    
+
     ##########
 else:
     ##########

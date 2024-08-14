@@ -84,7 +84,7 @@ class scoreboard #(RX0_ITEM_WIDTH, RX1_ITEM_WIDTH, TX_ITEM_WIDTH) extends uvm_sc
         analysis_imp_mvb_tx .connect(cmp .analysis_imp_dut);
         analysis_imp_mvb_tx0.connect(cmp0.analysis_imp_dut);
         analysis_imp_mvb_tx1.connect(cmp1.analysis_imp_dut);
-        
+
     endfunction
 
     function void report_phase(uvm_phase phase);
@@ -92,7 +92,7 @@ class scoreboard #(RX0_ITEM_WIDTH, RX1_ITEM_WIDTH, TX_ITEM_WIDTH) extends uvm_sc
 
         $swrite(msg, "%s\n\tDATA STUCK INSIDE\t\nRX0:%d, RX1:%d", msg, m_model.model_mvb_in0.used(), m_model.model_mvb_in1.used());
 
-        if (this.success() && this.used() == 0) begin 
+        if (this.success() && this.used() == 0) begin
             `uvm_info(get_type_name(), {msg, "\n\n\t---------------------------------------\n\t----     VERIFICATION SUCCESS      ----\n\t---------------------------------------"}, UVM_NONE)
         end else begin
             `uvm_info(get_type_name(), {msg, "\n\n\t---------------------------------------\n\t----     VERIFICATION FAILED       ----\n\t---------------------------------------"}, UVM_NONE)

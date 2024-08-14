@@ -138,7 +138,7 @@ begin
             end case;
         end if;
     end process;
-  
+
     MI_ARDY <= MI_RD or MI_WR;
 
     mi_drdy_reg_p : process (CLK)
@@ -147,7 +147,7 @@ begin
             MI_DRDY <= MI_RD;
             if (RST = '1') then
                 MI_DRDY <= '0';
-            end if; 
+            end if;
         end if;
     end process;
 

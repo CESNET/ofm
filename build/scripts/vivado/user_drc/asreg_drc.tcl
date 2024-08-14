@@ -1,5 +1,5 @@
 # asreg_drc.tcl: definition of procedure for reporting
-#                async reset regs in the design 
+#                async reset regs in the design
 # Copyright (C) 2014 CESNET
 # Author: Jan Kucera <xkucer73@stud.fit.vutbr.cz>
 #
@@ -23,7 +23,7 @@ proc asregCheck {} {
    }
    # remove duplicates
    set synccells [lsort -unique $synccells]
-   # define the message 
+   # define the message
    set msg "Cell %ELG with only one clock domain uses registers with async reset."
    # create violation objects
    foreach cell $synccells {

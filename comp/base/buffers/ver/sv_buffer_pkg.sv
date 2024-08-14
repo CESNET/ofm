@@ -12,7 +12,7 @@
 // Fifo2nFifo Interface
 `include "buffer_ifc.sv"
 
-package sv_buffer_pkg; 
+package sv_buffer_pkg;
 
   import sv_common_pkg::*; // Import SV common classes
 
@@ -27,5 +27,5 @@ package sv_buffer_pkg;
   `include "fifo_responder.sv"
   `include "nfifo_responder.sv"
   `include "mem_responder.sv"
-  
+
 endpackage : sv_buffer_pkg

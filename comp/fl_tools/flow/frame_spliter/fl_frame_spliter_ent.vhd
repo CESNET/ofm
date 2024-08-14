@@ -1,5 +1,5 @@
 --
--- fl_frame_spliter_ent.vhd: Dividing frame link into two parts 
+-- fl_frame_spliter_ent.vhd: Dividing frame link into two parts
 -- Copyright (C) 2006 CESNET
 -- Author(s): Jan Kastil <xkasti00@stud.fit.vutbr.cz>
 --
@@ -7,7 +7,7 @@
 --
 -- $Id$
 --
--- TODO: 
+-- TODO:
 --
 --
 library IEEE;

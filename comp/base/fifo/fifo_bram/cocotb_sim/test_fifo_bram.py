@@ -35,7 +35,7 @@ async def fifo_bram_randomised_test(dut):
     #data_out = 0
     read = 0
     data_stream = Queue(maxsize = 0)
-    
+
     cocotb.fork(clock_gen(dut.CLK, PERIOD))
 
     #Reset of design

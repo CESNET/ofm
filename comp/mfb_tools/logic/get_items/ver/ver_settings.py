@@ -39,7 +39,7 @@ SETTINGS = {
     "ext_item_min" : {
         "EXTRACTED_ITEMS"   : "1",
     },
-    "_combinations_" : (  
+    "_combinations_" : (
     (), # Works the same as '("default",),' as the "default" is applied in every combination
     ("region1",),
     ("region4",),

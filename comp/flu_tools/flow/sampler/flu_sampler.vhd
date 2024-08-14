@@ -1,6 +1,6 @@
 -- flu_sampler.vhd: Full architecture of FLU_SAMPLER unit.
 -- Copyright (C) 2012 CESNET
--- Author(s): Lukas Kekely <kekely@cesnet.cz>  
+-- Author(s): Lukas Kekely <kekely@cesnet.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --
@@ -29,12 +29,12 @@ entity FLU_SAMPLER is
       -- common signals
       CLK            : in  std_logic;
       RESET          : in  std_logic;
-      
+
       -- Sampling RATE 1:N
       RATE           : in std_logic_vector(log2(MAX_RATE)- 1 downto 0);
       -- Discarded packet? (1 = yes, 0 = no)
       PCKT_DISCARD   : out std_logic;
-	  
+
       -- Frame Link Unaligned input interface
       RX_DATA       : in std_logic_vector(DATA_WIDTH-1 downto 0);
       RX_SOP_POS    : in std_logic_vector(SOP_POS_WIDTH-1 downto 0);
@@ -43,7 +43,7 @@ entity FLU_SAMPLER is
       RX_EOP        : in std_logic;
       RX_SRC_RDY    : in std_logic;
       RX_DST_RDY    : out std_logic;
-      
+
       -- Frame Link Unaligned output interface
       TX_DATA       : out std_logic_vector(DATA_WIDTH-1 downto 0);
       TX_SOP_POS    : out std_logic_vector(SOP_POS_WIDTH-1 downto 0);
@@ -74,7 +74,7 @@ signal discard_sop         : std_logic;
 signal discard_src         : std_logic;
 signal discard_reg         : std_logic;
 
-begin 
+begin
    rx_sop_detect      <= RX_SOP and RX_SRC_RDY and sig_rx_dst_rdy; -- valid SOP on RX interface
    rx_eop_detect      <= RX_EOP and RX_SRC_RDY and sig_rx_dst_rdy; -- valid EOP on RX interface
    rx_sop_detect_weak <= RX_SOP and RX_SRC_RDY; -- valid SOP on RX interface (weak)
@@ -83,10 +83,10 @@ begin
    discard_eop        <= discard_reg when (rx_sop_pos_augment > RX_EOP_POS) else discard; -- block active EOP signal
    discard_src        <= discard_reg and discard when (rx_eop_detect_weak='1' and rx_sop_pos_augment > RX_EOP_POS) else discard;
    sig_rx_dst_rdy     <= TX_DST_RDY or discard_src;
-   discard            <= '0' when (rx_sop_detect_weak='1') and (cnt_packet=(log2(MAX_RATE)-1 downto 0 => '0'))  else 
+   discard            <= '0' when (rx_sop_detect_weak='1') and (cnt_packet=(log2(MAX_RATE)-1 downto 0 => '0'))  else
                          '1' when (rx_sop_detect_weak='1') and (cnt_packet/=(log2(MAX_RATE)-1 downto 0 => '0')) else
                          discard_reg;
-                    
+
    process(CLK,RESET)
    begin
       if CLK'event and CLK='1' then
@@ -97,14 +97,14 @@ begin
          end if;
       end if;
    end process;
-   
+
    rx_sop_pos_augment_gen : if EOP_POS_WIDTH>SOP_POS_WIDTH generate
       rx_sop_pos_augment <= RX_SOP_POS & (EOP_POS_WIDTH-SOP_POS_WIDTH-1 downto 0 => '0');
    end generate;
    rx_sop_pos_augment_fake_gen : if EOP_POS_WIDTH=SOP_POS_WIDTH generate
       rx_sop_pos_augment <= RX_SOP_POS;
-   end generate; 
-   
+   end generate;
+
    -- Passed packet counter
    cnt_packetp: process(RESET, CLK)
    begin
@@ -121,7 +121,7 @@ begin
       end if;
    end process;
 
-   -- Maping output ports 
+   -- Maping output ports
    TX_DATA       <= RX_DATA;
    TX_SOP_POS    <= RX_SOP_POS;
    TX_EOP_POS    <= RX_EOP_POS;
@@ -129,7 +129,7 @@ begin
    TX_EOP        <= RX_EOP and not discard_eop;
    TX_SRC_RDY    <= RX_SRC_RDY and not discard_src;
    RX_DST_RDY    <= sig_rx_dst_rdy;
-   
+
    PCKT_DISCARD  <= rx_eop_detect and discard_eop; -- discarded valid EOP == discarded packet
 
 end architecture full;

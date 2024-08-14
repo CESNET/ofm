@@ -12,7 +12,7 @@
  */
 
 import sv_common_pkg::*;
-  
+
   // --------------------------------------------------------------------------
   // -- Frame Link Driver Callbacks
   // --------------------------------------------------------------------------
@@ -28,14 +28,14 @@ import sv_common_pkg::*;
     // -------------------
 
     // -- Constructor ---------------------------------------------------------
-    // Create a class 
+    // Create a class
     function new (TransactionTable #(TR_TABLE_FIRST_ONLY) sc_table);
       this.sc_table = sc_table;
     endfunction
-    
+
     // ------------------------------------------------------------------------
-    // Function is called after is transaction sended 
-    
+    // Function is called after is transaction sended
+
     virtual task post_tx(Transaction transaction, string inst);
        // transaction.display("DRIVER");
        sc_table.add(transaction);
@@ -48,38 +48,38 @@ import sv_common_pkg::*;
   // -- Frame Link Monitor Callbacks
   // --------------------------------------------------------------------------
   class ScoreboardMonitorCbs extends MonitorCbs;
-    
+
     // ---------------------
     // -- Class Variables --
     // ---------------------
     TransactionTable #(TR_TABLE_FIRST_ONLY) sc_table;
-    
+
     // -- Constructor ---------------------------------------------------------
-    // Create a class 
+    // Create a class
     function new (TransactionTable #(TR_TABLE_FIRST_ONLY) sc_table);
       this.sc_table = sc_table;
     endfunction
-    
+
     // ------------------------------------------------------------------------
     // Function is called after is transaction received (scoreboard)
-    
+
     virtual task post_rx(Transaction transaction, string inst);
       bit status=0;
       // transaction.display("MONITOR");
       sc_table.remove(transaction, status);
       if (status==0)begin
          $write("Unknown transaction received from monitor %d\n", inst);
-         transaction.display(); 
+         transaction.display();
          sc_table.display();
          $stop;
        end;
     endtask
 
- 
+
   endclass : ScoreboardMonitorCbs
 
   // -- Constructor ---------------------------------------------------------
-  // Create a class 
+  // Create a class
   // --------------------------------------------------------------------------
   // -- Scoreboard
   // --------------------------------------------------------------------------
@@ -93,7 +93,7 @@ import sv_common_pkg::*;
     ScoreboardDriverCbs   driverCbs;
 
     // -- Constructor ---------------------------------------------------------
-    // Create a class 
+    // Create a class
     function new (string inst);
       this.inst       = inst;
       this.scoreTable = new;
@@ -102,10 +102,10 @@ import sv_common_pkg::*;
     endfunction
 
     // -- Display -------------------------------------------------------------
-    // Create a class 
+    // Create a class
     task display();
       scoreTable.display(.inst(this.inst));
     endtask
-  
+
   endclass : Scoreboard
 

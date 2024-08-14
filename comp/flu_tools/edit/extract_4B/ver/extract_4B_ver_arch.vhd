@@ -8,7 +8,7 @@
 -- TODO:
 --
 
-library IEEE;  
+library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.std_logic_arith.all;
 use IEEE.std_logic_unsigned.all;
@@ -26,11 +26,11 @@ architecture full of EXTRACT_4B_VER is
    signal out_dst_rdy : std_logic;
    signal out_data    : std_logic_vector((8*4)-1 downto 0);
 
-   signal in_fifo_wtite  : std_logic; 
-   signal out_fifo_wtite : std_logic; 
-   signal in_fifo_empty  : std_logic; 
-   signal out_fifo_empty : std_logic; 
-   signal fifo_read      : std_logic;  
+   signal in_fifo_wtite  : std_logic;
+   signal out_fifo_wtite : std_logic;
+   signal in_fifo_empty  : std_logic;
+   signal out_fifo_empty : std_logic;
+   signal fifo_read      : std_logic;
 begin
 
    in_src_rdy <= RX_SRC_RDY;
@@ -42,18 +42,18 @@ begin
    port map (
       CLK         => CLK,
       RESET       => RESET,
-      OFFSET      => OFFSET,      
-      RX_DATA     => RX_DATA,    
-      RX_SOP_POS  => RX_SOP_POS, 
-      RX_EOP_POS  => RX_EOP_POS, 
-      RX_SOP      => RX_SOP,     
-      RX_EOP      => RX_EOP,     
-      RX_SRC_RDY  => in_src_rdy, 
-      RX_DST_RDY  => in_dst_rdy,                 
+      OFFSET      => OFFSET,
+      RX_DATA     => RX_DATA,
+      RX_SOP_POS  => RX_SOP_POS,
+      RX_EOP_POS  => RX_EOP_POS,
+      RX_SOP      => RX_SOP,
+      RX_EOP      => RX_EOP,
+      RX_SRC_RDY  => in_src_rdy,
+      RX_DST_RDY  => in_dst_rdy,
 
-      TX_DATA     => out_data,  
-      TX_SRC_RDY  => out_src_rdy, 
-      TX_DST_RDY  => out_dst_rdy   
+      TX_DATA     => out_data,
+      TX_SRC_RDY  => out_src_rdy,
+      TX_DST_RDY  => out_dst_rdy
    );
 
 
@@ -64,11 +64,11 @@ begin
       ITEMS          => 64,
       BLOCK_SIZE     => 0,
       DATA_WIDTH     => 1
-   ) 
+   )
    port map(
       RESET       => RESET,
       CLK         => CLK,
-      
+
       DATA_IN(0)  => '1',
       WRITE_REQ   => in_fifo_wtite,
       FULL        => open,
@@ -85,11 +85,11 @@ begin
       ITEMS          => 64,
       BLOCK_SIZE     => 0,
       DATA_WIDTH     => 8*4
-   ) 
+   )
    port map(
       RESET       => RESET,
       CLK         => CLK,
-      
+
       DATA_IN     => out_data,
       WRITE_REQ   => out_fifo_wtite,
       FULL        => open,
@@ -100,9 +100,9 @@ begin
 
    TX_SRC_RDY <= not out_fifo_empty and not in_fifo_empty;
    fifo_read  <= not out_fifo_empty and not in_fifo_empty and TX_DST_RDY;
-   
-   TX_EOP <= '1'; 
+
+   TX_EOP <= '1';
    TX_SOP <= '1';
-   TX_EOP_POS <= (others => '1'); 
+   TX_EOP_POS <= (others => '1');
    TX_SOP_POS <= (others => '0');
 end architecture;

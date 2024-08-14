@@ -19,7 +19,7 @@ interface iMi #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) (input wire logic CLK, R
   logic DRDY;              // Data ReaDY
   logic [DATA_WIDTH-1:0]    DRD;   // Data to be ReaD
 
-  //-- MI32 Clocking Blocks --------------------------------------------------- 
+  //-- MI32 Clocking Blocks ---------------------------------------------------
 
   clocking monitor_cb @(posedge CLK);
     input ADDR, DWR, MWR, DRD, BE, RD, WR, ARDY, DRDY;
@@ -62,7 +62,7 @@ interface iMi #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) (input wire logic CLK, R
   property valid_response;
      @(posedge CLK) disable iff(RESET)
      (DRDY) |-> (!$isunknown(DRD));
-  endproperty 
+  endproperty
 
   assert property (valid) else begin $error("signlas RD and WR have to be allways valid"); $stop(); end
   assert property (valid_request) else begin $error("signal addr and be have to be valid when RD or WR signal is asserted"); $stop(); end

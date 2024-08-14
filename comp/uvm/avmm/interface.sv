@@ -35,11 +35,11 @@ interface avmm_if #(int unsigned ADDRESS_WIDTH, int unsigned DATA_WIDTH, int uns
     clocking monitor_cb @(posedge CLK);
         input READY, READ, WRITE, ADDRESS, READDATA, READDATAVALID, WRITEDATA, BURSTCOUNT;
     endclocking
-    
+
     // Connection to DUT
     modport dut_slave (input READ, WRITE, ADDRESS, WRITEDATA, BURSTCOUNT, output READY, READDATA, READDATAVALID);
     modport dut_master (output READ, WRITE, ADDRESS, WRITEDATA, BURSTCOUNT, input READY, READDATA, READDATAVALID);
-    
+
     // Specifies wires and direction used for each connection for driver and monitor
     modport driver_slave (clocking driver_slave_cb);
     modport driver_master (clocking driver_master_cb);

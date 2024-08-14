@@ -6,10 +6,10 @@
 
 
 -- Control IN
--- [MI_DATA_WIDTH]:     MEM_DATA_WIDTH 
--- [MI_DATA_WIDTH]:     MEM_ADDR_WIDTH 
--- [MI_DATA_WIDTH]:     MEM_BURST_COUNT_WIDTH 
--- [MI_DATA_WIDTH]:     MEM_FREQ_KHZ 
+-- [MI_DATA_WIDTH]:     MEM_DATA_WIDTH
+-- [MI_DATA_WIDTH]:     MEM_ADDR_WIDTH
+-- [MI_DATA_WIDTH]:     MEM_BURST_COUNT_WIDTH
+-- [MI_DATA_WIDTH]:     MEM_FREQ_KHZ
 --
 -- Control OUT
 -- 0:                   latency to first read word
@@ -44,7 +44,7 @@ use work.type_pack.all;
 
 -- .. vhdl:autogenerics:: MEM_LOGGER
 entity MEM_LOGGER is
-generic (    
+generic (
     MEM_DATA_WIDTH          : integer := 512;
     MEM_ADDR_WIDTH          : integer := 26;
     MEM_BURST_COUNT_WIDTH   : integer := 7;
@@ -64,11 +64,11 @@ generic (
 
     DEVICE                  : string  := "AGILEX"
 );
-port(    
+port(
     CLK                     : in  std_logic;
     -- Synchronous to CLK
     RST                     : in  std_logic;
-    -- Synchronous to CLK 
+    -- Synchronous to CLK
     RST_DONE                : out std_logic;
 
     -- ================================
@@ -106,7 +106,7 @@ end entity;
 -- =========================================================================
 
 architecture FULL of MEM_LOGGER is
-  
+
     ---------------
     -- Constants --
     ---------------
@@ -142,9 +142,9 @@ architecture FULL of MEM_LOGGER is
     -----------------------
 
     signal mem_clk_int          : std_logic;
-    signal mem_rst_int          : std_logic; 
+    signal mem_rst_int          : std_logic;
 
-    
+
     signal rst_done_int         : std_logic;
 
     signal mi_dwr_int                  : std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
@@ -286,7 +286,7 @@ begin
     -------------------------
 
     data_logger_i : entity work.DATA_LOGGER
-    generic map (    
+    generic map (
         MI_DATA_WIDTH       => MI_DATA_WIDTH  ,
         MI_ADDR_WIDTH       => MI_ADDR_WIDTH  ,
         CNTER_CNT           => CNTER_CNT      ,
@@ -301,7 +301,7 @@ begin
         HIST_BOX_WIDTH      => HIST_BOX_WIDTH ,
         CTRLO_DEFAULT       => CTRLO_DEFAULT
     )
-    port map (    
+    port map (
         CLK                 => mem_clk_int    ,
         RST                 => mem_rst_int    ,
         RST_DONE            => rst_done_int   ,
@@ -362,11 +362,11 @@ begin
     port map (
         CLK         => mem_clk_int,
         RESET       => rst_intern,
-    
+
         DI          => burst_count,
         WR          => rd_req,
         --FULL        => FIFO_FULL,
-    
+
         DO          => rd_burst,
         RD          => rd_start
     );
@@ -409,15 +409,15 @@ begin
     wait_cycle          <= not read and not write and not ready;
 
     wr_start    <= wr_req and not wr_running;
-    wr_done     <= '1' when ((wr_req = '1' and wr_burst_reg = BURST_MIN and wr_running = '1') or burst_one = '1') else 
-                   '0'; 
-    burst_one   <= '1' when (wr_req = '1' and wr_running = '0' and burst_count = BURST_MIN) else 
+    wr_done     <= '1' when ((wr_req = '1' and wr_burst_reg = BURST_MIN and wr_running = '1') or burst_one = '1') else
+                   '0';
+    burst_one   <= '1' when (wr_req = '1' and wr_running = '0' and burst_count = BURST_MIN) else
                    '0';
 
     rd_start    <= rd_resp and not rd_running;
-    rd_done     <= '1' when ((rd_resp = '1' and rd_burst_reg = BURST_MIN and rd_running = '1') or rd_burst_one = '1') else 
-                   '0'; 
-    rd_burst_one<= '1' when (rd_resp = '1' and rd_running = '0' and rd_burst = BURST_MIN) else 
+    rd_done     <= '1' when ((rd_resp = '1' and rd_burst_reg = BURST_MIN and rd_running = '1') or rd_burst_one = '1') else
+                   '0';
+    rd_burst_one<= '1' when (rd_resp = '1' and rd_running = '0' and rd_burst = BURST_MIN) else
                    '0';
 
     cnters_diff(6)(MEM_BURST_COUNT_WIDTH - 1 downto 0)  <= burst_count;
@@ -425,13 +425,13 @@ begin
     cnters_submit(1)    <= write_rdy_hold;
     cnters_submit(2)    <= read_write_hold;
     cnters_submit(3)    <= wait_cycle;
-    
+
     cnters_submit(4)    <= wr_req;
     cnters_submit(5)    <= rd_req;
     cnters_submit(6)    <= wr_req or rd_req;
 
     latency_to_first    <= ctrlo(0);
-    latency_end         <= rd_done when (latency_to_first = '0') else 
+    latency_end         <= rd_done when (latency_to_first = '0') else
                            rd_start;
 
     ---------------

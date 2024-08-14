@@ -3,7 +3,7 @@
 --! \file
 --! \brief Generic "modulo constant" block.
 --! \author Lukas Kekely <kekely@cesnet.cz>
---! \date 2013 
+--! \date 2013
 --!
 --! \section License
 --!
@@ -15,7 +15,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_arith.all;
-use ieee.std_logic_unsigned.all; 
+use ieee.std_logic_unsigned.all;
 --! Library containing log2 function
 use work.math_pack.all;
 
@@ -58,11 +58,11 @@ begin
       res <= conv_std_logic_vector(conv_integer(VALUE) mod MODULO,res'length);
     end generate;
   end generate;
-  
+
   -- No need for modulo
   fake_mod_gen1 : if 2**DATA_WIDTH<=MODULO and MODULO>1 generate
     res(VALUE'length-1 downto 0) <= VALUE;
-  end generate;                            
+  end generate;
   fake_mod_gen2 : if 2**DATA_WIDTH>MODULO and MODULO<=1 generate
     res <= "0";
   end generate;

@@ -45,7 +45,7 @@ entity MONITOR is
       RX_SOP         : in std_logic;
       RX_EOP         : in std_logic;
       RX_SRC_RDY     : in std_logic;
-      RX_DST_RDY     : out  std_logic  
+      RX_DST_RDY     : out  std_logic
      );
 end entity MONITOR;
 
@@ -61,8 +61,8 @@ architecture MONITOR_ARCH of MONITOR is
    signal   eop         : std_logic;
    signal   src_rdy     : std_logic;
    signal   dst_rdy     : std_logic;
-   signal   dst_rdy_sig : std_logic;  
-   -- signal for extended sop_pos 
+   signal   dst_rdy_sig : std_logic;
+   -- signal for extended sop_pos
    signal   ext_sop_pos : std_logic_vector(log2(DATA_WIDTH/8)-1 downto 0);
 
 begin
@@ -112,7 +112,7 @@ begin
             -- wait for clk = '1' and src_rdy = '1' and dst_rdy = '1'
             loop
                wait until (FLU_CLK'event and FLU_CLK='1');
-               wait for 0.5 ps; 
+               wait for 0.5 ps;
                if(src_rdy = '1' and dst_rdy = '1') then
                   exit;
                end if;
@@ -122,14 +122,14 @@ begin
             var_ext_sop_pos := conv_integer(ext_sop_pos)*8;
             var_eop_pos     := conv_integer(eop_pos)*8;
 
-            -- mirror data   
+            -- mirror data
             j := DATA_WIDTH/4;
             for i in 1 to DATA_WIDTH/4 loop
                my_data((j*4)-1 downto (j-1)*4) := data((i*4)-1 downto (i-1)*4);
                j := j-1;
             end loop;
-            
-            if (sop = '1' and eop = '1') then 
+
+            if (sop = '1' and eop = '1') then
                -- packet ends and starts new in one transaction
                if(var_ext_sop_pos > var_eop_pos) then
                   -- write only valid data of ended packet in hexa

@@ -14,7 +14,7 @@ set SV_STATS_BASE    "$OFM_PATH/comp/proc/stat_unit/ver"
 
 set MFB_FIFO_BASE    "$OFM_PATH/comp/mfb_tools/storage/fifo_bram"
 set MVB_FIFO_BASE    "$OFM_PATH/comp/mvb_tools/storage/fifo"
-  
+
 set COMPONENTS [list \
    [ list "SV_CRC"              $SV_CRC_BASE   "ETHERNET"] \
    [ list "SV_MFB"              $SV_MFB_BASE   "FULL"] \

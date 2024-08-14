@@ -12,7 +12,7 @@
 #                       Signals of interfaces
 # -------------------------------------------------------------------
 proc rx {NAME PATH} {
-    add wave -divider "$NAME"      
+    add wave -divider "$NAME"
      add_wave "-noupdate  -hex -label RX_DATA"    $PATH/RX_DATA
      add_wave "-noupdate  -hex -label RX_REM"     $PATH/RX_DREM
      add_wave "-noupdate  -label RX_SOF_N"        $PATH/RX_SOF_N
@@ -25,7 +25,7 @@ proc rx {NAME PATH} {
 }
 
 proc tx {NAME PATH} {
-    add wave -divider "$NAME"      
+    add wave -divider "$NAME"
      add_wave "-noupdate  -hex -label TX_DATA"    $PATH/TX_DATA
      add_wave "-noupdate  -hex -label TX_REM"     $PATH/TX_DREM
      add_wave "-noupdate  -label TX_SOF_N"        $PATH/TX_SOF_N
@@ -38,12 +38,12 @@ proc tx {NAME PATH} {
 }
 
 proc stat {NAME PATH} {
-    add wave -divider "$NAME"      
+    add wave -divider "$NAME"
      add_wave "-noupdate  -hex -label STATUS"     $PATH/STATUS
 }
 
 proc mi32 {NAME PATH} {
-    add wave -divider "$NAME"      
+    add wave -divider "$NAME"
      add_wave "-noupdate  -hex -label MI_DWR"     $PATH/MI_DWR
      add_wave "-noupdate  -hex -label MI_ADDR"    $PATH/MI_ADDR
      add_wave "-noupdate  -label MI_BE"           $PATH/MI_BE

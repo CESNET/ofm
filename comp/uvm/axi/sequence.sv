@@ -2,7 +2,7 @@
 //-- Copyright (C) 2022 CESNET z. s. p. o.
 //-- Author(s): Daniel Kříž <xkrizd01@vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 class sequence_simple_tx #(int unsigned DATA_WIDTH, int unsigned TUSER_WIDTH, int unsigned REGIONS) extends uvm_common::sequence_base #(config_sequence, uvm_axi::sequence_item #(DATA_WIDTH, TUSER_WIDTH, REGIONS));
     `uvm_object_param_utils(uvm_axi::sequence_simple_tx #(DATA_WIDTH, TUSER_WIDTH, REGIONS))

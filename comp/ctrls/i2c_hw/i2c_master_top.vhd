@@ -195,9 +195,9 @@ begin
 
 	-- assign DRD
         DRD <= X"0000" & rxr & sr & X"00" & ctr & std_logic_vector(prer);
-         
+
         ctr(5 downto 0) <= (others => '0');
-        
+
 	-- generate registers (CR, SR see below)
 	gen_regs: process(rst_i, CLK)
 	begin
@@ -213,11 +213,11 @@ begin
 	        ctr(7) <= '0';
 	        txr    <= (others => '0');
 	      elsif (WEN = '1') then
-	         if core_en = '0' then 
-	            if BE(0) = '1' then   -- 
+	         if core_en = '0' then
+	            if BE(0) = '1' then   --
 	               prer(7 downto 0) <= unsigned(DWR(7 downto 0));
 	            end if;
-	            if BE(1) = '1' then   -- 
+	            if BE(1) = '1' then   --
 	               prer(15 downto 8) <= unsigned(DWR(15 downto 8));
 	            end if;
 	         end if;
@@ -266,7 +266,7 @@ begin
 	iack <= cr(0);
 
 	-- decode control register
-	core_en <= ctr(7); 
+	core_en <= ctr(7);
 	ien     <= ctr(6);
 
 	-- hookup byte controller block
@@ -287,12 +287,12 @@ begin
 		cmd_ack  => done,
 		ack_out  => irxack,
 		dout     => rxr,
-		scl_i    => SCL_PAD_I,   
-		scl_o    => SCL_PAD_O,   
+		scl_i    => SCL_PAD_I,
+		scl_o    => SCL_PAD_O,
 		scl_oen  => SCL_PADOEN_O,
-		sda_i    => SDA_PAD_I,   
-		sda_o    => SDA_PAD_O,   
-		sda_oen  => SDA_PADOEN_O 
+		sda_i    => SDA_PAD_I,
+		sda_o    => SDA_PAD_O,
+		sda_oen  => SDA_PADOEN_O
 	);
 
 

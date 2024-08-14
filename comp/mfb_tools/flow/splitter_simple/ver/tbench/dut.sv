@@ -41,7 +41,7 @@ module DUT (
         .RX_MFB_SRC_RDY  (RX.SRC_RDY),
         .RX_MFB_DST_RDY  (RX.DST_RDY),
         .TX0_MFB_DATA    (TX0.DATA),
-        .TX0_MFB_META    (),  
+        .TX0_MFB_META    (),
         .TX0_MFB_SOF_POS (TX0.SOF_POS),
         .TX0_MFB_EOF_POS (TX0.EOF_POS),
         .TX0_MFB_SOF     (TX0.SOF),

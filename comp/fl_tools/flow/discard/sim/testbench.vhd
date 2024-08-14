@@ -104,7 +104,7 @@ uut: entity work.FL_DISCARD_STAT
       TX_CHAN        => tx_chan,
 
       STATUS         => status,
-                                 
+
       MI_DWR         => mi.dwr,
       MI_ADDR        => mi.addr,
       MI_BE          => mi.be,
@@ -354,7 +354,7 @@ begin
    ib_op(ib_local_read(X"00001800", X"00000002", 4, 16#ABAB#));
 
    -- Write into command register to stop counting
-   ib_op(ib_local_write(X"00001800", X"00000000", 4, 16#ABAB#, '0',        
+   ib_op(ib_local_write(X"00001800", X"00000000", 4, 16#ABAB#, '0',
                         X"0000000000000000"));
 
 

@@ -352,7 +352,7 @@ begin
                 when "001"  =>
                     reg_mps      <= to_unsigned(256,reg_mps'length);
                     reg_mps_mask <= to_unsigned(255,reg_mps'length);
-                when "010"  => 
+                when "010"  =>
                     reg_mps      <= to_unsigned(512,reg_mps'length);
                     reg_mps_mask <= to_unsigned(511,reg_mps'length);
                 when "011"  =>
@@ -449,7 +449,7 @@ begin
     tr_cq_mfb_tph_present <= tr_cq_mfb_meta(PCIE_CQ_META_TPH_PRESENT_O);
     tr_cq_mfb_tph_type    <= tr_cq_mfb_meta(PCIE_CQ_META_TPH_TYPE);
     tr_cq_mfb_tph_st_tag  <= tr_cq_mfb_meta(PCIE_CQ_META_TPH_ST_TAG);
-    
+
     tr_cq_mfb_hdr_g : if IS_MFB_META_DEV generate
         tr_cq_mfb_hdr <= tr_cq_mfb_meta(PCIE_CQ_META_HEADER);
     else generate
@@ -475,7 +475,7 @@ begin
         OUT_TARGET_FUNC   => cq_hdr_gen_target_func,
         OUT_BAR_ID        => cq_hdr_gen_bar_id,
         OUT_BAR_APERTURE  => cq_hdr_gen_bar_aperture,
-        
+
         IN_HEADER        => tr_cq_mfb_hdr,
         IN_FBE           => tr_cq_mfb_fbe,
         IN_LBE           => tr_cq_mfb_lbe,
@@ -503,7 +503,7 @@ begin
     begin
         if (rising_edge(CLK)) then
             if (cq_ready = '1' and tr_cq_mfb_src_rdy = '1') then
-                if (tr_cq_mfb_sof = '1') then 
+                if (tr_cq_mfb_sof = '1') then
                     cq_hdr_tag           <= cq_hdr_gen_tag;
                     cq_hdr_addr_type     <= cq_hdr_gen_addr_type;
                     cq_hdr_addr          <= cq_hdr_gen_addr;
@@ -578,7 +578,7 @@ begin
         OUT_LAST_IB    => open,
         OUT_BYTE_COUNT => cq_byte_count
     );
-    
+
     -- computation of two LSB bits of lower address
     process (cq_hdr_first_be)
     begin
@@ -599,7 +599,7 @@ begin
     begin
         if (rising_edge(CLK)) then
             if (cq_ready = '1' and cq_valid = '1') then
-                if (cq_sot = '1') then 
+                if (cq_sot = '1') then
                     reg1_cq_hdr_tag           <= cq_hdr_tag;
                     reg1_cq_hdr_addr_type     <= cq_hdr_addr_type;
                     reg1_cq_hdr_first_be      <= cq_hdr_first_be;
@@ -827,7 +827,7 @@ begin
                 cc_byte_count <= to_unsigned(1,cc_byte_count'length);
                 if (IS_XILINX_DEV) then
                     cc_dwords <= to_unsigned(0,cc_dwords'length);
-                end if;   
+                end if;
                 if (reg1_cq_valid = '1' and reg1_cq_eot = '1') then
                     cc_request <= '1';
                     mi_fsm_nst <= st_cc_done_last;
@@ -835,7 +835,7 @@ begin
                     cq_ready <= '1';
                 end if;
 
-            when st_ignore =>  
+            when st_ignore =>
                 if (reg1_cq_valid = '1' and reg1_cq_eot = '1') then
                     mi_fsm_nst <= st_idle;
                 else
@@ -1105,7 +1105,7 @@ begin
             for i in 0 to MFB_REGIONS-1 loop
                 if (cc_eot_pos(log2(DW_PER_CC_WORD)-1 downto log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE)) = i) then
                     mfb_eof(i) <= cc_eot;
-                end if; 
+                end if;
             end loop;
         end if;
     end process;
@@ -1130,7 +1130,7 @@ begin
     port map(
         CLK        => CLK,
         RESET      => RESET,
-        
+
         RX_DATA    => cc_data,
         RX_META    => slv_array_ser(mfb_meta_arr),
         RX_SOF_POS => (others => '0'),

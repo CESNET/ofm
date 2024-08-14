@@ -119,10 +119,10 @@ begin
 
     TX_DATA    <= RX_DATA;
     TX_META    <= RX_META;
-    TX_SOF     <= RX_SOF; 
+    TX_SOF     <= RX_SOF;
     TX_EOF     <= RX_EOF;
     TX_SOF_POS <= RX_SOF_POS;
-    TX_SRC_RDY <= RX_SRC_RDY; 
+    TX_SRC_RDY <= RX_SRC_RDY;
     RX_DST_RDY <= TX_DST_RDY;
 
     -- Simply add or remove bits at the end of each EOF_POS

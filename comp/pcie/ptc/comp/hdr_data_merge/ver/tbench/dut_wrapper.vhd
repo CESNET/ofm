@@ -14,7 +14,7 @@ use work.math_pack.all;
 entity DUT_WRAPPER is
    generic(
       -- =======================================================================
-      -- MFB DATA BUS CONFIGURATION: 
+      -- MFB DATA BUS CONFIGURATION:
       -- =======================================================================
       -- Supported configuration is only MFB(2,1,8,32) for PCIe on UltraScale+
       MFB_REGIONS        : natural := 2;
@@ -22,13 +22,13 @@ entity DUT_WRAPPER is
       MFB_BLOCK_SIZE     : natural := 8;
       MFB_ITEM_WIDTH     : natural := 32;
       -- =======================================================================
-      -- MVB HEADER BUS CONFIGURATION: 
+      -- MVB HEADER BUS CONFIGURATION:
       -- =======================================================================
       -- Supported configuration is only MVB(2,128) for PCIe on UltraScale+
       MVB_ITEMS          : natural := 2;
       MVB_ITEM_WIDTH     : natural := 128+1;
       -- =======================================================================
-      -- OTHER CONFIGURATION: 
+      -- OTHER CONFIGURATION:
       -- =======================================================================
       -- Set maximum supported PCIe transaction size (HDR + payload) in dwords,
       -- is used to correctly set the data width of the word counter.
@@ -138,7 +138,7 @@ begin
       RX_EOF     => RX_MFB_EOF,
       RX_SRC_RDY => RX_MFB_SRC_RDY,
       RX_DST_RDY => RX_MFB_DST_RDY,
-      
+
       TX_CLK     => PCIE_CLK,
       TX_RESET   => PCIE_RESET,
       TX_DATA    => s_fifo_data,
@@ -232,7 +232,7 @@ begin
       RX_MVB_DST_RDY      => RX_MVB_DST_RDY,
 
       RX_CODAPA_INC  => s_codapa_inc_sync_reg,
-      
+
       TX_MVB_DATA         => s_codapa_mvb_data,
       TX_MVB_BE           => s_codapa_mvb_be,
       TX_MVB_PAYLOAD      => s_codapa_mvb_payload,

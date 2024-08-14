@@ -28,7 +28,7 @@ entity ASFIFO_MUX_1TO2 is
       OUTPUT_DATA_WIDTH             : integer := 512
    );
 
- 
+
    port (
       --! Write interface, all signals synchronous to CLK_WR
       CLK_WR      : in  std_logic;

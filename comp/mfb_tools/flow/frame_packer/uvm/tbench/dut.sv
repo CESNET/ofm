@@ -1,4 +1,4 @@
-// dut.sv: Design under test 
+// dut.sv: Design under test
 // Copyright (C) 2024 CESNET z. s. p. o.
 // Author(s): David Beneš <xbenes52@vutbr.cz>
 
@@ -17,7 +17,7 @@ module DUT (
 
     localparam MVB_LEN_WIDTH = $clog2(USR_RX_PKT_SIZE_MAX+1);
     localparam MVB_CHANNEL_WIDTH = $clog2(RX_CHANNELS);
-   
+
     logic [MFB_REGIONS*MVB_LEN_WIDTH-1:0]     rx_mvb_len;
     logic [MFB_REGIONS*HDR_META_WIDTH-1:0]    rx_mvb_hdr_meta;
     logic [MFB_REGIONS*MVB_CHANNEL_WIDTH-1:0] rx_mvb_channel;
@@ -134,7 +134,7 @@ module DUT (
         .TX_DST_RDY     (pipe_dst_rdy)
 
     );
-    
+
     FRAME_PACKER # (
         .MFB_REGIONS            (MFB_REGIONS),
         .MFB_REGION_SIZE        (MFB_REGION_SIZE),

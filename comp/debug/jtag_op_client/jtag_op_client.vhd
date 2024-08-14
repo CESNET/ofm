@@ -167,7 +167,7 @@ begin
         MI_ARDY            => sync_mi_ardy,
         MI_DRD             => sync_mi_drd,
         MI_DRDY            => sync_mi_drdy,
-        
+
         AVMM_ADDRESS       => jtag_op_address,
         AVMM_WRITEDATA     => jtag_op_writedata,
         AVMM_BYTEENABLE    => jtag_op_byteenable,

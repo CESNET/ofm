@@ -41,7 +41,7 @@ entity HINS is
 
       --! \name Input FLU interface
       --! Input data
-      RX_DATA        : in  std_logic_vector(DATA_WIDTH-1 downto 0); 
+      RX_DATA        : in  std_logic_vector(DATA_WIDTH-1 downto 0);
       --! Input position of packet start inside word
       RX_SOP_POS     : in  std_logic_vector(max(1,SOP_POS_WIDTH)-1 downto 0);
       --! Input position of packet end inside word
@@ -61,7 +61,7 @@ entity HINS is
       --! Header ready (source ready)
       HDR_READY     : in  std_logic;
       --! Header next (destination ready)
-      HDR_NEXT      : out std_logic; 
+      HDR_NEXT      : out std_logic;
 
       --! \name Output FLU interface
       --! Output data

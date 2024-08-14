@@ -10,12 +10,12 @@
  * TODO:
  *
  */
- 
+
 import ip_protocol_pkg::*;
- 
+
 /*
- * This class implements IPv4 protocol. Class inherates from Layer 
- * abstract class. 
+ * This class implements IPv4 protocol. Class inherates from Layer
+ * abstract class.
  */
 class IPv4 extends Layer;
    /*
@@ -24,7 +24,7 @@ class IPv4 extends Layer;
     * maxSrcIP - maximal source IP address for randomization
     * minDstIP - minimal destination IP address for randomization
     * maxDstIP - maximal destination IP address for randomization
-    * 
+    *
     * Class atributes affected by randomization:
     * version            - version of IP, allways 4 for IPv4
     * headerLength       - number of 32-bit word in IP header (usualy 5, can be
@@ -40,9 +40,9 @@ class IPv4 extends Layer;
     * destinationAddress - destination IP address
     *
     * Class atributes not affected by randomization:
-    * totalLength - packet size (header + upper layers data), computed 
+    * totalLength - packet size (header + upper layers data), computed
     *               after randomization
-    * protocol    - upper layer protocol type, set according upper 
+    * protocol    - upper layer protocol type, set according upper
     *               layer protocol
     * enableMultipleProtocolNesting - if true, other IP layers or ETHERNET can
     *                                 be nested in this IPv6 layer
@@ -66,11 +66,11 @@ class IPv4 extends Layer;
    rand  bit   [15:0]   headerChecksum;
    rand  bit   [31:0]   sourceAddress;
    rand  bit   [31:0]   destinationAddress;
-   
+
    const int            headerSize = 20;
-     
+
          bit            enableMultipleProtocolNesting;
-   
+
    /*
     * Class constructor.
     */
@@ -88,7 +88,7 @@ class IPv4 extends Layer;
       maxDstIP = '1;
       enableMultipleProtocolNesting = 0;
    endfunction: new
- 
+
    /*
     * Constraint for randomization. Sets value ranges for IP addresses.
     */
@@ -97,15 +97,15 @@ class IPv4 extends Layer;
       sourceAddress inside {[minDstIP:maxDstIP]};
       destinationAddress inside {[minSrcIP:maxSrcIP]};
    }
-  
+
    /*
     * Constraint for randomization. Sets value ranges for version field.
     */
-   constraint versionc 
+   constraint versionc
    {
       version == 4;
    }
-  
+
    /*
     * Constraint for randomization. Sets value ranges for header length.
     * Allways 5, because options aren't supported yet.
@@ -114,7 +114,7 @@ class IPv4 extends Layer;
    {
       headerLength == 5;
    }
-  
+
    /*
     * Constraint for randomization. Sets value ranges for type of service field.
     */
@@ -122,7 +122,7 @@ class IPv4 extends Layer;
    {
       typeOfService[7:6] == 0;
    }
-  
+
    /*
     * Constraint for randomization. Sets value ranges for flags field.
     */
@@ -133,7 +133,7 @@ class IPv4 extends Layer;
          flags[0] == 0;*/
       flags == '0;
    }
-  
+
    /*
     * Post randomization sets upper layer type to protocol field. Value is
     * assigned according upper layer protocol type. It also set data length
@@ -141,7 +141,7 @@ class IPv4 extends Layer;
     *
     * Supported upper layer protocols:
     * IPv4, IPv6, ICMP, TCP, UDP, ETHERNET, RAW
-    */ 
+    */
    function void post_randomize();
       if (this.next.typ == "IP")
       begin
@@ -150,89 +150,89 @@ class IPv4 extends Layer;
          if (this.next.subtype == "6")
             protocol = PROTO_IPV6;
       end;
-   
+
       if (this.next.typ == "ICMP")
          protocol = PROTO_ICMP;
-       
+
       if (this.next.typ == "TCP")
          protocol = PROTO_TCP;
-       
+
       if (this.next.typ == "UDP" )
          protocol = PROTO_UDP;
-   
+
       if (this.next.typ == "ETHERNET" )
          protocol = PROTO_ETHERNET;
-       
+
       if (this.next.typ == "RAW" )
          protocol = PROTO_RAW;
-       
+
       if (next != null)
       begin
          next.minMTU = (minMTU - headerSize > 0) ? minMTU - headerSize : 0;
          next.maxMTU = (maxMTU - headerSize > 0) ? maxMTU - headerSize : 0;
-         void'(next.randomize);    
+         void'(next.randomize);
       end
 
    endfunction:  post_randomize
-  
+
    /*
     * Returns array of bytes, which contains protocol header.
     */
    function data getHeader();
       data vystup = new[headerSize];
       bit [7:0] helper;
-   
+
       helper[7:4] = version;
       helper[3:0] = headerLength;
       vystup[0] = helper;
-   
+
       vystup[1] = typeOfService;
-   
+
       vystup[2] = totalLength[15:8];
       vystup[3] = totalLength[7:0];
-   
+
       vystup[4] = identification[15:8];
       vystup[5] = identification[7:0];
-   
+
       helper[7:5] = flags;
       helper[4:0] = fragmentOffset[12:8];
       vystup[6] = helper;
-   
+
       vystup[7] = fragmentOffset[7:0];
-   
+
       vystup[8] = timeToLive;
-   
+
       vystup[9] = protocol;
-   
+
       vystup[10] = headerChecksum[15:8];
       vystup[11] = headerChecksum[7:0];
-   
+
       vystup[12] = sourceAddress[31:24];
       vystup[13] = sourceAddress[23:16];
       vystup[14] = sourceAddress[15:8];
       vystup[15] = sourceAddress[7:0];
-   
+
       vystup[16] = destinationAddress[31:24];
       vystup[17] = destinationAddress[23:16];
       vystup[18] = destinationAddress[15:8];
       vystup[19] = destinationAddress[7:0];
-   
+
       return vystup;
    endfunction: getHeader
- 
+
    /*
     * Returns array of bytes, which contains protocol footer.
-    */ 
+    */
    function data getFooter();
       data vystup;
       return vystup;
    endfunction: getFooter
- 
+
    /*
     * Returns class atribute by it's name in form of array of bytes.
     * Not full implemented yet, only old IDS names (SRC for source IP address
     * and DST for destination IP address).
-    */   
+    */
    function data getAttributeByName(string name);
       data vystup = new[4];
       if (name == "SRC")
@@ -242,7 +242,7 @@ class IPv4 extends Layer;
          vystup[2] = sourceAddress[15:8];
          vystup[3] = sourceAddress[7:0];
       end
-   
+
       if (name == "DST")
       begin
          vystup[0] = destinationAddress[31:24];
@@ -250,31 +250,31 @@ class IPv4 extends Layer;
          vystup[2] = destinationAddress[15:8];
          vystup[3] = destinationAddress[7:0];
       end
-   
+
       return vystup;
    endfunction: getAttributeByName
- 
+
    /*
-    * Returns array of bytes containing protocol and upper layers 
+    * Returns array of bytes containing protocol and upper layers
     * protocol data.
-    */   
+    */
    function data getData();
       data header, payload, vystup;
-      
+
       header = getHeader();
       payload = next.getData();
-      
+
       vystup = new [header.size() + payload.size()];
-      
+
       foreach (header[j])
          vystup[j] = header[j];
-         
+
       foreach (payload[j])
          vystup[header.size() + j] = payload[j];
-         
-      return vystup; 
+
+      return vystup;
    endfunction: getData
- 
+
    /*
     * Copy function.
     */
@@ -308,10 +308,10 @@ class IPv4 extends Layer;
       protocol.errorProbability = errorProbability;
       protocol.minMTU = minMTU;
       protocol.maxMTU = maxMTU;
-     
+
       return protocol;
    endfunction: copy
- 
+
    /*
     * Check if upper layer protocol is compatibile with IPv6 protocol.
     * This function is used by generator.
@@ -325,7 +325,7 @@ class IPv4 extends Layer;
     * IPv4, IPv6, ICMP, TCP, UDP, RAW, ETHERNET
     */
    function bit checkType(string typ, string subtype ,string name);
-      if (enableMultipleProtocolNesting) begin 
+      if (enableMultipleProtocolNesting) begin
          if (typ == "IP")
          begin
             if (subtype == "4")
@@ -333,29 +333,29 @@ class IPv4 extends Layer;
             if (subtype == "6")
                return 1'b1;
          end;
-   
+
          if (typ == "ETHERNET")
             return 1'b1;
       end
-   
+
       if (typ == "ICMP")
          if (subtype == "4")
             return 1'b1;
          else
             return 1'b0;
-       
+
       if (typ == "TCP")
          return 1'b1;
-       
+
       if (typ == "UDP")
          return 1'b1;
-       
+
       if (typ == "RAW")
          return 1'b1;
-         
+
       return 1'b0;
    endfunction: checkType
- 
+
    /*
     * Displays informations about protocol including upper layer protocols.
     */
@@ -374,15 +374,15 @@ class IPv4 extends Layer;
       if (next != null)
          next.display();
    endfunction: display
-   
+
    /*
-    * Returns length of protocol data plus all upper level protocols data 
+    * Returns length of protocol data plus all upper level protocols data
     * length.
     *
     * Parameters:
     * split - if set length of RAW protocol layer isn't returned, otherwise
     *         the length of RAW protocol layer is returned.
-    */     
+    */
    function int getLength(bit split);
       if (next != null)
       begin
@@ -395,5 +395,5 @@ class IPv4 extends Layer;
          return headerSize;
       end
    endfunction: getLength
- 
+
 endclass: IPv4

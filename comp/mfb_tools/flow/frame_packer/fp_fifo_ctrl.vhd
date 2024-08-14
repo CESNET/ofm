@@ -33,7 +33,7 @@ entity FP_FIFO_CTRL is
         FIFO_TX_SOF_POS     : in  std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE))-1 downto 0);
         FIFO_TX_EOF_POS     : in  std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE))-1 downto 0);
 
-        -- Instructions for FIFO_CTRL 
+        -- Instructions for FIFO_CTRL
         -- Number of packets that make up the SuperPacket
         SPKT_RX_EOF_NUM     : in  std_logic_vector(max(1, log2(MFB_REGIONS*FIFO_DEPTH)) - 1 downto 0);
         -- Length of the SuperPacket
@@ -53,8 +53,8 @@ entity FP_FIFO_CTRL is
     );
 end entity;
 
-architecture FULL of FP_FIFO_CTRL is 
-    subtype MFB_EOF_BLOCK_SLICE     is natural range max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE))-1 downto max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE)) - max(1,log2(MFB_REGION_SIZE));  
+architecture FULL of FP_FIFO_CTRL is
+    subtype MFB_EOF_BLOCK_SLICE     is natural range max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE))-1 downto max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE)) - max(1,log2(MFB_REGION_SIZE));
 
     type fifo_ctrl_fsm is (
         st_LOAD_LNG,        -- Load length of the SuperPacket
@@ -108,9 +108,9 @@ begin
             end if;
         end loop;
 
-        if pkt_cont(index+1) = '1' then 
+        if pkt_cont(index+1) = '1' then
             new_sof(index)   <= '1';
-        else 
+        else
             if eof_last(index) = '1' then
                 new_sof(index+1) <= '1';
             else
@@ -148,7 +148,7 @@ begin
     processed_eofs_p: process(all)
     begin
         if rising_edge(CLK) then
-            if RST = '1' then 
+            if RST = '1' then
                 eof_enable  <= (others => '0');
             elsif FIFO_TX_DST_RDY = '1' then
                 eof_enable  <= (others => '0');
@@ -170,7 +170,7 @@ begin
         for r in 0 to MFB_REGIONS - 1 loop
             if (FIFO_TX_EOF(r) and (not eof_enable(r))) = '1' then
                 eof_cnt_v  := eof_cnt_v + 1;
-            else 
+            else
                 eof_cnt_v  := eof_cnt_v;
             end if;
 
@@ -202,14 +202,14 @@ begin
             end if;
         end if;
     end process;
-   
+
     -- Load the number of sub-packets forming the superpacket
     load_en     <= SPKT_RX_SRC_RDY and SPKT_RX_DST_RDY;
     pkt_read    <= FIFO_TX_SRC_RDY and FIFO_TX_DST_RDY and (or(FIFO_TX_EOF));
 
     process(all)
     begin
-        if rising_edge(CLK) then 
+        if rising_edge(CLK) then
             if RST = '1' then
                 pkts_to_read    <= (others => '0');
             elsif load_en = '1' then
@@ -222,13 +222,13 @@ begin
         end if;
     end process;
 
-    -- Indication that some packets are still in the word 
+    -- Indication that some packets are still in the word
     pkt_underflow <= pkts_to_read - to_unsigned(count_ones(FIFO_TX_EOF and (not eof_enable)),pkt_underflow'length);
 
     fifo_ctrl_reg_p: process(all)
     begin
         if rising_edge(CLK) then
-            if RST = '1' then 
+            if RST = '1' then
                 state   <= st_LOAD_LNG;
             else
                 state   <= next_state;
@@ -278,7 +278,7 @@ begin
                         FIFO_TX_DST_RDY <= (not pkt_cont(MFB_REGIONS)) and (not pkt_underflow(pkt_underflow'high));
                         next_state      <= st_LOAD_LNG;
                         pkt_last        <= '1';
-                    else 
+                    else
                         next_state      <= st_PASS;
                     end if;
                 end if;
@@ -307,5 +307,5 @@ begin
             end if;
         end if;
     end process;
-    
+
 end architecture;

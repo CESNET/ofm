@@ -16,7 +16,7 @@ entity NP_LUTRAM_PRO is
    generic(
       DATA_WIDTH : integer := 64; -- any possitive value
       ITEMS      : integer := 64;  -- any possitive value
-      WRITE_PORTS: integer := 8;     
+      WRITE_PORTS: integer := 8;
       READ_PORTS : integer := 8;
       DEVICE     : string := "ULTRASCALE"
    );
@@ -38,7 +38,7 @@ entity NP_LUTRAM_PRO is
 end entity;
 
 architecture behavioral of NP_LUTRAM_PRO is
-   
+
    constant CLK_MULT : integer := 2;
 
    constant WRITE_PORTS_EXT : integer := integer(ceil(real(WRITE_PORTS)/real(CLK_MULT)))*CLK_MULT;
@@ -57,7 +57,7 @@ architecture behavioral of NP_LUTRAM_PRO is
    signal reg2_we_ext : std_logic_vector(WRITE_PORTS_EXT-1 downto 0);
    signal reg2_addra_ext : slv_array_t(0 to WRITE_PORTS_EXT-1)(LOG2(ITEMS)-1 downto 0);
    signal reg2_addrb_ext : slv_array_t(0 to READ_PORTS_EXT-1)(LOG2(ITEMS)-1 downto 0);
-   
+
    signal reg2_addra_onehot   : slv_array_t(0 to WRITE_PORTS_EXT-1)(ITEMS-1 downto 0);
    signal reg2_addra_onehot_reord   : slv_array_t(0 to ITEMS-1)(WRITE_PORTS_EXT-1 downto 0);
    signal reg2_addra_onehot_reord_red   : slv_array_t(0 to ITEMS-1)(WRITE_PORTS_EXT/CLK_MULT-1 downto 0);

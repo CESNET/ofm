@@ -16,7 +16,7 @@ SETTINGS = {
     "avalon_1024b" : {
         "REGIONS"         : "4"                 ,
     },
-    "_combinations_" : (  
+    "_combinations_" : (
     (), # Works the same as '("default",),' as the "default" is applied in every combination
     ("avalon_256b",),
     ("avalon_1024b",),

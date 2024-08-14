@@ -38,7 +38,7 @@ logic FIFO_FULL;
         .WR_FULL     (FIFO_FULL),
 
         .RD_CLK      (TX_CLK),
-        .RD_RST      (TX_RST), 
+        .RD_RST      (TX_RST),
         .RD_DATA     (TX.DATA),
         .RD_EMPTY    (FIFO_EMPTY),
         .RD_EN       (TX.DST_RDY)

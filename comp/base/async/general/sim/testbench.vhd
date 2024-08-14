@@ -8,9 +8,9 @@
 --! $Id$
 --!
 
-library IEEE;	
-use IEEE.std_logic_1164.all;	
-use IEEE.std_logic_unsigned.all;	
+library IEEE;
+use IEEE.std_logic_1164.all;
+use IEEE.std_logic_unsigned.all;
 use IEEE.std_logic_arith.all;
 
 --! ----------------------------------------------------------------------------
@@ -40,7 +40,7 @@ architecture behavioral of testbench is
    generic map(
       TWO_REG            => false, --! For two reg = true
                                    --! for three reg = false
-      
+
       --! When DETECT_RISING_EDGE=true  and DETECT_FALLING_EDGE=true
       --! are detected rising edges and falling edges.
       --! When DETECT_RISING_EDGE=true  and DETECT_FALLING_EDGE=false
@@ -51,17 +51,17 @@ architecture behavioral of testbench is
       --! are detected log.1.
       DETECT_RISING_EDGE  => false,
       DETECT_FALLING_EDGE => false
-   ) 
+   )
    port map(
-      --! A clock domain 
+      --! A clock domain
       ACLK     => aclk,         --! Source clock
-      ARST     => arst,         --! Source reset     
+      ARST     => arst,         --! Source reset
       ADATAIN  => data_in,      --! Data input
       AREADY   => aready,       --! Ready signal
-      
-      --! B clock domain   
+
+      --! B clock domain
       BCLK     => bclk,         --! Target clock
-      BRST     => brst,         --! Target reset  
+      BRST     => brst,         --! Target reset
       BDATAOUT => data_out      --! Data output
    );
 
@@ -84,70 +84,70 @@ architecture behavioral of testbench is
    --! main testbench process
    sim : process
    begin
-   
+
       data_in <= '0';
-      
+
       arst <= '1';
       brst <= '1';
       wait for 20 ns;
       arst <= '0';
       brst <= '0';
-      
+
       wait until rising_edge(aclk) and aready = '1';
       data_in <= '1';
-      
+
       wait until rising_edge(aclk);
       data_in <= '0';
-      
+
       wait until rising_edge(aclk) and aready = '1';
       data_in <= '1';
-      
+
       wait until rising_edge(aclk);
       data_in <= '0';
-      
+
       --! arst <= '1';
       --! brst <= '1';
       --! wait for 20 ns;
       --! arst <= '0';
       --! brst <= '0';
-      
+
       wait until rising_edge(aclk) and aready = '1';
       data_in <= '1';
-      
+
       wait for 10 ns;
-      
+
       wait until rising_edge(aclk);
       data_in <= '0';
-      
+
       wait for 10 ns;
-      
+
       wait until rising_edge(aclk);
-      data_in <= '1';       
-      
+      data_in <= '1';
+
       wait for 33 ns;
-      
+
       wait until rising_edge(aclk);
       data_in <= '0';
-      
+
       wait until rising_edge(aclk) and aready = '1';
-      data_in <= '1';  
-      
+      data_in <= '1';
+
       wait for 99 ns;
-      
+
       wait until rising_edge(aclk) and aready = '1';
       data_in <= '0';
 
       wait for 19 ns;
-      
+
       wait until rising_edge(aclk) and aready = '1';
-      data_in <= '1';  
-      
+      data_in <= '1';
+
       wait for 99 ns;
-      
+
       wait until rising_edge(aclk) and aready = '1';
       data_in <= '0';
-   
-      wait;  
+
+      wait;
 
    end process;
 

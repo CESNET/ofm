@@ -1,4 +1,4 @@
-# top.fdo: 
+# top.fdo:
 # Copyright (C) 2019 CESNET z. s. p. o.
 # Author(s): Jan Kubalek <xkubal11@stud.fit.vutbr.cz>
 #

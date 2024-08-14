@@ -7,7 +7,7 @@
 --
 -- $Id$
 --
--- TODO: 
+-- TODO:
 --
 --
 library IEEE;
@@ -112,7 +112,7 @@ signal FRAME_RDY     : std_logic;
 -- FL FIFO constants
 --constant DATA_WIDTH  : integer   := 32;
 constant USE_BRAMS   : boolean   := true;
-constant ITEMS       : integer   := 32768; 
+constant ITEMS       : integer   := 32768;
 constant BLOCK_SIZE  : integer   := 15;
 -- Inside bus width
 constant RX_DATA_WIDTH32 : integer   := 32;
@@ -141,7 +141,7 @@ FL_SIM_LOGGING_RX_U: entity work.FL_SIM_LOGGING
       RX_EOP_N=>RX_EOP_N,
       RX_SRC_RDY_N=>RX_SRC_RDY_N,
       RX_DST_RDY_N=>RX_DST_RDY_N,
-      
+
      -- TX Frame link Interface
       TX_DATA=>INBUS3_DATA,
       TX_REM=>INBUS3_REM,
@@ -176,7 +176,7 @@ FL_SIM_LOGGING_TX_U: entity work.FL_SIM_LOGGING
       RX_EOP_N=>INBUS2_EOP_N,
       RX_SRC_RDY_N=>INBUS2_SRC_RDY_N,
       RX_DST_RDY_N=>INBUS2_DST_RDY_N,
-      
+
      -- TX Frame link Interface
       TX_DATA=>TX_DATA,
       TX_REM=>TX_REM,
@@ -212,7 +212,7 @@ FL_SIM_LOGGING_TX_U: entity work.FL_SIM_LOGGING
       RX.EOP_N       => AUX_FL_BUS2.EOP_N,
       RX.SOF_N       => AUX_FL_BUS2.SOF_N,
       RX.EOF_N       => AUX_FL_BUS2.EOF_N,
-      
+
       -- read interface
       TX.DATA        => AUX_FL_BUS3.DATA,
       TX.DREM         => AUX_FL_BUS3.DREM,
@@ -327,7 +327,7 @@ if (file_status = OPEN_OK) then
          AUX_FL_BUS.EOP_N<='1';
          AUX_FL_BUS.SOF_N<='0';
          AUX_FL_BUS.SOP_N<='0';
-         if not endfile(input_file) then 
+         if not endfile(input_file) then
            read_string(input_file,s,size);
            i:=1;
          end if;
@@ -341,7 +341,7 @@ if (file_status = OPEN_OK) then
          AUX_FL_BUS.SOF_N<='1';
          AUX_FL_BUS.EOP_N<='1';
          AUX_FL_BUS.SOP_N<='0';
-         if not endfile(input_file) then 
+         if not endfile(input_file) then
            read_string(input_file,s,size);
            i:=1;
          end if;
@@ -361,7 +361,7 @@ if (file_status = OPEN_OK) then
   while (i<=size)and(s(i)/='#')and(s(i)/='$')and(FL_RESET='0') loop
     count:="00";
     load_32(data,s,i,size,count);  --read 8-32bits from string
-    if (i+1)<size then 
+    if (i+1)<size then
       -- 32bits were read, write them to FL BUS
      -- wait until (AUX_FL_BUS.DST_RDY_N='0');
       AUX_FL_BUS.EOF_N<='1';

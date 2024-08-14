@@ -9,7 +9,7 @@
 `define RX_MAC_LITE_BUFFER_ENV_SV
 
 package uvm_rx_mac_lite_buffer;
-    
+
     `include "uvm_macros.svh"
     import uvm_pkg::*;
 

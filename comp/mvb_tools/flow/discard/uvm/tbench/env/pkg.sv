@@ -8,7 +8,7 @@
 `define FIFOX_ENV_SV
 
 package uvm_discard;
-    
+
     `include "uvm_macros.svh"
     import uvm_pkg::*;
 

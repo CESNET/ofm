@@ -7,7 +7,7 @@
 
 
 set SV_VER_BASE   "$OFM_PATH/comp/ver/word_link"
-  
+
 set COMPONENTS [list \
       [ list "SV_VER"   $SV_VER_BASE  "FULL"] \
 ]

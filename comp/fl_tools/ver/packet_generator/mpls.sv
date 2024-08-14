@@ -13,17 +13,17 @@
 
 /*
  * This class implements MPLS(Multi protocol label switching) protocol. Class
- * inherates from Layer abstract class. 
- */  
+ * inherates from Layer abstract class.
+ */
 class MPLS extends Layer;
    /*
    * Randomizations constraints:
    * minLabel - minimal MPLS label for randomization
    * maxLabel - maximal MPLS label for randomization
-   * 
+   *
    * Class atributes affected by randomization:
    * label          - MPLS label
-   * exp            - experimental / currently used for implementing QoS 
+   * exp            - experimental / currently used for implementing QoS
    * ttl            - time to live
    *
    * Class atributes not affected by randomization:
@@ -40,9 +40,9 @@ class MPLS extends Layer;
    rand  bit unsigned   [2:0]    exp;
          bit unsigned            stack;
    rand  bit unsigned   [7:0]    ttl;
- 
+
    const int unsigned            headerSize = 4;
-   
+
    /*
     * Class constructor.
     */
@@ -57,7 +57,7 @@ class MPLS extends Layer;
       minLabel = '0;
       maxLabel = '1;
    endfunction: new
- 
+
    /*
     * Constraint for randomization. Sets value ranges for random variables.
     */
@@ -65,10 +65,10 @@ class MPLS extends Layer;
    {
       label inside {[minLabel:maxLabel]};
    }
- 
+
    /*
     * Sets bottom of MPLS stack according upper layer protocol. If upper layer
-    * protocol is MPLS stack is set to 0, otherwise is set to 1. It also set 
+    * protocol is MPLS stack is set to 0, otherwise is set to 1. It also set
     * data length boundaries for upper layer protocol.
     */
    function void post_randomize();
@@ -80,10 +80,10 @@ class MPLS extends Layer;
             this.stack = 0;
          next.minMTU = (minMTU - headerSize > 0) ? minMTU - headerSize : 0;
          next.maxMTU = (maxMTU - headerSize > 0) ? maxMTU - headerSize : 0;
-         void'(next.randomize);    
+         void'(next.randomize);
       end
    endfunction: post_randomize
- 
+
    /*
     * Returns array of bytes, which contains protocol header.
     */
@@ -94,7 +94,7 @@ class MPLS extends Layer;
       word[8] = stack;
       word[11:9] = exp;
       word[31:12] = label;
-      
+
       result[0] =  word[31:24];
       result[1] =  word[23:16];
       result[2] =  word[15:8];
@@ -102,29 +102,29 @@ class MPLS extends Layer;
 
       return result;
    endfunction: getHeader
-   
+
     /*
      * Returns array of bytes, which contains protocol footer. It returns zero
      * sized array.
-     */     
+     */
    function data getFooter();
       data result;
       return result;
    endfunction: getFooter
-   
+
     /*
      * Returns class atribute by it's name in form of array of bytes.
      * Not implemented yet.
-     */     
+     */
    function data getAttributeByName(string name);
       data result;
       return result;
    endfunction: getAttributeByName
-   
+
     /*
      * Returns array of bytes containing protocol and upper layers protocol
      * data.
-     */      
+     */
    function data getData();
       data header, payload, footer, result;
       header = getHeader();
@@ -135,9 +135,9 @@ class MPLS extends Layer;
          result[j] = header[j];
       foreach (payload[j])
          result[header.size() + j] = payload[j];
-      return result; 
+      return result;
    endfunction: getData
- 
+
     /*
      * Copy function.
      */
@@ -150,7 +150,7 @@ class MPLS extends Layer;
       protocol.exp = exp;
       protocol.stack = stack;
       protocol.ttl = ttl;
-       
+
       protocol.typ = typ;
       protocol.subtype = subtype;
       protocol.name = name;
@@ -160,10 +160,10 @@ class MPLS extends Layer;
       protocol.errorProbability = errorProbability;
       protocol.minMTU = minMTU;
       protocol.maxMTU = maxMTU;
-    
+
       return protocol;
    endfunction: copy
- 
+
     /*
      * Check if upper layer protocol is compatibile with MPLS.
      * This function is used by generator.
@@ -186,7 +186,7 @@ class MPLS extends Layer;
       end;
       return 1'b0;
    endfunction: checkType
- 
+
     /*
      * Displays informations about protocol including upper layer protocols.
      */
@@ -200,20 +200,20 @@ class MPLS extends Layer;
       if (next != null)
          next.display();
    endfunction: display
-   
+
     /*
-     * Returns length of protocol data plus all upper level protocols data 
+     * Returns length of protocol data plus all upper level protocols data
      * length.
      *
      * Parameters:
      * split - if set length of RAW protocol layer isn't returned, otherwise
      *         the length of RAW protocol layer is returned.
-     */    
+     */
    function int getLength(bit split);
       if (next != null)
          return headerSize + next.getLength(split);
       else
          return headerSize;
    endfunction: getLength
- 
+
 endclass: MPLS

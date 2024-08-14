@@ -298,7 +298,7 @@ begin
             rx_avst_hdr_arr(i)(32-1 downto 0)  & rx_avst_hdr_arr(i)(64-1 downto 32) &
             rx_avst_hdr_arr(i)(96-1 downto 64) & rx_avst_hdr_arr(i)(128-1 downto 96);
     end generate;
-    
+
     rx_avst_meta <= slv_array_ser(rx_avst_meta_arr,MFB_REGIONS,MFB_DOWN_META_WIDTH);
 
     -- conversion AVST2MFB
@@ -365,7 +365,7 @@ begin
     port map(
         CLK        => CLK,
         RESET      => RESET,
-        
+
         RX_DATA    => down_mfb_data,
         RX_META    => down_mfb_meta,
         RX_SOF_POS => (others => '0'),
@@ -443,7 +443,7 @@ begin
         TX0_MFB_EOF_POS => down0_mfb_eof_pos,
         TX0_MFB_SRC_RDY => down0_mfb_src_rdy,
         TX0_MFB_DST_RDY => down0_mfb_dst_rdy,
- 
+
         TX1_MFB_DATA    => down1_mfb_data,
         TX1_MFB_META    => down1_mfb_meta,
         TX1_MFB_SOF     => down1_mfb_sof,
@@ -470,7 +470,7 @@ begin
         port map(
             CLK        => CLK,
             RESET      => RESET,
-            
+
             RX_DATA    => down0_mfb_data,
             RX_META    => down0_mfb_meta,
             RX_SOF_POS => (others => '0'),
@@ -505,7 +505,7 @@ begin
         port map(
             CLK        => CLK,
             RST        => RESET,
-            
+
             RX_DATA    => down0_mfb_data,
             RX_META    => down0_mfb_meta,
             RX_SOF_POS => (others => '0'),
@@ -611,7 +611,7 @@ begin
     port map(
         CLK        => CLK,
         RESET      => RESET,
-        
+
         RX_DATA    => down1_mfb_data,
         RX_META    => down1_mfb_meta,
         RX_SOF_POS => (others => '0'),
@@ -726,7 +726,7 @@ begin
     port map(
         CLK        => CLK,
         RESET      => RESET,
-        
+
         RX_DATA    => up0_mfb_data,
         RX_META    => up0_mfb_meta,
         RX_SOF_POS => (others => '0'),
@@ -816,7 +816,7 @@ begin
     port map(
         CLK        => CLK,
         RESET      => RESET,
-        
+
         RX_DATA    => up1_mfb_data,
         RX_META    => up1_mfb_meta,
         RX_SOF_POS => (others => '0'),
@@ -915,7 +915,7 @@ begin
         RX_MFB1_EOF_POS => (others => '0'),
         RX_MFB1_SRC_RDY => up1_pipe_mfb_src_rdy_2,
         RX_MFB1_DST_RDY => up1_pipe_mfb_dst_rdy_2,
- 
+
         TX_MFB_DATA     => up_mfb_data,
         TX_MFB_META     => up_mfb_meta,
         TX_MFB_SOF      => up_mfb_sof,
@@ -941,7 +941,7 @@ begin
     port map(
         CLK        => CLK,
         RESET      => RESET,
-        
+
         RX_DATA    => up_mfb_data,
         RX_META    => up_mfb_meta,
         RX_SOF_POS => (others => '0'),
@@ -1018,7 +1018,7 @@ begin
             if (RESET = '1') then
                 tx_inc_frame(0) <= '0';
             elsif (up_pipe_mfb_src_rdy = '1' and up_pipe_mfb_dst_rdy = '1') then
-                tx_inc_frame(0) <= tx_inc_frame(MFB_REGIONS);  
+                tx_inc_frame(0) <= tx_inc_frame(MFB_REGIONS);
             end if;
         end if;
     end process;
@@ -1037,7 +1037,7 @@ begin
         end if;
     end process;
 
-    assert (tx_gap_inside_frame_dbg_reg /= '1') 
+    assert (tx_gap_inside_frame_dbg_reg /= '1')
         report "PCIE_CONNECTION_BLOCK: Gap inside frame on TX stream!"
         severity failure;
 

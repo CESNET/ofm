@@ -61,34 +61,34 @@ async def run_test(dut, pkt_count:int=1000, item_width_min:int = 1, item_width_m
     await tb.reset()
 
     tb.backpressure.start((1, i % 5) for i in itertools.count())
- 
-    for testcase in range(2): 
+
+    for testcase in range(2):
         """two test cases - read = 0, write = 1"""
-        
+
         item_count = 0
 
         for transaction in random_packets(item_width_min, item_width_max, pkt_count):
             left_to_enable = len(transaction)
-        
+
             cycles = (len(transaction) + (tb.master_stream_in.data_width - 1)) // tb.master_stream_in.data_width
 
             item_count += cycles
 
             for i in range(cycles):
-                if left_to_enable > tb.master_stream_in.data_width: 
+                if left_to_enable > tb.master_stream_in.data_width:
                     byte_enable = 2**tb.master_stream_in.data_width - 1
                     """setting all bytes of byte enable to 1"""
-                    
+
                     left_to_enable -= tb.master_stream_in.data_width
-            
+
                 else:
-                    byte_enable = 2**left_to_enable - 1               
+                    byte_enable = 2**left_to_enable - 1
 
                 byte_enable = 15 if testcase == 0 else byte_enable
 
                 tb.model((int.from_bytes(transaction[0:tb.master_stream_in.addr_width], 'little') + i*tb.master_stream_in.addr_width, int.from_bytes(transaction[i*tb.master_stream_in.data_width:(i+1)*tb.master_stream_in.data_width], 'little'), byte_enable), testcase)
-        
-            if testcase == 0: 
+
+            if testcase == 0:
                 """read test"""
                 cocotb.log.debug(f"generated transaction: {transaction.hex()}")
                 tb.master_stream_in.append(("rd", transaction))
@@ -110,5 +110,5 @@ async def run_test(dut, pkt_count:int=1000, item_width_min:int = 1, item_width_m
                 last_num = stream_out.item_cnt // 1000
                 cocotb.log.info(f"Number of {transaction_type} transactions processed: {stream_out.item_cnt}/{item_count}")
             await ClockCycles(dut.CLK, 100)
- 
+
     raise tb.scoreboard.result

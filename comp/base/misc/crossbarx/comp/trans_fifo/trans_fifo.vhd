@@ -281,17 +281,17 @@ begin
             for i in 0 to TRANS_STREAMS-1 loop
 
                 tmp_data_size := src_buf_data_transed_reg(i);
-    
+
                 -- increment when SRC Buffer read pointer moved
                 if (src_buf_ptr_reg(i)/=BUF_A_PTR(i)) then
                     tmp_data_size := tmp_data_size+(unsigned(BUF_A_PTR(i))-unsigned(src_buf_ptr_reg(i)));
                 end if;
-    
+
                 -- decrement when releasing a word of Transactions
                 if (TX_TRANS_DST_RDY='1' and trans_fifox_empty='0' and src_buf_data_transed_enough_all='1') then
                     tmp_data_size := tmp_data_size-unsigned(trans_fifox_do_a_len_sum(i));
                 end if;
-    
+
                 src_buf_data_transed_reg(i) <= tmp_data_size;
 
             end loop;

@@ -42,7 +42,7 @@ logic [SPLITTER_OUTPUTS-1:0]                                                    
 
    generate
       for (genvar i = 0; i < SPLITTER_OUTPUTS; i++) begin
-         assign TX_MVB[i].DATA    = tx_mvb_data   [i]; 
+         assign TX_MVB[i].DATA    = tx_mvb_data   [i];
          assign TX_MVB[i].VLD     = tx_mvb_vld    [i];
          assign TX_MVB[i].SRC_RDY = tx_mvb_src_rdy[i];
          assign tx_mvb_dst_rdy[i] = TX_MVB[i].DST_RDY;

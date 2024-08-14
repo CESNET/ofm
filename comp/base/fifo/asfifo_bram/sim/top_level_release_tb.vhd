@@ -117,7 +117,7 @@ begin
    --! ----------------------------------------------------------------------------
 
    tb : process
-      
+
       procedure read_n(n  : in integer) is
       begin
          wait until (clk_rd'event and clk_rd='1');
@@ -163,7 +163,7 @@ begin
       wr <= '0';
       rd <= '0';
       wait until reset = '0';
-      
+
       --! start test
       write_n(5,0);
       mark_p;

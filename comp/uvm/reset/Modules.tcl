@@ -1,4 +1,4 @@
-# Modules.tcl:  Local include script for reset agent 
+# Modules.tcl:  Local include script for reset agent
 # Copyright (C) 2021 CESNET z. s. p. o.
 # Author(s): Radek Iša <isa@cesnet.cz>
 #

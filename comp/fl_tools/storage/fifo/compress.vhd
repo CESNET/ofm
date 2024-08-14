@@ -20,7 +20,7 @@ entity fl_compress is
       -- Common interface
       CLK            : in  std_logic;
       RESET          : in  std_logic;
-      
+
       -- Recieve interface
       RX_SRC_RDY_N   : in  std_logic;
       RX_DST_RDY_N   : in  std_logic; -- Is input, because this comp does not
@@ -29,11 +29,11 @@ entity fl_compress is
       RX_EOP_N       : in  std_logic;
       RX_SOF_N       : in  std_logic;
       RX_EOF_N       : in  std_logic;
-      
-      FL_JUICE       : out std_logic_vector(WIRES-1 downto 0); 
+
+      FL_JUICE       : out std_logic_vector(WIRES-1 downto 0);
          -- Compressed FL control signals
-         
-      FRAME_PART     : out std_logic 
+
+      FRAME_PART     : out std_logic
          -- Every cycle in '1' means one frame part
    );
 end entity;

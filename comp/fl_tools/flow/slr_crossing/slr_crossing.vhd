@@ -30,7 +30,7 @@ entity FL_SLR_CROSSING is
     RX_DST_RDY_N   : out std_logic;
     RX_DATA        : in  std_logic_vector(DATA_WIDTH-1 downto 0);
     RX_DREM        : in  std_logic_vector(max(0,log2(DATA_WIDTH/8)-1) downto 0);
- 
+
     TX_RESET       : in  std_logic;
     TX_SOF_N       : out std_logic;
     TX_EOP_N       : out std_logic;

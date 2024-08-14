@@ -13,7 +13,7 @@ class virt_sequence#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDT
         super.new(name);
     endfunction
 
-    //RX 
+    //RX
     uvm_reset::sequence_start                             m_reset;
     uvm_logic_vector_array::sequence_lib#(MFB_ITEM_WIDTH) m_mfb_data_seq;
     uvm_framepacker::sequence_mvb_data#(MVB_ITEM_WIDTH)   m_mvb_data_seq;
@@ -57,7 +57,7 @@ class virt_sequence#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDT
         m_mvb_tx_seq.min_random_count = 200000;
         m_mvb_tx_seq.max_random_count = 500000;
         m_mvb_rdy_seq = m_mvb_tx_seq;
-        
+
         this.phase = phase;
 
     endfunction

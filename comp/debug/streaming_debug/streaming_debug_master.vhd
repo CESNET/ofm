@@ -3,7 +3,7 @@
 -- Author(s): Lukas Kekely <kekely@cesnet.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
--- 
+--
 
 library IEEE;
 use IEEE.std_logic_1164.all;
@@ -23,13 +23,13 @@ entity STREAMING_DEBUG_MASTER is
     DEBUG_ENABLED      : boolean := false;
     --! \brief Selective enabling of monitoring of connected probes when master enable is true.
     --! \details Character 'E' or 'e' means enabled, each other character means disabled.
-    --! String is red from left to right, one character for each interface numbered from 0. 
+    --! String is red from left to right, one character for each interface numbered from 0.
     PROBE_ENABLED      : string := "EEEE";
     --! \brief Should counter of data words be available?
     COUNTER_WORD       : string := "EEEE";
     --! \brief Should counter of waiting cycles (not source nor destination ready) be available?
     COUNTER_WAIT       : string := "EEEE";
-    --! \brief Should counter of cycles when source is ready and destination is not be available? 
+    --! \brief Should counter of cycles when source is ready and destination is not be available?
     COUNTER_DST_HOLD   : string := "EEEE";
     --! \brief Should counter of cycles when destination is ready and source is not be available?
     COUNTER_SRC_HOLD   : string := "EEEE";
@@ -46,11 +46,11 @@ entity STREAMING_DEBUG_MASTER is
     DEBUG_REG          : boolean := false
   );
   port (
-    --! \name CLOCK and RESET       
+    --! \name CLOCK and RESET
     CLK         : in std_logic;
     RESET       : in std_logic;
 
-    --! \name Input controll MI32 interface 
+    --! \name Input controll MI32 interface
     MI_DWR             : in  std_logic_vector(31 downto 0);
     MI_ADDR            : in  std_logic_vector(31 downto 0);
     MI_RD              : in  std_logic;
@@ -59,16 +59,16 @@ entity STREAMING_DEBUG_MASTER is
     MI_DRD             : out std_logic_vector(31 downto 0) := X"00000000";
     MI_ARDY            : out std_logic := '0';
     MI_DRDY            : out std_logic := '0';
-    
+
     --! \name Multi-interface for connected streaming interfaces
-    DEBUG_BLOCK        : out std_logic_vector(CONNECTED_PROBES-1 downto 0) := (others => '0');              
+    DEBUG_BLOCK        : out std_logic_vector(CONNECTED_PROBES-1 downto 0) := (others => '0');
     DEBUG_DROP         : out std_logic_vector(CONNECTED_PROBES-1 downto 0) := (others => '0');
     DEBUG_SRC_RDY      : in  std_logic_vector(CONNECTED_PROBES-1 downto 0) := (others => '0');
     DEBUG_DST_RDY      : in  std_logic_vector(CONNECTED_PROBES-1 downto 0) := (others => '0');
     DEBUG_SOP          : in  std_logic_vector(CONNECTED_PROBES*REGIONS-1 downto 0) := (others => '0');
-    DEBUG_EOP          : in  std_logic_vector(CONNECTED_PROBES*REGIONS-1 downto 0) := (others => '0')                  
+    DEBUG_EOP          : in  std_logic_vector(CONNECTED_PROBES*REGIONS-1 downto 0) := (others => '0')
   );
-end entity; 
+end entity;
 
 architecture full of STREAMING_DEBUG_MASTER is
   -- Functions converting enable character to reasonable types
@@ -154,7 +154,7 @@ begin
     mi_wr_dec : entity work.dec1fn_enable
       generic map (CONNECTED_PROBES*16)
       port map (MI_ADDR(log2(CONNECTED_PROBES)+5 downto 2), MI_WR, mi_wes);
-    
+
     probes_stats_gen : for i in 0 to CONNECTED_PROBES-1 generate
       probe_enabled_gen : if enableChar2bool(PROBE_ENABLED(i+1)) generate
         -- Write data mapping for single probe
@@ -163,7 +163,7 @@ begin
         line_block(i) <= MI_DWR(0) and not MI_DWR(1);
         line_drop(i)  <= MI_DWR(1) and not MI_DWR(0);
         line_req(i)   <= mi_wes(i*16+15);
-        
+
         -- Read data mapping for single probe
         mi_drds(i*16+ 0) <= std_logic_vector(word_cnt(i)(31 downto 0));
         mi_drds(i*16+ 1) <= std_logic_vector(word_cnt(i)(63 downto 32));
@@ -192,7 +192,7 @@ begin
                             enableChar2logic(COUNTER_WORD(i+1));
         mi_drds(i*16+14) <= X"0000000" & "000" & cnt_running(i);
         mi_drds(i*16+15) <= X"0000000" & "00"  & line_droped(i) & line_blocked(i);
-        
+
         -- Counters enabled (running) register
         cnt_en_reg : process (CLK)
         begin
@@ -204,7 +204,7 @@ begin
             end if;
           end if;
         end process;
-        
+
         -- Line controlling registers
         bus_control_gen : if enableChar2bool(BUS_CONTROL(i+1)) generate
           line_ctrl_reg : process (CLK)
@@ -222,7 +222,7 @@ begin
         end generate;
         reg_debug_block(i) <= line_blocked(i);
         reg_debug_drop(i)  <= line_droped(i);
-        
+
         -- Word counter
         word_cnt_gen : if enableChar2bool(COUNTER_WORD(i+1)) generate
           word_cnt_reg : process (CLK)
@@ -274,7 +274,7 @@ begin
               end if;
             end if;
           end process;
-        end generate;  
+        end generate;
         -- Start of transaction counter
         sop_cnt_gen : if enableChar2bool(COUNTER_SOP(i+1)) generate
           sop_cnt_reg : process (CLK)
@@ -292,7 +292,7 @@ begin
               end if;
             end if;
           end process;
-        end generate;  
+        end generate;
         -- End of transaction counter
         eop_cnt_gen : if enableChar2bool(COUNTER_EOP(i+1)) generate
           eop_cnt_reg : process (CLK)
@@ -313,9 +313,9 @@ begin
         end generate;
       end generate;
     end generate;
-    
+
   end generate;
-  
+
   empty_architecture_gen : if not DEBUG_ENABLED generate
     MI_DRD      <= X"00000000";
     MI_DRDY     <= '0';

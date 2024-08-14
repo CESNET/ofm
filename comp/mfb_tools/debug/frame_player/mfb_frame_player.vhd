@@ -73,7 +73,7 @@ architecture FULL of MFB_FRAME_PLAYER is
    signal s_fifo_out_reg_vld        : std_logic;
 
    signal s_fifo_status             : std_logic_vector(log2(FIFO_DEPTH) downto 0);
-   
+
    signal s_mi2fifo_vld_reg_we      : std_logic;
    signal s_mi2fifo_vld_reg_sel     : std_logic;
 
@@ -145,7 +145,7 @@ begin
             when "00000" => --X"00"
                MI_DRD <= s_sreg;
             when "00100" => --X"04"
-               MI_DRD <= s_creg;         
+               MI_DRD <= s_creg;
             when others =>
                MI_DRD <= X"DEAAAAAD";
          end case;

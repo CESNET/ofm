@@ -4,7 +4,7 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-set SHAKEDOWN_BASE "$OFM_PATH/comp/mvb_tools/flow/shakedown" 
+set SHAKEDOWN_BASE "$OFM_PATH/comp/mvb_tools/flow/shakedown"
 
 # Packages
 lappend PACKAGES "$OFM_PATH/comp/base/pkg/math_pack.vhd"

@@ -19,7 +19,7 @@ if { [info exists SYNTH_FLAGS(TOOL)] && $SYNTH_FLAGS(TOOL) == "quartus" } {
     set MOD "$MOD $ENTITY_BASE/count48.vhd"
     set MOD "$MOD $ENTITY_BASE/count_dsp.vhd"
 
-    # COUNT_TOP with input and output registers for measurements 
+    # COUNT_TOP with input and output registers for measurements
     # set MOD "$MOD $ENTITY_BASE/synth/count_top.vhd"
 
 }

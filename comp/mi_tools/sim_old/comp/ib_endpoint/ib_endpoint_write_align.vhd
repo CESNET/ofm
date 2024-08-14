@@ -35,7 +35,7 @@ entity IB_ENDPOINT_WRITE_ALIGN is
       RD_SRC_RDY_OUT     : out std_logic;
       RD_DST_RDY_OUT     : in  std_logic;
       RD_EOF_OUT         : out std_logic;
-      
+
       -- Align Control Interface
       MASTER_ALIGN       : in  std_logic_vector(2 downto 0);
       MASTER_LENGTH      : in  std_logic_vector(2 downto 0);
@@ -56,7 +56,7 @@ architecture IB_ENDPOINT_WRITE_ALIGN_ARCH of IB_ENDPOINT_WRITE_ALIGN is
    signal data_reg0      : std_logic_vector(63 downto 0);
    signal data_reg1      : std_logic_vector(63 downto 0);
    signal data_reg_we    : std_logic;
-   
+
    signal data_out_mux0  : std_logic_vector(7 downto 0);
    signal data_out_mux1  : std_logic_vector(7 downto 0);
    signal data_out_mux2  : std_logic_vector(7 downto 0);

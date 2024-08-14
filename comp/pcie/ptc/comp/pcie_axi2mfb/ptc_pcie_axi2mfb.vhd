@@ -15,8 +15,8 @@ use work.dma_bus_pack.all; -- contains definitions for MVB header fields
 -- ----------------------------------------------------------------------------
 --                           Description
 -- ----------------------------------------------------------------------------
--- 
--- 
+--
+--
 
 -- ----------------------------------------------------------------------------
 --                             Entity
@@ -30,7 +30,7 @@ entity PTC_PCIE_AXI2MFB is
       -- Supported devices: "7SERIES", "ULTRASCALE"
       DEVICE           : string  := "ULTRASCALE";
       -- =======================================================================
-      -- MFB BUS CONFIGURATION: 
+      -- MFB BUS CONFIGURATION:
       -- =======================================================================
       -- Supported configuration is MFB(4,1,4,32) for PCIe on UltraScale+
       -- Supported configuration is MFB(2,1,4,32) for PCIe on Virtex 7 Series
@@ -39,7 +39,7 @@ entity PTC_PCIE_AXI2MFB is
       MFB_BLOCK_SIZE   : natural := 4;
       MFB_ITEM_WIDTH   : natural := 32;
       -- =======================================================================
-      -- AXI BUS CONFIGURATION: 
+      -- AXI BUS CONFIGURATION:
       -- =======================================================================
       -- DATA=512, RC=161 for Gen3x16 PCIe (Virtex UltraScale+) - with straddling!
       -- DATA=256, RC=70  for Gen3x16 PCIe (Virtex 7 Series) - with straddling!

@@ -30,7 +30,7 @@ entity MFB_ASFIFO_512to256 is
 
       TX_CLK        : in  std_logic;
       TX_RESET      : in  std_logic;
-      
+
       TX_DATA       : out std_logic_vector(1*1*8*32-1 downto 0);
       TX_SOF_POS    : out std_logic_vector(1*max(1,log2(1))-1 downto 0);
       TX_EOF_POS    : out std_logic_vector(1*max(1,log2(1*8))-1 downto 0);
@@ -68,7 +68,7 @@ begin
 
    auxiliary_signals_i : entity work.MFB_AUXILIARY_SIGNALS
    generic map(
-      REGIONS       => 2    , 
+      REGIONS       => 2    ,
       REGION_SIZE   => 1    ,
       BLOCK_SIZE    => 8    ,
       ITEM_WIDTH    => 32   ,
@@ -133,7 +133,7 @@ begin
 
          TX_CLK       => TX_CLK  ,
          TX_RESET     => TX_RESET,
-         
+
          TX_DATA      => asfifo_tx_data(i),
          TX_META(0)   => asfifo_tx_region_vld(i),
          TX_SOF_POS   => asfifo_tx_sof_pos(i),
@@ -164,7 +164,7 @@ begin
    TX_SOF     <= asfifo_tx_sof    (to_integer(out_ptr_reg));
    TX_EOF     <= asfifo_tx_eof    (to_integer(out_ptr_reg));
    TX_SRC_RDY <= asfifo_tx_src_rdy(to_integer(out_ptr_reg)) and asfifo_tx_region_vld(to_integer(out_ptr_reg));
-   
+
    asfifo_tx_dst_rdy(0) <= TX_DST_RDY and not out_ptr_reg(0);
    asfifo_tx_dst_rdy(1) <= TX_DST_RDY and     out_ptr_reg(0);
 

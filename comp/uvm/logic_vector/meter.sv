@@ -2,7 +2,7 @@
 // Copyright (C) 2024 CESNET z. s. p. o.
 // Author(s): Oliver Gurka <oliver.gurka@cesnet.cz>
 
-// SPDX-License-Identifier: BSD-3-Clause 
+// SPDX-License-Identifier: BSD-3-Clause
 
 class meter #(int unsigned ITEM_WIDTH) extends uvm_subscriber#(sequence_item #(ITEM_WIDTH));
     `uvm_component_param_utils(uvm_logic_vector::meter #(ITEM_WIDTH))
@@ -58,7 +58,7 @@ class meter #(int unsigned ITEM_WIDTH) extends uvm_subscriber#(sequence_item #(I
                 real std_dev;
 
                 msg = $sformatf("\nMeter information time [%0dns, %0dns]\n", start_time/1ns, stop_time/1ns);
-                
+
                 speed.count(min, max, avg, std_dev);
                 msg = {msg, $sformatf("\tspeed :\n\t\tMIN : %0.2f MT/s \n\t\tMAX : %0.2f MT/s\n\t\tAVG STD_DEV : %0.2f MT/s %0.2f MT/s\n", min, max, avg, std_dev)};
 
@@ -80,7 +80,7 @@ class meter #(int unsigned ITEM_WIDTH) extends uvm_subscriber#(sequence_item #(I
         time diff;
 
         super.report_phase(phase);
-        
+
         stop_time = $time;
         diff = stop_time - start_time;
 

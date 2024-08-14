@@ -13,7 +13,7 @@ use work.math_pack.all;
 use work.type_pack.all;
 
 
--- Descritpion: Through this component it is possible to send MI transactions indirectly to one or more output interfaces. 
+-- Descritpion: Through this component it is possible to send MI transactions indirectly to one or more output interfaces.
 --              That means you have to set the parameters of the MI transaction (by sending Write requests) to a set of registers,
 --              which are also accessed by MI.
 
@@ -39,7 +39,7 @@ entity MI_INDIRECT_ACCESS is
 
         CLK         : in std_logic;
         RESET       : in std_logic;
-    
+
         -- ==================
         -- Input MI interface
         -- ==================
@@ -51,7 +51,7 @@ entity MI_INDIRECT_ACCESS is
         RX_ARDY     : out std_logic;
         RX_DRD      : out std_logic_vector(DATA_WIDTH-1 downto 0);
         RX_DRDY     : out std_logic;
-    
+
         -- ===================
         -- Output MI interface
         -- ===================
@@ -87,7 +87,7 @@ architecture FULL of MI_INDIRECT_ACCESS is
     -- Interface register - set this register to choose output interface
     -- 0x00
     constant INF_REG_ADDR             : std_logic_vector(7 downto UNNECESSARY_BITS) := "000000";
-    -- Address register - this register stores the address of the request that will be sent to desired output interface 
+    -- Address register - this register stores the address of the request that will be sent to desired output interface
     -- 0x04
     constant ADDR_REG_ADDR            : std_logic_vector(7 downto UNNECESSARY_BITS) := "000001";
     -- Write data register - this register stores the data of Write request that will come from desired output interface
@@ -113,7 +113,7 @@ architecture FULL of MI_INDIRECT_ACCESS is
     signal cmd               : std_logic_vector(COMMANDS  -1 downto 0);
     signal cmd_reg           : std_logic_vector(COMMANDS  -1 downto 0);
     signal stat_reg          : std_logic_vector(STATUSES  -1 downto 0);
-    
+
     -- state signals for FSM
     type state is (IDLE, WR, RD, DRD);
     signal present_st        : state := IDLE;
@@ -166,7 +166,7 @@ begin
     next_state_p : process (all)
     begin
         case present_st is
-            
+
             when IDLE =>
                 -- send WR request
                 if (cmd(0) = '1') then
@@ -207,7 +207,7 @@ begin
                     next_st <= DRD;
                 end if;
 
-            when others => 
+            when others =>
                 next_st <= IDLE;
         end case;
     end process;
@@ -264,4 +264,4 @@ begin
     end process;
 
 end architecture;
-    
+

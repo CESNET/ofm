@@ -1,7 +1,7 @@
 /*
  * file       : reader.sv
  * Copyright (C) 2021 CESNET z. s. p. o.
- * description: reading pcap files 
+ * description: reading pcap files
  * date       : 2022
  * author     : Radek Iša <isa@cesnet.cz>
  *
@@ -22,7 +22,7 @@ class reader;
     endfunction
 
     function int open(string file_name);
-        file = dpi_pcap_read_open(file_name); 
+        file = dpi_pcap_read_open(file_name);
         return (file != null);
     endfunction
 

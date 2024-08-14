@@ -15,12 +15,12 @@
 //                        Package declaration
 // ----------------------------------------------------------------------------
 package test_pkg;
-   
+
    // Include scoreboard and coverage
    `include "scoreboard.sv"
    `include "command_coverage.sv"
-   
-  
+
+
    // -- MFIFO2MEM PARAMETERS -----------------------------
     // Data width
    parameter DATA_WIDTH      = 64;
@@ -32,7 +32,7 @@ package test_pkg;
    parameter LUT_MEMORY      = 0;
     // Use output register (1 = true)
    parameter OUTPUT_REG      = 0;
-   
+
    // -- TESTBENT PARAMETERS ------------------------------
     // CLOCKS AND RESETS
    parameter CLK_PERIOD = 10ns;
@@ -40,40 +40,40 @@ package test_pkg;
 
    // -- TRANSACTION PARAMETERS ---------------------------
    parameter GENERATOR0_DATA_SIZE      = DATA_WIDTH;
-   parameter GENERATOR0_FLOW_COUNT     = FLOWS; 
+   parameter GENERATOR0_FLOW_COUNT     = FLOWS;
 
    // -- MFIFO DRIVER PARAMETERS --------------------------
    parameter DRIVER0_DATA_WIDTH         = DATA_WIDTH;
    parameter DRIVER0_FLOWS              = FLOWS;
    parameter DRIVER0_BLOCK_SIZE         = BLOCK_SIZE;
-   parameter DRIVER0_LUT_MEMORY         = LUT_MEMORY;  
+   parameter DRIVER0_LUT_MEMORY         = LUT_MEMORY;
     // Delay enable weight
    parameter DRIVER0_DELAYEN_WT         = 1;
     // Delay disable weight
-   parameter DRIVER0_DELAYDIS_WT        = 10;  
+   parameter DRIVER0_DELAYDIS_WT        = 10;
     // Lower limit of delay time
-   parameter DRIVER0_DELAYLOW           = 0; 
+   parameter DRIVER0_DELAYLOW           = 0;
     // Upper limit of delay time
-   parameter DRIVER0_DELAYHIGH          = 10;                     
+   parameter DRIVER0_DELAYHIGH          = 10;
 
    // -- MEMORY MONITOR PARAMETERS -----------------------
-   parameter MONITOR0_DATA_WIDTH        = DATA_WIDTH; 
+   parameter MONITOR0_DATA_WIDTH        = DATA_WIDTH;
    parameter MONITOR0_FLOWS             = FLOWS;
    parameter MONITOR0_BLOCK_SIZE        = BLOCK_SIZE;
-   parameter MONITOR0_LUT_MEMORY        = LUT_MEMORY;  
+   parameter MONITOR0_LUT_MEMORY        = LUT_MEMORY;
    parameter MONITOR0_OUTPUT_REG        = OUTPUT_REG;
     // READ delay enable weight
    parameter MONITOR0_DELAYEN_WT        = 1;
     // READ delay disable weight
-   parameter MONITOR0_DELAYDIS_WT       = 3;  
+   parameter MONITOR0_DELAYDIS_WT       = 3;
     // PIPE_EN delay enable weight
    parameter MONITOR0_PIPEEN_WT         = 1;
     // PIPE_EN delay disable weight
-   parameter MONITOR0_PIPEDIS_WT        = 3;  
+   parameter MONITOR0_PIPEDIS_WT        = 3;
 
 
    // -- TEST PARAMETERS ---------------------------------
     // Count of transactions to generate
    parameter TRANSACTION_COUNT = 5000;
-   
+
 endpackage

@@ -96,7 +96,7 @@ begin
    TX_EOF_N       <= not (lblk and (sig_eof or flag_eof));
    TX_SRC_RDY_N   <= src_rdy_n;
    RX_DST_RDY_N   <= TX_DST_RDY_N or not first_word;
-   
+
    first_word <= '1'
       when conv_integer(cnt_data) = 0
       else '0';
@@ -150,7 +150,7 @@ begin
    lblk <= got_valid
       when (RX_SRC_RDY_N = '0') or (flag_sop = '1')
       else '1';
-      
+
    cnt_bytep: process(RESET, CLK)
    begin
       if (CLK'event AND CLK = '1') then

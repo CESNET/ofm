@@ -54,8 +54,8 @@ signal master_sda_oen_o : std_logic;  -- i2c data line output enable, active low
 signal master_be  : std_logic_vector( 7 downto 0);
 signal master_dwr : std_logic_vector(63 downto 0);
 signal master_drd : std_logic_vector(63 downto 0);
-signal master_wen : std_logic;	              -- 
-signal master_int : std_logic;                    
+signal master_wen : std_logic;	              --
+signal master_int : std_logic;
 
 signal tristate_scl : std_logic;
 signal tristate_sda : std_logic;
@@ -71,7 +71,7 @@ uut: entity work.I2C_SLAVE_TOP
    port map(
       CLK         => clk,
       RESET       => reset,
-                               
+
       DWR         => dwr,
       ADDR        => addr,
       RD          => rd,
@@ -80,13 +80,13 @@ uut: entity work.I2C_SLAVE_TOP
       DRD         => drd,
       ARDY        => ardy,
       DRDY        => drdy,
-                               
+
       SCL_I       => scl_i,
       SCL_O       => scl_o,
       SCL_OEN     => scl_oen,
       SDA_I       => sda_i,
       SDA_O       => sda_o,
-      SDA_OEN     => sda_oen   
+      SDA_OEN     => sda_oen
    );
 tristate_scl <= scl_o when (scl_oen = '0') else 'Z';
 tristate_sda <= sda_o when (sda_oen = '0') else 'Z';
@@ -138,7 +138,7 @@ reset_gen : process
 
 tb_main:process
 begin
-   
+
    drd <= X"00000000";
    ardy <= '0';
    drdy <= '0';
@@ -243,12 +243,12 @@ begin
 
    -- Read data at MI32
    wait until rd = '1';
-   ardy <= '1'; 
+   ardy <= '1';
    drd <= X"01020304"; drdy <= '1' ;
-   wait for clkper; 
+   wait for clkper;
    ardy <= '0';
-   --wait for 2*clkper; 
-   --wait for clkper; 
+   --wait for 2*clkper;
+   --wait for clkper;
    drdy <= '0';
 
    wait for 50*clkper;

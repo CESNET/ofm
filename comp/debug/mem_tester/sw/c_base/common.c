@@ -61,7 +61,7 @@ bool WriteReg(struct nfb_comp *comp, enum Registers_e reg, uint32_t data)
     {
         nfb_comp_write32(comp, RegAddr[reg], data);
 
-        // Ensure that data was written 
+        // Ensure that data was written
         // Also it waits for data are written
         for (unsigned i = 0; i < REG_CHECK_CNT; i++)
             if ((readedData = ReadReg(comp, reg)) == data)
@@ -78,7 +78,7 @@ bool WriteReg(struct nfb_comp *comp, enum Registers_e reg, uint32_t data)
             printf("Data were not written at address: 0x%08X (req: %d, written: %d)\n", RegAddr[reg], data, readedData);
             return false;
         }
-        else 
+        else
             return true;
     }
     else
@@ -121,12 +121,12 @@ bool WaitForBit(struct nfb_comp *comp, enum Registers_e reg, uint32_t bit, bool 
 
 double TicksToMS(double freq_MHz, uint32_t ticks)
 {
-    return ticks / (freq_MHz * 1000.0); 
+    return ticks / (freq_MHz * 1000.0);
 }
 
 double TicksToNS(double freq_MHz, uint32_t ticks)
 {
-    return (ticks / (freq_MHz)) * 1000.0; 
+    return (ticks / (freq_MHz)) * 1000.0;
 }
 
 double MSToDataFlow(struct DevConfig *devConfig, double time_ms, uint32_t words)

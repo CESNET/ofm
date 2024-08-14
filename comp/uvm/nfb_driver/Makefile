@@ -6,7 +6,7 @@
 
 include ../../../build/paths.mk
 
-LIB=`pkg-config --libs protobuf grpc++ grpc` -lpthread -lfdt 
+LIB=`pkg-config --libs protobuf grpc++ grpc` -lpthread -lfdt
 PIC="-fpic"
 
 libnfb_driver.so: nfb_driver.cc nfb_grpc.pb.o nfb_grpc.grpc.pb.o

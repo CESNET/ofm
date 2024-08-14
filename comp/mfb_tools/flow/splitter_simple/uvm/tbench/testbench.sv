@@ -18,7 +18,7 @@ module testbench;
 
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // Interfaces
-    reset_if                                                                                      reset(CLK); 
+    reset_if                                                                                      reset(CLK);
     mfb_if #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, $clog2(SPLITTER_OUTPUTS) + META_WIDTH) mfb_rx(CLK);
     mfb_if #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)                            mfb_tx[SPLITTER_OUTPUTS](CLK);
 

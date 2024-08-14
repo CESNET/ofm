@@ -21,7 +21,7 @@ set COMPONENTS [list \
                ]
 
 # Global include file for compilation
-source "$FIRMWARE_BASE/build/Modelsim.inc.fdo" 
+source "$FIRMWARE_BASE/build/Modelsim.inc.fdo"
 
 # Suppress warnings from arithm library
 puts "Std Arith Warnings - Disabled"

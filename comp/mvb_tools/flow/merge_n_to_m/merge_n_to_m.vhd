@@ -91,7 +91,7 @@ begin
          --! --------------------------------------------------------------------------
          D => ones,
 
-         --! \name N one number 
+         --! \name N one number
          --! -------------------------------------------------------------------------
          N => std_logic_vector(to_unsigned(i, max(log2(INPUTS),1))),
 
@@ -111,8 +111,8 @@ begin
    reg_sels_ext <= sels_ext;
 
    --! registers
-  
-   reg_vld0g: if OUTPUT_REG = true generate 
+
+   reg_vld0g: if OUTPUT_REG = true generate
       reg_vldp: process(CLK)
       begin
          if (CLK'event and CLK = '1') then
@@ -121,7 +121,7 @@ begin
                   OUTPUT_DATA(i*DATA_WIDTH) <= reg_vld(i);
                   OUTPUT_DATA((i+1)*DATA_WIDTH-1 downto i*DATA_WIDTH+1) <= mux_out((i+1)*(DATA_WIDTH-1)-1 downto i*(DATA_WIDTH-1));
                   OUTPUT_SRC_RDY <= INPUT_SRC_RDY;
-   
+
                   if (RESET = '1') then
                      OUTPUT_DATA(i*DATA_WIDTH) <= '0';
                   end if;

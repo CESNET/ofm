@@ -1,5 +1,5 @@
 /*
- * root.sv  
+ * root.sv
  * Copyright (C) 2020 CESNET z. s. p. o.
  * Author(s): Radek Iša <isa@cesnet.cz>
  * SPDX-License-Identifier: BSD-3-Clause

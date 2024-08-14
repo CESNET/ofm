@@ -25,12 +25,12 @@ use UNISIM.vcomponents.all;
 --                      Architecture declaration
 -- ----------------------------------------------------------------------------
 architecture behavioral of SDP_BMEM is
-    
+
    attribute ram_style   : string; -- for XST
    attribute block_ram   : boolean; -- for precision
-   
+
    type t_mem is array(0 to ITEMS-1) of std_logic_vector(DATA_WIDTH-1 downto 0);
-   
+
    -- ----------------------------------------------------------------------
    -- Function to Zero out the memory
    -- This is to prevent 'U' signals in simulations
@@ -46,7 +46,7 @@ architecture behavioral of SDP_BMEM is
    -- ----------------------------------------------------------------------
 
    shared variable memory : t_mem := BRAM_INIT_MEM;
-   
+
    signal dob_to_reg        : std_logic_vector(DATA_WIDTH-1 downto 0);
    signal reg_dob           : std_logic_vector(DATA_WIDTH-1 downto 0);
    signal reg_dob_dv1       : std_logic;
@@ -55,11 +55,11 @@ architecture behavioral of SDP_BMEM is
 
    attribute ram_style of memory: variable is "block"; -- auto,block,distributed
    attribute block_ram of memory: variable is true; -- true,false
-   
+
 begin
-   
+
    -- ------------------------- memory - port A ------------------------------
-   
+
    process(CLKA)
    begin
       if (CLKA'event and CLKA = '1') then
@@ -68,10 +68,10 @@ begin
          end if;
       end if;
    end process;
-   
-   
+
+
    -- ------------------------- memory - port B ------------------------------
-   
+
    process(CLKB)
    begin
       if (CLKB'event and CLKB = '1') then
@@ -81,13 +81,13 @@ begin
       end if;
    end process;
 
-   
+
    -- ------------------------ Output registers -------------------------------
 
    GEN_DATA_RST: if (RESET_DATA_PATH) generate
       reset_data_b <= RSTB;
    end generate;
-   
+
    GEN_DATA_NOT_RST: if (not RESET_DATA_PATH) generate
       reset_data_b <= '0';
    end generate;
@@ -118,7 +118,7 @@ begin
             end if;
          end if;
       end process;
-   
+
       -- Mapping registers to output
       DOB <= reg_dob;
       DOB_DV <= reg_dob_dv2;
@@ -128,7 +128,7 @@ begin
    -- --------------------- No Output registers -------------------------------
 
    NOOUTPUTREG: if (OUTPUT_REG = false) generate
-      -- DOB DV Register   
+      -- DOB DV Register
       process(CLKB)
       begin
          if (CLKB'event AND CLKB = '1') then
@@ -139,9 +139,9 @@ begin
             end if;
          end if;
       end process;
-      
+
       -- Mapping memory to output
       DOB <= dob_to_reg;
    end generate;
-   
+
 end architecture behavioral;

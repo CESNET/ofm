@@ -145,7 +145,7 @@ begin
       if (rst='1') then
          wait until rst='0';
       end if;
-      
+
       if (rx_src_rdy='1' and rx_rdy='1') then
          i := to_integer(false_wr_ptr);
          false_fifo((i+1)*DATA_WIDTH-1 downto i*DATA_WIDTH) <= std_logic_vector(d_i);
@@ -156,7 +156,7 @@ begin
       if (rx_rdy='1' or rx_src_rdy='0') then
          rx_src_rdy <= '0';
          rx_data    <= std_logic_vector(d_i);
-         
+
          uniform(seed1,seed2,rand);
          X := integer(rand*real(src_rdy_ch+not_src_rdy_ch));
          if (X<=src_rdy_ch) then
@@ -201,4 +201,4 @@ begin
 
       wait for C_CLK_PER;
    end process;
-end architecture behavioral; 
+end architecture behavioral;

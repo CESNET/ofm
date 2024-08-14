@@ -2,7 +2,7 @@
 # Copyright (C) 2014 CESNET
 # Author: Mario Kuka <xkukam00@stud.fit.vutbr.cz>
 # SPDX-License-Identifier: BSD-3-Clause
-# 
+#
 # $Id$
 #
 
@@ -18,10 +18,10 @@ proc blk_STREAM { } {
     add_wave "-noupdate -hex -label DRD" /$STREAM_PATH/MI_DRD
     add_wave "-noupdate -hex -label ARDY" /$STREAM_PATH/MI_ARDY
     add_wave "-noupdate -hex -label DRDY" /$STREAM_PATH/MI_DRDY
-    add wave -divider "SETTINGS" 
+    add wave -divider "SETTINGS"
     add_wave "-noupdate -hex -label setting1" /$STREAM_PATH/settings1
     add_wave "-noupdate -hex -label setting2" /$STREAM_PATH/settings2
-    add wave -divider "IN" 
+    add wave -divider "IN"
     add_wave "-noupdate -hex -label DST_RDY" /$STREAM_PATH/DST_RDY
     add wave -divider "OUT"
     add_wave "-noupdate -hex -label DATA" /$STREAM_PATH/DATA
@@ -37,7 +37,7 @@ proc blk_STREAM { } {
     add_wave "-noupdate -hex -label wea" /$STREAM_PATH/wea
     add_wave "-noupdate -hex -label rea" /$STREAM_PATH/rea
     add_wave "-noupdate -hex -label dia" /$STREAM_PATH/dia
-    add wave -divider "RD_OUT_MUX" 
+    add wave -divider "RD_OUT_MUX"
     add_wave "-noupdate -hex -label mux_addr_out" /$STREAM_PATH/mux_addr_out
     add_wave "-noupdate -hex -label mux_reg_out" /$STREAM_PATH/mux_reg_out
     add_wave "-noupdate -hex -label mux_drd_mem" /$STREAM_PATH/mux_drd_mem

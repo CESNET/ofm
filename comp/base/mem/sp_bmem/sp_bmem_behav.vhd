@@ -28,12 +28,12 @@ use UNISIM.vcomponents.all;
 --                      Architecture declaration
 -- ----------------------------------------------------------------------------
 architecture behavioral of SP_BMEM is
-   
+
    attribute ram_style   : string; -- for XST
    attribute block_ram   : boolean; -- for precision
-   
+
    type t_mem is array(0 to ITEMS-1) of std_logic_vector(DATA_WIDTH-1 downto 0);
-   
+
    -- ----------------------------------------------------------------------
    -- Function to Zero out the memory
    -- This is to prevent 'U' signals in simulations
@@ -47,21 +47,21 @@ architecture behavioral of SP_BMEM is
       return init;
    end BRAM_INIT_MEM;
    -- ----------------------------------------------------------------------
-   
+
    signal memory : t_mem := BRAM_INIT_MEM;
-   
+
    attribute ram_style of memory: signal is "block"; -- auto,block,distributed
    attribute block_ram of memory: signal is true; -- true,false
-   
+
    signal do_to_reg        : std_logic_vector(DATA_WIDTH-1 downto 0);
    signal reg_do           : std_logic_vector(DATA_WIDTH-1 downto 0);
    signal reg_do_dv1       : std_logic;
    signal reg_do_dv2       : std_logic;
-   
+
 begin
-   
+
    -- ------------------------------ memory -----------------------------------
-   
+
    GEN_WRITE_FIRST: if (WRITE_MODE = "WRITE_FIRST") generate
       process(CLK)
       begin
@@ -105,8 +105,8 @@ begin
          end if;
       end process;
    end generate;
-   
-   
+
+
    -- ------------------------ Output registers -------------------------------
    OUTPUTREG : if (OUTPUT_REG = true) generate
       -- DO Register
@@ -124,7 +124,7 @@ begin
             end if;
          end if;
       end process;
-   
+
       -- mapping registers to output
       DO <= reg_do;
       DO_DV <= reg_do_dv2;
@@ -143,9 +143,9 @@ begin
             end if;
          end if;
       end process;
-      
+
       -- mapping memory to output
       DO <= do_to_reg;
    end generate;
-   
+
 end architecture behavioral;

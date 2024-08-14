@@ -1,7 +1,7 @@
 /*
  * file       : monitor.sv
  * Copyright (C) 2021 CESNET z. s. p. o.
- * description: convert byte array to intel mac seq 
+ * description: convert byte array to intel mac seq
  * date       : 2021
  * author     : Radek Iša <isa@cesnet.cz>
  *

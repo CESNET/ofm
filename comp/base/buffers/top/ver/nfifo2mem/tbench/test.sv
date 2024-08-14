@@ -11,7 +11,7 @@
  *
  */
 
-import sv_buffer_pkg::*; 
+import sv_buffer_pkg::*;
 import test_pkg::*;
 import sv_common_pkg::*;
 
@@ -21,38 +21,38 @@ import sv_common_pkg::*;
 // ----------------------------------------------------------------------------
 program TEST (
   input  logic           CLK,
-  output logic           RESET,  
+  output logic           RESET,
   iNFifoRx.nfifo_write_tb FW[FLOWS],
   iMemRead.tb             MR
   );
-  
+
   // --------------------------------------------------------------------------
   //                       Variables declaration
   // --------------------------------------------------------------------------
   // AK MA KOMPONENTA VIAC DRIVEROV ALEBO MONITOROV TREBA ICH NA TOMTO MIESTE DEKLAROVAT A V TASKU
   // CREATEENVIRONMENT INSTANCIOVAT
-  
+
   // Transaction
-  BufferTransaction                                                   buffBlueprint;                  
-  // Generator 
-  Generator                                                           generator[FLOWS]; 
-  // Driver 
+  BufferTransaction                                                   buffBlueprint;
+  // Generator
+  Generator                                                           generator[FLOWS];
+  // Driver
   nFifoDriver #(DRIVER0_DATA_WIDTH,DRIVER0_FLOWS,DRIVER0_BLOCK_SIZE,
                  DRIVER0_LUT_MEMORY, 0)                               fDriver[FLOWS];
   // Monitor
   MemMonitorNew #(MONITOR0_DATA_WIDTH,MONITOR0_FLOWS,MONITOR0_BLOCK_SIZE,
                  MONITOR0_LUT_MEMORY, MONITOR0_OUTPUT_REG)
-                                                                      fMonitor;   
+                                                                      fMonitor;
   // Scoreboard
   Scoreboard                                                          scoreboard;
   // Coverage
   Coverage #(DATA_WIDTH,FLOWS,BLOCK_SIZE,LUT_MEMORY,0)                coverage;
-  
+
   // --------------------------------------------------------------------------
   //                       Creating Environment tasks
   // --------------------------------------------------------------------------
 
-  // --------------------------------------------------------------------------  
+  // --------------------------------------------------------------------------
   // Create Test Environment
   task createEnvironment();
     // Create generator
@@ -62,36 +62,36 @@ program TEST (
       buffBlueprint.dataSize   = GENERATOR0_DATA_SIZE;
       buffBlueprint.flowCount  = GENERATOR0_FLOW_COUNT;
       generator[i].blueprint = buffBlueprint;
-    end;   
-   
+    end;
+
     // Create scoreboard
     scoreboard = new;
-    
+
     // Coverage class
     coverage = new();
-      
-    // Create and connect driver 
-    if (FLOWS>0) 
-    begin  
+
+    // Create and connect driver
+    if (FLOWS>0)
+    begin
       fDriver[0] = new ("Driver0", 0, generator[0].transMbx, FW[0]);
       coverage.addGeneralInterfaceWrite(FW[0],"FWcoverage0");
-    end 
-     
+    end
+
     if (FLOWS>1)
     begin
       fDriver[1] = new ("Driver1", 1, generator[1].transMbx, FW[1]);
       coverage.addGeneralInterfaceWrite(FW[1],"FWcoverage1");
-    end  
-    
-    if (FLOWS>2) 
+    end
+
+    if (FLOWS>2)
     begin
       fDriver[2] = new ("Driver2", 2, generator[2].transMbx, FW[2]);
       coverage.addGeneralInterfaceWrite(FW[2],"FWcoverage2");
       fDriver[3] = new ("Driver3", 3, generator[3].transMbx, FW[3]);
       coverage.addGeneralInterfaceWrite(FW[3],"FWcoverage3");
     end
-    
-    if (FLOWS>4) 
+
+    if (FLOWS>4)
     begin
       fDriver[4] = new ("Driver4", 4, generator[4].transMbx, FW[4]);
       coverage.addGeneralInterfaceWrite(FW[4],"FWcoverage4");
@@ -101,10 +101,10 @@ program TEST (
       coverage.addGeneralInterfaceWrite(FW[6],"FWcoverage6");
       fDriver[7] = new ("Driver7", 7, generator[7].transMbx, FW[7]);
       coverage.addGeneralInterfaceWrite(FW[7],"FWcoverage7");
-    end  
+    end
 
     for(int i=0; i<FLOWS; i++) begin
-       fDriver[i].fwDelayEn_wt             = DRIVER0_DELAYEN_WT; 
+       fDriver[i].fwDelayEn_wt             = DRIVER0_DELAYEN_WT;
        fDriver[i].fwDelayDisable_wt        = DRIVER0_DELAYDIS_WT;
        fDriver[i].fwDelayLow               = DRIVER0_DELAYLOW;
        fDriver[i].fwDelayHigh              = DRIVER0_DELAYHIGH;
@@ -121,11 +121,11 @@ program TEST (
     coverage.addGeneralInterfaceMonitor(MR,"MRcoverage");
 
   endtask : createEnvironment
-  
+
   // --------------------------------------------------------------------------
   //                       Test auxilarity procedures
   // --------------------------------------------------------------------------
-  
+
   // --------------------------------------------------------------------------
   // Resets design
   task resetDesign();
@@ -137,8 +137,8 @@ program TEST (
   // Enable test Enviroment
   task enableTestEnvironment();
     // Enable Driver, Monitor, Coverage for each port
-    // V PRIPADE POTREBY ZAPNUT VSETKY POUZITE DRIVERY A MONITORY 
-    for(int i=0; i<FLOWS; i++) 
+    // V PRIPADE POTREBY ZAPNUT VSETKY POUZITE DRIVERY A MONITORY
+    for(int i=0; i<FLOWS; i++)
         fDriver[i].setEnabled();
     fMonitor.setEnabled();
     coverage.setEnabled();
@@ -150,13 +150,13 @@ program TEST (
      // V PRIPADE POTREBY VYPNUT VSETKY POUZITE DRIVERY A MONITORY
      // Disable drivers
     #(1000*CLK_PERIOD);
-    for(int i=0; i<FLOWS; i++) 
+    for(int i=0; i<FLOWS; i++)
         fDriver[i].setDisabled();
     fMonitor.setDisabled();
     coverage.setDisabled();
   endtask : disableTestEnvironment
 
-  
+
   // --------------------------------------------------------------------------
   //                            Test cases
   // --------------------------------------------------------------------------
@@ -167,16 +167,16 @@ program TEST (
      $write("\n\n############ TEST CASE 1 ############\n\n");
      // Enable Test enviroment
      enableTestEnvironment();
-     // Run generators 
-     for(int i=0; i<FLOWS; i++) begin 
+     // Run generators
+     for(int i=0; i<FLOWS; i++) begin
         generator[i].setEnabled(TRANSACTION_COUNT);
      end
-     
-     // Pokud je generator aktivni nic nedelej 
-    for(int i=0; i<FLOWS; i++) begin   
+
+     // Pokud je generator aktivni nic nedelej
+    for(int i=0; i<FLOWS; i++) begin
     while (generator[i].enabled)
       #(CLK_PERIOD);
-    end  
+    end
 
     // Disable Test Enviroment
     disableTestEnvironment();
@@ -185,8 +185,8 @@ program TEST (
     scoreboard.display();
     coverage.display();
   endtask: test1
-  
-  
+
+
   // --------------------------------------------------------------------------
   //                           Main test part
   // --------------------------------------------------------------------------
@@ -200,7 +200,7 @@ program TEST (
     // TESTING
     // -------------------------------------
     test1();       // Run Test 1
-    
+
     // -------------------------------------
     // STOP TESTING
     // -------------------------------------

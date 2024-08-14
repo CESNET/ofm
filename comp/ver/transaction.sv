@@ -16,9 +16,9 @@
   // -- Transaction Class
   // --------------------------------------------------------------------------
   class Transaction;
-  
+
     // -- Public Class Atributes --
-   
+
     //-------------------------------------------------------------------------
      /*
      * Unique identifiers for a data model or transaction descriptor
@@ -28,13 +28,13 @@
      * generator before randomization so they can be used to specify conditional
      * constraints to express instance-specific or stream-specific constraints.
      */
-    int stream_id; 
-    int scenario_id; 
-    int data_id; 
+    int stream_id;
+    int scenario_id;
+    int data_id;
 
     // -- Public Class Methods --
     //
-  
+
     //-------------------------------------------------------------------------
     /*
      * Displays the current value of the transaction or data described by this
@@ -44,7 +44,7 @@
      */
     virtual function void display(string prefix = "");
     endfunction : display
-  
+
     //-------------------------------------------------------------------------
     /*
      * Copies the current value of the object instance to the specified object instance.
@@ -70,7 +70,7 @@
     endfunction : compare
 
   endclass : Transaction
-  
+
   // --------------------------------------------------------------------------
   // -- Transaction mailbox
   // --------------------------------------------------------------------------

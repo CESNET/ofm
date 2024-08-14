@@ -671,7 +671,7 @@ begin
 
                     TX_DATA    => oshk_do (i),
                     TX_VLD     => oshk_vld(i),
-                    TX_NEXT    => (others => '1') 
+                    TX_NEXT    => (others => '1')
                 );
 
                 -- Check Shakedown overflow

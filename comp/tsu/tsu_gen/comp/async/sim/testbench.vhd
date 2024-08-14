@@ -33,7 +33,7 @@ architecture behavioral of testbench is
    constant delay        : time := 5.5 ns;
    constant reset_delay  : time := 100 ns;
 
-   -- Signal declaration   
+   -- Signal declaration
    signal in_clk          : std_logic := '0';
    signal mi32_reset      : std_logic;
    signal tsu_core_reset  : std_logic;
@@ -41,7 +41,7 @@ architecture behavioral of testbench is
    signal rqst            : std_logic;
    signal rdy             : std_logic;
    signal out_rqst        : std_logic;
-   
+
 -- ----------------------------------------------------------------------------
 --                      Architecture body
 -- ----------------------------------------------------------------------------
@@ -97,7 +97,7 @@ begin
       tsu_core_reset <= '0';
       wait;
    end process;
-  
+
    -- ----------------------------------------------------------------------------
    --                         Main testbench process
    -- ----------------------------------------------------------------------------

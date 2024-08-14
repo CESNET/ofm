@@ -29,24 +29,24 @@ program TEST (
    iFrameLinkUTx.tb         TXHDR,
    iFrameLinkUTx.monitor    MONITORHDR
   );
-  
+
   // --------------------------------------------------------------------------
   //                       Variables declaration
   // --------------------------------------------------------------------------
-  
+
   FrameLinkUTransaction                fluBlueprint[PORTS];                         // Transaction
-  FrameLinkUTransaction                fluhdrBlueprint;     
+  FrameLinkUTransaction                fluhdrBlueprint;
   Generator                            generator[PORTS];                            // Generator
   Generator                            generator_hdr[PORTS];
   FrameLinkUDriver   #(DRIVER0_DATA_WIDTH, DRIVER0_EOP_WIDTH, DRIVER0_SOP_WIDTH)            fluDriver[PORTS];    // Driver
-  FrameLinkUDriver   #(DRIVER_HDR_DATA_WIDTH,DRIVER_HDR_EOP_WIDTH,DRIVER_HDR_SOP_WIDTH)     fluhdrDriver[PORTS];  
+  FrameLinkUDriver   #(DRIVER_HDR_DATA_WIDTH,DRIVER_HDR_EOP_WIDTH,DRIVER_HDR_SOP_WIDTH)     fluhdrDriver[PORTS];
   FrameLinkUMonitor  #(DRIVER0_DATA_WIDTH, DRIVER0_EOP_WIDTH, DRIVER0_SOP_WIDTH)            fluMonitor;          // Monitor
   FrameLinkUMonitor   #(DRIVER_HDR_DATA_WIDTH,DRIVER_HDR_EOP_WIDTH,DRIVER_HDR_SOP_WIDTH)    fluhdrMonitor;
   FrameLinkUResponder #(DRIVER0_DATA_WIDTH, DRIVER0_EOP_WIDTH, DRIVER0_SOP_WIDTH)           fluResponder;        // Responder
   FrameLinkUResponder  #(DRIVER_HDR_DATA_WIDTH,DRIVER_HDR_EOP_WIDTH,DRIVER_HDR_SOP_WIDTH)   fluhdrResponder;
   Scoreboard                           scoreboard;                              // Scoreboard
-  
-   virtual iFrameLinkURx.tb      #(DRIVER0_DATA_WIDTH, DRIVER0_EOP_WIDTH, DRIVER0_SOP_WIDTH)        vRX[PORTS]; 
+
+   virtual iFrameLinkURx.tb      #(DRIVER0_DATA_WIDTH, DRIVER0_EOP_WIDTH, DRIVER0_SOP_WIDTH)        vRX[PORTS];
    virtual iFrameLinkURx.tb      #(DRIVER_HDR_DATA_WIDTH,DRIVER_HDR_EOP_WIDTH,DRIVER_HDR_SOP_WIDTH) vRX_hdr[PORTS];
 
   // --------------------------------------------------------------------------
@@ -76,27 +76,27 @@ program TEST (
       generator_hdr[i] = new("Hdr Generator",i);
       generator_hdr[i].blueprint = fluhdrBlueprint;
    end
-  endtask: createGeneratorEnvironment    
+  endtask: createGeneratorEnvironment
 
   task createEnvironment();
     int unsigned enableAlign;
     string driverLabel;
-    
+
     vRX=RX;
     vRX_hdr = RXHDR;
-    
+
     // Create scoreboard
     scoreboard = new;
-   
+
     // Create driver
     for (int i=0; i<PORTS; i++) begin
-    $swrite(driverLabel, "Driver %0d", i);    
+    $swrite(driverLabel, "Driver %0d", i);
     fluDriver[i]  = new (driverLabel, generator[i].transMbx, vRX[i]);
-      fluDriver[i].insideTxDelayEn_wt       = DRIVER0_INSIDE_DELAYEN_WT; 
+      fluDriver[i].insideTxDelayEn_wt       = DRIVER0_INSIDE_DELAYEN_WT;
       fluDriver[i].insideTxDelayDisable_wt  = DRIVER0_INSIDE_DELAYDIS_WT;
       fluDriver[i].insideTxDelayLow         = DRIVER0_INSIDE_DELAYLOW;
       fluDriver[i].insideTxDelayHigh        = DRIVER0_INSIDE_DELAYHIGH;
-      
+
       // Get the information about aligning (& 1 means anding with mash 0000..001)
       enableAlign = (ALIGN_MAP >> i) & 1;
       fluDriver[i].startPositionLow         = DRIVER0_START_POS_LOW*enableAlign;
@@ -104,7 +104,7 @@ program TEST (
 
    $swrite(driverLabel, "Hdr Driver %0d",i);
    fluhdrDriver[i] = new (driverLabel, generator_hdr[i].transMbx, vRX_hdr[i]);
-      fluhdrDriver[i].insideTxDelayEn_wt       = DRIVER_HDR_INSIDE_DELAYEN_WT; 
+      fluhdrDriver[i].insideTxDelayEn_wt       = DRIVER_HDR_INSIDE_DELAYEN_WT;
       fluhdrDriver[i].insideTxDelayDisable_wt  = DRIVER_HDR_INSIDE_DELAYDIS_WT;
       fluhdrDriver[i].insideTxDelayLow         = DRIVER_HDR_INSIDE_DELAYLOW;
       fluhdrDriver[i].insideTxDelayHigh        = DRIVER_HDR_INSIDE_DELAYHIGH;
@@ -114,30 +114,30 @@ program TEST (
     fluDriver[i].setCallbacks(scoreboard.driverCbs);
     fluhdrDriver[i].setCallbacks(scoreboard.driverCbs);
     end;
-   
-   // Create and connect monitor and responder     
+
+   // Create and connect monitor and responder
       fluMonitor   = new ("Monitor0", MONITOR);
       fluResponder = new ("Responder0", TX);
       fluhdrMonitor   = new ("Monitor1",MONITORHDR);
       fluhdrResponder = new ("Responder1", TXHDR);
 
-      fluResponder.rxDelayEn_wt            = MONITOR0_DELAYEN_WT; 
+      fluResponder.rxDelayEn_wt            = MONITOR0_DELAYEN_WT;
       fluResponder.rxDelayDisable_wt       = MONITOR0_DELAYDIS_WT;
       fluResponder.rxDelayLow              = MONITOR0_DELAYLOW;
       fluResponder.rxDelayHigh             = MONITOR0_DELAYHIGH;
-      fluResponder.insideRxDelayEn_wt      = MONITOR0_INSIDE_DELAYEN_WT; 
+      fluResponder.insideRxDelayEn_wt      = MONITOR0_INSIDE_DELAYEN_WT;
       fluResponder.insideRxDelayDisable_wt = MONITOR0_INSIDE_DELAYDIS_WT;
       fluResponder.insideRxDelayLow        = MONITOR0_INSIDE_DELAYLOW;
-      fluResponder.insideRxDelayHigh       = MONITOR0_INSIDE_DELAYHIGH;    
-      
-      fluhdrResponder.rxDelayEn_wt            = MONITOR_HDR_DELAYEN_WT; 
+      fluResponder.insideRxDelayHigh       = MONITOR0_INSIDE_DELAYHIGH;
+
+      fluhdrResponder.rxDelayEn_wt            = MONITOR_HDR_DELAYEN_WT;
       fluhdrResponder.rxDelayDisable_wt       = MONITOR_HDR_DELAYDIS_WT;
       fluhdrResponder.rxDelayLow              = MONITOR_HDR_DELAYLOW;
       fluhdrResponder.rxDelayHigh             = MONITOR_HDR_DELAYHIGH;
-      fluhdrResponder.insideRxDelayEn_wt      = MONITOR_HDR_INSIDE_DELAYEN_WT; 
+      fluhdrResponder.insideRxDelayEn_wt      = MONITOR_HDR_INSIDE_DELAYEN_WT;
       fluhdrResponder.insideRxDelayDisable_wt = MONITOR_HDR_INSIDE_DELAYDIS_WT;
       fluhdrResponder.insideRxDelayLow        = MONITOR_HDR_INSIDE_DELAYLOW;
-      fluhdrResponder.insideRxDelayHigh       = MONITOR_HDR_INSIDE_DELAYHIGH;    
+      fluhdrResponder.insideRxDelayHigh       = MONITOR_HDR_INSIDE_DELAYHIGH;
 
       fluMonitor.setCallbacks(scoreboard.monitorCbs);
       fluhdrMonitor.setCallbacks(scoreboard.monitorCbs);
@@ -149,7 +149,7 @@ program TEST (
   // --------------------------------------------------------------------------
   //                       Test auxilarity procedures
   // --------------------------------------------------------------------------
-  
+
   // --------------------------------------------------------------------------
   // Resets design
   task resetDesign();
@@ -176,7 +176,7 @@ program TEST (
   // --------------------------------------------------------------------------
   // Disable test Environment
   task disableTestEnvironment();
-     #(1000*CLK_PERIOD); 
+     #(1000*CLK_PERIOD);
      for(int i=0; i<PORTS; i++) fluDriver[i].setDisabled();
      fluMonitor.setDisabled();
      fluResponder.setDisabled();
@@ -185,7 +185,7 @@ program TEST (
       for(int i=0;i<PORTS;i++) fluhdrDriver[i].setDisabled();
       fluhdrMonitor.setDisabled();
       fluhdrResponder.setDisabled();
-     end 
+     end
   endtask : disableTestEnvironment
 
   // Run all generators
@@ -226,7 +226,7 @@ program TEST (
      // Display Scoreboard
      scoreboard.display();
   endtask: test1
-  
+
   // --------------------------------------------------------------------------
   // Test Case 2
   // Classic length transactions, slow TX and fast RX
@@ -236,19 +236,19 @@ program TEST (
     // create & enable environment
     createGeneratorEnvironment();
     createEnvironment();
-    
+
     // set delays
-    fluResponder.rxDelayEn_wt            = 5; 
+    fluResponder.rxDelayEn_wt            = 5;
     fluResponder.rxDelayDisable_wt       = 1;
     fluResponder.rxDelayLow              = 0;
     fluResponder.rxDelayHigh             = 10;
-    fluResponder.insideRxDelayEn_wt      = 5; 
+    fluResponder.insideRxDelayEn_wt      = 5;
     fluResponder.insideRxDelayDisable_wt = 1;
     fluResponder.insideRxDelayLow        = 0;
     fluResponder.insideRxDelayHigh       = 10;
-    
+
     for(int i=0; i<PORTS; i++)
-    fluDriver[i].insideTxDelayEn_wt =0; 
+    fluDriver[i].insideTxDelayEn_wt =0;
 
     // Enable Test environment
     enableTestEnvironment();
@@ -262,7 +262,7 @@ program TEST (
 
     // Display Scoreboard
     scoreboard.display();
-  endtask: test2 
+  endtask: test2
 
   // --------------------------------------------------------------------------
   // Test Case 3
@@ -273,10 +273,10 @@ program TEST (
     // create & enable environment
     createGeneratorEnvironment();
     createEnvironment();
-    
+
     // set zero delays
-    fluResponder.rxDelayEn_wt        = 0; 
-    fluResponder.insideRxDelayEn_wt  = 0; 
+    fluResponder.rxDelayEn_wt        = 0;
+    fluResponder.insideRxDelayEn_wt  = 0;
 
     // Enable Test environment
     enableTestEnvironment();
@@ -301,16 +301,16 @@ program TEST (
     // create & enable environment
     createGeneratorEnvironment();
     createEnvironment();
-    
+
     // set delays
-    fluResponder.rxDelayEn_wt            = 5; 
+    fluResponder.rxDelayEn_wt            = 5;
     fluResponder.rxDelayDisable_wt       = 1;
     fluResponder.rxDelayLow              = 0;
     fluResponder.rxDelayHigh             = 4;
-    fluResponder.insideRxDelayEn_wt      = 5; 
+    fluResponder.insideRxDelayEn_wt      = 5;
     fluResponder.insideRxDelayDisable_wt = 1;
     fluResponder.insideRxDelayLow        = 0;
-    fluResponder.insideRxDelayHigh       = 4;    
+    fluResponder.insideRxDelayHigh       = 4;
     // Enable Test environment
     enableTestEnvironment();
 
@@ -324,7 +324,7 @@ program TEST (
     // Display Scoreboard
     scoreboard.display();
   endtask: test4
-  
+
     // --------------------------------------------------------------------------
   // Test Case 5
   // Classic length transactions, fast RX0 and TX, slow other RXs
@@ -334,25 +334,25 @@ program TEST (
     // create & enable environment
     createGeneratorEnvironment();
     createEnvironment();
-    
+
     // set delays
-    fluDriver[0].insideTxDelayEn_wt      = 1; 
+    fluDriver[0].insideTxDelayEn_wt      = 1;
     fluDriver[0].insideTxDelayDisable_wt = 1;
     fluDriver[0].insideTxDelayLow        = 0;
-    fluDriver[0].insideTxDelayHigh       = 1; 
+    fluDriver[0].insideTxDelayHigh       = 1;
     for(int i=1; i<PORTS; i++) begin
-    fluDriver[i].insideTxDelayEn_wt      = 5; 
+    fluDriver[i].insideTxDelayEn_wt      = 5;
     fluDriver[i].insideTxDelayDisable_wt = 1;
     fluDriver[i].insideTxDelayLow        = 0;
-    fluDriver[i].insideTxDelayHigh       = 10; 
+    fluDriver[i].insideTxDelayHigh       = 10;
     end
-    
+
     fluResponder.insideRxDelayEn_wt =0;
     fluResponder.rxDelayEn_wt =0;
-    
+
     // Enable Test environment
     enableTestEnvironment();
-     
+
     // Start Test
       runGenerators();
       waitAndDisableGenerators();
@@ -362,8 +362,8 @@ program TEST (
 
     // Display Scoreboard
     scoreboard.display();
-  endtask: test5 
- 
+  endtask: test5
+
   // --------------------------------------------------------------------------
   // Test Case 6
   // Classical Ethernet Frame transaction, no TX wait, fast RX
@@ -373,17 +373,17 @@ program TEST (
     // create & enable environment
     createGeneratorEnvironment(1500,60);
     createEnvironment();
-    
-    // set zero delays
-    fluResponder.rxDelayEn_wt        = 0; 
-    fluResponder.insideRxDelayEn_wt  = 0; 
 
-    fluResponder.rxDelayEn_wt            = 0; 
-    fluResponder.insideRxDelayEn_wt      = 0; 
-    
+    // set zero delays
+    fluResponder.rxDelayEn_wt        = 0;
+    fluResponder.insideRxDelayEn_wt  = 0;
+
+    fluResponder.rxDelayEn_wt            = 0;
+    fluResponder.insideRxDelayEn_wt      = 0;
+
     for(int i=0; i<PORTS; i++)
-    fluDriver[i].insideTxDelayEn_wt =0; 
-    
+    fluDriver[i].insideTxDelayEn_wt =0;
+
     // Enable Test environment
     enableTestEnvironment();
 
@@ -410,7 +410,7 @@ program TEST (
      createEnvironment();
      // Enable Test environment
      enableTestEnvironment();
-     
+
      // Start Test
       runGenerators();
       waitAndDisableGenerators();
@@ -420,7 +420,7 @@ program TEST (
      // Display Scoreboard
      scoreboard.display();
   endtask: test7
- 
+
   // --------------------------------------------------------------------------
   //                           Main test part
   // --------------------------------------------------------------------------
@@ -434,13 +434,13 @@ program TEST (
     // -------------------------------------
     // TESTING
     // -------------------------------------
-    test1(); 
+    test1();
     test2();
     test3();
     test4();
     test5();
     test6();
-       
+
     // Last test with very short packets will be run if and only if
     // the 128 bit gap is not reserved
     if(RESERVE_GAP_EN == FALSE ) test7();

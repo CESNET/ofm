@@ -24,7 +24,7 @@ entity MUL_DSP is
    generic (
       --! Maximum 24 bits
       A_DATA_WIDTH   : integer := 10;
-      --! N bits  
+      --! N bits
       B_DATA_WIDTH   : integer := 32;
       --! Input pipeline registers (0, 1)
       REG_IN      : integer := 0;

@@ -23,7 +23,7 @@ class WordLinkDriver #(int pDataWidth=512)
    virtual iWordLinkRx.tb #(pDataWidth) dc;
 
    //! Semaphore to solve problems with subprocesses
-   semaphore sem;                 
+   semaphore sem;
 
    //! Enable/Disable delays
    rand bit enTxDelay;
@@ -80,14 +80,14 @@ class WordLinkDriver #(int pDataWidth=512)
     * Lock driver
     */
    function int tryLock();
-      return sem.try_get(1);          // Try set semaphore to lock 
+      return sem.try_get(1);          // Try set semaphore to lock
    endfunction: tryLock
 
    /**
     * Lock driver
     */
    task lock();
-      sem.get(1);                     // Semaphore is set to lock 
+      sem.get(1);                     // Semaphore is set to lock
    endtask: lock
 
    /**
@@ -107,7 +107,7 @@ class WordLinkDriver #(int pDataWidth=512)
 
       // Lock driver
       lock();
-    
+
       // Driver is sending transaction
       busy = 1;
 

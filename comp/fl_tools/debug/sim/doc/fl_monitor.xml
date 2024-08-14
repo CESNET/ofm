@@ -27,7 +27,7 @@
 
 
     <description>
-         Data are logged on input FrameLink interface. Component suports FrameLink data bus width of 16, 32, 64 and 128 bits. 
+         Data are logged on input FrameLink interface. Component suports FrameLink data bus width of 16, 32, 64 and 128 bits.
     </description>
 
     <interface>
@@ -82,7 +82,7 @@
 	    <port name="RX_DST_RDY_N" dir="in" width="1">
 		    RX destination ready.
             </port>
-	    
+
         </port_map>
 
     </interface>
@@ -91,17 +91,17 @@
 
         <h1>Data alignment</h1>
         <p>
-            Little-endian byte order is used in this component. 
+            Little-endian byte order is used in this component.
         </p>
 
         <h1>FrameLink Monitor Component</h1>
         <p>
-          The size of internal FL FIFO is 32768 items. 
+          The size of internal FL FIFO is 32768 items.
         </p>
         <p>
          When you want to use Monitor component fl_bfm_rdy_pkg package must be included:
          </p>
-         <p> 
+         <p>
          <i>use work.fl_bfm_rdy_pkg;</i>
         </p>
 
@@ -121,7 +121,7 @@
        </ul>
        Random generator seed can be set by procedure <i>SetSeed(Seed : in integer);</i>.
       </p>
-      
+
      <h1>File format</h1>
        <p>
        <ul>

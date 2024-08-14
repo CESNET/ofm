@@ -11,7 +11,7 @@
  * TODO:
  *
  */
- 
+
   // --------------------------------------------------------------------------
   // -- Mi32 Driver Class
   // --------------------------------------------------------------------------
@@ -30,10 +30,10 @@
     tTransMbx transMbx;                         // Transaction mailbox
     DriverCbs cbs[$];                           // Callbacks list
     virtual iMi32.tb    mi;
-  
+
     rand bit enTxDelay;   // Enable/Disable delays between transactions
       // Enable/Disable delays between transaction (weights)
-      int txDelayEn_wt             = 1; 
+      int txDelayEn_wt             = 1;
       int txDelayDisable_wt        = 3;
 
     rand integer txDelay; // Delay between transactions
@@ -56,13 +56,13 @@
     // -- Public Class Methods --
 
     // -- Constructor ---------------------------------------------------------
-    // Create driver object 
-    function new ( string inst, 
-                   tTransMbx transMbx, 
-                   virtual iMi32.tb mi 
+    // Create driver object
+    function new ( string inst,
+                   tTransMbx transMbx,
+                   virtual iMi32.tb mi
                          );
       this.enabled     = 0;            // Driver is disabled by default
-      this.mi          = mi;           // Store pointer interface 
+      this.mi          = mi;           // Store pointer interface
       this.transMbx    = transMbx;     // Store pointer to mailbox
       this.inst        = inst;         // Store driver identifier
       this.busy        = 0;            // Driver is not busy by default
@@ -72,57 +72,57 @@
       this.mi.cb.BE        <= 0;
       this.mi.cb.RD        <= 0;
       this.mi.cb.WR        <= 0;
-    endfunction: new  
-    
-    
+    endfunction: new
+
+
     // -- Set Callbacks -------------------------------------------------------
-    // Put callback object into List 
+    // Put callback object into List
     function void setCallbacks(DriverCbs cbs);
       this.cbs.push_back(cbs);
     endfunction : setCallbacks
-    
+
     // -- Enable Driver -------------------------------------------------------
     // Enable driver and runs driver process
     task setEnabled();
       enabled = 1; // Driver Enabling
-      fork         
+      fork
         run();     // Creating driver subprocess
       join_none;   // Don't wait for ending
     endtask : setEnabled
-        
+
     // -- Disable Driver ------------------------------------------------------
     // Disable generator
     task setDisabled();
       enabled = 0; // Disable driver, after sending last transaction it ends
     endtask : setDisabled
-    
+
     // -- Send Transaction ----------------------------------------------------
     // Send transaction to mi32 interface
     task sendTransaction( Mi32Transaction transaction );
       Transaction tr;
       $cast(tr, transaction);
-    
+
       busy = 1;
       // Call transaction preprocesing, if is available
       foreach (cbs[i]) cbs[i].pre_tx(tr, inst);
 
       // Wait before sending transaction
       if (enTxDelay) repeat (txDelay) @(mi.cb);
-      
+
       // Send transaction
       executeTransaction(transaction);
-      
-      // Set no request 
+
+      // Set no request
       mi.cb.RD     <= 0;
       mi.cb.WR     <= 0;
-    
+
       // Call transaction postprocesing, if is available
       foreach (cbs[i]) cbs[i].post_tx(tr, inst);
       busy = 0;
     endtask : sendTransaction
-    
+
     // -- Private Class Methods --
-    
+
     // -- Run Driver ----------------------------------------------------------
     // Take transactions from mailbox and generate them to interface
     task run();
@@ -137,7 +137,7 @@
 //        transaction.display();
       end
     endtask : run
-    
+
 
     // -- Wait for ARDY -----------------------------------------------------
     // Wait for address ready signal
@@ -150,14 +150,14 @@
     // -- Execute transaction -----------------------------------------------
     // Send transaction command and data
     task executeTransaction(Mi32Transaction tr);
-    
+
       // Allign data from transaction to fl.DATA
       mi.cb.ADDR      <= tr.address;
-      mi.cb.DWR       <= tr.data;    
-      mi.cb.BE        <= tr.be;     
-      mi.cb.WR        <= tr.rw;  // wr == 1 => write request 
-      mi.cb.RD        <= !tr.rw; // wr == 0 => read request 
-      
+      mi.cb.DWR       <= tr.data;
+      mi.cb.BE        <= tr.be;
+      mi.cb.WR        <= tr.rw;  // wr == 1 => write request
+      mi.cb.RD        <= !tr.rw; // wr == 0 => read request
+
       @(mi.cb);
       waitForARDY();  // Wait until oposit side set ready
 
@@ -166,6 +166,6 @@
       mi.cb.RD        <= 0;
 
     endtask : executeTransaction
-     
-  endclass : Mi32Driver 
+
+  endclass : Mi32Driver
 

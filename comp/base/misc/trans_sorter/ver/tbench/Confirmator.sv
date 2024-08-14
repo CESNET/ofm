@@ -2,7 +2,7 @@
 //-- Copyright (C) 2020 CESNET z. s. p. o.
 //-- Author(s): Tomáš Beneš <xbenes55@stud.fit.vutbr.cz>
 //--
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 // -- This class is designed to send confirmation transactions ----------------
 //    to mailbox of confsDriver. And also handle implementation
@@ -11,9 +11,9 @@ class  Confirmator;
 
     tTransMbx   confsMbx;
     tTransMbx   confsInDUTMbx;
-    tTransMbx   transMbx;    
+    tTransMbx   transMbx;
     IdTable     idTable;
-    bit         enabled; 
+    bit         enabled;
     event       transactionMoved;
 
     TransactionTable #(0)       transTable;
@@ -28,7 +28,7 @@ class  Confirmator;
         this.transTable         =tt;
         this.scoreTable         =st;
     endfunction
-    
+
     function setEnabled();
         enabled=1;
         //  Start implementation and generator processes.
@@ -37,7 +37,7 @@ class  Confirmator;
             runImplementationOfDUT();
         join_none;
     endfunction
-    
+
     function setDisabled();
         enabled=0;
     endfunction
@@ -54,18 +54,18 @@ class  Confirmator;
             #((delayBetweenConfirmations*CLK_PERIOD));
 
             //  Generate "numberOfConfTransaction" confirmations.
-            while(numberOfConfTransaction>0)begin       
-                bit status=0;               
+            while(numberOfConfTransaction>0)begin
+                bit status=0;
                 int delayToSendConf = $urandom_range(DELAY_TO_SEND_CONFS_HIGH, DELAY_TO_SEND_CONFS_LOW);      //  Generate delay between generate and send of confirmations.
                 int ID              = $urandom_range(2**ID_WIDTH-1,0);     //  Generated ID.
 
                 idTable.setCounterToConfState(ID,status);     //  Set up this ID to confirmation state.
-                
+
                 //  Send generated ID.
                 if(status==1)begin
-                    
+
                     MvbTransaction #(ID_WIDTH) confsTrans=new();
-                    
+
                     if(VERBOSE_LEVEL>2)begin
                         $write("- idTable for id %1d --------------------------------------\n", ID);
                         idTable.display();
@@ -86,14 +86,14 @@ class  Confirmator;
     // -- This task will confirm transaction with same ID as is in the confirmationID. ----------------------------------------------------------------
     //  The MvbTransaction confirmationID containts ID that is being confirmed.
     task confirmTrWithSameID(MvbTransaction #(ID_WIDTH) confirmationID);
-        for(int i=0 ; i < transTable.tr_table.size ; i++) begin 
+        for(int i=0 ; i < transTable.tr_table.size ; i++) begin
             MvbTransaction #(ITEM_WIDTH+1) actualTransaction=new();
             transTable.tr_table[i].copy(actualTransaction);
             //  Only if the IDs are the same is the LSB set to 1.
-            if(actualTransaction.data[ID_WIDTH:1]==confirmationID.data)begin      
+            if(actualTransaction.data[ID_WIDTH:1]==confirmationID.data)begin
                 actualTransaction.data[0]=1;
-                actualTransaction.copy(transTable.tr_table[i]);        
-            end    
+                actualTransaction.copy(transTable.tr_table[i]);
+            end
         end
     endtask
 
@@ -102,7 +102,7 @@ class  Confirmator;
         //  Check all transactions while they are confirmed.
         for (int k=0 ; k < transTable.tr_table.size ; k++) begin
             MvbTransaction #(ITEM_WIDTH+1) actualTransaction=new();
-            
+
             transTable.tr_table[k].copy(actualTransaction);
             //  Remove only confirmed transactions.
             if(actualTransaction.data[0]==1)begin
@@ -113,7 +113,7 @@ class  Confirmator;
                 transactionToScoreTable.data=actualTransaction.data[ITEM_WIDTH:1];
                 transactionToScoreTable.word=actualTransaction.word;
                 transactionToScoreTable.stream=actualTransaction.stream;
-                
+
                 //  Add transaction to scoreTable and remove it from transTable.
                 scoreTable.add(transactionToScoreTable);
                 transTable.remove(actualTransaction,status);
@@ -129,29 +129,29 @@ class  Confirmator;
             end
         end
     endtask
-    
+
     // -- Implementation of the component. ------------------------------------------------------------------------------------------------------------
     //    This task implements the acceptance of transactions and confirmation of the transacrion in that order.
     //    This process happens only if some word was moved at any input interface.
     task runImplementationOfDUT();
         while (enabled==1) begin
             Transaction tr;
-            
+
             //  Waiting for transaction to be moved.
             @(transactionMoved);
             //  Trying to get transactions from mailbox dedicated for transactions.
             while(transMbx.try_get(tr)!=0)begin
-                
-                MvbTransaction #(ITEM_WIDTH) incomingTransaction        =new();
-                MvbTransaction #(ITEM_WIDTH+1) transactionWithConfBit   =new(); 
 
-                if(VERBOSE_LEVEL>2)begin                    
+                MvbTransaction #(ITEM_WIDTH) incomingTransaction        =new();
+                MvbTransaction #(ITEM_WIDTH+1) transactionWithConfBit   =new();
+
+                if(VERBOSE_LEVEL>2)begin
                     $timeformat(-9, 3, " ns", 8);
                     $write("%t transaction in mailbox- ",$time);
                     tr.display();
                 end
-                tr.copy(incomingTransaction);     
-                //  Setting transaction variables.    
+                tr.copy(incomingTransaction);
+                //  Setting transaction variables.
                 transactionWithConfBit.data[0]=0;
                 transactionWithConfBit.data[ITEM_WIDTH:1]=incomingTransaction.data;
                 transactionWithConfBit.stream=incomingTransaction.stream;
@@ -163,7 +163,7 @@ class  Confirmator;
                 transTable.add(transactionWithConfBit);
                 if(VERBOSE_LEVEL>0)begin
                     $timeformat(-9, 3, " ns", 8);
-                    $write("Transaction 0x%b added to transTable %t\n", transactionWithConfBit.data,$time);   
+                    $write("Transaction 0x%b added to transTable %t\n", transactionWithConfBit.data,$time);
                 end
                 if (VERBOSE_LEVEL>1) begin
                     transTable.display(1, "transTable with new item - ");
@@ -193,13 +193,13 @@ class  Confirmator;
                 end else begin
                     confirmTrWithSameID(confirmationID);
                     removeAlreadyConfTrInOrder();
-                        
+
                     if (VERBOSE_LEVEL>1) begin
                         transTable.display(1,"transTable after confirmation - ");
                     end
-                    
+
                 end
-                
+
             end
         end
     endtask

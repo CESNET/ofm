@@ -8,7 +8,7 @@
 # Set paths
 
 set SV_MVB_BASE   "$OFM_PATH/comp/mvb_tools/ver"
-  
+
 set COMPONENTS [list \
       [ list "SV_MVB"   $SV_MVB_BASE  "FULL"] \
 ]

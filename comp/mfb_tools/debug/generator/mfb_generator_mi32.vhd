@@ -22,7 +22,7 @@ use work.math_pack.all;
 -- options (like frame length) accessible over the MI.
 --
 -- The MI address space is (considering only the lowest 6 bits):
--- 
+--
 -- - 0x00 - Control (write 1 to start, 0 to stop)
 -- - 0x04 - Length (set length of generated frames)
 -- - 0x08 - Channel increment

@@ -47,7 +47,7 @@ end entity;
 architecture FULL of ALU_STATS is
    --! signals
    signal zeros      : std_logic_vector(63 downto 0);
-begin 
+begin
    zeros <= X"0000000000000000";
 
    gen_dps : if(EN_DSP = true) generate
@@ -72,7 +72,7 @@ begin
       -- enable A in
       en_A <= '0' when RST_ADD = '1' else
               '1';
-      
+
       opmode <= '0' & en_A & en_A & "00" & en_B & en_B;
 
       --! DSP slice instantion
@@ -84,10 +84,10 @@ begin
         USE_DPORT => FALSE, -- Select D port usage (TRUE or FALSE)
         USE_MULT => "NONE", -- Select multiplier usage ("MULTIPLY", "DYNAMIC", or "NONE")
         -- Pattern Detector Attributes: Pattern Detection Configuration
-        AUTORESET_PATDET => "NO_RESET",   -- "NO_RESET", "RESET_MATCH", "RESET_NOT_MATCH" 
+        AUTORESET_PATDET => "NO_RESET",   -- "NO_RESET", "RESET_MATCH", "RESET_NOT_MATCH"
         MASK => X"3fffffffffff",          -- 48-bit mask value for pattern detect (1=ignore)
         PATTERN => X"000000000000",       -- 48-bit pattern match for pattern detect
-        SEL_MASK => "MASK",               -- "C", "MASK", "ROUNDING_MODE1", "ROUNDING_MODE2" 
+        SEL_MASK => "MASK",               -- "C", "MASK", "ROUNDING_MODE1", "ROUNDING_MODE2"
         SEL_PATTERN => "PATTERN",         -- Select pattern value ("PATTERN" or "C")
         USE_PATTERN_DETECT => "NO_PATDET",-- Enable pattern detect ("PATDET" or "NO_PATDET")
         -- Register Control Attributes: Pipeline Register Configuration
@@ -166,38 +166,38 @@ begin
       );
    end generate;
 
- 
+
    BEH_ALU : if(EN_DSP = false) generate
       signal in_a  : std_logic_vector(A'range);
       signal in_b  : std_logic_vector(B'range);
       signal out_p : std_logic_vector(P'range);
    begin
-        
+
       in_b <= (others => '0') when RST_ADD = '1' else
               B               when EN_ADD = '1' else
               (others => '0');
-      
+
       in_a <= (others => '0') when RST_ADD = '1' else
               A;
-      
+
       out_p <= in_a + in_b;
 
       GEN_REG_on : if(REG_OUT = 1) generate
          process(CLK)
          begin
             if (CLK'event) and (CLK = '1') then
-               if (RESET = '1') then   
+               if (RESET = '1') then
                   P <= (others => '0');
                else
-                  P <= out_p;  
+                  P <= out_p;
                end if;
             end if;
          end process;
       end generate;
-      
+
       GEN_REG_off : if(REG_OUT = 0) generate
          P <= out_p;
       end generate;
-   
+
    end generate;
 end architecture;

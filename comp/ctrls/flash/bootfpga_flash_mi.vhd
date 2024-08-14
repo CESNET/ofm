@@ -1,4 +1,4 @@
--- bootfpga_mi_x16.vhd : Component for work with parallel x16 flash 
+-- bootfpga_mi_x16.vhd : Component for work with parallel x16 flash
 --!
 --! \file
 --! \brief Parallel asynchronous flash interface & FPGA boot component
@@ -50,15 +50,15 @@ port(
    RST_N     : out std_logic;
    -- Write anable
    WE_N      : out std_logic;
-   -- Synchronous mode only      
+   -- Synchronous mode only
    FWAIT      : in  std_logic;
-   -- Synchronous mode only. Tie LOW 
+   -- Synchronous mode only. Tie LOW
    ADV_N     : out std_logic;
    -- Write protect - tie HIGH
    WP_N      : out std_logic;
    -- synchronous mode flash clock - tie LOW or HIGH
    FCLK      : out std_logic
-   
+
 );
 end bootfpga_flash_mi;
 
@@ -71,13 +71,13 @@ architecture full of bootfpga_flash_mi is
    signal mi_wr_str     :  std_logic := '0';
    signal timeout       :  std_logic_vector(25 downto 0) := (others => '0');
    signal timeout_en    :  std_logic := '0';
-   
+
 begin
 
    ADV_N <= '0';
    WP_N  <= '1';
    FCLK  <= '0';
-      
+
    -- INFO: X"E" is a Reload FPGA Design Command, we send it delayed. (cca 135ms @ 250 MHz)
    -- INFO: Driver must detach device from the bus first. Otherwise is raised Kernel panic
 
@@ -128,7 +128,7 @@ begin
          when others => null;
       end case;
    end process;
-   
+
    FLASHCTRL_I: entity work.flashctrl
    generic map ( CLK_PERIOD => 4 )
    port map (
@@ -146,7 +146,7 @@ begin
       CS_N   => CS_N,
       OE_N   => OE_N,
       RST_N  => RST_N,
-      WE_N   => WE_N 
+      WE_N   => WE_N
    );
-   
+
 end full;

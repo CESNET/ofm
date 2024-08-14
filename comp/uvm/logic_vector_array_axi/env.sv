@@ -2,7 +2,7 @@
 //-- Copyright (C) 2022 CESNET z. s. p. o.
 //-- Author(s): Daniel Kříž <xkrizd01@vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 // Definition of axi environment
 class env_rx #(int unsigned DATA_WIDTH, int unsigned TUSER_WIDTH, int unsigned ITEM_WIDTH, int unsigned REGIONS, int unsigned BLOCK_SIZE, int unsigned STRADDLING) extends uvm_env;
@@ -120,7 +120,7 @@ class env_tx #(int unsigned DATA_WIDTH, int unsigned TUSER_WIDTH, int unsigned I
     uvm_reset::sync_cbs                                                     reset_sync;
 
     // ------------------------------------------------------------------------
-    // Definition of agents 
+    // Definition of agents
     uvm_logic_vector_array::agent#(ITEM_WIDTH) m_logic_vector_array_agent;
     uvm_logic_vector_array::config_item        logic_vector_array_agent_cfg;
 

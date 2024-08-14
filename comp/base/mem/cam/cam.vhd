@@ -24,7 +24,7 @@ entity CAM is
       CAM_ROW_WIDTH     : integer := 128;
       -- Number of data rows (depth of the CAM)
       CAM_ROW_COUNT     : integer := 32;
-      -- Width of address bus 
+      -- Width of address bus
       -- set to log2(CAM_ROW_COUNT)
       CAM_ADDR_WIDTH    : integer := 5;
       -- Width of internal storage element
@@ -53,12 +53,12 @@ entity CAM is
       -- common interface
       CLK               : in std_logic;
       RESET             : in std_logic;
-      
+
       -- insert interface
       ADDR              : in std_logic_vector((CAM_ADDR_WIDTH - 1) downto 0);
       MASK_IN           : in std_logic_vector((CAM_ROW_WIDTH - 1) downto 0);
       WRITE_EN          : in std_logic;
-      
+
       -- insert/search interface
       DATA_IN           : in std_logic_vector((CAM_ROW_WIDTH - 1) downto 0);
 

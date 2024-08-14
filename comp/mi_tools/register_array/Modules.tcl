@@ -11,8 +11,8 @@ set MI_PIPE  "$ENTITY_BASE/../pipe"
 set COMPONENTS [list \
     [list "GEN_MUX_ONEHOT"       $MUX      "FULL"] \
     [list "MI_PIPE"     $MI_PIPE    "FULL"] \
-] 
- 
+]
+
 set MOD "$MOD $ENTITY_BASE/reg_type.vhd"
 set MOD "$MOD $ENTITY_BASE/be_reg.vhd"
 set MOD "$MOD $ENTITY_BASE/mi_reg.vhd"

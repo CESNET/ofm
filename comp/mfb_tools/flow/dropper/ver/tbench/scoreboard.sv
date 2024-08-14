@@ -32,7 +32,7 @@ class ScoreboardDriverCbs extends DriverCbs;
 
       if (tr.meta == 1) begin
          //$write("Transaction dropped!\n");
-      end else begin 
+      end else begin
          sc_table.add(transaction);
          //$write("Transaction added to ScoreBoard table!\n");
          //$write("Transaction: \n");

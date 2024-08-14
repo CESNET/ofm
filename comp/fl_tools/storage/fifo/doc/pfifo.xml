@@ -56,11 +56,11 @@
    <port name="RX"       dir="inout" width="">
       Recieve interface (write to FIFO)
    </port>
-      
+
    <port name="TX"       dir="inout" width="">
       Transmit interface (read from FIFO)
    </port>
-  
+
    <divider>FIFO Control Interface</divider>
    <port name="DISCARD"       dir="in" width="1">
       Discard whole frame.
@@ -87,10 +87,10 @@
 
     <h1>Specification</h1>
     <p>
-    Use entity FL_PFIFO_FLxx for FIFO with frame discarding, 
-    where xx is data width (8, 16, 32, 64 or 128 bits). 
+    Use entity FL_PFIFO_FLxx for FIFO with frame discarding,
+    where xx is data width (8, 16, 32, 64 or 128 bits).
     </p>
-    
+
 <p>
    Both FrameLink interfaces have standard behavior. Output LSTBLK is asserted
    when N or less than N free items are in FIFO, where N is generic parameter.
@@ -113,9 +113,9 @@
 
     <h1>Implementation</h1>
 <p>
-   When using BRAM FIFO with DATA_WIDTH greater than 32, 
+   When using BRAM FIFO with DATA_WIDTH greater than 32,
    all four protocol control signals
-   (SOP_N, EOP_N, SOF_N, EOF_N) are stored in the FIFO. 
+   (SOP_N, EOP_N, SOF_N, EOF_N) are stored in the FIFO.
    For DATA_WIDTH = 32, only 2 parity
    bits are left, so only EOF_N and EOP_N are stored and the other signals are
    restored at the output of FrameLink FIFO. If DATA_WIDTH is 16 or 8 bits,
@@ -139,7 +139,7 @@
 	<p>
 
         <!--Resources usage and max. frequency by Precision-->
-	
+
 		<tab sloupce="cccc">
 			<tr>
 				<th>Entity and generic settings</th>
@@ -148,39 +148,39 @@
             <th>Max. frequency</th>
 			</tr>
 			<tr>
-				<th>FL_PFIFO_FL128, ITEMS=1024, MAX_DISCARD_BLOCKS=10</th> 
+				<th>FL_PFIFO_FL128, ITEMS=1024, MAX_DISCARD_BLOCKS=10</th>
 				<td>113</td>
 				<td>8</td>
             <td>249 MHz</td>
 			</tr>
 			<tr>
-				<th>FL_PFIFO_FL64, ITEMS=1024, MAX_DISCARD_BLOCKS=10</th> 
+				<th>FL_PFIFO_FL64, ITEMS=1024, MAX_DISCARD_BLOCKS=10</th>
 				<td>76</td>
 				<td>4</td>
             <td>249 MHz</td>
 			</tr>
 			<tr>
-				<th>FL_PFIFO_FL32, ITEMS=1024, MAX_DISCARD_BLOCKS=10</th> 
+				<th>FL_PFIFO_FL32, ITEMS=1024, MAX_DISCARD_BLOCKS=10</th>
 				<td>60</td>
 				<td>2</td>
             <td>251 MHz</td>
 			</tr>
 			<tr>
-				<th>FL_PFIFO_FL16, ITEMS=1024, MAX_DISCARD_BLOCKS=10</th> 
+				<th>FL_PFIFO_FL16, ITEMS=1024, MAX_DISCARD_BLOCKS=10</th>
 				<td>62</td>
 				<td>1</td>
             <td>251 MHz</td>
 			</tr>
 			<tr>
-				<th>FL_PFIFO_FL8, ITEMS=1024, MAX_DISCARD_BLOCKS=10</th> 
+				<th>FL_PFIFO_FL8, ITEMS=1024, MAX_DISCARD_BLOCKS=10</th>
 				<td>62</td>
 				<td>1</td>
             <td>251 MHz</td>
 			</tr>
          <nazev>Resources and maximal frequency</nazev>
-		</tab> 
-	
-  </p> 
+		</tab>
+
+  </p>
 
 
 </body>

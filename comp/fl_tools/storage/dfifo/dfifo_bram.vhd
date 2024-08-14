@@ -22,7 +22,7 @@ use work.math_pack.all;
 --                      Architecture declaration
 -- ----------------------------------------------------------------------------
 architecture fl_dfifo_arch of fl_dfifo is
-   
+
    constant FRAME_LENGHT       : integer := 4;
    constant ADDRESS_WIDTH  : integer := log2(ITEMS);
    constant JUICE_WIDTH        : integer := 1;
@@ -37,7 +37,7 @@ architecture fl_dfifo_arch of fl_dfifo is
    signal input_rx_sof_n        : std_logic;
    signal input_rx_eof_n        : std_logic;
    signal sig_discard           : std_logic;
-      
+
       -- read interface
    signal output_tx_data        : std_logic_vector(TX_DATA'length-1 downto 0);
    signal output_tx_rem         : std_logic_vector(TX_REM'length-1 downto 0);
@@ -90,7 +90,7 @@ begin
    input_rx_eop_n        <= RX_EOP_N;
    input_rx_sof_n        <= RX_SOF_N;
    input_rx_eof_n        <= RX_EOF_N;
-      
+
       -- read interface
    TX_DATA             <= output_tx_data;
    TX_REM              <= output_tx_rem;
@@ -131,13 +131,13 @@ begin
    );
 
    mem_di   <= fl_com_juice & input_rx_rem & input_rx_data;
-   
+
    output_tx_data    <= mem_dob(DATA_WIDTH-1 downto 0);
    output_tx_rem     <= mem_dob(DATA_WIDTH+output_tx_rem'length-1 downto DATA_WIDTH);
-   fl_decom_juice    <= mem_dob(mem_dob'left 
+   fl_decom_juice    <= mem_dob(mem_dob'left
                            downto mem_dob'left - fl_decom_juice'length + 1);
 
-   
+
    mem_write_addr <= reg_write_address;
    mem_write_en <= write_en;
    mem_read_addr <= cnt_read_address;
@@ -173,7 +173,7 @@ begin
       -- Common interface
       CLK         => CLK,
       RESET       => RESET,
-         
+
       TX_SRC_RDY_N=> output_tx_src_rdy_n,
       TX_DST_RDY_N=> output_tx_dst_rdy_n,
       TX_SOP_N    => output_tx_sop_n,
@@ -220,7 +220,7 @@ begin
                cnt_write_address <= reg_cnt_state + 1;
             elsif (cnt_write_address(ADDRESS_WIDTH-1 downto 0) = ITEMS-1) then
                cnt_write_address(ADDRESS_WIDTH-1 downto 0) <= (others => '0');
-            else    
+            else
                cnt_write_address <= cnt_write_address + 1;
             end if;
          end if;
@@ -229,7 +229,7 @@ begin
 
 --   cnt_write_rollback <= write_en and (not input_rx_eof_n) and (reg_discard or sig_discard);
    cnt_write_rollback <= write_en and ((reg_discard and input_rx_sof_n) or sig_discard);
-   
+
    -- register reg_cnt_state ------------------------------------------------------
    reg_cnt_statep: process(RESET, CLK)
    begin
@@ -260,7 +260,7 @@ begin
 
          end if;
       end if;
-   end process;  
+   end process;
 
    -- register reg_discard ------------------------------------------------------
    reg_discardp: process(RESET, CLK)
@@ -268,7 +268,7 @@ begin
       if (CLK'event AND CLK = '1') then
          if (RESET = '1') then
             reg_discard <= '0';
-         elsif write_en = '1' then 
+         elsif write_en = '1' then
             reg_discard <= sig_discard or (reg_discard and input_rx_sof_n);
          end if;
       end if;
@@ -300,7 +300,7 @@ begin
    begin
       if (RESET = '1') then
          reg_empty <= '1';
-      elsif (CLK'event AND CLK = '1') then       
+      elsif (CLK'event AND CLK = '1') then
          reg_empty <= cmp_empty;
       end if;
    end process;

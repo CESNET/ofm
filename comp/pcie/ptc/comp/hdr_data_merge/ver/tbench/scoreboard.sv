@@ -31,11 +31,11 @@ endclass
 class ScoreboardMonitorCbs extends MonitorCbs;
    TransactionTable #(1) sc_table;
    int cnt = 0;
-    
+
    function new (TransactionTable #(1) st);
       this.sc_table = st;
    endfunction
-    
+
    virtual task post_rx(Transaction transaction, string inst);
       CustomTransaction #(HDR_WIDTH,MFB_ITEM_WIDTH) custom_tr;
       bit status=0;

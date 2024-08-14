@@ -44,11 +44,11 @@ class rand_mi_driver_delay extends sv_mi_pkg::MiDriverRand;
         end
 
         //setup randomization
-        this.txDelayEn_wt      = cfg.txDelayEn_wt; 
+        this.txDelayEn_wt      = cfg.txDelayEn_wt;
         this.txDelayDisable_wt = cfg.txDelayDisable_wt;
         this.txDelayLow        = cfg.txDelayLow;
         this.txDelayHigh       = cfg.txDelayHigh;
-        
+
         //decrement count
         cfg.rand_count--;
     endfunction
@@ -110,7 +110,7 @@ class mi_transaction_config #(DATA_WIDTH, ADDR_WIDTH = DATA_WIDTH);
 
     constraint c1 {
        //length of sequence
-       rand_count inside {[20:200]}; 
+       rand_count inside {[20:200]};
        //address constraint
        minAddr <= maxAddr;
        minAddr % (DATA_WIDTH/8) == 0;
@@ -125,7 +125,7 @@ endclass
 
 // Randomization class (Transaction)
 class mi_sequence #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends sv_mi_pkg::MiTransaction #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH);
-    mi_transaction_config #(DATA_WIDTH, ADDR_WIDTH) cfg; 
+    mi_transaction_config #(DATA_WIDTH, ADDR_WIDTH) cfg;
 
     constraint c2 {
         be dist {DATA_WIDTH > 8 -> (DATA_WIDTH/8)-1 := 7, [0:(DATA_WIDTH/8)-1] := 3};
@@ -134,7 +134,7 @@ class mi_sequence #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends sv_mi_pkg::M
     function new(mi_transaction_config #(DATA_WIDTH, ADDR_WIDTH) cfg = null);
         if(cfg == null) begin
             this.cfg = new();
-        end else begin 
+        end else begin
             this.cfg = cfg;
         end
     endfunction

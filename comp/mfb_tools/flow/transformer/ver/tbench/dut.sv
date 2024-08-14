@@ -1,6 +1,6 @@
 // dut.sv: Design under test
 // Copyright (C) 2020 CESNET
-// Author: Tomas Hak <xhakto01@stud.fit.vutbr.cz> 
+// Author: Tomas Hak <xhakto01@stud.fit.vutbr.cz>
 // SPDX-License-Identifier: BSD-3-Clause
 
 import test_pkg::*;

@@ -20,21 +20,21 @@ architecture full of FL_DEC is
    -- ------------------ Signals declaration ----------------------------------
    -- (de)multiplexers
    signal dmx_pairs_out    : std_logic_vector(5 downto 0);
-   
+
    -- registers
    signal reg_packet       : std_logic;
    signal reg_packet_we    : std_logic;
-   
+
    -- comparators
    signal cmp_header       : std_logic;
    signal cmp_payload      : std_logic;
    signal cmp_footer       : std_logic;
-   
+
    -- FSM signals
    signal fsm_eop          : std_logic;
    signal fsm_eof          : std_logic;
    signal fsm_part         : std_logic_vector(1 downto 0);
-   
+
    -- others
    signal sof_i            : std_logic;
    signal sop_i            : std_logic;
@@ -54,11 +54,11 @@ begin
    en             <= (not SRC_RDY_N) and DST_RDY;
    input_pair     <= eop_i & sop_i;
    pkt_trans      <= sof_i or reg_packet;
-   
+
    -- FSM signals
    fsm_eop        <= eop_i and en;
    fsm_eof        <= eof_i and en;
-   
+
    -- register control signals
    reg_packet_we  <= sof_i or (eof_i and en);
 
@@ -66,21 +66,21 @@ begin
    cmp_header     <= '1' when fsm_part = "00" else '0';
    cmp_payload    <= '1' when fsm_part = "01" else '0';
    cmp_footer     <= '1' when fsm_part = "10" else '0';
-   
+
    -- output interface mapping
    SOF            <= sof_i;
    SOHDR          <= dmx_pairs_out(0);
    EOHDR          <= dmx_pairs_out(1);
    HDR_FRAME      <= cmp_header and pkt_trans;
-   
+
    SOPLD          <= dmx_pairs_out(2);
    EOPLD          <= dmx_pairs_out(3);
    PLD_FRAME      <= cmp_payload and pkt_trans;
-   
+
    SOFTR          <= dmx_pairs_out(4);
    EOFTR          <= dmx_pairs_out(5);
    FTR_FRAME      <= cmp_footer and pkt_trans;
-   
+
    EOF            <= eof_i;
    SRC_RDY        <= not SRC_RDY_N;
    DST_RDY_N      <= not DST_RDY;

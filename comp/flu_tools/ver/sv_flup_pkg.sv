@@ -4,7 +4,7 @@
  * \author Jan Kučera <xkucer73@stud.fit.vutbr.cz>
  * \date 2015
  */
-  
+
 /**
  * Copyright (C) 2015 CESNET
  *

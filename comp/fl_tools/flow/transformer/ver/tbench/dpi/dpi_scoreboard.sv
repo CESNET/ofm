@@ -14,14 +14,14 @@
   import sv_common_pkg::*;
   import sv_fl_pkg::*;
   import dpi_scoreboard_pkg::*;
-  
+
   // --------------------------------------------------------------------------
   // -- Frame Link Driver Callbacks
   // --------------------------------------------------------------------------
   class ScoreboardDriverCbs extends DriverCbs;
-   
+
     // ------------------------------------------------------------------------
-    // Function is called after is transaction sended 
+    // Function is called after is transaction sended
     virtual task post_tx(Transaction transaction, string inst);
       tFlTransactionInfo info;
       FrameLinkTransaction tr;
@@ -45,7 +45,7 @@
   // -- Frame Link Monitor Callbacks
   // --------------------------------------------------------------------------
   class ScoreboardMonitorCbs extends MonitorCbs;
-    
+
     // ------------------------------------------------------------------------
     // Function is called after is transaction received (scoreboard)
     virtual task post_rx(Transaction transaction, string inst);
@@ -64,11 +64,11 @@
       end
     endtask
 
- 
+
   endclass : ScoreboardMonitorCbs
 
   // -- Constructor ---------------------------------------------------------
-  // Create a class 
+  // Create a class
   // --------------------------------------------------------------------------
   // -- Scoreboard
   // --------------------------------------------------------------------------
@@ -80,17 +80,17 @@
     ScoreboardDriverCbs  driverCbs;
 
     // -- Constructor ---------------------------------------------------------
-    // Create a class 
+    // Create a class
     function new ();
       this.monitorCbs = new;
       this.driverCbs  = new;
     endfunction
 
      // -- Display -------------------------------------------------------------
-    // Create a class 
+    // Create a class
     task display();
       c_display();
-    endtask 
+    endtask
 
   endclass : Scoreboard
 

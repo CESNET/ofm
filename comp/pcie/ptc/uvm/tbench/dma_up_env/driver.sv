@@ -7,9 +7,9 @@
 class driver#(DMA_PORTS) extends uvm_component;
     `uvm_component_param_utils(uvm_dma_up::driver #(DMA_PORTS))
 
-    localparam MFB_META_WIDTH = sv_dma_bus_pack::DMA_REQUEST_LENGTH_W   + sv_dma_bus_pack::DMA_REQUEST_TYPE_W + sv_dma_bus_pack::DMA_REQUEST_FIRSTIB_W + 
-                                sv_dma_bus_pack::DMA_REQUEST_LASTIB_W   + sv_dma_bus_pack::DMA_REQUEST_TAG_W + sv_dma_bus_pack::DMA_REQUEST_UNITID_W   + 
-                                sv_dma_bus_pack::DMA_REQUEST_GLOBAL_W   + sv_dma_bus_pack::DMA_REQUEST_VFID_W + sv_dma_bus_pack::DMA_REQUEST_PASID_W   + 
+    localparam MFB_META_WIDTH = sv_dma_bus_pack::DMA_REQUEST_LENGTH_W   + sv_dma_bus_pack::DMA_REQUEST_TYPE_W + sv_dma_bus_pack::DMA_REQUEST_FIRSTIB_W +
+                                sv_dma_bus_pack::DMA_REQUEST_LASTIB_W   + sv_dma_bus_pack::DMA_REQUEST_TAG_W + sv_dma_bus_pack::DMA_REQUEST_UNITID_W   +
+                                sv_dma_bus_pack::DMA_REQUEST_GLOBAL_W   + sv_dma_bus_pack::DMA_REQUEST_VFID_W + sv_dma_bus_pack::DMA_REQUEST_PASID_W   +
                                 sv_dma_bus_pack::DMA_REQUEST_PASIDVLD_W + sv_dma_bus_pack::DMA_REQUEST_RELAXED_W;
     localparam PORTS_W_FIX = (DMA_PORTS > 1) ? $clog2(DMA_PORTS) : 1;
 
@@ -81,7 +81,7 @@ class driver#(DMA_PORTS) extends uvm_component;
                     if (DMA_PORTS > 1) begin
                         header_req.tag[sv_dma_bus_pack::DMA_REQUEST_TAG_W-1 : sv_dma_bus_pack::DMA_REQUEST_TAG_W-PORTS_W_FIX] = port;
                     end
-                    if (tag_sync.list_of_tags.size() != 0) begin 
+                    if (tag_sync.list_of_tags.size() != 0) begin
                         while ((tag_sync.list_of_tags.exists(header_req.tag))) begin
                             void'(std::randomize(header_req.tag));
                             if (DMA_PORTS > 1) begin

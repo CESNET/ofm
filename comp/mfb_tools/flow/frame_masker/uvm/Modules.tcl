@@ -19,4 +19,4 @@ lappend MOD "$ENTITY_BASE/tbench/env/pkg.sv"   \
             "$ENTITY_BASE/tbench/property.sv"  \
             "$ENTITY_BASE/tbench/dut.sv"       \
             "$ENTITY_BASE/tbench/testbench.sv" \
-            
+

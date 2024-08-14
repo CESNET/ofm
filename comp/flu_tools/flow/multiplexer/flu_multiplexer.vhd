@@ -1,13 +1,13 @@
 --
 -- flu_multiplexer.vhd: Multiplexer for Frame Link Unaligned (not packet oriented!)
 -- Copyright (C) 2012 CESNET
--- Author: Lukas Kekely <kekely@cesnet.cz> 
+-- Author: Lukas Kekely <kekely@cesnet.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --
 -- $Id$
 --
--- TODO: 
+-- TODO:
 --
 --
 
@@ -25,15 +25,15 @@ use work.math_pack.all;
 entity FLU_MULTIPLEXER is
    generic(
        DATA_WIDTH    : integer :=256;
-       SOP_POS_WIDTH : integer :=2; 	
+       SOP_POS_WIDTH : integer :=2;
        INPUT_PORTS   : integer :=2;
-       BLOCKING      : boolean := true 
+       BLOCKING      : boolean := true
    );
    port(
        -- Common interface
       RESET          : in  std_logic;
       CLK            : in  std_logic;
-      
+
       SEL            : in std_logic_vector(log2(INPUT_PORTS)-1 downto 0);
 
       -- Frame Link Unaligned input interfaces
@@ -43,7 +43,7 @@ entity FLU_MULTIPLEXER is
       RX_SOP        : in std_logic_vector(INPUT_PORTS-1 downto 0);
       RX_EOP        : in std_logic_vector(INPUT_PORTS-1 downto 0);
       RX_SRC_RDY    : in std_logic_vector(INPUT_PORTS-1 downto 0);
-      RX_DST_RDY    : out std_logic_vector(INPUT_PORTS-1 downto 0); 
+      RX_DST_RDY    : out std_logic_vector(INPUT_PORTS-1 downto 0);
 
       -- Frame Link Unaligned concentrated interface
       TX_DATA       : out std_logic_vector(DATA_WIDTH-1 downto 0);
@@ -52,7 +52,7 @@ entity FLU_MULTIPLEXER is
       TX_SOP        : out std_logic;
       TX_EOP        : out std_logic;
       TX_SRC_RDY    : out std_logic;
-      TX_DST_RDY    : in std_logic 
+      TX_DST_RDY    : in std_logic
    );
 end entity;
 
@@ -71,7 +71,7 @@ begin
       SEL         => SEL,
       DATA_OUT    => TX_DATA
    );
-   
+
    sop_pos_mx_i : entity work.GEN_MUX
    generic map (
       DATA_WIDTH  => SOP_POS_WIDTH,
@@ -81,7 +81,7 @@ begin
       SEL         => SEL,
       DATA_OUT    => TX_SOP_POS
    );
-   
+
    eop_pos_mx_i : entity work.GEN_MUX
    generic map (
       DATA_WIDTH  => EOP_POS_WIDTH,
@@ -91,7 +91,7 @@ begin
       SEL         => SEL,
       DATA_OUT    => TX_EOP_POS
    );
-   
+
    sop_mx_i : entity work.GEN_MUX
    generic map (
       DATA_WIDTH  => 1,
@@ -101,7 +101,7 @@ begin
       SEL         => SEL,
       DATA_OUT(0) => TX_SOP
    );
-   
+
    eop_mx_i : entity work.GEN_MUX
    generic map (
       DATA_WIDTH  => 1,
@@ -111,7 +111,7 @@ begin
       SEL         => SEL,
       DATA_OUT(0) => TX_EOP
    );
-   
+
    src_rdy_mx_i : entity work.GEN_MUX
    generic map (
       DATA_WIDTH  => 1,
@@ -121,7 +121,7 @@ begin
       SEL         => SEL,
       DATA_OUT(0) => TX_SRC_RDY
    );
-   
+
    blocking_gen : if BLOCKING=true generate
       dst_rdy_mx_i : entity work.GEN_DEMUX
       generic map (

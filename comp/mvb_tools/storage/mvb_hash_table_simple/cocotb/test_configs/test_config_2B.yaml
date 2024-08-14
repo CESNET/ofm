@@ -1,6 +1,6 @@
 #Configuration file for MVB_HASH_TABLE_SIMPLE component:
 mvb_hash_table_simple:
-    
+
     #MVB_HASH_TABLE_SIMPLE parametres and settings:
     hash_key: 2534237992
     mvb_key_width: 16
@@ -24,7 +24,7 @@ mvb_hash_table_simple:
         - record:
             mvb_key: 468
             data: 123
-    
+
     #Configuration of table using simple xor hash function:
     SIMPLE_XOR:
         - record:

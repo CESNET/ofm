@@ -142,7 +142,7 @@ begin
                 -- One LED per ETH channel
                 for i in 0 to ETH_CHANNELS-1 loop
                     s_eth_led_r(p*LEDS_PER_PORT+i) <= s_led_r(p*ETH_CHANNELS+i);
-                    s_eth_led_g(p*LEDS_PER_PORT+i) <= s_led_g(p*ETH_CHANNELS+i); 
+                    s_eth_led_g(p*LEDS_PER_PORT+i) <= s_led_g(p*ETH_CHANNELS+i);
                 end loop;
             end if;
         end process;

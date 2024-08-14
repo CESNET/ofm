@@ -6,7 +6,7 @@
 -- SPDX-License-Identifier: BSD-3-Clause
 --
 --
--- TODO: 
+-- TODO:
 --
 --
 
@@ -40,21 +40,21 @@ architecture FULL of FLU_ALIGN is
    signal in_rx_eop        : std_logic;
    signal in_rx_src_rdy    : std_logic;
    signal in_rx_dst_rdy    : std_logic;
- 
-   signal flu2fl_tx_sop_n        : std_logic;                                            
-   signal flu2fl_tx_eop_n        : std_logic;                                            
+
+   signal flu2fl_tx_sop_n        : std_logic;
+   signal flu2fl_tx_eop_n        : std_logic;
    signal flu2fl_tx_src_rdy_n    : std_logic;
    signal flu2fl_tx_dst_rdy_n    : std_logic;
    signal flu2fl_tx_data         : std_logic_vector(DATA_WIDTH-1 downto 0);
    signal flu2fl_tx_drem         : std_logic_vector(abs(log2(DATA_WIDTH/8)-1) downto 0);
-  
+
 begin
 
    -- -------------------------------------------------------------------------
    -- Input port map
    -- -------------------------------------------------------------------------
    -- Deal with map of the input RX flow
-   in_rx_data        <= RX_DATA;    
+   in_rx_data        <= RX_DATA;
    in_rx_sop_pos     <= RX_SOP_POS;
    in_rx_eop_pos     <= RX_EOP_POS;
    in_rx_sop         <= RX_SOP;
@@ -87,12 +87,12 @@ begin
             OUT_PIPE_TYPE      => OUT_PIPE_TYPE,
             -- use output register of input pipe
             OUT_PIPE_OUTREG   => OUT_PIPE_OUTREG
-         )    
+         )
          port map(
-            -- common interface 
+            -- common interface
             CLK            => CLK,
             RESET          => RESET,
-            
+
             -- input interface (FLU)
             RX_DATA        => in_rx_data,
             RX_SOP_POS     => in_rx_sop_pos,
@@ -101,7 +101,7 @@ begin
             RX_EOP         => in_rx_eop,
             RX_SRC_RDY     => in_rx_src_rdy,
             RX_DST_RDY     => in_rx_dst_rdy,
-              
+
             -- output interface (FL)
             TX_SOF_N       => open,
             TX_EOP_N       => flu2fl_tx_eop_n,
@@ -122,7 +122,7 @@ begin
          flu2fl_tx_sop_n <= not(in_rx_sop);
          flu2fl_tx_eop_n <= not(in_rx_eop);
       end generate;
-   
+
    -- -------------------------------------------------------------------------
    -- Output port map
    -- -------------------------------------------------------------------------
@@ -134,6 +134,6 @@ begin
    TX_EOP               <= not(flu2fl_tx_eop_n);
    TX_SRC_RDY           <= not(flu2fl_tx_src_rdy_n);
    flu2fl_tx_dst_rdy_n  <= not(TX_DST_RDY);
-   
+
 
 end architecture FULL;

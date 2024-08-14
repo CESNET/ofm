@@ -14,13 +14,13 @@
 // ----------------------------------------------------------------------------
 
 // -- Control Interface ----------------------------------------
-interface inumInterface #(pPorts = 4) (input logic CLK, RESET);  
+interface inumInterface #(pPorts = 4) (input logic CLK, RESET);
   // Control Interface
   logic [pPorts-1:0] INUM_MASK ;
   logic INUM_READY;
-  logic INUM_NEXT;  
+  logic INUM_NEXT;
 
-  // Clocking blocks  
+  // Clocking blocks
   clocking cb @(posedge CLK);
     input INUM_NEXT;
     output INUM_READY, INUM_MASK;
@@ -31,7 +31,7 @@ interface inumInterface #(pPorts = 4) (input logic CLK, RESET);
                input  INUM_READY,
                input  INUM_MASK
                );
-  
+
   modport tb (clocking cb);
 
 endinterface : inumInterface
@@ -59,7 +59,7 @@ class inumDriver #(int pPorts=4)
    int DelayLow  = 0;
    //! Max delay inside transaction
    int DelayHigh = 3;
-   
+
    /**
     * Constrains for randomization
     */
@@ -165,7 +165,7 @@ class inumDriver #(int pPorts=4)
       for (int j=0; j < pPorts; j++) begin
         dataToSend[j]=to.data[j/8][j%8];
       end;
-      
+
       ii.cb.INUM_READY <= 1;
       ii.cb.INUM_MASK <= dataToSend;
       @(ii.cb);

@@ -10,7 +10,7 @@ class generator#(USR_RX_PKT_SIZE_MAX, RX_CHANNELS, HDR_META_WIDTH, MVB_ITEM_WIDT
 
     localparam MVB_LEN_WIDTH = $clog2(USR_RX_PKT_SIZE_MAX+1);
     localparam MVB_CHANNEL_WIDTH = $clog2(RX_CHANNELS);
-    
+
     // PORT DECLARATION
     //INPUT
     uvm_seq_item_pull_port #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH), uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))                                         seq_item_port_byte_array;

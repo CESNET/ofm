@@ -99,5 +99,5 @@ class statistics #(int unsigned ADDRESS_WIDTH, int unsigned DATA_WIDTH, int unsi
             end
         end
     endtask
-    
+
 endclass

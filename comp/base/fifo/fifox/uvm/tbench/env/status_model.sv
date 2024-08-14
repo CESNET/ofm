@@ -6,7 +6,7 @@
 
 class status_model #(STATUS_WIDTH, ITEMS, ALMOST_FULL_OFFSET, ALMOST_EMPTY_OFFSET) extends uvm_component;
     `uvm_component_param_utils(uvm_fifox::status_model #(STATUS_WIDTH, ITEMS, ALMOST_FULL_OFFSET, ALMOST_EMPTY_OFFSET))
-    
+
     // Model inputs
     uvm_probe::cbs_simple #(2) wr_and_rd_en_in;
 
@@ -17,7 +17,7 @@ class status_model #(STATUS_WIDTH, ITEMS, ALMOST_FULL_OFFSET, ALMOST_EMPTY_OFFSE
         super.new(name, parent);
 
         model_out = new("model_out", this);
-        
+
     endfunction
 
     function void build_phase(uvm_phase phase);
@@ -57,7 +57,7 @@ class status_model #(STATUS_WIDTH, ITEMS, ALMOST_FULL_OFFSET, ALMOST_EMPTY_OFFSE
             if (rd_en) status--;
 
         end
-        
+
     endtask
 
 endclass

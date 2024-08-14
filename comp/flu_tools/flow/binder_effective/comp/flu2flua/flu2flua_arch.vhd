@@ -1,11 +1,11 @@
 --
 -- flu2flua_arch.vhd: Component for conversion of FLU to Aligned FLU
 -- Copyright (C) 2014 CESNET
--- Author: Pavel Benacek <benacek@cesnet.cz> 
+-- Author: Pavel Benacek <benacek@cesnet.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --
--- TODO: 
+-- TODO:
 --
 --
 
@@ -27,7 +27,7 @@ architecture FULL of FLU2FLUA is
    signal tx_src_rdy0_out   : std_logic;
    signal tx_dst_rdy0_sig   : std_logic;
    signal tx_dst_rdy0_in    : std_logic;
-   
+
    signal tx_src_rdy1_sig   : std_logic;
    signal tx_src_rdy1_out   : std_logic;
    signal tx_dst_rdy1_sig   : std_logic;
@@ -48,9 +48,9 @@ architecture FULL of FLU2FLUA is
    signal hdr_enable_read_req    : std_logic;
    signal hdr_enable_empty       : std_logic;
    signal hdr_enable_out         : std_logic_vector(0 downto 0);
-   signal hdr_enable_in          : std_logic_vector(0 downto 0); 
+   signal hdr_enable_in          : std_logic_vector(0 downto 0);
 
-   signal flu2flua_distrib_to    : std_logic; 
+   signal flu2flua_distrib_to    : std_logic;
 
    signal flu2flua_sop           : std_logic;
    signal flu2flua_src_rdy       : std_logic;
@@ -72,7 +72,7 @@ FLU2FLUA_CORE_I:entity work.FLU2FLUA_CORE
       --! FLU protocol generics
       DATA_WIDTH     => DATA_WIDTH,
       SOP_POS_WIDTH  => SOP_POS_WIDTH,
-     
+
       -- Pipeline Config ------------------------
       -- Use input pipe
       IN_PIPE_EN           => IN_PIPE_EN,
@@ -88,7 +88,7 @@ FLU2FLUA_CORE_I:entity work.FLU2FLUA_CORE
       OUT_PIPE_OUTREG      => OUT_PIPE_OUTREG,
       -- Select PIPE component implementation: "REG" or "SHREG"
       PIPE_TYPE            => PIPE_TYPE,
-      -- Base ID 
+      -- Base ID
       ENABLE_DEBUG         => ENABLE_DEBUG,
       ID_WIDTH             => ID_WIDTH,
       ID0_VAL              => ID0_VAL,
@@ -109,7 +109,7 @@ FLU2FLUA_CORE_I:entity work.FLU2FLUA_CORE
       RX_SOP         => flu2flua_sop,
       RX_EOP         => RX_EOP,
       RX_SRC_RDY     => flu2flua_src_rdy_sig,
-      RX_DST_RDY     => flu2flua_dst_rdy, 
+      RX_DST_RDY     => flu2flua_dst_rdy,
 
       -- Distributed to output (active when SOP = 1)
       DISTRIBUTED_TO => flu2flua_distrib_to,
@@ -139,9 +139,9 @@ FLU2FLUA_CORE_I:entity work.FLU2FLUA_CORE
    ENABLE_DISTRIBUTE_TO:if(ENABLE_DEBUG = 1)generate
       DISTRIBUTED_TO    <= flu2flua_distrib_to;
    end generate;
-   
+
    flu2flua_sop      <= RX_SOP;
-   flu2flua_src_rdy  <= RX_SRC_RDY; 
+   flu2flua_src_rdy  <= RX_SRC_RDY;
    RX_DST_RDY        <= flu2flua_dst_rdy_sig;
 
    --! Generation of desination and source ready
@@ -166,20 +166,20 @@ FLU2FLUA_CORE_I:entity work.FLU2FLUA_CORE
          generic map(
             -- Set data width here
             DATA_WIDTH     => 1,
-      
+
             -- Set number of items in FIFO here
             ITEMS          => HDR_FIFO_ITEMS
          )
          port map(
             RESET    => RESET,
             CLK      => CLK,
-      
+
             -- Write interface
-            DATA_IN     => hdr_enable_in, 
-            WRITE_REQ   => hdr_enable_wr, 
+            DATA_IN     => hdr_enable_in,
+            WRITE_REQ   => hdr_enable_wr,
             FULL        => hdr_enable_full,
             LSTBLK      => open,
-      
+
             -- Read interface
             DATA_OUT    => hdr_enable_out,
             READ_REQ    => hdr_enable_read_req,
@@ -188,7 +188,7 @@ FLU2FLUA_CORE_I:entity work.FLU2FLUA_CORE
 
          -- Map of input enable signal
          hdr_enable_in(0)  <= flu2flua_distrib_to;
-         hdr_enable_wr     <= flu2flua_sop and flu2flua_src_rdy_sig and flu2flua_dst_rdy_sig; 
+         hdr_enable_wr     <= flu2flua_sop and flu2flua_src_rdy_sig and flu2flua_dst_rdy_sig;
 
          -- Output header data map
          TX_HDR_DATA0 <= tx_hdr_data_out;

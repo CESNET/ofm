@@ -12,10 +12,10 @@
  */
 
 import ip_protocol_pkg::*;
- 
+
 /*
- * This class implements IPv6 protocol. Class inherates from Layer 
- * abstract class. 
+ * This class implements IPv6 protocol. Class inherates from Layer
+ * abstract class.
  */
 class IPv6 extends Layer;
    /*
@@ -24,7 +24,7 @@ class IPv6 extends Layer;
     * maxSrcIP - maximal source IP address for randomization
     * minDstIP - minimal destination IP address for randomization
     * maxDstIP - maximal destination IP address for randomization
-    * 
+    *
     * Class atributes affected by randomization:
     * version            - version of IP, allways 6 for IPv6
     * trafficClass       - priority of packet
@@ -58,9 +58,9 @@ class IPv6 extends Layer;
    rand  bit   [127:0]  destinationAddress;
 
    const int            headerSize = 40;
-  
+
          bit            enableMultipleProtocolNesting;
-   
+
    /*
     * Class constructor.
     */
@@ -78,24 +78,24 @@ class IPv6 extends Layer;
       maxDstIP = '1;
       enableMultipleProtocolNesting = 1;
    endfunction: new
- 
+
    /*
     * Constraint for randomization. Sets value ranges for version field.
     */
-   constraint versionc 
+   constraint versionc
    {
       version == 6;
    }
-  
+
    /*
     * Constraint for randomization. Sets value ranges for IP addresses.
-    */  
+    */
    constraint c
    {
       sourceAddress inside {[minDstIP:maxDstIP]};
       destinationAddress inside {[minSrcIP:maxSrcIP]};
    }
-  
+
    /*
     * Post randomization sets upper layer type to nextHeader field. Value is
     * assigned according upper layer protocol type. It also set data length
@@ -103,7 +103,7 @@ class IPv6 extends Layer;
     *
     * Supported upper layer protocols:
     * IPv4, IPv6, ICMPv6, TCP, UDP, ETHERNET, RAW
-    */ 
+    */
    function void post_randomize();
       if (this.next.typ == "IP")
       begin
@@ -112,55 +112,55 @@ class IPv6 extends Layer;
          if (this.next.subtype == "6")
             nextHeader = PROTO_IPV6;
       end;
-   
+
       if (this.next.typ == "ICMP")
          nextHeader = PROTO_ICMPv6;
-       
+
       if (this.next.typ == "TCP")
          nextHeader = PROTO_TCP;
-       
+
       if (this.next.typ == "UDP" )
          nextHeader = PROTO_UDP;
-   
+
       if (this.next.typ == "ETHERNET" )
          nextHeader = PROTO_ETHERNET;
-  
+
       if (this.next.typ == "RAW" )
          nextHeader = PROTO_RAW;
-            
+
       if (next != null)
       begin
          next.minMTU = (minMTU - headerSize > 0) ? minMTU - headerSize : 0;
          next.maxMTU = (maxMTU - headerSize > 0) ? maxMTU - headerSize : 0;
-         void'(next.randomize);    
+         void'(next.randomize);
       end
    endfunction:  post_randomize
-  
+
    /*
     * Returns array of bytes, which contains protocol header.
     */
    function data getHeader();
       data vystup=new[headerSize];
       bit [7:0] helper;
-   
+
       helper[7:4] = version;
       helper[3:0] = trafficClass[7:4];
       vystup[0] = helper;
-   
+
       helper[7:4] = trafficClass[3:0];
       helper[3:0] = flowLabel[19:16];
       vystup[1] = helper;
-   
+
       vystup[2] = flowLabel[15:8];
       vystup[3] = flowLabel[7:0];
-   
+
       vystup[4] = payloadLength[15:8];
       vystup[5] = payloadLength[7:0];
-   
+
       vystup[6] = nextHeader;
-   
+
       vystup[7] = hopLimit;
-   
+
       vystup[8]  = sourceAddress[127:120];
       vystup[9]  = sourceAddress[119:112];
       vystup[10] = sourceAddress[111:104];
@@ -177,7 +177,7 @@ class IPv6 extends Layer;
       vystup[21] = sourceAddress[23:16];
       vystup[22] = sourceAddress[15:8];
       vystup[23] = sourceAddress[7:0];
-   
+
       vystup[24] = destinationAddress[127:120];
       vystup[25] = destinationAddress[119:112];
       vystup[26] = destinationAddress[111:104];
@@ -194,28 +194,28 @@ class IPv6 extends Layer;
       vystup[37] = destinationAddress[23:16];
       vystup[38] = destinationAddress[15:8];
       vystup[39] = destinationAddress[7:0];
-   
+
       return vystup;
    endfunction: getHeader
- 
+
     /*
     * Returns array of bytes, which contains protocol footer.
-    */ 
+    */
    function data getFooter();
       data vystup;
       return vystup;
    endfunction: getFooter
- 
+
    /*
     * Returns class atribute by it's name in form of array of bytes.
     * Not full implemented yet, only old IDS names (SRC for source IP address
     * and DST for destination IP address).
-    */   
+    */
    function data getAttributeByName(string name);
       data vystup = new[16];
-   
+
       if (name == "SRC")
-      begin 
+      begin
          vystup[0] = sourceAddress[127:120];
          vystup[1] = sourceAddress[119:112];
          vystup[2] = sourceAddress[111:104];
@@ -233,9 +233,9 @@ class IPv6 extends Layer;
          vystup[14] = sourceAddress[15:8];
          vystup[15] = sourceAddress[7:0];
       end
-   
+
       if (name == "DST")
-      begin 
+      begin
          vystup[0] = destinationAddress[127:120];
          vystup[1] = destinationAddress[119:112];
          vystup[2] = destinationAddress[111:104];
@@ -253,31 +253,31 @@ class IPv6 extends Layer;
          vystup[14] = destinationAddress[15:8];
          vystup[15] = destinationAddress[7:0];
       end
-      
+
       return vystup;
    endfunction: getAttributeByName
- 
+
    /*
-    * Returns array of bytes containing protocol and upper layers 
+    * Returns array of bytes containing protocol and upper layers
     * protocol data.
-    */   
+    */
    function data getData();
       data header, payload, vystup;
-      
+
       header = getHeader();
       payload = next.getData();
-      
+
       vystup = new [header.size() + payload.size()];
-      
+
       foreach (header[j])
          vystup[j] = header[j];
-         
+
       foreach (payload[j])
          vystup[header.size() + j] = payload[j];
-         
-      return vystup; 
+
+      return vystup;
    endfunction: getData
- 
+
    /*
     * Copy function.
     */
@@ -292,14 +292,14 @@ class IPv6 extends Layer;
       protocol.hopLimit = hopLimit;
       protocol.sourceAddress = sourceAddress;
       protocol.destinationAddress = destinationAddress;
-    
+
       protocol.minSrcIP = minSrcIP;
       protocol.maxSrcIP = maxSrcIP;
       protocol.minDstIP = minDstIP;
       protocol.maxDstIP = maxDstIP;
 
       protocol.enableMultipleProtocolNesting = enableMultipleProtocolNesting;
-        
+
       protocol.typ = typ;
       protocol.subtype = subtype;
       protocol.name = name;
@@ -309,10 +309,10 @@ class IPv6 extends Layer;
       protocol.errorProbability = errorProbability;
       protocol.minMTU = minMTU;
       protocol.maxMTU = maxMTU;
-    
+
       return protocol;
    endfunction: copy
- 
+
    /*
     * Check if upper layer protocol is compatibile with IPv6 protocol.
     * This function is used by generator.
@@ -326,7 +326,7 @@ class IPv6 extends Layer;
     * IPv4, IPv6, ICMPv6, TCP, UDP, RAW, ETHERNET
     */
    function bit checkType(string typ, string subtype ,string name);
-      if (enableMultipleProtocolNesting) begin 
+      if (enableMultipleProtocolNesting) begin
          if (typ == "IP")
          begin
             if (subtype == "4")
@@ -334,7 +334,7 @@ class IPv6 extends Layer;
             if (subtype == "6")
                return 1'b1;
          end;
-   
+
          if (typ == "ETHERNET")
             return 1'b1;
       end
@@ -345,19 +345,19 @@ class IPv6 extends Layer;
          else
             return 1'b0;
       end
-       
+
       if (typ == "TCP")
          return 1'b1;
-       
+
       if (typ == "UDP")
          return 1'b1;
-       
+
       if (typ == "RAW")
          return 1'b1;
-   
+
       return 1'b0;
    endfunction: checkType
- 
+
    /*
     * Displays informations about protocol including upper layer protocols.
     */
@@ -370,15 +370,15 @@ class IPv6 extends Layer;
       if (next != null)
          next.display();
    endfunction: display
-      
+
    /*
-    * Returns length of protocol data plus all upper level protocols data 
+    * Returns length of protocol data plus all upper level protocols data
     * length.
     *
     * Parameters:
     * split - if set length of RAW protocol layer isn't returned, otherwise
     *         the length of RAW protocol layer is returned.
-    */  
+    */
    function int getLength(bit split);
       if (next != null)
       begin
@@ -392,5 +392,5 @@ class IPv6 extends Layer;
          return headerSize;
       end
    endfunction: getLength
- 
+
 endclass: IPv6

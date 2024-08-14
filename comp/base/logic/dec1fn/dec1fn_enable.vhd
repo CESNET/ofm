@@ -2,7 +2,7 @@
 -- dec1fn_enable.vhd: Decoder 1 from n with ENABLE
 -- Copyright (C) 2013 CESNET
 -- Author(s): Lukas Kekely <kekely@cesnet.cz>
--- 
+--
 -- SPDX-License-Identifier: BSD-3-Clause
 --
 --

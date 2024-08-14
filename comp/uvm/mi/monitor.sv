@@ -1,7 +1,7 @@
 /*
  * file       : monitor.sv
  * Copyright (C) 2021 CESNET z. s. p. o.
- * description: monitor mi interface and send data to subscribers 
+ * description: monitor mi interface and send data to subscribers
  * date       : 2021
  * author     : Radek Iša <isa@cesnet.cz>
  *

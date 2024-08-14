@@ -1,7 +1,7 @@
 /*
  * scoreboard.sv: Frame Link Unaligned Scoreboard
  * Copyright (C) 2015 CESNET
- * Author: Pavel Benacek <benacek@cesnet.cz> 
+ * Author: Pavel Benacek <benacek@cesnet.cz>
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -9,7 +9,7 @@
 
 import sv_common_pkg::*;
 import sv_flu_pkg::*;
-  
+
   // --------------------------------------------------------------------------
   // -- Frame Link Driver Callbacks
   // --------------------------------------------------------------------------
@@ -25,28 +25,28 @@ import sv_flu_pkg::*;
     // -------------------
 
     // -- Constructor ---------------------------------------------------------
-    // Create a class 
+    // Create a class
     function new (TransactionTable #(0) sc_table);
       this.sc_table = sc_table;
     endfunction
-    
+
     // ------------------------------------------------------------------------
-    // Function is called before is transaction sended 
+    // Function is called before is transaction sended
     // Allow modify transaction before is sended
     virtual task pre_tx(ref Transaction transaction, string inst);
     //   FrameLinkTransaction tr;
     //   $cast(tr,transaction);
-    
-    // Example - set first byte of first packet in each frame to zero   
+
+    // Example - set first byte of first packet in each frame to zero
     //   tr.data[0][0]=0;
     endtask
-    
+
     // ------------------------------------------------------------------------
-    // Function is called after is transaction sended 
-    
+    // Function is called after is transaction sended
+
     virtual task post_tx(Transaction transaction, string inst);
 
-      // Receive take the transaction and convert it from the 
+      // Receive take the transaction and convert it from the
       // FrameLinkUEditTransaction to FrameLinkUTransaction
       FrameLinkUEditTransaction d;
       FrameLinkUTransaction r;
@@ -63,21 +63,21 @@ import sv_flu_pkg::*;
   // -- Frame Link Monitor Callbacks
   // --------------------------------------------------------------------------
   class ScoreboardMonitorCbs extends MonitorCbs;
-    
+
     // ---------------------
     // -- Class Variables --
     // ---------------------
     TransactionTable #(0) sc_table;
-    
+
     // -- Constructor ---------------------------------------------------------
-    // Create a class 
+    // Create a class
     function new (TransactionTable #(0) sc_table);
       this.sc_table = sc_table;
     endfunction
-    
+
     // ------------------------------------------------------------------------
     // Function is called after is transaction received (scoreboard)
-    
+
     virtual task post_rx(Transaction transaction, string inst);
       bit status=0;
       sc_table.remove(transaction, status);
@@ -85,17 +85,17 @@ import sv_flu_pkg::*;
          $write("Unknown transaction received from monitor %d\n", inst);
          $timeformat(-9, 3, " ns", 8);
          $write("Time: %t\n", $time);
-         transaction.display(); 
+         transaction.display();
          sc_table.display();
          $stop;
        end;
     endtask
 
- 
+
   endclass : ScoreboardMonitorCbs
 
   // -- Constructor ---------------------------------------------------------
-  // Create a class 
+  // Create a class
   // --------------------------------------------------------------------------
   // -- Scoreboard
   // --------------------------------------------------------------------------
@@ -108,7 +108,7 @@ import sv_flu_pkg::*;
     ScoreboardDriverCbs   driverCbs;
 
     // -- Constructor ---------------------------------------------------------
-    // Create a class 
+    // Create a class
     function new ();
       this.scoreTable = new;
       this.monitorCbs = new(scoreTable);
@@ -116,10 +116,10 @@ import sv_flu_pkg::*;
     endfunction
 
     // -- Display -------------------------------------------------------------
-    // Create a class 
+    // Create a class
     task display();
       scoreTable.display();
     endtask
-  
+
   endclass : Scoreboard
 

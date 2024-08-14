@@ -1,6 +1,6 @@
 # signals.fdo : Include file with signals
 # Copyright (C) 2012 CESNET
-# Author: Lukas Kekely <kekely@cesnet.cz> 
+# Author: Lukas Kekely <kekely@cesnet.cz>
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -12,7 +12,7 @@
 #                       Signals of interfaces
 # -------------------------------------------------------------------
 proc rx {NAME PATH} {
-    add wave -divider "$NAME"      
+    add wave -divider "$NAME"
      add_wave "-noupdate  -hex -label RX_DATA"       $PATH/RX_DATA
      add_wave "-noupdate  -hex -label RX_SOP_POS"    $PATH/RX_SOP_POS
      add_wave "-noupdate  -hex -label RX_EOP_POS"    $PATH/RX_EOP_POS
@@ -23,7 +23,7 @@ proc rx {NAME PATH} {
 }
 
 proc tx {NAME PATH} {
-    add wave -divider "$NAME"      
+    add wave -divider "$NAME"
      add_wave "-noupdate  -hex -label TX_DATA"    $PATH/TX_DATA
      add_wave "-noupdate  -hex -label TX_DREM"    $PATH/TX_DREM
      add_wave "-noupdate  -label TX_SOF_N"        $PATH/TX_SOF_N
@@ -35,7 +35,7 @@ proc tx {NAME PATH} {
 }
 
 proc all {NAME PATH} {
-    add wave -divider "$NAME"      
+    add wave -divider "$NAME"
      add_wave "-noupdate  -label end_sent"    $PATH/end_sent
      add_wave "-noupdate  -label end_sending"    $PATH/end_sending
      add_wave "-noupdate  -label full"    $PATH/full

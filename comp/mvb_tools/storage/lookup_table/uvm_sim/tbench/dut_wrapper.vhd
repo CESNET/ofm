@@ -26,20 +26,20 @@ entity DUT_WRAPPER is
     port (
         CLK             : in  std_logic;
         RESET           : in  std_logic;
-    
+
         RX_MVB_LUT_ADDR : in  slv_array_t(MVB_ITEMS-1 downto 0)(max(log2(LUT_DEPTH),1)+2-1 downto 0);
         RX_MVB_METADATA : in  slv_array_t(MVB_ITEMS-1 downto 0)(META_WIDTH-1 downto 0) := (others => (others => '0'));
         RX_MVB_VLD      : in  std_logic_vector(MVB_ITEMS-1 downto 0);
         RX_MVB_SRC_RDY  : in  std_logic;
         RX_MVB_DST_RDY  : out std_logic;
-    
+
         TX_MVB_LUT_DATA : out slv_array_t(MVB_ITEMS-1 downto 0)(LUT_WIDTH-1 downto 0);
         TX_MVB_LUT_ADDR : out slv_array_t(MVB_ITEMS-1 downto 0)(max(log2(LUT_DEPTH),1)+2-1 downto 0);
         TX_MVB_METADATA : out slv_array_t(MVB_ITEMS-1 downto 0)(META_WIDTH-1 downto 0);
         TX_MVB_VLD      : out std_logic_vector(MVB_ITEMS-1 downto 0);
         TX_MVB_SRC_RDY  : out std_logic;
         TX_MVB_DST_RDY  : in  std_logic;
-    
+
         MI_ADDR         : in  std_logic_vector(max(log2(LUT_DEPTH),1)+2-1 downto 0);
         MI_SLICE        : in  std_logic_vector(max(log2(LUT_WIDTH/SW_WIDTH),1)-1 downto 0);
         MI_DIN          : in  std_logic_vector(SW_WIDTH-1 downto 0);
@@ -50,7 +50,7 @@ entity DUT_WRAPPER is
         MI_DOUT_VLD     : out std_logic
     );
     end entity;
-    
+
 
 architecture FULL of DUT_WRAPPER is
     signal rx_mvb_lut_addr_sig : slv_array_t(MVB_ITEMS-1 downto 0)(max(log2(LUT_DEPTH),1)-1 downto 0);
@@ -88,20 +88,20 @@ begin
     port map(
         CLK             => CLK,
         RESET           => RESET,
-    
+
         RX_MVB_LUT_ADDR => rx_mvb_lut_addr_sig,
         RX_MVB_METADATA => RX_MVB_METADATA,
         RX_MVB_VLD      => RX_MVB_VLD,
         RX_MVB_SRC_RDY  => RX_MVB_SRC_RDY,
         RX_MVB_DST_RDY  => RX_MVB_DST_RDY,
-    
+
         TX_MVB_LUT_DATA => TX_MVB_LUT_DATA,
         TX_MVB_LUT_ADDR => tx_mvb_lut_addr_sig,
         TX_MVB_METADATA => TX_MVB_METADATA,
         TX_MVB_VLD      => TX_MVB_VLD,
         TX_MVB_SRC_RDY  => TX_MVB_SRC_RDY,
         TX_MVB_DST_RDY  => TX_MVB_DST_RDY,
-    
+
         SW_ADDR         => sw_addr_sig,
         SW_SLICE        => MI_SLICE,
         SW_DIN          => MI_DIN,

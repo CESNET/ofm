@@ -1,4 +1,4 @@
-// registers.sv: register model 
+// registers.sv: register model
 // Copyright (C) 2023 CESNET z. s. p. o.
 // Author(s): Daniel Kříž <danielkriz@cesnet.cz>
 
@@ -26,7 +26,7 @@ class reg_reset_queue extends uvm_reg;
                                  0   , // Value on reset
                                  1   , // Can the value be reset?
                                  1   , // Can the value be randomized?
-                                 0     // Does the field occupy an entire byte lane? 
+                                 0     // Does the field occupy an entire byte lane?
                                  );
     endfunction
 endclass
@@ -54,7 +54,7 @@ class reg_sel_queue #(QUEUES) extends uvm_reg;
                                  0        , // Value on reset
                                  1        , // Can the value be reset?
                                  1        , // Can the value be randomized?
-                                 0          // Does the field occupy an entire byte lane? 
+                                 0          // Does the field occupy an entire byte lane?
                                  );
     endfunction
 endclass

@@ -29,7 +29,7 @@ architecture behavioral of testbench is
 
    constant TEST_HEADER : boolean := true;
    constant TEST_FOOTER : boolean := true;
-   
+
    constant clkper      : time      := 10 ns;
 
    signal clk           : std_logic;
@@ -42,7 +42,7 @@ architecture behavioral of testbench is
    signal eof_n         : std_logic;
    signal src_rdy_n     : std_logic;
    signal dst_rdy_n     : std_logic;
-   
+
    -- output interface
    signal sof           : std_logic;
    signal sohdr         : std_logic;
@@ -118,12 +118,12 @@ begin
    eof_n       <= '1';
    src_rdy_n   <= '0';
    dst_rdy     <= '1';
-   
+
    wait for 10*clkper;
    reset <= '0';
 
    wait for 5*clkper;
-   
+
    -- -------------------------------------------------------------------------
    -- first frame
    sof_n       <= '0';
@@ -135,7 +135,7 @@ begin
    eop_n       <= '0';
    wait for clkper;
    eop_n       <= '1';
-   
+
    sop_n       <= '0';
    wait for clkper;
    sof_n       <= '1';
@@ -155,14 +155,14 @@ begin
    wait for clkper;
    eof_n       <= '1';
    eop_n       <= '1';
-   
+
 
    wait for 10*clkper;   -- footer
 
    -- -------------------------------------------------------------------------
    -- second frame
    -- try one word sections -> EOP and SOP in one clock cycle
-   
+
    sof_n       <= '0';
    sop_n       <= '0';
    eop_n       <= '0';
@@ -185,7 +185,7 @@ begin
    eof_n       <= '1';
    eop_n       <= '1';
    sop_n       <= '1';
-   
+
    wait;
 end process;
 

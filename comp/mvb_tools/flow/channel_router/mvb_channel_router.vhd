@@ -11,7 +11,7 @@ use IEEE.numeric_std.all;
 use work.math_pack.all;
 use work.type_pack.all;
 
---  NOTES: 
+--  NOTES:
 --  Round-robin distribution control register format:
 --  31             23              15             7           0
 -- +----------------------------------------------------------+
@@ -21,11 +21,11 @@ use work.type_pack.all;
 --   incr   : RR increment. 0 = round-robin disable (stay on current channel). Default 0x0
 --   ch_min : low DMA channel limit for round-robin distribution. Default 0x0
 --   ch_max : high DMA channel limit for round-robin distribution. Default 0x0
--- Examples: 
+-- Examples:
 --    0x000000: Do not distribute frames - frame from Eth chan N is routed to DMA chan N
---    0xff0001: Distribute frames to all available DMA channels 
+--    0xff0001: Distribute frames to all available DMA channels
 --    0x070401: Distribute frames to DMA channels 4 to 7
---    0xff0002: Distribute frames to even DMA channels 
+--    0xff0002: Distribute frames to even DMA channels
 --    0x050501: Send all frames to DMA channel 5 only
 
 entity MVB_CHANNEL_ROUTER is

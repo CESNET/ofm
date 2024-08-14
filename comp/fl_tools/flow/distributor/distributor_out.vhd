@@ -56,14 +56,14 @@ end entity;
 --                      Architecture declaration
 -- ----------------------------------------------------------------------------
 architecture full of fl_distributor_out is
-   
-   -- width of the RX_REM signal 
+
+   -- width of the RX_REM signal
    constant REM_WIDTH : integer := log2(DATA_WIDTH/8);
 
 begin
 
    -- connections to TX interfaces:
-   gen_tx_connections: 
+   gen_tx_connections:
    for i in 0 to INTERFACES_COUNT-1 generate
       TX_DATA((i+1)*DATA_WIDTH-1 downto i*DATA_WIDTH) <= RX_DATA;
       TX_REM((i+1)*REM_WIDTH-1 downto i*REM_WIDTH) <= RX_REM;
@@ -73,7 +73,7 @@ begin
       TX_EOP_N(i) <= RX_EOP_N;
 
       TX_SRC_RDY_N(i) <= RX_SRC_RDY_N when i = conv_integer(unsigned(TX_INTERFACE)) else '1';
-   
+
       process(CLK, TX_DST_RDY_N, TX_INTERFACE)
          variable tx_rdy_n : std_logic;
       begin
@@ -91,4 +91,4 @@ begin
 
 end architecture;
 
- 
+

@@ -20,7 +20,7 @@ QUOTE="
 OBJS = $(SRCS:%.c=%.o)
 
 all: clean lib$(TARGET).$(DLL_SUFFIX)
-	
+
 clean:
 	rm -fR $(OBJS) *.$(DLL_SUFFIX)
 

@@ -50,14 +50,14 @@ entity FL_FIFO_FL16 is
       STATUS         : out std_logic_vector(STATUS_WIDTH-1 downto 0);
       FRAME_RDY      : out std_logic
    );
-end entity FL_FIFO_FL16;      
+end entity FL_FIFO_FL16;
 
 architecture full of FL_FIFO_FL16 is
 
 signal RX_DST_RDY_N : std_logic;
 
 begin
-   
+
    FL_FIFO_I: entity work.FL_FIFO
    generic map
    (
@@ -82,7 +82,7 @@ begin
       RX_EOP_N       => RX.EOP_N,
       RX_SOF_N       => RX.SOF_N,
       RX_EOF_N       => RX.EOF_N,
-      
+
       -- read interface
       TX_DATA        => TX.DATA,
       TX_REM         => TX.DREM,

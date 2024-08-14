@@ -78,7 +78,7 @@
         </port>
         <port  name="RESET" dir="in" width="1">
         </port>
-        
+
         <!-- RX interface -->
         <port  name="RX_DATA" dir="in" width="FL_DATA_WIDTH">
           Receive interface data.
@@ -104,7 +104,7 @@
         <port  name="RX_EOF_N" dir="in" width="1">
           Receive interface end of frame.
         </port>
-        
+
         <!-- TX0 interface -->
         <port  name="TX0_DATA" dir="in" width="FL_DATA_WIDTH">
             Transmit framelink interface 0.
@@ -198,14 +198,14 @@
         <h1>Specification</h1>
 
     <p>
-        Framelink switch uses shift register and counter to save data until 
+        Framelink switch uses shift register and counter to save data until
         the switch information arrives. Then, register is filled with this
         information that drives the transmit interface - it determines, which
         of them will be active.
     </p>
 
     <p>
-        The switching information is in the form of four bits, where each bit 
+        The switching information is in the form of four bits, where each bit
         denotes wether the frame should be sent to the particular interface or
         not. When the bit is set, frame will be send out this interface.
     </p>
@@ -233,7 +233,7 @@
     <p>
         The main parameter of the component is the Framelink data width.
         Other parameters influence the device utilization only by +/-
-        a few slices. Frequency is only approximate and 
+        a few slices. Frequency is only approximate and
         real frequency depends on the specific design that uses this
         component.
     </p>
@@ -245,15 +245,15 @@
 				<th>Slices (% of C6X slices)</th>
 			</tr>
 			<tr>
-				<th>64/127</th> 
+				<th>64/127</th>
 				<td>58(0.2%)</td>
 			</tr>
 			<tr>
-				<th>128/127</th> 
+				<th>128/127</th>
 				<td>88(0.3%)</td>
 			</tr>
 		<nazev>Chip utilization</nazev>
-		</tab> 
+		</tab>
 
 		<tab sloupce="ccc">
 			<tr>
@@ -262,19 +262,19 @@
 				<th>Frequency tested in HW</th>
 			</tr>
 			<tr>
-				<th>64/127</th> 
+				<th>64/127</th>
 				<td>up to 200 MHz</td>
 				<td>100 MHz</td>
 			</tr>
 			<tr>
-				<th>128/127</th> 
+				<th>128/127</th>
 				<td>up to 200 MHz</td>
 				<td>100 MHz</td>
 			</tr>
 		<nazev>Maximal frequency</nazev>
-		</tab> 
+		</tab>
     </p>
-	
+
 </body>
 
 </source>

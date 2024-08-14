@@ -24,7 +24,7 @@ DLL_SUFFIX=so
 QUOTE="
 
 all: lib$(TARGET1).$(DLL_SUFFIX) lib$(TARGET2).$(DLL_SUFFIX) lib$(TARGET3).$(DLL_SUFFIX) lib$(TARGET4).$(DLL_SUFFIX)
-	
+
 clean:
 	rm -fR *.o *.$(DLL_SUFFIX)
 

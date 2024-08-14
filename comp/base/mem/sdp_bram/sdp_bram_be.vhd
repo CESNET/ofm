@@ -43,13 +43,13 @@ entity SDP_BRAM_BE is
         WR_RST      : in  std_logic;
         WR_EN       : in  std_logic;
         WR_BE       : in  std_logic_vector(DATA_WIDTH/BLOCK_WIDTH-1 downto 0);
-        WR_ADDR     : in  std_logic_vector(log2(ITEMS)-1 downto 0); 
+        WR_ADDR     : in  std_logic_vector(log2(ITEMS)-1 downto 0);
         WR_DATA     : in  std_logic_vector(DATA_WIDTH-1 downto 0);
 
         RD_CLK      : in  std_logic;
         RD_RST      : in  std_logic;
         RD_EN       : in  std_logic;
-        RD_PIPE_EN  : in  std_logic; 
+        RD_PIPE_EN  : in  std_logic;
         RD_META_IN  : in  std_logic_vector(METADATA_WIDTH-1 downto 0) := (others => '0');
         RD_ADDR     : in  std_logic_vector(log2(ITEMS)-1 downto 0);
         RD_DATA     : out std_logic_vector(DATA_WIDTH-1 downto 0);
@@ -126,7 +126,7 @@ begin
         WR_BE       => internal_wr_be  ,
         WR_ADDR     => WR_ADDR         ,
         WR_DATA     => internal_wr_data,
-                                  
+
         RD_CLK      => RD_CLK          ,
         RD_RST      => RD_RST          ,
         RD_EN       => RD_EN           ,

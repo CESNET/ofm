@@ -100,7 +100,7 @@ begin
             end if;
         end if;
     end process;
-    
+
     -- =========================================================================
     -- Convert AXI CC stream to MFB stream
     -- =========================================================================
@@ -175,7 +175,7 @@ begin
     port map(
         CLK        => CLK,
         RESET      => RESET,
-        
+
         RX_DATA    => s_mfb_data,
         RX_SOF_POS => (others => '0'),
         RX_EOF_POS => (others => '0'),

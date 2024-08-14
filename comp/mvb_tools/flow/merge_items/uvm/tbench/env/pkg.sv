@@ -8,7 +8,7 @@
 `define MERGE_ITEMS_ENV_SV
 
 package merge_items;
-    
+
     `include "uvm_macros.svh"
     import uvm_pkg::*;
 

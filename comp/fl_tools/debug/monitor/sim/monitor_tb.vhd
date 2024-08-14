@@ -46,7 +46,7 @@ architecture behavioral of testbench is
    constant PAC_LENGTH : integer := 43;
 
    -- Number of packets to send
-   constant PAC_NUM    : integer := 16; 
+   constant PAC_NUM    : integer := 16;
 
    -- UUT generics
    constant FL_WIDTH       : integer := 64;
@@ -60,8 +60,8 @@ architecture behavioral of testbench is
    signal clk      : std_logic;
    signal reset    : std_logic;
 
-   signal rx_data      : std_logic_vector(FL_WIDTH - 1 downto 0); 
-   signal rx_rem       : std_logic_vector(log2(FL_WIDTH/8) - 1 downto 0); 
+   signal rx_data      : std_logic_vector(FL_WIDTH - 1 downto 0);
+   signal rx_rem       : std_logic_vector(log2(FL_WIDTH/8) - 1 downto 0);
    signal rx_src_rdy_n : std_logic;
    signal rx_dst_rdy_n : std_logic;
    signal rx_sop_n     : std_logic;

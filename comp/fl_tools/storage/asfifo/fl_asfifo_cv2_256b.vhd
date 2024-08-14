@@ -83,7 +83,7 @@ begin
    par1_in  <= "0000" & RX_SOP_N & RX_EOP_N & RX_SOF_N & RX_EOF_N;
    par2_in  <= X"00";
    par3_in  <= X"00";
-   
+
    RX_DST_RDY_N <= sig_full;
    sig_wren <= (not RX_SRC_RDY_N) and (not sig_full);
 
@@ -92,7 +92,7 @@ begin
       ALMOST_FULL_OFFSET => X"0080",  -- Sets almost full threshold
       ALMOST_EMPTY_OFFSET => X"0080", -- Sets the almost empty threshold
       DO_REG => 1,                    -- Enable output register (0 or 1)
-                                      -- Must be 1 if EN_SYN = FALSE 
+                                      -- Must be 1 if EN_SYN = FALSE
       EN_ECC_READ => FALSE,           -- Enable ECC decoder, TRUE or FALSE
       EN_ECC_WRITE => FALSE,          -- Enable ECC encoder, TRUE or FALSE
       EN_SYN => FALSE,                -- Specifies FIFO as Asynchronous (FALSE)
@@ -121,13 +121,13 @@ begin
       WRCLK => RX_CLK,              -- 1-bit write clock input
       WREN => sig_wren              -- 1-bit write enable input
    );
-   
+
    FIFO36_72_inst1 : FIFO36_72
    generic map (
       ALMOST_FULL_OFFSET => X"0080",  -- Sets almost full threshold
       ALMOST_EMPTY_OFFSET => X"0080", -- Sets the almost empty threshold
       DO_REG => 1,                    -- Enable output register (0 or 1)
-                                      -- Must be 1 if EN_SYN = FALSE 
+                                      -- Must be 1 if EN_SYN = FALSE
       EN_ECC_READ => FALSE,           -- Enable ECC decoder, TRUE or FALSE
       EN_ECC_WRITE => FALSE,          -- Enable ECC encoder, TRUE or FALSE
       EN_SYN => FALSE,                -- Specifies FIFO as Asynchronous (FALSE)
@@ -162,7 +162,7 @@ begin
       ALMOST_FULL_OFFSET => X"0080",  -- Sets almost full threshold
       ALMOST_EMPTY_OFFSET => X"0080", -- Sets the almost empty threshold
       DO_REG => 1,                    -- Enable output register (0 or 1)
-                                      -- Must be 1 if EN_SYN = FALSE 
+                                      -- Must be 1 if EN_SYN = FALSE
       EN_ECC_READ => FALSE,           -- Enable ECC decoder, TRUE or FALSE
       EN_ECC_WRITE => FALSE,          -- Enable ECC encoder, TRUE or FALSE
       EN_SYN => FALSE,                -- Specifies FIFO as Asynchronous (FALSE)
@@ -191,13 +191,13 @@ begin
       WRCLK => RX_CLK,              -- 1-bit write clock input
       WREN => sig_wren              -- 1-bit write enable input
    );
-   
+
    FIFO36_72_inst3 : FIFO36_72
    generic map (
       ALMOST_FULL_OFFSET => X"0080",  -- Sets almost full threshold
       ALMOST_EMPTY_OFFSET => X"0080", -- Sets the almost empty threshold
       DO_REG => 1,                    -- Enable output register (0 or 1)
-                                      -- Must be 1 if EN_SYN = FALSE 
+                                      -- Must be 1 if EN_SYN = FALSE
       EN_ECC_READ => FALSE,           -- Enable ECC decoder, TRUE or FALSE
       EN_ECC_WRITE => FALSE,          -- Enable ECC encoder, TRUE or FALSE
       EN_SYN => FALSE,                -- Specifies FIFO as Asynchronous (FALSE)

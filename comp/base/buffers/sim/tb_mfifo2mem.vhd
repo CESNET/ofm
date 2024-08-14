@@ -43,7 +43,7 @@ architecture behavioral of testbench is
   signal init		: std_logic_vector(TEST_FLOWS-1 downto 0);
 
   signal data_in	: std_logic_vector(TEST_WIDTH-1 downto 0);
-  signal wr_blk_addr	: std_logic_vector(abs(log2(TEST_FLOWS)-1) downto 0); 
+  signal wr_blk_addr	: std_logic_vector(abs(log2(TEST_FLOWS)-1) downto 0);
   signal write		: std_logic;
   signal full		: std_logic_vector(TEST_FLOWS-1 downto 0);
 
@@ -113,7 +113,7 @@ begin
   data_in <= (others => '0');
   wr_blk_addr <= (others => '0');
   write <= '0';
-  
+
   rd_blk_addr <= (others => '0');
   read <= '0';
   pipe_en <= '1';
@@ -184,7 +184,7 @@ begin
   wait for 2*clkper;
   rel_len_dv <= (others => '0');
   wait for 4*clkper;
-  init(1) <= '1'; 
+  init(1) <= '1';
   wait for 4*clkper;
 end process;
 

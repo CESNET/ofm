@@ -33,37 +33,37 @@ SETTINGS = {
         "DATA_ROT_LAT"           : "0"              ,
         "DATA_ROT_OUTREG_EN"     : "true"           ,
     },
-    "2_streams" : { # 
+    "2_streams" : { #
         "TRANS_STREAMS"          : "2"              ,
     },
-    "4_streams" : { # 
+    "4_streams" : { #
         "TRANS_STREAMS"          : "4"              ,
     },
-    "2_transs" : { # 
+    "2_transs" : { #
         "TRANSS"                 : "2"              ,
     },
-    "4_transs" : { # 
+    "4_transs" : { #
         "TRANSS"                 : "4"              ,
     },
-    "4_a_sections" : { # 
+    "4_a_sections" : { #
         "BUF_A_SECTIONS"         : "4"              ,
     },
-    "4_b_sections" : { # 
+    "4_b_sections" : { #
         "BUF_B_SECTIONS"         : "4"              ,
     },
-    "2_row_items" : { # 
+    "2_row_items" : { #
         "ROW_ITEMS"              : "2"              ,
     },
-    "4_row_items" : { # 
+    "4_row_items" : { #
         "ROW_ITEMS"              : "4"              ,
     },
-    "2_a_rows" : { # 
+    "2_a_rows" : { #
         "BUF_A_STREAM_ROWS"      : "2"              ,
     },
-    "2_b_rows" : { # 
+    "2_b_rows" : { #
         "BUF_B_ROWS"             : "2"              ,
     },
-    "4_b_rows" : { # 
+    "4_b_rows" : { #
         "BUF_B_ROWS"             : "4"              ,
     },
     "low_dst_rdy" : { # Extremely low DST_RDY
@@ -102,7 +102,7 @@ SETTINGS = {
     "clk_arb" : { # Use arbitrary CLK
         "USE_CLK_ARB"            : "true"           ,
     },
-#    "" : { # 
+#    "" : { #
 #    },
     "_combinations_" : (
     # basic tests

@@ -15,7 +15,7 @@
 
    FrameLink Pipe is a small FIFO memory with FrameLink interface inserted
    between FrameLink components to break-up possible critical path between
-   components. FIFO consists of shift registers SRL16 (SRL32 for Virtex-5) 
+   components. FIFO consists of shift registers SRL16 (SRL32 for Virtex-5)
    thus is very resource efficient. Possiblity to register
    all output signals allows better placement of interconnected FrameLink
    components on the chip with smaller effort of PaR program.
@@ -28,7 +28,7 @@
          Input and output data width
       </generic>
       <generic name="USE_OUTREG" type="boolean" default="false">
-         If true, output register is instantiated 
+         If true, output register is instantiated
       </generic>
    </generic_map>
    <port_map>

@@ -15,7 +15,7 @@ entity LATENCY_METER is
 generic (
     -- Tick counter width (defines max. latency)
     DATA_WIDTH              : integer;
-    -- Defines max. number of parallel events that can be measured 
+    -- Defines max. number of parallel events that can be measured
     MAX_PARALEL_EVENTS      : integer := 1;
     DEVICE                  : string  := "ULTRASCALE"
 );
@@ -74,12 +74,12 @@ begin
     port map (
         CLK         => CLK,
         RESET       => RST,
-    
+
         DI          => tick_cnt,
         WR          => START_EVENT,
         FULL        => FIFO_FULL,
         STATUS      => FIFO_ITEMS,
-    
+
         DO          => start_ticks,
         RD          => end_event_delay_2,
         EMPTY       => fifo_empty
@@ -89,11 +89,11 @@ begin
     -- Combinational logic --
     -------------------------
 
-    tick_limit  <= '1' when (tick_cnt = DATA_MAX) else 
+    tick_limit  <= '1' when (tick_cnt = DATA_MAX) else
                    '0';
 
-    tick_ovf    <= '1' when (tick_cnt_delay_2 < start_ticks) else 
-                   '0'; 
+    tick_ovf    <= '1' when (tick_cnt_delay_2 < start_ticks) else
+                   '0';
 
     zero_delay  <= start_event_delay_2 and end_event_delay_2 and fifo_empty;
 
@@ -102,35 +102,35 @@ begin
     ---------------
 
     tick_cnt_p : process(CLK)
-    begin 
-        if (rising_edge(CLK)) then 
-            if (RST = '1' or tick_limit = '1') then 
+    begin
+        if (rising_edge(CLK)) then
+            if (RST = '1' or tick_limit = '1') then
                 tick_cnt    <= (others => '0');
-            else 
+            else
                 tick_cnt    <= std_logic_vector(unsigned(tick_cnt) + 1);
             end if;
         end if;
     end process;
 
     latency_p : process(CLK)
-    begin 
+    begin
         if (rising_edge(CLK)) then
-            LATENCY <= (others => '0')                                                      when (zero_delay = '1') else 
-                       std_logic_vector(unsigned(tick_cnt_delay_2) - unsigned(start_ticks)) when (tick_ovf = '0')   else 
+            LATENCY <= (others => '0')                                                      when (zero_delay = '1') else
+                       std_logic_vector(unsigned(tick_cnt_delay_2) - unsigned(start_ticks)) when (tick_ovf = '0')   else
                        std_logic_vector(unsigned(tick_cnt_delay_2) + unsigned(DATA_MAX) - unsigned(start_ticks) + 1);
         end if;
     end process;
 
     latency_vld_p : process(CLK)
-    begin 
-        if (rising_edge(CLK)) then 
+    begin
+        if (rising_edge(CLK)) then
             LATENCY_VLD <= end_event_delay_2;
         end if;
     end process;
 
     delay_p : process(CLK)
-    begin 
-        if (rising_edge(CLK)) then 
+    begin
+        if (rising_edge(CLK)) then
             end_event_delay_0   <= END_EVENT;
             end_event_delay_1   <= end_event_delay_0;
             end_event_delay_2   <= end_event_delay_1;

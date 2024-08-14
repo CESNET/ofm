@@ -83,5 +83,5 @@ module DUT (
         .TX_MFB_DST_RDY     (mfb_tx.DST_RDY)
 
     );
-    
+
 endmodule

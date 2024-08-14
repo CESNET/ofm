@@ -204,8 +204,8 @@ begin
 
             signal dout_dsp_1           : std_logic_vector(NUM_OF_FULL_COMPARATORS*26-1 downto 0); -- output of all DSP blocks that use max width of inputs (26 bits)
             signal dout_dsp_2           : std_logic_vector(NUM_OF_FULL_COMPARATORS*26-1 downto 0); -- output of all DSP blocks that use max width of inputs (26 bits)
-            signal input_1_sig_leftover : std_logic_vector(LEFTOVER_BITS downto 0); -- signal that accomodates the bits that do not fill up the whole DSP block (<26 bits) 
-            signal input_2_sig_leftover : std_logic_vector(LEFTOVER_BITS downto 0); -- signal that accomodates the bits that do not fill up the whole DSP block (<26 bits) 
+            signal input_1_sig_leftover : std_logic_vector(LEFTOVER_BITS downto 0); -- signal that accomodates the bits that do not fill up the whole DSP block (<26 bits)
+            signal input_2_sig_leftover : std_logic_vector(LEFTOVER_BITS downto 0); -- signal that accomodates the bits that do not fill up the whole DSP block (<26 bits)
             signal dout_dsp_1_leftover  : std_logic_vector(LEFTOVER_BITS downto 0); -- output of the 1st DSP block where input_2_sig_leftover is subtracted from input_1_sig_leftover
             signal dout_dsp_2_leftover  : std_logic_vector(LEFTOVER_BITS downto 0); -- output of the 2nd DSP block where input_1_sig_leftover is subtracted from input_2_sig_leftover
             signal combined_result      : slv_array_t(TOTAL_NUM_OF_COMPARATORS-1 downto 0)(1 downto 0); -- array of results from each comparator (from each pair of DSP blocks that form one comparator)

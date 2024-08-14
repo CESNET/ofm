@@ -22,7 +22,7 @@ entity STREAMING_DEBUG_PROBE_MFB is
         RX_DST_RDY     : out std_logic;
         RX_SOF         : in  std_logic_vector(REGIONS-1 downto 0) := (others => '0');
         RX_EOF         : in  std_logic_vector(REGIONS-1 downto 0) := (others => '0');
-    
+
         -- ================
         -- Output interface
         -- ================
@@ -30,7 +30,7 @@ entity STREAMING_DEBUG_PROBE_MFB is
         TX_DST_RDY     : in  std_logic;
         TX_SOF         : out std_logic_vector(REGIONS-1 downto 0) := (others => '0');
         TX_EOF         : out std_logic_vector(REGIONS-1 downto 0) := (others => '0');
-            
+
         -- ==================
         -- Debuging interface
         -- ==================
@@ -49,14 +49,14 @@ entity STREAMING_DEBUG_PROBE_MFB is
     );
 end entity;
 
-architecture FULL of STREAMING_DEBUG_PROBE_MFB is 
+architecture FULL of STREAMING_DEBUG_PROBE_MFB is
 begin
     TX_SRC_RDY    <= not DEBUG_DROP and not DEBUG_BLOCK and RX_SRC_RDY;
     RX_DST_RDY    <= DEBUG_DROP or (not DEBUG_BLOCK and TX_DST_RDY);
     DEBUG_SRC_RDY <= not DEBUG_BLOCK and RX_SRC_RDY;
-    DEBUG_DST_RDY <= DEBUG_DROP or (not DEBUG_BLOCK and TX_DST_RDY); 
+    DEBUG_DST_RDY <= DEBUG_DROP or (not DEBUG_BLOCK and TX_DST_RDY);
     TX_SOF        <= RX_SOF;
     TX_EOF        <= RX_EOF;
     DEBUG_SOF     <= RX_SOF;
-    DEBUG_EOF     <= RX_EOF; 
+    DEBUG_EOF     <= RX_EOF;
 end architecture;

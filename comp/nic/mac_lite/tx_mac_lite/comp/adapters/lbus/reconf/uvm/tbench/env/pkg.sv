@@ -9,7 +9,7 @@
 `define MFB_TO_LBUS_ADAPTER_ENV_SV
 
 package uvm_mfb_to_lbus_adapter;
-    
+
     `include "uvm_macros.svh"
     import uvm_pkg::*;
 

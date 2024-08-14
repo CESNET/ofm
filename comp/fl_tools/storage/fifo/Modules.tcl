@@ -19,7 +19,7 @@ set MOD "$MOD $ENTITY_BASE/pfifo8_ent.vhd"
 set PACKAGES "$PACKAGES $ENTITY_BASE/fifo_pkg.vhd"
 # Global FrameLink package
 set PACKAGES "$PACKAGES $ENTITY_BASE/../../pkg/fl_pkg.vhd"
-      
+
 # Wrappers for normal FIFO
 set MOD "$MOD $ENTITY_BASE/fifo_fl8.vhd"
 set MOD "$MOD $ENTITY_BASE/fifo_fl16.vhd"
@@ -40,9 +40,9 @@ if { $ARCHGRP == "FULL" } {
       set MOD "$MOD $ENTITY_BASE/compress.vhd"
       set MOD "$MOD $ENTITY_BASE/decompress_any.vhd"
 
-      set MOD "$MOD $ENTITY_BASE/decompress.vhd" 
+      set MOD "$MOD $ENTITY_BASE/decompress.vhd"
       # Deprecated
-      
+
       # Full architectures
       set MOD "$MOD $ENTITY_BASE/fifo_arch_full.vhd"
       set MOD "$MOD $ENTITY_BASE/pfifo_arch_full.vhd"

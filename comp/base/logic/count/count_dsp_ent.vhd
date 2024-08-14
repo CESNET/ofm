@@ -13,7 +13,7 @@ entity COUNT_DSP is
       DATA_WIDTH   : integer := 48;
       --! Input pipeline registers
       REG_IN       : integer := 0;
-      --! Reset when MAX == P ( 0 => "NO_RESET", 1 => "RESET_MATCH") 
+      --! Reset when MAX == P ( 0 => "NO_RESET", 1 => "RESET_MATCH")
       AUTO_RESET   : integer := 0;
       --! Use DSP slices
       DSP_EN       : boolean := true;
@@ -29,9 +29,9 @@ entity COUNT_DSP is
       ENABLE   : in  std_logic;
       --! Reset input
       RESET    : in  std_logic;
-      --! Data input 
+      --! Data input
       A        : in  std_logic_vector(DATA_WIDTH-1 downto 0);
-      --! Data input (must MAX % A = 0), Maximum value 
+      --! Data input (must MAX % A = 0), Maximum value
       MAX      : in  std_logic_vector(DATA_WIDTH-1 downto 0);
       --! Data output
       P        : out std_logic_vector(DATA_WIDTH-1 downto 0)

@@ -38,7 +38,7 @@ SETTINGS = {
     "1_output_port" : {
         "OUTPUT_PORTS"      : "1",
     },
-    "_combinations_" : (  
+    "_combinations_" : (
     (), # Works the same as '("default",),' as the "default" is applied in every combination
 
     ("bus_comb_2","version_simple","use_dst_rdy_0",),

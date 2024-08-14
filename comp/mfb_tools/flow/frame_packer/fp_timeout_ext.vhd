@@ -11,7 +11,7 @@ use IEEE.numeric_std.all;
 use work.math_pack.all;
 use work.type_pack.all;
 
--- The purpose of this component is set timeout when necessary 
+-- The purpose of this component is set timeout when necessary
 -- Also the correct SOF, EOF and SOF_POS, EOF_POS is set since these doesn't have to come at the same time as overflow
 entity FP_TIMEOUT_EXT is
     generic(
@@ -20,13 +20,13 @@ entity FP_TIMEOUT_EXT is
         MFB_BLOCK_SIZE      : natural := 8;
         MFB_ITEM_WIDTH      : natural := 8;
         RX_PKT_SIZE_MAX     : natural := 2**10;
-        
+
         TIMEOUT_CLK_NO      : natural := 32
     );
     port(
         CLK : in std_logic;
         RST : in std_logic;
-        
+
         RX_SOF_ONE_HOT_CURR  : in  std_logic_vector(MFB_REGIONS*MFB_REGION_SIZE - 1 downto 0);
         RX_EOF_ONE_HOT_CURR  : in  std_logic_vector(MFB_REGIONS*MFB_REGION_SIZE - 1 downto 0);
         RX_PKT_LNG_CURR      : in  slv_array_t(MFB_REGIONS*MFB_REGION_SIZE - 1 downto 0)(max(1, log2(RX_PKT_SIZE_MAX+1)) - 1 downto 0);
@@ -34,7 +34,7 @@ entity FP_TIMEOUT_EXT is
         RX_SOF_ONE_HOT_REG   : in  std_logic_vector(MFB_REGIONS*MFB_REGION_SIZE - 1 downto 0);
         RX_EOF_ONE_HOT_REG   : in  std_logic_vector(MFB_REGIONS*MFB_REGION_SIZE - 1 downto 0);
         RX_PKT_LNG_REG       : in  slv_array_t(MFB_REGIONS*MFB_REGION_SIZE - 1 downto 0)(max(1, log2(RX_PKT_SIZE_MAX+1)) - 1 downto 0);
-        
+
         RX_OVERFLOW          : in  std_logic;
         RX_TMP_PTR           : in  unsigned(max(1,log2(MFB_REGIONS*MFB_REGION_SIZE))-1 downto 0);
 
@@ -47,13 +47,13 @@ entity FP_TIMEOUT_EXT is
     );
 end entity;
 
-architecture FULL of FP_TIMEOUT_EXT is 
+architecture FULL of FP_TIMEOUT_EXT is
     -- Time-machine
     type ext_timeout_fsm is (
         st_PASS,        -- Normal operation
         st_TIMEOUT      -- Possible timeout event
     );
-    signal state, next_state: ext_timeout_fsm := st_PASS;    
+    signal state, next_state: ext_timeout_fsm := st_PASS;
 
     signal sof                  : std_logic_vector(MFB_REGIONS - 1 downto 0);
     signal eof                  : std_logic_vector(MFB_REGIONS - 1 downto 0);
@@ -72,13 +72,13 @@ architecture FULL of FP_TIMEOUT_EXT is
     signal eof_pos_reg          : slv_array_t(MFB_REGIONS - 1 downto 0)(max(1,log2(MFB_REGION_SIZE))-1 downto 0);
 
 
-    -- Timeout 
+    -- Timeout
     signal timeout              : std_logic;
     signal timeout_event        : std_logic;
     signal timeout_en           : std_logic;
-    signal timeout_cnt          : unsigned(max(1, log2(TIMEOUT_CLK_NO) + 1) - 1 downto 0):= (others => '0');    
+    signal timeout_cnt          : unsigned(max(1, log2(TIMEOUT_CLK_NO) + 1) - 1 downto 0):= (others => '0');
     signal timeout_block        : std_logic := '0';
-    -- Fixup - output is a vector ... 
+    -- Fixup - output is a vector ...
     signal mux_out_sof_oh_arr   : slv_array_t(MFB_REGIONS*MFB_REGION_SIZE - 1 downto 0)(0 downto 0);
     signal mux_out_eof_oh_arr   : slv_array_t(MFB_REGIONS*MFB_REGION_SIZE - 1 downto 0)(0 downto 0);
     signal mux_out_sof_oh       : std_logic_vector(MFB_REGIONS*MFB_REGION_SIZE - 1 downto 0);
@@ -88,13 +88,13 @@ architecture FULL of FP_TIMEOUT_EXT is
     -- TIME_SELECT
     signal sel_out              : std_logic_vector(MFB_REGIONS*MFB_REGION_SIZE - 1 downto 0);
     signal sel_out_n            : std_logic_vector(MFB_REGIONS*MFB_REGION_SIZE - 1 downto 0);
-    signal sel_one_hot          : std_logic_vector(MFB_REGIONS*MFB_REGION_SIZE - 1 downto 0);    
+    signal sel_one_hot          : std_logic_vector(MFB_REGIONS*MFB_REGION_SIZE - 1 downto 0);
 
     signal mux_select           : slv_array_t(MFB_REGIONS*MFB_REGION_SIZE - 1 downto 0)(0 downto 0);
 
     signal sof_mask             : std_logic_vector(MFB_REGIONS - 1 downto 0) := (others => '0');
     signal eof_mask             : std_logic_vector(MFB_REGIONS - 1 downto 0) := (others => '0');
-    
+
 begin
     --------------------------------------------------------------------------------
     ---                                TIME_SELECT                               ---
@@ -113,11 +113,11 @@ begin
         port map(
             DI  => sel_one_hot,
             DO  => sel_out_n
-        );    
+        );
 
     sel_reg_p: process(all)
     begin
-        if rising_edge(CLK) then 
+        if rising_edge(CLK) then
             sel_out <= not sel_out_n;
         end if;
     end process;
@@ -175,7 +175,7 @@ begin
 
         variable mux_out_sof_oh_v   : slv_array_t(MFB_REGIONS - 1 downto 0)(MFB_REGION_SIZE - 1 downto 0);
         variable pkt_lng_v          : slv_array_t(MFB_REGIONS - 1 downto 0)(max(1, log2(RX_PKT_SIZE_MAX+1)) - 1 downto 0);
-    begin 
+    begin
         mux_out_sof_oh_v    := slv_array_deser(mux_out_sof_oh, MFB_REGIONS);
 
         sof_v               := (others => '0');
@@ -184,7 +184,7 @@ begin
 
         sof_region_l: for r in 0 to MFB_REGIONS - 1 loop
             sof_block_l: for b in 0 to MFB_REGION_SIZE - 1 loop
-                if mux_out_sof_oh_v(r)(b) = '1' then 
+                if mux_out_sof_oh_v(r)(b) = '1' then
                     sof_v(r)           := '1';
                     sof_pos_block_v(r) := std_logic_vector(to_unsigned(b, max(1, log2(MFB_REGION_SIZE))));
                     pkt_lng_v(r)       := mux_out_pkt_lng(r*MFB_REGION_SIZE + b);
@@ -206,7 +206,7 @@ begin
 
         variable mux_out_eof_oh_v   : slv_array_t(MFB_REGIONS - 1 downto 0)(MFB_REGION_SIZE - 1 downto 0);
         variable eof_pos_cmp_v      : unsigned(max(1, log2(MFB_REGIONS*MFB_REGION_SIZE)) - 1 downto 0);
-    begin 
+    begin
         mux_out_eof_oh_v        := slv_array_deser(mux_out_eof_oh, MFB_REGIONS);
 
         eof_v           := (others => '0');
@@ -216,11 +216,11 @@ begin
 
         eof_region_l: for r in 0 to MFB_REGIONS - 1 loop
             eof_block_l: for b in 0 to MFB_REGION_SIZE - 1 loop
-                if mux_out_eof_oh_v(r)(b) = '1' then 
+                if mux_out_eof_oh_v(r)(b) = '1' then
                     eof_v(r)           := '1';
                     eof_pos_block_v(r) := std_logic_vector(to_unsigned(b, max(1, log2(MFB_REGION_SIZE))));
 
-                    -- Last valid value compare value 
+                    -- Last valid value compare value
                     eof_pos_cmp_v      := to_unsigned(r*MFB_REGION_SIZE, eof_pos_cmp_v'length) + to_unsigned(b, eof_pos_cmp_v'length);
                 end if;
             end loop;
@@ -249,11 +249,11 @@ begin
                 pkt_lng_reg  <= (others => (others => '0'));
             else
                 for r in 0 to MFB_REGIONS - 1 loop
-                    if eof(r) = '1' then 
+                    if eof(r) = '1' then
                         eof_reg(r)      <= '1';
                         eof_pos_reg(r)  <= eof_pos(r);
                     end if;
-                    if sof(r) = '1' then 
+                    if sof(r) = '1' then
                         sof_reg(r)      <= '1';
                         sof_pos_reg(r)  <= sof_pos(r);
                         pkt_lng_reg(r)  <= pkt_lng(r);
@@ -270,7 +270,7 @@ begin
             if timeout_event = '1' then
                 sof_mask    <= sof;
                 eof_mask    <= eof;
-            elsif RX_OVERFLOW = '1' then 
+            elsif RX_OVERFLOW = '1' then
                 sof_mask    <= (others => '0');
                 eof_mask    <= (others => '0');
             end if;
@@ -280,9 +280,9 @@ begin
     process(all)
     begin
         if rising_edge(CLK) then
-            if RX_OVERFLOW = '1' then 
+            if RX_OVERFLOW = '1' then
                 timeout_block   <= '0';
-            elsif timeout_event = '1' then 
+            elsif timeout_event = '1' then
                 timeout_block   <= '1';
             end if;
         end if;
@@ -291,7 +291,7 @@ begin
     ext_timeout_reg_p: process(all)
     begin
         if (rising_edge(CLK)) then
-            if RST = '1' then 
+            if RST = '1' then
                 state   <= st_PASS;
             else
                 state   <= next_state;
@@ -333,14 +333,14 @@ begin
                             else
                                 TX_EOF(r)       <= eof(r);
                                 tx_eof_pos_s(r) <= eof_pos(r);
-                            end if;                           
+                            end if;
                         end loop;
                     elsif (eof_v = '1') and (eof_compare = '1') then
                         next_state  <=  st_TIMEOUT;
                     end if;
                 -- More regions
                 else
-                    if RX_OVERFLOW = '1' then 
+                    if RX_OVERFLOW = '1' then
                         for r in 0 to MFB_REGIONS - 1 loop
                             TX_SOF(r)       <= sof(r) and (not sof_mask(r));
                             tx_sof_pos_s(r) <= sof_pos(r);
@@ -356,7 +356,7 @@ begin
                 if RX_OVERFLOW = '1' then
                     next_state  <= st_PASS;
                     for r in 0 to MFB_REGIONS - 1 loop
-                        if sof_reg(r) = '1' then 
+                        if sof_reg(r) = '1' then
                             TX_SOF(r)       <= sof_reg(r);
                             tx_sof_pos_s(r) <= sof_pos_reg(r);
                             TX_PKT_LNG(r)   <= pkt_lng_reg(r);
@@ -366,7 +366,7 @@ begin
                             TX_PKT_LNG(r)   <= pkt_lng(r);
                         end if;
 
-                        if eof_reg(r) = '1' then 
+                        if eof_reg(r) = '1' then
                             TX_EOF(r)       <= eof_reg(r);
                             tx_eof_pos_s(r) <= eof_pos_reg(r);
                         else
@@ -374,20 +374,20 @@ begin
                             tx_eof_pos_s(r) <= eof_pos(r);
                         end if;
                     end loop;
-                elsif timeout_event = '1' then 
+                elsif timeout_event = '1' then
                     next_state  <= st_PASS;
                     for r in 0 to MFB_REGIONS - 1 loop
-                        if sof_reg(r) = '1' then 
+                        if sof_reg(r) = '1' then
                             TX_SOF(r)       <= sof_reg(r);
                             tx_sof_pos_s(r) <= sof_pos_reg(r);
                             TX_PKT_LNG(r)   <= pkt_lng_reg(r);
-                        else 
+                        else
                             TX_SOF(r)       <= '0';
                             tx_sof_pos_s(r) <= sof_pos(r);
                             TX_PKT_LNG(r)   <= pkt_lng(r);
                         end if;
 
-                        if eof_reg(r) = '1' then 
+                        if eof_reg(r) = '1' then
                             TX_EOF(r)       <= eof_reg(r);
                             tx_eof_pos_s(r) <= eof_pos_reg(r);
                         else
@@ -395,7 +395,7 @@ begin
                             tx_eof_pos_s(r) <= eof_pos(r);
                         end if;
                     end loop;
-                elsif eof_compare = '0' then 
+                elsif eof_compare = '0' then
                     next_state  <= st_PASS;
                 end if;
 
@@ -408,31 +408,31 @@ begin
     --------------------------------------------------------------------------------
     ---                              EXTERNAL_TIMEOUT                            ---
     --------------------------------------------------------------------------------
-    timeout_p: process(all) 
+    timeout_p: process(all)
     begin
         if rising_edge(CLK) then
             timeout <= '0';
             if timeout_en = '1' then
                 if RX_OVERFLOW = '0' then
-                    if timeout_cnt = TIMEOUT_CLK_NO then 
+                    if timeout_cnt = TIMEOUT_CLK_NO then
                         timeout       <= '1';
                         timeout_cnt   <= (others => '0');
-                    else 
+                    else
                         timeout_cnt <= timeout_cnt + 1;
                     end if;
-                else 
+                else
                     timeout_cnt <= (others => '0');
                 end if;
             else
                 timeout_cnt <= (others => '0');
             end if;
         end if;
-    end process; 
+    end process;
 
     -- This prevents timeout to occur when new packets arrives in timeout event
     timeout_event   <= timeout and eof_compare;
-    
+
     TX_TIMEOUT_EXT  <= timeout_event when RX_OVERFLOW = '0' else '0';
-        
+
 
 end architecture;

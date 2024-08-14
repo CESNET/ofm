@@ -81,7 +81,7 @@ entity DMA_MFB_GENERATOR is
         ETH_MFB_EOF_POS    : out std_logic_vector(REGIONS*max(1,log2(REGION_SIZE*BLOCK_SIZE))-1 downto 0);
         ETH_MFB_SRC_RDY    : out std_logic;
         ETH_MFB_DST_RDY    : in  std_logic
-    );  
+    );
 end entity;
 
 architecture FULL of DMA_MFB_GENERATOR is
@@ -189,7 +189,7 @@ begin
         -- Common interface
         CLK      => CLK,
         RESET    => RESET,
-        
+
         -- Input MI interface
         IN_DWR   => mi_sync_dwr,
         IN_ADDR  => mi_sync_addr,
@@ -199,7 +199,7 @@ begin
         IN_DRD   => mi_sync_drd,
         IN_ARDY  => mi_sync_ardy,
         IN_DRDY  => mi_sync_drdy,
-        
+
         -- Output MI interface
         OUT_DWR  => mi_pipe_dwr,
         OUT_ADDR => mi_pipe_addr,
@@ -225,7 +225,7 @@ begin
     port map(
         CLK            => CLK,
         RST            => RESET,
-        
+
         MI_DWR         => mi_pipe_dwr,
         MI_ADDR        => mi_pipe_addr,
         MI_BE          => mi_pipe_be,
@@ -285,7 +285,7 @@ begin
         variable tmp_sof_pos : unsigned(log2(REGION_SIZE)-1 downto 0);
     begin
         if (rising_edge(CLK)) then
-            if (ETH_MFB_DST_RDY = '1') then                                
+            if (ETH_MFB_DST_RDY = '1') then
                 ETH_MFB_DATA    <= mfb_gen_data;
                 ETH_MFB_SOF     <= mfb_gen_sof;
                 ETH_MFB_EOF     <= mfb_gen_eof;

@@ -1,7 +1,7 @@
 /*
  * file       : scoreboard.sv
  * Copyright (C) 2021 CESNET z. s. p. o.
- * description: scoreboard 
+ * description: scoreboard
  * date       : 2021
  * author     : Radek Iša <isa@cesnet.cz>
  *
@@ -33,7 +33,7 @@ class scoreboard extends uvm_scoreboard;
     //ADD time to sequence
     uvm_common::subscriber#(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))  model_input;
 
- 
+
     function new(string name, uvm_component parent = null);
         super.new(name, parent);
 

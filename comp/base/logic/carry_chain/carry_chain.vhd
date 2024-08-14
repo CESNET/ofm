@@ -41,17 +41,17 @@ end entity;
 
 architecture structural of CARRY_CHAIN is
 
-   -- CARRY4 declaration as synthesis hack due to Quartus 
-   component CARRY4 
+   -- CARRY4 declaration as synthesis hack due to Quartus
+   component CARRY4
    port (
       CO     : out std_logic_vector(4-1 downto 0);
       O      : out std_logic_vector(4-1 downto 0);
-      CI     : in  std_logic; 
-      CYINIT : in  std_logic; 
+      CI     : in  std_logic;
+      CYINIT : in  std_logic;
       DI     : in  std_logic_vector(4-1 downto 0);
       S      : in  std_logic_vector(4-1 downto 0)
-   ); 
-   end component; 
+   );
+   end component;
 
 begin
 

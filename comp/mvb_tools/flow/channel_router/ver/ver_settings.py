@@ -42,7 +42,7 @@ SETTINGS = {
     "reg_settings_3" : {
         "REG_SETTINGS"      : "3",
     },
-    "_combinations_" : (  
+    "_combinations_" : (
     (), # Works the same as '("default",),' as the "default" is applied in every combination
     ("src_same_as_dst_channels",),
     ("bus_comb_1",),

@@ -73,11 +73,11 @@ architecture fl_monitor_arch of fl_monitor is
 
 begin
 
-   fl_transaction <= not (SRC_RDY_N or DST_RDY_N); 
+   fl_transaction <= not (SRC_RDY_N or DST_RDY_N);
 
    -- This comparator checks if the data matches with the pattern
    cmp_data_match <= '1' when monitored_data = reg_data_match else '0';
-   
+
 
 
    -- ---------------------------------------------------------------------
@@ -164,7 +164,7 @@ begin
       -- This comparator compares if the desired position in the frame
       -- has been reached
       cmp_pos_match <= '1' when cnt_word = FL_WORD_COUNT else '0';
-   
+
 
    end generate;
 
@@ -195,7 +195,7 @@ begin
    cnt_match_ld <= cs_mon and ADC_WR;
 
 
-   
+
    -- register reg_pos_matched -------------------------------------------
    reg_pos_matchedp: process(RESET, CLK)
    begin
@@ -215,7 +215,7 @@ begin
    reg_pos_matched_ld <= fl_transaction and not EOF_N;
 
 
-   
+
    -- ---------------------------------------------------------------------
    --                      Memory connection
    -- ---------------------------------------------------------------------
@@ -244,7 +244,7 @@ begin
 
 
    -- Monitored data multiplexor and decoder
-   -- Generate only when the monitored data width is more than 
+   -- Generate only when the monitored data width is more than
    -- MI32 data width
    gen_more_data: if (WORD_WIDTH > 32) generate
 

@@ -49,12 +49,12 @@ end entity i2c_slave_top;
 architecture structural of i2c_slave_top is
 
    -- FSM
-   type t_states is (idle, cmd_dev_addr, wait_dev_addr, 
-                     cmd_mi_read, wait_mi_read, 
+   type t_states is (idle, cmd_dev_addr, wait_dev_addr,
+                     cmd_mi_read, wait_mi_read,
                      cmd_reply, wait_reply,
                      cmd_read_addr_lo, wait_addr_lo,
                      cmd_read_addr_hi, wait_addr_hi,
-                     cmd_read_data, wait_data, 
+                     cmd_read_data, wait_data,
                      cmd_mi_write);
 
    signal state            : t_states;
@@ -107,11 +107,11 @@ begin
       ACK_IN   => '0',
       CMD_VLD  => core_cmd_vld,
       CMD_RDY  => core_cmd_rdy,
-                              
+
       CMD_ACK  => core_cmd_ack,
       ACK_OUT  => core_ack_out,
       DOUT     => core_dout,
-            
+
       START    => core_start,
       STOP     => core_stop,
 
@@ -309,7 +309,7 @@ begin
       WR    <= '0';
 
       case state is
-         when idle => 
+         when idle =>
 
          when cmd_dev_addr =>
             core_cmd_vld <= '1';

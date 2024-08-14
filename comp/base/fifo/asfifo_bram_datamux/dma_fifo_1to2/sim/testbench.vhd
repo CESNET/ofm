@@ -43,7 +43,7 @@ architecture behavioral of testbench is
    signal rst_rd        : std_logic;
    signal tx_data       : std_logic_vector(TEST_WIDTH-1 downto 0);
    signal tx_src_rdy    : std_logic;
-   signal tx_src_rdy_h  : std_logic;                 
+   signal tx_src_rdy_h  : std_logic;
    signal rx_eop        : std_logic;
    signal rx_sop        : std_logic;
    signal rx_src_rdy    : std_logic;
@@ -154,7 +154,7 @@ begin
    rx_eop     <= '1';
    rx_sop     <= '0';
    wait for 400 ns;
-   
+
    wait until (clk_wr'event and clk_wr='1' and RX_DST_RDY='1');
       rx_src_rdy <= '1';
       rx_eop <= '0';

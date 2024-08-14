@@ -66,7 +66,7 @@ class model#(INPUT_CHANNELS, OUTPUT_CHANNELS, RESET_TYPE, OPT_MODE) extends uvm_
         if (m_regmodel.channel[input_port].incr.get() == 0) begin
             ret = input_port;
         end else begin
-            if (OPT_MODE == 1) begin 
+            if (OPT_MODE == 1) begin
                 int ch_diff;
                 ret = channel[input_port].act + m_regmodel.channel[input_port].ch_min.get();
                 ch_diff = (m_regmodel.channel[input_port].ch_max.get() - m_regmodel.channel[input_port].ch_min.get());
@@ -83,7 +83,7 @@ class model#(INPUT_CHANNELS, OUTPUT_CHANNELS, RESET_TYPE, OPT_MODE) extends uvm_
             end
         end
 
-        $swrite(msg, "\n\tInput channel %0d output channel %0d", input_port, ret); 
+        $swrite(msg, "\n\tInput channel %0d output channel %0d", input_port, ret);
         `uvm_info(this.get_full_name(), msg, UVM_DEBUG);
         return ret;
     endfunction

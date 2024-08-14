@@ -17,8 +17,8 @@
 
 
 class MfbDriver #(REGIONS = 4, REGION_SIZE = 8, BLOCK_SIZE = 8, ITEM_WIDTH = 8, SOF_CTRL = 0, META_WIDTH = 1, META_ALIGNMENT = 0) extends Driver;
-    // META_WIDTH defines width META signal in bits per region. 
-    // META_ALIGNMENT=0 => META signal is aligned with SOF, META_ALIGNMENT=1 => META signal is aligned with EOF. 
+    // META_WIDTH defines width META signal in bits per region.
+    // META_ALIGNMENT=0 => META signal is aligned with SOF, META_ALIGNMENT=1 => META signal is aligned with EOF.
 
     localparam ITEMS = REGIONS * REGION_SIZE * BLOCK_SIZE;
     localparam REGION_ITEMS = REGION_SIZE * BLOCK_SIZE;

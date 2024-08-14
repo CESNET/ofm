@@ -73,7 +73,7 @@ class probe_cbs #(int unsigned REGIONS) extends uvm_event_callback;
                 out_discard_meta.push_back(0);
             end
         end
-        
+
     endfunction
 
     //---------------------------------------

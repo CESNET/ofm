@@ -14,7 +14,7 @@ use work.type_pack.all;
 entity UMII_ENC is
     generic(
         -- =====================================================================
-        -- UNIVERSAL MII ENCODER CONFIGURATION: 
+        -- UNIVERSAL MII ENCODER CONFIGURATION:
         -- =====================================================================
         -- Data width of MII data signal, must be power of two, minimum is 64
         MII_DW      : natural := 2048;
@@ -130,7 +130,7 @@ architecture FULL of UMII_ENC is
 begin
 
     -- asserts
-    assert ((BLOCK_SIZE = 8 or BLOCK_SIZE = 4) and ITEM_WIDTH = 8) 
+    assert ((BLOCK_SIZE = 8 or BLOCK_SIZE = 4) and ITEM_WIDTH = 8)
         report "UMII_ENC: BLOCK_SIZE must be 8 or 4 and ITEM_WIDTH must be 8, other values are not supported!!!"
         severity failure;
 
@@ -148,7 +148,7 @@ begin
     else generate
         s_rx_sof_pos_arr <= (others => (others => '0'));
     end generate;
-    
+
     s_rx_eof_pos_arr <= slv_array_deser(RX_EOF_POS,REGIONS,EOF_POS_SIZE);
 
     sfd_in_prev_region_g : for r in 0 to REGIONS-1 generate
@@ -167,7 +167,7 @@ begin
     s_sfd_pos(REGIONS-1) <= unsigned(s_sfd_pos_plus_arr(REGIONS-1)(SOF_POS_SIZE-1 downto 0));
 
     s_sfd_in_prev_word <= s_sfd_pos_under_bit(0);
-    
+
     efd_flag_g : for r in 0 to REGIONS-1 generate
         -- Position of EFD flag, EFD is one byte after EOF.
         s_efd_pos_plus_arr(r) <= resize(unsigned(s_rx_eof_pos_arr(r)),(EOF_POS_SIZE+1)) + 1;
@@ -243,22 +243,22 @@ begin
             if (RESET = '1') then
                 s_incomplete_word(0) <= '0';
             elsif (MII_RDY = '1') then
-                s_incomplete_word(0) <= s_incomplete_word(REGIONS);  
+                s_incomplete_word(0) <= s_incomplete_word(REGIONS);
             end if;
         end if;
     end process;
 
     s_word_vld <= (or s_sfd_vld_final) or s_incomplete_word(0);
-    
+
     sfd_efd_oh_g : for r in 0 to REGIONS-1 generate
         sfd_oh_g : if REGION_SIZE > 1 generate
             bin2hot_sfd_i : entity work.BIN2HOT
             generic map(
                 DATA_WIDTH => LOG2_REGION_SIZE
-            )             
-            port map(   
-                EN     => s_sfd_vld_final(r), 
-                INPUT  => std_logic_vector(s_sfd_pos_final(r)),  
+            )
+            port map(
+                EN     => s_sfd_vld_final(r),
+                INPUT  => std_logic_vector(s_sfd_pos_final(r)),
                 OUTPUT => s_sfd_pos_oh((r+1)*REGION_SIZE-1 downto r*REGION_SIZE)
             );
         else generate
@@ -268,10 +268,10 @@ begin
         bin2hot_efd_i : entity work.BIN2HOT
         generic map(
             DATA_WIDTH => LOG2_REGION_SIZE
-        )             
-        port map(   
-            EN     => s_efd_vld_reg1(r), 
-            INPUT  => std_logic_vector(s_efd_pos_reg1(r)(LOG2_REGION_SIZE+LOG2_BLOCK_SIZE-1 downto LOG2_BLOCK_SIZE)),  
+        )
+        port map(
+            EN     => s_efd_vld_reg1(r),
+            INPUT  => std_logic_vector(s_efd_pos_reg1(r)(LOG2_REGION_SIZE+LOG2_BLOCK_SIZE-1 downto LOG2_BLOCK_SIZE)),
             OUTPUT => s_efd_pos_oh((r+1)*REGION_SIZE-1 downto r*REGION_SIZE)
         );
     end generate;
@@ -294,7 +294,7 @@ begin
             if (RESET = '1') then
                 s_incomplete_block(0) <= '0';
             elsif (MII_RDY = '1') then
-                s_incomplete_block(0) <= s_incomplete_block(WORD_BLOCKS);  
+                s_incomplete_block(0) <= s_incomplete_block(WORD_BLOCKS);
             end if;
         end if;
     end process;
@@ -467,7 +467,7 @@ begin
     -- =========================================================================
     -- 3. REGISTERS STAGE
     -- =========================================================================
-   
+
     reg3_p : process (CLK)
     begin
         if (rising_edge(CLK)) then

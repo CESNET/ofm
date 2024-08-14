@@ -2,7 +2,7 @@
 --!
 --! \file
 --! \brief Packet oriented FLU multiplexer, with optional packet discarding
---! \author Lukas Kekely <kekely@cesnet.cz> 
+--! \author Lukas Kekely <kekely@cesnet.cz>
 --! \author Jan Kučera <xkucer73@stud.fit.vutbr.cz>
 --! \date 2012, 2013
 --!
@@ -25,14 +25,14 @@ use work.math_pack.all;
 entity FLU_MULTIPLEXER_DPACKET is
    generic (
       DATA_WIDTH     : integer := 512;
-      SOP_POS_WIDTH  : integer := 3; 	
+      SOP_POS_WIDTH  : integer := 3;
       INPUT_PORTS    : integer := 2
    );
    port (
       --! \name Common interface
       RESET         : in  std_logic;
       CLK           : in  std_logic;
-      
+
       --! \name Control interface
       --! \details Port blocking settings:
       --!   when 1:  specific port is blocked
@@ -51,7 +51,7 @@ entity FLU_MULTIPLEXER_DPACKET is
       RX_SOP        : in std_logic_vector(INPUT_PORTS-1 downto 0);
       RX_EOP        : in std_logic_vector(INPUT_PORTS-1 downto 0);
       RX_SRC_RDY    : in std_logic_vector(INPUT_PORTS-1 downto 0);
-      RX_DST_RDY    : out std_logic_vector(INPUT_PORTS-1 downto 0); 
+      RX_DST_RDY    : out std_logic_vector(INPUT_PORTS-1 downto 0);
 
       --! \name Frame Link Unaligned concentrated interface
       TX_DATA       : out std_logic_vector(DATA_WIDTH-1 downto 0);
@@ -60,7 +60,7 @@ entity FLU_MULTIPLEXER_DPACKET is
       TX_SOP        : out std_logic;
       TX_EOP        : out std_logic;
       TX_SRC_RDY    : out std_logic;
-      TX_DST_RDY    : in std_logic 
+      TX_DST_RDY    : in std_logic
    );
 end entity;
 
@@ -73,9 +73,9 @@ architecture FULL of FLU_MULTIPLEXER_DPACKET is
 
 
    -- ------------------------------ Signals ----------------------------------
- 
-   signal ctrl_sel_in    : std_logic_vector(log2(INPUT_PORTS)-1 downto 0);   
-   signal ctrl_block_in  : std_logic_vector(INPUT_PORTS-1 downto 0);   
+
+   signal ctrl_sel_in    : std_logic_vector(log2(INPUT_PORTS)-1 downto 0);
+   signal ctrl_block_in  : std_logic_vector(INPUT_PORTS-1 downto 0);
    signal ctrl_ready_in  : std_logic;
    signal ctrl_next_out  : std_logic;
 
@@ -92,7 +92,7 @@ architecture FULL of FLU_MULTIPLEXER_DPACKET is
    signal mx_rx_src_rdy  : std_logic_vector(INPUT_PORTS-1 downto 0);
    signal rx_sop_detect  : std_logic_vector(INPUT_PORTS-1 downto 0);
    signal rx_sop_detect_all : std_logic;
-   
+
    signal mux_data       : std_logic_vector(DATA_WIDTH-1 downto 0);
    signal mux_sop_pos    : std_logic_vector(EOP_POS_WIDTH-1 downto 0);
    signal mux_eop_pos    : std_logic_vector(log2(DATA_WIDTH/8)-1 downto 0);
@@ -101,13 +101,13 @@ architecture FULL of FLU_MULTIPLEXER_DPACKET is
    signal mux_src_rdy    : std_logic;
    signal mux_dst_rdy    : std_logic;
 
-   signal mux_eop_sop    : std_logic; 
+   signal mux_eop_sop    : std_logic;
    signal mux_sop_out    : std_logic;
-   signal mux_eop_out    : std_logic;  
-   
+   signal mux_eop_out    : std_logic;
+
    signal tx_src_rdy_out : std_logic;
    signal tx_dst_rdy_in  : std_logic;
-   
+
    signal rx_sel         : std_logic_vector(log2(INPUT_PORTS)-1 downto 0);
    signal sel_reg        : std_logic_vector(log2(INPUT_PORTS)-1 downto 0);
    signal rx_block       : std_logic_vector(INPUT_PORTS-1 downto 0);
@@ -116,7 +116,7 @@ architecture FULL of FLU_MULTIPLEXER_DPACKET is
    signal block_mask     : std_logic_vector(INPUT_PORTS-1 downto 0);
    signal ctrl_change    : std_logic;
    signal ctrl_nochange  : std_logic;
-   
+
    signal reg_frame_sent  : std_logic;
    signal reg_frame_start : std_logic;
 
@@ -150,7 +150,7 @@ begin
    rx_block      <= block_mask when reg_frame_sent='1' and ctrl_ready_in = '1' else block_reg;
    ctrl_nochange <= '1' when ctrl_sel_in=sel_reg and ctrl_ready_in='1' else '0';
    ctrl_change   <= '0' when ctrl_sel_in=sel_reg and ctrl_ready_in='1' else '1';
-   
+
    process(CLK)
    begin
       if (CLK'event and CLK = '1') then
@@ -175,7 +175,7 @@ begin
 
       rx_sop_detect(i) <= rx_sop_in(i) and rx_src_rdy_in(i);
    end generate;
-      
+
    rx_sop_detect_all_i : process(rx_sop_detect, rx_block)
       variable and_sop : std_logic;
    begin
@@ -184,13 +184,13 @@ begin
          and_sop := and_sop and (rx_sop_detect(k) or rx_block(k));
       end loop;
       rx_sop_detect_all <= and_sop;
-   end process; 
+   end process;
 
    --! FLU basic multiplexer instantiation
    rx_flu_mux_i : entity work.FLU_MULTIPLEXER
    generic map (
       DATA_WIDTH     => DATA_WIDTH,
-      SOP_POS_WIDTH  => SOP_POS_WIDTH, 	
+      SOP_POS_WIDTH  => SOP_POS_WIDTH,
       INPUT_PORTS    => INPUT_PORTS,
       BLOCKING       => false
    ) port map (
@@ -199,7 +199,7 @@ begin
       RESET => RESET,
       --! Control signal
       SEL => rx_sel,
-      --! Input FLUs 
+      --! Input FLUs
       RX_DATA    => rx_data_in,
       RX_SOP_POS => rx_sop_pos_in,
       RX_EOP_POS => rx_eop_pos_in,
@@ -241,16 +241,16 @@ begin
 
    --! MUX, TX & CTRL ready signals
    mux_dst_rdy <= tx_dst_rdy_in and (ctrl_ready_in or not mux_sop_out) and (reg_frame_sent or not ctrl_change or not mux_sop or not mux_eop_sop);
-   tx_src_rdy_out <= mux_src_rdy and (ctrl_ready_in or not mux_sop_out) and not (reg_frame_sent and not reg_frame_start and not mux_sop_out);   
+   tx_src_rdy_out <= mux_src_rdy and (ctrl_ready_in or not mux_sop_out) and not (reg_frame_sent and not reg_frame_start and not mux_sop_out);
    ctrl_next_out <= mux_sop_out and tx_src_rdy_out and tx_dst_rdy_in;
-        
+
    --! FLU output signals
    TX_DATA       <= mux_data;
    TX_SOP_POS    <= mux_sop_pos(EOP_POS_WIDTH-1 downto EOP_POS_WIDTH-SOP_POS_WIDTH);
    TX_EOP_POS    <= mux_eop_pos;
    TX_SOP        <= mux_sop_out;
-   TX_EOP        <= mux_eop_out;   
+   TX_EOP        <= mux_eop_out;
    TX_SRC_RDY    <= tx_src_rdy_out and (not reg_frame_sent or reg_frame_start or mux_sop_out);
-   tx_dst_rdy_in <= TX_DST_RDY;  
+   tx_dst_rdy_in <= TX_DST_RDY;
 
 end architecture;

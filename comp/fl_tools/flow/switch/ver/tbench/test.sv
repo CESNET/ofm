@@ -25,23 +25,23 @@ program TEST (
   iFrameLinkTx.tb  TX[IF_COUNT],
   iFrameLinkTx.monitor  MONITOR[IF_COUNT]
   );
-  
+
   // --------------------------------------------------------------------------
   //                       Variables declaration
   // --------------------------------------------------------------------------
-  
+
   FrameLinkTransaction                          flBlueprint;
-  Generator                                     generator; 
+  Generator                                     generator;
   FrameLinkDriver  #(DATA_WIDTH, DREM_WIDTH)    flDriver;
   FrameLinkMonitor #(DATA_WIDTH, DREM_WIDTH)    flMonitor[IF_COUNT];
-  FrameLinkResponder #(DATA_WIDTH, DREM_WIDTH)  flResponder[IF_COUNT];      
+  FrameLinkResponder #(DATA_WIDTH, DREM_WIDTH)  flResponder[IF_COUNT];
   Coverage #(DATA_WIDTH,DREM_WIDTH,DATA_WIDTH,DREM_WIDTH) coverage;
-  Scoreboard #(IF_COUNT, IFNUM_OFFSET)          scoreboard;                              
-  
-  // Only array of virtual interfaces can be indexed 
+  Scoreboard #(IF_COUNT, IFNUM_OFFSET)          scoreboard;
+
+  // Only array of virtual interfaces can be indexed
   virtual iFrameLinkTx.tb      #(DATA_WIDTH, DREM_WIDTH) vTX[IF_COUNT];
   virtual iFrameLinkTx.monitor #(DATA_WIDTH, DREM_WIDTH) vMONITOR[IF_COUNT];
-  
+
   // --------------------------------------------------------------------------
   //                       Creating Environment tasks
   // --------------------------------------------------------------------------
@@ -59,14 +59,14 @@ program TEST (
     flBlueprint.packetSizeMax = packet_size_max;
     flBlueprint.packetSizeMin = packet_size_min;
     generator.blueprint = flBlueprint;
-  endtask: createGeneratorEnvironment    
-  
+  endtask: createGeneratorEnvironment
+
   // Create Test Environment
   task createEnvironment();
     // Assign virtual interfaces
     vTX      = TX;
     vMONITOR = MONITOR;
-    
+
     // Coverage class
     coverage = new();
     // Create scoreboard
@@ -74,37 +74,37 @@ program TEST (
 
     // Create and connect driver
     flDriver       = new ("Driver0", generator.transMbx, RX);
-      flDriver.txDelayEn_wt             = DRIVER_DELAYEN_WT; 
+      flDriver.txDelayEn_wt             = DRIVER_DELAYEN_WT;
       flDriver.txDelayDisable_wt        = DRIVER_DELAYDIS_WT;
       flDriver.txDelayLow               = DRIVER_DELAYLOW;
       flDriver.txDelayHigh              = DRIVER_DELAYHIGH;
-      flDriver.insideTxDelayEn_wt       = DRIVER_INSIDE_DELAYEN_WT; 
+      flDriver.insideTxDelayEn_wt       = DRIVER_INSIDE_DELAYEN_WT;
       flDriver.insideTxDelayDisable_wt  = DRIVER_INSIDE_DELAYDIS_WT;
       flDriver.insideTxDelayLow         = DRIVER_INSIDE_DELAYLOW;
       flDriver.insideTxDelayHigh        = DRIVER_INSIDE_DELAYHIGH;
       flDriver.setCallbacks(scoreboard.driverCbs);
       coverage.addFrameLinkInterfaceRx(RX,"RX Coverage");
-        
+
     // Create and connect monitor and responder
     for(int i=0; i<IF_COUNT; i++) begin
       string monitorLabel;
       string responderLabel;
       string coverageLabel;
-      
+
       $swrite(monitorLabel, "Monitor %0d", i);
       $swrite(responderLabel, "Responder %0d", i);
       $swrite(coverageLabel, "TX Coverage %0d", i);
       flMonitor[i]   = new (monitorLabel, vMONITOR[i]);
       flResponder[i] = new (responderLabel, vTX[i]);
-      
-      flResponder[i].rxDelayEn_wt            = MONITOR_DELAYEN_WT; 
+
+      flResponder[i].rxDelayEn_wt            = MONITOR_DELAYEN_WT;
       flResponder[i].rxDelayDisable_wt       = MONITOR_DELAYDIS_WT;
       flResponder[i].rxDelayLow              = MONITOR_DELAYLOW;
       flResponder[i].rxDelayHigh             = MONITOR_DELAYHIGH;
-      flResponder[i].insideRxDelayEn_wt      = MONITOR_INSIDE_DELAYEN_WT; 
+      flResponder[i].insideRxDelayEn_wt      = MONITOR_INSIDE_DELAYEN_WT;
       flResponder[i].insideRxDelayDisable_wt = MONITOR_INSIDE_DELAYDIS_WT;
       flResponder[i].insideRxDelayLow        = MONITOR_INSIDE_DELAYLOW;
-      flResponder[i].insideRxDelayHigh       = MONITOR_INSIDE_DELAYHIGH;    
+      flResponder[i].insideRxDelayHigh       = MONITOR_INSIDE_DELAYHIGH;
       flMonitor[i].setCallbacks(scoreboard.monitorCbs);
       coverage.addFrameLinkInterfaceTx(vMONITOR[i], coverageLabel);
     end;
@@ -113,7 +113,7 @@ program TEST (
   // --------------------------------------------------------------------------
   //                       Test auxilarity procedures
   // --------------------------------------------------------------------------
-  
+
   // --------------------------------------------------------------------------
   // Resets design
   task resetDesign();
@@ -144,7 +144,7 @@ program TEST (
     // Disable drivers
     #(1000*CLK_PERIOD);
     flDriver.setDisabled();
-    
+
     // Check if monitors are not receiving transaction for 100 CLK_PERIODs
     while (i<100) begin
       busy = 0;
@@ -154,15 +154,15 @@ program TEST (
       if (busy)
         i = 0;
       else i++;
-      #(CLK_PERIOD); 
+      #(CLK_PERIOD);
     end
-    
+
     // Disable monitors
     for(int i=0; i<IF_COUNT; i++) begin
       flMonitor[i].setDisabled();
       flResponder[i].setDisabled();
     end
-     
+
     coverage.setDisabled();
   endtask : disableTestEnvironment
 
@@ -189,7 +189,7 @@ program TEST (
     scoreboard.display();
     coverage.display();
   endtask: test1
-  
+
 
   // --------------------------------------------------------------------------
   //                           Main test part
@@ -208,7 +208,7 @@ program TEST (
     $write("\n\n############ GENERICS ############\n\n");
     $write("DATA_WIDTH:\t%1d\nIF_COUNT:\t%1d\nIFNUM_OFFSET:\t%1d\n",DATA_WIDTH,IF_COUNT,IFNUM_OFFSET);
     test1();       // Run Test 1
-    
+
     // -------------------------------------
     // STOP TESTING
     // -------------------------------------

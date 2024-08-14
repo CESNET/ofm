@@ -17,38 +17,38 @@
 <interface>
 	<!-- doplnit dividery -->
 	<generic_map>
-      <generic name="PROJECT_ID" type="std_logic_vector(15:0)" default="1"> 
+      <generic name="PROJECT_ID" type="std_logic_vector(15:0)" default="1">
           Project identification number. This number has to be unique for
           every project. There is no special policy how to assigne number
-          for a new project. 
+          for a new project.
       </generic>
 
-      <generic name="SW_MAJOR" type="std_logic_vector(7:0)" default="1"> 
+      <generic name="SW_MAJOR" type="std_logic_vector(7:0)" default="1">
           Software interface version - major number. This number is
           incremented whenever new firmware design is released and the
-          concept of software interface is changed (only big changes). 
+          concept of software interface is changed (only big changes).
       </generic>
 
-      <generic name="SW_MINOR" type="std_logic_vector(7:0)" default="1"> 
+      <generic name="SW_MINOR" type="std_logic_vector(7:0)" default="1">
           Software interface version - minor number. This number is
           incremented whenever the software interface is changed (all
           changes). If SW major number is changed, the SW minor number is
           set to zero.
       </generic>
 
-      <generic name="HW_MAJOR" type="std_logic_vector(15:0)" default="1"> 
+      <generic name="HW_MAJOR" type="std_logic_vector(15:0)" default="1">
           Firmware version - major number. This number is incremented only
           if new firmware version is released and the whole architecture is
-          changed. 
+          changed.
       </generic>
 
-      <generic name="HW_MINOR" type="std_logic_vector(15:0)" default="1"> 
+      <generic name="HW_MINOR" type="std_logic_vector(15:0)" default="1">
           Firmware version - minor number. This number is incremented
           whenever new firmware version is released. If HW major number is
           changed, the HW minor number is set to zero.
       </generic>
 
-      <generic name="PROJECT_TEXT" type="std_logic_vector(255:0)" default="1"> 
+      <generic name="PROJECT_TEXT" type="std_logic_vector(255:0)" default="1">
           Project text - the project text is null terminated string which
           must not contain white spaces. Please use "_" character instead
           of spaces.
@@ -148,9 +148,9 @@
 		</p>
 		<p>
 		 Example: If you write 0x00000000 value to the ID_NEG register, then
-		 0xFFFFFFFF value is stored and returned if read operation is performed. 
+		 0xFFFFFFFF value is stored and returned if read operation is performed.
 		</p>
-   
+
 			</description_above>
 		</bit_vect>
 </reg>
@@ -161,7 +161,7 @@
 			This register is dedicated for SW. It consists of two parts.
            The first part contains project ID and the second design
            version.
-   
+
 			</description_above>
 			<format>
       <bit from="0" to="7" name="SW minor version">
@@ -186,7 +186,7 @@
 			This register contain design version number which is exactly the same
 		   as tag in CVS. Value in this registers should be used when any HW bug
 		   is reported.
-   
+
 			</description_above>
 			<format>
       <bit from="0" to="15" name="HW minor version">
@@ -208,7 +208,7 @@
 		   stored. For example SCAMPI or Liberouter. See documentation of
 		   interface - part generics for detailed description and policy how to
 		   assign this number.
-   
+
 			</description_above>
 		</bit_vect>
 </reg>

@@ -32,7 +32,7 @@ PACKAGE fl_bfm_pkg IS
   END RECORD;
 
   TYPE DataType IS ARRAY (0 TO DataTypeLength) of Item;
-  
+
   -- Operation parameters
   TYPE CmdTypeItem IS RECORD
     RDYDriver      : RDYSignalDriver;
@@ -41,9 +41,9 @@ PACKAGE fl_bfm_pkg IS
     --Enable         : boolean;
     --FileName       : FileNameType;
   END RECORD;
-  
+
   TYPE CmdType IS ARRAY (0 to 15) of CmdTypeItem;
-  
+
   -- Command REQ/ACK record
   TYPE flCmdTypeItem IS
     RECORD
@@ -51,7 +51,7 @@ PACKAGE fl_bfm_pkg IS
       ReqAck   : std_logic;
       Ack      : std_logic;
     END RECORD;
-  
+
   ----------------------------------------------------------------------------
   -- SIGNAL FOR SETTINGS BFM REQUESTS
   ----------------------------------------------------------------------------
@@ -71,7 +71,7 @@ PACKAGE fl_bfm_pkg IS
  signal flCmd_D : flCmdTypeItem := ('0','Z','Z');
  signal flCmd_E : flCmdTypeItem := ('0','Z','Z');
  signal flCmd_F : flCmdTypeItem := ('0','Z','Z');
-	    
+
   ----------------------------------------------------------------------------
   -- BFM FUNCTIONS
   ----------------------------------------------------------------------------
@@ -86,22 +86,22 @@ PACKAGE fl_bfm_pkg IS
 
   -- convert character to upper case
   function to_upper(c:character) return character;
-  
-  -- convert hexa character to std_logic_vector 
-  procedure convert_character(data:inout std_logic_vector; -- output 4-bit number 
+
+  -- convert hexa character to std_logic_vector
+  procedure convert_character(data:inout std_logic_vector; -- output 4-bit number
                               c:character);  -- input hexa value in character
   -- load 32bit number from input string
   procedure load_32(data:inout std_logic_vector; -- 32bit number
                     s:string;  -- input string
                     i:inout integer; -- current position in string
-                    size:integer;  -- size of string 
+                    size:integer;  -- size of string
                     count: inout integer); -- count of valid bytes in 32-bit number
-  
+
   -- read variable length string from input file
   procedure read_string(file in_file: TEXT;  --input file
                         out_string: out string;  --output string
-                        load_count: inout integer); --number of read characters 
-  
+                        load_count: inout integer); --number of read characters
+
   procedure SendPreparedData(
     CONSTANT RDYDriver  : IN RDYSignalDriver;
     SIGNAL   flCmd      : INOUT flCmdTypeItem;
@@ -139,8 +139,8 @@ PACKAGE BODY fl_bfm_pkg IS
   PROCEDURE WriteCommand (VARIABLE Cmd  : IN CmdTypeItem; CONSTANT FLBFMID : IN integer) IS
   BEGIN
     Command(FLBFMID) := Cmd;
-  END;  
-  
+  END;
+
   -- read variable length string from input file
   procedure read_string(file in_file: TEXT;out_string: out string;load_count: inout integer) is
   variable l:line;
@@ -157,9 +157,9 @@ PACKAGE BODY fl_bfm_pkg IS
            exit;
          end if;
          load_count:=load_count+1;
-     end loop;                
+     end loop;
   end read_string;
-  
+
   -- convert character to upper case
   function to_upper(c:character) return character is
   variable output:character;
@@ -175,8 +175,8 @@ PACKAGE BODY fl_bfm_pkg IS
     end case;
     return output;
   end;
- 
-  -- convert hexa character to std_logic_vector 
+
+  -- convert hexa character to std_logic_vector
   procedure convert_character(data:inout std_logic_vector;c:character) is
   variable c_decoded:std_logic_vector(3 downto 0);
   variable lbound:integer;
@@ -235,7 +235,7 @@ PACKAGE BODY fl_bfm_pkg IS
       convert_character(data,s(i));
       i:=i+1;
     end if;
-  end load_32;  
+  end load_32;
 
   -- Send data prepared in the Cmd parameter
   procedure SendPreparedData(
@@ -251,7 +251,7 @@ PACKAGE BODY fl_bfm_pkg IS
     flCmd.Req <= '0';
     WAIT ON flCmd.Ack;
   end SendPreparedData;
-    
+
 
   PROCEDURE SendWriteFile (
     CONSTANT FileName : IN string;                        -- Filename from where are data writen
@@ -267,18 +267,18 @@ PACKAGE BODY fl_bfm_pkg IS
     variable count       : integer;
     variable i           : integer;
     variable data        : std_logic_vector(31 downto 0);
-    
-  BEGIN    
+
+  BEGIN
     for i in 0 to DataTypeLength loop
       Command(FLBFMID).Data(i).StartControl := NOP;
       Command(FLBFMID).Data(i).EndControl := NOP;
     end loop;
     Command(FLBFMID).Data(0).StartControl := SOF;
-    
+
     index := 0;
     file_open(file_status, input_file, FileName, READ_MODE);
     assert (file_status = OPEN_OK) report "File with data was not found!" severity ERROR;
-    
+
     while (not endfile(input_file)) loop
        read_string(input_file, s, size);
        i := 1;
@@ -293,7 +293,7 @@ PACKAGE BODY fl_bfm_pkg IS
 	  Command(FLBFMID).Data(index).StartControl := SOP;
           --i := i + 1;
        elsif (s(i) = '-') then
-         
+
        else
          while (i<=size) loop
            load_32(data, s, i, size, count);
@@ -307,13 +307,13 @@ PACKAGE BODY fl_bfm_pkg IS
     file_close(input_file);
     Command(FLBFMID).Length := index - 1;
     Command(FLBFMID).RDYDriver := RDYDriver;
-    
+
     -- Req toggles each time we want the BFM to do a new check.
     flCmd.Req <= '1';
     WAIT ON flCmd.ReqAck;
     flCmd.Req <= '0';
     WAIT UNTIL flCmd.Ack = '1';
-    
+
   END SendWriteFile;
-    
+
 END fl_bfm_pkg;

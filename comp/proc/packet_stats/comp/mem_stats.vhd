@@ -72,21 +72,21 @@ begin
       CLKA     => CLK,
       RSTA     => RESET,
       PIPE_ENA => '1',
-      REA      => '1', 
-      WEA      => '0', 
-      ADDRA    => RD_ADDRESS, 
-      DIA      => (others => '0'), 
-      DOA_DV   => open, 
-      DOA      => bram_rd, 
+      REA      => '1',
+      WEA      => '0',
+      ADDRA    => RD_ADDRESS,
+      DIA      => (others => '0'),
+      DOA_DV   => open,
+      DOA      => bram_rd,
 
       CLKB     => CLK,
       RSTB     => RESET,
       PIPE_ENB => '1',
-      REB      => '0', 
-      WEB      => '1', 
-      ADDRB    => WR_ADDRESS, 
-      DIB      => bram_wr, 
-      DOB_DV   => open, 
-      DOB      => open 
+      REB      => '0',
+      WEB      => '1',
+      ADDRB    => WR_ADDRESS,
+      DIB      => bram_wr,
+      DOB_DV   => open,
+      DOB      => open
    );
 end architecture;

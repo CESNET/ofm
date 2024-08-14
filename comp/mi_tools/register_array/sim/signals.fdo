@@ -2,7 +2,7 @@
 # Copyright (C) 2014 CESNET
 # Author: Mario Kuka <xkukam00@stud.fit.vutbr.cz>
 # SPDX-License-Identifier: BSD-3-Clause
-# 
+#
 # $Id$
 #
 
@@ -25,5 +25,5 @@ proc blk_STREAM { } {
     add_wave "-noupdate -hex -label REG_WR_OUT" /$STREAM_PATH/REG_WR_OUT
     add_wave "-noupdate -hex -label REG_RD_OUT" /$STREAM_PATH/REG_RD_OUT
     add_wave "-noupdate -hex -label REG_ARDY_IN" /$STREAM_PATH/REG_ARDY_IN
-  
+
 }

@@ -29,7 +29,7 @@ entity FP_VER_MOD is
         --FIFO read enable
         RX_READ_EN  : in std_logic;
 
-        RX_PKT_NUM          : in std_logic_vector(max(1, log2(MFB_REGIONS*FIFO_DEPTH)) - 1 downto 0); 
+        RX_PKT_NUM          : in std_logic_vector(max(1, log2(MFB_REGIONS*FIFO_DEPTH)) - 1 downto 0);
         RX_PKT_NUM_SRC_RDY  : in std_logic;
 
         --End of packets at FRAME_SHIFTER input
@@ -58,7 +58,7 @@ architecture FULL of FP_VER_MOD is
     signal cpt_fifox_empty  : std_logic;
 
     signal cnt_load         : std_logic;
-    
+
     signal small_packets_cnt    : unsigned(30 downto 0);
     signal big_packets_cnt      : unsigned(30 downto 0);
 
@@ -81,7 +81,7 @@ architecture FULL of FP_VER_MOD is
 
     signal unit_fifo_status     : std_logic_vector(log2(2048) downto 0);
     signal request_fifo_status  : std_logic_vector(log2(2048) downto 0);
-    
+
 begin
 
     process(all)
@@ -98,7 +98,7 @@ begin
             end if;
         end if;
     end process;
-    
+
     unit_fifo_di    <= std_logic_vector(to_unsigned(count_ones(RX_EOF), MAX_PKT_NUM) + eve_cnt_reg);
 
     unit_fifo_i : entity work.FIFOX
@@ -156,7 +156,7 @@ begin
         if request_fifo_empty = '0' and sp_pkt_cnt = 0 then
             req_cnt_load    <= '1';
             request_fifo_rd <= '1';
-        else 
+        else
             req_cnt_load    <= '0';
             request_fifo_rd <= '0';
         end if;
@@ -171,7 +171,7 @@ begin
                 sp_pkt_cnt          <= unsigned(request_fifo_do);
                 number_of_packets   <= (others => '0');
             else
-                if sp_pkt_cnt /= 0 then 
+                if sp_pkt_cnt /= 0 then
                     sp_pkt_cnt          <= sp_pkt_cnt - unsigned(unit_fifo_do);
                     number_of_packets   <= number_of_packets + unsigned(unit_fifo_do);
                 end if;
@@ -189,7 +189,7 @@ begin
 
     process(all)
     begin
-        if rising_edge(CLK) then 
+        if rising_edge(CLK) then
             sp_pkt_cnt_prev <= sp_pkt_cnt;
         end if;
     end process;
@@ -228,7 +228,7 @@ begin
         if cpt_fifox_empty = '0' and pkt_cnt = 0 then
             cnt_load        <= '1';
             cpt_fifox_rd    <= '1';
-        else 
+        else
             cnt_load        <= '0';
             cpt_fifox_rd    <= '0';
         end if;
@@ -242,7 +242,7 @@ begin
                 pkt_cnt <= (others => '0');
             elsif cnt_load = '1' then
                 pkt_cnt <= unsigned(cpt_fifox_do);
-            elsif pkt_cnt /= 0 then 
+            elsif pkt_cnt /= 0 then
                     pkt_cnt <= pkt_cnt - 1;
             end if;
         end if;
@@ -261,7 +261,7 @@ begin
             if RST = '1' then
                 output_pkt_cnt <= (others => '0');
             elsif VER_EOF = '1' then
-                output_pkt_cnt <= output_pkt_cnt + 1; 
+                output_pkt_cnt <= output_pkt_cnt + 1;
             end if;
         end if;
     end process;
@@ -286,5 +286,5 @@ begin
                 big_packets_cnt   <= big_packets_cnt + 1;
             end if;
         end if;
-    end process;        
+    end process;
  end architecture;

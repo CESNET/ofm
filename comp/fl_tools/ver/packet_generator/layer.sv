@@ -10,12 +10,12 @@
  * TODO:
  *
  */
-  
+
    /*
     * Definition of type data as array of byte.
     */
    typedef byte unsigned data [];
- 
+
 
    /*
     * Abstract class Layer is inherated by all protocol's classes. It defines
@@ -43,7 +43,7 @@
       int errorProbability;
       int minMTU;
       int maxMTU;
-         
+
       /*
        * Returns array of bytes, which contains protocol header.
        */
@@ -51,39 +51,39 @@
          data vystup = new[0];
          return vystup;
       endfunction: getHeader
-      
+
       /*
        * Returns array of bytes, which contains protocol footer.
-       */ 
+       */
       virtual function data getFooter();
          data vystup = new[0];
          return vystup;
       endfunction: getFooter
-      
+
       /*
        * Returns class atribute by it's name in form of array of bytes.
-       */ 
+       */
       virtual function data getAttributeByName(string name);
          data vystup = new[0];
          return vystup;
       endfunction: getAttributeByName
-      
+
       /*
-       * Returns array of bytes containing protocol and upper layers 
+       * Returns array of bytes containing protocol and upper layers
        * protocol data.
-       */  
+       */
       virtual function data getData();
          data vystup = new[0];
          return vystup;
       endfunction: getData
-      
+
       /*
        * Copy function.
        */
       virtual function Layer copy();
          return null;
       endfunction : copy
-    
+
       /*
        * Check if upper layer protocol is compatibile with current protocol.
        * This function is used by generator.
@@ -92,27 +92,27 @@
        * typ     - type of protocol
        * subtype - subtype of protocol
        * name    - name of protocol (for special cases, mostly unused)
-       */  
+       */
       virtual function bit checkType(string typ, string subtype ,string name);
          return 0;
       endfunction: checkType
-      
+
       /*
        * Displays informations about protocol including upper layer protocols.
        */
       virtual function void display();
       endfunction: display
-      
+
       /*
-       * Returns length of protocol data plus all upper level protocols data 
+       * Returns length of protocol data plus all upper level protocols data
        * length.
        *
        * Parameters:
        * split - if set length of RAW protocol layer isn't returned, otherwise
        *         the length of RAW protocol layer is returned.
-       */  
+       */
       virtual function int getLength(bit split);
          return 0;
       endfunction: getLength
-      
+
    endclass : Layer

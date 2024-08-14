@@ -4,7 +4,7 @@
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 
-library ieee;	
+library ieee;
 use ieee.std_logic_1164.all;
 
    --! -------------------------------------------------------------------------
@@ -15,7 +15,7 @@ entity ASYNC_GENERAL_FSM is
    Generic (
       DETECT_RISING_EDGE  : BOOLEAN := false;
       DETECT_FALLING_EDGE : BOOLEAN := false
-   ); 
+   );
    Port (
       ACLK       : in  STD_LOGIC;   --! Clock
       ARST       : in  STD_LOGIC;   --! Reset
@@ -89,7 +89,7 @@ begin
       comp_last_adatain2 <= '1';
       comp_adatain2      <= '0';
    end generate;
- 
+
    --! -------------------------------------------------------------------------
    --!                      FSM
    --! -------------------------------------------------------------------------

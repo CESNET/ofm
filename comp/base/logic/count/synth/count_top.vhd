@@ -50,7 +50,7 @@ architecture V7_DSP_TOP of COUNT_TOP is
    signal max_D       : std_logic_vector((DATA_WIDTH - 1) downto 0);
    signal enable_p    : std_logic;
    signal p_D         : std_logic_vector((DATA_WIDTH - 1) downto 0);
- 
+
 begin
 
  uut : entity work.COUNT_DSP(structural)
@@ -60,14 +60,14 @@ begin
       AUTO_RESET => AUTO_RESET
     )
     port map (
-      CLK         => CLK, 
+      CLK         => CLK,
       RESET       => reset_D,
       A           => a_D,
       MAX         => max_D,
       ENABLE      => enable_p,
       P           => p_D
    );
- 
+
     -- input registers
    process(CLK)
 	begin
@@ -91,11 +91,11 @@ begin
 	begin
 	  if (CLK'event) and (CLK='1') then
  	    if (RESET='1') then
-              P <=(others => '0');  
+              P <=(others => '0');
 	    else
-              P <= p_D; 
+              P <= p_D;
   	    end if;
   	  end if;
  	end process;
- 
+
 end V7_DSP_TOP;

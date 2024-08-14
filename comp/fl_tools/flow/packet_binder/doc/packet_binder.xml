@@ -53,7 +53,7 @@
             <port name="RESET" dir="in" width="1">
                 Global reset.
             </port>
-            
+
 
 	    <divider>
 	  	    RX FrameLink interface 0
@@ -111,7 +111,7 @@
 		    RX end of frame.
 	    </port>
 
-	    
+
             <divider>
                 TX FrameLink interface
             </divider>
@@ -157,27 +157,27 @@
 				<th>Slices XST (% of C6X slices)</th>
 			</tr>
 			<tr>
-				<th>BUFFER_SIZE = 512 for each interface, OUTPUT_REG=true, FL_WIDTH=32</th> 
+				<th>BUFFER_SIZE = 512 for each interface, OUTPUT_REG=true, FL_WIDTH=32</th>
 				<td>149 (0.618%)</td>
 			</tr>
-		
+
 		<nazev>Chip utilization</nazev>
-		</tab> 
-	
+		</tab>
+
 		<tab sloupce="cccc">
 			<tr>
 				<th>Generic settings</th>
                                 <th>Max.frequency by XST</th>
 			</tr>
 			<tr>
-				<th>buffer_size = 512 for each interface, OUTPUT_REG=true, FL_WIDTH=32</th> 
+				<th>buffer_size = 512 for each interface, OUTPUT_REG=true, FL_WIDTH=32</th>
 				<td>235.716 MHz</td>
 			</tr>
-			
+
 		<nazev>Maximal frequency</nazev>
-		</tab> 
-	
+		</tab>
+
          All values was measured after synthesis before PaR.
-       </p> 
+       </p>
     </body>
 </source>

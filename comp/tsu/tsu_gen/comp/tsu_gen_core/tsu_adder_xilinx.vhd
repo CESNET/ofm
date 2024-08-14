@@ -107,7 +107,7 @@ begin
          add_result_high_0 <= REG_RTR(95 downto 48);
       end if;
    end process;
-    
+
    -- -------------------------------------------------------
    -- Multiplexor for second dsp adder
    second_adder_input_mux : process(reg_rtr_we_2, add_result_high_0, add_result_high_1)
@@ -141,4 +141,4 @@ begin
 
    ADD_RESULT <= add_result_high_1 & add_result_low_1;
 
-end architecture FULL; 
+end architecture FULL;

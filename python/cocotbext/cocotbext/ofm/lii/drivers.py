@@ -82,7 +82,7 @@ class LIIDriver(BusDriver):
             if bb == 0:
                 # set SOF flag
                 self._sof_flag = 2**self._blk_idx
-        
+
             # EOF flag
             if bb == (len(transaction) - 1):
                 # Move EOF flag to next word

@@ -19,7 +19,7 @@ use work.pcie_meta_pack.all;
 -- that.
 
 -- Note: std_logic_vector(to_unsigned(BAR_APERTURE_INTEL, 6)) & pcie_mfb_meta_arr(i)(PCIE_CQ_META_BAR) & (8 - 1 downto 0 => '0')
--- 6 + 
+-- 6 +
 -- TODO: Add PCIe header to metadata
 entity RX_DMA_HDR_INSERTOR is
     generic (
@@ -66,7 +66,7 @@ entity RX_DMA_HDR_INSERTOR is
         -- MFB output interface
         -- =========================================================================================
         TX_MFB_DATA    : out std_logic_vector(TX_REGIONS*TX_REGION_SIZE*TX_BLOCK_SIZE*TX_ITEM_WIDTH-1 downto 0);
-        -- RQ PCIe header 
+        -- RQ PCIe header
         TX_MFB_META    : out std_logic_vector(TX_REGIONS*PCIE_RQ_META_WIDTH - 1 downto 0);
         TX_MFB_SOF     : out std_logic_vector(TX_REGIONS-1 downto 0);
         TX_MFB_EOF     : out std_logic_vector(TX_REGIONS-1 downto 0);
@@ -157,9 +157,9 @@ begin
 
                 tprocess_pst       <= IDLE;
                 shift_sel_pst      <= '0';
-                if (IS_INTEL = FALSE) then 
+                if (IS_INTEL = FALSE) then
                     high_shift_val_pst <= "11";
-                else 
+                else
                     high_shift_val_pst <= "00";
                 end if;
 
@@ -224,10 +224,10 @@ begin
 
             when TRANSACTION_SEND =>
 
-                if (IS_INTEL = FALSE) then 
+                if (IS_INTEL = FALSE) then
                     if (high_shift_val_pst = "11") then
 
-                        -- For one region - the DMA header is sent in separate word 
+                        -- For one region - the DMA header is sent in separate word
                         if (RX_MFB_EOF = '1' and TX_REGIONS = 1) then
                             tprocess_nst <= DMA_HDR_SEND;
                         -- For two regions - the DMA header is able to fit in second region of the TX word
@@ -241,25 +241,25 @@ begin
                             tprocess_nst <= IDLE;
                         end if;
                     end if;
-                else 
+                else
                     -- Both regions moves to DMA_HDR_SEND state when EOF occurs
                     if (TX_REGIONS = 1) then
                         if (high_shift_val_pst = "11") then
-                            if (RX_MFB_EOF = '1') then 
+                            if (RX_MFB_EOF = '1') then
                                 tprocess_nst <= DMA_HDR_SEND;
-                            else 
+                            else
                                 tprocess_nst <= IDLE;
                             end if;
                         end if;
                     else
                         if (high_shift_val_pst = "10") then
-                            if (RX_MFB_EOF = '1') then 
+                            if (RX_MFB_EOF = '1') then
                                 tprocess_nst <= DMA_HDR_SEND;
-                            else 
+                            else
                                 tprocess_nst <= IDLE;
                             end if;
                         end if;
-                    end if;                    
+                    end if;
                 end if;
 
             when DMA_HDR_SEND =>
@@ -377,8 +377,8 @@ begin
                         if (high_shift_val_pst = "11") then
                             -- PCIe_HDR request
                             HDRM_PCIE_HDR_DST_RDY <= TX_MFB_DST_RDY;
-                            
-                            -- No DMA_HDR - new data request 
+
+                            -- No DMA_HDR - new data request
                             if (RX_MFB_EOF = '0') then
                                 RX_MFB_DST_RDY <= TX_MFB_DST_RDY;
                             end if;
@@ -388,7 +388,7 @@ begin
                             -- PCIe_HDR request
                             HDRM_PCIE_HDR_DST_RDY <= TX_MFB_DST_RDY;
 
-                            -- No DMA_HDR - new data request 
+                            -- No DMA_HDR - new data request
                             if (RX_MFB_EOF = '0') then
                                 RX_MFB_DST_RDY  <= TX_MFB_DST_RDY;
                             end if;
@@ -396,7 +396,7 @@ begin
                     end if;
                 end if;
 
-            -- This state will be used in One region configuration only 
+            -- This state will be used in One region configuration only
             when DMA_HDR_SEND =>
 
                 -- release the headers on the input and allow next packet to arrive
@@ -508,7 +508,7 @@ begin
 
                             if (TX_REGIONS = 2 and RX_MFB_EOF = '1') then
 
-                                -- Not for intel 
+                                -- Not for intel
                                 TX_MFB_DATA <= (TX_MFB_DATA'high downto 96 + 64 + (TX_MFB_DATA'length / 2) => '0')
                                             & HDRM_DMA_HDR_DATA
                                             & HDRM_PCIE_HDR_DATA(95 downto 0)
@@ -544,7 +544,7 @@ begin
                         if (high_shift_val_pst = "11") then
 
                             -- high_shift_val_nst <= high_shift_val_pst;
-                            
+
                             -- The packet will be aligned "111"
                             TX_MFB_EOF      <= std_logic_vector(to_unsigned(1, TX_MFB_EOF'length));
                             TX_MFB_EOF_POS  <= std_logic_vector(to_unsigned(7, TX_MFB_EOF_POS'length));
@@ -552,9 +552,9 @@ begin
                         end if;
                     else
                         if (high_shift_val_pst = "10") then
-                            
+
                             -- high_shift_val_nst <= high_shift_val_pst;
-                            
+
                             -- The packet will be aligned "111000"
                             TX_MFB_EOF      <= std_logic_vector(to_unsigned(2, TX_MFB_EOF'length));
                             TX_MFB_EOF_POS  <= std_logic_vector(to_unsigned(56, TX_MFB_EOF_POS'length));
@@ -570,11 +570,11 @@ begin
 
                 if (HDRM_PCIE_HDR_SRC_RDY_DMA_HDR = '1') then
 
-                    -- Both 
+                    -- Both
                     TX_MFB_SOF     <= std_logic_vector(to_unsigned(1, TX_MFB_SOF'length));
                     TX_MFB_EOF     <= std_logic_vector(to_unsigned(1, TX_MFB_EOF'length));
                     TX_MFB_SRC_RDY <= '1';
-                    
+
                     -- Xilinx
                     intel_hdr: if (IS_INTEL = FALSE) then
                         -- load the DMA header and some other non-important data
@@ -586,7 +586,7 @@ begin
                             TX_MFB_EOF_POS <= std_logic_vector(to_unsigned(5, TX_MFB_EOF_POS'length));
                         end if;
                     -- Intel - both regions
-                    else 
+                    else
                         TX_MFB_DATA         <= (TX_MFB_DATA'high downto 64 => '0') & HDRM_DMA_HDR_DATA;
                         TX_MFB_EOF_POS      <= std_logic_vector(to_unsigned(1, TX_MFB_EOF_POS'length));
 

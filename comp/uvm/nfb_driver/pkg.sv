@@ -1,7 +1,7 @@
 /*
  * file       : pkg.sv
  * Copyright (C) 2022 CESNET z. s. p. o.
- * description: dpi for mi interface 
+ * description: dpi for mi interface
  * date       : 2022
  * author     : Radek Iša <isa@cesnet.ch>
  *

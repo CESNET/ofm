@@ -9,7 +9,7 @@
 `define GEN_MVB_DEMUX_ENV_SV
 
 package uvm_mvb_demux;
-    
+
     `include "uvm_macros.svh"
     import uvm_pkg::*;
 

@@ -166,7 +166,7 @@ class Axi4S_RQ_agent #(DATA_WIDTH = 512, USER_WIDTH = 137, ITEM_WIDTH_IN = 8, ST
          //$write("offset: %d\n",offset);
          //$write("hasSOF: %d\n",hasSOF());
          //$write("hasEOF: %d\n",hasEOF());
-			
+
 
 			if (!enabled)
 				break;
@@ -184,7 +184,7 @@ class Axi4S_RQ_agent #(DATA_WIDTH = 512, USER_WIDTH = 137, ITEM_WIDTH_IN = 8, ST
 				if(!inframe) begin
 					$write("@%0t - %s: Error in MFB protocol! Valid data outside frame.\n", $time, inst);
                $stop();
-            end 
+            end
 				offset = offset + ITEMS;
 			end else begin // some SOF or EOF => process them
 				for (j = 0; j < REGIONS; j++, offset = offset+REGION_ITEMS) begin

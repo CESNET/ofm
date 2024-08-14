@@ -24,7 +24,7 @@ architecture packet_linker_arch of packet_linker is
   signal inner_eof_n     : std_logic;
   signal inner_src_rdy_n : std_logic;
   signal inner_dst_rdy_n : std_logic;
-  
+
   signal out_data      : std_logic_vector(31 downto 0);
   signal out_rem       : std_logic_vector(1 downto 0);
   signal out_sof_n     : std_logic;
@@ -49,7 +49,7 @@ architecture packet_linker_arch of packet_linker is
   signal sdata3 : std_logic_vector(31 downto 0);
 
   signal shifted_data : std_logic_vector(31 downto 0);
- 
+
   signal mux_ds_select   : std_logic_vector(1 downto 0);
   signal mux_link_select : std_logic_vector(1 downto 0);
 
@@ -57,23 +57,23 @@ architecture packet_linker_arch of packet_linker is
   signal next_state    : states;
 
   signal is_last : std_logic;
-  
+
   signal WE : std_logic;
   signal WEO : std_logic;
   signal WES : std_logic;
-  
+
   signal reg_rem : std_logic_vector(1 downto 0);
   signal next_rem : std_logic_vector(1 downto 0);
-  
+
   signal lout_rem : std_logic_vector(1 downto 0);
   signal wout_rem : std_logic_vector(1 downto 0);
-  
+
   signal wrem_sel : std_logic_vector(3 downto 0);
   signal lrem_sel : std_logic_vector(3 downto 0);
-    
+
   signal reg_first : std_logic;
   signal next_first : std_logic;
-  
+
   begin
   -- write enabled registers for data and rem signal
   data_register: process (CLK, RESET)
@@ -98,7 +98,7 @@ architecture packet_linker_arch of packet_linker is
   end process data_register;
 
   WE <= not (RX_SRC_RDY_N or inner_dst_rdy_n);
-  
+
   --registers for SOF_N, SOP_N, EOP_N, EOF_N, SRC_RDY_N and DST_RDY_N signal
   data_register2: process (CLK, RESET)
   begin
@@ -120,12 +120,12 @@ architecture packet_linker_arch of packet_linker is
       end if;
     end if;
   end process data_register2;
-  
+
   WEO <= not (out_src_rdy_n or TX_DST_RDY_N);
-  
+
   data_register3: process (CLK, RESET)
   begin
-    if RESET = '1' then    
+    if RESET = '1' then
       inner_src_rdy_n <= '1';
       TX_SRC_RDY_N <= '1';
     elsif CLK'event and CLK = '1' then
@@ -137,15 +137,15 @@ architecture packet_linker_arch of packet_linker is
   end process data_register3;
 
   WES <= not out_dst_rdy_n;
-  
+
   out_dst_rdy_n <= TX_DST_RDY_N;
   inner_dst_rdy_n <= out_dst_rdy_n;
-  
+
   -- part of packet counter
-  packet_counter: process (CLK, rst) 
+  packet_counter: process (CLK, rst)
   begin
    if CLK='1' and CLK'event then
-     if rst='1' then  
+     if rst='1' then
         count <= "0001";
      elsif inc='1' then
           count <= count + 1;
@@ -203,7 +203,7 @@ architecture packet_linker_arch of packet_linker is
         reg_rem <= next_rem;
      end if;
   end process register_rem;
-  
+
   register_first: process (CLK, RESET)
   begin
      if RESET = '1' then
@@ -212,10 +212,10 @@ architecture packet_linker_arch of packet_linker is
         reg_first <= next_first;
      end if;
   end process register_first;
-  
+
   wrem_sel <= reg_rem&RX_REM;
   lrem_sel <= reg_rem&inner_rem;
-  
+
   wrem_gen:process(wrem_sel)
   begin
      case wrem_sel is
@@ -228,7 +228,7 @@ architecture packet_linker_arch of packet_linker is
         when others => wout_rem <= "11";
      end case;
   end process wrem_gen;
-  
+
   lrem_gen:process(lrem_sel)
   begin
      case lrem_sel is
@@ -245,8 +245,8 @@ architecture packet_linker_arch of packet_linker is
         when others => lout_rem <= "11";
      end case;
   end process lrem_gen;
-  
-  
+
+
   -- FA state register
   state_register: process (RESET, CLK)
   begin
@@ -269,15 +269,15 @@ architecture packet_linker_arch of packet_linker is
 		      else
                          if RX_SRC_RDY_N = '0' then
                             if RX_EOP_N = '0' then
-                               if is_last = '0' then	      
+                               if is_last = '0' then
                                  next_state <= SWAIT;
-                               else	      
+                               else
                                  next_state <= SLAST;
                                end if;
-                            else	    
+                            else
                                next_state <= SLINK;
                             end if;
-                         else	         
+                         else
                             next_state <= SINTERNAL;
                          end if;
 		      end if;
@@ -288,25 +288,25 @@ architecture packet_linker_arch of packet_linker is
                    if inner_src_rdy_n = '0' and out_dst_rdy_n = '0' then
 		      if reg_rem = "11" then
 		        if inner_eop_n = '0' then
-			   next_state <= SREAD; 
+			   next_state <= SREAD;
 	                else
 			   next_state <= current_state;
 		        end if;
 		      else
-                         if RX_SRC_RDY_N = '0' then   
+                         if RX_SRC_RDY_N = '0' then
                             if RX_EOP_N = '0' then
                                if is_last = '0' then
                                   next_state <= SWAIT;
-                               else       
+                               else
                                   next_state <= SLAST;
                                end if;
-                            else   
+                            else
                                next_state <= current_state;
                             end if;
                          else
                             next_state <= SINTERNAL;
                          end if;
-		      end if;  
+		      end if;
                    else
                       next_state <= current_state;
                    end if;
@@ -331,7 +331,7 @@ architecture packet_linker_arch of packet_linker is
                                 next_state <= SLAST;
                              end if;
                           else
-                             next_state <= SLINK; 
+                             next_state <= SLINK;
                           end if;
                        else
                           next_state <= current_state;
@@ -440,8 +440,8 @@ architecture packet_linker_arch of packet_linker is
                             out_eof_n <= '1';
                             out_eop_n <= '1';
                             out_src_rdy_n <= '1';
-                         end if; 
-		      end if;  
+                         end if;
+		      end if;
                    else
                       out_eof_n <= '1';
                       out_eop_n <= '1';
@@ -493,7 +493,7 @@ architecture packet_linker_arch of packet_linker is
                           else
                               out_rem<="11";
                               out_eof_n <= '1';
-                              out_eop_n <= '1'; 
+                              out_eop_n <= '1';
 			      out_src_rdy_n <= '0';
                           end if;
                        else
@@ -505,6 +505,6 @@ architecture packet_linker_arch of packet_linker is
 
     end case;
   end process outputs_FA;
-  
+
   RX_DST_RDY_N <= inner_dst_rdy_n;
 end packet_linker_arch;

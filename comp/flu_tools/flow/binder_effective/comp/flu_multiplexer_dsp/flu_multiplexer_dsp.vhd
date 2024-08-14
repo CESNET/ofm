@@ -1,7 +1,7 @@
--- flu_multiplexer_dsp.vhd 
+-- flu_multiplexer_dsp.vhd
 --!
 --! \brief FLU light-weight multiplexer which is made out of DSP multiplexers
---! \author Pavel Benacek <benacek@cesnet.cz> 
+--! \author Pavel Benacek <benacek@cesnet.cz>
 --! \date 2015
 --!
 --! \section License
@@ -24,7 +24,7 @@ entity FLU_MULTIPLEXER_DSP is
       --! \brief Data width of the Multiplexer
       DATA_WIDTH    : integer := 512;
       --! \brief Width of the SOP_POS bus
-      SOP_POS_WIDTH : integer := 3; 	
+      SOP_POS_WIDTH : integer := 3;
       --! \brief Number of input ports
       INPUT_PORTS   : integer := 8;
 
@@ -32,7 +32,7 @@ entity FLU_MULTIPLEXER_DSP is
       REG_IN      : integer := 1;
       --! Output pipeline registers (0, 1)
       REG_OUT     : integer := 1;
-      --! Pipeline between muxs levels (0, 1) 
+      --! Pipeline between muxs levels (0, 1)
       REG_LVL     : integer := 1
    );
    port(
@@ -41,17 +41,17 @@ entity FLU_MULTIPLEXER_DSP is
       -- --------------------------------------------------
       CLK            : in  std_logic;
       RESET          : in  std_logic;
-      
+
       -- --------------------------------------------------
       --! \name Selection interface
       -- --------------------------------------------------
       --! Select input
       SEL            : in std_logic_vector(log2(INPUT_PORTS)-1 downto 0);
-      --! Confirmation of selected input 
+      --! Confirmation of selected input
       SEL_RDY        : in std_logic;
       --! Ready to get new request
       SEL_NEXT       : out std_logic;
-      
+
       -- --------------------------------------------------
       --! \name Frame Link Unaligned input interfaces
       -- --------------------------------------------------
@@ -61,8 +61,8 @@ entity FLU_MULTIPLEXER_DSP is
       RX_SOP        : in std_logic_vector(INPUT_PORTS-1 downto 0);
       RX_EOP        : in std_logic_vector(INPUT_PORTS-1 downto 0);
       RX_SRC_RDY    : in std_logic_vector(INPUT_PORTS-1 downto 0);
-      RX_DST_RDY    : out std_logic_vector(INPUT_PORTS-1 downto 0); 
-      
+      RX_DST_RDY    : out std_logic_vector(INPUT_PORTS-1 downto 0);
+
       -- --------------------------------------------------
       --! \name Frame Link Unaligned concentrated interface
       -- --------------------------------------------------
@@ -72,7 +72,7 @@ entity FLU_MULTIPLEXER_DSP is
       TX_SOP        : out std_logic;
       TX_EOP        : out std_logic;
       TX_SRC_RDY    : out std_logic;
-      TX_DST_RDY    : in std_logic 
+      TX_DST_RDY    : in std_logic
    );
 end entity;
 
@@ -91,7 +91,7 @@ architecture full of FLU_MULTIPLEXER_DSP is
    constant SRC_RDY_RANGE     : integer := 0;
    constant EOP_RANGE         : integer := SRC_RDY_RANGE + 1;
    constant SOP_RANGE         : integer := EOP_RANGE + 1;
-      -- Definition of EOP_POS range 
+      -- Definition of EOP_POS range
    constant EOP_POS_START     : integer := SOP_RANGE + 1;
    constant EOP_POS_END       : integer := EOP_POS_START + EOP_POS_WIDTH - 1;
       -- Definition of SOP_POS range
@@ -118,7 +118,7 @@ architecture full of FLU_MULTIPLEXER_DSP is
    signal eop_pos_sig         : t_sop_pos_rep;
 
    --! Block is ready to process new request
-   signal next_rdy_gen        : std_logic; 
+   signal next_rdy_gen        : std_logic;
 
    --! Output FLU data
    signal flu_data_out     : std_logic_vector(DATA_WIDTH-1 downto 0);
@@ -137,22 +137,22 @@ begin
       mux_data_in(EOP_RANGE + i*MUX_DATA_WIDTH)       <= RX_EOP(i);
       mux_data_in(SOP_RANGE + i*MUX_DATA_WIDTH)       <= RX_SOP(i);
 
-      mux_data_in(EOP_POS_END + i*MUX_DATA_WIDTH downto i*MUX_DATA_WIDTH + EOP_POS_START)   
+      mux_data_in(EOP_POS_END + i*MUX_DATA_WIDTH downto i*MUX_DATA_WIDTH + EOP_POS_START)
          <= RX_EOP_POS((i+1)*EOP_POS_WIDTH-1 downto i*EOP_POS_WIDTH);
 
-      mux_data_in(SOP_POS_END + i*MUX_DATA_WIDTH downto i*MUX_DATA_WIDTH + SOP_POS_START)   
+      mux_data_in(SOP_POS_END + i*MUX_DATA_WIDTH downto i*MUX_DATA_WIDTH + SOP_POS_START)
          <= RX_SOP_POS((i+1)*SOP_POS_WIDTH-1 downto i*SOP_POS_WIDTH);
 
-      mux_data_in(DATA_END + i*MUX_DATA_WIDTH downto DATA_START + i*MUX_DATA_WIDTH)      
+      mux_data_in(DATA_END + i*MUX_DATA_WIDTH downto DATA_START + i*MUX_DATA_WIDTH)
          <= RX_DATA((i+1)*DATA_WIDTH-1 downto i*DATA_WIDTH);
-      
+
       --! Generate the src rdy validity detector
-      mux_data_in(SRC_RDY_RANGE + i*MUX_DATA_WIDTH)   <= RX_SRC_RDY(i); 
-      
+      mux_data_in(SRC_RDY_RANGE + i*MUX_DATA_WIDTH)   <= RX_SRC_RDY(i);
+
       --! Enable input when:
-      --! * Port is selected 
+      --! * Port is selected
       --! * Transaction is running
-      input_active(i) <= '1' when ((SEL = i and SEL_RDY = '1' and next_rdy_gen = '1') or 
+      input_active(i) <= '1' when ((SEL = i and SEL_RDY = '1' and next_rdy_gen = '1') or
                                     transaction_active(i) = '1')
                         else '0';
 
@@ -168,11 +168,11 @@ begin
          sop_pos_rep(i) <= (others=>'0');
          sop_pos_rep(i)(EOP_POS_WIDTH-1 downto EOP_POS_WIDTH-SOP_POS_WIDTH) <=
             RX_SOP_POS((i+1)*SOP_POS_WIDTH-1 downto i*SOP_POS_WIDTH);
-      
+
          -- Deal with EOP
          eop_pos_sig(i) <= RX_EOP_POS((i+1)*EOP_POS_WIDTH-1 downto i*EOP_POS_WIDTH);
       end process;
-         
+
 
       --! \brief Transaction detector for the input. This process detects transaction
       --! which takes more than two clock cycles
@@ -187,7 +187,7 @@ begin
                -- not active transaction, word is not shared
                if(mux_ce_en = '1' and RX_SRC_RDY(i) = '1' and RX_SOP(i) = '1' and
                   RX_EOP(i) = '0' and input_active(i) = '1')then
-                  
+
                   transaction_active(i) <= '1';
 
                -- If, input is selected, short packet is not detected and
@@ -201,7 +201,7 @@ begin
                -- transaction
                elsif(mux_ce_en = '1' and RX_SRC_RDY(i) = '1' and RX_SOP(i) = '0' and
                   RX_EOP(i) = '1' and transaction_active(i) = '1')then
-            
+
                   transaction_active(i) <= '0';
                end if;
             end if;
@@ -212,7 +212,7 @@ begin
 
    --! Map "next redy" signal
    SEL_NEXT <= next_rdy_gen;
-   
+
    --!  Write next_rdy_gen logic - we are ready to receive the packet if mux is ready and long transaction is not running
    next_rdy_gen <= '0' when (transaction_active /= 0 or (transaction_active = 0 and mux_ce_en = '0'))
                    else '1';
@@ -249,7 +249,7 @@ begin
       REG_IN         => REG_IN,
       --! Output pipeline registers (0, 1)
       REG_OUT        => REG_OUT,
-      --! Pipeline between muxs levels (0, 1) 
+      --! Pipeline between muxs levels (0, 1)
       REG_LVL        => REG_LVL
    )
    port map(
@@ -265,7 +265,7 @@ begin
       CE_OUT      => mux_ce_en,
       --! Clock enable for lvls
       CE_LVL      => mux_ce_en,
-      --! Select input data 
+      --! Select input data
       SEL         => mux_sel,
       --! output
       DATA_OUT    => mux_data_out
@@ -284,7 +284,7 @@ begin
    flu_src_rdy_out   <= mux_data_out(SRC_RDY_RANGE);
 
    -- -----------------------------------------------------
-   -- TX Connection 
+   -- TX Connection
    -- -----------------------------------------------------
    TX_DATA           <= flu_data_out;
    TX_SOP_POS        <= flu_sop_pos_out;

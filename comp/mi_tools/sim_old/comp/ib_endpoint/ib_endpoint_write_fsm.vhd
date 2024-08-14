@@ -56,7 +56,7 @@ entity IB_ENDPOINT_WRITE_FSM is
    WRITE_TRANS     : in  std_logic;
    -- read back
    READ_BACK       : in  std_logic;
-   
+
    -- ========================
    -- Control Interface
    -- ========================
@@ -137,12 +137,12 @@ state_trans: process(present_state, DATA_VLD, SOP, EOP, WR_RDY, WRITE_TRANS, pro
 
       when st_idle =>
          -- New Write Transaction
-         if (process_en = '1' and SOP = '1' and WRITE_TRANS = '1') then  
+         if (process_en = '1' and SOP = '1' and WRITE_TRANS = '1') then
            next_state <= st_hdr; -- Start of Header
          else
            next_state <= st_idle; -- Idle
          end if;
-      
+
       -- ST_HDR
       when st_hdr =>
          if (DATA_VLD = '1') then
@@ -150,7 +150,7 @@ state_trans: process(present_state, DATA_VLD, SOP, EOP, WR_RDY, WRITE_TRANS, pro
          else
             next_state <= st_hdr;
          end if;
-                  
+
       -- ST_START_OF_FRAME
       when st_sof =>
          if (EOP = '1' and WR_RDY = '1') then
@@ -189,7 +189,7 @@ output_logic: process(present_state, DATA_VLD, SOP, EOP, WR_RDY, WRITE_TRANS, re
    IDLE              <= '0';
    read_back_reg_we  <= '0';
    RD_BACK           <= '0';
-   
+
    case present_state is
 
       -- ST_IDLE
@@ -207,8 +207,8 @@ output_logic: process(present_state, DATA_VLD, SOP, EOP, WR_RDY, WRITE_TRANS, re
       -- ST_HDR
       when st_hdr =>
          SRC_ADDR_WE <= '1';
-         SHR_RE      <= '1'; 
-         
+         SHR_RE      <= '1';
+
       -- ST_START_OF_FRAME
       when st_sof =>
          RD_BACK <= read_back_reg;

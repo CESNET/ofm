@@ -133,7 +133,7 @@ port map(
    -- Common interface
    CLK         => CLK,
    RESET       => RESET,
-      
+
    TX_SRC_RDY_N=> sig_tx_src_rdy_n,
    TX_DST_RDY_N=> TX_DST_RDY_N,
    TX_SOP_N    => sig_sop_n_rd,
@@ -235,7 +235,7 @@ end process;
 
 sig_frame_rdy <= '0' when (cnt_frame = 0) or (cnt_frame = 1) else
                  '1';
-   
+
 RX_DST_RDY_N  <= sig_full or RESET;
 TX_SRC_RDY_N  <= sig_tx_src_rdy_n;
 

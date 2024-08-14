@@ -102,17 +102,17 @@ begin
    reset_p: process
    begin
       rst_wr <= '1';
-      rst_rd <= '1';   
+      rst_rd <= '1';
       wait for 100 ns;
       rst_wr <= '0';
-      rst_rd <= '0';   
+      rst_rd <= '0';
       wait;
    end process;
 
    --! ----------------------------------------------------------------------------
    --!                         Main testbench process
    --! ----------------------------------------------------------------------------
-   
+
    tb_rd : process
    begin
       rd <= '0';

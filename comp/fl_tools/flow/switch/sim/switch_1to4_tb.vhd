@@ -45,7 +45,7 @@ architecture behavioral of testbench is
    constant WORD_POS   : integer :=
       (IFC_BYTE_OFFSET rem (FL_DATA_WIDTH/8)) * 2 + IFC_NIBBLE_OFFSET;
 
-   
+
    constant clkper      : time      := 10 ns;
    constant INIT_TIME   : time      := 4*clkper + 10*clkper;
    constant RESET_TIME  : time      := 3*clkper;
@@ -59,13 +59,13 @@ architecture behavioral of testbench is
    constant PAC_LENGTH : integer := 32;
 
    -- Number of packets to send
-   constant PAC_NUM    : integer := 16; 
+   constant PAC_NUM    : integer := 16;
 
    signal clk      : std_logic;
    signal reset    : std_logic;
 
-   signal rx_data      : std_logic_vector(FL_DATA_WIDTH - 1 downto 0); 
-   signal rx_rem       : std_logic_vector(log2(FL_DATA_WIDTH/8) - 1 downto 0); 
+   signal rx_data      : std_logic_vector(FL_DATA_WIDTH - 1 downto 0);
+   signal rx_rem       : std_logic_vector(log2(FL_DATA_WIDTH/8) - 1 downto 0);
    signal rx_src_rdy_n : std_logic;
    signal rx_dst_rdy_n : std_logic;
    signal rx_sop_n     : std_logic;
@@ -73,49 +73,49 @@ architecture behavioral of testbench is
    signal rx_sof_n     : std_logic;
    signal rx_eof_n     : std_logic;
 
-   signal tx0_data     : std_logic_vector(FL_DATA_WIDTH - 1 downto 0); 
-   signal tx0_rem      : std_logic_vector(log2(FL_DATA_WIDTH/8) - 1 downto 0); 
+   signal tx0_data     : std_logic_vector(FL_DATA_WIDTH - 1 downto 0);
+   signal tx0_rem      : std_logic_vector(log2(FL_DATA_WIDTH/8) - 1 downto 0);
    signal tx0_src_rdy_n: std_logic;
    signal tx0_dst_rdy_n: std_logic;
    signal tx0_sop_n    : std_logic;
    signal tx0_eop_n    : std_logic;
    signal tx0_sof_n    : std_logic;
    signal tx0_eof_n    : std_logic;
-   
-   signal tx1_data     : std_logic_vector(FL_DATA_WIDTH - 1 downto 0); 
-   signal tx1_rem      : std_logic_vector(log2(FL_DATA_WIDTH/8) - 1 downto 0); 
+
+   signal tx1_data     : std_logic_vector(FL_DATA_WIDTH - 1 downto 0);
+   signal tx1_rem      : std_logic_vector(log2(FL_DATA_WIDTH/8) - 1 downto 0);
    signal tx1_src_rdy_n: std_logic;
    signal tx1_dst_rdy_n: std_logic;
    signal tx1_sop_n    : std_logic;
    signal tx1_eop_n    : std_logic;
    signal tx1_sof_n    : std_logic;
    signal tx1_eof_n    : std_logic;
-   
-   signal tx2_data     : std_logic_vector(FL_DATA_WIDTH - 1 downto 0); 
-   signal tx2_rem      : std_logic_vector(log2(FL_DATA_WIDTH/8) - 1 downto 0); 
+
+   signal tx2_data     : std_logic_vector(FL_DATA_WIDTH - 1 downto 0);
+   signal tx2_rem      : std_logic_vector(log2(FL_DATA_WIDTH/8) - 1 downto 0);
    signal tx2_src_rdy_n: std_logic;
    signal tx2_dst_rdy_n: std_logic;
    signal tx2_sop_n    : std_logic;
    signal tx2_eop_n    : std_logic;
    signal tx2_sof_n    : std_logic;
    signal tx2_eof_n    : std_logic;
-   
-   signal tx3_data     : std_logic_vector(FL_DATA_WIDTH - 1 downto 0); 
-   signal tx3_rem      : std_logic_vector(log2(FL_DATA_WIDTH/8) - 1 downto 0); 
+
+   signal tx3_data     : std_logic_vector(FL_DATA_WIDTH - 1 downto 0);
+   signal tx3_rem      : std_logic_vector(log2(FL_DATA_WIDTH/8) - 1 downto 0);
    signal tx3_src_rdy_n: std_logic;
    signal tx3_dst_rdy_n: std_logic;
    signal tx3_sop_n    : std_logic;
    signal tx3_eop_n    : std_logic;
    signal tx3_sof_n    : std_logic;
    signal tx3_eof_n    : std_logic;
-   
+
 
 -- ----------------------------------------------------------------------------
 --                      Architecture body
 -- ----------------------------------------------------------------------------
 begin
 
-   UUT: entity work.fl_switch_1to4 
+   UUT: entity work.fl_switch_1to4
       generic map (
          FL_DATA_WIDTH     => FL_DATA_WIDTH,
          IFC_BYTE_OFFSET   => IFC_BYTE_OFFSET,
@@ -124,8 +124,8 @@ begin
       port map (
          CLK          => CLK,
          RESET        => RESET,
-   
-         -- Write interface 
+
+         -- Write interface
          RX_DATA      => rx_data,
          RX_REM       => rx_rem,
          RX_SRC_RDY_N => rx_src_rdy_n,
@@ -134,7 +134,7 @@ begin
          RX_EOP_N     => rx_eop_n,
          RX_SOF_N     => rx_sof_n,
          RX_EOF_N     => rx_eof_n,
-         
+
          -- Read interface 0
          TX0_DATA     => tx0_data,
          TX0_REM      => tx0_rem,
@@ -144,7 +144,7 @@ begin
          TX0_EOP_N    => tx0_eop_n,
          TX0_SOF_N    => tx0_sof_n,
          TX0_EOF_N    => tx0_eof_n,
-   
+
          -- Read interface 1
          TX1_DATA     => tx1_data,
          TX1_REM      => tx1_rem,
@@ -154,7 +154,7 @@ begin
          TX1_EOP_N    => tx1_eop_n,
          TX1_SOF_N    => tx1_sof_n,
          TX1_EOF_N    => tx1_eof_n,
-   
+
          -- Read interface 2
          TX2_DATA     => tx2_data,
          TX2_REM      => tx2_rem,
@@ -164,7 +164,7 @@ begin
          TX2_EOP_N    => tx2_eop_n,
          TX2_SOF_N    => tx2_sof_n,
          TX2_EOF_N    => tx2_eof_n,
-   
+
          -- Read interface 3
          TX3_DATA     => tx3_data,
          TX3_REM      => tx3_rem,
@@ -225,7 +225,7 @@ begin
             RX_DATA((WORD_POS+1)*4 - 1 downto WORD_POS*4) <=
                conv_std_logic_vector(pnum, 4);
          end if;
-         
+
          wait for clkper;
          wait until clk'event and clk = '1' and RX_DST_RDY_N = '0';
       end loop;
@@ -267,8 +267,8 @@ begin
          reset <= '1';
          wait for RESET_TIME + clkper/6;
          reset <= '0';
-      else 
-      
+      else
+
          if (i = 8) then
             -- Test situation when the others are waiting for one interface
             TX2_DST_RDY_N <= '1';

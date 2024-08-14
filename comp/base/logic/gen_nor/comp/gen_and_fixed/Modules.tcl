@@ -8,8 +8,8 @@
 set PACKAGES "$PACKAGES $OFM_PATH/comp/base/pkg/math_pack.vhd"
 set PACKAGES "$PACKAGES $OFM_PATH/comp/base/pkg/type_pack.vhd"
 
-set MOD "$MOD $ENTITY_BASE/gen_and_fixed_ent.vhd" 
-set MOD "$MOD $ENTITY_BASE/gen_and_fixed.vhd" 
+set MOD "$MOD $ENTITY_BASE/gen_and_fixed_ent.vhd"
+set MOD "$MOD $ENTITY_BASE/gen_and_fixed.vhd"
 
 set CARRY_CHAIN_BASE    "$OFM_PATH/comp/base/logic/carry_chain"
 

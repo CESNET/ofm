@@ -32,7 +32,7 @@ component fifo_bram_discard is
       DATA_WIDTH  : integer;
 
       STATUS_WIDTH: integer := 4;
-      
+
       -- AUTO_PIPELINE:boolean := false
 
       -- Maximal blocks
@@ -125,7 +125,7 @@ port map(
    -- Common interface
    CLK         => CLK,
    RESET       => RESET,
-      
+
    TX_SRC_RDY_N=> sig_tx_src_rdy_n,
    TX_DST_RDY_N=> TX_DST_RDY_N,
    TX_SOP_N    => sig_sop_n_rd,
@@ -164,7 +164,7 @@ port map(
    DV          => sig_vld,
    FRAME_RDY   => FRAME_RDY
 );
-   
+
 sig_fifo_eob <= not RX_EOF_N;
 
 RX_DST_RDY_N  <= sig_full or RESET;

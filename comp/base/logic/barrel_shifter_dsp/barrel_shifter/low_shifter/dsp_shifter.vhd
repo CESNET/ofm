@@ -37,7 +37,7 @@ entity DSP_SHIFTER is
       RESET    : in  std_logic;
       --! Data input
       A        : in  std_logic_vector(23 downto 0);
-      --! Number of shift 
+      --! Number of shift
       SHIFT    : in  std_logic_vector(16 downto 0);
       --! cascade out
       OUT_CAS  : out std_logic_vector(15 downto 0);
@@ -64,7 +64,7 @@ architecture V7_DSP of DSP_SHIFTER is
    signal P_CAS_IN      : std_logic_vector(47 downto 0);
    signal opmode        : std_logic_vector(6 downto 0);
 
-begin  
+begin
    zeros <= (others => '0');
 
    A_DSP <= '0' & A;
@@ -74,17 +74,17 @@ begin
    GEN_NORMAL_CAS_OUT: if(EN_CON_CAS_OUT = 0) generate
       OUT_CAS <= P_CAS_OUT(39 downto 24);
    end generate;
-   
+
    GEN_CON_CAS_OUT: if(EN_CON_CAS_OUT = 1) generate
       OUT_CAS <= P_CAS_OUT(UP downto DOWN);
    end generate;
 
    P_CAS_IN <= zeros(47 downto 16) & IN_CAS;
-   
+
    GEN_OPMODE_CAS_ON: if(EN_CAS_IN = 1) generate
       opmode <= "0010101";
    end generate;
-   
+
    GEN_OPMODE_CAS_OFF: if(EN_CAS_IN = 0) generate
       opmode <= "0000101";
    end generate;
@@ -98,10 +98,10 @@ begin
       USE_DPORT => TRUE,     -- Select D port usage (TRUE or FALSE)
       USE_MULT => "DYNAMIC", -- Select multiplier usage ("MULTIPLY", "DYNAMIC", or "NONE")
       -- Pattern Detector Attributes: Pattern Detection Configuration
-      AUTORESET_PATDET => "NO_RESET",   -- "NO_RESET", "RESET_MATCH", "RESET_NOT_MATCH" 
+      AUTORESET_PATDET => "NO_RESET",   -- "NO_RESET", "RESET_MATCH", "RESET_NOT_MATCH"
       MASK => X"3fffffffffff",          -- 48-bit mask value for pattern detect (1=ignore)
       PATTERN => X"000000000000",       -- 48-bit pattern match for pattern detect
-      SEL_MASK => "MASK",               -- "C", "MASK", "ROUNDING_MODE1", "ROUNDING_MODE2" 
+      SEL_MASK => "MASK",               -- "C", "MASK", "ROUNDING_MODE1", "ROUNDING_MODE2"
       SEL_PATTERN => "PATTERN",         -- Select pattern value ("PATTERN" or "C")
       USE_PATTERN_DETECT => "NO_PATDET",-- Enable pattern detect ("PATDET" or "NO_PATDET")
       -- Register Control Attributes: Pipeline Register Configuration

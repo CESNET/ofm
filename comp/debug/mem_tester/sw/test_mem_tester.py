@@ -6,7 +6,7 @@ import pytest
 from mem_tester import MemTester
 from mem_logger.mem_logger import MemLogger
 
-# python3 -m pytest -xs --tb=short test_mem_tester.py 
+# python3 -m pytest -xs --tb=short test_mem_tester.py
 # -s ... to show measured data
 # -x ... end after first failure
 # -tb ... show only assertion message

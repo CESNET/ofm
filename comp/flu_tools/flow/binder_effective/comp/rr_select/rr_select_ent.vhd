@@ -5,7 +5,7 @@
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --
--- TODO: 
+-- TODO:
 --
 --
 
@@ -28,7 +28,7 @@ entity RR_SELECT is
       SOP_POS_WIDTH  : integer:= 3;
       --! Number of input input interfaces
       INPUTS         : integer := 2;
-      
+
       --! ID information width. If not enabled, ID output is not
       --! connected.
       ENABLE_ID      : integer := 1;
@@ -51,7 +51,7 @@ entity RR_SELECT is
    port(
        -- -------------------------------------------------
        -- \name Common interface
-       -- -------------------------------------------------  
+       -- -------------------------------------------------
       RESET          : in  std_logic;
       CLK            : in  std_logic;
 
@@ -66,7 +66,7 @@ entity RR_SELECT is
       RX_SRC_RDY    : in std_logic_vector(INPUTS-1 downto 0);
       RX_DST_RDY    : out std_logic_vector(INPUTS-1 downto 0);
       ID_IN         : in std_logic_vector(INPUTS*ID_WIDTH-1 downto 0);
-      RX_HDR        : in std_logic_vector(INPUTS*HDR_WIDTH-1 downto 0);   
+      RX_HDR        : in std_logic_vector(INPUTS*HDR_WIDTH-1 downto 0);
 
       -- --------------------------------------------------
       -- \name Frame Link Unaligned output interface

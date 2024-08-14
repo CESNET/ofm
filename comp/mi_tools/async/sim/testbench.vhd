@@ -221,7 +221,7 @@ begin
 
         -- comp reset
         RESET_S   <= '1', '0' after CLK_S_period*5;
-        RESET_M   <= '1', '0' after CLK_M_period*5; 
+        RESET_M   <= '1', '0' after CLK_M_period*5;
 
         wait;
 

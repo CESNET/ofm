@@ -1,4 +1,4 @@
-//-- property.sv: Properties for mfb bus 
+//-- property.sv: Properties for mfb bus
 // Copyright (C) 2023 CESNET z. s. p. o.
 // Author(s): David Beneš <xbenes52@vutbr.cz>
 
@@ -34,7 +34,7 @@ module mfb_pipe_property #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WI
     property_wr (
         .RESET          (reset.RESET),
         .vif            (mfb_wr_vif)
-    );  
+    );
 
 endmodule
 

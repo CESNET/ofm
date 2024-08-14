@@ -3,7 +3,7 @@
  * \brief PACODAG Statistics Monitor
  * \author Jan Kučera <xkucer73@stud.fit.vutbr.cz>
  * \date 2014
- */  
+ */
 
 /**
  * Copyright (C) 2014 CESNET

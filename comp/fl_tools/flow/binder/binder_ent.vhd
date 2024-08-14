@@ -27,15 +27,15 @@ entity FL_BINDER is
       INPUT_WIDTH    : integer := 16;
       -- number of input interfaces: only 2,4,8,16 supported
       INPUT_COUNT    : integer := 4;
-      -- output width - most effective value is INPUT_WIDTH*INPUT_COUNT. In 
+      -- output width - most effective value is INPUT_WIDTH*INPUT_COUNT. In
       -- other cases FL_TRANSFORMER is instantiated
       OUTPUT_WIDTH   : integer := 64;
       -- number of parts in one FrameLink frame
       FRAME_PARTS    : integer := 2;
-      
+
       -- select BlockRAM or LUT memory
       LUT_MEMORY     : boolean := false;
-      -- Number of items (INPUT_WIDTH*INPUT_COUNT wide) in LUT memory that can 
+      -- Number of items (INPUT_WIDTH*INPUT_COUNT wide) in LUT memory that can
       -- be stored for each block
       LUT_BLOCK_SIZE : integer := 16;
       -- Queue choosing policy
@@ -59,9 +59,9 @@ entity FL_BINDER is
       RX_EOF_N       : in  std_logic_vector(INPUT_COUNT-1 downto 0);
       RX_SRC_RDY_N   : in  std_logic_vector(INPUT_COUNT-1 downto 0);
       RX_DST_RDY_N   : out std_logic_vector(INPUT_COUNT-1 downto 0);
-      RX_DATA        : in  std_logic_vector(INPUT_COUNT*INPUT_WIDTH-1 
+      RX_DATA        : in  std_logic_vector(INPUT_COUNT*INPUT_WIDTH-1
                                                                      downto 0);
-      RX_REM         : in  std_logic_vector(INPUT_COUNT*log2(INPUT_WIDTH/8)-1 
+      RX_REM         : in  std_logic_vector(INPUT_COUNT*log2(INPUT_WIDTH/8)-1
                                                                      downto 0);
 
       -- output FrameLink interface

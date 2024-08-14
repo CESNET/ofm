@@ -52,7 +52,7 @@ class NppTxSoftware #(int pChannels) extends NppSoftware #(pChannels);
 //      $write("             data length: 0x%x\n", descLength);
 //      $write("             eop:         %d\n", eop);
 //      $write("             descriptor:  0x%x\n", descData);
-     
+
       {<<byte{data}} = descData;
       ram.write(descAddress, 8, data);
    endfunction
@@ -65,7 +65,7 @@ class NppTxSoftware #(int pChannels) extends NppSoftware #(pChannels);
       resetHwPtr(channel);
       hwPtr[channel]          = 0;
       swPtr[channel]          = 0;
-      
+
       lastDescAddr[channel] = 0;
       firstDesc[channel] = 1;
 
@@ -188,7 +188,7 @@ class NppTxSoftware #(int pChannels) extends NppSoftware #(pChannels);
             partSize = restSize;
          end
 
-//			partOffset = 0;      // force offset 
+//			partOffset = 0;      // force offset
 //         partSize = restSize; // force one descriptor per packet
 
          head = head + partOffset;

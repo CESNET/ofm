@@ -65,7 +65,7 @@ module asfifo_cov ();
 endmodule
 
 //module asfifo_cov_mod #(/*DATA_WIDTH, STATUS_WIDTH,*/ PATH) ();
-//    
+//
 //    //logic CLK_WR;
 //    //logic RST_WR;
 //    //logic DI;
@@ -85,18 +85,18 @@ endmodule
 //    //assign WR     = PATH.WR;
 //    //assign FULL   = PATH.FULL;
 //    //assign STATUS = PATH.STATUS;
-//    //              
+//    //
 //    //assign CLK_RD = PATH.CLK_RD;
 //    //assign RST_RD = PATH.RST_RD;
 //    //assign DO     = PATH.DO;
 //    //assign RD     = PATH.RD;
 //    //assign EMPTY  = PATH.EMPTY;
-//   
+//
 //    covergroup inf @(PATH.MASTER_CLK);
 //        test : coverpoint PATH.MASTER_RESET {
 //            bins addr[] = {[0:$]};
 //        }
-//    
+//
 //    endgroup
 //endmodule
 
@@ -106,14 +106,14 @@ endmodule
 
 //class asfifo  #(PATH);
 //
-//        //testbench.DUT_U.VHDL_DUT_U.MI_M_ADDR 
-//        
+//        //testbench.DUT_U.VHDL_DUT_U.MI_M_ADDR
+//
 //
 //
 //        function new();
 //            inf = new();
 //        endfunction
-//    
-//    
+//
+//
 //endclass
 

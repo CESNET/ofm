@@ -63,7 +63,7 @@ architecture FULL of TSU_FORMAT_TO_NS is
     signal tsu_seconds_conv : unsigned(64-1 downto 0);
     signal ns_part1         : unsigned(64-1 downto 0);
     signal ns_part2         : unsigned(64-1 downto 0);
-    
+
     signal ns_sum           : unsigned(64-1 downto 0);
 
 begin
@@ -88,7 +88,7 @@ begin
     -- ========================================================================
     -- Stage 2
     -- ========================================================================
-        
+
     tsu_seconds_conv <= resize(tsu_seconds*CONV_RATIO,64);
     middle_reg_g : if REG_BITMAP(1)='1' generate
         process(CLK)

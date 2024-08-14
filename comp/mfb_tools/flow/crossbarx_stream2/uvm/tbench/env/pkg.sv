@@ -8,7 +8,7 @@
 `define MFB_CROSSBARX_STREAM2_ENV_SV
 
 package uvm_mfb_crossbarx_stream2;
-    
+
     `include "uvm_macros.svh"
     import uvm_pkg::*;
 

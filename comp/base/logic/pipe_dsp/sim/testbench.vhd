@@ -21,7 +21,7 @@ architecture behavioral of testbench is
 
    constant clkper         : time := 10 ns; --Clock period
    constant reset_time     : time := 2*clkper + 1 ns; --Reset durati
-   --! generic parameters 
+   --! generic parameters
    constant DATA_WIDTH     : integer := 20;
    constant NUM_REGS       : integer := 1;
    --! Clock and reset signals
@@ -31,7 +31,7 @@ architecture behavioral of testbench is
    signal DATA_IN          : std_logic_vector(DATA_WIDTH-1 downto 0);
    signal DATA_OUT         : std_logic_vector(DATA_WIDTH-1 downto 0);
    signal CE               : std_logic;
-   
+
 begin
 
    uut: entity work.PIPE_DSP
@@ -40,7 +40,7 @@ begin
       NUM_REGS => NUM_REGS,
       ENABLE_DSP => true,
       PIPE_EN => false
-   )  
+   )
    port map (
       CLK => CLK,
       RESET => RESET,
@@ -50,7 +50,7 @@ begin
    );
 
    --Generate clock
-   clk_gen_p : process 
+   clk_gen_p : process
    begin
       CLK <= '1';
       wait for clkper/2;
@@ -67,10 +67,10 @@ begin
    wait;
    end process;
 
-   --! Simulating input flow 
+   --! Simulating input flow
    input_flow : process
    begin
-      
+
       --! Initialize input interface
       DATA_IN <= (others => '0');
       CE <= '1';
@@ -78,16 +78,16 @@ begin
       wait for reset_time;
       wait for 3*clkper;
       wait for clkper;
-      
+
       DATA_IN <= conv_std_logic_vector(1, DATA_IN'LENGTH);
       wait for clkper;
-      
+
       DATA_IN <= conv_std_logic_vector(2, DATA_IN'LENGTH);
       wait for clkper;
- 
+
       DATA_IN <= conv_std_logic_vector(3, DATA_IN'LENGTH);
       wait for clkper;
- 
+
       wait;
 
    end process input_flow;

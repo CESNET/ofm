@@ -1,6 +1,6 @@
 -- led_ctrl.vhd: LED controler
 -- Copyright (C) 2016 CESNET
--- Author(s): Juraj Kubis 
+-- Author(s): Juraj Kubis
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --
@@ -28,12 +28,12 @@ entity led_ctrl is
       CLK : in std_logic;
       --! Global synchronous reset
       RESET : in std_logic;
-      
+
       --! Enable the change of state
       STATE_CHANGE : in std_logic;
-      --! High frequency signal for generating yellow color 
+      --! High frequency signal for generating yellow color
       PWM_YELLOW_SYNC : in std_logic;
-      
+
       --! Blink pattern
       PTRN : in std_logic_vector(PTRN_LENGTH*2-1 downto 0);
 
@@ -62,26 +62,26 @@ begin
             cnt_pattern_step <= 0;
          else
             --! No light
-            if (PTRN(2*cnt_pattern_step+1 downto 2*cnt_pattern_step) = "11") then 
+            if (PTRN(2*cnt_pattern_step+1 downto 2*cnt_pattern_step) = "11") then
                LED_RED <= not ON_VALUE;
                LED_GREEN <= not ON_VALUE;
 
             --! Red
-            elsif (PTRN(2*cnt_pattern_step+1 downto 2*cnt_pattern_step) = "10") then 
+            elsif (PTRN(2*cnt_pattern_step+1 downto 2*cnt_pattern_step) = "10") then
                LED_RED <= ON_VALUE;
                LED_GREEN <= not ON_VALUE;
 
             --! Green
-            elsif (PTRN(2*cnt_pattern_step+1 downto 2*cnt_pattern_step) = "01") then 
+            elsif (PTRN(2*cnt_pattern_step+1 downto 2*cnt_pattern_step) = "01") then
                LED_RED <= not ON_VALUE;
-               LED_GREEN <= ON_VALUE;         
-            
+               LED_GREEN <= ON_VALUE;
+
             --! Yellow
-            elsif (PTRN(2*cnt_pattern_step+1 downto 2*cnt_pattern_step) = "00") then  
+            elsif (PTRN(2*cnt_pattern_step+1 downto 2*cnt_pattern_step) = "00") then
                LED_RED <= PWM_YELLOW_SYNC;
                LED_GREEN <= not PWM_YELLOW_SYNC;
             end if;
-            
+
             --! Step counting
             if (STATE_CHANGE = '1') then
                if (cnt_pattern_step = PTRN_LENGTH-1) then

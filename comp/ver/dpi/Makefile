@@ -14,12 +14,12 @@ CC=gcc
 LL=ld
 INCLUDE=$(MODELSIM_PATH)/include
 FLAGS=-std=c99 -c -g -fPIC
-DLL_FLAGS=-shared 
+DLL_FLAGS=-shared
 DLL_SUFFIX=so
 QUOTE="
 
 all: lib$(TARGET).$(DLL_SUFFIX)
-	
+
 clean:
 	rm -fR *.h *.o *.$(DLL_SUFFIX)
 

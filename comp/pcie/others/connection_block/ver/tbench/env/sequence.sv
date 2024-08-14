@@ -1,5 +1,5 @@
 /*
- * file       : sequence.sv 
+ * file       : sequence.sv
  * description: virtual sequence run on virtual sequencer ....
  * date       : 2020
  * author     : Radek Iša <isa@cesnet.cz>
@@ -13,17 +13,17 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 // virtual sequence which can run on virtual sequencer.
-// this sequence is end when 
+// this sequence is end when
 class virtual_sequence extends uvm_sequence;
     `uvm_object_utils(env::virtual_sequence)
     `uvm_declare_p_sequencer(virtual_sequencer);
 
     //////////////////////////////////
-    // variables 
+    // variables
     rand int unsigned mvb_rx_count;
 
     //////////////////////////////////
-    // constraints 
+    // constraints
     constraint s1{
         mvb_rx_count    inside {[10:20]};
     }
@@ -49,7 +49,7 @@ class virtual_sequence extends uvm_sequence;
     endtask
 
     task avalon_tx_sequence();
-       avst_tx::sequence_item avalon_tx_seq; 
+       avst_tx::sequence_item avalon_tx_seq;
        forever begin
             avalon_tx_seq = avst_tx::sequence_item::type_id::create("avalon_tx_seq");
             avalon_tx_seq.randomize();
@@ -84,7 +84,7 @@ class virtual_sequence extends uvm_sequence;
     /////////////////////////////////
     task mfb_tx_sequence_ptc();
         mfb_tx::sequence_item mfb_tx_ptc_seq;
-    
+
         forever begin
             mfb_tx_ptc_seq = mfb_tx::sequence_item::type_id::create("mfb_tx_ptc_seq");
             mfb_tx_ptc_seq.ready_one  = 10;
@@ -113,13 +113,13 @@ class virtual_sequence extends uvm_sequence;
     task body;
         fork
             //avalon
-            avalon_rx_sequence(); 
+            avalon_rx_sequence();
             avalon_tx_sequence();
-          
+
             //PTC
             mfb_rx_sequence(p_sequencer.mfb_rx_ptc_sequencer);
-            mfb_tx_sequence_ptc(); 
-    
+            mfb_tx_sequence_ptc();
+
             //MI
             mfb_rx_sequence(p_sequencer.mfb_rx_mi_sequencer);
             mfb_tx_sequence_mi();

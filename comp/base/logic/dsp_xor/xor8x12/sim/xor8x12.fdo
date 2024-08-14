@@ -9,7 +9,7 @@
 
 # For whole design testing
 set FIRMWARE_BASE    "../../../../../.."
-set xor8x12_BASE       ".."  
+set xor8x12_BASE       ".."
 
 set TB_FILE          "./testbench.vhd"
 set SIG_FILE         "./xor8x12_sig.fdo"

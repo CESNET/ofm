@@ -17,10 +17,10 @@ class ScoreboardMiiDriverCbs extends DriverCbs;
         sc_table = st;
         i = index;
     endfunction
-        
+
     virtual task pre_tx(ref Transaction transaction, string inst);
     endtask
-        
+
     virtual task post_tx(Transaction transaction, string inst);
         MiiTransaction               mii_tr;
         MfbTransaction #(ITEM_WIDTH) mfb_tr;
@@ -41,7 +41,7 @@ class ScoreboardMiiDriverCbs extends DriverCbs;
         end
 
         //mfb_tr.display();
-        if (TRANSACTION_CHECK[i]) begin 
+        if (TRANSACTION_CHECK[i]) begin
             sc_table.add(mfb_tr);
         end
     endtask
@@ -51,17 +51,17 @@ class ScoreboardMfbMonitorCbs extends MonitorCbs;
     TransactionTable #(1) sc_table;
     int cnt = 0;
     int i;
-    
+
     function new (int index, TransactionTable #(1) st);
         sc_table = st;
         i = index;
     endfunction
-    
+
     virtual task post_rx(Transaction transaction, string inst);
         bit status=0;
         //$write("New MFB transaction received, time: %t\n", $time);
         cnt = cnt + 1;
-        if (TRANSACTION_CHECK[i]) begin 
+        if (TRANSACTION_CHECK[i]) begin
             sc_table.remove(transaction, status);
         end else begin
             status=1;

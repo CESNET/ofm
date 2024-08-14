@@ -17,13 +17,13 @@ class FlTransaction {
 	int data_id;
 	string inst;
     vector< vector <unsigned char> > data;
-  
+
     //-----------------------------------------------------------------------------
     int getPacketCount();
 
     //-----------------------------------------------------------------------------
     int getPacketSize(int packetNo);
-	
+
     //-----------------------------------------------------------------------------
 	int compare(FlTransaction tr, int kind=0);
 
@@ -31,4 +31,4 @@ class FlTransaction {
 	void display();
 };
 
-#endif 
+#endif

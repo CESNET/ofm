@@ -14,7 +14,7 @@
  */
 
 package test_pkg;
-   
+
    import math_pkg::*;
 
    parameter REGIONS     = 2; // any power of two

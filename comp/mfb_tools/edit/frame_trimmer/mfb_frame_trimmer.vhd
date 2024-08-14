@@ -202,7 +202,7 @@ begin
         s_nl_region_off_prev(r) <= s_rx_new_len_ext(r)(log2(REGIONS*REGION_ITEMS)-1 downto log2(REGION_ITEMS));
         s_nl_block_off_prev(r)  <= s_rx_new_len_ext(r)(log2(REGION_ITEMS)-1 downto log2(BLOCK_SIZE));
         s_nl_pos_off_prev(r)    <= s_rx_new_len_ext(r)(log2(REGION_ITEMS)-1 downto 0);
-        
+
         s_nl_word_ok(r)        <= '1' when ((s_nl_word_off(r) = s_rx_word_cnt(r)))           else '0';
         s_nl_region_ok(r)      <= '1' when ((REGIONS = 1) or (s_nl_region_off(r) = r))       else '0';
         s_nl_word_prev_ok(r)   <= '1' when ((s_nl_word_off_prev(r) = s_rx_word_cnt_prev(r))) else '0';

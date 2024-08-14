@@ -15,7 +15,7 @@ use work.type_pack.all;
 entity MFB_USER_PACKET_GEN is
    generic(
       -- =======================================================================
-      -- MFB BUS CONFIGURATION: 
+      -- MFB BUS CONFIGURATION:
       -- =======================================================================
       REGIONS     : natural := 4; -- any power of two
       REGION_SIZE : natural := 8; -- any power of two
@@ -23,7 +23,7 @@ entity MFB_USER_PACKET_GEN is
       ITEM_WIDTH  : natural := 8; -- any positive
       META_WIDTH  : natural := 2; -- any positive
       -- =======================================================================
-      -- USER PACKET GENERATOR CONFIGURATION: 
+      -- USER PACKET GENERATOR CONFIGURATION:
       -- =======================================================================
       -- This parameter determines maximum length of generated packet.
       LEN_WIDTH   : natural := 14;
@@ -134,7 +134,7 @@ begin
       s_pkt_end_offset(r) <= std_logic_vector(unsigned(s_pkt_len(r)) - 1);
       s_fifo_pkt_din(r)   <= s_pkt_end_offset(r) & s_pkt_meta(r);
    end generate;
-   
+
    -- FIFOX multi of generated packet length
    fifox_multi_i : entity work.FIFOX_MULTI
    generic map(
@@ -267,7 +267,7 @@ begin
       -- =======================================================================
       -- create signal with previous EOF offset for next region
       s_eof_offset_prev(r+1) <= s_eof_offset_prev_new(r) when (s_set_sof_fake(r) = '1') else s_eof_offset_prev(r);
-      -- control of creating EOF signal 
+      -- control of creating EOF signal
       s_need_set_eof(r+1) <='1' when ((s_set_sof(r) = '1' and s_set_eof(r) = '0') or (s_set_sof(r) = '1' and s_set_eof(r) = '1' and s_need_set_eof(r) = '1')) else
                             '0' when (s_set_eof(r) = '1') else s_need_set_eof(r);
    end generate;

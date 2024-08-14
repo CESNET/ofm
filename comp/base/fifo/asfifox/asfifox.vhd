@@ -1,4 +1,4 @@
--- asfifox.vhd: Universal asynchronous (dual clock) FIFO 
+-- asfifox.vhd: Universal asynchronous (dual clock) FIFO
 -- Copyright (C) 2019 CESNET z. s. p. o.
 -- Author(s): Jakub Cabal <cabal@cesnet.cz>
 --
@@ -29,7 +29,7 @@ entity ASFIFOX is
         --
         -- - "LUT"  - effective for shallow FIFO (approx. ITEMS <= 64),
         -- - "BRAM" - effective for deep FIFO (approx. ITEMS > 64).
-        RAM_TYPE            : string  := "BRAM"; 
+        RAM_TYPE            : string  := "BRAM";
         -- First Word Fall Through mode. If FWFT_MODE=True, valid data will be
         -- ready at the ASFIFOX output without RD_EN requests.
         FWFT_MODE           : boolean := True;
@@ -157,7 +157,7 @@ architecture behavioral of ASFIFOX is
 
     constant MEM_ADDR_WIDTH : natural := log2(ITEMS);
     constant ADDR_WIDTH     : natural := MEM_ADDR_WIDTH+1;
-    constant AFULL_CAPACITY : natural := ITEMS - ALMOST_FULL_OFFSET; 
+    constant AFULL_CAPACITY : natural := ITEMS - ALMOST_FULL_OFFSET;
 
     signal arst                : std_logic;
     signal rd_arst             : std_logic;
@@ -215,7 +215,7 @@ begin
     wr_arst_i : entity work.ASYNC_RESET
     generic map(
        TWO_REG => false
-    ) 
+    )
     port map(
        CLK        => WR_CLK,
        ASYNC_RST  => arst,
@@ -225,7 +225,7 @@ begin
     rd_arst_i : entity work.ASYNC_RESET
     generic map(
        TWO_REG => false
-    ) 
+    )
     port map(
        CLK        => RD_CLK,
        ASYNC_RST  => arst,
@@ -348,7 +348,7 @@ begin
                     end if;
                 end if;
             end process;
-    
+
         end generate;
         ram_dout_reg <= lutram_dout_reg;
     end generate;
@@ -418,7 +418,7 @@ begin
     -- -------------------------------------------------------------------------
     --  WRITE ADDRESS TO GRAY CODE CONVERSION
     -- -------------------------------------------------------------------------
-            
+
     wr_addr_gray(ADDR_WIDTH-1) <= wr_addr_cnt(ADDR_WIDTH-1);
 
     wr_addr_gray_g : for i in ADDR_WIDTH-2 downto 0 generate
@@ -433,7 +433,7 @@ begin
     generic map(
         DATA_WIDTH => ADDR_WIDTH,
         ASYNC_RST  => True
-    )  
+    )
     port map(
         ACLK     => WR_CLK,
         ARST     => wr_arst,
@@ -441,7 +441,7 @@ begin
 
         BCLK     => RD_CLK,
         BRST     => rd_arst,
-        BDATAOUT => wr_addr_gray_synced 
+        BDATAOUT => wr_addr_gray_synced
     );
 
     -- -------------------------------------------------------------------------
@@ -496,7 +496,7 @@ begin
     -- -------------------------------------------------------------------------
     --  READ ADDRESS TO GRAY CODE CONVERSION
     -- -------------------------------------------------------------------------
-    
+
     rd_addr_gray(ADDR_WIDTH-1) <= rd_addr_cnt(ADDR_WIDTH-1);
 
     rd_addr_gray_g : for i in ADDR_WIDTH-2 downto 0 generate
@@ -511,7 +511,7 @@ begin
     generic map(
         DATA_WIDTH => ADDR_WIDTH,
         ASYNC_RST  => True
-    )  
+    )
     port map(
         ACLK     => RD_CLK,
         ARST     => rd_arst,
@@ -519,7 +519,7 @@ begin
 
         BCLK     => WR_CLK,
         BRST     => wr_arst,
-        BDATAOUT => rd_addr_gray_synced 
+        BDATAOUT => rd_addr_gray_synced
     );
 
     -- -------------------------------------------------------------------------
@@ -527,7 +527,7 @@ begin
     -- -------------------------------------------------------------------------
 
     rd_addr_synced(ADDR_WIDTH-1) <= rd_addr_gray_synced(ADDR_WIDTH-1);
-    
+
     rd_addr_synced_g : for i in ADDR_WIDTH-2 downto 0 generate
         rd_addr_synced(i) <= rd_addr_synced(i+1) xor rd_addr_gray_synced(i);
     end generate;
@@ -559,7 +559,7 @@ begin
         if (wr_arst = '1') then
             full_flag_reg <= '1';
         elsif (rising_edge(WR_CLK)) then
-            full_flag_reg <= full_flag; 
+            full_flag_reg <= full_flag;
         end if;
     end process;
 
@@ -570,7 +570,7 @@ begin
     -- =========================================================================
 
     wr_status_uns <= wr_addr_cnt - rd_addr_synced_reg;
-    WR_STATUS     <= std_logic_vector(wr_status_uns); 
+    WR_STATUS     <= std_logic_vector(wr_status_uns);
 
     WR_AFULL <= '1' when (wr_status_uns >= AFULL_CAPACITY) else '0';
 
@@ -587,7 +587,7 @@ begin
                           "00" when others;
 
     rd_status_uns <= (wr_addr_synced_reg - rd_addr_cnt) + out_reg_status_uns;
-    RD_STATUS     <= std_logic_vector(rd_status_uns); 
+    RD_STATUS     <= std_logic_vector(rd_status_uns);
 
     RD_AEMPTY <= '1' when (rd_status_uns <= ALMOST_EMPTY_OFFSET) else '0';
 

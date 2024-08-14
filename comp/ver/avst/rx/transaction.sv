@@ -14,7 +14,7 @@ class transaction  extends sv_common_pkg::Transaction;
     logic            eop;
 
     ///////////////////////////////////
-    // copy, compare, convert to string function 
+    // copy, compare, convert to string function
     function new ();
     endfunction
 

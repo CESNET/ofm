@@ -5,7 +5,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 package test_pkg;
-   
+
     import math_pkg::*;
 
     // TX MFB configuration, allows you to set the required output data width
@@ -21,7 +21,7 @@ package test_pkg;
     parameter RX_REGION_SIZE  = TX_REGION_SIZE;
     parameter RX_BLOCK_SIZE   = TX_BLOCK_SIZE;
     parameter RX_ITEM_WIDTH   = TX_ITEM_WIDTH;
-    
+
     parameter RX_INCLUDE_CRC  = 0;
     parameter RX_INCLUDE_IPG  = 0;
     parameter CRC_INSERT_EN   = 0;

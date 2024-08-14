@@ -1,6 +1,6 @@
 # Modules.tcl: Local include script
 # Copyright (C) 2021 CESNET
-# Author: Tomáš Beneš <xbenes55@stud.fit.vutbr.cz> 
+# Author: Tomáš Beneš <xbenes55@stud.fit.vutbr.cz>
 # SPDX-License-Identifier: BSD-3-Clause
 
 lappend COMPONENTS [list "RESET"        "$OFM_PATH/comp/uvm/reset"          "FULL"]

@@ -24,7 +24,7 @@ entity fl_binder_fl16x2to16 is
       FRAME_PARTS    : integer;
       -- select BlockRAM or LUT memory
       LUT_MEMORY : boolean := false;
-      -- Number of items (INPUT_WIDTH*INPUT_COUNT wide) in LUT memory that can 
+      -- Number of items (INPUT_WIDTH*INPUT_COUNT wide) in LUT memory that can
       -- be stored for each block
       LUT_BLOCK_SIZE : integer := 16;
       -- Queue choosing policy
@@ -42,7 +42,7 @@ entity fl_binder_fl16x2to16 is
       -- input interfaces
       RX0            : inout t_fl16;
       RX1            : inout t_fl16;
-      
+
       -- output interface
       TX             : inout t_fl16
 
@@ -103,8 +103,8 @@ begin
       TX_DST_RDY_N   => TX.DST_RDY_N,
       TX_DATA        => TX.DATA,
       TX_REM         => TX.DREM
-      
-   ); 
 
-end architecture full; 
+   );
+
+end architecture full;
 

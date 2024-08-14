@@ -175,7 +175,7 @@ architecture FULL of TCAM2 is
     -- --------------------------------------------------------------------------
     --  Write logic signals
     -- --------------------------------------------------------------------------
-    
+
     -- control signals
     signal wr_en         : std_logic;
     signal wr_en_reg     : std_logic;

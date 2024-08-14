@@ -12,7 +12,7 @@
 #                       Signals of interfaces
 # -------------------------------------------------------------------
 proc fl_sim {NAME PATH} {
-    add wave -divider "$NAME"       
+    add wave -divider "$NAME"
       add_wave "-noupdate -color yellow -label RESET" $PATH/RESET
       add_wave "-noupdate -color yellow -label CLK"   $PATH/FL_CLK
       add_wave "-noupdate -hex -label FRAME_LINK_BUS"   $PATH/FL_BUS

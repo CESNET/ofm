@@ -10,7 +10,7 @@
  * TODO:
  *
  */
- 
+
 // ----------------------------------------------------------------------------
 //                        Module declaration
 // ----------------------------------------------------------------------------
@@ -26,14 +26,14 @@ module DUT (
 
 // Signals for DUT conection
 wire [DATA_WIDTH-1:0] fw_data_in;
-wire [FLOWS-1:0] fw_write;  
-wire [FLOWS-1:0] fw_full; 
+wire [FLOWS-1:0] fw_write;
+wire [FLOWS-1:0] fw_full;
 genvar i;
 
 // Connecting FW to interfaces
 generate
 for (i=0; i<FLOWS; i++) begin
-  assign fw_data_in[(i+1)*(DATA_WIDTH/FLOWS)-1:(DATA_WIDTH/FLOWS)*i]    = FW[i].DATA_IN; 
+  assign fw_data_in[(i+1)*(DATA_WIDTH/FLOWS)-1:(DATA_WIDTH/FLOWS)*i]    = FW[i].DATA_IN;
   assign fw_write[i]                                                    = FW[i].WRITE;
   assign FW[i].FULL                                                     = fw_full[i];
   end
@@ -52,16 +52,16 @@ NFIFO2MEM #(
 
    VHDL_DUT_U (
     // Common Interface
-    
+
     //vyber signalov
     .CLK               (CLK),
     .RESET             (RESET),
- 
+
     // Write interface
     .DATA_IN            (fw_data_in),
     .WRITE              (fw_write),
     .FULL               (fw_full),
-    
+
     // Read interface
     .DATA_OUT           (MR.DATA_OUT),
     .DATA_VLD           (MR.DATA_VLD),
@@ -72,8 +72,8 @@ NFIFO2MEM #(
     .REL_LEN_DV         (MR.REL_LEN_DV),
     .PIPE_EN            (MR.PIPE_EN),
     .EMPTY              (MR.EMPTY),
-    
-    .STATUS             (MR.STATUS)    
+
+    .STATUS             (MR.STATUS)
     );
 
 endmodule : DUT

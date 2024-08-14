@@ -20,7 +20,7 @@ use ieee.std_logic_unsigned.all;
 use work.math_pack.all;
 
 -- **OBSOLETE!!!** Use at your own risk. This component is used by **SHAKEDOWN**.
--- Merges N item MVB into M item MVB, on RX interface, there must be at most 
+-- Merges N item MVB into M item MVB, on RX interface, there must be at most
 -- M items marked as valid, otherwise, they will be lost!.
 -- This component can be used as combinational logic.
 entity merge_n_to_m is

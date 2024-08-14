@@ -11,7 +11,7 @@ set DEC1FN_ENABLE_BASE "$OFM_PATH/comp/base/logic/dec1fn"
 lappend PACKAGES "$OFM_PATH/comp/base/pkg/math_pack.vhd"
 lappend PACKAGES "$OFM_PATH/comp/base/pkg/type_pack.vhd"
 
-if { $ARCHGRP == "FULL" } { 
+if { $ARCHGRP == "FULL" } {
   # Components
   lappend COMPONENTS [ list "DEC1FN_ENABLE" $DEC1FN_ENABLE_BASE "FULL" ]
 

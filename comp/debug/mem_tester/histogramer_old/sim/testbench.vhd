@@ -33,7 +33,7 @@ architecture BEHAVIORAL Of TESTBENCH is
     signal cnt_ovf                  : std_logic;
 
 begin
-	
+
     ---------
     -- UUT --
     ---------
@@ -45,7 +45,7 @@ begin
         CNT_WIDTH       => CNT_WIDTH,
         CNTER_CNT       => CNTER_CNT
     )
-    port map (    
+    port map (
         CLK             => clk,
         RST             => rst,
         INPUT_VLD       => input_vld,
@@ -67,10 +67,10 @@ begin
         clk <= '0';
         wait for CLK_PERIOD / 2;
     end process;
-   
+
     -- reset generators
     reset_gen_p : process
-    begin 
+    begin
         if (sim_done = '1') then
             wait;
         end if;
@@ -78,11 +78,11 @@ begin
         rst <= '1';
         wait for 2 * CLK_PERIOD;
         rst <= '0';
-        wait;        
+        wait;
     end process;
 
-    main_p : process 
-    begin 
+    main_p : process
+    begin
         sim_done    <= '0';
         wait until rst = '0';
 
@@ -92,7 +92,7 @@ begin
         input_vld   <= '1';
         wait until rising_edge(clk);
         input_vld   <= '0';
-        for i in 0 to CNTER_CNT - 1 loop 
+        for i in 0 to CNTER_CNT - 1 loop
             sel_cnter <= std_logic_vector(to_unsigned(i, sel_cnter'length));
             wait for CLK_PERIOD;
         end loop;
@@ -103,7 +103,7 @@ begin
         input_vld   <= '1';
         wait until rising_edge(clk);
         input_vld   <= '0';
-        for i in 0 to CNTER_CNT - 1 loop 
+        for i in 0 to CNTER_CNT - 1 loop
             sel_cnter <= std_logic_vector(to_unsigned(i, sel_cnter'length));
             wait for CLK_PERIOD;
         end loop;
@@ -114,7 +114,7 @@ begin
         input_vld   <= '1';
         wait until rising_edge(clk);
         input_vld   <= '0';
-        for i in 0 to CNTER_CNT - 1 loop 
+        for i in 0 to CNTER_CNT - 1 loop
             sel_cnter <= std_logic_vector(to_unsigned(i, sel_cnter'length));
             wait for CLK_PERIOD;
         end loop;
@@ -125,7 +125,7 @@ begin
         input_vld   <= '1';
         wait until rising_edge(clk);
         input_vld   <= '0';
-        for i in 0 to CNTER_CNT - 1 loop 
+        for i in 0 to CNTER_CNT - 1 loop
             sel_cnter <= std_logic_vector(to_unsigned(i, sel_cnter'length));
             wait for CLK_PERIOD;
         end loop;
@@ -136,7 +136,7 @@ begin
         input_vld   <= '1';
         wait until rising_edge(clk);
         input_vld   <= '0';
-        for i in 0 to CNTER_CNT - 1 loop 
+        for i in 0 to CNTER_CNT - 1 loop
             sel_cnter <= std_logic_vector(to_unsigned(i, sel_cnter'length));
             wait for CLK_PERIOD;
         end loop;

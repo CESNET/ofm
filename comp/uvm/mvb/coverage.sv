@@ -2,7 +2,7 @@
 //-- Copyright (C) 2020 CESNET z. s. p. o.
 //-- Author(s): Tomáš Beneš <xbenes55@stud.fit.vutbr.cz>
 //--
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 class coverage #(int unsigned ITEMS, int unsigned ITEM_WIDTH) extends uvm_subscriber#(sequence_item #(ITEMS, ITEM_WIDTH));
     `uvm_component_param_utils(uvm_mvb::coverage #(ITEMS, ITEM_WIDTH))

@@ -43,7 +43,7 @@ component FL_FIFO_FL8 is
       RESET          : in  std_logic;
 
       -- write interface
-      RX             : inout t_fl8;      
+      RX             : inout t_fl8;
       -- read interface
       TX             : inout t_fl8;
       -- FIFO state signals
@@ -79,7 +79,7 @@ signal RX_SOP_N      : std_logic;
 signal RX_EOP_N      : std_logic;
 signal RX_SOF_N      : std_logic;
 signal RX_EOF_N      : std_logic;
-      
+
 signal TX_DATA       : std_logic_vector(DATA_WIDTH-1 downto 0);
 signal TX_SRC_RDY_N  : std_logic;
 signal TX_DST_RDY_N  : std_logic;
@@ -126,7 +126,7 @@ port map(
    CLK         => CLK,
    RESET       => RESET,
 
-   RX          => RX,     
+   RX          => RX,
    TX          => TX,
 
    LSTBLK      => LSTBLK,
@@ -161,7 +161,7 @@ begin
    wait for 4*clkper;
    RESET <= '0';
    wait for 4*clkper;
-   
+
    -- Send second frame, the shortest possible
    RX_SRC_RDY_N <= '0';
    RX_DATA  <= conv_std_logic_vector(10, RX_DATA'length);
@@ -194,44 +194,44 @@ begin
    RX_SOF_N   <= '0';
    RX_SOP_N   <= '0';
    wait for clkper;  -- SOF, SOP
-   
+
    RX_DATA  <= conv_std_logic_vector(2, RX_DATA'length);
    RX_SOF_N   <= '1';
    RX_SOP_N   <= '1';
    wait for clkper;
-   
+
    RX_DATA  <= conv_std_logic_vector(3, RX_DATA'length);
    RX_EOP_N   <= '0';
    wait for clkper; -- EOP
-   
+
    RX_EOP_N   <= '1';
    RX_DATA  <= conv_std_logic_vector(4, RX_DATA'length);
    RX_SOP_N   <= '0';
    TX_DST_RDY_N  <= '0';
    wait for clkper; -- SOP
-   
+
    RX_DATA  <= conv_std_logic_vector(5, RX_DATA'length);
    RX_SOP_N   <= '1';
    wait for clkper;
-   
+
    RX_DATA  <= conv_std_logic_vector(6, RX_DATA'length);
    wait for clkper;
-   
+
    RX_DATA  <= conv_std_logic_vector(7, RX_DATA'length);
    RX_EOP_N   <= '0';
    wait for clkper; -- EOP
-   
+
    RX_EOP_N   <= '1';
    RX_SOP_N   <= '0';
    RX_DATA  <= conv_std_logic_vector(8, RX_DATA'length);
    wait for clkper; -- SOP
-   
+
    RX_SOP_N   <= '1';
    RX_DATA  <= conv_std_logic_vector(9, RX_DATA'length);
    RX_EOF_N   <= '0';
    RX_EOP_N   <= '0';
    wait for clkper; -- EOP, EOF
-   
+
    RX_EOF_N   <= '1';
    RX_EOP_N   <= '1';
    RX_SRC_RDY_N <= '1';
@@ -278,50 +278,50 @@ begin
    RX_SOF_N   <= '0';
    RX_SOP_N   <= '0';
    wait for clkper;  -- SOF, SOP
-   
+
    RX_DATA  <= conv_std_logic_vector(2, RX_DATA'length);
    RX_SOF_N   <= '1';
    RX_SOP_N   <= '1';
    wait for clkper;
-   
+
    RX_DATA  <= conv_std_logic_vector(3, RX_DATA'length);
    RX_EOP_N   <= '0';
    wait for clkper; -- EOP
-   
+
    RX_EOP_N   <= '1';
    RX_DATA  <= conv_std_logic_vector(4, RX_DATA'length);
    RX_SOP_N   <= '0';
    wait for clkper; -- SOP
-   
+
    RX_DATA  <= conv_std_logic_vector(5, RX_DATA'length);
    RX_SOP_N   <= '1';
    wait for clkper;
-   
+
    RX_DATA  <= conv_std_logic_vector(6, RX_DATA'length);
    wait for clkper;
 
    RX_SRC_RDY_N <= '1';
    wait for 5*clkper;
    RX_SRC_RDY_N <= '0';
-   
+
    RX_DATA  <= conv_std_logic_vector(7, RX_DATA'length);
    RX_EOP_N   <= '0';
    wait for clkper; -- EOP
-   
+
    RX_EOP_N   <= '1';
    RX_SOP_N   <= '0';
    RX_DATA  <= conv_std_logic_vector(8, RX_DATA'length);
    wait for clkper; -- SOP
-   
+
    RX_SOP_N   <= '1';
    RX_DATA  <= conv_std_logic_vector(6, RX_DATA'length);
    wait for clkper;
-   
+
    RX_DATA  <= conv_std_logic_vector(9, RX_DATA'length);
    RX_EOF_N   <= '0';
    RX_EOP_N   <= '0';
    wait for clkper; -- EOP, EOF
-   
+
    RX_EOF_N   <= '1';
    RX_EOP_N   <= '1';
    RX_SRC_RDY_N <= '1';
@@ -331,7 +331,7 @@ begin
    TX_DST_RDY_N <= '0';
 
    wait for 15*clkper;
-   
+
    RX_DATA     <= (others => '0');
    RX_SRC_RDY_N  <= '1';
    RX_SOP_N      <= '1';
@@ -345,7 +345,7 @@ begin
    wait for 5*clkper;
    RESET <= '0';
    wait for 5*clkper;
-   
+
 
  -- Send first frame - with two fields only
    RX_SRC_RDY_N <= '0';
@@ -354,34 +354,34 @@ begin
    RX_SOP_N   <= '0';
    TX_DST_RDY_N  <= '0';
    wait for clkper;  -- SOF, SOP
-   
+
    RX_DATA  <= conv_std_logic_vector(2, RX_DATA'length);
    RX_SOF_N   <= '1';
    RX_SOP_N   <= '1';
    wait for clkper;
-   
+
    RX_DATA  <= conv_std_logic_vector(3, RX_DATA'length);
    RX_EOP_N   <= '0';
    wait for clkper; -- EOP
-   
+
    RX_EOP_N   <= '1';
    RX_DATA  <= conv_std_logic_vector(4, RX_DATA'length);
    RX_SOP_N   <= '0';
    wait for clkper; -- SOP
-   
+
    RX_DATA  <= conv_std_logic_vector(5, RX_DATA'length);
    RX_SOP_N   <= '1';
    wait for clkper;
-   
+
    RX_DATA  <= conv_std_logic_vector(6, RX_DATA'length);
    wait for clkper;
-    
+
    RX_SOP_N   <= '1';
    RX_DATA  <= conv_std_logic_vector(9, RX_DATA'length);
    RX_EOF_N   <= '0';
    RX_EOP_N   <= '0';
    wait for clkper; -- EOP, EOF
-   
+
    RX_EOF_N   <= '1';
    RX_EOP_N   <= '1';
    RX_SRC_RDY_N <= '1';
@@ -401,14 +401,14 @@ begin
    wait for 5*clkper;
    RESET <= '0';
    wait for 5*clkper;
-   
+
    -- Send first frame - with one field only
    RX_SRC_RDY_N <= '0';
    RX_DATA  <= conv_std_logic_vector(1, RX_DATA'length);
    RX_SOF_N   <= '0';
    RX_SOP_N   <= '0';
    wait for clkper;  -- SOF, SOP
-   
+
    RX_DATA  <= conv_std_logic_vector(20, RX_DATA'length);
    RX_SOF_N   <= '1';
    RX_SOP_N   <= '1';
@@ -427,7 +427,7 @@ begin
    RX_EOF_N   <= '0';
    RX_EOP_N   <= '0';
    wait for clkper; -- EOP, EOF
-   
+
    RX_EOF_N   <= '1';
    RX_EOP_N   <= '1';
    RX_SRC_RDY_N <= '1';

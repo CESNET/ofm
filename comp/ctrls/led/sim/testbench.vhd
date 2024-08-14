@@ -11,8 +11,8 @@ end testbench;
 
 architecture Behavioral of testbench is
 
-signal CLK : std_logic := '0';     
-signal RESET : std_logic := '1';     
+signal CLK : std_logic := '0';
+signal RESET : std_logic := '1';
 signal LED_GREEN, LED_RED : std_logic_vector(2 downto 0);
 
 constant ptrn_0 : std_logic_vector(15 downto 0) := "0001101100011011";
@@ -40,8 +40,8 @@ signal RD_DATA_VLD : std_logic;
 begin
    ram: RAMB36E1
       generic map (
-         RAM_MODE       => "SDP", 
-         READ_WIDTH_A   => 72     
+         RAM_MODE       => "SDP",
+         READ_WIDTH_A   => 72
       )
       port map (
          --! Clock
@@ -91,7 +91,7 @@ begin
          RESET       => RESET,
 
          PTRNS       => ptrn_2 & ptrn_1 & ptrn_0,
-         
+
          LED_GREEN   => LED_GREEN,
          LED_RED     => LED_RED
       );

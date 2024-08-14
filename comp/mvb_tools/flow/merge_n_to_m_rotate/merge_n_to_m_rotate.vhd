@@ -110,7 +110,7 @@ begin
          --! --------------------------------------------------------------------------
          D => ones,
 
-         --! \name N one number 
+         --! \name N one number
          --! -------------------------------------------------------------------------
          N => std_logic_vector(to_unsigned(i, max(log2(INPUTS),1))),
 
@@ -141,7 +141,7 @@ begin
 
    selI  <= to_integer(unsigned(SEL));
    sel_u <= unsigned(SEL);
-   
+
    sel_rot_pr : process (sels,sels3,selI)
    begin
       if SHIFT_LEFT = true then
@@ -158,8 +158,8 @@ begin
    end process;
 
    --! registers
-  
-   reg_vld0g: if OUTPUT_REG = true generate 
+
+   reg_vld0g: if OUTPUT_REG = true generate
       reg_vldp: process(CLK)
       begin
          if (CLK'event and CLK = '1') then

@@ -13,7 +13,7 @@ set COMPONENTS [list \
     [list "DP_BRAM_V7"    $BRAM     "FULL"] \
     [list "GEN_MUX"       $MUX      "FULL"] \
     [list "GEN_DEMUX"     $DEMUX    "FULL"] \
-] 
+]
 set MOD "$MOD $ENTITY_BASE/rand_generator.vhd"
 set MOD "$MOD $ENTITY_BASE/rw_registers.vhd"
 set MOD "$MOD $ENTITY_BASE/cmp_wr_bram.vhd"

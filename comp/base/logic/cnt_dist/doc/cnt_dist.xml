@@ -84,19 +84,19 @@
             <th>Max. HW frequency</th>
          </tr>
          <tr>
-            <th>32b wide counter, 16 counters</th> 
+            <th>32b wide counter, 16 counters</th>
             <td>98 (0.4%)</td>
             <td>0 (0.0%)</td>
             <td>150 MHz</td>
          </tr>
          <tr>
-            <th>32b wide counter, 32 counters</th> 
+            <th>32b wide counter, 32 counters</th>
             <td>113 (0.5%)</td>
             <td>0 (0.0%)</td>
             <td>150 MHz</td>
          </tr>
       <nazev>Chip utilization &amp; max design frequency</nazev>
-      </tab> 
+      </tab>
    </p>
 
 </body>

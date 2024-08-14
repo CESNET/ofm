@@ -14,13 +14,13 @@
 // ----------------------------------------------------------------------------
 
 // -- Control Interface ----------------------------------------
-interface lengthInterface #(width = 12) (input logic CLK, RESET);  
+interface lengthInterface #(width = 12) (input logic CLK, RESET);
   // Control Interface
   logic [width-1:0] LENGTH ;
   logic LENGTH_READY;
-  logic LENGTH_NEXT;  
+  logic LENGTH_NEXT;
 
-  // Clocking blocks  
+  // Clocking blocks
   clocking cb @(posedge CLK);
     input LENGTH_NEXT;
     output LENGTH_READY, LENGTH;
@@ -31,7 +31,7 @@ interface lengthInterface #(width = 12) (input logic CLK, RESET);
                input  LENGTH_READY,
                input  LENGTH
                );
-  
+
   modport tb (clocking cb);
 
 endinterface : lengthInterface
@@ -59,7 +59,7 @@ class lengthDriver #(int width=12)
    int DelayLow  = 0;
    //! Max delay inside transaction
    int DelayHigh = 3;
-   
+
    /**
     * Constrains for randomization
     */
@@ -165,24 +165,24 @@ class lengthDriver #(int width=12)
       // -- For all bytes in packet --
       x=to.data[0];                    //normal behaviour!!
       if(x<10) begin // all ones
-        for (int j=0; j < width; j++) begin 
+        for (int j=0; j < width; j++) begin
           dataToSend[j]=1;
         end;
       end
       else if (x>180) begin // all zeros
-        for (int j=0; j < width; j++) begin 
+        for (int j=0; j < width; j++) begin
           dataToSend[j]=0;
         end;
       end
       else  // trimm length
-        for (int j=0; j < width; j++) begin 
+        for (int j=0; j < width; j++) begin
           dataToSend[j]=to.data[j/8][j%8];
         end;
-      /*if(to.data[0]>200) x=1; else x=0;  // only zeros or ones (allow/discard, no trim)   
+      /*if(to.data[0]>200) x=1; else x=0;  // only zeros or ones (allow/discard, no trim)
       for (int j=0; j<width; j++) begin
         dataToSend[j]=x;
       end;*/
-      
+
       ii.cb.LENGTH_READY <= 1;
       ii.cb.LENGTH       <= dataToSend;
       @(ii.cb);

@@ -170,7 +170,7 @@ begin
         dwr_in_pipe  <= (others => (others => '0'));
         mwr_in_pipe  <= (others => (others => '0'));
         addr_in_pipe <= (others => (others => '0'));
-        be_in_pipe   <= (others => (others => '0')); 
+        be_in_pipe   <= (others => (others => '0'));
 
         dwr_in_pipe(current_port)  <= RX_DWR;
         mwr_in_pipe(current_port)  <= RX_MWR;
@@ -180,7 +180,7 @@ begin
 
         RX_DRD  <= drd_in_pipe(current_port);
         RX_DRDY <= drdy_in_pipe(current_port);
-    
+
     end process;
 
     -- ========================================================================
@@ -201,7 +201,7 @@ begin
     next_state_p : process (all)
     begin
         case present_st is
-            
+
             when run =>
                 if ((RX_RD = '1') and (ardy_in_pipe(current_port) = '1') and (drdy_in_pipe(current_port) = '0')) then
                     next_st <= hold;
@@ -215,10 +215,10 @@ begin
                 else
                     next_st <= hold;
                 end if;
-         
-            when others => 
+
+            when others =>
                 next_st <= run;
-         
+
         end case;
     end process;
 
@@ -240,7 +240,7 @@ begin
     -- ========================================================================
     rd_resp_immediate <= '1' when ((ardy_in_pipe(current_port) = '1') and (drdy_in_pipe(current_port) = '1')) else '0';
     rd_resp_overdue   <= '1' when ((ardy_in_pipe_dly = '1')           and (drdy_in_pipe(current_port) = '1')) else '0';
-    
+
     ardy_rd <= '1' when ((RX_RD = '1') and ((rd_resp_immediate = '1') or (rd_resp_overdue = '1'))) else '0';
     ardy_wr <= '1' when ((RX_WR = '1') and (ardy_in_pipe(current_port) = '1'))                     else '0';
 
@@ -294,8 +294,8 @@ begin
             OUT_RD    => TX_RD(i),
             OUT_ARDY  => TX_ARDY(i),
             OUT_DRD   => TX_DRD(i),
-            OUT_DRDY  => TX_DRDY(i) 
+            OUT_DRDY  => TX_DRDY(i)
         );
-    end generate; 
+    end generate;
 
 end architecture;

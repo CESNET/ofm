@@ -18,7 +18,7 @@ set FLU2FLUA_BASE       "$BINDER_COMP_BASE/flu2flua"
 set FLUA_BINDER_BASE    "$BINDER_COMP_BASE/flua_binder"
 set RR_SELECT           "$BINDER_COMP_BASE/rr_select"
 
-if { "$ARCHGRP" == "" } { 
+if { "$ARCHGRP" == "" } {
   set ARCHGRP     "FULL"
 }
 

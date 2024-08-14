@@ -35,7 +35,7 @@ architecture cam_tb of testbench is
 
    constant clk_period      : time    := 10 ns;
    constant WAIT_BETWEEN_SEARCH:integer:= 0;
-   
+
 -- ------------------ Signals declaration -------------------------------------
    signal ADDR              : std_logic_vector((CAM_ADDR_WIDTH - 1) downto 0);
    signal DATA_IN           : std_logic_vector((CAM_ROW_WIDTH - 1) downto 0);
@@ -48,7 +48,7 @@ architecture cam_tb of testbench is
    signal CLK               : std_logic;
    signal MATCH_BUS         : std_logic_vector((CAM_ROW_COUNT - 1) downto 0);
    signal MATCH_BUS_VLD     : std_logic;
-   
+
 begin
 
 -- ---------- Connecting component to testbench  ------------------------------
@@ -74,14 +74,14 @@ begin
          MATCH_BUS         => MATCH_BUS,
          MATCH_BUS_VLD     => MATCH_BUS_VLD
       );
-   
+
 -- ----------- Generating clock signal ----------------------------------------
    tb_clk_gen: process
    begin
       CLK <= '1';
-      wait for clk_period/2; 
+      wait for clk_period/2;
       CLK <= '0';
-      wait for clk_period/2; 
+      wait for clk_period/2;
    end process tb_clk_gen;
 
 -- ----------- Probes ---------------------------------------------------------
@@ -144,7 +144,7 @@ begin
    wait for 10*clk_period;
    wait until CLK'event and CLK='1';
 
-   RESET <= '0';  
+   RESET <= '0';
 
    MATCH_RST <= '0';
    WRITE_ENABLE <= '0';
@@ -156,7 +156,7 @@ begin
    wait for clk_period;
    wait until CLK'event and CLK='1';
    wait for 1 ns;
-   
+
 -- ----------- Fill memory elements -------------------------------------------
 
 -- Try simple inserting (without using MASK)
@@ -187,7 +187,7 @@ begin
    wait for 5*clk_period;
    wait until clk'event and clk='1';
    wait for 1 ns;
-   
+
    cam_search_word("000000000000000000");
    wait until MATCH_BUS_VLD = '1';
    wait for 0.5*clk_period; -- this wait is here only for testing purposes (so that
@@ -201,22 +201,22 @@ begin
    wait for 0.5*clk_period;
    assert (MATCH_BUS="0111000000000010")
       report "Search #2 FAILED!!!" severity error;
-   
+
    wait for WAIT_BETWEEN_SEARCH*clk_period;
    cam_search_word("000000000010101010");
    wait until MATCH_BUS_VLD = '1';
    wait for 0.5*clk_period;
    assert (MATCH_BUS="0001000000010000")
       report "Search #3 FAILED!!!" severity error;
-   
+
    wait for WAIT_BETWEEN_SEARCH*clk_period;
    cam_search_word("000000000001010101");
    wait until MATCH_BUS_VLD = '1';
    wait for 0.5*clk_period;
    assert (MATCH_BUS="0000000000100000")
       report "Search #4 FAILED!!!" severity error;
-   
-   wait; 
+
+   wait;
    end process probe;
 
 end cam_tb;

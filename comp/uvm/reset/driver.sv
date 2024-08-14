@@ -1,7 +1,7 @@
 /*
  * file       : driver.sv
  * Copyright (C) 2021 CESNET z. s. p. o.
- * description: driver drives RESET sequence item if there is no then keep previous value. 
+ * description: driver drives RESET sequence item if there is no then keep previous value.
  * date       : 2021
  * author     : Radek Iša <isa@cesnet.cz>
  *

@@ -22,7 +22,7 @@ virtual class sequence_rx_base #(int unsigned UPDATE_CNT_WIDTH) extends uvm_sequ
     int unsigned min_transaction_count = 10;
     rand int unsigned transaction_count;
     constraint c_transaction_count {transaction_count inside {[min_transaction_count : max_transaction_count]};}
-    
+
     // Constructor
     function new(string name = "sequence_rx_base");
         super.new(name);
@@ -42,7 +42,7 @@ endclass
 
 class sequence_rx #(int unsigned UPDATE_CNT_WIDTH) extends sequence_rx_base #(UPDATE_CNT_WIDTH);
     `uvm_object_param_utils(uvm_avst_crdt::sequence_rx #(UPDATE_CNT_WIDTH))
-    
+
     // Constructor
     function new(string name = "sequence_rx");
         super.new(name);
@@ -60,7 +60,7 @@ class sequence_rx #(int unsigned UPDATE_CNT_WIDTH) extends sequence_rx_base #(UP
         else begin
             `uvm_fatal(this.get_full_name(), "\n\tCannot randomize")
         end
-        
+
         finish_item(req);
         get_response(rsp);
     endtask
@@ -69,7 +69,7 @@ endclass
 
 class sequence_rx_hdr extends sequence_rx #(2);
     `uvm_object_utils(uvm_avst_crdt::sequence_rx_hdr)
-    
+
     // Constructor
     function new(string name = "sequence_rx_hdr");
         super.new(name);
@@ -79,7 +79,7 @@ endclass
 
 class sequence_rx_data extends sequence_rx #(4);
     `uvm_object_utils(uvm_avst_crdt::sequence_rx_data)
-    
+
     // Constructor
     function new(string name = "sequence_rx_data");
         super.new(name);
@@ -93,7 +93,7 @@ class sequence_rx_initializing #(int unsigned UPDATE_CNT_WIDTH) extends sequence
     // SEPARATION_LENGTH means length of clock cycle separation between the deassertion of the *update and *init signals.
     // https://www.intel.com/content/www/us/en/docs/programmable/683501/24-2-11-3-0/credit-initialization.html
     localparam int unsigned SEPARATION_LENGTH = 2;
-    
+
     // Constructor
     function new(string name = "sequence_rx_initializing");
         super.new(name);
@@ -111,7 +111,7 @@ class sequence_rx_initializing #(int unsigned UPDATE_CNT_WIDTH) extends sequence
         else begin
             `uvm_fatal(this.get_full_name(), "\n\tCannot randomize")
         end
-        
+
         finish_item(req);
         get_response(rsp);
     endtask
@@ -129,7 +129,7 @@ class sequence_rx_initializing #(int unsigned UPDATE_CNT_WIDTH) extends sequence
         else begin
             `uvm_fatal(this.get_full_name(), "\n\tCannot randomize")
         end
-        
+
         finish_item(req);
         get_response(rsp);
     endtask
@@ -151,7 +151,7 @@ endclass
 
 class sequence_rx_initializing_hdr extends sequence_rx_initializing #(2);
     `uvm_object_utils(uvm_avst_crdt::sequence_rx_initializing_hdr)
-    
+
     // Constructor
     function new(string name = "sequence_rx_initializing_hdr");
         super.new(name);
@@ -161,7 +161,7 @@ endclass
 
 class sequence_rx_initializing_data extends sequence_rx_initializing #(4);
     `uvm_object_utils(uvm_avst_crdt::sequence_rx_initializing_data)
-    
+
     // Constructor
     function new(string name = "sequence_rx_initializing_data");
         super.new(name);
@@ -193,7 +193,7 @@ class sequence_tx_ack #(int unsigned UPDATE_CNT_WIDTH) extends uvm_sequence #(se
         else begin
             `uvm_fatal(this.get_full_name(), "\n\tCannot randomize")
         end
-        
+
         finish_item(req);
         get_response(rsp);
     endtask
@@ -210,7 +210,7 @@ class sequence_tx_ack #(int unsigned UPDATE_CNT_WIDTH) extends uvm_sequence #(se
         else begin
             `uvm_fatal(this.get_full_name(), "\n\tCannot randomize")
         end
-        
+
         finish_item(req);
         get_response(rsp);
     endtask
@@ -230,7 +230,7 @@ endclass
 
 class sequence_tx_ack_hdr extends sequence_tx_ack #(2);
     `uvm_object_utils(uvm_avst_crdt::sequence_tx_ack_hdr)
-    
+
     // Constructor
     function new(string name = "sequence_tx_ack_hdr");
         super.new(name);
@@ -240,7 +240,7 @@ endclass
 
 class sequence_tx_ack_data extends sequence_tx_ack #(4);
     `uvm_object_utils(uvm_avst_crdt::sequence_tx_ack_data)
-    
+
     // Constructor
     function new(string name = "sequence_tx_ack_data");
         super.new(name);

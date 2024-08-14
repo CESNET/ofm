@@ -4,7 +4,7 @@
 SCOREBOARD_DLL  = dpi_scoreboard_pkg
 
 ifeq ($(OS), Windows_NT)
-  CC=g++ 
+  CC=g++
   LL=g++
   INCLUDE=C:\Modeltech\include
   LIB=C:\Modeltech\win32
@@ -52,7 +52,7 @@ $(SCOREBOARD_DLL).h: $(SCOREBOARD_DLL).sv
 $(SCOREBOARD_DLL).$(DLL_SUFFIX): $(SCOREBOARD_DLL).o fl_transaction.o
 	$(LL) $(DLL_FLAGS) -o $@ $^ -L$(LIB) $(LIBS)
 
-$(SCOREBOARD_DLL).o: $(SCOREBOARD_DLL).h $(SCOREBOARD_DLL).c 
+$(SCOREBOARD_DLL).o: $(SCOREBOARD_DLL).h $(SCOREBOARD_DLL).c
 	$(CC) $(FLAGS) -I$(INCLUDE) $(SCOREBOARD_DLL).c
 
 fl_transaction.o: fl_transaction.h fl_transaction.cpp

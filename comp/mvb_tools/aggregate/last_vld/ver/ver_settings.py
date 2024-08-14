@@ -30,7 +30,7 @@ SETTINGS = {
     "version_prefixsum" : {
         "IMPLEMENTATION"    : "\\\"prefixsum\\\"",
     },
-    "_combinations_" : (  
+    "_combinations_" : (
     (), # Works the same as '("default",),' as the "default" is applied in every combination
 
     ("version_parallel",),

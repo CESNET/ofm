@@ -2,7 +2,7 @@
  * file       : env.sv
  * description: verry simple and not correct way how to generate asynchronous reset synchronously
  * Copyright (C) 2021 CESNET z. s. p. o.
- * description: RESET packages 
+ * description: RESET packages
  * date       : 2021
  * author     : Radek Iša <isa@cesnet.cz>
  *

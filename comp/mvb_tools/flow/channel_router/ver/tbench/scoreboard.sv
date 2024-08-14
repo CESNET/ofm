@@ -34,10 +34,10 @@ class ScoreboardDriverCbs extends DriverCbs;
             end
         end
     endfunction
-    
+
     virtual task pre_tx(ref Transaction transaction, string inst);
     endtask
-    
+
     virtual task post_tx(Transaction transaction, string inst);
         MvbTransaction #(NEW_RX_ITEM_WIDTH) mvb_tr;
         MvbTransaction #(NEW_TX_ITEM_WIDTH) mvb_tr_ext = new();
@@ -84,8 +84,8 @@ class ScoreboardDriverCbs extends DriverCbs;
             $write("Min value of dst channel in register is higher than maximal channel or than max channel in register");
             $stop;
         end
-        
-        
+
+
         if(register[channel][0] == 0) begin
             ch_cnt[channel] = channel;
             channel_out = ch_cnt[channel];
@@ -130,9 +130,9 @@ class ScoreboardDriverCbs extends DriverCbs;
         if(VERBOSE >= 1) begin
             $write("Out transaction: \n");
             mvb_tr_ext.display();
-            $write("\n"); 
+            $write("\n");
         end
-        
+
         sc_table.add(mvb_tr_ext);
     endtask
 
@@ -141,13 +141,13 @@ endclass
 
 
 class ScoreboardMonitorCbs extends MonitorCbs;
-    
+
     TransactionTable #(0) sc_table;
-    
+
     function new (TransactionTable #(0) st);
         this.sc_table = st;
     endfunction
-    
+
     virtual task post_rx(Transaction transaction, string inst);
         bit status=0;
         sc_table.remove(transaction, status);
@@ -186,5 +186,5 @@ class Scoreboard;
     task display();
       scoreTable.display();
     endtask
-  
+
 endclass

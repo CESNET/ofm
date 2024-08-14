@@ -21,13 +21,13 @@ import sv_common_pkg::*;
     TransactionTable sc_table;
 
     // -- Constructor ---------------------------------------------------------
-    // Create a class 
+    // Create a class
     function new (TransactionTable sc_table);
       this.sc_table = sc_table;
     endfunction
-    
+
     // ------------------------------------------------------------------------
-    // Function is called after is transaction sended 
+    // Function is called after is transaction sended
     virtual task post_tx(Transaction transaction, string inst);
        sc_table.add(transaction);
     endtask
@@ -37,13 +37,13 @@ import sv_common_pkg::*;
 
   class ScoreboardMonitorCbs extends MonitorCbs;
     TransactionTable sc_table;
-    
+
     // -- Constructor ---------------------------------------------------------
-    // Create a class 
+    // Create a class
     function new (TransactionTable sc_table);
       this.sc_table = sc_table;
     endfunction
-    
+
     // ------------------------------------------------------------------------
     // Function is called after is transaction received (scoreboard)
     virtual task post_rx(Transaction transaction, string inst);
@@ -66,7 +66,7 @@ import sv_common_pkg::*;
     ScoreboardDriverCbs  driverCbs;
 
     // -- Constructor ---------------------------------------------------------
-    // Create a class 
+    // Create a class
     function new ();
       this.scoreTable = new;
       this.monitorCbs = new(scoreTable);
@@ -74,7 +74,7 @@ import sv_common_pkg::*;
     endfunction
 
     // -- Display -------------------------------------------------------------
-    // Create a class 
+    // Create a class
     task display();
       scoreTable.display();
     endtask

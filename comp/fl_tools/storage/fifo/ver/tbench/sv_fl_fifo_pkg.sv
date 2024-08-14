@@ -12,7 +12,7 @@
 // FrameLink FIFO Control Interface
 `include "fl_fifo_ifc.sv"
 
-package sv_fl_fifo_pkg; 
+package sv_fl_fifo_pkg;
 
   `include "fl_fifo_ctrl_checker.sv"
   `include "fl_fifo_ctrl_cover.sv"

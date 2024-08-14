@@ -7,14 +7,14 @@
 # -----------------------------------------------------------------------------
 
 if { $ARCHGRP == "FULL" } {
-  
+
   set COMPONENTS [list \
       [list "PIPE"  "$OFM_PATH/comp/base/misc/pipe"   "FULL"] \
   ]
-  
+
   set MOD "$MOD $ENTITY_BASE/mi_pipe.vhd"
   set MOD "$MOD $ENTITY_BASE/mi_pipe_arch.vhd"
-}  
+}
 
 # -----------------------------------------------------------------------------
 

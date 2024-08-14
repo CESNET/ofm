@@ -54,7 +54,7 @@ class monitor #(AVST_REGIONS) extends sv_common_pkg::Monitor;
      //do monitor
      forever begin
        @(vif.monitor_cb)
-     
+
        for (int it = 0; it < AVST_REGIONS; it++) begin
            read(it);
        end

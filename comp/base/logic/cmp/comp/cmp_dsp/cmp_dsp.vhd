@@ -27,7 +27,7 @@ begin
       dec_pom(0) <= p_pom(0);
 
       --! generate decoders before last
-      GEN_FOR: for I in 0 to ((DATA_WIDTH/48) + (1 mod ((DATA_WIDTH mod 48) +1)) - 3) generate 
+      GEN_FOR: for I in 0 to ((DATA_WIDTH/48) + (1 mod ((DATA_WIDTH mod 48) +1)) - 3) generate
          CMP_DECODE_inst: entity work.CMP_DECODE
          port map (
             L_IN => dec_pom(I),
@@ -35,8 +35,8 @@ begin
             P => dec_pom(I + 1)
          );
       end generate;
-         
-      -- generate last decoder 
+
+      -- generate last decoder
       CMP_DECODE_inst: entity work.CMP_DECODE
       port map (
          L_IN => dec_pom(((DATA_WIDTH/48) + (1 mod ((DATA_WIDTH mod 48) +1)) - 2)),
@@ -46,15 +46,15 @@ begin
    end generate;
 
 
-   GEN_ALU_DIV: for I in 0 to (DATA_WIDTH/48)-1 generate 
+   GEN_ALU_DIV: for I in 0 to (DATA_WIDTH/48)-1 generate
    begin
       --! generate DSP only for 48 bit
       GEN_PORT_REG_ONE_48: if(DATA_WIDTH = 48) generate
          CMP48_inst: entity work.CMP48
          generic map(
-            REG_IN  => REG_IN, 
+            REG_IN  => REG_IN,
             REG_OUT => REG_OUT
-         )   
+         )
          port map (
             CLK => CLK,
             RESET => RESET,
@@ -62,7 +62,7 @@ begin
             B => B(47+I*48 downto 0+I*48),
             CE_IN => CE_IN,
             CE_OUT => CE_OUT,
-            P => P         
+            P => P
          );
       end generate;
 
@@ -71,9 +71,9 @@ begin
       begin
          CMP48_inst: entity work.CMP48
          generic map(
-            REG_IN  => REG_IN, 
+            REG_IN  => REG_IN,
             REG_OUT => REG_OUT
-         )   
+         )
          port map (
             CLK => CLK,
             RESET => RESET,
@@ -83,13 +83,13 @@ begin
             CE_OUT => CE_OUT,
             P => p_pom(I)
          );
-       end generate;    
+       end generate;
    end generate;
 
    GEN_ALU_MOD: if (DATA_WIDTH mod 48 > 0) generate
       signal Amod : std_logic_vector(47 downto 0);
       signal Bmod : std_logic_vector(47 downto 0);
-   begin   
+   begin
       Amod((DATA_WIDTH mod 48)-1 downto 0) <= A(A'LENGTH-1 downto A'LENGTH-1-(DATA_WIDTH mod 48)+1);
       Amod(47 downto (DATA_WIDTH mod 48)) <= (others => '0');
       Bmod((DATA_WIDTH mod 48)-1 downto 0) <= B(B'LENGTH-1 downto B'LENGTH-1-(DATA_WIDTH mod 48)+1);
@@ -115,7 +115,7 @@ begin
 
       --! generate last DSP when DATA_WIDTH mod 48 /= 0
       GEN_DSP_LAST: if(DATA_WIDTH > 48) generate
-         
+
          CMP48_inst: entity work.CMP48
          generic map (
             REG_IN => REG_IN,
@@ -128,7 +128,7 @@ begin
             B => Bmod,
             CE_IN => CE_IN,
             CE_OUT => CE_OUT,
-            P => p_pom(((DATA_WIDTH/48) + (1 mod ((DATA_WIDTH mod 48) + 1)) - 1)) 
+            P => p_pom(((DATA_WIDTH/48) + (1 mod ((DATA_WIDTH mod 48) + 1)) - 1))
          );
       end generate;
    end generate;

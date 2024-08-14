@@ -8,7 +8,7 @@
 `define FIFOX_MULTI_ENV_SV
 
 package uvm_fifox_multi;
-    
+
     `include "uvm_macros.svh"
     import uvm_pkg::*;
 

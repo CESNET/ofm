@@ -11,7 +11,7 @@ use IEEE.numeric_std.all;
 use work.math_pack.all;
 use work.type_pack.all;
 
-entity FP_MERGER is 
+entity FP_MERGER is
     generic(
         MFB_REGIONS         : natural := 1;
         MFB_REGION_SIZE     : natural := 8;
@@ -75,7 +75,7 @@ architecture FULL of FP_MERGER is
     signal input_skip               : std_logic;
     signal input_valid              : unsigned(max(1, log2(MERGER_INPUTS)) - 1 downto 0);
 
-    -- One-Hot 
+    -- One-Hot
     signal input_select_oh          : std_logic_vector(MERGER_INPUTS - 1 downto 0);
     -- After one
     signal input_select_ao          : std_logic_vector(MERGER_INPUTS - 1 downto 0);
@@ -123,9 +123,9 @@ begin
     port map(
         DI  => input_select_oh,
         DO  => input_select_ao
-    );    
+    );
 
-    -- Select next valid pointer 
+    -- Select next valid pointer
     pointer_sel_p: process(all)
         variable input_valid_v  : unsigned(max(1, log2(MERGER_INPUTS)) - 1 downto 0);
     begin
@@ -143,7 +143,7 @@ begin
     fp_merger_reg_p: process(CLK)
     begin
         if (rising_edge(CLK)) then
-            if RST = '1' then 
+            if RST = '1' then
                 state   <= st_SKIP;
             else
                 state   <= next_state;
@@ -164,7 +164,7 @@ begin
                 if RX_MFB_SRC_RDY(to_integer(input_select)) = '1' then
                     next_state  <= st_PASS;
                     -- Small Packet
-                    if (eof_std_v = '1') and (pipe_rx_dst_rdy = '1') then 
+                    if (eof_std_v = '1') and (pipe_rx_dst_rdy = '1') then
                         next_state  <= st_SKIP;
                         input_skip  <= '1';
                     end if;
@@ -173,7 +173,7 @@ begin
                 end if;
 
             when st_PASS    =>
-                if (eof_std_v = '1') and (pipe_rx_dst_rdy = '1') then 
+                if (eof_std_v = '1') and (pipe_rx_dst_rdy = '1') then
                     next_state  <= st_SKIP;
                     input_skip  <= '1';
                 end if;
@@ -203,7 +203,7 @@ begin
         DATA_IN     => slv_array_ser(RX_MFB_META),
         SEL         => std_logic_vector(input_select),
         DATA_OUT    => pipe_rx_meta
-    );  
+    );
 
     -- SOF MUX
     sof_mux_i: entity work.GEN_MUX
@@ -279,7 +279,7 @@ begin
         BLOCK_SIZE     => MFB_BLOCK_SIZE,
         ITEM_WIDTH     => MFB_ITEM_WIDTH,
         META_WIDTH     => MFB_META_WIDTH,
-    
+
         PIPE_TYPE      => "SHREG",
         DEVICE         => DEVICE
     )
@@ -287,7 +287,7 @@ begin
 
         CLK    => CLK,
         RESET  => RST,
-    
+
         RX_DATA       => pipe_rx_data,
         RX_META       => pipe_rx_meta,
         RX_SOF        => pipe_rx_sof,
@@ -296,7 +296,7 @@ begin
         RX_EOF_POS    => slv_array_ser(pipe_rx_eof_pos_round_up),
         RX_SRC_RDY    => pipe_rx_src_rdy,
         RX_DST_RDY    => pipe_rx_dst_rdy,
-    
+
         TX_DATA       => TX_MFB_DATA,
         TX_META       => TX_MFB_META,
         TX_SOF        => TX_MFB_SOF,

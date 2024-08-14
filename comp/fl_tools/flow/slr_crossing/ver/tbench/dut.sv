@@ -12,7 +12,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
- 
+
 import test_pkg::*; // Test constants
 
 module DUT (

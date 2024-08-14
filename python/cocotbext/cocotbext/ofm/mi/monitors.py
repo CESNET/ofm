@@ -13,7 +13,7 @@ import random
 
 class MIMasterMonitor(BusMonitor):
     """Master monitor intended for monitoring the MI BUS OUTPUT side.
-    
+
     Atributes:
         item_cnt(int): number of items recieved.
         _clk_re(cocotb.triggers.RisingEdge): object used for awaiting the rising edge of clock signal.
@@ -32,7 +32,7 @@ class MIMasterMonitor(BusMonitor):
         self._clk_re = RisingEdge(self.clock)
         self.addr_width = len(self.bus.addr) // 8
         self.data_width = len(self.bus.dwr) // 8
-  
+
     async def _monitor_recv(self):
         """Recieve function for the cocotb testbench"""
 
@@ -41,14 +41,14 @@ class MIMasterMonitor(BusMonitor):
 
         while True:
             await clk_re
-                  
+
             if self.in_reset:
                 continue
-        
+
             if self.bus.wr.value == 1 and self.bus.ardy.value == 1:
                 dwr_bytes = get_signal_value_in_bytes(self.bus.dwr)
                 addr_bytes = get_signal_value_in_bytes(self.bus.addr)
-  
+
                 be = self.bus.be.value
                 be.big_endian = False
                 be_int = int.from_bytes(be.buff, 'little')
@@ -59,19 +59,19 @@ class MIMasterMonitor(BusMonitor):
                 first_be = be_list.index(1)
                 last_be = (be_list+[0]).index(0, first_be)
                 dwr_recv = dwr_bytes[first_be:last_be]
-  
+
                 self.log.debug(f"ITEM     {self.item_cnt}")
                 self.log.debug(f"OUT_ADDR {addr_bytes.hex()}")
                 self.log.debug(f"OUT_DWR  {dwr_bytes.hex()}")
                 self.log.debug(f"OUT_BE   {be_int}")
-                    
+
                 self._recv((int.from_bytes(addr_bytes, 'little'), int.from_bytes(dwr_recv, 'little'), be_int))
                 self.item_cnt += 1
 
 
 class MISlaveMonitor(BusMonitor):
     """Slave monitor intended for monitoring the MI BUS INPUT side.
-    
+
     Atributes:
         _signals(list): mandatory signals of the MI BUS.
         _optional_signals(list): any other usefull signal that may be part of the MI BUS.
@@ -92,16 +92,16 @@ class MISlaveMonitor(BusMonitor):
         self._clk_re = RisingEdge(self.clock)
         self.addr_width = len(self.bus.addr) // 8
         self.data_width = len(self.bus.dwr) // 8
-  
-    async def _monitor_recv(self): 
+
+    async def _monitor_recv(self):
         """Recieve function for the cocotb testbench."""
-        
+
         # Avoid spurious object creation by recycling
         clk_re = RisingEdge(self.clock)
 
         while True:
             await clk_re
-                  
+
             if self.in_reset:
                 continue
 
@@ -111,14 +111,14 @@ class MISlaveMonitor(BusMonitor):
                 be.big_endian = False
                 be_int = int.from_bytes(be.buff, 'little')
 
-            if self.bus.drdy.value == 1: 
+            if self.bus.drdy.value == 1:
                 drd_bytes = get_signal_value_in_bytes(self.bus.drd)
-                
+
                 self.log.debug(f"ITEM     {self.item_cnt}")
                 self.log.debug(f"IN_ADDR {addr_bytes.hex()}")
                 self.log.debug(f"IN_DRD  {drd_bytes.hex()}")
-                
+
                 self._recv((int.from_bytes(addr_bytes, 'little'), int.from_bytes(drd_bytes, 'little'), be_int))
-                
+
                 self.item_cnt += 1
 

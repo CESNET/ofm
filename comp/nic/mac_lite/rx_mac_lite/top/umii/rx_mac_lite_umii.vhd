@@ -15,7 +15,7 @@ use work.eth_hdr_pack.all;
 entity RX_MAC_LITE_UMII is
     generic(
         -- =====================================================================
-        -- MII CONFIGURATION: 
+        -- MII CONFIGURATION:
         -- =====================================================================
         -- Data width of MII data signal, must be power of two, minimum is 64
         MII_DW           : natural := 2048;
@@ -37,7 +37,7 @@ entity RX_MAC_LITE_UMII is
         -- when the MFB bus increases (TX MFB width >= 2x MII_DW width)!
         RESIZE_BUFFER    : boolean := false;
         -- =====================================================================
-        -- OTHERS CONFIGURATION: 
+        -- OTHERS CONFIGURATION:
         -- =====================================================================
         -- ID of this network port, it is inserted into the packet metadata.
         NETWORK_PORT_ID : natural := 0;
@@ -166,7 +166,7 @@ begin
         MII_RXD        => MII_RXD,
         MII_RXC        => MII_RXC,
         MII_VLD        => MII_VLD,
-  
+
         TX_DATA        => adp_mfb_data,
         TX_SOF_POS     => adp_mfb_sof_pos,
         TX_EOF_POS     => adp_mfb_eof_pos,

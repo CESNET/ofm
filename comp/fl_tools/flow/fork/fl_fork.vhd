@@ -7,7 +7,7 @@
 --
 -- $Id$
 --
--- TODO: 
+-- TODO:
 --
 --
 
@@ -72,11 +72,11 @@ begin
   end generate divider;
 
   DST_RDY(0)<=TX_DST_RDY_N(0);
-    
+
   gen: for i in 1 to OUTPUT_PORTS-1 generate
   DST_RDY(i)<=DST_RDY(i-1) or TX_DST_RDY_N(i);
   end generate gen;
-  
+
   RX_DST_RDY_N<=DST_RDY(OUTPUT_PORTS-1);
 
   gendst: for i in 0 to OUTPUT_PORTS-1 generate

@@ -1,8 +1,8 @@
-//-- dut.sv: Design under test 
+//-- dut.sv: Design under test
 //-- Copyright (C) 2022 CESNET z. s. p. o.
 //-- Author(s): Daniel Kříž <xkrizd01@vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 import test::*;
 
@@ -276,5 +276,5 @@ module DUT (
         .TAG_ASSIGN_VLD   ()
     );
 
-    
+
 endmodule

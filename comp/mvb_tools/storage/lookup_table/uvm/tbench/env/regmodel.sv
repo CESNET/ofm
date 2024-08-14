@@ -1,8 +1,8 @@
-//-- regmodel.sv: register model 
+//-- regmodel.sv: register model
 //-- Copyright (C) 2022 CESNET z. s. p. o.
 //-- Author(s): Daniel Kriz <danielkriz@cesnet.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 class regmodel#(REG_DEPTH, SW_WIDTH) extends uvm_reg_block;
     `uvm_object_param_utils(uvm_lookup_table::regmodel#(REG_DEPTH, SW_WIDTH))

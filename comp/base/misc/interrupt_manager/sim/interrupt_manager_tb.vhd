@@ -34,7 +34,7 @@ architecture behavioral of testbench is
    signal interrupt_out  : std_logic;
    signal intr_data_out  : std_logic_vector(4 downto 0);
    signal intr_rdy_out   : std_logic;
-   
+
    signal cnt_delay      : std_logic_vector(2 downto 0);
 
 begin
@@ -45,7 +45,7 @@ begin
       PULSE    => X"FFFF0000"
    )
    port map (
-      CLK            => clk,  
+      CLK            => clk,
       RESET          => reset,
 
       INTERRUPT_IN   => interrupt_in,

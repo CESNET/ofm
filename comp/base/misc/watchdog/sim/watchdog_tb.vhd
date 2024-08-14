@@ -36,14 +36,14 @@ architecture behavioral of testbench is
    constant COUNT          : positive := 9;
    constant COUNTER_WIDTH  : positive := 32;
    signal   TIMING         : boolean  := false;
-   
+
    constant clkper      : time      := 10 ns;
    constant RESET_TIME  : time      := 3*clkper - 1ns ;
 
    signal clk           : std_logic;
    signal reset         : std_logic;
-   
-   signal data_in       : std_logic_vector(DATA_WIDTH-1 downto 0) 
+
+   signal data_in       : std_logic_vector(DATA_WIDTH-1 downto 0)
                                           := (others => '0');
    signal src_rdy_in    : std_logic;
    signal dst_rdy_in    : std_logic;
@@ -54,15 +54,15 @@ architecture behavioral of testbench is
 
    signal counter       : std_logic_vector(COUNTER_WIDTH-1 downto 0);
    signal locked        : std_logic;
-   
+
    -- MI32
    signal dwr           : std_logic_vector(31 downto 0);
-   signal addr          : std_logic_vector(31 downto 0); 
+   signal addr          : std_logic_vector(31 downto 0);
    signal rd            : std_logic;
    signal wr            : std_logic;
-   signal be            : std_logic_vector(3 downto 0); 
+   signal be            : std_logic_vector(3 downto 0);
    signal drd           : std_logic_vector(31 downto 0);
-   signal ardy          : std_logic; 
+   signal ardy          : std_logic;
    signal drdy          : std_logic;
 
 -- ----------------------------------------------------------------------------
@@ -82,30 +82,30 @@ begin
          -- Common interface
          CLK            => clk,
          RESET          => reset,
-   
-         DATA_IN        => data_in,    
-         SRC_RDY_IN     => src_rdy_in, 
-         DST_RDY_IN     => dst_rdy_in, 
-                                
+
+         DATA_IN        => data_in,
+         SRC_RDY_IN     => src_rdy_in,
+         DST_RDY_IN     => dst_rdy_in,
+
          DATA_OUT       => data_out,
          SRC_RDY_OUT    => src_rdy_out,
          DST_RDY_OUT    => dst_rdy_out,
-         COUNTER        => counter,    
+         COUNTER        => counter,
          LOCKED         => locked,
-         
+
          -- MI32
          DWR            => dwr,
-         ADDR           => addr, 
-         RD             => rd,   
-         WR             => wr,   
-         BE             => be,   
-         DRD            => drd,  
-         ARDY           => ardy, 
-         DRDY           => drdy 
+         ADDR           => addr,
+         RD             => rd,
+         WR             => wr,
+         BE             => be,
+         DRD            => drd,
+         ARDY           => ardy,
+         DRDY           => drdy
      );
-     
+
    be <= "0001";
-  
+
 -- ----------------------------------------------------
 -- CLK clock generator
    clkgen : process
@@ -134,7 +134,7 @@ begin
 
       wait for RESET_TIME;
       reset <= '0';
-      
+
       -- test IN signals-----
       wait for 4*clkper;
       src_rdy_in <= '0';
@@ -165,7 +165,7 @@ begin
       wait for 3*clkper;
       wr <= '1';
       rd <= '1';
-      
+
       -- test keep_alive ---
       addr(2) <= '1';
       wait for (COUNT/2)*clkper;
@@ -181,11 +181,11 @@ begin
       dwr(0) <= '0';
       wait for clkper*4;
       rd <= '0';
- 
+
       reset <= '1';
       wait for RESET_TIME;
       reset <= '0';
-      
+
       wait for 5*clkper;
 
       wait;

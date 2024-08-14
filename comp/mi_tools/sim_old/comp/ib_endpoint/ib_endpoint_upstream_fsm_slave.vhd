@@ -43,7 +43,7 @@ entity IB_ENDPOINT_UPSTREAM_FSM_SLAVE is
 
    -- Get second header
    GET_SECOND_HDR     : out std_logic;
-   
+
    -- ========================
    -- Align buffer Interface
    -- ========================
@@ -77,7 +77,7 @@ entity IB_ENDPOINT_UPSTREAM_FSM_SLAVE is
    );
 end entity IB_ENDPOINT_UPSTREAM_FSM_SLAVE;
 
-  
+
 -- ----------------------------------------------------------------------------
 --                      Architecture declaration
 -- ----------------------------------------------------------------------------
@@ -116,7 +116,7 @@ state_trans: process(present_state, RD_COMPL_REQ, DST_RDY, RD_EOF, RD_SRC_RDY)
          else
             next_state <= st_idle;
          end if;
-      
+
       -- Wait for readed data
       when st_read_wait =>
          if (DST_RDY = '1' and RD_SRC_RDY = '1') then
@@ -132,7 +132,7 @@ state_trans: process(present_state, RD_COMPL_REQ, DST_RDY, RD_EOF, RD_SRC_RDY)
          else
             next_state <= st_rd_hdr;
          end if;
-         
+
       -- ST_DATA
       when st_data =>
          -- When Last data readed
@@ -141,7 +141,7 @@ state_trans: process(present_state, RD_COMPL_REQ, DST_RDY, RD_EOF, RD_SRC_RDY)
          else
            next_state <= st_data;
          end if;
-         
+
       end case;
   end process;
 
@@ -155,7 +155,7 @@ output_logic: process(present_state, RD_COMPL_REQ, DST_RDY, RD_EOF, RD_SRC_RDY)
    SRC_RDY            <= '0'; -- Source Ready
    GET_SECOND_HDR     <= '0';
    RD_COMPL_ACK       <= '0';
-  
+
    case present_state is
 
       -- ST_IDLE
@@ -175,7 +175,7 @@ output_logic: process(present_state, RD_COMPL_REQ, DST_RDY, RD_EOF, RD_SRC_RDY)
       when st_rd_hdr =>
          GET_SECOND_HDR    <= '1';
          SRC_RDY           <= DST_RDY;
-               
+
       -- ST_DATA
       when st_data =>
          RD_DST_RDY        <= DST_RDY;

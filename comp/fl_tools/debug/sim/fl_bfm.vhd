@@ -7,7 +7,7 @@
 --
 -- $Id$
 --
--- TODO: 
+-- TODO:
 --
 --
 library IEEE;
@@ -40,8 +40,8 @@ entity FL_BFM is
       RESET          : in  std_logic;
       CLK            : in  std_logic;
 
-      -- Frame link output Interface 
-      
+      -- Frame link output Interface
+
       TX_DATA        : out std_logic_vector(DATA_WIDTH-1 downto 0);
       TX_REM         : out std_logic_vector(log2(DATA_WIDTH/8)-1 downto 0);
       TX_SOF_N       : out std_logic;
@@ -61,9 +61,9 @@ architecture FL_BFM_ARCH of FL_BFM is
   signal test: CmdTypeItem;
   signal SRC_RDY_N : std_logic;
   signal SRC_DRIVE : std_logic;
-  
+
   signal flCmd : flCmdTypeItem := ('0','Z','Z');
-  
+
   PROCEDURE Write(variable trans      :  IN CmdTypeItem;
                   signal   CLK        :  IN std_logic;
                   signal   DATA       : OUT std_logic_vector(DATA_WIDTH-1 downto 0);
@@ -79,12 +79,12 @@ architecture FL_BFM_ARCH of FL_BFM is
   variable byteCount : std_logic_vector(log2(DATA_WIDTH/8)-1 downto 0);
   variable i         : integer;
   variable maxRem    : std_logic_vector(log2(DATA_WIDTH/8)-1 downto 0);
-  
+
   BEGIN
     Enable <= '0';
     maxRem := (others => '1');
     index := 0;
- 
+
     wait until (CLK'event and CLK='1' and SRC_RDY_N = '0'); --and DST_RDY_N='0');
     Enable <= '1';
       while (index <= trans.Length) loop
@@ -130,125 +130,125 @@ architecture FL_BFM_ARCH of FL_BFM is
       end loop;
   Enable <= '0';
   END Write;
-  
+
  begin
- 
+
  gen0: if (FL_BFM_ID = 0) generate
    flCmd_0.Ack <= flCmd.Ack;
    flCmd_0.ReqAck <= flCmd.ReqAck;
    flCmd.Req <= flCmd_0.Req;
  end generate gen0;
- 
+
  gen1: if (FL_BFM_ID = 1) generate
    flCmd_1.Ack <= flCmd.Ack;
    flCmd_1.ReqAck <= flCmd.ReqAck;
    flCmd.Req <= flCmd_1.Req;
  end generate gen1;
- 
+
  gen2: if (FL_BFM_ID = 2) generate
    flCmd_2.Ack <= flCmd.Ack;
    flCmd_2.ReqAck <= flCmd.ReqAck;
    flCmd.Req <= flCmd_2.Req;
  end generate gen2;
- 
+
  gen3: if (FL_BFM_ID = 3) generate
    flCmd_3.Ack <= flCmd.Ack;
    flCmd_3.ReqAck <= flCmd.ReqAck;
    flCmd.Req <= flCmd_3.Req;
  end generate gen3;
- 
+
  gen4: if (FL_BFM_ID = 4) generate
    flCmd_4.Ack <= flCmd.Ack;
    flCmd_4.ReqAck <= flCmd.ReqAck;
    flCmd.Req <= flCmd_4.Req;
  end generate gen4;
- 
+
  gen5: if (FL_BFM_ID = 5) generate
    flCmd_5.Ack <= flCmd.Ack;
    flCmd_5.ReqAck <= flCmd.ReqAck;
    flCmd.Req <= flCmd_5.Req;
  end generate gen5;
- 
+
  gen6: if (FL_BFM_ID = 6) generate
    flCmd_6.Ack <= flCmd.Ack;
    flCmd_6.ReqAck <= flCmd.ReqAck;
    flCmd.Req <= flCmd_6.Req;
  end generate gen6;
- 
+
  gen7: if (FL_BFM_ID = 7) generate
    flCmd_7.Ack <= flCmd.Ack;
    flCmd_7.ReqAck <= flCmd.ReqAck;
    flCmd.Req <= flCmd_7.Req;
  end generate gen7;
- 
+
  gen8: if (FL_BFM_ID = 8) generate
    flCmd_8.Ack <= flCmd.Ack;
    flCmd_8.ReqAck <= flCmd.ReqAck;
    flCmd.Req <= flCmd_8.Req;
  end generate gen8;
- 
+
  gen9: if (FL_BFM_ID = 9) generate
    flCmd_9.Ack <= flCmd.Ack;
    flCmd_9.ReqAck <= flCmd.ReqAck;
    flCmd.Req <= flCmd_9.Req;
  end generate gen9;
- 
+
  genA: if (FL_BFM_ID = 10) generate
    flCmd_A.Ack <= flCmd.Ack;
    flCmd_A.ReqAck <= flCmd.ReqAck;
    flCmd.Req <= flCmd_A.Req;
  end generate genA;
- 
+
  genB: if (FL_BFM_ID = 11) generate
    flCmd_B.Ack <= flCmd.Ack;
    flCmd_B.ReqAck <= flCmd.ReqAck;
    flCmd.Req <= flCmd_B.Req;
  end generate genB;
- 
+
  genC: if (FL_BFM_ID = 12) generate
    flCmd_C.Ack <= flCmd.Ack;
    flCmd_C.ReqAck <= flCmd.ReqAck;
    flCmd.Req <= flCmd_C.Req;
  end generate genC;
- 
+
  genD: if (FL_BFM_ID = 13) generate
    flCmd_D.Ack <= flCmd.Ack;
    flCmd_D.ReqAck <= flCmd.ReqAck;
    flCmd.Req <= flCmd_D.Req;
  end generate genD;
- 
+
  genE: if (FL_BFM_ID = 14) generate
    flCmd_E.Ack <= flCmd.Ack;
    flCmd_E.ReqAck <= flCmd.ReqAck;
    flCmd.Req <= flCmd_E.Req;
  end generate genE;
- 
+
  genF: if (FL_BFM_ID = 15) generate
    flCmd_F.Ack <= flCmd.Ack;
    flCmd_F.ReqAck <= flCmd.ReqAck;
    flCmd.Req <= flCmd_F.Req;
  end generate genF;
- 
+
   SEND:process
   begin
-    TX_DATA      <= (others => '0');        
-    TX_REM       <= (others => '0');       
-    TX_SOF_N     <= '1';      
-    TX_EOF_N     <= '1';      
-    TX_SOP_N     <= '1';      
-    TX_EOP_N     <= '1';      
-        
+    TX_DATA      <= (others => '0');
+    TX_REM       <= (others => '0');
+    TX_SOF_N     <= '1';
+    TX_EOF_N     <= '1';
+    TX_SOP_N     <= '1';
+    TX_EOP_N     <= '1';
+
     LOOP
       flCmd.Ack    <= '0';
       flCmd.ReqAck <= '0';
-    
+
       SRC_DRIVE    <= '0';
-      
+
       -- Get Command
       WHILE (flCmd.Req = '0') LOOP
          WAIT UNTIL (flCmd.Req = '1');
       END LOOP;
-      
+
       -- Send Request Acknowledge
       flCmd.ReqAck <= NOT(flCmd.ReqAck);
       -- Wait for Reqest Deasert
@@ -264,10 +264,10 @@ architecture FL_BFM_ARCH of FL_BFM is
       -- Send Command done
       flCmd.Ack <= '1';
       wait until (CLK'event and CLK='1');
-    end loop;	
+    end loop;
   end process;
-  
-  -- Drive SRC_RDY_N --------------------------------------------------------------- 
+
+  -- Drive SRC_RDY_N ---------------------------------------------------------------
   DRIVE_SRC_RDY_N: PROCESS
   BEGIN
     LOOP
@@ -280,7 +280,7 @@ architecture FL_BFM_ARCH of FL_BFM is
       end if;
     END LOOP;
   END PROCESS;
- 
+
  TX_SRC_RDY_N <= SRC_RDY_N or not SRC_DRIVE;
- 
+
 end architecture FL_BFM_ARCH;

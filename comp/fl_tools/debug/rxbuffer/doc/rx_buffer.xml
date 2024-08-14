@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <source>
-	
+
 <!-- MAIN INFO ********************************************************** -->
 
 
@@ -48,23 +48,23 @@
 <interface>
 
 	<generic_map>
-		
+
 		<generic name="DATA_WIDTH" type="integer" default="16">
 			FrameLink data width
 		</generic>
 		<generic name="USE_BRAMS" type="boolean" default="True">
 			True => use BlockBAMs in the FIFO;
-      False => use SelectRAMs in the FIFO	
+      False => use SelectRAMs in the FIFO
 		</generic>
 		<generic name="ITEMS" type="integer" default="1024">
 			Number of items in the FIFO
 		</generic>
-		
+
 	</generic_map>
 
 	<port_map>
 
-		<divider>Common signals</divider>		
+		<divider>Common signals</divider>
 		<port  name="CLK" dir="in" width="1">
 			Clock input
 		</port>
@@ -72,7 +72,7 @@
 			Global reset
 		</port>
 
-		<divider>FrameLink input interface</divider> 		
+		<divider>FrameLink input interface</divider>
 		<port name="RX_DATA" dir="in" width="DATA_WIDTH">
 			FrameLink data
 		</port>
@@ -97,12 +97,12 @@
 		<port name="RX_DST_READY_N" dir="out" width="1">
 			RX destination ready
 		</port>
-		
-		<divider>MI32 interface</divider> 
+
+		<divider>MI32 interface</divider>
 		<port name="MI32" dir="in/out" width="1">
 			MI32 Local Bus
 		</port>
-		
+
 	</port_map>
 </interface>
 
@@ -114,7 +114,7 @@
 		<ref id="RXB_REG_CMD">command register</ref> RX Buffer accepts incoming
 		FrameLink protocol.
     </const>
-	
+
     <const name="STOP command" id="RXB_CMD_STOP" value="0x00">
 		Loading this constant to the
 		<ref id="RXB_REG_CMD">command register</ref> stops input
@@ -143,18 +143,18 @@
 		<it ref="RXB_OP_ACCEPT"> Start accepting incoming transmission  </it>
 	</init>
 
-	
+
 	<op name="START input processing" id="RXB_OP_ACCEPT">
 		RX Buffer is not accepting incoming FrameLink protocol after reset. The
 		input processing is started by loading
 		<ref id="RXB_CMD_ACCEPT">ACCEPT command</ref> into the
-		<ref id="RXB_REG_CMD">command register</ref>. 
+		<ref id="RXB_REG_CMD">command register</ref>.
 	</op>
 
 	<op name="STOP input processing" id="RXB_OP_STOP">
-		The input processing can be stopped any time by 
+		The input processing can be stopped any time by
 		loading <ref id="RXB_CMD_STOP">STOP command</ref> into the
-		<ref id="RXB_REG_CMD">command register</ref>. 
+		<ref id="RXB_REG_CMD">command register</ref>.
 	</op>
 
 	<op name="GET ITEM operation" id="RXB_OP_GET_ITEM">
@@ -346,7 +346,7 @@
 
 	<p>
         <!--Resources usage and max. frequency by Precision-->
-	
+
 		<tab sloupce="ccc">
 			<tr>
 				<th>Generic settings</th>
@@ -354,18 +354,18 @@
 				<th>BlockRams (+ % of C6X BRAMs)</th>
 			</tr>
 			<tr>
-				<th>DATA_WIDTH = 16, ITEMS = 1024</th> 
+				<th>DATA_WIDTH = 16, ITEMS = 1024</th>
 				<td>49(0.21%)</td>
 				<td>1(0.43%)</td>
 			</tr>
 			<!--			<tr>
-				<th>ITEMS = 1024</th> 
+				<th>ITEMS = 1024</th>
 				<td>1249(5.7%)</td>
 				<td>10(4%)</td>
 			</tr>-->
 		<nazev>Chip utilization (Precision)</nazev>
-		</tab> 
-	
+		</tab>
+
 		<tab sloupce="ccc">
 			<tr>
 				<th>Generic settings</th>
@@ -373,19 +373,19 @@
 				<th>Frequency tested in HW</th>
 			</tr>
 			<tr>
-				<th>DATA_WIDTH = 16, ITEMS = 1024</th> 
+				<th>DATA_WIDTH = 16, ITEMS = 1024</th>
 				<td>203.625 MHz</td>
 				<td>None</td>
 			</tr>
 			<!--			<tr>
-				<th>ITEMS = 1024</th> 
+				<th>ITEMS = 1024</th>
 				<td>122 MHz</td>
 				<td>100 MHz</td>
 			</tr>-->
 		<nazev>Maximal frequency (Precision)</nazev>
-		</tab> 
+		</tab>
         <!--Resources usage and max. frequency by XST-->
-	
+
 		<tab sloupce="ccc">
 			<tr>
 				<th>Generic settings</th>
@@ -393,13 +393,13 @@
 				<th>BlockRams (+ % of C6X BRAMs)</th>
 			</tr>
 			<tr>
-				<th>DATA_WIDTH = 16, ITEMS = 1024</th> 
+				<th>DATA_WIDTH = 16, ITEMS = 1024</th>
 				<td>15(0%)</td>
 				<td>1(0%)</td>
 			</tr>
 		<nazev>Chip utilization (XST)</nazev>
-		</tab> 
-	
+		</tab>
+
 		<tab sloupce="ccc">
 			<tr>
 				<th>Generic settings</th>
@@ -407,22 +407,22 @@
 				<th>Frequency tested in HW</th>
 			</tr>
 			<tr>
-				<th>DATA_WIDTH = 16, ITEMS = 1024</th> 
+				<th>DATA_WIDTH = 16, ITEMS = 1024</th>
 				<td>359.512 MHz</td>
 				<td>None</td>
 			</tr>
 		<nazev>Maximal frequency (XST)</nazev>
-		</tab>	
-  </p> 
+		</tab>
+  </p>
 
 <h1>Schemes</h1>
-	
+
 	<p>
 		The block structure of the component is in the following figure.
 		It's composed of FrameLink FIFO, address decoder and registers.
 		<obr src="./fig/rx_buffer.fig">RX Buffer  architecture</obr>
 	</p>
-	
+
 	<p>
 		More detailed figures of the address decoder.
 		<obr src="./fig/write_enable.fig">Write enable control</obr>

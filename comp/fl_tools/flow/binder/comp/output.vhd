@@ -47,7 +47,7 @@ entity FLB_OUTPUT is
       STATUS         : in  std_logic_vector(COUNT*STATUS_WIDTH-1 downto 0);
       EMPTY          : in  std_logic_vector(COUNT-1 downto 0);
       IFC            : out std_logic_vector(log2(COUNT)-1 downto 0);
-      
+
       -- FrameLink Binder output
       TX_SOF_N       : out std_logic;
       TX_SOP_N       : out std_logic;
@@ -109,7 +109,7 @@ architecture most_occupied of FLB_OUTPUT is
    signal dv                 : std_logic;
    signal rx_dst_rdy_n_i     : std_logic;
    signal chosen_queue_empty : std_logic;
-  
+
 begin
    -- ------------------ Directly mapped signals ------------------------------
    cnt_next_ce       <= '1';
@@ -150,12 +150,12 @@ begin
       port map(
          CLK            => CLK,
          RESET          => RESET,
-   
+
          -- input signals
          EOF            => fsm_eof,
          QUEUE_RDY      => fsm_queue_rdy,
          EMPTY          => fsm_empty,
-   
+
          -- output signals
          SET_VALID      => fsm_set_valid,
          CLR_VALID      => fsm_clr_valid,
@@ -174,7 +174,7 @@ begin
          DI             => STATUS,
          EXTREM         => min_bus
       );
-   
+
    -- generic multiplexer mapping
    MIN_MUX : entity work.GEN_MUX
       generic map(
@@ -215,7 +215,7 @@ begin
    cnt_nextp: process (CLK)
    begin
       if CLK='1' and CLK'event then
-         if (RESET = '1') then 
+         if (RESET = '1') then
             cnt_next <= (others => '0');
          elsif cnt_next_ce = '1' then
             if (cmp_cnt_next_max = '1') then
@@ -226,7 +226,7 @@ begin
          end if;
       end if;
    end process;
-   
+
    -- detect maximal value of address counter so that we can clear it
    cmp_cnt_next_maxp: process(cnt_next)
    begin
@@ -288,5 +288,5 @@ begin
          reg_min_bus <= min_bus;
       end if;
    end process;
-   
+
 end architecture most_occupied;

@@ -1,6 +1,6 @@
 -- pfifo_core_arch.vhd: Frame Link Unaligned protocol generic Packet Store-And-Forward FIFO core
 -- Copyright (C) 2012 CESNET
--- Author: Pavel Benacek <benacek@cesnet.cz> 
+-- Author: Pavel Benacek <benacek@cesnet.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --
@@ -15,9 +15,9 @@ use ieee.std_logic_unsigned.all;
 -- library containing log2 and min functions
 use work.math_pack.all;
 
-architecture full of FLU_PFIFO_CORE is   
+architecture full of FLU_PFIFO_CORE is
    --Constant declaration ---------------------------------
-   --! Hight index of EOP_BLOCK 
+   --! Hight index of EOP_BLOCK
    constant EOP_BLOCK_HINDEX  : integer := log2(DATA_WIDTH/8) - 1;
    --! Low index of EOP_BLOCK
    constant EOP_BLOCK_LINDEX  : integer := log2(DATA_WIDTH/8) - SOP_POS_WIDTH;
@@ -65,7 +65,7 @@ architecture full of FLU_PFIFO_CORE is
    signal sop_unmask          : std_logic;
 
 begin
-   
+
    --! Data FIFO
    DFIFO_I:entity work.FLU_FIFO
    generic map(
@@ -80,10 +80,10 @@ begin
       BLOCK_SIZE     => BLOCK_SIZE,
       --! Width of STATUS signal available
       STATUS_WIDTH   => STATUS_WIDTH,
-      --! Ouptut register (important to set in a case that USE_BRAMS = true) 
+      --! Ouptut register (important to set in a case that USE_BRAMS = true)
       --False -  data will be available one clock earlier
       OUTPUT_REG => false
-   ) 
+   )
    port map(
       -----------------------------------------------------
       --! \name Clocking & Reset interface
@@ -100,8 +100,8 @@ begin
       RX_SOP        => RX_SOP,
       RX_EOP        => RX_EOP,
       RX_SRC_RDY    => sig_rx_src_rdy,
-      RX_DST_RDY    => sig_rx_dst_rdy, 
-      
+      RX_DST_RDY    => sig_rx_dst_rdy,
+
       -----------------------------------------------------
       --! \name Frame Link Unaligned output interface
       -----------------------------------------------------
@@ -126,7 +126,7 @@ begin
 
    --! RX_DST_RDY output map
    RX_DST_RDY <= sig_rx_dst_rdy;
-   
+
    --! TX DATA map
    TX_DATA  <= sig_data;
 
@@ -147,7 +147,7 @@ begin
 
    --! Output packet count information
    PACKET_COUNT <= packet_cnt;
-   
+
    --------------------------------------------------------
    -- Packet inc. logic
    --------------------------------------------------------
@@ -205,7 +205,7 @@ begin
    sig_eop_pos_block <= sig_eop_pos(EOP_BLOCK_HINDEX downto EOP_BLOCK_LINDEX);
 
    --! Need SOP mask generator -> Word is shared and actual packet count is 1
-   need_sop_mask <= '1' when(packet_cnt = 1 and sig_eop = '1' and sig_sop = '1' and 
+   need_sop_mask <= '1' when(packet_cnt = 1 and sig_eop = '1' and sig_sop = '1' and
                              sig_tx_src_rdy = '1' and TX_DST_RDY = '1' and sig_sop_pos > sig_eop_pos_block) else
                     '0';
 
@@ -213,7 +213,7 @@ begin
    sop_unmask <= '1' when(packet_cnt > 0 and sig_tx_src_rdy = '1' and TX_DST_RDY = '1' and
                           reg_need_sop_mask = '1') else
                  '0';
-   
+
    --! \brief Remember SOP masking in next transfer.
    --! \details SET when EOP, RESET when SOP  & DATA available
    need_sop_mask_regp:process(CLK)

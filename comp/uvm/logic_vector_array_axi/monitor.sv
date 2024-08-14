@@ -2,7 +2,7 @@
 //-- Copyright (C) 2022 CESNET z. s. p. o.
 //-- Author(s): Daniel Kříž <xkrizd01@vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 class monitor_logic_vector_array #(int unsigned DATA_WIDTH, int unsigned TUSER_WIDTH, int unsigned ITEM_WIDTH, int unsigned REGIONS, int unsigned BLOCK_SIZE, int unsigned STRADDLING) extends uvm_logic_vector_array::monitor #(ITEM_WIDTH);
     `uvm_component_param_utils(uvm_logic_vector_array_axi::monitor_logic_vector_array #(DATA_WIDTH, TUSER_WIDTH, ITEM_WIDTH, REGIONS, BLOCK_SIZE, STRADDLING))
@@ -43,7 +43,7 @@ class monitor_logic_vector_array #(int unsigned DATA_WIDTH, int unsigned TUSER_W
     function int unsigned sof_pos_count (logic sof, logic[1 : 0] pos);
         int unsigned ret = 0;
         if (sof == 1'b1) begin
-            if (TUSER_WIDTH == 161) begin 
+            if (TUSER_WIDTH == 161) begin
                 case (pos)
                     2'b00 : ret = 0;
                     2'b01 : ret = (ITEMS);

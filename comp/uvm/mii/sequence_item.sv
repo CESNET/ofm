@@ -75,7 +75,7 @@ class sequence_item #(int unsigned CHANNELS, int unsigned WIDTH) extends uvm_seq
 
         return output_string;
     endfunction
-    
+
 endclass: sequence_item
 
 `endif

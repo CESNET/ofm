@@ -86,9 +86,8 @@ begin
 			CEP => CEP,
 			P => Pmod
 		);
-		
-		P(P'LENGTH-1 downto P'LENGTH-1-(data_width mod 48)+1) <= Pmod((data_width mod 48)-1 downto 0); 
+
+		P(P'LENGTH-1 downto P'LENGTH-1-(data_width mod 48)+1) <= Pmod((data_width mod 48)-1 downto 0);
 	end generate;
 
 end architecture;
-   

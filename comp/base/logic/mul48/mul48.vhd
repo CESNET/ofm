@@ -29,7 +29,7 @@ entity MUL48 is
       --! enable pcin 17 bit shift
       EN_SHIFT    : boolean := false;
       --!
-      EN_CASCADE  : boolean := false 
+      EN_CASCADE  : boolean := false
    );
    port (
       --! Clock input
@@ -58,8 +58,8 @@ architecture V7_DSP of MUL48 is
    signal zeros   : std_logic_vector(63 downto 0);
    signal opmode  : std_logic_vector(6 downto 0);
 
-begin  
-   opmode <= "0110101"; 
+begin
+   opmode <= "0110101";
    zeros <= X"0000000000000000";
 
    --! DSP slice instantion
@@ -71,10 +71,10 @@ begin
       USE_DPORT => TRUE,     -- Select D port usage (TRUE or FALSE)
       USE_MULT => "DYNAMIC", -- Select multiplier usage ("MULTIPLY", "DYNAMIC", or "NONE")
       -- Pattern Detector Attributes: Pattern Detection Configuration
-      AUTORESET_PATDET => "NO_RESET",   -- "NO_RESET", "RESET_MATCH", "RESET_NOT_MATCH" 
+      AUTORESET_PATDET => "NO_RESET",   -- "NO_RESET", "RESET_MATCH", "RESET_NOT_MATCH"
       MASK => X"3fffffffffff",          -- 48-bit mask value for pattern detect (1=ignore)
       PATTERN => X"000000000000",       -- 48-bit pattern match for pattern detect
-      SEL_MASK => "MASK",               -- "C", "MASK", "ROUNDING_MODE1", "ROUNDING_MODE2" 
+      SEL_MASK => "MASK",               -- "C", "MASK", "ROUNDING_MODE1", "ROUNDING_MODE2"
       SEL_PATTERN => "PATTERN",         -- Select pattern value ("PATTERN" or "C")
       USE_PATTERN_DETECT => "NO_PATDET",-- Enable pattern detect ("PATDET" or "NO_PATDET")
       -- Register Control Attributes: Pipeline Register Configuration

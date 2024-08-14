@@ -137,7 +137,7 @@ class sequence_item #(string DEVICE) extends uvm_sequence_item;
         string ret;
 
         $swrite(ret, "\tglobal_id : %h\n\tpadd_1 : %b\n\treq_id : %b\n\ttag : %d\n\tlastbe : %b\n\tfirstbe : %b\n\tfmt : %b\n\ttype_n : %b\n\ttag_9 : %b\n\ttc : %b\n\ttag_8 : %b\n\tpadd_0 : %b
-                      \n\ttd : %b\n\tep : %b\n\trelaxed : %b\n\tsnoop : %b\n\tat : %b\n\tlen : %d\n\tlow_addr : %h\n", 
+                      \n\ttd : %b\n\tep : %b\n\trelaxed : %b\n\tsnoop : %b\n\tat : %b\n\tlen : %d\n\tlow_addr : %h\n",
                      global_id, padd_1, req_id, tag, lastbe, firstbe, fmt,
                      type_n, tag_9, tc, tag_8, padd_0, td, ep, relaxed, snoop,
                      at, len, low_addr);

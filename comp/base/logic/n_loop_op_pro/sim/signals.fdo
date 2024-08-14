@@ -17,7 +17,7 @@ proc tb_internals { PATH GROUP } {
 }
 
 proc n_loop_op_pro_ports { PATH GROUP } {
-   
+
    eval "add wave $GROUP -divider {Synchronization}"
    add_wave "$GROUP -noupdate -hex -label CLK -color yellow"   $PATH/CLK
    add_wave "$GROUP -noupdate -hex -label CLK2 -color yellow"   $PATH/CLK2

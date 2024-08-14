@@ -43,7 +43,7 @@ class virt_sequence#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) e
         join_none
 
         #(100ns);
-        
+
         fork
             begin
                 m_mfb_data_sq.randomize();

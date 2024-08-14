@@ -14,7 +14,7 @@ use work.type_pack.all;
 use work.hist_types.all;
 
 entity HISTOGRAMER_OLD is
-generic (    
+generic (
     VARIANT                 : HIST_T := LINEAR;
     DATA_WIDTH              : integer;
     CNT_WIDTH               : integer;
@@ -22,7 +22,7 @@ generic (
     -- Must be power of 2
     CNTER_CNT               : integer := DATA_WIDTH
 );
-port(    
+port(
     -- Main --
     CLK                     : in  std_logic;
     RST                     : in  std_logic;

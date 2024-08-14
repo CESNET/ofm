@@ -1,7 +1,7 @@
 /*
  * DUT.sv: Design under test
  * Copyright (C) 2012 CESNET
- * Author: Lukas Kekely <kekely@cesnet.cz> 
+ * Author: Lukas Kekely <kekely@cesnet.cz>
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -10,7 +10,7 @@
  * TODO:
  *
  */
- 
+
 // ----------------------------------------------------------------------------
 //                        Module declaration
 // ----------------------------------------------------------------------------
@@ -27,7 +27,7 @@ module DUT (
 // -------------------- Module body -------------------------------------------
 FLU_FIFO #(
      .DATA_WIDTH    (DATA_WIDTH),
-     .SOP_POS_WIDTH (SOP_POS_WIDTH), 
+     .SOP_POS_WIDTH (SOP_POS_WIDTH),
      .USE_BRAMS     (USE_BRAMS),
      .ITEMS         (ITEMS),
      .BLOCK_SIZE    (BLOCK_SIZE),
@@ -55,7 +55,7 @@ FLU_FIFO #(
      .TX_SOP      (TX.SOP),
      .TX_EOP      (TX.EOP),
      .TX_SRC_RDY  (TX.SRC_RDY),
-     .TX_DST_RDY  (TX.DST_RDY), 
+     .TX_DST_RDY  (TX.DST_RDY),
 
     // Control interface
      .LSTBLK        (CTRL.LSTBLK),

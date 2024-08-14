@@ -58,7 +58,7 @@ entity MP_BRAM is
         -- Block enable of written data, used only when BLOCK_ENABLE = True.
         WR_BE       : in  slv_array_t(WRITE_PORTS - 1 downto 0)(max((DATA_WIDTH/BLOCK_WIDTH),1)-1 downto 0);
         -- Write address.
-        WR_ADDR     : in  slv_array_t(WRITE_PORTS - 1 downto 0)(log2(ITEMS)-1 downto 0); 
+        WR_ADDR     : in  slv_array_t(WRITE_PORTS - 1 downto 0)(log2(ITEMS)-1 downto 0);
         -- Write data input.
         WR_DATA     : in  slv_array_t(WRITE_PORTS - 1 downto 0)(DATA_WIDTH-1 downto 0);
 
@@ -68,7 +68,7 @@ entity MP_BRAM is
         -- Read enable signal, it is only used to generate RD_DATA_VLD.
         RD_EN       : in  std_logic_vector(READ_PORTS - 1 downto 0);
         -- Clock enable of read port.
-        RD_PIPE_EN  : in  std_logic_vector(READ_PORTS - 1 downto 0); 
+        RD_PIPE_EN  : in  std_logic_vector(READ_PORTS - 1 downto 0);
         -- Metadata propagated when RD_PIPE_EN=='1' (valid on RD_EN)
         RD_META_IN  : in  slv_array_t(READ_PORTS - 1 downto 0)(METADATA_WIDTH-1 downto 0) := (others => (others => '0'));
         -- Read address.
@@ -89,7 +89,7 @@ begin
     assert WRITE_PORTS = 1
         report "[MP_BRAM]: Currently supports only one write port!"
         severity failure;
-    
+
     rd1_wrn_g : if WRITE_PORTS = 1 generate
         brams_g : for i in 0 to READ_PORTS - 1 generate
             bram_i : entity work.SDP_BRAM
@@ -105,15 +105,15 @@ begin
             ) port map (
                 WR_CLK          => CLK,
                 WR_RST          => RESET,
-    
+
                 WR_EN           => WR_EN(0),
                 WR_BE           => WR_BE(0),
                 WR_ADDR         => WR_ADDR(0),
                 WR_DATA         => WR_DATA(0),
-    
+
                 RD_CLK          => CLK,
                 RD_RST          => RESET,
-    
+
                 RD_EN           => RD_EN(i),
                 RD_PIPE_EN      => RD_PIPE_EN(i),
                 RD_META_IN      => RD_META_IN(i),
@@ -124,5 +124,5 @@ begin
             );
         end generate;
     end generate;
-    
+
 end architecture;

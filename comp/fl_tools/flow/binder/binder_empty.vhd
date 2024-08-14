@@ -17,7 +17,7 @@ use work.math_pack.all;
 architecture empty of FL_BINDER is
 
    -- ------------------ Signals declaration ----------------------------------
-   signal empty_sig : std_logic_vector(3 + 5*INPUT_COUNT + 
+   signal empty_sig : std_logic_vector(3 + 5*INPUT_COUNT +
    INPUT_COUNT*INPUT_WIDTH + INPUT_COUNT*log2(INPUT_WIDTH/8)-1 downto 0);
 
 begin
@@ -32,9 +32,9 @@ begin
                 RX_REM           & -- INPUT_COUNT*log2(INPUT_WIDTH/8)
                 TX_DST_RDY_N;      -- 1
                 -- --------------------------------------------
-                -- 3 + 5*INPUT_WIDTH + INPUT_COUNT*INPUT_WIDTH + 
+                -- 3 + 5*INPUT_WIDTH + INPUT_COUNT*INPUT_WIDTH +
                 -- + INPUT_COUNT*log2(INPUT_WIDTH/8)
-   
+
    -- output signals
    RX_DST_RDY_N   <= (others => '0');
    TX_SOF_N       <= '1';

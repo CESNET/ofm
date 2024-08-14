@@ -1,6 +1,6 @@
 -- last_vld.vhd: Last valid item aggregation of Multi-Value Bus
 -- Copyright (C) 2016 CESNET z. s. p. o.
--- Author(s): Lukas Kekely <kekely@cesnet.cz> 
+-- Author(s): Lukas Kekely <kekely@cesnet.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --
@@ -26,7 +26,7 @@ entity MVB_AGGREGATE_LAST_VLD is
   port(
     CLK            : in std_logic;
     RESET          : in std_logic;
-      
+
     RX_DATA       : in std_logic_vector(ITEMS*ITEM_WIDTH-1 downto 0);
     RX_VLD        : in std_logic_vector(ITEMS-1 downto 0);
     RX_SRC_RDY    : in std_logic;
@@ -37,7 +37,7 @@ entity MVB_AGGREGATE_LAST_VLD is
     REG_OUT_DATA  : out std_logic_vector(ITEM_WIDTH-1 downto 0);
     REG_OUT_VLD   : out std_logic;
     REG_OUT_WR    : out std_logic;
- 
+
     TX_DATA         : out std_logic_vector(ITEMS*ITEM_WIDTH-1 downto 0); -- starting from: REG_IN + RX_DATA[0]
     TX_VLD          : out std_logic_vector(ITEMS-1 downto 0);
     TX_PRESCAN_DATA : out std_logic_vector(ITEMS*ITEM_WIDTH-1 downto 0); -- starting from: REG_IN

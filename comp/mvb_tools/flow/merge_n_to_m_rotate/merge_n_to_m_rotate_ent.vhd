@@ -45,7 +45,7 @@ port (
    --! \brief Common reset
    RESET             : in  std_logic;
 
-   --! \name Input data 
+   --! \name Input data
    -- --------------------------------------------------------------------------
    INPUT_DATA           : in  std_logic_vector(INPUTS*DATA_WIDTH-1 downto 0);
 

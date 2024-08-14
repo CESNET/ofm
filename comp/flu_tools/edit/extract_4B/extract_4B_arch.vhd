@@ -8,7 +8,7 @@
 -- TODO:
 --
 
-library IEEE;  
+library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.std_logic_arith.all;
 use IEEE.std_logic_unsigned.all;
@@ -27,29 +27,29 @@ architecture full of EXTRACT_4B is
 
    signal zeros               : std_logic_vector(511 downto 0);
 
-   signal editor_pause        : std_logic; 
-   signal editor_out_vld      : std_logic; 
-   signal editor_data_out     : std_logic_vector((4*8)-1 downto 0); 
-   signal editor_in_vld       : std_logic; 
-   signal editor_data_in      : std_logic_vector(DATA_WIDTH-1 downto 0); 
-   signal editor_in_offset    : std_logic_vector(OFFSET_WIDTH-1 downto 0); 
+   signal editor_pause        : std_logic;
+   signal editor_out_vld      : std_logic;
+   signal editor_data_out     : std_logic_vector((4*8)-1 downto 0);
+   signal editor_in_vld       : std_logic;
+   signal editor_data_in      : std_logic_vector(DATA_WIDTH-1 downto 0);
+   signal editor_in_offset    : std_logic_vector(OFFSET_WIDTH-1 downto 0);
    signal editor_next_packet  : std_logic;
-   signal split_flu           : std_logic;       
-   signal split_flu_reg       : std_logic;     
-   signal in_enable           : std_logic;     
-   signal in_enable_zero      : std_logic;     
-   signal editor_start        : std_logic;     
-   signal enable_editor       : std_logic; 
-   signal offset_in_editor    : std_logic_vector(OFFSET_WIDTH-1 downto 0); 
-   signal offset_editor       : std_logic_vector(OFFSET_WIDTH-1 downto 0); 
-   signal rx_sop_pos_editor   : std_logic_vector(RX_SOP_POS'range); 
-   signal data_in_editor      : std_logic_vector(DATA_WIDTH-1 downto 0); 
-   signal sop_editor          : std_logic; 
-   signal eop_editor          : std_logic; 
-   signal src_rdy_editor      : std_logic; 
-   signal src_rdy_pipe        : std_logic; 
-   signal src_rdy_pipe2       : std_logic; 
-   signal eop_pipe            : std_logic; 
+   signal split_flu           : std_logic;
+   signal split_flu_reg       : std_logic;
+   signal in_enable           : std_logic;
+   signal in_enable_zero      : std_logic;
+   signal editor_start        : std_logic;
+   signal enable_editor       : std_logic;
+   signal offset_in_editor    : std_logic_vector(OFFSET_WIDTH-1 downto 0);
+   signal offset_editor       : std_logic_vector(OFFSET_WIDTH-1 downto 0);
+   signal rx_sop_pos_editor   : std_logic_vector(RX_SOP_POS'range);
+   signal data_in_editor      : std_logic_vector(DATA_WIDTH-1 downto 0);
+   signal sop_editor          : std_logic;
+   signal eop_editor          : std_logic;
+   signal src_rdy_editor      : std_logic;
+   signal src_rdy_pipe        : std_logic;
+   signal src_rdy_pipe2       : std_logic;
+   signal eop_pipe            : std_logic;
    signal sop_pipe            : std_logic;
    signal tx_dst_rdy_editor   : std_logic;
    signal zero_offset         : std_logic;
@@ -57,11 +57,11 @@ architecture full of EXTRACT_4B is
 
    signal mux_sop_in          : std_logic_vector(5*sop_pos_num-1 downto 0);
    signal mux_sop_sel         : std_logic_vector(SOP_POS_WIDTH-1 downto 0);
-   signal mux_sop_out         : std_logic_vector(5-1 downto 0); 
+   signal mux_sop_out         : std_logic_vector(5-1 downto 0);
    signal add_in1             : std_logic_vector(47 downto 0);
    signal add_in2             : std_logic_vector(47 downto 0);
    signal add_out             : std_logic_vector(47 downto 0);
-   
+
    signal offset_sub_in1      : std_logic_vector(47 downto 0);
    signal offset_sub_in2      : std_logic_vector(47 downto 0);
    signal offset_sub_out      : std_logic_vector(47 downto 0);
@@ -70,12 +70,12 @@ architecture full of EXTRACT_4B is
    signal big_offset_pipe     : std_logic;
    signal in_enable_next      : std_logic;
    signal split_flu_first     : std_logic;
-   
+
    constant EN_REPLACE        : std_logic := '1';
 
 begin
    zeros <= (others => '0');
-  
+
    -- input pipe
    process(CLK)
    begin
@@ -87,7 +87,7 @@ begin
             src_rdy_editor       <= '0';
             big_offset_pipe      <= '0';
          else
-            if(tx_dst_rdy_editor = '1') then 
+            if(tx_dst_rdy_editor = '1') then
                enable_editor     <= EN_REPLACE;
                offset_in_editor  <= OFFSET;
                rx_sop_pos_editor <= RX_SOP_POS;
@@ -97,7 +97,7 @@ begin
             end if;
 
             if(TX_DST_RDY = '1') then
-               src_rdy_pipe         <= src_rdy_editor;           
+               src_rdy_pipe         <= src_rdy_editor;
                src_rdy_pipe2        <= src_rdy_pipe;
                big_offset_pipe      <= big_offset;
             end if;
@@ -114,7 +114,7 @@ begin
    GEN_SOP_MUX_IN: for I in 0 to sop_pos_num-1 generate
       mux_sop_in(4+I*5 downto I*5) <= conv_std_logic_vector(16/sop_pos_num*I, 5);
    end generate;
-   
+
    mux_sop_sel    <= rx_sop_pos_editor;
    -- select constant sop pos
    MUX_SOP_OFFSET: entity work.GEN_MUX
@@ -127,8 +127,8 @@ begin
       SEL         => mux_sop_sel,
       DATA_OUT    => mux_sop_out
    );
-   
-   -- add offset and constant  
+
+   -- add offset and constant
    add_in1 <= zeros(48-5-1 downto 0) & mux_sop_out;
    add_in2 <= zeros(48-OFFSET_WIDTH-1 downto 0) & offset_in_editor;
    OFFSET_ADD: entity work.ALU_DSP
@@ -147,10 +147,10 @@ begin
       ALUMODE     => "0000",
       CARRY_IN    => '0',
       CARRY_OUT   => open,
-      P           => add_out 
+      P           => add_out
    );
    offset_editor <= add_out(OFFSET_WIDTH-1 downto 0);
-   
+
    process(offset_editor(OFFSET_WIDTH-1 downto 4), TX_DST_RDY)
    begin
       if(TX_DST_RDY = '1') then
@@ -160,7 +160,7 @@ begin
          end if;
       end if;
    end process;
-    
+
    in_enable <= src_rdy_editor and sop_editor and enable_editor;
    process(in_enable, RESET, editor_next_packet, TX_DST_RDY)
    begin
@@ -189,7 +189,7 @@ begin
    end process;
 
    tx_dst_rdy_editor <= TX_DST_RDY and (not split_flu);
-   
+
    process(CLK)
    begin
       if (CLK'event) and (CLK='1') then
@@ -207,10 +207,10 @@ begin
          editor_start <= '0';
       else
          editor_start <= (in_enable and not big_offset) or big_offset_pipe;
-      end if;     
+      end if;
    end process;
 
-   
+
    offset_sub_in1 <= zeros(48-OFFSET_WIDTH-1 downto 0) & offset_editor;
    offset_sub_in2 <= conv_std_logic_vector(num_blocks, 48);
    OFFSET_ALU: entity work.ALU_DSP
@@ -229,7 +229,7 @@ begin
       ALUMODE     => "0001",
       CARRY_IN    => '0',
       CARRY_OUT   => open,
-      P           => offset_sub_out 
+      P           => offset_sub_out
    );
 
    offset_alu_pipe_out <= offset_sub_out(OFFSET_WIDTH-1 downto 0);
@@ -240,9 +240,9 @@ begin
       else
          editor_in_offset <= offset_editor;
       end if;
-   end process;  
-   
-   -- connect four bytes editor 
+   end process;
+
+   -- connect four bytes editor
    editor_pause         <= TX_DST_RDY;
    editor_in_vld        <= src_rdy_editor;
    editor_data_in       <= data_in_editor;

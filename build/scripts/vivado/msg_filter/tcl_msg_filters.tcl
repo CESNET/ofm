@@ -1,6 +1,6 @@
 # tcl_msg_filters.tcl: definition of procedures for filtering Vivado messages
 #                      in command line mode (according to UNITERESTING and
-#                      MOST_INTERESTING lists of message IDs) 
+#                      MOST_INTERESTING lists of message IDs)
 # Copyright (C) 2014 CESNET
 # Author: Jiri Matousek <xmatou06@stud.fit.vutbr.cz>
 #
@@ -47,7 +47,7 @@ proc filter_msg { } {
       puts $MESSAGES_ALL $LINE
       if { ![regexp "INFO: " $LINE] } {
          lappend MSG_LINES_NO_INFO $LINE
-      } 
+      }
    }
 
    # close the file for all messages
@@ -76,7 +76,7 @@ proc filter_msg { } {
 
    # close the file for all messages except INFOs
    close $MESSAGES_NO_INFO
-   
+
    # open a file for all messages not defined in the UNINTERESTING list
    set MESSAGES_NO_UNINTERESTING [open "messages-no_uninteresting.txt" "w+"]
 
@@ -104,7 +104,7 @@ proc filter_msg { } {
    foreach LINE $MSG_LINES_MOST_INTERESTING {
       puts $MESSAGES_MOST_INTERESTING $LINE
    }
-   
+
    # close the file for messages defined in the MOST_INTERESTING list
    close $MESSAGES_MOST_INTERESTING
 }

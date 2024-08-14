@@ -18,12 +18,12 @@ package editor_func is
    function func_num_regs(input_pipe : boolean) return integer;
 end package;
 
---! \brief Body of package with functions 
+--! \brief Body of package with functions
 package body editor_func is
-   
+
    function func_num_regs(input_pipe : boolean) return integer is
    begin
-      if (input_pipe = true) then 
+      if (input_pipe = true) then
          return 4;
       else
          return 3;

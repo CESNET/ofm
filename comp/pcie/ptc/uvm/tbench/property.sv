@@ -1,16 +1,16 @@
-//-- property.sv: Properties for mfb bus 
+//-- property.sv: Properties for mfb bus
 //-- Copyright (C) 2022 CESNET z. s. p. o.
 //-- Author(s): Daniel Kriz <xkrizd01@vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 `include "uvm_macros.svh"
 import uvm_pkg::*;
 
 module ptc_property #(DMA_MFB_UP_REGIONS, MFB_UP_REG_SIZE, MFB_UP_BLOCK_SIZE, MFB_UP_ITEM_WIDTH,
-                      DMA_MVB_UP_ITEMS, MFB_UP_REGIONS, PCIE_UPHDR_WIDTH, 
+                      DMA_MVB_UP_ITEMS, MFB_UP_REGIONS, PCIE_UPHDR_WIDTH,
                       MFB_DOWN_REGIONS, MFB_DOWN_REG_SIZE, MFB_DOWN_BLOCK_SIZE, MFB_DOWN_ITEM_WIDTH,
-                      PCIE_DOWNHDR_WIDTH, DMA_MFB_DOWN_REGIONS, DMA_MVB_DOWN_ITEMS, META_WIDTH, DMA_PORTS, DEVICE) 
+                      PCIE_DOWNHDR_WIDTH, DMA_MFB_DOWN_REGIONS, DMA_MVB_DOWN_ITEMS, META_WIDTH, DMA_PORTS, DEVICE)
     (
         input RESET,
         input RESET_DMA,

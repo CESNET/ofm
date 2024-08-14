@@ -50,13 +50,13 @@ class MiDriver #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends sv_common_pkg::
 	logic reset;
 
     // -- Constructor ---------------------------------------------------------
-    // Create driver object 
-    function new ( string inst, 
-                   sv_common_pkg::tTransMbx transMbx, 
+    // Create driver object
+    function new ( string inst,
+                   sv_common_pkg::tTransMbx transMbx,
                    virtual iMi #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH).tb_master mi
                          );
       super.new(inst, transMbx);
-      this.mi          = mi;           // Store pointer interface 
+      this.mi          = mi;           // Store pointer interface
       this.delay       = new();
     endfunction
 

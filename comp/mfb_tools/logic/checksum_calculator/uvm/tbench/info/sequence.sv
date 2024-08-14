@@ -137,7 +137,7 @@ class sequence_lib #(PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH) extends uvm_sequence_l
     virtual function void init_sequence();
         this.add_sequence(uvm_header_type::sequence_simple #(PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH)::get_type());
         this.add_sequence(uvm_header_type::sequence_two_bytes #(PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH)::get_type());
-        if (LENGTH_WIDTH == $clog2(PKT_MTU)) begin 
+        if (LENGTH_WIDTH == $clog2(PKT_MTU)) begin
             this.add_sequence(uvm_header_type::sequence_whole_frame_chsum #(PKT_MTU, OFFSET_WIDTH, LENGTH_WIDTH)::get_type());
         end
     endfunction

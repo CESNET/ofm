@@ -288,16 +288,16 @@ begin
                 end if;
             end if;
         end process;
-    
+
     else generate
-    
+
         -- direct asynch connection
         s0_rot_sel_reg  (0) <= s_1_rot_sel_reg;
         s0_src_block_reg(0) <= s_1_src_block_reg;
         s0_dst_be_reg   (0) <= s_1_dst_be_reg;
         s0_dst_word_reg (0) <= s_1_dst_word_reg;
         s0_vld_reg      (0) <= s_1_vld_reg;
-    
+
     end generate;
 
     -- step 1 - Source buffer read data save
@@ -352,13 +352,13 @@ begin
             TX_SRC_RDY  => s2_vld_reg(i)                    ,
             TX_DST_RDY  => '1'
         );
-            
+
         (s2_rot_sel_tmp, s2_dst_be_tmp, s2_dst_word_tmp) <= s2_rot_sel_dst_be_dst_word_reg(i);
 
         s2_rot_sel_reg (i) <= s2_rot_sel_tmp;
         s2_dst_be_reg  (i) <= s2_dst_be_tmp;
         s2_dst_word_reg(i) <= s2_dst_word_tmp;
-        
+
     end generate;
 
     --------
@@ -399,7 +399,7 @@ begin
 
         DST_BUF_WR_IE  (i) <= DST_BUF_WR_IE_tmp;
         DST_BUF_WR_ADDR(i) <= DST_BUF_WR_ADDR_tmp;
-        
+
     end generate;
 
 

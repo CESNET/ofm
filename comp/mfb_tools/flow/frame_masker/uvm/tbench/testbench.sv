@@ -19,14 +19,14 @@ module testbench;
     // Signals
     logic CLK = 0;
     logic RST = 0;
-   
+
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // Interfaces
     reset_if                                                                               reset (CLK);
     mfb_if #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH) mfb_rx(CLK);
     mfb_if #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH) mfb_tx(CLK);
     mvb_if #(MFB_REGIONS, 1)                                                               mvb_rx(CLK);
-    
+
     bind MFB_FRAME_MASKER : DUT_U.VHDL_DUT_U probe_inf#(REGIONS*2) probe_mask2discard(TX_DST_RDY & src_rdy_reg, {TX_SOF_UNMASKED, TX_MASK}, CLK);
 
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------

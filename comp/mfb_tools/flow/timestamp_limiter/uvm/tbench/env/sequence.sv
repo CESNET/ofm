@@ -42,7 +42,7 @@ class sequence_meta#(META_WIDTH, TIMESTAMP_WIDTH, TIMESTAMP_MIN, TIMESTAMP_MAX, 
                 end
             end
             assert(std::randomize(ts_step) with {
-                    ts_step inside {[TIMESTAMP_MIN : TIMESTAMP_MAX]}; 
+                    ts_step inside {[TIMESTAMP_MIN : TIMESTAMP_MAX]};
                 });
             `uvm_do_with(req, {
                 if (TIMESTAMP_FORMAT == 0) {

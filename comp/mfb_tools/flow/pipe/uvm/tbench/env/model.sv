@@ -2,7 +2,7 @@
 //-- Copyright (C) 2023 CESNET z. s. p. o.
 //-- Author(s): David Beneš <xbenes52@vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 class model #(ITEM_WIDTH, META_WIDTH) extends uvm_component;
     `uvm_component_param_utils(uvm_mfb_pipe::model#(ITEM_WIDTH, META_WIDTH))
