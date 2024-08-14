@@ -25,6 +25,7 @@ def find_etherlink_info():
             conn_info = r_fields[3].split(':')
     return conn_info
 
+
 # identification strings
 default_dev_path        = "/dev/nfb0"
 default_etherlink_path  = "/usr/local/bin/etherlink"

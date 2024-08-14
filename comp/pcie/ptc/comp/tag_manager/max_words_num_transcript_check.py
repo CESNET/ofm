@@ -278,6 +278,7 @@ def check_transcript(transcript_file_name):
        print("Transcript info correct.")
     return
 
+
 #################################################################
 # transctipt correctness checking
 if (len(sys.argv)>1):

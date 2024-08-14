@@ -160,5 +160,6 @@ def main() -> None:
     with open(arguments.output, 'w') as profile_file:
         profile_generator.write_profile(profile_file)
 
+
 if __name__ == '__main__':
     main()

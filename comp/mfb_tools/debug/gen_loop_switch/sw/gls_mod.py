@@ -289,6 +289,7 @@ def print_modes():
     print("packet generator.)\n")
     print("Additional configuration is available inside the script.")
 
+
 if __name__ == '__main__':
     args = []
     args = sys.argv[1:]

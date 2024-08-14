@@ -332,5 +332,6 @@ def main() -> None:
     with open(arguments.output, 'w') as config_file:
         yaml.dump(config, config_file, default_flow_style=False)
 
+
 if __name__ == '__main__':
     main()

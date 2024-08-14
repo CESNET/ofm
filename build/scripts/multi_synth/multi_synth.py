@@ -44,6 +44,7 @@ def run_synthesis(makefile_path,implement=False,quartus=False):
 # Parsing script arguments
 ##########
 
+
 parser = argparse.ArgumentParser()
 
 parser.add_argument("makefile", help="Name of Makefile for running synthesis")

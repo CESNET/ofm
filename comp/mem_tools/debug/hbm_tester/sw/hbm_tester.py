@@ -219,6 +219,7 @@ class hbm_tester:
             self.run_test(hbm_ports)
             self.print_data_result(hbm_ports)
 
+
 if __name__ == '__main__':
     # Argument parsing
     args = argparse.ArgumentParser()
