@@ -11,4 +11,4 @@ pycodestyle:
     name: plone/code-quality
     entrypoint: [""]
   script:
-    - flake8 --select W293
+    - flake8 --select W293,E305
