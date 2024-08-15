@@ -12,7 +12,7 @@
 /*
  * This package contains values for Ethernet type field.
  */
-package ethernet_type_pkg; 
+package ethernet_type_pkg;
    const bit   [15:0]   IPV4 = 16'h0800;
    const bit   [15:0]   IPV6 = 16'h86DD;
    const bit   [15:0]   MPLSUNI = 16'h8847;

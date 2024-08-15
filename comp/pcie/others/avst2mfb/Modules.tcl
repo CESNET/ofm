@@ -12,6 +12,6 @@ set PACKAGES "$PACKAGES $OFM_PATH/comp/base/pkg/type_pack.vhd"
 
 set COMPONENTS [list \
     [list "FIFOX" $FIFOX_BASE "FULL" ] \
-]	
+]
 
 set MOD "$MOD $ENTITY_BASE/pcie_avst2mfb.vhd"

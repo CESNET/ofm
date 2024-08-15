@@ -15,7 +15,7 @@ set PACKAGES   "$PACKAGES  $MATH_PKG/math_pack.vhd"
 
 set MOD "$MOD $ENTITY_BASE/qdr_ent.vhd"
 
-  
+
 # Setup architecture
 set MOD "$MOD $ENTITY_BASE/qdr_arch.vhd"
 
@@ -23,6 +23,6 @@ set MOD "$MOD $ENTITY_BASE/qdr_arch.vhd"
 set COMPONENTS [list \
       [list "ASFIFO_BRAM"     $ASFIFO_BASE   ] \
       [list "GEN_OR" $OFM_PATH/comp/base/logic/or "FULL"] \
-      [list "GEN_AND" $OFM_PATH/comp/base/logic/and "FULL"] 
+      [list "GEN_AND" $OFM_PATH/comp/base/logic/and "FULL"]
 
 ]

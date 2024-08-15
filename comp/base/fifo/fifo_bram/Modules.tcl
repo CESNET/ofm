@@ -12,6 +12,6 @@ set PACKAGES "$PACKAGES $OFM_PATH/comp/base/pkg/math_pack.vhd"
 
 set COMPONENTS [list \
     [list "SDP_BRAM" $OFM_PATH/comp/base/mem/sdp_bram "behavioral" ] \
-] 
+]
 
 set MOD "$MOD $ENTITY_BASE/fifo_bram.vhd"

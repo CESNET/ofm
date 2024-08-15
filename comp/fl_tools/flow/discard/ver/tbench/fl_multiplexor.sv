@@ -10,7 +10,7 @@
  * TODO:
  *
  */
- 
+
   // --------------------------------------------------------------------------
   // -- Frame Link Multiplexor Class
   // --------------------------------------------------------------------------
@@ -28,7 +28,7 @@
     virtual iFrameLinkTx.tb #(pDataWidth, pDremWidth) tx[pChannels];
     virtual iFrameLinkRx.tb #(pDataWidth, pDremWidth) rx;
     virtual iDiscardStat.rx_tb #(pChannels, pStatusWidth) chan;
-  
+
     // ----
     rand int muxDelay; // Delay between multiplexing
       // Delay between multiplexing limits
@@ -44,21 +44,21 @@
                        [muxDelayLow:muxDelayHigh]
                       };
       }
-    
-    
+
+
     // -- Public Class Methods --
 
     // -- Constructor ---------------------------------------------------------
-    // Create driver object 
-    function new ( string inst, 
+    // Create driver object
+    function new ( string inst,
                    virtual iFrameLinkTx.tb #(pDataWidth,pDremWidth) tx[],
                    virtual iFrameLinkRx.tb #(pDataWidth,pDremWidth) rx,
                    virtual iDiscardStat.rx_tb #(pChannels, pStatusWidth) chan
                          );
       this.inst        = inst;
-      this.tx          = tx;         // Store pointer interface 
-      this.rx          = rx;         // Store pointer interface 
-      this.chan        = chan;       // Store pointer interface 
+      this.tx          = tx;         // Store pointer interface
+      this.rx          = rx;         // Store pointer interface
+      this.chan        = chan;       // Store pointer interface
 
       this.rx.cb.DATA           <= 0;
       this.rx.cb.DREM           <= 0;
@@ -68,32 +68,32 @@
       this.rx.cb.EOP_N          <= 1;
       this.rx.cb.SRC_RDY_N      <= 1;
       this.chan.rx_cb.RX_CHAN   <= 0;
-    endfunction: new  
-    
+    endfunction: new
+
     // -- Enable Multiplexor --------------------------------------------------
     // Enable multiplexor and runs multiplexor process
     task setEnabled();
       enabled = 1; // Multiplexor Enabling
-      fork         
+      fork
         run();     // Creating multiplexor subprocess
       join_none;   // Don't wait for ending
     endtask : setEnabled
-        
+
     // -- Disable Multipexor --------------------------------------------------
     // Disable multiplexor
     task setDisabled();
       enabled = 0; //Disable multiplexor, after sending last transaction it ends
     endtask : setDisabled
-    
+
     // -- Private Class Methods --
-    
+
     // -- Run Multiplexor -----------------------------------------------------
     // Randomly generate channel and multiplex signals from respective input
     // interface to output interface
     task run();
       int unsigned prevChannel;
       @(rx.cb);                        // Wait for clock
-      
+
       while (enabled) begin            // Repeat while enabled
         prevChannel = channel;
         assert(randomize());           // Randomize rand variables
@@ -118,6 +118,6 @@
         end
       end
     endtask : run
-     
-  endclass : FrameLinkMultiplexor 
+
+  endclass : FrameLinkMultiplexor
 

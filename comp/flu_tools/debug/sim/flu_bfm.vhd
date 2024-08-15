@@ -37,8 +37,8 @@ entity FLU_BFM is
       RESET          : in  std_logic;
       CLK            : in  std_logic;
 
-      -- Frame link output Interface 
-      
+      -- Frame link output Interface
+
       TX_DATA      : out std_logic_vector(DATA_WIDTH-1 downto 0);
       TX_SOP_POS   : out std_logic_vector(SOP_POS_WIDTH-1 downto 0);
       TX_EOP_POS   : out std_logic_vector(log2(DATA_WIDTH/8)-1 downto 0);
@@ -57,10 +57,10 @@ architecture FLU_BFM_ARCH of FLU_BFM is
    signal test: CmdTypeItem;
    signal SRC_RDY   : std_logic;
    signal SRC_DRIVE : std_logic;
-  
+
    signal fluCmd : fluCmdTypeItem := ('0','Z','Z');
-   
-   -- function adjust space between packets according to SOP_POS_WIDTH and it's step 
+
+   -- function adjust space between packets according to SOP_POS_WIDTH and it's step
    function check_space (space: integer; index: integer; step: integer) return integer is
    variable var_space : integer;
    begin
@@ -82,7 +82,7 @@ architecture FLU_BFM_ARCH of FLU_BFM is
       end if;
       return var_space;
    end check_space;
- 
+
    PROCEDURE Write(variable trans      :  INOUT CmdTypeItem;
                    signal   CLK        :  IN std_logic;
                    signal   DATA       : OUT std_logic_vector(DATA_WIDTH-1 downto 0);
@@ -114,7 +114,7 @@ architecture FLU_BFM_ARCH of FLU_BFM is
    variable sop_pos_step : integer := ((DATA_WIDTH/8)/(2**SOP_POS_WIDTH));
    variable zeros        : std_logic_vector(7 downto 0);
    variable get_ready    : integer;
-  
+
    BEGIN
       Enable       <='0';
       index        := 0;
@@ -187,7 +187,7 @@ architecture FLU_BFM_ARCH of FLU_BFM is
                -- set TX_EOP and TX_EOP_POS
                TX_EOP <= '1';
                TX_EOP_POS <= conv_std_logic_vector(eop_pos, log2(DATA_WIDTH/8));
-               -- set and adjust space 
+               -- set and adjust space
                count := check_space(trans.Data(index + 1).Space + count_eop + count_sop, bytes + 1, sop_pos_step);
                -- set := 1 only when one EOP is in one transaction
                if (eop_set = 0) then
@@ -252,91 +252,91 @@ begin
       fluCmd_0.ReqAck <= fluCmd.ReqAck;
       fluCmd.Req <= fluCmd_0.Req;
    end generate gen0;
- 
+
    gen1: if (FLU_BFM_ID = 1) generate
       fluCmd_1.Ack <= fluCmd.Ack;
       fluCmd_1.ReqAck <= fluCmd.ReqAck;
       fluCmd.Req <= fluCmd_1.Req;
    end generate gen1;
- 
+
    gen2: if (FLU_BFM_ID = 2) generate
       fluCmd_2.Ack <= fluCmd.Ack;
       fluCmd_2.ReqAck <= fluCmd.ReqAck;
       fluCmd.Req <= fluCmd_2.Req;
    end generate gen2;
- 
+
    gen3: if (FLU_BFM_ID = 3) generate
       fluCmd_3.Ack <= fluCmd.Ack;
       fluCmd_3.ReqAck <= fluCmd.ReqAck;
       fluCmd.Req <= fluCmd_3.Req;
    end generate gen3;
- 
+
    gen4: if (FLU_BFM_ID = 4) generate
       fluCmd_4.Ack <= fluCmd.Ack;
       fluCmd_4.ReqAck <= fluCmd.ReqAck;
       fluCmd.Req <= fluCmd_4.Req;
    end generate gen4;
- 
+
    gen5: if (FLU_BFM_ID = 5) generate
       fluCmd_5.Ack <= fluCmd.Ack;
       fluCmd_5.ReqAck <= fluCmd.ReqAck;
       fluCmd.Req <= fluCmd_5.Req;
    end generate gen5;
- 
+
    gen6: if (FLU_BFM_ID = 6) generate
       fluCmd_6.Ack <= fluCmd.Ack;
       fluCmd_6.ReqAck <= fluCmd.ReqAck;
       fluCmd.Req <= fluCmd_6.Req;
    end generate gen6;
- 
+
    gen7: if (FLU_BFM_ID = 7) generate
       fluCmd_7.Ack <= fluCmd.Ack;
       fluCmd_7.ReqAck <= fluCmd.ReqAck;
       fluCmd.Req <= fluCmd_7.Req;
    end generate gen7;
- 
+
    gen8: if (FLU_BFM_ID = 8) generate
       fluCmd_8.Ack <= fluCmd.Ack;
       fluCmd_8.ReqAck <= fluCmd.ReqAck;
       fluCmd.Req <= fluCmd_8.Req;
    end generate gen8;
- 
+
    gen9: if (FLU_BFM_ID = 9) generate
       fluCmd_9.Ack <= fluCmd.Ack;
       fluCmd_9.ReqAck <= fluCmd.ReqAck;
       fluCmd.Req <= fluCmd_9.Req;
    end generate gen9;
- 
+
    genA: if (FLU_BFM_ID = 10) generate
       fluCmd_A.Ack <= fluCmd.Ack;
       fluCmd_A.ReqAck <= fluCmd.ReqAck;
       fluCmd.Req <= fluCmd_A.Req;
    end generate genA;
- 
+
    genB: if (FLU_BFM_ID = 11) generate
       fluCmd_B.Ack <= fluCmd.Ack;
       fluCmd_B.ReqAck <= fluCmd.ReqAck;
       fluCmd.Req <= fluCmd_B.Req;
    end generate genB;
- 
+
    genC: if (FLU_BFM_ID = 12) generate
       fluCmd_C.Ack <= fluCmd.Ack;
       fluCmd_C.ReqAck <= fluCmd.ReqAck;
       fluCmd.Req <= fluCmd_C.Req;
    end generate genC;
- 
+
    genD: if (FLU_BFM_ID = 13) generate
       fluCmd_D.Ack <= fluCmd.Ack;
       fluCmd_D.ReqAck <= fluCmd.ReqAck;
       fluCmd.Req <= fluCmd_D.Req;
    end generate genD;
- 
+
    genE: if (FLU_BFM_ID = 14) generate
       fluCmd_E.Ack <= fluCmd.Ack;
       fluCmd_E.ReqAck <= fluCmd.ReqAck;
       fluCmd.Req <= fluCmd_E.Req;
    end generate genE;
- 
+
    genF: if (FLU_BFM_ID = 15) generate
       fluCmd_F.Ack <= fluCmd.Ack;
       fluCmd_F.ReqAck <= fluCmd.ReqAck;
@@ -345,23 +345,23 @@ begin
 
    SEND:process
    begin
-      TX_DATA      <= (others => '0');        
-      TX_EOP_POS   <= (others => '0');       
-      TX_SOP_POS   <= (others => '0');      
-      TX_EOP       <= '0';      
-      TX_SOP       <= '0';            
-        
+      TX_DATA      <= (others => '0');
+      TX_EOP_POS   <= (others => '0');
+      TX_SOP_POS   <= (others => '0');
+      TX_EOP       <= '0';
+      TX_SOP       <= '0';
+
       LOOP
          fluCmd.Ack    <= '0';
          fluCmd.ReqAck <= '0';
-    
+
          SRC_DRIVE    <= '0';
-      
+
          -- Get Command
          WHILE (fluCmd.Req = '0') LOOP
             WAIT UNTIL (fluCmd.Req = '1');
          END LOOP;
-      
+
          -- Send Request Acknowledge
          fluCmd.ReqAck <= NOT(fluCmd.ReqAck);
          -- Wait for Reqest Deasert
@@ -377,10 +377,10 @@ begin
          -- Send Command done
          fluCmd.Ack <= '1';
          wait until (CLK'event and CLK='1');
-      end loop;	
+      end loop;
    end process;
-  
-  -- Drive SRC_RDY_N --------------------------------------------------------------- 
+
+  -- Drive SRC_RDY_N ---------------------------------------------------------------
    DRIVE_SRC_RDY: PROCESS
    BEGIN
       LOOP
@@ -396,7 +396,7 @@ begin
 
    TX_SRC_RDY <= SRC_RDY and SRC_DRIVE;
 --process(SRC_DRIVE)
---begin 
+--begin
 --   if SRC_DRIVE = '1' then
 --      TX_SRC_RDY <= SRC_DRIVE;
 --   else

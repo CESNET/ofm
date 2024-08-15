@@ -46,7 +46,7 @@ begin
    tx_out_dst_rdy_n  <= TX_DST_RDY_N;
 
    -- for each TX INTERFACE add one tx_out unit, that solves SRC_RDY/DST_RDY problems
-   gen_tx_out_array : 
+   gen_tx_out_array :
    for i in 0 to TX_COUNT - 1 generate
       gen_tx_out_unit : entity work.tx_out
       port map (
@@ -55,7 +55,7 @@ begin
          IFNUM => IFNUM(i),
          EN_N  => SEND_EN_N,
          RELOAD => tx_out_reload,
-         
+
          TX_SRC_RDY_N => tx_out_src_rdy_n(i),
          TX_DST_RDY_N => tx_out_dst_rdy_n(i)
       );
@@ -69,7 +69,7 @@ begin
    reload_and_gate : process(tx_out_src_rdy_n)
       variable var_reload : std_logic := '1';
    begin
-     
+
       -- when all tx_out sets src_rdy_n to '1', we can reload them
       -- (so let's constract a big AND gate over all tx_out_src_rdy_n)
       for i in 0 to TX_COUNT - 1 loop

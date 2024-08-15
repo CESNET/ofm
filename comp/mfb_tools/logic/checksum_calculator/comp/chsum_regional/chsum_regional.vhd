@@ -95,10 +95,10 @@ architecture FULL of CHSUM_REGIONAL is
     signal chsum_data_16_arr : slv_array_2d_t(ITEMS_16-1 downto 0)(ITEMS_16-1 downto 0)(ITEM_WIDTH_16-1 downto 0);
     signal chsum_end_16_arr  : slv_array_t   (ITEMS_16-1 downto 0)(ITEMS_16-1 downto 0);
     signal chsum_vld_16_arr  : slv_array_t   (ITEMS_16-1 downto 0)(ITEMS_16-1 downto 0);
-    
+
     signal chsum_32          : u_array_2d_t(ITEMS_16-1 downto 0)(ITEMS_16-1 downto 0)(ITEM_WIDTH_16_EXT-1 downto 0);
     signal chsum_zeros_32    : unsigned                                              (ITEM_WIDTH_16_EXT-1 downto 0) := (others => '0');
-    
+
     signal chsum_32_reg2     : u_array_t       (ITEMS_16-1 downto 0)(ITEM_WIDTH_16_EXT-1 downto 0);
     signal chsum_end_16_reg2 : std_logic_vector(ITEMS_16-1 downto 0);
     signal chsum_vld_16_reg2 : std_logic_vector(ITEMS_16-1 downto 0);
@@ -251,10 +251,10 @@ begin
             end if;
         end loop;
     end process;
-    
+
     tx_checksum_arr (0) <= std_logic_vector(chsum_16(output0_ptr));
     tx_checksum_arr (1) <= std_logic_vector(chsum_16(output1_ptr));
-    
+
     tx_chsum_end_arr(0) <=                                                                  chsum_end_16_reg2(output0_ptr);
     tx_chsum_end_arr(1) <= '0' when (chsum_end_16_reg2(0) = '1') and (output1_ptr = 0) else chsum_end_16_reg2(output1_ptr);
 

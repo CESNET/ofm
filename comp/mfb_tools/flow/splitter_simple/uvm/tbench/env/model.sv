@@ -3,7 +3,7 @@
 //-- Copyright (C) 2023 CESNET z. s. p. o.
 //-- Author(s): Radek Iša  <isa@cesnet.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 class model #(ITEM_WIDTH, META_WIDTH, CHANNELS) extends uvm_component;
     `uvm_component_param_utils(uvm_splitter_simple::model#(ITEM_WIDTH, META_WIDTH, CHANNELS))
@@ -45,7 +45,7 @@ class model #(ITEM_WIDTH, META_WIDTH, CHANNELS) extends uvm_component;
         ret |= (headers.size() != 0);
         return ret;
     endfunction
-   
+
     task run_meta(uvm_phase phase);
         forever begin
             uvm_common::model_item#(uvm_logic_vector::sequence_item #($clog2(CHANNELS) + META_WIDTH)) tr_in;
@@ -104,7 +104,7 @@ class model #(ITEM_WIDTH, META_WIDTH, CHANNELS) extends uvm_component;
             tr_out.tag  = tr_in.tag;
             tr_out.item = tr_in.item;
             channel     = tr_in_meta.item.data[SEL_WIDTH + META_WIDTH-1 : META_WIDTH];
-      
+
             if (channel >= CHANNELS) begin
                 string msg;
                 $swrite(msg, "\n\tWrong channel num %0d Channel range is 0-%0d", channel, CHANNELS-1);

@@ -2,7 +2,7 @@
 //-- Copyright (C) 2021 CESNET z. s. p. o.
 //-- Author(s): Tomáš Beneš <xbenes55@stud.fit.vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 // Definition of mfb monitor
 class monitor #(int unsigned REGIONS, int unsigned REGION_SIZE, int unsigned BLOCK_SIZE, int unsigned ITEM_WIDTH, int unsigned META_WIDTH) extends uvm_monitor;
@@ -22,7 +22,7 @@ class monitor #(int unsigned REGIONS, int unsigned REGION_SIZE, int unsigned BLO
     // ------------------------------------------------------------------------
     // Reference to the virtual interface
     virtual mfb_if #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH).monitor vif;
-    
+
     // ------------------------------------------------------------------------
     // Analysis port used to send transactions to all connected components.
     uvm_analysis_port #(sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)) analysis_port;
@@ -55,7 +55,7 @@ class monitor #(int unsigned REGIONS, int unsigned REGION_SIZE, int unsigned BLO
                 if (META_WIDTH > 0) begin
                     si.meta[it]    = vif.monitor_cb.META[(it+1)*META_WIDTH                        -1 -: META_WIDTH];
                 end else begin
-                    si.meta[it]    = 'x; 
+                    si.meta[it]    = 'x;
                 end
                 if ($clog2(REGION_SIZE) > 0) begin
                     si.sof_pos[it] = vif.monitor_cb.SOF_POS[(it+1)*$clog2(REGION_SIZE)            -1 -: $clog2(REGION_SIZE)];

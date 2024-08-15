@@ -36,10 +36,10 @@ class FrameLinkUEditTransaction #(int offsetWidth = 8,int enMask = 1) extends Tr
    rand bit insertData;
    rand bit editData;
 
-   //! Static parameter for the constraint generator. If value equals to  0, 
+   //! Static parameter for the constraint generator. If value equals to  0,
    //! mask bitmak will be filled with 1 on all positions.
    int maskEnabled = enMask;
-   
+
    /**
     * Length constraint.
     */
@@ -63,18 +63,18 @@ class FrameLinkUEditTransaction #(int offsetWidth = 8,int enMask = 1) extends Tr
    /**
     * Insret constraint.
     */
-  constraint c5 { 
+  constraint c5 {
             insertData dist{0 := 1, 1 := 1};
    };
 
    /**
     * Edit constraint.
     */
-   constraint c4 { 
+   constraint c4 {
             editData inside{0,1};
             (insertData == 1) -> (editData == 1);
    };
-   
+
 
    // -- Public Class Methods --
 
@@ -91,7 +91,7 @@ class FrameLinkUEditTransaction #(int offsetWidth = 8,int enMask = 1) extends Tr
    virtual function void display(string prefix = "");
       // Temporal variable for computation of 4byte shift
       integer tmp;
-      
+
       if (prefix != "")
       begin
          $write("---------------------------------------------------------\n");
@@ -163,7 +163,7 @@ class FrameLinkUEditTransaction #(int offsetWidth = 8,int enMask = 1) extends Tr
          tr = new();
       else
          $cast(tr, to);
- 
+
       // Here, we need to modify the data with respect
       // to edit information
       //
@@ -201,7 +201,7 @@ class FrameLinkUEditTransaction #(int offsetWidth = 8,int enMask = 1) extends Tr
                if(show_insert == 1)
                begin
                   tr.display();
-               end 
+               end
            end //End if
          else
            begin
@@ -233,7 +233,7 @@ class FrameLinkUEditTransaction #(int offsetWidth = 8,int enMask = 1) extends Tr
                         this.display();
                      end
                   end
-                  
+
                if(show_edit == 1)
                begin
                   tr.display();
@@ -242,7 +242,7 @@ class FrameLinkUEditTransaction #(int offsetWidth = 8,int enMask = 1) extends Tr
          end
       else
          begin
-            
+
             if(show_edit == 1 || show_insert == 1)
             begin
                $write("BIG DATA - offset: %0d, size: %0d\n", offset*4, data.size-1);
@@ -262,7 +262,7 @@ class FrameLinkUEditTransaction #(int offsetWidth = 8,int enMask = 1) extends Tr
       tr.packetSizeMin = packetSizeMin;
       toFLU = tr;
    endfunction : toFLU
- 	
+
    /**
     * Compare transactions.
     * Compares the current value of the object instance with the current value
@@ -323,13 +323,13 @@ class FrameLinkUEditTransaction #(int offsetWidth = 8,int enMask = 1) extends Tr
       begin
          same = 0;
          $swrite(diff, "insertData command does not match");
-      end 
-      
+      end
+
       if(maskEnabled != tr.maskEnabled)
       begin
          same = 0;
          $swrite(diff, "maskEnabled parameter does not match");
-      end 
+      end
 
       compare = same;
    endfunction: compare

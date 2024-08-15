@@ -37,7 +37,7 @@ entity FIFO_BRAM_XILINX is
     WR       : in  std_logic;
     AFULL    : out std_logic;
     FULL     : out std_logic;
-      
+
     DO       : out std_logic_vector(DATA_WIDTH-1 downto 0);
     RD       : in  std_logic;
     AEMPTY   : out std_logic;

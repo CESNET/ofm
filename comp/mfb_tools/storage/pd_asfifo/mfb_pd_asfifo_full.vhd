@@ -1,6 +1,6 @@
 -- pd_asfifo_full.vhd: Asynchronous packet buffer
--- 
--- 
+--
+--
 -- Copyright (C) 2018 CESNET z. s. p. o.
 -- SPDX-License-Identifier: BSD-3-Clause
 -- Author(s): Jan Kubalek <xkubal11@stud.fit.vutbr.cz>
@@ -35,7 +35,7 @@ architecture full of MFB_PD_ASFIFO is
                                             +REGIONS*EOF_POS_WIDTH
                                             +REGIONS
                                             +REGIONS;
-   
+
    -- ----------------------------------------------------------------------------
 
    -- ----------------------------------------------------------------------------

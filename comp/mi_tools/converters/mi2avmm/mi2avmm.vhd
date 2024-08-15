@@ -40,7 +40,7 @@ entity MI2AVMM is
         MI_DRD  : out std_logic_vector(DATA_WIDTH-1 downto 0);     -- Output Data
         MI_ARDY : out std_logic;                                   -- Address Ready
         MI_DRDY : out std_logic;                                   -- Data Ready
-        
+
         -- Avalon MM interface
 
         AVMM_ADDRESS       : out std_logic_vector(ADDR_WIDTH-1 downto 0);     -- Address

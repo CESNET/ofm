@@ -1,6 +1,6 @@
 /*
  * file       : env.sv
- * description: create enviroment for connection block verification 
+ * description: create enviroment for connection block verification
  * date       : 2020
  * author     : Radek Iša <isa@cesnet.cz>
  *
@@ -17,7 +17,7 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////
 class avalon_rx_transaction extends packet::transaction#(ITEM_WIDTH, MFB_META_TX_WIDTH);
         `uvm_object_utils(env::avalon_rx_transaction)
-          
+
         constraint c_size { meta[127:120] dist { 8'b00001010 := 1, //0A
                                                 8'b01001010 := 1, //4A
                                                 8'b00001011 := 1, //0B
@@ -26,7 +26,7 @@ class avalon_rx_transaction extends packet::transaction#(ITEM_WIDTH, MFB_META_TX
 
         function new (string name = "");
             super.new(name);
-        endfunction 
+        endfunction
 endclass
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -35,14 +35,14 @@ endclass
 ///////////////////////////////////////////////////////////////////////////////////////////////
 class mfb_transaction extends mfb_rx::transaction #(ITEM_WIDTH, MFB_META_RX_WIDTH);
         `uvm_object_utils(env::mfb_transaction)
-          
+
         constraint c_size { meta[29:0] == data.size();};
 
         function new (string name = "");
             super.new(name);
             this.data_size_max = 128;
             this.data_size_min = 0;
-        endfunction  
+        endfunction
 endclass
 
 
@@ -55,7 +55,7 @@ class mfb_driver_new #(REGIONS, REGIONS_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH
 
     virtual function void end_of_elaboration_phase(uvm_phase phase);
         m_driver_old.wordDelayEnable_wt  =  5;
-        m_driver_old.wordDelayDisable_wt = 95; 
+        m_driver_old.wordDelayDisable_wt = 95;
         m_driver_old.wordDelayHigh       = 10;
         m_driver_old.wordDelayLow        = 0;
     endfunction
@@ -111,9 +111,9 @@ class env_base extends uvm_env;
         m_mfb_rx_agent_mi = mfb_rx::agent#(REGIONS, REGIONS_SIZE, BLOCK_SIZE, ITEM_WIDTH, MFB_META_RX_WIDTH)::type_id::create("m_mfb_rx_agent_mi", this);
         m_mfb_tx_agent_mi = mfb_tx::agent#(REGIONS, REGIONS_SIZE, BLOCK_SIZE, ITEM_WIDTH, MFB_META_TX_WIDTH)::type_id::create("m_mfb_tx_agent_mi", this);
 
-        // create sequencer and scoreboard 
+        // create sequencer and scoreboard
         sc = scoreboard::type_id::create("sc", this);
-        vir_sqr = virtual_sequencer::type_id::create("vir_sqr", this); 
+        vir_sqr = virtual_sequencer::type_id::create("vir_sqr", this);
     endfunction
 
     function void connect_phase(uvm_phase phase);

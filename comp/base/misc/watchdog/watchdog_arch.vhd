@@ -54,7 +54,7 @@ signal flow_rdy         : std_logic;
       end generate;
 
      --! set maximum value of counter
-     limit <= std_logic_vector(to_unsigned(COUNT-1,limit'length)); 
+     limit <= std_logic_vector(to_unsigned(COUNT-1,limit'length));
       --! counter
       cnt : process(CLK)
       begin

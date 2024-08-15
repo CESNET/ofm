@@ -19,7 +19,7 @@ class ram_random  #(ADDR_WIDTH) extends ram_base #(ADDR_WIDTH);
         logic [ADDR_WIDTH-1:0] addr_new_prev;
         logic [ADDR_WIDTH-1:0] addr_new_next;
         logic [ADDR_WIDTH-1:0] addr_new_max = '1;
-        
+
         addr_new_max -= length;
         do begin
             loop_end = 1'b1;
@@ -27,20 +27,20 @@ class ram_random  #(ADDR_WIDTH) extends ram_base #(ADDR_WIDTH);
             addr_new &= ~alignmask;
             addr_new_prev = addr_new;
             addr_new_next = addr_new;
-        
-            //check if generated address is applicable. 
-            //(ADDR_PREV+ADDR_PREV.size < ADDR < ADDR + ADDR.size < ADDR_NEXT) 
+
+            //check if generated address is applicable.
+            //(ADDR_PREV+ADDR_PREV.size < ADDR < ADDR + ADDR.size < ADDR_NEXT)
             if(memory.exists(addr_new) == 1'b1) begin
                 loop_end = 1'b0;
-            end else if (memory.prev(addr_new_prev) == 1 && 
+            end else if (memory.prev(addr_new_prev) == 1 &&
                         ((addr_new_prev + memory[addr_new_prev].size()) >= addr_new)) begin
                 loop_end = 1'b0;
-            end else if (memory.next(addr_new_next) == 1 && 
+            end else if (memory.next(addr_new_next) == 1 &&
                         ((addr_new + length) >= addr_new_next)) begin
                 loop_end = 1'b0;
             //check if addres is not on end of address space
             end else if(addr_new_max < addr_new) begin
-                 loop_end = 1'b0;              
+                 loop_end = 1'b0;
             end
         end while(loop_end != 1'b1);
 

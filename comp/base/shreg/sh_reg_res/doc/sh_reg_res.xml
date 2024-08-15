@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <source>
-	
+
 <!-- MAIN INFO ********************************************************** -->
 
 
@@ -33,7 +33,7 @@
 	Interface is the same as the interface of the sh_reg, only the RESET signal is added.
 	The RESET signal must be high at least the same number of clock cycles as is the bit width of the shift register
 	to set the register to zeroes.
-	
+
 </description>
 
 
@@ -42,7 +42,7 @@
 
 	<!-- Generic description -->
 	<generic_map>
-		
+
 		<generic name="NUM_BITS" type="integer" default="16">
 			Number of bits in the register
 		</generic>
@@ -52,13 +52,13 @@
 		<generic name="INIT_EXT00" type="std_logic_vector(63 downto 0)" default="0">
 			extended init value
 		</generic>
-		
+
 	</generic_map>
 
 	<!-- Port description -->
 	<port_map>
 
-		<divider>Common signals</divider>		
+		<divider>Common signals</divider>
 		<port  name="CLK" dir="in" width="1">
 			Clock
 		</port>
@@ -68,15 +68,15 @@
 		<port name="CE" dir="in" width="1">
 			Clock enable
 		</port>
-		
-		<divider>Input/output interface</divider> 		
+
+		<divider>Input/output interface</divider>
 		<port name="DIN" dir="in" width="1">
 			Data in
-		</port> 
+		</port>
 		<port name="DOUT" dir="out" width="1">
 			Data out
 		</port>
-		
+
 	</port_map>
 
 </interface>
@@ -86,21 +86,21 @@
 <!-- HW BODY SECTION **************************************************** -->
 <!-- information for HW designers, structure should be as follow          -->
 <body>
-	
+
 		<h1>The reset feature</h1>
 	<p>
 	The reseting process is done by shifting zeroes into the sh_reg shift register, so the reset signal must be high at least the same number of clock cycles as is the bit width of the shift register.
-	
-	
+
+
 	</p>
-			
+
 
 <h1>Frequency and Resources usage</h1>
 
 	<p>
 
         <!--Resources usage and max. frequency by Precision-->
-	
+
 		<tab sloupce="ccc">
 			<tr>
 				<th>Generic settings</th>
@@ -108,25 +108,25 @@
 				<th>BlockRams (+ % of C6X BRAMs)</th>
 			</tr>
 			<tr>
-				<th>16bit width</th> 
+				<th>16bit width</th>
 				<td>2 (0.78%)</td>
 				<td>0 (0 %)</td>
 			</tr>
 			<tr>
-				<th>64bit width</th> 
+				<th>64bit width</th>
 				<td>3 (0.21%)</td>
 				<td>0 (0 %)</td>
 			</tr>
 		<nazev>Chip utilization</nazev>
-		</tab> 
-	
+		</tab>
 
-	
-  </p> 
+
+
+  </p>
 
 
 <h1>Schemes</h1>
-	
+
 	<p>
 		The block structure of the component is in the following figure.
 		It's composed of shift register sh_reg

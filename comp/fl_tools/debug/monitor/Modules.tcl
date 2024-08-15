@@ -6,7 +6,7 @@
 #
 
 # Base directories
-set FL_BASE             "$OFM_PATH/comp/fl_tools" 
+set FL_BASE             "$OFM_PATH/comp/fl_tools"
 
 set PACKAGES            "$OFM_PATH/comp/base/pkg/math_pack.vhd \
                         $FL_BASE/pkg/fl_pkg.vhd         \

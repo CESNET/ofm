@@ -11,7 +11,7 @@ module DUT #(
         BLOCK_SIZE  ,
         ITEM_WIDTH  ,
         META_WIDTH  ,
-        DEVICE      
+        DEVICE
     )(
         input logic     RX_CLK,
         input logic     RX_RST,
@@ -61,5 +61,5 @@ module DUT #(
     );
 
     assign mfb_rx.DST_RDY = 1'b1;
-    
+
 endmodule

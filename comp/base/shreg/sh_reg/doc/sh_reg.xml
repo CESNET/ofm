@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <source>
-	
+
 <!-- MAIN INFO ********************************************************** -->
 
 
@@ -29,7 +29,7 @@
 
 <!-- Things to do -->
 <todo>
-	
+
 </todo>
 
 
@@ -40,7 +40,7 @@
 	     fully describe the component and its main functions -->
 
 	sh_reg is a generic shift register based on SRL16 component
-	
+
 
 </description>
 
@@ -50,7 +50,7 @@
 
 	<!-- Generic description -->
 	<generic_map>
-		
+
 		<generic name="NUM_BITS" type="integer" default="16">
 			Number of bits in the register
 		</generic>
@@ -60,28 +60,28 @@
 		<generic name="INIT_EXT00" type="std_logic_vector(63 downto 0)" default="0">
 			extended init value
 		</generic>
-		
+
 	</generic_map>
 
 	<!-- Port description -->
 	<port_map>
 
-		<divider>Common signals</divider>		
+		<divider>Common signals</divider>
 		<port  name="CLK" dir="in" width="1">
 			Clock
 		</port>
 		<port name="CE" dir="in" width="1">
 			Clock enable
 		</port>
-		
-		<divider>Input/output interface</divider> 		
+
+		<divider>Input/output interface</divider>
 		<port name="DIN" dir="in" width="1">
 			Data in
-		</port> 
+		</port>
 		<port name="DOUT" dir="out" width="1">
 			Data out
 		</port>
-		
+
 	</port_map>
 
 </interface>
@@ -93,7 +93,7 @@
 <body>
 
 
-			
+
 </body>
 
 

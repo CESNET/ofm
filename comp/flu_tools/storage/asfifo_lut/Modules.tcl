@@ -1,6 +1,6 @@
 # Modules.tcl: Local include Modules tcl script
 # Copyright (C) 2014 CESNET
-# Author: Jakub Cabal <jakubcabal@gmail.com>  
+# Author: Jakub Cabal <jakubcabal@gmail.com>
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
@@ -8,7 +8,7 @@ set ASFIFO_BASE   "$OFM_PATH/comp/base/fifo/asfifo"
 set MATH_PKG_BASE "$OFM_PATH/comp/base/pkg"
 
 # Packages
-set PACKAGES      "$PACKAGES $MATH_PKG_BASE/math_pack.vhd" 
+set PACKAGES      "$PACKAGES $MATH_PKG_BASE/math_pack.vhd"
 
 # List of components
 set COMPONENTS [list \

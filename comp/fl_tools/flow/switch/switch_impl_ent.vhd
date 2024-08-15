@@ -61,7 +61,7 @@ port (
    TX_EOP_N       : out std_logic;
    TX_SRC_RDY_N   : out std_logic_vector(TX_COUNT - 1 downto 0);
    TX_DST_RDY_N   : in  std_logic_vector(TX_COUNT - 1 downto 0);
-   
+
    --* Extracted interface number
    IFNUM          : in  std_logic_vector(TX_COUNT - 1 downto 0)
 );

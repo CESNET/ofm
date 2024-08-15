@@ -46,7 +46,7 @@ entity FL_FIFO8 is
       RX_EOP_N       : in  std_logic;
       RX_SOF_N       : in  std_logic;
       RX_EOF_N       : in  std_logic;
-      
+
       -- read interface
       TX_DATA        : out std_logic_vector(8-1 downto 0);
       TX_SRC_RDY_N   : out std_logic;

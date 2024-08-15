@@ -13,7 +13,7 @@ class monitor #(int unsigned ADDRESS_WIDTH, int unsigned DATA_WIDTH, int unsigne
 
     // Reference to the virtual interface
     virtual avmm_if #(ADDRESS_WIDTH, DATA_WIDTH, BURST_WIDTH).monitor vif;
-    
+
     // Analysis ports
     uvm_analysis_port #(sequence_item_request  #(ADDRESS_WIDTH, DATA_WIDTH, BURST_WIDTH)) analysis_port_request;
     uvm_analysis_port #(sequence_item_response #(DATA_WIDTH))                             analysis_port_response;

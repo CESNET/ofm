@@ -90,7 +90,7 @@ class scoreboard #(MVB_ITEM_WIDTH, MFB_ITEM_WIDTH, RX_CHANNELS, USR_RX_PKT_SIZE_
 
     virtual function void report_phase(uvm_phase phase);
 
-        if (this.success() && this.used() == 0) begin 
+        if (this.success() && this.used() == 0) begin
             `uvm_info(get_type_name(), $sformatf("\n\n\t---------------------------------------\n\t----     VERIFICATION SUCCESS      ----\n\t---------------------------------------"), UVM_NONE)
         end else begin
             `uvm_info(get_type_name(), $sformatf("\n\n\t---------------------------------------\n\t----     VERIFICATION FAIL      ----\n\t---------------------------------------"), UVM_NONE)

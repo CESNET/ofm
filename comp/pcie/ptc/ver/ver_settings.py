@@ -110,7 +110,7 @@ SETTINGS = {
     "verbose" : { #
         "FULL_PRINT"                 : "true"              ,
     },
-#    "" : { # 
+#    "" : { #
 #    },
     "_combinations_" : (
     # Basic tests for Ultrascale

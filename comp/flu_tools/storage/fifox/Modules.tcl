@@ -1,6 +1,6 @@
 # Modules.tcl: Components include script
 # Copyright (C) 2018 CESNET
-# Author(s): Michal Szabo <xszabo11@vutbr.cz> 
+# Author(s): Michal Szabo <xszabo11@vutbr.cz>
 #
 # SPDX-License-Identifier: BSD-3-Clause
 

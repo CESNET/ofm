@@ -124,7 +124,7 @@ begin
                 reg0_instr_a_sop(I) <= unsigned(INSTR_A_ITEM(I));
                 reg0_instr_a_eop(I) <= unsigned(INSTR_A_ITEM(I))+resize_left(unsigned(INSTR_LEN(I))-1,log2(BUF_A_ROWS*ROW_ITEMS));
             end loop;
-    
+
             if (RESET='1') then
                 reg0_instr_vld <= (others => '0');
             end if;
@@ -149,7 +149,7 @@ begin
 
             -- Buffer A column is the same for all uInstructions
             reg1_uinstr_a_col  <= reg0_instr_a_col;
-            
+
             for I in 0 to INSTRS-1 loop
 
                 -- Setting default values to avoid latch
@@ -182,7 +182,7 @@ begin
 
                     ----
                     -- Calculate number of items for this row
-                    -- Only the first and the last row of the uInstruction can have an unaligned number of items 
+                    -- Only the first and the last row of the uInstruction can have an unaligned number of items
                     reg1_uinstr_len(I)(R) <= to_unsigned(ROW_ITEMS,log2(ROW_ITEMS+1));
 
                     if (first_row and last_row) then -- the Instruction only describes one row in buffer A

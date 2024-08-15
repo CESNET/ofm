@@ -16,4 +16,4 @@
   set MOD "$MOD $ENTITY_BASE/i2c_slave_bit_ctrl.vhd"
   set MOD "$MOD $ENTITY_BASE/i2c_slave_byte_ctrl.vhd"
   set MOD "$MOD $ENTITY_BASE/i2c_slave_top.vhd"
-  
+

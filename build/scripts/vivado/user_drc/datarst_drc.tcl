@@ -31,7 +31,7 @@ proc datarstCheck {} {
             set msg "Wide register '$reglbl' with reset found \[$file_name:$line_number\]."
             set vio [ create_drc_violation -name {DATARST-1} -msg $msg ]
             lappend vios $vio
-         }        
+         }
       }
    }
    # return error code if something is found

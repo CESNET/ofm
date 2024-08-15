@@ -2,7 +2,7 @@
 //-- Copyright (C) 2022 CESNET z. s. p. o.
 //-- Author(s): Radek Iša <isa@cesnet.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 class stats;
 
@@ -93,7 +93,7 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_score
     // Contructor of scoreboard.
     function new(string name, uvm_component parent);
         super.new(name, parent);
-        // DUT MODEL COMUNICATION 
+        // DUT MODEL COMUNICATION
         analysis_export_rx_packet = new("analysis_export_rx_packet", this);
         analysis_export_rx_meta   = new("analysis_export_rx_meta",   this);
         analysis_export_dma       = new("analysis_export_dma",       this);
@@ -149,7 +149,7 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_score
                 end
             end
         end else begin
-            tr_model      = uvm_logic_vector_array::sequence_item#(32)::type_id::create("tr_model"); 
+            tr_model      = uvm_logic_vector_array::sequence_item#(32)::type_id::create("tr_model");
             tr_model.data = packet_model.data;
             ret           = tr_dut.compare(tr_model);
         end
@@ -225,7 +225,7 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_score
         uvm_logic_vector::sequence_item#(META_WIDTH) tr_meta_model;
         output_type tr_dut;
 
-        fork 
+        fork
             run_output();
             run_input();
         join_none

@@ -14,7 +14,7 @@ TARGET          = mem_tester
 SRCS            = $(C_BASE)/mem_tester.c $(C_BASE)/common.c $(C_BASE)/core.c
 
 CC = gcc
-CFLAGS = -pedantic -Wall -Wextra 
+CFLAGS = -pedantic -Wall -Wextra
 
 $(TARGET): $(SRCS)
 	$(CC) $(NFB_CFLAGS) $(CFLAGS) $^ -o $@ $(NFB_LDLIBS)

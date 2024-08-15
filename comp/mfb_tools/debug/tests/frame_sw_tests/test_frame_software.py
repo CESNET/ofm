@@ -1,5 +1,5 @@
 # test_frame_software.py : Script for testing of frame_player and
-#                          frame_recorder software. 
+#                          frame_recorder software.
 #
 # Copyright (C) 2017 CESNET z. s. p. o.
 # Author(s): Pavel Benacek <benacek@cesnet.cz>
@@ -47,7 +47,7 @@ def compare_pcaps(input_file,output_file):
     # Opent both pcaps in scapy
     in_packets = scapy.rdpcap(input_file)
     out_packets = scapy.rdpcap(output_file)
-    
+
     # Search for all input packets in the output pcap file
     for in_pkt in in_packets:
         # I know, this is not efficient but it is enough for testing purposes
@@ -71,23 +71,23 @@ def main():
             print("Input PCAP file:  %s" % (pcap))
             # Absolute PCAP path
             abs_pcap_path = os.path.join(pcap_path,pcap)
-            # Prepare the player object and use read/write function in the player module 
+            # Prepare the player object and use read/write function in the player module
             play = player.PlayerConfigurator(regs,reg_size,block_size,item_width,fifo_depth,player.write32,player.read32,abs_pcap_path,0x0)
             # Prepare the recorder object and use read/wrute function in the recorder module
             rec  = recorder.RecorderReader(regs,reg_size,block_size,item_width,recorder.write32,recorder.read32,out_pcap,0x0,False,0)
             # Remove old pickle file
             if os.path.exists("memory.pickle"):
                 os.remove("memory.pickle")
-            # Remove the pcap file and 
+            # Remove the pcap file and
             if os.path.exists(out_pcap):
                 os.remove(out_pcap)
-            # Run the configuration. The output is serialized and catched in the 
+            # Run the configuration. The output is serialized and catched in the
             # memory.pickle file.
             play.configure()
             # Restore the memory and run the packet capture
             try:
                 recorder.load_memory("memory.pickle")
-                rec.read()    
+                rec.read()
             except IOError as e:
                 print("Error during the loading of pickled memory!")
                 return 0x1
@@ -106,6 +106,7 @@ def main():
     print("======================\n")
 
     return 0x0
+
 
 if __name__ == "__main__":
     ret = main()

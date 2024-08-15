@@ -10,7 +10,7 @@
  * TODO:
  *
  */
- 
+
 // ----------------------------------------------------------------------------
 //                        Module declaration
 // ----------------------------------------------------------------------------
@@ -25,7 +25,7 @@ module DUT (
 );
 
 // Signals for DUT conection
-wire [(IF_COUNT*DATA_WIDTH)-1:0] tx_data;  
+wire [(IF_COUNT*DATA_WIDTH)-1:0] tx_data;
 wire [(IF_COUNT*log2(DATA_WIDTH/8))-1:0] tx_drem;
 wire [IF_COUNT-1:0] tx_sof_n;
 wire [IF_COUNT-1:0] tx_eof_n;
@@ -61,7 +61,7 @@ FL_SWITCH_1TON #(
     // Common Interface
      .CLK               (CLK),
      .RESET             (RESET),
- 
+
     // RX Port
      .RX_DATA       (RX.DATA),
      .RX_REM        (RX.DREM),
@@ -71,7 +71,7 @@ FL_SWITCH_1TON #(
      .RX_EOP_N      (RX.EOP_N),
      .RX_SRC_RDY_N  (RX.SRC_RDY_N),
      .RX_DST_RDY_N  (RX.DST_RDY_N),
-     
+
      // TX Ports
      .TX_DATA       (tx_data),
      .TX_REM        (tx_drem),

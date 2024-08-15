@@ -9,7 +9,7 @@
 -- TODO:
 --
 
-library IEEE;  
+library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.std_logic_arith.all;
 use IEEE.std_logic_unsigned.all;
@@ -21,7 +21,7 @@ entity EXTRACT_4B_SYNT is
       DATA_WIDTH 	   : integer := 512;
       SOP_POS_WIDTH 	: integer := 3;
       OFFSET_WIDTH   : integer := 10
-   );  
+   );
    port(
       CLK            : in std_logic;
       RESET          : in std_logic;
@@ -36,10 +36,10 @@ entity EXTRACT_4B_SYNT is
       TX_DATA        : out std_logic_vector((8*4)-1 downto 0);
       TX_SRC_RDY     : out std_logic;
       TX_DST_RDY     : in std_logic
-   ); 
+   );
 end entity;
 
-architecture full of EXTRACT_4B_SYNT is 
+architecture full of EXTRACT_4B_SYNT is
    signal REG_OFFSET        : std_logic_vector(OFFSET_WIDTH-1 downto 0);
    signal REG_RX_DATA       : std_logic_vector(DATA_WIDTH-1 downto 0);
    signal REG_RX_SOP_POS    : std_logic_vector(SOP_POS_WIDTH-1 downto 0);
@@ -52,7 +52,7 @@ architecture full of EXTRACT_4B_SYNT is
    signal REG_TX_SRC_RDY    : std_logic;
    signal REG_TX_DST_RDY    : std_logic;
 begin
-   
+
    process(CLK)
    begin
       if (CLK'event) and (CLK='1') then
@@ -78,7 +78,7 @@ begin
    )
    port map (
       CLK            => CLK,
-      RESET          => RESET, 
+      RESET          => RESET,
       OFFSET         => REG_OFFSET,
       RX_DATA        => REG_RX_DATA,
       RX_SOP_POS     => REG_RX_SOP_POS,

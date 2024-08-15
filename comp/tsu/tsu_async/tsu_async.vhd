@@ -5,9 +5,9 @@
 --            Jan Kucera <xkucer73@stud.fit.vutbr.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
--- 
+--
 -- TODO:
--- 
+--
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -85,7 +85,7 @@ begin
       RD       => '1',
       EMPTY    => data_empty
    );
-   
+
    data_reg_p: process(OUT_CLK)
    begin
       if (OUT_CLK'event and OUT_CLK = '1') then
@@ -99,4 +99,4 @@ begin
    OUT_TS_NS <= data_reg(63 downto 0);
    OUT_TS_DV <= '1';
 
-end architecture behavioral; 
+end architecture behavioral;

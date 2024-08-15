@@ -803,7 +803,7 @@ begin
 
     -- HHP register --------------------
     -- Reset after DMA Channel Start
-    -- Update by Header Manager module 
+    -- Update by Header Manager module
     reg_di   (R_HHP)(0) <= (others => '0');
     reg_we   (R_HHP)(0) <= chan_start_det;
     reg_addra(R_HHP)(0) <= start_pending_reg_chan;

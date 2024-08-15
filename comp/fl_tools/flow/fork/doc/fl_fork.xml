@@ -15,7 +15,7 @@
             Supports rx/tx FrameLink data bus width of 16, 32, 64 and 128 bits.
         </item>
         <item>
-            Split input FrameLink dataflow to output ports and waits until all devices are ready to receive data. 
+            Split input FrameLink dataflow to output ports and waits until all devices are ready to receive data.
         </item>
     </features>
 
@@ -41,7 +41,7 @@
             <port name="RESET" dir="in" width="1">
                 Global reset.
             </port>
-            
+
 
 	    <divider>
 	  	    RX FrameLink interface
@@ -72,7 +72,7 @@
 	    </port>
 
 
-	    
+
             <divider>
                 TX FrameLink interface - concentrated ports (use wrappers for spliting to
                 output interfaces)
@@ -109,7 +109,7 @@
 
         <h1>Data alignment</h1>
 	<p>
-            Little-endian byte order is used in this component. 
+            Little-endian byte order is used in this component.
         </p>
 
         <h1>FrameLink Fork Component</h1>
@@ -129,14 +129,14 @@
                                 <th>Slices Precision (% of C6X slices)</th>
 			</tr>
 			<tr>
-                <th>4 port interface</th> 
+                <th>4 port interface</th>
 				<td>1 (0.004%)</td>
                                 <td>1 (0.004%)</td>
 			</tr>
-		
+
 		<nazev>Chip utilization</nazev>
-		</tab> 
-	
+		</tab>
+
 		<tab sloupce="cccc">
 			<tr>
 				<th>Generic settings</th>
@@ -144,16 +144,16 @@
 				<th>Max.frequency by Precision</th>
 			</tr>
 			<tr>
-                          <th>4 port interface</th> 
+                          <th>4 port interface</th>
 				<td>no sequential logic</td>
                                 <td>no sequential logic</td>
 			</tr>
-			
+
 		<nazev>Maximal frequency</nazev>
-		</tab> 
-	
+		</tab>
+
          All values was measured after synthesis before PaR.
-       </p> 
+       </p>
        <h2>Wrappers</h2>
        <p>
          For splitting concentrated output ports to standalone FrameLink bus output interfaces use wrappers. Wrappers currently exists for 2, 3 and 4 output ports interfaces. This wrappers ara in files named fl_fork_1tox.vhd, where x is number of output ports.

@@ -33,7 +33,7 @@ class monitor #(int unsigned CHANNELS, int unsigned WIDTH) extends uvm_monitor;
     // Constructor
     function new (string name, uvm_component parent);
         super.new(name, parent);
-        
+
         WHOLE_BYTES : assert((WIDTH & 7) == 0);
     endfunction
 

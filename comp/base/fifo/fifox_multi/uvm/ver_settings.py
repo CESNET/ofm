@@ -73,7 +73,7 @@ SETTINGS = {
 
         (),
         ("IMPL_SHAKEDOWN_ON",),
-        
+
         ("SIZE_SMALL", "DEVICE_7SERIES", "SAFE_READ_MODE_ON",),
         ("SIZE_BIG",   "DEVICE_ARRIA10",   "ALMOST_FULL_OFFSET_71", "ALMOST_EMPTY_OFFSET_54",),
         (              "DEVICE_STRATIX10", "ALMOST_FULL_OFFSET_5",  "ALMOST_EMPTY_OFFSET_3", ),

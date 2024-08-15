@@ -2,7 +2,7 @@
 //-- Copyright (C) 2021 CESNET z. s. p. o.
 //-- Author(s): Tomáš Beneš <xbenes55@stud.fit.vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 
 import test_pkg::*;
@@ -16,7 +16,7 @@ module DUT (
 );
 
     MI_PIPE #(
-        
+
     ) VHDL_DUT_U (
         .CLK         (CLK),
         .RESET       (RESET),
@@ -41,7 +41,7 @@ module DUT (
         .OUT_BE         (MI_SLAVE.BE  ),
         .OUT_DRD        (MI_SLAVE.DRD ),
         .OUT_ARDY       (MI_SLAVE.ARDY),
-        .OUT_DRDY       (MI_SLAVE.DRDY)  
+        .OUT_DRDY       (MI_SLAVE.DRDY)
     );
 
 endmodule

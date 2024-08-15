@@ -10,7 +10,7 @@
  * TODO:
  *
  */
- 
+
 
 // ----------------------------------------------------------------------------
 //                         FrameLink Interface declaration
@@ -18,7 +18,7 @@
 import math_pkg::*; //log2
 
 // -- FrameLink Discard Stat Interface ----------------------------------------
-interface iDiscardStat #(CHANNELS=2, STATUS_WIDTH=2) (input logic CLK, RESET);  
+interface iDiscardStat #(CHANNELS=2, STATUS_WIDTH=2) (input logic CLK, RESET);
   logic [log2(CHANNELS)-1:0] RX_CHAN        = 0;  // Input channel
   logic [CHANNELS-1:0]       DST_RDY_N         ;  // FL RX Destination Ready
   logic [log2(CHANNELS)-1:0] TX_CHAN           ;  // Output channel
@@ -27,16 +27,16 @@ interface iDiscardStat #(CHANNELS=2, STATUS_WIDTH=2) (input logic CLK, RESET);
 
   clocking rx_cb @(posedge CLK);
     input  DST_RDY_N;
-    output RX_CHAN;  
+    output RX_CHAN;
   endclocking: rx_cb
 
   clocking tx_cb @(posedge CLK);
-    input TX_CHAN;  
+    input TX_CHAN;
   endclocking: tx_cb
 
   clocking stat_cb @(posedge CLK);
-    output STATUS;  
-    input  BUF_STATUS;  
+    output STATUS;
+    input  BUF_STATUS;
   endclocking: stat_cb
 
   // DUT Modport
@@ -45,7 +45,7 @@ interface iDiscardStat #(CHANNELS=2, STATUS_WIDTH=2) (input logic CLK, RESET);
                output TX_CHAN,
                input  STATUS,
                output BUF_STATUS);
-  
+
   // Testbench Modports
   modport rx_tb   (clocking rx_cb);
   modport tx_tb   (clocking tx_cb);

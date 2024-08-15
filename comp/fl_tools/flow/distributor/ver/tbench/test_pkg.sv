@@ -23,7 +23,7 @@ package test_pkg;
 
    // Include Scoreboard
    `include "scoreboard.sv"
-  
+
    // DUT GENERICS
    parameter DATA_WIDTH    =  128;   // Input/output data width
    parameter OUTPUT_COUNT  =  8;    // Number of output interfaces
@@ -32,15 +32,15 @@ package test_pkg;
                                    //   in bits. Mark cannot be between two
                                    //   words.
    parameter PARTS         =  1;
-   
+
    // TEST PARAMETERS
    parameter TRANSACTION_COUT = 200; // Count of transactions to generate
 
- 
+
    // TESTBENCH PARAMETERS
-   parameter DREM_WIDTH  = log2(DATA_WIDTH/8);            
+   parameter DREM_WIDTH  = log2(DATA_WIDTH/8);
    parameter FRAME_PARTS =  1;
-      
+
    // CLOCKS AND RESETS
    parameter CLK_PERIOD = 10ns;
    parameter RESET_TIME = 10*CLK_PERIOD;
@@ -61,15 +61,15 @@ package test_pkg;
    parameter DRIVER_INSIDE_DELAYDIS_WT = 50;                  // vaha delay disable v transakcii
    parameter DRIVER_INSIDE_DELAYLOW    = 0;                  // spodna hranica delay v transakcii
    parameter DRIVER_INSIDE_DELAYHIGH   = 10;                  // horna hranica delay v transakcii
-   
+
    // MONITOR PARAMETERS
    parameter MONITOR_DATA_WIDTH         = DATA_WIDTH;     // datova sirka monitoru
    parameter MONITOR_DREM_WIDTH         = DREM_WIDTH;     // drem sirka monitoru
-   parameter MONITOR_DELAYEN_WT         = 1;                 // vaha delay enable medzi transakciami 
+   parameter MONITOR_DELAYEN_WT         = 1;                 // vaha delay enable medzi transakciami
    parameter MONITOR_DELAYDIS_WT        = 50;                 // vaha delay disable medzi transakciami
    parameter MONITOR_DELAYLOW           = 0;                 // spodna hranica delay medzi transakciami
    parameter MONITOR_DELAYHIGH          = 10;                 // horna hranica delay medzi transakciami
-   parameter MONITOR_INSIDE_DELAYEN_WT  = 1;                 // vaha delay enable v transakcii 
+   parameter MONITOR_INSIDE_DELAYEN_WT  = 1;                 // vaha delay enable v transakcii
    parameter MONITOR_INSIDE_DELAYDIS_WT = 50;                 // vaha delay disable v transakcii
    parameter MONITOR_INSIDE_DELAYLOW    = 0;                 // spodna hranica delay v transakcii
    parameter MONITOR_INSIDE_DELAYHIGH   = 10;                 // horna hranica delay v transakcii

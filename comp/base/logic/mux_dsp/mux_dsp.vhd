@@ -15,14 +15,14 @@ use ieee.std_logic_1164.all;
 
 entity MUX_DSP is
    generic (
-      DATA_WIDTH  : integer := 48; 
+      DATA_WIDTH  : integer := 48;
       --! Input pipeline registers (0, 1)
       REG_IN_A    : integer := 1;
       REG_IN_B    : integer := 1;
       REG_SEL     : integer := 1;
       --! Output pipeline register (0, 1)
       REG_OUT     : integer := 1;
-      --! 
+      --!
       EN_CASCADE_IN  : boolean := false;
       NEG_SEL        : boolean := false
    );
@@ -53,8 +53,8 @@ architecture full of MUX_DSP is
    constant NUM : integer := DATA_WIDTH/48;
 begin
 
-   GEN_MUX: for I in 0 to NUM generate 
-   
+   GEN_MUX: for I in 0 to NUM generate
+
       GEN_OTHERS: if (I < NUM) generate
          signal tmp_P_OUT      : std_logic_vector(47 downto 0);
          signal tmp_P_CAS_OUT  : std_logic_vector(47 downto 0);
@@ -64,13 +64,13 @@ begin
 
          MUX48_inst: entity work.MUX48
          generic map(
-            REG_IN_A  => REG_IN_A, 
+            REG_IN_A  => REG_IN_A,
             REG_IN_B  => REG_IN_B,
-            REG_SEL   => REG_SEL, 
+            REG_SEL   => REG_SEL,
             REG_OUT   => REG_OUT,
             CASCADE_EN => EN_CASCADE_IN,
             NEG_SEL    => NEG_SEL
-         )   
+         )
          port map (
             CLK => CLK,
             RESET => RESET,
@@ -97,19 +97,19 @@ begin
          tmp_a(47 downto num_bits)  <=  (others => '0');
          tmp_b(num_bits-1 downto 0) <=  B(DATA_WIDTH-1 downto DATA_WIDTH-num_bits);
          tmp_b(47 downto num_bits)  <=  (others => '0');
-         
+
          P_CAS(DATA_WIDTH-1 downto DATA_WIDTH-num_bits) <= tmp_p_cas(num_bits-1 downto 0);
          P(DATA_WIDTH-1 downto DATA_WIDTH-num_bits) <= tmp_p(num_bits-1 downto 0);
 
          MUX48_inst: entity work.MUX48
          generic map(
-            REG_IN_A  => REG_IN_A, 
-            REG_IN_B  => REG_IN_B, 
-            REG_SEL   => REG_SEL, 
+            REG_IN_A  => REG_IN_A,
+            REG_IN_B  => REG_IN_B,
+            REG_SEL   => REG_SEL,
             REG_OUT   => REG_OUT,
             CASCADE_EN => EN_CASCADE_IN,
             NEG_SEL    => NEG_SEL
-         )   
+         )
          port map (
             CLK => CLK,
             RESET => RESET,

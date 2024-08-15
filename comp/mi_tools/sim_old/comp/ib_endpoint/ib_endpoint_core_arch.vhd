@@ -20,7 +20,7 @@ use work.ib_pkg.all; -- Internal Bus package
 --                      Architecture declaration
 -- ----------------------------------------------------------------------------
 architecture IB_ENDPOINT_CORE_ARCH of IB_ENDPOINT_CORE is
-   
+
    -- Input maping
    signal ib_in_data              : std_logic_vector(63 downto 0);
    signal ib_in_src_rdy           : std_logic;
@@ -28,13 +28,13 @@ architecture IB_ENDPOINT_CORE_ARCH of IB_ENDPOINT_CORE is
    signal ib_in_eop               : std_logic;
    signal ib_in_dst_rdy           : std_logic;
    signal internal_bus_down       : t_internal_bus_link64;
-   
+
    -- Output Data
    signal ib_out_sop              : std_logic;
    signal ib_out_eop              : std_logic;
    signal ib_out_src_rdy          : std_logic;
    signal ib_out_dst_rdy          : std_logic;
-   
+
    -- Address Decoder
    signal addr_dec_sop_vld        : std_logic;
    signal addr_dec_trans_type     : std_logic_vector(3 downto 0);
@@ -96,7 +96,7 @@ architecture IB_ENDPOINT_CORE_ARCH of IB_ENDPOINT_CORE is
    signal read_align_src_rdy_out  : std_logic;
    signal read_align_dst_rdy_out  : std_logic;
    signal read_align_eof_out      : std_logic;
-   
+
    -- Write Align circuit
    signal write_align_data_out    : std_logic_vector(63 downto 0);
    signal write_align_src_rdy_out : std_logic;
@@ -116,14 +116,14 @@ architecture IB_ENDPOINT_CORE_ARCH of IB_ENDPOINT_CORE is
    signal last_read_req              : std_logic;
    signal master_re_counter_reg      : std_logic_vector(C_IB_LENGTH_WIDTH-3 downto 0);
    signal master_last_read_req       : std_logic;
-   
+
    -- Header Generator
    signal hdr_data                   : std_logic_vector(63 downto 0);
    signal rd_compl_req               : std_logic;
    signal rd_compl_ack               : std_logic;
    signal get_slave_master           : std_logic;
    signal get_second_hdr             : std_logic;
-  
+
    -- Upstream Multipexor
    signal upstream_mux               : std_logic_vector(63 downto 0);
    signal upstream_mux_sel           : std_logic;
@@ -142,7 +142,7 @@ architecture IB_ENDPOINT_CORE_ARCH of IB_ENDPOINT_CORE is
    signal bm_fsm_idle                : std_logic;
    signal aux_sof                    : std_logic;
    signal aux_eof                    : std_logic;
- 
+
    -- Bus master length max comparator; BM_LENGTH = 0 is max
    signal cmp_bm_length_max : std_logic;
 
@@ -157,7 +157,7 @@ RD_ADDR <= read_addr_cnt;
 -------------------------------------------------------------------------------
 -- NO INPUT BUFFER (Only input signal maping)
 -------------------------------------------------------------------------------
-NO_INPUT_BUFFER_GEN: if (INPUT_BUFFER_SIZE = 0) generate 
+NO_INPUT_BUFFER_GEN: if (INPUT_BUFFER_SIZE = 0) generate
   ib_in_data        <= IB_DOWN_DATA;
   ib_in_src_rdy     <= not IB_DOWN_SRC_RDY_N; --// and ib_in_dst_rdy;
   ib_in_sop         <= not IB_DOWN_SOP_N;
@@ -168,14 +168,14 @@ end generate;
 -------------------------------------------------------------------------------
 -- WITH INPUT BUFFER
 -------------------------------------------------------------------------------
-INPUT_BUFFER_GEN: if (INPUT_BUFFER_SIZE > 0) generate 
+INPUT_BUFFER_GEN: if (INPUT_BUFFER_SIZE > 0) generate
  IB_ENDPOINT_DOWNSTREAM_BUFFER_U : entity work.IB_ENDPOINT_DOWNSTREAM_BUFFER
     generic map (
        ITEMS      => INPUT_BUFFER_SIZE
        )
     port map (
      -- Common Interface
-       IB_CLK            => IB_CLK, 
+       IB_CLK            => IB_CLK,
        IB_RESET          => IB_RESET,
        IN_DATA           => IB_DOWN_DATA,
        IN_SOP_N          => IB_DOWN_SOP_N,
@@ -192,7 +192,7 @@ INPUT_BUFFER_GEN: if (INPUT_BUFFER_SIZE > 0) generate
   ib_in_src_rdy                <= not internal_bus_down.src_rdy_n;
   ib_in_sop                    <= not internal_bus_down.sop_n;
   ib_in_eop                    <= not internal_bus_down.eop_n;
-  internal_bus_down.dst_rdy_n  <=  not ib_in_dst_rdy; 
+  internal_bus_down.dst_rdy_n  <=  not ib_in_dst_rdy;
 end generate;
 
 -------------------------------------------------------------------------------
@@ -213,7 +213,7 @@ IB_ENDPOINT_SHIFT_REG_U : entity work.IB_ENDPOINT_SHIFT_REG
       EOP_IN       => ib_in_eop,
       SRC_RDY_IN   => ib_in_src_rdy,
       DST_RDY_IN   => ib_in_dst_rdy,
-    
+
       --Output Interface
       DATA_OUT     => input_shr_data_out,
       DATA_OUT_VLD => input_shr_data_out_vld,
@@ -251,17 +251,17 @@ IB_ENDPOINT_WRITE_FSM_U : entity work.IB_ENDPOINT_WRITE_FSM
       IDLE            => write_fsm_idle,         -- FSM is Idle (For Strict Version)
       READ_FSM_IDLE   => read_fsm_idle,          -- Read FSM is Idle (For Strict Version)
       BM_FSM_IDLE     => bm_fsm_idle,            -- BM FSM Idle
- 
+
       -- SHR_IN Interface
       DATA_VLD        => input_shr_data_out_vld, -- Data from Shift Reg is valid
       SOP             => input_shr_sop_out,      -- Start of Packet
       EOP             => input_shr_eop_out,      -- End of Packet
       SHR_RE          => input_shr_write_re,     -- Read Data from shift reg
-      
+
       -- Address Decoder Interface
       WRITE_TRANS     => addr_dec_write_trans,   -- Processing write transactio
       READ_BACK       => addr_dec_read_back,
-       
+
       -- Reg ctrl
       DST_ADDR_WE     => write_addr_we,          -- Store Addr into addr_cnt and addr_align
       DST_ADDR_CNT_CE => write_addr_cnt_ce,      -- Increment address
@@ -355,7 +355,7 @@ IB_ENDPOINT_READ_FSM_U : entity work.IB_ENDPOINT_READ_FSM
       RESET            => read_reset,     -- IB_RESET,
       IDLE             => read_fsm_idle,  -- FSM is Idle (For Strict Version)
       WRITE_FSM_IDLE   => write_fsm_idle, -- Write FSM is Idle (For Strict Version)
-      
+
       -- SHR_IN Interface
       DATA_VLD         => input_shr_data_out_vld, -- Input shift reg data signals
       SOP              => input_shr_sop_out,
@@ -551,7 +551,7 @@ IB_ENDPOINT_READ_SHR_U : entity work.IB_ENDPOINT_READ_SHR
       RD_SRC_RDY_IN   => RD_SRC_RDY,
       RD_DST_RDY_IN   => RD_DST_RDY,
       -- Output Interface
-      RD_DATA_OUT     => read_shr_data_out, 
+      RD_DATA_OUT     => read_shr_data_out,
       RD_SRC_RDY_OUT  => read_shr_src_rdy_out,
       RD_DST_RDY_OUT  => read_shr_dst_rdy_out
       );
@@ -575,7 +575,7 @@ IB_ENDPOINT_READ_ALIGN_U : entity work.IB_ENDPOINT_READ_ALIGN
       RD_SRC_RDY_OUT => read_align_src_rdy_out,
       RD_DST_RDY_OUT => read_align_dst_rdy_out,
       RD_EOF         => read_align_eof_out,
- 
+
       -- Align Control Interface
       SLAVE_INIT      => slave_read_align_init,
       SLAVE_LENGTH    => input_shr_data_out(11 downto 0),
@@ -606,7 +606,7 @@ IB_ENDPOINT_WRITE_ALIGN_U : entity work.IB_ENDPOINT_WRITE_ALIGN
       RD_SRC_RDY_OUT     => write_align_src_rdy_out,
       RD_DST_RDY_OUT     => write_align_dst_rdy_out,
       RD_EOF_OUT         => write_align_eof_out,
-      
+
       -- Align Control Interface
       MASTER_ALIGN       => BM_GLOBAL_ADDR(2 downto 0),
       MASTER_LENGTH      => BM_LENGTH(2 downto 0),
@@ -698,12 +698,12 @@ IB_ENDPOINT_UPSTREAM_FSM_U : entity work.IB_ENDPOINT_UPSTREAM_FSM_SLAVE
       -- Upstream FSM Request Interface
       RD_COMPL_REQ       => rd_compl_req,
       RD_COMPL_ACK       => rd_compl_ack,
-      -- Header Generator Control Interface       
+      -- Header Generator Control Interface
       GET_SECOND_HDR     => get_second_hdr,
       -- Align Buffer Interface
       RD_SRC_RDY         => read_src_rdy_out,  -- Align buffer Data Valid
       RD_DST_RDY         => read_dst_rdy_out,  -- Align buffer dst_rdy
-      RD_EOF             => read_eof_out,      -- Align buffer Last Data 
+      RD_EOF             => read_eof_out,      -- Align buffer Last Data
       -- Multipexor Interface
       MUX_SEL            => upstream_mux_sel,    -- Select HEADER/DATA
       -- Upstream Interface
@@ -728,7 +728,7 @@ IB_ENDPOINT_UPSTREAM_FSM_U : entity work.IB_ENDPOINT_UPSTREAM_FSM_MASTER
       BM_REQ             => BM_REQ,
       BM_READ_ACK        => bm_read_ack,
       BM_ACK             => bm_ack_out,
-      BM_TRANS_TYPE      => BM_TRANS_TYPE,     
+      BM_TRANS_TYPE      => BM_TRANS_TYPE,
       -- Header Generator Control Interface
       GET_SLAVE_MASTER   => get_slave_master,  -- 0-Slave/1-Master
       GET_SECOND_HDR     => get_second_hdr,    -- Get second header
@@ -736,7 +736,7 @@ IB_ENDPOINT_UPSTREAM_FSM_U : entity work.IB_ENDPOINT_UPSTREAM_FSM_MASTER
       -- Align buffer Interface
       RD_SRC_RDY         => read_src_rdy_out,  -- Align buffer Data Valid
       RD_DST_RDY         => read_dst_rdy_out,  -- Align buffer dst_rdy
-      RD_EOF             => read_eof_out,      -- Align buffer Last Data 
+      RD_EOF             => read_eof_out,      -- Align buffer Last Data
       -- Multipexor Interface
       MUX_SEL            => upstream_mux_sel,    -- Select HEADER/DATA
       -- Upstream Interface
@@ -806,7 +806,7 @@ IB_ENDPOINT_MASTER_FSM_U : entity work.IB_ENDPOINT_MASTER_FSM
 rd_compl_start  <= '1' when input_shr_sop_out = '1' and input_shr_shr_re='1' and
                    input_shr_data_out(14 downto 12) = C_IB_RD_COMPL_TRANSACTION and
                    input_shr_data_out(15) = '1' else '0'; -- Flag must be '1' last fragment
-                   
+
 rd_compl_done   <= input_shr_eop_out and input_shr_write_re;
 
 -- Local to Local Write or Local to Global Write
@@ -826,8 +826,8 @@ IB_ENDPOINT_OP_DONE_BUFFER_U: entity work.IB_ENDPOINT_OP_DONE_BUFFER
       BM_TAG             => BM_TAG,
       BM_DONE            => gen_bm_op_done,
       -- OP Done Interface
-      OP_TAG             => BM_OP_TAG,      
-      OP_DONE            => BM_OP_DONE      
+      OP_TAG             => BM_OP_TAG,
+      OP_DONE            => BM_OP_DONE
       );
 
 end generate;

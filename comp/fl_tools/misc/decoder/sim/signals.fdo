@@ -8,13 +8,13 @@
 
 proc blk_FL_DEC { PARAM } {
    global FL_DEC_BASE
-   
+
    # FL_DEC interface
    if { $PARAM == "IFC" } {
       add wave -divider "FL_DEC"
       add_wave "-label clk" $FL_DEC_BASE/clk
       add_wave "-label reset" $FL_DEC_BASE/reset
-      
+
       add wave -divider "FrameLink interface"
       add_wave "-label sof_n" $FL_DEC_BASE/sof_n
       add_wave "-label sop_n" $FL_DEC_BASE/sop_n

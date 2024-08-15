@@ -36,8 +36,8 @@ void * nfb_sv_create(const char * path, int unsigned msg_size)
     if (ret->buff == NULL) {
         nfb_sv_close(ret, path);
         return NULL;
-    } 
-    
+    }
+
     // REQUEST
     attr.mq_flags   = 0;
     attr.mq_maxmsg  = 2;

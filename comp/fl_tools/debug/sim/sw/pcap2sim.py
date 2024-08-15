@@ -69,7 +69,7 @@ while (stopFlag == 0):
         l = s[i+4] + s[i+5] + s[i+2] + s[i+3] + s[i] + s[i+1]
         i = i + 6
     else:
-      l = s[i+6] + s[i+7] + s[i+4] + s[i+5] + s[i+2] + s[i+3] + s[i] + s[i+1] 
+      l = s[i+6] + s[i+7] + s[i+4] + s[i+5] + s[i+2] + s[i+3] + s[i] + s[i+1]
       i = i + 8
     t = t + l + "\n"
   t = t + "#"

@@ -19,13 +19,13 @@ use work.type_pack.all;
 -- **MI address space and register format:**
 --
 -- .. code-block::
--- 
+--
 --   Address space: SRC -> DST channel distribution table:
 --      0x000000: Source channel 0 round-robin distr. control
 --      0x000004: Source channel 1 round-robin distr. control
 --      0x000008: Source channel 2 round-robin distr. control
 --      ....
---   
+--
 --    Round-robin distribution control register format:
 --    31             23              15             7           0
 --   +----------------------------------------------------------+
@@ -36,11 +36,11 @@ use work.type_pack.all;
 --     ch_min : low DMA channel limit for round-robin distribution. Default 0x0
 --     ch_max : high DMA channel limit for round-robin distribution. Default 0x0
 --
---   Examples: 
+--   Examples:
 --      0x000000: Do not distribute frames - frame from Eth chan N is routed to DMA chan N
---      0xff0001: Distribute frames to all available DMA channels 
+--      0xff0001: Distribute frames to all available DMA channels
 --      0x070401: Distribute frames to DMA channels 4 to 7
---      0xff0002: Distribute frames to even DMA channels 
+--      0xff0002: Distribute frames to even DMA channels
 --      0x050501: Send all frames to DMA channel 5 only
 --
 -- **Channel number calculation:**

@@ -35,7 +35,7 @@ class sequence_slave_simple #(int unsigned ADDRESS_WIDTH, int unsigned DATA_WIDT
             finish_item(req);
         end
     endtask
-    
+
 endclass
 
 // Master
@@ -70,7 +70,7 @@ class sequence_master #(int unsigned ADDRESS_WIDTH, int unsigned DATA_WIDTH, int
     // Get response fifo from sequence
     task pre_body();
         super.pre_body();
-        
+
         assert(uvm_config_db #(uvm_tlm_analysis_fifo #(response_item #(DATA_WIDTH)))::get(m_sequencer, "", "response_in", response_in))
         else begin
             `uvm_fatal(m_sequencer.get_full_name(), "\n\tCannot get response input fifo");
@@ -126,7 +126,7 @@ class sequence_master #(int unsigned ADDRESS_WIDTH, int unsigned DATA_WIDTH, int
         end
         finish_item(req);
     endtask
-    
+
 endclass
 
 class sequence_master_endless #(int unsigned ADDRESS_WIDTH, int unsigned DATA_WIDTH, int unsigned BURST_WIDTH) extends sequence_master #(ADDRESS_WIDTH, DATA_WIDTH, BURST_WIDTH);
@@ -151,7 +151,7 @@ class sequence_master_endless #(int unsigned ADDRESS_WIDTH, int unsigned DATA_WI
             end
         end
     endtask
-    
+
 endclass
 
 // Always sets the READY signals
@@ -212,7 +212,7 @@ class sequence_master_fullspeed #(int unsigned ADDRESS_WIDTH, int unsigned DATA_
         end
         finish_item(req);
     endtask
-    
+
 endclass
 
 class sequence_master_static_latency #(int unsigned ADDRESS_WIDTH, int unsigned DATA_WIDTH, int unsigned BURST_WIDTH) extends sequence_master #(ADDRESS_WIDTH, DATA_WIDTH, BURST_WIDTH);
@@ -247,7 +247,7 @@ class sequence_master_static_latency #(int unsigned ADDRESS_WIDTH, int unsigned 
 
         req = sequence_item_response #(DATA_WIDTH)::type_id::create("req");
         while (current_transaction_count < transaction_count) begin
-            if (response_in.try_get(response)) begin    
+            if (response_in.try_get(response)) begin
                 latency_wait(response.timestamp);
 
                 send_response(response);
@@ -266,7 +266,7 @@ class sequence_master_static_latency #(int unsigned ADDRESS_WIDTH, int unsigned 
             #(latency - delay);
         end
     endtask
-    
+
 endclass
 
 class sequence_master_dynamic_latency #(int unsigned ADDRESS_WIDTH, int unsigned DATA_WIDTH, int unsigned BURST_WIDTH) extends sequence_master_static_latency #(ADDRESS_WIDTH, DATA_WIDTH, BURST_WIDTH);
@@ -296,7 +296,7 @@ class sequence_master_dynamic_latency #(int unsigned ADDRESS_WIDTH, int unsigned
             end
         end
     endtask
-    
+
 endclass
 
 class sequence_master_dynamic_minmax_latency #(int unsigned ADDRESS_WIDTH, int unsigned DATA_WIDTH, int unsigned BURST_WIDTH) extends sequence_master_static_latency #(ADDRESS_WIDTH, DATA_WIDTH, BURST_WIDTH);
@@ -327,7 +327,7 @@ class sequence_master_dynamic_minmax_latency #(int unsigned ADDRESS_WIDTH, int u
             end
         end
     endtask
-    
+
 endclass
 
 class sequence_master_bursting #(int unsigned ADDRESS_WIDTH, int unsigned DATA_WIDTH, int unsigned BURST_WIDTH) extends sequence_master_static_latency #(ADDRESS_WIDTH, DATA_WIDTH, BURST_WIDTH);
@@ -386,7 +386,7 @@ class sequence_master_bursting #(int unsigned ADDRESS_WIDTH, int unsigned DATA_W
             end
         end
     endtask
-    
+
 endclass
 
 class sequence_library_master #(int unsigned ADDRESS_WIDTH, int unsigned DATA_WIDTH, int unsigned BURST_WIDTH) extends uvm_common::sequence_library #(config_sequence, sequence_item_response #(DATA_WIDTH), sequence_item_request #(ADDRESS_WIDTH, DATA_WIDTH, BURST_WIDTH));

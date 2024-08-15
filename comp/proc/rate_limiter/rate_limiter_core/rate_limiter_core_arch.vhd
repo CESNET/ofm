@@ -78,7 +78,7 @@ architecture limiter of rate_lim is
    signal reg5_addr        : std_logic_vector(ADDR_WIDTH-1 downto 0);
    signal reg6_addr        : std_logic_vector(ADDR_WIDTH-1 downto 0);
    signal reg_addr         : std_logic_vector(ADDR_WIDTH-1 downto 0);
-   
+
    signal reg1_addr_vld    : std_logic;
    signal reg2_addr_vld    : std_logic;
    signal reg3_addr_vld    : std_logic;

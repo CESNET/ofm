@@ -8,10 +8,10 @@
 `define AVST_CRDT_PKG
 
 package uvm_avst_crdt;
-    
+
     `include "uvm_macros.svh"
     import uvm_pkg::*;
-   
+
     `include "config.sv"
     `include "sequence_item.sv"
     `include "sequencer.sv"

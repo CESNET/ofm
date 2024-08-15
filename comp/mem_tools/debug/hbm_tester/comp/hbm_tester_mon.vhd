@@ -109,7 +109,7 @@ begin
             s_rd_addr_word         <= RD_ADDR_VALID and RD_ADDR_READY;
             s_rd_data_word         <= RD_DATA_VALID and RD_DATA_READY;
             s_gen_data_ok_inc_reg  <= GEN_DATA_OK_INC;
-            s_gen_data_err_inc_reg <= GEN_DATA_ERR_INC;            
+            s_gen_data_err_inc_reg <= GEN_DATA_ERR_INC;
         end if;
     end process;
 
@@ -122,7 +122,7 @@ begin
     s_monitor_done  <= '1' when (s_monitor_time_cnt = unsigned(CS_MONITOR_TIME)) else '0';
 
     CS_MONITOR_DONE <= s_monitor_done;
-    
+
     monitor_busy_p : process (CLK)
     begin
         if (rising_edge(CLK)) then
@@ -191,7 +191,7 @@ begin
     end process;
 
     -- -------------------------------------------------------------------------
-    --  CONFIGURABLE COUNTER 0 
+    --  CONFIGURABLE COUNTER 0
     -- -------------------------------------------------------------------------
 
     s_counter0_rst <= RESET or CS_MONITOR_RESET;
@@ -245,7 +245,7 @@ begin
             end if;
         end if;
     end process;
-    
+
     CS_COUNTER1_OUT <= std_logic_vector(s_counter1);
 
 end architecture;

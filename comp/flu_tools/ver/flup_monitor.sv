@@ -156,7 +156,7 @@ class FrameLinkUPMonitor #(int pDataWidth=512, int pEopWidth=6, int pSopWidth=3,
          // Get channel
          channel = sw.monitor_cb.CHANNEL;
 
-         last_sop_pos = sw.monitor_cb.SOP_POS;         
+         last_sop_pos = sw.monitor_cb.SOP_POS;
          started = 1;
       end
       else begin
@@ -228,7 +228,7 @@ class FrameLinkUPMonitor #(int pDataWidth=512, int pEopWidth=6, int pSopWidth=3,
                end;  // for
 
                // Get channel
-               interframe_channel = sw.monitor_cb.CHANNEL;               
+               interframe_channel = sw.monitor_cb.CHANNEL;
 
                // Get data word byte by byte
                interframe_aux = new[(pDataWidth-last_sop_pos*sopstep)/8];

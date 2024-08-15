@@ -14,6 +14,6 @@ set TESTBENCH_PATH	    "/testbench"
 source "signals.fdo"
 
 # Functions for vsim wave setup
-blk_DISTRIB 
+blk_DISTRIB
 blk_OTHER
 

@@ -37,7 +37,7 @@ signal cmd_rdy  : std_logic;
 signal cmd_ack  : std_logic; -- command done
 signal ack_out  : std_logic;
 signal dout     : std_logic_vector(7 downto 0);
-            
+
 signal start    : std_logic;
 signal stop     : std_logic;
 
@@ -58,8 +58,8 @@ signal master_sda_oen_o : std_logic;  -- i2c data line output enable, active low
 signal master_be  : std_logic_vector( 7 downto 0);
 signal master_dwr : std_logic_vector(63 downto 0);
 signal master_drd : std_logic_vector(63 downto 0);
-signal master_wen : std_logic;	              -- 
-signal master_int : std_logic;                    
+signal master_wen : std_logic;	              --
+signal master_int : std_logic;
 
 signal tristate_scl : std_logic;
 signal tristate_sda : std_logic;
@@ -73,7 +73,7 @@ uut: entity work.I2C_SLAVE_BYTE_CTRL
    port map(
       CLK         => clk,
       RESET       => reset,
-                               
+
       CMD         => cmd,
       DIN         => din,
       DEV_ADDR    => dev_addr,
@@ -81,20 +81,20 @@ uut: entity work.I2C_SLAVE_BYTE_CTRL
       ACK_IN      => ack_in,
       CMD_VLD     => cmd_vld,
       CMD_RDY     => cmd_rdy,
-                               
+
       CMD_ACK     => cmd_ack,
       ACK_OUT     => ack_out,
       DOUT        => dout,
-                           
+
       START       => start,
       STOP        => stop,
-                               
+
       SCL_I       => scl_i,
       SCL_O       => scl_o,
       SCL_OEN     => scl_oen,
       SDA_I       => sda_i,
       SDA_O       => sda_o,
-      SDA_OEN     => sda_oen   
+      SDA_OEN     => sda_oen
    );
 tristate_scl <= scl_o when (scl_oen = '0') else 'Z';
 tristate_sda <= sda_o when (sda_oen = '0') else 'Z';

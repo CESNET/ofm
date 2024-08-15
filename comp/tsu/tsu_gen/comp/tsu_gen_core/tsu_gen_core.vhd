@@ -137,7 +137,7 @@ begin
    -- ----------------------------------------------------------------------------
    --                            ASYNC MI32
    -- ----------------------------------------------------------------------------
-  
+
    mi_async_i : entity work.MI_ASYNC
    generic map (
       RAM_TYPE => "AUTO",
@@ -302,9 +302,9 @@ begin
    end process select_register;
 
    -- --------------------------------------------------------------------------------
-   --! Set write enable into register   
+   --! Set write enable into register
      reg_rtr_we_0            <= sel_reg_rtr_rd and reg_write;
-     reg_incr_val_we         <= sel_reg_incr_val_rd and reg_write; 
+     reg_incr_val_we         <= sel_reg_incr_val_rd and reg_write;
 
    -- -------------------------------------------------------
    --! MI32 common data register low
@@ -459,7 +459,7 @@ begin
          tsu_drd <= drd_mux;
       end if;
    end process;
-  
+
    mux_mi32_drd : process(core_reg_mi_data_low_drdy, core_reg_mi_data_low, core_reg_mi_data_middle_drdy, core_reg_mi_data_middle,
                           core_reg_mi_data_high_drdy, core_reg_mi_data_high)
    begin
@@ -499,7 +499,7 @@ begin
    -- --------------------------------------------------------------------------------
    --! Set write enable into register
    mi_reg_mi_data_low_we      <= sel_reg_mi_data_low and tsu_wr;
-   mi_reg_mi_data_middle_we   <= sel_reg_mi_data_middle and tsu_wr; 
+   mi_reg_mi_data_middle_we   <= sel_reg_mi_data_middle and tsu_wr;
    mi_reg_mi_data_high_we     <= sel_reg_mi_data_high and tsu_wr;
    mi_reg_cntrl_we            <= sel_reg_cntrl and tsu_wr;
    mi_reg_ts_dv_we            <= sel_reg_inta and tsu_wr;
@@ -508,4 +508,4 @@ begin
    core_reg_mi_data_middle_we <= (sel_reg_rtr_wr or sel_reg_incr_val_wr or sel_reg_pulsepsec_wr) and reg_write;
    core_reg_mi_data_high_we   <= (sel_reg_rtr_wr or sel_reg_pulsepsec_wr) and reg_write;
 
-end architecture; 
+end architecture;

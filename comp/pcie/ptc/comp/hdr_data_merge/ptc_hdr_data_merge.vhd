@@ -16,7 +16,7 @@ use work.dma_bus_pack.all; -- contains definitions for MVB header fields
 entity PTC_HDR_DATA_MERGE is
    generic(
       -- =======================================================================
-      -- MFB DATA BUS CONFIGURATION: 
+      -- MFB DATA BUS CONFIGURATION:
       -- =======================================================================
       -- Supported configuration is only MFB(2,1,8,32)
       MFB_REGIONS         : natural := 2;
@@ -24,13 +24,13 @@ entity PTC_HDR_DATA_MERGE is
       MFB_BLOCK_SIZE      : natural := 8;
       MFB_ITEM_WIDTH      : natural := 32;
       -- =======================================================================
-      -- MVB HEADER BUS CONFIGURATION: 
+      -- MVB HEADER BUS CONFIGURATION:
       -- =======================================================================
       -- Supported configuration is only MVB(2,128)
       MVB_ITEMS           : natural := 2;
       MVB_ITEM_WIDTH      : natural := 128;
       -- =======================================================================
-      -- OTHER CONFIGURATION: 
+      -- OTHER CONFIGURATION:
       -- =======================================================================
       -- Width of PCIe transaction size signal. Set Log2 of maximum supported
       -- PCIe transaction size (HDR + payload) in dwords
@@ -197,7 +197,7 @@ begin
       RX_MFB_DATA_EOF     => RX_MFB_EOF,
       RX_MFB_DATA_SRC_RDY => RX_MFB_SRC_RDY,
       RX_MFB_DATA_DST_RDY => RX_MFB_DST_RDY,
-      
+
       TX_MVB_DATA         => TX_MVB_DATA,
       TX_MVB_VLD          => TX_MVB_VLD,
 

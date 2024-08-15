@@ -14,7 +14,7 @@
 class monitor #(int unsigned DATA_WIDTH) extends uvm_byte_array::monitor;
 
     `uvm_component_param_utils(uvm_byte_array_pma::monitor #(DATA_WIDTH))
-    
+
     // Analysis port
     uvm_analysis_imp #(uvm_pma::sequence_item #(DATA_WIDTH), monitor #(DATA_WIDTH)) analysis_export;
     uvm_byte_array::sequence_item h_tr;

@@ -3,7 +3,7 @@
 --! \file
 --! \brief Async FL_FIFO composed of FPGA built-in FIFOs.
 --! \author Jakub Cabal <jakubcabal@gmail.com>
---! \date 2014 
+--! \date 2014
 --!
 --! \section License
 --!
@@ -30,18 +30,18 @@ entity FL_ASFIFO_LUT is
   );
   port (
     --! \name Resets and clocks
-    
+
     --! Input Framelink clock
     RX_CLK         : in  std_logic;
-    --! Input Framelink reset 
+    --! Input Framelink reset
     RX_RESET       : in  std_logic;
     --! Output Framelink clock
     TX_CLK         : in  std_logic;
-    --! Output Framelink reset 
+    --! Output Framelink reset
     TX_RESET       : in  std_logic;
 
     --! \name Write interface
-    
+
     --! Write side data
     RX_DATA        : in  std_logic_vector(DATA_WIDTH-1 downto 0);
     --! Write side data remainder
@@ -58,7 +58,7 @@ entity FL_ASFIFO_LUT is
     RX_SOF_N       : in  std_logic;
     --! Write side not end of frame
     RX_EOF_N       : in  std_logic;
-    
+
     --! \name Read interface
 
     --! Read side data
@@ -82,9 +82,9 @@ end entity;
 
 --! \brief Full implementation of async FL_FIFO composed of FPGA built-in FIFOs.
 architecture full of FL_ASFIFO_LUT is
-  constant EOP_POS_WIDTH : integer := log2(DATA_WIDTH/8);  
+  constant EOP_POS_WIDTH : integer := log2(DATA_WIDTH/8);
   constant FIFO_WIDTH    : integer := DATA_WIDTH+EOP_POS_WIDTH+1+1+1+1;
- 
+
   signal full            : std_logic;
   signal empty           : std_logic;
   signal read            : std_logic;
@@ -100,12 +100,12 @@ begin
   TX_EOP_N     <= data_out(2);
   TX_SOF_N     <= data_out(1);
   TX_EOF_N     <= data_out(0);
-  
+
   --! input control
   RX_DST_RDY_N <= full;
-  write        <= not RX_SRC_RDY_N and not full; 
-  
-  --! ASFIFO  
+  write        <= not RX_SRC_RDY_N and not full;
+
+  --! ASFIFO
   asfifo : entity work.ASFIFO
     generic map (
       DATA_WIDTH   => FIFO_WIDTH,
@@ -125,7 +125,7 @@ begin
       RD       => read,
       EMPTY    => empty
     );
-    
+
   --! output control
   TX_SRC_RDY_N <= empty;
   read         <= not TX_DST_RDY_N and not empty;

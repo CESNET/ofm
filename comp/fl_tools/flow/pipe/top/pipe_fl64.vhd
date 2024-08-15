@@ -26,7 +26,7 @@ entity fl_pipe_fl64 is
 
       -- input interface
       RX    : inout t_fl64;
-      
+
       -- output interfaces
       TX    : inout t_fl64
    );
@@ -52,7 +52,7 @@ begin
       RX_EOF_N       => RX.EOF_N,
       RX_SRC_RDY_N   => RX.SRC_RDY_N,
       RX_DST_RDY_N   => RX.DST_RDY_N,
-      
+
       -- output interface
       TX_DATA        => TX.DATA,
       TX_REM         => TX.DREM,

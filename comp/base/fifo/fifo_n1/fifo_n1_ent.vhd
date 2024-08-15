@@ -58,7 +58,7 @@ entity FIFO_N1 is
       -- Data input
       DATA_IN  : in  slv_array_t(0 to WRITE_PORTS-1)(DATA_WIDTH-1 downto 0);
       -- Write request
-      WE       : in  std_logic_vector(WRITE_PORTS-1 downto 0); 
+      WE       : in  std_logic_vector(WRITE_PORTS-1 downto 0);
       -- FIFO is full
       FULL     : out std_logic;
       -- FIFO is almost full (see ALMOST_FULL_OFFSET)

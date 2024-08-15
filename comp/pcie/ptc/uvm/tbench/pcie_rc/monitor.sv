@@ -2,7 +2,7 @@
 //-- Copyright (C) 2022 CESNET z. s. p. o.
 //-- Author(s): Daniel Kříž <xkrizd01@vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 class monitor #(ITEM_WIDTH, DEVICE) extends uvm_logic_vector::monitor#(ITEM_WIDTH);
     `uvm_component_param_utils(uvm_pcie_rc::monitor #(ITEM_WIDTH, DEVICE))

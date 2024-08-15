@@ -32,7 +32,7 @@ class LoggerTools:
 
         for i in d_list:
             for keys in self.nested_dict_keys(res):
-                orig   = i 
+                orig   = i
                 handle = res
                 for k in keys:
                     handle  = handle[k]
@@ -45,7 +45,7 @@ class LoggerTools:
                     handle.append(orig)
 
         return res
-    
+
     def dict_to_numpy(self, d):
         first = d[list(d.keys())[0]]
         res = np.zeros((len(d), len(first)))
@@ -53,7 +53,7 @@ class LoggerTools:
             res[i] = d[k]
 
         return res
-    
+
  #   ## Printing ##
  #
  #   def printValue(self, name, key=None, value=None, norm='from main', normV=None):
@@ -97,7 +97,7 @@ class LoggerTools:
  #
  #       for k, v in sort:
  #           txt += f"  {k} = {v}\n"
- #       return txt 
+ #       return txt
  #
  #   def topNHistRaw(self, hist, N=5):
  #       hist = {float(k) : v for k,v in hist.items()}

@@ -1,4 +1,4 @@
-# multiplexer_sig.fdo : Include file with signals 
+# multiplexer_sig.fdo : Include file with signals
 # Copyright (C) 2010 CESNET
 # Author: Marek Santa <santa@liberouter.org>
 #
@@ -10,7 +10,7 @@
 source "./signals.fdo"
 
 # zmena nazvu testovanej komponenty
-add wave -divider "MULTIPLEXER"  
+add wave -divider "MULTIPLEXER"
 add_wave "-noupdate -color yellow -label RESET"   /testbench/RESET
 add_wave "-noupdate -color yellow -label CLK"     /testbench/CLK
 # zmena nazvu testovanej komponenty

@@ -47,7 +47,7 @@ module DUT (
 
     generate
         for (genvar i = 0; i < MERGER_INPUTS; i++) begin
-            
+
             for (genvar e = 0; e < MVB_ITEMS; e++) begin
                 assign rx_mvb_data   [i][(e+1)*MVB_ITEM_WIDTH-1 : e*MVB_ITEM_WIDTH] = RX_MVB[i].DATA[(e+1)*MVB_ITEM_WIDTH-1 : e*MVB_ITEM_WIDTH];
                 assign rx_mvb_payload[i][e]                                         = RX_MVB[i].DATA[e*MVB_ITEM_WIDTH];

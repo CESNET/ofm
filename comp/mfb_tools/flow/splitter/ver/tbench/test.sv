@@ -74,7 +74,7 @@ program TEST (
 
          mvb_monitor[i] = new($sformatf("MVB Monitor %03d",i), vMO_MVB[i]);
          mfb_monitor[i] = new($sformatf("MFB Monitor %03d",i), vMO_MFB[i]);
-   
+
          mvb_monitor[i].setCallbacks(scoreboard.mvbMonitorCbs[i]);
          mfb_monitor[i].setCallbacks(scoreboard.mfbMonitorCbs[i]);
       end

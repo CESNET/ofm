@@ -1,6 +1,6 @@
 # signals.fdo : Include file with signals
 # Copyright (C) 2020 CESNET z. s. p. o.
-# Author: Daniel Kriz <xkrizd01@vutbr.cz> 
+# Author: Daniel Kriz <xkrizd01@vutbr.cz>
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -13,11 +13,11 @@ proc rx {NAME PATH} {
 }
 
 proc tx {NAME PATH} {
-    add wave -divider "$NAME"      
+    add wave -divider "$NAME"
      add_wave "-noupdate  -hex"       $PATH/TX_*
 }
 
 proc all {NAME PATH} {
-    add wave -divider "$NAME"      
+    add wave -divider "$NAME"
      add_wave "-noupdate  -hex"       $PATH/*
 }

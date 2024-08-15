@@ -61,7 +61,7 @@ class DataLogger(nfb.BaseComp):
 
         self.config = self.load_config()
         self.mi_width = self.config["MI_DATA_WIDTH"]
-         
+
     def main_ctrl_read(self):
         return {
             "sw_rst":   (self._comp.get_bit(self._REG_CTRL, self._BIT_SW_RST)),
@@ -82,7 +82,7 @@ class DataLogger(nfb.BaseComp):
     def load_slices(self, width):
         slices = math.ceil(width / self.config["MI_DATA_WIDTH"])
         value = 0
-        
+
         for i in range(0, slices):
             if self.last_slice != i:
                 self._comp.write32(self._REG_SLICE, i)
@@ -91,7 +91,7 @@ class DataLogger(nfb.BaseComp):
             value += self._comp.read32(self._REG_VALUE) << (i * self.config["MI_DATA_WIDTH"])
 
         return value
-    
+
     def stat_read(self, stat, index=0, en_slices=True):
         if self.last_stat != stat:
             self._comp.write32(self._REG_STATS, stat)
@@ -122,7 +122,7 @@ class DataLogger(nfb.BaseComp):
             width = self.config["MI_DATA_WIDTH"]
 
         return self.load_slices(width)
-    
+
     def hist_read(self, index, addr):
         if self.last_stat != self._ID_VALUE_HIST:
             self._comp.write32(self._REG_STATS, self._ID_VALUE_HIST)
@@ -167,16 +167,16 @@ class DataLogger(nfb.BaseComp):
             config["HIST_BOX_CNT"   ].append(self.stat_read(self._ID_HIST_BOX_CNT   , i, en_slices=False))
             config["HIST_BOX_WIDTH" ].append(self.stat_read(self._ID_HIST_BOX_WIDTH , i, en_slices=False))
 
-            hist_max  = 2 ** config["VALUE_WIDTH"][i] 
+            hist_max  = 2 ** config["VALUE_WIDTH"][i]
             hist_step = hist_max / config["HIST_BOX_CNT"][i]
             config["HIST_STEP"].append(hist_step)
 
         return config
-    
+
     def load_ctrl(self, out):
         id    = self._ID_CTRLO if out else self._ID_CTRLI
         return self.stat_read(id, 0)
-    
+
     def set_ctrlo(self, val):
         if self.last_stat != self._ID_CTRLO:
             self._comp.write32(self._REG_STATS, self._ID_CTRLO)
@@ -184,7 +184,7 @@ class DataLogger(nfb.BaseComp):
         if self.last_index != 0:
             self._comp.write32(self._REG_INDEX, 0)
             self.last_index = 0
-        
+
         slices = math.ceil(self.config["CTRLO_WIDTH"] / self.mi_width)
         for i in range(0, slices):
             if self.last_slice != i:
@@ -196,7 +196,7 @@ class DataLogger(nfb.BaseComp):
 
     def load_cnter(self, index):
         return self.stat_read(self._ID_CNTER, index)
-    
+
     def load_value(self, index):
         if self.config['VALUE_CNT'] <= index:
             print("Value out of range", file=sys.stderr)
@@ -208,7 +208,7 @@ class DataLogger(nfb.BaseComp):
                 'avg': 0,
                 'hist': [],
             }
-            
+
         val = {}
         val["cnt"] = self.stat_read(self._ID_CNTER, index + self.config["CNTER_CNT"])
         if self.config["VALUE_EN"][index]["MIN"]:
@@ -224,7 +224,7 @@ class DataLogger(nfb.BaseComp):
                 val["hist"].append(self.hist_read(index, b))
 
         return val
-    
+
     def get_bits(self, val, width, pos):
         binary = bin(val)[2:]
         end   = - pos
@@ -233,10 +233,10 @@ class DataLogger(nfb.BaseComp):
             end = None
         cut = binary[start:end]
         if len(cut) == 0:
-            return 0 
+            return 0
         else:
             return int(cut, 2)
-    
+
     def config_to_str(self):
         return json.dumps(self.config, indent=4)
 
@@ -253,12 +253,12 @@ class DataLogger(nfb.BaseComp):
 
 
 def parseParams():
-    parser = argparse.ArgumentParser(description = 
+    parser = argparse.ArgumentParser(description =
         """data_logger control script""",
     )
 
     access = parser.add_argument_group('card access arguments')
-    access.add_argument('-d', '--device', default=nfb.libnfb.Nfb.default_device, 
+    access.add_argument('-d', '--device', default=nfb.libnfb.Nfb.default_device,
                         metavar='device', help = """device with target FPGA card""")
     access.add_argument('-i', '--index',        type=int, metavar='index', default=0, help = """index inside DevTree""")
 

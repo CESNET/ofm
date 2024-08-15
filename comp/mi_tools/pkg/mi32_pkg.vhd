@@ -21,8 +21,8 @@ package mi32_pkg is
       BE       : std_logic_vector(3  downto 0);           -- Byte Enable
       DRD      : std_logic_vector(31 downto 0);           -- Output Data
       ARDY     : std_logic;                               -- Address Ready
-      DRDY     : std_logic;                               -- Data Ready   
-   end record;   
+      DRDY     : std_logic;                               -- Data Ready
+   end record;
 
    type t_mi32_array is array (natural range <>) of t_mi32;
 

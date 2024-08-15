@@ -6,7 +6,7 @@
 
 
 package test_pkg;
-   
+
     import math_pkg::*;
 
     parameter REGIONS     = 1;
@@ -27,6 +27,6 @@ package test_pkg;
 
     parameter CLK_PERIOD = 10ns;
     parameter RESET_TIME = 10*CLK_PERIOD;
- 
+
     `include "scoreboard.sv"
 endpackage

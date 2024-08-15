@@ -26,7 +26,7 @@ architecture behavioral of testbench is
    signal CLK              : std_logic;
    signal RESET            : std_logic;
 
-   signal DATA             : std_logic_vector(DATA_WIDTH-1 downto 0); 
+   signal DATA             : std_logic_vector(DATA_WIDTH-1 downto 0);
    signal SRC_RDY          : std_logic;
    signal DST_RDY          : std_logic;
 
@@ -47,7 +47,7 @@ architecture behavioral of testbench is
      signal MI_ARDY                       :  std_logic;
       --! Data Ready
      signal MI_DRDY                       :  std_logic;
-   
+
 begin
 
    -- MUL48
@@ -83,9 +83,9 @@ begin
       --! Data Ready
       MI_DRDY                       => MI_DRDY
    );
-   
+
    --Generate clock
-   clk_gen_p : process 
+   clk_gen_p : process
    begin
       CLK <= '1';
       wait for clkper/2;
@@ -93,14 +93,14 @@ begin
       wait for clkper/2;
    end process clk_gen_p;
 
-   dst_rdy_gen : process 
+   dst_rdy_gen : process
    begin
       DST_RDY <= '1';
       wait for 472 ns;
       DST_RDY<= '0';
       wait for clkper*4;
-   end process dst_rdy_gen;    
-         
+   end process dst_rdy_gen;
+
    reset_gen : process
    begin
       RESET <= '1';
@@ -109,10 +109,10 @@ begin
    wait;
    end process;
 
-   -- Simulating input flow 
+   -- Simulating input flow
    input_flow : process
    begin
-      
+
       -- Initialize input interface
       MI_DWR                        <= X"00000000";
       --! Address
@@ -130,8 +130,8 @@ begin
 
       MI_BE   <= "1111";
       MI_WR   <= '1';
-      
-      --! writing data to bram  
+
+      --! writing data to bram
       --! #1
       MI_ADDR <= (13 => '0', 6 => '1', others => '0');
       MI_DWR  <= X"00000001";
@@ -186,31 +186,31 @@ begin
       MI_DWR  <= X"00000006";
       wait for 2*clkper;
 
-                  
+
       MI_WR   <= '0';
       wait for clkper;
-      
-      --! writing config1 
+
+      --! writing config1
       MI_WR   <= '1';
       MI_ADDR <= (3 => '1', others => '0');
       MI_DWR  <= X"000C000C";
       wait for 2*clkper;
 
-      --! writing config2 
+      --! writing config2
       MI_ADDR <= (3 => '1', 2 => '1', others => '0');
       MI_DWR  <= X"00000001";
       wait for 2*clkper;
 
-      --! writing config3 
+      --! writing config3
       MI_ADDR <= (4 => '1', others => '0');
       MI_DWR  <= X"00000003";
       wait for 2*clkper;
 
-      --! writing config4 
+      --! writing config4
       MI_ADDR <= (4 => '1', 2 => '1', others => '0');
       MI_DWR  <= X"1F000000";
       wait for 2*clkper;
-  
+
       --! run set 1
       MI_ADDR <= (4 => '1', 3 => '1', others => '0');
       MI_DWR  <= X"00000001";

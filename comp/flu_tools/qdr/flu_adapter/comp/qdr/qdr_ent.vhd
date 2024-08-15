@@ -44,7 +44,7 @@ entity QDR is
       --! Calibration done from QDR IP core
       CAL_DONE            : in  std_logic_vector(QDR_NUMBER-1 downto 0);
       REG_CAL_DONE        : out std_logic;
-      
+
       --! FLU2QDR -> QDR adapter
       --! read request (address)
       QDR_RX_RD_ADDR      : in  std_logic_vector(ADDR_WIDTH-2 downto 0);

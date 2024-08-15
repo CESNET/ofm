@@ -1,5 +1,5 @@
 /*
- * file       : sequencer.sv 
+ * file       : sequencer.sv
  * description: virtual sequencer associate all sequencer together
  * date       : 2020
  * author     : Radek Iša <isa@cesnet.cz>
@@ -18,12 +18,12 @@ class virtual_sequencer extends uvm_sequencer;
 
     // variables
     packet::sequencer#(ITEM_WIDTH, MFB_META_TX_WIDTH) avalon_rx_sequencer;
-    avst_tx::sequencer avalon_tx_sequencer; 
+    avst_tx::sequencer avalon_tx_sequencer;
     //PTC
-    mfb_rx::sequencer #(ITEM_WIDTH, MFB_META_RX_WIDTH) mfb_rx_ptc_sequencer;      
+    mfb_rx::sequencer #(ITEM_WIDTH, MFB_META_RX_WIDTH) mfb_rx_ptc_sequencer;
     mfb_tx::sequencer mfb_tx_ptc_sequencer;
     //MI
-    mfb_rx::sequencer #(ITEM_WIDTH, MFB_META_RX_WIDTH) mfb_rx_mi_sequencer;           
+    mfb_rx::sequencer #(ITEM_WIDTH, MFB_META_RX_WIDTH) mfb_rx_mi_sequencer;
     mfb_tx::sequencer mfb_tx_mi_sequencer;
 
     //functions

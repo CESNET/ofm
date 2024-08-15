@@ -10,7 +10,7 @@ proc read_p {NAME PATH} {
 }
 
 proc write_p {NAME PATH} {
-    add wave -divider "$NAME"      
+    add wave -divider "$NAME"
     add_wave "-noupdate  -hex"       $PATH/WRITE_*
 }
 

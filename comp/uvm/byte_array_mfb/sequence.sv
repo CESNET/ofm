@@ -1,8 +1,8 @@
 //-- sequence.sv: Mfb sequence
 //-- Copyright (C) 2021 CESNET z. s. p. o.
-//-- Author(s): Radek Iša <isa@cesnet> 
+//-- Author(s): Radek Iša <isa@cesnet>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 
 

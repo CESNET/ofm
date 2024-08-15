@@ -1,8 +1,8 @@
-//-- sequencer.sv: Virtual sequencer 
+//-- sequencer.sv: Virtual sequencer
 //-- Copyright (C) 2022 CESNET z. s. p. o.
 //-- Author(s): Radek Iša <isa@cesnet.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 class sequencer#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH, CHANNELS) extends uvm_sequencer;
     `uvm_component_param_utils(uvm_dma_ll::sequencer#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH, CHANNELS))

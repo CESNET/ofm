@@ -33,7 +33,7 @@ entity PCIE_AVST2MFB is
         RX_AVST_META   : in  std_logic_vector(REGIONS*META_WIDTH-1 downto 0);
         RX_AVST_SOP    : in  std_logic_vector(REGIONS-1 downto 0);
         RX_AVST_EOP    : in  std_logic_vector(REGIONS-1 downto 0);
-        RX_AVST_EMPTY  : in  std_logic_vector(REGIONS*log2(REGION_SIZE*BLOCK_SIZE)-1 downto 0); 
+        RX_AVST_EMPTY  : in  std_logic_vector(REGIONS*log2(REGION_SIZE*BLOCK_SIZE)-1 downto 0);
         RX_AVST_VALID  : in  std_logic_vector(REGIONS-1 downto 0);
         RX_AVST_READY  : out std_logic;
         -- tx interface
@@ -44,11 +44,11 @@ entity PCIE_AVST2MFB is
         TX_MFB_EOF_POS : out std_logic_vector(REGIONS*log2(REGION_SIZE*BLOCK_SIZE)-1 downto 0);
         TX_MFB_SRC_RDY : out std_logic;
         TX_MFB_DST_RDY : in  std_logic
-    );	
+    );
 end entity;
 
 architecture behav of PCIE_AVST2MFB is
-    
+
     constant META_SIGNAL_WIDTH : natural := REGIONS*META_WIDTH;
     constant DATA_WIDTH        : natural := REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH;
     constant EOF_POS_WIDTH     : natural := REGIONS*log2(REGION_SIZE*BLOCK_SIZE); -- also for avst_empty
@@ -75,21 +75,21 @@ architecture behav of PCIE_AVST2MFB is
 
     attribute preserve_for_debug : boolean;
     attribute preserve_for_debug of fifo_owf_err_reg : signal is true;
-    
+
 begin
 
     fifo_enable_g : if (FIFO_ENABLE = true) generate
 
         rx_avst_sop_masked <= RX_AVST_SOP and RX_AVST_VALID;
         rx_avst_eop_masked <= RX_AVST_EOP and RX_AVST_VALID;
-          
+
         process (CLK)
         begin
             if (rising_edge(CLK)) then
                 fifo_data_in <= rx_avst_sop_masked & rx_avst_eop_masked & RX_AVST_EMPTY & RX_AVST_META & RX_AVST_DATA;
             end if;
         end process;
-          
+
         process (CLK)
         begin
             if (rising_edge(CLK)) then
@@ -145,8 +145,8 @@ begin
                 end if;
             end if;
         end process;
-    
-        assert (fifo_owf_err_reg /= '1') 
+
+        assert (fifo_owf_err_reg /= '1')
             report "PCIE_AVST2MFB: fifox_i overflow!"
             severity failure;
 
@@ -194,6 +194,6 @@ begin
 
         RX_AVST_READY <= TX_MFB_DST_RDY;
     end generate;
- 
+
 
 end behav;

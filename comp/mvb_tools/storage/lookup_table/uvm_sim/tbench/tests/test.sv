@@ -1,8 +1,8 @@
-//-- test.sv: Verification test 
+//-- test.sv: Verification test
 //-- Copyright (C) 2022 CESNET z. s. p. o.
 //-- Author:   Daniel Kříž <xkrizd01@vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 class mfb_rx_rand#(ITEMS, ITEM_WIDTH) extends uvm_logic_vector_mvb::sequence_lib_rx#(ITEMS, ITEM_WIDTH);
   `uvm_object_param_utils(test::mfb_rx_rand#(ITEMS, ITEM_WIDTH))

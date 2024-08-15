@@ -148,7 +148,7 @@ SETTINGS = {
         "ONLY_READ"            : "1"                               ,
         "TEST_NAME"            : "\\\"test::slow_dma_down_test\\\"",
     },
-    "_combinations_" : (  
+    "_combinations_" : (
     (), # Works the same as '("default",),' as the "default" is applied in every combination
     ("virtex7_1_port"      , "2_ports", "rcb_128", "slow_read",),
     ("s10_256_port"        ,                                   ),

@@ -39,7 +39,7 @@ entity LVT_MEM is
     port (
         CLK         : in std_logic;
         RESET       : in std_logic;
-        
+
         WR_EN       : in    std_logic_vector(WRITE_PORTS-1 downto 0);
         WR_ADDR     : in    slv_array_t(WRITE_PORTS-1 downto 0)(log2(ITEMS)-1 downto 0);
         WR_DATA     : in    slv_array_t(WRITE_PORTS-1 downto 0)(DATA_WIDTH-1 downto 0);
@@ -51,8 +51,8 @@ end entity;
 
 architecture FULL of LVT_MEM is
 
-    constant WR_PORT_IND_W : natural := log2(WRITE_PORTS);    
-    constant ADDR_W        : natural := log2(ITEMS);    
+    constant WR_PORT_IND_W : natural := log2(WRITE_PORTS);
+    constant ADDR_W        : natural := log2(ITEMS);
 
     -- Result of this function is static and is here to improve
     -- readability.
@@ -75,7 +75,7 @@ begin
     assert not (MEM_TYPE = "BRAM") or RD_LATENCY = 1
         report "[LVT MEM]: When using BRAM in LVT MEM, one must use read latency of 1!"
         severity error;
-    
+
     lvt_i: entity work.GEN_REG_ARRAY
     generic map (
         DATA_WIDTH  => WR_PORT_IND_W,
@@ -95,7 +95,7 @@ begin
         RD_DATA     => lvt_rd_data
     );
     lvt_rd_data_arr <= slv_array_deser(lvt_rd_data, WRITE_PORTS);
-    
+
     wr_lutram_g : for wr_i in 0 to WRITE_PORTS-1 generate
         signal lut_rd_data  : std_logic_vector(READ_PORTS*DATA_WIDTH-1 downto 0);
     begin
@@ -149,7 +149,7 @@ begin
                     RD_META_OUT     => open,
                     RD_DATA_VLD     => open
                 );
-            end generate;    
+            end generate;
         end generate;
     end generate;
 
@@ -205,7 +205,7 @@ begin
                 SEL         => rdw_reg_mvec,
                 DATA_OUT    => rdw_dout
             );
-            
+
             -- Select memory with "live" value when no port is writing to the same address,
             -- otherwise select forwarded value
             RD_DATA(rd_i) <= wr_ports_data_arr(to_integer(unsigned(lvt_rd_data_arr(rd_i)))) when rdw_reg_m = '0' else rdw_dout;
@@ -214,5 +214,5 @@ begin
         end generate;
     end generate;
 
-    
+
 end architecture;

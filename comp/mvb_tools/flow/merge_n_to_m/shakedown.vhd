@@ -14,7 +14,7 @@ use work.type_pack.all;
 
 -- Merges input MVB of N items to output MVB of M items.
 -- There can be at most M items valid on input MVB, otherwise,
--- items might get lost, if you . Can be used as combinational logic with 
+-- items might get lost, if you . Can be used as combinational logic with
 -- ``OUTPUT_REG`` disabled.
 --
 -- Working principle of SHAKEDOWN.
@@ -89,7 +89,7 @@ begin
    port map (
       CLK            => CLK,
       RESET          => RESET,
-      
+
       INPUT_DATA     => slv_array_ser(s_merge_din_arr,INPUTS,DATA_WIDTH+1),
       INPUT_SRC_RDY  => DIN_SRC_RDY,
       INPUT_DST_RDY  => DIN_DST_RDY,

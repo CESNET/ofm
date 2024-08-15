@@ -10,7 +10,7 @@
  * TODO:
  *
  */
- 
+
 
 // ----------------------------------------------------------------------------
 //                                 TESTBENCH
@@ -25,11 +25,11 @@ module testbench;
    logic RESET;
    iFrameLinkURx #(DATA_WIDTH, EOP_POS_WIDTH, SOP_POS_WIDTH) RX (RX_CLK, RX_RESET);
    iFrameLinkUTx #(DATA_WIDTH, EOP_POS_WIDTH, SOP_POS_WIDTH) TX (TX_CLK, TX_RESET);
-  
+
   //-- Clock generation -------------------------------------------------------
   always #(RX_CLK_PERIOD/2) RX_CLK = ~RX_CLK;
   always #(TX_CLK_PERIOD/2) TX_CLK = ~TX_CLK;
-  
+
   //-- Reset generation -------------------------------------------------------
   always @(posedge RX_CLK) RX_RESET = RESET;
   always @(posedge TX_CLK) TX_RESET = RESET;
@@ -38,7 +38,7 @@ module testbench;
 
   //-- Design Under Test ------------------------------------------------------
   DUT DUT_U   (.RX_CLK      (RX_CLK),
-               .RX_RESET    (RX_RESET), 
+               .RX_RESET    (RX_RESET),
                .TX_CLK      (TX_CLK),
                .TX_RESET    (TX_RESET),
                .RX          (RX),

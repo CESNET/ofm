@@ -1,4 +1,4 @@
-// regmodel.sv: register model 
+// regmodel.sv: register model
 // Copyright (C) 2023 CESNET z. s. p. o.
 // Author(s): Daniel Kříž <danielkriz@cesnet.cz>
 

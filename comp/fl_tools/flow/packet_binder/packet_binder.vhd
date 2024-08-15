@@ -76,12 +76,12 @@ end entity packet_binder;
 --                      Architecture declaration
 -- ----------------------------------------------------------------------------
 architecture arc_packet_binder of packet_binder is
-	
+
    type fsm_state is (if0, if1);
 
    signal pstate                : fsm_state;
-   signal nstate                : fsm_state; 
-   
+   signal nstate                : fsm_state;
+
 
 
    -- FIFO_0 output signals
@@ -118,7 +118,7 @@ architecture arc_packet_binder of packet_binder is
    signal cstate0		: std_logic;
    signal cstate1		: std_logic;
 begin
-   
+
 FL_FIFO_0 : entity work.FL_FIFO
          generic map(
             DATA_WIDTH     => FL_WIDTH,
@@ -154,7 +154,7 @@ FL_FIFO_0 : entity work.FL_FIFO
             FULL           => open,
             EMPTY          => open,
             STATUS         => open
-         ); 
+         );
 
 
 FL_FIFO_1 : entity work.FL_FIFO
@@ -192,7 +192,7 @@ FL_FIFO_1 : entity work.FL_FIFO
             FULL           => open,
             EMPTY          => open,
             STATUS         => open
-         ); 
+         );
 
 
 
@@ -244,17 +244,17 @@ outputlogic: process(pstate,reset)
 
 
 
-sofeof0:   if PRIMARY=0 generate 
-            pb_output_sof_n  <= '1' when (muxsel = '1') 
+sofeof0:   if PRIMARY=0 generate
+            pb_output_sof_n  <= '1' when (muxsel = '1')
 	                   else flfifo_tx_sof_n_0;
-            pb_output_eof_n  <= '1' when (muxsel = '0') 
+            pb_output_eof_n  <= '1' when (muxsel = '0')
 	                   else flfifo_tx_eof_n_1;
    end generate;
 
-sofeof1:   if PRIMARY=1 generate 
-            pb_output_sof_n  <= '1' when (muxsel = '0') 
+sofeof1:   if PRIMARY=1 generate
+            pb_output_sof_n  <= '1' when (muxsel = '0')
 	                   else flfifo_tx_sof_n_1;
-            pb_output_eof_n  <= '1' when (muxsel = '1') 
+            pb_output_eof_n  <= '1' when (muxsel = '1')
 	                   else flfifo_tx_eof_n_0;
 
    end generate;
@@ -274,7 +274,7 @@ sofeof1:   if PRIMARY=1 generate
 
             flfifo_tx_dst_rdy_n_0 <= '1' when (muxsel = '1')
       	                                 else TX_DST_RDY;
- 
+
             flfifo_tx_dst_rdy_n_1 <= '1' when (muxsel = '0')
 			                 else TX_DST_RDY;
 

@@ -64,5 +64,5 @@ begin
          TX_DST_RDY_N   => TX.DST_RDY_N
       );
 
-end architecture full; 
+end architecture full;
 

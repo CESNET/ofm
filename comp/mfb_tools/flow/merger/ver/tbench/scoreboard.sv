@@ -43,12 +43,12 @@ endclass
 class ScoreboardMonitorCbs extends MonitorCbs;
    mailbox mfbMbx;
    mailbox mvbMbx;
-    
+
    function new (mailbox fMbx, mailbox vMbx);
       mfbMbx = fMbx;
       mvbMbx = vMbx;
    endfunction
-    
+
    virtual task post_rx(Transaction transaction, string inst);
       MvbTransaction #(MVB_ITEM_WIDTH) mvb_tr;
       MfbTransaction #(MFB_ITEM_WIDTH,MFB_META_WIDTH) mfb_tr;
@@ -88,7 +88,7 @@ class Checker;
 
    task setEnabled();
       enabled = 1; // Model Enabling
-      fork         
+      fork
          run(); // Creating model subprocess
       join_none; // Don't wait for ending
    endtask
@@ -177,7 +177,7 @@ class Scoreboard;
    task setEnabled();
       dutCheck.setEnabled();
    endtask
-        
+
    task setDisabled();
       dutCheck.setDisabled();
    endtask

@@ -152,7 +152,7 @@ class PcieRequest extends sv_common_pkg::Transaction;
            if (data.size() > 0) begin
                 data_que = { << 32{ {<< 8 {data}} }};
             end
-           
+
             //get not alligned address
             address = {addr, 2'b00};
             // correct addres acording to fbe

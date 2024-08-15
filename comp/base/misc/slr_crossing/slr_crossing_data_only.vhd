@@ -3,7 +3,7 @@
 -- Author(s): Lukas Kekely <kekely@cesnet.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
--- 
+--
 
 library IEEE;
 use IEEE.std_logic_1164.all;
@@ -24,7 +24,7 @@ entity SLR_CROSSING_DATA_ONLY is
     OUT_DATA       : out std_logic_vector(DATA_WIDTH-1 downto 0);
     OUT_SRC_RDY    : out std_logic
   );
-end entity; 
+end entity;
 
 
 

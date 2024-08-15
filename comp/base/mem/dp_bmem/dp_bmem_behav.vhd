@@ -26,12 +26,12 @@ use UNISIM.vcomponents.all;
 --                      Architecture declaration
 -- ----------------------------------------------------------------------------
 architecture behavioral of DP_BMEM is
-    
+
    attribute ram_style   : string; -- for XST
    attribute block_ram   : boolean; -- for precision
-   
+
    type t_mem is array(0 to ITEMS-1) of std_logic_vector(DATA_WIDTH-1 downto 0);
-   
+
    -- ----------------------------------------------------------------------
    -- Function to Zero out the memory
    -- This is to prevent 'U' signals in simulations
@@ -47,7 +47,7 @@ architecture behavioral of DP_BMEM is
    -- ----------------------------------------------------------------------
 
    shared variable memory : t_mem := BRAM_INIT_MEM;
-   
+
    signal doa_to_reg        : std_logic_vector(DATA_WIDTH-1 downto 0);
    signal dob_to_reg        : std_logic_vector(DATA_WIDTH-1 downto 0) := (others => '0');
    signal reg_doa           : std_logic_vector(DATA_WIDTH-1 downto 0);
@@ -61,11 +61,11 @@ architecture behavioral of DP_BMEM is
 
    attribute ram_style of memory: variable is "block"; -- auto,block,distributed
    attribute block_ram of memory: variable is true; -- true,false
-   
+
 begin
-   
+
    -- ------------------------- memory - port A ------------------------------
-   
+
    GEN_WRITE_FIRST_A: if (WRITE_MODE_A = "WRITE_FIRST") generate
       process(CLKA)
       begin
@@ -79,7 +79,7 @@ begin
          end if;
       end process;
    end generate;
-   
+
    GEN_READ_FIRST_A: if (WRITE_MODE_A = "READ_FIRST") generate
       process(CLKA)
       begin
@@ -93,8 +93,8 @@ begin
          end if;
       end process;
    end generate;
-   
-   
+
+
    -- doesn't work
    GEN_NO_CHANGE_A: if (WRITE_MODE_A = "NO_CHANGE") generate
       process(CLKA)
@@ -109,10 +109,10 @@ begin
          end if;
       end process;
    end generate;
-   
-   
+
+
    -- ------------------------- memory - port B ------------------------------
-   
+
    GEN_WRITE_FIRST_B: if (WRITE_MODE_B = "WRITE_FIRST") generate
       process(CLKB)
       begin
@@ -126,7 +126,7 @@ begin
          end if;
       end process;
    end generate;
-   
+
    GEN_READ_FIRST_B: if (WRITE_MODE_B = "READ_FIRST") generate
       process(CLKB)
       begin
@@ -140,7 +140,7 @@ begin
          end if;
       end process;
    end generate;
-   
+
    GEN_NO_CHANGE_B: if (WRITE_MODE_B = "NO_CHANGE") generate
       process(CLKB)
       begin
@@ -175,7 +175,7 @@ begin
 
    -- ------------------------ Output registers -------------------------------
    OUTPUTREG : if (OUTPUT_REG = true) generate
-      -- DOA Data Register   
+      -- DOA Data Register
       process(CLKA)
       begin
          if (CLKA'event AND CLKA = '1') then
@@ -186,7 +186,7 @@ begin
             end if;
          end if;
       end process;
-      
+
       process(CLKA)
       begin
          if (CLKA'event AND CLKA = '1') then
@@ -199,7 +199,7 @@ begin
             end if;
          end if;
       end process;
-   
+
       -- DOB Register
       process(CLKB)
       begin
@@ -211,7 +211,7 @@ begin
             end if;
          end if;
       end process;
-      
+
       process(CLKB)
       begin
          if (CLKB'event AND CLKB = '1') then
@@ -224,7 +224,7 @@ begin
             end if;
          end if;
       end process;
-   
+
       -- mapping registers to output
       DOA <= reg_doa;
       DOB <= reg_dob;
@@ -245,7 +245,7 @@ begin
             end if;
          end if;
       end process;
-   
+
       process(CLKB)
       begin
          if (CLKB'event AND CLKB = '1') then
@@ -256,10 +256,10 @@ begin
             end if;
          end if;
       end process;
-      
+
       -- mapping memory to output
       DOA <= doa_to_reg;
       DOB <= dob_to_reg;
    end generate;
-   
+
 end architecture behavioral;

@@ -197,7 +197,7 @@ begin
     end process;
 
     -- ----------------------------------------------------------------------------------------------
-    -- this is the simulated counter, whose result is compared with the result from the tested counter 
+    -- this is the simulated counter, whose result is compared with the result from the tested counter
     -- ----------------------------------------------------------------------------------------------
     -- renaming the clk_ena signal, also delaying it if input registers are enabled
     clk_ena_behind_regs_g : if (INPUT_REGS = false) generate

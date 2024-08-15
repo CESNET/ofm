@@ -33,14 +33,14 @@ entity PCIE_BAR_ADDR_TRANSLATOR is
     port (
         CLK             : in  std_logic;
         RESET           : in  std_logic;
-        
+
         -- Aperture of used BAR
         IN_BAR_APERTURE : in  std_logic_vector(6-1 downto 0);
         -- BAR ID of TLP header
         IN_BAR_ID       : in  std_logic_vector(3-1 downto 0);
         -- 64 bit address from TLP header
         IN_ADDR         : in  std_logic_vector(64-1 downto 0);
-        
+
         -- Translated 64 bit address
         OUT_ADDR        : out std_logic_vector(64-1 downto 0)
     );
@@ -62,7 +62,7 @@ begin
         for i in 0 to 63 loop
             if (i < unsigned(IN_BAR_APERTURE)) then
                 mask_var(i) := '1';
-            end if; 
+            end if;
         end loop;
         tlp_addr_mask <= mask_var;
     end process;

@@ -15,7 +15,7 @@ use work.type_pack.all;
 entity MVB_COMPRESSOR is
    generic(
       -- =======================================================================
-      -- MVB BUS CONFIGURATION: 
+      -- MVB BUS CONFIGURATION:
       -- =======================================================================
       ITEMS      : natural := 2;
       ITEM_WIDTH : natural := 512
@@ -113,7 +113,7 @@ begin
             if (RESET = '1') then
                s_reg_vld(i) <= '0';
             elsif (s_reg_en = '1') then
-               s_reg_vld(i) <= s_shake_dout_arr(i)(0);  
+               s_reg_vld(i) <= s_shake_dout_arr(i)(0);
             end if;
          end if;
       end process;
@@ -122,7 +122,7 @@ begin
       begin
          if (rising_edge(CLK)) then
             if (s_reg_en = '1') then
-               s_reg_data(i) <= s_shake_dout_arr(i)(ITEM_WIDTH downto 1);  
+               s_reg_data(i) <= s_shake_dout_arr(i)(ITEM_WIDTH downto 1);
             end if;
          end if;
       end process;

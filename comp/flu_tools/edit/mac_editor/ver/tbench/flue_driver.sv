@@ -36,7 +36,7 @@ class FrameLinkUEditDriver #(int pDataWidth=512, int pEopWidth=6, int pSopWidth=
    bit       oneword_transaction = 0;
 
    //! Semaphore to solve problems with subprocesses
-   semaphore sem;                 
+   semaphore sem;
 
    //! Enable/Disable delays inside transactions
    rand bit enInsideTxDelay;
@@ -117,14 +117,14 @@ class FrameLinkUEditDriver #(int pDataWidth=512, int pEopWidth=6, int pSopWidth=
     * Lock driver
     */
    function int tryLock();
-      return sem.try_get(1);          // Try set semaphore to lock 
+      return sem.try_get(1);          // Try set semaphore to lock
    endfunction: tryLock
 
    /**
     * Lock driver
     */
    task lock();
-      sem.get(1);                     // Semaphore is set to lock 
+      sem.get(1);                     // Semaphore is set to lock
    endtask: lock
 
    /**
@@ -144,13 +144,13 @@ class FrameLinkUEditDriver #(int pDataWidth=512, int pEopWidth=6, int pSopWidth=
 
       // Lock driver
       lock();
-    
+
       // Driver is sending transaction
       busy = 1;
 
       // Call transaction preprocesing, if is available
       foreach (cbs[i]) cbs[i].pre_tx(tr, inst);
-    
+
       // Wait before sending transaction
       if (enInsideTxDelay) begin
         repeat (insideTxDelay) @(flu.cb);
@@ -290,7 +290,7 @@ class FrameLinkUEditDriver #(int pDataWidth=512, int pEopWidth=6, int pSopWidth=
 
       // Mark this transaction unfinished
       finished = 0;
-      
+
       flu.cb.DST_MASK     <= tr.dstMask;
       flu.cb.DST_W        <= tr.dstW;
       flu.cb.SRC_MASK     <= tr.srcMask;
@@ -300,7 +300,7 @@ class FrameLinkUEditDriver #(int pDataWidth=512, int pEopWidth=6, int pSopWidth=
       for(int j=0;j < 6;j++)
         dstDataToSend[j*8 +: 8] = tr.dstData[j];
       flu.cb.DST_DATA     <= dstDataToSend;
-      
+
       for(int j=0;j < 6;j++)
         srcDataToSend[j*8 +: 8] = tr.srcData[j];
       flu.cb.SRC_DATA     <= srcDataToSend;

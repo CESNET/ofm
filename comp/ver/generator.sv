@@ -16,9 +16,9 @@
   // -- Generator Class
   // --------------------------------------------------------------------------
   class Generator;
-  
+
     // -- Public Class Atributes --
- 
+
     //-------------------------------------------------------------------------
     /*
      * Internal mailbox is used only when no mailbox is specified in the
@@ -35,7 +35,7 @@
      * its own.
      */
     int unsigned stop_after_n_insts = 0;
-    
+
     //-------------------------------------------------------------------------
     /*
      * Transaction or data descriptor instance that is repeatedly
@@ -51,18 +51,18 @@
      */
     Transaction blueprint;
 
-    bit enabled; 
+    bit enabled;
 
     // -- Protected Class Atributes
     protected int stream_id;
-    
+
     protected int scenario_id;
-    
+
     protected int data_id;
-    
-    
+
+
     // -- Public Class Methods
-    
+
     //-------------------------------------------------------------------------
     /*
      * Creates a new instance of the generator class with the specified
@@ -77,14 +77,14 @@
         this.transMbx = new(100);        // Create own mailbox
       else
         this.transMbx = transMbx;        // Use created mailbox
-    
+
       enabled         = 0;               // Disable generator by default
       blueprint       = null;            // Null the blueprint transaction
       stream_id       = stream_id;       // Set stream id
       scenario_id     = -1;              // Set default scenario
       data_id         = 0;               // Set default data identifier
     endfunction : new
-    
+
     //-------------------------------------------------------------------------
     /*
      * Enable generator for creating n Instances.
@@ -97,7 +97,7 @@
         run();
       join_none;
     endtask : setEnabled
-    
+
     //-------------------------------------------------------------------------
     /*
      * Disable generator immediately.
@@ -106,7 +106,7 @@
       this.enabled = 0;
       wait (transMbx.num() == 0);
     endtask : setDisabled
-    
+
 
     //-------------------------------------------------------------------------
     virtual task run();
@@ -129,6 +129,6 @@
       wait (transMbx.num() == 0);
       enabled = 0;
     endtask : run
-    
+
   endclass : Generator
 

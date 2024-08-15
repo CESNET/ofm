@@ -1,7 +1,7 @@
 /*
  * file       : sequencer.sv
  * Copyright (C) 2021 CESNET z. s. p. o.
- * description: RESET sequence item 
+ * description: RESET sequence item
  * date       : 2021
  * author     : Radek Iša <isa@cesnet.cz>
  *

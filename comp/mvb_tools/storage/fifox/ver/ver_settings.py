@@ -42,7 +42,7 @@ SETTINGS = {
     "fifo_items_3" : {
         "FIFO_ITEMS"        : "32",
     },
-    "_combinations_" : (  
+    "_combinations_" : (
     (), # Works the same as '("default",),' as the "default" is applied in every combination
     ("fifo_items_1",),
     ("fifo_items_2",),

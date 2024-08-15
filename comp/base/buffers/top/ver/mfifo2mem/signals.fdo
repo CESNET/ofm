@@ -13,16 +13,16 @@
 # -------------------------------------------------------------------
 
 proc fifo_write {NAME PATH} {
-    add wave -divider "$NAME"      
+    add wave -divider "$NAME"
      add_wave "-noupdate -hex -label DATA_IN"         $PATH/DATA_IN
      add_wave "-noupdate -hex -label WR_BLK_ADDR"     $PATH/WR_BLK_ADDR
      add_wave "-noupdate -label WRITE"                $PATH/WRITE
      add_wave "-noupdate -label FULL"                 $PATH/FULL
-     
+
 }
 
 proc mem_read {NAME PATH} {
-    add wave -divider "$NAME"      
+    add wave -divider "$NAME"
      add_wave "-noupdate -hex -label DATA_OUT"        $PATH/DATA_OUT
      add_wave "-noupdate -label DATA_VLD"             $PATH/DATA_VLD
      add_wave "-noupdate -uns -label RD_BLK_ADDR"     $PATH/RD_BLK_ADDR
@@ -34,5 +34,5 @@ proc mem_read {NAME PATH} {
      add_wave "-noupdate -label EMPTY"                $PATH/EMPTY
      add_wave "-noupdate -uns -label STATUS"          $PATH/blk_status
      add_wave "-noupdate -hex -label STATUS"          $PATH/STATUS
-      
+
 }

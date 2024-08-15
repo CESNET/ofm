@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <source>
-	
+
 <!-- MAIN INFO ********************************************************** -->
 
 
@@ -35,20 +35,20 @@
 
 	<!-- Generic description -->
 	<generic_map>
-		
+
         <generic name="RX_DATA_WIDTH" type="integer" default="">
             RX interface data bus width
         </generic>
         <generic name="TX_DATA_WIDTH" type="integer" default="">
             TX interface data bus width
         </generic>
-		
+
 	</generic_map>
 
 	<!-- Port description -->
 	<port_map>
 
-		<divider>Common signals</divider>		
+		<divider>Common signals</divider>
         <port name="CLK" dir="in" width="1">
             Clock input
         </port>
@@ -111,7 +111,7 @@
         <port name="TX_DST_RDY_N" dir="in" width="1">
             TX destination ready
         </port>
-		
+
 	</port_map>
 
 </interface>
@@ -130,63 +130,63 @@
        lowest position in final data word. When decreasing bus width,
        data on the lowest position in input data word are sent first.
    </p>
-			
+
 
 <h1>Frequency and Resources usage</h1>
 
 	<p>
 
         <!--Resources usage and max. frequency by Precision-->
-	
+
 		<tab sloupce="ccc">
 			<tr>
 				<th>Generic settings</th>
 				<th>Slices (% of C6X slices)</th>
 			</tr>
 			<tr>
-                <th>64b -> 16b</th> 
+                <th>64b -> 16b</th>
 				<td>101(1%)</td>
 			</tr>
 			<tr>
-                <th>16b -> 64b</th> 
+                <th>16b -> 64b</th>
 				<td>82(1%)</td>
 			</tr>
 			<tr>
-                <th>64b -> 32b</th> 
+                <th>64b -> 32b</th>
 				<td>80(1%)</td>
 			</tr>
 			<tr>
-                <th>32b -> 64b</th> 
+                <th>32b -> 64b</th>
 				<td>59(1%)</td>
 			</tr>
 		<nazev>Chip utilization</nazev>
-		</tab> 
-	
+		</tab>
+
 		<tab sloupce="ccc">
 			<tr>
 				<th>Generic settings</th>
 				<th>Max.frequency by Precision</th>
 			</tr>
 			<tr>
-                <th>64b -> 16b</th> 
+                <th>64b -> 16b</th>
 				<td>200 MHz</td>
 			</tr>
 			<tr>
-                <th>16b -> 64b</th> 
+                <th>16b -> 64b</th>
 				<td>200 MHz</td>
 			</tr>
 			<tr>
-                <th>64b -> 32b</th> 
+                <th>64b -> 32b</th>
 				<td>200 MHz</td>
 			</tr>
 			<tr>
-                <th>32b -> 64b</th> 
+                <th>32b -> 64b</th>
 				<td>200 MHz</td>
 			</tr>
 		<nazev>Maximal frequency</nazev>
-		</tab> 
-	
-  </p> 
+		</tab>
+
+  </p>
 
 
 </body>

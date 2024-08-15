@@ -96,7 +96,7 @@ program TEST (
         scoreboard = new;
         mfb_driver.setCallbacks(scoreboard.driverCbs);
         mfb_monitor.setCallbacks(scoreboard.monitorCbs);
-        
+
         mfb_driver.setCallbacks(mfb_speed_rx.cbs);
         mfb_monitor.setCallbacks(mfb_speed_tx.cbs);
     endtask

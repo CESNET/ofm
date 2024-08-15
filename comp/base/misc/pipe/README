@@ -6,7 +6,7 @@ Abstract:
 ~~~~~~~~~
 Component for pipelining data paths with source and destination ready signals.
 
- 
+
 Author:
 ~~~~~~~
 Vaclav Bartos <washek@liberouter.org>

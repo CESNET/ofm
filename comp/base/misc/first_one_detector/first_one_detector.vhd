@@ -1,13 +1,13 @@
 
--- first_one_detector.vhd: This component finds the first 'one' in the std_logic_vector 
+-- first_one_detector.vhd: This component finds the first 'one' in the std_logic_vector
 -- Copyright (C) 2006 CESNET, Liberouter project
 -- Author(s): Jan Pazdera <pazdera@liberouter.org>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --
 -- $Id$
--- 
--- TODO: - 
+--
+-- TODO: -
 
 library IEEE;
 use IEEE.std_logic_1164.all;
@@ -21,10 +21,10 @@ use std.textio.all;
 library unisim;
 use unisim.vcomponents.ALL;
 -- pragma translate_on
-use work.math_pack.all; 
+use work.math_pack.all;
 
 -- -------------------------------------------------------------
---       Entity :   
+--       Entity :
 -- -------------------------------------------------------------
 
 entity first_one_detector is
@@ -52,12 +52,12 @@ entity first_one_detector is
 end first_one_detector;
 
 -- -------------------------------------------------------------
---       Architecture :     
+--       Architecture :
 -- -------------------------------------------------------------
 architecture behavioral of first_one_detector is
 
-type t_or_input is array (max(log2(DATA_WIDTH)-1, 0) downto 0) of std_logic_vector(DATA_WIDTH/2 downto 0); 
-type t_or_output is array (max(log2(DATA_WIDTH)-1, 0) downto 0) of std_logic_vector((DATA_WIDTH/2) downto 0); 
+type t_or_input is array (max(log2(DATA_WIDTH)-1, 0) downto 0) of std_logic_vector(DATA_WIDTH/2 downto 0);
+type t_or_output is array (max(log2(DATA_WIDTH)-1, 0) downto 0) of std_logic_vector((DATA_WIDTH/2) downto 0);
 
 signal qtr_first_one    : std_logic_vector(((DATA_WIDTH-2)/3)+1 downto 0);
 signal first_one_i      : std_logic_vector(DATA_WIDTH-1 downto 0);
@@ -76,15 +76,15 @@ end generate;
 width_greater_one_gen: if (DATA_WIDTH > 1) generate
    -- -------------------------------------------------------------
    -- qtr_first_one signal generation
-   
+
    qtr_first_one(0) <= MASK(0);
-   
+
    zero_module_gen: if ((DATA_WIDTH-1) mod 3 = 0) generate
          qtr_first_one_gen: for i in 0 to ((DATA_WIDTH-2)/3) generate
             qtr_first_one(i+1) <= qtr_first_one(i) or MASK((3*i) + 1) or MASK((3*i) + 2) or MASK((3*i) + 3);
          end generate;
    end generate;
-   
+
    one_module_gen: if ((DATA_WIDTH-1) mod 3 = 1) generate
          qtr_first_one_gen: for i in 0 to ((DATA_WIDTH-2)/3) generate
             non_last_i_gen: if (i < ((DATA_WIDTH-2)/3)) generate
@@ -95,7 +95,7 @@ width_greater_one_gen: if (DATA_WIDTH > 1) generate
             end generate;
          end generate;
    end generate;
-   
+
    two_module_gen: if ((DATA_WIDTH-1) mod 3 = 2) generate
          qtr_first_one_gen: for i in 0 to ((DATA_WIDTH-2)/3) generate
             non_last_i_gen: if (i < ((DATA_WIDTH-2)/3)) generate
@@ -106,11 +106,11 @@ width_greater_one_gen: if (DATA_WIDTH > 1) generate
             end generate;
          end generate;
    end generate;
-   
+
    -- -------------------------------------------------------------
    -- first_one_i signal generation
    first_one_i(0) <= MASK(0);
-   
+
    first_one_i_gen: for i in 1 to (DATA_WIDTH - 1) generate
          zero_module_gen: if ((i-1) mod 3 = 0) generate
             first_one_i(i) <= (not qtr_first_one((i-1)/3)) and MASK(i);
@@ -134,7 +134,7 @@ width_greater_one_gen: if (DATA_WIDTH > 1) generate
    );
 
 end generate;
- 
+
 -- -------------------------------------------------------------
 -- Output mapping
 

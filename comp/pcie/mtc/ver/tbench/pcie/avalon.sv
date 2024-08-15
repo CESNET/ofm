@@ -266,7 +266,7 @@ class avalon2pcie extends sv_common_pkg::MonitorCbs;
 endclass
 
 ///////////////////////////////////////////////////
-// IFG CONGIG AVALON 
+// IFG CONGIG AVALON
 ///////////////////////////////////////////////////
 class ifg_config_avst_rx extends avst_rx::ifg_config;
     ifg_config_rand_setup cfg;

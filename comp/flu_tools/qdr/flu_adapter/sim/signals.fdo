@@ -8,7 +8,7 @@
 
 
 proc flu_adapter_ports { TB } {
-   
+
    add wave -divider ""
    add wave -divider "Synchronization"
    add_wave "-group { SYNC } -noupdate -hex -label SDM_CLK"                   $TB/app_clk
@@ -67,7 +67,7 @@ proc flu_adapter_ports { TB } {
 
    add wave -divider "Read requests"
    add_wave "-group { RR } -noupdate -hex -label QDR_TX_RD_ADDR"    $TB/uut/flu2qdri/qdr_tx_rd_addr
-   add_wave "-group { RR } -noupdate -hex -label QDR_TX_RD_SRC_RDY" $TB/uut/flu2qdri/qdr_tx_rd_src_rdy 
+   add_wave "-group { RR } -noupdate -hex -label QDR_TX_RD_SRC_RDY" $TB/uut/flu2qdri/qdr_tx_rd_src_rdy
    add_wave "-group { RR } -noupdate -hex -label QDR_TX_RD_DST_RDY" $TB/uut/flu2qdri/qdr_tx_rd_dst_rdy
 
    add wave -divider "Write requests"
@@ -146,7 +146,7 @@ proc flu_adapter_ports { TB } {
    add_wave "-group { STS } -noupdate -hex -label state_replay"    $TB/uut/flu2qdri/state_replay
    add_wave "-group { STS } -noupdate -hex -label state_replay_repeated"    $TB/uut/flu2qdri/state_replay_repeated
    add_wave "-group { STS } -noupdate -hex -label state_clear"    $TB/uut/flu2qdri/state_clear
-   
+
    add wave -divider "Output QDR registers"
    add_wave "-group { OQR } -noupdate -hex -label QDR_REG0"    $TB/uut/flu2qdri/qdr_reg0
    add_wave "-group { OQR } -noupdate -hex -label QDR_REG1"    $TB/uut/flu2qdri/qdr_reg1
@@ -169,7 +169,7 @@ proc flu_adapter_ports { TB } {
    add_wave "-group { QC } -noupdate -hex -label CAL_DONE_S"    $TB/uut/qdri/cal_done_s
    add_wave "-group { QC } -noupdate -hex -label CAL_DONE_REG1"    $TB/uut/qdri/cal_done_reg1
    add_wave "-group { QC } -noupdate -hex -label CAL_DONE_REG2"    $TB/uut/qdri/cal_done_reg2
-   
+
    add wave -divider "Read request FIFO"
    add_wave "-group { RRF } -noupdate -hex -label FIFO_RDIN_WR"    $TB/uut/qdri/fifo_rdin_wr
    add_wave "-group { RRF } -noupdate -hex -label FIFO_RDIN_DI"    $TB/uut/qdri/fifo_rdin_di
@@ -182,7 +182,7 @@ proc flu_adapter_ports { TB } {
    add_wave "-group { RRFSM } -noupdate -label CURRENT_STATE"    $TB/uut/qdri/current_staterd
    add_wave "-group { RRFSM } -noupdate -label NEXT_STATE"    $TB/uut/qdri/next_staterd
    add_wave "-group { RRFSM } -noupdate -hex -label RD_ADDR_LSB"    $TB/uut/qdri/rd_addr_lsb
-   
+
    add wave -divider "Write request FIFO"
    add_wave "-group { WRF } -noupdate -hex -label FIFO_WRIN_WR"    $TB/uut/qdri/fifo_wrin_wr
    add_wave "-group { WRF } -noupdate -hex -label FIFO_WRIN_DI"    $TB/uut/qdri/fifo_wrin_di

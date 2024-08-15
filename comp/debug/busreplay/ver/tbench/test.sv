@@ -112,7 +112,7 @@ program TEST (
         dpiwait(0, 1); dpicall("busreplay", "-d DeviceTree-dut1.dtb -e 0", ret);
         scoreboard.display();
   endtask: test
-  
+
 
   initial begin
     resetDesign();

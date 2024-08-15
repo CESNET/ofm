@@ -31,7 +31,7 @@ class Model;
 
     task setEnabled();
         enabled = 1; // Model Enabling
-        fork         
+        fork
             run(); // Creating model subprocess
         join_none; // Don't wait for ending
     endtask
@@ -74,12 +74,12 @@ class Model;
             end
         end
 
-        case (MAC_CHECK_MODE) 
+        case (MAC_CHECK_MODE)
             0 : frame.mac_error = 0;
             1 : frame.mac_error = !is_allowed_mac;
             2 : frame.mac_error = (!is_allowed_mac && !is_mac_bcast);
             3 : frame.mac_error = (!is_allowed_mac && !is_mac_bcast && !is_mac_mcast);
-            default : $write("Error in MAC_CHECK_MODE SEL \n"); 
+            default : $write("Error in MAC_CHECK_MODE SEL \n");
         endcase
 
         frame.mac_mcast = is_mac_mcast;
@@ -124,9 +124,9 @@ class Model;
                 frame.mac_mcast = 0;
                 frame.mac_bcast = 0;
                 frame.mac_type  = 0;
-                frame.mac_index = 0; 
+                frame.mac_index = 0;
             end
-            
+
             stat = new();
             stat.newPacket = 1;
 
@@ -157,7 +157,7 @@ class Model;
             end
 
             frame.error = frame.adapter_error || frame.mac_error || frame.mintu_error || frame.maxtu_error || frame.crc_error;
-            
+
             if (!frame.error) begin
                 sc_table.add(frame);
             end
@@ -191,7 +191,7 @@ class Checker;
 
     task setEnabled();
         enabled = 1; // Model Enabling
-        fork         
+        fork
             run(); // Creating model subprocess
         join_none; // Don't wait for ending
     endtask
@@ -249,7 +249,7 @@ class Checker;
             //    tx_tr.display();
             //    $stop;
             //end
-            
+
             sc_table.remove(tx_tr, status);
             if (status==0)begin
                 $write("Unknown transaction in DUT checker\n");
@@ -275,7 +275,7 @@ class ScoreboardDriverCbs extends DriverCbs;
     function new (mailbox Mbx);
         this.RxMbx = Mbx;
     endfunction
-        
+
     virtual task pre_tx(ref Transaction transaction, string inst);
         MiiTransaction mii_tr;
         MyTransaction  #(RX_ITEM_WIDTH) my_tr;
@@ -296,7 +296,7 @@ class ScoreboardDriverCbs extends DriverCbs;
         mii_tr.crc = my_tr.crc;
         $cast(transaction, mii_tr);
     endtask
-        
+
     virtual task post_tx(Transaction transaction, string inst);
         //$write("New transaction posted by driver, time: %t\n", $time);
         //transaction.display();
@@ -306,11 +306,11 @@ endclass
 
 class ScoreboardMfbMonitorCbs extends MonitorCbs;
     tTransMbx mfbMbx;
-        
+
     function new (tTransMbx Mbx);
         this.mfbMbx = Mbx;
     endfunction
-        
+
     virtual task post_rx(Transaction transaction, string inst);
         //$write("New MFB transaction received, time: %t\n", $time);
         //transaction.display();
@@ -321,11 +321,11 @@ endclass
 
 class ScoreboardMvbMonitorCbs extends MonitorCbs;
     tTransMbx mvbMbx;
-        
+
     function new (tTransMbx Mbx);
         this.mvbMbx = Mbx;
     endfunction
-        
+
     virtual task post_rx(Transaction transaction, string inst);
         //$write("New MVB transaction received, time: %t\n", $time);
         //transaction.display();
@@ -369,7 +369,7 @@ class Scoreboard;
         dutCheck.setEnabled(); // Enable checker
         statModule.setEnabled(); //Enable RFC2819 module
     endtask
-        
+
     task setDisabled();
         dutModel.setDisabled(); // Disable model
         dutCheck.setDisabled(); // Disable checker

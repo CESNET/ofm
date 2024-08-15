@@ -15,7 +15,7 @@ use work.type_pack.all;
 entity PTC_HDR_DATA_MERGE_HPAI is
    generic(
       -- =======================================================================
-      -- MFB DATA BUS CONFIGURATION: 
+      -- MFB DATA BUS CONFIGURATION:
       -- =======================================================================
       -- Supported configuration is only MFB(2,1,8,32)
       MFB_REGIONS        : natural := 2;
@@ -23,13 +23,13 @@ entity PTC_HDR_DATA_MERGE_HPAI is
       MFB_BLOCK_SIZE     : natural := 8;
       MFB_ITEM_WIDTH     : natural := 32;
       -- =======================================================================
-      -- MVB HEADER BUS CONFIGURATION: 
+      -- MVB HEADER BUS CONFIGURATION:
       -- =======================================================================
       -- Supported configuration is only MVB(2,128)
       MVB_ITEMS          : natural := 2;
       MVB_ITEM_WIDTH     : natural := 128;
       -- =======================================================================
-      -- OTHER CONFIGURATION: 
+      -- OTHER CONFIGURATION:
       -- =======================================================================
       -- Width of PCIe transaction size signal. Set Log2 of maximum supported
       -- PCIe transaction size (HDR + payload) in dwords
@@ -339,7 +339,7 @@ begin
    s_plan_wait(0) <= '0';
    -- first header is every time on zero position
    s_hdr_mux_sel(0) <= (others => '0');
-   
+
    plan_g : for r in 0 to MFB_REGIONS-1 generate
       -- Whole packet is in one region
       s_whole_pkt(r) <= '1' when (unsigned(s_hdr_payload_size_muxed(r)) <= (MFB_REGION_SIZE*MFB_BLOCK_SIZE)) else '0';
@@ -371,11 +371,11 @@ begin
       s_plan_wait(r+1) <= '1' when (ONE_PKT_PER_WORD = True) else '0';
       -- select next header only when you accepted previous header
       s_hdr_mux_sel(r+1) <= (s_hdr_mux_sel(r) + 1) when (s_plan_en(r) = '1') else s_hdr_mux_sel(r);
-      -- control of creating EOF signal 
+      -- control of creating EOF signal
       s_need_set_eof(r+1) <= '0' when (s_eof_vld(r) = '1') else
                              '1' when (s_plan_en(r) = '1') else s_need_set_eof(r);
 
-      -- some signals of output MFB 
+      -- some signals of output MFB
       s_mfb_sof(r) <= s_plan_en(r);
       s_mfb_eof(r) <= (s_eof_ok(r) and s_need_set_eof(r)) or (s_plan_en(r) and s_whole_pkt(r));
       s_mfb_eof_pos(r) <= std_logic_vector(s_eof_pos(r));

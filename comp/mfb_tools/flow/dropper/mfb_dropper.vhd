@@ -143,7 +143,7 @@ begin
          if (RESET = '1') then
             s_inc_pkt(0) <= '0';
          elsif (RX_SRC_RDY = '1' and TX_DST_RDY = '1') then
-            s_inc_pkt(0) <= s_inc_pkt(REGIONS);  
+            s_inc_pkt(0) <= s_inc_pkt(REGIONS);
          end if;
       end if;
    end process;

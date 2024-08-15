@@ -40,7 +40,7 @@ entity FLB_DATA_TRANSFORMER is
       READ           : out std_logic;
       EMPTY          : in  std_logic_vector(INPUT_COUNT-1 downto 0);
       STATUS         : in  std_logic_vector(log2(BLOCK_SIZE+1)*INPUT_COUNT-1 downto 0);
-      
+
       -- Output data
       TX_SOF_N       : out std_logic;
       TX_SOP_N       : out std_logic;
@@ -72,13 +72,13 @@ architecture full of FLB_DATA_TRANSFORMER is
    -- memory word width
    constant IWORD_WIDTH       : integer := INPUT_WIDTH + (INPUT_WIDTH/8);
    constant FL_MEM_WIDTH      : integer := INPUT_COUNT * INPUT_WIDTH;
-   
+
    -- ------------------ Types declaration ------------------------------------
    type t_juice_in         is array (0 to (WORD_COUNT-1)) of
                               std_logic_vector(JUICE_WIDTH-1 downto 0);
 
    -- ------------------ Signals declaration ----------------------------------
-   
+
    -- decompressor signals
    signal decomp_sof_n     : std_logic;
    signal decomp_sop_n     : std_logic;
@@ -105,7 +105,7 @@ architecture full of FLB_DATA_TRANSFORMER is
    signal sig_frame_done   : std_logic;
    signal data_valid_n     : std_logic;
    signal read_i           : std_logic;
-   
+
 begin
    -- directly mapped signals -------------------------------------------------
    data_valid_n      <= decomp_src_rdy_n or decomp_dst_rdy_n;
@@ -126,7 +126,7 @@ begin
    TX_EMPTY          <= EMPTY;
 
    GEN_STATUS_SIGNAL : for i in 0 to INPUT_COUNT-1 generate
-      TX_STATUS((i+1)*STATUS_WIDTH-1 downto i*STATUS_WIDTH) <= 
+      TX_STATUS((i+1)*STATUS_WIDTH-1 downto i*STATUS_WIDTH) <=
          STATUS((i+1)*log2(BLOCK_SIZE+1)-1 downto (i+1)*log2(BLOCK_SIZE+1)-STATUS_WIDTH);
    end generate;
 
@@ -155,7 +155,7 @@ begin
          DISCARD        => '0',
          FRAME_PART     => '0'
       );
-   
+
    -- map REM computing unit
    REM_COMPUTER : entity work.FLB_REM_CMP
       generic map(
@@ -172,7 +172,7 @@ begin
       );
 
    GEN_REM_CMP_IN : for i in 0 to WORD_COUNT-1 generate
-      rem_sel(i) <= not DATA_OUT(i*IWORD_WIDTH + 
+      rem_sel(i) <= not DATA_OUT(i*IWORD_WIDTH +
          INPUT_WIDTH + log2(INPUT_WIDTH/8));
       rem_in((i+1)*log2(INPUT_WIDTH/8)-1 downto i*log2(INPUT_WIDTH/8))
          <= DATA_OUT(
@@ -184,20 +184,20 @@ begin
    GEN_JUICE_IN : for i in 0 to WORD_COUNT-1 generate
 
       fl_juice_in(i) <=
-         DATA_OUT(i*IWORD_WIDTH + INPUT_WIDTH + log2(INPUT_WIDTH/8) + 
+         DATA_OUT(i*IWORD_WIDTH + INPUT_WIDTH + log2(INPUT_WIDTH/8) +
          JUICE_WIDTH - 1
-         downto 
+         downto
          i*IWORD_WIDTH + INPUT_WIDTH + log2(INPUT_WIDTH/8));
 
    end generate;
 
    GEN_JUICE : for i in 0 to JUICE_WIDTH-1 generate
-         
+
       juice_andp : process(fl_juice_in)
          variable and_int : std_logic;
       begin
          and_int := '1';
-   
+
          for j in 0 to WORD_COUNT - 1 loop
             and_int := and_int and fl_juice_in(j)(i);
          end loop;

@@ -14,7 +14,7 @@ use work.type_pack.all;
 entity UMII_DEC is
     generic(
         -- =====================================================================
-        -- UNIVERSAL MII DECODER CONFIGURATION: 
+        -- UNIVERSAL MII DECODER CONFIGURATION:
         -- =====================================================================
         -- Data width of MII data signal, must be power of two, minimum is 64
         MII_DW           : natural := 2048;
@@ -194,10 +194,10 @@ architecture FULL of UMII_DEC is
    signal s_whole_frame                     : std_logic_vector(REGIONS-1 downto 0);
 
    -- register stage 5
-   signal s_sof_last_reg5                   : std_logic;   
+   signal s_sof_last_reg5                   : std_logic;
    signal s_sof_pos_last_reg5               : std_logic_vector(SOF_POS_SIZE-1 downto 0);
-   signal s_sof_ok_last_reg5                : std_logic;   
-   signal s_sof_next_last_reg5              : std_logic;   
+   signal s_sof_ok_last_reg5                : std_logic;
+   signal s_sof_next_last_reg5              : std_logic;
    signal s_mii_rxd_reg5                    : std_logic_vector(MII_DW-1 downto 0);
    signal s_wf_reg5                         : std_logic_vector(REGIONS-1 downto 0);
    signal s_sof_reg5                        : std_logic_vector(REGIONS-1 downto 0);
@@ -231,7 +231,7 @@ architecture FULL of UMII_DEC is
 begin
 
     -- asserts
-    assert (BLOCK_SIZE = 8 and ITEM_WIDTH = 8) 
+    assert (BLOCK_SIZE = 8 and ITEM_WIDTH = 8)
         report "UMII_DEC: BLOCK_SIZE and ITEM_WIDTH must be 8, other values are not supported!!!"
         severity failure;
 
@@ -352,7 +352,7 @@ begin
             DI => s_pos_last_terminate(r),
             DO => s_pos_last_terminate_after64(r)
         );
-        
+
         pos_last_terminate_after_g : for i in 0 to REGION_SIZE-1 generate
             s_pos_last_terminate_after(r)(i) <= s_pos_last_terminate_after64(r)(i*BLOCK_SIZE);
         end generate;
@@ -405,7 +405,7 @@ begin
         elsif (s_is_some_terminate = '1') then
             s_cnt_let_nxt_uns <= (others => '0');
         else
-            s_cnt_let_nxt_uns <= s_cnt_let_uns_reg3 - 1;  
+            s_cnt_let_nxt_uns <= s_cnt_let_uns_reg3 - 1;
         end if;
     end process;
 
@@ -485,7 +485,7 @@ begin
     -- =========================================================================
     -- 3. REGISTERS STAGE
     -- =========================================================================
-    
+
     -- link error timeout counter
     cnt_let_uns_reg3_p : process (CLK)
     begin
@@ -547,13 +547,13 @@ begin
 
         -- Active when at least one Start control character occurs
         s_sof_temp(r) <= s_is_first_start_reg3(r);
-    
+
         -- Indication that SOF will be asserted in the next MFB region
         s_sof_next(r) <= s_pos_first_start_reg3(r)(REGION_SIZE-1);
 
         -- Rotate Start position to the left by 1 (jump over the Preamble)
-        s_pos_first_start_rol(r) <= s_pos_first_start_reg3(r)(REGION_SIZE-2 downto 0) & 
-        s_pos_first_start_reg3(r)(REGION_SIZE-1);   
+        s_pos_first_start_rol(r) <= s_pos_first_start_reg3(r)(REGION_SIZE-2 downto 0) &
+        s_pos_first_start_reg3(r)(REGION_SIZE-1);
 
         -- SOP position encoder (REGION_SIZE possible values)
         sop_pos_enc_i : entity work.gen_enc
@@ -564,7 +564,7 @@ begin
             DI    => s_pos_first_start_rol(r),
             ADDR  => s_sof_pos_temp(r)
         );
-   
+
         -- Active when at least one control character occurs
         s_is_ctrl(r) <= or s_mii_rxc_reg3_arr(r);
 
@@ -572,18 +572,18 @@ begin
         s_pos_ctrl_after_start(r) <= s_pos_first_start_after_reg3(r) and s_mii_rxc_reg3_arr(r);
         -- Is control before Terminate character?
         s_pos_ctrl_before_terminate(r) <= s_pos_first_terminate_before_reg3(r) and s_mii_rxc_reg3_arr(r);
-    
+
         -- Detection whether there are some control characters after Start
         s_is_ctrl_after_start_n(r) <= nor s_pos_ctrl_after_start(r);
-    
+
         -- Detection whether there are some control characters before Terminate
         s_is_ctrl_before_terminate_n(r) <= nor s_pos_ctrl_before_terminate(r);
-    
+
         -- Active when there are no control characters in the range given by
         -- Start and Terminate or Start and the end of the word and least one
         -- Preamble pattern occurs
         s_sof_ok(r) <= s_is_ctrl_after_start_n(r) and s_is_preamble_reg3(r);
-    
+
         -- Active when there are no control characters in the range given by
         -- Start and Terminate or Start of the word and Terminate
         s_eof_ok(r) <= s_is_ctrl_before_terminate_n(r);
@@ -707,13 +707,13 @@ begin
         s_sof_err(r) <= s_sof_mx(r) and (not s_sof_ok_mx(r));
         -- Erroneous EOF
         s_eof_err(r) <= s_eof_mx(r) and (not s_eof_ok_mx(r));
-    
+
         -- Control characters other than Start or Terminate occured
         s_ctrl_err(r) <= (not s_sof_reg4(r)) and (not s_eof_reg4(r)) and (s_is_ctrl_reg4(r));
-    
+
         -- SOF is before EOF, position of SOF is smaller than of EOF
         s_sof_before_eof(r) <= '1' when ((unsigned(s_sof_pos_mx(r)) & "000") < unsigned(s_eof_pos_mx(r))) else '0';
-    
+
         -- Active when there is a whole frame in one word
         s_whole_frame(r) <= s_sof_mx(r) and s_eof_mx(r) and s_sof_before_eof(r);
     end generate;
@@ -794,7 +794,7 @@ begin
         OUT_SOF     => s_sof_fsm,
         OUT_EOF     => s_eof_fsm,
         OUT_ERR     => s_err_fsm
-    );  
+    );
 
     -- -------------------------------------------------------------------------
     --  FRAME STATE LOGIC
@@ -812,7 +812,7 @@ begin
             if (RESET = '1') then
                 s_inc_frame(0) <= '0';
             elsif (s_valid_reg5 = '1') then
-                s_inc_frame(0) <= s_inc_frame(REGIONS);  
+                s_inc_frame(0) <= s_inc_frame(REGIONS);
             end if;
         end if;
     end process;

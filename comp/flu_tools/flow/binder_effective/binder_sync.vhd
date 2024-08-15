@@ -1,7 +1,7 @@
--- binder_sync.vhd 
+-- binder_sync.vhd
 --!
 --! \brief Synchronization component for FLU and Header
---! \author Pavel Benacek <benacpav@fit.cvut.cz> 
+--! \author Pavel Benacek <benacpav@fit.cvut.cz>
 --! \date 2015
 --!
 --! \section License
@@ -41,7 +41,7 @@ entity BINDER_SYNC is
       RX_SOP        : in std_logic;
       RX_EOP        : in std_logic;
       RX_SRC_RDY    : in std_logic;
-      RX_DST_RDY    : out std_logic; 
+      RX_DST_RDY    : out std_logic;
 
       --! \name Frame Link Unaligned concentrated interface
       TX_DATA       : out std_logic_vector(DATA_WIDTH-1 downto 0);
@@ -66,7 +66,7 @@ end entity;
 architecture full of BINDER_SYNC is
    --! States of the FSM
    type FSM_STATES is (DATA_TRANS,DATA_TAKEN,HEADER_TAKEN);
-   
+
    --! Signals for actual and next states
    signal reg_act_state : FSM_STATES;
    signal next_state    : FSM_STATES;
@@ -81,11 +81,11 @@ architecture full of BINDER_SYNC is
 begin
 
    --! Map data inputs and outputs
-   TX_DATA       <= RX_DATA; 
+   TX_DATA       <= RX_DATA;
    TX_SOP_POS    <= RX_SOP_POS;
    TX_EOP_POS    <= RX_EOP_POS;
-   TX_SOP        <= RX_SOP;    
-   TX_EOP        <= RX_EOP;    
+   TX_SOP        <= RX_SOP;
+   TX_EOP        <= RX_EOP;
    TX_SRC_RDY    <= sig_tx_src_rdy;
    RX_DST_RDY    <= sig_rx_dst_rdy;
 
@@ -96,14 +96,14 @@ begin
 
 
    -- Control FSM -------------------------------------------------------------
-   
+
    --! \brief Register for storage of the actual FSM state (with synchronous RESET)
    reg_act_statep : process(CLK)
    begin
       if CLK = '1' and CLK'event then
          if RESET = '1' then
-            reg_act_state <= DATA_TRANS; 
-         else  
+            reg_act_state <= DATA_TRANS;
+         else
             reg_act_state <= next_state;
          end if;
       end if;
@@ -114,7 +114,7 @@ begin
    begin
       -- Next state is the actual state (by default)
       next_state <= reg_act_state;
-      
+
       -- Compute the next state
       case reg_act_state is
          when DATA_TRANS =>
@@ -142,16 +142,16 @@ begin
       end case;
 
    end process;
-   
+
    --! \brief Process for computation of the otput signals
    fsm_outp : process(reg_act_state,RX_SRC_RDY,TX_HDR_DST_RDY,TX_DST_RDY,RX_SOP)
    begin
       -- Defatul signal values
       sig_tx_src_rdy <= RX_SRC_RDY;
-      sig_rx_dst_rdy <= TX_DST_RDY; 
-      
+      sig_rx_dst_rdy <= TX_DST_RDY;
+
       -- Ready and sop is detected (sop is the place with next header)
-      sig_tx_hdr_src_rdy <= RX_SRC_RDY and RX_SOP; 
+      sig_tx_hdr_src_rdy <= RX_SRC_RDY and RX_SOP;
 
       -- Compute output values
       case reg_act_state is

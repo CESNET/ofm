@@ -67,7 +67,7 @@ SETTINGS = {
     "fifo_depth_comb_4" : {
         "FIFO_DEPTH"          : "4096",
     },
-    "_combinations_" : (  
+    "_combinations_" : (
     (), # Works the same as '("default",),' as the "default" is applied in every combination
     ("fifo_depth_comb_1",),
     ("fifo_depth_comb_2",),

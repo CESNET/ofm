@@ -90,7 +90,7 @@ entity MFB_FRAME_MASKER is
         -- Either there is a new word (no mask applied) or
         -- an older word that is partially masked by a previous mask (or masks when masking the same word more than two clock cycles).
         -- ====================================================================
-        
+
         -- SOF before the current mask was applied.
         TX_SOF_UNMASKED     : out std_logic_vector(REGIONS-1 downto 0);
         -- EOF before the current mask was applied.
@@ -102,7 +102,7 @@ entity MFB_FRAME_MASKER is
         --
         -- With original packet layout (no mask applied).
         -- ====================================================================
-    
+
         -- Original SOF that was at input.
         TX_SOF_ORIGINAL     : out std_logic_vector(REGIONS-1 downto 0);
         -- Original EOF that was at input.

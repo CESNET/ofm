@@ -35,22 +35,22 @@ architecture behavioral of testbench is
     signal clk               : std_logic;
     signal rst               : std_logic;
 
-    signal rx_data           : std_logic_vector(DATA_WIDTH-1 downto 0); 
-    signal rx_ch             : std_logic_vector(log2(CHANNELS)-1 downto 0);  
+    signal rx_data           : std_logic_vector(DATA_WIDTH-1 downto 0);
+    signal rx_ch             : std_logic_vector(log2(CHANNELS)-1 downto 0);
     signal rx_wr             : std_logic;
     signal rx_full           : std_logic;
     signal set_read          : std_logic := '0';
 
-    signal tx_data           : std_logic_vector(DATA_WIDTH-1 downto 0); 
+    signal tx_data           : std_logic_vector(DATA_WIDTH-1 downto 0);
     signal tx_rd             : std_logic;
-    signal tx_ch             : std_logic_vector(log2(CHANNELS)-1 downto 0);    
+    signal tx_ch             : std_logic_vector(log2(CHANNELS)-1 downto 0);
     signal tx_empty          : std_logic;
 
     signal clr               : std_logic_vector(CHANNELS-1 downto 0) := (others => '0');
     signal clr_reg           : std_logic_vector(CHANNELS-1 downto 0) := (others => '0');
     signal asyn_clr          : std_logic_vector(CHANNELS-1 downto 0) := (others => '0');
 
-    signal rx_data_reg       : std_logic_vector(DATA_WIDTH-1 downto 0); 
+    signal rx_data_reg       : std_logic_vector(DATA_WIDTH-1 downto 0);
     signal rx_ch_reg         : integer := 0;
     signal rx_wr_reg         : std_logic;
     signal rx_full_reg       : std_logic;

@@ -88,7 +88,7 @@ class PCIeRootAxi #(ADDR_WIDTH = 32, PAGE_SIZE = 4096) extends MonitorCbs;
         address     = {header[63:2], 2'b00};
         length      = {header[74:64], 2'b00};
         request     = header[78:75];
-        tag         = header[103:96];        
+        tag         = header[103:96];
 
         fbe         = tr.fbe;
         lbe         = (length == 4) ? tr.fbe : tr.lbe;
@@ -327,12 +327,12 @@ class PCIeRootAxi #(ADDR_WIDTH = 32, PAGE_SIZE = 4096) extends MonitorCbs;
             1 : begin tr.fbe = 4'b1110; address -= 1; data = {8'h00, data}; end
             2 : begin tr.fbe = 4'b1100; address -= 2; data = {8'h00, 8'h00, data}; end
             3 : begin tr.fbe = 4'b1000; address -= 3; data = {8'h00, 8'h00, 8'h00, data}; end
-        endcase       
+        endcase
 
 
         ////setup lbe
         case (data.size() & 3)
-            0 : begin tr.lbe = 4'b1111; end 
+            0 : begin tr.lbe = 4'b1111; end
             1 : begin tr.lbe = 4'b0001; data = {data, 8'h00, 8'h00, 8'h00}; end
             2 : begin tr.lbe = 4'b0011; data = {data, 8'h00, 8'h00}; end
             3 : begin tr.lbe = 4'b0111; data = {data, 8'h00}; end

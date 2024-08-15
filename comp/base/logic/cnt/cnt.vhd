@@ -67,7 +67,7 @@ begin
          end if;
       end process;
    end generate;
-   
+
    down_cnt_gen : if DIR=down generate
       cnt : process(CLK)
       begin
@@ -80,7 +80,7 @@ begin
          end if;
       end process;
    end generate;
-   
+
    DO <= reg_cnt;
 end architecture full;
 

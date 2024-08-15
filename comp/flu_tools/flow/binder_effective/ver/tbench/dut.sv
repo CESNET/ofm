@@ -10,7 +10,7 @@
  * TODO:
  *
  */
- 
+
 // ----------------------------------------------------------------------------
 //                        Module declaration
 // ----------------------------------------------------------------------------
@@ -28,8 +28,8 @@ module DUT (
 // Signals for DUT conection
     // Data
 wire [(PORTS*DATA_WIDTH)-1:0] rx_data;
-wire [(PORTS*SOP_POS_WIDTH)-1:0] rx_sop_pos; 
-wire [(PORTS*EOP_POS_WIDTH)-1:0] rx_eop_pos;   
+wire [(PORTS*SOP_POS_WIDTH)-1:0] rx_sop_pos;
+wire [(PORTS*EOP_POS_WIDTH)-1:0] rx_eop_pos;
 wire [PORTS-1:0] rx_sop;
 wire [PORTS-1:0] rx_eop;
 wire [PORTS-1:0] rx_src_rdy;
@@ -55,13 +55,13 @@ for (i=0; i<PORTS; i++) begin
   assign rx_eop[i] = RX[i].EOP;
   assign rx_src_rdy[i] = RX[i].SRC_RDY;
   assign RX[i].DST_RDY = rx_dst_rdy[i];
-    
+
     // Header
   assign rx_hdr_data[(i+1)*HDR_WIDTH-1:HDR_WIDTH*i] = RXHDR[i].DATA;
   assign rx_hdr_src_rdy[i] = RXHDR[i].SRC_RDY;
-  assign RXHDR[i].DST_RDY = rx_hdr_dst_rdy[i]; 
+  assign RXHDR[i].DST_RDY = rx_hdr_dst_rdy[i];
 end
-endgenerate 
+endgenerate
 
 // Connecting header interface to TX (default values - we are transfering one word only)
 assign TXHDR.SOP = 1;
@@ -93,7 +93,7 @@ flu_binder_eff #(
     // Common Interface
      .CLK               (CLK),
      .RESET             (RESET),
-     
+
     // RX Port
      .RX_DATA     (rx_data),
      .RX_SOP_POS  (rx_sop_pos),
@@ -106,7 +106,7 @@ flu_binder_eff #(
      .RX_HDR_DATA       (rx_hdr_data),
      .RX_HDR_SRC_RDY    (rx_hdr_src_rdy),
      .RX_HDR_DST_RDY    (rx_hdr_dst_rdy),
- 
+
     // TX Port
      .TX_DATA     (TX.DATA),
      .TX_SOP_POS  (TX.SOP_POS),

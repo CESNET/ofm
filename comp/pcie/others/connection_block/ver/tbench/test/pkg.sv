@@ -1,5 +1,5 @@
 /*
- * file       : pkg.sv 
+ * file       : pkg.sv
  * description: test pkg
  * date       : 2020
  * author     : Radek Iša <isa@cesnet.cz>

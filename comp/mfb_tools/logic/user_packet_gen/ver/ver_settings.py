@@ -47,7 +47,7 @@ SETTINGS = {
     "len_width_comb_2" : {
         "LEN_WIDTH"          : "16",
     },
-    "_combinations_" : (  
+    "_combinations_" : (
     (), # Works the same as '("default",),' as the "default" is applied in every combination
     ("region_comb_1",),
     ("region_comb_3",),

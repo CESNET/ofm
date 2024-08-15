@@ -568,9 +568,9 @@ proc SynthesizeProject {synth_flags hierarchy} {
 # synthesis/implementation runs.
 #
 proc get_all_log_files {} {
-    global env 
+    global env
 
-    # filename of Vivado's main log 
+    # filename of Vivado's main log
     set MAIN_LOGFILES $env(OUTPUT_NAME).log
 
     # construct a list of paths to all utilized log files

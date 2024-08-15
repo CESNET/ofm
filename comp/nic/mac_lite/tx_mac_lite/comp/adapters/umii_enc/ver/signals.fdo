@@ -10,11 +10,11 @@ proc mii {NAME PATH} {
 }
 
 proc rx {NAME PATH} {
-    add wave -divider "$NAME"      
+    add wave -divider "$NAME"
     add_wave "-group {$NAME} -noupdate  -hex"       $PATH/RX_*
 }
 
 proc int {NAME PATH} {
-    add wave -divider "$NAME"      
+    add wave -divider "$NAME"
     add_wave "-group {$NAME} -noupdate  -hex"       $PATH/s_*
 }

@@ -10,7 +10,7 @@
  * TODO:
  *
  */
- 
+
 // ----------------------------------------------------------------------------
 //                        Module declaration
 // ----------------------------------------------------------------------------
@@ -42,7 +42,7 @@ FL_DISCARD_STAT#(
     // Common Interface
      .CLK               (CLK),
      .RESET             (RESET),
- 
+
     // Write Interface
      .RX_DATA       (RX.DATA),
      .RX_DREM       (RX.DREM),

@@ -168,11 +168,11 @@ begin
 
    USR_ACK <= wr_usr_ack or rd_usr_ack;
 
-   ep_tag_p : process(rd_ep_tag, wr_ep_tag, rd_ep_req, wr_ep_req, 
+   ep_tag_p : process(rd_ep_tag, wr_ep_tag, rd_ep_req, wr_ep_req,
       wr_ep_trans_type, rd_ep_trans_type)
    begin
       if wr_ep_req = '1' then
-         EP_TAG <= zeros(EP_TAG_WIDTH-1 downto WR_TAG_WIDTH+1) & 
+         EP_TAG <= zeros(EP_TAG_WIDTH-1 downto WR_TAG_WIDTH+1) &
                    wr_ep_tag & '1'; -- WRITE tags are marked by LSB=1
          EP_TRANS_TYPE <= wr_ep_trans_type;
       else

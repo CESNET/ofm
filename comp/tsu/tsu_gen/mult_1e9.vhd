@@ -102,7 +102,7 @@ begin
    ---------------------------------------------
 
    -- 1E9 = 00111011 10011010 11001010 00000000 binary
-   -- That is 13 ones. 
+   -- That is 13 ones.
    -- Bit weights: 9 11 14 15 17 19 20 23 24 25 27 28 29
    -- Bits 0-8 of the result will always be zeros.
    -- We will save bits by not storing those which can contain only zeros.
@@ -112,9 +112,9 @@ begin
    ---------------------------------------------
    -- First tree level - add neighbouring weights
    ---------------------------------------------
-   
+
    -- add1 = (din<<9 + din<<11) >> 9
-   -- 35 bits are needed for the result 
+   -- 35 bits are needed for the result
    add1_a <= (zeros64(2 downto 0) & din);
    add1_b <= ("0" & din & zeros64(1 downto 0));
    ADD1_inst: entity work.ALU_DSP
@@ -156,7 +156,7 @@ begin
       CARRY_IN    => '0',
       P           => reg_add2
    );
-   
+
    -- add3 = (din<<17 + din<<19) >> 17
    -- 35 bits are needed for the result
    reg_add3 <= reg_add1;
@@ -224,7 +224,7 @@ begin
       CARRY_IN    => '0',
       P           => reg_add7
    );
-   
+
    -- add8 = (din<<17 + din<<19 + din<<20 din<<23) >> 17
    -- 40 bits are needed for the result
    add8_a <= (zeros64(4 downto 0) & reg_add3);
@@ -246,7 +246,7 @@ begin
       CARRY_IN    => '0',
       P           => reg_add8
    );
-   
+
    -- add9 = (din<<24 + din<<25 + din<<27 din<<28) >> 24
    -- 38 bits are needed for the result
    add9_a <= (zeros64(3 downto 0) & reg_add5);
@@ -276,8 +276,8 @@ begin
    ---------------------------------------------
    -- Third tree level
    ---------------------------------------------
-   
-   -- add10 = (din<<9 + din<<11 + din<<14 + din<<15 + 
+
+   -- add10 = (din<<9 + din<<11 + din<<14 + din<<15 +
    --          din<<17 + din<<19 + din<<20 + din<<23) >> 9
    -- 49 bits are needed for the result
    add10_a <= (zeros64(8 downto 0) & reg_add7);
@@ -299,7 +299,7 @@ begin
       CARRY_IN    => '0',
       P           => reg_add10
    );
-   
+
    -- add11 = (din<<24 + din<<25 + din<<27 + din<<28) >> 24 + din<<5
    -- add11 = (din<<24 + din<<25 + din<<27 + din<<28) >> 24 + din<<29 >> 24
    -- add11 = (din<<24 + din<<25 + din<<27 + din<<28 + din<<29) >> 24
@@ -331,7 +331,7 @@ begin
    ---------------------------------------------
    -- Fourh tree level
    ---------------------------------------------
-   
+
    -- add12 = (din<<9 + din<<11 + din<<14 + din<<15 +
    --          din<<17 + din<<19 + din<<20 + din<<23) >> 9
    --         (din<<24 + din<<25 + din<<27 + din<<28 + din<<29)>>24 << 15
@@ -364,7 +364,7 @@ begin
    -- End of fourth tree level
    ---------------------------------------------
 
-   -- reg_add12 contains the result shifted 9 bits left. 
+   -- reg_add12 contains the result shifted 9 bits left.
    -- We will ignore another 23 bits in our application, which leaves us with
    -- nice 32 bits of result.
    dout <= reg_add12(54 downto 23);

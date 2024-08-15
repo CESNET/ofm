@@ -1,8 +1,8 @@
 /*
  * file       : low_sequence.sv
- * description:  sequence check driver variable if reset is set 
+ * description:  sequence check driver variable if reset is set
  * Copyright (C) 2021 CESNET z. s. p. o.
- * description: RESET packages 
+ * description: RESET packages
  * date       : 2021
  * author     : Radek Iša <isa@cesnet.cz>
  *

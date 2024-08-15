@@ -90,17 +90,17 @@ class FrameLinkUMonitor #(int pDataWidth=512, int pEopWidth=6, int pSopWidth=3)
     task checkGapValue();
         if ( this.gapMeasureEn == 1) begin
             // Gap measuring is enabled, check the measured value
-            if (!(this.minGapVal <= this.actGapVal &&  this.maxGapVal >= this.actGapVal && 
+            if (!(this.minGapVal <= this.actGapVal &&  this.maxGapVal >= this.actGapVal &&
                   this.maxGapVal != -1)
                 &&
                 !(this.minGapVal <= this.actGapVal && this.maxGapVal == -1))
             begin
-            
+
                 $write("Measured gap is out of specified range!\n");
                 $write("Gap equals to %d\n",this.actGapVal);
                 $stop;
             end
-        end 
+        end
     endtask
 
    /**
@@ -149,7 +149,7 @@ class FrameLinkUMonitor #(int pDataWidth=512, int pEopWidth=6, int pSopWidth=3)
          if ((!flu.monitor_cb.SOP) ||
              (!flu.monitor_cb.SRC_RDY) ||
              (!flu.monitor_cb.DST_RDY))
-            begin 
+            begin
                 //Wait one clock and update the gap counter
                 @(flu.monitor_cb);
                 // Update the gap value
@@ -219,14 +219,14 @@ class FrameLinkUMonitor #(int pDataWidth=512, int pEopWidth=6, int pSopWidth=3)
             shared = 1;
             //Word is shared, compute the gap and check it!
             if (this.actGapVal != -1) begin
-               this.actGapVal = flu.monitor_cb.SOP_POS*bsopstep - 
+               this.actGapVal = flu.monitor_cb.SOP_POS*bsopstep -
                                 (flu.monitor_cb.EOP_POS+1);
                 checkGapValue();
-            end 
+            end
          end
          else begin
             shared = 0;
-            
+
             // Word is not shared, just check if the SOP is available
             if(flu.monitor_cb.SOP && this.actGapVal != -1) begin
                 // Update the gap value and check it!

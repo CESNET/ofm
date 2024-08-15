@@ -1,7 +1,7 @@
 /*
  * file       : nfb_driver.h
  * Copyright (C) 2022 CESNET z. s. p. o.
- * description: create interprocess comunication with nfb programs 
+ * description: create interprocess comunication with nfb programs
  * date       : 2022
  * author     : Radek Iša <isa@cesnet.ch>
  *

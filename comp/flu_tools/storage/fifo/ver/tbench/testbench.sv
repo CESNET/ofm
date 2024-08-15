@@ -1,7 +1,7 @@
 /*
  * testbench.sv: Top Entity for FL_FIFO automatic test
  * Copyright (C) 2012 CESNET
- * Author: Lukas Kekely <kekely@cesnet.cz> 
+ * Author: Lukas Kekely <kekely@cesnet.cz>
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -10,7 +10,7 @@
  * TODO:
  *
  */
- 
+
 
 // ----------------------------------------------------------------------------
 //                                 TESTBENCH
@@ -26,7 +26,7 @@ module testbench;
   iFrameLinkUTx #(DATA_WIDTH, EOP_POS_WIDTH, SOP_POS_WIDTH) TX       (CLK, RESET);
   iFrameLinkUFifo #(STATUS_WIDTH)         CTRL     (CLK, RESET);
 
-  
+
   //-- Clock generation -------------------------------------------------------
   always #(CLK_PERIOD/2) CLK = ~CLK;
 

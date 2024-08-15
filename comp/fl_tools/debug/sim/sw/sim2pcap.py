@@ -55,4 +55,3 @@ for i in range(0, len(parts)):
     fpcap.write(d)
 fsim.close()
 fpcap.close()
-    

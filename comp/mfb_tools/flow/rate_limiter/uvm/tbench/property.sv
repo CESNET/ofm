@@ -1,11 +1,11 @@
-//-- property.sv: Properties for mfb bus 
+//-- property.sv: Properties for mfb bus
 //-- Copyright (C) 2023 CESNET z. s. p. o.
 //-- Author(s): Tomas Hak <xhakto01@vut.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 
-module rate_limiter_property #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH) 
+module rate_limiter_property #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH)
     (
         input RESET,
         mfb_if tx_mfb_vif,

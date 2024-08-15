@@ -98,11 +98,11 @@ class CustomTransGenerator;
          if (custom_tr.payload_en == 1) begin
             mfbTransMbx.put(mfb_tr);
          end
-         //$display("MFB TRANSACTION %d SENDING TO DRIVER",data_id); 
+         //$display("MFB TRANSACTION %d SENDING TO DRIVER",data_id);
          data_id = data_id + 1;
       end // while
       enabled = 0;
-      //$display("GENERATOR STOP"); 
+      //$display("GENERATOR STOP");
    endtask
 
 endclass

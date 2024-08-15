@@ -72,16 +72,16 @@ begin
 
     en_reg_p: process(CLK)
     begin
-        if rising_edge(CLK) then 
+        if rising_edge(CLK) then
             en_tmp_reg  <= not en_tmp_n;
         end if;
     end process;
 
     enable_p: process(all)
     begin
-        if RX_TMP_OVERFLOW = '1' then 
+        if RX_TMP_OVERFLOW = '1' then
             tmp_enable  <= (others => '1');
-        else 
+        else
             tmp_enable  <= en_tmp_reg;
         end if;
     end process;
@@ -94,9 +94,9 @@ begin
         tmp_reg_data_p: process(CLK)
         begin
             if rising_edge(CLK) then
-                if RST = '1' then 
+                if RST = '1' then
                     TX_TMP_DATA(i) <= (others => '0');
-                elsif tmp_enable(i) = '1' then 
+                elsif tmp_enable(i) = '1' then
                     TX_TMP_DATA(i) <= RX_TMP_DATA_ARR(i);
                 end if;
             end if;
@@ -109,14 +109,14 @@ begin
     eof_oncatenation_g: for i in MFB_REGIONS*MFB_REGION_SIZE -1 downto 0 generate
         xof_reg_input(i)  <= RX_TMP_SOF_ONE_HOT(i) & RX_TMP_EOF_ONE_HOT(i);
     end generate;
-    
+
     xof_reg_g: for i in MFB_REGIONS*MFB_REGION_SIZE -1 downto 0 generate
         tmp_reg_xof_p: process(CLK)
         begin
             if rising_edge(CLK) then
-                if RST = '1' then 
+                if RST = '1' then
                     xof_reg(i) <= (others => '0');
-                elsif tmp_enable(i) = '1' then 
+                elsif tmp_enable(i) = '1' then
                     xof_reg(i) <= xof_reg_input(i);
                 end if;
             end if;
@@ -127,7 +127,7 @@ begin
         TX_TMP_SOF_ONE_HOT(i)   <= xof_reg(i)(1);
         TX_TMP_EOF_ONE_HOT(i)   <= xof_reg(i)(0);
     end generate;
-        
+
     --------------------------------------------------------------------------------
     ---                           TMP_REG - PKT_LNG                              ---
     --------------------------------------------------------------------------------
@@ -135,9 +135,9 @@ begin
         tmp_reg_lng_p: process(CLK)
         begin
             if rising_edge(CLK) then
-                if RST = '1' then 
+                if RST = '1' then
                     TX_PKT_LNG(i)   <= (others => '0');
-                elsif tmp_enable(i) = '1' then 
+                elsif tmp_enable(i) = '1' then
                     TX_PKT_LNG(i)   <= RX_PKT_LNG(i);
                 end if;
             end if;

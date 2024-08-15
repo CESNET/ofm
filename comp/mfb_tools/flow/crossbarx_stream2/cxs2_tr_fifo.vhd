@@ -178,8 +178,8 @@ begin
                 end if;
             end if;
         end process;
-         
-        assert (txbuf_done_cnt_ovf_reg(s) /= '1') 
+
+        assert (txbuf_done_cnt_ovf_reg(s) /= '1')
             report "CXS2-TRFIFO: Counter txbuf_done_cnt overflowed!"
             severity failure;
     end generate;

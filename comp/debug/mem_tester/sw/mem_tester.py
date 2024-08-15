@@ -81,7 +81,7 @@ class MemTester(nfb.BaseComp):
                 time.sleep(delay)
 
         return False
-    
+
     def load_status(self):
         status = { }
 
@@ -107,9 +107,9 @@ class MemTester(nfb.BaseComp):
         status["addr_lim"]              = self._comp.read32(self._REG_ADDR_LIM)
         status["refr_period_ticks"]     = self._comp.read32(self._REG_REFRESH_PERIOD)
         status["def_refr_period_ticks"] = self._comp.read32(self._REG_DEF_REFRESH_PERIOD)
-        
+
         return status
-    
+
     def status_to_str(self, status):
         res = ""
         res += f"Mem_tester status:\n"
@@ -136,7 +136,7 @@ class MemTester(nfb.BaseComp):
         res += f"refresh period [ticks]         {status['refr_period_ticks']}\n"
         res += f"default refresh period [ticks] {status['def_refr_period_ticks']}\n"
         return res
-    
+
     def rst(self, emif=True):
         self.mi_toggle(self._REG_CTRL_IN, self._BIT_RESET)
         if emif:
@@ -152,7 +152,7 @@ class MemTester(nfb.BaseComp):
         if not self._comp.wait_for_bit(self._REG_CTRL_OUT, self._BIT_TEST_DONE, timeout=60):
             print("Test timeout (TEST_DONE was not set)", file=sys.stderr)
 
-    def config_test(self, 
+    def config_test(self,
         rand_addr           = False,
         burst_cnt           = 4,
         addr_lim_scale      = 1.0,
@@ -220,20 +220,20 @@ class MemTester(nfb.BaseComp):
         stats = self.mem_logger.load_stats()
         errs = self.check_test_result(config, status, stats)
         return config, status, stats, errs
-   
+
     def test_result_to_str(self, config, status, stats, errs):
         res = ""
         if errs == "":
-            res += "|| ------------------- ||\n" 
-            res += "|| TEST WAS SUCCESSFUL ||\n" 
-            res += "|| ------------------- ||\n" 
+            res += "|| ------------------- ||\n"
+            res += "|| TEST WAS SUCCESSFUL ||\n"
+            res += "|| ------------------- ||\n"
         else:
-            res += "|| ----------- ||\n" 
-            res += "|| TEST FAILED ||\n" 
-            res += "|| ----------- ||\n" 
-            res += "\nErrors:\n" 
+            res += "|| ----------- ||\n"
+            res += "|| TEST FAILED ||\n"
+            res += "|| ----------- ||\n"
+            res += "\nErrors:\n"
             res += errs
-        res += "\n" 
+        res += "\n"
         res += self.mem_logger.stats_to_str(stats)
         return res
 
@@ -247,7 +247,7 @@ class MemTester(nfb.BaseComp):
             self._comp.write32(self._REG_AMM_GEN_ADDR, burst)
             self._comp.write32(self._REG_AMM_GEN_SLICE, s)
             self._comp.write32(self._REG_AMM_GEN_DATA, slice)
-        
+
         self._comp.write32(self._REG_AMM_GEN_ADDR, prev_addr)
 
     def amm_gen_get_buff(self):
@@ -265,7 +265,7 @@ class MemTester(nfb.BaseComp):
                 slice = self._comp.read32(self._REG_AMM_GEN_DATA)
                 val += slice << (s * mi_width)
             data.append(val)
-        
+
         self._comp.write32(self._REG_AMM_GEN_ADDR, prev_addr)
         return data
 
@@ -305,13 +305,13 @@ class MemTester(nfb.BaseComp):
         return res
 
 def parseParams():
-    parser = argparse.ArgumentParser(description = 
+    parser = argparse.ArgumentParser(description =
         """mem_tester control script""",
         #formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
 
     access = parser.add_argument_group('card access arguments')
-    access.add_argument('-d', '--device', default=nfb.libnfb.Nfb.default_device, 
+    access.add_argument('-d', '--device', default=nfb.libnfb.Nfb.default_device,
                         metavar='device', help = """device with target FPGA card.""")
     access.add_argument('-i', '--index',        type=int, metavar='index', default=0, help = """mem_tester index inside DevTree.""")
     access.add_argument('-I', '--logger-index', type=int, metavar='index', default=None, help = """mem_logger index inside DevTree.""")
@@ -342,6 +342,7 @@ def parseParams():
 
     args = parser.parse_args()
     return args
+
 
 if __name__ == '__main__':
     args = parseParams()

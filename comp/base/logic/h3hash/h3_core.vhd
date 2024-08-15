@@ -1,4 +1,4 @@
--- h3_core.vhd - H3 Class generic hash function                  
+-- h3_core.vhd - H3 Class generic hash function
 -- Copyright (C) 2024 CESNET z. s. p. o.
 -- Author(s): Oliver Gurka <oliver.gurka@cesnet.cz>
 --
@@ -44,7 +44,7 @@ architecture behavioral of H3_CORE is
     signal do_int : std_logic_vector(CONFIG.hash_width - 1 downto 0);
 
 begin
-    
+
     and_g : for i in 0 to CONFIG.key_width - 1 generate
         anded_mtx(i) <= MATRIX_DESER(i) when DATA_IN(i) = '1' else (others => '0');
     end generate;
@@ -121,5 +121,5 @@ begin
     end generate;
 
     DATA_IN_RDY <= DATA_OUT_RDY;
-    
+
 end architecture;

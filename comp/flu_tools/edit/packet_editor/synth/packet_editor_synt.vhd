@@ -9,7 +9,7 @@
 -- TODO:
 --
 
-library IEEE;  
+library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.std_logic_arith.all;
 use IEEE.std_logic_unsigned.all;
@@ -23,7 +23,7 @@ entity PACKET_EDITOR_SYNT is
       SOP_POS_WIDTH 	: integer := 3;
       OFFSET_WIDTH   : integer := 10;
       EN_MASK        : boolean := true
-   );  
+   );
    port(
       CLK            : in std_logic;
       RESET          : in std_logic;
@@ -46,10 +46,10 @@ entity PACKET_EDITOR_SYNT is
       TX_EOP         : out std_logic;
       TX_SRC_RDY     : out std_logic;
       TX_DST_RDY     : in std_logic
-   ); 
+   );
 end entity;
 
-architecture full of PACKET_EDITOR_SYNT is 
+architecture full of PACKET_EDITOR_SYNT is
 
    signal REG_NEW_DATA      : std_logic_vector(8*4-1 downto 0);
    signal REG_OFFSET        : std_logic_vector(OFFSET_WIDTH-1 downto 0);
@@ -72,11 +72,11 @@ architecture full of PACKET_EDITOR_SYNT is
    signal REG_MASK          : std_logic_vector(3 downto 0);
 
 begin
-   
+
    process(CLK)
    begin
       if (CLK'event) and (CLK='1') then
-         REG_NEW_DATA      <= NEW_DATA; 
+         REG_NEW_DATA      <= NEW_DATA;
          REG_OFFSET        <= OFFSET;
          REG_EN_REPLACE    <= EN_REPLACE;
          REG_SHIFT         <= SHIFT;
@@ -107,7 +107,7 @@ begin
    )
    port map (
       CLK            => CLK,
-      RESET          => RESET, 
+      RESET          => RESET,
       MASK           => REG_MASK,
       NEW_DATA       => REG_NEW_DATA,
       SHIFT          => REG_SHIFT,

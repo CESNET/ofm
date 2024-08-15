@@ -11,7 +11,7 @@
  * TODO:
  *
  */
- 
+
   // --------------------------------------------------------------------------
   // -- Driver Callbacks
   // --------------------------------------------------------------------------
@@ -20,24 +20,24 @@
    * class. Inheritence from this basic class is neaded for functionality.
    */
    class DriverCbs;
-    
+
     // -- Class Methods --
 
     // ------------------------------------------------------------------------
     // Function is called before is transaction sended - usefull for
     // transaction modification
-    
+
     virtual task pre_tx(ref Transaction transaction, string inst);
       // By default, callback does nothing
     endtask: pre_tx
-    
+
     // ------------------------------------------------------------------------
-    // Function is called after is transaction sended throw interface - 
+    // Function is called after is transaction sended throw interface -
     // usefull for scoreboards
-    
+
     virtual task post_tx(Transaction transaction, string inst);
       // By default, callback does nothing
     endtask: post_tx
-    
+
   endclass : DriverCbs
 

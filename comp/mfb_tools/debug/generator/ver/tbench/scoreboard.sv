@@ -10,12 +10,12 @@ import sv_mfb_pkg::*;
 class ScoreboardMonitorCbs extends MonitorCbs;
     longint cnt;
     int expPktLen;
-    
+
     function new ();
         cnt = 0;
         expPktLen = 0;
     endfunction
-    
+
     virtual task post_rx(Transaction transaction, string inst);
         MfbTransaction #(MFB_ITEM_WIDTH) mfbTrans;
         int pktLen;
@@ -84,7 +84,7 @@ class Scoreboard;
         this.monitorCbs.expPktLen = length;
         this.monitorCbs.cnt = 0;
     endtask
-    
+
     function longint getPktCounter();
         return this.monitorCbs.cnt;
     endfunction;

@@ -340,12 +340,12 @@ begin
             port map(
                 CLK        => CLK,
                 RESET      => RESET,
-        
+
                 RX_DATA    => up_mvb_asfifo_out_data(i)   ,
                 RX_VLD     => up_mvb_asfifo_out_vld(i)    ,
                 RX_SRC_RDY => up_mvb_asfifo_out_src_rdy(i),
                 RX_DST_RDY => up_mvb_asfifo_out_dst_rdy(i),
-        
+
                 TX_DATA    => up_mvb_trans_out_data(i),
                 TX_VLD     => up_mvb_trans_out_vld(i) ,
                 TX_NEXT    => (others => up_mvb_trans_out_dst_rdy(i))
@@ -420,7 +420,7 @@ begin
         port map(
             CLK         => CLK,
             RESET       => RESET,
-    
+
             RX_DATA     => up_mfb_asfifo_out_data(i),
             RX_SOP      => up_mfb_asfifo_out_sof(i),
             RX_EOP      => up_mfb_asfifo_out_eof(i),
@@ -428,7 +428,7 @@ begin
             RX_EOP_POS  => up_mfb_asfifo_out_eof_pos(i),
             RX_SRC_RDY  => up_mfb_asfifo_out_src_rdy(i),
             RX_DST_RDY  => up_mfb_asfifo_out_dst_rdy(i),
-    
+
             TX_DATA     => up_mfb_trans_out_data(i),
             TX_SOP      => up_mfb_trans_out_sof(i),
             TX_EOP      => up_mfb_trans_out_eof(i),
@@ -966,8 +966,8 @@ begin
                 end if;
             end if;
         end process;
-     
-        assert (down_storage_fifo_err_reg /= '1') 
+
+        assert (down_storage_fifo_err_reg /= '1')
            report "PTC: No dst_rdy part error! Writing in full DOWN MFB storage FIFO!"
            severity failure;
 
@@ -1124,8 +1124,8 @@ begin
             end if;
         end if;
     end process;
- 
-    assert (down_mvb_tfifo_in_err_reg /= '1') 
+
+    assert (down_mvb_tfifo_in_err_reg /= '1')
        report "PTC: No dst_rdy error! Writing in full DOWN MVB TFIFO!"
        severity failure;
 
@@ -1262,12 +1262,12 @@ begin
             port map(
                 CLK        => CLK,
                 RESET      => RESET,
-        
+
                 RX_DATA    => down_mvb_trans_in_data(i),
                 RX_VLD     => down_mvb_trans_in_vld(i),
                 RX_SRC_RDY => down_mvb_trans_in_src_rdy(i),
                 RX_DST_RDY => down_mvb_trans_in_dst_rdy(i),
-        
+
                 TX_DATA    => down_mvb_asfifo_in_data(i),
                 TX_VLD     => down_mvb_asfifo_in_vld(i) ,
                 TX_NEXT    => (others => down_mvb_asfifo_in_dst_rdy(i))
@@ -1343,7 +1343,7 @@ begin
         port map(
             CLK         => CLK,
             RESET       => RESET,
-    
+
             RX_DATA     => down_mfb_trans_in_data(i),
             RX_SOP      => down_mfb_trans_in_sof(i),
             RX_EOP      => down_mfb_trans_in_eof(i),
@@ -1351,7 +1351,7 @@ begin
             RX_EOP_POS  => down_mfb_trans_in_eof_pos(i),
             RX_SRC_RDY  => down_mfb_trans_in_src_rdy(i),
             RX_DST_RDY  => down_mfb_trans_in_dst_rdy(i),
-    
+
             TX_DATA     => down_mfb_asfifo_in_data(i),
             TX_SOP      => down_mfb_asfifo_in_sof(i),
             TX_EOP      => down_mfb_asfifo_in_eof(i),

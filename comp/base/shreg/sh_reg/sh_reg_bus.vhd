@@ -23,7 +23,7 @@ entity sh_reg_bus is
       -- INIT        : std_logic_vector(15 downto 0) := X"0000";
       -- INIT_EXT00  : std_logic_vector(63 downto 0) := X"0000000000000000";
       INIT        : std_logic_vector := x"0000";
-      INIT_EXT00  : std_logic_vector := X"0000000000000000"; 
+      INIT_EXT00  : std_logic_vector := X"0000000000000000";
       DATA_WIDTH  : integer := 1
    );
    port(
@@ -54,7 +54,7 @@ begin
    port map(
      CLK => CLK,
      CE  => CE,
-     
+
      DIN  => DIN,
      DOUT => DOUT
    );

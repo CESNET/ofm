@@ -8,7 +8,7 @@
 
 
 proc qdr_bram_ports { TB } {
-   
+
    add wave -divider ""
    add wave -divider "Synchronization"
    add_wave "-group { SYNC } -noupdate -hex -label CLK"                   $TB/clk

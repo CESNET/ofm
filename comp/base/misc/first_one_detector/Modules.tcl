@@ -13,4 +13,4 @@ set GEN_ENC_BASE  "$OFM_PATH/comp/base/logic/enc"
 
 set COMPONENTS [list \
 			[list "GEN_ENC" $GEN_ENC_BASE "FULL"]
-		] 
+		]

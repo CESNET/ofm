@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <source>
-	
+
 <!-- MAIN INFO ********************************************************** -->
 
 
@@ -21,7 +21,7 @@
 </features>
 
 
-<!-- Bugs 
+<!-- Bugs
 <bugs>
 </bugs>
 -->
@@ -45,8 +45,8 @@
    In ACK signal vector only one bit is '1' at the same time. When
    acknowledged device should be changed, the ENABLE signal have to be set to
    '1'. In other case the ACK signal vector stay the same.
-   
-   
+
+
 </description>
 
 
@@ -55,7 +55,7 @@
 
 	<!-- Generic description -->
 	<generic_map>
-		
+
 		<generic name="PORTS" type="integer" default="2">
 			Number of arbitrating devices.
 		</generic>
@@ -64,7 +64,7 @@
 	<!-- Port description -->
 	<port_map>
 
-		<divider>Common signals</divider>		
+		<divider>Common signals</divider>
 		<port  name="CLK" dir="in" width="1">
 			Global FPGA clock
 		</port>
@@ -72,7 +72,7 @@
 			Global reset
 		</port>
 
-		<divider>Input/output interface</divider> 		
+		<divider>Input/output interface</divider>
 		<port name="ENABLE" dir="in" width="1">
 		   If '1' the acknowledged unit changes.
 		</port>
@@ -80,11 +80,11 @@
 			Request vector, if set the device is requesting for
          acknowledgement.
 		</port>
-		
+
 		<port name="ACK" dir="out" width="PORTS">
 			Acknowledgement vector, if set the device is selected.
 		</port>
-		
+
 	</port_map>
 
 </interface>
@@ -94,7 +94,7 @@
 <!-- use if the component has a SW interface, otherwise delete this section -->
 
 <constant>
-	
+
 </constant>
 
 
@@ -114,7 +114,7 @@
 <body>
 
 Maximal frequency is highly dependent on surrounding.
-   
+
 </body>
 
 </source>

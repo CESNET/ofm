@@ -1,6 +1,6 @@
 -- shifter_one.vhd: Left or right bit-by-bit shifter or rotator
 -- Copyright (C) 2017 CESNET
--- Author(s): Lukas Kekely <kekely@cesnet.cz> 
+-- Author(s): Lukas Kekely <kekely@cesnet.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --

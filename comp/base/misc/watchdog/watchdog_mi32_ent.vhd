@@ -26,7 +26,7 @@ entity WATCHDOG_MI32 is
       --! if TIMING is true, counter counts clock's periods, not data flowing
       TIMING            : boolean   := false
    );
-   
+
    port(
    -----------------------------------------
    ---        watchdog signals           ---
@@ -52,7 +52,7 @@ entity WATCHDOG_MI32 is
       COUNTER           : out std_logic_vector(COUNTER_WIDTH-1 downto 0);
       --!   if watchdog releases data or if it is locked
       LOCKED            : out std_logic;
-      
+
       -----------------------------------------
       ---        mi32 signals               ---
       -----------------------------------------
@@ -65,5 +65,5 @@ entity WATCHDOG_MI32 is
       ARDY     : out std_logic;                       -- Address Ready
       DRDY     : out std_logic                        -- Data Ready
    );
-   
+
 end WATCHDOG_MI32;

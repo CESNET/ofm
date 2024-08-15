@@ -10,7 +10,7 @@
  * TODO:
  *
  */
- 
+
 
 // ----------------------------------------------------------------------------
 //                                 TESTBENCH
@@ -27,7 +27,7 @@ module testbench;
   iFrameLinkUTx #(RX_DWIDTH, RX_EOPWIDTH, RX_SOPWIDTH) TX  (CLK, RESET);
   iFrameLinkUTx #(RX_DWIDTH, RX_EOPWIDTH, RX_SOPWIDTH) MONITOR  (CLK, RESET);
 
-  
+
   //-- Clock generation -------------------------------------------------------
   always #(CLK_PERIOD/2) CLK = ~CLK;
 

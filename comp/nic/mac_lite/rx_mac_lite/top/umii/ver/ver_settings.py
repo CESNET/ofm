@@ -67,7 +67,7 @@ SETTINGS = {
         "TX_CLK_PERIOD"     : "8ns",
     },
 
-    "_combinations_" : (  
+    "_combinations_" : (
     (), # Works the same as '("default",),' as the "default" is applied in every combination
     ("rx1024b",),
     ("rx512b","frames_big","mac_check_disable",),

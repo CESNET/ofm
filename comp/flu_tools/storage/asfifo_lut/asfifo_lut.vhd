@@ -1,6 +1,6 @@
 --! asfifo_lut.vhd: Frame Link Unaliged protocol generic ASFIFO_LUT
 --! Copyright (C) 2014 CESNET
---! Author: Jakub Cabal <jakubcabal@gmail.com> 
+--! Author: Jakub Cabal <jakubcabal@gmail.com>
 --!
 --! SPDX-License-Identifier: BSD-3-Clause
 --!
@@ -50,7 +50,7 @@ entity FLU_ASFIFO_LUT is
       RX_SRC_RDY    : in std_logic;
       RX_DST_RDY    : out std_logic;
       RX_STATUS     : out std_logic_vector(STATUS_WIDTH-1 downto 0);
-      
+
       -----------------------------------------------------
       --! \name Frame Link Unaligned output interface
       -----------------------------------------------------
@@ -89,10 +89,10 @@ begin
    sig_rd      <= TX_DST_RDY;
    --! Write signal generation
    sig_wr      <= RX_SRC_RDY and not sig_full;
-   
+
    --! Signal TX_SRC_RDY
    sig_tx_src_rdy <= sig_vld;
-   
+
    --! Data to write
    sig_data_wr <= RX_SOP & RX_EOP & RX_SOP_POS & RX_EOP_POS & RX_DATA;
 
@@ -100,7 +100,7 @@ begin
     generic map(
       --! ITEMS = Numer of items in FIFO
       --! !!!!!!!!!!! Must be (2^n), n>=2 !!!!!!!!!!!!!!!!!!!!!!
-      ITEMS          => ITEMS,   
+      ITEMS          => ITEMS,
 
       --! Data Width
       DATA_WIDTH     => MEM_WIDTH,
@@ -133,7 +133,7 @@ begin
    --! RX signal map
    --------------------------------------------------------
    RX_DST_RDY  <= not(sig_full or RX_RESET);
-   RX_STATUS   <= sig_status; 
+   RX_STATUS   <= sig_status;
 
    --------------------------------------------------------
    --! TX signal map

@@ -110,7 +110,7 @@ class env_tx #(int unsigned ITEMS, int unsigned ITEM_WIDTH) extends uvm_env;
     uvm_reset::sync_cbs                                               reset_sync;
 
     // ------------------------------------------------------------------------
-    // Definition of agents 
+    // Definition of agents
 
     uvm_logic_vector::agent#(ITEM_WIDTH) m_logic_vector_agent;
     uvm_logic_vector::meter#(ITEM_WIDTH) m_meter;

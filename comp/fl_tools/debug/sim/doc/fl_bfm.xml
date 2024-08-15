@@ -30,7 +30,7 @@
 
 
     <description>
-        This FrameLink simulation component creates FrameLink dataflow 
+        This FrameLink simulation component creates FrameLink dataflow
         from hexa values in formated file. Component suports FrameLink data bus width of 16, 32, 64 and 128 bits.
 	Component replaces FL_SIM. New functionality is generating of SRC_RDY_N signal in 3 modes. For logging use
 	component <ref_comp ref="fl_monitor" tag_id="HEAD">FrameLink Monitor</ref_comp>. In testbench up to 16 FL_BFMs
@@ -55,7 +55,7 @@
             <port name="CLK" dir="in" width="1">
                 Clock input.
             </port>
-	    
+
             <divider>
                 TX FrameLink interface
             </divider>
@@ -91,7 +91,7 @@
 
         <h1>Data alignment</h1>
         <p>
-            Little-endian byte order is used in this component. 
+            Little-endian byte order is used in this component.
         </p>
 
         <h1>FrameLink Simulation Component</h1>
@@ -101,7 +101,7 @@
         <p>
          When you want to use FL_BFM component fl_bfm_rdy_pkg and FL_BFM_pkg packages must be included:
          </p>
-         <p> 
+         <p>
          <i>use work.fl_bfm_rdy_pkg.all;</i><br/>
 	 <i>use work.FL_BFM_pkg.all;</i>
         </p>
@@ -125,7 +125,7 @@
        <li> FLBFMID - identifies FL_BFM component in design. Range is from 0 to 15 (decimal). Must corespond with name of ahared variable and generic FL_BFM_ID  </li>
        </ul>
       </p>
-      
+
       <h1>Modes of generating SRC_RDY_N signal</h1>
       <p>
         Three modes of generating signal SRC_RDY_N:
@@ -136,8 +136,8 @@
        </ul>
        Random generator seed can be set by procedure <i>SetSeed(Seed : in integer);</i>.
       </p>
-      
-      
+
+
      <h1>File format</h1>
        <p>
        <ul>

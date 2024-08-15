@@ -65,7 +65,7 @@ if {![info exists SYNTH_FLAGS(FPGA)]} {
     if {![info exists SYNTH_FLAGS(DEVICE)] || $SYNTH_FLAGS(DEVICE) == ""} {
         set SYNTH_FLAGS(DEVICE) "EFLX_EFPGA"
     }
-    set SYNTH_FLAGS(FPGA) [string map { 
+    set SYNTH_FLAGS(FPGA) [string map {
             "EFLX_EFPGA"       "EFLX"
         } $SYNTH_FLAGS(DEVICE)]
 }
@@ -89,7 +89,7 @@ nb_file_update $CONSTR_FILENAME $CONSTR_TEXT
 
 proc target_default {_ignore} {
     global SYNTH_FLAGS HIERARCHY
-    
+
     # Prepare design for synthesis
     SetupDesign SYNTH_FLAGS
     AddInputFiles SYNTH_FLAGS HIERARCHY

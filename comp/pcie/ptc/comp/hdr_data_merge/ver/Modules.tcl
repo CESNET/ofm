@@ -13,7 +13,7 @@ set ASFIFO_BASE         "$OFM_PATH/comp/base/fifo/asfifo_bram"
 
 set SV_MFB_BASE            "$OFM_PATH/comp/mfb_tools/ver"
 set SV_MVB_BASE            "$OFM_PATH/comp/mvb_tools/ver"
-  
+
 set COMPONENTS [list \
    [ list "MFB_ASFIFOX"    $MFB_ASFIFO_BASE     "FULL"] \
    [ list "SUM_ONE"        $SUM_ONE_BASE        "FULL"] \

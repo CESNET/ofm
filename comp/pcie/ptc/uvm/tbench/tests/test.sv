@@ -1,8 +1,8 @@
-//-- test.sv: Verification test 
+//-- test.sv: Verification test
 //-- Copyright (C) 2022 CESNET z. s. p. o.
 //-- Author(s): Daniel Kříž <xkrizd01@vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 
 class ex_test extends uvm_test;
@@ -120,7 +120,7 @@ class ex_test extends uvm_test;
                 down_mvb_seq(index);
             join_none
         end
-        
+
         for (int i = 0; i < DMA_PORTS; i++) begin
             fork
                 automatic int index = i;

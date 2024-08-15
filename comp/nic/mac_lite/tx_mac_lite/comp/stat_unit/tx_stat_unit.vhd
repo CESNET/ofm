@@ -34,7 +34,7 @@ entity TX_MAC_LITE_STAT_UNIT is
         RESET                       : in  std_logic;
 
         -- =====================================================================
-        --  STATS INPUT 
+        --  STATS INPUT
         -- =====================================================================
         -- CONTROL INTERFACE
         CTRL_STROBE_CNT             : in  std_logic;
@@ -86,11 +86,11 @@ begin
         INPUT_WIDTH  => MFB_REGIONS,
         OUTPUT_WIDTH => MFB_REGIONS,
         OUTPUT_REG   => True
-    )             
-    port map(   
+    )
+    port map(
         -- CLOCK AND RESET
-        CLK      => CLK, 
-        RESET    => RESET,  
+        CLK      => CLK,
+        RESET    => RESET,
         -- INPUT
         DIN      => VECTOR_INC_TOTAL_FRAMES,
         DIN_MASK => (others => '1'),
@@ -105,11 +105,11 @@ begin
         INPUT_WIDTH  => MFB_REGIONS,
         OUTPUT_WIDTH => MFB_REGIONS,
         OUTPUT_REG   => True
-    )             
-    port map(   
+    )
+    port map(
         -- CLOCK AND RESET
-        CLK      => CLK, 
-        RESET    => RESET,  
+        CLK      => CLK,
+        RESET    => RESET,
         -- INPUT
         DIN      => VECTOR_INC_SENT_FRAMES,
         DIN_MASK => (others => '1'),
@@ -124,11 +124,11 @@ begin
         INPUT_WIDTH  => MFB_REGIONS,
         OUTPUT_WIDTH => MFB_REGIONS,
         OUTPUT_REG   => True
-    )             
-    port map(   
+    )
+    port map(
         -- CLOCK AND RESET
-        CLK      => CLK, 
-        RESET    => RESET,  
+        CLK      => CLK,
+        RESET    => RESET,
         -- INPUT
         DIN      => VECTOR_INC_DISCARDED,
         DIN_MASK => (others => '1'),

@@ -31,7 +31,7 @@ entity MI_register_array_top is
       --! MI32 input interface -------------------------------------------------
       --! Input Data
       MI_DWR                        : in  std_logic_vector(MI_WIDTH-1 downto 0);
-      --! addres  
+      --! addres
       MI_ADDR                       : in  std_logic_vector(MI_ADDR_WIDTH-1 downto 0);
       --! Read Request
       MI_RD                         : in  std_logic;
@@ -46,15 +46,15 @@ entity MI_register_array_top is
       --! Data Ready
       MI_DRDY                       : out std_logic;
 
-      --! registers Data output              
+      --! registers Data output
       REG_DATA_OUT                  : out std_logic_vector((NUM_REGS*MI_WIDTH)-1 downto 0);
       --! MI_WR signals
       REG_WR_OUT                    : out std_logic_vector(NUM_REGS-1 downto 0);
       --! MI_RD signals
       REG_RD_OUT                    : out std_logic_vector(NUM_REGS-1 downto 0);
-      --! users data input 
+      --! users data input
       REG_DATA_IN                   : in std_logic_vector((NUM_REGS*MI_WIDTH)-1 downto 0);
-      --! users we signal 
+      --! users we signal
       REG_WE_IN                     : in std_logic_vector(NUM_REGS-1 downto 0);
       --! MI_ARDY signal from extern register
       REG_ARDY_IN                   : in std_logic_vector(NUM_REGS-1 downto 0)
@@ -74,45 +74,45 @@ begin
       FIRST_ADDR => (MI_ADDR_WIDTH-1 downto 0 => '0'),
       INICIAL => X"C0000003C0000002C0000001",
 
-      --! range musi byt od "1 to (pocet registov)"                                              
+      --! range musi byt od "1 to (pocet registov)"
       GENER_REGS(1 to 3) =>  ( --! registers data width
                               (DATA_WIDTH => 31,                --! nastavujem generiky pre 1. register
-                               --! true - inter , false - exter 
-                               INTER => true, 
+                               --! true - inter , false - exter
+                               INTER => true,
                                --! support MI read
-                               MI_RD_EN => true, 
+                               MI_RD_EN => true,
                                --! support MI write
                                MI_WR_EN => true,
                                --! support user write
                                USR_WR_EN => true,
-                               --! response to reset 
+                               --! response to reset
                                RST_EN => true,
-                               --! support MI_BE signal 
-                               BE_EN => true), 
+                               --! support MI_BE signal
+                               BE_EN => true),
 
-                              (DATA_WIDTH => 32,  --! nastavujem generiki pre 2. register 
-                               INTER => true, 
-                               MI_RD_EN => true, 
+                              (DATA_WIDTH => 32,  --! nastavujem generiki pre 2. register
+                               INTER => true,
+                               MI_RD_EN => true,
                                MI_WR_EN => true,
                                USR_WR_EN => true,
                                RST_EN => true,
                                BE_EN => true),
 
-                              (DATA_WIDTH => 31,  --! nastavujem generiki pre 3. register 
-                               INTER => false, 
-                               MI_RD_EN => true, 
+                              (DATA_WIDTH => 31,  --! nastavujem generiki pre 3. register
+                               INTER => false,
+                               MI_RD_EN => true,
                                MI_WR_EN => true,
                                USR_WR_EN => true,
                                RST_EN => true,
                                BE_EN => false)
-                            ) 
+                            )
    )
    port map (
       CLK            => CLK,
       RESET          => RESET,
       REG_DATA_OUT   => REG_DATA_OUT,
-      REG_DATA_IN    => REG_DATA_IN,  
-      REG_WR_OUT     => REG_WR_OUT, 
+      REG_DATA_IN    => REG_DATA_IN,
+      REG_WR_OUT     => REG_WR_OUT,
       REG_RD_OUT     => REG_RD_OUT,
       REG_WE_IN      => REG_WE_IN,
       REG_ARDY_IN    => REG_ARDY_IN,
@@ -125,5 +125,5 @@ begin
       MI_ARDY        => MI_ARDY,
       MI_DRDY        => MI_DRDY
    );
- 
+
 end full;

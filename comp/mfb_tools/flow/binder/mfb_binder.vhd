@@ -131,7 +131,7 @@ begin
    s_rx_sof_pos_arr <= slv_array_downto_deser(RX_SOF_POS,INPUTS,RX_SOF_POS_WIDTH);
    s_rx_eof_pos_arr <= slv_array_downto_deser(RX_EOF_POS,INPUTS,RX_EOF_POS_WIDTH);
 
-   -- Input component mapping   
+   -- Input component mapping
    mfb_binder_input_g : for i in 0 to INPUTS-1 generate
       mfb_binder_input_i : entity work.MFB_BINDER_INPUT
       generic map(
@@ -144,29 +144,29 @@ begin
          FIFO_DEPTH        => FIFO_DEPTH,
          FIFO_AFULL_OFFSET => FIFO_AFULL_OFFSET,
          DEVICE            => DEVICE
-      )             
-      port map(   
+      )
+      port map(
          -- CLOCK AND RESET
-         CLK                 => CLK, 
-         RST                 => RST,  
+         CLK                 => CLK,
+         RST                 => RST,
          -- RX MULTI MFB INTERFACE
-         RX_DATA             => s_rx_data_arr(i), 
-         RX_META             => s_rx_meta_arr(i), 
-         RX_SOF_POS          => s_rx_sof_pos_arr(i), 
-         RX_EOF_POS          => s_rx_eof_pos_arr(i), 
-         RX_SOF              => RX_SOF(i),  
-         RX_EOF              => RX_EOF(i),  
-         RX_SRC_RDY          => RX_SRC_RDY(i),  
+         RX_DATA             => s_rx_data_arr(i),
+         RX_META             => s_rx_meta_arr(i),
+         RX_SOF_POS          => s_rx_sof_pos_arr(i),
+         RX_EOF_POS          => s_rx_eof_pos_arr(i),
+         RX_SOF              => RX_SOF(i),
+         RX_EOF              => RX_EOF(i),
+         RX_SRC_RDY          => RX_SRC_RDY(i),
          RX_DST_RDY          => RX_DST_RDY(i),
          RX_FIFO_AFULL       => RX_FIFO_AFULL(i),
          -- TX MFB INTERFACE
-         TX_DATA             => s_fifo_data_arr(i), 
-         TX_META             => s_fifo_meta_arr(i), 
-         TX_SOF_POS          => s_fifo_sof_pos_arr(i), 
-         TX_EOF_POS          => s_fifo_eof_pos_arr(i), 
-         TX_SOF              => s_fifo_sof_arr(i), 
-         TX_EOF              => s_fifo_eof_arr(i), 
-         TX_SRC_RDY          => s_fifo_src_rdy(i), 
+         TX_DATA             => s_fifo_data_arr(i),
+         TX_META             => s_fifo_meta_arr(i),
+         TX_SOF_POS          => s_fifo_sof_pos_arr(i),
+         TX_EOF_POS          => s_fifo_eof_pos_arr(i),
+         TX_SOF              => s_fifo_sof_arr(i),
+         TX_EOF              => s_fifo_eof_arr(i),
+         TX_SRC_RDY          => s_fifo_src_rdy(i),
          TX_DST_RDY          => s_fifo_dst_rdy_demuxed(i),
          -- FRAME STATE
          -- In this word continues the previously unfinished frame.
@@ -183,14 +183,14 @@ begin
    -- --------------------------------------------------------------------------
    -- Used in forced MFB input switch. Masked signal is sent to output with s_mask_enable.
    -- Masking first SOF from top (REGIONS-1 donwto 0) if it's part of incomplete frame.
-   -- If masking was done before on given input, the rest (SOF, EOF) is masked, except for previously masked SOF. 
+   -- If masking was done before on given input, the rest (SOF, EOF) is masked, except for previously masked SOF.
 
    mfb_binder_mask_g : for i in 0 to INPUTS-1 generate
       mfb_binder_mask_i : entity work.MFB_BINDER_MASK
       generic map(
          REGIONS => REGIONS
-      )       
-      port map(   
+      )
+      port map(
          -- CLOCK AND RESET
          CLK                 => CLK,
          RST                 => RST,
@@ -224,7 +224,7 @@ begin
    end process;
 
    -- --------------------------------------------------------------------------
-   -- WORD COUNTER 
+   -- WORD COUNTER
    -- --------------------------------------------------------------------------
    -- After reaching defined counter_max -> forced EOF and SOF masking,
    -- and switching to the next MFB input.
@@ -290,8 +290,8 @@ begin
                s_mfb_select_next <= '0';
                s_fifo_dst_rdy    <= TX_DST_RDY;
                s_mask_enable     <= s_need_mask_fword_muxed and TX_DST_RDY;
-            end if;               
-   
+            end if;
+
          when reading =>
             s_next_state      <= reading;
             s_mfb_select_next <= '0';
@@ -313,7 +313,7 @@ begin
                s_mfb_select_next <= '1';
                s_mask_enable     <= '0';
             end if;
-            
+
          when others =>
             s_next_state      <= check;
             s_mfb_select_next <= '1';
@@ -332,7 +332,7 @@ begin
    s_tx_sof_pos <= s_fifo_sof_pos_arr(to_integer(s_mfb_select));
    s_tx_eof_pos <= s_fifo_eof_pos_arr(to_integer(s_mfb_select));
    s_tx_sof     <= s_sof_masked_arr(to_integer(s_mfb_select));
-   s_tx_eof     <= s_eof_masked_arr(to_integer(s_mfb_select));   
+   s_tx_eof     <= s_eof_masked_arr(to_integer(s_mfb_select));
    s_tx_src_rdy <= s_fifo_src_rdy(to_integer(s_mfb_select));
 
    -- --------------------------------------------------------------------------
@@ -348,11 +348,11 @@ begin
             TX_SOF_POS <= s_tx_sof_pos;
             TX_EOF_POS <= s_tx_eof_pos;
             TX_SOF     <= s_tx_sof;
-            TX_EOF     <= s_tx_eof;   
+            TX_EOF     <= s_tx_eof;
          end if;
       end if;
    end process;
-   
+
    process (CLK)
    begin
       if rising_edge(CLK) then

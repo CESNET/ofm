@@ -1,6 +1,6 @@
 # Modules.tcl: Local include Leonardo tcl script
 # Copyright (C) 2016 CESNET
-# Author: Lukas Kekely <kekely@cesnet.cz> 
+# Author: Lukas Kekely <kekely@cesnet.cz>
 #
 # SPDX-License-Identifier: BSD-3-Clause
 

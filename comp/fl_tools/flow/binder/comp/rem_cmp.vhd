@@ -27,7 +27,7 @@ entity FLB_REM_CMP is
    port(
       -- which REM is valid
       SEL            : in  std_logic_vector(COUNT-1 downto 0);
-      INPUT_REMS     : in  std_logic_vector(COUNT*log2(INPUT_WIDTH/8)-1 
+      INPUT_REMS     : in  std_logic_vector(COUNT*log2(INPUT_WIDTH/8)-1
                                                                      downto 0);
       -- computed REM
       TX_REM         : out std_logic_vector(log2(OUTPUT_WIDTH/8)-1 downto 0)
@@ -53,19 +53,19 @@ architecture full of FLB_REM_CMP is
 
 begin
    TX_REM   <= mx_offset + mx_rem;
-   
+
    -- generate necessary comparators ------------------------------------------
    GEN_OFFSETS: for i in 0 to COUNT-1 generate
-      offset((i+1)*log2(OUTPUT_WIDTH/8)-1 downto i*log2(OUTPUT_WIDTH/8)) 
+      offset((i+1)*log2(OUTPUT_WIDTH/8)-1 downto i*log2(OUTPUT_WIDTH/8))
          <= conv_std_logic_vector(i*(INPUT_WIDTH/8), log2(OUTPUT_WIDTH/8));
    end generate;
-   
+
    -- generate components in case when COUNT = 1 ------------------------------
    GEN_COUNT_1 : if COUNT = 1 generate
       mx_rem      <= INPUT_REMS;
       mx_offset   <= offset;
    end generate;
-   
+
    -- generate components in case when COUNT > 1 ------------------------------
    GEN_COUNT_N : if COUNT > 1 generate
       -- get chosen REM number
@@ -77,7 +77,7 @@ begin
             DI          => SEL,
             ADDR        => chosen_rem
          );
-   
+
       REM_MUX : entity work.GEN_MUX
          generic map(
             DATA_WIDTH  => log2(INPUT_WIDTH/8),
@@ -88,7 +88,7 @@ begin
             SEL         => chosen_rem,
             DATA_OUT    => mx_rem
          );
-   
+
       OFFSET_MUX : entity work.GEN_MUX
          generic map(
             DATA_WIDTH  => log2(OUTPUT_WIDTH/8),

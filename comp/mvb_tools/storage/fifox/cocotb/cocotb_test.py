@@ -28,7 +28,7 @@ class testbench():
         self.scoreboard = Scoreboard(dut)
         self.scoreboard.add_interface(self.stream_out, self.expected_output)
 
-        #self.stream_in_recovered = AvalonSTMonitor(dut, "stream_in", dut.clk, callback=self.model) 
+        #self.stream_in_recovered = AvalonSTMonitor(dut, "stream_in", dut.clk, callback=self.model)
 
         if debug:
             self.stream_in.log.setLevel(cocotb.logging.DEBUG)
@@ -65,5 +65,5 @@ async def run_test(dut, pkt_count=10000, item_width=1):
             last_num = tb.stream_out.item_cnt // 1000
             cocotb.log.info(f"Number of transactions processed: {tb.stream_out.item_cnt}/{pkt_count}")
         await ClockCycles(dut.CLK, 100)
- 
+
     raise tb.scoreboard.result

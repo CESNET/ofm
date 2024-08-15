@@ -34,7 +34,7 @@ program TEST (
 
     task resetDesign();
         RESET=1;
-        #RESET_TIME 
+        #RESET_TIME
         RESET=0;
     endtask
 

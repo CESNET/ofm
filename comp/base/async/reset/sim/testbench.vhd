@@ -8,9 +8,9 @@
 --! $Id$
 --!
 
-library IEEE;	
-use IEEE.std_logic_1164.all;	
-use IEEE.std_logic_unsigned.all;	
+library IEEE;
+use IEEE.std_logic_1164.all;
+use IEEE.std_logic_unsigned.all;
 use IEEE.std_logic_arith.all;
 
 --! ----------------------------------------------------------------------------
@@ -34,8 +34,8 @@ architecture behavioral of testbench is
 
    uut : entity work.ASYNC_RESET
    generic map(
-      TWO_REG => false  --! For two reg = true, for three reg = false  
-   ) 
+      TWO_REG => false  --! For two reg = true, for three reg = false
+   )
    port map(
       CLK        => clk,
       ASYNC_RST  => async_rst,
@@ -52,37 +52,37 @@ architecture behavioral of testbench is
 
    --! main testbench process
    sim : process
-   begin 
-     
+   begin
+
       async_rst <= '0';
       wait for 1 ns;
 
       async_rst <= '1';
       wait for 10 ns;
-      
+
       async_rst <= '0';
       wait for 77 ns;
-      
+
       async_rst <= '1';
       wait for 12 ns;
-      
+
       async_rst <= '0';
-      
+
       wait for 44 ns;
-      
+
       async_rst <= '1';
       wait for 5 ns;
-      
+
       async_rst <= '0';
-      
+
       wait for 4 ns;
-      
+
       async_rst <= '1';
       wait for 15 ns;
-      
+
       async_rst <= '0';
-   
-      wait;  
+
+      wait;
 
    end process;
 

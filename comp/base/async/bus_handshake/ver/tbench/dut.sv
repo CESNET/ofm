@@ -25,12 +25,12 @@ module DUT (
         .ASEND    (RX.SRC_RDY),
         .AREADY   (RX.DST_RDY),
         .BCLK     (TX_CLK),
-        .BRST     (TX_RST), 
-        .BDATAOUT (TX.DATA),  
+        .BRST     (TX_RST),
+        .BDATAOUT (TX.DATA),
         .BLOAD    (TX.DST_RDY),
         .BVALID   (TX.SRC_RDY)
     );
 
     assign TX.VLD = 1;
-    
+
 endmodule

@@ -30,8 +30,8 @@ entity fl_switch_1toN is
    generic (
       --* FrameLink data width
       DATA_WIDTH     : integer := 32;
-      
-      --* Count of output interfaces. It <b>must</b> fit into one 
+
+      --* Count of output interfaces. It <b>must</b> fit into one
       --* word of FrameLink (it is the size of the searched bit mask).
       IF_COUNT       : integer := 4;
 

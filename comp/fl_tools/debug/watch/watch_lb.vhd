@@ -37,7 +37,7 @@ entity FL_WATCH_LB is
       -- Local bus
       -- =========
 
-      -- base address 
+      -- base address
       BASE_ADDR      : integer;
       -- address width
       ADDR_WIDTH     : integer;
@@ -60,7 +60,7 @@ entity FL_WATCH_LB is
       -- =================
 
       LBCLK       : in    std_logic;
-      -- Frame 
+      -- Frame
       LBFRAME     : in    std_logic;
       -- Hold Ack (HOLDA), active LOW
       LBHOLDA     : out   std_logic;
@@ -96,20 +96,20 @@ begin
       port map (
          CLK            => CLK,
          RESET          => RESET,
-   
+
          SOF_N          => SOF_N,
          EOF_N          => EOF_N,
          SOP_N          => SOP_N,
          EOP_N          => EOP_N,
          DST_RDY_N      => DST_RDY_N,
          SRC_RDY_N      => SRC_RDY_N,
-   
+
          MI             => mi
       );
-   
+
    mi.addr(31 downto ADDR_WIDTH) <= (others => '0');
    mi.be <= (others => '1');
-   
+
    LB_CONNECT_U: entity work.lb_connect
       generic map (
          BASE_ADDR  => BASE_ADDR,
@@ -119,7 +119,7 @@ begin
       port map (
          -- Control signals
          RESET             => RESET,
-   
+
          -- LB signals
          LBCLK       => LBCLK,
          LBFRAME     => LBFRAME,
@@ -129,7 +129,7 @@ begin
          LBRW        => LBRW,
          LBRDY       => LBRDY,
          LBLAST      => LBLAST,
-   
+
          -- Address decoder interface
          CLK         => CLK,
          ADC_RD      => mi.rd,

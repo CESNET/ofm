@@ -2,7 +2,7 @@
 //-- Copyright (C) 2022 CESNET z. s. p. o.
 //-- Author(s): Radek Iša <isa@cesnet.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 class model_packet extends uvm_logic_vector_array::sequence_item#(32);
     `uvm_object_utils(uvm_dma_ll::model_packet);
@@ -259,7 +259,7 @@ class model #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_component;
         packet_meta.data = pcie_meta_tmp;
         analysis_port_tx.write(packet_output);
         analysis_port_tx_meta.write(packet_meta);
-      
+
         //SEND DMA HEADER
         packet_meta   = uvm_logic_vector::sequence_item#(META_WIDTH)::type_id::create("packet_meta");
         packet_output = model_packet::type_id::create("packet_output");

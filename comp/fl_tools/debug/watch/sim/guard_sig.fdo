@@ -8,7 +8,7 @@
 
    add_wave "-noupdate -hex -label RESET"       /testbench/RESET
    add_wave "-noupdate -hex -label CLK"       /testbench/CLK
-   
+
    add wave -divider "Frame Link interface"
    add_wave "-noupdate -hex -label SOF_N"       /testbench/SOF_N
    add_wave "-noupdate -hex -label EOF_N"       /testbench/EOF_N

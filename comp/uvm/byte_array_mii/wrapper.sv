@@ -11,13 +11,13 @@
 
 class wrapper extends uvm_object;
     `uvm_object_utils(uvm_byte_array_mii::wrapper)
-    
-    
+
+
     local const byte unsigned preamble[8] = {8'hFB, 8'h55, 8'h55, 8'h55, 8'h55, 8'h55, 8'h55, 8'hD5};
     local const int unsigned preamble_size = 8 - 1;
 
     local const byte unsigned eof = 8'hFD;
-    
+
     function new(string name = "wrapper");
         super.new(name);
     endfunction

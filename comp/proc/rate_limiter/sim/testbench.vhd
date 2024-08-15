@@ -420,8 +420,8 @@ begin
       IN_SRC_RDY <= '1';
 
       for i in 1 to 25 loop
-         
-         if(i >= 15 and i <= 17) then 
+
+         if(i >= 15 and i <= 17) then
             ADDR_VLD <= '0';
          else
             ADDR_VLD <= '1';

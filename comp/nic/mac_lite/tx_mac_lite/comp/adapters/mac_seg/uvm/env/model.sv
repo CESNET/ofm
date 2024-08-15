@@ -1,7 +1,7 @@
 /*
  * file       : model.sv
  * Copyright (C) 2021 CESNET z. s. p. o.
- * description: model of rx_mac_lite adapter 
+ * description: model of rx_mac_lite adapter
  * date       : 2021
  * author     : Radek Iša <isa@cesnet.cz>
  *

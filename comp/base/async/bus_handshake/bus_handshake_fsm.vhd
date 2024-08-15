@@ -17,7 +17,7 @@ use IEEE.std_logic_1164.all;
    --! -------------------------------------------------------------------------
 
 entity BUS_HANDSHAKE_FSM is
-   Port ( 
+   Port (
       CLK       : in  STD_LOGIC;    --! Clock
       RST       : in  STD_LOGIC;    --! Reset
       ACK       : in  STD_LOGIC;    --! Signal ACK

@@ -1,9 +1,13 @@
 stages:
+  - check
   - build
 
 variables:
   GIT_STRATEGY: clone
   GIT_SUBMODULE_STRATEGY: recursive
+
+include:
+  - local: 'tests/ci/check.gitlab-ci.yaml'
 
 .rpmbuild:
   stage: build

@@ -8,7 +8,7 @@
 `define GEN_MVB_MUX_ENV_SV
 
 package uvm_mvb_mux;
-    
+
     `include "uvm_macros.svh"
     import uvm_pkg::*;
 

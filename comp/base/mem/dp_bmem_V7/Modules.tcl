@@ -28,6 +28,6 @@ if {false && [info exists SIMULATION] && $SIMULATION} then {
 
 # Synthetise source files
 } else {
-   set MOD "$MOD $ENTITY_BASE/dp_bmem_V7_arch.vhd"  
+   set MOD "$MOD $ENTITY_BASE/dp_bmem_V7_arch.vhd"
    set MOD "$MOD $ENTITY_BASE/sdp_bmem_V7_arch.vhd"
 }

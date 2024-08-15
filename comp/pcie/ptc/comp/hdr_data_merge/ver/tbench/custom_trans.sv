@@ -94,7 +94,7 @@ class CustomTransaction #(HDR_WIDTH = 128, PAYLOAD_ITEM_WIDTH = 32) extends Tran
             return 0;
          end
       end
-      
+
       return 1;
    endfunction
 

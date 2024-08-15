@@ -24,7 +24,7 @@ SETTINGS = {
     "device_agilex" : { # Target device is Agilex
         "DEVICE" : "\\\"AGILEX\\\"",
     },
-    "_combinations_" : (  
+    "_combinations_" : (
     (), # Works the same as '("default",),' as the "default" is applied in every combination
     ("input_regs_dis",                                                       ),
     (                 "dsp_dis",                                             ),

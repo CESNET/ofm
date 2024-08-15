@@ -24,7 +24,7 @@ SETTINGS = {
     "avalon_latency_27" : {
         "READY_LATENCY"   : "27"                 ,
     },
-    "_combinations_" : (  
+    "_combinations_" : (
     (), # Works the same as '("default",),' as the "default" is applied in every combination
     (                "avalon_latency_27",),
     ("avalon_256b",                                            ),

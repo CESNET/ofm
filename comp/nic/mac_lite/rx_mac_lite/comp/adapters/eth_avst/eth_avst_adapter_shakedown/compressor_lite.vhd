@@ -14,7 +14,7 @@ use work.type_pack.all;
 entity EASA_COMPRESSOR_LITE is
     generic(
         -- ====================================================================
-        -- BUS CONFIGURATION: 
+        -- BUS CONFIGURATION:
         -- ====================================================================
         ITEMS      : natural := 2;
         ITEM_WIDTH : natural := 512
@@ -125,7 +125,7 @@ begin
     generic map (
         BLOCKS     => ITEMS,
         BLOCK_SIZE => BS_BLOCK_WIDTH,
-        SHIFT_LEFT => true 
+        SHIFT_LEFT => true
     )
     port map (
         DATA_IN  => slv_array_ser(s_bs_data_in_arr,ITEMS,BS_BLOCK_WIDTH),
@@ -167,7 +167,7 @@ begin
                 s_reg_vld_count  <= (others => '0');
                 s_reg_vld_vector <= (others => '0');
             else
-                s_reg_vld_count  <= s_reg_vld_count_next;  
+                s_reg_vld_count  <= s_reg_vld_count_next;
                 s_reg_vld_vector <= s_reg_vld_vector_next;
             end if;
         end if;
@@ -182,14 +182,14 @@ begin
             if (rising_edge(CLK)) then
                 if (s_bs_out_vld(i) = '1') then
                 s_reg_last(i) <= s_bs_out_last(i);
-                s_reg_data(i) <= s_bs_out_data_arr(i);  
+                s_reg_data(i) <= s_bs_out_data_arr(i);
                 end if;
             end if;
         end process;
     end generate;
 
     out_arr_g : for i in 0 to ITEMS-1 generate
-        --                   valid data from output register                or   barel shifter output data                   
+        --                   valid data from output register                or   barel shifter output data
         s_data_out_arr(i) <= s_reg_data(i) when (s_reg_vld_vector(i) = '1') else s_bs_out_data_arr(i);
         s_vld_out_arr(i)  <= s_reg_vld_vector(i) or s_bs_out_vld(i);
     end generate;

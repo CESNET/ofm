@@ -9,7 +9,7 @@
 # Paths to components
 set GEN_LUTRAM_BASE "$OFM_PATH/comp/base/mem/gen_lutram"
 set SDP_BRAM_BASE   "$OFM_PATH/comp/base/mem/sdp_bram"
-set SDP_URAM_BASE   "$OFM_PATH/comp/base/mem/sdp_uram_xilinx" 
+set SDP_URAM_BASE   "$OFM_PATH/comp/base/mem/sdp_uram_xilinx"
 set SH_REG_BASE     "$OFM_PATH/comp/base/shreg/sh_reg_base"
 
 # Packages

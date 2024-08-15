@@ -25,7 +25,7 @@ class virt_sequence#(MVB_ITEMS, MVB_ITEM_WIDTH, RX_STREAMS) extends uvm_sequence
             m_rx_mvb_seq[port].transaction_count_min = MIN_TRANSACTION_COUNT;
             m_rx_mvb_seq[port].transaction_count_max = MAX_TRANSACTION_COUNT;
         end
-        
+
         m_rx_sel_mvb_seq = uvm_logic_vector::sequence_simple#($clog2(RX_STREAMS))::type_id::create("m_rx_sel_mvb_seq");
         m_rx_sel_mvb_seq.transaction_count_min = MIN_TRANSACTION_COUNT;
         m_rx_sel_mvb_seq.transaction_count_max = MAX_TRANSACTION_COUNT;

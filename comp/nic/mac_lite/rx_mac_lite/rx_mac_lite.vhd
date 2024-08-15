@@ -52,9 +52,9 @@ entity RX_MAC_LITE is
         RESIZE_BUFFER   : boolean := false;
 
         -- =====================================================================
-        -- OTHERS CONFIGURATION: 
+        -- OTHERS CONFIGURATION:
         -- =====================================================================
-        
+
         -- ID of this network port, it is inserted into the packet metadata.
         NETWORK_PORT_ID : natural := 0;
         -- Maximum allowed size of packet in bytes.
@@ -346,13 +346,13 @@ architecture FULL of RX_MAC_LITE is
     signal s_stat_frames_received     : std_logic_vector(63 downto 0);
     signal s_stat_frames_transmitted  : std_logic_vector(63 downto 0);
     signal s_stat_frames_discarded    : std_logic_vector(63 downto 0);
-    signal s_stat_buffer_ovf          : std_logic_vector(63 downto 0); 
-    signal s_stat_rx_bytes            : std_logic_vector(63 downto 0); 
+    signal s_stat_buffer_ovf          : std_logic_vector(63 downto 0);
+    signal s_stat_rx_bytes            : std_logic_vector(63 downto 0);
     signal s_stat_tx_bytes            : std_logic_vector(63 downto 0);
     signal s_stat_crc_err             : std_logic_vector(63 downto 0);
-    signal s_stat_mac_err             : std_logic_vector(63 downto 0); 
-    signal s_stat_over_mtu            : std_logic_vector(63 downto 0); 
-    signal s_stat_below_min           : std_logic_vector(63 downto 0); 
+    signal s_stat_mac_err             : std_logic_vector(63 downto 0);
+    signal s_stat_over_mtu            : std_logic_vector(63 downto 0);
+    signal s_stat_below_min           : std_logic_vector(63 downto 0);
     signal s_stat_bcast_frames        : std_logic_vector(63 downto 0);
     signal s_stat_mcast_frames        : std_logic_vector(63 downto 0);
     signal s_stat_fragment_frames     : std_logic_vector(63 downto 0);
@@ -406,7 +406,7 @@ begin
             if (RX_RESET = '1') then
                 s_rx_inc_frame(0) <= '0';
             elsif (RX_MFB_SRC_RDY = '1') then
-                s_rx_inc_frame(0) <= s_rx_inc_frame(RX_REGIONS);  
+                s_rx_inc_frame(0) <= s_rx_inc_frame(RX_REGIONS);
             end if;
         end if;
     end process;
@@ -547,7 +547,7 @@ begin
         TX_EOF         => s_flc_eof,
         TX_SRC_RDY     => s_flc_src_rdy,
         TX_DST_RDY     => '1',
-        
+
         TX_LNG_MAX_ERR => s_flc_len_max_err,
         TX_LNG_MIN_ERR => s_flc_len_min_err,
         TX_FRAME_LNG   => s_flc_frame_len
@@ -560,10 +560,10 @@ begin
 
     s_flc_len_min_err_fixed <= s_flc_len_min_err or s_flc_crc_cut_err;
 
-    s_flc_sync_in <= s_flc_src_rdy & s_flc_eof & s_flc_sof & s_flc_eof_pos & 
+    s_flc_sync_in <= s_flc_src_rdy & s_flc_eof & s_flc_sof & s_flc_eof_pos &
         s_flc_sof_pos & s_flc_data & s_flc_frame_len & s_flc_len_min_err_fixed &
         s_flc_len_max_err & s_flc_adapter_err;
-   
+
     -- If RESET has 5 or more cycles, then it is enough SH_REG without reset.
     flc_sync_shreg_i : entity work.SH_REG_BASE_STATIC
     generic map(
@@ -963,12 +963,12 @@ begin
         port map(
             CLK        => TX_CLK,
             RESET      => TX_RESET,
-    
+
             RX_DATA    => s_buf_mvb_data,
             RX_VLD     => s_buf_mvb_vld,
             RX_SRC_RDY => s_buf_mvb_src_rdy,
             RX_DST_RDY => s_buf_mvb_dst_rdy,
-    
+
             TX_DATA    => TX_MVB_DATA,
             TX_VLD     => TX_MVB_VLD,
             TX_NEXT    => (others => TX_MVB_DST_RDY)
@@ -1045,12 +1045,12 @@ begin
         OUT_FRAMES_TRANSMITTED => s_stat_frames_transmitted,
         OUT_FRAMES_DISCARDED   => s_stat_frames_discarded,
         OUT_BUFFER_OVF         => s_stat_buffer_ovf,
-        OUT_RX_BYTES           => s_stat_rx_bytes, 
+        OUT_RX_BYTES           => s_stat_rx_bytes,
         OUT_TX_BYTES           => s_stat_tx_bytes,
         OUT_CRC_ERR            => s_stat_crc_err,
-        OUT_MAC_ERR            => s_stat_mac_err, 
-        OUT_OVER_MTU           => s_stat_over_mtu, 
-        OUT_BELOW_MIN          => s_stat_below_min, 
+        OUT_MAC_ERR            => s_stat_mac_err,
+        OUT_OVER_MTU           => s_stat_over_mtu,
+        OUT_BELOW_MIN          => s_stat_below_min,
         OUT_BCAST_FRAMES       => s_stat_bcast_frames,
         OUT_MCAST_FRAMES       => s_stat_mcast_frames,
         OUT_FRAGMENT_FRAMES    => s_stat_fragment_frames,
@@ -1120,11 +1120,11 @@ begin
         STAT_FRAMES_TRANSMITTED => s_stat_frames_transmitted,
         STAT_FRAMES_DISCARDED   => s_stat_frames_discarded,
         STAT_BUFFER_OVF         => s_stat_buffer_ovf,
-        STAT_RX_BYTES           => s_stat_rx_bytes, 
+        STAT_RX_BYTES           => s_stat_rx_bytes,
         STAT_TX_BYTES           => s_stat_tx_bytes,
         STAT_CRC_ERR            => s_stat_crc_err,
-        STAT_OVER_MTU           => s_stat_over_mtu, 
-        STAT_BELOW_MIN          => s_stat_below_min, 
+        STAT_OVER_MTU           => s_stat_over_mtu,
+        STAT_BELOW_MIN          => s_stat_below_min,
         STAT_BCAST_FRAMES       => s_stat_bcast_frames,
         STAT_MCAST_FRAMES       => s_stat_mcast_frames,
         STAT_FRAGMENT_FRAMES    => s_stat_fragment_frames,

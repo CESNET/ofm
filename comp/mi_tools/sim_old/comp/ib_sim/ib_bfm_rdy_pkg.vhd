@@ -27,7 +27,7 @@ PACKAGE ib_bfm_rdy_pkg IS
   ----------------------------------------------------------------------------
 
 ----------------------------------------------------------------------------
-  -- 
+  --
   PROCEDURE DriveDstRdyN(signal CLK       : IN    std_logic;
                          signal DST_RDY_N : OUT std_logic);
 
@@ -39,9 +39,9 @@ END ib_bfm_rdy_pkg;
 --                      Internal Bus BFM Package BODY
 -- ----------------------------------------------------------------------------
 PACKAGE BODY ib_bfm_rdy_pkg IS
-  
+
   -----------------------------------------------------------------------------
-  -- 
+  --
   PROCEDURE DriveDstRdyN (signal CLK       : IN  std_logic;
                           signal DST_RDY_N : OUT std_logic) IS
   BEGIN

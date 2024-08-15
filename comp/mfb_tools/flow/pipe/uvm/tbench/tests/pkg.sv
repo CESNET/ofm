@@ -12,7 +12,7 @@ package test;
     `include "uvm_macros.svh"
     import uvm_pkg::*;
 
-    //MFB parameters 
+    //MFB parameters
     parameter REGIONS       = 4;
     parameter REGION_SIZE   = 8;
     parameter BLOCK_SIZE    = 8;
@@ -29,6 +29,6 @@ package test;
 
     `include "sequence.sv"
     `include "test.sv"
-    
+
 endpackage
 `endif

@@ -1,8 +1,8 @@
-//-- dut.sv: Design under test 
+//-- dut.sv: Design under test
 //-- Copyright (C) 2022 CESNET z. s. p. o.
 //-- Author(s): Radek Iša <isa@cesnet.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 
 module DMA_LL_DUT #(DEVICE, USER_REGIONS, USER_REGION_SIZE, USER_BLOCK_SIZE, USER_ITEM_WIDTH, PCIE_UP_REGIONS, PCIE_UP_REGION_SIZE, PCIE_UP_BLOCK_SIZE, PCIE_UP_ITEM_WIDTH, CHANNELS, PKT_SIZE_MAX, SW_ADDR_WIDTH, POINTER_WIDTH, CNTRS_WIDTH, OPT_BUFF)
@@ -16,14 +16,14 @@ module DMA_LL_DUT #(DEVICE, USER_REGIONS, USER_REGION_SIZE, USER_BLOCK_SIZE, USE
 
     // UVM_PROBE //
     // Drop indicator + Drop Channel
-    // Trigger: hdr_dma_hdr_src_rdy & hdr_dma_hdr_dst_rdy 
+    // Trigger: hdr_dma_hdr_src_rdy & hdr_dma_hdr_dst_rdy
     bind RX_DMA_CALYPTE: VHDL_DUT_U probe_inf #(1)                probe_discard((hdrm_dma_hdr_src_rdy & hdrm_dma_hdr_dst_rdy & (RESET === 1'b0)), hdrm_pkt_drop, CLK);
     bind RX_DMA_CALYPTE: VHDL_DUT_U probe_inf #($clog2(CHANNELS)) probe_channel((hdrm_dma_hdr_src_rdy & hdrm_dma_hdr_dst_rdy & (RESET === 1'b0)), hdrm_dma_hdr_chan_num, CLK);
 
     logic [$clog2(PKT_SIZE_MAX+1)-1:0] packet_size;
     logic [$clog2(CHANNELS)-1:0]       channel;
     logic [24-1:0]                     meta;
-   
+
     //{packet_size, channel, meta} 24 + $clog2(PKT_SIZE_MAX+1) + $clog2(CHANNELS)
     assign packet_size[$clog2(PKT_SIZE_MAX+1)-1 -: $clog2(PKT_SIZE_MAX+1)] = mfb_rx.META[24 + $clog2(PKT_SIZE_MAX+1) + $clog2(CHANNELS)-1 -: $clog2(PKT_SIZE_MAX+1)];
     assign channel[$clog2(CHANNELS)-1 -: $clog2(CHANNELS)]                 = mfb_rx.META[24 + $clog2(CHANNELS)-1                          -: $clog2(CHANNELS)];
@@ -91,5 +91,5 @@ module DMA_LL_DUT #(DEVICE, USER_REGIONS, USER_REGION_SIZE, USER_BLOCK_SIZE, USE
         .PCIE_UP_MFB_DST_RDY  (mfb_tx.DST_RDY)
     );
 
-    
+
 endmodule

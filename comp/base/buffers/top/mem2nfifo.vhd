@@ -303,7 +303,7 @@ FIELD : for j in 0 to FLOWS-1 generate
       DATA_WIDTH => FLOW_WIDTH,
       ITEMS      => BLOCK_SIZE*FLOWS,
       OUTPUT_REG => true
-    ) 
+    )
     port map (
       CLK      => CLK,
       RESET    => RESET,
@@ -327,7 +327,7 @@ FIELD : for j in 0 to FLOWS-1 generate
       FIFO_DEPTH => OUTCOMP_ITEMS,
       USE_INREG  => false,
       USE_OUTREG => false
-    ) 
+    )
     port map (
       CLK    => CLK,
       RESET  => RESET,
@@ -337,7 +337,7 @@ FIELD : for j in 0 to FLOWS-1 generate
 
       RE     => read_allow(j),
       DOUT   => DATA_OUT(FLOW_WIDTH*j+FLOW_WIDTH-1 downto FLOW_WIDTH*j),
- 
+
       FULL   => outcomp_full(j),
       EMPTY  => outcomp_empty(j)
     );
@@ -444,7 +444,7 @@ FIELD : for j in 0 to FLOWS-1 generate
       ITEMS       => BLOCK_SIZE,
       MULTI_WRITE => true,
       MULTI_READ  => false
-    ) 
+    )
     port map (
       CLK      => CLK,
       RESET    => RESET,
@@ -455,7 +455,7 @@ FIELD : for j in 0 to FLOWS-1 generate
       WR_REG   => reg_write_addr(j),
       RD_CNT   => cnt_read_addr(j),
       RD_REG   => blk_read_addr(j)(BLOCK_SIZE_W+FLOWS_W downto FLOWS_W),
- 
+
       EMPTY    => blk_empty(j),
       FULL     => blk_full(j),
       STATUS   => blk_status(j)
@@ -479,7 +479,7 @@ FIELD : for j in 0 to FLOWS-1 generate
     glob_status_sigs : entity work.BUF_STATUS
       generic map (
         ITEMS => BLOCK_SIZE
-      ) 
+      )
       port map (
         CLK      => CLK,
         RESET    => RESET,
@@ -490,7 +490,7 @@ FIELD : for j in 0 to FLOWS-1 generate
         WR_REG   => reg_write_addr(j),
         RD_CNT   => glob_read_cnt(j)(BLOCK_SIZE_W+FLOWS_W downto FLOWS_W),
         RD_REG   => glob_read_addr(j)(BLOCK_SIZE_W+FLOWS_W downto FLOWS_W),
- 
+
         EMPTY    => open,
         FULL     => glob_full(j),
         STATUS   => glob_status(j)
@@ -566,7 +566,7 @@ FIELD : for j in 0 to FLOWS-1 generate
     end process;
 
     glob_read_cnt(j) <= glob_read_cnt_msb(j) & glob_read_cnt_item(j) & glob_read_cnt_mem(j);
-    
+
     -- global address register ------------------------------------------------
     process(CLK)
     begin

@@ -34,7 +34,7 @@ entity LB_ENDPOINT_BUFFER is
       BE_IN        : in  std_logic_vector(1 downto 0);
       WR_IN        : in  std_logic;
       RD_IN        : in  std_logic;
-    
+
       --Output Interface
       DATA_OUT     : out std_logic_vector(15 downto 0);
       BE_OUT       : out std_logic_vector(1 downto 0);
@@ -51,7 +51,7 @@ end entity LB_ENDPOINT_BUFFER;
 architecture LB_ENDPOINT_BUFFER_ARCH of LB_ENDPOINT_BUFFER is
 
 -- Signal Declaration ---------------------------------------------------------
-   signal srl_data_in     : std_logic_vector(19 downto 0); 
+   signal srl_data_in     : std_logic_vector(19 downto 0);
    signal srl_data_out    : std_logic_vector(19 downto 0);
    signal srl_en          : std_logic;
    signal srl_addr        : std_logic_vector(3 downto 0);

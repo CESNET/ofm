@@ -18,7 +18,7 @@ use work.basics_test_pkg.all;
 --       it seems like it is because the DSP does not react in time and starts counting one cycle later that it should - identified on Stratix 10 only (probably Agilex too).
 
 -- Another NOTE: Please beware that the counter on Xilix with DSPs enabled has different latency for each extra chained DSP block and reacts later on CE and reset signals
---               1 DSP has max OUTPUT_WIDTH=48, chaining each other DSP results in latency+1, 
+--               1 DSP has max OUTPUT_WIDTH=48, chaining each other DSP results in latency+1,
 --               this simulation does not give correct results with more than 2 chained DSPs
 --               rather than reading comments I recommend running the simulation and studying the wave diagram
 

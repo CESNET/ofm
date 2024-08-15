@@ -51,12 +51,12 @@ program TEST (
         driver.wordDelayDisable_wt = 8;
         driver.wordDelayLow = 0;
         driver.wordDelayHigh = 6;
-        
+
         if (RX_INCLUDE_IPG) begin
             $write("RX MFB stream is include IPG (RX_INCLUDE_IPG=True)!\n");
             driver.ifgEnable_wt = 1;
             driver.ifgDisable_wt = 0;
-            driver.ifgLow = 4+13; // 4 bytes for CRC, 13 bytes for IPG 
+            driver.ifgLow = 4+13; // 4 bytes for CRC, 13 bytes for IPG
             driver.ifgHigh = 20;
         end
     endtask
@@ -65,7 +65,7 @@ program TEST (
         RX_RESET=1;
         TX_RESET=1;
         MI_RESET=1;
-        #RESET_TIME 
+        #RESET_TIME
         RX_RESET=0;
         TX_RESET=0;
         MI_RESET=0;
@@ -168,7 +168,7 @@ program TEST (
         mi32Transaction.address = 32'h18;
         mi32Monitor.executeTransaction(mi32Transaction);
         dfc[63:32] = mi32Transaction.data;
-        
+
         // Read Total Sent Frames Counter
         // Low part
         mi32Transaction.address = 32'h0c;
@@ -201,7 +201,7 @@ program TEST (
             $write("Mismatch in expected and read byte counter!\n");
             $stop();
         end
-    
+
         // Detected and expected number of discarded frames
         if (discarded != dfc) begin
             $write("Mismatch in expected and read discarded frames counter!\n");

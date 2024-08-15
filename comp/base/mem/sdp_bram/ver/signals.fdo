@@ -11,15 +11,15 @@ proc tb_signals { PATH } {
     add_wave " -noupdate -group { others } -hex -color yellow" $PATH/WRESET
     add_wave " -noupdate -group { others } -hex -color yellow" $PATH/RCLK
     add_wave " -noupdate -group { others } -hex -color yellow" $PATH/RRESET
- 
+
     eval "add wave  -divider {}"
     add_wave " -noupdate -group { others } -hex" $PATH/model_mem
     add_wave " -noupdate -group { others } -hex" $PATH/model_mem_block_vld
     add_wave " -noupdate -group { others } -hex" $PATH/out_reg0_data
-    add_wave " -noupdate -group { others } -hex" $PATH/out_reg0_block_vld 
+    add_wave " -noupdate -group { others } -hex" $PATH/out_reg0_block_vld
     add_wave " -noupdate -group { others } -hex" $PATH/out_reg0_vld
     add_wave " -noupdate -group { others } -hex" $PATH/out_reg1_data
-    add_wave " -noupdate -group { others } -hex" $PATH/out_reg1_block_vld 
+    add_wave " -noupdate -group { others } -hex" $PATH/out_reg1_block_vld
     add_wave " -noupdate -group { others } -hex" $PATH/out_reg1_vld
 
 }
@@ -27,7 +27,7 @@ proc tb_signals { PATH } {
 proc uut_ports { PATH } {
 
     eval "add wave  -divider {}"
- 
+
     add_wave " -noupdate -group { all } -hex -color yellow" $PATH/WR_CLK
     add_wave " -noupdate -group { all } -hex -color yellow" $PATH/WR_RST
     add_wave " -noupdate -group { all } -hex" $PATH/WR_EN
@@ -41,7 +41,7 @@ proc uut_ports { PATH } {
     add_wave " -noupdate -group { all } -hex" $PATH/RD_ADDR
     add_wave " -noupdate -group { all } -hex" $PATH/RD_DATA
     add_wave " -noupdate -group { all } -hex" $PATH/RD_DATA_VLD
- 
+
 }
 
 proc uut_internals { PATH } {

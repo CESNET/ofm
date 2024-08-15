@@ -77,12 +77,12 @@ package pcie_endpoint_test_pkg is
    constant RC_TUSER_WIDTH      : integer := 161;
 
    -------------------------------
-   
+
    constant PCIE_UPHDR_WIDTH    : integer := 128;
    constant PCIE_DOWNHDR_WIDTH  : integer := 3*4*8;
-   
+
    constant PCIE_TAG_WIDTH      : integer := 8;
-   
+
    constant RCB_SIZE            : integer := 64; -- 64 or 128 [B]
 
    constant DMA_ADDR_WIDTH      : integer := DMA_REQUEST_GLOBAL'high - DMA_REQUEST_GLOBAL'low + 1;
@@ -158,7 +158,7 @@ package pcie_endpoint_test_pkg is
    -- RC tuser operations
    function rc_tuser_ser(tu : rc_tuser_t) return std_logic_vector;
    function rc_tuser_deser(tu : std_logic_vector) return rc_tuser_t;
-   
+
    -- RQ accepting
    procedure accept_rq_word(rq_i : inout rq_i_t; unfinished : inout mvb_mfb_trans_t; unfinished_expected_len : inout integer;
                             unfinished_vld : inout std_logic; accepted : out mvb_mfb_trans_array_t; accepted_vld : out std_logic_vector;
@@ -233,7 +233,7 @@ package body pcie_endpoint_test_pkg is
          tuser.first_be(i) := tu( 0+4*(i+1)-1 downto  0+4*i);
          tuser.last_be(i)  := tu(l1+4*(i+1)-1 downto l1+4*i);
       end loop;
-      
+
       if (DEVICE="ULTRASCALE") then
          tuser.sop := tu(l4-1 downto l3);
 
@@ -297,7 +297,7 @@ package body pcie_endpoint_test_pkg is
       variable tuser : rc_tuser_t;
    begin
       tuser.be  := tu(l1-1 downto  0);
-      
+
       tuser.sop := tu(l2-1 downto l1);
 
       if (DEVICE="ULTRASCALE") then
@@ -573,7 +573,7 @@ package body pcie_endpoint_test_pkg is
    -- post new RC word
    -- rc_i                                               - interface status
    -- response_remaining_addr(PCIE_TAG_WIDTH-1 downto 0) - address of awaiting responses
-   --                        (DMA_ADDR_WIDTH-1 downto 0) - 
+   --                        (DMA_ADDR_WIDTH-1 downto 0) -
    -- response_remaining_len(PCIE_TAG_WIDTH-1 downto 0)  - remaining length to send of each awaiting response
    -- response_vld(PCIE_TAG_WIDTH-1 downto 0)            - valid bit for each awaiting response
    -- unfinished                                         - transaction, whose part was send in previous word

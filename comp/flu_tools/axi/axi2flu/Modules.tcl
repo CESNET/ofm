@@ -12,5 +12,5 @@ set COMPONENTS [ list \
    [ list "FLU_PIPE"   $FLU_PIPE_BASE  "FULL"]\
 ]
 
-set PACKAGES "$OFM_PATH/comp/base/pkg/math_pack.vhd"   
+set PACKAGES "$OFM_PATH/comp/base/pkg/math_pack.vhd"
 set MOD "$ENTITY_BASE/axi2flu.vhd"

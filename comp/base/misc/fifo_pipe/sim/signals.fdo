@@ -15,7 +15,7 @@ proc tb_internals { PATH GROUP } {
 }
 
 proc fifo_pipe_ports { PATH GROUP } {
-   
+
    eval "add wave $GROUP -divider {Synchronization}"
    add_wave "$GROUP -noupdate -hex -label CLK -color yellow"   $PATH/CLK
    add_wave "$GROUP -noupdate -hex -label RESET -color yellow"   $PATH/RESET

@@ -1,4 +1,4 @@
--- mi_test_space.vhd: 
+-- mi_test_space.vhd:
 -- Copyright (C) 2019 CESNET z. s. p. o.
 -- Author(s): Jakub Cabal <cabal@cesnet.cz>
 --

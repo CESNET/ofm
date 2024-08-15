@@ -24,7 +24,7 @@ architecture empty of HINS is
 begin
 
    RX_DST_RDY <= '1';
-   
+
    HDR_NEXT   <= '1';
 
    TX_DATA <= (others => '0');
@@ -33,6 +33,6 @@ begin
    TX_SOP <= '0';
    TX_EOP <= '0';
    TX_SRC_RDY <= '1';
-   
+
 end architecture empty;
 

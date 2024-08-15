@@ -147,7 +147,7 @@ class sequence_flowtest #(int unsigned ITEM_WIDTH) extends uvm_common::sequence_
                             ipv4[i].address[23 : 16],
                             ipv4[i].address[15 : 8],
                             ipv4[i].address[7 : 0]);
-            
+
             if (ipv4_addresses == "") begin
                 ipv4_addresses = ipv4_address;
             end
@@ -173,7 +173,7 @@ class sequence_flowtest #(int unsigned ITEM_WIDTH) extends uvm_common::sequence_
                             ipv6[i].address[47 : 32],
                             ipv6[i].address[31 : 16],
                             ipv6[i].address[15 : 0]);
-            
+
             if (ipv6_addresses == "") begin
                 ipv6_addresses = ipv6_address;
             end
@@ -197,7 +197,7 @@ class sequence_flowtest #(int unsigned ITEM_WIDTH) extends uvm_common::sequence_
                             mac[i].address[23 : 16],
                             mac[i].address[15 : 8],
                             mac[i].address[7 : 0]);
-            
+
             if (mac_addresses == "") begin
                 mac_addresses = mac_address;
             end

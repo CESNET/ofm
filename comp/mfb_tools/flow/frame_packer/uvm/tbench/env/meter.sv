@@ -114,11 +114,11 @@ class meter #(MVB_ITEM_WIDTH, MFB_ITEM_WIDTH, RX_CHANNELS, USR_RX_PKT_SIZE_MAX) 
         m_input_length  = new();
         m_output_length = new();
     endfunction
-    
+
     task run_phase(uvm_phase phase);
         fork
             run_input();
-            run_output(); 
+            run_output();
             test_mvb();
         join_none
     endtask
@@ -193,7 +193,7 @@ class meter #(MVB_ITEM_WIDTH, MFB_ITEM_WIDTH, RX_CHANNELS, USR_RX_PKT_SIZE_MAX) 
             end
         end
 
-    endtask    
+    endtask
 
     task test_mvb();
         string msg = "";
@@ -207,7 +207,7 @@ class meter #(MVB_ITEM_WIDTH, MFB_ITEM_WIDTH, RX_CHANNELS, USR_RX_PKT_SIZE_MAX) 
         uvm_logic_vector::sequence_item #(MVB_ITEM_WIDTH) tr_mvb_in;
         uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) tr_tx_mfb_in;
 
-        forever begin 
+        forever begin
             mfb_control_data.get(tr_tx_mfb_in);
             meta_in.get(tr_mvb_in);
 
@@ -222,11 +222,11 @@ class meter #(MVB_ITEM_WIDTH, MFB_ITEM_WIDTH, RX_CHANNELS, USR_RX_PKT_SIZE_MAX) 
             // MVB_ITEM_WIDTH = 15 + 12 + 4 + 1 = 32
 
             if (tr_tx_mfb_in.item.data.size() == pkt_len) begin
-                $swrite(msg,"\nCHANNEL      %0d             
+                $swrite(msg,"\nCHANNEL      %0d
                              \nPKT_LEN      %0d
                              \n", tr_mvb_in, channel, pkt_len);
                 //`uvm_info(this.get_full_name(), msg, UVM_NONE);
-            end else begin 
+            end else begin
                 $swrite(msg,"\nWHOLE_MVB    %0b
                              \nCHANNEL      %0d
                              \nPKT_LEN      %0d
@@ -262,7 +262,7 @@ class meter #(MVB_ITEM_WIDTH, MFB_ITEM_WIDTH, RX_CHANNELS, USR_RX_PKT_SIZE_MAX) 
             // Output length
             m_output_length.count(min, max, avg, std_dev, median, modus);
             `uvm_info(this.get_full_name(), $sformatf("\n\tLength OUTPUT statistics => min : %0d Bytes, max : %0d Bytes, average : %0d Bytes, standard deviation : %0d Bytes, median : %0d Bytes", min, max, avg, std_dev, median), UVM_NONE);
-            
+
     endfunction
 
 

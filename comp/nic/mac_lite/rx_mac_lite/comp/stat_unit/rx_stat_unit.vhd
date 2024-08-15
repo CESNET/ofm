@@ -14,14 +14,14 @@ use work.type_pack.all;
 entity RX_MAC_LITE_STAT_UNIT is
     generic(
         -- =====================================================================
-        -- MFB CONFIGURATION: 
+        -- MFB CONFIGURATION:
         -- =====================================================================
         REGIONS            : natural := 4;
         REGION_SIZE        : natural := 8;
         BLOCK_SIZE         : natural := 8;
         ITEM_WIDTH         : natural := 8;
         -- =====================================================================
-        -- OTHERS CONFIGURATION: 
+        -- OTHERS CONFIGURATION:
         -- =====================================================================
         INBANDFCS          : boolean := true;
         LEN_WIDTH          : natural := 14;
@@ -47,7 +47,7 @@ entity RX_MAC_LITE_STAT_UNIT is
         -- =====================================================================
         -- Enable of statistics
         CTRL_STAT_EN           : in  std_logic;
-        -- SW reset   
+        -- SW reset
         CTRL_SW_RESET          : in  std_logic;
         -- Take snapshot of counter
         CTRL_TAKE_SNAPSHOT     : in  std_logic;
@@ -92,19 +92,19 @@ entity RX_MAC_LITE_STAT_UNIT is
         -- Total number of discarded frames
         OUT_FRAMES_DISCARDED   : out std_logic_vector(63 downto 0);
         -- Discarded frames due to buffer overflow
-        OUT_BUFFER_OVF         : out std_logic_vector(63 downto 0); 
+        OUT_BUFFER_OVF         : out std_logic_vector(63 downto 0);
         -- Total number of received bytes (including CRC)
-        OUT_RX_BYTES           : out std_logic_vector(63 downto 0); 
+        OUT_RX_BYTES           : out std_logic_vector(63 downto 0);
         -- Total number of transmitted bytes
         OUT_TX_BYTES           : out std_logic_vector(63 downto 0);
         -- Total number of received frames with bad CRC
         OUT_CRC_ERR            : out std_logic_vector(63 downto 0);
         -- Total number of received frames with bad MAC
-        OUT_MAC_ERR            : out std_logic_vector(63 downto 0); 
+        OUT_MAC_ERR            : out std_logic_vector(63 downto 0);
         -- Total number of received frames over MTU
-        OUT_OVER_MTU           : out std_logic_vector(63 downto 0); 
+        OUT_OVER_MTU           : out std_logic_vector(63 downto 0);
         -- Total number of received frames below minimal length
-        OUT_BELOW_MIN          : out std_logic_vector(63 downto 0); 
+        OUT_BELOW_MIN          : out std_logic_vector(63 downto 0);
         -- Total number of received broadcast frames
         OUT_BCAST_FRAMES       : out std_logic_vector(63 downto 0);
         -- Total number of received multicast frames that were not
@@ -202,7 +202,7 @@ architecture FULL of RX_MAC_LITE_STAT_UNIT is
 
     signal s_cnt_fragment_frames       : std_logic_vector(63 downto 0);
     signal s_cnt_jabber_frames         : std_logic_vector(63 downto 0);
-    
+
     signal s_frames_64                 : std_logic_vector(REGIONS-1 downto 0);
     signal s_frames_65_127             : std_logic_vector(REGIONS-1 downto 0);
     signal s_frames_128_255            : std_logic_vector(REGIONS-1 downto 0);
@@ -307,7 +307,7 @@ begin
     OUT_STAT_VLD <= s_snapshot_en;
 
     -- =========================================================================
-    -- Counters: Received & Received & Discarded 
+    -- Counters: Received & Received & Discarded
     -- =========================================================================
 
     -- Received frames ---------------------------------------------------------
@@ -364,7 +364,7 @@ begin
         DOUT     => s_frame_transmitted_inc,
         DOUT_VLD => open
     );
-    
+
     cnt_frame_transmitted_i : entity work.DSP_COUNTER
     generic map (
         INPUT_WIDTH  => log2(REGIONS+1),
@@ -400,7 +400,7 @@ begin
         DOUT     => s_frame_discarded_inc,
         DOUT_VLD => open
     );
-    
+
     cnt_frame_discarded_i : entity work.DSP_COUNTER
     generic map (
         INPUT_WIDTH  => log2(REGIONS+1),
@@ -436,7 +436,7 @@ begin
         DOUT     => s_buffer_ovf_inc,
         DOUT_VLD => open
     );
-    
+
     cnt_buff_ovf_traff_i : entity work.DSP_COUNTER
     generic map (
         INPUT_WIDTH  => log2(REGIONS+1),
@@ -748,7 +748,7 @@ begin
     -- =========================================================================
     -- Counters: Multicast and broadcast
     -- =========================================================================
-        
+
     cast_g : if BCAST_MCAST_EN generate
         -- MAC BCAST -----------------------------------------------------------
         bcast_inc_i : entity work.SUM_ONE
@@ -785,7 +785,7 @@ begin
             MAX_VAL    => (others => '1'),
             RESULT     => s_cnt_bcast_frames
         );
-        
+
         -- MAC MCAST -----------------------------------------------------------
         mcast_inc_i : entity work.SUM_ONE
         generic map (
@@ -948,15 +948,15 @@ begin
     len_hist_g : if LEN_HISTOGRAM_EN generate
         frame_sizes_g : for r in 0 to REGIONS-1 generate
             s_frames_64(r)        <= '1' when (s_fixed_frame_len(r) = 64) else '0';
-            s_frames_65_127(r)    <= '1' when (s_fixed_frame_len(r) >= 65 and s_fixed_frame_len(r) <= 127) else '0'; 
-            s_frames_128_255(r)   <= '1' when (s_fixed_frame_len(r) >= 128 and s_fixed_frame_len(r) <= 255) else '0'; 
-            s_frames_256_511(r)   <= '1' when (s_fixed_frame_len(r) >= 256 and s_fixed_frame_len(r) <= 511) else '0'; 
-            s_frames_512_1023(r)  <= '1' when (s_fixed_frame_len(r) >= 512 and s_fixed_frame_len(r) <= 1023) else '0'; 
-            s_frames_1024_1518(r) <= '1' when (s_fixed_frame_len(r) >= 1024 and s_fixed_frame_len(r) <= 1518) else '0'; 
+            s_frames_65_127(r)    <= '1' when (s_fixed_frame_len(r) >= 65 and s_fixed_frame_len(r) <= 127) else '0';
+            s_frames_128_255(r)   <= '1' when (s_fixed_frame_len(r) >= 128 and s_fixed_frame_len(r) <= 255) else '0';
+            s_frames_256_511(r)   <= '1' when (s_fixed_frame_len(r) >= 256 and s_fixed_frame_len(r) <= 511) else '0';
+            s_frames_512_1023(r)  <= '1' when (s_fixed_frame_len(r) >= 512 and s_fixed_frame_len(r) <= 1023) else '0';
+            s_frames_1024_1518(r) <= '1' when (s_fixed_frame_len(r) >= 1024 and s_fixed_frame_len(r) <= 1518) else '0';
             s_frames_over_1518(r) <= '1' when (s_fixed_frame_len(r) > 1518) else '0';
             s_frames_undersize(r) <= '1' when (s_fixed_frame_len(r) < 64) else '0';
         end generate;
-        
+
         -- frames 64 -----------------------------------------------------------
         frames_64_inc_i : entity work.SUM_ONE
         generic map (
@@ -1083,7 +1083,7 @@ begin
             DOUT     => s_frames_256_511_inc,
             DOUT_VLD => open
         );
-        
+
         cnt_frames_256_511_i : entity work.DSP_COUNTER
         generic map (
             INPUT_WIDTH  => log2(REGIONS+1),
@@ -1119,7 +1119,7 @@ begin
             DOUT     => s_frames_512_1023_inc,
             DOUT_VLD => open
         );
-        
+
         cnt_frames_512_1023_i : entity work.DSP_COUNTER
         generic map (
             INPUT_WIDTH  => log2(REGIONS+1),
@@ -1155,7 +1155,7 @@ begin
             DOUT     => s_frames_1024_1518_inc,
             DOUT_VLD => open
         );
-        
+
         cnt_frames_1024_1518_i : entity work.DSP_COUNTER
         generic map (
             INPUT_WIDTH  => log2(REGIONS+1),
@@ -1191,7 +1191,7 @@ begin
             DOUT     => s_frames_over_1518_inc,
             DOUT_VLD => open
         );
-        
+
         cnt_frames_over_1518_i : entity work.DSP_COUNTER
         generic map (
             INPUT_WIDTH  => log2(REGIONS+1),
@@ -1227,7 +1227,7 @@ begin
             DOUT     => s_frames_undersize_inc,
             DOUT_VLD => open
         );
-        
+
         cnt_frames_undersize_i : entity work.DSP_COUNTER
         generic map (
             INPUT_WIDTH  => log2(REGIONS+1),
@@ -1264,12 +1264,12 @@ begin
     end generate;
 
     no_len_hist_g : if not LEN_HISTOGRAM_EN generate
-        OUT_FRAMES_64        <= (others=>'0'); 
+        OUT_FRAMES_64        <= (others=>'0');
         OUT_FRAMES_65_127    <= (others=>'0');
         OUT_FRAMES_128_255   <= (others=>'0');
         OUT_FRAMES_256_511   <= (others=>'0');
         OUT_FRAMES_512_1023  <= (others=>'0');
-        OUT_FRAMES_1024_1518 <= (others=>'0'); 
+        OUT_FRAMES_1024_1518 <= (others=>'0');
         OUT_FRAMES_OVER_1518 <= (others=>'0');
         OUT_FRAMES_UNDERSIZE <= (others=>'0');
     end generate;

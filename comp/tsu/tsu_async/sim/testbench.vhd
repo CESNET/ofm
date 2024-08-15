@@ -32,7 +32,7 @@ architecture behavioral of testbench is
 
    signal OUT_TS         : std_logic_vector(63 downto 0);
    signal OUT_TS_DV      : std_logic;
-   
+
 begin
 
    uut : entity work.tsu_async
@@ -47,14 +47,14 @@ begin
          IN_TS_DV   => IN_TS_DV,
 
          -- Output interface
-         OUT_CLK    => OUT_CLK, 
+         OUT_CLK    => OUT_CLK,
 
          OUT_TS     => OUT_TS,
          OUT_TS_DV  => OUT_TS_DV
    );
-   
+
    --Generate clock
-   clk_gen_p : process 
+   clk_gen_p : process
    begin
       IN_CLK <= '1';
       wait for clkper_in/2;
@@ -62,7 +62,7 @@ begin
       wait for clkper_in/2;
    end process clk_gen_p;
 
-   clk_gen_p_out : process 
+   clk_gen_p_out : process
    begin
       OUT_CLK <= '1';
       wait for clkper_out/2;
@@ -79,24 +79,24 @@ begin
    wait;
    end process;
 
-   -- Simulating input flow 
+   -- Simulating input flow
    input_flow : process
    begin
-      
+
       IN_TS_DV   <= '0';
       IN_TS <= (others => '0');
 
       wait for reset_time;
       wait for 3*clkper_in;
       wait for clkper_in;
- 
 
-      for I in 1 to 80 loop            
+
+      for I in 1 to 80 loop
             IN_TS_DV <= '1';
             IN_TS <= IN_TS + 1;
             wait for clkper_in;
       end loop;
-		  
+
       wait;
 
    end process input_flow;

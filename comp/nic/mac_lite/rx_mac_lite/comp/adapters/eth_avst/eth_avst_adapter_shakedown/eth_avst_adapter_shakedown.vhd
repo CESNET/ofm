@@ -264,7 +264,7 @@ begin
     out_reg_p : process (CLK)
     begin
         if (rising_edge(CLK)) then
-            OUT_MFB_DATA    <= mfb_data;    
+            OUT_MFB_DATA    <= mfb_data;
             OUT_MFB_SOF     <= mfb_sof;
             OUT_MFB_SOF_POS <= mfb_sof_pos;
             OUT_MFB_EOF     <= mfb_eof;

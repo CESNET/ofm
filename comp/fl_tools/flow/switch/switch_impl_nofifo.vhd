@@ -22,7 +22,7 @@ use work.math_pack.all;
 
 --* This architecture is intended to save some resouces when the IFNUM is located
 --* in the first word of the FrameLink. In that case no special FIFO is needed.
---* Uses only one register for FrameLink data to solve the 1 CLK delay and because 
+--* Uses only one register for FrameLink data to solve the 1 CLK delay and because
 --* of possible waiting for the TX interfaces to be ready.
 --*
 --* @author Jan Viktorin
@@ -56,7 +56,7 @@ architecture nofifo of fl_switch_impl is
    signal rx_read_ifnum_n : std_logic;
 
 begin
- 
+
    rx_isreading_n <= RX_SRC_RDY_N or not tx_out_reload;
    RX_DST_RDY_N   <= not tx_out_reload;
 
@@ -115,7 +115,7 @@ begin
          end if;
       end if;
    end process;
-   
+
 
    -- Register IFNUM (REG_IFNUM)
    reg_ifnum_we   <= not rx_read_ifnum_n;

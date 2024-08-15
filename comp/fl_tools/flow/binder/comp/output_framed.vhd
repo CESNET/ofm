@@ -64,7 +64,7 @@ architecture framed of FLB_OUTPUT is
    signal dv                 : std_logic;
    signal rx_dst_rdy_n_i     : std_logic;
    signal chosen_queue_empty : std_logic;
-  
+
 begin
    -- ------------------ Directly mapped signals ------------------------------
    cnt_next_ce       <= not reg_ready or fsm_next_queue;
@@ -107,12 +107,12 @@ begin
       port map(
          CLK            => CLK,
          RESET          => RESET,
-   
+
          -- input signals
          EOF            => fsm_eof,
          QUEUE_RDY      => fsm_queue_rdy,
          EMPTY          => fsm_empty,
-   
+
          -- output signals
          SET_VALID      => fsm_set_valid,
          CLR_VALID      => fsm_clr_valid,
@@ -160,7 +160,7 @@ begin
    cnt_nextp: process (CLK)
    begin
       if CLK='1' and CLK'event then
-         if (RESET = '1') then 
+         if (RESET = '1') then
             cnt_next <= (others => '0');
          elsif cnt_next_ce = '1' then
             if (cmp_cnt_next_max = '1') then
@@ -225,5 +225,5 @@ begin
          end if;
       end if;
    end process;
-   
+
 end architecture framed;

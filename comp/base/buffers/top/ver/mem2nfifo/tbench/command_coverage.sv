@@ -12,14 +12,14 @@
  */
 
   import math_pkg::*;       // log2()
-  
+
   // --------------------------------------------------------------------------
   // -- Fifo Command Coverage for Interface iGeneral.fifo_write_cb
   // --------------------------------------------------------------------------
   // This class measures exercised combinations of interface signals
-    
+
   class CommandsCoverageWrite #(int pDataWidth=64,int pFlows=8,int pBlSize=512,int pLutMem=0, pGlobSt=0);
-  
+
     // Interface on witch is covering measured
     virtual iNFifoTx.mem_write_tb #(pDataWidth,pFlows,pBlSize,pLutMem,pGlobSt) m_w;
     string  instanceName;
@@ -34,18 +34,18 @@
     logic [pFlows-1:0] new_len_dv;
     logic write;
     logic [pFlows-1:0] full;
-    
+
     //-- Covering transactions ----------------------------------------------
     covergroup CommandsCovergroup;
       // block_addr coverpoint
       block_addr: coverpoint block_addr;
-      
+
       // wr_addr coverpoint
       wr_addr: coverpoint wr_addr;
-      
+
       // new_len coverpoint
       new_len: coverpoint new_len;
-      
+
       // wr_addr coverpoint
       new_len_dv: coverpoint new_len_dv{
         bins new_len_dv0 = {8'b00000001};
@@ -57,19 +57,19 @@
         bins new_len_dv6 = {8'b01000000};
         bins new_len_dv7 = {8'b10000000};
       }
-      
+
       // write coverpoint
       write: coverpoint write {
         bins write0 = {0};
         bins write1 = {1};
       }
-      
+
       option.per_instance=1; // Also per instance statistics
      endgroup
 
     // ------------------------------------------------------------------------
     // Constructor
-    
+
     function new (virtual iNFifoTx.mem_write_tb #(pDataWidth,pFlows,pBlSize,pLutMem,pGlobSt) m_w,
                   string instanceName);
       this.m_w = m_w;                 // Store interface
@@ -82,17 +82,17 @@
     // Enable commands coverage measures
     task setEnabled();
       enabled = 1; // Coverage Enabling
-      fork         
+      fork
          run();    // Creating coverage subprocess
       join_none;   // Don't wait for ending
     endtask : setEnabled
-         
+
     // -- Disable command coverage measures -----------------------------------
     // Disable generator
     task setDisabled();
       enabled = 0; // Disable measures
     endtask : setDisabled
-   
+
     // -- Run command coverage measures ---------------------------------------
     // Take transactions from mailbox and generate them to interface
     task run();
@@ -105,11 +105,11 @@
          new_len_dv = m_w.mem_write_cb.NEW_LEN_DV;
          write      = m_w.mem_write_cb.WRITE;
          full       = m_w.mem_write_cb.FULL;
-         
+
          CommandsCovergroup.sample();
       end
     endtask : run
-  
+
     // ------------------------------------------------------------------------
     // Display coverage statistic
     task display();
@@ -123,9 +123,9 @@
   // -- Memory Command Coverage for Interface iGeneral.fifo_monitor_cb
   // --------------------------------------------------------------------------
   // This class measures exercised combinations of interface signals
-  
+
   class CommandsCoverageMonitor #(int pDataWidth=64,int pFlows=8,int pBlSize=512,int pLutMem=0, pGlobSt=0);
-  
+
     // Interface on witch is covering measured
     virtual iNFifoTx.nfifo_monitor #(pDataWidth,pFlows,pBlSize,pLutMem,pGlobSt) f_m;
     string  instanceName;
@@ -137,7 +137,7 @@
     logic data_vld;
     logic read;
     logic empty;
-    
+
     //-- Covering transactions ----------------------------------------------
     covergroup CommandsCovergroup;
       // data_vld coverpoint
@@ -145,25 +145,25 @@
         bins data_vld0 = {0};
         bins data_vld1 = {1};
       }
-           
+
       // read coverpoint
       read: coverpoint read {
         bins read0 = {0};
         bins read1 = {1};
-      } 
-      
+      }
+
       // empty coverpoint
       empty: coverpoint empty{
         bins empty0 = {0};
         bins empty1 = {1};
       }
-        
+
       option.per_instance=1; // Also per instance statistics
      endgroup
 
     // ------------------------------------------------------------------------
     // Constructor
-    
+
     function new (virtual iNFifoTx.nfifo_monitor #(pDataWidth,pFlows,pBlSize,pLutMem,pGlobSt) f_m,
                   string instanceName);
       this.f_m = f_m;                 // Store interface
@@ -176,17 +176,17 @@
     // Enable commands coverage measures
     task setEnabled();
       enabled = 1; // Coverage Enabling
-      fork         
+      fork
          run();    // Creating coverage subprocess
       join_none;   // Don't wait for ending
     endtask : setEnabled
-         
+
     // -- Disable command coverage measures -----------------------------------
     // Disable generator
     task setDisabled();
       enabled = 0; // Disable measures
     endtask : setDisabled
-   
+
     // -- Run command coverage measures ---------------------------------------
     // Take transactions from mailbox and generate them to interface
     task run();
@@ -196,11 +196,11 @@
          data_vld = f_m.nfifo_monitor_cb.DATA_VLD;
          read     = f_m.nfifo_monitor_cb.READ;
          empty    = f_m.nfifo_monitor_cb.EMPTY;
-         
+
          CommandsCovergroup.sample();
       end
     endtask : run
-  
+
     // ------------------------------------------------------------------------
     // Display coverage statistic
     task display();
@@ -216,23 +216,23 @@
   // This class measure coverage of commands
   class Coverage #(int pDataWidth=64,int pFlows=8,int pBlSize=512,int pLutMem=0, pGlobSt=0);
     // Commands coverage lists
-    CommandsCoverageWrite   #(pDataWidth,pFlows,pBlSize,pLutMem,pGlobSt) cmdListWrite[$];    
+    CommandsCoverageWrite   #(pDataWidth,pFlows,pBlSize,pLutMem,pGlobSt) cmdListWrite[$];
     CommandsCoverageMonitor #(pDataWidth,pFlows,pBlSize,pLutMem,pGlobSt) cmdListMonitor[$];
-        
+
     // -- Add interface Write for command coverage ----------------------------------
     task addGeneralInterfaceWrite (virtual iNFifoTx.mem_write_tb #(pDataWidth,pFlows,pBlSize,pLutMem,pGlobSt) port,
                                    string name);
       // Create commands coverage class
-      CommandsCoverageWrite #(pDataWidth,pFlows,pBlSize,pLutMem,pGlobSt) cmdCoverageWrite = new(port, name);  
+      CommandsCoverageWrite #(pDataWidth,pFlows,pBlSize,pLutMem,pGlobSt) cmdCoverageWrite = new(port, name);
       // Insert class into list
       cmdListWrite.push_back(cmdCoverageWrite);
     endtask : addGeneralInterfaceWrite
-    
+
     // -- Add interface Tx for command coverage ----------------------------------
     task addGeneralInterfaceMonitor (virtual iNFifoTx.nfifo_monitor #(pDataWidth,pFlows,pBlSize,pLutMem,pGlobSt) port,
                                      string name);
       // Create commands coverage class
-      CommandsCoverageMonitor #(pDataWidth,pFlows,pBlSize,pLutMem,pGlobSt) cmdCoverageMonitor = new(port, name);  
+      CommandsCoverageMonitor #(pDataWidth,pFlows,pBlSize,pLutMem,pGlobSt) cmdCoverageMonitor = new(port, name);
       // Insert class into list
       cmdListMonitor.push_back(cmdCoverageMonitor);
     endtask : addGeneralInterfaceMonitor
@@ -243,7 +243,7 @@
       foreach (cmdListWrite[i])   cmdListWrite[i].setEnabled();     // Enable for commands
       foreach (cmdListMonitor[i]) cmdListMonitor[i].setEnabled();   // Enable for commands
     endtask : setEnabled
-         
+
     // -- Disable coverage measures -------------------------------------------
     // Disable coverage measures
     task setDisabled();

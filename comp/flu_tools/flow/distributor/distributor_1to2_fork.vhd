@@ -1,13 +1,13 @@
 --
 -- distributor_1to2_fork.vhd: Two port wrapper for distributor component used as fork for Frame Link Unaligned
 -- Copyright (C) 2012 CESNET
--- Author: Lukas Kekely <kekely@cesnet.cz> 
+-- Author: Lukas Kekely <kekely@cesnet.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --
 -- $Id$
 --
--- TODO: 
+-- TODO:
 --
 --
 library IEEE;
@@ -38,7 +38,7 @@ entity FLU_DFORK_1TO2 is
       RX_SOP        : in std_logic;
       RX_EOP        : in std_logic;
       RX_SRC_RDY    : in std_logic;
-      RX_DST_RDY    : out std_logic; 
+      RX_DST_RDY    : out std_logic;
 
       -- Frame Link Unaligned output interfaces
       -- Interface 0
@@ -108,7 +108,7 @@ begin
       INUM_READY    => '1',
       INUM_NEXT     => open
    );
-     
+
    -- Interface 0
    TX0_DATA     <= data((0+1)*DATA_WIDTH-1 downto 0*DATA_WIDTH);
    TX0_SOP_POS  <= sop_pos((0+1)*SOP_POS_WIDTH-1 downto 0*SOP_POS_WIDTH);

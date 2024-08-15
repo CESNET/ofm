@@ -13,7 +13,7 @@ use work.math_pack.all;
 
 entity ELASTIC_FIFO is
     generic (
-        
+
         -- Number of items in FIFO. The capacity should be raised with amount of clock cycles,
         -- when no idle blocks can be omitted or generated (no rate compensation can be done)
         FIFO_ITEMS          : natural := 16;
@@ -37,7 +37,7 @@ entity ELASTIC_FIFO is
         -- Block width in bits, must be n-th power of 2, where n =  3, 4, 5, ...
         -- Elementary unit with which this component works
         BLOCK_WIDTH         : natural := 64;
-        
+
         -- Number of blocks in data
         BLOCK_COUNT         : natural := 8;
 
@@ -66,7 +66,7 @@ entity ELASTIC_FIFO is
         -- with them by position (block at 63th to 0th bit <=> aux_data at 7th to 0th bit)
         AUX_IN              : in std_logic_vector((BLOCK_WIDTH * BLOCK_COUNT / 8) - 1 downto 0);
 
-        -- Tells which blocks don't have to be put into FIFO to compensate for 
+        -- Tells which blocks don't have to be put into FIFO to compensate for
         -- faster input clock (log. "1" means, that block on that position can be omittted)
         MASK_IN             : in std_logic_vector(BLOCK_COUNT - 1 downto 0);
 
@@ -103,7 +103,7 @@ architecture FULL of ELASTIC_FIFO is
     signal wr_din_prebuff      : std_logic_vector(DIN_WIDTH - 1 downto 0);
     signal wr_aux_in_prebuff   : std_logic_vector(AUX_DATA_WIDTH - 1 downto 0);
     signal wr_mask_in_prebuff  : std_logic_vector(BLOCK_COUNT - 1 downto 0);
-    
+
     -- FIFO write interface
     signal fifo_wr_data     : std_logic_vector(FIFO_DATA_WIDTH - 1 downto 0);
     signal fifo_wr_en       : std_logic := '0';
@@ -150,7 +150,7 @@ architecture FULL of ELASTIC_FIFO is
     signal rd_dout_buff         : std_logic_vector(DIN_WIDTH - 1 downto 0);
     signal rd_auxo_buff         : std_logic_vector(AUX_DATA_WIDTH - 1 downto 0);
     signal rd_mask_buff         : std_logic_vector(BLOCK_COUNT - 1 downto 0);
-    
+
     -- Output buffer
     signal rd_dout_string       : std_logic_vector(DIN_WIDTH * 2 - 1 downto 0);
     signal rd_auxo_string       : std_logic_vector(AUX_DATA_WIDTH * 2 - 1 downto 0);
@@ -210,7 +210,7 @@ architecture FULL of ELASTIC_FIFO is
 
     signal rd_fsm_curr_state        : unsigned(max(log2(BLOCK_COUNT + 2), 1) - 1 downto 0);
     signal rd_fsm_next_state        : unsigned(max(log2(BLOCK_COUNT + 2), 1) - 1 downto 0);
-    
+
     ---------------
     -- Functions --
     ---------------
@@ -220,7 +220,7 @@ architecture FULL of ELASTIC_FIFO is
         variable result: std_logic_vector(DIN_WIDTH - 1 downto 0);
     begin
         for i in 0 to BLOCK_COUNT - 1 loop
-            result((BLOCK_COUNT - i) * BLOCK_WIDTH - 1 downto (BLOCK_COUNT - i - 1) * BLOCK_WIDTH) := 
+            result((BLOCK_COUNT - i) * BLOCK_WIDTH - 1 downto (BLOCK_COUNT - i - 1) * BLOCK_WIDTH) :=
             to_reverse((i + 1) * BLOCK_WIDTH - 1 downto i * BLOCK_WIDTH);
         end loop;
         return result;
@@ -230,7 +230,7 @@ architecture FULL of ELASTIC_FIFO is
         variable result: std_logic_vector(AUX_DATA_WIDTH - 1 downto 0);
     begin
         for i in 0 to BLOCK_COUNT - 1 loop
-            result((BLOCK_COUNT - i) * BLOCK_WIDTH / 8 - 1 downto (BLOCK_COUNT - i - 1) * BLOCK_WIDTH / 8) := 
+            result((BLOCK_COUNT - i) * BLOCK_WIDTH / 8 - 1 downto (BLOCK_COUNT - i - 1) * BLOCK_WIDTH / 8) :=
             to_reverse((i + 1) * BLOCK_WIDTH / 8 - 1 downto i * BLOCK_WIDTH / 8);
         end loop;
         return result;
@@ -240,7 +240,7 @@ architecture FULL of ELASTIC_FIFO is
         variable result: std_logic_vector(BLOCK_COUNT - 1 downto 0);
     begin
         for i in 0 to BLOCK_COUNT - 1 loop
-            result((BLOCK_COUNT - i) - 1 downto BLOCK_COUNT - i - 1) := 
+            result((BLOCK_COUNT - i) - 1 downto BLOCK_COUNT - i - 1) :=
             to_reverse((i + 1) - 1 downto i);
         end loop;
         return result;
@@ -265,7 +265,7 @@ begin
             end if;
         end if;
     end process;
-    
+
     -- Read FSN Next State + Mealy logic
     rd_fsm_next_state_p : process(all)
     begin
@@ -289,7 +289,7 @@ begin
             rd_fsm_next_state <= rd_fsm_curr_state;
         end if;
     end process;
-    
+
     -- Read FSM Moore logic
     rd_fsm_out_logic_p : process(all)
     begin
@@ -328,7 +328,7 @@ begin
             end if;
         end if;
     end process;
-    
+
     -- Generation of output registers
     output_reg_g : if OUTPUT_REGISTERS generate
         output_reg_p : process(RD_CLK)
@@ -349,7 +349,7 @@ begin
         DOUT <= data_out_signal;
         AUX_OUT <= aux_out_signal;
     end generate;
-    
+
     -- Finds first idle block in FIFO DOUT (1 hot)
     rd_first_idle_e : entity work.FIRST_ONE
     generic map (
@@ -359,7 +359,7 @@ begin
         DI => rd_mask_mux_out_i,
         DO => rd_first_idle
     );
-    
+
     -- Used for checking whether data were shifted
     rd_shift_check <= std_logic_vector(((unsigned(not rd_first_idle)) + 1));
     -- All block after first are shifted: 000100 -> 111000
@@ -395,7 +395,7 @@ begin
             SEL         => rd_blocks_to_shift(i downto i),
             DATA_OUT    => rd_shift_data_demux_out_i(i * 2 * BLOCK_WIDTH - 1 downto (i - 1) * 2 * BLOCK_WIDTH)
         );
-        
+
         -- Auxiliary data shifting
         rd_auxo_shift_demux_e : entity work.GEN_DEMUX
         generic map (
@@ -408,24 +408,24 @@ begin
             SEL         => rd_blocks_to_shift(i downto i),
             DATA_OUT    => rd_shift_auxo_demux_out_i(i * 2 * BLOCK_WIDTH / 8 - 1 downto (i - 1) * 2 * BLOCK_WIDTH / 8)
         );
-        
+
         -- The 1. block does not need or gate because the 0. block is never shifted
         first_block_or_g : if i = 1 generate
             rd_mux_idle_din((i + 1) * BLOCK_WIDTH - 1 downto i * BLOCK_WIDTH) <= rd_shift_data_demux_out_i(i * BLOCK_WIDTH - 1 downto 0);
             rd_mux_idle_auxin((i + 1) * BLOCK_WIDTH / 8 - 1 downto i * BLOCK_WIDTH / 8) <= rd_shift_auxo_demux_out_i(i * BLOCK_WIDTH / 8 - 1 downto 0);
         end generate;
-        
+
         other_blocks_or_g : if i > 1 generate
-            rd_mux_idle_din((i + 1) * BLOCK_WIDTH - 1 downto i * BLOCK_WIDTH) <= 
+            rd_mux_idle_din((i + 1) * BLOCK_WIDTH - 1 downto i * BLOCK_WIDTH) <=
                                     rd_shift_data_demux_out_i(BLOCK_WIDTH * (i * 2 - 1) - 1 downto BLOCK_WIDTH * (i - 1) * 2) or
                                     rd_shift_data_demux_out_i(BLOCK_WIDTH * (i - 1) * 2 - 1 downto BLOCK_WIDTH * ((i - 1) * 2 - 1));
-            rd_mux_idle_auxin((i + 1) * BLOCK_WIDTH / 8 - 1 downto i * BLOCK_WIDTH / 8) <= 
+            rd_mux_idle_auxin((i + 1) * BLOCK_WIDTH / 8 - 1 downto i * BLOCK_WIDTH / 8) <=
                                     rd_shift_auxo_demux_out_i((BLOCK_WIDTH / 8) * (i * 2 - 1) - 1 downto (BLOCK_WIDTH / 8) * (i - 1) * 2) or
                                     rd_shift_auxo_demux_out_i((BLOCK_WIDTH / 8) * (i - 1) * 2 - 1 downto (BLOCK_WIDTH / 8) * ((i - 1) * 2 - 1));
         end generate;
 
     end generate;
-    
+
     -- Converts 1 hot code into binary for selection of idle block which can be inserted
     rd_mux_get_idle_sel_enc_e : entity work.GEN_ENC
     generic map (
@@ -436,7 +436,7 @@ begin
         DI      => rd_first_idle,
         ADDR    => rd_first_idle_addr
     );
-    
+
     -- From selected blocks selects and idle block which can be inserted into data
     rd_mux_get_idle_e : entity work.GEN_MUX
     generic map (
@@ -470,12 +470,12 @@ begin
             MUX_WIDTH => 2
         )
         port map(
-            DATA_IN     => idle_block & 
+            DATA_IN     => idle_block &
                            rd_mux_idle_din((i + 1) * BLOCK_WIDTH - 1 downto i * BLOCK_WIDTH),
             SEL         => rd_mux_idle_sel(i downto i),
             DATA_OUT    => rd_inserted_dout((i + 1) * BLOCK_WIDTH - 1 downto i * BLOCK_WIDTH)
         );
-        
+
         -- Idle auxiliary data
         rd_idle_auxo_mux_e : entity work.GEN_MUX
         generic map (
@@ -483,7 +483,7 @@ begin
             MUX_WIDTH => 2
         )
         port map(
-            DATA_IN     => idle_aux_data & 
+            DATA_IN     => idle_aux_data &
                            rd_mux_idle_auxin((i + 1) * BLOCK_WIDTH / 8 - 1 downto i * BLOCK_WIDTH / 8),
             SEL         => rd_mux_idle_sel(i downto i),
             DATA_OUT    => rd_inserted_auxo((i + 1) * BLOCK_WIDTH / 8 - 1 downto i * BLOCK_WIDTH / 8)
@@ -500,7 +500,7 @@ begin
             MUX_WIDTH => BLOCK_COUNT + 1
         )
         port map(
-            DATA_IN     => reverse_data(rd_dout_string((BLOCK_COUNT + i) * BLOCK_WIDTH - 1 downto i * BLOCK_WIDTH)) & 
+            DATA_IN     => reverse_data(rd_dout_string((BLOCK_COUNT + i) * BLOCK_WIDTH - 1 downto i * BLOCK_WIDTH)) &
                            rd_dout_string((BLOCK_COUNT + i + 1) * BLOCK_WIDTH - 1  downto (BLOCK_COUNT + i) * BLOCK_WIDTH),
             SEL         => std_logic_vector(rd_insert_cnt),
             DATA_OUT    => rd_data_mux_out_i((i + 1) * BLOCK_WIDTH - 1 downto i * BLOCK_WIDTH)
@@ -512,7 +512,7 @@ begin
             MUX_WIDTH => BLOCK_COUNT + 1
         )
         port map (
-            DATA_IN     => reverse_aux_data(rd_auxo_string((BLOCK_COUNT + i) * BLOCK_WIDTH / 8 - 1 downto i * BLOCK_WIDTH / 8)) & 
+            DATA_IN     => reverse_aux_data(rd_auxo_string((BLOCK_COUNT + i) * BLOCK_WIDTH / 8 - 1 downto i * BLOCK_WIDTH / 8)) &
                            rd_auxo_string((BLOCK_COUNT + i + 1) * BLOCK_WIDTH / 8 - 1 downto (BLOCK_COUNT + i) * BLOCK_WIDTH / 8),
             SEL         => std_logic_vector(rd_insert_cnt),
             DATA_OUT    => rd_auxo_mux_out_i((i + 1) * BLOCK_WIDTH / 8 - 1 downto i * BLOCK_WIDTH / 8)
@@ -524,7 +524,7 @@ begin
             MUX_WIDTH => BLOCK_COUNT + 1
         )
         port map (
-            DATA_IN     => reverse_mask(rd_mask_string((BLOCK_COUNT + i) - 1 downto i)) & 
+            DATA_IN     => reverse_mask(rd_mask_string((BLOCK_COUNT + i) - 1 downto i)) &
                            rd_mask_string((BLOCK_COUNT + i + 1) - 1 downto BLOCK_COUNT + i),
             SEL         => std_logic_vector(rd_insert_cnt),
             DATA_OUT    => rd_mask_mux_out_i((i + 1) - 1 downto i)
@@ -578,10 +578,10 @@ begin
     begin
         if wr_fsm_curr_state = BLOCK_COUNT then
             wr_fsm_next_state <= (others => '0');
-        else 
+        else
             if (wr_shift = '1' and fifo_wr_en = '1') then
                 wr_fsm_next_state <= wr_fsm_curr_state + 1;
-            else 
+            else
                 wr_fsm_next_state <= wr_fsm_curr_state;
             end if;
         end if;
@@ -593,7 +593,7 @@ begin
         wr_mux_base_offset <= wr_fsm_curr_state;
 
         if wr_fsm_curr_state = BLOCK_COUNT then
-            wr_fsm_fifo_wr_en <= '0';  
+            wr_fsm_fifo_wr_en <= '0';
         end if;
     end process;
 
@@ -601,7 +601,7 @@ begin
     wr_mask_string <= wr_mask_in_prebuff & wr_mask_in_buff;
     wr_data_string <= wr_din_prebuff & wr_din_buff;
     wr_auxin_string <= wr_aux_in_prebuff & wr_aux_in_buff;
-    
+
     -- Sets mux select to 1 if mux has to be shifted
     wr_data_mux_offset_g : for i in 1 to BLOCK_COUNT generate
         mux_sel_i(i - 1) <= '1' when wr_data_mux_offset_set(i) = '1' and fifo_wr_afull = '1' else '0';
@@ -620,7 +620,7 @@ begin
             DATA_OUT    => wr_mux_mask_out(i downto i)
         );
     end generate;
-    
+
     -- Finds sequence of "11" and into new vector places "10"
     wr_idle_seq_g : for i in BLOCK_COUNT downto 1 generate
         wr_mask_idle_seq(i) <= '1' when wr_mux_mask_out(i downto i - 1) = "11" else '0';
@@ -646,7 +646,7 @@ begin
     fifo_wr_en <= WR_CE and wr_fsm_fifo_wr_en;
 
     wr_shift <= '1' when not (wr_mask_first_seq = (wr_mask_first_seq'range => '0')) and fifo_wr_afull = '1' else '0';
-    
+
     -- DIN buffer
     wr_din_buff_p : process(WR_CLK)
     begin
@@ -668,7 +668,7 @@ begin
             end if;
         end if;
     end process;
-    
+
     -- MASK_IN buffer
     wr_mask_in_buff_p : process(WR_CLK)
     begin
@@ -705,7 +705,7 @@ begin
             SEL         => std_logic_vector(wr_mux_base_offset + unsigned(mux_sel_i(i downto i))),
             DATA_OUT    => mux_auxo_i((BLOCK_WIDTH / 8) * (i + 1) - 1 downto (BLOCK_WIDTH / 8) * i)
         );
-        
+
         wr_maskin_mux_e : entity work.GEN_MUX
         generic map (
             DATA_WIDTH => 1,
@@ -744,7 +744,7 @@ begin
         ASYNC_RST => AS_RST,
         OUT_RST => rd_rst
     );
-    
+
     -- Asynchronous FIFO instance
     asfifox_e : entity work.ASFIFOX
     generic map (
@@ -773,5 +773,5 @@ begin
         RD_AEMPTY => fifo_rd_aempty,
         RD_STATUS => fifo_rd_status
     );
-    
+
 end architecture;

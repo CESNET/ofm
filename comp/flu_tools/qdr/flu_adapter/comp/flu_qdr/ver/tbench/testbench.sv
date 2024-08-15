@@ -1,7 +1,7 @@
 /*
  * testbench.sv: Top Entity for FLU_FIFO automatic test
  * Copyright (C) 2014 CESNET
- * Author: Vaclav Hummel <xhumme00@stud.fit.vutbr.cz> 
+ * Author: Vaclav Hummel <xhumme00@stud.fit.vutbr.cz>
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -10,7 +10,7 @@
  * TODO:
  *
  */
- 
+
 
 // ----------------------------------------------------------------------------
 //                                 TESTBENCH
@@ -27,7 +27,7 @@ module testbench;
   iFrameLinkURx #(DATA_WIDTH, EOP_POS_WIDTH, SOP_POS_WIDTH) RX       (APP_CLK, APP_RST);
   iFrameLinkUTx #(DATA_WIDTH, EOP_POS_WIDTH, SOP_POS_WIDTH) TX       (APP_CLK, APP_RST);
 
-  
+
   //-- Clock generation -------------------------------------------------------
   always #(APP_CLK_PERIOD/2) APP_CLK = ~APP_CLK;
   always #(QDR_CLK_PERIOD/2) QDR_CLK = ~QDR_CLK;

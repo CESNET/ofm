@@ -1,7 +1,7 @@
 /*
  * file       : rand_rdy.sv
  * Copyright (C) 2021 CESNET z. s. p. o.
- * description: bound to sequencer for generating spaces 
+ * description: bound to sequencer for generating spaces
  * date       : 2021
  * author     : Radek Iša <isa@cesnet.cz>
  *

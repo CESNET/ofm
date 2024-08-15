@@ -39,7 +39,7 @@ module testbench;
 
         run_test();
         $stop(2);
-    end 
+    end
 
     //DUT mapping
     DUT DUT_U(

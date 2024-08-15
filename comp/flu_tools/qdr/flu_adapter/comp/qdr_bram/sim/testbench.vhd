@@ -165,7 +165,7 @@ begin
       user_wr_bw_n <= (others => '0');
       user_rd_cmd <= '0';
       user_rd_addr <= (others => '0');
-      
+
       wait;
    end process;
 

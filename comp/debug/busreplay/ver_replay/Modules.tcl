@@ -7,7 +7,7 @@
 set SWTOOLS_BASE     "$OFM_PATH/comp/mi_tools/ver/sw_access/nfb/tools"
 
 set SV_LIB "$SV_LIB $SWTOOLS_BASE/busreplay/busreplay"
-  
+
 set COMPONENTS [list \
     [ list "SV_MI32"    "$OFM_PATH/comp/mi_tools/ver" "FULL"] \
     [ list "BUSREPLAY"  "$OFM_PATH/comp/debug/busreplay"   "FULL"] \

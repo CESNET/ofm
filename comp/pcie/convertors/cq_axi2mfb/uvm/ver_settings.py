@@ -27,7 +27,7 @@ SETTINGS = {
     "axi_straddling_off" : {
         "STRADDLING"      : "0"                 ,
     },
-    "_combinations_" : (  
+    "_combinations_" : (
     (), # Works the same as '("default",),' as the "default" is applied in every combination
     ("axi_straddling_off"   ,),
     ("axi_256b"              ,),

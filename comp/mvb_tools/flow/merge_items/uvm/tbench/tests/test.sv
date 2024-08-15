@@ -1,8 +1,8 @@
-//-- test.sv: Verification test 
+//-- test.sv: Verification test
 //-- Copyright (C) 2023 CESNET z. s. p. o.
 //-- Author(s): Yaroslav Marushchenko <xmarus09@stud.fit.vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 class ex_test extends uvm_test;
     typedef uvm_component_registry #(test::ex_test, "test::ex_test") type_id;
@@ -74,5 +74,5 @@ class ex_test extends uvm_test;
             `uvm_error(this.get_full_name(), "\n\t===================================================\n\tTIMEOUT SOME PACKET STUCK IN DESIGN\n\t===================================================\n\n");
         end
     endfunction
-    
+
 endclass

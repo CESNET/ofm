@@ -350,7 +350,7 @@ begin
         RX_EOF_POS => min1_eof_pos,
         RX_SRC_RDY => min1_src_rdy,
         RX_DST_RDY => min1_dst_rdy,
-                                  
+
         TX_DATA    => min2_data   ,
         TX_META    => min2_meta   ,
         TX_SOF     => min2_sof    ,
@@ -430,7 +430,7 @@ begin
         RX_EOF_POS => tx0_eof_pos,
         RX_SRC_RDY => tx0_src_rdy,
         RX_DST_RDY => tx0_dst_rdy,
-                                  
+
         TX_DATA    => tx1_data   ,
         TX_META    => tx1_meta   ,
         TX_SOF     => tx1_sof    ,

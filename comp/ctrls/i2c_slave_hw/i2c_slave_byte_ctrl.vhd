@@ -45,7 +45,7 @@ entity i2c_slave_byte_ctrl is
       ACK_OUT  : out std_logic;
       --* Data word if command was accept
       DOUT     : out std_logic_vector(7 downto 0);
-            
+
       --* START condidion detected (pulse)
       START    : out std_logic;
       --* STOP condidion detected (pulse)
@@ -98,13 +98,13 @@ architecture structural of i2c_slave_byte_ctrl is
    signal dcnt_en          : std_logic;
 
    -- FSM
-   type states is (st_idle, st_read, st_read_cmd, st_write, 
+   type states is (st_idle, st_read, st_read_cmd, st_write,
                    st_write_cmd, st_ack, st_read_ack_cmd, st_write_ack_cmd);
    signal state            : states;
    signal next_state       : states;
 
 begin
-   
+
    --* Store input command, reply byte shift register
    shreg_din_p : process(CLK)
    begin
@@ -133,7 +133,7 @@ begin
    DOUT <= SHREG_DOUT;
 
 	--* bit controller instantion
-	bit_ctrl: entity work.i2c_slave_bit_ctrl 
+	bit_ctrl: entity work.i2c_slave_bit_ctrl
    generic map(
       FILTER_LENGTH  => FILTER_LENGTH,
       FILTER_SAMPLING=> FILTER_SAMPLING
@@ -170,7 +170,7 @@ begin
       if (CLK'event and CLK = '1') then
          if (RESET = '1') then
            dcnt <= (others => '0');
-         else 
+         else
             if (dcnt_ld = '1') then
                dcnt <= (others => '1');  -- load counter with 7
             elsif (dcnt_en = '1') then
@@ -192,10 +192,10 @@ begin
          end if;
       end if;
    end process;
-   
+
    --* Next state computation
    next_state_p : process(state, CMD, CMD_VLD, iCMD_RDY, core_start,
-                          dcnt, core_ack, core_dout, core_cmd_rdy, 
+                          dcnt, core_ack, core_dout, core_cmd_rdy,
                           reg_dev_addr, reg_dev_addr_mask, shreg_dout)
    begin
       next_state <= state; -- Stay in current state by default
@@ -212,17 +212,17 @@ begin
             end if;
 
          -- Issue read command
-         when st_read_cmd => 
+         when st_read_cmd =>
             if core_cmd_rdy = '1' then
                next_state <= st_read;
             end if;
 
          -- Wait for read command to complete
-         when st_read => 
-            if core_ack = '1' then 
+         when st_read =>
+            if core_ack = '1' then
                if dcnt = "111" then
-                  if ((not((shreg_dout(6 downto 0) & core_dout) 
-                           xor reg_dev_addr)) 
+                  if ((not((shreg_dout(6 downto 0) & core_dout)
+                           xor reg_dev_addr))
                       or reg_dev_addr_mask) = "11111111" then
                      next_state <= st_write_ack_cmd; -- Addres match
                   else
@@ -290,19 +290,19 @@ begin
             iCMD_RDY <= '1';
             dcnt_ld <= '1';
 
-         when st_read_cmd => 
+         when st_read_cmd =>
             core_cmd <= I2C_ACCEPT_BIT;
             core_cmd_vld <= '1';
             if core_cmd_rdy = '1' then
                dcnt_en <= '1';
             end if;
 
-         when st_read => 
+         when st_read =>
             if core_ack = '1' then
                shreg_dout_we <= '1';
             end if;
 
-         when st_write_cmd => 
+         when st_write_cmd =>
             core_cmd <= I2C_REPLY_BIT;
             core_din <= shreg_din(7);
             core_cmd_vld <= '1';
@@ -311,23 +311,23 @@ begin
                dcnt_en <= '1';
             end if;
 
-         when st_write => 
+         when st_write =>
 
-         when st_write_ack_cmd => 
+         when st_write_ack_cmd =>
             core_cmd <= I2C_REPLY_BIT;
             core_din <= reg_ack_in;
             core_cmd_vld <= '1';
 
-         when st_read_ack_cmd => 
+         when st_read_ack_cmd =>
             core_CMD <= I2C_ACCEPT_BIT;
             core_cmd_vld <= '1';
-         
-         when st_ack => 
+
+         when st_ack =>
             if core_ack = '1' then
                CMD_ACK <= '1';
             end if;
-         
-         when others => 
+
+         when others =>
       end case;
    end process;
 

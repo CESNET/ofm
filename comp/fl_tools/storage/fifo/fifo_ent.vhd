@@ -64,7 +64,7 @@ entity FL_FIFO is
       RX_SOF_N       : in  std_logic;
       --! Write side not end of frame
       RX_EOF_N       : in  std_logic;
-      
+
       ----------------------------------------------------------------------
       --! \name Read interface
       ----------------------------------------------------------------------

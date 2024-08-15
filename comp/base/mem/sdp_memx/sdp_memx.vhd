@@ -1,4 +1,4 @@
--- sdp_memx.vhd: SDP_MEMX 
+-- sdp_memx.vhd: SDP_MEMX
 -- Copyright (C) 2018 CESNET z. s. p. o.
 -- Author(s): Michal Szabo <xszabo11@vutbr.cz>
 --
@@ -11,11 +11,11 @@ use IEEE.numeric_std.all;
 use work.math_pack.all;
 
 -- SDP_MEMX is component capable of implementing memeory into different
--- memory types, such as LUT memeory, BRAMs and UltraRAMs. It also has 
--- automatic mode that based on DATA_WIDTH and ITEMS decides which memory 
--- type should be used. Data output delay can be 1 CLK cycle if OUTPUT_REG 
--- is False or 2 CLK cycles if True. Output registers are enabled with 
--- RD_PIPE_EN together at the same time. 
+-- memory types, such as LUT memeory, BRAMs and UltraRAMs. It also has
+-- automatic mode that based on DATA_WIDTH and ITEMS decides which memory
+-- type should be used. Data output delay can be 1 CLK cycle if OUTPUT_REG
+-- is False or 2 CLK cycles if True. Output registers are enabled with
+-- RD_PIPE_EN together at the same time.
 
 entity SDP_MEMX is
    generic(
@@ -24,14 +24,14 @@ entity SDP_MEMX is
       -- FIFO depth, number of data words
       ITEMS               : natural := 16;
       -- Select memory implementation. Options:
-      -- "LUT"   - effective when ITEMS <= 64 (on Intel FPGA <= 32), 
-      -- "BRAM"  - effective when ITEMS  > 64 (on Intel FPGA  > 32), 
-      -- "URAM"  - effective when ITEMS*DATA_WIDTH >= 288000 
+      -- "LUT"   - effective when ITEMS <= 64 (on Intel FPGA <= 32),
+      -- "BRAM"  - effective when ITEMS  > 64 (on Intel FPGA  > 32),
+      -- "URAM"  - effective when ITEMS*DATA_WIDTH >= 288000
       --           and DATA_WIDTH >= 72 (URAM is only for Xilinx Ultrascale(+)),
       -- "AUTO"  - effective implementation dependent on ITEMS and DEVICE.
       RAM_TYPE            : string  := "AUTO";
       -- Defines what architecture is FIFO implemented on Options:
-      -- "ULTRASCALE" (Xilinx) 
+      -- "ULTRASCALE" (Xilinx)
       -- "7SERIES"    (Xilinx)
       -- "ARRIA10"    (Intel)
       -- "STRATIX10"  (Intel)
@@ -66,36 +66,36 @@ architecture behavioral of SDP_MEMX is
 
    -- Set of 2 data output registers used with LUT memory impementation.
    -- (These registers are built in BRAM memory implementation.)
-   signal lut_mem_reg      : std_logic_vector(DATA_WIDTH-1 downto 0); 
+   signal lut_mem_reg      : std_logic_vector(DATA_WIDTH-1 downto 0);
    signal lut_mem_out      : std_logic_vector(DATA_WIDTH-1 downto 0);
- 
+
    -- This function is the AUTO mode of RAM_TYPE. If RAM_TYPE is specified,
    -- specific RAM_TYPE will be used. If AUTO is selected, it will choose the
    -- best implementation according to the size of the memory and plaform used.
    -- If the DEVICE and ITEMS don't fit, BRAM will be used defaultly.
 
-   function auto_ram_type(DATA_WIDTH,ITEMS:natural; RAM_TYPE,DEVICE:string) 
+   function auto_ram_type(DATA_WIDTH,ITEMS:natural; RAM_TYPE,DEVICE:string)
                            return string is
    begin
-      if (RAM_TYPE = "LUT") then 
+      if (RAM_TYPE = "LUT") then
          return "LUT";
-      elsif (RAM_TYPE = "BRAM") then 
+      elsif (RAM_TYPE = "BRAM") then
          return "BRAM";
-      elsif (RAM_TYPE = "URAM" AND DEVICE = "ULTRASCALE") then 
+      elsif (RAM_TYPE = "URAM" AND DEVICE = "ULTRASCALE") then
          return "URAM";
       elsif (RAM_TYPE = "AUTO") then
-         if (DEVICE = "ULTRASCALE" OR DEVICE = "7SERIES") then 
-            if (ITEMS <= 64) then 
+         if (DEVICE = "ULTRASCALE" OR DEVICE = "7SERIES") then
+            if (ITEMS <= 64) then
                return "LUT";
-            elsif ((ITEMS * DATA_WIDTH) >= 288000 AND DATA_WIDTH >= 72 AND DEVICE = "ULTRASCALE") then 
+            elsif ((ITEMS * DATA_WIDTH) >= 288000 AND DATA_WIDTH >= 72 AND DEVICE = "ULTRASCALE") then
                return "URAM";
-            else 
+            else
                return "BRAM";
             end if;
-         elsif (DEVICE = "ARRIA10" OR DEVICE = "STRATIX10" OR DEVICE = "AGILEX") then 
-            if (ITEMS <= 32) then 
+         elsif (DEVICE = "ARRIA10" OR DEVICE = "STRATIX10" OR DEVICE = "AGILEX") then
+            if (ITEMS <= 32) then
                return "LUT";
-            else 
+            else
                return "BRAM";
             end if;
          else
@@ -103,7 +103,7 @@ architecture behavioral of SDP_MEMX is
             return "BRAM";
          end if;
       else
-         report "Wrong RAM_TYPE settings. BRAM memory used!";  
+         report "Wrong RAM_TYPE settings. BRAM memory used!";
          return "BRAM";
       end if;
    end function;
@@ -113,8 +113,8 @@ begin
    -- -------------------------------------------------------------------------
    --                   BRAM MEMOMRY GENERATION
    -- -------------------------------------------------------------------------
-   
-   bram_g : if auto_ram_type(DATA_WIDTH,ITEMS,RAM_TYPE,DEVICE) = "BRAM"  generate 
+
+   bram_g : if auto_ram_type(DATA_WIDTH,ITEMS,RAM_TYPE,DEVICE) = "BRAM"  generate
       bram_i : entity work.SDP_BRAM_BEHAV
          generic map(
             DATA_WIDTH  => DATA_WIDTH,
@@ -130,8 +130,8 @@ begin
             --READ INTERFACE
             RD_CLK      => CLK,           -- Input and output CLKs are same
             RD_RST      => RESET,
-            RD_CE       => RD_PIPE_EN,   
-            RD_REG_CE   => RD_PIPE_EN,     
+            RD_CE       => RD_PIPE_EN,
+            RD_REG_CE   => RD_PIPE_EN,
             RD_ADDR     => RD_ADDR,
             RD_EN       => RD_PIPE_EN,
             RD_DOUT     => RD_DATA,
@@ -142,7 +142,7 @@ begin
    -- -------------------------------------------------------------------------
    --                   LUT MEMEORY GENERATION
    -- -------------------------------------------------------------------------
-   
+
    logic_g : if auto_ram_type(DATA_WIDTH,ITEMS,RAM_TYPE,DEVICE) = "LUT" generate
       sdp_lutram_i : entity work.GEN_LUTRAM
       generic map (

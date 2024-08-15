@@ -21,7 +21,7 @@ package test_pkg;
     parameter REGION_SIZE    = 8;
     parameter BLOCK_SIZE     = 8;
     parameter ITEM_WIDTH     = 8;
-    
+
     parameter OUTPUT_REG     = 1;
     parameter CNT_WIDTH      = 32;
     parameter AUTO_RESET     = 1;

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2020 CESNET z. s. p. o.
- * SPDX-License-Identifier: BSD-3-Clause 
+ * SPDX-License-Identifier: BSD-3-Clause
 */
 
 ///////////////////////////////////////////////////
@@ -39,8 +39,8 @@ class ifg_config_setup_slow extends ifg_config_setup;
     };
 
     function void post_randomize();
-        this.rand_count   = rand_rand_count; 
-        this.ifg_enabled  = 90; 
+        this.rand_count   = rand_rand_count;
+        this.ifg_enabled  = 90;
         this.ifg_disabled = 10;
         this.ifg_low      = 0;
         this.ifg_high     = 60;
@@ -60,8 +60,8 @@ class ifg_config_setup_fast extends ifg_config_setup;
     };
 
     function void post_randomize();
-        this.rand_count   = rand_rand_count; 
-        this.ifg_enabled  = 0; 
+        this.rand_count   = rand_rand_count;
+        this.ifg_enabled  = 0;
         this.ifg_disabled = 90;
         this.ifg_low      = 0;
         this.ifg_high     = 0;
@@ -116,7 +116,7 @@ endclass
 //rand medium
 class ifg_config_setup_rand_medium extends ifg_config_setup_rand;
     function new();
-        this.ifg_enabled_min  = 30;    
+        this.ifg_enabled_min  = 30;
         this.ifg_enabled_max  = 50;
         this.ifg_disabled_min = 30;
         this.ifg_disabled_max = 70;
@@ -130,7 +130,7 @@ endclass
 //rand slow
 class ifg_config_setup_rand_slow extends ifg_config_setup_rand;
     function new();
-        this.ifg_enabled_min  = 80;    
+        this.ifg_enabled_min  = 80;
         this.ifg_enabled_max  = 100;
         this.ifg_disabled_min = 0;
         this.ifg_disabled_max = 20;
@@ -144,7 +144,7 @@ endclass
 //rand fast
 class ifg_config_setup_rand_fast extends ifg_config_setup_rand;
     function new();
-        this.ifg_enabled_min  = 0;    
+        this.ifg_enabled_min  = 0;
         this.ifg_enabled_max  = 30;
         this.ifg_disabled_min = 60;
         this.ifg_disabled_max = 90;
@@ -158,7 +158,7 @@ endclass
 //rand long spaces
 class ifg_config_setup_rand_long_spaces extends ifg_config_setup_rand;
     function new();
-        this.ifg_enabled_min  = 0;    
+        this.ifg_enabled_min  = 0;
         this.ifg_enabled_max  = 10;
         this.ifg_disabled_min = 90;
         this.ifg_disabled_max = 100;
@@ -175,10 +175,10 @@ endclass
 // library randomly pick some of sequence and run them
 class ifg_config_setup_lib extends ifg_config_setup;
     typedef enum {IFG_SLOW, IFG_FAST, IFG_RAND_MEDIUM, IFG_RAND_SLOW, IFG_RAND_FAST, IFG_RAND_LONG_SPACES} ifg_config_type;
-    
-    rand ifg_config_type ifg_type; 
-    ifg_config_setup ifg[ifg_config_type]; 
-    
+
+    rand ifg_config_type ifg_type;
+    ifg_config_setup ifg[ifg_config_type];
+
     //distribution parameters
 
     int unsigned dist_slow = 7;
@@ -195,7 +195,7 @@ class ifg_config_setup_lib extends ifg_config_setup;
         ifg[IFG_RAND_SLOW]   = ifg_config_setup_rand_slow::new();
         ifg[IFG_RAND_FAST]   = ifg_config_setup_rand_fast::new();
         ifg[IFG_RAND_LONG_SPACES] = ifg_config_setup_rand_long_spaces::new();
-    endfunction 
+    endfunction
 
     constraint c1{
         ifg_type dist {IFG_SLOW :/ dist_slow,  IFG_FAST :/ dist_fast, IFG_RAND_MEDIUM :/ dist_rand_medium,

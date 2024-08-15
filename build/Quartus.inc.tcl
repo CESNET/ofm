@@ -298,7 +298,7 @@ proc SynthesizeDesignSetup {synth_flags} {
         exec $SYNTH_FLAGS(SCRIPT_AFTER_IP_GEN) $FIRMWARE_BASE
     }
 
-    # Quartus TLG stage, only for Quartus Prime Pro 21.2 and newer 
+    # Quartus TLG stage, only for Quartus Prime Pro 21.2 and newer
     if { [info exist SYNTH_FLAGS(QUARTUS_TLG)] } {
         PrintLabel "Support-Logic Generation"
         qexec "quartus_tlg $SYNTH_FLAGS(OUTPUT)"

@@ -43,7 +43,7 @@ class reg_counter extends uvm_reg;
 
         //Configure
         //rsvd.configure(  this, 8, 24, "RW", 0, 8'h00, 1, 1, 0);
-        //configure(uvm_reg parent, size, lsb_pos, access, volatile, reset, has_reset, is_rand, individually_accessible); 
+        //configure(uvm_reg parent, size, lsb_pos, access, volatile, reset, has_reset, is_rand, individually_accessible);
         value.configure(this, 32, 0, "RO", 1, 'h0, 1, 0, 0);
     endfunction
 endclass
@@ -89,7 +89,7 @@ class reg_status extends uvm_reg;
 
         //Configure
         //rsvd.configure(  this, 8, 24, "RW", 0, 8'h00, 1, 1, 0);
-        //configure(uvm_reg parent, size, lsb_pos, access, volatile, reset, has_reset, is_rand, individually_accessible); 
+        //configure(uvm_reg parent, size, lsb_pos, access, volatile, reset, has_reset, is_rand, individually_accessible);
         enable    .configure(this, 1,  0, "RO", 1, 'h0, 1, 0, 0);
         crc_insert.configure(this, 1,  1, "RO", 1, 'h0, 1, 0, 0);
     endfunction

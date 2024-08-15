@@ -94,8 +94,8 @@ begin
 
     en_g: if CRDT_ENABLE generate
 
-        crdt_upda_masked <= CRDT_UPDATE and CRDT_MASK; 
-    
+        crdt_upda_masked <= CRDT_UPDATE and CRDT_MASK;
+
         -- =====================================================================
         --  CREDIT COUNTERS
         -- =====================================================================
@@ -220,8 +220,8 @@ begin
                 end if;
             end if;
         end process;
-    
-        assert (tlp_error_vld_reg /= '1') 
+
+        assert (tlp_error_vld_reg /= '1')
             report "CB_RTILE_CRDT_UP: Unsupported TLP type!"
             severity failure;
 

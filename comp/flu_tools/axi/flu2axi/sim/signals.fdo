@@ -3,7 +3,7 @@
 # Author: Ivan Bryndza <xbrynd00@stud.feec.vutbr.cz>
 #
 # SPDX-License-Identifier: BSD-3-Clause
-# 
+#
 # $Id$
 #
 
@@ -22,7 +22,7 @@ proc blk_FLU2AXI_RX { } {
     add_wave "-noupdate -hex -label RX_DST_RDY" /$TB_PATH/RX_DST_RDY
     add wave -divider  "Internal signal"
     add_wave "-noupdate -hex -label ext_sop_pos" /$FLU2AXI_PATH/ext_sop_pos
-    
+
     add wave -divider "In pipe signals"
     add_wave "-noupdate -hex -label in_pipe_data" /$FLU2AXI_PATH/in_pipe_data
     add_wave "-noupdate -hex -label in_pipe_sop_pos" /$FLU2AXI_PATH/in_pipe_sop_pos
@@ -38,7 +38,7 @@ proc blk_FLU2AXI_TX { } {
     global TB_PATH
     global FLU2AXI_PATH
 
-    add wave -divider "Out pipe signals" 
+    add wave -divider "Out pipe signals"
     add_wave "-noupdate -hex -label out_pipe_tdata" /$FLU2AXI_PATH/out_pipe_tdata
     add_wave "-noupdate -hex -label out_pipe_tkeep" /$FLU2AXI_PATH/out_pipe_tkeep
     add_wave "-noupdate -hex -label out_pipe_tlast" /$FLU2AXI_PATH/out_pipe_tlast

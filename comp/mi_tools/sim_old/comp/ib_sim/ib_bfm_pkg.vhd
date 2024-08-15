@@ -47,7 +47,7 @@ PACKAGE ib_bfm_pkg IS
     SrcAddr        : std_logic_vector(31 downto 0); -- Source Address
     DstAddr        : std_logic_vector(31 downto 0); -- Destination Address
     LocalAddr      : std_logic_vector(31 downto 0); -- Local Address (for GlobalTransactions)
-    GlobalAddr     : std_logic_vector(63 downto 0); -- Global Address (for GlobalTransactions) 
+    GlobalAddr     : std_logic_vector(63 downto 0); -- Global Address (for GlobalTransactions)
     Length         : integer;                       -- Length
     Tag            : integer;                       -- Tag
     Data           : DataType;                      -- Data
@@ -178,7 +178,7 @@ PACKAGE ib_bfm_pkg IS
     CONSTANT FileName : IN string;                        -- Filename from where are data writen (64 bit hexa values)
     SIGNAL   IbCmd    : INOUT IbCmdType                   -- Command record
     );
-  
+
   -----------------------------------------------------------------------
   -- Send Not Last Completition Transaction (op_done is not generated)
   PROCEDURE SendNotLastCompletition (
@@ -244,7 +244,7 @@ END ib_bfm_pkg;
 --                      Internal Bus BFM Package BODY
 -- ----------------------------------------------------------------------------
 PACKAGE BODY ib_bfm_pkg IS
-  
+
   -----------------------------------------------------------------------------
   -- Command shared variable
   SHARED  VARIABLE IbCmdV : IbCmdVType;
@@ -357,7 +357,7 @@ PACKAGE BODY ib_bfm_pkg IS
     CONSTANT FileName : IN string;                        -- Filename from where are data writen (64 bit hexa values)
     SIGNAL   IbCmd    : INOUT IbCmdType                   -- Command record
     ) IS
-  
+
     file     in_file      : text;
     variable in_line      : line;
     variable readFlag     : boolean;
@@ -379,7 +379,7 @@ PACKAGE BODY ib_bfm_pkg IS
       IbCmdV.Di.DstAddr  := DstAddr;
       IbCmdV.Di.Length   := len;
       IbCmdV.Di.Tag      := Tag;
-         
+
       file_open(in_file, FileName, READ_MODE);
       i:=0;
       while (i < len) loop
@@ -394,14 +394,14 @@ PACKAGE BODY ib_bfm_pkg IS
       WAIT ON IbCmd.ReqAck;
       IbCmd.Req <= '0';
       WAIT ON IbCmd.Ack;
-    
+
     else -- Split transactions
       file_open(in_file, FileName, READ_MODE);
       split_cnt := (len / MAX_WRITE_LENGTH);
       if (len > (MAX_WRITE_LENGTH*split_cnt)) then
         split_cnt := split_cnt+1;
       end if;
-  
+
       i:=0;
       WHILE (split_cnt > 0) loop
         if (len > MAX_WRITE_LENGTH) then
@@ -414,7 +414,7 @@ PACKAGE BODY ib_bfm_pkg IS
         IbCmdV.Di.DstAddr  := DstAddr+(i*MAX_WRITE_LENGTH);
         IbCmdV.Di.Length   := split_len;
         IbCmdV.Di.Tag      := Tag;
-        
+
         j:=0;
         while (j < split_len) loop
           readline(in_file, in_line);
@@ -472,7 +472,7 @@ PACKAGE BODY ib_bfm_pkg IS
     CONSTANT FileName : IN string;                        -- Filename from where are data writen (32 bit hexa values)
     SIGNAL   IbCmd    : INOUT IbCmdType                   -- Command record
     ) IS
-  
+
     file     in_file      : text;
     variable in_line      : line;
     variable data32a      : std_logic_vector(31 downto 0);
@@ -496,7 +496,7 @@ PACKAGE BODY ib_bfm_pkg IS
     IbCmdV.Di.DstAddr  := DstAddr;
     IbCmdV.Di.Length   := Len;
     IbCmdV.Di.Tag      := Tag;
-         
+
     file_open(in_file, FileName, READ_MODE);
     i:=0;
     while (i < len) loop
@@ -526,7 +526,7 @@ PACKAGE BODY ib_bfm_pkg IS
       if (len > (MAX_WRITE_LENGTH*split_cnt)) then
         split_cnt := split_cnt+1;
       end if;
-  
+
       i:=0;
       WHILE (split_cnt > 0) loop
         if (len > MAX_WRITE_LENGTH) then
@@ -539,7 +539,7 @@ PACKAGE BODY ib_bfm_pkg IS
         IbCmdV.Di.DstAddr  := DstAddr+(i*MAX_WRITE_LENGTH);
         IbCmdV.Di.Length   := split_len;
         IbCmdV.Di.Tag      := Tag;
-        
+
         j := 0;
 	while (j < split_len) loop
         readline(in_file, in_line);
@@ -567,7 +567,7 @@ PACKAGE BODY ib_bfm_pkg IS
         WAIT ON IbCmd.Ack;
       END LOOP;
       file_close(in_file);
-	   
+
     end if;
   END;
 
@@ -625,7 +625,7 @@ PACKAGE BODY ib_bfm_pkg IS
     IbCmdV.Di.DstAddr  := DstAddr;
     IbCmdV.Di.Length   := len;
     IbCmdV.Di.Tag      := Tag;
-    IbCmdV.Di.LastFlag := '1';     
+    IbCmdV.Di.LastFlag := '1';
     file_open(in_file, FileName, READ_MODE);
     i:=0;
     while (i < len) loop
@@ -642,7 +642,7 @@ PACKAGE BODY ib_bfm_pkg IS
     IbCmd.Req <= '0';
     WAIT ON IbCmd.Ack;
   END;
-  
+
   -----------------------------------------------------------------------
   -- Send Not Last Completition Transaction (op_done is not generated)
   PROCEDURE SendNotLastCompletition (
@@ -679,7 +679,7 @@ PACKAGE BODY ib_bfm_pkg IS
     CONSTANT FileName : IN string;                        -- Filename from where are data writen (64 bit hexa values)
     SIGNAL   IbCmd    : INOUT IbCmdType                   -- Command record
     ) IS
-  
+
     file     in_file      : text;
     variable in_line      : line;
     variable readFlag     : boolean;
@@ -697,7 +697,7 @@ PACKAGE BODY ib_bfm_pkg IS
     IbCmdV.Di.DstAddr  := DstAddr;
     IbCmdV.Di.Length   := len;
     IbCmdV.Di.Tag      := Tag;
-    IbCmdV.Di.LastFlag := '0';     
+    IbCmdV.Di.LastFlag := '0';
     file_open(in_file, FileName, READ_MODE);
     i:=0;
     while (i < len) loop

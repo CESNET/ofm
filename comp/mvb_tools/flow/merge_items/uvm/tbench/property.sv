@@ -1,4 +1,4 @@
-//-- property.sv: Properties for mvb bus 
+//-- property.sv: Properties for mvb bus
 // Copyright (C) 2023 CESNET z. s. p. o.
 // Author(s): Yaroslav Marushchenko <xmarus09@stud.fit.vutbr.cz>
 

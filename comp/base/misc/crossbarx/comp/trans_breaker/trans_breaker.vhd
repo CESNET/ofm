@@ -479,7 +479,7 @@ begin
                 INSTR_SRC_RDY <= (or trans_part0_vld);
 
             end if;
-          
+
             if (RESET='1') then
                 INSTR_SRC_RDY <= '0';
             end if;

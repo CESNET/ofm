@@ -9,7 +9,7 @@
 `define MVB2MFB_ENV_SV
 
 package uvm_mvb2mfb;
-    
+
     `include "uvm_macros.svh"
     import uvm_pkg::*;
 

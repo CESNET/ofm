@@ -23,19 +23,19 @@ def random_delays_config(items:int, params_dic:dict) -> (dict, int, int):
     cDelays = dict()
 
     mode = params_dic.get("mode", 1)
-        
+
     #parameters for whole invalid words
     wordDelayEnable_wt = params_dic.get("wordDelayEnable_wt", 10)
     wordDelayDisable_wt= params_dic.get("wordDelayDisable_wt", 90)
     wordDelayLow = params_dic.get("wordDelayLow", 0)
     wordDelayHigh = params_dic.get("wordDelayHigh", 50)
 
-    #parameters for whole invalid items        
+    #parameters for whole invalid items
     ivgEnable_wt = params_dic.get("ivgEnable_wt", 3)
     ivgDisable_wt = params_dic.get("ivgDisable_wt", 1)
     ivgLow = params_dic.get("ivgLow", 0)
     ivgHigh = params_dic.get("ivgHigh", 2*items-1)
-    
+
     cDelays["wordDelayEn_wt"] = (wordDelayDisable_wt, wordDelayEnable_wt)
     cDelays["wordDelay"] = range(wordDelayLow, wordDelayHigh)
     cDelays["ivgEn_wt"] = (ivgDisable_wt, ivgEnable_wt)

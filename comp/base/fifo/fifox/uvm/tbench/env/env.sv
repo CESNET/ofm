@@ -30,7 +30,7 @@ class env #(DATA_WIDTH, STATUS_WIDTH, ITEMS, ALMOST_FULL_OFFSET, ALMOST_EMPTY_OF
     function new(string name, uvm_component parent);
         super.new(name, parent);
 
-        // Creation of the coverages 
+        // Creation of the coverages
         m_cover_mvb_rx     = new("m_cover_mvb_rx"    );
         m_cover_mvb_tx     = new("m_cover_mvb_tx"    );
         m_cover_mvb_status = new("m_cover_mvb_status");
@@ -92,7 +92,7 @@ class env #(DATA_WIDTH, STATUS_WIDTH, ITEMS, ALMOST_FULL_OFFSET, ALMOST_EMPTY_OF
         m_reset.sync_connect(m_env_mvb_rx    .reset_sync);
         m_reset.sync_connect(m_env_mvb_tx    .reset_sync);
         m_reset.sync_connect(m_env_mvb_status.reset_sync);
-        
+
         // RX environments connection
         m_env_mvb_rx.analysis_port.connect(sc.analysis_imp_mvb_rx.analysis_export);
 

@@ -16,7 +16,7 @@
 
 
 class MiiMonitor #(int WIDTH = 0, int LANE_WIDTH = 8) extends Monitor;
-    
+
     // -- Private Class Attributes --
     localparam BYTES = WIDTH >> 3;
     localparam LANE_BYTES = LANE_WIDTH >> 3;

@@ -18,9 +18,9 @@ python -m pip install pylibfdt fdt
 python -m pip install scapy
 python -m pip install colorama
 python -m pip install pyyaml
-python -m pip install $PKG_PYNFB 
-python -m pip install $PKG_LIBNFBEXT_PYTHON 
-python -m pip install $PKG_COCOTBEXT_OFM 
+python -m pip install $PKG_PYNFB
+python -m pip install $PKG_LIBNFBEXT_PYTHON
+python -m pip install $PKG_COCOTBEXT_OFM
 
 echo ""
 echo "Now activate environment with:"

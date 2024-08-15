@@ -10,7 +10,7 @@
 -- TODO:
 --
 
-library IEEE;  
+library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.std_logic_arith.all;
 use IEEE.std_logic_unsigned.all;
@@ -18,10 +18,10 @@ use IEEE.std_logic_unsigned.all;
 use work.math_pack.all;
 
 -- ----------------------------------------------------------------------------
---                  ENTITY DECLARATION -- Barrel shifter                     -- 
+--                  ENTITY DECLARATION -- Barrel shifter                     --
 -- ----------------------------------------------------------------------------
 
-entity BARREL_SHIFTER is 
+entity BARREL_SHIFTER is
    generic (
       DATA_WIDTH  : integer := 64;
       -- set true to shift left, false to shift right
@@ -40,9 +40,9 @@ end BARREL_SHIFTER;
 -- ----------------------------------------------------------------------------
 
 architecture barrel_shifter_arch of BARREL_SHIFTER is
-      
+
 begin
-   
+
    multiplexors: for i in 0 to DATA_WIDTH/8-1 generate
       process (DATA_IN, SEL)
          variable sel_aux: integer;
@@ -52,8 +52,8 @@ begin
          else
             sel_aux := conv_integer('0'&(0-SEL));
          end if;
-         
-         DATA_OUT(i*8+7 downto i*8) <= 
+
+         DATA_OUT(i*8+7 downto i*8) <=
                      DATA_IN(
                       ((DATA_WIDTH/8-sel_aux+i) mod (DATA_WIDTH/8))*8 + 7
                      downto
@@ -61,5 +61,5 @@ begin
                      );
       end process;
    end generate;
-   
+
 end barrel_shifter_arch;

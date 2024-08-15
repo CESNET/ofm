@@ -83,7 +83,7 @@ SETTINGS = {
         "TX_CLK_PERIOD"     : "8ns",
     },
 
-    "_combinations_" : (  
+    "_combinations_" : (
     (), # Works the same as '("default",),' as the "default" is applied in every combination
     ("tx1024b",),
     ("tx512b",),

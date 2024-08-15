@@ -16,7 +16,7 @@
 <description>
    <p>
       Overview of FrameLink tools. See <a href="http://www.liberouter.org/vhdl_design/generated/HEAD_FL_TOOLS_hw.php">
-      HW section</a> for list of available tools. 
+      HW section</a> for list of available tools.
    </p>
 </description>
 
@@ -97,7 +97,7 @@
          <li><ref_comp ref="fl_monitor" tag_id="HEAD">Monitor</ref_comp>
             - logs FrameLink dataflow in a file. (simulation only) </li>
          <li><ref_comp ref="fl_watch" tag_id="HEAD">Watch</ref_comp>
-            - counts number of passed frames and guards the integrity of 
+            - counts number of passed frames and guards the integrity of
             FrameLink protocol</li>
          <li><ref_comp ref="fl_icmp_det" tag_id="HEAD">ICMP detacher</ref_comp>
             - discards every non ICMPv4 packets</li>
@@ -110,7 +110,7 @@
    <p>
       <ul>
          <li><ref_comp ref="fl_agregator" tag_id="HEAD">Agregator</ref_comp>
-            - agregated incoming frames into one large frame, which length is controlled 
+            - agregated incoming frames into one large frame, which length is controlled
             by time-out and maximal size</li>
          <li><ref_comp ref="fl_decoder" tag_id="HEAD">Decoder</ref_comp>
             - transforms FrameLink negatove logic into positive one and adds few useful signal.</li>

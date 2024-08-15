@@ -8,9 +8,9 @@
 --! $Id$
 --!
 
-library IEEE;	
-use IEEE.std_logic_1164.all;	
-use IEEE.std_logic_unsigned.all;	
+library IEEE;
+use IEEE.std_logic_1164.all;
+use IEEE.std_logic_unsigned.all;
 use IEEE.std_logic_arith.all;
 
 --! ----------------------------------------------------------------------------
@@ -38,17 +38,17 @@ architecture behavioral of testbench is
    uut : entity work.ASYNC_OPEN_LOOP
    generic map(
       IN_REG  => false,  --! For one register on input = true
-      TWO_REG => false   --! For two reg = true, for three reg = false  
-   ) 
+      TWO_REG => false   --! For two reg = true, for three reg = false
+   )
    port map(
-      --! A clock domain 
+      --! A clock domain
       ACLK     => aclk,         --! Source clock
-      ARST     => arst,         --! Source reset     
+      ARST     => arst,         --! Source reset
       ADATAIN  => data_in,      --! Data input
-      
-      --! B clock domain   
+
+      --! B clock domain
       BCLK     => bclk,         --! Target clock
-      BRST     => brst,         --! Target reset  
+      BRST     => brst,         --! Target reset
       BDATAOUT => data_out      --! Data output
    );
 
@@ -71,49 +71,49 @@ architecture behavioral of testbench is
    --! main testbench process
    sim : process
    begin
-   
+
       data_in <= '0';
-      
+
       arst <= '1';
       brst <= '1';
       wait for 20 ns;
       arst <= '0';
       brst <= '0';
-      
+
       wait until rising_edge(aclk);
       data_in <= '1';
-      
+
       wait until rising_edge(aclk);
       data_in <= '0';
-      
+
       wait until rising_edge(aclk);
       data_in <= '1';
-      
+
       wait until rising_edge(aclk);
       data_in <= '1';
-      
+
       wait until rising_edge(aclk);
       data_in <= '1';
-      
+
       wait until rising_edge(aclk);
       data_in <= '0';
-      
+
       wait until rising_edge(aclk);
       data_in <= '1';
-      
+
       wait until rising_edge(aclk);
       data_in <= '0';
-      
+
       wait until rising_edge(aclk);
-      data_in <= '0';    
-      
+      data_in <= '0';
+
       wait until rising_edge(aclk);
       data_in <= '1';
-      
+
       wait until rising_edge(aclk);
       data_in <= '0';
-   
-      wait;  
+
+      wait;
 
    end process;
 

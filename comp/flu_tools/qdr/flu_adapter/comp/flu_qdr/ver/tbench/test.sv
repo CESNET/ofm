@@ -1,7 +1,7 @@
 /*
  * test.sv: FLU_QDR automatic test
  * Copyright (C) 2014 CESNET
- * Author: Vaclav Hummel <xhumme00@stud.fit.vutbr.cz> 
+ * Author: Vaclav Hummel <xhumme00@stud.fit.vutbr.cz>
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -28,36 +28,36 @@ program TEST (
   iFrameLinkUTx.tb      TX,
   iFrameLinkUTx.monitor MONITOR
   );
-  
+
   // --------------------------------------------------------------------------
   //                       Variables declaration
   // --------------------------------------------------------------------------
- 
-  // AK MA KOMPONENTA VIAC DRIVEROV ALEBO MONITOROV TREBA ICH NA TOMTO 
-  // MIESTE DEKLAROVAT A V TASKU CREATEENVIRONMENT INSTANCIOVAT
-  
-  // Transaction
-  FrameLinkUTransaction    fluBlueprint; 
 
-  // Generator                            
+  // AK MA KOMPONENTA VIAC DRIVEROV ALEBO MONITOROV TREBA ICH NA TOMTO
+  // MIESTE DEKLAROVAT A V TASKU CREATEENVIRONMENT INSTANCIOVAT
+
+  // Transaction
+  FrameLinkUTransaction    fluBlueprint;
+
+  // Generator
   Generator               generator;
 
-  // Driver                               
-  FrameLinkUDriver #(DRIVER0_DATA_WIDTH, DRIVER0_EOP_WIDTH, DRIVER0_SOP_WIDTH)       fluDriver; 
+  // Driver
+  FrameLinkUDriver #(DRIVER0_DATA_WIDTH, DRIVER0_EOP_WIDTH, DRIVER0_SOP_WIDTH)       fluDriver;
 
-  // Monitor      
-  FrameLinkUMonitor #(DRIVER0_DATA_WIDTH, DRIVER0_EOP_WIDTH, DRIVER0_SOP_WIDTH)    fluMonitor; 
+  // Monitor
+  FrameLinkUMonitor #(DRIVER0_DATA_WIDTH, DRIVER0_EOP_WIDTH, DRIVER0_SOP_WIDTH)    fluMonitor;
 
-  // Responder     
+  // Responder
   FrameLinkUResponder #(DRIVER0_DATA_WIDTH, DRIVER0_EOP_WIDTH, DRIVER0_SOP_WIDTH)  fluResponder;
 
-  // Scoreboard  
-  Scoreboard              scoreboard; 
+  // Scoreboard
+  Scoreboard              scoreboard;
 
-  // Coverage                             
+  // Coverage
   //Coverage #(DATA_WIDTH,DREM_WIDTH,DATA_WIDTH,DREM_WIDTH)         coverage;
-  //FifoCoverage #(STATUS_WIDTH)                                    fifoCoverage; 
-  
+  //FifoCoverage #(STATUS_WIDTH)                                    fifoCoverage;
+
   // --------------------------------------------------------------------------
   //                       Creating Environment tasks
   // --------------------------------------------------------------------------
@@ -73,30 +73,30 @@ program TEST (
       fluBlueprint.packetSizeMax = packet_size_max;
       fluBlueprint.packetSizeMin = packet_size_min;
       generator.blueprint       = fluBlueprint;
-  endtask: createGeneratorEnvironment 
+  endtask: createGeneratorEnvironment
 
   // Create Test Environment
-  task createEnvironment();    
-    // Create driver    
+  task createEnvironment();
+    // Create driver
     fluDriver  = new ("Driver0", generator.transMbx, RX);
-      fluDriver.insideTxDelayEn_wt       = DRIVER0_INSIDE_DELAYEN_WT; 
+      fluDriver.insideTxDelayEn_wt       = DRIVER0_INSIDE_DELAYEN_WT;
       fluDriver.insideTxDelayDisable_wt  = DRIVER0_INSIDE_DELAYDIS_WT;
       fluDriver.insideTxDelayLow         = DRIVER0_INSIDE_DELAYLOW;
       fluDriver.insideTxDelayHigh        = DRIVER0_INSIDE_DELAYHIGH;
       fluDriver.startPositionLow         = DRIVER0_START_POS_LOW;
-      fluDriver.startPositionHigh        = DRIVER0_START_POS_HIGH; 
+      fluDriver.startPositionHigh        = DRIVER0_START_POS_HIGH;
     // Create monitor
     fluMonitor = new ("Monitor0", MONITOR);
     // Create responder
     fluResponder = new ("Responder0", TX);
-      fluResponder.rxDelayEn_wt            = MONITOR0_DELAYEN_WT; 
+      fluResponder.rxDelayEn_wt            = MONITOR0_DELAYEN_WT;
       fluResponder.rxDelayDisable_wt       = MONITOR0_DELAYDIS_WT;
       fluResponder.rxDelayLow              = MONITOR0_DELAYLOW;
       fluResponder.rxDelayHigh             = MONITOR0_DELAYHIGH;
-      fluResponder.insideRxDelayEn_wt      = MONITOR0_INSIDE_DELAYEN_WT; 
+      fluResponder.insideRxDelayEn_wt      = MONITOR0_INSIDE_DELAYEN_WT;
       fluResponder.insideRxDelayDisable_wt = MONITOR0_INSIDE_DELAYDIS_WT;
       fluResponder.insideRxDelayLow        = MONITOR0_INSIDE_DELAYLOW;
-      fluResponder.insideRxDelayHigh       = MONITOR0_INSIDE_DELAYHIGH;    
+      fluResponder.insideRxDelayHigh       = MONITOR0_INSIDE_DELAYHIGH;
 
     // Create scoreboard
     scoreboard = new;
@@ -114,13 +114,13 @@ program TEST (
   // --------------------------------------------------------------------------
   //                       Test auxilarity procedures
   // --------------------------------------------------------------------------
-  
+
   // --------------------------------------------------------------------------
   // Resets design
   task resetDesign();
     APP_RST=1;
     QDR_RST=1;                       // Init Reset variable
-    #APP_RST_TIME     
+    #APP_RST_TIME
     APP_RST = 0;
     QDR_RST = 0;                     // Deactivate reset after reset_time
   endtask : resetDesign
@@ -140,7 +140,7 @@ program TEST (
   // Disable test Environment
   task disableTestEnvironment();
      // Disable drivers
-     #(1000*APP_CLK_PERIOD); 
+     #(1000*APP_CLK_PERIOD);
      fluDriver.setDisabled();
      // Disable monitors
      #(1000*APP_CLK_PERIOD);
@@ -166,7 +166,7 @@ program TEST (
      // Pokud je generator aktivni nic nedelej
      while (generator.enabled)
        #(APP_CLK_PERIOD);
-     
+
      // Disable Test Enviroment
      disableTestEnvironment();
 
@@ -174,7 +174,7 @@ program TEST (
      scoreboard.display();
      //coverage.display();
   endtask: test1
-  
+
   // --------------------------------------------------------------------------
   // Test Case 2
   // Generate very short packets
@@ -200,7 +200,7 @@ program TEST (
      scoreboard.display();
      //coverage.display();
   endtask: test2
-  
+
   // --------------------------------------------------------------------------
   // Test Case 3
   // Classic length transactions, slow TX and fast RX  (full fifo)
@@ -210,18 +210,18 @@ program TEST (
     // create & enable environment
     createGeneratorEnvironment();
     createEnvironment();
-    
+
     // set delays
-    fluResponder.rxDelayEn_wt            = 5; 
+    fluResponder.rxDelayEn_wt            = 5;
     fluResponder.rxDelayDisable_wt       = 1;
     fluResponder.rxDelayLow              = 0;
     fluResponder.rxDelayHigh             = 10;
-    fluResponder.insideRxDelayEn_wt      = 5; 
+    fluResponder.insideRxDelayEn_wt      = 5;
     fluResponder.insideRxDelayDisable_wt = 1;
     fluResponder.insideRxDelayLow        = 0;
-    fluResponder.insideRxDelayHigh       = 10; 
-    
-    fluDriver.insideTxDelayEn_wt =0; 
+    fluResponder.insideRxDelayHigh       = 10;
+
+    fluDriver.insideTxDelayEn_wt =0;
 
     // Enable Test environment
     enableTestEnvironment();
@@ -250,10 +250,10 @@ program TEST (
     // create & enable environment
     createGeneratorEnvironment();
     createEnvironment();
-    
+
     // set zero delays
-    fluResponder.rxDelayEn_wt        = 0; 
-    fluResponder.insideRxDelayEn_wt  = 0; 
+    fluResponder.rxDelayEn_wt        = 0;
+    fluResponder.insideRxDelayEn_wt  = 0;
 
     // Enable Test environment
     enableTestEnvironment();
@@ -281,16 +281,16 @@ program TEST (
     // create & enable environment
     createGeneratorEnvironment();
     createEnvironment();
-    
+
     // set delays
-    fluResponder.rxDelayEn_wt            = 5; 
+    fluResponder.rxDelayEn_wt            = 5;
     fluResponder.rxDelayDisable_wt       = 1;
     fluResponder.rxDelayLow              = 0;
     fluResponder.rxDelayHigh             = 4;
-    fluResponder.insideRxDelayEn_wt      = 5; 
+    fluResponder.insideRxDelayEn_wt      = 5;
     fluResponder.insideRxDelayDisable_wt = 1;
     fluResponder.insideRxDelayLow        = 0;
-    fluResponder.insideRxDelayHigh       = 4;    
+    fluResponder.insideRxDelayHigh       = 4;
 
     // Enable Test environment
     enableTestEnvironment();
@@ -328,7 +328,7 @@ program TEST (
     test3();
     test4();
     test5();
-        
+
     // -------------------------------------
     // STOP TESTING
     // -------------------------------------

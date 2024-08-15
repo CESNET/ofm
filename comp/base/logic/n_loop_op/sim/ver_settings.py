@@ -19,17 +19,17 @@ SETTINGS = {
         "DATA_WIDTH"           : "16"             ,
         "ITEMS"                : "256"            ,
     },
-    "no_quick_reset" : { # 
+    "no_quick_reset" : { #
         "QUICK_RESET_EN"       : "false"          ,
     },
-    "single_port" : { # 
+    "single_port" : { #
         "READ_PORTS"           : "1"              ,
         "OPERATORS"            : "1"              ,
         "OPERATIONS"           : "1"              ,
     },
-    "reg_array" : { # 
+    "reg_array" : { #
         "USE_REG_ARRAY"        : "true"           ,
     },
-#    "" : { # 
+#    "" : { #
 #    },
 }

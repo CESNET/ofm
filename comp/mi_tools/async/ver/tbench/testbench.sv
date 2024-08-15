@@ -3,7 +3,7 @@
  * Author(s): Radek Iša <isa@cesnet.cz>
  * SPDX-License-Identifier: BSD-3-Clause
  */
- 
+
 // ----------------------------------------------------------------------------
 //                                 TESTBENCH
 // ----------------------------------------------------------------------------
@@ -17,11 +17,11 @@ module testbench;
 
   logic        MASTER_RESET;
   logic        SLAVE_RESET;
-  
+
   iMi #(MI_WIDTH, MI_WIDTH, MI_META_WIDTH)  MASTER    (MASTER_CLK, MASTER_RESET);
   iMi #(MI_WIDTH, MI_WIDTH, MI_META_WIDTH)  SLAVE     (SLAVE_CLK, SLAVE_RESET);
 
-  
+
   //-- Clock generation -------------------------------------------------------
   always #(MASTER_CLK_PERIOD/2)   MASTER_CLK = ~MASTER_CLK;
   always #(SLAVE_CLK_PERIOD/2)    SLAVE_CLK  = ~SLAVE_CLK;

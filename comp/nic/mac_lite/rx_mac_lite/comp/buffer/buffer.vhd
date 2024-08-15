@@ -100,8 +100,8 @@ architecture FULL of RX_MAC_LITE_BUFFER is
 
     signal fsm_pst              : fsm_t;
     signal fsm_nst              : fsm_t;
-    signal s_rx_sof_mod         : std_logic_vector(REGIONS-1 downto 0); 
-    signal s_rx_eof_mod         : std_logic_vector(REGIONS-1 downto 0); 
+    signal s_rx_sof_mod         : std_logic_vector(REGIONS-1 downto 0);
+    signal s_rx_eof_mod         : std_logic_vector(REGIONS-1 downto 0);
     signal s_rx_eof_pos_mod     : slv_array_t(REGIONS-1 downto 0)(max(1,log2(REGION_SIZE*BLOCK_SIZE))-1 downto 0);
     signal s_rx_src_rdy_mod     : std_logic;
     signal s_rx_force_drop      : std_logic_vector(REGIONS-1 downto 0);
@@ -147,7 +147,7 @@ architecture FULL of RX_MAC_LITE_BUFFER is
     attribute preserve_for_debug : boolean;
     attribute preserve_for_debug of s_mfb_error : signal is true;
     attribute preserve_for_debug of s_mfb_error_reg : signal is true;
-  
+
 begin
 
     -- -------------------------------------------------------------------------
@@ -274,7 +274,7 @@ begin
             s_whole_frame_reg    <= s_whole_frame;
         end if;
     end process;
-    
+
     process (RX_CLK)
     begin
         if (rising_edge(RX_CLK)) then
@@ -350,7 +350,7 @@ begin
 
         TX_CLK           => TX_CLK,
         TX_RESET         => TX_RESET,
-        
+
         TX_DATA          => TX_MFB_DATA,
         TX_SOF_POS       => TX_MFB_SOF_POS,
         TX_EOF_POS       => TX_MFB_EOF_POS,
@@ -373,8 +373,8 @@ begin
             end if;
         end if;
     end process;
- 
-    assert (s_dbuf_ovf_err_reg /= '1') 
+
+    assert (s_dbuf_ovf_err_reg /= '1')
        report "RX_MAC_LITE_BUFFER: Ilegal wite to full dbuf_i FIFO!"
        severity failure;
 
@@ -434,8 +434,8 @@ begin
             end if;
         end if;
     end process;
- 
-    assert (s_mbuf_ovf_err_reg /= '1') 
+
+    assert (s_mbuf_ovf_err_reg /= '1')
        report "RX_MAC_LITE_BUFFER: Ilegal wite to full mbuf_i FIFO!"
        severity failure;
 

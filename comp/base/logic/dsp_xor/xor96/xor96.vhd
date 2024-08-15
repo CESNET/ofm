@@ -1,7 +1,7 @@
 -- xor96.vhd:  Implemented XOR function in DSP48E2 slice.
 --             First half of 96-bit string is compared to the second half of the string.
 -- Copyright (C) 2018 CESNET
--- Author(s)   Petr Panák <xpanak04@stud.feec.vutbr.cz> 
+-- Author(s)   Petr Panák <xpanak04@stud.feec.vutbr.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --
@@ -95,7 +95,7 @@ begin
       ADREG => 0,                         -- Pipeline stages for pre-adder (0-1)
       ALUMODEREG => 0,                    -- Pipeline stages for ALUMODE (0-1)
       AREG => IREG,                       -- Pipeline stages for A (0-2)
-      BCASCREG => IREG,                   -- Number of pipeline stages between B/BCIN and BCOUT (0-2) 
+      BCASCREG => IREG,                   -- Number of pipeline stages between B/BCIN and BCOUT (0-2)
       BREG => IREG,                       -- Pipeline stages for B (0-2)
       CARRYINREG => 0,                    -- Pipeline stages for CARRYIN (0-1)
       CARRYINSELREG => 0,                 -- Pipeline stages for CARRYINSEL (0-1)
@@ -166,4 +166,4 @@ begin
       RSTP => RESET                    -- 1-bit input: Reset for OREG
    );
 
-end architecture;	
+end architecture;

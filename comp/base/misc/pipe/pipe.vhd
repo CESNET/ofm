@@ -14,7 +14,7 @@ use IEEE.std_logic_1164.all;
 
 -- ----------------------------------------------------------------------------
 --               ENTITY DECLARATION -- Internal Bus Pipeline                 --
--- ---------------------------------------------------------------------------- 
+-- ----------------------------------------------------------------------------
 
 entity PIPE is
    generic(
@@ -39,7 +39,7 @@ entity PIPE is
       RESET_BY_INIT : boolean := false;
 
       DEVICE        : string  := "7SERIES"
-   );   
+   );
    port(
       -- =================
       -- Common interface
@@ -48,7 +48,7 @@ entity PIPE is
       CLK           : in std_logic;
       -- NOTE: also starts debug counters
       RESET         : in std_logic;
-      
+
       -- =================
       -- Input interface
       -- =================
@@ -56,7 +56,7 @@ entity PIPE is
       IN_DATA       : in  std_logic_vector(DATA_WIDTH-1 downto 0);
       IN_SRC_RDY    : in  std_logic;
       IN_DST_RDY    : out std_logic;
- 
+
       -- =================
       -- Output interface
       -- =================
@@ -64,7 +64,7 @@ entity PIPE is
       OUT_DATA      : out std_logic_vector(DATA_WIDTH-1 downto 0);
       OUT_SRC_RDY   : out std_logic;
       OUT_DST_RDY   : in  std_logic;
-      
+
       -- ===================
       -- Debuging interface
       -- ===================

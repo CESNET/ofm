@@ -31,7 +31,7 @@ port(
     -- =====================================================================
     --  Clock and Reset
     -- =====================================================================
-    
+
     CLK   : in  std_logic;
     RESET : in  std_logic;
 
@@ -79,7 +79,7 @@ begin
     int_cyc_reg_pr : process (CLK)
     begin
         if (rising_edge(CLK)) then
-                
+
             if (INTERVAL_SET='1') then
                 int_cyc_reg     <= unsigned(INTERVAL_CYCLES);
                 int_cyc_reg_vld <= '1';

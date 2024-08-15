@@ -16,15 +16,15 @@ set MOD "$MOD $ENTITY_BASE/dfifo_ent.vhd"
 
 # Global FrameLink package
 set PACKAGES "$PACKAGES $ENTITY_BASE/../../pkg/fl_pkg.vhd"
-      
+
 if { $ARCHGRP == "FULL" } {
       # Common entities to compress / decompress (S|E)O(P|F) signals
       set MOD "$MOD $COMPRESS_BASE/compress.vhd"
       set MOD "$MOD $COMPRESS_BASE/decompress_any.vhd"
 
-      set MOD "$MOD $COMPRESS_BASE/decompress.vhd" 
+      set MOD "$MOD $COMPRESS_BASE/decompress.vhd"
       # Deprecated
-      
+
       # Full architectures
       set MOD "$MOD $ENTITY_BASE/dfifo.vhd"
 
@@ -38,9 +38,9 @@ if { $ARCHGRP == "BRAM" } {
       set MOD "$MOD $COMPRESS_BASE/compress.vhd"
       set MOD "$MOD $COMPRESS_BASE/decompress_any.vhd"
 
-      set MOD "$MOD $COMPRESS_BASE/decompress.vhd" 
+      set MOD "$MOD $COMPRESS_BASE/decompress.vhd"
       # Deprecated
-      
+
       # Full architectures
       set MOD "$MOD $ENTITY_BASE/dfifo_bram.vhd"
 

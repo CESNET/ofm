@@ -79,7 +79,7 @@ class FrameLinkUTransaction extends Transaction;
       copy = tr;
    endfunction: copy
 
- 	
+
    /**
     * Compare transactions.
     * Compares the current value of the object instance with the current value

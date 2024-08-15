@@ -9,7 +9,7 @@
 #                       Signals of interfaces
 # -------------------------------------------------------------------
 proc mi {NAME INT PATH} {
-     add wave -divider "$NAME"      
+     add wave -divider "$NAME"
      add_wave "-noupdate  -hex -label MI_${NAME}_DWR"     $PATH/${INT}_DWR
      add_wave "-noupdate  -hex -label MI_${NAME}_ADDR"    $PATH/${INT}_ADDR
      add_wave "-noupdate  -label MI_${NAME}_RD"           $PATH/${INT}_RD

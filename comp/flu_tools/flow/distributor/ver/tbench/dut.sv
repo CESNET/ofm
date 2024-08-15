@@ -10,7 +10,7 @@
  * TODO:
  *
  */
- 
+
 // ----------------------------------------------------------------------------
 //                        Module declaration
 // ----------------------------------------------------------------------------
@@ -26,8 +26,8 @@ module DUT (
 
 // Signals for DUT conection
 wire [(PORTS*DATA_WIDTH)-1:0] tx_data;
-wire [(PORTS*SOP_POS_WIDTH)-1:0] tx_sop_pos; 
-wire [(PORTS*EOP_POS_WIDTH)-1:0] tx_eop_pos;   
+wire [(PORTS*SOP_POS_WIDTH)-1:0] tx_sop_pos;
+wire [(PORTS*EOP_POS_WIDTH)-1:0] tx_eop_pos;
 wire [PORTS-1:0] tx_sop;
 wire [PORTS-1:0] tx_eop;
 wire [PORTS-1:0] tx_src_rdy;
@@ -45,7 +45,7 @@ for (i=0; i<PORTS; i++) begin
   assign TX[i].SRC_RDY = tx_src_rdy[i];
   assign tx_dst_rdy[i] = TX[i].DST_RDY;
   end
-endgenerate 
+endgenerate
 
 // -------------------- Module body -------------------------------------------
 flu_distributor #(
@@ -58,7 +58,7 @@ flu_distributor #(
     // Common Interface
      .CLK               (CLK),
      .RESET             (RESET),
- 
+
     // Port 0
      .RX_DATA     (RX.DATA),
      .RX_SOP_POS  (RX.SOP_POS),
@@ -76,7 +76,7 @@ flu_distributor #(
      .TX_EOP      (tx_eop),
      .TX_SRC_RDY  (tx_src_rdy),
      .TX_DST_RDY  (tx_dst_rdy),
-     
+
      .INUM_MASK  (INUM.INUM_MASK),
      .INUM_READY (INUM.INUM_READY),
      .INUM_NEXT  (INUM.INUM_NEXT)

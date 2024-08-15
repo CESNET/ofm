@@ -44,9 +44,9 @@ entity HBM_TESTER_ADC is
         -- Generator conection control: 0 = USER <-> HBM, 1 = GEN <-> HBM
         DB_GEN_CONNECT   : out std_logic;
         DB_GEN_BL8_MODE  : out std_logic;
-        -- Generator run mode: "11" = RD and WR, 
-        --                     "10" = only RD, 
-        --                     "01" = only WR, 
+        -- Generator run mode: "11" = RD and WR,
+        --                     "10" = only RD,
+        --                     "01" = only WR,
         --                     "00" = no requests
         DB_GEN_RUN_MODE  : out std_logic_vector(1 downto 0);
         -- Generator control per pseudo-channel: 0 = stop, 1 = run

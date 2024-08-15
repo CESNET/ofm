@@ -1,8 +1,8 @@
-//-- input_fifo.sv: Convert to input transactions 
+//-- input_fifo.sv: Convert to input transactions
 //-- Copyright (C) 2023 CESNET z. s. p. o.
 //-- Author(s): Radek Iša  <isa@cesnet.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 
 class model_rc_input_fifo#(MEATA_WIDTH) extends uvm_common::fifo#(dma_header_rq);

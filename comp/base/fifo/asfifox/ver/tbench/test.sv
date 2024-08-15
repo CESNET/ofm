@@ -88,7 +88,7 @@ program TEST (
         disableTestEnvironment();
         scoreboard.display();
     endtask
-   
+
     task test2();
         $write("\n\n############ TEST CASE 2 ############\n\n");
         responder.wordDelayEnable_wt = 2;

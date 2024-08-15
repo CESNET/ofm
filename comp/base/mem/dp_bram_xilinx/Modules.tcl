@@ -14,4 +14,4 @@ set PACKAGES  "$PACKAGES $OFM_PATH/comp/base/pkg/math_pack.vhd"
 set PACKAGES  "$PACKAGES $ENTITY_BASE/dp_bram_xilinx_func.vhd"
 
 set MOD  "$MOD $ENTITY_BASE/dp_bram_xilinx_ent.vhd"
-set MOD  "$MOD $ENTITY_BASE/dp_bram_xilinx_arch.vhd"  
+set MOD  "$MOD $ENTITY_BASE/dp_bram_xilinx_arch.vhd"

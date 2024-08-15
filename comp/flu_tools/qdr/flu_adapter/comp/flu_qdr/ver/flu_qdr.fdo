@@ -1,6 +1,6 @@
 # flu_qdr.fdo: FLU_QDR Function simulation file
 # Copyright (C) 2014 CESNET
-# Author: Vaclav Hummel <xhumme00@stud.fit.vutbr.cz> 
+# Author: Vaclav Hummel <xhumme00@stud.fit.vutbr.cz>
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -9,7 +9,7 @@
 
 # For whole design testing
 set FIRMWARE_BASE         "../../../../../../../.."
-                                       
+
 set FLU_DUT_BASE           ".."
 set FLU_DUT_VER_BASE       "$FLU_DUT_BASE/ver"
 

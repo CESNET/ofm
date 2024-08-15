@@ -1,6 +1,6 @@
 -- pfifo_ent.vhd: Frame Link Unaliged protocol generic Packet Store-And-Forwad FIFO
 -- Copyright (C) 2012 CESNET
--- Author: Pavel Benacek <benacek@cesnet.cz> 
+-- Author: Pavel Benacek <benacek@cesnet.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --
@@ -37,12 +37,12 @@ entity FLU_PFIFO is
       DISABLE_ASFIFO : boolean := false;
       --! Number of items for clock domain crossing FIFO
       HFIFO_ITEMS    : integer := 64;
-      
-      --! Use the ASFIFO composed from BRAMs. If true, fill following 
+
+      --! Use the ASFIFO composed from BRAMs. If true, fill following
       --! two BRAM_* generics.
       BRAM_ASFIFO       : boolean := false;
       --! \brief Target FPGA type.
-      --! \description Supported values are "VIRTEX5", "VIRTEX6" or "7SERIES". 
+      --! \description Supported values are "VIRTEX5", "VIRTEX6" or "7SERIES".
       BRAM_DEVICE       : string := "7SERIES"
    );
    port(
@@ -65,7 +65,7 @@ entity FLU_PFIFO is
       RX_SRC_RDY    : in std_logic;
       RX_DST_RDY    : out std_logic;
       RX_STATUS     : out std_logic_vector(STATUS_WIDTH-1 downto 0);
-      
+
       -----------------------------------------------------
       --! \name Frame Link Unaligned output interface
       -----------------------------------------------------

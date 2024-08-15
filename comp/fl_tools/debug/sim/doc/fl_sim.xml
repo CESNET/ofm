@@ -27,9 +27,9 @@
 
 
     <description>
-        This FrameLink simulation component creates FrameLink dataflow 
+        This FrameLink simulation component creates FrameLink dataflow
         from hexa values in formated file. This component supports FrameLink
-	dataflow logging to a formated file. Data can be logged on both input and output FrameLink interfaces. Component suports FrameLink data bus width of 16, 32, 64 and 128 bits. 
+	dataflow logging to a formated file. Data can be logged on both input and output FrameLink interfaces. Component suports FrameLink data bus width of 16, 32, 64 and 128 bits.
     </description>
 
     <interface>
@@ -81,7 +81,7 @@
 	    <port name="RX_DST_RDY_N" dir="in" width="1">
 		    RX destination ready.
             </port>
-	    
+
             <divider>
                 TX FrameLink interface
             </divider>
@@ -117,7 +117,7 @@
 		    Send filename to component and indicate send/log.
             </port>
             <port name="STROBE" dir="in" width="1">
-                Filename is on CTRL port 
+                Filename is on CTRL port
             </port>
             <port name="BUSY" dir="out" width="1">
                 FL_SIM is busy. FrameLink dataflow generation/logging is in progres.
@@ -130,23 +130,23 @@
 
         <h1>Data alignment</h1>
         <p>
-            Little-endian byte order is used in this component. 
+            Little-endian byte order is used in this component.
         </p>
 
         <h1>FrameLink Simulation Component</h1>
         <p>
-          The size of internal FL FIFO is 32768 items. 
+          The size of internal FL FIFO is 32768 items.
         </p>
         <p>
          When you want to use FL_SIM component fl_sim_oper package must be included:
          </p>
-         <p> 
+         <p>
          <i>use work.fl_sim_oper.all; -- FrameLink Simulation Package</i>
         </p>
 
        <h2>FL_OP procedure for testbench</h2>
        <p>
-        This procedure must be placed to your testbench file. Using this procedure is 
+        This procedure must be placed to your testbench file. Using this procedure is
         necessery for corect function of FL_SIM.
 
        <pre>
@@ -184,7 +184,7 @@
        This code will start simulation. (Sending data from file to output FrameLink interface). The file contains neccesary amount of data for crating both data signal and control signals. The file format is described below.
       </p>
       <p>
-       <b><i> Convert file name to t_fl_ctrl and idicate that 
+       <b><i> Convert file name to t_fl_ctrl and idicate that
          data will be send</i></b>
        <pre>
         function fl_send32(file_name:string) return t_fl_ctrl;
@@ -194,7 +194,7 @@
       <p>
         This component can also logging data on both interfaces. The logged data are stored in the same file format as data for simulation, so they can be used for simulation. If you want to log data on input interface you have to set generic parameter RX_LOG_FILE to the name of file to which you want to save logged data.If you want to log data on output interface you have to set generic parameter TX_LOG_FILE to the name of file to which you want to save logged data. This generic parameters can be ommited, which means that no logging will be performed. The empty string means that no logging will be performed.
       </p>
-      
+
       <h2> Scheme </h2>
       <p>
         Block scheme of <obr src="./fig/fl_sim.fig">FL_SIM.</obr> <br/>

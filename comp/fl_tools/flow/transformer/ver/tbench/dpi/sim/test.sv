@@ -13,7 +13,7 @@
 import dpi_scoreboard_pkg::*;
 
 module testbench();
- 
+
   initial begin
       tFlTransactionInfo info;
       $display("\n\n");
@@ -27,7 +27,7 @@ module testbench();
         info.inst="Driver";
         assert(c_flPostTx(info,0,"1Prvni"));
         assert(c_flPostTx(info,0,"1Druhy"));
-        assert(c_flPostTx(info,1,"1Treti")); 
+        assert(c_flPostTx(info,1,"1Treti"));
 
         info.stream_id=0;
         info.scenario_id=0;
@@ -43,7 +43,7 @@ module testbench();
         info.inst="Driver";
         assert(c_flPostTx(info,0,"2Prvni"));
         assert(c_flPostTx(info,0,"2Druhy"));
-        assert(c_flPostTx(info,1,"2Treti")); 
+        assert(c_flPostTx(info,1,"2Treti"));
 
         info.stream_id=0;
         info.scenario_id=0;

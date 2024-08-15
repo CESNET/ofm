@@ -45,7 +45,7 @@ architecture behavioral of testbench is
    constant NFIFO2FIFO_BINDER : boolean := false;
 
    constant PACKET_BURSTS     : integer := 1000;
-   
+
    constant clkper            : time := 10 ns;
    constant reset_time        : time := 10 * clkper;
 
@@ -66,7 +66,7 @@ architecture behavioral of testbench is
    signal rx_data       : std_logic_vector
                            (TEST_INPUT_COUNT*TEST_INPUT_WIDTH-1 downto 0);
    signal rx_rem        : std_logic_vector
-                           (TEST_INPUT_COUNT*log2(TEST_INPUT_WIDTH/8)-1 
+                           (TEST_INPUT_COUNT*log2(TEST_INPUT_WIDTH/8)-1
                            downto 0);
    -- output FrameLink interface
    signal tx_sof_n      : std_logic;
@@ -76,7 +76,7 @@ architecture behavioral of testbench is
    signal tx_src_rdy_n  : std_logic;
    signal tx_dst_rdy_n  : std_logic;
    signal tx_data       : std_logic_vector(TEST_OUTPUT_WIDTH-1 downto 0);
-   signal tx_rem        : std_logic_vector(log2(TEST_OUTPUT_WIDTH/8)-1 
+   signal tx_rem        : std_logic_vector(log2(TEST_OUTPUT_WIDTH/8)-1
                                                                      downto 0);
 
    -- auxiliary signals for packet generator
@@ -87,7 +87,7 @@ architecture behavioral of testbench is
    signal tst_src_rdy_n : std_logic;
    signal tst_dst_rdy_n : std_logic;
    signal tst_data      : std_logic_vector(TEST_INPUT_WIDTH-1 downto 0);
-   signal tst_rem       : std_logic_vector(log2(TEST_INPUT_WIDTH/8)-1 
+   signal tst_rem       : std_logic_vector(log2(TEST_INPUT_WIDTH/8)-1
                                                                      downto 0);
 
    -- aliases to simplify testing
@@ -103,15 +103,15 @@ architecture behavioral of testbench is
    alias rx_src_rdy_n_1 : std_logic is rx_src_rdy_n(1);
    alias rx_dst_rdy_n_0 : std_logic is rx_dst_rdy_n(0);
    alias rx_dst_rdy_n_1 : std_logic is rx_dst_rdy_n(1);
-   alias rx_data_0      : std_logic_vector(TEST_INPUT_WIDTH-1 downto 0) 
+   alias rx_data_0      : std_logic_vector(TEST_INPUT_WIDTH-1 downto 0)
                           is rx_data(TEST_INPUT_WIDTH-1 downto 0);
-   alias rx_data_1      : std_logic_vector(TEST_INPUT_WIDTH-1 downto 0) 
-                          is rx_data(2*TEST_INPUT_WIDTH-1 downto 
+   alias rx_data_1      : std_logic_vector(TEST_INPUT_WIDTH-1 downto 0)
+                          is rx_data(2*TEST_INPUT_WIDTH-1 downto
                           TEST_INPUT_WIDTH);
-   alias rx_rem_0       : std_logic_vector(log2(TEST_INPUT_WIDTH/8)-1 downto 0) 
+   alias rx_rem_0       : std_logic_vector(log2(TEST_INPUT_WIDTH/8)-1 downto 0)
                           is rx_rem(log2(TEST_INPUT_WIDTH/8)-1 downto 0);
    alias rx_rem_1       : std_logic_vector(log2(TEST_INPUT_WIDTH/8)-1 downto 0)
-                          is rx_rem(2*log2(TEST_INPUT_WIDTH/8)-1 downto 
+                          is rx_rem(2*log2(TEST_INPUT_WIDTH/8)-1 downto
                           log2(TEST_INPUT_WIDTH/8));
 
    -- FL Sim signals
@@ -178,14 +178,14 @@ begin
       port map(
          CLK            => CLK,
          RESET          => RESET,
-   
+
          SOF_N(0)       => tx_sof_n,
          EOF_N(0)       => tx_eof_n,
          SOP_N(0)       => tx_sop_n,
          EOP_N(0)       => tx_eop_n,
          DST_RDY_N(0)   => tx_dst_rdy_n,
          SRC_RDY_N(0)   => tx_src_rdy_n,
-   
+
          FRAME_ERR(0)   => frame_err,
          MI             => mi32_watch
       );
@@ -269,7 +269,7 @@ tb : process
       fl_sim_strobe(ifc) <= '0';
    end send_packet;
 begin
-   
+
    wait for reset_time;
 
    -- generate first packet

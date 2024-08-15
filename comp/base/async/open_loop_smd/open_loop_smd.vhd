@@ -4,7 +4,7 @@
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 
-library ieee;	
+library ieee;
 use ieee.std_logic_1164.all;
 
     -- README:
@@ -17,7 +17,7 @@ entity ASYNC_OPEN_LOOP_SMD is
         DATA_WIDTH : natural := 8;
         -- Use asynchronous reset in flop-flops
         ASYNC_RST  : boolean := False
-    );    
+    );
     Port (
         -- Clock domain A (source)
         ACLK     : in  std_logic;
@@ -73,7 +73,7 @@ begin
         arst_sync  <= ARST;
         brst_sync  <= BRST;
     end generate;
-     
+
     -- input register of clock domain A
     process (ACLK, arst_async)
     begin
@@ -87,7 +87,7 @@ begin
             end if;
         end if;
     end process;
-   
+
     -- three synchronization registers of clock domain B
     process (BCLK, brst_async)
     begin
@@ -104,7 +104,7 @@ begin
                 sync1_reg <= input_reg;
                 sync2_reg <= sync1_reg;
                 sync3_reg <= sync2_reg;
-            end if;      
+            end if;
         end if;
     end process;
 

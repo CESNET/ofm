@@ -72,10 +72,10 @@ architecture FULL of testbench is
     signal reset             : std_logic;
 
     signal pcie_avst_rx_ready     : std_logic;
-    signal pcie_avst_rx_sop       : std_logic_vector(1 downto 0);  
-    signal pcie_avst_rx_eop       : std_logic_vector(1 downto 0);  
-    signal pcie_avst_rx_data      : std_logic_vector(511 downto 0);  
-    signal pcie_avst_rx_valid     : std_logic_vector(1 downto 0);  
+    signal pcie_avst_rx_sop       : std_logic_vector(1 downto 0);
+    signal pcie_avst_rx_eop       : std_logic_vector(1 downto 0);
+    signal pcie_avst_rx_data      : std_logic_vector(511 downto 0);
+    signal pcie_avst_rx_valid     : std_logic_vector(1 downto 0);
     signal pcie_avst_rx_empty     : std_logic_vector(5 downto 0);
     signal pcie_avst_rx_bar_range : std_logic_vector(5 downto 0);
 
@@ -109,9 +109,9 @@ architecture FULL of testbench is
     signal axi_cc_valid          : std_logic;
     signal axi_cc_ready          : std_logic;
 
-    signal pcie_avst_tx_sop   : std_logic_vector(1 downto 0);  
-    signal pcie_avst_tx_eop   : std_logic_vector(1 downto 0);  
-    signal pcie_avst_tx_data  : std_logic_vector(511 downto 0); 
+    signal pcie_avst_tx_sop   : std_logic_vector(1 downto 0);
+    signal pcie_avst_tx_eop   : std_logic_vector(1 downto 0);
+    signal pcie_avst_tx_data  : std_logic_vector(511 downto 0);
     signal pcie_avst_tx_valid : std_logic_vector(1 downto 0);
     signal pcie_avst_tx_err   : std_logic_vector(1 downto 0);
     signal pcie_avst_tx_ready : std_logic;
@@ -136,7 +136,7 @@ begin
 
     pcie_avst_tx_ready <= '1';
 
-    clk_gen : process 
+    clk_gen : process
     begin
         clk <= '1';
         wait for CLK_PERIOD / 2;
@@ -177,8 +177,8 @@ begin
         -- UP stream
         TX_AVST_DATA      => pcie_avst_tx_data,
         TX_AVST_SOP       => pcie_avst_tx_sop,
-        TX_AVST_EOP       => pcie_avst_tx_eop, 
-        TX_AVST_ERROR     => pcie_avst_tx_err, 
+        TX_AVST_EOP       => pcie_avst_tx_eop,
+        TX_AVST_ERROR     => pcie_avst_tx_err,
         TX_AVST_VALID     => pcie_avst_tx_valid,
         TX_AVST_READY     => pcie_avst_tx_ready,
         -- =====================================================================

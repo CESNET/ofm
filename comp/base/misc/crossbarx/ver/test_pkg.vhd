@@ -26,7 +26,7 @@ package test_pkg is
     constant SEED2 : natural := 555;
 
     constant TRANSACTIONS            : natural := 2048;
-    
+
     constant TRANS_LENGTH_MIN        : natural := 1;
     constant TRANS_LENGTH_MAX        : natural := 256;
 
@@ -89,7 +89,7 @@ package test_pkg is
 
     constant BUF_A_SECTION_COLS : natural := BUF_A_COLS/BUF_A_SECTIONS;
     constant BUF_B_SECTION_COLS : natural := BUF_B_COLS/BUF_B_SECTIONS;
-    
+
     type trans_t is record
         a_stream     : natural;
         a_section    : natural;

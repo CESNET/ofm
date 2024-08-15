@@ -3,7 +3,7 @@
 --! @file
 --! \brief Architecture of GPS synchronized timestamp unit
 --! \author Lukas Kekely <kekely@cesnet.cz>, Jakub Cabal <jakubcabal@gmail.com>
---! \date 2012 
+--! \date 2012
 --!
 --! @section License
 --!
@@ -22,7 +22,7 @@ use work.math_pack.all;
 
 --! \brief Architecture of GPS synchronized timestamp unit
 architecture BEHAVIORAL of TSU_GEN is
-  
+
    --! \name TSU core signals
    signal tsu_core_pps_n                : std_logic;
    signal tsu_core_drdy                 : std_logic;
@@ -40,15 +40,15 @@ architecture BEHAVIORAL of TSU_GEN is
    signal state_bits                    : std_logic_vector(31 downto 0);
    signal reg_src                       : std_logic_vector(31 downto 0);
    signal det_clk                       : std_logic;
-   signal mi_clk_ref_now                : std_logic;  
+   signal mi_clk_ref_now                : std_logic;
    signal mi_clk_ref_old                : std_logic;
    signal detect_pps_reg                : std_logic;
    signal detect_pps_reset              : std_logic_vector(3 downto 0);
    signal detect_pps_reset_zeros        : std_logic;
    signal sync_detect_pps_reset_zeros   : std_logic;
-   signal sig_clk_sel                   : std_logic_vector(max(CLK_SEL_WIDTH-1,0) downto 0); 
+   signal sig_clk_sel                   : std_logic_vector(max(CLK_SEL_WIDTH-1,0) downto 0);
    signal sig_pps_sel                   : std_logic_vector(max(PPS_SEL_WIDTH-1,0) downto 0);
-   signal sync_sig_pps_sel              : std_logic_vector(max(PPS_SEL_WIDTH-1,0) downto 0);   
+   signal sync_sig_pps_sel              : std_logic_vector(max(PPS_SEL_WIDTH-1,0) downto 0);
 
    --! \name CLK counters
    signal mi_clk_ref_cnt                : std_logic_vector(5 downto 0);
@@ -84,7 +84,7 @@ architecture BEHAVIORAL of TSU_GEN is
 
 begin
    --! \name
-   
+
    --! \brief Instance of core unit of whole timestamp unit
    --! \details There are registers for counting real-time inside.
    tsu_cv2_core_i : entity work.TSU_CV2_CORE
@@ -139,8 +139,8 @@ begin
    ts_format_convertor: entity work.tsu_convertor
    generic map(
       TS_MULT_SMART_DSP => TS_MULT_SMART_DSP,
-      TS_MULT_USE_DSP   => TS_MULT_USE_DSP     
-   )  
+      TS_MULT_USE_DSP   => TS_MULT_USE_DSP
+   )
    port map(
       CLK   => CLK,
       RESET => RESET,
@@ -168,15 +168,15 @@ begin
    clk_ref_reclock: entity work.ASYNC_OPEN_LOOP
    generic map(
       IN_REG  => false,    --! We do not use!
-      TWO_REG => false     
-   )  
+      TWO_REG => false
+   )
    port map(
       ACLK     => CLK,
       BCLK     => MI_CLK,
       ARST     => RESET,
       BRST     => MI_RESET,
-      ADATAIN  => clk_ref_cnt(3),                
-      BDATAOUT => mi_clk_ref_now 
+      ADATAIN  => clk_ref_cnt(3),
+      BDATAOUT => mi_clk_ref_now
    );
 
    --! OLD_REF_CLK Register
@@ -234,15 +234,15 @@ begin
    detect_reclock: entity work.ASYNC_OPEN_LOOP
    generic map(
       IN_REG  => false,    --! We do not use!
-      TWO_REG => false     
-   )  
+      TWO_REG => false
+   )
    port map(
       ACLK     => CLK,
       BCLK     => MI_CLK,
       ARST     => RESET,
       BRST     => MI_RESET,
-      ADATAIN  => detect_pps_reg,                
-      BDATAOUT => mi_detect_pps_reg1 
+      ADATAIN  => detect_pps_reg,
+      BDATAOUT => mi_detect_pps_reg1
    );
 
 -- ----------------------------------------------------------------------------
@@ -288,7 +288,7 @@ begin
       sync_sig_pps_sel <= "0";
    end generate;
    PPS_SEL <= sync_sig_pps_sel;
-   
+
    --! \brief Address register for mux to choose source CLK signal controlled by SW, SEL_CLK register
    clk_sel_gen : if CLK_SEL_WIDTH > 0 generate
       clk_mux_cntrl_reg : process(MI_CLK)
@@ -341,8 +341,8 @@ begin
    --! Synchronize detect_pps_reset_zeros to tsu clock domain
    detect_pps_reset_reclock: entity work.ASYNC_RESET
    generic map(
-      TWO_REG => false     
-   )  
+      TWO_REG => false
+   )
    port map(
       CLK        => CLK,
       ASYNC_RST  => detect_pps_reset_zeros,
@@ -376,7 +376,7 @@ begin
          end if;
       end if;
    end process;
-   
+
    --! Register MI.DRD (data output)
    reg_mi32_drd : process(MI_CLK)
    begin
@@ -384,7 +384,7 @@ begin
          MI_DRD <= mi_drd_mux;
       end if;
    end process;
-   
+
    mux_mi32_drd : process(CLK_FREQ,state_bits,reg_src,sig_pps_sel,sig_clk_sel,tsu_core_drd,
                           freq_drdy,detect_drdy,src_drdy,pps_mux_drdy,clk_mux_drdy)
    begin

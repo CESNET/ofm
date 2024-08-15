@@ -1,7 +1,7 @@
 /*
  * file       :  stats.sv
  * Copyright (C) 2021 CESNET z. s. p. o.
- * description: this class count statistics 
+ * description: this class count statistics
  * date       : 2021
  * author     : Radek Iša <isa@cesnet.cz>
  *

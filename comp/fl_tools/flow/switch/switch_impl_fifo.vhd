@@ -21,14 +21,14 @@ use work.math_pack.all;
 -- ----------------------------------------------------------------------------
 
 --* Implementation of switching logic with FIFO.
---* The implementation uses FL_DFIFO, that can discard the last frame that 
+--* The implementation uses FL_DFIFO, that can discard the last frame that
 --* is stored there. This is useful to solve critical situations:
 --* <ul>
 --*   <li>The frame is too short, so it does not contain the FINUM.</li>
 --*   <li>The IFNUM is placed in a non-first FrameLink Part and at the end
 --*         of one of the preceding Part there was some bits (Bytes) discarded
 --*         by RX_REM signal (so the computation of the IFNUM position is wrong now.</li>
---*   <li>The IFNUM is located at the end of a FrameLink Part and it is 
+--*   <li>The IFNUM is located at the end of a FrameLink Part and it is
 --*         cutted by RX_REM. the IFNUM is incomplete and can not be used.</li>
 --*   <li>The extracted IFNUM disallows all TX interfaces, so the current frame
 --*         should be discarded.</li>
@@ -95,11 +95,11 @@ begin
    -- IFNUM is contained in the current word
    ifnum_comes    <= '1' when cnt_scan = WORD_OFFSET else '0';
 
-   fifo_discard   <= rx_reading and (frame_end_too_early 
-                                       or space_between_parts 
+   fifo_discard   <= rx_reading and (frame_end_too_early
+                                       or space_between_parts
                                        or ifnum_incomplete
                                        or ifnum_eq_zeros);
-   
+
    fifo_write_en_n   <= tx_out_reload;
    send_en_n         <= fifo_write_rdy_n;
    fifo_read_en_n    <= RX_SRC_RDY_N;
@@ -108,14 +108,14 @@ begin
    -- detecting the critical sitations
    frame_end_too_early  <= '1' when RX_EOF_N = '0' and next_is_ifnum = '0'    else '0';
    space_between_parts  <= '1' when RX_EOP_N = '0' and RX_REM < ONES_REM      else '0';
-   ifnum_incomplete     <= '1' when RX_EOP_N = '0' and next_is_ifnum = '1' 
+   ifnum_incomplete     <= '1' when RX_EOP_N = '0' and next_is_ifnum = '1'
                                     and (BITS_OFFSET + TX_COUNT)/8 < RX_REM   else '0';
    ifnum_eq_zeros       <= '1' when IFNUM = ZEROS_IFNUM and ifnum_incomplete = '0' else '0';
 
    -- reg_ifnum and cnt_scan ctrl
    reg_ifnum_ce   <= next_is_ifnum;
    reg_ifnum_clr  <= fifo_discard or RESET;
-   
+
    cnt_scan_ce    <= rx_reading;
    cnt_scan_clr   <= '1' when rx_reading = '1' and RX_EOF_N = '0' else '0';
 
@@ -160,12 +160,12 @@ begin
       DISCARD  => fifo_discard,
 
       -- Read interface
-      RX_DATA  => RX_DATA,      
+      RX_DATA  => RX_DATA,
       RX_REM   => RX_REM,
       RX_SOP_N => RX_SOP_N,
-      RX_EOP_N => RX_EOP_N,    
+      RX_EOP_N => RX_EOP_N,
       RX_SOF_N => RX_SOF_N,
-      RX_EOF_N => RX_EOF_N, 
+      RX_EOF_N => RX_EOF_N,
       RX_SRC_RDY_N   => fifo_read_en_n,
       RX_DST_RDY_N   => fifo_read_rdy_n,
 

@@ -11,8 +11,8 @@ use IEEE.numeric_std.all;
 use work.math_pack.all;
 use work.type_pack.all;
 
--- The purpose of this component is to generate auxiliary signals for each packet in the MFB word 
-entity FP_AUX_GEN is 
+-- The purpose of this component is to generate auxiliary signals for each packet in the MFB word
+entity FP_AUX_GEN is
     generic(
         MFB_REGIONS         : natural := 1;
         MFB_REGION_SIZE     : natural := 8;
@@ -39,14 +39,14 @@ entity FP_AUX_GEN is
         RX_MFB_SRC_RDY  : in  std_logic;
         RX_MFB_DST_RDY  : out std_logic;
 
-        -- TX MFB interface 
+        -- TX MFB interface
         TX_MFB_DATA     : out std_logic_vector(MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH-1 downto 0);
         TX_MFB_SRC_RDY  : out std_logic_vector(MFB_REGIONS downto 0);
-        -- Not used 
+        -- Not used
         TX_MFB_DST_RDY  : in  std_logic;
-        
+
         -- Auxiliary data for each packet:
-        -- Channel per Packet 
+        -- Channel per Packet
         TX_CHANNEL_BS   : out slv_array_t(MFB_REGIONS downto 0)(max(1, log2(RX_CHANNELS))-1 downto 0);
         -- Packet length per Packet
         TX_PKT_LNG      : out slv_array_t(MFB_REGIONS downto 0)(max(1, log2(RX_PKT_SIZE_MAX+1))-1 downto 0);
@@ -65,7 +65,7 @@ architecture FULL of FP_AUX_GEN is
     ------------------------------------------------------------
     --                   SIGNAL DECLARATION                   --
     ------------------------------------------------------------
-    -- Extract MVB data 
+    -- Extract MVB data
     signal rx_mfb_meta_arr          : slv_array_t(MFB_REGIONS - 1 downto 0)(META_WIDTH - 1 downto 0);
     signal rx_channel_s             : slv_array_t(MFB_REGIONS - 1 downto 0)(max(1, log2(RX_CHANNELS)) - 1 downto 0);
     signal rx_pkt_lng_s             : slv_array_t(MFB_REGIONS - 1 downto 0)(max(1, log2(RX_PKT_SIZE_MAX+1))-1 downto 0);
@@ -130,7 +130,7 @@ begin
     pkt_cont_reg_msk_p: process(all)
     begin
         if rising_edge(CLK) then
-            if RST = '1' then 
+            if RST = '1' then
                 rx_pkt_cont_reg_msk  <= '0';
             elsif (RX_MFB_SRC_RDY = '1') then
                 rx_pkt_cont_reg_msk  <= or (tx_dropper_pkt_cont);
@@ -194,7 +194,7 @@ begin
                 TX_EOF      => tx_dropper_eof(i),
                 TX_SRC_RDY  => tx_dropper_src_rdy(i),
                 TX_DST_RDY  => '1'
-        );        
+        );
     end generate;
 
     ------------------------------------------------------------
@@ -203,7 +203,7 @@ begin
     -- External register for last_vld
     channel_reg_p: process(all)
     begin
-        if rising_edge(CLK) then            
+        if rising_edge(CLK) then
             if RST = '1' then
                 lv_channel_per_bs(0)  <= (others => '0');
                 lv_vld_reg_in         <= '0';
@@ -225,18 +225,18 @@ begin
         port map(
             CLK             => CLK,
             RESET           => RST,
-        
+
             RX_DATA         => slv_array_ser(rx_channel_s),
             RX_VLD          => RX_MFB_SOF,
             RX_SRC_RDY      => RX_MFB_SRC_RDY,
             RX_DST_RDY      => open,
-        
+
             REG_IN_DATA     => lv_channel_per_bs(0),
             REG_IN_VLD      => lv_vld_reg_in,
             REG_OUT_DATA    => lv_data_reg_out,
             REG_OUT_VLD     => lv_vld_reg_out,
             REG_OUT_WR      => lv_wr_reg_out,
-        
+
             TX_DATA         => lv_tx_data,
             TX_VLD          => open,
             TX_PRESCAN_DATA => open,
@@ -303,7 +303,7 @@ begin
         );
     end generate;
 
-    -- Round up current packet length 
+    -- Round up current packet length
     process(all)
         variable pkt_len_rounded_v  : u_array_t(MFB_REGIONS - 1 downto 0)(log2(RX_PKT_SIZE_MAX+ 1)  - 1 downto 0);
     begin
@@ -343,7 +343,7 @@ begin
 
     -- SOF_POS per Packet
     tx_sof_pos_arr      <= slv_array_deser(mfb_sof_pos_reg, MFB_REGIONS);
-    TX_SOF_POS_BS(0)    <= (others => '0');    
+    TX_SOF_POS_BS(0)    <= (others => '0');
     sof_pos_per_bs_g: for i in 1 to MFB_REGIONS generate
         TX_SOF_POS_BS(i)    <= tx_sof_pos_arr(i - 1);
     end generate;

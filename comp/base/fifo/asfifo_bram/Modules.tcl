@@ -4,7 +4,7 @@
 #         Jakub Cabal    <jakubcabal@gmail.com>
 #
 # SPDX-License-Identifier: BSD-3-Clause
-# 
+#
 
 # Base directories
 set DP_BMEM_BASE    "$OFM_PATH/comp/base/mem/dp_bmem"

@@ -67,7 +67,7 @@ architecture FULL of MVB_REALIGN_EOF2SOF is
    signal accept_eof_reg           : std_logic_vector(ITEMS-1 downto 0);
    signal accept_eof_reg_en        : std_logic;
    signal accept_eof_reg_rst       : std_logic;
-   
+
 begin
 
 fake_gen: if ITEMS <= 1 generate
@@ -157,7 +157,7 @@ real_gen: if ITEMS > 1 generate
       for i in 0 to ITEMS-1 loop
          mux_sel_onehot(i) <= eof_vld_vector_first_one(order_var);
          if (mfb_sof_vld_mask(i) = '1') then
-            mux_out_vld(i)  <= or eof_vld_vector_first_one(order_var);   
+            mux_out_vld(i)  <= or eof_vld_vector_first_one(order_var);
             accept_last_sof <= or eof_vld_vector_first_one(order_var);
             accept_eof_var  := accept_eof_var or eof_vld_vector_first_one(order_var);
             order_var       := order_var + 1;
@@ -187,7 +187,7 @@ real_gen: if ITEMS > 1 generate
    -- bypass of data register is enable when was not valid of multiplexor output
    -- in last valid cycle
    data_reg_bypass_en <= not mux_out_vld_reg;
-   
+
    -- flag assert when was accepted (processed) all flags of EOF valid vector
    accept_all_eof <= nor (eof_vld_mask and not accept_eof);
 
@@ -227,7 +227,7 @@ real_gen: if ITEMS > 1 generate
             end if;
          end if;
       end process;
-        
+
       process (CLK)
       begin
          if (rising_edge(CLK)) then
@@ -238,12 +238,12 @@ real_gen: if ITEMS > 1 generate
          end if;
       end process;
    end generate;
-        
+
    out_reg_off_g : if not OUTPUT_REG generate
       TX_SRC_RDY <= or tx_vld_comb;
       TX_DATA    <= tx_data_comb;
       TX_VLD     <= tx_vld_comb;
    end generate;
 end generate;
-   
+
 end architecture;

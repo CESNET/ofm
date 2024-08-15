@@ -32,7 +32,7 @@ class ScoreboardDriverCbs extends DriverCbs;
       if (tr.data.size() > 3) begin
          sc_table.add(tr);
       end
-      
+
    endtask
 endclass
 

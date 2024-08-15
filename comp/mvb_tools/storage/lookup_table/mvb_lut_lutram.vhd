@@ -71,7 +71,7 @@ architecture FULL of MVB_LOOKUP_TABLE_LUTRAM is
 begin
 
     RX_MVB_DST_RDY <= TX_MVB_DST_RDY;
-    
+
     lram_wr_addr    <= SW_ADDR;
     lram_rd_addr(0) <= SW_ADDR;
 
@@ -139,7 +139,7 @@ begin
             SW_DOUT_VLD <= SW_READ;
             if (RESET = '1') then
                 SW_DOUT_VLD <= '0';
-            end if; 
+            end if;
         end if;
     end process;
 
@@ -153,10 +153,10 @@ begin
                     TX_MVB_LUT_DATA <= lram_rd_data(MVB_ITEMS downto 1);
                     TX_MVB_VLD      <= RX_MVB_VLD;
                     TX_MVB_SRC_RDY  <= RX_MVB_SRC_RDY;
-                end if; 
+                end if;
                 if (RESET = '1') then
                     TX_MVB_SRC_RDY <= '0';
-                end if; 
+                end if;
             end if;
         end process;
     else generate

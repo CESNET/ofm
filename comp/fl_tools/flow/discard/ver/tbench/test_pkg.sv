@@ -38,7 +38,7 @@ package test_pkg;
 
    // -- TESTBENCH PARAMS --
    parameter DREM_WIDTH = log2(DATA_WIDTH/8); // drem width
-   
+
    // -- CLOCKS AND RESETS --
    parameter CLK_PERIOD = 10ns;
    parameter RESET_TIME = 10*CLK_PERIOD;
@@ -51,29 +51,29 @@ package test_pkg;
    // -- DRIVER0 PARAMETERS --
     // FL data width
    parameter DRIVER0_DATA_WIDTH         = DATA_WIDTH;
-    // FL REM width 
+    // FL REM width
    parameter DRIVER0_DREM_WIDTH         = DREM_WIDTH;
-    // Delay enable/disable between transactions weight          
+    // Delay enable/disable between transactions weight
    parameter DRIVER0_DELAYEN_WT         = 0;
    parameter DRIVER0_DELAYDIS_WT        = 5;
-    // Delay between transactions limits                    
+    // Delay between transactions limits
    parameter DRIVER0_DELAYLOW           = 0;
    parameter DRIVER0_DELAYHIGH          = 10;
-    // Delay enable/disalbe inside transaction weight          
+    // Delay enable/disalbe inside transaction weight
    parameter DRIVER0_INSIDE_DELAYEN_WT  = 0;
    parameter DRIVER0_INSIDE_DELAYDIS_WT = 5;
-    // Delay inside transaction limits                    
+    // Delay inside transaction limits
    parameter DRIVER0_INSIDE_DELAYLOW    = 0;
    parameter DRIVER0_INSIDE_DELAYHIGH   = 10;
 
    // -- MONITOR0 PARAMETERS --
     // FL data width
    parameter MONITOR0_DATA_WIDTH         = DATA_WIDTH;
-    // FL REM width 
+    // FL REM width
    parameter MONITOR0_DREM_WIDTH         = DREM_WIDTH;
 
-   // -- MULTIPLEXOR PARAMETERS -- 
-    // Delay between multiplexing limits                    
+   // -- MULTIPLEXOR PARAMETERS --
+    // Delay between multiplexing limits
    parameter MULTIPLEXOR_MUXDELAYLOW     = 1;
    parameter MULTIPLEXOR_MUXDELAYHIGH    = 3;
 

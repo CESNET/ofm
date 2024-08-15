@@ -123,7 +123,7 @@ end if;
 
 -- Do main loop
 while true loop
-   
+
 wait until (IB_CLK'event and IB_CLK='1' and IB_IN.SRC_RDY_N='0' and IB_OUT.DST_RDY_N='0');
 
 -- HEAD 1 ---------------------------------------------------------
@@ -157,13 +157,13 @@ if (state = ST_HEAD1 and IB_IN.SOP_N='0') then
       assert FILE_NAME = "" report "Unknown Transaction Type" severity ERROR;
    end if;
    file_close(log_file);
- 
 
 
-   
+
+
 -- HEAD 2 ---------------------------------------------------------
 elsif (state = ST_HEAD2) then
-   
+
 
    if (FILE_NAME /= "") then
       file_open(log_file, FILE_NAME, APPEND_MODE);
@@ -228,7 +228,7 @@ elsif (state = ST_HEAD2) then
       hwrite(out_line, address2);
       writeline(log_file, out_line);
       write(out_line, str_null);
-      writeline(log_file, out_line);  
+      writeline(log_file, out_line);
 
    elsif (trans_type = C_IB_L2GW_TRANSACTION and FILE_NAME /= "") then
       address2 := IB_IN.DATA(63 downto 32);
@@ -264,7 +264,7 @@ elsif (state = ST_HEAD2) then
    end if;
    file_close(log_file);
 
--- DATA -----------------------------------------------------------     
+-- DATA -----------------------------------------------------------
 elsif (IB_IN.SRC_RDY_N='0') then
    data := IB_IN.DATA;
 
@@ -285,10 +285,10 @@ elsif (IB_IN.SRC_RDY_N='0') then
       state := ST_HEAD1;
    end if;
 
-   
+
 end if;
 
-end loop;  
+end loop;
 
 end process;
 

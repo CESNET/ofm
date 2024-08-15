@@ -43,7 +43,7 @@ architecture FULL of SUM_ONE is
 begin
 
    -- SUM ONE assert
-   assert (OUTPUT_WIDTH >= log2(INPUT_WIDTH+1)) 
+   assert (OUTPUT_WIDTH >= log2(INPUT_WIDTH+1))
       report "SUM_ONE: Output width must be equal log2(INPUT_WIDTH+1) or bigger!!!"
       severity failure;
 

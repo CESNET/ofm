@@ -26,7 +26,7 @@ architecture full of HINS_PLUS is
   signal sig_tx_src_rdy : std_logic;
   signal sig_tx_sop     : std_logic;
   signal valid_rx_sop   : std_logic;
-  signal valid_tx_sop   : std_logic;        
+  signal valid_tx_sop   : std_logic;
 begin
   main_hins : entity work.HINS
     generic map (
@@ -57,7 +57,7 @@ begin
   RX_DST_RDY <= sig_rx_dst_rdy;
   TX_SRC_RDY <= sig_tx_src_rdy;
   TX_SOP     <= sig_tx_sop;
-   
+
   TX_CHANNEL <= channel_reg when reg_vld='1' else RX_CHANNEL;
   channel_register : process(CLK)
   begin
@@ -79,6 +79,6 @@ begin
   end process;
   valid_rx_sop <= RX_SOP     and RX_SRC_RDY     and sig_rx_dst_rdy;
   valid_tx_sop <= sig_tx_sop and sig_tx_src_rdy and TX_DST_RDY;
-   
+
 end architecture;
 

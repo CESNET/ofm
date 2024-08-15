@@ -37,7 +37,7 @@ class ScoreboardGeneratorCbs;
         bit [DMA_DOWNHDR_WIDTH-1 : 0] dma_header;
         $cast(dma_tr,transaction);
         {<<{dma_header}} = dma_tr.header;
-        
+
         $write("SIZE: %d\n", dma_tr.size);
         $write("HDR: 0x%x\n", dma_header);
         $write("DATA (0x%x dwords):",(dma_tr.data.size/4));
@@ -57,7 +57,7 @@ class ScoreboardDriverCbs extends DriverCbs;
 
     virtual task pre_tx(ref Transaction transaction, string inst);
     endtask
-    
+
     virtual task post_tx(Transaction transaction, string inst);
         if (FULL_PRINT == TRUE) begin
            $write("\nRX transaction send from monitor %s\n", inst);
@@ -70,11 +70,11 @@ endclass
 
 class ScoreboardMonitorCbs extends MonitorCbs;
     TransactionTable #(1) sc_table;
-    
+
     function new (TransactionTable #(1) st);
         sc_table = st;
     endfunction
-    
+
     virtual task post_rx(Transaction transaction, string inst);
         bit status=0;
         sc_table.remove(transaction, status);

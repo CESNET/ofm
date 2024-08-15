@@ -27,7 +27,7 @@ entity fl_monitor is
       FL_WIDTH : integer;
       -- Monitored word width in bits
       WORD_WIDTH : integer;
-      -- Monitored word position - Counts the i'th word (with WORD_WIDTH 
+      -- Monitored word position - Counts the i'th word (with WORD_WIDTH
       -- width) starting from 0
       WORD_POS : integer
       -- Default data the component is checking for
@@ -50,7 +50,7 @@ entity fl_monitor is
       EOF_N     : in std_logic;
       SRC_RDY_N : in std_logic;
       -- This is actually signal from the component that is receiving data
-      DST_RDY_N : in std_logic; 
+      DST_RDY_N : in std_logic;
       DATA      : in std_logic_vector(FL_WIDTH - 1 downto 0);
       DREM      : in std_logic_vector(log2(FL_WIDTH/8) - 1 downto 0);
 

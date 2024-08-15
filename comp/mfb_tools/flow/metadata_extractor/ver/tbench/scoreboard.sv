@@ -25,7 +25,7 @@ class ScoreboardDriverCbs extends DriverCbs;
         sc_table = st;
         sc_mvb_table = mvb_st;
     endfunction
-    
+
     virtual task pre_tx(ref Transaction transaction, string inst);
         MfbTransaction #(MFB_ITEM_WIDTH,MFB_META_WIDTH) tr;
         MvbTransaction #(MFB_META_WIDTH) mvb_tr = new();
@@ -42,20 +42,20 @@ class ScoreboardDriverCbs extends DriverCbs;
         sc_table.add(tr);
         sc_mvb_table.add(mvb_tr);
     endtask
-    
+
     virtual task post_tx(Transaction transaction, string inst);
     endtask
 
 endclass
 
 class ScoreboardMonitorMfbCbs extends MonitorCbs;
-    
+
     TransactionTable #(0) sc_table;
 
     function new (TransactionTable #(0) st);
         this.sc_table = st;
     endfunction
-    
+
     virtual task post_rx(Transaction transaction, string inst);
         bit status=0;
         MfbTransaction #(MFB_ITEM_WIDTH,MFB_META_WIDTH) tr;
@@ -77,11 +77,11 @@ endclass
 class ScoreboardMonitorMvbCbs extends MonitorCbs;
 
     TransactionTable #(0) sc_mvb_table;
-    
+
     function new (TransactionTable #(0) mvb_st);
         this.sc_mvb_table = mvb_st;
     endfunction
-    
+
     virtual task post_rx(Transaction transaction, string inst);
         MvbTransaction #(MFB_META_WIDTH) mvb_tr;
 
@@ -126,5 +126,5 @@ class Scoreboard;
         scoreTable.display();
         mvb_scoreTable.display();
     endtask
-  
+
 endclass

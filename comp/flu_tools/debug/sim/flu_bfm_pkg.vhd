@@ -24,23 +24,23 @@ PACKAGE flu_bfm_pkg IS
    TYPE EndDriveType    IS (EOP, NOP);
    CONSTANT DataTypeLength : integer := 65535;
    TYPE Item IS RECORD
-      Data         : std_logic_vector(7 downto 0);   
+      Data         : std_logic_vector(7 downto 0);
       Space        : integer;
       StartControl :StartDriveType;
       EndControl   :EndDriveType;
    END RECORD;
 
    TYPE DataType IS ARRAY (0 TO DataTypeLength) of Item;
-  
+
    -- Operation parameters
    TYPE CmdTypeItem IS RECORD
       RDYDriver      : RDYSignalDriver;
       Length         : integer;                       -- Length
       Data           : DataType;                      -- Data
    END RECORD;
-  
+
    TYPE CmdType IS ARRAY (0 to 15) of CmdTypeItem;
-  
+
    -- Command REQ/ACK record
    TYPE fluCmdTypeItem IS
       RECORD
@@ -68,7 +68,7 @@ PACKAGE flu_bfm_pkg IS
    signal fluCmd_D : fluCmdTypeItem := ('0','Z','Z');
    signal fluCmd_E : fluCmdTypeItem := ('0','Z','Z');
    signal fluCmd_F : fluCmdTypeItem := ('0','Z','Z');
-	    
+
    ----------------------------------------------------------------------------
    -- BFM FUNCTIONS
    ----------------------------------------------------------------------------
@@ -82,9 +82,9 @@ PACKAGE flu_bfm_pkg IS
 
    -- convert character to upper case
    function to_upper(c:character) return character;
-  
-   -- convert hexa character to std_logic_vector 
-   procedure convert_character(data:inout std_logic_vector; -- output 4-bit number 
+
+   -- convert hexa character to std_logic_vector
+   procedure convert_character(data:inout std_logic_vector; -- output 4-bit number
                               c:character);  -- input hexa value in character
 
    -- converts a three-digit number from string into integer
@@ -97,14 +97,14 @@ PACKAGE flu_bfm_pkg IS
    procedure load_32(data:inout std_logic_vector; -- 32bit number
                      s:string;  -- input string
                      i:inout integer; -- current position in string
-                     size:integer;  -- size of string 
+                     size:integer;  -- size of string
                      count: inout integer); -- count of valid bytes in 32-bit number
-  
+
    -- read variable length string from input file
    procedure read_string(file in_file: TEXT;  --input file
                          out_string: out string;  --output string
-                         load_count: inout integer); --number of read characters 
-  
+                         load_count: inout integer); --number of read characters
+
    PROCEDURE SendWriteFile (
       CONSTANT FileName : IN string;               -- Filename from where are data writen
       CONSTANT RDYDriver: IN RDYSignalDriver;
@@ -134,8 +134,8 @@ PACKAGE BODY flu_bfm_pkg IS
    PROCEDURE WriteCommand (VARIABLE Cmd  : IN CmdTypeItem; CONSTANT FLUBFMID : IN integer) IS
    BEGIN
       Command(FLUBFMID) := Cmd;
-   END;  
-  
+   END;
+
    -- read variable length string from input file
    procedure read_string(file in_file: TEXT;out_string: out string; load_count: inout integer) is
       variable l:line;
@@ -152,9 +152,9 @@ PACKAGE BODY flu_bfm_pkg IS
             exit;
          end if;
          load_count:=load_count+1;
-      end loop;                
+      end loop;
    end read_string;
-  
+
    -- convert character to upper case
    function to_upper(c:character) return character is
       variable output:character;
@@ -172,7 +172,7 @@ PACKAGE BODY flu_bfm_pkg IS
    end;
 
 
-   -- convert hexa character to std_logic_vector 
+   -- convert hexa character to std_logic_vector
    procedure convert_character(data:inout std_logic_vector;c:character) is
       variable c_decoded:std_logic_vector(3 downto 0);
       variable lbound:integer;
@@ -201,7 +201,7 @@ PACKAGE BODY flu_bfm_pkg IS
    end convert_character;
 
    -- converts a three-digit number from string into integer
-   function to_integer(s: string) return integer is 
+   function to_integer(s: string) return integer is
       variable int100: integer;
       variable int10: integer;
       variable int1: integer;
@@ -264,7 +264,7 @@ PACKAGE BODY flu_bfm_pkg IS
          convert_character(data,s(i-1));
          i:=i+1;
       end if;
-   end load_32;  
+   end load_32;
 
    PROCEDURE SendWriteFile (
       CONSTANT FileName : IN string;                   -- Filename from where are data writen
@@ -282,18 +282,18 @@ PACKAGE BODY flu_bfm_pkg IS
       variable i           : integer;
       variable j           : integer;
       variable data        : std_logic_vector(31 downto 0);
-    
-   BEGIN    
+
+   BEGIN
       for i in 0 to DataTypeLength loop
          Command(FLUBFMID).Data(i).StartControl := NOP;
          Command(FLUBFMID).Data(i).EndControl := NOP;
       end loop;
       Command(FLUBFMID).Data(0).StartControl := SOP;
-    
+
       index := 0;
       file_open(file_status, input_file, FileName, READ_MODE);
       assert (file_status = OPEN_OK) report "File with data was not found!" severity ERROR;
-    
+
       while (not endfile(input_file)) loop
          read_string(input_file, s, size);
          i := 1;
@@ -306,9 +306,9 @@ PACKAGE BODY flu_bfm_pkg IS
                Command(FLUBFMID).Data(index - 1).EndControl := EOP;
             else
                Command(FLUBFMID).Data(index).EndControl := NOP;
-            end if;   
+            end if;
             Command(FLUBFMID).Data(index).StartControl := SOP;
-         
+
          elsif (s(i) = '-') then
 
          else
@@ -325,12 +325,12 @@ PACKAGE BODY flu_bfm_pkg IS
       file_close(input_file);
       Command(FLUBFMID).Length := index - 1;
       Command(FLUBFMID).RDYDriver := RDYDriver;
-    
+
       -- Req toggles each time we want the BFM to do a new check.
       fluCmd.Req <= '1';
       WAIT ON fluCmd.ReqAck;
       fluCmd.Req <= '0';
       WAIT UNTIL fluCmd.Ack = '1';
-    
+
    END SendWriteFile;
 END flu_bfm_pkg;

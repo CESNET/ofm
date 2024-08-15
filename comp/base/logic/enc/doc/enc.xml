@@ -12,7 +12,7 @@
 
 <description>
    <p>
-      This generic encoder should help us to improve readability and 
+      This generic encoder should help us to improve readability and
       reusability of our designs.
    </p>
 </description>
@@ -44,27 +44,27 @@
             <th>BlockRams (% of C6X BRAMs)</th>
          </tr>
          <tr>
-            <th>4b input</th> 
+            <th>4b input</th>
             <td>1 (0.0%)</td>
             <td>0 (0.0%)</td>
          </tr>
          <tr>
-            <th>8b input</th> 
+            <th>8b input</th>
             <td>3 (0.21%)</td>
             <td>0 (0.0%)</td>
          </tr>
          <tr>
-            <th>16b input</th> 
+            <th>16b input</th>
             <td>10 (0.71%)</td>
             <td>0 (0.0%)</td>
          </tr>
          <tr>
-            <th>32b input</th> 
+            <th>32b input</th>
             <td>25 (1.78%)</td>
             <td>0 (0.0%)</td>
          </tr>
       <nazev>Chip utilization</nazev>
-      </tab> 
+      </tab>
    </p>
 </body>
 

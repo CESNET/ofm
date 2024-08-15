@@ -5,7 +5,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 package test_pkg;
-   
+
     import math_pkg::*;
 
     parameter DEVICE = "ULTRASCALE";

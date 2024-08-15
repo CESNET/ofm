@@ -5,7 +5,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 package test_pkg;
-   
+
     import math_pkg::*;
     import sv_common_pkg::TRUE, sv_common_pkg::FALSE;
 
@@ -32,7 +32,7 @@ package test_pkg;
 
     parameter RESIZE_BUFFER   = 0;
     parameter METADATA_WIDTH  = 102;
-    
+
     parameter CRC_CHECK_EN    = 0;
     parameter MAC_CHECK_EN    = 0;
     parameter MAC_COUNT_MAX   = 16;
@@ -56,7 +56,7 @@ package test_pkg;
     parameter RESET_TIME    = 10*MI_CLK_PERIOD;
 
     // -- RFC2819 Counter addresses
-    //Use extended or base address space 
+    //Use extended or base address space
     //  * 1 = enabled
     //  * 0 = disabled (use output address space command)
     parameter USE_RFC2819_EXTENDED = 1;
@@ -78,7 +78,7 @@ package test_pkg;
         {32'h2C,RFC2819_BASE_ADDRESS + 32'h2C}, //Frames - length 256 to 511 (low)
         {32'h30,RFC2819_BASE_ADDRESS + 32'h30}, //Frames - length 512 to 1023 (low)
         {32'h34,RFC2819_BASE_ADDRESS + 32'h34}, //Frames - length 1024 to 1518 (low)
-                                            
+
         {32'h38,RFC2819_BASE_ADDRESS + 32'h38}, //CRC Error counters (high)
         {32'h3C,RFC2819_BASE_ADDRESS + 32'h3C}, //MTU error counters (high)
         {32'h40,RFC2819_BASE_ADDRESS + 32'h40}, //Minimal TU error (high)

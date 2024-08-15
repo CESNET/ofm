@@ -51,7 +51,7 @@ entity TX_MAC_LITE_CRC_INSERT is
         RX_MFB_DST_RDY     : out std_logic;
 
         -- =====================================================================
-        --  TX MFB STREAM 
+        --  TX MFB STREAM
         -- =====================================================================
         TX_MFB_DATA        : out std_logic_vector(MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH-1 downto 0);
         TX_MFB_SOF_POS     : out std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE))-1 downto 0);
@@ -96,7 +96,7 @@ architecture FULL of TX_MAC_LITE_CRC_INSERT is
 
     signal crc_byte_en             : std_logic_vector(MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE+4-1 downto 0);
     signal crc_byte_en_reg         : std_logic_vector(4-1 downto 0);
- 
+
     signal ci_mfb_data_plus_raw    : std_logic_vector(MFB_DATA_W+CRC_W-1 downto 0);
     signal ci_mfb_data_plus_masked : std_logic_vector(MFB_DATA_W+CRC_W-1 downto 0);
     signal ci_mfb_data_plus        : std_logic_vector(MFB_DATA_W+CRC_W-1 downto 0);
@@ -143,7 +143,7 @@ begin
     begin
         if rising_edge(CLK) then
             if (RESET = '1') then
-                reg0_mfb_src_rdy <= '0';   
+                reg0_mfb_src_rdy <= '0';
             elsif (RX_MFB_DST_RDY = '1') then
                 reg0_mfb_src_rdy <= RX_MFB_SRC_RDY;
             end if;
@@ -216,7 +216,7 @@ begin
         end if;
     end process;
 
-    assert (not crc_out_of_sync_dbg_reg) 
+    assert (not crc_out_of_sync_dbg_reg)
         report "TX_MAC_LITE_CRC_INSERT: CRC32 out of sync!"
         severity error;
 
@@ -340,7 +340,7 @@ begin
     begin
         if rising_edge(CLK) then
             if (RESET = '1') then
-                ci_mfb_eof_pos_over(0) <= '0';   
+                ci_mfb_eof_pos_over(0) <= '0';
             elsif (ci_mfb_dst_rdy = '1') then
                 ci_mfb_eof_pos_over(0) <= ci_mfb_eof_pos_over(MFB_REGIONS);
             end if;
@@ -370,7 +370,7 @@ begin
             if (RESET = '1') then
                 ci_inc_region(0) <= '0';
             elsif (ci_mfb_dst_rdy = '1') then
-                ci_inc_region(0) <= ci_inc_region(MFB_REGIONS);  
+                ci_inc_region(0) <= ci_inc_region(MFB_REGIONS);
             end if;
         end if;
     end process;
@@ -398,7 +398,7 @@ begin
     begin
         if rising_edge(CLK) then
             if (RESET = '1') then
-                TX_MFB_SRC_RDY <= '0';   
+                TX_MFB_SRC_RDY <= '0';
             elsif (ci_mfb_dst_rdy = '1') then
                 TX_MFB_SRC_RDY <= ci_mfb_src_rdy_new;
             end if;

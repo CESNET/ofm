@@ -8,5 +8,5 @@
 #
 
 
-create_clock -name in_clk  -period 5 [get_ports IN_CLK] 
-create_clock -name out_clk -period 8 [get_ports OUT_CLK] 
+create_clock -name in_clk  -period 5 [get_ports IN_CLK]
+create_clock -name out_clk -period 8 [get_ports OUT_CLK]

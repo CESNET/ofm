@@ -8,21 +8,21 @@
 
 proc blk_SH_FIFO { PARAM } {
    global SH_FIFO_PATH
-    
+
    # Relay interface
    if { $PARAM == "IFC" } {
       add wave -divider "SH FIFO"
       add_wave "-label din -hex" $SH_FIFO_PATH/din
       add_wave "-label we" $SH_FIFO_PATH/we
       add_wave "-label full" $SH_FIFO_PATH/full
-   
+
       add_wave "-label dout -hex" $SH_FIFO_PATH/dout
       add_wave "-label re" $SH_FIFO_PATH/re
       add_wave "-label empty" $SH_FIFO_PATH/empty
 
       add_wave "-uns -label status" $SH_FIFO_PATH/status
    }
-   
+
    # Internal signals
    if { $PARAM == "INT" } {
       add wave -divider "SH FIFO: Internal"

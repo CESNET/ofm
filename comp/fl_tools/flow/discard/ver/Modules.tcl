@@ -16,10 +16,10 @@ if { $ARCHGRP == "FULL" } {
       [ list "SV_FL_BASE"   $SV_FL_BASE   "FULL"] \
       [ list "SV_MI32_BASE" $SV_MI32_BASE "FULL"] \
    ]
-  
+
 
   set MOD "$MOD $ENTITY_BASE/tbench/sv_discard_stat_pkg.sv"
   set MOD "$MOD $ENTITY_BASE/tbench/test_pkg.sv"
   set MOD "$MOD $ENTITY_BASE/tbench/dut.sv"
-  set MOD "$MOD $ENTITY_BASE/tbench/test.sv"  
+  set MOD "$MOD $ENTITY_BASE/tbench/test.sv"
 }

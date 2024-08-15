@@ -8,10 +8,10 @@
   // -- Mi Monitor Class
   // --------------------------------------------------------------------------
   /* This class is responsible for creating transaction objects from Mi32
-   * interface signals. After a transaction is received it is sent by callback 
-   * to processing units (typicaly scoreboard). Unit must be enabled by 
+   * interface signals. After a transaction is received it is sent by callback
+   * to processing units (typicaly scoreboard). Unit must be enabled by
    * "setEnable()" function call. Monitoring can be stoped by "setDisable()"
-   * function call. You can receive your custom transaction by calling 
+   * function call. You can receive your custom transaction by calling
    * "receiveTransaction" function.
    */
 class MiMonitor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends sv_common_pkg::Monitor;
@@ -20,10 +20,10 @@ class MiMonitor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends sv_common_pkg:
 
     // -- Private Class Atributes --
     virtual iMi #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH).monitor    mi;
-    
+
     // -- Public Class Methods --
     // -- Constructor ---------------------------------------------------------
-    // Create monitor object 
+    // Create monitor object
     function new (string inst, virtual iMi #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH).monitor mi);
         super.new(inst);
         this.mi = mi;
@@ -78,4 +78,4 @@ class MiMonitor #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH = 0) extends sv_common_pkg:
             end
         end
     endtask
-endclass 
+endclass

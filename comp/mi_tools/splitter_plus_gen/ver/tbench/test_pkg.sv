@@ -27,7 +27,7 @@ package test_pkg;
     parameter ADDR_BASES = 10;
     parameter logic [ADDR_WIDTH-1:0] ADDR_BASE[ADDR_BASES] = {8'b00000000,8'b00011000,8'b00100000,8'b01000000,8'b01100000,8'b10000000,8'b10100000,8'b11000000,8'b11010000,8'b11100000};
     parameter int PORT_MAPPING[ADDR_BASES] = {0,1,2,3,4,5,6,7,0,0};
-    
+
     parameter DEVICE = "STRATIX10";
 
     parameter TRANSACTION_COUNT = 1000;

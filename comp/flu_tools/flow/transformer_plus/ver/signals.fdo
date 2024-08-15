@@ -1,6 +1,6 @@
 # signals.fdo : Include file with signals
 # Copyright (C) 2013 CESNET
-# Author: Lukas Kekely <kekely@cesnet.cz> 
+# Author: Lukas Kekely <kekely@cesnet.cz>
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -12,7 +12,7 @@
 #                       Signals of interfaces
 # -------------------------------------------------------------------
 proc rx {NAME PATH} {
-    add wave -divider "$NAME"      
+    add wave -divider "$NAME"
      add_wave "-noupdate  -hex -label RX_HEADER"       $PATH/RX_HEADER
      add_wave "-noupdate  -hex -label RX_CHANNEL"       $PATH/RX_CHANNEL
      add_wave "-noupdate  -hex -label RX_DATA"       $PATH/RX_DATA
@@ -25,7 +25,7 @@ proc rx {NAME PATH} {
 }
 
 proc tx {NAME PATH} {
-    add wave -divider "$NAME"      
+    add wave -divider "$NAME"
      add_wave "-noupdate  -hex -label TX_HEADER"       $PATH/TX_HEADER
      add_wave "-noupdate  -hex -label TX_CHANNEL"       $PATH/TX_CHANNEL
      add_wave "-noupdate  -hex -label TX_DATA"       $PATH/TX_DATA
@@ -34,9 +34,9 @@ proc tx {NAME PATH} {
      add_wave "-noupdate  -label TX_SOP"        $PATH/TX_SOP
      add_wave "-noupdate  -label TX_EOP"        $PATH/TX_EOP
      add_wave "-noupdate  -label TX_SRC_RDY"    $PATH/TX_SRC_RDY
-     add_wave "-noupdate  -label TX_DST_RDY"    $PATH/TX_DST_RDY 
+     add_wave "-noupdate  -label TX_DST_RDY"    $PATH/TX_DST_RDY
 }
 
 proc internal {NAME PATH} {
-    add wave -divider "$NAME"      
+    add wave -divider "$NAME"
 }

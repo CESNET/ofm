@@ -18,7 +18,7 @@ SETTINGS = {
         "MFB_ITEM_WIDTH"  : "32"                ,
         "CC_TUSER_WIDTH"  : "33"                ,
     },
-    "_combinations_" : (  
+    "_combinations_" : (
     (), # Works the same as '("default",),' as the "default" is applied in every combination
     ("axi_256b",),
     ),

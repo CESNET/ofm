@@ -4,33 +4,33 @@
 SCOREBOARD_DLL  = dpi_scoreboard_pkg
 
 ifeq ($(OS), Windows_NT)
-  CC=g++ 
-  LL=g++
-  INCLUDE=C:\Modeltech\include
-  LIB=C:\Modeltech\win32
-  LIBS=-lmtipli -lm
-  FLAGS=-c
-  DLL_FLAGS=-shared -Bsymbolic
-  DLL_SUFFIX=dll
-  ifeq ($(TERM),cygwin)
-    CC=$(WIN_GPLUSPLUS)
-    LL=$(WIN_GPLUSPLUS)
+	CC=g++
+	LL=g++
+	INCLUDE=C:\Modeltech\include
+	LIB=C:\Modeltech\win32
+	LIBS=-lmtipli -lm
+	FLAGS=-c
+	DLL_FLAGS=-shared -Bsymbolic
+	DLL_SUFFIX=dll
+	ifeq ($(TERM),cygwin)
+		CC=$(WIN_GPLUSPLUS)
+		LL=$(WIN_GPLUSPLUS)
 	QUOTE="
-  else
-  	QUOTE=
-  endif
+	else
+		QUOTE=
+	endif
 
 else # Linux
-  PLATFORM=`uname`
-  CC=g++
-  LL=ld
-  INCLUDE=/usr/local/fpga/modeltechdir/Modeltech62g/include
-  LIB=
-  LIBS=-lm
-  FLAGS=-c -fPIC
-  DLL_FLAGS=-shared -Bsymbolic -E --allow-shlib-undefined
-  DLL_SUFFIX=so
-  QUOTE="
+	PLATFORM=`uname`
+	CC=g++
+	LL=ld
+	INCLUDE=/usr/local/fpga/modeltechdir/Modeltech62g/include
+	LIB=
+	LIBS=-lm
+	FLAGS=-c -fPIC
+	DLL_FLAGS=-shared -Bsymbolic -E --allow-shlib-undefined
+	DLL_SUFFIX=so
+	QUOTE="
 endif
 
 
@@ -52,7 +52,7 @@ $(SCOREBOARD_DLL).h: $(SCOREBOARD_DLL).sv
 $(SCOREBOARD_DLL).$(DLL_SUFFIX): $(SCOREBOARD_DLL).o fl_transaction.o
 	$(LL) $(DLL_FLAGS) -o $@ $^ -L$(LIB) $(LIBS)
 
-$(SCOREBOARD_DLL).o: $(SCOREBOARD_DLL).h $(SCOREBOARD_DLL).c 
+$(SCOREBOARD_DLL).o: $(SCOREBOARD_DLL).h $(SCOREBOARD_DLL).c
 	$(CC) $(FLAGS) -I$(INCLUDE) $(SCOREBOARD_DLL).c
 
 fl_transaction.o: fl_transaction.h fl_transaction.cpp

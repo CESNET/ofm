@@ -277,7 +277,7 @@ void PrintHistItem(uint32_t data, double from, double to, int i, bool xml, bool 
             printf(XML_VALUE_3("value", "%u"),  data);
         printf(XML_END_3("item"));
     }
-    else 
+    else
         printf("        %10.2lf - %-10.2lf ... %-u\n", from, to, data);
 }
 /*
@@ -320,7 +320,7 @@ void PrintLinearHistogram(uint32_t *data, uint32_t width, double ammFreq, bool x
 {
     double xScale       = 1000.0 / ammFreq;
     uint32_t maxTicks   = pow(2, devConfig.lat_ticks_width);
-    double ticksStep    = maxTicks / width; 
+    double ticksStep    = maxTicks / width;
 
     size_t first = 0, last = width;
     //FindFirstLastNonZero(data, width, &first, &last);
@@ -346,7 +346,7 @@ void AMMProbeLoadData(struct AMMProbeData_s *data)
     uint32_t reg            = ReadReg(component, CTRL_OUT);
     data->errOcc            = ! ((reg >> TEST_SUCCESS) & 1);
     data->eccErrOcc         = (reg >> ECC_ERR) & 1;
-        
+
     reg                     =  ReadReg(component,  PROBE_CTRL);
     data->latencyToFirst    = (reg >> LATENCY_TO_FIRST   ) & 1;
     data->wrTicksOvf        = (reg >> WR_TICKS_OVF       ) & 1;
@@ -728,8 +728,8 @@ bool RunTest(struct TestParams_s *testParams)
         return false;
 
     // Set test parameters
-    WriteReg(component, ADDR_LIM, 
-        GetAddLim(testParams->burstCnt, 
+    WriteReg(component, ADDR_LIM,
+        GetAddLim(testParams->burstCnt,
         devConfig.amm_addr_width, testParams->addrLimScale));
     WriteReg(component, BURST_CNT, testParams->burstCnt);
     WriteReg_bit(component, PROBE_CTRL, LATENCY_TO_FIRST,   testParams->latencyToFirst);

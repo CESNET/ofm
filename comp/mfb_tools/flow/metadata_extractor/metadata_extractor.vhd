@@ -124,7 +124,7 @@ architecture FULL of METADATA_EXTRACTOR is
 
     signal shake_rx_src_rdy  : std_logic;
     signal shake_rx_dst_rdy  : std_logic;
-    
+
     signal shake_tx_data     : std_logic_vector(MVB_ITEMS*MFB_META_WIDTH-1 downto 0);
     signal shake_tx_vld      : std_logic_vector(MVB_ITEMS-1 downto 0);
     signal shake_tx_next     : std_logic_vector(MVB_ITEMS-1 downto 0);
@@ -169,17 +169,17 @@ begin
         port map(
             CLK        => CLK  ,
             RESET      => RESET,
-    
+
             RX_DATA    => RX_MFB_META     ,
             RX_VLD     => RX_MFB_XOF      ,
             RX_SRC_RDY => shake_rx_src_rdy,
             RX_DST_RDY => shake_rx_dst_rdy,
-    
+
             TX_DATA    => shake_tx_data,
             TX_VLD     => shake_tx_vld ,
             TX_NEXT    => shake_tx_next
         );
-    
+
         shake_tx_next    <= (others => shake_tx_dst_rdy);
         shake_tx_src_rdy <= (or shake_tx_vld);
     else generate

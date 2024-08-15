@@ -63,7 +63,7 @@ architecture cam_row_arch of cam_row is
    signal reg_result : std_logic := '0';
    signal match_result : std_logic;
    signal match_enable_reg : std_logic;
-   
+
 begin
 
 -- --------- Generating and maping cam_elements -------------------------------
@@ -139,7 +139,7 @@ begin
    logic_gen : if not USE_CARRY_CHAINS generate
       match_result <= match_enable_reg and and_reduce(muxcy_sel_reg);
    end generate;
-   
+
 -- register reg_result --------------------------------------------------------
    reg_resultp: process(CLK)
    begin
@@ -162,5 +162,5 @@ begin
       muxcy_sel_reg <= muxcy_sel;
       match_enable_reg <= MATCH_ENABLE;
    end generate;
-   
+
 end architecture cam_row_arch;

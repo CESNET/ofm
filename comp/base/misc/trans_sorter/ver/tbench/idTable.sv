@@ -2,7 +2,7 @@
 //-- Copyright (C) 2020 CESNET z. s. p. o.
 //-- Author(s): Tomáš Beneš <xbenes55@stud.fit.vutbr.cz>
 //--
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 // -- This class is designed to contain information about Ids. ----------------
 class IdTable;
@@ -22,11 +22,11 @@ class IdTable;
     //  The transaction with same ID as index was sent to component. Counter in idTable[index] was incresed.
     task addToCounter(int index);
         sem.get(1);
-        idTable[index].idCount+=1;   
+        idTable[index].idCount+=1;
         if(VERBOSE_LEVEL>1)begin
             $timeformat(-9, 3, " ns", 8);
-            $write("ID %1d is in the component %d times\nAnd status is %d %t\n",index,idTable[index].idCount,idTable[index].status,$time);    
-        end 
+            $write("ID %1d is in the component %d times\nAnd status is %d %t\n",index,idTable[index].idCount,idTable[index].status,$time);
+        end
         sem.put(1);
     endtask
 

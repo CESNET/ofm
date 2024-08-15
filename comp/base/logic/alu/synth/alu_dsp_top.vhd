@@ -42,11 +42,11 @@ entity ALU_DSP_TOP is
       --! Clock enable for output pipeline registers
       CE_OUT   : in  std_logic;
 
-      --! control alu 
+      --! control alu
       --! operators (A [operator] B):
       --!     "0000" -> ADD
       --!
-      --!     "0001" -> SUB (A - (B + CARRY_IN)) 
+      --!     "0001" -> SUB (A - (B + CARRY_IN))
       --!     (WARNING for SUB: when "DATA_WIDTH <= 48" or "DATA_WIDTH mod 48 = 0"
       --!      CARRY_OUT is inverted)
       --!
@@ -56,7 +56,7 @@ entity ALU_DSP_TOP is
       --!     "0101" -> NOR
       --!     "0110" -> XOR
       --!     "0111" -> XNOR
-      --! operators and negated data inputs:       
+      --! operators and negated data inputs:
       --!     "1000" -> B AND (NOT A)
       --!     "1001" -> (NOT B) ADD A
       --!     "1010" -> B OR (NOT A)
@@ -86,7 +86,7 @@ architecture V7_DSP_TOP of ALU_DSP_TOP is
    signal carry_in_D  : std_logic;
    signal carry_out_D : std_logic;
    signal p_D         : std_logic_vector((DATA_WIDTH - 1) downto 0);
- 
+
 begin
 
    uut : entity work.ALU_DSP(structural)
@@ -107,7 +107,7 @@ begin
       CARRY_OUT   => carry_out_D,
       P           => p_D
    );
-   
+
     -- input registers
    process(CLK)
    begin
@@ -141,7 +141,7 @@ begin
             P <= (others => '0');
          else
             CARRY_OUT <= carry_out_D;
-            P <= p_D; 
+            P <= p_D;
          end if;
       end if;
    end process;

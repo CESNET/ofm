@@ -27,7 +27,7 @@ SETTINGS = {
 	},
 
 	"_combinations_" : (
-	(), 
+	(),
 	("input_regs_dis",                                    				  ),
 	(                 "high_data_width",                  				  ),
 	("input_regs_dis","high_data_width",                  				  ),

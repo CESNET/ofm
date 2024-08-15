@@ -12,7 +12,7 @@
 // FrameLink Discard Stat Interface
 `include "discard_stat_ifc.sv"
 
-package sv_discard_stat_pkg; 
+package sv_discard_stat_pkg;
 
   import sv_common_pkg::*; // Import SV common classes
   import sv_fl_pkg::*; // Import SV FrameLink classes

@@ -25,7 +25,7 @@ entity FLU_TRANSFORMER_PLUS is
   port(
     CLK            : in  std_logic;
     RESET          : in  std_logic;
-    
+
     -- Frame Link Unaligned input interface
     RX_HEADER     : in std_logic_vector(HEADER_WIDTH-1 downto 0);
     RX_CHANNEL    : in std_logic_vector(CHANNEL_WIDTH-1 downto 0);
@@ -36,7 +36,7 @@ entity FLU_TRANSFORMER_PLUS is
     RX_EOP        : in std_logic;
     RX_SRC_RDY    : in std_logic;
     RX_DST_RDY    : out std_logic;
-    
+
     -- Frame Link Unaligned output interface
     TX_HEADER     : out std_logic_vector(HEADER_WIDTH-1 downto 0);
     TX_CHANNEL    : out std_logic_vector(CHANNEL_WIDTH-1 downto 0);

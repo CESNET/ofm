@@ -18,9 +18,9 @@ architecture full of PIPE_DSP is
    signal tmp_inout  : tmp_t;
 begin
 
-   PIPE_TRUE: if(PIPE_EN = true and NUM_REGS /= 0) generate 
+   PIPE_TRUE: if(PIPE_EN = true and NUM_REGS /= 0) generate
       tmp_inout(0) <= DATA_IN;
-   
+
       --! generate normal registers
       GEN_NORMAL_REGS: if(ENABLE_DSP = false) generate
          DATA_OUT     <= tmp_inout(NUM_REGS);
@@ -29,10 +29,10 @@ begin
             process(CLK)
             begin
                if (CLK'event) and (CLK='1') then
-                  if (RESET='1') then   
+                  if (RESET='1') then
                      tmp_inout(I + 1) <= (others => '0');
                   elsif (CE = '1') then
-                     tmp_inout(I + 1) <= tmp_inout(I);  
+                     tmp_inout(I + 1) <= tmp_inout(I);
                   end if;
                end if;
             end process;
@@ -46,7 +46,7 @@ begin
             generic map(
                DATA_WIDTH => DATA_WIDTH,
                NUM_REGS => 3
-            )   
+            )
             port map (
                CLK => CLK,
                RESET => RESET,
@@ -63,7 +63,7 @@ begin
             generic map(
                DATA_WIDTH => DATA_WIDTH,
                NUM_REGS => tmp
-            )   
+            )
             port map (
                CLK => CLK,
                RESET => RESET,
@@ -74,7 +74,7 @@ begin
 
             DATA_OUT <= tmp_inout((NUM_REGS/3)+1);
          end generate;
-         
+
          GEN_DSP_MOD_NO: if((NUM_REGS mod 3) = 0) generate
             DATA_OUT <= tmp_inout((NUM_REGS/3));
          end generate;
@@ -83,5 +83,5 @@ begin
 
    PIPE_FALSE: if(PIPE_EN = false or NUM_REGS = 0) generate
       DATA_OUT <= DATA_IN;
-   end generate; 
+   end generate;
 end architecture;

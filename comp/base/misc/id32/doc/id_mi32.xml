@@ -16,7 +16,7 @@
          and TX channels.</item>
    <item>Command output.</item>
    <item>Status output.</item>
-</features> 
+</features>
 
 <!-- Short Block description -->
 <description>
@@ -35,48 +35,48 @@
 <interface>
 
   <generic_map>
-      <generic name="PROJECT_ID" type="std_logic_vector(15:0)" default="0"> 
+      <generic name="PROJECT_ID" type="std_logic_vector(15:0)" default="0">
           Project identification number. This number has to be unique for
           every project. There is no special policy how to assign number
-          for a new project. 
+          for a new project.
       </generic>
 
-      <generic name="SW_MAJOR" type="std_logic_vector(7:0)" default="0"> 
+      <generic name="SW_MAJOR" type="std_logic_vector(7:0)" default="0">
           Software interface version - major number. This number is
           incremented whenever new firmware design is released and the
-          concept of software interface is changed (only big changes). 
+          concept of software interface is changed (only big changes).
       </generic>
 
-      <generic name="SW_MINOR" type="std_logic_vector(7:0)" default="0"> 
+      <generic name="SW_MINOR" type="std_logic_vector(7:0)" default="0">
           Software interface version - minor number. This number is
           incremented whenever the software interface is changed (all
           changes). If SW major number is changed, the SW minor number is
           set to zero.
       </generic>
 
-      <generic name="HW_MAJOR" type="std_logic_vector(15:0)" default="0"> 
+      <generic name="HW_MAJOR" type="std_logic_vector(15:0)" default="0">
           Firmware version - major number. This number is incremented only
           if new firmware version is released and the whole architecture is
-          changed. 
+          changed.
       </generic>
 
-      <generic name="HW_MINOR" type="std_logic_vector(15:0)" default="0"> 
+      <generic name="HW_MINOR" type="std_logic_vector(15:0)" default="0">
           Firmware version - minor number. This number is incremented
           whenever new firmware version is released. If HW major number is
           changed, the HW minor number is set to zero.
       </generic>
 
-      <generic name="PROJECT_TEXT" type="std_logic_vector(255:0)" default="0"> 
+      <generic name="PROJECT_TEXT" type="std_logic_vector(255:0)" default="0">
           Project text - the project text is null terminated string which
           must not contain white spaces. Please use "_" character instead
           of spaces.
       </generic>
 
-      <generic name="RX_CHANNELS" type="std_logic_vector(7:0)" default="FF"> 
+      <generic name="RX_CHANNELS" type="std_logic_vector(7:0)" default="FF">
           Number of RX (receive) channels.
       </generic>
 
-      <generic name="TX_CHANNELS" type="std_logic_vector(7:0)" default="FF"> 
+      <generic name="TX_CHANNELS" type="std_logic_vector(7:0)" default="FF">
           Number of TX (transmit) channels.
       </generic>
   </generic_map>
@@ -307,7 +307,7 @@
    </reg>
 
 </addr_space>
- 
+
 <body>
 
     <!-- Here is description in standard Satrapa format-->
@@ -323,7 +323,7 @@
         The first 32bit word is writable and is dedicated to detect if
         ID component is presented. If you write there any value, the
         negative value is stored.  Following 32bit register contain
-        unique project number and software major and minor version number. 
+        unique project number and software major and minor version number.
         Next two registers contain hardware major and minor
         version number.
         Next register is Command register and may be used to controll
@@ -337,7 +337,7 @@
     </p>
 
     <p>
-        Only the first ID detection and Command register are writable. 
+        Only the first ID detection and Command register are writable.
         Other registers are read only.
     </p>
 
@@ -345,13 +345,13 @@
 
     <p>
         Memory interface is universal type t_mi32.
-        In that case, two lowest bits are ignored and five following bits 
+        In that case, two lowest bits are ignored and five following bits
         are used for addressing.
     </p>
 
     <h2>Resources</h2>
     <p>
-      After synthesis with XST, 197 Slices are used. 
+      After synthesis with XST, 197 Slices are used.
       Maximum frequency is much higher than 125MHz.
     </p>
 

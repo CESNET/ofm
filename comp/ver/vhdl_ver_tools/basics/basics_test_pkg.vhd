@@ -157,17 +157,17 @@ package body basics_test_pkg is
    procedure write_dec(l : inout line; i : integer) is
    begin
       write(l,integer'image(i));
-   end procedure; 
+   end procedure;
 
    procedure write_dec(l : inout line; i : std_logic_vector) is
    begin
       write_dec(l,to_integer(unsigned(i)));
-   end procedure; 
+   end procedure;
 
    procedure write_dec(l : inout line; i : unsigned) is
    begin
       write_dec(l,to_integer(i));
-   end procedure; 
+   end procedure;
 
    procedure write_log(l : inout line; i : std_logic) is
    begin
@@ -205,7 +205,7 @@ package body basics_test_pkg is
             write(l, rev_line(i));
          end loop;
       end if;
-   end procedure; 
+   end procedure;
 
    procedure write_hex(l : inout line; i : std_logic_vector) is
    begin

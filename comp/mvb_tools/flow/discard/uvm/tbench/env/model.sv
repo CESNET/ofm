@@ -2,12 +2,12 @@
 //-- Copyright (C) 2022 CESNET z. s. p. o.
 //-- Author(s): Jakub Cabal <cabal@cesnet.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 
 class model #(ITEM_WIDTH) extends uvm_component;
     `uvm_component_param_utils(uvm_discard::model#(ITEM_WIDTH))
-    
+
     // Model inputs
     uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(ITEM_WIDTH+1)) model_mvb_in;
 
@@ -36,7 +36,7 @@ class model #(ITEM_WIDTH) extends uvm_component;
 
             if (discard == 1'b0) begin
                 model_mvb_out.write(tr_mvb_out);
-            end 
+            end
 
         end
     endtask

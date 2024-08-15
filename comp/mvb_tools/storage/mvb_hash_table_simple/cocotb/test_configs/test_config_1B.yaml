@@ -1,6 +1,6 @@
 #Configuration file for MVB_HASH_TABLE_SIMPLE component:
 mvb_hash_table_simple:
-    
+
     #MVB_HASH_TABLE_SIMPLE parametres and settings:
     hash_key: 2534237992
     mvb_key_width: 8

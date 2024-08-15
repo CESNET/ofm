@@ -31,7 +31,7 @@ entity HINS_PLUS is
 
       --! \brief Data width of input FrameLink header.
       HDR_WIDTH      : integer := 128;
-      
+
       --! \brief Number of RX DMA channels
       RX_CHANNELS    : integer := 8
       );
@@ -44,7 +44,7 @@ entity HINS_PLUS is
 
       --! \name Input FLU interface
       --! Input data
-      RX_DATA        : in  std_logic_vector(DATA_WIDTH-1 downto 0); 
+      RX_DATA        : in  std_logic_vector(DATA_WIDTH-1 downto 0);
       --! Input channel
       RX_CHANNEL     : in  std_logic_vector(max(1,log2(RX_CHANNELS))-1 downto 0);
       --! Input position of packet start inside word
@@ -66,7 +66,7 @@ entity HINS_PLUS is
       --! Header ready (source ready)
       HDR_READY     : in  std_logic;
       --! Header next (destination ready)
-      HDR_NEXT      : out std_logic; 
+      HDR_NEXT      : out std_logic;
 
       --! \name Output FLU interface
       --! Output data

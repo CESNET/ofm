@@ -71,7 +71,7 @@ def words_count_long(a,l):
             wptr = 0
             w    = 0
             start=False
-        
+
         w |= 1 << wptr
 
         if (((dword_a+1) & (RCBS-1))==0): # end of completition boundary part
@@ -120,14 +120,14 @@ def words_count_long(a,l):
 def words_count_short(a,l):
     s = 0
     log = ""
-    
+
     addr_u = a >> 2
     log += "addr_u: "+hex(addr_u)+"\n"
     addr_u_rcbs = (addr_u & (RCBS-1))
     log += "addr_u_rcbs: "+hex(addr_u_rcbs)+"\n"
     addr_u_w = (addr_u % DOWN_W_D)
     log += "addr_u_w: "+hex(addr_u_w)+"\n"
-    
+
     len_u = l
     log += "len_u: "+hex(len_u)+"\n"
     len_u_rcbs = (len_u & (RCBS-1))
@@ -277,6 +277,7 @@ def check_transcript(transcript_file_name):
     if (all_ok):
        print("Transcript info correct.")
     return
+
 
 #################################################################
 # transctipt correctness checking

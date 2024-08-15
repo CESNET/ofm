@@ -6,13 +6,13 @@
 
 class config_item extends uvm_object;
 
-    // ------------------------------------------------------------------------ 
+    // ------------------------------------------------------------------------
     // configuration variables
     uvm_active_passive_enum active;
     string interface_name;
     uvm_pcie_hdr::sync_tag tag_sync;
 
-    // ------------------------------------------------------------------------ 
+    // ------------------------------------------------------------------------
     // functions
     function new (string name = "");
         super.new(name);

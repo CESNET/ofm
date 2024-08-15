@@ -38,7 +38,7 @@ architecture behavioral of testbench is
    constant reset_delay	   : time := 100 ns;
 
    -- ================
-   -- Address offsets							  
+   -- Address offsets
    -- ================
    constant MICOM_LOW  	   : std_logic_vector(31 downto 0) := X"00000000";
    constant MICOM_MIDDLE   : std_logic_vector(31 downto 0) := X"00000004";
@@ -49,12 +49,12 @@ architecture behavioral of testbench is
    constant SEL_PPS_N	   : std_logic_vector(31 downto 0) := X"00000018";
    constant FREQ_REG       : std_logic_vector(31 downto 0) := X"0000001C";
 
-   -- Signal declaration   
+   -- Signal declaration
    signal mi32_clk          : std_logic := '0';
    signal mi32_reset        : std_logic;
    signal tsu_core_reset    : std_logic;
    signal tsu_core_clk      : std_logic := '0';
-   
+
    -- mi32 bus interface
    signal mi32		   : t_mi32;
 
@@ -62,7 +62,7 @@ architecture behavioral of testbench is
    signal mi32_sim_ctrl    : t_ib_ctrl;
    signal mi32_sim_strobe  : std_logic := '0';
    signal mi32_sim_busy    : std_logic;
-   
+
    -- Output interface
    signal ts	   	   : std_logic_vector(63 downto 0) := X"0000000000000000";
    signal ts_dv     	   : std_logic;
@@ -86,7 +86,7 @@ begin
           -- Combo clock and reset signals for MI_32 interface
           MI32_CLK       => mi32_clk,
           MI32_RESET     => mi32_reset,
-          
+
           -- In / Out SW interface via MI_32
 	  DWR          => mi32.dwr,
 	  ADDR         => mi32.addr,
@@ -96,7 +96,7 @@ begin
 	  DRD          => mi32.drd,
 	  ARDY         => mi32.ardy,
 	  DRDY	       => mi32.drdy,
-          
+
           -- Input PPS_N signal
           PPS_N    => pps_n,
 
@@ -144,7 +144,7 @@ begin
          STROBE            => mi32_sim_strobe,
          BUSY              => mi32_sim_busy
      );
-   
+
 
    -- ----------------------------------------------------
    -- CLK generator - 125 MHz
@@ -177,7 +177,7 @@ begin
       tsu_core_reset <= '0';
       wait;
    end process;
-  
+
    -- ----------------------------------------------------
    -- PPS_N pulse generator
    pps_gen : process

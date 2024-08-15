@@ -1,10 +1,10 @@
-//-- sync.sv: synchronization classes 
+//-- sync.sv: synchronization classes
 //-- Copyright (C) 2024 CESNET z. s. p. o.
 //-- Author(s): Radek Iša <isa@cesnet.cz>
 
 //-- SPDX-License-Identifier: BSD-3-Clause
 
-//sync classes 
+//sync classes
 class sync_id;
     protected int unsigned active_id;
     protected semaphore    sem;

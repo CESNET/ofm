@@ -52,7 +52,7 @@ class sequence_rx_base #(int unsigned CHANNELS, int unsigned CHANNEL_WIDTH) exte
     // Constructor - creates new instance of this class
     function new(string name = "sequence");
         super.new(name);
-        
+
         WHOLE_BYTES : assert((CHANNEL_WIDTH & 7) == 0);
         wrapper = new("simple_sequence.wrapper");
         channel_align = new("simple_sequence.channel_align");
@@ -82,15 +82,15 @@ class sequence_rx_base #(int unsigned CHANNELS, int unsigned CHANNEL_WIDTH) exte
         if(!uvm_config_db #(uvm_byte_array_mii::sequencer)::get(p_sequencer, "", "hi_sqr", hi_sqr)) begin
             `uvm_fatal(get_type_name(), "Unable to get configuration object")
         end
-        
+
         `uvm_info(get_name(), start_msg, UVM_DEBUG)
-        
+
         send_init();
         while (hl_transactions > 0 || frame != null) begin
             try_get();
             if (attempts > MAX_ATTEMPTS) begin
                 break;
-            end 
+            end
             if (frame != null) begin
                 byte unsigned data[$] = {frame.data};
                 logic control[$];
@@ -108,16 +108,16 @@ class sequence_rx_base #(int unsigned CHANNELS, int unsigned CHANNEL_WIDTH) exte
                 while (this.data_buffer.get(data, control)) begin
                     req = uvm_mii::sequence_item #(CHANNELS, CHANNEL_WIDTH)::type_id::create("req");
                     ce = this.ce_gen.get_ce();
-                    
+
                     while (ce != 1'b1) begin
                         start_item(req);
                         req.randomize();
                         req.clk_en = ce;
                         finish_item(req);
-                        
+
                         ce = this.ce_gen.get_ce();
                     end
-                    
+
                     start_item(req);
                     for (int i = 0; i < CHANNELS; i++) begin
                         req.data[i] = {>>1{ { <<8{ data[i * CHANNEL_BYTES : (i + 1) * CHANNEL_BYTES - 1] } } }};
@@ -140,13 +140,13 @@ class sequence_rx_base #(int unsigned CHANNELS, int unsigned CHANNEL_WIDTH) exte
             bit ce;
 
             ce = this.ce_gen.get_ce();
-                    
+
             while (ce != 1'b1) begin
                 start_item(req);
                 req.randomize();
                 req.clk_en = ce;
                 finish_item(req);
-                
+
                 ce = this.ce_gen.get_ce();
             end
 
@@ -177,7 +177,7 @@ class sequence_rx_base #(int unsigned CHANNELS, int unsigned CHANNEL_WIDTH) exte
         while (this.data_buffer.get(data, control)) begin
             req = uvm_mii::sequence_item #(CHANNELS, CHANNEL_WIDTH)::type_id::create("req");
             ce = this.ce_gen.get_ce();
-            
+
             while (ce != 1'b1) begin
                 start_item(req);
                 req.randomize();

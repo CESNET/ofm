@@ -74,7 +74,7 @@ begin
    WE <= '0';
    RE <= '0';
    wait for 20 ns;
-   
+
    ADDR <= std_logic_vector(to_unsigned(42, 12));
    DI <= std_logic_vector(to_unsigned(22,72));
    WE <= '1';

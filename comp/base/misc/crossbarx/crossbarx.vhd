@@ -907,7 +907,7 @@ begin
         DST_BUF_WR_ADDR   => DST_BUF_WR_ADDR    ,
         DST_BUF_WR_DATA   => DST_BUF_WR_DATA    ,
         DST_BUF_WR_IE     => DST_BUF_WR_IE      ,
-        DST_BUF_WR_EN     => DST_BUF_WR_EN  
+        DST_BUF_WR_EN     => DST_BUF_WR_EN
     );
 
     -- ------------------------------------------------------------------------

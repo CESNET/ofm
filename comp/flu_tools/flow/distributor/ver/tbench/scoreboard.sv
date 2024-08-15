@@ -14,7 +14,7 @@
 import sv_common_pkg::*;
 import sv_flu_pkg::*;
 import math_pkg::*;
-  
+
   // --------------------------------------------------------------------------
   // -- Frame Link Driver Callbacks
   // --------------------------------------------------------------------------
@@ -27,51 +27,51 @@ import math_pkg::*;
     bit inum_mask[$][pFlows];
     Transaction t[$];
     int t_flag, i_flag;
-    
+
 
     // -------------------
     // -- Class Methods --
     // -------------------
 
     // -- Constructor ---------------------------------------------------------
-    // Create a class 
+    // Create a class
     function new (TransactionTable #(TR_TABLE_FIRST_ONLY) sc_table[]);
       this.sc_table = sc_table;
     endfunction
-    
+
     virtual task pre_tx(ref Transaction transaction, string inst);
       Transaction tr;
       FrameLinkUTransaction tr_flu;
       bit x[pFlows];
-      
+
       if("Driver0" == inst) begin
         t.push_back(transaction);
       end;
-      
+
       if("DriverI" == inst) begin
         $cast(tr_flu,transaction);
         for(int i=0; i<pFlows; i++)
           x[i]=tr_flu.data[i/8][i%8];
         inum_mask.push_back(x);
-        //transaction.display(inst); 
+        //transaction.display(inst);
       end;
-      
+
       if(t.size() && inum_mask.size()) begin
         x=inum_mask.pop_front();
         tr=t.pop_front();
         $cast(tr_flu,tr);
         $write(inum_mask);
         for(int i=0; i<pFlows; i++)
-          if(x[i]) 
+          if(x[i])
             sc_table[i].add(tr_flu);
       end;
-      
+
       //transaction.display(inst);
     endtask
-    
+
     // ------------------------------------------------------------------------
-    // Function is called after is transaction sended 
-    
+    // Function is called after is transaction sended
+
     virtual task post_tx(Transaction transaction, string inst);
     endtask
 
@@ -82,48 +82,48 @@ import math_pkg::*;
   // -- Frame Link Monitor Callbacks
   // --------------------------------------------------------------------------
   class ScoreboardMonitorCbs #(int pFlows = 4) extends MonitorCbs;
-    
+
     // ---------------------
     // -- Class Variables --
     // ---------------------
     TransactionTable #(TR_TABLE_FIRST_ONLY) sc_table[] = new[pFlows];
-    
+
     // -- Constructor ---------------------------------------------------------
-    // Create a class 
+    // Create a class
     function new (TransactionTable #(TR_TABLE_FIRST_ONLY) sc_table[]);
       this.sc_table = sc_table;
     endfunction
-    
+
     // ------------------------------------------------------------------------
     // Function is called after is transaction received (scoreboard)
-    
+
     virtual task post_rx(Transaction transaction, string inst);
       bit status=0;
       // Gets number of transaction table from instance name
       int i;
       string tableLabel;
-         
+
       for(i=0; i< pFlows; i++) begin
         string monitorLabel;
         $swrite(monitorLabel, "Monitor %0d", i);
         if (monitorLabel == inst) break;
-      end  
-      
+      end
+
       //transaction.display(inst);
       sc_table[i].remove(transaction, status);
       if (status==0)begin
          $swrite(tableLabel, "TX%0d", i);
          $write("Unknown transaction received from monitor %d\n", inst);
-         transaction.display(); 
+         transaction.display();
          sc_table[i].display(.inst(tableLabel));
          $stop;
        end
     endtask
- 
+
   endclass : ScoreboardMonitorCbs
 
   // -- Constructor ---------------------------------------------------------
-  // Create a class 
+  // Create a class
   // --------------------------------------------------------------------------
   // -- Scoreboard
   // --------------------------------------------------------------------------
@@ -137,7 +137,7 @@ import math_pkg::*;
     ScoreboardDriverCbs  #(pFlows) driverCbs;
 
     // -- Constructor ---------------------------------------------------------
-    // Create a class 
+    // Create a class
     function new ();
       this.scoreTable = new[pFlows];
       foreach(this.scoreTable[i])
@@ -148,14 +148,14 @@ import math_pkg::*;
     endfunction
 
     // -- Display -------------------------------------------------------------
-    // Create a class 
+    // Create a class
     task display();
       string tableLabel;
 
       foreach(this.scoreTable[i]) begin
         $swrite(tableLabel, "TX%0d", i);
         scoreTable[i].display(.inst(tableLabel));
-      end  
+      end
     endtask
-  
+
   endclass : Scoreboard

@@ -1,8 +1,8 @@
-//-- property.sv: Properties for mfb bus 
+//-- property.sv: Properties for mfb bus
 //-- Copyright (C) 2021 CESNET z. s. p. o.
 //-- Author(s): Tomáš Beneš <xbenes55@stud.fit.vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 `ifndef MFB_PROPERTY
 `define MFB_PROPERTY
@@ -12,7 +12,7 @@
 import uvm_pkg::*;
 
 
-module mfb_property #(int unsigned REGIONS, int unsigned REGION_SIZE, int unsigned BLOCK_SIZE, int unsigned ITEM_WIDTH, int unsigned META_WIDTH) 
+module mfb_property #(int unsigned REGIONS, int unsigned REGION_SIZE, int unsigned BLOCK_SIZE, int unsigned ITEM_WIDTH, int unsigned META_WIDTH)
     (
         input RESET,
         mfb_if vif
@@ -91,7 +91,7 @@ module mfb_property #(int unsigned REGIONS, int unsigned REGION_SIZE, int unsign
         vif.SRC_RDY |-> !$isunknown(vif.EOF);
     endproperty
 
-    
+
     generate if (REGION_SIZE * BLOCK_SIZE > 1) begin
         property eof_pos_undefined (int unsigned region);
             @(posedge vif.CLK)

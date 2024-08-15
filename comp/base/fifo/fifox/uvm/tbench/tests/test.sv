@@ -1,4 +1,4 @@
-// test.sv: Verification test 
+// test.sv: Verification test
 // Copyright (C) 2023 CESNET z. s. p. o.
 // Author(s): Yaroslav Marushchenko <xmarus09@stud.fit.vutbr.cz>
 
@@ -59,5 +59,5 @@ class ex_test extends uvm_test;
     function void report_phase(uvm_phase phase);
         `uvm_info(this.get_full_name(), {"\n\tTEST : ", this.get_type_name(), " END\n"}, UVM_NONE);
     endfunction
-    
+
 endclass

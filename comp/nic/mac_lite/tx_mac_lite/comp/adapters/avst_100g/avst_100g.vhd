@@ -108,12 +108,12 @@ begin
         RX_EOP_POS      => RX_MFB_EOF_POS,
         RX_SOP          => RX_MFB_SOF(0),
         RX_EOP          => RX_MFB_EOF(0),
-        RX_SRC_RDY      => RX_MFB_SRC_RDY, 
+        RX_SRC_RDY      => RX_MFB_SRC_RDY,
         RX_DST_RDY      => RX_MFB_DST_RDY,
 
         TX_SOF_N        => fl_sof_n,
         TX_EOP_N        => open,
-        TX_SOP_N        => open, 
+        TX_SOP_N        => open,
         TX_EOF_N        => fl_eof_n,
         TX_SRC_RDY_N    => fl_src_rdy_n,
         TX_DST_RDY_N    => fl_dst_rdy_n,
@@ -143,7 +143,7 @@ begin
     port map(
         CLK        => CLK,
         RESET      => RESET,
-        
+
         RX_META    => (others => '0'),
         RX_DATA    => mfb_aligned_data,
         RX_SOF     => mfb_aligned_sof,
@@ -241,9 +241,9 @@ begin
     pkt_cnt_dec <= mfb_fifo_src_rdy and mfb_fifo_dst_rdy and mfb_fifo_eof(0);
     pkt_cnt_ready_flag <= '1' when (pkt_cnt_reg > 0) else '0';
 
-    -- rotate bytes 
+    -- rotate bytes
     data_rotation : for i in 0 to DATA_BYTES-1 generate
-        mfb_fifo_data_rotated((i+1)*8-1 downto i*8) <= mfb_fifo_data((DATA_BYTES-i)*8-1 downto (DATA_BYTES-1-i)*8);    
+        mfb_fifo_data_rotated((i+1)*8-1 downto i*8) <= mfb_fifo_data((DATA_BYTES-i)*8-1 downto (DATA_BYTES-1-i)*8);
     end generate;
 
     TX_AVST_DATA  <= mfb_fifo_data_rotated;

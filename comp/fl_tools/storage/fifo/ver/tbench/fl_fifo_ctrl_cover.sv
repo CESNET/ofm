@@ -15,9 +15,9 @@
   // -- Frame Link FIFO Command Coverage for Interface FrameLinkFifo
   // --------------------------------------------------------------------------
   // This class measures exercised combinations of interface signals
-  
+
   class CommandsCoverageFifo #(int pStatusWidth=10);
-  
+
     // Interface on witch is covering measured
     virtual iFrameLinkFifo.ctrl_tb #(pStatusWidth) ctrl;
     string  instanceName;
@@ -32,12 +32,12 @@
     logic full                      ;   // FIFO is full
     logic frameRdy                  ;   // At least one whole frame is in the FIFO
 
-     
+
     //-- Covering transactions ----------------------------------------------
     covergroup CommandsCovergroup;
       // Last block coverpoint
       lstblk: coverpoint lstblk {
-        bins lstblk0 = {0};        
+        bins lstblk0 = {0};
         bins lstblk1 = {1};
         }
       // Empty coverpoint
@@ -63,7 +63,7 @@
 
     // ------------------------------------------------------------------------
     // Constructor
-    
+
     function new (virtual iFrameLinkFifo.ctrl_tb #(pStatusWidth) ctrl,
                   string instanceName);
       this.ctrl = ctrl;               // Store interface
@@ -76,17 +76,17 @@
     // Enable commands coverage measures
     task setEnabled();
       enabled = 1; // Coverage Enabling
-      fork         
+      fork
          run();    // Creating coverage subprocess
       join_none;   // Don't wait for ending
     endtask : setEnabled
-         
+
     // -- Disable command coverage measures -----------------------------------
     // Disable generator
     task setDisabled();
       enabled = 0; // Disable measures
     endtask : setDisabled
-   
+
     // -- Run command coverage measures ---------------------------------------
     // Take transactions from mailbox and generate them to interface
     task run();
@@ -101,7 +101,7 @@
          CommandsCovergroup.sample();
       end
     endtask : run
-  
+
     // ------------------------------------------------------------------------
     // Display coverage statistic
     task display();
@@ -117,22 +117,22 @@
   // This class measure coverage of commands
   class FifoCoverage #(int pStatusWidth=10) ;
     CommandsCoverageFifo #(pStatusWidth)   cmdListFifo[$];  // Commands coverage list
-        
+
     // -- Add interface Fifo ctrl for command coverage ------------------------
     task addFrameLinkInterfaceFifo ( virtual iFrameLinkFifo.ctrl_tb #(pStatusWidth)port,
                                    string name);
       // Create commands coverage class
-      CommandsCoverageFifo #(pStatusWidth) cmdCoverageFifo = new(port, name);  
+      CommandsCoverageFifo #(pStatusWidth) cmdCoverageFifo = new(port, name);
       // Insert class into list
       cmdListFifo.push_back(cmdCoverageFifo);
     endtask : addFrameLinkInterfaceFifo
-    
+
     // -- Enable coverage measures --------------------------------------------
     // Enable coverage measres
     task setEnabled();
       foreach (cmdListFifo[i]) cmdListFifo[i].setEnabled();   // Enable for commands
     endtask : setEnabled
-         
+
     // -- Disable coverage measures -------------------------------------------
     // Disable coverage measures
     task setDisabled();

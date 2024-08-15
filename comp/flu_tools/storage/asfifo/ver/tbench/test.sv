@@ -26,18 +26,18 @@ program TEST (
    iFrameLinkUTx.tb TX,
    iFrameLinkUTx.monitor MONITOR
   );
-  
+
   // --------------------------------------------------------------------------
   //                       Variables declaration
   // --------------------------------------------------------------------------
-  
+
   FrameLinkUTransaction                fluBlueprint;                             // Transaction
   Generator                            generator;                               // Generator
   FrameLinkUDriver #(DRIVER0_DATA_WIDTH, DRIVER0_EOP_WIDTH, DRIVER0_SOP_WIDTH)   fluDriver;       // Driver
   FrameLinkUMonitor #(DRIVER0_DATA_WIDTH, DRIVER0_EOP_WIDTH, DRIVER0_SOP_WIDTH)  fluMonitor;     // Monitor
   FrameLinkUResponder #(DRIVER0_DATA_WIDTH, DRIVER0_EOP_WIDTH, DRIVER0_SOP_WIDTH) fluResponder;  // Responder
   Scoreboard                            scoreboard;                              // Scoreboard
-  
+
   // --------------------------------------------------------------------------
   //                       Creating Environment tasks
   // --------------------------------------------------------------------------
@@ -53,43 +53,43 @@ program TEST (
     fluBlueprint.packetSizeMax = packet_size_max;
     fluBlueprint.packetSizeMin = packet_size_min;
     generator.blueprint       = fluBlueprint;
-  endtask: createGeneratorEnvironment    
+  endtask: createGeneratorEnvironment
 
   task createEnvironment();
     string driverLabel;
     // Create scoreboard
     scoreboard = new;
-   
+
     // Create driver
     fluDriver  = new ("Driver", generator.transMbx, RX);
-    fluDriver.insideTxDelayEn_wt       = DRIVER0_INSIDE_DELAYEN_WT; 
+    fluDriver.insideTxDelayEn_wt       = DRIVER0_INSIDE_DELAYEN_WT;
     fluDriver.insideTxDelayDisable_wt  = DRIVER0_INSIDE_DELAYDIS_WT;
     fluDriver.insideTxDelayLow         = DRIVER0_INSIDE_DELAYLOW;
     fluDriver.insideTxDelayHigh        = DRIVER0_INSIDE_DELAYHIGH;
     fluDriver.startPositionLow         = DRIVER0_START_POS_LOW;
     fluDriver.startPositionHigh        = DRIVER0_START_POS_HIGH;
     fluDriver.setCallbacks(scoreboard.driverCbs);
-   
-   // Create and connect monitor and responder     
+
+   // Create and connect monitor and responder
       fluMonitor   = new ("Monitor0", MONITOR);
       fluResponder = new ("Responder0", TX);
-      
-      fluResponder.rxDelayEn_wt            = MONITOR0_DELAYEN_WT; 
+
+      fluResponder.rxDelayEn_wt            = MONITOR0_DELAYEN_WT;
       fluResponder.rxDelayDisable_wt       = MONITOR0_DELAYDIS_WT;
       fluResponder.rxDelayLow              = MONITOR0_DELAYLOW;
       fluResponder.rxDelayHigh             = MONITOR0_DELAYHIGH;
-      fluResponder.insideRxDelayEn_wt      = MONITOR0_INSIDE_DELAYEN_WT; 
+      fluResponder.insideRxDelayEn_wt      = MONITOR0_INSIDE_DELAYEN_WT;
       fluResponder.insideRxDelayDisable_wt = MONITOR0_INSIDE_DELAYDIS_WT;
       fluResponder.insideRxDelayLow        = MONITOR0_INSIDE_DELAYLOW;
-      fluResponder.insideRxDelayHigh       = MONITOR0_INSIDE_DELAYHIGH;    
+      fluResponder.insideRxDelayHigh       = MONITOR0_INSIDE_DELAYHIGH;
       fluMonitor.setCallbacks(scoreboard.monitorCbs);
-    
+
   endtask : createEnvironment
 
   // --------------------------------------------------------------------------
   //                       Test auxilarity procedures
   // --------------------------------------------------------------------------
-  
+
   // --------------------------------------------------------------------------
   // Resets design
   task resetDesign();
@@ -115,9 +115,9 @@ program TEST (
      while (i<100) begin
         if (fluDriver.busy || fluMonitor.busy)
            i = 0;
-        else 
+        else
            i++;
-        #(RX_CLK_PERIOD); 
+        #(RX_CLK_PERIOD);
      end
      fluDriver.setDisabled();
      fluMonitor.setDisabled();
@@ -139,14 +139,14 @@ program TEST (
 
      // Pokud je generator aktivni nic nedelej
      wait (generator.enabled == 0);
-     
+
      // Disable Test Enviroment
      disableTestEnvironment();
 
      // Display Scoreboard
      scoreboard.display();
   endtask: test1
-  
+
   // --------------------------------------------------------------------------
   // Test Case 2
   // Generate very short packets
@@ -171,7 +171,7 @@ program TEST (
      // Display Scoreboard
      scoreboard.display();
   endtask: test2
-  
+
   // --------------------------------------------------------------------------
   // Test Case 3
   // Classic length transactions, slow TX and fast RX
@@ -181,25 +181,25 @@ program TEST (
     // create & enable environment
     createGeneratorEnvironment();
     createEnvironment();
-    
+
     // set delays
-    fluResponder.rxDelayEn_wt            = 5; 
+    fluResponder.rxDelayEn_wt            = 5;
     fluResponder.rxDelayDisable_wt       = 1;
     fluResponder.rxDelayLow              = 0;
     fluResponder.rxDelayHigh             = 10;
-    fluResponder.insideRxDelayEn_wt      = 5; 
+    fluResponder.insideRxDelayEn_wt      = 5;
     fluResponder.insideRxDelayDisable_wt = 1;
     fluResponder.insideRxDelayLow        = 0;
     fluResponder.insideRxDelayHigh       = 10;
-    
-    fluDriver.insideTxDelayEn_wt =0; 
+
+    fluDriver.insideTxDelayEn_wt =0;
 
     // Enable Test environment
     enableTestEnvironment();
 
     // Run generators
     generator.setEnabled(TRANSACTION_COUNT);
-    
+
     // wait until all generators are disabled
     wait (generator.enabled == 0);
 
@@ -208,7 +208,7 @@ program TEST (
 
     // Display Scoreboard
     scoreboard.display();
-  endtask: test3 
+  endtask: test3
 
   // --------------------------------------------------------------------------
   // Test Case 4
@@ -219,10 +219,10 @@ program TEST (
     // create & enable environment
     createGeneratorEnvironment();
     createEnvironment();
-    
+
     // set zero delays
-    fluResponder.rxDelayEn_wt        = 0; 
-    fluResponder.insideRxDelayEn_wt  = 0; 
+    fluResponder.rxDelayEn_wt        = 0;
+    fluResponder.insideRxDelayEn_wt  = 0;
 
     // Enable Test environment
     enableTestEnvironment();
@@ -249,16 +249,16 @@ program TEST (
     // create & enable environment
     createGeneratorEnvironment();
     createEnvironment();
-    
+
     // set delays
-    fluResponder.rxDelayEn_wt            = 5; 
+    fluResponder.rxDelayEn_wt            = 5;
     fluResponder.rxDelayDisable_wt       = 1;
     fluResponder.rxDelayLow              = 0;
     fluResponder.rxDelayHigh             = 4;
-    fluResponder.insideRxDelayEn_wt      = 5; 
+    fluResponder.insideRxDelayEn_wt      = 5;
     fluResponder.insideRxDelayDisable_wt = 1;
     fluResponder.insideRxDelayLow        = 0;
-    fluResponder.insideRxDelayHigh       = 4;    
+    fluResponder.insideRxDelayHigh       = 4;
     // Enable Test environment
     enableTestEnvironment();
 
@@ -274,7 +274,7 @@ program TEST (
     // Display Scoreboard
     scoreboard.display();
   endtask: test5
-  
+
   // --------------------------------------------------------------------------
   // Test Case 6
   // Classic length transactions, A lot of waiting, no TX wait
@@ -284,20 +284,20 @@ program TEST (
     // create & enable environment
     createGeneratorEnvironment();
     createEnvironment();
-    
+
     // A lot of waitin on RX
-    fluResponder.rxDelayEn_wt            = 5; 
+    fluResponder.rxDelayEn_wt            = 5;
     fluResponder.rxDelayDisable_wt       = 1;
     fluResponder.rxDelayLow              = 0;
     fluResponder.rxDelayHigh             = 4;
-    fluResponder.insideRxDelayEn_wt      = 5; 
+    fluResponder.insideRxDelayEn_wt      = 5;
     fluResponder.insideRxDelayDisable_wt = 1;
     fluResponder.insideRxDelayLow        = 0;
-    fluResponder.insideRxDelayHigh       = 4;    
+    fluResponder.insideRxDelayHigh       = 4;
 
     // No waiting on TX
-    fluResponder.rxDelayEn_wt        = 0; 
-    fluResponder.insideRxDelayEn_wt  = 0; 
+    fluResponder.rxDelayEn_wt        = 0;
+    fluResponder.insideRxDelayEn_wt  = 0;
 
     // Enable Test environment
     enableTestEnvironment();
@@ -334,7 +334,7 @@ program TEST (
     test4();
     test5();
     test6();
-    
+
     // -------------------------------------
     // STOP TESTING
     // -------------------------------------

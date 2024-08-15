@@ -13,7 +13,7 @@
  * This package contains values for IPv4/IPv6 protocol/next header field.
  * See IANA list of protocol numbers or RFC 791 for more.
  */
-package ip_protocol_pkg; 
+package ip_protocol_pkg;
    const bit   [7:0]   PROTO_IPV4 = 8'd4;
    const bit   [7:0]   PROTO_IPV6 = 8'd41;
    const bit   [7:0]   PROTO_ICMP = 8'd1;

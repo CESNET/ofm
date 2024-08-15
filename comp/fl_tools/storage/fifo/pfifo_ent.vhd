@@ -50,7 +50,7 @@ entity FL_PFIFO is
       RX_EOP_N       : in  std_logic;
       RX_SOF_N       : in  std_logic;
       RX_EOF_N       : in  std_logic;
-      
+
       -- ====================
       -- read interface
       -- ====================

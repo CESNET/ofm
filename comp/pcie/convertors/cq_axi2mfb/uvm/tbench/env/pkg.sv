@@ -8,7 +8,7 @@
 `define CQ_MFB2AXI_ENV_SV
 
 package uvm_cq_mfb2axi;
-    
+
     `include "uvm_macros.svh"
     import uvm_pkg::*;
 

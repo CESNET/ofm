@@ -10,7 +10,7 @@
  * TODO:
  *
  */
- 
+
   // --------------------------------------------------------------------------
   // -- Frame Link Demultiplexor Class
   // --------------------------------------------------------------------------
@@ -28,20 +28,20 @@
     virtual iFrameLinkTx.tb #(pDataWidth, pDremWidth) tx;
     virtual iFrameLinkRx.tb #(pDataWidth, pDremWidth) rx[pChannels];
     virtual iDiscardStat.tx_tb #(pChannels, pStatusWidth) chan;
-  
+
     // -- Public Class Methods --
 
     // -- Constructor ---------------------------------------------------------
-    // Create driver object 
-    function new ( string inst, 
+    // Create driver object
+    function new ( string inst,
                    virtual iFrameLinkTx.tb #(pDataWidth,pDremWidth) tx,
                    virtual iFrameLinkRx.tb #(pDataWidth,pDremWidth) rx[],
                    virtual iDiscardStat.tx_tb #(pChannels, pStatusWidth) chan
                          );
       this.inst        = inst;
-      this.tx          = tx;         // Store pointer interface 
-      this.rx          = rx;         // Store pointer interface 
-      this.chan        = chan;       // Store pointer interface 
+      this.tx          = tx;         // Store pointer interface
+      this.rx          = rx;         // Store pointer interface
+      this.chan        = chan;       // Store pointer interface
 
       for (int i=0; i<pChannels; i++) begin
         this.rx[i].cb.DATA           <= 0;
@@ -52,32 +52,32 @@
         this.rx[i].cb.EOP_N          <= 1;
         this.rx[i].cb.SRC_RDY_N      <= 1;
       end
-    endfunction: new  
-    
+    endfunction: new
+
     // -- Enable Demultiplexor -----------------------------------------------
     // Enable demultiplexor and runs demultiplexor process
     task setEnabled();
       enabled = 1; // Demultiplexor Enabling
-      fork         
+      fork
         run();     // Creating demultiplexor subprocess
       join_none;   // Don't wait for ending
     endtask : setEnabled
-        
+
     // -- Disable Multipexor --------------------------------------------------
     // Disable demultiplexor
     task setDisabled();
       enabled = 0; //Disable demultiplexor
     endtask : setDisabled
-    
+
     // -- Private Class Methods --
-    
+
     // -- Run Demultiplexor ---------------------------------------------------
-    // According to channel demultiplex signals form input interface to 
+    // According to channel demultiplex signals form input interface to
     // respective output interface
     task run();
       int unsigned channel;
       @(tx.cb);                        // Wait for clock
-      
+
       while (enabled) begin            // Repeat while enabled
         for (int i=0; i<pChannels; i++)
           rx[i].cb.SRC_RDY_N <= 1;
@@ -93,6 +93,6 @@
         @(tx.cb);
       end
     endtask : run
-     
-  endclass : FrameLinkDemultiplexor 
+
+  endclass : FrameLinkDemultiplexor
 

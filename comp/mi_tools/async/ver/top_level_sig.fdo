@@ -1,4 +1,4 @@
-# mi32_async_handshake_sig.fdo : Include file with signals 
+# mi32_async_handshake_sig.fdo : Include file with signals
 # Copyright (C) 2014 CESNET
 # Author: Jiri Matousek <xmatou06@stud.fit.vutbr.cz>
 #
@@ -12,7 +12,7 @@ source "./signals.fdo"
 
 set COMP_PATH "/testbench/DUT_U/VHDL_DUT_U"
 
-add wave -divider "MI32 ASYNC"  
+add wave -divider "MI32 ASYNC"
 add_wave "-noupdate -color yellow -label MASTER_RESET"      /testbench/MASTER_RESET
 add_wave "-noupdate -color yellow -label SLAVE_RESET"       /testbench/SLAVE_RESET
 

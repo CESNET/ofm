@@ -1,7 +1,7 @@
 /*
  * file       : config.sv
  * Copyright (C) 2021 CESNET z. s. p. o.
- * description: configuration for intel seq mac agent 
+ * description: configuration for intel seq mac agent
  * date       : 2021
  * author     : Radek Iša <isa@cesnet.cz>
  *

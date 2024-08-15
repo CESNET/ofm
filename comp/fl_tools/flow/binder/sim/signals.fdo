@@ -9,13 +9,13 @@
 proc blk_FL_BINDER { PARAM {UNIT_ID 0} } {
    global FL_BINDER_PATH
    set BASE "$FL_BINDER_PATH"
-  
+
    # Binder interface
    if { $PARAM == "IFC" } {
       add wave -divider "FL Binder"
       add_wave "-label clk" $BASE/clk
       add_wave "-label reset" $BASE/reset
-      
+
       add wave -divider "FLB: Input interface"
       add_wave "-label rx_sof_n" $BASE/rx_sof_n
       add_wave "-label rx_sop_n" $BASE/rx_sop_n
@@ -25,7 +25,7 @@ proc blk_FL_BINDER { PARAM {UNIT_ID 0} } {
       add_wave "-label rx_dst_rdy_n" $BASE/rx_dst_rdy_n
       add_wave "-label rx_data -hex" $BASE/rx_data
       add_wave "-label rx_rem -hex" $BASE/rx_rem
-      
+
       add wave -divider "FLB: Output interface"
       add_wave "-label tx_sof_n" $BASE/tx_sof_n
       add_wave "-label tx_sop_n" $BASE/tx_sop_n
@@ -36,7 +36,7 @@ proc blk_FL_BINDER { PARAM {UNIT_ID 0} } {
       add_wave "-label tx_data -hex" $BASE/tx_data
       add_wave "-label tx_rem -hex" $BASE/tx_rem
    }
-   
+
    # Output block - most occupied queue choosing policy
    if { $PARAM == "OUTPUT_BLOCK" } {
       add wave -divider "FLB - Output block"
@@ -71,7 +71,7 @@ proc blk_FL_BINDER { PARAM {UNIT_ID 0} } {
       add_wave "-label reg_addr" $BASE/gen_full_binder/fl_binder/gen_output/output_block/reg_addr
       add_wave "-label min_bus" $BASE/gen_full_binder/fl_binder/gen_output/output_block/min_bus
       add_wave "-label mx_min" $BASE/gen_full_binder/fl_binder/gen_output/output_block/mx_min
-      
+
       add wave -divider "FSM"
       add_wave "-label clk" $BASE/gen_full_binder/fl_binder/gen_output/output_block/flb_output_fsm_i/clk
       add_wave "-label eof" $BASE/gen_full_binder/fl_binder/gen_output/output_block/flb_output_fsm_i/eof
@@ -119,7 +119,7 @@ proc blk_FL_BINDER { PARAM {UNIT_ID 0} } {
       add_wave "-label reg_addr" $BASE/gen_simple_binder/fl_binder/gen_output/output_block/reg_addr
       add_wave "-label min_bus" $BASE/gen_simple_binder/fl_binder/gen_output/output_block/min_bus
       add_wave "-label mx_min" $BASE/gen_simple_binder/fl_binder/gen_output/output_block/mx_min
-      
+
       add wave -divider "FSM"
       add_wave "-label clk" $BASE/gen_simple_binder/fl_binder/gen_output/output_block/flb_output_fsm_i/clk
       add_wave "-label eof" $BASE/gen_simple_binder/fl_binder/gen_output/output_block/flb_output_fsm_i/eof
@@ -172,7 +172,7 @@ proc blk_FL_BINDER { PARAM {UNIT_ID 0} } {
       add_wave "-label reg_addr" $BASE/gen_full_binder/fl_binder/gen_output_robin/output_block/reg_addr
       add_wave "-label min_bus" $BASE/gen_full_binder/fl_binder/gen_output_robin/output_block/min_bus
       add_wave "-label mx_min" $BASE/gen_full_binder/fl_binder/gen_output_robin/output_block/mx_min
-      
+
       add wave -divider "FSM"
       add_wave "-label clk" $BASE/gen_full_binder/fl_binder/gen_output_robin/output_block/flb_output_fsm_i/clk
       add_wave "-label eof" $BASE/gen_full_binder/fl_binder/gen_output_robin/output_block/flb_output_fsm_i/eof
@@ -253,7 +253,7 @@ proc blk_FL_BINDER { PARAM {UNIT_ID 0} } {
       add_wave "-label full" $BASE/gen_nfifo2fifo_binder/fl_binder/gen_align_frame__$UNIT_ID/align_frame_i/full
       add_wave "-label new_frame" $BASE/gen_nfifo2fifo_binder/fl_binder/gen_align_frame__$UNIT_ID/align_frame_i/new_frame
       add_wave "-label frame_part" $BASE/gen_nfifo2fifo_binder/fl_binder/gen_align_frame__$UNIT_ID/align_frame_i/frame_part
-      
+
       add wave -divider "Input FIFO"
       add_wave "-label fifo_data -hex" $BASE/gen_nfifo2fifo_binder/fl_binder/gen_align_frame__$UNIT_ID/align_frame_i/fifo_data
       add_wave "-label fifo_rem -hex" $BASE/gen_nfifo2fifo_binder/fl_binder/gen_align_frame__$UNIT_ID/align_frame_i/fifo_rem
@@ -263,7 +263,7 @@ proc blk_FL_BINDER { PARAM {UNIT_ID 0} } {
       add_wave "-label fifo_eop_n" $BASE/gen_nfifo2fifo_binder/fl_binder/gen_align_frame__$UNIT_ID/align_frame_i/fifo_eop_n
       add_wave "-label fifo_sof_n" $BASE/gen_nfifo2fifo_binder/fl_binder/gen_align_frame__$UNIT_ID/align_frame_i/fifo_sof_n
       add_wave "-label fifo_eof_n" $BASE/gen_nfifo2fifo_binder/fl_binder/gen_align_frame__$UNIT_ID/align_frame_i/fifo_eof_n
-      
+
       add wave -divider "Internal"
       add_wave "-label cnt_row" $BASE/gen_nfifo2fifo_binder/fl_binder/gen_align_frame__$UNIT_ID/align_frame_i/cnt_row
       add_wave "-label cnt_row_ce" $BASE/gen_nfifo2fifo_binder/fl_binder/gen_align_frame__$UNIT_ID/align_frame_i/cnt_row_ce
@@ -336,15 +336,15 @@ proc blk_FL_BINDER { PARAM {UNIT_ID 0} } {
       add_wave "-label fl_juice" $BASE/gen_nfifo2fifo_binder/fl_binder/data_transformer_i/fl_juice
       add_wave "-label rem_sel" $BASE/gen_nfifo2fifo_binder/fl_binder/data_transformer_i/rem_sel
       add_wave "-label rem_in" $BASE/gen_nfifo2fifo_binder/fl_binder/data_transformer_i/rem_in
-      add_wave "-label sig_frame_done" $BASE/gen_nfifo2fifo_binder/fl_binder/data_transformer_i/sig_frame_done      
-      
+      add_wave "-label sig_frame_done" $BASE/gen_nfifo2fifo_binder/fl_binder/data_transformer_i/sig_frame_done
+
    }
    # Only tests for Stupid Binder
    if { $PARAM == "ONLY_TESTS" } {
       add wave -divider "Stupid binder tests"
       add_wave "-label status" $BASE/gen_stupid_binder/fl_binder/status
-      add_wave "-label fc_frame_rdy" $BASE/gen_stupid_binder/fl_binder/fc_frame_rdy      
-      add_wave "-label mx_ifc_sel -uns" $BASE/gen_stupid_binder/fl_binder/mx_ifc_sel      
+      add_wave "-label fc_frame_rdy" $BASE/gen_stupid_binder/fl_binder/fc_frame_rdy
+      add_wave "-label mx_ifc_sel -uns" $BASE/gen_stupid_binder/fl_binder/mx_ifc_sel
       add_wave "-label hold_fl" $BASE/gen_stupid_binder/fl_binder/hold_fl
       add_wave "-label num_fl" $BASE/gen_stupid_binder/fl_binder/num_fl
       add_wave "-label start_num -unsigned" $BASE/gen_stupid_binder/fl_binder/start_num

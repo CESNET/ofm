@@ -20,7 +20,7 @@ use work.math_pack.all;
 architecture full of FL_TRIMMER is
 
    -- ------------------ Constants declaration --------------------------------
-   
+
 
    -- ------------------ Signals declaration ----------------------------------
    -- FL_DEC interface
@@ -32,7 +32,7 @@ architecture full of FL_TRIMMER is
    signal eopld            : std_logic;
    signal softr            : std_logic;
    signal ftr_frame        : std_logic;
-      
+
    -- registers
    signal reg_enable       : std_logic;
    signal reg_enable_we    : std_logic;
@@ -95,7 +95,7 @@ begin
    GEN_EOF_NOFTR : if not TRIM_FOOTER generate
       trimmer_tx_eof_n     <= RX_EOF_N;
    end generate;
-   
+
    GEN_FC_HDR_FTR : if TRIM_HEADER and TRIM_FOOTER generate
       trimmer_tx_src_rdy_n <= RX_SRC_RDY_N or (not pld_frame);
       trimmer_rx_dst_rdy_n <= TX_DST_RDY_N and pld_frame;
@@ -163,8 +163,8 @@ begin
    -- register reg_enable - enable FL_TRIMMER
    reg_enablep:process (CLK)
    begin
-      if CLK'event and CLK='1' then  
-         if RESET='1' then   
+      if CLK'event and CLK='1' then
+         if RESET='1' then
             reg_enable <= '0';
          else
             reg_enable <= ENABLE;
@@ -183,7 +183,7 @@ begin
       port map(
          CLK         => CLK,
          RESET       => RESET,
-   
+
          -- FrameLink interface
          SOF_N       => RX_SOF_N,
          SOP_N       => RX_SOP_N,

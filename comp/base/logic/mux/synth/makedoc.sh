@@ -454,7 +454,7 @@ do
 	 if [ ${#sed_commands[@]} -eq 0 ]; then
 	    warn "There wasn't changed any generic"
 	    cat ../$toplevel.orig > ../$toplevel
-	 else 
+	 else
             # Here comes the sed editing the generic section of VHDL (and excluding comments)
 	    sed --posix -r "s/--.*//" ../$toplevel.orig |
             sed --posix -r "${sed_commands[@]:0}" > ../$toplevel

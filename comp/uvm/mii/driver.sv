@@ -28,7 +28,7 @@ class driver_rx #(int unsigned CHANNELS, int unsigned WIDTH) extends uvm_driver 
     // Constructor
     function new(string name, uvm_component parent);
         super.new(name, parent);
-        
+
         WHOLE_BYTES : assert((WIDTH & 7) == 0);
     endfunction
 
@@ -71,7 +71,7 @@ class driver_tx #(int unsigned CHANNELS, int unsigned WIDTH) extends uvm_driver 
     // Constructor
     function new(string name, uvm_component parent);
         super.new(name, parent);
-        
+
         WHOLE_BYTES : assert((WIDTH & 7) == 0);
     endfunction
 

@@ -60,7 +60,7 @@ class LIIMonitor(BusMonitor):
 
                 self._recv(frame)
                 self.frame_cnt += 1
-            
+
             if is_sof:
                 if in_frame:
                     raise LIIProtocolError("Duplicate start-of-frame received on LII bus!")
@@ -71,4 +71,4 @@ class LIIMonitor(BusMonitor):
                 #print("start frame: " + frame.hex())
             else:
                 frame += d_bytes
-                #print("mid frame: " + frame.hex())           
+                #print("mid frame: " + frame.hex())

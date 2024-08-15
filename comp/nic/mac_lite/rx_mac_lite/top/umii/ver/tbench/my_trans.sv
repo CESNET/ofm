@@ -21,8 +21,8 @@ class MyTransaction #(ITEM_WIDTH = 8) extends Transaction;
     bit mac_bcast = 0;
     int dataSizeMax = 512;
     int dataSizeMin = 64;
-    int mac_count = 0; 
-    int mac_type = 0; 
+    int mac_count = 0;
+    int mac_type = 0;
     rand int mac_index;
     byte unsigned mac_array[16][6] = '{default: 0};
 
@@ -137,7 +137,7 @@ class MyTransaction #(ITEM_WIDTH = 8) extends Transaction;
             $swrite(diff, "MAC index does not match");
             return 0;
         end
-        
+
         return 1;
     endfunction
 
@@ -157,13 +157,13 @@ class MyTransaction #(ITEM_WIDTH = 8) extends Transaction;
                 end
                 mac_bcast = 1;
             end
-            
+
             1: begin // MULTICAST
                 mac_type = 2;
                 data[0][0] = 1;
                 mac_mcast = 1;
             end
-            
+
             1: begin // AVAILABLE UNICAST
                 if (mac_count > 0) begin
                     mac_type = 1;
@@ -172,14 +172,14 @@ class MyTransaction #(ITEM_WIDTH = 8) extends Transaction;
                         data[i] = mac_array[mac_index][5-i];
                     end
                 end
-                
+
             1: ; // UNICAST
         endcase
 
         if (data.size() >= 4) begin
             crc_offset = data.size()-4;
             data_without_crc = new[crc_offset](data);
-            
+
             // Compute correct CRC
             crc_value = ~crc32_ethernet(data_without_crc, 32'hffffffff);
             crc = {<< byte{crc_value}};

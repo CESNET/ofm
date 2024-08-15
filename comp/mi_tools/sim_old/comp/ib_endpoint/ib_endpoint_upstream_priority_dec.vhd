@@ -52,7 +52,7 @@ end entity IB_ENDPOINT_UPSTREAM_PRIORITY_DEC;
 --                      Architecture declaration
 -- ----------------------------------------------------------------------------
 architecture IB_ENDPOINT_UPSTREAM_PRIORITY_DEC_ARCH of IB_ENDPOINT_UPSTREAM_PRIORITY_DEC is
-   
+
    -- priority counter registers
    signal priority_reg0 : std_logic;
    signal change_priority : std_logic;
@@ -77,10 +77,10 @@ end process;
 
 
 OUT_RD_RQ <= '1' when  ( (priority_reg0='1' and IN_RD_RQ  = '1') or
-                         (priority_reg0='0' and IN_RD_RQ  = '1' and IN_BM_RQ = '0')) else '0'; 
-                  
+                         (priority_reg0='0' and IN_RD_RQ  = '1' and IN_BM_RQ = '0')) else '0';
+
 OUT_BM_RQ <= '1' when  ( (priority_reg0='0' and IN_BM_RQ = '1') or
-                         (priority_reg0='1' and IN_BM_RQ = '1' and IN_RD_RQ = '0')) else '0'; 
-                  
+                         (priority_reg0='1' and IN_BM_RQ = '1' and IN_RD_RQ = '0')) else '0';
+
 end architecture IB_ENDPOINT_UPSTREAM_PRIORITY_DEC_ARCH;
 

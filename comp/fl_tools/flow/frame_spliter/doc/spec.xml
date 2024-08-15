@@ -9,12 +9,12 @@
    <features>
       <item>Split frame into two frames</item>
    </features>
-   
+
    <!-- Bugs -->
    <bugs>
      <item>Not known bugs</item>
    </bugs>
-   
+
    <!-- What have to be done -->
    <todo>
     test in HW
@@ -23,38 +23,38 @@
 
 
    <description>
-   Frame spliter splits frame into two others. First output frame contains packets from 0 to Fl_Width_N-1. Second frame contains others packets. If split_pos is equal to 0, only first packet of frame is send to fist output and all others packets go into second output. 
+   Frame spliter splits frame into two others. First output frame contains packets from 0 to Fl_Width_N-1. Second frame contains others packets. If split_pos is equal to 0, only first packet of frame is send to fist output and all others packets go into second output.
    </description>
-   
+
    <interface>
       <generic_map>
          <generic name="FL_WIDTH_IN" type="integer" default="32">
 		Width of input framelink.
          </generic>
-         
+
 		   <generic name="FL_WIDTH_OUT1" type="integer" default="32">
 			   Width of first output framelink.
          </generic>
-         
+
 		   <generic name="FL_WIDTH_OUT2" type="integer" default="32">
 			   Width of second output framelink.
          </generic>
-         
+
          <generic name="SPLIT_POS" type="integer" default="1">
-		This number plus one packet will enter first output. The others packets enters second output. 
+		This number plus one packet will enter first output. The others packets enters second output.
          </generic>
       </generic_map>
-      
+
       <port_map>
-                
+
          <port name="FL_RESET" dir="in" width="1">
             Reset signal. Active in 1.
          </port>
-           
+
          <port name="FL_CLK" dir="in" width="1">
             Clock
          </port>
-            
+
     <divider>
 	  	    RX FrameLink interface
 	    </divider>
@@ -140,16 +140,16 @@
             </port>
 
        </port_map>
-       </interface>  
+       </interface>
 
-   
+
    <body>
 
-      
+
     <!-- Here is description in standard Satrapa format-->
     <h1> component</h1>
     <p>
- Frame spliter splits frame into two others. First output frame contains packets from 0 to Fl_Width_N-1. Second frame contains others packets. If split_pos is equal to 0, only first packet of frame is send to fist output and all others packets go into second output. 
+ Frame spliter splits frame into two others. First output frame contains packets from 0 to Fl_Width_N-1. Second frame contains others packets. If split_pos is equal to 0, only first packet of frame is send to fist output and all others packets go into second output.
     </p>
-    </body>  
+    </body>
 </source>

@@ -1,7 +1,7 @@
 /* pcie_sequencer.sv
  * Copyright (C) 2020 CESNET z. s. p. o.
  * Author(s): Martin Spinler <spinler@cesnet.cz>
- * 
+ *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
@@ -126,7 +126,7 @@ class PcieCompletionSequencer #(RCB = 64, MPS = 256) extends Driver;
                 comp.data[i] = from.data[index + i];
             comp.lower_address = address[6:0];
             comp.byte_count    = byte_count;
-            byte_count -= (comp_length*4 - address[1:0]); 
+            byte_count -= (comp_length*4 - address[1:0]);
             if (verbosity)
                 comp.display({inst, " Completion"});
                 //$writeh("Completion addr: %x, len: %x, tag: %x, length: %x, completed: %x: data: %p\n", address, comp_length, comp.tag, comp.length, comp.completed, comp.data);

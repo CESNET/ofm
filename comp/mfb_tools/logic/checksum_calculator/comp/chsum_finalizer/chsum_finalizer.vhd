@@ -16,7 +16,7 @@ use work.type_pack.all;
 --  Description
 -- ============================================================================
 
--- 
+--
 entity CHSUM_FINALIZER is
 generic(
     -- Number of Regions within a data word, must be power of 2.

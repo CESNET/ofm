@@ -2,7 +2,7 @@
 //-- Copyright (C) 2021 CESNET z. s. p. o.
 //-- Author(s): Tomáš Beneš <xbenes55@stud.fit.vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 class Sequence #(type TransType = Transaction);
 
@@ -42,12 +42,12 @@ class Sequence #(type TransType = Transaction);
     task run();
         for (int index = 0; index< this.listOfTransactions.size; index++ ) begin
 	        if(this.enabled == 1) begin
-	            this.listOfTransactions[index].stream_id    = this.stream_id;       
-            	this.listOfTransactions[index].scenario_id  = -1;                             
-            	this.transMbx.put(this.listOfTransactions[index]);                                    
+	            this.listOfTransactions[index].stream_id    = this.stream_id;
+            	this.listOfTransactions[index].scenario_id  = -1;
+            	this.transMbx.put(this.listOfTransactions[index]);
 	        end else begin
 		        break;
-	        end 
+	        end
         end
         this.enabled = 0;
     endtask
@@ -58,9 +58,9 @@ class Sequence #(type TransType = Transaction);
         $write("------------------------------------------------------------\n");
         $write("Size: %d\n", $size(listOfTransactions));
         foreach(listOfTransactions[i])begin
-            listOfTransactions[i].display();            
+            listOfTransactions[i].display();
         end
         $write("------------------------------------------------------------\n");
     endtask
-    
-endclass 
+
+endclass

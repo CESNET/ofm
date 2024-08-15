@@ -18,7 +18,7 @@ DLL_SUFFIX=so
 QUOTE="
 
 all: lib$(TARGET).$(DLL_SUFFIX)
-	
+
 clean:
 	rm -fR *.h *.o *.$(DLL_SUFFIX)
 

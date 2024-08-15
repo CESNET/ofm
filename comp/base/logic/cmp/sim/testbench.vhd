@@ -32,7 +32,7 @@ architecture behavioral of testbench is
    signal CE_IN            : std_logic;
    signal CE_OUT           : std_logic;
    signal P                : std_logic_vector(1 downto 0);
-   
+
 begin
 
    --! CMP48
@@ -53,7 +53,7 @@ begin
    );
 
    --Generate clock
-   clk_gen_p : process 
+   clk_gen_p : process
    begin
       CLK <= '1';
       wait for clkper/2;
@@ -70,10 +70,10 @@ begin
    wait;
    end process;
 
-   --! Simulating input flow 
+   --! Simulating input flow
    input_flow : process
    begin
-      
+
       --! Initialize input interface
       A <= (others => '0');
       B <= (others => '0');
@@ -87,7 +87,7 @@ begin
       A <= (24 => '0', others => '1');
       B <= (others => '1');
       wait for clkper;
-      
+
       CE_IN <= '1';
       CE_OUT <= '1';
       wait for clkper;
@@ -95,7 +95,7 @@ begin
       A <= (  105 => '1', 84 => '0', 1 => '1', 30 => '0', others => '0');
       B <= (  105 => '1', 84 => '1', 1 => '1', 30 => '0', others => '0');
       wait for clkper;
-     
+
       A <= (  105 => '1', 84 => '1', 1 => '1', 30 => '0', others => '0');
       B <= (  105 => '1', 84 => '1', 1 => '1', 30 => '0', others => '0');
       wait for clkper;
@@ -111,7 +111,7 @@ begin
       A <= (  105 => '1', 84 => '1', 45 => '1', 30 => '1', others => '0');
       B <= (  105 => '1', 84 => '1', 45 => '1', 30 => '1', others => '0');
       wait for clkper;
- 
+
       wait;
 
    end process input_flow;

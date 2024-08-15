@@ -1,7 +1,7 @@
 # Modules.tcl: Components include script
 # Copyright (C) 2024 CESNET z. s. p. o.
 # Author(s): David Beneš <xbenes52@vutbr.cz>
-            
+
 # SPDX-License-Identifier: BSD-3-Clause
 
 # Set paths

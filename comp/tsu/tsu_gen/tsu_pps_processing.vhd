@@ -122,4 +122,4 @@ begin
 
    DETECT_PPS <= detect_pps_reg;
 
-end architecture; 
+end architecture;

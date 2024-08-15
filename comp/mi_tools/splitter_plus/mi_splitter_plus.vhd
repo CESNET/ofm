@@ -14,7 +14,7 @@ use work.type_pack.all;
 
 -- ----------------------------------------------------------------------------
 --                                Description
--- ---------------------------------------------------------------------------- 
+-- ----------------------------------------------------------------------------
 -- !!!     THIS UNIT HAS BEEN DEPRECATED    !!!
 -- !!! USE THE MI_SPLITTER_PLUS_GEN INSTEAD !!!
 --
@@ -23,9 +23,9 @@ use work.type_pack.all;
 
 -- ----------------------------------------------------------------------------
 --                             ENTITY DECLARATION                            --
--- ---------------------------------------------------------------------------- 
+-- ----------------------------------------------------------------------------
 
--- Unlike MI_SPLITTER, components connected to MI_SPLITTER_PLUS see whole 
+-- Unlike MI_SPLITTER, components connected to MI_SPLITTER_PLUS see whole
 -- global address (as it comes to MI_SPLITTER_PLUS), not it's local address.
 -- If you need, you can connect MI_ADDR_SUBTRACTOR to convert global address
 -- to local (subtract base of address space from the address).
@@ -39,7 +39,7 @@ entity MI_SPLITTER_PLUS is -- DEPRECATED!
       -- Number of output ports
       ITEMS         : integer := 2;
       -- Bits of address that are needed to determine output port.
-      -- (see example in documentation if you don't know) 
+      -- (see example in documentation if you don't know)
       ADDR_CMP_MASK : std_logic_vector(31 downto 0) := X"FFFFFFFF";
       -- Bases of address spaces (base of port0 is 0x00000000)
       PORT1_BASE    : std_logic_vector(31 downto 0) := X"00001000";
@@ -60,7 +60,7 @@ entity MI_SPLITTER_PLUS is -- DEPRECATED!
       -- Common interface -----------------------------------------------------
       CLK         : in std_logic;
       RESET       : in std_logic;
-      
+
       -- Input MI interface ---------------------------------------------------
       IN_DWR      : in  std_logic_vector(DATA_WIDTH-1 downto 0);
       IN_MWR      : in  std_logic_vector(META_WIDTH-1 downto 0) := (others => '0');
@@ -71,7 +71,7 @@ entity MI_SPLITTER_PLUS is -- DEPRECATED!
       IN_ARDY     : out std_logic;
       IN_DRD      : out std_logic_vector(DATA_WIDTH-1 downto 0);
       IN_DRDY     : out std_logic;
-      
+
       -- Output MI interfaces -------------------------------------------------
       OUT_DWR     : out std_logic_vector(ITEMS*DATA_WIDTH-1 downto 0);
       OUT_MWR     : out std_logic_vector(ITEMS*META_WIDTH-1 downto 0);
@@ -82,7 +82,7 @@ entity MI_SPLITTER_PLUS is -- DEPRECATED!
       OUT_ARDY    : in  std_logic_vector(ITEMS-1 downto 0);
       OUT_DRD     : in  std_logic_vector(ITEMS*DATA_WIDTH-1 downto 0);
       OUT_DRDY    : in  std_logic_vector(ITEMS-1 downto 0)
-      
+
    );
 end entity MI_SPLITTER_PLUS;
 

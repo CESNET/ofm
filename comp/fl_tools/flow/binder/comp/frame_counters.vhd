@@ -27,11 +27,11 @@ entity FLB_FRAME_COUNTERS is
    port(
       CLK            : in std_logic;
       RESET          : in std_logic;
-      
+
       -- input interface
       INC            : in std_logic_vector(COUNT-1 downto 0);
       DEC            : in std_logic_vector(COUNT-1 downto 0);
-      
+
       -- output interface
       FRAME_RDY      : out std_logic_vector(COUNT-1 downto 0);
       NO_FRAME       : out std_logic
@@ -64,13 +64,13 @@ begin
             FRAME_RDY      => sig_frame_rdy(i)
          );
    end generate;
-   
+
    -- NO_FRAME signal generic OR
    no_framep : process(sig_frame_rdy)
       variable or_int : std_logic;
    begin
       or_int := '0';
-      
+
       for k in 0 to COUNT - 1 loop
          or_int := or_int or sig_frame_rdy(k);
       end loop;

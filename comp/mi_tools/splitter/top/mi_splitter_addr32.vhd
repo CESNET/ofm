@@ -17,7 +17,7 @@ use work.math_pack.all;
 
 -- ----------------------------------------------------------------------------
 --                             ENTITY DECLARATION                            --
--- ---------------------------------------------------------------------------- 
+-- ----------------------------------------------------------------------------
 
 entity MI_SPLITTER_ADDR32 is
    generic(
@@ -36,7 +36,7 @@ entity MI_SPLITTER_ADDR32 is
       -- Common interface -----------------------------------------------------
       CLK         : in std_logic;
       RESET       : in std_logic;
-      
+
       -- Input MI interface ---------------------------------------------------
       IN_DWR      : in  std_logic_vector(DATA_WIDTH-1 downto 0);
       IN_ADDR     : in  std_logic_vector((ADDR_WIDTH+log2(ITEMS))-1 downto 0);
@@ -46,7 +46,7 @@ entity MI_SPLITTER_ADDR32 is
       IN_ARDY     : out std_logic;
       IN_DRD      : out std_logic_vector(DATA_WIDTH-1 downto 0);
       IN_DRDY     : out std_logic;
-      
+
       -- Output MI interfaces -------------------------------------------------
       OUT_DWR     : out std_logic_vector(ITEMS*DATA_WIDTH-1 downto 0);
       OUT_ADDR    : out std_logic_vector(ITEMS*32-1 downto 0);
@@ -56,7 +56,7 @@ entity MI_SPLITTER_ADDR32 is
       OUT_ARDY    : in  std_logic_vector(ITEMS-1 downto 0);
       OUT_DRD     : in  std_logic_vector(ITEMS*DATA_WIDTH-1 downto 0);
       OUT_DRDY    : in  std_logic_vector(ITEMS-1 downto 0)
-      
+
    );
 end entity MI_SPLITTER_ADDR32;
 
@@ -66,7 +66,7 @@ architecture mi_splitter_addr32_arch of MI_SPLITTER_ADDR32 is
    signal out_addr_aux : std_logic_vector(ITEMS*ADDR_WIDTH-1 downto 0);
 
 begin
-   
+
    MI_SPLITTER : entity work.MI_SPLITTER
    generic map (
       ITEMS       => ITEMS,
@@ -80,7 +80,7 @@ begin
       -- Common interface -----------------------------------------------------
       CLK         => CLK,
       RESET       => RESET,
-      
+
       -- Input MI interface ---------------------------------------------------
       IN_DWR      => IN_DWR,
       IN_ADDR     => IN_ADDR,
@@ -90,7 +90,7 @@ begin
       IN_ARDY     => IN_ARDY,
       IN_DRD      => IN_DRD,
       IN_DRDY     => IN_DRDY,
-      
+
       -- Output MI interfaces -------------------------------------------------
       OUT_DWR     => OUT_DWR,
       OUT_ADDR    => out_addr_aux,
@@ -101,11 +101,11 @@ begin
       OUT_DRD     => OUT_DRD,
       OUT_DRDY    => OUT_DRDY
    );
-   
+
    addr_gen: for i in 0 to ITEMS-1 generate
       OUT_ADDR(i*32+ADDR_WIDTH-1 downto i*32) <=
                            out_addr_aux((i+1)*ADDR_WIDTH-1 downto i*ADDR_WIDTH);
       OUT_ADDR((i+1)*32-1 downto i*32+ADDR_WIDTH) <= (others => '0');
    end generate;
-   
+
 end architecture;

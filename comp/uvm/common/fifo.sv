@@ -48,7 +48,7 @@ class fifo #(type ITEM_TYPE) extends uvm_component;
 endclass
 
 ////////////////////////////////////////////////
-// SIMPLE FIFO 
+// SIMPLE FIFO
 class fifo_convertor#(type INPUT_ITEM) extends fifo#(INPUT_ITEM);
     `uvm_component_param_utils(uvm_common::fifo_convertor#(INPUT_ITEM))
 

@@ -11,7 +11,7 @@
  */
 
 
-package sv_common_pkg; 
+package sv_common_pkg;
   // Define boolean values
   typedef enum bit {FALSE, TRUE} bool;
 

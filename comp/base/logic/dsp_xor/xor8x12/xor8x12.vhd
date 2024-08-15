@@ -1,7 +1,7 @@
 -- xor8x12.vhd:  Implemented XOR function in DSP48E2 slice.
 --             First half of 96-bit string is compared to the second half of the string.
 -- Copyright (C) 2018 CESNET
--- Author(s)   Petr Panák <xpanak04@stud.feec.vutbr.cz> 
+-- Author(s)   Petr Panák <xpanak04@stud.feec.vutbr.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --
@@ -44,7 +44,7 @@ begin
    -- Inputs to DSP
    ab <= DI(95 downto 90) & DI(83 downto 78) & DI(71 downto 66) & DI(59 downto 54) & DI(47 downto 42) & DI(35 downto 30) & DI(23 downto 18) & DI(11 downto 6);
    c <= DI(89 downto 84) & DI(77 downto 72) & DI(65 downto 60) & DI(53 downto 48) & DI(41 downto 36) & DI(29 downto 24) & DI(17 downto 12) & DI(5 downto 0);
- 
+
    -- DSP slice instantion --
    DSP48E2_inst : DSP48E2
    generic map (
@@ -88,7 +88,7 @@ begin
       ADREG => 0,                         -- Pipeline stages for pre-adder (0-1)
       ALUMODEREG => 0,                    -- Pipeline stages for ALUMODE (0-1)
       AREG => IREG,                       -- Pipeline stages for A (0-2)
-      BCASCREG => IREG,                   -- Number of pipeline stages between B/BCIN and BCOUT (0-2) 
+      BCASCREG => IREG,                   -- Number of pipeline stages between B/BCIN and BCOUT (0-2)
       BREG => IREG,                       -- Pipeline stages for B (0-2)
       CARRYINREG => 0,                    -- Pipeline stages for CARRYIN (0-1)
       CARRYINSELREG => 0,                 -- Pipeline stages for CARRYINSEL (0-1)
@@ -159,4 +159,4 @@ begin
       RSTP => RESET                    -- 1-bit input: Reset for OREG
    );
 
-end architecture;	
+end architecture;

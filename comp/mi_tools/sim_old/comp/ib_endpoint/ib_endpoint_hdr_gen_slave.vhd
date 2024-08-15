@@ -31,7 +31,7 @@ entity IB_ENDPOINT_HDR_GEN_SLAVE is
       RD_COMPL_LENGTH       : in  std_logic_vector(11 downto 0);
 
       -- ========================
-      -- Control            
+      -- Control
       -- ========================
 
       -- Get second header
@@ -50,7 +50,7 @@ end entity IB_ENDPOINT_HDR_GEN_SLAVE;
 --                      Architecture declaration
 -- ----------------------------------------------------------------------------
 architecture IB_ENDPOINT_HDR_GEN_SLAVE_ARCH of IB_ENDPOINT_HDR_GEN_SLAVE is
-  
+
    signal rd_completition_hdr1 : std_logic_vector(63 downto 0);
    signal rd_completition_hdr2 : std_logic_vector(63 downto 0);
    signal mux_header_data_sel  : std_logic_vector(1 downto 0);

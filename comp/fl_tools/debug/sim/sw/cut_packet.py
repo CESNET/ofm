@@ -32,12 +32,12 @@ t = str()
 for i in range(0, len(parts)):
   if len(parts[i]) > 0:
     in_parts = re.split("\$\n",parts[i])
-    
+
     for j in range(0, len(in_parts)):
       if (len(in_parts[j]) > 0):
 	if j == int(sys.argv[3]):
 	  t = t + in_parts[j] + "#\n"
-          
+
 fout.write(t)
 
 fout.close()

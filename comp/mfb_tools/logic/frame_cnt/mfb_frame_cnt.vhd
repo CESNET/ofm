@@ -118,7 +118,7 @@ begin
          if (frame_cnt_reg_rst = '1') then
             frame_cnt_reg <= (others => '0');
          elsif (frame_cnt_reg_en = '1') then
-            frame_cnt_reg <= frame_cnt_comb;  
+            frame_cnt_reg <= frame_cnt_comb;
          end if;
       end if;
    end process;

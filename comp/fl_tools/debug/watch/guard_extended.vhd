@@ -31,7 +31,7 @@ entity FL_GUARD_EXTENDED is
       SOP_N          : in std_logic;
       EOP_N          : in std_logic;
       DST_RDY_N      : in std_logic;
-      SRC_RDY_N      : in std_logic;      
+      SRC_RDY_N      : in std_logic;
 
       INVALID        : out std_logic
  );
@@ -98,7 +98,7 @@ begin
    end if;
 end process;
 
--- Used to determine end of frame more exactly. (In situation when 
+-- Used to determine end of frame more exactly. (In situation when
 -- protocol is violated, it can be difficult)
 reg_fend_p : process(CLK, RESET)
 begin
@@ -135,9 +135,9 @@ begin
    if RESET = '1' then
       part2 <= '0';
    elsif CLK'event and CLK = '1' then
-      if SRC_RDY_N = '0' and DST_RDY_N = '0' and 
-         EOF_N = '0' then 
-         part2 <= '0';   
+      if SRC_RDY_N = '0' and DST_RDY_N = '0' and
+         EOF_N = '0' then
+         part2 <= '0';
       elsif SRC_RDY_N = '0' and DST_RDY_N = '0' and SOP_N = '0' and
          part1 = '1' then
          part2 <= '1';
@@ -151,9 +151,9 @@ begin
    if RESET = '1' then
       part3 <= '0';
    elsif CLK'event and CLK = '1' then
-      if SRC_RDY_N = '0' and DST_RDY_N = '0' and 
-         EOF_N = '0' then 
-         part3 <= '0';   
+      if SRC_RDY_N = '0' and DST_RDY_N = '0' and
+         EOF_N = '0' then
+         part3 <= '0';
       elsif SRC_RDY_N = '0' and DST_RDY_N = '0' and SOP_N = '0' and
          part2 = '1' then
          part3 <= '1';
@@ -167,9 +167,9 @@ begin
    if RESET = '1' then
       part4 <= '0';
    elsif CLK'event and CLK = '1' then
-      if SRC_RDY_N = '0' and DST_RDY_N = '0' and 
-         EOF_N = '0' then 
-         part4 <= '0';   
+      if SRC_RDY_N = '0' and DST_RDY_N = '0' and
+         EOF_N = '0' then
+         part4 <= '0';
       elsif SRC_RDY_N = '0' and DST_RDY_N = '0' and SOP_N = '0' and
          part3 = '1' then
          part4 <= '1';
@@ -195,11 +195,11 @@ begin
       if SOF_N = '0' and SOP_N = '1' then
          invld <= '1';  -- With every SOF, SOP must also come
       end if;
-      
+
       if EOF_N = '0' and EOP_N = '1' then
          invld <= '1';  -- With every EOF, EOP must also come
       end if;
-      
+
       if PARTS = 1 then -- All frames must have 1 part
          if SOF_N = '1' and SOP_N = '0' then
             invld <= '1'; -- SOP not together with SOF means next part.
@@ -211,7 +211,7 @@ begin
             invld <= '1'; -- SOP, but the second part has already started
          end if;
 
-         if EOF_N = '0' and 
+         if EOF_N = '0' and
             ((part2 = '0' and SOP_N = '1') or part1 = '0') then
             invld <= '1'; -- Frame had only one part
          end if;
@@ -222,7 +222,7 @@ begin
             invld <= '1'; -- SOP, but the third part has already started
          end if;
 
-         if EOF_N = '0' and 
+         if EOF_N = '0' and
             ((part3 = '0' and SOP_N = '1') or part2 = '0') then
             invld <= '1'; -- Frame had only one or two parts
          end if;
@@ -233,7 +233,7 @@ begin
             invld <= '1'; -- SOP, but the fourth part has already started
          end if;
 
-         if EOF_N = '0' and 
+         if EOF_N = '0' and
             ((part4 = '0' and SOP_N = '1') or part3 = '0') then
             invld <= '1'; -- Frame had only one, two or three parts
          end if;

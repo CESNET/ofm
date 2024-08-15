@@ -6,7 +6,7 @@
 
 class model #(ITEM_WIDTH) extends uvm_component;
     `uvm_component_param_utils(uvm_pipe::model #(ITEM_WIDTH))
-    
+
     // Model inputs
     uvm_tlm_analysis_fifo #(uvm_common::model_item #(uvm_logic_vector::sequence_item #(ITEM_WIDTH))) model_mvb_in;
 
@@ -18,7 +18,7 @@ class model #(ITEM_WIDTH) extends uvm_component;
 
         model_mvb_in  = new("model_mvb_in",  this);
         model_mvb_out = new("model_mvb_out", this);
-        
+
     endfunction
 
     task run_phase(uvm_phase phase);

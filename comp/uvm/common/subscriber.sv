@@ -39,7 +39,7 @@ virtual class subscriber_base #(type SEQ_ITEM, type OUTPUT_ITEM) extends uvm_sub
 endclass
 
 ////////////////////////////////////////////////
-// subscriber add time to item 
+// subscriber add time to item
 class subscriber #(type SEQ_ITEM) extends subscriber_base#(SEQ_ITEM, SEQ_ITEM);
    `uvm_component_param_utils(uvm_common::subscriber#(SEQ_ITEM))
 

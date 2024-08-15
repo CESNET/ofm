@@ -94,7 +94,7 @@ architecture mem_modul of rate_lim_mem is
 
    signal reg1_addr_vld    : std_logic;
    signal reg_addr_vld     : std_logic;
-   
+
    signal reg1_in_src_rdy  : std_logic;
    signal reg_in_src_rdy   : std_logic;
 

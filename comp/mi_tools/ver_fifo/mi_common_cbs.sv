@@ -3,10 +3,10 @@
 //-- Author(s): Radek Iša <isa@cesnet.cz>
 //--            Tomáš Beneš <xbenes55@stud.fit.vutbr.cz>
 //--
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
-`include "mi_common_data_checker.sv"    
-    
+`include "mi_common_data_checker.sv"
+
 // ----------------------------------------------------------------------------
 //                      Callback classes
 // ----------------------------------------------------------------------------

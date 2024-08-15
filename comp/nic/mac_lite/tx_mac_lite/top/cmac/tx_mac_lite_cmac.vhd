@@ -22,7 +22,7 @@ entity TX_MAC_LITE_CMAC is
         MFB_BLOCK_SIZE  : natural := 8; -- must be 8
         MFB_ITEM_WIDTH  : natural := 8; -- must be 8
         -- =====================================================================
-        -- OTHERS CONFIGURATION: 
+        -- OTHERS CONFIGURATION:
         -- =====================================================================
 
         -- Maximum allowed size of packet in bytes.
@@ -161,7 +161,7 @@ begin
        -- CLOCK AND RESET
        CMAC_CLK   => TX_CLK,
        CMAC_RESET => TX_RESET,
-       
+
        RX_DATA    => mac_mfb_data,
        RX_SOP_POS => mac_mfb_sof_pos,
        RX_EOP_POS => mac_mfb_eof_pos,
@@ -184,7 +184,7 @@ begin
     port map(
        CMAC_CLK   => TX_CLK,
        CMAC_RESET => TX_RESET,
- 
+
        RX_DATA    => rbas_mfb_data,
        RX_SOF_POS => rbas_mfb_sof_pos,
        RX_EOF_POS => rbas_mfb_eof_pos,
@@ -192,7 +192,7 @@ begin
        RX_EOF     => rbas_mfb_eof,
        RX_SRC_RDY => rbas_mfb_src_rdy,
        RX_DST_RDY => rbas_mfb_dst_rdy,
- 
+
        TX_DATA    => TX_MFB_DATA,
        TX_SOF_POS => TX_MFB_SOF_POS,
        TX_EOF_POS => TX_MFB_EOF_POS,

@@ -86,7 +86,7 @@ entity MFB_MERGER_SIMPLE is
         TX_MFB_EOF_POS  : out std_logic_vector(REGIONS*log2(REGION_SIZE*BLOCK_SIZE)-1 downto 0);
         TX_MFB_SRC_RDY  : out std_logic;
         TX_MFB_DST_RDY  : in  std_logic
-    );  
+    );
 end entity;
 
 architecture BEHAVIORAL of MFB_MERGER_SIMPLE is
@@ -94,7 +94,7 @@ architecture BEHAVIORAL of MFB_MERGER_SIMPLE is
     constant META_SIGNAL_WIDTH  : natural := REGIONS*META_WIDTH;
     constant DATA_WIDTH         : natural := REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH;
     constant EOF_POS_WIDTH      : natural := REGIONS*log2(REGION_SIZE*BLOCK_SIZE);
-    constant SOF_POS_WIDTH      : natural := REGIONS*max(1,log2(REGION_SIZE));    
+    constant SOF_POS_WIDTH      : natural := REGIONS*max(1,log2(REGION_SIZE));
 
     -- MFB0 input signals
     signal data0_rx_dly         : std_logic_vector(DATA_WIDTH-1 downto 0);
@@ -120,7 +120,7 @@ architecture BEHAVIORAL of MFB_MERGER_SIMPLE is
     signal eof_pos1_rx_dly      : std_logic_vector(EOF_POS_WIDTH-1 downto 0);
     signal src_rdy1_rx          : std_logic;
     signal src_rdy1_rx_dly      : std_logic;
-    signal dst_rdy1_rx          : std_logic;    
+    signal dst_rdy1_rx          : std_logic;
 
     -- inner signals
     signal mux_addr             : std_logic;
@@ -140,10 +140,10 @@ architecture BEHAVIORAL of MFB_MERGER_SIMPLE is
     signal pkt_cnt_reached      : std_logic;
     signal src_not_rdy          : std_logic; -- is true when the counter reaches its limit and the other input has src_rdy deasserted
     signal cnt_rst              : std_logic; -- reset of the counter
-    signal inc_pkt0             : std_logic_vector(REGIONS downto 0); -- incomplete packet in this data word 
+    signal inc_pkt0             : std_logic_vector(REGIONS downto 0); -- incomplete packet in this data word
     signal inc_pkt1             : std_logic_vector(REGIONS downto 0); -- incomplete packet in this data word
-    signal sw_right_now0        : std_logic; -- signals whether it is possibe to switch from one input to other input right now 
-    signal sw_right_now1        : std_logic; -- signals whether it is possibe to switch from one input to other input right now 
+    signal sw_right_now0        : std_logic; -- signals whether it is possibe to switch from one input to other input right now
+    signal sw_right_now1        : std_logic; -- signals whether it is possibe to switch from one input to other input right now
 
     -- state signals for FSM
     type state is (sel0, sel1, mask_sof0, mask_sof1, mask_eof0, mask_eof1);
@@ -204,7 +204,7 @@ begin
             if (RST = '1') then
                 src_rdy1_rx_dly <= '0';
             elsif dst_rdy1_rx = '1' then
-                src_rdy1_rx_dly <= RX_MFB1_SRC_RDY; 
+                src_rdy1_rx_dly <= RX_MFB1_SRC_RDY;
             end if;
         end if;
     end process;
@@ -231,8 +231,8 @@ begin
         case mux_addr is
             when '0' => src_not_rdy <= not src_rdy1_rx_dly;
             when '1' => src_not_rdy <= not src_rdy0_rx_dly;
-            when others => null;      
-        end case;       
+            when others => null;
+        end case;
     end process;
 
     -- packet counting process; after its value is equal to the maximum count (PKT_CNT_MAX), the counter resets
@@ -243,7 +243,7 @@ begin
                 pkt_cnt <= (others => '0');
             elsif ((dst_rdy_tx = '1') and (pkt_cnt_reached = '0')) then
                 pkt_cnt <= pkt_cnt + 1;
-            end if; 
+            end if;
         end if;
     end process;
 
@@ -252,12 +252,12 @@ begin
     -- ================================
     -- this logic calculates whether or not current data word ends with an incomplete packet, according to which is decided, if masking is needed or
     -- if it is possible to switch at this moment
-    inc_pkt0_g : for i in 0 to REGIONS-1 generate 
+    inc_pkt0_g : for i in 0 to REGIONS-1 generate
         inc_pkt0(i+1) <= (sof0_rx(i) and not eof0_rx(i) and not inc_pkt0(i)) or
                          (sof0_rx(i) and eof0_rx(i) and inc_pkt0(i)) or
                          (not sof0_rx(i) and not eof0_rx(i) and inc_pkt0(i));
     end generate;
-    
+
     incomplete_pkt0_p : process (CLK)
     begin
         if (rising_edge(CLK)) then
@@ -272,12 +272,12 @@ begin
     sof0_to_be_masked <= inc_pkt0(REGIONS) and (or eof0_rx) and src_rdy0_rx;
     sw_right_now0 <= (not inc_pkt0(0) and (or eof0_rx_dly) and src_rdy0_rx_dly) or (not inc_pkt0(0) and not src_rdy0_rx_dly);
 
-    inc_pkt1_g : for i in 0 to REGIONS-1 generate 
+    inc_pkt1_g : for i in 0 to REGIONS-1 generate
         inc_pkt1(i+1) <= (sof1_rx(i) and not eof1_rx(i) and not inc_pkt1(i)) or
                          (sof1_rx(i) and eof1_rx(i) and inc_pkt1(i)) or
                          (not sof1_rx(i) and not eof1_rx(i) and inc_pkt1(i));
     end generate;
-    
+
     incomplete_pkt1_p : process (CLK)
     begin
         if (rising_edge(CLK)) then
@@ -295,7 +295,7 @@ begin
     -- ============================
     -- masking processes
     -- ============================
-    -- the correct (masked or not masked) sof and eof signals, that are here generated, are later tranferred to the output according to address 
+    -- the correct (masked or not masked) sof and eof signals, that are here generated, are later tranferred to the output according to address
     masking0_p : process (all)
     begin
         if (present_st = mask_sof0) then
@@ -305,7 +305,7 @@ begin
                 if (sof0_rx_dly(i) = '1') then
                     masked_sof0_rx_dly(i) <= '0';
                     exit;
-                end if;    
+                end if;
             end loop;
         elsif (present_st = mask_eof0) then
             masked_sof0_rx_dly <= (others => '0');
@@ -331,7 +331,7 @@ begin
                 if (sof1_rx_dly(i) = '1') then
                     masked_sof1_rx_dly(i) <= '0';
                     exit;
-                end if;    
+                end if;
             end loop;
         elsif (present_st = mask_eof1) then
             masked_sof1_rx_dly <= (others => '0');
@@ -385,7 +385,7 @@ begin
     next_state_p : process (all)
     begin
         case present_st is
-            
+
             when sel0 =>
                 if ((mux_addr_change_to_1 = '1') and (sof1_masked = '0') and (sw_right_now0 = '1')) then
                     next_st <= sel1;
@@ -407,7 +407,7 @@ begin
                 else
                     next_st <= sel1;
                 end if;
-                
+
             when mask_sof0 =>
 
                 if (sof1_masked = '0') then
@@ -428,10 +428,10 @@ begin
 
             when mask_eof1 =>
                 next_st <= sel1;
-         
-            when others => 
+
+            when others =>
                 next_st <= sel0;
-         
+
         end case;
     end process;
 
@@ -488,7 +488,7 @@ begin
                 dst_rdy1_rx <= '0';
                 sof0_masked <= sof0_masked_reg;
                 sof1_masked <= '1';
-                cnt_rst     <= '1';                                                  
+                cnt_rst     <= '1';
             -- in this state the input has been switched form 1 to 0 and only the incomplete part of packet that were previously masked is sent
             when mask_eof0 =>
                 mux_addr    <= '0';
@@ -507,20 +507,20 @@ begin
                 sof0_masked <= sof0_masked_reg;
                 sof1_masked <= '0';
                 cnt_rst     <= '1';
-        
+
         end case;
     end process;
 
     -- the actual switching between inputs 0 and 1 according to the mux address
     data_tx    <= data0_rx_dly when mux_addr = '0' else
                   data1_rx_dly;
- 
+
     meta_tx    <= meta0_rx_dly when mux_addr = '0' else
                   meta1_rx_dly;
- 
+
     sof_tx     <= masked_sof0_rx_dly when mux_addr = '0' else
                   masked_sof1_rx_dly;
-   
+
     eof_tx     <= masked_eof0_rx_dly when mux_addr = '0' else
                   masked_eof1_rx_dly;
 
@@ -544,7 +544,7 @@ begin
             end if;
         end if;
     end process;
-    
+
     reg_out_src_rdy_p : process (CLK)
     begin
         if (rising_edge(CLK)) then

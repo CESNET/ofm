@@ -1,7 +1,7 @@
 /* sv_pcie_pkg.sv
  * Copyright (C) 2020 CESNET z. s. p. o.
  * Author(s): Martin Spinler <spinler@cesnet.cz>
- * 
+ *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 

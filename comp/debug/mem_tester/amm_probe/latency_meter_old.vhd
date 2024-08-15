@@ -1,4 +1,4 @@
--- latency_meter.vhd: Component for measuring latency 
+-- latency_meter.vhd: Component for measuring latency
 -- Copyright (C) 2021 CESNET z. s. p. o.
 -- Author(s): Lukas Nevrkla <xnevrk03@stud.fit.vutbr.cz>
 --
@@ -47,7 +47,7 @@ port(
     HIST_CNT                        : out std_logic_vector(HIST_CNT_WIDTH - 1 downto 0);
 
     -- Error detection
-    TICKS_OVF                       : out std_logic; 
+    TICKS_OVF                       : out std_logic;
     COUNTERS_OVF                    : out std_logic;
     SUM_OVF                         : out std_logic;
     HIST_CNT_OVF                    : out std_logic
@@ -78,7 +78,7 @@ architecture FULL of LATENCY_METER_OLD is
     signal ticks_to_process         : std_logic_vector(TICKS_WIDTH - 1 downto 0);
     signal ticks_to_process_vld     : std_logic;
 
-    -- Index counter which points to the tick counter (inside cyclic pool), 
+    -- Index counter which points to the tick counter (inside cyclic pool),
     -- that will be used for measuring a new request
     signal newest_cnter             : std_logic_vector(log2(COUNTERS_CNT) - 1 downto 0);
     signal newest_cnter_onehot      : std_logic_vector(COUNTERS_CNT - 1 downto 0);
@@ -92,7 +92,7 @@ architecture FULL of LATENCY_METER_OLD is
     -- Delay oldest index counter to get correct tick count to process
     signal oldest_cnter_delayed     : std_logic_vector(log2(COUNTERS_CNT) - 1 downto 0);
     signal oldest_cnter_en_delayed  : std_logic;
-    
+
     -- Indicates which index counter was recently incremented
     -- To determine if cyclic pool of counters was overflowed or is empty
     signal newest_incr              : std_logic;
@@ -140,13 +140,13 @@ begin
     );
 
     histogramer_i : entity work.HISTOGRAMER_OLD
-    generic map (    
+    generic map (
         VARIANT         => HIST_VARIANT,
         DATA_WIDTH      => TICKS_WIDTH,
         CNT_WIDTH       => HIST_CNT_WIDTH,
         CNTER_CNT       => HIST_CNTER_CNT
     )
-    port map (    
+    port map (
         CLK             => CLK,
         RST             => RST,
 
@@ -166,9 +166,9 @@ begin
     oldest_cnter_en             <= READ_RESP;
 
     newest_cnter_full           <= '1' when (newest_cnter = INDEX_CNTERS_LIM) else
-                                   '0';                                   
+                                   '0';
     oldest_cnter_full           <= '1' when (oldest_cnter = INDEX_CNTERS_LIM) else
-                                   '0';                                   
+                                   '0';
     cnters_full_g : for i in 0 to COUNTERS_CNT - 1 generate
         tick_cnts_full(i)       <= '1' when (tick_cnts(i) = TICKS_CNTERS_LIM) else
                                    '0';
@@ -182,8 +182,8 @@ begin
     oldest_incr                 <= oldest_cnter_en and (not newest_cnter_en);
     index_cnters_eq             <= '1' when (unsigned(newest_cnter) = unsigned(oldest_cnter)) else
                                    '0';
-    SUM_OVF                     <= '1' when (sum_ticks_intern(SUM_WIDTH) = '1' and ticks_to_process_vld = '1') else 
-                                   '0'; 
+    SUM_OVF                     <= '1' when (sum_ticks_intern(SUM_WIDTH) = '1' and ticks_to_process_vld = '1') else
+                                   '0';
     SUM_TICKS                   <= sum_ticks_intern(SUM_WIDTH - 1 downto 0);
     COUNTERS_OVF                <= newest_incr_delayed and index_cnters_eq and not pool_empty;
 
@@ -321,10 +321,10 @@ begin
         if (rising_edge(CLK)) then
             if (RST = '1') then
                 pool_empty      <= '1';
-            elsif (index_cnters_eq = '1') then 
-                if (newest_incr_delayed = '1') then 
+            elsif (index_cnters_eq = '1') then
+                if (newest_incr_delayed = '1') then
                     pool_empty      <= '0';
-                elsif (oldest_incr_delayed = '1') then 
+                elsif (oldest_incr_delayed = '1') then
                     pool_empty      <= '1';
                 end if;
             end if;

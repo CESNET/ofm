@@ -10,11 +10,11 @@
 
 if { $ARCHGRP == "FULL" } {
   set SV_FL_BASE   "$ENTITY_BASE/.."
-  
+
   set COMPONENTS [list \
       [ list "SV_FL_BASE"   $SV_FL_BASE  "FULL"] \
   ]
-  set MOD "$MOD $ENTITY_BASE/ethernet_type_pkg.sv" 
+  set MOD "$MOD $ENTITY_BASE/ethernet_type_pkg.sv"
   set MOD "$MOD $ENTITY_BASE/ip_protocol_pkg.sv"
-  set MOD "$MOD $ENTITY_BASE/packet_generator_pkg.sv"   
+  set MOD "$MOD $ENTITY_BASE/packet_generator_pkg.sv"
 }

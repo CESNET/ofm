@@ -123,7 +123,7 @@ begin
          if (CLK'event and CLK = '1') then
             if (shreg_ce = '1') then
                shreg(i) <= shreg(i)((FIFO_DEPTH-2) downto 0) & din_int(i);
-            end if; 
+            end if;
          end if;
       end process;
 

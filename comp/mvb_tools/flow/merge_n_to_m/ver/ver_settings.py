@@ -37,7 +37,7 @@ SETTINGS = {
     "output_reg_0" : {
         "OUTPUT_REG"        : "0",
     },
-    "_combinations_" : (  
+    "_combinations_" : (
     (), # Works the same as '("default",),' as the "default" is applied in every combination
     ("outputs_comb_1",),
     ("outputs_comb_2",),

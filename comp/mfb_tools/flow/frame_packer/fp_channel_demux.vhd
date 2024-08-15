@@ -12,7 +12,7 @@ use work.math_pack.all;
 use work.type_pack.all;
 
 -- The purpose of this component to route data to its channel
-entity FP_CHANNEL_DEMUX is 
+entity FP_CHANNEL_DEMUX is
     generic(
         MFB_REGIONS         : natural := 1;
         MFB_REGION_SIZE     : natural := 8;
@@ -39,7 +39,7 @@ entity FP_CHANNEL_DEMUX is
     );
 end entity;
 
-architecture FULL of FP_CHANNEL_DEMUX is 
+architecture FULL of FP_CHANNEL_DEMUX is
     signal item_eof_pos : slv_array_t(MFB_REGIONS downto 0)(MFB_REGIONS*MFB_REGION_SIZE*max(1, log2(MFB_ITEM_WIDTH)) - 1 downto 0);
 
     signal data_demux               : slv_array_t(MFB_REGIONS downto 0)(RX_CHANNELS*MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH - 1 downto 0);
@@ -69,7 +69,7 @@ begin
                 DATA_OUT    => data_demux(i)
         );
         data_demux_arr(i) <= slv_array_deser(data_demux(i), RX_CHANNELS);
-    
+
         block_vld_demux_i: entity work.GEN_DEMUX
             generic map(
                 DATA_WIDTH  => MFB_REGIONS*MFB_REGION_SIZE,

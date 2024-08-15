@@ -18,7 +18,7 @@ use work.type_pack.all;
 -- Deassertion of bits inside MMR reg is done automaticaly by EMIF
 
 entity EMIF_REFRESH is
-generic (    
+generic (
     -- Avalon MMR bus --
     AMM_DATA_WIDTH          : integer := 32;
     AMM_ADDR_WIDTH          : integer := 10;
@@ -31,16 +31,16 @@ generic (
 
     -- Others --
     RANK_CNT                : integer := 4;
-    REFRESH_REG_ADDR        : integer := 44; 
-    ACK_REG_ADDR            : integer := 50; 
+    REFRESH_REG_ADDR        : integer := 44;
+    ACK_REG_ADDR            : integer := 50;
     DEVICE                  : string
 );
-port(    
+port(
     -- Main --
     CLK                     : in  std_logic;
     RST                     : in  std_logic;
 
-    -- Will trigger refresh on specified rank 
+    -- Will trigger refresh on specified rank
     REFRESH                 : in  std_logic_vector(RANK_CNT - 1 downto 0);
     REFRESHING              : out std_logic_vector(RANK_CNT - 1 downto 0);
     REFRESHING_ANY          : out std_logic;
@@ -51,13 +51,13 @@ port(
     REFRESH_PERIOD_TICKS    : in std_logic_vector(REFRESH_PERIOD_WIDTH - 1 downto 0);
 
     -- Avalon interface --
-    AMM_READY               : in  std_logic;                                             
+    AMM_READY               : in  std_logic;
     AMM_BEGIN_BURST         : out std_logic := '0';
     AMM_READ                : out std_logic;
     AMM_WRITE               : out std_logic;
-    AMM_ADDRESS             : out std_logic_vector(AMM_ADDR_WIDTH - 1 downto 0);  
-    AMM_READ_DATA           : in  std_logic_vector(AMM_DATA_WIDTH - 1 downto 0);        
-    AMM_WRITE_DATA          : out std_logic_vector(AMM_DATA_WIDTH - 1 downto 0);       
+    AMM_ADDRESS             : out std_logic_vector(AMM_ADDR_WIDTH - 1 downto 0);
+    AMM_READ_DATA           : in  std_logic_vector(AMM_DATA_WIDTH - 1 downto 0);
+    AMM_WRITE_DATA          : out std_logic_vector(AMM_DATA_WIDTH - 1 downto 0);
     AMM_BURST_COUNT         : out std_logic_vector(AMM_BURST_COUNT_WIDTH - 1 downto 0);
     AMM_READ_DATA_VALID     : in  std_logic
 );
@@ -69,20 +69,20 @@ architecture FULL of EMIF_REFRESH is
 
     type STATES_T is (
         INIT,
-        PERFORM_REFRESH, 
+        PERFORM_REFRESH,
         REQ_ACK,
         WAIT_FOR_ACK
     );
 
-    constant REFRESH_REG_ADDR_VEC : std_logic_vector(AMM_ADDR_WIDTH - 1 downto 0) 
-        := std_logic_vector(to_unsigned(REFRESH_REG_ADDR, AMM_ADDR_WIDTH)); 
-    constant ACK_REG_ADDR_VEC : std_logic_vector(AMM_ADDR_WIDTH - 1 downto 0) 
-        := std_logic_vector(to_unsigned(ACK_REG_ADDR, AMM_ADDR_WIDTH)); 
+    constant REFRESH_REG_ADDR_VEC : std_logic_vector(AMM_ADDR_WIDTH - 1 downto 0)
+        := std_logic_vector(to_unsigned(REFRESH_REG_ADDR, AMM_ADDR_WIDTH));
+    constant ACK_REG_ADDR_VEC : std_logic_vector(AMM_ADDR_WIDTH - 1 downto 0)
+        := std_logic_vector(to_unsigned(ACK_REG_ADDR, AMM_ADDR_WIDTH));
 
     -- To overcome timing issues
     signal rst_intern               : std_logic;
 
-    -- State machine                
+    -- State machine
     signal curr_state               : STATES_T;
     signal next_state               : STATES_T;
 
@@ -134,7 +134,7 @@ begin
 
     rst_p : process(CLK)
     begin
-        if (rising_edge(CLK)) then 
+        if (rising_edge(CLK)) then
             rst_intern <= RST;
         end if;
     end process;
@@ -168,7 +168,7 @@ begin
     -----------------
     -- Control FSM --
     -----------------
-  
+
     -- Next state process
     state_reg_p : process (CLK)
     begin
@@ -188,62 +188,62 @@ begin
         AMM_WRITE           <= '0';
         AMM_ADDRESS         <= (others => '0');
         AMM_WRITE_DATA      <= (others => '0');
-        AMM_BURST_COUNT     <= std_logic_vector(to_unsigned(1, AMM_BURST_COUNT_WIDTH)); 
+        AMM_BURST_COUNT     <= std_logic_vector(to_unsigned(1, AMM_BURST_COUNT_WIDTH));
 
         REFRESH_DONE_ANY    <= '0';
         REFRESH_START_ANY   <= '0';
 
         case curr_state is
-            when INIT => 
+            when INIT =>
 
             when PERFORM_REFRESH =>
                 AMM_ADDRESS         <= REFRESH_REG_ADDR_VEC;
                 AMM_WRITE           <= '1';
                 AMM_WRITE_DATA(RANK_CNT - 1 downto 0) <= REFRESHING;
 
-                if (AMM_READY = '1') then 
+                if (AMM_READY = '1') then
                     REFRESH_START_ANY   <= '1';
                 end if;
 
-            when REQ_ACK => 
+            when REQ_ACK =>
                 AMM_ADDRESS         <= ACK_REG_ADDR_VEC;
                 AMM_READ            <= '1';
 
-            when WAIT_FOR_ACK => 
-                if (AMM_READ_DATA_VALID = '1' and AMM_READ_DATA(0) = '0') then 
+            when WAIT_FOR_ACK =>
+                if (AMM_READ_DATA_VALID = '1' and AMM_READ_DATA(0) = '0') then
                     REFRESH_DONE_ANY    <= '1';
                 end if;
 
         end case;
     end process;
-    
+
     -- Next state logic
-    process (all)   
+    process (all)
     begin
-        next_state <= curr_state;       
+        next_state <= curr_state;
 
         case curr_state is
             when INIT =>
-                if (any_refresh_edge = '1' or refresh_cnter_full = '1') then 
+                if (any_refresh_edge = '1' or refresh_cnter_full = '1') then
                     next_state <= PERFORM_REFRESH;
                 end if;
 
             when PERFORM_REFRESH =>
-                if (AMM_READY = '1') then 
+                if (AMM_READY = '1') then
                     -- Request was send
                     next_state <= REQ_ACK;
                 end if;
 
-            when REQ_ACK => 
-                if (AMM_READY = '1') then 
+            when REQ_ACK =>
+                if (AMM_READY = '1') then
                     next_state <= WAIT_FOR_ACK;
                 end if;
 
-            when WAIT_FOR_ACK => 
-                if (AMM_READ_DATA_VALID = '1') then 
-                    if (AMM_READ_DATA(0) = '0') then 
+            when WAIT_FOR_ACK =>
+                if (AMM_READ_DATA_VALID = '1') then
+                    if (AMM_READ_DATA(0) = '0') then
                         next_state <= INIT;
-                    else 
+                    else
                         next_state <= REQ_ACK;
                     end if;
                 end if;

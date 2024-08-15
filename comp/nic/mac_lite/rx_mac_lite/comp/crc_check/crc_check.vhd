@@ -47,7 +47,7 @@ architecture FULL of RX_MAC_LITE_CRC_CHECK is
 
 begin
 
-    assert (ITEM_WIDTH = 8) 
+    assert (ITEM_WIDTH = 8)
         report "RX_MAC_LITE_CRC_CHECK: ITEM_WIDTH must be 8, other values are not supported!!!"
         severity failure;
 
@@ -186,7 +186,7 @@ begin
     begin
         if (rising_edge(CLK)) then
             if (s_calc_crc_src_rdy = '1') then
-                s_calc_crc_lva_reg <= s_calc_crc_lva(regions-1); 
+                s_calc_crc_lva_reg <= s_calc_crc_lva(regions-1);
             end if;
         end if;
     end process;

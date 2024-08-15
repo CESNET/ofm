@@ -55,7 +55,7 @@ architecture TESTBENCH_arch of TESTBENCH is
 	signal   tx_eop        :  std_logic;
 	signal   tx_src_rdy    :  std_logic;
 	signal   tx_dst_rdy    :  std_logic;
-     
+
 begin
 
 -- Reset generation -----------------------------------------------------------
@@ -66,7 +66,7 @@ begin
       reset <= '0';
       wait;
    end process reset_gen;
-   
+
 -- clk50 generator ------------------------------------------------------------
 clk100_gen : process
 begin

@@ -2,7 +2,7 @@
 // Copyright (C) 2022 CESNET z. s. p. o.
 // Author(s): Daniel Kříž <xkrizd01@vutbr.cz>
 
-// SPDX-License-Identifier: BSD-3-Clause 
+// SPDX-License-Identifier: BSD-3-Clause
 
 
 `ifndef MFB_TO_LBUS_ADAPTER_TEST_SV
@@ -18,7 +18,7 @@ package test;
     // Supported devices: "7SERIES", "ULTRASCALE"
     parameter DEVICE          = "ULTRASCALE";
     // =======================================================================
-    // MFB BUS CONFIGURATION: 
+    // MFB BUS CONFIGURATION:
     // =======================================================================
     // Supported configuration is MFB(4,1,4,32) for PCIe on UltraScale+
     // Supported configuration is MFB(2,1,4,32) for PCIe on Virtex 7 Series
@@ -27,7 +27,7 @@ package test;
     parameter BLOCK_SIZE  = 4;
     parameter ITEM_WIDTH  = 32;
     // =======================================================================
-    // AXI BUS CONFIGURATION: 
+    // AXI BUS CONFIGURATION:
     // =======================================================================
     // DATA=512, RC=161 for Gen3x16 PCIe (Virtex UltraScale+) - with straddling!
     // DATA=256, RC=70  for Gen3x16 PCIe (Virtex 7 Series) - with straddling!

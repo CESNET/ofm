@@ -27,12 +27,12 @@
     virtual task pre_rx(ref Transaction transaction, string inst);
       // By default, callback does nothing
     endtask
-    
+
     // ------------------------------------------------------------------------
     // Function is called after is transaction received (scoreboard)
     virtual task post_rx(Transaction transaction, string inst);
       // By default, callback does nothing
     endtask
-  
+
   endclass : MonitorCbs
 

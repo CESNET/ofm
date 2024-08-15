@@ -96,14 +96,14 @@ int c_flPostTx(const tFlTransactionInfo* info,
   auxPkt = (unsigned char*) svGetArrayPtr(pkt);
   for (int i=0; i<packetSize; i++)
     packetData.push_back(auxPkt[i]);
-  
+
   // Insert packet to transaction
   txTrans->data.push_back(packetData);
-    
+
   if (last) {
     // Call Received
 	result = processPostTx();
-	delete txTrans;  
+	delete txTrans;
 	txTrans = NULL;
   }
   return result;
@@ -134,14 +134,14 @@ int c_flPostRx( const tFlTransactionInfo* info,
   auxPkt = (unsigned char*) svGetArrayPtr(pkt);
   for (int i=0; i<packetSize; i++)
     packetData.push_back(auxPkt[i]);
-  
+
   // Insert packet to transaction
   rxTrans->data.push_back(packetData);
-    
+
   if (last) {
     // Call Received
 	result = processPostRx();
-	delete rxTrans;  
+	delete rxTrans;
 	rxTrans = NULL;
   }
   return result;

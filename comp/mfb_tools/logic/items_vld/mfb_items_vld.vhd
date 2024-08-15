@@ -148,7 +148,7 @@ architecture FULL of MFB_ITEMS_VLD is
     signal vp_end2_reg0          : std_logic_vector(MFB_REGIONS-1 downto 0);
     signal vp_src_rdy_reg0       : std_logic;
     signal vp_dst_rdy_reg0       : std_logic;
-    
+
     signal rx_data_reg1          : std_logic_vector(MFB_DATA_W-1 downto 0);
     signal rx_data_items_reg1    : slv_array_t     (MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE-1 downto 0)(MFB_ITEM_WIDTH-1 downto 0); -- debug
     signal rx_meta_reg1          : std_logic_vector(MFB_REGIONS*MFB_META_WIDTH-1 downto 0);

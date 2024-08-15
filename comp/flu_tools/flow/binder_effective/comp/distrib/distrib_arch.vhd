@@ -6,7 +6,7 @@
 -- SPDX-License-Identifier: BSD-3-Clause
 --
 --
--- TODO: 
+-- TODO:
 --
 --
 
@@ -29,7 +29,7 @@ architecture FULL of DISTRIB is
    signal in_rx_eop        : std_logic;
    signal in_rx_src_rdy    : std_logic;
    signal in_rx_dst_rdy    : std_logic;
-  
+
    --! Signal for distribute information
    signal distributed_to_out : std_logic;
 
@@ -41,7 +41,7 @@ architecture FULL of DISTRIB is
    signal out_tx_eop0       : std_logic;
    signal out_tx_src_rdy0   : std_logic;
    signal out_tx_dst_rdy0   : std_logic;
-   
+
    --! FLU output signals - lane 0
    signal out_tx_data1      : std_logic_vector(DATA_WIDTH-1 downto 0);
    signal out_tx_sop_pos1   : std_logic_vector(SOP_POS_WIDTH-1 downto 0);
@@ -62,14 +62,14 @@ begin
    -- Input port map
    -- -------------------------------------------------------------------------
    -- Deal with map of the input RX flow
-   in_rx_data        <= RX_DATA;    
+   in_rx_data        <= RX_DATA;
    in_rx_sop_pos     <= RX_SOP_POS;
    in_rx_eop_pos     <= RX_EOP_POS;
    in_rx_sop         <= RX_SOP;
    in_rx_eop         <= RX_EOP;
    in_rx_src_rdy     <= RX_SRC_RDY;
    RX_DST_RDY        <= in_rx_dst_rdy;
-   
+
    DISTRIBUTED_TO    <= distributed_to_out;
 
 
@@ -82,7 +82,7 @@ begin
           -- Common interface
          RESET          => RESET,
          CLK            => CLK,
-   
+
          -- Frame Link Unaligned input interface
          RX_DATA        => in_rx_data,
          RX_SOP_POS     => in_rx_sop_pos,
@@ -91,7 +91,7 @@ begin
          RX_EOP         => in_rx_eop,
          RX_SRC_RDY     => in_rx_src_rdy,
          RX_DST_RDY     => in_rx_dst_rdy,
-   
+
          -- Frame Link Unaligned output interfaces
          -- Interface 0
          TX0_DATA       => out_tx_data0,
@@ -101,7 +101,7 @@ begin
          TX0_EOP        => out_tx_eop0,
          TX0_SRC_RDY    => out_tx_src_rdy0,
          TX0_DST_RDY    => out_tx_dst_rdy0,
-   
+
          -- Interface 1
          TX1_DATA       => out_tx_data1,
          TX1_SOP_POS    => out_tx_sop_pos1,
@@ -110,7 +110,7 @@ begin
          TX1_EOP        => out_tx_eop1,
          TX1_SRC_RDY    => out_tx_src_rdy1,
          TX1_DST_RDY    => out_tx_dst_rdy1,
-         
+
          -- Distribution control interface
          INUM_MASK      => flu_distrib_mask,
          INUM_READY     => flu_distrib_rdy,
@@ -119,7 +119,7 @@ begin
 
    --! Generation of distribution mask (select the fit active output)
    --flu_distrib_mask <=  "01" when(out_tx_dst_rdy0 = '1' and flu_distrib_next = '1') else
-   --                     "10" when(out_tx_dst_rdy1 = '1' and flu_distrib_next = '1') else 
+   --                     "10" when(out_tx_dst_rdy1 = '1' and flu_distrib_next = '1') else
    --                     "00";
 
    --! Distribution mask
@@ -136,7 +136,7 @@ begin
          end if;
       end if;
    end process;
-   
+
    --! Distribution selection ready
   -- flu_distrib_rdy <= in_rx_sop and in_rx_src_rdy and
   --                    (out_tx_dst_rdy0 or out_tx_dst_rdy1);

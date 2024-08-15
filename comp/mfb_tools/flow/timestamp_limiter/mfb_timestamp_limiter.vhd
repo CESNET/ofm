@@ -239,7 +239,7 @@ architecture FULL of MFB_TIMESTAMP_LIMITER is
     signal rx_pd_eof            : slv_array_t     (QUEUES-1 downto 0)(MFB_REGIONS-1 downto 0);
     signal rx_pd_src_rdy        : std_logic_vector(QUEUES-1 downto 0);
     signal rx_pd_dst_rdy        : std_logic_vector(QUEUES-1 downto 0);
-    
+
     signal tx_pd_data           : slv_array_t     (QUEUES-1 downto 0)(MFB_WORD_WIDTH-1 downto 0);
     signal tx_pd_meta           : slv_array_t     (QUEUES-1 downto 0)(MFB_REGIONS*MFB_META_WIDTH-1 downto 0);
     signal tx_pd_sof_pos        : slv_array_t     (QUEUES-1 downto 0)(MFB_REGIONS*MFB_SOFPOS_WIDTH-1 downto 0);
@@ -369,7 +369,7 @@ begin
     -- ========================================================================
     -- Time counter
     -- ========================================================================
-    
+
     time_cnt_i : entity work.DSP_COUNTER
     generic map (
         INPUT_WIDTH  => log2(CLK_PERIOD),
@@ -396,7 +396,7 @@ begin
     else generate
         input_time <= time_cnt;
     end generate;
-            
+
     -- ========================================================================
     -- Input MFB Splitter
     -- ========================================================================
@@ -517,7 +517,7 @@ begin
                 RAM_TYPE            => "AUTO"         ,
                 DEVICE              => DEVICE         ,
                 ALMOST_FULL_OFFSET  => 0              ,
-                ALMOST_EMPTY_OFFSET => 0          
+                ALMOST_EMPTY_OFFSET => 0
             )
             port map(
                 CLK => CLK,

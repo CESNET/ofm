@@ -1,7 +1,7 @@
 /*
  * DUT.sv: Design under test
  * Copyright (C) 2014 CESNET
- * Author: Vaclav Hummel <xhumme00@stud.fit.vutbr.cz> 
+ * Author: Vaclav Hummel <xhumme00@stud.fit.vutbr.cz>
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -10,7 +10,7 @@
  * TODO:
  *
  */
- 
+
 // ----------------------------------------------------------------------------
 //                        Module declaration
 // ----------------------------------------------------------------------------
@@ -26,7 +26,7 @@ module DUT (
 );
 
 // -------------------- Module body -------------------------------------------
-   FLU_QDR #() 
+   FLU_QDR #()
    VHDL_DUT_U  (
     // Common Interface
      .APP_CLK               (APP_CLK),

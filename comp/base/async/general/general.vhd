@@ -4,7 +4,7 @@
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 
-library ieee;	
+library ieee;
 use ieee.std_logic_1164.all;
 
    --! -------------------------------------------------------------------------
@@ -12,7 +12,7 @@ use ieee.std_logic_1164.all;
    --! -------------------------------------------------------------------------
 
 entity ASYNC_GENERAL is
-   Generic (     
+   Generic (
       --! For two synchronization registers TWO_REG=true.
       --! For three synchronization registers TWO_REG=false.
       TWO_REG             : BOOLEAN := false;
@@ -27,18 +27,18 @@ entity ASYNC_GENERAL is
       --! are detected log.1.
       DETECT_RISING_EDGE  : BOOLEAN := false;
       DETECT_FALLING_EDGE : BOOLEAN := false
-   ); 
-   Port ( 
+   );
+   Port (
       --! A clock domain
       ACLK      : in  STD_LOGIC;   --! Source clock
-      ARST      : in  STD_LOGIC;   --! Source reset 
+      ARST      : in  STD_LOGIC;   --! Source reset
       ADATAIN   : in  STD_LOGIC;   --! Data in
       AREADY    : out STD_LOGIC;   --! Ready signal
-         
+
       --! B clock domain
       BCLK      : in  STD_LOGIC;   --! Target clock
-      BRST      : in  STD_LOGIC;   --! Target reset 
-      BDATAOUT  : out STD_LOGIC    --! Data out     
+      BRST      : in  STD_LOGIC;   --! Target reset
+      BDATAOUT  : out STD_LOGIC    --! Data out
    );
 end ASYNC_GENERAL;
 
@@ -46,8 +46,8 @@ end ASYNC_GENERAL;
    --!                      Architecture declaration
    --! -------------------------------------------------------------------------
 
-architecture FULL of ASYNC_GENERAL is  
-   
+architecture FULL of ASYNC_GENERAL is
+
    signal adata         : std_logic := '0';
    signal adata_next    : std_logic := '0';
    signal bdata         : std_logic;
@@ -56,41 +56,41 @@ architecture FULL of ASYNC_GENERAL is
    signal signal_aready : std_logic;
 
 --! -------------------------------------------------------------------------
-begin 
---! -------------------------------------------------------------------------  
-   
+begin
+--! -------------------------------------------------------------------------
+
    signal_aready <= aack XNOR adata;
    BDATAOUT      <= bdata XOR bdata_q;
-   
+
    --! -------------------------------------------------------------------------
    --! Generics detect rising edge on
-   detect_edge_on : if ((DETECT_RISING_EDGE AND DETECT_FALLING_EDGE) OR (NOT DETECT_RISING_EDGE AND DETECT_FALLING_EDGE) OR (DETECT_RISING_EDGE AND NOT DETECT_FALLING_EDGE)) generate	
-      
+   detect_edge_on : if ((DETECT_RISING_EDGE AND DETECT_FALLING_EDGE) OR (NOT DETECT_RISING_EDGE AND DETECT_FALLING_EDGE) OR (DETECT_RISING_EDGE AND NOT DETECT_FALLING_EDGE)) generate
+
       --! FSM
       FSM: entity work.ASYNC_GENERAL_FSM
       generic map(
          DETECT_RISING_EDGE  => DETECT_RISING_EDGE,
-         DETECT_FALLING_EDGE => DETECT_FALLING_EDGE   
-      )  
+         DETECT_FALLING_EDGE => DETECT_FALLING_EDGE
+      )
       port map(
          ACLK       => ACLK,
          ARST       => ARST,
-         ADATAIN    => ADATAIN, 
+         ADATAIN    => ADATAIN,
          ADATA      => adata,
          SIG_AREADY => signal_aready,
          AREADY     => AREADY
-      );      
-   
-   --! -------------------------------------------------------------------------  	
+      );
+
+   --! -------------------------------------------------------------------------
    end generate;
    --! -------------------------------------------------------------------------
 
    --! Generics detect rising edge off
    detect_edge_off : if NOT DETECT_RISING_EDGE AND NOT DETECT_FALLING_EDGE generate
-      
+
       AREADY     <= signal_aready;
-      adata_next <= adata XOR ADATAIN; 
-   
+      adata_next <= adata XOR ADATAIN;
+
       --! adata register
       process(ACLK)
       begin
@@ -101,29 +101,29 @@ begin
                adata <= adata_next;
             end if;
          end if;
-      end process;     
-   
-   --! -------------------------------------------------------------------------  	
+      end process;
+
+   --! -------------------------------------------------------------------------
    end generate;
    --! -------------------------------------------------------------------------
-   
+
    --! Open-loop
    ASYNC_OPEN_LOOP: entity work.ASYNC_OPEN_LOOP
    generic map(
       IN_REG  => false,    --! We do not use!
-      TWO_REG => TWO_REG     
-   )  
+      TWO_REG => TWO_REG
+   )
    port map(
       ACLK     => ACLK,
       BCLK     => BCLK,
       ARST     => ARST,
       BRST     => BRST,
-      ADATAIN  => adata,                
-      BDATAOUT => bdata 
+      ADATAIN  => adata,
+      BDATAOUT => bdata
    );
-   
+
    --! -------------------------------------------------------------------------
-      
+
    --! Output register
    process(BCLK)
       begin
@@ -134,25 +134,25 @@ begin
             bdata_q <= bdata;
          end if;
       end if;
-   end process;              
+   end process;
 
    --! -------------------------------------------------------------------------
-   
+
    --! Open-loop for feedback
    ASYNC_OPEN_LOOP_FEEDBACK: entity work.ASYNC_OPEN_LOOP
    generic map(
       IN_REG  => false,    --! We do not use!
-      TWO_REG => TWO_REG     
-   )  
+      TWO_REG => TWO_REG
+   )
    port map(
       ACLK     => BCLK,
       BCLK     => ACLK,
       ARST     => BRST,
       BRST     => ARST,
-      ADATAIN  => bdata,                        
-      BDATAOUT => aack 
+      ADATAIN  => bdata,
+      BDATAOUT => aack
    );
-   
+
    --! -------------------------------------------------------------------------
 
 end architecture FULL;

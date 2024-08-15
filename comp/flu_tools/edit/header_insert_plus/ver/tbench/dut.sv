@@ -1,12 +1,12 @@
 /*
  * DUT.sv: Design under test
  * Copyright (C) 2014 CESNET
- * Author: Lukas Kekely <kekely@cesnet.cz> 
+ * Author: Lukas Kekely <kekely@cesnet.cz>
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
- 
+
 // ----------------------------------------------------------------------------
 //                        Module declaration
 // ----------------------------------------------------------------------------
@@ -32,7 +32,7 @@ wire tx_dst_rdy;
 // -------------------- Module body -------------------------------------------
 HINS_PLUS #(
      .DATA_WIDTH    (DATA_WIDTH),
-     .SOP_POS_WIDTH (SOP_POS_WIDTH), 
+     .SOP_POS_WIDTH (SOP_POS_WIDTH),
      .HDR_WIDTH     (HDR_WIDTH),
      .RX_CHANNELS   (8)
    )
@@ -51,7 +51,7 @@ HINS_PLUS #(
      .RX_EOP      (RX.EOP),
      .RX_SRC_RDY  (RX.SRC_RDY),
      .RX_DST_RDY  (RX.DST_RDY),
-     
+
      .HDR_DATA    (HDR.DATA),
      .HDR_READY   (HDR.SRC_RDY),
      .HDR_NEXT    (HDR.DST_RDY),

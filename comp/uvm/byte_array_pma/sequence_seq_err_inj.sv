@@ -124,7 +124,7 @@ class sequence_seq_err_inj #(int unsigned DATA_WIDTH) extends uvm_sequence #(uvm
         start_item(req);
         req.block_lock = 1'b1;
         send_same();
-        
+
         if (done == 1'b0) begin
             req.hdr     = uvm_pma::C_HDR;
             req.hdr_vld = 1'b1;

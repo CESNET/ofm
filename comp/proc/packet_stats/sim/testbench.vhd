@@ -27,7 +27,7 @@ architecture behavioral of testbench is
    constant PACKET_LENGTH_WD  : integer := 16;
    constant REG_OUT           : integer := 0;
    constant ADDRESS_WIDTH     : integer := 10;
-  
+
    type ifc_t is record
       RM_ADDRESS       : std_logic_vector(ADDRESS_WIDTH-1 downto 0);
       RM_RD_ENABLE     : std_logic;
@@ -41,8 +41,8 @@ architecture behavioral of testbench is
 
    signal CLK              : std_logic;
    signal RESET            : std_logic;
-   
-   signal ifc              : ifc_t; 
+
+   signal ifc              : ifc_t;
    signal DST_RDY          : std_logic;
    signal RD_NUM_BYTES     : std_logic_vector(NUM_BYTES_WD-1 downto 0);
    signal RD_NUM_PACKETS   : std_logic_vector(NUM_PACKETS_WD-1 downto 0);
@@ -50,34 +50,34 @@ architecture behavioral of testbench is
 
    procedure init (signal ifc : out ifc_t) is
    begin
-      ifc.RM_ADDRESS    <= (others => '0'); 
-      ifc.RM_REQ        <= '0';        
-	   ifc.CNT_ADDRESS   <= (others => '0');     
-	   ifc.PACKET_LENGTH <= (others => '0');     
-	   ifc.ADD_PACKET    <= '0';     
-	   ifc.SRC_RDY       <= '0';     
-	   ifc.RD_NEXT       <= '1';      
+      ifc.RM_ADDRESS    <= (others => '0');
+      ifc.RM_REQ        <= '0';
+	   ifc.CNT_ADDRESS   <= (others => '0');
+	   ifc.PACKET_LENGTH <= (others => '0');
+	   ifc.ADD_PACKET    <= '0';
+	   ifc.SRC_RDY       <= '0';
+	   ifc.RD_NEXT       <= '1';
 	   wait for reset_time;
       wait for clkper;
    end procedure;
 
    procedure send_rm (
       read    : in boolean;
-      address : in integer; 
+      address : in integer;
       signal ifc : out ifc_t
       ) is
    begin
-      ifc.RM_ADDRESS    <= conv_std_logic_vector(address, ADDRESS_WIDTH); 
+      ifc.RM_ADDRESS    <= conv_std_logic_vector(address, ADDRESS_WIDTH);
       ifc.RM_REQ        <= '1';
-      if(read = false) then 
+      if(read = false) then
          ifc.RM_RD_ENABLE  <= '0';
       else
          ifc.RM_RD_ENABLE  <= '1';
       end if;
-	   ifc.SRC_RDY       <= '1';     
+	   ifc.SRC_RDY       <= '1';
       wait for clkper;
-      ifc.RM_REQ        <= '0';        
-	   ifc.SRC_RDY       <= '0';     
+      ifc.RM_REQ        <= '0';
+	   ifc.SRC_RDY       <= '0';
    end procedure;
 
    procedure send_pac (
@@ -88,12 +88,12 @@ architecture behavioral of testbench is
       ) is
    begin
       for I in 0 to num-1 loop
-	      ifc.CNT_ADDRESS   <= conv_std_logic_vector(address, ADDRESS_WIDTH);     
-	      ifc.PACKET_LENGTH <= conv_std_logic_vector(length, PACKET_LENGTH_WD);     
-	      ifc.ADD_PACKET    <= '1';     
-	      ifc.SRC_RDY       <= '1';     
+	      ifc.CNT_ADDRESS   <= conv_std_logic_vector(address, ADDRESS_WIDTH);
+	      ifc.PACKET_LENGTH <= conv_std_logic_vector(length, PACKET_LENGTH_WD);
+	      ifc.ADD_PACKET    <= '1';
+	      ifc.SRC_RDY       <= '1';
          wait for clkper;
-	      ifc.SRC_RDY       <= '0';  
+	      ifc.SRC_RDY       <= '0';
 	   end loop;
    end procedure;
 
@@ -106,9 +106,9 @@ architecture behavioral of testbench is
       variable addrs : int_array;
    begin
       for I7 in 0 to num-1 loop
-         send_rm(true, base_address + I7, ifc); 
-      end loop;      
-      
+         send_rm(true, base_address + I7, ifc);
+      end loop;
+
       for I1 in 0 to num-1 loop
          addrs(0) := I1;
          for I2 in 0 to num-1 loop
@@ -119,24 +119,24 @@ architecture behavioral of testbench is
                   addrs(3) := I4;
                   for I5 in 0 to num-1 loop
                      addrs(4) := I5;
-                     
+
                      for I6 in 0 to 5-1 loop
-                        send_pac(1, base_address + addrs(I6), addrs(I6)+1, ifc); 
-                     end loop;      
+                        send_pac(1, base_address + addrs(I6), addrs(I6)+1, ifc);
+                     end loop;
 
 	               end loop;
 	            end loop;
 	         end loop;
 	      end loop;
       end loop;
-       
+
       for I8 in 0 to num-1 loop
-         send_rm(true, base_address + I8, ifc); 
-      end loop;      
- 
+         send_rm(true, base_address + I8, ifc);
+      end loop;
+
       for I8 in 0 to num-1 loop
-         send_rm(true, base_address + I8, ifc); 
-      end loop;      
+         send_rm(true, base_address + I8, ifc);
+      end loop;
    end procedure;
 
 begin
@@ -144,31 +144,31 @@ begin
    -- packet editor
    uut : entity work.PAC_STATS
    generic map (
-      EN_DSP            => EN_DSP, 
-      NUM_BYTES_WD      => NUM_BYTES_WD, 
-      NUM_PACKETS_WD    => NUM_PACKETS_WD, 
-      PACKET_LENGTH_WD  => PACKET_LENGTH_WD, 
-      ADDRESS_WIDTH     => ADDRESS_WIDTH 
+      EN_DSP            => EN_DSP,
+      NUM_BYTES_WD      => NUM_BYTES_WD,
+      NUM_PACKETS_WD    => NUM_PACKETS_WD,
+      PACKET_LENGTH_WD  => PACKET_LENGTH_WD,
+      ADDRESS_WIDTH     => ADDRESS_WIDTH
    )
    port map (
-      CLK               => CLK, 
-      RESET             => RESET, 
+      CLK               => CLK,
+      RESET             => RESET,
       RM_ADDRESS        => ifc.RM_ADDRESS,
       RM_RD_ENABLE      => ifc.RM_RD_ENABLE,
-      RM_REQ            => ifc.RM_REQ, 
-      CNT_ADDRESS       => ifc.CNT_ADDRESS, 
-      PACKET_LENGTH     => ifc.PACKET_LENGTH, 
-      ADD_PACKET        => ifc.ADD_PACKET, 
-      SRC_RDY           => ifc.SRC_RDY, 
-      DST_RDY           => DST_RDY, 
-      RD_NUM_BYTES      => RD_NUM_BYTES, 
-      RD_NUM_PACKETS    => RD_NUM_PACKETS, 
-      RD_VLD            => RD_VLD, 
-      RD_NEXT           => ifc.RD_NEXT         
+      RM_REQ            => ifc.RM_REQ,
+      CNT_ADDRESS       => ifc.CNT_ADDRESS,
+      PACKET_LENGTH     => ifc.PACKET_LENGTH,
+      ADD_PACKET        => ifc.ADD_PACKET,
+      SRC_RDY           => ifc.SRC_RDY,
+      DST_RDY           => DST_RDY,
+      RD_NUM_BYTES      => RD_NUM_BYTES,
+      RD_NUM_PACKETS    => RD_NUM_PACKETS,
+      RD_VLD            => RD_VLD,
+      RD_NEXT           => ifc.RD_NEXT
    );
 
    --Generate clock
-   clk_gen_p : process 
+   clk_gen_p : process
    begin
       CLK <= '1';
       wait for clkper/2;
@@ -185,7 +185,7 @@ begin
    wait;
    end process;
 
-   -- Simulating input flow 
+   -- Simulating input flow
    input_flow : process
    begin
       init(ifc);

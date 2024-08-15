@@ -75,9 +75,9 @@ begin
     -- ========================================================================
     link_up    <= IN_RX_PCS_READY and IN_RX_BLOCK_LOCK and IN_RX_AM_LOCK;
 
-    -- rotate bytes 
+    -- rotate bytes
     data_rotation : for i in 0 to DATA_BYTES-1 generate
-        in_avst_data_rotated((i+1)*8-1 downto i*8) <= IN_AVST_DATA((DATA_BYTES-i)*8-1 downto (DATA_BYTES-1-i)*8);    
+        in_avst_data_rotated((i+1)*8-1 downto i*8) <= IN_AVST_DATA((DATA_BYTES-i)*8-1 downto (DATA_BYTES-1-i)*8);
     end generate;
 
     -- eof_pos

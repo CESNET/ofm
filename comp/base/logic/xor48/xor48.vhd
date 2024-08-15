@@ -64,10 +64,10 @@ begin
       USE_DPORT => FALSE, -- Select D port usage (TRUE or FALSE)
       USE_MULT => "NONE", -- Select multiplier usage ("MULTIPLY", "DYNAMIC", or "NONE")
       -- Pattern Detector Attributes: Pattern Detection Configuration
-      AUTORESET_PATDET => "NO_RESET",   -- "NO_RESET", "RESET_MATCH", "RESET_NOT_MATCH" 
+      AUTORESET_PATDET => "NO_RESET",   -- "NO_RESET", "RESET_MATCH", "RESET_NOT_MATCH"
       MASK => X"3fffffffffff",          -- 48-bit mask value for pattern detect (1=ignore)
       PATTERN => X"000000000000",       -- 48-bit pattern match for pattern detect
-      SEL_MASK => "MASK",               -- "C", "MASK", "ROUNDING_MODE1", "ROUNDING_MODE2" 
+      SEL_MASK => "MASK",               -- "C", "MASK", "ROUNDING_MODE1", "ROUNDING_MODE2"
       SEL_PATTERN => "PATTERN",         -- Select pattern value ("PATTERN" or "C")
       USE_PATTERN_DETECT => "NO_PATDET",-- Enable pattern detect ("PATDET" or "NO_PATDET")
       -- Register Control Attributes: Pipeline Register Configuration

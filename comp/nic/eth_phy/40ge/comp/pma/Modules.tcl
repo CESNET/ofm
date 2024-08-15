@@ -1,7 +1,7 @@
-# Modules.tcl: 
+# Modules.tcl:
 # Copyright (C) 2013 CESNET
 # Author(s): Stepan Friedl <friedl@cesnet.cz>, Jakub Cabal <jakubcabal@gmail.com>
-# 
+#
 # SPDX-License-Identifier: BSD-3-Clause
 
 # Base directories

@@ -73,14 +73,14 @@ begin
 
       -- RX interface 1
       RX_SOF_N_1        => RX1.sof_n,
-      RX_SOP_N_1        => RX1.eop_n, 
+      RX_SOP_N_1        => RX1.eop_n,
       RX_EOF_N_1        => RX1.eof_n,
       RX_EOP_N_1        => RX1.eop_n,
       RX_SRC_RDY_N_1    => RX1.src_rdy_n,
       RX_DST_RDY_N_1    => RX1.dst_rdy_n,
       RX_DATA_1         => RX1.data,
       RX_REM_1          => RX1.drem,
-    
+
       -- TX interface
       TX_DATA           => TX.data,
       TX_REM            => TX.drem,
@@ -93,5 +93,5 @@ begin
 
       );
 
-end architecture full; 
+end architecture full;
 

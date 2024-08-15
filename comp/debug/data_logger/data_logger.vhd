@@ -8,7 +8,7 @@
 -- MI address space:
 -- 0x0000: CTRL REG
 --         0: sw rst
---         1: rst done  
+--         1: rst done
 -- 0x0004: STATS REG
 -- 0x0008: INDEX REG
 -- 0x000C: SLICE REG
@@ -51,7 +51,7 @@ use work.type_pack.all;
 
 -- .. vhdl:autogenerics:: DATA_LOGGER
 entity DATA_LOGGER is
-generic (    
+generic (
     MI_DATA_WIDTH           : integer := 32;
     MI_ADDR_WIDTH           : integer := 32;
 
@@ -75,7 +75,7 @@ generic (
     -- Default value of control output instrface
     CTRLO_DEFAULT           : std_logic_vector(max(CTRLO_WIDTH - 1, 0) downto 0) := (others => '0')
 );
-port(    
+port(
     CLK                     : in  std_logic;
     RST                     : in  std_logic;
     RST_DONE                : out std_logic;
@@ -104,7 +104,7 @@ port(
 
     VALUES_VLD              : in  std_logic_vector(max(VALUE_CNT - 1, 0) downto 0) := (others => '0');
     VALUES                  : in  std_logic_vector(max(sum(VALUE_WIDTH) - 1, 0) downto 0) := (others => '0');
-     
+
     -- ==========================
     -- MI bus interface
     -- ==========================
@@ -204,12 +204,12 @@ architecture FULL of DATA_LOGGER is
     constant HIST_ADDR_WIDTH    : i_array_t(max(VALUE_CNT - 1, 0) downto 0) := log2_arr(HIST_BOX_CNT);
 
     constant MI_ADDR_CUTOFF     : integer := 5;
-    constant MI_CTRL_ADDR       : std_logic_vector(MI_ADDR_CUTOFF - 1 downto 0) := std_logic_vector(to_unsigned(0,  MI_ADDR_CUTOFF)); 
-    constant MI_STATS_ADDR      : std_logic_vector(MI_ADDR_CUTOFF - 1 downto 0) := std_logic_vector(to_unsigned(4,  MI_ADDR_CUTOFF)); 
-    constant MI_INDEX_ADDR      : std_logic_vector(MI_ADDR_CUTOFF - 1 downto 0) := std_logic_vector(to_unsigned(8,  MI_ADDR_CUTOFF)); 
-    constant MI_SLICE_ADDR      : std_logic_vector(MI_ADDR_CUTOFF - 1 downto 0) := std_logic_vector(to_unsigned(12, MI_ADDR_CUTOFF)); 
-    constant MI_HIST_ADDR       : std_logic_vector(MI_ADDR_CUTOFF - 1 downto 0) := std_logic_vector(to_unsigned(16, MI_ADDR_CUTOFF)); 
-    constant MI_VALUE_ADDR      : std_logic_vector(MI_ADDR_CUTOFF - 1 downto 0) := std_logic_vector(to_unsigned(20, MI_ADDR_CUTOFF)); 
+    constant MI_CTRL_ADDR       : std_logic_vector(MI_ADDR_CUTOFF - 1 downto 0) := std_logic_vector(to_unsigned(0,  MI_ADDR_CUTOFF));
+    constant MI_STATS_ADDR      : std_logic_vector(MI_ADDR_CUTOFF - 1 downto 0) := std_logic_vector(to_unsigned(4,  MI_ADDR_CUTOFF));
+    constant MI_INDEX_ADDR      : std_logic_vector(MI_ADDR_CUTOFF - 1 downto 0) := std_logic_vector(to_unsigned(8,  MI_ADDR_CUTOFF));
+    constant MI_SLICE_ADDR      : std_logic_vector(MI_ADDR_CUTOFF - 1 downto 0) := std_logic_vector(to_unsigned(12, MI_ADDR_CUTOFF));
+    constant MI_HIST_ADDR       : std_logic_vector(MI_ADDR_CUTOFF - 1 downto 0) := std_logic_vector(to_unsigned(16, MI_ADDR_CUTOFF));
+    constant MI_VALUE_ADDR      : std_logic_vector(MI_ADDR_CUTOFF - 1 downto 0) := std_logic_vector(to_unsigned(20, MI_ADDR_CUTOFF));
 
     constant CTRL_RST_BIT       : integer := 0;
     constant CTRL_RST_DONE_BIT  : integer := 1;
@@ -217,22 +217,22 @@ architecture FULL of DATA_LOGGER is
     constant STAT_CNT           : integer := 18;
     constant MI_READ_DELAY      : integer := 2;
 
-    constant MAX_DATA_WIDTH_RAW : integer := 
-        max(CTRLI_WIDTH, 
-        max(CTRLO_WIDTH, 
-        max(CNTER_WIDTH, 
-        max(max(VALUE_WIDTH),  
+    constant MAX_DATA_WIDTH_RAW : integer :=
+        max(CTRLI_WIDTH,
+        max(CTRLO_WIDTH,
+        max(CNTER_WIDTH,
+        max(max(VALUE_WIDTH),
         max(max(SUM_WIDTH), max(HIST_BOX_WIDTH))
     ))));
-    constant MAX_DATA_WIDTH     : integer := div_roundup(MAX_DATA_WIDTH_RAW, MI_DATA_WIDTH) * MI_DATA_WIDTH;  
-    constant MI_SLICES          : integer := div_roundup(MAX_DATA_WIDTH, MI_DATA_WIDTH);  
+    constant MAX_DATA_WIDTH     : integer := div_roundup(MAX_DATA_WIDTH_RAW, MI_DATA_WIDTH) * MI_DATA_WIDTH;
+    constant MI_SLICES          : integer := div_roundup(MAX_DATA_WIDTH, MI_DATA_WIDTH);
 
     constant MI_STAT_MAX        : std_logic_vector(MI_DATA_WIDTH - 1 downto 0) := std_logic_vector(to_unsigned(STAT_CNT,        MI_DATA_WIDTH));
     constant MI_CNTER_INDEX_MAX : std_logic_vector(MI_DATA_WIDTH - 1 downto 0) := std_logic_vector(to_unsigned(ALL_CNTER_CNT,   MI_DATA_WIDTH));
     constant MI_VALUE_INDEX_MAX : std_logic_vector(MI_DATA_WIDTH - 1 downto 0) := std_logic_vector(to_unsigned(VALUE_CNT,       MI_DATA_WIDTH));
     constant MI_SLICE_MAX       : std_logic_vector(MI_DATA_WIDTH - 1 downto 0) := std_logic_vector(to_unsigned(MI_SLICES,       MI_DATA_WIDTH));
 
-    constant CTRLO_SLICE_CNT    : integer := div_roundup(CTRLO_WIDTH, MI_DATA_WIDTH);  
+    constant CTRLO_SLICE_CNT    : integer := div_roundup(CTRLO_WIDTH, MI_DATA_WIDTH);
 
     -------------
     -- Signals --
@@ -357,10 +357,10 @@ begin
                 CLK                     => CLK,
                 RST                     => rst_intern,
                 RST_DONE                => rst_done_vec(i),
-   
+
                 INPUT                   => VALUES(msb(i) downto lsb(i)),
                 INPUT_VLD               => VALUES_VLD(i),
-   
+
                 READ_REQ                => hist_read(i),
                 READ_ADDR               => hist_read_addr(msb(i, HIST_ADDR_WIDTH) downto lsb(i, HIST_ADDR_WIDTH)),
                 READ_BOX_VLD            => hist_read_vld(i),
@@ -400,7 +400,7 @@ begin
     ----------------------
 
     cnter_diff_intern_g : if (CNTER_CNT > 0) generate
-        cnter_diff_intern(CNTER_CNT - 1 downto 0) <= CNTERS_DIFF;    
+        cnter_diff_intern(CNTER_CNT - 1 downto 0) <= CNTERS_DIFF;
     end generate;
 
     value_cnter_g : if (VALUE_CNT > 0) generate
@@ -410,7 +410,7 @@ begin
     -- New counter value (has one more bit to detect overflow)
     cnter_incr_g : for i in 0 to ALL_CNTER_CNT - 1 generate
         cnter_new(i)    <= std_logic_vector(
-            unsigned('0' & cnter_reg_tmp(i)) + 
+            unsigned('0' & cnter_reg_tmp(i)) +
             unsigned('0' & cnter_diff_intern(i))
         );
     end generate;
@@ -421,16 +421,16 @@ begin
     -- Calculate sum + overflow
     value_sum_new_g : for i in 0 to VALUE_CNT - 1 generate
         value_sum_new_if_g : if (SUM_EN(i) = true) generate
-            value_sum_new(msb(i, SUM_WIDTH) downto lsb(i, SUM_WIDTH)) <= 
+            value_sum_new(msb(i, SUM_WIDTH) downto lsb(i, SUM_WIDTH)) <=
                 -- TODO overflow
-                --(others => '1') 
+                --(others => '1')
                 --when (
                 --    std_logic_vector(
-                --        ('1' & unsigned(value_sum_reg(msb(i, SUM_WIDTH) downto lsb(i, SUM_WIDTH)))) + 
+                --        ('1' & unsigned(value_sum_reg(msb(i, SUM_WIDTH) downto lsb(i, SUM_WIDTH)))) +
                 --        ('1' & unsigned(VALUES(msb(i) downto lsb(i))))
                 --        ) > std_logic_vector(to_unsigned(max(2 ** SUM_WIDTH(i) - 1, 0), SUM_WIDTH(i) + 1))
                 --) else
-                std_logic_vector(unsigned(value_sum_reg(msb(i, SUM_WIDTH) downto lsb(i, SUM_WIDTH))) + 
+                std_logic_vector(unsigned(value_sum_reg(msb(i, SUM_WIDTH) downto lsb(i, SUM_WIDTH))) +
                     unsigned(VALUES(msb(i) downto lsb(i)))
                 );
         end generate;
@@ -448,10 +448,10 @@ begin
                                0;
     mi_value_index_reg_i    <= to_integer(unsigned(mi_index_reg)) when (mi_index_reg < MI_VALUE_INDEX_MAX) else
                                0;
-    mi_slice_reg_i          <= to_integer(unsigned(mi_slice_reg)) when (mi_slice_reg < MI_SLICE_MAX) else 
+    mi_slice_reg_i          <= to_integer(unsigned(mi_slice_reg)) when (mi_slice_reg < MI_SLICE_MAX) else
                                0;
 
-    mi_sel_stat   <=  
+    mi_sel_stat   <=
         std_logic_vector(to_unsigned(CNTER_CNT,     MI_DATA_WIDTH)) when (mi_stats_reg_i = 0 ) else
         std_logic_vector(to_unsigned(VALUE_CNT,     MI_DATA_WIDTH)) when (mi_stats_reg_i = 1 ) else
         std_logic_vector(to_unsigned(MI_DATA_WIDTH, MI_DATA_WIDTH)) when (mi_stats_reg_i = 2 ) else
@@ -473,7 +473,7 @@ begin
         sel_reg_value_hist_slice                                    when (mi_stats_reg_i = 17) else
         X"DEAD_BEAF";
 
-    mi_sel_stat_vld  <= 
+    mi_sel_stat_vld  <=
         '1'                     when (mi_stats_reg_i = 0 ) else
         '1'                     when (mi_stats_reg_i = 1 ) else
         '1'                     when (mi_stats_reg_i = 2 ) else
@@ -520,7 +520,7 @@ begin
     -- Values to slices
     value_slices_g : for i in 0 to VALUE_CNT - 1 generate
         value_width_slices(i)                               <= std_logic_vector(to_unsigned(VALUE_WIDTH(i),     MI_DATA_WIDTH));
-        value_ens_slices(i)(4 - 1 downto 0)                 <= 
+        value_ens_slices(i)(4 - 1 downto 0)                 <=
             bool_to_logic(HIST_EN(i)) &
             bool_to_logic(SUM_EN(i))  &
             bool_to_logic(MAX_EN(i))  &
@@ -562,8 +562,8 @@ begin
     ---------------------
 
     hist_read_g : for i in 0 to VALUE_CNT - 1 generate
-        hist_read_raw(i) <= '1' when (mi_value_index_reg_i = i and mi_addr_intern = MI_HIST_ADDR and MI_WR = '1' and MI_ARDY = '1') else 
-                            '0';  
+        hist_read_raw(i) <= '1' when (mi_value_index_reg_i = i and mi_addr_intern = MI_HIST_ADDR and MI_WR = '1' and MI_ARDY = '1') else
+                            '0';
         hist_read_addr(msb(i, HIST_ADDR_WIDTH) downto lsb(i, HIST_ADDR_WIDTH))  <= mi_hist_reg(HIST_ADDR_WIDTH(i) - 1 downto 0);
     end generate;
 
@@ -721,10 +721,10 @@ begin
         hist_box_reg_p : process(CLK)
         begin
             if (rising_edge(CLK)) then
-                if (rst_intern = '1') then 
+                if (rst_intern = '1') then
                     hist_read_box_reg(msb(i, HIST_BOX_WIDTH) downto lsb(i, HIST_BOX_WIDTH))   <= (others => '0');
                 elsif (hist_read_vld(i) = '1') then
-                    hist_read_box_reg(msb(i, HIST_BOX_WIDTH) downto lsb(i, HIST_BOX_WIDTH))   
+                    hist_read_box_reg(msb(i, HIST_BOX_WIDTH) downto lsb(i, HIST_BOX_WIDTH))
                         <= hist_read_box(msb(i, HIST_BOX_WIDTH) downto lsb(i, HIST_BOX_WIDTH));
                 end if;
             end if;
@@ -735,7 +735,7 @@ begin
         hist_box_vld_reg_p : process(CLK)
         begin
             if (rising_edge(CLK)) then
-                if (rst_intern = '1' or hist_read_raw(i) = '1') then 
+                if (rst_intern = '1' or hist_read_raw(i) = '1') then
                     hist_read_vld_reg(i)    <= '0';
                 elsif (hist_read_vld(i) = '1') then
                     hist_read_vld_reg(i)    <= '1';

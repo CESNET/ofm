@@ -21,15 +21,15 @@ use std.textio.all;
 --                        Internal Bus Package
 -- ----------------------------------------------------------------------------
 package ib_pkg is
-   
+
    -- ========================
-   -- Address 
+   -- Address
    -- ========================
 
    constant C_IB_TRANS_TYPE_WIDTH : integer := 3;
    constant C_IB_FLAG_WIDTH       : integer := 1;
    constant C_IB_LENGTH_WIDTH     : integer := 12;
-   
+
    -- =============================================
    -- IB Transaction Type
    --
@@ -46,7 +46,7 @@ package ib_pkg is
    -- Fourth bit of type (15 bit) is reserved for 1) Ack flag - for L2LW transaction
    --                                             2) Last fragment flag - for G2LR
 
-   -- Internal 64 bit Bus Link 
+   -- Internal 64 bit Bus Link
    type t_internal_bus_link64 is record
       DATA       : std_logic_vector(63 downto 0);
       SOP_N      : std_logic;
@@ -191,7 +191,7 @@ package ib_pkg is
    type t_ibbm_64 is record
       -- Master Interface Input
 
-      -- Global Address 
+      -- Global Address
       GLOBAL_ADDR   : std_logic_vector(63 downto 0);
       -- Local Address
       LOCAL_ADDR    : std_logic_vector(31 downto 0);
@@ -203,7 +203,7 @@ package ib_pkg is
       TRANS_TYPE    : std_logic_vector(1 downto 0);
       -- Request
       REQ           : std_logic;
-                 
+
       -- Master Output interface
 
       -- Ack
@@ -222,6 +222,6 @@ end ib_pkg;
 --                        Internal Bus Package
 -- ----------------------------------------------------------------------------
 package body ib_pkg is
-       
+
 end ib_pkg;
 

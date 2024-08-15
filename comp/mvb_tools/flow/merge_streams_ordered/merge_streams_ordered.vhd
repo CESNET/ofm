@@ -58,7 +58,7 @@ entity MVB_MERGE_STREAMS_ORDERED is
         RX_SRC_RDY : in  std_logic_vector(RX_STREAMS-1 downto 0);
         -- RX MVB: destination ready
         RX_DST_RDY : out std_logic_vector(RX_STREAMS-1 downto 0);
-        
+
         -- RX SEL MVB: defines from which interface a word should be taken
         RX_SEL_IF       : in  std_logic_vector(RX_STREAMS*MVB_ITEMS*log2(RX_STREAMS)-1 downto 0);
         -- RX SEL MVB: valid of each MVB item
@@ -140,7 +140,7 @@ begin
 
             TX_DATA         => sel_shake_tx_data,
             TX_VLD          => sel_shake_tx_vld,
-            TX_NEXT         => (others => sel_shake_tx_dst_rdy) 
+            TX_NEXT         => (others => sel_shake_tx_dst_rdy)
         );
         sel_shake_tx_src_rdy <= or (sel_shake_tx_vld);
     else generate
@@ -149,7 +149,7 @@ begin
         sel_shake_tx_src_rdy    <= RX_SEL_SRC_RDY;
         RX_SEL_DST_RDY          <= sel_shake_tx_dst_rdy;
     end generate;
-    
+
 
     sel_shake_tx_dst_rdy <= (and rx_strm_rdy) and TX_DST_RDY;
 
@@ -256,7 +256,7 @@ begin
                 TX_DATA         => fifox_multi_do(i),
                 TX_VLD          => fifox_multi_src_rdy(i),
                 TX_NEXT         => fifox_multi_rd(i)
-            );   
+            );
         end generate;
     end generate;
 

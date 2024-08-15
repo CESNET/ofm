@@ -1,10 +1,10 @@
 /*
  * Copyright (C) 2020 CESNET z. s. p. o.
- * SPDX-License-Identifier: BSD-3-Clause 
+ * SPDX-License-Identifier: BSD-3-Clause
 */
 
 class agent #(AVST_REGIONS);
-   
+
     monitor #(AVST_REGIONS) m_monitor_packet;
     driver  #(AVST_REGIONS) m_driver_packet;
 

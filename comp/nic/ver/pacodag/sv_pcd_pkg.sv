@@ -12,7 +12,7 @@
 // PACODAG Interface
 `include "pcd_ifc.sv"
 
-package sv_pcd_pkg; 
+package sv_pcd_pkg;
 
   import sv_common_pkg::*; // Import SV common classes
 

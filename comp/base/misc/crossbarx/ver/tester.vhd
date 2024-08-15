@@ -74,7 +74,7 @@ architecture FULL of CROSSBARX_TESTER is
     end function;
 
 begin
-    
+
     -------------------------------------------------------------
     -- Transaction generation
     -------------------------------------------------------------
@@ -190,7 +190,7 @@ begin
                             end if;
                         end if;
                         start_a_col := t.a_ptr/(BUF_A_STREAM_ROWS*ROW_ITEMS);
-                        
+
                         a_wr_ptr(i)(t.a_section) := (a_wr_ptr(i)(t.a_section)+t.length) mod (BUF_A_SECTION_COLS*BUF_A_STREAM_ROWS*ROW_ITEMS);
                         b_wr_ptr   (t.b_section) := (b_wr_ptr   (t.b_section)+t.length) mod (BUF_B_SECTION_COLS*BUF_B_ROWS*ROW_ITEMS);
 
@@ -281,7 +281,7 @@ begin
             end if;
         end if;
     end process;
-    
+
     -------------------------------------------------------------
 
     -------------------------------------------------------------
@@ -388,7 +388,7 @@ begin
             end if;
 --        end if;
     end process;
-    
+
     -------------------------------------------------------------
 
     -------------------------------------------------------------
@@ -406,15 +406,15 @@ begin
             write(l,string'("ERROR: Verification finished, but verification FIFO is not empty!"));
             report "" severity failure;
         end if;
-        
+
         for i in 0 to 8-1 loop
             wait until (rising_edge(CLK));
         end loop;
-        
+
         write(l,string'("VERIFICATION SUCCESS"));writeline(output,l);
         stop;
     end process;
-    
+
     -------------------------------------------------------------
 
 end architecture;

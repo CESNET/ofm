@@ -5,7 +5,7 @@
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --
--- TODO: 
+-- TODO:
 --
 --
 
@@ -32,7 +32,7 @@ entity FLUA_SHIFTER is
       --! Header configuratoin
       HDR_ENABLE    : integer := 1;
       HDR_WIDTH     : integer := 128;
-      
+
       --! Changes for binding with FLU gap,
       --! if short frame with non zero shift is detected,
       --! ignore first EOP because it is not valid, this signal
@@ -42,7 +42,7 @@ entity FLUA_SHIFTER is
    port(
        -- -------------------------------------------------
        -- \name Common interface
-       -- -------------------------------------------------  
+       -- -------------------------------------------------
       RESET          : in  std_logic;
       CLK            : in  std_logic;
 
@@ -84,7 +84,7 @@ end entity;
 -- ----------------------------------------------------------------------------
 --                        Entity declaration
 -- ----------------------------------------------------------------------------
-architecture FULL of FLUA_SHIFTER is 
+architecture FULL of FLUA_SHIFTER is
 
    -- Signals declaration -----------------------------------------------------
    signal masked_data       : std_logic_vector(DATA_WIDTH-1 downto 0);
@@ -109,17 +109,17 @@ begin
       port map(
           -- -------------------------------------------------
           -- \name Common interface
-          -- -------------------------------------------------  
+          -- -------------------------------------------------
          RESET          => RESET,
          CLK            => CLK,
-   
+
          -- --------------------------------------------------
          -- \name Control interface
          -- --------------------------------------------------
          -- Shifting value of SOP_POS; this signal is valid
          -- when RX_SOP is asserted.
          SHIFT_VAL      => SHIFT_VAL,
-   
+
          -- --------------------------------------------------
          -- \name Frame Link Unaligned input interface
          -- --------------------------------------------------
@@ -130,7 +130,7 @@ begin
          RX_EOP         => RX_EOP,
          RX_SRC_RDY     => RX_SRC_RDY,
          RX_DST_RDY     => RX_DST_RDY,
-   
+
          -- --------------------------------------------------
          -- \name Frame Link Unaligned output interface
          -- --------------------------------------------------
@@ -143,7 +143,7 @@ begin
          TX_DST_RDY     => masked_dst_rdy
       );
 
-      
+
       -- Copy the rest of signals without any change
       TX_DATA        <= masked_data;
       TX_SOP_POS     <= masked_sop_pos;
@@ -152,7 +152,7 @@ begin
       TX_EOP         <= masked_eop;
       TX_SRC_RDY     <= masked_src_rdy;
       masked_dst_rdy <= TX_DST_RDY;
-      
+
       -- Transfer the ID_IN value
    ID_OUT_GEN:if(ENABLE_ID = 1)generate
       ID_OUT <= ID_IN;

@@ -185,7 +185,7 @@ reset_gen : process
 
 tb: process
    -- This procedure must be placed in this testbench file. Using this
-   -- procedure is necessery for corect function of FL_SIM 
+   -- procedure is necessery for corect function of FL_SIM
    procedure send_packet(ctrl : in t_fl_ctrl) is
    begin
       wait until (clk'event and clk='1' and fl_sim_busy = '0');
@@ -199,13 +199,13 @@ tb: process
    TX_DST_RDY_N1 <= '1';
 
    wait for 1 us;
-   
-   -----------------------------------------------------  
+
+   -----------------------------------------------------
    -- DOWN architecture testing
-   -----------------------------------------------------  
+   -----------------------------------------------------
    send_packet(fl_send32("packet1.txt"));
    send_packet(fl_send32("packet1.txt"));
-   
+
    wait until clk'event and clk='1';
    TX_DST_RDY_N1 <= '0';
 

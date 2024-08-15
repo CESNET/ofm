@@ -1,5 +1,5 @@
 /*
- * interface.sv  
+ * interface.sv
  * Copyright (C) 2020 CESNET z. s. p. o.
  * Author(s): Radek Iša <isa@cesnet.cz>
  * SPDX-License-Identifier: BSD-3-Clause
@@ -7,7 +7,7 @@
 
 
 interface i_pcie_c #(DEVICE, DATA_WIDTH) (input logic CLK, RESET);
-   
+
     localparam AXI_CQ_TUSER_WIDTH = (DEVICE=="7SERIES") ? 85 : (DEVICE=="ULTRASCALE" && DATA_WIDTH == 512) ? 183 : 88;
     localparam AXI_CC_TUSER_WIDTH = (DEVICE=="7SERIES") ? 33 : (DEVICE=="ULTRASCALE" && DATA_WIDTH == 512) ? 81  : 33;
 

@@ -4,12 +4,12 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-set FIFOXM_BASE       "$OFM_PATH/comp/base/fifo/fifox_multi" 
+set FIFOXM_BASE       "$OFM_PATH/comp/base/fifo/fifox_multi"
 set AUX_BASE          "$OFM_PATH/comp/mfb_tools/logic/auxiliary_signals"
 set MVB_PIPE_BASE     "$OFM_PATH/comp/mvb_tools/flow/pipe"
 set MFB_PIPE_BASE     "$OFM_PATH/comp/mfb_tools/flow/pipe"
-set PIPE_REG_BASE     "$OFM_PATH/comp/base/misc/pipe" 
-set SHAKEDOWN_BASE    "$OFM_PATH/comp/mvb_tools/flow/shakedown" 
+set PIPE_REG_BASE     "$OFM_PATH/comp/base/misc/pipe"
+set SHAKEDOWN_BASE    "$OFM_PATH/comp/mvb_tools/flow/shakedown"
 set MVB_MERGE_ST_BASE "$OFM_PATH/comp/mvb_tools/flow/merge_streams"
 
 set PKG_BASE "$OFM_PATH/comp/base/pkg"

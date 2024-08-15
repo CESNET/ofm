@@ -20,7 +20,7 @@ class sequencer #(int unsigned CHANNELS, int unsigned WIDTH) extends uvm_sequenc
     // Constructor
     function new(string name = "sequencer", uvm_component parent = null);
         super.new(name, parent);
-        
+
         WHOLE_BYTES : assert((WIDTH & 7) == 0);
     endfunction: new
 

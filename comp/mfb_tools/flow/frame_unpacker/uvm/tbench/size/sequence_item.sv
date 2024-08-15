@@ -64,7 +64,7 @@ class sequence_item extends uvm_sequence_item;
     function string convert2string();
         string ret;
 
-        $swrite(ret, "\tsp_size : %d\n", 
+        $swrite(ret, "\tsp_size : %d\n",
                      sp_size);
 
         return ret;

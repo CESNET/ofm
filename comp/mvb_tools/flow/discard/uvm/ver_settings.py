@@ -22,7 +22,7 @@ SETTINGS = {
     "items_comb_2" : {
         "ITEMS"             : "1",
     },
-    "_combinations_" : (  
+    "_combinations_" : (
     (), # Works the same as '("default",),' as the "default" is applied in every combination
 
     ("bus_comb_1",),

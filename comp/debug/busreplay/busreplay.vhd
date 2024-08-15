@@ -1,6 +1,6 @@
 -- busreplay.vhd: Syntetisable data bus active replay from MI32 accessible memory
 -- Copyright (C) 2016 CESNET
--- Author: Lukas Kekely <kekely@cesnet.cz> 
+-- Author: Lukas Kekely <kekely@cesnet.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --

@@ -14,7 +14,7 @@
  */
 
 package test_pkg;
-   
+
     import math_pkg::*;
     import sv_common_pkg::*; // SystemVerilog Boolean
 

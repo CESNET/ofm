@@ -32,7 +32,7 @@ architecture FULL of RR_SELECT is
    signal next_req_vld          : std_logic;
 
    --! Signals for round robin selection
-   signal rr_req              : std_logic_vector(INPUTS-1 downto 0); 
+   signal rr_req              : std_logic_vector(INPUTS-1 downto 0);
    signal rr_req_prev         : std_logic_vector(INPUTS-1 downto 0);
    signal rr_req_shifted      : std_logic_vector(INPUTS-1 downto 0);
    signal rr_req_masked       : std_logic_vector(INPUTS-1 downto 0);
@@ -41,7 +41,7 @@ architecture FULL of RR_SELECT is
    signal rr_lsb_req_masked   : std_logic_vector(INPUTS-1 downto 0);
    signal rr_lsb_req          : std_logic_vector(INPUTS-1 downto 0);
    --! Output RR winner
-   signal rr_req_win          : std_logic_vector(INPUTS-1 downto 0);  
+   signal rr_req_win          : std_logic_vector(INPUTS-1 downto 0);
 
    --! Control signals for FLU multiplexer
    signal flu_mux_sel      : std_logic_vector(log2(INPUTS)-1 downto 0);
@@ -68,7 +68,7 @@ architecture FULL of RR_SELECT is
 
    --! FLU bus from FLU multiplexer to FLU PIPE
    constant DATA_JUICE_WIDTH          : integer := DATA_WIDTH+ENABLE_ID*ID_WIDTH+HDR_ENABLE*HDR_WIDTH;
-   
+
    signal flu_pipe_rx_data          : std_logic_vector(DATA_WIDTH-1 downto 0);
    signal flu_pipe_rx_data_id       : std_logic_vector(DATA_JUICE_WIDTH-1 downto 0);
    signal flu_pipe_tx_data_id       : std_logic_vector(DATA_JUICE_WIDTH-1 downto 0);
@@ -98,7 +98,7 @@ architecture FULL of RR_SELECT is
    component FLU_MULTIPLEXER_DSP is
       generic(
          DATA_WIDTH    : integer := 512;
-         SOP_POS_WIDTH : integer := 3; 	
+         SOP_POS_WIDTH : integer := 3;
          INPUT_PORTS   : integer := 8;
          REG_IN      : integer := 1;
          REG_OUT     : integer := 1;
@@ -116,21 +116,21 @@ architecture FULL of RR_SELECT is
          RX_SOP        : in std_logic_vector(INPUT_PORTS-1 downto 0);
          RX_EOP        : in std_logic_vector(INPUT_PORTS-1 downto 0);
          RX_SRC_RDY    : in std_logic_vector(INPUT_PORTS-1 downto 0);
-         RX_DST_RDY    : out std_logic_vector(INPUT_PORTS-1 downto 0); 
+         RX_DST_RDY    : out std_logic_vector(INPUT_PORTS-1 downto 0);
          TX_DATA       : out std_logic_vector(DATA_WIDTH-1 downto 0);
          TX_SOP_POS    : out std_logic_vector(SOP_POS_WIDTH-1 downto 0);
          TX_EOP_POS    : out std_logic_vector(log2(DATA_WIDTH/8)-1 downto 0);
          TX_SOP        : out std_logic;
          TX_EOP        : out std_logic;
          TX_SRC_RDY    : out std_logic;
-         TX_DST_RDY    : in std_logic 
+         TX_DST_RDY    : in std_logic
       );
    end component;
 
    component MUX_DSP_GEN is
      generic (
         DATA_WIDTH  : integer := 512;
-        MUX_WIDTH   : integer := 8; 
+        MUX_WIDTH   : integer := 8;
         REG_IN      : integer := 1;
         REG_OUT     : integer := 1;
         REG_LVL     : integer := 1
@@ -153,19 +153,19 @@ begin
    -- Input port map
    -- -------------------------------------------------------------------------
    -- Deal with map of the input RX flow
-   in_rx_data        <= RX_DATA;    
+   in_rx_data        <= RX_DATA;
    in_rx_sop_pos     <= RX_SOP_POS;
    in_rx_eop_pos     <= RX_EOP_POS;
    in_rx_sop         <= RX_SOP;
    in_rx_eop         <= RX_EOP;
    in_rx_src_rdy     <= RX_SRC_RDY;
    RX_DST_RDY        <= in_rx_dst_rdy_sig;
-   in_rx_id          <= ID_IN; 
+   in_rx_id          <= ID_IN;
    in_rx_hdr         <= RX_HDR;
 
    --! Generation of booster infrastructure
    FLOW_BOOSTER_GEN:for i in 0 to INPUTS-1 generate
-      --! \brief SOP used detector (will be active during 
+      --! \brief SOP used detector (will be active during
       --! whole transaction)
       sop_trans_detp:process(CLK)
       begin
@@ -173,7 +173,7 @@ begin
             if(RESET = '1')then
                rx_sop_used(i) <= '0';
             else
-               if(in_rx_src_rdy(i) = '1' and 
+               if(in_rx_src_rdy(i) = '1' and
                   in_rx_dst_rdy(i) = '1' and in_rx_sop(i) = '1' and in_rx_eop(i) = '0')then
                   --! Sop has been detected
                      rx_sop_used(i) <= '1';
@@ -185,14 +185,14 @@ begin
             end if;
          end if;
       end process;
-    
+
       -- Copy the destinatin ready signal if valid data are prepared.
       -- Two possible situations for dst rdy copy:
       -- 1) Start of transaction is detected
       -- 2) Transaction is running
       --
       -- If the transaction is not running, we assert logic one to take all the data forward
-      in_rx_dst_rdy_sig(i) <= in_rx_dst_rdy(i) 
+      in_rx_dst_rdy_sig(i) <= in_rx_dst_rdy(i)
                               when((rx_sop_used(i) = '0' and in_rx_sop(i) = '1' and in_rx_src_rdy(i) = '1') or
                                    (rx_sop_used(i) = '1'))
                            else '1';
@@ -205,7 +205,7 @@ begin
       FLU_MUX_I:entity work.FLU_MULTIPLEXER_PACKET
          generic map(
              DATA_WIDTH       => DATA_WIDTH,
-             SOP_POS_WIDTH    => SOP_POS_WIDTH,	
+             SOP_POS_WIDTH    => SOP_POS_WIDTH,
              INPUT_PORTS      => INPUTS,
              -- is multiplexer blocking or not
                -- when TRUE:  not selected ports are blocked
@@ -217,11 +217,11 @@ begin
              -- Common interface
             RESET          => RESET,
             CLK            => CLK,
-            
+
             SEL            => flu_mux_sel,
             SEL_READY      => flu_mux_sel_rdy,
             SEL_NEXT       => flu_mux_sel_nxt,
-      
+
             -- Frame Link Unaligned input interfaces
             RX_DATA       => in_rx_data,
             RX_SOP_POS    => in_rx_sop_pos,
@@ -230,7 +230,7 @@ begin
             RX_EOP        => in_rx_eop,
             RX_SRC_RDY    => in_rx_src_rdy,
             RX_DST_RDY    => in_rx_dst_rdy,
-      
+
             -- Frame Link Unaligned concentrated interface
             TX_DATA       => flu_pipe_rx_data,
             TX_SOP_POS    => flu_pipe_rx_sop_pos,
@@ -283,7 +283,7 @@ begin
             REG_IN         => BoolToInt(OUT_PIPE_EN),
             --! Output pipeline registers (0, 1)
             REG_OUT        => BoolToInt(OUT_PIPE_EN),
-            --! Pipeline between muxs levels (0, 1) 
+            --! Pipeline between muxs levels (0, 1)
             REG_LVL        => BoolToInt(OUT_PIPE_EN)
          )
          port map(
@@ -292,17 +292,17 @@ begin
             -- --------------------------------------------------
             CLK            => CLK,
             RESET          => RESET,
-            
+
             -- --------------------------------------------------
             --! \name Selection interface
             -- --------------------------------------------------
             --! Select input
             SEL            => flu_mux_sel,
-            --! Confirmation of selected input 
+            --! Confirmation of selected input
             SEL_RDY        => flu_mux_sel_rdy,
             --! Ready to get new request
             SEL_NEXT       => flu_mux_sel_nxt,
-            
+
             -- --------------------------------------------------
             --! \name Frame Link Unaligned input interfaces
             -- --------------------------------------------------
@@ -313,7 +313,7 @@ begin
             RX_EOP         => in_rx_eop,
             RX_SRC_RDY     => in_rx_src_rdy,
             RX_DST_RDY     => in_rx_dst_rdy,
-            
+
             -- --------------------------------------------------
             --! \name Frame Link Unaligned concentrated interface
             -- --------------------------------------------------
@@ -328,7 +328,7 @@ begin
 
          --! Generation of the CE signal
          ce_en <= flu_pipe_rx_dst_rdy;
-         
+
          --! Generate the HDR DSP multiplexor
          HDR_MUX_I: MUX_DSP_GEN
          generic map(
@@ -338,7 +338,7 @@ begin
             REG_IN         => BoolToInt(OUT_PIPE_EN),
             --! Output pipeline registers (0, 1)
             REG_OUT        => BoolToInt(OUT_PIPE_EN),
-            --! Pipeline between muxs levels (0, 1) 
+            --! Pipeline between muxs levels (0, 1)
             REG_LVL        => BoolToInt(OUT_PIPE_EN)
          )
          port map(
@@ -354,7 +354,7 @@ begin
             CE_OUT      => ce_en,
             --! Clock enable for lvls
             CE_LVL      => ce_en,
-            --! Select input data 
+            --! Select input data
             SEL         => flu_mux_sel,
             --! output
             DATA_OUT    => sel_hdr_out
@@ -364,12 +364,12 @@ begin
          ID_MUX_I: MUX_DSP_GEN
          generic map(
             DATA_WIDTH     => ID_WIDTH,
-            MUX_WIDTH      => INPUTS, 
+            MUX_WIDTH      => INPUTS,
             --! Input pipeline registers (0, 1)
             REG_IN         => BoolToInt(OUT_PIPE_EN),
             --! Output pipeline registers (0, 1)
             REG_OUT        => BoolToInt(OUT_PIPE_EN),
-            --! Pipeline between muxs levels (0, 1) 
+            --! Pipeline between muxs levels (0, 1)
             REG_LVL        => BoolToInt(OUT_PIPE_EN)
          )
          port map(
@@ -385,7 +385,7 @@ begin
             CE_OUT         => ce_en,
             --! Clock enable for lvls
             CE_LVL         => ce_en,
-            --! Select input data 
+            --! Select input data
             SEL            => flu_mux_sel,
             --! output
             DATA_OUT       => sel_id_out
@@ -422,11 +422,11 @@ begin
 
       --! Generation of round robin mask
       INTERFACE_POS_GEN:for i in 0 to INPUTS-1 generate
-         OR_I:entity work.GEN_OR 
+         OR_I:entity work.GEN_OR
             generic map(
                --! \brief Width of input signal, number of bits to OR.
                --! \details Must be greater than 0.
-               OR_WIDTH    => i+1 
+               OR_WIDTH    => i+1
             )
             port map(
                --! Input data, vector of bits to OR.
@@ -435,7 +435,7 @@ begin
                DO    => rr_req_mask(i)
             );
       end generate;
-       
+
       --! Masked version of actual input request
       rr_req_masked  <= rr_req and rr_req_mask;
 
@@ -484,20 +484,20 @@ begin
          end loop;
       end process;
 
-      --! Generation of selection ready signal (out input is selected when 
+      --! Generation of selection ready signal (out input is selected when
       flu_mux_sel_rdy <= '1' when (rr_req /= 0)
                          else '0';
 
       -- ----------------------------------------------------------------------
-      -- Ouptput pipeline (depends on generic OUT_PIPE_EN) 
+      -- Ouptput pipeline (depends on generic OUT_PIPE_EN)
       -- ----------------------------------------------------------------------
-      --! Pipeline is being generated and 
+      --! Pipeline is being generated and
       PIPE_GEN:if(OUT_PIPE_EN = true )generate
          NO_HDR_DATA_ID_GEN:if(HDR_ENABLE = 0 and ENABLE_ID = 1)generate
             --! Map of DATA and ID
             flu_pipe_rx_data_id <= sel_id_out & flu_pipe_rx_data;
          end generate;
-         
+
          NO_HDR_DATA_NO_ID_GEN:if(HDR_ENABLE = 0 and ENABLE_ID = 0)generate
             --! Map of DATA and ID
             flu_pipe_rx_data_id <= flu_pipe_rx_data;
@@ -507,7 +507,7 @@ begin
             --! Map of DATA,HEADER and ID
             flu_pipe_rx_data_id <= sel_hdr_out & sel_id_out & flu_pipe_rx_data;
          end generate;
-         
+
          HDR_DATA_NO_ID_GEN:if(HDR_ENABLE = 1 and ENABLE_ID = 0)generate
             --! Map of DATA,HEADER and ID
             flu_pipe_rx_data_id <= sel_hdr_out & flu_pipe_rx_data;
@@ -527,14 +527,14 @@ begin
                -- FrameLinkUnaligned Data Width
                DATA_WIDTH     => DATA_JUICE_WIDTH,
                SOP_POS_WIDTH  => SOP_POS_WIDTH,
-               USE_OUTREG     => FLU_PIPE_USE_OUTREG, 
+               USE_OUTREG     => FLU_PIPE_USE_OUTREG,
                FAKE_PIPE      => FLU_PIPE_FAKE_PIPE
-            )   
+            )
             port map(
-               -- Common interface 
+               -- Common interface
                CLK            => CLK,
                RESET          => RESET,
-               
+
                -- Input interface
                RX_DATA        => flu_pipe_rx_data_id,
                RX_SOP_POS     => flu_pipe_rx_sop_pos,
@@ -543,7 +543,7 @@ begin
                RX_EOP         => flu_pipe_rx_eop,
                RX_SRC_RDY     => flu_pipe_rx_src_rdy,
                RX_DST_RDY     => flu_pipe_rx_dst_rdy,
-          
+
                -- Output interface
                TX_DATA        => flu_pipe_tx_data_id,
                TX_SOP_POS     => TX_SOP_POS,
@@ -552,14 +552,14 @@ begin
                TX_EOP         => TX_EOP,
                TX_SRC_RDY     => TX_SRC_RDY,
                TX_DST_RDY     => TX_DST_RDY,
-                     
+
                -- Debuging interface ---------------------------------------------------
                DEBUG_BLOCK       => '0',
                DEBUG_DROP        => '0',
-               DEBUG_SRC_RDY     => open, 
-               DEBUG_DST_RDY     => open, 
-               DEBUG_SOP         => open, 
-               DEBUG_EOP         => open 
+               DEBUG_SRC_RDY     => open,
+               DEBUG_DST_RDY     => open,
+               DEBUG_SOP         => open,
+               DEBUG_EOP         => open
             );
 
             --! Correction of output data
@@ -569,24 +569,24 @@ begin
 
             TX_DATA <= flu_pipe_tx_data_id(DATA_WIDTH-1 downto 0);
             TX_EOP_POS <= flu_pipe_tx_eop_pos_id(log2(DATA_WIDTH/8)-1 downto 0);
-            
+
             NO_HDR_OUT_GEN:if(HDR_ENABLE = 0)generate
                TX_HDR <= (others=>'0');
             end generate;
 
             HDR_ID_OUT_GEN:if(HDR_ENABLE = 1 and ENABLE_ID = 1)generate
-               TX_HDR <= 
+               TX_HDR <=
                flu_pipe_tx_data_id(DATA_WIDTH+ID_WIDTH+HDR_WIDTH-1 downto ID_WIDTH+DATA_WIDTH);
             end generate;
 
             HDR_NO_ID_OUT_GEN:if(HDR_ENABLE = 1 and ENABLE_ID = 0)generate
-               TX_HDR <= 
+               TX_HDR <=
                flu_pipe_tx_data_id(DATA_WIDTH+HDR_WIDTH-1 downto DATA_WIDTH);
             end generate;
       end generate;
 
 
-      --! No pipeline is being generated 
+      --! No pipeline is being generated
       NO_PIPE_GEN:if(OUT_PIPE_EN = false )generate
          --! Connect output from FLU multiplexer directly to output
          TX_DATA              <= flu_pipe_rx_data;
@@ -604,10 +604,10 @@ begin
          NO_HDR_OUT_GEN:if(HDR_ENABLE = 0)generate
             TX_HDR <= (others=>'0');
          end generate;
-         
+
          HDR_OUT_GEN:if(HDR_ENABLE = 1)generate
             TX_HDR <= sel_hdr_out;
          end generate;
       end generate;
 
-end architecture; 
+end architecture;

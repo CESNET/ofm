@@ -50,15 +50,15 @@ begin
       REG_OUT  => REG_OUT
    )
    port map (
-      CLK      => CLK, 
+      CLK      => CLK,
       RESET    => RESET,
-      EN_ADD   => ADD_PACKET, 
+      EN_ADD   => ADD_PACKET,
       RST_ADD  => RST_COUNTERS,
       A        => IN_NUM_BYTES,
       B        => PACKET_LENGTH,
       P        => OUT_NUM_BYTES
    );
-   
+
    SECOND_CNT_i : entity work.ALU_STATS
    generic map (
       EN_DSP   => EN_DSP,
@@ -68,9 +68,9 @@ begin
       REG_OUT  => REG_OUT
    )
    port map (
-      CLK      => CLK, 
+      CLK      => CLK,
       RESET    => RESET,
-      EN_ADD   => ADD_PACKET, 
+      EN_ADD   => ADD_PACKET,
       RST_ADD  => RST_COUNTERS,
       A        => IN_NUM_PACKETS,
       B        => "1",

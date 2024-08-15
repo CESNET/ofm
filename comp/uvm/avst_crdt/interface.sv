@@ -8,7 +8,7 @@ interface avst_crdt_if #(int unsigned UPDATE_CNT_WIDTH) (input logic CLK);
     // ------------------------------- //
     // Bus structure of credit control //
     // ------------------------------- //
-    
+
     wire logic                          INIT;
     wire logic                          INIT_ACK;
     wire logic                          UPDATE;

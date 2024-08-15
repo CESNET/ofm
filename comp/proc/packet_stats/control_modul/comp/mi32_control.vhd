@@ -7,7 +7,7 @@
 --
 --
 
-library IEEE;  
+library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.std_logic_arith.all;
 use IEEE.std_logic_unsigned.all;
@@ -19,7 +19,7 @@ entity MI32_CONTROL is
       NUM_BYTES_WD      : integer := 48;
       NUM_PACKETS_WD    : integer := 48;
       ADDRESS_WIDTH     : integer := 10
-   );   
+   );
    port(
       CLK               : in  std_logic;
       RESET             : in  std_logic;
@@ -32,21 +32,21 @@ entity MI32_CONTROL is
       MI32_DRDY         : out std_logic;
       MI32_ARDY         : out std_logic;
       MI32_BE           : in  std_logic_vector(3 downto 0);
-      
+
       RM_ADDR           : out std_logic_vector(ADDRESS_WIDTH-1 downto 0);
       RM_RD_ENABLE      : out std_logic;
       RM                : out std_logic;
       RM_ARDY           : in  std_logic;
-      
+
       CNT_NUM_BYTES     : in  std_logic_vector(NUM_BYTES_WD-1 downto 0);
       CNT_NUM_PACKETS   : in  std_logic_vector(NUM_PACKETS_WD-1 downto 0);
       CNT_VLD           : in  std_logic;
       CNT_NEXT          : out std_logic
-    ); 
+    );
 end entity;
 
 architecture full of MI32_CONTROL is
-   constant num_regs_bytes    : integer := div_roundup(NUM_BYTES_WD, 32); 
+   constant num_regs_bytes    : integer := div_roundup(NUM_BYTES_WD, 32);
    constant num_regs_packets  : integer := div_roundup(NUM_PACKETS_WD, 32);
    constant num_regs          : integer := 3 + num_regs_bytes + num_regs_packets;
    constant log_regs          : integer := log2(num_regs);
@@ -60,10 +60,10 @@ architecture full of MI32_CONTROL is
    signal addr_wr             : std_logic;
 
 begin
- 
+
    MI32_ARDY <= MI32_RD or MI32_WR;
    MI32_DRDY <= MI32_RD;
-   RM_RD_ENABLE <= '1'; 
+   RM_RD_ENABLE <= '1';
 
    addr_wr <= MI32_WR when MI32_ADDR(log_regs+1 downto 2) = conv_std_logic_vector(0, log_regs) else
               '0';
@@ -112,7 +112,7 @@ begin
    mux_rd(32) <= next_req;
    mux_rd(32*2-1 downto 33) <= (others => '0');
 
-   mux_rd(32*3-1 downto 32*2) <= conv_std_logic_vector(NUM_PACKETS_WD, 11) & 
+   mux_rd(32*3-1 downto 32*2) <= conv_std_logic_vector(NUM_PACKETS_WD, 11) &
                                  conv_std_logic_vector(NUM_BYTES_WD, 11) &
                                  conv_std_logic_vector(ADDRESS_WIDTH, 10);
 
@@ -131,14 +131,14 @@ begin
       constant reg_range : integer := 32 * (I + 3 + 1);
    begin
       gen_others : if I < num_regs_bytes - 1 generate
-         mux_rd(reg_range-1 downto reg_range-32) <= CNT_NUM_BYTES(32*(I+1)-1 downto 32*I); 
+         mux_rd(reg_range-1 downto reg_range-32) <= CNT_NUM_BYTES(32*(I+1)-1 downto 32*I);
       end generate;
-      
+
       gen_last : if I = num_regs_bytes - 1 generate
          constant vld_bist  : integer := 32 - (num_regs_bytes * 32 - NUM_BYTES_WD);
       begin
          mux_rd(reg_range-1 downto reg_range - vld_bist) <= (others => '0');
-         mux_rd(reg_range-vld_bist-1 downto reg_range-32) <= CNT_NUM_BYTES(CNT_NUM_BYTES'length-1 downto 32*I); 
+         mux_rd(reg_range-vld_bist-1 downto reg_range-32) <= CNT_NUM_BYTES(CNT_NUM_BYTES'length-1 downto 32*I);
       end generate;
    end generate;
 
@@ -146,14 +146,14 @@ begin
       constant reg_range : integer := 32 * (I + 3 + 1 + num_regs_bytes);
    begin
       gen_others : if I < num_regs_packets - 1 generate
-         mux_rd(reg_range-1 downto reg_range-32) <= CNT_NUM_PACKETS(32*(I+1)-1 downto 32*I); 
+         mux_rd(reg_range-1 downto reg_range-32) <= CNT_NUM_PACKETS(32*(I+1)-1 downto 32*I);
       end generate;
-      
+
       gen_last : if I = num_regs_packets - 1 generate
          constant vld_bist  : integer := 32 - (num_regs_packets * 32 - NUM_PACKETS_WD);
       begin
          mux_rd(reg_range-1 downto reg_range - vld_bist) <= (others => '0');
-         mux_rd(reg_range - vld_bist-1 downto reg_range-32) <= CNT_NUM_PACKETS(CNT_NUM_PACKETS'length-1 downto 32*I); 
+         mux_rd(reg_range - vld_bist-1 downto reg_range-32) <= CNT_NUM_PACKETS(CNT_NUM_PACKETS'length-1 downto 32*I);
       end generate;
    end generate;
 

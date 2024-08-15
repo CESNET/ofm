@@ -13,7 +13,7 @@ use IEEE.std_logic_1164.all;
 
 -- ----------------------------------------------------------------------------
 --               ENTITY DECLARATION -- Internal Bus Pipeline                 --
--- ---------------------------------------------------------------------------- 
+-- ----------------------------------------------------------------------------
 
 entity PIPE_DEEPER is
    generic(
@@ -27,7 +27,7 @@ entity PIPE_DEEPER is
       -- If you realy want shift register use SRL.
       -- VIVADO, SRL
       OPT             : string  := "SRL"
-   );   
+   );
    port(
       -- ================
       -- Common interface
@@ -36,7 +36,7 @@ entity PIPE_DEEPER is
       CLK            : in std_logic;
       -- NOTE: also starts debug counters
       RESET          : in std_logic;
-      
+
       -- ================
       -- Input interface
       -- ================
@@ -44,7 +44,7 @@ entity PIPE_DEEPER is
       IN_DATA        : in  std_logic_vector(DATA_WIDTH-1 downto 0);
       IN_SRC_RDY     : in  std_logic;
       IN_DST_RDY     : out std_logic;
- 
+
       -- ================
       -- Output interface
       -- ================
@@ -52,7 +52,7 @@ entity PIPE_DEEPER is
       OUT_DATA       : out std_logic_vector(DATA_WIDTH-1 downto 0);
       OUT_SRC_RDY    : out std_logic;
       OUT_DST_RDY    : in  std_logic;
-      
+
       -- ==================
       -- Debuging interface
       -- ==================

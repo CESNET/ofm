@@ -61,11 +61,11 @@ SETTINGS = {
     ("items_comb_12", "item_width_comb_1",),
 
     ("items_comb_11", "items_comb_21", "item_width_comb_1", "enable_output_fifo",),
-    
+
     ("items_comb_12", "items_comb_22", "item_width_comb_2", "enable_output_fifo", "fifo_depth_comb_3", "device_comb_1",),
     ("items_comb_12", "items_comb_22", "item_width_comb_2", "enable_output_fifo", "fifo_depth_comb_3", "device_comb_3",),
     ("items_comb_12", "items_comb_22", "enable_output_fifo", "fifo_depth_comb_3", "device_comb_3",),
-    
+
     ("items_comb_11", "items_comb_22", "item_width_comb_2",  "enable_input_fifo", "fifo_depth_comb_2", "device_comb_1",),
     ("items_comb_12", "items_comb_21", "enable_output_fifo", "enable_input_fifo", "fifo_depth_comb_1", "device_comb_2",),
     ("items_comb_12", "items_comb_22", "item_width_comb_1",  "enable_input_fifo", "fifo_depth_comb_2", "device_comb_3",),

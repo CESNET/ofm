@@ -77,7 +77,7 @@ program TEST (
                 $write("Counter is OK \n");
             end
 
-            else begin 
+            else begin
 
                 if(TRANSACTION_COUNT >= CNT_WIDTH_MAX-1) begin
                     $write("Value of counter: %d\n", FRAME_COUNTER);
@@ -85,7 +85,7 @@ program TEST (
                     $write("Counter is not OK \n");
                     $stop();
                 end;
-    
+
                 if(TRANSACTION_COUNT <= CNT_WIDTH_MAX-1) begin
                     $write("Value of counter: %d\n", FRAME_COUNTER);
                     $write("Expected value: %d\n", TRANSACTION_COUNT);

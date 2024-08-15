@@ -39,7 +39,7 @@ architecture behavioral of testbench is
    signal D_96       : std_logic;                        -- Data output for 96-bit xor
    signal D_2x48     : std_logic_vector(1 downto 0);     -- Data output for 2x48-bit xor
    signal D_4x24     : std_logic_vector(3 downto 0);     -- Data output for 4x24-bit xor
- 
+
 begin
    -- xor96 entity
    uut : entity work.xor96(VU_DSP)
@@ -60,7 +60,7 @@ begin
    );
 
    --Generate clock
-   clk_gen_p : process 
+   clk_gen_p : process
    begin
       CLK <= '1';
       wait for clkper/2;
@@ -86,7 +86,7 @@ begin
    D_4x24(2) <= xor_reduce(DI(11+24 downto 0+24) & DI(11+48+24 downto 48+24));
    D_4x24(3) <= xor_reduce(DI(11+36 downto 0+36) & DI(11+48+36 downto 48+36));
 
-   -- Simulating input flow 
+   -- Simulating input flow
    input_flow : process
    begin
 
@@ -97,15 +97,15 @@ begin
 
       wait for reset_time;
       wait for 10*clkper;
-      
+
       for I in 0 to 95 loop
          DI <= (others => '0');
          DI(I) <= '1';
          wait for clkper;
-         
-         report "Output 2x48: " & integer'image(conv_integer(DO_2x48)) & 
-                " Output 4x24: " & integer'image(conv_integer(DO_4x24)) & 
-                " Bit position: " & integer'image(I); 
+
+         report "Output 2x48: " & integer'image(conv_integer(DO_2x48)) &
+                " Output 4x24: " & integer'image(conv_integer(DO_4x24)) &
+                " Bit position: " & integer'image(I);
       end loop;
 
       wait;

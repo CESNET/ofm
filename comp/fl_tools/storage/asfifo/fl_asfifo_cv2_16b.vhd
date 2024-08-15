@@ -7,7 +7,7 @@
 -- $Id$
 --
 -- TODO: There was used 72b fifo for 21b data. It uses one BlockRAM - if
---       you need more space for saved words, you should use smaller fifo. 
+--       you need more space for saved words, you should use smaller fifo.
 
 library IEEE;
 use IEEE.std_logic_1164.all;
@@ -78,7 +78,7 @@ begin
       ALMOST_FULL_OFFSET => X"0080",  -- Sets almost full threshold
       ALMOST_EMPTY_OFFSET => X"0080", -- Sets the almost empty threshold
       DO_REG => 1,                    -- Enable output register (0 or 1)
-                                      -- Must be 1 if EN_SYN = FALSE 
+                                      -- Must be 1 if EN_SYN = FALSE
       EN_SYN => FALSE,                -- Specifies FIFO as Asynchronous (FALSE)
                                       -- or Synchronous (TRUE)
       FIRST_WORD_FALL_THROUGH => TRUE,-- Sets the FIFO FWFT to TRUE or FALSE

@@ -86,9 +86,9 @@ entity fl_discard is
       -- Frame dropped (1-cycle pulse
       STAT_DROP   : out std_logic;
          -- Channel number (active with PASS od DROP)
-      STAT_CHAN   : out std_logic_vector(log2(CHANNELS) - 1 downto 0); 
+      STAT_CHAN   : out std_logic_vector(log2(CHANNELS) - 1 downto 0);
          -- Frame length (active with PASS od DROP)
-      STAT_LEN    : out std_logic_vector(15 downto 0); 
+      STAT_LEN    : out std_logic_vector(15 downto 0);
          -- Free space (active with PASS od DROP)
       STAT_FREE   : out std_logic_vector(15 downto 0);
          -- Cannot process frames, because counters are being cleared

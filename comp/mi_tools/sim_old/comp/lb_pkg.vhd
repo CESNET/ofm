@@ -22,7 +22,7 @@ use std.textio.all;
 --                        Internal Bus Package
 -- ----------------------------------------------------------------------------
 package lb_pkg is
-   
+
    -- Local 16 bit Bus
    type t_local_bus16 is record
       DWR        : std_logic_vector(15 downto 0);
@@ -59,6 +59,6 @@ end lb_pkg;
 --                        Internal Bus Package
 -- ----------------------------------------------------------------------------
 package body lb_pkg is
-       
+
 end lb_pkg;
 

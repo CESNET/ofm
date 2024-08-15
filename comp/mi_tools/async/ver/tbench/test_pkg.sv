@@ -8,9 +8,9 @@
 //                        Package declaration
 // ----------------------------------------------------------------------------
 package test_pkg;
-   
+
    import math_pkg::*;//log2
-   
+
    // CLOCKS AND RESETS
    parameter MASTER_CLK_PERIOD = 8ns;
    parameter SLAVE_CLK_PERIOD  = 6.25ns;

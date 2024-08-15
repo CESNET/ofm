@@ -1,5 +1,5 @@
 --
--- dp_bmem_ent.vhd: Dual port generic memory composed from Block Rams - entity 
+-- dp_bmem_ent.vhd: Dual port generic memory composed from Block Rams - entity
 -- declaration
 -- Copyright (C) 2004 CESNET
 -- Author(s): Petr Kobiersky <xkobie00@stud.fit.vutbr.cz>

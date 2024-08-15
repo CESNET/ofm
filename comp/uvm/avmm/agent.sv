@@ -7,15 +7,15 @@
 // Slave
 class agent_slave #(int unsigned ADDRESS_WIDTH, int unsigned DATA_WIDTH, int unsigned BURST_WIDTH) extends uvm_agent;
     `uvm_component_param_utils(uvm_avmm::agent_slave #(ADDRESS_WIDTH, DATA_WIDTH, BURST_WIDTH))
-    
+
     // --------- //
     // Variables //
     // --------- //
-    
+
     // Analysis ports
     uvm_analysis_port #(sequence_item_request  #(ADDRESS_WIDTH, DATA_WIDTH, BURST_WIDTH)) analysis_port_request;
     uvm_analysis_port #(sequence_item_response #(DATA_WIDTH))                             analysis_port_response;
-    
+
     // Agent's base components
     sequencer_slave #(ADDRESS_WIDTH, DATA_WIDTH, BURST_WIDTH) m_sequencer;
     driver_slave    #(ADDRESS_WIDTH, DATA_WIDTH, BURST_WIDTH) m_driver;
@@ -23,12 +23,12 @@ class agent_slave #(int unsigned ADDRESS_WIDTH, int unsigned DATA_WIDTH, int uns
     coverage        #(ADDRESS_WIDTH, DATA_WIDTH, BURST_WIDTH) m_coverage;
     statistics      #(ADDRESS_WIDTH, DATA_WIDTH, BURST_WIDTH) m_statistics;
     config_item                                               m_config;
-    
+
     // Constructor
     function new(string name = "agent_slave", uvm_component parent = null);
         super.new(name, parent);
     endfunction
-    
+
     // --------- //
     // Functions //
     // --------- //

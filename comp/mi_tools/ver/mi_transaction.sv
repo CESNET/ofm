@@ -54,7 +54,7 @@
                  tr_type, op, address, data, be, meta);
     endfunction
 
-     //-- Copy ----------------------------------------------------------------- 
+     //-- Copy -----------------------------------------------------------------
      // Copy constructor
      virtual function sv_common_pkg::Transaction copy(sv_common_pkg::Transaction to = null);
         MiTransaction #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH) tr;

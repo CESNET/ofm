@@ -1,8 +1,8 @@
-//-- sequence_item.sv: logic vector sequence item(transaction) 
+//-- sequence_item.sv: logic vector sequence item(transaction)
 //-- Copyright (C) 2021 CESNET z. s. p. o.
 //-- Author(s): Tomáš Beneš <xbenes55@stud.fit.vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 // This class represents high level transaction, which can be reusable for other components.
 class sequence_item #(int unsigned DATA_WIDTH)extends uvm_sequence_item;

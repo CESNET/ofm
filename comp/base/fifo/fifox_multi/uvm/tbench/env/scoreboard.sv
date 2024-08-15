@@ -76,13 +76,13 @@ class scoreboard #(DATA_WIDTH, ITEMS, WRITE_PORTS, READ_PORTS, ALMOST_FULL_OFFSE
             m_status_model.model_out.connect(status_cmp.analysis_imp_model);
             analysis_imp_mvb_status .connect(status_cmp.analysis_imp_dut  );
         end
-        
+
     endfunction
 
     function void report_phase(uvm_phase phase);
         string msg = "\n";
 
-        if (this.success() && this.used() == 0) begin 
+        if (this.success() && this.used() == 0) begin
             `uvm_info(get_type_name(), {msg, "\n\n\t---------------------------------------\n\t----     VERIFICATION SUCCESS      ----\n\t---------------------------------------"}, UVM_NONE)
         end else begin
             `uvm_info(get_type_name(), {msg, "\n\n\t---------------------------------------\n\t----     VERIFICATION FAILED       ----\n\t---------------------------------------"}, UVM_NONE)

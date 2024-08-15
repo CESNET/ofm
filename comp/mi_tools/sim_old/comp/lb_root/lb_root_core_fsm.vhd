@@ -92,7 +92,7 @@ entity LB_ROOT_CORE_FSM is
    );
 end entity LB_ROOT_CORE_FSM;
 
-  
+
 -- ----------------------------------------------------------------------------
 --                      Architecture declaration
 -- ----------------------------------------------------------------------------
@@ -104,7 +104,7 @@ architecture LB_ROOT_CORE_FSM_ARCH of LB_ROOT_CORE_FSM is
    signal reading_flag_reg          : std_logic;
    signal reading_flag_reg_set      : std_logic;
    signal reading_flag_reg_rst      : std_logic;
-   
+
    signal abort_cnt_ce  : std_logic;
    signal abort_cnt_rst : std_logic;
    signal abort_cnt     : std_logic_vector(ABORT_CNT_WIDTH-1 downto 0);
@@ -164,20 +164,20 @@ state_trans: process(present_state, BUFFER_VLD, BUFFER_SOF, BUFFER_EOF,
                      PENDING_CNT, DATA_OUT_CNT, LAST_REQ, abort_cnt, GEN_ABORT_FLAG)
   begin
     case present_state is
-      
+
       -- ST_IDLE
       when st_idle =>
          if (GEN_ABORT_FLAG = '1') then
             next_state <= st_abort;
          -- When start of transaction
-         elsif (BUFFER_VLD = '1' and BUFFER_SOF = '1') then  
+         elsif (BUFFER_VLD = '1' and BUFFER_SOF = '1') then
            next_state <= st_addr;
          else
            next_state <= st_idle;
          end if;
 
       -- ST_ADDR
-      when st_addr =>         
+      when st_addr =>
          if (GEN_ABORT_FLAG = '1') then
            next_state <= st_abort;
          else
@@ -196,7 +196,7 @@ state_trans: process(present_state, BUFFER_VLD, BUFFER_SOF, BUFFER_EOF,
          else
            next_state <= st_rw0;
          end if;
-      
+
       -- ST_RW1
       when st_rw1 =>
          if (GEN_ABORT_FLAG = '1') then
@@ -222,7 +222,7 @@ state_trans: process(present_state, BUFFER_VLD, BUFFER_SOF, BUFFER_EOF,
            next_state <= st_rw_wait;
          end if;
 
-      -- ST_ABORT       
+      -- ST_ABORT
       when st_abort =>
          if (abort_cnt = abort_vccvec) then
             next_state <= st_idle;
@@ -258,7 +258,7 @@ output_logic: process(present_state, BUFFER_VLD, BUFFER_SOF, BUFFER_EOF, BUFFER_
          INIT_COUNTERS          <= '1';
          abort_cnt_rst          <= '1';
          reading_flag_reg_rst   <= '1';
-         if (BUFFER_VLD = '1' and BUFFER_SOF = '1') then  
+         if (BUFFER_VLD = '1' and BUFFER_SOF = '1') then
             ADDR_DATA_MUX_SEL   <= "00";
             LB_ADS              <= '1';
          end if;
@@ -281,7 +281,7 @@ output_logic: process(present_state, BUFFER_VLD, BUFFER_SOF, BUFFER_EOF, BUFFER_
            LB_RD                <= BUFFER_RD;
            DATA_OUT_CNT_CE      <= '1';
          end if;
-      
+
       -- ST_RW1
       when st_rw1 =>
          if (LAST_REQ = '1') then -- TODO Check this
@@ -300,8 +300,8 @@ output_logic: process(present_state, BUFFER_VLD, BUFFER_SOF, BUFFER_EOF, BUFFER_
       -- ST_RW_WAIT
       when st_rw_wait =>
          WAIT_FOR_ALL_RDY       <= '1';
-      
-      -- ST_ABORT       
+
+      -- ST_ABORT
       when st_abort =>
           abort_cnt_ce  <= '1';
           LB_ABORT      <= '1';

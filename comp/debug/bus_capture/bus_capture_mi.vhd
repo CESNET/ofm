@@ -17,9 +17,9 @@ entity BUS_CAPTURE_MI is
         -- The number of words you can capture.
         ITEMS      : natural := 512;
         -- Select memory implementation. Options:
-        -- "LUT"   - effective when ITEMS <= 64 (on Intel FPGA <= 32), 
-        -- "BRAM"  - effective when ITEMS  > 64 (on Intel FPGA  > 32), 
-        -- "URAM"  - effective when ITEMS*DATA_WIDTH >= 288000 
+        -- "LUT"   - effective when ITEMS <= 64 (on Intel FPGA <= 32),
+        -- "BRAM"  - effective when ITEMS  > 64 (on Intel FPGA  > 32),
+        -- "URAM"  - effective when ITEMS*DATA_WIDTH >= 288000
         --           and DATA_WIDTH >= 72 (URAM is only for Xilinx Ultrascale(+)),
         -- "AUTO"  - effective implementation dependent on ITEMS and DEVICE.
         RAM_TYPE   : string  := "AUTO";
@@ -112,7 +112,7 @@ begin
     port map(
         CLK          => CLK,
         RESET        => RESET,
-        
+
         BUS_DATA     => BUS_DATA,
         BUS_VALID    => BUS_VALID,
         STOP_TRIGGER => STOP_TRIGGER,
@@ -172,7 +172,7 @@ begin
         -- Common interface
         CLK      => CLK,
         RESET    => RESET,
-        
+
         -- Input MI interface
         IN_DWR   => mi_sync_dwr,
         IN_ADDR  => mi_sync_addr,
@@ -182,7 +182,7 @@ begin
         IN_DRD   => mi_sync_drd,
         IN_ARDY  => mi_sync_ardy,
         IN_DRDY  => mi_sync_drdy,
-        
+
         -- Output MI interface
         OUT_DWR  => mi_pipe_dwr,
         OUT_ADDR => mi_pipe_addr,
@@ -279,7 +279,7 @@ begin
             end case;
         end if;
     end process;
-    
+
     mi_drdy_reg_p : process (CLK)
     begin
         if (rising_edge(CLK)) then

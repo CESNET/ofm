@@ -36,7 +36,7 @@ entity IB_ENDPOINT_CORE is
 
       IB_CLK        : in std_logic;
       IB_RESET      : in std_logic;
-      
+
       -- ========================
       -- Internal Bus Interface
       --
@@ -96,7 +96,7 @@ entity IB_ENDPOINT_CORE is
       RD_DATA          : in  std_logic_vector(63 downto 0);
       RD_SRC_RDY       : in  std_logic;
       RD_DST_RDY       : out std_logic;
-      
+
       -- RD_WR Abort
       RD_WR_ABORT      : in  std_logic;
 
@@ -104,7 +104,7 @@ entity IB_ENDPOINT_CORE is
       -- Master Interface Input
       -- ========================
 
-      -- Global Address 
+      -- Global Address
       BM_GLOBAL_ADDR   : in  std_logic_vector(63 downto 0);
       -- Local Address
       BM_LOCAL_ADDR    : in  std_logic_vector(31 downto 0);

@@ -15,5 +15,5 @@ class virt_sequencer#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WID
     function new(string name = "virt_sequencer", uvm_component parent);
         super.new(name, parent);
     endfunction
-    
+
 endclass

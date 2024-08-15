@@ -100,6 +100,7 @@ def run_modelsim(fdo_file, test_name, manual=False, gui=False, coverage=False, e
 # Parsing script arguments
 ##########
 
+
 parser = argparse.ArgumentParser()
 
 parser.add_argument("fdo_file", help="Name of verification \".fdo\" file to run in Modelsim")

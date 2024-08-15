@@ -1,4 +1,4 @@
-//-- dut.sv: Design under test 
+//-- dut.sv: Design under test
 //-- Copyright (C) 2023 CESNET z. s. p. o.
 //-- Author:   Daniel Kříž <xkrizd01@vutbr.cz>
 
@@ -10,7 +10,7 @@ module DUT (
     input logic     CLK,
     input logic     RST,
     mfb_if.dut_tx   mfb_rx,
-    avst_if.dut_rx  mfb_avst 
+    avst_if.dut_rx  mfb_avst
     );
 
     assign mfb_rx.SOF_POS = '0;

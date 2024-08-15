@@ -11,9 +11,9 @@ use IEEE.numeric_std.all;
 architecture ARCH of SENSOR_INTERFACE is
 
 begin
-    
+
     ARDY <= RD or WR;
-    
+
     process(CLK)
     begin
         if (rising_edge(CLK)) then

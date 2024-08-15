@@ -31,7 +31,7 @@ SETTINGS = {
     "fake_pipe_1" : {
         "FAKE_PIPE"         : "1",
     },
-    "_combinations_" : (  
+    "_combinations_" : (
     (), # Works the same as '("default",),' as the "default" is applied in every combination
 
     ("use_dst_rdy_0",),

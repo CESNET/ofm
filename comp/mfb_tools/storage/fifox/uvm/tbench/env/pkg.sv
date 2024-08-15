@@ -9,7 +9,7 @@
 `define UVM_MFB_FIFOX
 
 package uvm_mfb_fifox;
-    
+
     `include "uvm_macros.svh"
     import uvm_pkg::*;
 

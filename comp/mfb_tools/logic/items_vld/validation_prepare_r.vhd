@@ -158,10 +158,10 @@ begin
     --  Select the Offset to output
     -- -----------------------------
     tx_selected_offset_start <= updated_offset when (section_start = '1') else rx_selected_offset_start;
-        
+
     -- -------------------
     --  Output assignment
-    -- -------------------    
+    -- -------------------
     TX_OFFSET_START <= tx_selected_offset_start;
     TX_OFFSET_END   <= rx_selected_offset_end;
     TX_VALID        <= rx_valid_input and not section_end;

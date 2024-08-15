@@ -61,7 +61,7 @@ class MVBMonitor(BusMonitor):
 
                 vld = self.bus.vld.value
 
-                for offset in range(self._items):   
+                for offset in range(self._items):
                     if (vld[self._items-offset-1]):
                         self.log.debug(f"ITEM {self.item_cnt}")
                         self.log.debug(f"recieved item: {data_bytes[offset*self._item_width:(offset+1)*self._item_width]}")

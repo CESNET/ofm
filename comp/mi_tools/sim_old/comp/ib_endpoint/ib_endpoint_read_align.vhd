@@ -25,7 +25,7 @@ entity IB_ENDPOINT_READ_ALIGN is
       CLK             : in  std_logic;
       RESET           : in  std_logic;
       -- RD_DATA_IN Interface
-      RD_DATA_IN      : in  std_logic_vector(63 downto 0); 
+      RD_DATA_IN      : in  std_logic_vector(63 downto 0);
       RD_SRC_RDY_IN   : in  std_logic;
       RD_DST_RDY_IN   : out std_logic;
       -- Internal Bus Interface
@@ -48,7 +48,7 @@ end entity IB_ENDPOINT_READ_ALIGN;
 --                      Architecture declaration
 -- ----------------------------------------------------------------------------
 architecture IB_ENDPOINT_READ_ALIGN_ARCH of IB_ENDPOINT_READ_ALIGN is
-   
+
    -- Data register signals
    signal data_reg0               : std_logic_vector(63 downto 0);
    signal data_reg1               : std_logic_vector(63 downto 0);
@@ -64,7 +64,7 @@ architecture IB_ENDPOINT_READ_ALIGN_ARCH of IB_ENDPOINT_READ_ALIGN is
    signal data_out_mux5           : std_logic_vector(7 downto 0);
    signal data_out_mux6           : std_logic_vector(7 downto 0);
    signal data_out_mux7           : std_logic_vector(7 downto 0);
-   
+
    -- Read Counter
    signal length_reg_one          : std_logic;
    signal length_reg_one_dec      : std_logic;
@@ -86,7 +86,7 @@ begin
 
 RD_DATA_OUT          <= data_out_mux7 & data_out_mux6 & data_out_mux5 &
                         data_out_mux4 & data_out_mux3 & data_out_mux2 &
-                        data_out_mux1 & data_out_mux0; 
+                        data_out_mux1 & data_out_mux0;
 
 RD_SRC_RDY_OUT       <= (RD_SRC_RDY_IN or write_last) and data_reg0_vld and ((must_src_rdy and RD_SRC_RDY_IN)or not must_src_rdy) ;
 RD_EOF               <= (write_last and data_reg0_vld and must_src_rdy and RD_SRC_RDY_IN)
@@ -115,7 +115,7 @@ master_dec_in <= MASTER_ALIGN & MASTER_LENGTH(2 downto 0);
 must_src_rdy_master_decp: process(master_dec_in)
 begin
    case master_dec_in is
-     when "001000"  => must_src_rdy_master <= '1'; 
+     when "001000"  => must_src_rdy_master <= '1';
      when "010000"  => must_src_rdy_master <= '1';
      when "010111"  => must_src_rdy_master <= '1';
      when "011000"  => must_src_rdy_master <= '1';
@@ -151,7 +151,7 @@ end process;
 must_src_rdy_slave_decp: process(slave_dec_in)
 begin
    case slave_dec_in is
-     when "001000"  => must_src_rdy_slave <= '1'; 
+     when "001000"  => must_src_rdy_slave <= '1';
      when "010000"  => must_src_rdy_slave <= '1';
      when "010111"  => must_src_rdy_slave <= '1';
      when "011000"  => must_src_rdy_slave <= '1';
@@ -228,7 +228,7 @@ end process;
 length_reg_dec     <= '1' when ( (RD_DST_RDY_OUT='1' and data_reg0_vld ='1') and RD_SRC_RDY_IN ='1' and length_reg_one = '0') else '0';
 length_reg_one_dec <= '1' when ( (RD_DST_RDY_OUT='1' and data_reg0_vld ='1') and RD_SRC_RDY_IN ='1' and length_reg_one = '1') else '0';
 -- register length_reg --------------------------------------------------------
--- No of data items to send out 
+-- No of data items to send out
 length_regp: process(RESET, CLK)
 begin
   if (CLK'event AND CLK = '1') then
@@ -360,7 +360,7 @@ begin
       when "000" => data_out_mux5 <= data_reg0(47 downto 40);
       when "001" => data_out_mux5 <= data_reg0(55 downto 48);
       when "010" => data_out_mux5 <= data_reg0(63 downto 56);
-      when "011" => data_out_mux5 <= data_reg1(7 downto 0); 
+      when "011" => data_out_mux5 <= data_reg1(7 downto 0);
       when "100" => data_out_mux5 <= data_reg1(15 downto 8);
       when "101" => data_out_mux5 <= data_reg1(23 downto 16);
       when "110" => data_out_mux5 <= data_reg1(31 downto 24);

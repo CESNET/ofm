@@ -9,7 +9,7 @@
 set SV_MII_BASE      "$OFM_PATH/comp/nic/ver"
 set SV_MFB_BASE      "$OFM_PATH/comp/mfb_tools/ver"
 set SV_COMMON_BASE   "$OFM_PATH/comp/ver"
-  
+
 set COMPONENTS [list \
    [ list "SV_MII"    $SV_MII_BASE    "FULL"] \
    [ list "SV_MFB"    $SV_MFB_BASE    "FULL"] \

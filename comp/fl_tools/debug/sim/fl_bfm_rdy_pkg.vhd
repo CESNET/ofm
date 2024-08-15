@@ -22,13 +22,13 @@ PACKAGE fl_bfm_rdy_pkg IS
 TYPE RDYSignalDriver IS (EVER, ONOFF, RND);
 PROCEDURE DriveRdyN50_50(signal CLK       : IN  std_logic;
                          signal RDY_N : OUT std_logic);
-			 
+
 PROCEDURE DriveRdyNAll(signal CLK       : IN  std_logic;
                        signal RDY_N : OUT std_logic);
-		       
+
 PROCEDURE DriveRdyNRnd(signal CLK       : IN  std_logic;
                        signal RDY_N : OUT std_logic);
-		       
+
 PROCEDURE SetSeed(Seed : in integer);
 END fl_bfm_rdy_pkg;
 -- ----------------------------------------------------------------------------
@@ -39,7 +39,7 @@ SHARED VARIABLE number: integer := 399751;
 
 PROCEDURE SetSeed(Seed : in integer) IS
    BEGIN
-      number := Seed; 
+      number := Seed;
    END;
 
 PROCEDURE Random(RND : out integer) IS
@@ -63,7 +63,7 @@ PROCEDURE DriveRdyNAll(signal CLK       : IN  std_logic;
     RDY_N <= '0';
     wait until (CLK'event and CLK='1');
   END;
-  
+
 PROCEDURE DriveRdyNRnd(signal CLK       : IN  std_logic;
                        signal RDY_N : OUT std_logic) IS
 VARIABLE RNDVAL: integer;
@@ -81,6 +81,6 @@ VARIABLE VALUE: std_logic;
          wait until (CLK'event and CLK='1');
       end loop;
    END;
-       
+
 
 END fl_bfm_rdy_pkg;

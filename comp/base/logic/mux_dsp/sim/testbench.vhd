@@ -35,7 +35,7 @@ architecture behavioral of testbench is
    signal SEL              : std_logic_vector(log2(mux_width)-1 downto 0);
    signal CE_OUT           : std_logic;
    signal DATA_OUT         : std_logic_vector(data_width-1 downto 0);
-   
+
 begin
 
    --! MUX_DSP
@@ -59,7 +59,7 @@ begin
    );
 
    --Generate clock
-   clk_gen_p : process 
+   clk_gen_p : process
    begin
       CLK <= '1';
       wait for clkper/2;
@@ -76,10 +76,10 @@ begin
    wait;
    end process;
 
-   --! Simulating input flow 
+   --! Simulating input flow
    input_flow : process
    begin
-      
+
       --! Initialize input interface
       CE_IN    <= '1';
       CE_LVL   <= '1';

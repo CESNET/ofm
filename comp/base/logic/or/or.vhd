@@ -3,7 +3,7 @@
 --! \file
 --! \brief Generic OR.
 --! \author Lukas Kekely <kekely@cesnet.cz>
---! \date 2012 
+--! \date 2012
 --!
 --! \section License
 --!
@@ -35,7 +35,7 @@ end entity;
 --! \brief Behavioral implementation of generic OR.
 architecture behav of GEN_OR is
 begin
-  
+
    --! ORing process
    genorp:process(DI)
       variable o : std_logic;

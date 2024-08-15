@@ -15,9 +15,9 @@
 </features>
 
 <description>
-   This component is passive probe of arbitrary number of Frame Link 
+   This component is passive probe of arbitrary number of Frame Link
    interfaces. It counts number
-   of passed frames and optionally checks 
+   of passed frames and optionally checks
    interfaces for violations of protocol specification.
    Gathered informations are accesible via MI32 interface.
 </description>
@@ -90,9 +90,9 @@
    </op>
 </operations>
 
-<addr_space id="fl_watch_space" name="FL_WATCH address space" main="yes" 
+<addr_space id="fl_watch_space" name="FL_WATCH address space" main="yes"
    size="generic">
-   <reg name="Control register" id="fl_watch_control" 
+   <reg name="Control register" id="fl_watch_control"
         offset="0x0" access="RW" words="1">
       <bit_vect bits="32">
       <description_above>
@@ -119,13 +119,13 @@
          </format>
       </bit_vect>
    </reg>
-   <reg name="Frame counters" id="fl_watch_count" 
+   <reg name="Frame counters" id="fl_watch_count"
         offset="0x8" access="R" words="1">
       <bit_vect bits="32">
          <description_above>
             Counters of frames. Counters are aligned to 32 bit words and padded
             by zeros.
-            Number of valid bits within one counter depends on 
+            Number of valid bits within one counter depends on
             CNTR_WIDTH generic.
             As this register has one instance for each interface, number of
             Frame counter registers equals INTERFACES generic.
@@ -137,12 +137,12 @@
          </format>
       </bit_vect>
    </reg>
-   <reg name="Invalid frame counters" id="fl_watch_invld_count" 
+   <reg name="Invalid frame counters" id="fl_watch_invld_count"
         offset="0xC" access="R" words="1">
       <bit_vect bits="32">
          <description_above>
-            Counter of invalid frames. Number of words and instances is 
-            the same as Frame counter register. Offset of first Invalid 
+            Counter of invalid frames. Number of words and instances is
+            the same as Frame counter register. Offset of first Invalid
             frame counter is just after last Frame counter.
          </description_above>
          <format>
@@ -173,7 +173,7 @@
    </reg>
 </addr_space>
 
-<sw_body> 
+<sw_body>
    <h1>Component control</h1>
     <p>
       There is one Control register. By writing zero into it, counting
@@ -189,19 +189,19 @@
             First and second words are always the same, as described in Addr space section.
          </li>
          <li>
-            Just after them, there is a set of frame counters. 
+            Just after them, there is a set of frame counters.
             One counter occupies as many 32 bit words, as it needs.
-            The rest of bits in each word (if CNTR_WIDTH mod 32 != 0) 
+            The rest of bits in each word (if CNTR_WIDTH mod 32 != 0)
             is padded with zeros.
             Number of the counters is defined by generic parameter INTERFACES.
             <ul>
             <li>
-            If CNTR_WIDTH is lower or equal 32, 
+            If CNTR_WIDTH is lower or equal 32,
             then one counter corresponds to one 32 bit word. The first counter
             is at address 0x08, the second one is at 0x0C, ...
             </li><li>
-            If CNTR_WIDTH is greater than 32, but not greater than 64, 
-            then one counter corresponds to two 32 bit words. 
+            If CNTR_WIDTH is greater than 32, but not greater than 64,
+            then one counter corresponds to two 32 bit words.
             The first counter is at addresses 0x08 and 0x0C, the second one
             is at 0x10 and 0x14.
             Lower bits of the counter are at lower address.
@@ -211,7 +211,7 @@
             </ul>
          </li>
          <li>
-            Just after the highest word of the last frame counter, 
+            Just after the highest word of the last frame counter,
             a set of invalid frames counters is placed. These counters are similar
             to frame counters.
          </li>
@@ -271,8 +271,8 @@
             <td>150 MHz</td>
          </tr>
 		<nazev>Maximal frequency</nazev>
-		</tab> 
-     </p> 
+		</tab>
+     </p>
 
 </body>
 </source>

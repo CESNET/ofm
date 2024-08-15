@@ -25,7 +25,7 @@ entity FLU_TRANSFORMER_UP is
   port(
     CLK            : in  std_logic;
     RESET          : in  std_logic;
-    
+
     -- Frame Link Unaligned input interface
     RX_DATA       : in std_logic_vector(RX_DATA_WIDTH-1 downto 0);
     RX_SOP_POS    : in std_logic_vector(max(1,RX_SOP_POS_WIDTH)-1 downto 0);
@@ -34,7 +34,7 @@ entity FLU_TRANSFORMER_UP is
     RX_EOP        : in std_logic;
     RX_SRC_RDY    : in std_logic;
     RX_DST_RDY    : out std_logic;
-    
+
     -- Frame Link Unaligned output interface
     TX_DATA       : out std_logic_vector(TX_DATA_WIDTH-1 downto 0);
     TX_SOP_POS    : out std_logic_vector(max(1,TX_SOP_POS_WIDTH)-1 downto 0);
@@ -54,7 +54,7 @@ architecture full of FLU_TRANSFORMER_UP is
   constant TX_SOP_POS_WIDTH_REAL: integer := RX_SOP_POS_WIDTH+log2(TX_BLOCKS);
   constant RX_EOP_POS_WIDTH     : integer := log2(RX_DATA_WIDTH/8);
   constant TX_EOP_POS_WIDTH     : integer := log2(TX_DATA_WIDTH/8);
-  
+
   type rx_data_width_array_t is array (integer range <>) of std_logic_vector(RX_DATA_WIDTH-1 downto 0);
   signal tx_data_regs           : rx_data_width_array_t(0 to TX_BLOCKS-1);
   signal tx_data_regs_ce        : std_logic_vector(TX_BLOCKS-1 downto 0);
@@ -76,12 +76,12 @@ architecture full of FLU_TRANSFORMER_UP is
   signal tx_cnt_en              : std_logic;
   signal tx_addr                : std_logic_vector(log2(TX_BLOCKS)-1 downto 0);
   signal tx_sop_addr            : std_logic_vector(log2(TX_BLOCKS)-1 downto 0);
-  
+
   signal aux_reg_vld_now        : std_logic;
   signal aux_reg_vld            : std_logic;
   signal aux_reg_data           : std_logic_vector(RX_DATA_WIDTH-1 downto 0);
   signal aux_reg_sop_pos        : std_logic_vector(max(1,RX_SOP_POS_WIDTH)-1 downto 0);
-  
+
   signal rx_shift_en            : std_logic;
   signal rx_depth               : std_logic_vector(log2(TX_BLOCKS+1)-1 downto 0);
   signal rx_sop_vld             : std_logic;
@@ -89,14 +89,14 @@ architecture full of FLU_TRANSFORMER_UP is
   signal rx_shreg_full          : std_logic;
   signal rx_shreg_empty         : std_logic;
   signal rx_in_packet           : std_logic;
-  
+
   signal shift_data             : std_logic_vector(RX_DATA_WIDTH-1 downto 0);
   signal shift_sop_pos          : std_logic_vector(max(1,RX_SOP_POS_WIDTH)-1 downto 0);
   signal shift_eop_pos          : std_logic_vector(max(1,RX_EOP_POS_WIDTH)-1 downto 0);
   signal shift_sop              : std_logic;
   signal shift_eop              : std_logic;
   signal shift_flags            : std_logic_vector(1 downto 0);
-  
+
   signal sop_array              : std_logic_vector(TX_BLOCKS downto 0);
   signal eop_array              : std_logic_vector(TX_BLOCKS downto 0);
   signal sop_array_fix          : std_logic_vector(TX_BLOCKS-1 downto 0);
@@ -138,8 +138,8 @@ begin
         rx_in_packet <= rx_in_packet xor RX_SOP xor RX_EOP;
       end if;
     end if;
-  end process; 
-  
+  end process;
+
   -- input shift registers (Serial-IN, Serial-OUT)
   data_shreg : entity work.SH_REG_BASE_DYNAMIC
     generic map (
@@ -184,7 +184,7 @@ begin
         DOUT       => shift_eop_pos
       );
   end generate;
-  
+
   -- input shift registers (Serial-IN, Parallel-OUT)
   sop_shreg : entity work.sh_reg_sipo
     generic map (
@@ -212,10 +212,10 @@ begin
     );
   rx_eop_vld <= RX_EOP and RX_SRC_RDY;
   shift_eop  <= eop_array(TX_BLOCKS-1) when rx_shreg_full='0' else eop_array(TX_BLOCKS);
-  
+
 -- -----------------------------------------------------------------------------
 
-  -- cut out important data from sop and eop arrays  
+  -- cut out important data from sop and eop arrays
   sop_array_fix <= (sop_array(TX_BLOCKS-1) and rx_shreg_full) & sop_array(TX_BLOCKS-2 downto 0);
   eop_array_fix <= (eop_array(TX_BLOCKS-1) and rx_shreg_full) & eop_array(TX_BLOCKS-2 downto 0);
   tx_sop_addr   <= eop_in_array_addr when rx_shreg_full='1' else eop_in_array_addr+1;
@@ -234,7 +234,7 @@ begin
   last_eop_addr : entity work.GEN_ENC
     generic map (TX_BLOCKS)
     port map (eop_array_fix,eop_in_array_addr);
-  
+
   -- output data registers
   tx_data_reg_gen : for i in 1 to TX_BLOCKS-1 generate
     tx_data_register : process (CLK)
@@ -258,7 +258,7 @@ begin
   end process;
   tx_sop_register : process (CLK)
   begin
-    if CLK'event and CLK='1' then      
+    if CLK'event and CLK='1' then
       if RESET='1' then
         tx_sop_reg <= '0';
       elsif tx_regs_wr='1' and (shift_sop='1' or aux_reg_vld='1') then
@@ -289,7 +289,7 @@ begin
         tx_sop_pos_reg <= tx_addr & shift_sop_pos;
       end if;
     end if;
-  end process;  
+  end process;
   tx_eop_pos_register : process (CLK)
   begin
     if CLK'event and CLK='1' then
@@ -300,7 +300,7 @@ begin
   end process;
   tx_sop_actual <= (tx_sop_reg and not tx_vld) or aux_reg_vld;
   tx_eop_actual <= tx_eop_reg and not tx_vld;
-  
+
   -- output interface connection
   tx_data_gen : for i in 0 to TX_BLOCKS-1 generate
     TX_DATA((i+1)*RX_DATA_WIDTH-1 downto RX_DATA_WIDTH*i) <= tx_data_regs(i);
@@ -313,8 +313,8 @@ begin
     TX_SOP_POS(TX_SOP_POS_WIDTH-TX_SOP_POS_WIDTH_REAL-1 downto 0) <= (others => '0');
   end generate;
   TX_SRC_RDY <= tx_vld;
-  shreg_pop  <= (TX_DST_RDY or not tx_vld) and not rx_shreg_empty; 
-  
+  shreg_pop  <= (TX_DST_RDY or not tx_vld) and not rx_shreg_empty;
+
   -- Auxilliary registers
   aux_data_reg : process (CLK)
   begin
@@ -340,7 +340,7 @@ begin
       end if;
     end if;
   end process;
-  
+
   -- state registers and signals of tx
   tx_in_packet_reg : process(CLK)
   begin
@@ -351,7 +351,7 @@ begin
         tx_in_packet <= tx_in_packet xor shift_sop xor shift_eop;
       end if;
     end if;
-  end process; 
+  end process;
   tx_vld_reg : process(CLK)
   begin
     if CLK'event and CLK='1' then
@@ -382,7 +382,7 @@ begin
   end process;
   tx_addr      <= tx_cnt when tx_cnt_en='1' or eop_in_array='0' or tx_cnt>tx_sop_addr else tx_sop_addr;
   tx_last_word <= '1' when tx_addr=conv_std_logic_vector(TX_BLOCKS-1,tx_addr'length) else '0';
-  
+
   -- action select based on actual state and new word
   shift_flags <= shift_sop & shift_eop;
   action_select : process (shift_flags,tx_in_packet,sop_in_array,tx_sop_actual,tx_last_word,shreg_pop,tx_eop_actual)
@@ -413,8 +413,8 @@ begin
         if tx_eop_actual='1' then
           -- Sop (Eop uz je)  - najdem Eop a zarovnam to vhodne (find first 1 v Eop array)
           tx_regs_wr <= shreg_pop;
-          export_now <= tx_last_word;  
-          tx_cnt_en  <= '0';            
+          export_now <= tx_last_word;
+          tx_cnt_en  <= '0';
         else
           -- Sop (Eop nie je) - zarovnam na zaciatok a vlozim
           tx_regs_wr <= shreg_pop;
@@ -430,7 +430,7 @@ begin
             -- Eop Sop (Sop nie je) - najdem Eop a zarovnam Sop vhodne (find first 1 v Eop array) => mozno rozdelit Sop a Eop v ramci slova
             tx_regs_wr <= shreg_pop;
             tx_cnt_en  <= '0';
-            export_now <= tx_last_word; 
+            export_now <= tx_last_word;
           end if;
         else
           -- Sop Eop (Eop uz je)  - NEMOZE NASTAT!!!
@@ -438,10 +438,10 @@ begin
           tx_regs_wr <= shreg_pop;
           export_now <= '1';
         end if;
-      when others => null;  
+      when others => null;
     end case;
   end process;
-  
+
   -- clock enable for tx registers
   chip_select1 : entity work.dec1fn
     generic map (TX_BLOCKS)
@@ -449,5 +449,5 @@ begin
   chip_select2 : entity work.dec1fn
     generic map (TX_BLOCKS)
     port map (tx_cnt,tx_data_regs_cs2);
-  tx_data_regs_ce <= (tx_data_regs_cs1 or tx_data_regs_cs2) and (TX_BLOCKS-1 downto 0 => tx_regs_wr);    
+  tx_data_regs_ce <= (tx_data_regs_cs1 or tx_data_regs_cs2) and (TX_BLOCKS-1 downto 0 => tx_regs_wr);
 end architecture;

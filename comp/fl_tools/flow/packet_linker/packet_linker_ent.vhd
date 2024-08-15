@@ -12,7 +12,7 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.std_logic_unsigned.all;
 use IEEE.std_logic_arith.all;
---use work.fl_pkg.all; 
+--use work.fl_pkg.all;
 
 -- library containing log2 function
 use work.math_pack.all;

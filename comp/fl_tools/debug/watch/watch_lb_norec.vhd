@@ -35,7 +35,7 @@ entity FL_WATCH_LB_NOREC is
       -- Local bus
       -- =========
 
-      -- base address 
+      -- base address
       BASE_ADDR      : integer;
       -- address width
       ADDR_WIDTH     : integer;
@@ -102,14 +102,14 @@ begin
       port map (
          CLK            => CLK,
          RESET          => RESET,
-   
+
          SOF_N          => SOF_N,
          EOF_N          => EOF_N,
          SOP_N          => SOP_N,
          EOP_N          => EOP_N,
          DST_RDY_N      => DST_RDY_N,
          SRC_RDY_N      => SRC_RDY_N,
-   
+
          MI_DWR         => mi_dwr,
 	 MI_ADDR        => mi_addr,
 	 MI_RD	        => mi_rd,
@@ -119,10 +119,10 @@ begin
 	 MI_ARDY        => mi_ardy,
 	 MI_DRDY        => mi_drdy
       );
-   
+
    mi_addr(31 downto ADDR_WIDTH) <= (others => '0');
    mi_be <= (others => '1');
-   
+
    LB_CONNECT_U: entity work.lb_connect
       generic map (
          BASE_ADDR  => BASE_ADDR,
@@ -132,7 +132,7 @@ begin
       port map (
          -- Control signals
          RESET             => RESET,
-   
+
          -- LB signals
          LBCLK       => LBCLK,
          LBFRAME     => LBFRAME,
@@ -142,7 +142,7 @@ begin
          LBRW        => LBRW,
          LBRDY       => LBRDY,
          LBLAST      => LBLAST,
-   
+
          -- Address decoder interface
          CLK         => CLK,
          ADC_RD      => mi_rd,

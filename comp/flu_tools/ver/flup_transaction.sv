@@ -4,7 +4,7 @@
  * \author Jan Kučera <xkucer73@stud.fit.vutbr.cz>
  * \date 2015
  */
-  
+
 /**
  * Copyright (C) 2015 CESNET
  *
@@ -71,7 +71,7 @@ class FrameLinkUPTransaction extends Transaction;
 
       tr.header = new[header.size];
       tr.header = header;
-      
+
       tr.channel = channel;
 
       copy = tr;
@@ -134,7 +134,7 @@ class FrameLinkUPTransaction extends Transaction;
          end
       return 1;
    endfunction: compareData
-	
+
    /**
     * Compare transactions
     */

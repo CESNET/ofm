@@ -9,7 +9,7 @@
 `define TIMESTAMP_LIMITER_ENV_SV
 
 package uvm_timestamp_limiter;
-    
+
     `include "uvm_macros.svh"
     import uvm_pkg::*;
 

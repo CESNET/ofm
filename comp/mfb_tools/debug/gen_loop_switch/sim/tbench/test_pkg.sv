@@ -7,7 +7,7 @@
  */
 
 package test_pkg;
-   
+
     import math_pkg::*;
     `include "scoreboard.sv"
 

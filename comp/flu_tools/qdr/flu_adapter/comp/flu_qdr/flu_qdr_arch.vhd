@@ -21,7 +21,7 @@ use IEEE.std_logic_unsigned.all;
 --! Package with log2 function.
 use work.math_pack.all;
 
---! \brief Implementation FLU_ADAPTER connected to 3 QDR composed of 2 BRAM 
+--! \brief Implementation FLU_ADAPTER connected to 3 QDR composed of 2 BRAM
 architecture FULL of FLU_QDR is
 
    signal user_wr_cmd       : std_logic;

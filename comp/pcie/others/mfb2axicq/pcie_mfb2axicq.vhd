@@ -69,32 +69,32 @@ architecture FULL of PCIE_MFB2AXICQ is
     signal s_fifoxm_din      : std_logic_vector(2*(256+3+3+1+1)-1 downto 0);
     signal s_fifoxm_full     : std_logic;
     signal s_fifoxm_afull    : std_logic;
-    signal s_fifoxm_wr       : std_logic_vector(1 downto 0);  
+    signal s_fifoxm_wr       : std_logic_vector(1 downto 0);
     signal s_fifoxm_dout     : std_logic_vector(2*(256+3+3+1+1)-1 downto 0);
-    signal s_fifoxm_rd       : std_logic_vector(1 downto 0);  
-    signal s_fifoxm_empty    : std_logic_vector(1 downto 0); 
+    signal s_fifoxm_rd       : std_logic_vector(1 downto 0);
+    signal s_fifoxm_empty    : std_logic_vector(1 downto 0);
     signal s_fifoxm_dout_arr : slv_array_t(2-1 downto 0)(256+3+3+1+1-1 downto 0);
 
-    signal s_fifoxm_mfb_region_vld : std_logic_vector(1 downto 0); 
+    signal s_fifoxm_mfb_region_vld : std_logic_vector(1 downto 0);
     signal s_fifoxm_mfb_data       : slv_array_t(2-1 downto 0)(256-1 downto 0);
-    signal s_fifoxm_mfb_sof        : std_logic_vector(1 downto 0); 
-    signal s_fifoxm_mfb_eof        : std_logic_vector(1 downto 0); 
+    signal s_fifoxm_mfb_sof        : std_logic_vector(1 downto 0);
+    signal s_fifoxm_mfb_eof        : std_logic_vector(1 downto 0);
     signal s_fifoxm_mfb_eof_pos    : slv_array_t(2-1 downto 0)(3-1 downto 0);
     signal s_fifoxm_mfb_bar_range  : slv_array_t(2-1 downto 0)(3-1 downto 0);
 
     signal s_flag_two_packets   : std_logic;
     signal s_flag_word_no_ready : std_logic;
 
-    signal s_destr_mfb_data      : std_logic_vector(511 downto 0); 
-    signal s_destr_mfb_eof_pos   : std_logic_vector(4-1 downto 0); 
-    signal s_destr_mfb_bar_range : std_logic_vector(3-1 downto 0); 
+    signal s_destr_mfb_data      : std_logic_vector(511 downto 0);
+    signal s_destr_mfb_eof_pos   : std_logic_vector(4-1 downto 0);
+    signal s_destr_mfb_bar_range : std_logic_vector(3-1 downto 0);
     signal s_destr_mfb_sof       : std_logic;
     signal s_destr_mfb_eof       : std_logic;
     signal s_destr_mfb_src_rdy   : std_logic;
 
-    signal s_reg_mfb_data      : std_logic_vector(511 downto 0); 
-    signal s_reg_mfb_eof_pos   : std_logic_vector(4-1 downto 0); 
-    signal s_reg_mfb_bar_range : std_logic_vector(3-1 downto 0); 
+    signal s_reg_mfb_data      : std_logic_vector(511 downto 0);
+    signal s_reg_mfb_eof_pos   : std_logic_vector(4-1 downto 0);
+    signal s_reg_mfb_bar_range : std_logic_vector(3-1 downto 0);
     signal s_reg_mfb_sof       : std_logic;
     signal s_reg_mfb_eof       : std_logic;
     signal s_reg_mfb_src_rdy   : std_logic;
@@ -102,23 +102,23 @@ architecture FULL of PCIE_MFB2AXICQ is
     signal s_mfb_data_parr  : slv_array_t(512/32 downto 0)(32-1 downto 0);
     signal s_is_3dw_header  : std_logic;
     signal s_last_dw_is_eof : std_logic;
-    signal s_shift_en       : std_logic_vector(512/32-1 downto 0); 
+    signal s_shift_en       : std_logic_vector(512/32-1 downto 0);
 
     type t_fsm_state is (idle,shifted_pkt,new_word);
     signal s_fsm_pst : t_fsm_state;
     signal s_fsm_nst : t_fsm_state;
 
-    signal s_sh_mfb_data      : std_logic_vector(511 downto 0); 
-    signal s_sh_mfb_eof_pos   : std_logic_vector(4-1 downto 0); 
-    signal s_sh_mfb_bar_range : std_logic_vector(3-1 downto 0); 
+    signal s_sh_mfb_data      : std_logic_vector(511 downto 0);
+    signal s_sh_mfb_eof_pos   : std_logic_vector(4-1 downto 0);
+    signal s_sh_mfb_bar_range : std_logic_vector(3-1 downto 0);
     signal s_sh_mfb_sof       : std_logic;
     signal s_sh_mfb_eof       : std_logic;
     signal s_sh_mfb_src_rdy   : std_logic;
     signal s_sh_mfb_dst_rdy   : std_logic;
 
-    signal s_reg1_mfb_data      : std_logic_vector(511 downto 0); 
-    signal s_reg1_mfb_eof_pos   : std_logic_vector(4-1 downto 0); 
-    signal s_reg1_mfb_bar_range : std_logic_vector(3-1 downto 0); 
+    signal s_reg1_mfb_data      : std_logic_vector(511 downto 0);
+    signal s_reg1_mfb_eof_pos   : std_logic_vector(4-1 downto 0);
+    signal s_reg1_mfb_bar_range : std_logic_vector(3-1 downto 0);
     signal s_reg1_mfb_sof       : std_logic;
     signal s_reg1_mfb_eof       : std_logic;
     signal s_reg1_mfb_src_rdy   : std_logic;
@@ -126,11 +126,11 @@ architecture FULL of PCIE_MFB2AXICQ is
     signal s_mfb_dst_rdy    : std_logic;
     signal s_tpl_mem_wr_req : std_logic;
 
-    signal s_axi_cq_addr32 : std_logic_vector(61 downto 0); 
-    signal s_axi_cq_addr64 : std_logic_vector(61 downto 0); 
-    signal s_axi_cq_addr   : std_logic_vector(61 downto 0); 
-    signal s_axi_cq_type   : std_logic_vector(3 downto 0); 
-    signal s_axi_cq_data   : std_logic_vector(512-1 downto 0); 
+    signal s_axi_cq_addr32 : std_logic_vector(61 downto 0);
+    signal s_axi_cq_addr64 : std_logic_vector(61 downto 0);
+    signal s_axi_cq_addr   : std_logic_vector(61 downto 0);
+    signal s_axi_cq_type   : std_logic_vector(3 downto 0);
+    signal s_axi_cq_data   : std_logic_vector(512-1 downto 0);
     signal s_axi_cq_user   : std_logic_vector(183-1 downto 0);
     signal s_axi_cq_keep   : std_logic_vector(512/32-1 downto 0);
     signal s_axi_cq_last   : std_logic;
@@ -161,7 +161,7 @@ begin
             (RX_MFB_SOF(i) and RX_MFB_EOF(i) and s_inc_pkt(i)) or
             (not RX_MFB_SOF(i) and not RX_MFB_EOF(i) and s_inc_pkt(i));
     end generate;
-    
+
     inc_pkt_reg_p : process (CLK)
     begin
         if (rising_edge(CLK)) then
@@ -223,7 +223,7 @@ begin
 
     -- flag of two packets on FIFOX output
     s_flag_two_packets <= s_fifoxm_mfb_eof(0) and s_fifoxm_mfb_region_vld(0) and s_fifoxm_mfb_sof(1) and s_fifoxm_mfb_region_vld(1);
-    
+
     -- first SOF in the word is not in first region
     s_flag_word_no_ready <= not s_fifoxm_mfb_region_vld(0) and s_fifoxm_mfb_sof(1) and s_fifoxm_mfb_region_vld(1);
 
@@ -393,7 +393,7 @@ begin
     s_axi_cq_addr64 <= s_reg1_mfb_data(95 downto 64) & s_reg1_mfb_data(127 downto 98);
     -- 64bit or 32bit address
     s_axi_cq_addr <= s_axi_cq_addr64 when (s_reg1_mfb_data(29) = '1') else s_axi_cq_addr32;
-    
+
     -- decode AXI PCIe packet type (support only memory R/W now)
     with s_reg1_mfb_data(31 downto 24) select
     s_axi_cq_type <= "0000" when "00000000", -- 32b mem rd

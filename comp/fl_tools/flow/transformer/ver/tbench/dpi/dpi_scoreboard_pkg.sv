@@ -1,10 +1,10 @@
 package dpi_scoreboard_pkg;
-  
+
   // Transaction informations
   typedef struct {
-    int stream_id; 
-    int scenario_id; 
-    int data_id; 
+    int stream_id;
+    int scenario_id;
+    int data_id;
     string inst;
   } tFlTransactionInfo;
 

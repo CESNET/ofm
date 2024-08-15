@@ -30,18 +30,18 @@ module DUT (
     logic [log2(RX_DMA_CHANNELS)-1:0] arr_ETH_RX_MVB_CHANNEL [REGIONS-1:0];
     logic [HDR_META_WIDTH    -1:0] arr_ETH_RX_MVB_HDR_META[REGIONS-1:0];
     logic [1                    -1:0] arr_ETH_RX_MVB_DISCARD [REGIONS-1:0];
-                                                             
+
     logic [ETH_TX_MVB.ITEM_WIDTH-1:0] arr_ETH_TX_MVB_DATA    [REGIONS-1:0];
     logic [log2(PKT_MTU+1)      -1:0] arr_ETH_TX_MVB_LEN     [REGIONS-1:0];
     logic [log2(TX_DMA_CHANNELS)-1:0] arr_ETH_TX_MVB_CHANNEL [REGIONS-1:0];
     logic [HDR_META_WIDTH    -1:0] arr_ETH_TX_MVB_HDR_META[REGIONS-1:0];
-                                                             
+
     logic [DMA_RX_MVB.ITEM_WIDTH-1:0] arr_DMA_RX_MVB_DATA    [REGIONS-1:0];
     logic [log2(PKT_MTU+1)      -1:0] arr_DMA_RX_MVB_LEN     [REGIONS-1:0];
     logic [log2(RX_DMA_CHANNELS)-1:0] arr_DMA_RX_MVB_CHANNEL [REGIONS-1:0];
     logic [HDR_META_WIDTH    -1:0] arr_DMA_RX_MVB_HDR_META[REGIONS-1:0];
     logic [1                    -1:0] arr_DMA_RX_MVB_DISCARD [REGIONS-1:0];
-                                                             
+
     logic [DMA_TX_MVB.ITEM_WIDTH-1:0] arr_DMA_TX_MVB_DATA    [REGIONS-1:0];
     logic [log2(PKT_MTU+1)      -1:0] arr_DMA_TX_MVB_LEN     [REGIONS-1:0];
     logic [log2(TX_DMA_CHANNELS)-1:0] arr_DMA_TX_MVB_CHANNEL [REGIONS-1:0];
@@ -163,24 +163,24 @@ module DUT (
     );
 
     generate
-  
+
         assign {>>{arr_ETH_RX_MVB_DATA}} = ETH_RX_MVB.DATA;
         assign ETH_TX_MVB.DATA           = {>>{arr_ETH_TX_MVB_DATA}};
         assign DMA_RX_MVB.DATA           = {>>{arr_DMA_RX_MVB_DATA}};
         assign {>>{arr_DMA_TX_MVB_DATA}} = DMA_TX_MVB.DATA;
-  
+
         for(genvar i = 0; i<REGIONS; i++) begin
-  
+
             assign {>>{arr_ETH_RX_MVB_LEN[i], arr_ETH_RX_MVB_CHANNEL[i], arr_ETH_RX_MVB_HDR_META[i], arr_ETH_RX_MVB_DISCARD[i]}} = arr_ETH_RX_MVB_DATA[i];
             assign arr_ETH_TX_MVB_DATA[i] = {>>{arr_ETH_TX_MVB_LEN[i], arr_ETH_TX_MVB_CHANNEL[i], arr_ETH_TX_MVB_HDR_META[i]}};
             assign arr_DMA_RX_MVB_DATA[i] = {>>{arr_DMA_RX_MVB_LEN[i], arr_DMA_RX_MVB_CHANNEL[i], arr_DMA_RX_MVB_HDR_META[i], arr_DMA_RX_MVB_DISCARD[i]}};
             assign {>>{arr_DMA_TX_MVB_LEN[i], arr_DMA_TX_MVB_CHANNEL[i], arr_DMA_TX_MVB_HDR_META[i]}} = arr_DMA_TX_MVB_DATA[i];
-  
+
             //assign arr_ETH_RX_MVB_LEN     [i] = ETH_RX_MVB_DATA[i][log2(PKT_MTU+1)+log2(RX_DMA_CHANNELS)+HDR_META_WIDTH+1-1:log2(RX_DMA_CHANNELS)+HDR_META_WIDTH+1];
             //assign arr_ETH_RX_MVB_CHANNEL [i] = ETH_RX_MVB_DATA[i][                log2(RX_DMA_CHANNELS)+HDR_META_WIDTH+1-1:                      HDR_META_WIDTH+1];
             //assign arr_ETH_RX_MVB_HDR_META[i] = ETH_RX_MVB_DATA[i][                                      HDR_META_WIDTH+1-1:                                     1];
             //assign arr_ETH_RX_MVB_DISCARD [i] = ETH_RX_MVB_DATA[i][                                                     1-1:                                     0];
-  
+
             //assign arr_ETH_TX_MVB_LEN     [i] = ETH_TX_MVB_DATA[i][log2(PKT_MTU+1)+log2(TX_DMA_CHANNELS)+HDR_META_WIDTH-1:log2(TX_DMA_CHANNELS)+HDR_META_WIDTH];
             //assign arr_ETH_TX_MVB_CHANNEL [i] = ETH_TX_MVB_DATA[i][                log2(TX_DMA_CHANNELS)+HDR_META_WIDTH-1:                      HDR_META_WIDTH];
             //assign arr_ETH_TX_MVB_HDR_META[i] = ETH_TX_MVB_DATA[i][                                      HDR_META_WIDTH-1:                                   0];
@@ -193,27 +193,27 @@ module DUT (
             //assign arr_DMA_TX_MVB_LEN     [i] = DMA_TX_MVB_DATA[i][log2(PKT_MTU+1)+log2(TX_DMA_CHANNELS)+HDR_META_WIDTH-1:log2(TX_DMA_CHANNELS)+HDR_META_WIDTH];
             //assign arr_DMA_TX_MVB_CHANNEL [i] = DMA_TX_MVB_DATA[i][                log2(TX_DMA_CHANNELS)+HDR_META_WIDTH-1:                      HDR_META_WIDTH];
             //assign arr_DMA_TX_MVB_HDR_META[i] = DMA_TX_MVB_DATA[i][                                      HDR_META_WIDTH-1:                                   0];
-  
+
         end
-  
+
         assign ETH_RX_MVB_LEN      = {>>{arr_ETH_RX_MVB_LEN     }};
         assign ETH_RX_MVB_CHANNEL  = {>>{arr_ETH_RX_MVB_CHANNEL }};
         assign ETH_RX_MVB_HDR_META = {>>{arr_ETH_RX_MVB_HDR_META}};
         assign ETH_RX_MVB_DISCARD  = {>>{arr_ETH_RX_MVB_DISCARD }};
-  
+
         assign {>>{arr_ETH_TX_MVB_LEN     }} = ETH_TX_MVB_LEN     ;
         assign {>>{arr_ETH_TX_MVB_CHANNEL }} = ETH_TX_MVB_CHANNEL ;
         assign {>>{arr_ETH_TX_MVB_HDR_META}} = ETH_TX_MVB_HDR_META;
-  
+
         assign {>>{arr_DMA_RX_MVB_LEN     }} = DMA_RX_MVB_LEN     ;
         assign {>>{arr_DMA_RX_MVB_CHANNEL }} = DMA_RX_MVB_CHANNEL ;
         assign {>>{arr_DMA_RX_MVB_HDR_META}} = DMA_RX_MVB_HDR_META;
         assign {>>{arr_DMA_RX_MVB_DISCARD }} = DMA_RX_MVB_DISCARD ;
-  
+
         assign DMA_TX_MVB_LEN      = {>>{arr_DMA_TX_MVB_LEN     }};
         assign DMA_TX_MVB_CHANNEL  = {>>{arr_DMA_TX_MVB_CHANNEL }};
         assign DMA_TX_MVB_HDR_META = {>>{arr_DMA_TX_MVB_HDR_META}};
-  
+
     endgenerate
 
 endmodule

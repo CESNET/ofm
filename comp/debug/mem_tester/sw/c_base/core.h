@@ -31,11 +31,11 @@ SPDX-License-Identifier: BSD-3-Clause
 #define XML_VALUE(item, format)     "\t<" item ">" format "</" item ">\n"
 
 #define XML_START_2(item)           "\t" XML_START(item)
-#define XML_END_2(item)             "\t" XML_END(item) 
+#define XML_END_2(item)             "\t" XML_END(item)
 #define XML_VALUE_2(item, format)   "\t" XML_VALUE(item, format)
 
 #define XML_START_3(item)           "\t" XML_START_2(item)
-#define XML_END_3(item)             "\t" XML_END_2(item) 
+#define XML_END_3(item)             "\t" XML_END_2(item)
 #define XML_VALUE_3(item, format)   "\t" XML_VALUE_2(item, format)
 
 

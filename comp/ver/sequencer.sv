@@ -2,7 +2,7 @@
 //-- Copyright (C) 2021 CESNET z. s. p. o.
 //-- Author(s): Tomáš Beneš <xbenes55@stud.fit.vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 class Sequencer;
 
@@ -24,15 +24,15 @@ class Sequencer;
 
         if (indexOfActualSequence >=0 && listOfSequences[indexOfActualSequence].enabled) begin
             returnCode = 1;
-        end 
-        
-        
+        end
+
+
         if(indexOfActualGenerator >=0 && listOfGenerators[indexOfActualGenerator].enabled)begin
             returnCode = 1;
         end
-        
+
         return returnCode;
-    endfunction 
+    endfunction
 
     task addSeq(Sequence seq);
         this.listOfSequences.push_back(seq);
@@ -53,9 +53,9 @@ class Sequencer;
             $write("Sequence with name \"%s\" do not exist\n", name);
         end
 
-        
+
     endtask
-    
+
     task stopActSeq();
         this.listOfSequences[indexOfActualSequence].setDisabled();
     endtask
@@ -64,7 +64,7 @@ class Sequencer;
         this.listOfGenerators.push_back(gen);
         this.indexOfActualGenerator=this.listOfGenerators.size - 1;
     endtask
-    
+
     task runGenByIndex(int numOfTrans);
         if(indexOfActualGenerator >= 0 && indexOfActualGenerator <= listOfGenerators.size-1 && !listOfGenerators[indexOfActualGenerator].enabled) begin;
             fork
@@ -72,7 +72,7 @@ class Sequencer;
             join_none;
         end
     endtask
-    
+
     task stopActGen();
         this.listOfGenerators[indexOfActualGenerator].setDisabled();
     endtask

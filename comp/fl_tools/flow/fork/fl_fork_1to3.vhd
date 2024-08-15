@@ -7,7 +7,7 @@
 --
 -- $Id$
 --
--- TODO: 
+-- TODO:
 --
 --
 library IEEE;
@@ -114,13 +114,13 @@ begin
 
       -- Frame link concentrated interface
       TX_DATA=>TX_DATA,
-      TX_REM=>TX_REM,      
-      TX_SOF_N=>TX_SOF_N,       
-      TX_EOF_N=>TX_EOF_N,       
-      TX_SOP_N=>TX_SOP_N,       
-      TX_EOP_N=>TX_EOP_N,       
+      TX_REM=>TX_REM,
+      TX_SOF_N=>TX_SOF_N,
+      TX_EOF_N=>TX_EOF_N,
+      TX_SOP_N=>TX_SOP_N,
+      TX_EOP_N=>TX_EOP_N,
       TX_SRC_RDY_N=>TX_SRC_RDY_N,
-      TX_DST_RDY_N=>TX_DST_RDY_N   
+      TX_DST_RDY_N=>TX_DST_RDY_N
      );
 
 -- signal mapping for output port 0

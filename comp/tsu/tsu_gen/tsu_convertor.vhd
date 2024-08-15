@@ -27,11 +27,11 @@ entity TSU_CONVERTOR is
       --! \details Meanings of supported values: \n
       --! true = use multiplication in DSPs composed of adds and shifts \n
       --! false = look at TS_MULT_USE_DSP
-      TS_MULT_SMART_DSP            : boolean := true; 
+      TS_MULT_SMART_DSP            : boolean := true;
       --! \brief Selects whether to use DSPs for timestamp format conversion
       --! \details Meanings of supported values: \n
       --! true = use multipliers in DSPs \n
-      --! false = disable DSPs, use logic 
+      --! false = disable DSPs, use logic
       TS_MULT_USE_DSP              : boolean := true
    );
    port (
@@ -62,7 +62,7 @@ architecture FULL of TSU_CONVERTOR is
    signal reg_upper_ts4           : std_logic_vector(31 downto 0);
    signal reg_upper_ts5           : std_logic_vector(31 downto 0);
    signal reg_upper_ts6           : std_logic_vector(31 downto 0);
-   
+
    --! \name Signals used with DSP's disabled code block
    signal no_dsp_reg_input1         : std_logic_vector(31 downto 0);
    signal no_dsp_reg_input2         : std_logic_vector(31 downto 0);
@@ -77,7 +77,7 @@ architecture FULL of TSU_CONVERTOR is
    signal no_dsp_reg_upper_ts2      : std_logic_vector(31 downto 0);
    signal no_dsp_reg_upper_ts3      : std_logic_vector(31 downto 0);
    signal no_dsp_reg_upper_ts4      : std_logic_vector(31 downto 0);
-    
+
    --! \name Attributes used with DSP's disabled code block
    attribute use_dsp : string;
    attribute use_dsp of no_dsp_multt : signal is "no";
@@ -184,4 +184,4 @@ begin
 -- END OF TIMESTAMP CONVERT
 -- ----------------------------------------------------------------------------
 
-end architecture; 
+end architecture;

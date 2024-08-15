@@ -14,7 +14,7 @@ use work.type_pack.all;
 entity TX_MAC_LITE_UMII is
     generic(
         -- =====================================================================
-        -- MII CONFIGURATION: 
+        -- MII CONFIGURATION:
         -- =====================================================================
         -- Data width of MII data signal, must be power of two, minimum is 64
         MII_DW          : natural := 2048;
@@ -28,7 +28,7 @@ entity TX_MAC_LITE_UMII is
         RX_ITEM_WIDTH   : natural := 8; -- must be 8, one item = one byte
         RX_REGION_SIZE  : natural := (MII_DW/RX_REGIONS)/(RX_BLOCK_SIZE*RX_ITEM_WIDTH);
         -- =====================================================================
-        -- OTHERS CONFIGURATION: 
+        -- OTHERS CONFIGURATION:
         -- =====================================================================
         -- Maximum allowed size of packet in bytes.
         PKT_MTU_BYTES   : natural := 16384;
@@ -110,7 +110,7 @@ architecture FULL of TX_MAC_LITE_UMII is
     signal mac_mfb_dst_rdy    : std_logic;
 
 begin
-    
+
     tx_mac_lite_i : entity work.TX_MAC_LITE
     generic map(
         TX_REGIONS      => TX_REGIONS,
@@ -185,7 +185,7 @@ begin
         RX_EOF     => mac_mfb_eof,
         RX_SRC_RDY => mac_mfb_src_rdy,
         RX_DST_RDY => mac_mfb_dst_rdy,
-        
+
         MII_TXD    => MII_TXD,
         MII_TXC    => MII_TXC,
         MII_VLD    => MII_VLD,

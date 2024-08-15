@@ -2,7 +2,7 @@
 //-- Copyright (C) 2021 CESNET z. s. p. o.
 //-- Author(s): Jan Kubalek <kubalek@cesnet.cz>
 //--
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 // ----------------------------------------------------------------------------
 //                        Scoreboard
@@ -48,7 +48,7 @@ class master_cbs #(RX_DATA_WIDTH, RX_ADDR_WIDTH, RX_META_WIDTH, TX_DATA_WIDTH = 
                 tx_tr.op      = rx_tr.op;
 
                 word_shift = (rx_tr.address % (TX_DATA_WIDTH / 8));
-                
+
                 tx_tr.address = rx_tr.address - word_shift;
 
                 tx_tr.be   = 0;
@@ -76,7 +76,7 @@ class master_cbs #(RX_DATA_WIDTH, RX_ADDR_WIDTH, RX_META_WIDTH, TX_DATA_WIDTH = 
                     // Only propagate when at least some BE is valid
                     if (tx_tr.be != 0)
                         rxtx_req_fifo.push_back(tx_tr);
-                
+
                 end
 
             end else begin
@@ -110,7 +110,7 @@ class master_cbs #(RX_DATA_WIDTH, RX_ADDR_WIDTH, RX_META_WIDTH, TX_DATA_WIDTH = 
                 rx_tr.meta    = rx_tr_ref.meta;
                 rx_tr.address = rx_tr_ref.address;
                 rx_tr.be      = rx_tr_ref.be;
-                
+
                 if (!rx_tr_ref.compare(rx_tr,error_str))
                     error = 2;
 

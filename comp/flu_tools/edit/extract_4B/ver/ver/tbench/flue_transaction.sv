@@ -58,7 +58,7 @@ class FrameLinkUEditTransaction #(int offsetWidth = 10) extends Transaction;
    virtual function void display(string prefix = "");
       // Temporal variable for computation of 4byte shift
       integer tmp;
-      
+
       if (prefix != "")
       begin
          $write("---------------------------------------------------------\n");
@@ -112,7 +112,7 @@ class FrameLinkUEditTransaction #(int offsetWidth = 10) extends Transaction;
          tr = new();
       else
          $cast(tr, to);
- 
+
       // Here, we need to modify the data with respect
       // to edit information
       //
@@ -126,22 +126,22 @@ class FrameLinkUEditTransaction #(int offsetWidth = 10) extends Transaction;
             // Edit data on given offset
             tr.data = new[4];
             // Extract  data and edit them
-            
+
             //$write("Get block data\n");
             //this.display();
-            
+
             for(int j=0;j<4;j++)
             begin
                tr.data[j] = data[j+offsetStart];
             end
-               
+
             //tr.display();
 
       // Setup common part of data
       tr.packetSizeMin = packetSizeMin;
       toFLU = tr;
    endfunction : toFLU
- 	
+
    /**
     * Compare transactions.
     * Compares the current value of the object instance with the current value

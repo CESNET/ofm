@@ -45,5 +45,5 @@ proc internal {NAME PATH} {
 	add_wave "-noupdate		 -label sig_empty_l"	     $PATH/empty_l
 	add_wave "-noupdate		 -label sig_empty_h"	     $PATH/empty_h
 	add_wave "-noupdate		 -label sig_present_state" 	 $PATH/present_state
-	add_wave "-noupdate -hex -label DO"                  $PATH/do		
+	add_wave "-noupdate -hex -label DO"                  $PATH/do
 }

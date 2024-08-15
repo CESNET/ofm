@@ -6,7 +6,7 @@
 #
 
 # -------------------------------------------------------------------------
-#                       Waveform Definition 
+#                       Waveform Definition
 # -------------------------------------------------------------------------
 
 proc blk_STATUS_UNIT { } {
@@ -50,21 +50,21 @@ add wave -label OUT_MIN_SIZE -hex           $STATUS_UNIT_PATH/OUT_MIN_SIZE
 add wave -label OUT_MIN_DELAY -hex          $STATUS_UNIT_PATH/OUT_MIN_DELAY
 add wave -label OUT_MAX_DELAY -hex          $STATUS_UNIT_PATH/OUT_MAX_DELAY
 add wave -label OUT_LAST_READ_DELAY -hex    $STATUS_UNIT_PATH/OUT_LAST_READ_DELAY
-add wave -label OUT_UNDERSIZE_FRAMES -hex   $STATUS_UNIT_PATH/OUT_UNDERSIZE_FRAMES   
+add wave -label OUT_UNDERSIZE_FRAMES -hex   $STATUS_UNIT_PATH/OUT_UNDERSIZE_FRAMES
 add wave -label OUT_FRAMES_64 -hex          $STATUS_UNIT_PATH/OUT_FRAMES_64
-add wave -label OUT_FRAMES_65_127 -hex      $STATUS_UNIT_PATH/OUT_FRAMES_65_127 
-add wave -label OUT_FRAMES_128_255 -hex     $STATUS_UNIT_PATH/OUT_FRAMES_128_255 
-add wave -label OUT_FRAMES_256_511 -hex     $STATUS_UNIT_PATH/OUT_FRAMES_256_511 
-add wave -label OUT_FRAMES_512_1023 -hex    $STATUS_UNIT_PATH/OUT_FRAMES_512_1023  
-add wave -label OUT_FRAMES_1024_1518 -hex   $STATUS_UNIT_PATH/OUT_FRAMES_1024_1518 
-add wave -label OUT_FRAMES_OVER_1518 -hex   $STATUS_UNIT_PATH/OUT_FRAMES_OVER_1518  
+add wave -label OUT_FRAMES_65_127 -hex      $STATUS_UNIT_PATH/OUT_FRAMES_65_127
+add wave -label OUT_FRAMES_128_255 -hex     $STATUS_UNIT_PATH/OUT_FRAMES_128_255
+add wave -label OUT_FRAMES_256_511 -hex     $STATUS_UNIT_PATH/OUT_FRAMES_256_511
+add wave -label OUT_FRAMES_512_1023 -hex    $STATUS_UNIT_PATH/OUT_FRAMES_512_1023
+add wave -label OUT_FRAMES_1024_1518 -hex   $STATUS_UNIT_PATH/OUT_FRAMES_1024_1518
+add wave -label OUT_FRAMES_OVER_1518 -hex   $STATUS_UNIT_PATH/OUT_FRAMES_OVER_1518
 
 add wave -divider "Control signals"
 add wave -label START_EN $TB_ROOT/start_en
 add wave -label SW_RESET $TB_ROOT/sw_reset
 add wave -label RAR $TB_ROOT/reset_after_read
 add wave -label READ_EN $TB_ROOT/read_en
-add wave -label LAST_ADDR_EN $TB_ROOT/last_addr_en 
+add wave -label LAST_ADDR_EN $TB_ROOT/last_addr_en
 
 }
 

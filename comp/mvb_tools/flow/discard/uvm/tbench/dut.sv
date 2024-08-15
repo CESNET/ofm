@@ -1,4 +1,4 @@
-//-- dut.sv: Design under test 
+//-- dut.sv: Design under test
 //-- Copyright (C) 2022 CESNET z. s. p. o.
 //-- Author:   Jakub Cabal <cabal@cesnet.cz>
 
@@ -10,7 +10,7 @@ module DUT (
     input logic     CLK,
     input logic     RST,
     mvb_if.dut_rx   mvb_wr,
-    mvb_if.dut_tx   mvb_rd 
+    mvb_if.dut_tx   mvb_rd
     );
 
     DUT_WRAPPER #(

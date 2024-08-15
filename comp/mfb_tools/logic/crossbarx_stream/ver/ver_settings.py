@@ -193,9 +193,9 @@ SETTINGS = {
     "verbose" : {
         "VERBOSE"               : "1",
     },
-    "_combinations_" : (  
+    "_combinations_" : (
     (), # Works the same as '("default",),' as the "default" is applied in every combination
-    # Clock         , MFB            , Metadata       , Gap             , Adjust size start   , Adjust size end   , SRC and DST ready      , Discard          
+    # Clock         , MFB            , Metadata       , Gap             , Adjust size start   , Adjust size end   , SRC and DST ready      , Discard
     ("clk_setting_1", "pcie"         ,                                    "extend_start_var_1",                     "src_and_dst_rdy_var_1",                   ),
     ("clk_setting_2", "mfb_setting_1", "mfb_meta_var1", "gap_size_var_1", "shrink_start_var_1",                                                                ),
     ("clk_setting_4", "mfb_setting_2", "mfb_meta_var1",                                         "extend_end_var_1", "src_and_dst_rdy_var_1",                   ),

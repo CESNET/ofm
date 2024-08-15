@@ -23,15 +23,15 @@ entity FLUA_HEADER_INSERT is
    generic(
       --! FLU configuration
       DATA_WIDTH    : integer:= 512;
-      SOP_POS_WIDTH : integer:= 3;      
-      
+      SOP_POS_WIDTH : integer:= 3;
+
       --! Enable/Disable header insertion
       --!   false - Disable Header insertion
       --!   true  - Enable Header insertion
       HDR_ENABLE    : boolean := true;
       --! Widht of the header (multiple of 8)
       HDR_WIDTH     : integer := 128;
-      
+
       -- Pipeline Config ------------------------
       -- Use input pipe
       OUT_PIPE_EN   : boolean := false
@@ -48,7 +48,7 @@ entity FLUA_HEADER_INSERT is
       RX_SOP        : in std_logic;
       RX_EOP        : in std_logic;
       RX_SRC_RDY    : in std_logic;
-      RX_DST_RDY    : out std_logic; 
+      RX_DST_RDY    : out std_logic;
 
       --! \name Header input interface
       RX_HDR_DATA       : in std_logic_vector(HDR_WIDTH-1 downto 0);
@@ -69,9 +69,9 @@ end entity;
 architecture FULL of FLUA_HEADER_INSERT is
 
    constant OUT_PIPE_DISABLE : boolean := not(OUT_PIPE_EN);
-   
+
    signal rx_src_rdy_in   : std_logic;
-   
+
    signal rx_data_pipe    : std_logic_vector(DATA_WIDTH-1 downto 0);
    signal rx_sop_pos_pipe : std_logic_vector(SOP_POS_WIDTH-1 downto 0);
    signal rx_eop_pos_pipe : std_logic_vector(log2(DATA_WIDTH/8)-1 downto 0);
@@ -79,19 +79,19 @@ architecture FULL of FLUA_HEADER_INSERT is
    signal rx_eop_pipe     : std_logic;
    signal rx_src_rdy_pipe : std_logic;
    signal rx_dst_rdy_pipe : std_logic;
-   
+
    signal rx_dst_rdy_out  : std_logic;
-   
+
    signal rx_data_hw_r    : std_logic_vector(HDR_WIDTH-1 downto 0);
    signal rx_eop_overflow : std_logic;
    signal rx_eop_insert_r : std_logic := '0';
    signal rx_eop_pos_r    : std_logic_vector(log2(DATA_WIDTH/8)-1 downto 0);
-   
+
 begin
 
-   HEAD_INS_T_GEN: if (HDR_ENABLE = true) generate      
+   HEAD_INS_T_GEN: if (HDR_ENABLE = true) generate
       rx_src_rdy_in <= RX_SRC_RDY and (not(RX_SOP) or RX_HDR_SRC_RDY);
-      
+
       RX_DATA_LW_R_P: process(CLK)
       begin
          if (CLK'event) and (CLK = '1') then
@@ -100,9 +100,9 @@ begin
             end if;
          end if;
       end process;
-      
-      rx_eop_overflow <= '1' when (RX_EOP_POS >= (DATA_WIDTH/8 - HDR_WIDTH/8)) else '0'; 
-      
+
+      rx_eop_overflow <= '1' when (RX_EOP_POS >= (DATA_WIDTH/8 - HDR_WIDTH/8)) else '0';
+
       RX_EOP_INSERT_R_P: process(CLK)
       begin
          if (CLK'event) and (CLK = '1') then
@@ -113,7 +113,7 @@ begin
             end if;
          end if;
       end process;
-      
+
       RX_EOP_POS_R_P: process(CLK)
       begin
          if (CLK'event) and (CLK = '1') then
@@ -122,38 +122,38 @@ begin
             end if;
          end if;
       end process;
-      
+
       rx_data_pipe(DATA_WIDTH-1 downto HDR_WIDTH) <= RX_DATA(DATA_WIDTH-HDR_WIDTH-1 downto 0);
       rx_data_pipe(HDR_WIDTH-1 downto 0) <= RX_HDR_DATA when ((RX_SOP = '1') and (rx_eop_insert_r = '0')) else rx_data_hw_r;
-      
+
       rx_sop_pos_pipe <= RX_SOP_POS;
       rx_eop_pos_pipe <= (RX_EOP_POS + HDR_WIDTH/8) when (rx_eop_insert_r = '0') else (rx_eop_pos_r - (DATA_WIDTH/8 - HDR_WIDTH/8));
-      
+
       rx_sop_pipe <= RX_SOP and not(rx_eop_insert_r);
       rx_eop_pipe <= (RX_EOP and not(rx_eop_overflow)) or rx_eop_insert_r;
-      
+
       rx_src_rdy_pipe <= rx_src_rdy_in or rx_eop_insert_r;
       rx_dst_rdy_out  <= rx_dst_rdy_pipe and rx_src_rdy_in and not(rx_eop_insert_r);
-      
+
       RX_DST_RDY      <= rx_dst_rdy_out;
       RX_HDR_DST_RDY  <= rx_dst_rdy_out and RX_SOP;
    end generate;
-   
-   HEAD_INS_F_GEN: if (HDR_ENABLE = false) generate 
+
+   HEAD_INS_F_GEN: if (HDR_ENABLE = false) generate
       rx_data_pipe <= RX_DATA;
-      
+
       rx_sop_pos_pipe <= RX_SOP_POS;
       rx_eop_pos_pipe <= RX_EOP_POS;
-      
+
       rx_sop_pipe <= RX_SOP;
       rx_eop_pipe <= RX_EOP;
-      
+
       rx_src_rdy_pipe <= RX_SRC_RDY;
       RX_DST_RDY      <= rx_dst_rdy_pipe;
-      
+
       RX_HDR_DST_RDY <= '1';
    end generate;
-   
+
    --! \brief Output data pipeline
    OUT_DATA_PIPE_I:entity work.FLU_PIPE
    generic map(
@@ -164,10 +164,10 @@ begin
       FAKE_PIPE      => OUT_PIPE_DISABLE
    )
    port map(
-      -- Common interface 
+      -- Common interface
       CLK            => CLK,
       RESET          => RESET,
-      
+
       -- Input interface
       RX_DATA       => rx_data_pipe,
       RX_SOP_POS    => rx_sop_pos_pipe,
@@ -185,15 +185,15 @@ begin
       TX_EOP        => TX_EOP,
       TX_SRC_RDY    => TX_SRC_RDY,
       TX_DST_RDY    => TX_DST_RDY,
-      
+
       -- Debuging interface ---------------------------------------------------
-      DEBUG_BLOCK     => open,   
-      DEBUG_DROP      => open,   
+      DEBUG_BLOCK     => open,
+      DEBUG_DROP      => open,
       DEBUG_SRC_RDY   => open,
-      DEBUG_DST_RDY   => open,   
+      DEBUG_DST_RDY   => open,
       DEBUG_SOP       => open,
-      DEBUG_EOP       => open   
+      DEBUG_EOP       => open
    );
-   
+
 end architecture;
 

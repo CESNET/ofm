@@ -8,7 +8,7 @@
 
 class model #(ITEM_WIDTH, TX_PORTS) extends uvm_component;
     `uvm_component_param_utils(uvm_mvb_demux::model#(ITEM_WIDTH, TX_PORTS))
-    
+
     // Model input
     uvm_tlm_analysis_fifo #(uvm_common::model_item #(uvm_logic_vector::sequence_item #(ITEM_WIDTH + $clog2(TX_PORTS))))  rx_mvb_analysis_fifo;
     // Model output

@@ -1,4 +1,4 @@
--- decompress_any.vhd: Frame Link protocol signals decompressor 
+-- decompress_any.vhd: Frame Link protocol signals decompressor
 -- (Any number of parts)
 -- Copyright (C) 2007 CESNET
 -- Author(s): Viktor Pus <pus@liberouter.org>
@@ -25,7 +25,7 @@ entity fl_decompress_any is
       -- Common interface
       CLK            : in  std_logic;
       RESET          : in  std_logic;
-      
+
       -- Transmit interface
       TX_SRC_RDY_N   : in  std_logic;
       TX_DST_RDY_N   : in  std_logic; -- Is input, because this comp does not
@@ -34,10 +34,10 @@ entity fl_decompress_any is
       TX_EOP_N       : out std_logic;
       TX_SOF_N       : out std_logic;
       TX_EOF_N       : out std_logic;
-      
-      FL_JUICE       : in  std_logic_vector(WIRES-1 downto 0); 
+
+      FL_JUICE       : in  std_logic_vector(WIRES-1 downto 0);
          -- Compressed FL control signals
-         
+
       DISCARD        : in  std_logic  -- Next item is SOF & SOP
    );
 end entity fl_decompress_any;
@@ -64,7 +64,7 @@ begin
          if TX_SRC_RDY_N = '0' and TX_DST_RDY_N = '0' and FL_JUICE(0) = '0'
             and cnt_parts = PARTS-1 then
             cnt_parts <= (others => '0');
-         elsif TX_SRC_RDY_N = '0' and TX_DST_RDY_N = '0' and 
+         elsif TX_SRC_RDY_N = '0' and TX_DST_RDY_N = '0' and
             FL_JUICE(0) = '0' then
             cnt_parts <= cnt_parts + 1;
          end if;

@@ -29,7 +29,7 @@ entity IB_ENDPOINT_HDR_GEN_MASTER is
       RD_COMPL_SRC_ADDR     : in  std_logic_vector(31 downto 0);
       RD_COMPL_TAG          : in  std_logic_vector(15 downto 0);
       RD_COMPL_LENGTH       : in  std_logic_vector(11 downto 0);
-              
+
       -- ========================
       -- Master Interface
       -- ========================
@@ -104,9 +104,9 @@ begin
    case mux_header_data_sel is
       when "0000"   => HEADER_DATA <= rd_completition_hdr1;
       when "0100"   => HEADER_DATA <= rd_completition_hdr2;
-      
+
       when "1010"   => HEADER_DATA <= l2lr_hdr1;
-      when "1011"   => HEADER_DATA <= l2lw_hdr1; 
+      when "1011"   => HEADER_DATA <= l2lw_hdr1;
       when "1000"   => HEADER_DATA <= g2lr_hdr1;
       when "1001"   => HEADER_DATA <= l2gw_hdr1;
 

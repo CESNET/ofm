@@ -45,9 +45,9 @@ entity FL_BINDER_NFIFO2FIFO is
       RX_EOF_N       : in  std_logic_vector(INPUT_COUNT-1 downto 0);
       RX_SRC_RDY_N   : in  std_logic_vector(INPUT_COUNT-1 downto 0);
       RX_DST_RDY_N   : out std_logic_vector(INPUT_COUNT-1 downto 0);
-      RX_DATA        : in  std_logic_vector(INPUT_COUNT*INPUT_WIDTH-1 
+      RX_DATA        : in  std_logic_vector(INPUT_COUNT*INPUT_WIDTH-1
                                                                      downto 0);
-      RX_REM         : in  std_logic_vector(INPUT_COUNT*log2(INPUT_WIDTH/8)-1 
+      RX_REM         : in  std_logic_vector(INPUT_COUNT*log2(INPUT_WIDTH/8)-1
                                                                      downto 0);
 
       -- output FrameLink interface
@@ -74,7 +74,7 @@ architecture full of FL_BINDER_NFIFO2FIFO is
    constant MEM_DATA_WIDTH       : integer := INPUT_WIDTH * INPUT_COUNT;
    constant BRAM_SIZE            : integer := 2048;
    constant BRAM_BLOCK_SIZE      : integer := BRAM_SIZE / (MEM_DATA_WIDTH/8);
-   
+
    function BLOCK_SIZE
       return integer is
    begin
@@ -90,10 +90,10 @@ architecture full of FL_BINDER_NFIFO2FIFO is
       else return false;
       end if;
    end function;
-   
+
    -- set to cover situation, when memory is full of one-word frames
    constant FRAMECOUNTER_WIDTH   : integer := log2(BLOCK_SIZE+1);
-   
+
    -- NFIFO2FIFO interface
    signal nfifo2fifo_data_in     : std_logic_vector(NFIFO2FIFO_WIDTH-1 downto 0);
    signal nfifo2fifo_write       : std_logic_vector(INPUT_COUNT-1 downto 0);
@@ -114,7 +114,7 @@ architecture full of FL_BINDER_NFIFO2FIFO is
    signal out_rx_src_rdy_n     : std_logic;
    signal out_rx_dst_rdy_n     : std_logic;
    signal out_rx_data          : std_logic_vector(OUTPUT_WIDTH-1 downto 0);
-   signal out_rx_rem           : std_logic_vector(log2(OUTPUT_WIDTH/8)-1 
+   signal out_rx_rem           : std_logic_vector(log2(OUTPUT_WIDTH/8)-1
                                 downto 0);
    signal out_tx_sof_n         : std_logic;
    signal out_tx_sop_n         : std_logic;
@@ -123,12 +123,12 @@ architecture full of FL_BINDER_NFIFO2FIFO is
    signal out_tx_src_rdy_n     : std_logic;
    signal out_tx_dst_rdy_n     : std_logic;
    signal out_tx_data          : std_logic_vector(OUTPUT_WIDTH-1 downto 0);
-   signal out_tx_rem           : std_logic_vector(log2(OUTPUT_WIDTH/8)-1 
+   signal out_tx_rem           : std_logic_vector(log2(OUTPUT_WIDTH/8)-1
                                 downto 0);
 
    signal out_frame_done       : std_logic_vector(INPUT_COUNT-1 downto 0);
    signal out_frame_part       : std_logic;
-   signal out_status           : std_logic_vector(INPUT_COUNT*STATUS_WIDTH-1 
+   signal out_status           : std_logic_vector(INPUT_COUNT*STATUS_WIDTH-1
                                 downto 0);
    signal out_empty            : std_logic_vector(INPUT_COUNT-1 downto 0);
    signal out_ifc              : std_logic_vector(log2(INPUT_COUNT)-1 downto 0);
@@ -139,7 +139,7 @@ architecture full of FL_BINDER_NFIFO2FIFO is
    signal fc_newframe         : std_logic_vector(INPUT_COUNT-1 downto 0);
    signal fc_frame_done       : std_logic_vector(INPUT_COUNT-1 downto 0);
 begin
-   
+
    -- -------------------------------------------------------------------------
    --                      INPUT DATA TRANSFORMATION
    -- -------------------------------------------------------------------------
@@ -172,7 +172,7 @@ begin
             FRAME_PART     => open
          );
    end generate;
-   
+
    -- -------------------------------------------------------------------------
    --                              NFIFO2FIFO
    -- -------------------------------------------------------------------------
@@ -237,7 +237,7 @@ begin
          -- Other
          FRAME_DONE     => fc_frame_done
       );
-   
+
    -- -------------------------------------------------------------------------
    --                              OUTPUT PART
    -- -------------------------------------------------------------------------
@@ -326,11 +326,11 @@ begin
          port map(
             CLK            => CLK,
             RESET          => RESET,
-            
+
             -- input interface
             INC            => fc_newframe,
             DEC            => fc_frame_done,
-            
+
             -- output interface
             FRAME_RDY      => fc_frame_rdy,
             NO_FRAME       => fc_no_frame
@@ -383,11 +383,11 @@ begin
          port map(
             CLK            => CLK,
             RESET          => RESET,
-            
+
             -- input interface
             INC            => fc_newframe,
             DEC            => fc_frame_done,
-            
+
             -- output interface
             FRAME_RDY      => fc_frame_rdy,
             NO_FRAME       => fc_no_frame
@@ -404,7 +404,7 @@ begin
             USE_OUTREG     => false
          )
          port map(
-            -- Common interface 
+            -- Common interface
             CLK            => CLK,
             RESET          => RESET,
             -- Input interface
@@ -416,7 +416,7 @@ begin
             RX_DST_RDY_N   => out_tx_dst_rdy_n,
             RX_DATA        => out_tx_data,
             RX_REM         => out_tx_rem,
-       
+
             -- Output interface
             TX_SOF_N       => TX_SOF_N,
             TX_EOP_N       => TX_EOP_N,

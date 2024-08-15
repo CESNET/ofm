@@ -34,11 +34,11 @@ program TEST (
   iDiscardStat.tx_tb   TX_CHAN,
   iDiscardStat.stat_tb STAT
   );
-  
+
   // --------------------------------------------------------------------------
   //                       Variables declaration
   // --------------------------------------------------------------------------
- 
+
   // Transaction
   FrameLinkTransaction                 flBlueprint;
   // Generator
@@ -61,15 +61,15 @@ program TEST (
   DiscardStatScoreboard #(CHANNELS, TR_TABLE_FIRST_ONLY) scoreboard;
   // Coverage
   Coverage #(DRIVER0_DATA_WIDTH,DRIVER0_DREM_WIDTH,MONITOR0_DATA_WIDTH,MONITOR0_DREM_WIDTH) coverage;
-  
-  // Virtual interfaces 
-  virtual iFrameLinkRx.tb #(DRIVER0_DATA_WIDTH, DRIVER0_DREM_WIDTH) 
+
+  // Virtual interfaces
+  virtual iFrameLinkRx.tb #(DRIVER0_DATA_WIDTH, DRIVER0_DREM_WIDTH)
                                                           vRX_DRIV[CHANNELS];
-  virtual iFrameLinkTx.tb #(DRIVER0_DATA_WIDTH, DRIVER0_DREM_WIDTH) 
+  virtual iFrameLinkTx.tb #(DRIVER0_DATA_WIDTH, DRIVER0_DREM_WIDTH)
                                                           vTX_MUX[CHANNELS];
-  virtual iFrameLinkRx.tb #(MONITOR0_DATA_WIDTH, MONITOR0_DREM_WIDTH) 
+  virtual iFrameLinkRx.tb #(MONITOR0_DATA_WIDTH, MONITOR0_DREM_WIDTH)
                                                           vRX_DEMUX[CHANNELS];
-  virtual iFrameLinkTx.monitor #(MONITOR0_DATA_WIDTH, MONITOR0_DREM_WIDTH) 
+  virtual iFrameLinkTx.monitor #(MONITOR0_DATA_WIDTH, MONITOR0_DREM_WIDTH)
                                                           vTX_MON[CHANNELS];
   // --------------------------------------------------------------------------
   //                       Creating Environment tasks
@@ -93,9 +93,9 @@ program TEST (
       flBlueprint.packetSizeMin = packet_size_min;
       generator[i].blueprint    = flBlueprint;
     end
-  endtask: createGeneratorEnvironment    
+  endtask: createGeneratorEnvironment
 
-  task createEnvironment();    
+  task createEnvironment();
     // Assign virtual interfaces
     vRX_DRIV      = RX_DRIV;
     vTX_MUX       = TX_MUX;
@@ -109,17 +109,17 @@ program TEST (
     discardingModel = new("Discarding Model", RX, RX_CHAN, STAT);
       discardingModel.setCallbacks(scoreboard.driverCbs);
 
-    // Create driver    
+    // Create driver
     for(int i=0; i<CHANNELS; i++) begin
       string driverLabel;
-      
+
       $swrite(driverLabel, "Driver %0d", i);
       flDriver[i]  = new (driverLabel, generator[i].transMbx, vRX_DRIV[i]);
-      flDriver[i].txDelayEn_wt             = DRIVER0_DELAYEN_WT; 
+      flDriver[i].txDelayEn_wt             = DRIVER0_DELAYEN_WT;
       flDriver[i].txDelayDisable_wt        = DRIVER0_DELAYDIS_WT;
       flDriver[i].txDelayLow               = DRIVER0_DELAYLOW;
       flDriver[i].txDelayHigh              = DRIVER0_DELAYHIGH;
-      flDriver[i].insideTxDelayEn_wt       = DRIVER0_INSIDE_DELAYEN_WT; 
+      flDriver[i].insideTxDelayEn_wt       = DRIVER0_INSIDE_DELAYEN_WT;
       flDriver[i].insideTxDelayDisable_wt  = DRIVER0_INSIDE_DELAYDIS_WT;
       flDriver[i].insideTxDelayLow         = DRIVER0_INSIDE_DELAYLOW;
       flDriver[i].insideTxDelayHigh        = DRIVER0_INSIDE_DELAYHIGH;
@@ -134,7 +134,7 @@ program TEST (
     // Create monitor
     for(int i=0; i<CHANNELS; i++) begin
       string monitorLabel;
-      
+
       $swrite(monitorLabel, "Monitor %0d", i);
       flMonitor[i] = new (monitorLabel, vTX_MON[i]);
       flMonitor[i].setCallbacks(scoreboard.monitorCbs);
@@ -152,7 +152,7 @@ program TEST (
   // --------------------------------------------------------------------------
   //                       Test auxilarity procedures
   // --------------------------------------------------------------------------
-  
+
   // --------------------------------------------------------------------------
   // Resets design
   task resetDesign();
@@ -184,7 +184,7 @@ program TEST (
     int i;
     bit busy;
 
-    // Check if drivers/monitors are not sending/receiving transaction for 
+    // Check if drivers/monitors are not sending/receiving transaction for
     // 100 CLK_PERIODs
     i = 0;
     while (i<100) begin
@@ -194,7 +194,7 @@ program TEST (
 
       if (busy) i = 0;
       else i++;
-      #(CLK_PERIOD); 
+      #(CLK_PERIOD);
     end
 
     // Disable drivers
@@ -216,7 +216,7 @@ program TEST (
   // -- Read Frame Counters ---------------------------------------------------
   //! Read Frame Counters
   /*!
-   * Function reads values in frame counter registers via MI32.          
+   * Function reads values in frame counter registers via MI32.
    */
   task readFrameCounters();
     automatic Mi32Transaction mi32Transaction = new();
@@ -307,7 +307,7 @@ program TEST (
   // -- Check Frame Counters --------------------------------------------------
   //! Check Frame Counters
   /*!
-   * Function check values of frame counters.          
+   * Function check values of frame counters.
    */
   function void checkFrameCounters(bit [63:0] droppedFrames[CHANNELS],
                                    bit [63:0] passedFrames[CHANNELS],
@@ -365,8 +365,8 @@ program TEST (
 
      // wait until generator is disabled
      for (int i=0; i<CHANNELS; i++)
-       wait (generator[i].enabled == 0); 
-    
+       wait (generator[i].enabled == 0);
+
      // Disable Test Enviroment
      disableTestEnvironment();
 
@@ -377,7 +377,7 @@ program TEST (
      // Read frames counters
      readFrameCounters();
   endtask: test1
-  
+
 
   // --------------------------------------------------------------------------
   //                           Main test part

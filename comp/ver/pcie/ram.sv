@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2020 CESNET z. s. p. o.
- * SPDX-License-Identifier: BSD-3-Clause 
+ * SPDX-License-Identifier: BSD-3-Clause
 */
 
 class ram #(ADDR_WIDTH, MPS, MRRS) extends sv_common_pkg::Driver;
@@ -16,7 +16,7 @@ class ram #(ADDR_WIDTH, MPS, MRRS) extends sv_common_pkg::Driver;
         this.ram_modul = ram_modul;
         this.mbx_output = new();
     endfunction
- 
+
     function void verbosity_set(int unsigned level);
         verbosity = level;
     endfunction
@@ -29,13 +29,13 @@ class ram #(ADDR_WIDTH, MPS, MRRS) extends sv_common_pkg::Driver;
             byte unsigned data[];
             int unsigned length;
             logic [63:0] address;
-            
+
 
             // get request
             transMbx.get(tr_new);
             $cast(tr, tr_new);
 
-            // data and address is alligned to 4bytes 
+            // data and address is alligned to 4bytes
             if ((({tr.addr, 2'b00} & (PAGE_SIZE-1)) + tr.data.size()*4) > PAGE_SIZE) begin
                 tr.display();
                 $error("PCIE: transaction continuos throught page boundary\n\tstart address : %h\n\tend address   : %h\n",
@@ -48,7 +48,7 @@ class ram #(ADDR_WIDTH, MPS, MRRS) extends sv_common_pkg::Driver;
             // REQUEST TYPE WRITE
             if (tr.type_tr == PCIE_RQ_WRITE) begin
                 if (verbosity) begin
-                    data_display("WRITE", data, address, tr.tag); 
+                    data_display("WRITE", data, address, tr.tag);
                 end
 
                 if (data.size() > MPS) begin
@@ -74,7 +74,7 @@ class ram #(ADDR_WIDTH, MPS, MRRS) extends sv_common_pkg::Driver;
                ram_modul.read(address, length, data_read);
 
                if (verbosity) begin
-                  data_display("READ", data_read, address, tr.tag); 
+                  data_display("READ", data_read, address, tr.tag);
                end
 
                send_response(address, tr.tag, data_read, tr.requester_id);
@@ -86,7 +86,7 @@ class ram #(ADDR_WIDTH, MPS, MRRS) extends sv_common_pkg::Driver;
             $timeformat(-9, 3, " ns", 8);
             $write("Time: %t: ", $time);
             $write("PCIe %s %s : %6d B <= %x (tag %x)\n", inst, dir, data.size(), addr, tag);
-        
+
             if (verbosity > 1) begin
                 for (integer j = 0; j < data.size(); j++) begin
                     if (j % 32 == 0)
@@ -118,18 +118,18 @@ class ram #(ADDR_WIDTH, MPS, MRRS) extends sv_common_pkg::Driver;
             1 : begin  length += 1; data = {8'h00, data}; end
             2 : begin  length += 2; data = {8'h00, 8'h00, data}; end
             3 : begin  length += 3; data = {8'h00, 8'h00, 8'h00, data}; end
-        endcase       
+        endcase
 
         ////setup lbe
         case (data.size() & 3)
-            0 : begin  end 
+            0 : begin  end
             1 : begin  length += 3; data = {data, 8'h00, 8'h00, 8'h00}; end
             2 : begin  length += 2; data = {data, 8'h00, 8'h00}; end
             3 : begin  length += 1; data = {data, 8'h00}; end
         endcase
 
         tr_compl.length = length/4;
-        tr_compl.data = { << 32{ {<< 8 {data}} }}; 
+        tr_compl.data = { << 32{ {<< 8 {data}} }};
 
         // put to transaction fifo
         $cast(to, tr_compl);

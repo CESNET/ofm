@@ -1,7 +1,7 @@
 /*
  * file       : pkg.sv
  * Copyright (C) 2021 CESNET z. s. p. o.
- * description: mi package. configuration of designs 
+ * description: mi package. configuration of designs
  * date       : 2021
  * author     : Radek Iša <isa@cesnet.cz>
  *

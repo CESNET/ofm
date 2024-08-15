@@ -41,11 +41,11 @@
    <port name="RX"       dir="inout" width="">
       Recieve interface (write to FIFO)
    </port>
-      
+
    <port name="TX"       dir="inout" width="">
       Transmit interface (read from FIFO)
    </port>
-  
+
 </port_map>
 </interface>
 
@@ -57,13 +57,13 @@
     In the future, generic version should exist for various data widths
     and implementations (distributed memories, BRAMS+custom logic).
     </p>
-    
+
 
 <h1>Frequency and Resources usage</h1>
 
-  <p> 
+  <p>
    Only one 36Kb BlockRAM and two invertors are needed...
-  </p> 
+  </p>
 
 
 </body>

@@ -16,8 +16,8 @@ use IEEE.std_logic_unsigned.all;
 use work.math_pack.all;
 
 -- ----------------------------------------------------------------------------
---                               ENTITY DECLARATION 
--- ---------------------------------------------------------------------------- 
+--                               ENTITY DECLARATION
+-- ----------------------------------------------------------------------------
 
 -- * FrameLink Multiplexer merges more FrameLinks into one Multiplexed FL.
 entity FL_MULTIPLEXER is
@@ -26,12 +26,12 @@ entity FL_MULTIPLEXER is
       DATA_WIDTH     : integer := 64;
       --* Number of FrameLink channels
       CHANNELS       : integer := 4
-   );   
+   );
    port(
-      --+ Common interface 
+      --+ Common interface
       CLK            : in std_logic;
       RESET          : in std_logic;
-      
+
       --+ Input FrameLink interface
       RX_SOF_N       : in  std_logic_vector(CHANNELS-1 downto 0);
       RX_SOP_N       : in  std_logic_vector(CHANNELS-1 downto 0);
@@ -41,7 +41,7 @@ entity FL_MULTIPLEXER is
       RX_DST_RDY_N   : out std_logic_vector(CHANNELS-1 downto 0);
       RX_DATA        : in  std_logic_vector(DATA_WIDTH*CHANNELS-1 downto 0);
       RX_DREM        : in  std_logic_vector(CHANNELS*log2(DATA_WIDTH/8)-1 downto 0);
- 
+
       --+ Output FrameLink interface
       TX_SOF_N       : out std_logic;
       TX_EOP_N       : out std_logic;
@@ -59,7 +59,7 @@ entity FL_MULTIPLEXER is
 end entity FL_MULTIPLEXER;
 
 -- ----------------------------------------------------------------------------
---                            ARCHITECTURE DECLARATION 
+--                            ARCHITECTURE DECLARATION
 -- ----------------------------------------------------------------------------
 --* FULL arhitecture implementing the module
 architecture fl_multiplexer_arch of FL_MULTIPLEXER is
@@ -81,7 +81,7 @@ architecture fl_multiplexer_arch of FL_MULTIPLEXER is
 
    signal mux_din          : std_logic_vector(CHANNELS*MUX_WORD-1 downto 0);
    signal mux_dout         : std_logic_vector(MUX_WORD-1 downto 0);
-   
+
 begin
    channel_gen : for i in 0 to CHANNELS-1 generate
       channel_rdy(i) <= not(RX_SRC_RDY_N(i) or TX_DST_RDY_N(i));
@@ -90,10 +90,10 @@ begin
       mux_din(i*MUX_WORD+1) <= RX_EOP_N(i);
       mux_din(i*MUX_WORD+2) <= RX_SOF_N(i);
       mux_din(i*MUX_WORD+3) <= RX_EOF_N(i);
-      mux_din((i*MUX_WORD)+4+REM_WIDTH-1 downto (i*MUX_WORD)+4) <= 
+      mux_din((i*MUX_WORD)+4+REM_WIDTH-1 downto (i*MUX_WORD)+4) <=
          RX_DREM((i+1)*REM_WIDTH-1 downto i*REM_WIDTH);
-      mux_din((i*MUX_WORD)+4+REM_WIDTH+DATA_WIDTH-1 downto 
-              (i*MUX_WORD)+4+REM_WIDTH) <= 
+      mux_din((i*MUX_WORD)+4+REM_WIDTH+DATA_WIDTH-1 downto
+              (i*MUX_WORD)+4+REM_WIDTH) <=
          RX_DATA((i+1)*DATA_WIDTH-1 downto i*DATA_WIDTH);
    end generate;
 

@@ -25,8 +25,8 @@ architecture full of FL_WATCH_EXTENDED_NOREC is
 -- There must be space for two sets of counters, rounded up to 32 bits, and
 -- Status and Command register and
 -- DRY signals.
-constant items   : integer := ((CNTR_WIDTH-1)/32+1) * INTERFACES * 2 + 
-                              2 + 
+constant items   : integer := ((CNTR_WIDTH-1)/32+1) * INTERFACES * 2 +
+                              2 +
                               (INTERFACES-1)/16+1;
 
 -- Effective address width (counters and Status register)
@@ -214,7 +214,7 @@ begin
                                          i*((CNTR_WIDTH-1)/32+1) -- cntr offset
                                          + j then -- part of counter
             if 32*(j+1) > CNTR_WIDTH then
-               out_mux <= zeros(31 downto CNTR_WIDTH mod 32) & 
+               out_mux <= zeros(31 downto CNTR_WIDTH mod 32) &
                           counters(i)(CNTR_WIDTH-1 downto 32*j);
             else
                out_mux <= counters(i)(32*(j+1)-1 downto 32*j);
@@ -226,12 +226,12 @@ begin
    for i in 0 to INTERFACES-1 loop -- i is index of counter
       for j in 0 to (CNTR_WIDTH-1)/32 loop -- j is index of 32 bit part of cntr
          if MI_ADDR(addr_w+1 downto 2) = 2 + -- offset by first two registers
-                                         INTERFACES*((CNTR_WIDTH-1)/32+1) + 
+                                         INTERFACES*((CNTR_WIDTH-1)/32+1) +
                                              -- offset from frame counters
                                          i*((CNTR_WIDTH-1)/32+1) -- cntr offset
                                          + j then -- part of counter
             if 32*(j+1) > CNTR_WIDTH then
-               out_mux <= zeros(31 downto CNTR_WIDTH mod 32) & 
+               out_mux <= zeros(31 downto CNTR_WIDTH mod 32) &
                           g_counters(i)(CNTR_WIDTH-1 downto 32*j);
             else
                out_mux <= g_counters(i)(32*(j+1)-1 downto 32*j);

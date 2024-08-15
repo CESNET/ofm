@@ -35,7 +35,7 @@ architecture FULL of CNT_TRAN is
    signal cnt_down   : std_logic;
    signal cnt_value  : std_logic_vector(CNT_WIDTH-1 downto 0);
 begin
-   
+
    cnt_up <= ADD_TR and ADD_RDY;
    cnt_down <= RM_TR and RM_RDY;
    TRANS_NUM <= cnt_value;
@@ -43,7 +43,7 @@ begin
    process(CLK)
    begin
       if (CLK'event) and (CLK = '1') then
-         if RESET = '1' then 
+         if RESET = '1' then
             cnt_value <= (others => '0');
          else
             if(cnt_up = '1' and cnt_down = '0') then

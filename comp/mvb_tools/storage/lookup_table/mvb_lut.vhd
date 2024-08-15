@@ -103,7 +103,7 @@ begin
 
         lut_reg_sw_nsw <= std_logic_vector(resize(unsigned(lut_reg),(SW_WORDS_PER_LUT*SW_WIDTH)));
         lut_reg_sw_nsw_arr <= slv_array_deser(lut_reg_sw_nsw,SW_WORDS_PER_LUT);
-    
+
         process (all)
         begin
             if (SW_WORDS_PER_LUT > 1) then
@@ -125,7 +125,7 @@ begin
                 SW_DOUT_VLD <= SW_READ;
                 if (RESET = '1') then
                     SW_DOUT_VLD <= '0';
-                end if; 
+                end if;
             end if;
         end process;
 
@@ -139,10 +139,10 @@ begin
                         TX_MVB_LUT_DATA <= (others => lut_reg);
                         TX_MVB_VLD      <= RX_MVB_VLD;
                         TX_MVB_SRC_RDY  <= RX_MVB_SRC_RDY;
-                    end if; 
+                    end if;
                     if (RESET = '1') then
                         TX_MVB_SRC_RDY <= '0';
-                    end if; 
+                    end if;
                 end if;
             end process;
         else generate
@@ -168,7 +168,7 @@ begin
         port map(
             CLK             => CLK,
             RESET           => RESET,
-    
+
             RX_MVB_LUT_ADDR => RX_MVB_LUT_ADDR,
             RX_MVB_METADATA => RX_MVB_METADATA,
             RX_MVB_VLD      => RX_MVB_VLD,
@@ -207,7 +207,7 @@ begin
         port map(
             CLK             => CLK,
             RESET           => RESET,
-    
+
             RX_MVB_LUT_ADDR => RX_MVB_LUT_ADDR,
             RX_MVB_METADATA => RX_MVB_METADATA,
             RX_MVB_VLD      => RX_MVB_VLD,

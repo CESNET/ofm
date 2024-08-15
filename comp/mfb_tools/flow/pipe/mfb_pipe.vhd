@@ -1,6 +1,6 @@
 -- pipe.vhd: Multi-Frame Bus pipeline
 -- Copyright (C) 2016 CESNET z. s. p. o.
--- Author(s): Lukas Kekely <kekely@cesnet.cz> 
+-- Author(s): Lukas Kekely <kekely@cesnet.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --
@@ -58,7 +58,7 @@ entity MFB_PIPE is
       -- =============================
       -- MFB input interface
       -- =============================
-        
+
       RX_DATA       : in std_logic_vector(REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0);
       RX_META       : in std_logic_vector(REGIONS*META_WIDTH-1 downto 0) := (others => '0');
       RX_SOF_POS    : in std_logic_vector(REGIONS*max(1,log2(REGION_SIZE))-1 downto 0);
@@ -66,7 +66,7 @@ entity MFB_PIPE is
       RX_SOF        : in std_logic_vector(REGIONS-1 downto 0);
       RX_EOF        : in std_logic_vector(REGIONS-1 downto 0);
       RX_SRC_RDY    : in std_logic;
-      RX_DST_RDY    : out std_logic; 
+      RX_DST_RDY    : out std_logic;
 
       -- =============================
       -- MFB output interface

@@ -1,8 +1,8 @@
-//-- test.sv: Verification test 
+//-- test.sv: Verification test
 //-- Copyright (C) 2023 CESNET z. s. p. o.
 //-- Author:   David Beneš <xbenes52@vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 class ex_test extends uvm_test;
     `uvm_component_utils(test::ex_test);
@@ -12,7 +12,7 @@ class ex_test extends uvm_test;
 
     uvm_sequence #(uvm_mfb::sequence_item#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH)) h_seq_tx;
 
-    //Functions 
+    //Functions
     function new(string name, uvm_component parent);
         super.new(name, parent);
     endfunction
@@ -71,7 +71,7 @@ class ex_test extends uvm_test;
             h_seq_lib_tx.max_random_count = 500;
             h_seq_tx = h_seq_lib_tx;
         end
-        
+
         fork
             run_seq_tx(phase);
             run_seq_rx(phase);

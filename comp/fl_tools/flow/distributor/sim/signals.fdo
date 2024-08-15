@@ -12,39 +12,39 @@ proc FL_DISTRIBUTOR_RX { } {
     global FL_DISTRIBUTOR_PATH
 
     add wave -divider "RX interface"
-    add_wave "-noupdate -hex -label rx_data      " $FL_DISTRIBUTOR_PATH/rx_data      
-    add_wave "-noupdate -hex -label rx_rem       " $FL_DISTRIBUTOR_PATH/rx_rem       
-    add_wave "-noupdate -hex -label rx_src_rdy_n " $FL_DISTRIBUTOR_PATH/rx_src_rdy_n 
-    add_wave "-noupdate -hex -label rx_dst_rdy_n " $FL_DISTRIBUTOR_PATH/rx_dst_rdy_n 
-    add_wave "-noupdate -hex -label rx_sop_n     " $FL_DISTRIBUTOR_PATH/rx_sop_n     
-    add_wave "-noupdate -hex -label rx_eop_n     " $FL_DISTRIBUTOR_PATH/rx_eop_n     
-    add_wave "-noupdate -hex -label rx_sof_n     " $FL_DISTRIBUTOR_PATH/rx_sof_n     
-    add_wave "-noupdate -hex -label rx_eof_n     " $FL_DISTRIBUTOR_PATH/rx_eof_n     
+    add_wave "-noupdate -hex -label rx_data      " $FL_DISTRIBUTOR_PATH/rx_data
+    add_wave "-noupdate -hex -label rx_rem       " $FL_DISTRIBUTOR_PATH/rx_rem
+    add_wave "-noupdate -hex -label rx_src_rdy_n " $FL_DISTRIBUTOR_PATH/rx_src_rdy_n
+    add_wave "-noupdate -hex -label rx_dst_rdy_n " $FL_DISTRIBUTOR_PATH/rx_dst_rdy_n
+    add_wave "-noupdate -hex -label rx_sop_n     " $FL_DISTRIBUTOR_PATH/rx_sop_n
+    add_wave "-noupdate -hex -label rx_eop_n     " $FL_DISTRIBUTOR_PATH/rx_eop_n
+    add_wave "-noupdate -hex -label rx_sof_n     " $FL_DISTRIBUTOR_PATH/rx_sof_n
+    add_wave "-noupdate -hex -label rx_eof_n     " $FL_DISTRIBUTOR_PATH/rx_eof_n
 }
-                                              
+
 proc FL_DISTRIBUTOR_TX { } {
     global FL_DISTRIBUTOR_PATH
     global UUT_PATH
 
     add wave -divider "TX interface"
-    add_wave "-noupdate -hex -label tx_data      " $FL_DISTRIBUTOR_PATH/tx_data     
-    add_wave "-noupdate -hex -label tx_rem       " $FL_DISTRIBUTOR_PATH/tx_rem       
+    add_wave "-noupdate -hex -label tx_data      " $FL_DISTRIBUTOR_PATH/tx_data
+    add_wave "-noupdate -hex -label tx_rem       " $FL_DISTRIBUTOR_PATH/tx_rem
     add_wave "-noupdate -hex -label tx_src_rdy_n " $FL_DISTRIBUTOR_PATH/tx_src_rdy_n
     add_wave "-noupdate -hex -label tx_dst_rdy_n " $FL_DISTRIBUTOR_PATH/tx_dst_rdy_n
-    add_wave "-noupdate -hex -label tx_sop_n     " $FL_DISTRIBUTOR_PATH/tx_sop_n     
-    add_wave "-noupdate -hex -label tx_eop_n     " $FL_DISTRIBUTOR_PATH/tx_eop_n     
-    add_wave "-noupdate -hex -label tx_sof_n     " $FL_DISTRIBUTOR_PATH/tx_sof_n    
-    add_wave "-noupdate -hex -label tx_eof_n     " $FL_DISTRIBUTOR_PATH/tx_eof_n    
+    add_wave "-noupdate -hex -label tx_sop_n     " $FL_DISTRIBUTOR_PATH/tx_sop_n
+    add_wave "-noupdate -hex -label tx_eop_n     " $FL_DISTRIBUTOR_PATH/tx_eop_n
+    add_wave "-noupdate -hex -label tx_sof_n     " $FL_DISTRIBUTOR_PATH/tx_sof_n
+    add_wave "-noupdate -hex -label tx_eof_n     " $FL_DISTRIBUTOR_PATH/tx_eof_n
 
 #    add wave -divider "TX interface OUTPUT"
-#    add_wave "-noupdate -hex -label tx_data      " $UUT_PATH/tx_data     
-#    add_wave "-noupdate -hex -label tx_rem       " $UUT_PATH/tx_rem       
+#    add_wave "-noupdate -hex -label tx_data      " $UUT_PATH/tx_data
+#    add_wave "-noupdate -hex -label tx_rem       " $UUT_PATH/tx_rem
 #    add_wave "-noupdate -hex -label tx_src_rdy_n " $UUT_PATH/tx_src_rdy_n
 #    add_wave "-noupdate -hex -label tx_dst_rdy_n " $UUT_PATH/tx_dst_rdy_n
-#    add_wave "-noupdate -hex -label tx_sop_n     " $UUT_PATH/tx_sop_n     
-#    add_wave "-noupdate -hex -label tx_eop_n     " $UUT_PATH/tx_eop_n     
-#    add_wave "-noupdate -hex -label tx_sof_n     " $UUT_PATH/tx_sof_n    
-#    add_wave "-noupdate -hex -label tx_eof_n     " $UUT_PATH/tx_eof_n    
+#    add_wave "-noupdate -hex -label tx_sop_n     " $UUT_PATH/tx_sop_n
+#    add_wave "-noupdate -hex -label tx_eop_n     " $UUT_PATH/tx_eop_n
+#    add_wave "-noupdate -hex -label tx_sof_n     " $UUT_PATH/tx_sof_n
+#    add_wave "-noupdate -hex -label tx_eof_n     " $UUT_PATH/tx_eof_n
 }
 
 proc FL_DISTRIBUTOR_INT { } {

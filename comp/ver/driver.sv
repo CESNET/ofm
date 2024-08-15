@@ -3,8 +3,8 @@
  * \brief Driver class
  * \author Marek Santa <xsanta06@stud.fit.vutbr.cz>
  * \date 2009
- */  
- /* 
+ */
+ /*
  * Copyright (C) 2009 CESNET
  *
  * LICENSE TERMS
@@ -14,22 +14,22 @@
  * $Id$
  *
  */
- 
-  
+
+
   // --------------------------------------------------------------------------
   // -- Driver Class
   // --------------------------------------------------------------------------
-  
+
   /*!
    * \brief Driver
-   * 
-   * This class is parent class for any driver. Transactions are received by 
-   * 'transMbx' (Mailbox) property. Unit must be enabled by "setEnable()" 
-   * function call. Generation can be stoped by "setDisable()" function call. 
+   *
+   * This class is parent class for any driver. Transactions are received by
+   * 'transMbx' (Mailbox) property. Unit must be enabled by "setEnable()"
+   * function call. Generation can be stoped by "setDisable()" function call.
    * You can send your custom transaction by calling "sendTransaction" function.
    */
   class Driver;
-    
+
     // -- Public Class Atributes --
     //! Driver identification
     string    inst;
@@ -46,7 +46,7 @@
     //! Enable/Disable delays between transactions
     rand bit enDelay;
       //! Enable/Disable delays between transaction (weights)
-      int delayEn_wt             = 1; 
+      int delayEn_wt             = 1;
       int delayDisable_wt        = 3;
 
     //! Delay between transactions
@@ -67,37 +67,37 @@
                    };
       }
 
-    
+
     // -- Public Class Methods --
 
     // ------------------------------------------------------------------------
-    //! Constructor 
+    //! Constructor
     /*!
-     * Creates driver object 
-     */     
+     * Creates driver object
+     */
     function new ( string inst, tTransMbx transMbx );
 
       this.enabled     = 0;            // Driver is disabled by default
-      this.busy        = 0;            // Driver is not busy by default   
+      this.busy        = 0;            // Driver is not busy by default
       this.transMbx    = transMbx;     // Store pointer to mailbox
       this.inst        = inst;         // Store driver identifier
 
-    endfunction: new          
-    
+    endfunction: new
+
     // ------------------------------------------------------------------------
-    //! Enable Driver 
+    //! Enable Driver
     /*!
      * Enable Driver and runs Driver process
-     */     
+     */
     virtual task setEnabled();
       enabled = 1; // Driver Enabling
-      fork         
+      fork
          run();                // Creating driver subprocess
       join_none;               // Don't wait for ending
     endtask : setEnabled
-        
+
     // ------------------------------------------------------------------------
-    //! Disable Driver 
+    //! Disable Driver
     virtual task setDisabled();
       enabled = 0; // Disable Driver
     endtask : setDisabled
@@ -105,28 +105,28 @@
     // ------------------------------------------------------------------------
     //! Set Callback
     /*!
-     * Put callback object into List 
+     * Put callback object into List
      */
     virtual function void setCallbacks(DriverCbs cbs);
       this.cbs.push_back(cbs);
     endfunction : setCallbacks
-    
+
     // ------------------------------------------------------------------------
     //! Send Transaction
-    /* 
+    /*
      * Send transaction to interface
      * \param transaction - transaction
      */
     task sendTransaction( Transaction transaction );
     endtask : sendTransaction
-    
+
     // -- Private Class Methods --
-    
+
     // ------------------------------------------------------------------------
     //! Run Driver
     /*!
      * Take transactions from mailbox and send it to interface
-     */      
+     */
     virtual task run();
     endtask : run
 

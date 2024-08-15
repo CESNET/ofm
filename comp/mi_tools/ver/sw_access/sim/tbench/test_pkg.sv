@@ -3,8 +3,8 @@
  * \brief Test Package
  * \author Lukas Kekely <kekely@cesnet.cz>
  * \date 2015
- */  
- /* 
+ */
+ /*
  * Copyright (C) 2013 CESNET
  *
  * LICENSE TERMS

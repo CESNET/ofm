@@ -39,7 +39,7 @@ port (
    --! --------------------------------------------------------------------------
    D                 : in  std_logic_vector(DATA_WIDTH-1 downto 0);
 
-   --! \name N one number 
+   --! \name N one number
    --! -------------------------------------------------------------------------
    N                 : in  std_logic_vector(max(log2(DATA_WIDTH),1)-1 downto 0);
 

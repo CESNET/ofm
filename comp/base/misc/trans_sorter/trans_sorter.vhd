@@ -193,7 +193,7 @@ architecture FULL of TRANS_SORTER is
     -------------------------------------------------------------
 
 begin
-    
+
     -------------------------------------------------------------
     -- Asserts
     -------------------------------------------------------------
@@ -309,9 +309,9 @@ begin
             EMPTY  => trans_fifo_empty,
             AEMPTY => open
         );
-    
+
     else generate
-    
+
         trans_fifo_i : entity work.FIFOX_MULTI(SHAKEDOWN)
         generic map(
             DATA_WIDTH          => METADATA_WIDTH+ID_WIDTH,
@@ -338,7 +338,7 @@ begin
             EMPTY  => trans_fifo_empty,
             AEMPTY => open
         );
-    
+
     end generate;
 
     trans_fifo_do_arr <= slv_array_deser(trans_fifo_do,TX_TRANSS);

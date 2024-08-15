@@ -3,7 +3,7 @@
 --! @file
 --! \brief Design identification with MI32 interface
 --! \author Lukas Kekely <kekely@cesnet.cz>
---! \date 2012 
+--! \date 2012
 --!
 --! @section License
 --!
@@ -20,22 +20,22 @@ use IEEE.std_logic_unsigned.all;
 use IEEE.numeric_std.all;
 
 --! \brief Design identification component with MI32 interface.
---! \details Uses MI32 address space 0x00-0x7F. 
+--! \details Uses MI32 address space 0x00-0x7F.
 entity ID_COMP is
   generic (
     --! \brief Identification of project
     --! \details Readable from address 0x04 as the highest 2 bytes.
     PROJECT_ID     : std_logic_vector(15 downto 0):= X"0000";
-    --! \brief Software version major number 
+    --! \brief Software version major number
     --! \details Readable from address 0x04 as the second lowest bytes.
     SW_MAJOR       : std_logic_vector( 7 downto 0):=   X"00";
-    --! \brief Software version minor number 
+    --! \brief Software version minor number
     --! \details Readable from address 0x04 as the lowest byte.
     SW_MINOR       : std_logic_vector( 7 downto 0):=   X"00";
-    --! \brief Hardware version major number 
+    --! \brief Hardware version major number
     --! \details Readable from address 0x08 as the highest 2 bytes.
     HW_MAJOR       : std_logic_vector(15 downto 0):= X"0000";
-    --! \brief Hardware version minor number 
+    --! \brief Hardware version minor number
     --! \details Readable from address 0x08 as the lowest 2 bytes.
     HW_MINOR       : std_logic_vector(15 downto 0):= X"0000";
     --! \brief Text identificator of project
@@ -55,16 +55,16 @@ entity ID_COMP is
     --! \details Readable from address 0x48 as the lowest byte. Should not be changed when instantiating.
     ID_MINOR       : std_logic_vector(7 downto 0) := X"04";
     --! \brief Version of NetCOPE major number
-    --! \details Readable from address 0x48 as the highest byte. 
+    --! \details Readable from address 0x48 as the highest byte.
     NETCOPE_MAJOR  : std_logic_vector(7 downto 0) := X"00";
     --! \brief Version of NetCOPE minor number
-    --! \details Readable from address 0x48 as the second highest byte. 
+    --! \details Readable from address 0x48 as the second highest byte.
     NETCOPE_MINOR  : std_logic_vector(7 downto 0) := X"00";
     --! \brief Date and time of building
-    --! \details Readable from address 0x4C. 
+    --! \details Readable from address 0x4C.
     BUILD_TIME     : std_logic_vector(31 downto 0) := X"00000000";
     --! \brief Builder's Unix User ID
-    --! \details Readable from address 0x50. 
+    --! \details Readable from address 0x50.
     BUILD_UID      : std_logic_vector(31 downto 0) := X"00000000";
     --! \brief CLK_ICS frequency in MHz
     --! \details Readable from address 0x40 as the highest 2 bytes.
@@ -90,30 +90,30 @@ entity ID_COMP is
   );
   port (
     --! \name Basic signals
-    
+
     --! Global clock.
     CLK            : in std_logic;
     --! Global reset.
     RESET          : in std_logic;
 
     --! \name Misc ports
- 
+
     --! Contents of the COMMAND register (writable by SW)
     COMMAND        : out std_logic_vector(31 downto 0);
     --! Signals readable by SW
     STATUS         : in  std_logic_vector(127 downto 0);
     --! Write enables for four 32bit words of STATUS
-    WE             : in  std_logic_vector(3 downto 0);  
+    WE             : in  std_logic_vector(3 downto 0);
     --! \brief Control of ethernet repeater
     --! \details Bit 0: Use repeater 0 output (instead of OBUF 0).
     --! Bit 1: Enable repeater 0 (send repeat data instead of idles).
     --! Bits 2, 3: repeater 1, ...
     REPEATER       : out std_logic_vector(31 downto 0);
     --! Bank select for sysmon
-    SYSMON_BANK    : out std_logic_vector(1 downto 0); 
-    
+    SYSMON_BANK    : out std_logic_vector(1 downto 0);
+
     --! \name Interrupt interface
-    
+
     --! Interrupt input, each one-cycle pulse sets INTERRUPT register and is forwarded to INTERRUPT_OUT
     INTERRUPT_IN   : in  std_logic_vector(31 downto 0);
     --! Allows INTERRUPT_IN
@@ -126,7 +126,7 @@ entity ID_COMP is
     INTR_RDY_OUT   : in  std_logic;
 
     --! \name MI32 interface
-    
+
     --! Data to write.
     MI_DWR        : in  std_logic_vector(31 downto 0);
     --! Read/write address.
@@ -136,7 +136,7 @@ entity ID_COMP is
     --! Write valid.
     MI_WR         : in  std_logic;
     --! Write data byte enable (not supported).
-    MI_BE         : in  std_logic_vector(3 downto 0); 
+    MI_BE         : in  std_logic_vector(3 downto 0);
     --! Read data.
     MI_DRD        : out std_logic_vector(31 downto 0);
     --! Read/write address ready.
@@ -176,9 +176,9 @@ architecture full of ID_COMP is
   signal neg_cs     : std_logic;
   signal reg_drdy   : std_logic;
   signal reg_drdy2  : std_logic;
-   
+
   --! \name Sysmon
-  signal sig_sysmon_bank : std_logic_vector( 1 downto 0);  
+  signal sig_sysmon_bank : std_logic_vector( 1 downto 0);
 
   --! \name Interrupts
   signal reg_intr         : std_logic_vector(31 downto 0);
@@ -196,10 +196,10 @@ begin
    --! Register with sysmon bank select
    reg_sysmon_bank : process(CLK)
    begin
-      if CLK'event and CLK = '1' then 
+      if CLK'event and CLK = '1' then
          if MI_WR = '1' and MI_ADDR(6 downto 2) = "10001" and MI_BE(0) = '1' then
             sig_sysmon_bank <= MI_DWR(1 downto 0);
-         end if;         
+         end if;
       end if;
    end process;
    SYSMON_BANK <= sig_sysmon_bank;
@@ -239,7 +239,7 @@ begin
    reg_cmd_p : process(CLK)
    begin
       if CLK'event and CLK = '1' then
-         if MI_WR = '1' and MI_ADDR(5 downto 2) = "0011" 
+         if MI_WR = '1' and MI_ADDR(5 downto 2) = "0011"
          then
             if MI_BE(0) = '1' then
                reg_cmd(7 downto 0) <= MI_DWR(7 downto 0);
@@ -257,7 +257,7 @@ begin
       end if;
    end process;
 
-   
+
    reg_rep_cs <= '1' when MI_ADDR(6 downto 0) = "1110000" else '0';
    reg_rep_we <= reg_rep_cs and MI_WR;
    --! Repeater register
@@ -333,7 +333,7 @@ begin
          end if;
       end if;
    end process;
-   
+
 
    --! Status registers
    reg_status_gen : for i in 0 to 3 generate
@@ -437,7 +437,7 @@ begin
 
    --! Output multiplex
    mx_dout_p : process(reg_address, reg_ctrl_data, reg_string_data, reg_ctrl2_data, reg_ctrl3_data)
-   begin 
+   begin
       case reg_address(6 downto 5) is
          when "00"   => mx_dout <= reg_ctrl_data;  -- 0x00...0x1f
          when "01"   => mx_dout <= reg_string_data;-- 0x20...0x3f
@@ -479,7 +479,7 @@ begin
          when others => mx_string_data  <= (others => '0');
       end case;
    end process mx_str_data_p;
-   
+
    --! \brief Interrupt manager component
    intr_man_i : entity work.INTERRUPT_MANAGER
    generic map(

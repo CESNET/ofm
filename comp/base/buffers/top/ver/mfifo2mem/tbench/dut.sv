@@ -10,7 +10,7 @@
  * TODO:
  *
  */
- 
+
 // ----------------------------------------------------------------------------
 //                        Module declaration
 // ----------------------------------------------------------------------------
@@ -36,17 +36,17 @@ MFIFO2MEM #(
 
    VHDL_DUT_U (
     // Common Interface
-    
+
     //vyber signalov
     .CLK               (CLK),
     .RESET             (RESET),
- 
+
     // Write interface
     .DATA_IN            (FW.DATA_IN),
     .WR_BLK_ADDR        (FW.BLOCK_ADDR),
     .WRITE              (FW.WRITE),
     .FULL               (FW.FULL),
-    
+
     // Read interface
     .DATA_OUT           (MR.DATA_OUT),
     .DATA_VLD           (MR.DATA_VLD),
@@ -57,8 +57,8 @@ MFIFO2MEM #(
     .REL_LEN_DV         (MR.REL_LEN_DV),
     .PIPE_EN            (MR.PIPE_EN),
     .EMPTY              (MR.EMPTY),
-    
-    .STATUS             (MR.STATUS)    
+
+    .STATUS             (MR.STATUS)
     );
 
 endmodule : DUT

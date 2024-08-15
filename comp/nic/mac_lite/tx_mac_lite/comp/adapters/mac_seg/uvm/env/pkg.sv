@@ -1,7 +1,7 @@
 /*
  * file       : pkg.sv
  * Copyright (C) 2021 CESNET z. s. p. o.
- * description: mag seq rx adapter 
+ * description: mag seq rx adapter
  * date       : 2021
  * author     : Radek Iša <isa@cesnet.cz>
  *

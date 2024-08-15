@@ -48,7 +48,7 @@ _CLEAR_TABLES   = 0x02
 _MVB_ITEMS      = 0x00
 _MVB_KEY_WIDTH  = 0x04
 _DATA_OUT_WIDTH = 0x08
-_HASH_WIDTH     = 0x0C 
+_HASH_WIDTH     = 0x0C
 _HASH_KEY_WIDTH = 0x10
 _TABLE_CAPACITY = 0x14
 
@@ -59,9 +59,9 @@ class testbench():
         self.backpressure = BitDriver(dut.TX_MVB_DST_RDY, dut.CLK)
         self.stream_out = MVBMonitor(dut, "TX_MVB", dut.CLK)
         self.mi_interface = MIDriver(dut, "MI", dut.CLK)
- 
+
         self.stream_out.bus.dst_rdy.value = 1
-    
+
         # Create a scoreboard on the stream_out bus
         self.pkts_sent = 0
         self.expected_output = []
@@ -92,9 +92,9 @@ class testbench():
         out_data = dict()
         tables = ["TOEPLITZ", "SIMPLE_XOR"]
         hash_functions = {"TOEPLITZ": toeplitz_hash, "SIMPLE_XOR": simple_xor_hash}
-        
+
         fp = open(path, 'r')
-        
+
         yaml_data = yaml.safe_load(fp)
         comp_conf = yaml_data["mvb_hash_table_simple"]
 
@@ -151,20 +151,20 @@ async def run_test(dut, config_file:str="test_configs/test_config_1B.yaml", conf
     await tb.reset()
 
     tb.backpressure.start((1, i % 5) for i in itertools.count())
-    
+
     """Reading configuration from the component."""
     mvb_items = int.from_bytes(await tb.mi_interface.read32(_MVB_ITEMS), 'little')
-    mvb_key_width = int.from_bytes(await tb.mi_interface.read32(_MVB_KEY_WIDTH), 'little')     
+    mvb_key_width = int.from_bytes(await tb.mi_interface.read32(_MVB_KEY_WIDTH), 'little')
     data_out_width = int.from_bytes(await tb.mi_interface.read32(_DATA_OUT_WIDTH), 'little')
-    hash_width = int.from_bytes(await tb.mi_interface.read32(_HASH_WIDTH), 'little')        
-    hash_key_width = int.from_bytes(await tb.mi_interface.read32(_HASH_KEY_WIDTH), 'little')    
+    hash_width = int.from_bytes(await tb.mi_interface.read32(_HASH_WIDTH), 'little')
+    hash_key_width = int.from_bytes(await tb.mi_interface.read32(_HASH_KEY_WIDTH), 'little')
     table_capacity = int.from_bytes(await tb.mi_interface.read32(_TABLE_CAPACITY), 'little')
 
     mvb_key_width_bytes = mvb_key_width // 8
     data_out_width_bytes = data_out_width // 8
 
     hash_func_params = {"mvb_key_width": mvb_key_width, "hash_key_width": hash_key_width, "hash_width": hash_width}
-    
+
     cocotb.log.debug(f"MVB_ITEMS: {mvb_items}")
     cocotb.log.debug(f"MVB_KEY_WIDTH: {mvb_key_width}")
     cocotb.log.debug(f"DATA_OUT_WIDTH: {data_out_width}")
@@ -198,9 +198,9 @@ async def run_test(dut, config_file:str="test_configs/test_config_1B.yaml", conf
             await tb.mi_interface.write32(_HASH_KEY_REG, hash_key_bytes[4*i : 4*(i+1)])
 
         await tb.mi_interface.write32(_COMMAND_REG, _CLEAR_TABLES.to_bytes(1, 'little'))
-        
+
         for i in range(len(config)):
-            await tb.mi_interface.write32(_COMMAND_REG, (i).to_bytes(1, "little")) 
+            await tb.mi_interface.write32(_COMMAND_REG, (i).to_bytes(1, "little"))
 
             for j in range(len(config[i])):
                 address_bytes = config[i][j][0].to_bytes(mvb_key_width_bytes, 'little')
@@ -225,29 +225,29 @@ async def run_test(dut, config_file:str="test_configs/test_config_1B.yaml", conf
         dev = await cocotb.external(nfb.open)(servicer.path())
 
         await cocotb.external(MVB_HASH_TABLE_SIMPLE_TOOLKIT)(mod_path=config_file, dev=dev)
-    
+
     else:
         raise RuntimeError("Invalid configuration setting.")
-     
+
     await ClockCycles(dut.CLK, 10)
-    
+
     for transaction in random_packets(item_width, item_width, pkt_count):
         int_transaction = int.from_bytes(transaction, "little")
-    
+
         if int_transaction in model_keys:
             tb.model((model_data[int_transaction].to_bytes(data_out_width_bytes, 'little'), 1))
         else:
             tb.model(((0).to_bytes(data_out_width_bytes, 'little'), 0))
-        
+
         cocotb.log.info(f"generated transaction: {transaction.hex()}")
         tb.stream_in.append(transaction)
 
     last_num = 0
-  
+
     while (tb.stream_out.item_cnt < pkt_count):
         if (tb.stream_out.item_cnt // 1000) > last_num:
             last_num = tb.stream_out.item_cnt // 1000
             cocotb.log.info(f"Number of random transactions processed: {tb.stream_out.item_cnt}/{pkt_count}")
         await ClockCycles(dut.CLK, 100)
-    
+
     raise tb.scoreboard.result

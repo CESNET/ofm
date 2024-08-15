@@ -294,7 +294,7 @@ begin
          ADDRB       => addr_rd_mx,
          DOB         => drop_len_do
       );
-      
+
       reg_drop_len_do_p : process(CLK)
       begin
          if CLK'event and CLK = '1' then
@@ -372,7 +372,7 @@ begin
    end process;
 
    -- Select channel
-   mi_cnt_mux_p : process(reg_mi_addr1, reg_mi_drop, reg_mi_pass, 
+   mi_cnt_mux_p : process(reg_mi_addr1, reg_mi_drop, reg_mi_pass,
                           reg_mi_drop_len, reg_mi_pass_len)
    begin
       case reg_mi_addr1(10 downto 9) is
@@ -461,7 +461,7 @@ begin
          if RESET = '1' then
             clr_running <= '1'; -- Clear all after reset
          else
-            if MI_ADDR = X"00000800" and MI_BE(0) = '1' and 
+            if MI_ADDR = X"00000800" and MI_BE(0) = '1' and
                MI_WR = '1' and MI_DWR(1) = '1' then
                clr_running <= '1';
             elsif clr_cnt_chan = ones then

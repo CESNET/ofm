@@ -46,7 +46,7 @@ entity MI_SPLITTER_PLUS_GEN_WRAPPER is
         -- Common interface -----------------------------------------------------
         CLK         : in std_logic;
         RESET       : in std_logic;
-      
+
         -- Input MI interface ---------------------------------------------------
         RX_DWR      : in  std_logic_vector(DATA_WIDTH-1 downto 0);
         RX_MWR      : in  std_logic_vector(META_WIDTH-1 downto 0);
@@ -57,7 +57,7 @@ entity MI_SPLITTER_PLUS_GEN_WRAPPER is
         RX_ARDY     : out std_logic;
         RX_DRD      : out std_logic_vector(DATA_WIDTH-1 downto 0);
         RX_DRDY     : out std_logic;
-      
+
         -- Output MI interfaces -------------------------------------------------
         TX_DWR     : out slv_array_t(PORTS-1 downto 0)(DATA_WIDTH-1 downto 0);
         TX_MWR     : out slv_array_t(PORTS-1 downto 0)(META_WIDTH-1 downto 0);
@@ -127,7 +127,7 @@ begin
             TX_RD    => TX_RD,
             TX_ARDY  => TX_ARDY,
             TX_DRD   => TX_DRD,
-            TX_DRDY  => TX_DRDY 
+            TX_DRDY  => TX_DRDY
         );
 
 end architecture;

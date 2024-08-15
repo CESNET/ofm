@@ -26,14 +26,14 @@ architecture behavioral of HYPER_PIPE is
     type reg_array_t is array (LATENCY-1 downto 0) of std_logic_vector(DATA_WIDTH-1 downto 0);
 
     signal hyper_pipe : reg_array_t;
-    
+
     -- Prevent large hyper-pipes from going into memory-based altshift_taps.
     attribute ALTERA_ATTRIBUTE : string;
  	attribute ALTERA_ATTRIBUTE of hyper_pipe :
         signal is "-name AUTO_SHIFT_REGISTER_RECOGNITION off";
 
 begin
-    
+
     -- Only wire without Hyper-Registers
     only_wires_g : if LATENCY = 0 generate
         DOUT <= DIN;

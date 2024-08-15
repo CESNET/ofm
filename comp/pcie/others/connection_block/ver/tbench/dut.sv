@@ -1,4 +1,4 @@
-/* dut.sv: system verilog cover of vhdl DUT 
+/* dut.sv: system verilog cover of vhdl DUT
  * Copyright (C) 2020 CESNET
  * Author: Radek Iša <isa@cesnet.cz>
  *
@@ -33,9 +33,9 @@ module DUT (
         .ENDPOINT_TYPE         ("P_TILE")
    )
    DUT_VHDL (
-        .CLK              (CLK), 
+        .CLK              (CLK),
         .RESET            (RESET),
- 
+
 //        -- =====================================================================
 //        -- TO/FROM STRATIX 10 PCIE H-TILE/P-TILE IP CORE
 //        -- =====================================================================

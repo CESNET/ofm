@@ -20,8 +20,8 @@ use work.type_pack.all;
 entity MFB_CROSSBARX_STREAM2 is
 generic (
     -- IN_STREAMS must be 1 for now!!!
-    IN_STREAMS      : natural := 1; 
-    -- The number of MFB regions 
+    IN_STREAMS      : natural := 1;
+    -- The number of MFB regions
     MFB_REGIONS     : natural := 4;
     -- MFB region size in blocks, must be power of two
     MFB_REGION_SIZE : natural := 8;
@@ -78,7 +78,7 @@ port (
     RX_MFB_EOF_POS         : in  slv_array_t(IN_STREAMS-1 downto 0)(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE))-1 downto 0);
     RX_MFB_SRC_RDY         : in  std_logic_vector(IN_STREAMS-1 downto 0);
     RX_MFB_DST_RDY         : out std_logic_vector(IN_STREAMS-1 downto 0);
-    
+
     -- =========================================================================
     --  TX MFB+MVB interface
     -- =========================================================================
@@ -222,7 +222,7 @@ architecture FULL of MFB_CROSSBARX_STREAM2 is
 
 begin
 
-    assert (IN_STREAMS = 1) 
+    assert (IN_STREAMS = 1)
         report "CXS2: Only the input stream is currently supported!"
         severity failure;
 
@@ -231,7 +231,7 @@ begin
     -- =========================================================================
 
     rx_stream_g: for s in 0 to IN_STREAMS-1 generate
-        
+
         rx_buf_i : entity work.MFB_CROSSBARX_STREAM2_RX_BUF
         generic map(
             MFB_REGIONS     => MFB_REGIONS,
@@ -514,12 +514,12 @@ begin
         ) port map(
             CLK        => CLK,
             RESET      => RESET,
-    
+
             RX_DATA    => slv_array_ser(dis_mvb_pkt_id(s)),
             RX_VLD     => dis_mvb_vld(s),
             RX_SRC_RDY => dis_mvb_src_rdy(s),
             RX_DST_RDY => dis_mvb_dst_rdy(s),
-    
+
             TX_DATA    => dis_fifo_mvb_data(s),
             TX_VLD     => dis_fifo_mvb_vld(s),
             TX_SRC_RDY => dis_fifo_mvb_src_rdy(s),
@@ -537,14 +537,14 @@ begin
                 end if;
             end if;
         end process;
-     
-        assert (dis_fifo_wr_err_reg(s) /= '1') 
+
+        assert (dis_fifo_wr_err_reg(s) /= '1')
            report "CXS2: dst_rdy error! Writing in full dis_fifo_i!"
            severity failure;
 
         dis_fifo_mvb_pkt_id(s)  <= slv_array_deser(dis_fifo_mvb_data(s), MFB_REGIONS);
         dis_fifo_mvb_dst_rdy(s) <= not crox_done_src_rdy(s);
-        
+
         rxbuf_done_id(s)  <= crox_done_meta(s) when (crox_done_src_rdy(s) = '1') else dis_fifo_mvb_pkt_id(s);
         rxbuf_done_vld(s) <= crox_done_vld(s) or (dis_fifo_mvb_src_rdy(s) and dis_fifo_mvb_vld(s));
         txbuf_done_vld(s) <= crox_done_vld(s);

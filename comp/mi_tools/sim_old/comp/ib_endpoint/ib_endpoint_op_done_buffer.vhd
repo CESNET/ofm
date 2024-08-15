@@ -29,7 +29,7 @@ entity IB_ENDPOINT_OP_DONE_BUFFER is
       RESET            : in  std_logic;
 
       -- =======================================
-      -- IB_Endpoint Input Interface 
+      -- IB_Endpoint Input Interface
       --
       -- Listening for completition transactions
       -- =======================================
@@ -58,7 +58,7 @@ end entity IB_ENDPOINT_OP_DONE_BUFFER;
 --                      Architecture declaration
 -- ----------------------------------------------------------------------------
 architecture IB_ENDPOINT_OP_DONE_BUFFER_ARCH of IB_ENDPOINT_OP_DONE_BUFFER is
-         
+
       signal tag_reg               : std_logic_vector(15 downto 0);
       signal bm_tag_reg            : std_logic_vector(15 downto 0);
       signal bm_tag_vld            : std_logic;

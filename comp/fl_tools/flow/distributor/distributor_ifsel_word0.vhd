@@ -23,7 +23,7 @@ architecture inum_in_word0 of fl_distributor_ifsel is
    constant INUM_WIDTH : integer := log2(INTERFACES_COUNT);
    constant WORD_INUM_OFFSET : integer := INUM_OFFSET mod DATA_WIDTH;
 
-   -- width of the RX_REM signal 
+   -- width of the RX_REM signal
    constant REM_WIDTH : integer := log2(DATA_WIDTH/8);
 
    signal reg_inum         : std_logic_vector(INUM_WIDTH-1 downto 0);
@@ -31,7 +31,7 @@ architecture inum_in_word0 of fl_distributor_ifsel is
    signal reg_inum_set     : std_logic_vector(INUM_WIDTH-1 downto 0);
 
 begin
-     
+
       inum_extract : entity work.inum_extract
       generic map (
          DATA_WIDTH => DATA_WIDTH,
@@ -49,7 +49,7 @@ begin
       );
 
       -- save the INUM when the right offset was reached or RX_EOF comes
-      reg_inum_ce <= not(RX_SOF_N) and not(RX_SRC_RDY_N); 
+      reg_inum_ce <= not(RX_SOF_N) and not(RX_SRC_RDY_N);
 
       -- select tx interface
       TX_INTERFACE <= reg_inum_set when RX_SOF_N = '0' and RX_SRC_RDY_N = '0' else
@@ -68,7 +68,7 @@ begin
 
             elsif reg_inum_ce = '1' then
                reg_inum <= reg_inum_set;
-   
+
             end if;
          end if;
       end process;

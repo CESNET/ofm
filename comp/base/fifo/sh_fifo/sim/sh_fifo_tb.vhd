@@ -35,7 +35,7 @@ architecture behavioral of testbench is
    constant FIFO_DEPTH  : integer   := 4;
    constant USE_INREG   : boolean   := true;
    constant USE_OUTREG  : boolean   := true;
-   
+
    constant clkper      : time      := 10 ns;
 
    -- ------------------ Signals declaration ----------------------------------

@@ -2,7 +2,7 @@
 -- Copyright (C) 2024 CESNET z. s. p. o.
 -- Author(s): Jakub Cabal <cabal@cesnet.cz>
 --            David Beneš <xbenes52@vutbr.cz>
--- 
+--
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 
@@ -14,7 +14,7 @@ use work.math_pack.all;
 use work.type_pack.all;
 
 -- This unit is based on mfb_auxiliary_signals.vhd and is adjusted for frame_packer purposes
-entity FP_BLOCK_VLD is 
+entity FP_BLOCK_VLD is
     generic(
         MFB_REGIONS         : natural := 1;
         MFB_REGION_SIZE     : natural := 8;
@@ -52,7 +52,7 @@ architecture FULL of FP_BLOCK_VLD is
     constant LOG2_REGION_BLOCKS  : natural := log2(REGION_BLOCKS);
     constant LOG2_REGION_ITEMS   : natural := log2(REGION_ITEMS);
     constant LOG2_BLOCK_SIZE     : natural := log2(MFB_BLOCK_SIZE);
- 
+
      -- Constants
     signal s_rx_sof_block_arr    : slv_array_t(MFB_REGIONS-1 downto 0)(LOG2_REGION_BLOCKS-1 downto 0);
     signal s_rx_eof_block_arr    : slv_array_t(MFB_REGIONS-1 downto 0)(LOG2_REGION_BLOCKS-1 downto 0);
@@ -64,7 +64,7 @@ architecture FULL of FP_BLOCK_VLD is
 
     signal s_incomplete_block    : std_logic_vector(WORD_BLOCKS downto 0);
 
-    -- respect to SRC_RDY 
+    -- respect to SRC_RDY
     signal tx_block_vld_s : std_logic_vector(MFB_REGIONS*MFB_REGION_SIZE-1 downto 0);
     signal tx_sof_oh_s    : std_logic_vector(MFB_REGIONS*MFB_REGION_SIZE-1 downto 0);
     signal tx_eof_oh_s    : std_logic_vector(MFB_REGIONS*MFB_REGION_SIZE-1 downto 0);
@@ -88,12 +88,12 @@ begin
 
     sof_eof_array_g : for r in 0 to MFB_REGIONS-1 generate
         s_rx_eof_block_arr(r) <= s_rx_eof_item_arr(r)(LOG2_REGION_ITEMS-1 downto LOG2_BLOCK_SIZE);
-    end generate;  
+    end generate;
 
    -- --------------------------------------------------------------------------
    --  VALID FOR EACH BLOCK
    -- --------------------------------------------------------------------------
-    
+
     block_onehot_g : for r in 0 to MFB_REGIONS-1 generate
         sof_block_onehot_i : entity work.BIN2HOT
             generic map(
@@ -104,7 +104,7 @@ begin
                 INPUT  => s_rx_sof_block_arr(r),
                 OUTPUT => s_rx_sof_block_onehot((r+1)*REGION_BLOCKS-1 downto r*REGION_BLOCKS)
         );
- 
+
         eof_block_onehot_i : entity work.BIN2HOT
             generic map(
                 DATA_WIDTH => LOG2_REGION_BLOCKS
@@ -132,7 +132,7 @@ begin
     block_vld_g : for i in 0 to WORD_BLOCKS-1 generate
         tx_block_vld_s(i) <= s_rx_sof_block_onehot(i) or s_rx_eof_block_onehot(i) or s_incomplete_block(i);
     end generate;
- 
+
         tx_sof_oh_s   <= s_rx_sof_block_onehot;
         tx_eof_oh_s   <= s_rx_eof_block_onehot;
 
@@ -143,7 +143,7 @@ begin
             TX_BLOCK_VLD    <= tx_block_vld_s;
             TX_SOF_OH       <= tx_sof_oh_s;
             TX_EOF_OH       <= tx_eof_oh_s;
-        else 
+        else
             TX_BLOCK_VLD    <= (others => '0');
             TX_SOF_OH       <= (others => '0');
             TX_EOF_OH       <= (others => '0');

@@ -33,7 +33,7 @@ architecture behavioral of testbench is
    signal SHIFT_BINARY     : std_logic_vector(log2(WIDTH_SHIFT)-1 downto 0);
    signal CE_IN            : std_logic;
    signal CE_OUT           : std_logic;
-   
+
 begin
 
    -- DSP_SHIFTER
@@ -59,7 +59,7 @@ begin
    );
 
    --Generate clock
-   clk_gen_p : process 
+   clk_gen_p : process
    begin
       CLK <= '1';
       wait for clkper/2;
@@ -76,10 +76,10 @@ begin
    wait;
    end process;
 
-   -- Simulating input flow 
+   -- Simulating input flow
    input_flow : process
    begin
-      
+
       -- Initialize input interface
       DATA_IN <= (others => '0');
       SHIFT_EXP <= (others => '0');
@@ -93,7 +93,7 @@ begin
       DATA_IN <= X"0F";
       SHIFT_EXP <= (others => '0');
       wait for clkper;
-      
+
       SHIFT_EXP <= (0 => '1', others => '0');
       SHIFT_BINARY <= conv_std_logic_vector(1, SHIFT_BINARY'LENGTH);
       wait for clkper;

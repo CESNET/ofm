@@ -15,7 +15,7 @@ use work.type_pack.all;
 entity PTC_HDR_DATA_MERGE_DINS is
    generic(
       -- =======================================================================
-      -- MFB DATA BUS CONFIGURATION: 
+      -- MFB DATA BUS CONFIGURATION:
       -- =======================================================================
       -- Supported configuration is only MFB(2,1,8,32) for PCIe on UltraScale+
       MFB_REGIONS     : natural := 2;
@@ -23,11 +23,11 @@ entity PTC_HDR_DATA_MERGE_DINS is
       MFB_BLOCK_SIZE  : natural := 8;
       MFB_ITEM_WIDTH  : natural := 32;
       -- =======================================================================
-      -- MVB HEADER BUS CONFIGURATION: 
+      -- MVB HEADER BUS CONFIGURATION:
       -- =======================================================================
       MVB_ITEM_WIDTH  : natural := 128;
       -- =======================================================================
-      -- OTHER CONFIGURATION: 
+      -- OTHER CONFIGURATION:
       -- =======================================================================
       -- Depth of MFB FIFO (payload data)
       MFB_FIFO_DEPTH  : natural := 32;
@@ -117,7 +117,7 @@ architecture FULL of PTC_HDR_DATA_MERGE_DINS is
    signal s_inc_pkt                 : std_logic_vector(MFB_REGIONS downto 0);
    signal s_rx_mfb_data_sof         : std_logic_vector(MFB_REGIONS-1 downto 0);
    signal s_rx_mfb_data_vld         : std_logic_vector(MFB_REGIONS-1 downto 0);
-   signal s_rx_mfb_data_dst_rdy_n   : std_logic; 
+   signal s_rx_mfb_data_dst_rdy_n   : std_logic;
 
    signal s_rx_mfb_data_arr         : slv_array_t(MFB_REGIONS-1 downto 0)(MFB_REGION_WIDTH-1 downto 0);
    signal s_rx_mfb_data_plus_arr    : slv_array_t(MFB_REGIONS-1 downto 0)(MFB_REGION_WIDTH+1 downto 0);
@@ -189,11 +189,11 @@ begin
          if (RESET = '1') then
             s_inc_pkt(0) <= '0';
          elsif (RX_MFB_DATA_DST_RDY = '1' and RX_MFB_DATA_SRC_RDY = '1') then
-            s_inc_pkt(0) <= s_inc_pkt(MFB_REGIONS);  
+            s_inc_pkt(0) <= s_inc_pkt(MFB_REGIONS);
          end if;
       end if;
    end process;
-   
+
    rx_valid_g : for r in 0 to MFB_REGIONS-1 generate
       s_rx_mfb_data_sof(r) <= RX_MFB_DATA_SRC_RDY and RX_MFB_DATA_SOF(r);
       s_rx_mfb_data_vld(r) <= RX_MFB_DATA_SRC_RDY and (RX_MFB_DATA_SOF(r) or RX_MFB_DATA_EOF(r) or s_inc_pkt(r));

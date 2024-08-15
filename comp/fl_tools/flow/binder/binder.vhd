@@ -58,7 +58,7 @@ begin
          );
    end generate;
 
-   
+
    -- generate STUPID Binder
    GEN_STUPID_BINDER: if STUPID_BINDER and not SIMPLE_BINDER generate
       FL_BINDER : entity work.FL_BINDER_STUPID

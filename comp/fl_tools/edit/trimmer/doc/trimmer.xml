@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-2"?>
 <source>
-	
+
 <!-- MAIN INFO ********************************************************** -->
 
 
@@ -36,17 +36,17 @@
 
 	<!-- Generic description -->
 	<generic_map>
-		
+
         <generic name="DATA_WIDTH" type="integer" default="">
            RX/TX interface data bus width
         </generic>
-		
+
 	</generic_map>
 
 	<!-- Port description -->
 	<port_map>
 
-		<divider>Common signals</divider>		
+		<divider>Common signals</divider>
         <port name="CLK" dir="in" width="1">
             Clock input
         </port>
@@ -142,19 +142,19 @@
             <th>Max. HW frequency</th>
          </tr>
          <tr>
-            <th>16b input</th> 
+            <th>16b input</th>
             <td>7 (0.03%)</td>
             <td>0 (0.0%)</td>
             <td>200 MHz</td>
          </tr>
          <tr>
-            <th>64b input</th> 
+            <th>64b input</th>
             <td>7 (0.03%)</td>
             <td>0 (0.0%)</td>
             <td>200 MHz</td>
          </tr>
       <nazev>Chip utilization &amp; max design frequency</nazev>
-      </tab> 
+      </tab>
    </p>
 
 </body>

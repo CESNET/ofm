@@ -1,6 +1,6 @@
 -- pipe.vhd: Multi-Value Bus pipeline
 -- Copyright (C) 2016 CESNET z. s. p. o.
--- Author(s): Lukas Kekely <kekely@cesnet.cz> 
+-- Author(s): Lukas Kekely <kekely@cesnet.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --
@@ -25,12 +25,12 @@ entity MVB_PIPE is
   port(
     CLK            : in std_logic;
     RESET          : in std_logic;
-      
+
     RX_DATA       : in std_logic_vector(ITEMS*ITEM_WIDTH-1 downto 0);
     RX_VLD        : in std_logic_vector(ITEMS-1 downto 0);
     RX_SRC_RDY    : in std_logic;
     RX_DST_RDY    : out std_logic;
- 
+
     TX_DATA       : out std_logic_vector(ITEMS*ITEM_WIDTH-1 downto 0);
     TX_VLD        : out std_logic_vector(ITEMS-1 downto 0);
     TX_SRC_RDY    : out std_logic;

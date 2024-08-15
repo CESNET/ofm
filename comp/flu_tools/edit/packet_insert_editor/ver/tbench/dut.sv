@@ -6,7 +6,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
- 
+
 // ----------------------------------------------------------------------------
 //                        Module declaration
 // ----------------------------------------------------------------------------
@@ -22,7 +22,7 @@ module DUT (
 // -------------------- Module body -------------------------------------------
 PACKET_INSERT_EDITOR #(
      .DATA_WIDTH    (DATA_WIDTH),
-     .SOP_POS_WIDTH (SOP_POS_WIDTH), 
+     .SOP_POS_WIDTH (SOP_POS_WIDTH),
      .OFFSET_WIDTH  (OFFSET_WIDTH),
      .INPUT_PIPE    (INPUT_PIPE),
      .EN_MASK       (EN_MASK)
@@ -41,7 +41,7 @@ PACKET_INSERT_EDITOR #(
      .RX_EOP      (RX.EOP),
      .RX_SRC_RDY  (RX.SRC_RDY),
      .RX_DST_RDY  (RX.DST_RDY),
-     
+
      .OFFSET      (RX.OFFSET),
      .EN_INSERT   (RX.EN_INSERT),
      .EN_REPLACE  (RX.EN_REPLACE),

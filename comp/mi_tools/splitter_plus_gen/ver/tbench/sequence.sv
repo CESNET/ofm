@@ -38,18 +38,18 @@ package sequence_pkg;
     //     function new();
     //         cfg = new();
     //     endfunction
- 
+
     //     function void pre_randomize ();
     //         if(cfg.rand_count == 0) begin
     //             assert(cfg.randomize());
     //         end
 
     //         //setup randomization
-    //         this.txDelayEn_wt      = cfg.txDelayEn_wt; 
+    //         this.txDelayEn_wt      = cfg.txDelayEn_wt;
     //         this.txDelayDisable_wt = cfg.txDelayDisable_wt;
     //         this.txDelayLow        = cfg.txDelayLow;
     //         this.txDelayHigh       = cfg.txDelayHigh;
-            
+
     //         //decrement count
     //         cfg.rand_count--;
     //     endfunction
@@ -77,7 +77,7 @@ package sequence_pkg;
         function new();
             cfg = new();
         endfunction
- 
+
         function void pre_randomize ();
             if(cfg.rand_count == 0) begin
                 assert(cfg.randomize());
@@ -108,7 +108,7 @@ package sequence_pkg;
 
         constraint c1 {
            //length of sequence
-           rand_count inside {[20:200]}; 
+           rand_count inside {[20:200]};
            //address constraint
            minAddr <= maxAddr;
            //rand distribution between operation
@@ -120,10 +120,10 @@ package sequence_pkg;
     endclass
 
     // ----------------------------------------------------------------------------
-    //   MI TRANSACTION WITH GENERATOR CONFIGURATION 
+    //   MI TRANSACTION WITH GENERATOR CONFIGURATION
     // ----------------------------------------------------------------------------
     class mi_sequence #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH) extends sv_mi_pkg::MiTransaction #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH);
-        mi_transaction_config #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH) cfg; 
+        mi_transaction_config #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH) cfg;
 
         constraint c2 {
             be dist {4'b1111 := 7, [4'b0:4'b1111] := 3};
@@ -132,7 +132,7 @@ package sequence_pkg;
         function new(mi_transaction_config #(DATA_WIDTH, ADDR_WIDTH, META_WIDTH) cfg = null);
             if(cfg == null) begin
                 this.cfg = new();
-            end else begin 
+            end else begin
                 this.cfg = cfg;
             end
         endfunction

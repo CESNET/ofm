@@ -12,7 +12,7 @@
 // Frame Link Unaligned FIFO Control Interface
 `include "flu_fifo_ifc.sv"
 
-package sv_flu_fifo_pkg; 
+package sv_flu_fifo_pkg;
 
   `include "flu_fifo_ctrl_checker.sv"
 

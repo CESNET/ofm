@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (C) 2022 CESNET z. s. p. o.
-# Author: Jakub Cabal <cabal@cesnet.cz> 
+# Author: Jakub Cabal <cabal@cesnet.cz>
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
@@ -40,7 +40,7 @@ def sm_get_speed(path,offset,frequency,type=0):
         bytes_offset = 0x48
         max_offset = 0x28
     else:
-        ticks_offset = 0x0 
+        ticks_offset = 0x0
         bytes_offset = 0x8
         max_offset = 0x4
 
@@ -57,11 +57,11 @@ def sm_get_speed(path,offset,frequency,type=0):
     sm_bytes = nfb_bus(path,offset+bytes_offset) * 8/(10**9)
     if sm_bytes == 0:
         return 0
-    
+
     # read test length in number of ticks
     sm_ticks = nfb_bus(path,offset+ticks_offset)
     sm_run_time = sm_ticks/frequency
-    
+
     return round(sm_bytes/sm_run_time, 2)
 
 def sm_reset(path,offset,type=0):
@@ -129,7 +129,7 @@ def run_test(mode,min_fr_size,max_fr_size,fr_size_step,gls_clk_freq,log_en,demo_
     # Reset MAC counters
     os.system('nfb-eth -R')
 
-    # Select correct SpeedMeters 
+    # Select correct SpeedMeters
     sm_tx_addr = sm_gls_eth_tx_addr
     sm_rx_addr = sm_gls_eth_rx_addr
     if (mode=="dma_rx" or mode=="dma_tx" or mode=="dma_rxtx" or mode=="dma_loop"):
@@ -217,7 +217,7 @@ def run_test(mode,min_fr_size,max_fr_size,fr_size_step,gls_clk_freq,log_en,demo_
 
             tx_total_speed += tx_app_speed
             rx_total_speed += rx_app_speed
-            
+
         tx_total_speed = round(tx_total_speed,2)
         rx_total_speed = round(rx_total_speed,2)
 
@@ -231,7 +231,7 @@ def run_test(mode,min_fr_size,max_fr_size,fr_size_step,gls_clk_freq,log_en,demo_
             demo_gui.write(str(tx_total_speed) + '\n')
             demo_gui.write(str(rx_total_speed))
             demo_gui.close()
-    
+
         # Stop TX generator
         if (mode=="tx" or mode=="rxtx" or mode=="dma_tx" or mode=="dma_rxtx" or mode=="dma_loop"):
             ndp_gen.send_signal(signal.SIGINT)
@@ -289,6 +289,7 @@ def print_modes():
     print("packet generator.)\n")
     print("Additional configuration is available inside the script.")
 
+
 if __name__ == '__main__':
     args = []
     args = sys.argv[1:]
@@ -316,7 +317,7 @@ if __name__ == '__main__':
         print("Incorrect mode!\n")
         print_modes()
         exit()
-    
+
     port_list = [0]
     if len(args) > 1:
         port_list = list(args[1].split(","))
@@ -341,7 +342,7 @@ if __name__ == '__main__':
     card_name = subprocess.Popen("nfb-info -q card",shell=True,stdout=subprocess.PIPE).stdout.read().strip().decode("utf-8")
     # Total number of Ethernet ports on card
     #eth_ports = int(subprocess.Popen("nfb-info -q port",shell=True,stdout=subprocess.PIPE).stdout.read().strip())
-    eth_ports = int(subprocess.Popen("nfb-bus -l | grep -iw app_core | wc -l",shell=True,stdout=subprocess.PIPE).stdout.read().strip())    
+    eth_ports = int(subprocess.Popen("nfb-bus -l | grep -iw app_core | wc -l",shell=True,stdout=subprocess.PIPE).stdout.read().strip())
     print("INFO: Card name:      %s" % card_name)
     print("INFO: APP streams:    %d" % eth_ports)
     # Get total number of DMA channels

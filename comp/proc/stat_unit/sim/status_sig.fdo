@@ -15,6 +15,6 @@ set TB_ROOT	"/testbench"
 source "signals.fdo"
 
 
-blk_STATUS_UNIT_OTHER 
-blk_STATUS_UNIT 
+blk_STATUS_UNIT_OTHER
+blk_STATUS_UNIT
 

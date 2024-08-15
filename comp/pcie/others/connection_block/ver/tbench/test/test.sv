@@ -1,6 +1,6 @@
 /*
  * file       : test.sv
- * description: test 
+ * description: test
  * date       : 2020
  * author     : Radek Iša <isa@cesnet.cz>
  *

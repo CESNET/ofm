@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 # Set paths
-set UVM_PATH "$OFM_PATH/comp/uvm" 
+set UVM_PATH "$OFM_PATH/comp/uvm"
 
 lappend COMPONENTS \
       [ list "SV_COMMON"           "$UVM_PATH/common"                           "FULL"] \

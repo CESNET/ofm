@@ -9,11 +9,11 @@ proc rx {NAME PATH} {
    add_wave "-group {$NAME} -noupdate -hex" $PATH/RX_*
 }
 
-proc tx {NAME PATH} {    
+proc tx {NAME PATH} {
    add_wave "-group {$NAME} -noupdate -hex" $PATH/TX_*
 }
 
-proc ex {NAME PATH} {  
+proc ex {NAME PATH} {
    add_wave "-group {$NAME} -noupdate -hex" $PATH/EX_*
 }
 

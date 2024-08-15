@@ -9,4 +9,4 @@
 #set PACKAGES  "$PACKAGES $ENTITY_BASE/dp_uram_xilinx_func.vhd"
 
 set MOD  "$MOD $ENTITY_BASE/sp_uram_xilinx_ent.vhd"
-set MOD  "$MOD $ENTITY_BASE/sp_uram_xilinx_arch.vhd"  
+set MOD  "$MOD $ENTITY_BASE/sp_uram_xilinx_arch.vhd"

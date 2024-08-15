@@ -11,7 +11,7 @@ NAME=valcon
 OUTPUTNAME=$(NAME).c
 
 $ (NAME): $(OUTPUTNAME)
-	  $(CC) $(CFLAGS) $(OUTPUTNAME) -o $(NAME) $(LDFLAGS)
+	$(CC) $(CFLAGS) $(OUTPUTNAME) -o $(NAME) $(LDFLAGS)
 
 clean:
 	$(RM) $(NAME) *.o core *.out

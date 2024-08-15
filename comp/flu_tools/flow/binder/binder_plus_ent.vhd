@@ -1,7 +1,7 @@
 --
 -- binder_plus_ent.vhd: Binder N-1 component for Frame Link Unaligned Plus
 -- Copyright (C) 2014 CESNET
--- Author: Lukas Kekely <kekely@cesnet.cz> 
+-- Author: Lukas Kekely <kekely@cesnet.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --
@@ -20,7 +20,7 @@ use work.math_pack.all;
 entity FLU_PLUS_BINDER is
    generic(
        DATA_WIDTH:    integer:=256;
-       SOP_POS_WIDTH: integer:=2; 	
+       SOP_POS_WIDTH: integer:=2;
        INPUT_PORTS:   integer:=2;
        CHANNEL_WIDTH: integer:=3
    );
@@ -37,7 +37,7 @@ entity FLU_PLUS_BINDER is
       RX_SOP        : in std_logic_vector(INPUT_PORTS-1 downto 0);
       RX_EOP        : in std_logic_vector(INPUT_PORTS-1 downto 0);
       RX_SRC_RDY    : in std_logic_vector(INPUT_PORTS-1 downto 0);
-      RX_DST_RDY    : out std_logic_vector(INPUT_PORTS-1 downto 0); 
+      RX_DST_RDY    : out std_logic_vector(INPUT_PORTS-1 downto 0);
 
       -- Frame Link Unaligned concentrated interface
       TX_DATA       : out std_logic_vector(DATA_WIDTH-1 downto 0);
@@ -47,6 +47,6 @@ entity FLU_PLUS_BINDER is
       TX_SOP        : out std_logic;
       TX_EOP        : out std_logic;
       TX_SRC_RDY    : out std_logic;
-      TX_DST_RDY    : in std_logic 
+      TX_DST_RDY    : in std_logic
    );
 end entity;

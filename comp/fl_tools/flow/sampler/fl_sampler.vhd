@@ -31,13 +31,13 @@ entity FL_SAMPLER is
 
       -- global synchronous reset
       RESET          : in  std_logic;
-	  
+
 	  -- Sampling RATE 1:N
 	  RATE           : in std_logic_vector(log2(MAX_RATE)  - 1 downto 0);
 	  -- Discarded packet? (1 = yes, 0 = no)
 	  PCKT_DISCARD    : out std_logic;
-	  
-	  
+
+
       -- RX Framelink interface
       RX_DATA        : in  std_logic_vector(DATA_WIDTH - 1 downto 0);
       RX_REM         : in  std_logic_vector(log2(DATA_WIDTH/8) - 1 downto 0);
@@ -85,16 +85,16 @@ end process;
 
 process(RX_EOF_N, RX_SOF_N, RX_SRC_RDY_N, mx_dst_rdy_n)
 begin
-   if RX_EOF_N = '0' and RX_SRC_RDY_N = '0' and mx_dst_rdy_n = '0' then 
+   if RX_EOF_N = '0' and RX_SRC_RDY_N = '0' and mx_dst_rdy_n = '0' then
       in_packet <= '0';
-   elsif RX_SOF_N = '0' and RX_SRC_RDY_N = '0' and mx_dst_rdy_n = '0' then 
+   elsif RX_SOF_N = '0' and RX_SRC_RDY_N = '0' and mx_dst_rdy_n = '0' then
       in_packet <= '1';
    else
       in_packet <= in_packet_reg;
-   end if;  
+   end if;
 end process;
 
-  
+
 -------------------------------------------------------------------------------
 -- Discarded packet signal register
 discard_generator: process(RESET, CLK)
@@ -123,7 +123,7 @@ begin
           else
 		     if (RX_EOF_N = '0') and (RX_SRC_RDY_N = '0') and (mx_dst_rdy_n = '0') then
                cnt_packet <= cnt_packet + 1 ;
-			 end if;  
+			 end if;
           end if;
        end if;
     end if;
@@ -138,7 +138,7 @@ begin
      when others => mx_dst_rdy_n <= '0';
     end case;
 end process;
- 
+
 RX_DST_RDY_N <= mx_dst_rdy_n ;
 
 -------------------------------------------------------------------------------
@@ -153,7 +153,7 @@ end process;
 TX_SRC_RDY_N <= tx_src_rdy_n_sig;
 
 -------------------------------------------------------------------------------
--- Maping other ports 
+-- Maping other ports
 TX_SOF_N <= RX_SOF_N;
 TX_SOP_N <= RX_SOP_N;
 TX_EOP_N <= RX_EOP_N;

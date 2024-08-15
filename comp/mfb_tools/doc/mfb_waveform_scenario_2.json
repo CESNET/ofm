@@ -2,7 +2,7 @@
   {name: 'CLK', wave: 'p.........'},
   {name: 'DATA', wave: 'x==.=xx==x', data : ["B/A", "D/C", "F/E", "G/F", "I/H/G"]},
   {},
-  ['SOF_POS', 
+  ['SOF_POS',
     {name: 'WHOLE WORD', wave: 'x==.=xx==x', data : ["x0A", "x40", "x00", "x80", "x03"]},
     ['BY REGIONS',
      {name: '0 [1:0]', wave: 'x==.=xx==x', data : ["10", "00", "XX", "XX", "11"]},

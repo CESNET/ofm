@@ -65,11 +65,11 @@ port(
     RX_OFFSET   : in  unsigned        (OFFSET_WIDTH-1 downto 0);
     RX_WORD     : in  unsigned        (log2(MAX_WORDS)-1 downto 0);
     RX_SOF_MASK : in  std_logic;
-    
+
     -- =====================================================================
     --  TX inf
     -- =====================================================================
-    
+
     TX_DATA     : out std_logic_vector(MFB_REGION_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH-1 downto 0);
     TX_META     : out std_logic_vector(MFB_META_WIDTH-1 downto 0);
     TX_OFFSET   : out unsigned        (OFFSET_WIDTH-1 downto 0);
@@ -141,7 +141,7 @@ begin
     rx_data_arr <= slv_array_deser(RX_DATA, MFB_REGION_SIZE);
     ext_block   <= rx_data_arr(to_integer(target_block));
     ext_length  <= ext_block(LENGTH_WIDTH-1 downto 0);
-    
+
     -- ========================================================================
     -- Output assignment
     -- ========================================================================

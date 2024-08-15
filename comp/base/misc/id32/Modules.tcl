@@ -1,7 +1,7 @@
 # Modules.tcl: Local include Modules tcl script
 # Copyright (C) 2013 CESNET
 # Author: Lukas Kekely <kekely@cesnet.cz>
-# 
+#
 # SPDX-License-Identifier: BSD-3-Clause
 
 set IM_BASE                   "$ENTITY_BASE/../interrupt_manager"

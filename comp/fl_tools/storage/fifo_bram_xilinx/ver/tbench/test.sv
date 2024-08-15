@@ -103,7 +103,7 @@ program TEST (
         disableTestEnvironment();
         scoreboard.display();
     endtask
-  
+
     task test2();
         $write("\n\n############ TEST CASE 2 ############\n\n");
         createGeneratorEnvironment(2,'{4,8},'{1,1});

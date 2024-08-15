@@ -6,7 +6,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
- 
+
 // ----------------------------------------------------------------------------
 //                        Module declaration
 // ----------------------------------------------------------------------------
@@ -22,7 +22,7 @@ module DUT (
 // -------------------- Module body -------------------------------------------
 MAC_EDITOR #(
      .DATA_WIDTH    (DATA_WIDTH),
-     .SOP_POS_WIDTH (SOP_POS_WIDTH) 
+     .SOP_POS_WIDTH (SOP_POS_WIDTH)
    )
 
    VHDL_DUT_U  (
@@ -38,7 +38,7 @@ MAC_EDITOR #(
      .RX_EOP      (RX.EOP),
      .RX_SRC_RDY  (RX.SRC_RDY),
      .RX_DST_RDY  (RX.DST_RDY),
-     
+
      .DST_DATA    (RX.DST_DATA),
      .DST_MASK    (RX.DST_MASK),
      .DST_W       (RX.DST_W),
@@ -46,7 +46,7 @@ MAC_EDITOR #(
      .SRC_DATA    (RX.SRC_DATA),
      .SRC_MASK    (RX.SRC_MASK),
      .SRC_W       (RX.SRC_W),
-     
+
      // Read Port
      .TX_DATA     (TX.DATA),
      .TX_SOP_POS  (TX.SOP_POS),

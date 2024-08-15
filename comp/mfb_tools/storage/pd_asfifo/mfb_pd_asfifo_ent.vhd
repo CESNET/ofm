@@ -1,6 +1,6 @@
 -- mfb_pd_asfifo_ent.vhd: Asynchronous packet discard FIFO
--- 
--- 
+--
+--
 -- Copyright (C) 2018 CESNET z. s. p. o.
 -- SPDX-License-Identifier: BSD-3-Clause
 -- Author(s): Jan Kubalek <xkubal11@stud.fit.vutbr.cz>
@@ -63,7 +63,7 @@ port (
    RX_FORCE_DISCARD : in  std_logic;
    -- Current number of taken items in FIFO (is not precise as this is an asynchronous FIFO) (Clocked on RX_CLK)
    STATUS           : out std_logic_vector(log2(ITEMS+1)-1 downto 0);
-   
+
    -- TX Synchronization
    TX_CLK           : in  std_logic;
    TX_RESET         : in  std_logic;

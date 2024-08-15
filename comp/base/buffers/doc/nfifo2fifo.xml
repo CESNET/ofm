@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <source>
-	
+
 <!-- MAIN INFO ********************************************************** -->
 
 
@@ -57,7 +57,7 @@
 
 	<!-- Generic description -->
 	<generic_map>
-		
+
 		<generic name="DATA_WIDTH" type="integer" default="64">
 			Output data width (at output FIFO interface).
 		</generic>
@@ -78,13 +78,13 @@
 			False: using all available space in component (memory and FIFOs);
 			True: allows only storing BLOCK_SIZE items (DATA_WIDTH wide) for each block.
 		</generic>
-		
+
 	</generic_map>
 
 	<!-- Port description -->
 	<port_map>
 
-		<divider>Common signals</divider>		
+		<divider>Common signals</divider>
 		<port name="CLK" dir="in" width="1">
 			Global FPGA clock.
 		</port>
@@ -92,15 +92,15 @@
 			Global synchronous reset.
 		</port>
 
-		<divider>Write interface</divider> 		
+		<divider>Write interface</divider>
 		<port name="DATA_IN" dir="in" width="DATA_WIDTH">
 			Input data (DATA_WIDTH/FLOWS for each flow).
 		</port>
 		<port name="WRITE" dir="in" width="FLOWS">
 			Write signal (one bit for each flow).
 		</port>
-		
-		<divider>Read interface</divider> 		
+
+		<divider>Read interface</divider>
 		<port name="DATA_OUT" dir="out" width="DATA_WIDTH">
 			Output data.
 		</port>
@@ -118,7 +118,7 @@
       Combined with OUTPUT_REG = true can cause reading old data.
 		</port>
 
-		<divider>Control signals</divider> 		
+		<divider>Control signals</divider>
 		<port name="EMPTY" dir="out" width="FLOWS">
 			Set when no valid data (= one item of DATA_WIDTH) is available in memory
       (one bit for each flow).
@@ -136,7 +136,7 @@
       Note: Signal width is log2(BLOCK_SIZE+1) for each flow to allow
       indication of all states from empty (0) to full (BLOCK_SIZE).
 		</port>
-		
+
 	</port_map>
 
 </interface>
@@ -148,7 +148,7 @@
 
 <h1>NFIFO2FIFO info</h1>
 
-	<p> 
+	<p>
     Equation DATA_WIDTH mod FLOWS = 0 is asserted (DATA_WIDTH/FLOWS is input
     width of single generic interface, all of them are joined into a vector).
     At each input flow data are received to sh_fifo and then send to memory
@@ -161,9 +161,9 @@
     than register is put into the path and latency is 1 cycle greater.
     When FLOWS is set to 1, no switching is done.
 	</p>
-		
+
 <h1>Schemes</h1>
-	
+
 	<p>
 		The block structure of the component is in the following figure.
 		It's composed of memory (dp_distmem or dp_bmem without output register

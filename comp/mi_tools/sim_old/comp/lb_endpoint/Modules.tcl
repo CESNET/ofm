@@ -19,5 +19,5 @@ if { $ARCHGRP == "FULL" } {
   set MOD "$MOD $ENTITY_BASE/lb_endpoint.vhd"
   set MOD "$MOD $ENTITY_BASE/lb_endpoint_arch.vhd"
   set MOD "$MOD $ENTITY_BASE/lb_endpoint_norec.vhd"
-  
+
   }

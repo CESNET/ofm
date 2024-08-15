@@ -24,7 +24,7 @@ entity fl_binder_fl16x4to64 is
       FRAME_PARTS    : integer;
       -- select BlockRAM or LUT memory
       LUT_MEMORY     : boolean := false;
-      -- Number of items (INPUT_WIDTH*INPUT_COUNT wide) in LUT memory that can 
+      -- Number of items (INPUT_WIDTH*INPUT_COUNT wide) in LUT memory that can
       -- be stored for each block
       LUT_BLOCK_SIZE : integer := 16;
       -- Queue choosing policy
@@ -43,7 +43,7 @@ entity fl_binder_fl16x4to64 is
       RX1            : inout t_fl16;
       RX2            : inout t_fl16;
       RX3            : inout t_fl16;
-      
+
       -- output interface
       TX             : inout t_fl64
 
@@ -52,7 +52,7 @@ end entity fl_binder_fl16x4to64;
 
 architecture full of fl_binder_fl16x4to64 is
 begin
-   
+
    -- FL_BINDER instantiation
    FL_BINDER_I: entity work.FL_BINDER
       generic map(
@@ -68,48 +68,48 @@ begin
       port map(
          CLK            => CLK,
          RESET          => RESET,
-   
+
          -- input interfaces
          RX_SOF_N(0)             => RX0.SOF_N,
          RX_SOF_N(1)             => RX1.SOF_N,
          RX_SOF_N(2)             => RX2.SOF_N,
          RX_SOF_N(3)             => RX3.SOF_N,
-   
+
          RX_SOP_N(0)             => RX0.SOP_N,
          RX_SOP_N(1)             => RX1.SOP_N,
          RX_SOP_N(2)             => RX2.SOP_N,
          RX_SOP_N(3)             => RX3.SOP_N,
-   
+
          RX_EOP_N(0)             => RX0.EOP_N,
          RX_EOP_N(1)             => RX1.EOP_N,
          RX_EOP_N(2)             => RX2.EOP_N,
          RX_EOP_N(3)             => RX3.EOP_N,
-   
+
          RX_EOF_N(0)             => RX0.EOF_N,
          RX_EOF_N(1)             => RX1.EOF_N,
          RX_EOF_N(2)             => RX2.EOF_N,
          RX_EOF_N(3)             => RX3.EOF_N,
-   
+
          RX_SRC_RDY_N(0)         => RX0.SRC_RDY_N,
          RX_SRC_RDY_N(1)         => RX1.SRC_RDY_N,
          RX_SRC_RDY_N(2)         => RX2.SRC_RDY_N,
          RX_SRC_RDY_N(3)         => RX3.SRC_RDY_N,
-   
+
          RX_DST_RDY_N(0)         => RX0.DST_RDY_N,
          RX_DST_RDY_N(1)         => RX1.DST_RDY_N,
          RX_DST_RDY_N(2)         => RX2.DST_RDY_N,
          RX_DST_RDY_N(3)         => RX3.DST_RDY_N,
-   
+
          RX_DATA(15 downto 0)    => RX0.DATA,
          RX_DATA(31 downto 16)   => RX1.DATA,
          RX_DATA(47 downto 32)   => RX2.DATA,
          RX_DATA(63 downto 48)   => RX3.DATA,
-   
+
          RX_REM(0 downto 0)      => RX0.DREM,
          RX_REM(1 downto 1)      => RX1.DREM,
          RX_REM(2 downto 2)      => RX2.DREM,
          RX_REM(3 downto 3)      => RX3.DREM,
-   
+
          -- output interface
          TX_SOF_N       => TX.SOF_N,
          TX_SOP_N       => TX.SOP_N,
@@ -119,7 +119,7 @@ begin
          TX_DST_RDY_N   => TX.DST_RDY_N,
          TX_DATA        => TX.DATA,
          TX_REM         => TX.DREM
-      ); 
+      );
 
-end architecture full; 
+end architecture full;
 

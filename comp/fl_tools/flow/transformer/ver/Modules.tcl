@@ -15,11 +15,11 @@ if { $ARCHGRP == "FULL" } {
   set COMPONENTS [list \
       [ list "SV_FL_BASE"   $SV_FL_BASE  "FULL"] \
    ]
-  
+
 #  set SV_LIB "$SV_LIB $ENTITY_BASE/tbench/dpi/dpi_scoreboard_pkg"
 
   set MOD "$MOD $ENTITY_BASE/tbench/dpi/dpi_scoreboard_pkg.sv"
   set MOD "$MOD $ENTITY_BASE/tbench/test_pkg.sv"
   set MOD "$MOD $ENTITY_BASE/tbench/dut.sv"
-  set MOD "$MOD $ENTITY_BASE/tbench/test.sv"  
+  set MOD "$MOD $ENTITY_BASE/tbench/test.sv"
 }

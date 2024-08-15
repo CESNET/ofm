@@ -27,6 +27,6 @@ if {[info exists SYNTH_FLAGS(TOOL)] && $SYNTH_FLAGS(TOOL) == "vivado"} {
         [list "AGILEX_CNT"    "$INTEL_CNT_COMP_BASE/dsp_counter_stratix10" "STRUCT"] \
         [list "STRATIX10_CNT" "$INTEL_CNT_COMP_BASE/dsp_counter_agilex"    "STRUCT"] \
     ]
-    
+
     lappend MOD "$ENTITY_BASE/dsp_counter_intel.vhd"
 }

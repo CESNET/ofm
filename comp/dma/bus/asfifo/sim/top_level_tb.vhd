@@ -41,7 +41,7 @@ architecture behavioral of testbench is
    signal wr_dma_eop     : std_logic;
    signal wr_dma_src_rdy : std_logic;
    signal wr_dma_dst_rdy : std_logic;
-   
+
    signal rd_clk         : std_logic;
    signal rd_rst         : std_logic;
    signal rd_dma_data    : std_logic_vector(DATA_WIDTH - 1 downto 0);
@@ -128,28 +128,28 @@ end process;
 -- ----------------------------------------------------------------------------
 tb_rd : process
 begin
-   
-   rd_dma_dst_rdy <= '0';  
+
+   rd_dma_dst_rdy <= '0';
    wait until (rising_edge(rd_clk) AND rd_rst='0' AND rd_dma_src_rdy='1');
-   
+
    for i in 1 to 10 loop
       rd_dma_dst_rdy    <= '1';
       wait until (rising_edge(rd_clk) AND rd_rst='0');
       rd_dma_dst_rdy    <= '0';
       wait until (rising_edge(rd_clk) AND rd_rst='0' AND rd_dma_src_rdy='1');
    end loop;
-   
+
    wait for 77 ns;
-   
+
    for i in 11 to 40 loop
       rd_dma_dst_rdy    <= '1';
       wait until (rising_edge(rd_clk) AND rd_rst='0');
       rd_dma_dst_rdy    <= '0';
       wait until (rising_edge(rd_clk) AND rd_rst='0' AND rd_dma_src_rdy='1');
    end loop;
-   
+
    wait;
-   
+
 end process;
 
 tb_wr : process
@@ -159,9 +159,9 @@ begin
    wr_dma_sop     <= '0';
    wr_dma_eop     <= '0';
    wr_dma_src_rdy <= '0';
-   
+
    wait until (rising_edge(wr_clk) AND wr_rst='0' AND wr_dma_dst_rdy='1');
-   
+
    for i in 1 to 5 loop
       wr_dma_data    <= conv_std_logic_vector(i, wr_dma_data'length);
       wr_dma_hdr     <= conv_std_logic_vector(i, wr_dma_hdr'length);
@@ -170,7 +170,7 @@ begin
       wr_dma_src_rdy <= '1';
       wait until (rising_edge(wr_clk) AND wr_rst='0' AND wr_dma_dst_rdy='1');
    end loop;
-   
+
    for i in 6 to 6 loop
       wr_dma_data    <= conv_std_logic_vector(i, wr_dma_data'length);
       wr_dma_hdr     <= conv_std_logic_vector(i, wr_dma_hdr'length);
@@ -179,7 +179,7 @@ begin
       wr_dma_src_rdy <= '1';
       wait until (rising_edge(wr_clk) AND wr_rst='0' AND wr_dma_dst_rdy='1');
    end loop;
-   
+
    for i in 7 to 22 loop
       wr_dma_data    <= conv_std_logic_vector(i, wr_dma_data'length);
       wr_dma_hdr     <= conv_std_logic_vector(i, wr_dma_hdr'length);
@@ -188,7 +188,7 @@ begin
       wr_dma_src_rdy <= '1';
       wait until (rising_edge(wr_clk) AND wr_rst='0' AND wr_dma_dst_rdy='1');
    end loop;
-   
+
    for i in 23 to 23 loop
       wr_dma_data    <= conv_std_logic_vector(i, wr_dma_data'length);
       wr_dma_hdr     <= conv_std_logic_vector(i, wr_dma_hdr'length);
@@ -206,7 +206,7 @@ begin
       wr_dma_src_rdy <= '1';
       wait until (rising_edge(wr_clk) AND wr_rst='0' AND wr_dma_dst_rdy='1');
    end loop;
-   
+
    for i in 25 to 32 loop
       wr_dma_data    <= conv_std_logic_vector(i, wr_dma_data'length);
       wr_dma_hdr     <= conv_std_logic_vector(i, wr_dma_hdr'length);
@@ -215,16 +215,16 @@ begin
       wr_dma_src_rdy <= '1';
       wait until (rising_edge(wr_clk) AND wr_rst='0' AND wr_dma_dst_rdy='1');
    end loop;
-   
-   for i in 33 to 33 loop     
+
+   for i in 33 to 33 loop
       wr_dma_data    <= conv_std_logic_vector(i, wr_dma_data'length);
       wr_dma_hdr     <= conv_std_logic_vector(i, wr_dma_hdr'length);
       wr_dma_sop     <= '0';
       wr_dma_eop     <= '1';
       wr_dma_src_rdy <= '1';
-      wait until (rising_edge(wr_clk) AND wr_rst='0' AND wr_dma_dst_rdy='1');   
+      wait until (rising_edge(wr_clk) AND wr_rst='0' AND wr_dma_dst_rdy='1');
    end loop;
-         
+
    wr_dma_src_rdy <= '0';
 
    wait;

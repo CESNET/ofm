@@ -3,8 +3,8 @@
  * \brief Test Cases
  * \author Lukas Kekely <kekely@cesnet.cz>
  * \date 2018
- */  
- /* 
+ */
+ /*
  * Copyright (C) 2018 CESNET
  *
  * LICENSE TERMS
@@ -37,7 +37,7 @@ program TEST (
         RESET=1;
         #100ns RESET = 0;
     endtask
-  
+
     task configDesign();
         int ret;
         string params;

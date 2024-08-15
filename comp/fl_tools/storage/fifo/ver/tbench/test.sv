@@ -28,33 +28,33 @@ program TEST (
   iFrameLinkFifo.ctrl  CTRL,
   iFrameLinkTx.monitor MONITOR
   );
-  
+
   // --------------------------------------------------------------------------
   //                       Variables declaration
   // --------------------------------------------------------------------------
- 
-  // AK MA KOMPONENTA VIAC DRIVEROV ALEBO MONITOROV TREBA ICH NA TOMTO 
+
+  // AK MA KOMPONENTA VIAC DRIVEROV ALEBO MONITOROV TREBA ICH NA TOMTO
   // MIESTE DEKLAROVAT A V TASKU CREATEENVIRONMENT INSTANCIOVAT
-  
+
   // Transaction
-  FrameLinkTransaction    flBlueprint; 
-  // Generator                            
+  FrameLinkTransaction    flBlueprint;
+  // Generator
   Generator               generator;
-  // Driver                               
-  FrameLinkDriver #(DRIVER0_DATA_WIDTH, DRIVER0_DREM_WIDTH)       flDriver; 
-  // Monitor      
-  FrameLinkMonitor #(MONITOR0_DATA_WIDTH, MONITOR0_DREM_WIDTH)    flMonitor; 
-  // Responder     
+  // Driver
+  FrameLinkDriver #(DRIVER0_DATA_WIDTH, DRIVER0_DREM_WIDTH)       flDriver;
+  // Monitor
+  FrameLinkMonitor #(MONITOR0_DATA_WIDTH, MONITOR0_DREM_WIDTH)    flMonitor;
+  // Responder
   FrameLinkResponder #(MONITOR0_DATA_WIDTH, MONITOR0_DREM_WIDTH)  flResponder;
   // Checker
-  FrameLinkFifoChecker #(DATA_WIDTH, DREM_WIDTH, BLOCK_SIZE, 
+  FrameLinkFifoChecker #(DATA_WIDTH, DREM_WIDTH, BLOCK_SIZE,
                          STATUS_WIDTH, ITEMS, USE_BRAMS)          flChecker;
-  // Scoreboard  
-  Scoreboard              scoreboard; 
-  // Coverage                             
+  // Scoreboard
+  Scoreboard              scoreboard;
+  // Coverage
   Coverage #(DATA_WIDTH,DREM_WIDTH,DATA_WIDTH,DREM_WIDTH)         coverage;
-  FifoCoverage #(STATUS_WIDTH)                                    fifoCoverage; 
-  
+  FifoCoverage #(STATUS_WIDTH)                                    fifoCoverage;
+
   // --------------------------------------------------------------------------
   //                       Creating Environment tasks
   // --------------------------------------------------------------------------
@@ -72,17 +72,17 @@ program TEST (
       flBlueprint.packetSizeMax = packet_size_max;
       flBlueprint.packetSizeMin = packet_size_min;
       generator.blueprint       = flBlueprint;
-  endtask: createGeneratorEnvironment    
+  endtask: createGeneratorEnvironment
 
   // Create Test Environment
-  task createEnvironment();    
-    // Create driver    
+  task createEnvironment();
+    // Create driver
     flDriver  = new ("Driver0", generator.transMbx, RX);
-      flDriver.txDelayEn_wt             = DRIVER0_DELAYEN_WT; 
+      flDriver.txDelayEn_wt             = DRIVER0_DELAYEN_WT;
       flDriver.txDelayDisable_wt        = DRIVER0_DELAYDIS_WT;
       flDriver.txDelayLow               = DRIVER0_DELAYLOW;
       flDriver.txDelayHigh              = DRIVER0_DELAYHIGH;
-      flDriver.insideTxDelayEn_wt       = DRIVER0_INSIDE_DELAYEN_WT; 
+      flDriver.insideTxDelayEn_wt       = DRIVER0_INSIDE_DELAYEN_WT;
       flDriver.insideTxDelayDisable_wt  = DRIVER0_INSIDE_DELAYDIS_WT;
       flDriver.insideTxDelayLow         = DRIVER0_INSIDE_DELAYLOW;
       flDriver.insideTxDelayHigh        = DRIVER0_INSIDE_DELAYHIGH;
@@ -90,14 +90,14 @@ program TEST (
     flMonitor = new ("Monitor0", MONITOR);
     // Create responder
     flResponder = new ("Responder0", TX);
-      flResponder.rxDelayEn_wt            = MONITOR0_DELAYEN_WT; 
+      flResponder.rxDelayEn_wt            = MONITOR0_DELAYEN_WT;
       flResponder.rxDelayDisable_wt       = MONITOR0_DELAYDIS_WT;
       flResponder.rxDelayLow              = MONITOR0_DELAYLOW;
       flResponder.rxDelayHigh             = MONITOR0_DELAYHIGH;
-      flResponder.insideRxDelayEn_wt      = MONITOR0_INSIDE_DELAYEN_WT; 
+      flResponder.insideRxDelayEn_wt      = MONITOR0_INSIDE_DELAYEN_WT;
       flResponder.insideRxDelayDisable_wt = MONITOR0_INSIDE_DELAYDIS_WT;
       flResponder.insideRxDelayLow        = MONITOR0_INSIDE_DELAYLOW;
-      flResponder.insideRxDelayHigh       = MONITOR0_INSIDE_DELAYHIGH;    
+      flResponder.insideRxDelayHigh       = MONITOR0_INSIDE_DELAYHIGH;
     // Create checker
     flChecker = new("Checker0", RX, TX, CTRL);
     // Create scoreboard
@@ -116,7 +116,7 @@ program TEST (
   // --------------------------------------------------------------------------
   //                       Test auxilarity procedures
   // --------------------------------------------------------------------------
-  
+
   // --------------------------------------------------------------------------
   // Resets design
   task resetDesign();
@@ -140,7 +140,7 @@ program TEST (
   // Disable test Environment
   task disableTestEnvironment();
      // Disable drivers
-     #(1000*CLK_PERIOD); 
+     #(1000*CLK_PERIOD);
      flDriver.setDisabled();
      // Disable monitors
      #(1000*CLK_PERIOD);
@@ -167,7 +167,7 @@ program TEST (
      // Pokud je generator aktivni nic nedelej
      while (generator.enabled)
        #(CLK_PERIOD);
-     
+
      // Disable Test Enviroment
      disableTestEnvironment();
 
@@ -191,7 +191,7 @@ program TEST (
     // TESTING
     // -------------------------------------
     test1();       // Run Test 1
-        
+
     // -------------------------------------
     // STOP TESTING
     // -------------------------------------

@@ -117,13 +117,13 @@ architecture full of MFB2DMA is
 
    constant INPUT_FIFOXM_SIZE : integer := max(MVB_ITEMS,MFB_REGIONS)*INPUT_FIFO_SIZE;
    constant DMA_LEN_WIDTH : integer := DMA_COMPLETION_LENGTH'high-DMA_COMPLETION_LENGTH'low+1;
-   
+
    ---------------------------------------------------------------------------
 
    ---------------------------------------------------------------------------
    -- Signals
    ---------------------------------------------------------------------------
-   
+
    -- MVB input register to increase latency
    signal rx_mvb_down_in_reg_hdr      : std_logic_vector(MVB_ITEMS*DMA_DOWNHDR_WIDTH-1 downto 0);
    signal rx_mvb_down_in_reg_vld      : std_logic_vector(MVB_ITEMS                  -1 downto 0);
@@ -166,7 +166,7 @@ architecture full of MFB2DMA is
    signal read_header_reg : std_logic;
    signal mfb_reg_wanted  : std_logic_vector(MFB_REGIONS+1-1 downto 0);
    signal allow_read      : std_logic;
-   
+
    -- output DMA register
    signal out_dma_down_hdr_reg  : std_logic_vector(DMA_DOWNHDR_WIDTH-1 downto 0);
    signal out_dma_down_data_reg : std_logic_vector(MFB_REGIONS*MFB_REG_WIDTH-1 downto 0);
@@ -183,7 +183,7 @@ begin
    -- -------------------------------------------------------------------------
 
    RX_MVB_DOWN_DST_RDY <= rx_mvb_down_in_reg_dst_rdy;
-   
+
    rx_mvb_input_reg_pr : process (CLK)
    begin
       if (CLK'event and CLK='1') then

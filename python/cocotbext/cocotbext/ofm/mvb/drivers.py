@@ -4,7 +4,7 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-import cocotb 
+import cocotb
 from cocotbext.ofm.base.drivers import BusDriver
 from cocotb.triggers import RisingEdge
 from cocotbext.ofm.mvb.utils import random_delays_config
@@ -77,7 +77,7 @@ class MVBDriver(BusDriver):
     async def _move_word(self) -> None:
         """Sends MVB word to the MVB bus if possible and clears the word."""
 
-        if (self._src_rdy):  
+        if (self._src_rdy):
             self._propagate_control_signals()
 
         else:
@@ -104,13 +104,13 @@ class MVBDriver(BusDriver):
 
            Args:
                data - data to be sent to the MVB bus.
-               
+
         """
 
         self.log.debug(f"ITEM {self._vld_item_cnt}:")
         self.log.debug(f"recieved item: {data}")
 
-        self._data[self._item_offset*self._item_width:(self._item_offset+1)*self._item_width] = data   
+        self._data[self._item_offset*self._item_width:(self._item_offset+1)*self._item_width] = data
 
         self.log.debug(f"word: {self._data}")
 

@@ -67,7 +67,7 @@ port(
     TX_VALID1        : out std_logic_vector(MFB_REGIONS-1 downto 0);
     TX_END1_POINTER  : out u_array_t       (MFB_REGIONS-1 downto 0)(log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE)-1 downto 0);
     TX_END1          : out std_logic_vector(MFB_REGIONS-1 downto 0);
-    
+
     -- With older SOF
     TX_OFFSET2_START : out u_array_t       (MFB_REGIONS-1 downto 0)(log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE)-1 downto 0);
     TX_OFFSET2_END   : out u_array_t       (MFB_REGIONS-1 downto 0)(log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE)-1 downto 0);
@@ -96,7 +96,7 @@ architecture FULL of VALIDATION_PREPARE is
 
     signal start_reached1         : std_logic_vector(MFB_REGIONS-1 downto 0);
     signal end_reached1           : std_logic_vector(MFB_REGIONS-1 downto 0);
-    
+
     signal vp_rx_word             : u_array_t       (MFB_REGIONS-1 downto 0)(log2(MAX_WORDS)-1 downto 0);
     signal vp_rx_word_prev        : u_array_t       (MFB_REGIONS-1 downto 0)(log2(MAX_WORDS)-1 downto 0);
     signal vp_rx_new_offset_start : u_array_t       (MFB_REGIONS-1 downto 0)(OFFSET_WIDTH-1 downto 0);
@@ -105,7 +105,7 @@ architecture FULL of VALIDATION_PREPARE is
     signal vp_rx_old_offset_start : u_array_t       (MFB_REGIONS-1 downto 0)(OFFSET_WIDTH-1 downto 0);
     signal vp_rx_old_offset_end   : u_array_t       (MFB_REGIONS-1 downto 0)(OFFSET_WIDTH-1 downto 0);
     signal vp_rx_old_valid        : std_logic_vector(MFB_REGIONS-1 downto 0);
-    
+
     signal vp_tx_offset_start     : u_array_t       (MFB_REGIONS-1 downto 0)(OFFSET_WIDTH-1 downto 0);
     signal vp_tx_offset_end       : u_array_t       (MFB_REGIONS-1 downto 0)(OFFSET_WIDTH-1 downto 0);
     signal vp_tx_valid            : std_logic_vector(MFB_REGIONS-1 downto 0);
@@ -138,7 +138,7 @@ begin
             RX_WORD    => RX_WORD        (r),
             RX_OFFSET  => RX_OFFSET_START(r),
             RX_VALID   => RX_VALID       (r),
-    
+
             TX_REACHED => start_reached1 (r)
         );
 
@@ -154,7 +154,7 @@ begin
             RX_WORD    => RX_WORD      (r),
             RX_OFFSET  => RX_OFFSET_END(r),
             RX_VALID   => RX_VALID     (r),
-    
+
             TX_REACHED => end_reached1 (r)
         );
 
@@ -239,7 +239,7 @@ begin
             RX_WORD    => vp_rx_word_prev       (r),
             RX_OFFSET  => vp_rx_old_offset_start(r),
             RX_VALID   => vp_rx_old_valid       (r),
-    
+
             TX_REACHED => start_reached2        (r)
         );
 
@@ -255,7 +255,7 @@ begin
             RX_WORD    => vp_rx_word_prev     (r),
             RX_OFFSET  => vp_rx_old_offset_end(r),
             RX_VALID   => vp_rx_old_valid     (r),
-    
+
             TX_REACHED => end_reached2        (r)
         );
 

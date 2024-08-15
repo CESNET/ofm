@@ -50,7 +50,7 @@ end entity RR_ARBITER;
 --                      Architecture declaration
 -- ----------------------------------------------------------------------------
 architecture RR_ARBITER_ARCH of RR_ARBITER is
-   
+
    -- priority counter registers
    signal priority_reg     : std_logic_vector(PORTS-1 downto 0);
    signal change_priority  : std_logic;
@@ -98,17 +98,17 @@ ARB_G: for i in 0 to PORTS-1 generate
          ACK         => sig_arb_ack_out(i),
          ACK_W       => sig_arb_w(i)
       );
-end generate;                 
+end generate;
 
 ack_we <= '0' when sig_arb_w = conv_std_logic_vector(0, PORTS) else '1';
 
 RQ_MAP1: for i in 0 to PORTS-1 generate
-   
+
    RQ_MAP2: for j in i + 1 to i + PORTS generate
       sig_arb_rq(i)(j - (i + 1)) <= RQ(j REM PORTS);
       sig_arb_ack(j REM PORTS)(i) <= sig_arb_ack_out(i)(j - (i + 1));
    end generate;
-   
+
 end generate;
 
 ACK_MAP1: for i in 0 to PORTS-1 generate

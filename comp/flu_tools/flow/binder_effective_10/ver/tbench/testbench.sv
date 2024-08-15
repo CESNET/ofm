@@ -10,7 +10,7 @@
  * TODO:
  *
  */
- 
+
 
 // ----------------------------------------------------------------------------
 //                                 TESTBENCH
@@ -19,12 +19,12 @@ import test_pkg::*; // Test constants
 
 module testbench;
    logic CLK = 0;
-   logic RESET; 
+   logic RESET;
    iFrameLinkURx #(DATA_WIDTH,EOP_POS_WIDTH,SOP_POS_WIDTH)              RX[PORTS] (CLK, RESET);
    iFrameLinkURx #(HDR_WIDTH,HDR_EOP_POS_WIDTH, HDR_SOP_POS_WIDTH )     RXHDR[PORTS] (CLK,RESET);
    iFrameLinkUTx #(DATA_WIDTH,EOP_POS_WIDTH,SOP_POS_WIDTH)              TX (CLK, RESET);
    iFrameLinkUTx #(HDR_WIDTH,HDR_EOP_POS_WIDTH,HDR_SOP_POS_WIDTH)       TXHDR (CLK,RESET);
-  
+
   //-- Clock generation -------------------------------------------------------
   always #(CLK_PERIOD/2) CLK = ~CLK;
 

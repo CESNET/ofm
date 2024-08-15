@@ -57,9 +57,9 @@ class MFBMonitor(BusMonitor):
                 self._sof_pos_arr = signal_unpack(self._regions, self.bus.sof_pos)
                 self._eof_pos_arr = signal_unpack(self._regions, self.bus.eof_pos)
                 #print("sof_arr " + str(self._sof_arr))
-                #print("eof_arr " + str(self._eof_arr)) 
+                #print("eof_arr " + str(self._eof_arr))
                 #print("sof_pos_arr " + str(self._sof_pos_arr))
-                #print("eof_pos_arr " + str(self._eof_pos_arr))       
+                #print("eof_pos_arr " + str(self._eof_pos_arr))
 
                 for rr in range(self._regions):
                     eof_done = False
@@ -69,10 +69,10 @@ class MFBMonitor(BusMonitor):
                     ss_idx = (rr*self._region_items+(self._sof_pos_arr[rr]*self._block_size))
 
                     #print("rs_inx " + str(rs_inx))
-                    #print("re_inx " + str(re_inx)) 
+                    #print("re_inx " + str(re_inx))
                     #print("ee_idx " + str(ee_idx))
-                    #print("ss_idx " + str(ss_idx)) 
-                    
+                    #print("ss_idx " + str(ss_idx))
+
                     if (self._eof_arr[rr] == 1) and (in_frame):
                         #print("Frame End")
                         in_frame = False
@@ -91,7 +91,7 @@ class MFBMonitor(BusMonitor):
                             raise MFBProtocolError("Duplicate start-of-frame received on MFB bus!")
                         in_frame = True
                         frame = b""
-                        
+
                         if (self._eof_arr[rr] == 1) and (not eof_done):
                             #print("Frame End in single region")
                             if not in_frame:

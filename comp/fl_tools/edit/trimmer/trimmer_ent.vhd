@@ -42,7 +42,7 @@ entity FL_TRIMMER is
       RX_DST_RDY_N   : out std_logic;
       RX_DATA        : in  std_logic_vector(DATA_WIDTH-1 downto 0);
       RX_REM         : in  std_logic_vector(log2(DATA_WIDTH/8)-1 downto 0);
-      
+
       -- output interface
       TX_SOF_N       : out std_logic;
       TX_SOP_N       : out std_logic;
@@ -52,7 +52,7 @@ entity FL_TRIMMER is
       TX_DST_RDY_N   : in  std_logic;
       TX_DATA        : out std_logic_vector(DATA_WIDTH-1 downto 0);
       TX_REM         : out std_logic_vector(log2(DATA_WIDTH/8)-1 downto 0);
-      
+
       -- control signals
       ENABLE         : in  std_logic
    );

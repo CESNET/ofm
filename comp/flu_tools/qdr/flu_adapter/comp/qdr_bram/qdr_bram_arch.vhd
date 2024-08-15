@@ -45,7 +45,7 @@ begin
 
    USER_RD_VALID <= user_rd_cmd_reg1;
 
-   we <= not USER_WR_BW_N; 
+   we <= not USER_WR_BW_N;
 
    BRAM_SDP_MACRO_inst0 : BRAM_SDP_MACRO
    generic map (

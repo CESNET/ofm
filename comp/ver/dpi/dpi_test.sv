@@ -1,5 +1,5 @@
 /*
- * dpi_test.sv: 
+ * dpi_test.sv:
  * Copyright (C) 2015 CESNET
  * Author: Lukas Kekely <kekely@cesnet.cz>
  *

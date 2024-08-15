@@ -28,11 +28,11 @@ program TEST (
   iFrameLinkUTx.tb  TX,
   iFrameLinkUTx.monitor MONITOR
   );
-  
+
   // --------------------------------------------------------------------------
   //                       Variables declaration
   // --------------------------------------------------------------------------
-  
+
   FrameLinkUTransaction                 fluBlueprint;                             // Transaction
   Generator                            generator;                               // Generator
   FrameLinkUDriver #(DRIVER0_DATA_WIDTH, DRIVER0_EOP_WIDTH, DRIVER0_SOP_WIDTH)   fluDriver;       // Driver
@@ -41,7 +41,7 @@ program TEST (
   Scoreboard                           scoreboard;                              // Scoreboard
   integer                         discard;
   integer i;
-  
+
   // --------------------------------------------------------------------------
   //                       Creating Environment tasks
   // --------------------------------------------------------------------------
@@ -58,30 +58,30 @@ program TEST (
       fluBlueprint.packetSizeMax = packet_size_max;
       fluBlueprint.packetSizeMin = packet_size_min;
       generator.blueprint       = fluBlueprint;
-  endtask: createGeneratorEnvironment    
+  endtask: createGeneratorEnvironment
 
-  task createEnvironment();    
-    // Create driver    
+  task createEnvironment();
+    // Create driver
     fluDriver  = new ("Driver0", generator.transMbx, RX);
-      fluDriver.insideTxDelayEn_wt       = DRIVER0_INSIDE_DELAYEN_WT; 
+      fluDriver.insideTxDelayEn_wt       = DRIVER0_INSIDE_DELAYEN_WT;
       fluDriver.insideTxDelayDisable_wt  = DRIVER0_INSIDE_DELAYDIS_WT;
       fluDriver.insideTxDelayLow         = DRIVER0_INSIDE_DELAYLOW;
       fluDriver.insideTxDelayHigh        = DRIVER0_INSIDE_DELAYHIGH;
       fluDriver.startPositionLow         = DRIVER0_START_POS_LOW;
-      fluDriver.startPositionHigh        = DRIVER0_START_POS_HIGH; 
-   
+      fluDriver.startPositionHigh        = DRIVER0_START_POS_HIGH;
+
     // Create monitor
     fluMonitor = new ("Monitor0", MONITOR);
     // Create responder
     fluResponder = new ("Responder0", TX);
-      fluResponder.rxDelayEn_wt            = MONITOR0_DELAYEN_WT; 
+      fluResponder.rxDelayEn_wt            = MONITOR0_DELAYEN_WT;
       fluResponder.rxDelayDisable_wt       = MONITOR0_DELAYDIS_WT;
       fluResponder.rxDelayLow              = MONITOR0_DELAYLOW;
       fluResponder.rxDelayHigh             = MONITOR0_DELAYHIGH;
-      fluResponder.insideRxDelayEn_wt      = MONITOR0_INSIDE_DELAYEN_WT; 
+      fluResponder.insideRxDelayEn_wt      = MONITOR0_INSIDE_DELAYEN_WT;
       fluResponder.insideRxDelayDisable_wt = MONITOR0_INSIDE_DELAYDIS_WT;
       fluResponder.insideRxDelayLow        = MONITOR0_INSIDE_DELAYLOW;
-      fluResponder.insideRxDelayHigh       = MONITOR0_INSIDE_DELAYHIGH;    
+      fluResponder.insideRxDelayHigh       = MONITOR0_INSIDE_DELAYHIGH;
     // Create scoreboard
     scoreboard = new(DUT_RATE);
       fluDriver.setCallbacks(scoreboard.driverCbs);
@@ -91,7 +91,7 @@ program TEST (
   // --------------------------------------------------------------------------
   //                       Test auxilarity procedures
   // --------------------------------------------------------------------------
-  
+
   // --------------------------------------------------------------------------
   // Resets design
   task resetDesign();
@@ -141,7 +141,7 @@ program TEST (
        #(CLK_PERIOD);
        if(PCKT_DISCARD) discard++;
      end
-     
+
      // Disable Test Enviroment
      disableTestEnvironment();
 
@@ -149,7 +149,7 @@ program TEST (
      scoreboard.display();
      $write("Discarded: %d\n",discard);
   endtask: test1
-  
+
   // --------------------------------------------------------------------------
   // Test Case 2
   // Generate very short packets
@@ -194,10 +194,10 @@ program TEST (
     // create & enable environment
     createGeneratorEnvironment();
     createEnvironment();
-    
+
     // set zero delays
-    fluResponder.rxDelayEn_wt        = 0; 
-    fluResponder.insideRxDelayEn_wt  = 0; 
+    fluResponder.rxDelayEn_wt        = 0;
+    fluResponder.insideRxDelayEn_wt  = 0;
 
     // Enable Test environment
     enableTestEnvironment();
@@ -233,16 +233,16 @@ program TEST (
     // create & enable environment
     createGeneratorEnvironment();
     createEnvironment();
-    
+
     // set delays
-    fluResponder.rxDelayEn_wt            = 5; 
+    fluResponder.rxDelayEn_wt            = 5;
     fluResponder.rxDelayDisable_wt       = 1;
     fluResponder.rxDelayLow              = 0;
     fluResponder.rxDelayHigh             = 4;
-    fluResponder.insideRxDelayEn_wt      = 5; 
+    fluResponder.insideRxDelayEn_wt      = 5;
     fluResponder.insideRxDelayDisable_wt = 1;
     fluResponder.insideRxDelayLow        = 0;
-    fluResponder.insideRxDelayHigh       = 4;    
+    fluResponder.insideRxDelayHigh       = 4;
 
     // Enable Test environment
     enableTestEnvironment();
@@ -266,7 +266,7 @@ program TEST (
     // Display Scoreboard
     scoreboard.display();
     $write("Discarded: %d\n",discard);
-  endtask: test5 
+  endtask: test5
 
   // --------------------------------------------------------------------------
   //                           Main test part
@@ -282,11 +282,11 @@ program TEST (
     // TESTING
     // -------------------------------------
     test1();       // Run Test 1
-    
+
     test2();
     test4();
     test5();
-    
+
     // -------------------------------------
     // STOP TESTING
     // -------------------------------------

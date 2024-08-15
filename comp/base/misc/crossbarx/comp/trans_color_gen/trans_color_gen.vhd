@@ -133,7 +133,7 @@ architecture FULL of CROSSBARX_TRANS_COLOR_GEN is
     -------------------------------------------------------------
 
 begin
-    
+
     -- This unit is wholly enabled by TX_TRANS_DST_RDY
     RX_TRANS_DST_RDY <= TX_TRANS_DST_RDY;
 
@@ -143,7 +143,7 @@ begin
     -- Color Confirmation Timeout counting must be cancelled when new
     -- Transactions are incomming.
     -- This signal must include DST_RDY to enable Timeout expiration
-    -- when pipeline is stopped by DST_RDY. (This only happens when 
+    -- when pipeline is stopped by DST_RDY. (This only happens when
     -- FIFO in Transaction Sorter is too small!)
 
     NEW_RX_TRANS <= RX_TRANS_SRC_RDY and (or RX_TRANS_VLD) and RX_TRANS_DST_RDY;

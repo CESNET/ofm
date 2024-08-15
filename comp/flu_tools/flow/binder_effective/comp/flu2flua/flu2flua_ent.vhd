@@ -1,11 +1,11 @@
 --
 -- flu2flua_ent.vhd: Component for conversion of FLU to Aligned FLU
 -- Copyright (C) 2014 CESNET
--- Author: Pavel Benacek <benacek@cesnet.cz> 
+-- Author: Pavel Benacek <benacek@cesnet.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --
--- TODO: 
+-- TODO:
 --
 --
 
@@ -26,7 +26,7 @@ entity FLU2FLUA is
       --! FLU protocol generics
       DATA_WIDTH    : integer:= 256;
       SOP_POS_WIDTH : integer:= 2;
-     
+
       -- Pipeline Config ------------------------
       -- Use input pipe
       IN_PIPE_EN           : boolean := false;
@@ -78,8 +78,8 @@ entity FLU2FLUA is
       RX_SOP        : in std_logic;
       RX_EOP        : in std_logic;
       RX_SRC_RDY    : in std_logic;
-      RX_DST_RDY    : out std_logic; 
-     
+      RX_DST_RDY    : out std_logic;
+
       -- Header input interface
       RX_HDR_DATA    : in std_logic_vector(HDR_WIDTH-1 downto 0);
       RX_HDR_SRC_RDY : in std_logic;

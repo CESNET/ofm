@@ -2,12 +2,12 @@
 //-- Copyright (C) 2023 CESNET z. s. p. o.
 //-- Author(s): Daniel Kříž <xkrizd01@vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 
 class model #(ITEM_WIDTH, META_WIDTH) extends uvm_component;
     `uvm_component_param_utils(uvm_pcie_mfb2avst::model#(ITEM_WIDTH, META_WIDTH))
-    
+
     // Model inputs
     uvm_analysis_port #(uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(ITEM_WIDTH)))     data_out;
     uvm_analysis_port #(uvm_common::model_item #(uvm_logic_vector::sequence_item #(META_WIDTH)))           meta_out;
@@ -43,7 +43,7 @@ class model #(ITEM_WIDTH, META_WIDTH) extends uvm_component;
     task run_phase(uvm_phase phase);
         fork
             run_data();
-            if (META_WIDTH > 0) begin 
+            if (META_WIDTH > 0) begin
                 run_meta();
             end
         join_none

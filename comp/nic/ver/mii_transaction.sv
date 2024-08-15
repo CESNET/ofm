@@ -24,7 +24,7 @@ class MiiTransaction extends Transaction;
     // -- Public Class Atributes --
     //! Randomization parameters
      //! Maximal data size
-    int dataSizeMax = 1518; 
+    int dataSizeMax = 1518;
      //! Minimal data size
     int dataSizeMin = 64;
      //! Enable MII error weight
@@ -35,7 +35,7 @@ class MiiTransaction extends Transaction;
     int crcErrorEn_wt    = 0;
      //! Disable CRC error weight
     int crcErrorDis_wt   = 1;
-   
+
     //! Randomized transaction data
     rand byte unsigned data[];
 
@@ -83,7 +83,7 @@ class MiiTransaction extends Transaction;
             $write("Error was injected into MII packet\n");
         $write("\n");
     endfunction
-  
+
     virtual function Transaction copy(Transaction to = null);
         MiiTransaction tr;
         if(to == null)

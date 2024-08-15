@@ -1,5 +1,5 @@
 #!/bin/python
-# -*- coding: iso-8859-2 -*- 
+# -*- coding: iso-8859-2 -*-
 
 import os, sys
 
@@ -51,7 +51,7 @@ for line in lines:
             for i in range(16,length-3,4):
                 fsim.write(res[i+3]+res[i+2]+res[i+1]+res[i]+"\n")
             if length % 4 != 0:
-                fsim.write("".join(res[((length/4)*4):])+"\n") 
+                fsim.write("".join(res[((length/4)*4):])+"\n")
             fsim.write('#'+"\n")
         else:
             state='D'
@@ -59,6 +59,6 @@ for line in lines:
 fsim.close()
 if state != 'B':
     sys.exit("Nacakany EOF")
-    
-    
-    
+
+
+

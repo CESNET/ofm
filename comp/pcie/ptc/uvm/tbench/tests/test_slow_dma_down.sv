@@ -1,8 +1,8 @@
-//-- test.sv: Verification test 
+//-- test.sv: Verification test
 //-- Copyright (C) 2022 CESNET z. s. p. o.
 //-- Author(s): Daniel Kříž <xkrizd01@vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 
 class virt_seq_slow_dma_down#(MRRS, MIN_READ_REQ_SIZE, MPS, MIN_WRITE_REQ_SIZE) extends virt_seq#(MRRS, MIN_READ_REQ_SIZE, MPS, MIN_WRITE_REQ_SIZE);
@@ -245,7 +245,7 @@ class slow_dma_down_test extends uvm_test;
                 down_mvb_seq(index);
             join_none
         end
-        
+
         for (int i = 0; i < DMA_PORTS; i++) begin
             fork
                 automatic int index = i;

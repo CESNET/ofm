@@ -33,7 +33,7 @@ architecture behavioral of testbench is
    signal CEAB             : std_logic;
    signal CEP              : std_logic;
    signal P                : std_logic_vector(47 downto 0);
-   
+
 begin
 
    -- XOR48
@@ -54,7 +54,7 @@ begin
    );
 
    --Generate clock
-   clk_gen_p : process 
+   clk_gen_p : process
    begin
       CLK <= '1';
       wait for clkper/2;
@@ -71,7 +71,7 @@ begin
    wait;
    end process;
 
-   -- Simulating input flow 
+   -- Simulating input flow
    input_flow : process
    begin
 

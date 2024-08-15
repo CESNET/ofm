@@ -2,7 +2,7 @@
 //-- Copyright (C) 2020 CESNET z. s. p. o.
 //-- Author(s): Tomáš Beneš <xbenes55@stud.fit.vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 import sv_common_pkg::*;
 import sv_mvb_pkg::*;
@@ -11,39 +11,39 @@ import test_pkg::*;
 program TEST (
     input logic     CLK,
     output logic    RESET,
-    iAFull.tb       FIFO_AFULL, 
+    iAFull.tb       FIFO_AFULL,
     iMvbRx.tb       RX_TRANS,
-    iMvbTx.monitor  RX_TRANS_MONITOR,    
+    iMvbTx.monitor  RX_TRANS_MONITOR,
     iMvbTx.tb       TX_TRANS,
-    iMvbTx.monitor  TX_TRANS_MONITOR,    
+    iMvbTx.monitor  TX_TRANS_MONITOR,
     iMvbRx.tb       RX_CONFS,
     iMvbTx.monitor  RX_CONFS_MONITOR
 );
 
-    tTransMbx       confsMbx;                                
+    tTransMbx       confsMbx;
 
-    MvbTransaction  #(META_WIDTH) transBlueprint;           
-    Generator       rxTransGenerator;                            
+    MvbTransaction  #(META_WIDTH) transBlueprint;
+    Generator       rxTransGenerator;
 
-    MvbDriver       #(MAX_RX_TRANS,ITEM_WIDTH)  rxTransDriver;     
+    MvbDriver       #(MAX_RX_TRANS,ITEM_WIDTH)  rxTransDriver;
     MvbMonitor      #(MAX_RX_TRANS,ITEM_WIDTH)  rxTransMonitor;
 
     MvbDriver       #(MAX_ID_CONFS,ID_WIDTH)    rxConfsDriver;
-    MvbMonitor      #(MAX_ID_CONFS,ID_WIDTH)    rxConfsMonitor;   
-    
+    MvbMonitor      #(MAX_ID_CONFS,ID_WIDTH)    rxConfsMonitor;
+
     MvbMonitor      #(MAX_TX_TRANS,ITEM_WIDTH)  txTransMonitor;
     MvbResponder    #(MAX_TX_TRANS,ITEM_WIDTH)  txTransResponder;
 
     Scoreboard      scoreboard;
 
     task createEnvironment();
-        //  Creating mailbox for confirmations.  
+        //  Creating mailbox for confirmations.
         confsMbx=new(1);
 
         //  Creating generator and assigning blueprint that the generator will use.
         rxTransGenerator = new("Transaction generator", 0);
         transBlueprint = new;
-        rxTransGenerator.blueprint = transBlueprint; 
+        rxTransGenerator.blueprint = transBlueprint;
 
         //  Creating of infrastructure for RX interfaces.
         rxTransMonitor = new("Transaction monitor", RX_TRANS_MONITOR);
@@ -52,14 +52,14 @@ program TEST (
         rxConfsDriver  = new("Confirmation driver", confsMbx, RX_CONFS);
 
         //  Creating of infrastructure for TX interfaces.
-        txTransMonitor = new("Monitor", TX_TRANS_MONITOR);   
-        txTransResponder = new("Transaction responder", TX_TRANS);     
+        txTransMonitor = new("Monitor", TX_TRANS_MONITOR);
+        txTransResponder = new("Transaction responder", TX_TRANS);
 
         scoreboard = new(confsMbx,FIFO_AFULL);
 
         rxTransMonitor.setCallbacks(scoreboard.rxTransMonitorCbs);
         rxTransDriver.setCallbacks(scoreboard.rxTransDriverCbs);
-        rxConfsMonitor.setCallbacks(scoreboard.rxConfsMonitorCbs);        
+        rxConfsMonitor.setCallbacks(scoreboard.rxConfsMonitorCbs);
         txTransMonitor.setCallbacks(scoreboard.txTransMonitorCbs);
     endtask
 
@@ -127,7 +127,7 @@ program TEST (
         txTransResponder.wordDelayEnable_wt = 2;
         txTransResponder.wordDelayDisable_wt = 8;
         enableTestEnvironment();
-       
+
         #(20*CLK_PERIOD);
         //  Waiting for generator to end generating.
         wait(rxTransGenerator.enabled==0);
@@ -170,7 +170,7 @@ program TEST (
         resetDesign();
         createEnvironment();
         test2();
-        
+
         $write("------------------------------------------------------------\n");
         $write("-- Verification finished successfully!\n");
         $write("------------------------------------------------------------\n");

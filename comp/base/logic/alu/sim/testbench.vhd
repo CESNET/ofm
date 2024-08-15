@@ -24,7 +24,7 @@ architecture behavioral of testbench is
 
    -- Clock and reset signals
    signal CLK              : std_logic;
-   signal RESET            : std_logic; 
+   signal RESET            : std_logic;
    signal A                : std_logic_vector(95 downto 0);
    signal B                : std_logic_vector(95 downto 0);
    signal CE_IN            : std_logic;
@@ -33,7 +33,7 @@ architecture behavioral of testbench is
    signal CARRY_IN         : std_logic;
    signal CARRY_OUT        : std_logic;
    signal P                : std_logic_vector(95 downto 0);
-   
+
 begin
 
    uut : entity work.ALU_DSP(structural)
@@ -56,7 +56,7 @@ begin
    );
 
    --Generate clock
-   clk_gen_p : process 
+   clk_gen_p : process
    begin
       CLK <= '1';
       wait for clkper/2;
@@ -73,10 +73,10 @@ begin
    wait;
    end process;
 
-   -- Simulating input flow 
+   -- Simulating input flow
    input_flow : process
    begin
-      
+
       CARRY_IN <= '0';
       ALUMODE <= "0000";
       -- Initialize input interface
@@ -89,16 +89,16 @@ begin
       wait for 3*clkper;
 
       ALUMODE <= "0000";
- 
+
       A <= (1 => '1', 3 => '1', others => '0');
       B <= (0 => '1', others => '0');
       wait for clkper;
- 
+
       CE_IN  <= '1';
       CE_OUT <= '1';
       wait for clkper;
 
-      CARRY_IN <= '1'; 
+      CARRY_IN <= '1';
       wait for clkper;
 
       CARRY_IN <= '0';
@@ -116,12 +116,12 @@ begin
       A <= (1 => '1', 3 => '1', others => '0');
       B <= (0 => '1', others => '0');
       wait for clkper;
- 
+
       CE_IN  <= '1';
       CE_OUT <= '1';
       wait for clkper;
 
-      CARRY_IN <= '1'; 
+      CARRY_IN <= '1';
       wait for clkper;
 
       CARRY_IN <= '0';

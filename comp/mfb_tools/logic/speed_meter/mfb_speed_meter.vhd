@@ -109,7 +109,7 @@ architecture FULL of MFB_SPEED_METER is
    signal sof_pos_arr          : slv_array_t(REGIONS-1 downto 0)(SOF_POS_SIZE-1 downto 0);
    signal eof_pos_arr          : slv_array_t(REGIONS-1 downto 0)(EOF_POS_SIZE-1 downto 0);
    signal sof_pos_ext_arr      : slv_array_t(REGIONS-1 downto 0)(EOF_POS_SIZE-1 downto 0);
-  
+
    signal incomplete_frame     : std_logic_vector(REGIONS downto 0);
    signal frame_state_reg      : slv_array_t(REGIONS-1 downto 0)(3-1 downto 0);
    signal cnt_reg_en           : std_logic;
@@ -162,9 +162,9 @@ begin
             rx_dst_rdy_reg2 <= '0';
          end if;
          rx_src_rdy_reg  <= RX_SRC_RDY;
-         rx_src_rdy_reg2 <= rx_src_rdy_reg;  
+         rx_src_rdy_reg2 <= rx_src_rdy_reg;
          rx_dst_rdy_reg  <= RX_DST_RDY;
-         rx_dst_rdy_reg2 <= rx_dst_rdy_reg;  
+         rx_dst_rdy_reg2 <= rx_dst_rdy_reg;
       end if;
    end process;
 
@@ -197,7 +197,7 @@ begin
          if (RST = '1') then
             incomplete_frame(0) <= '0';
          elsif (valid_word = '1') then
-            incomplete_frame(0) <= incomplete_frame(REGIONS);  
+            incomplete_frame(0) <= incomplete_frame(REGIONS);
          end if;
       end if;
    end process;
@@ -215,7 +215,7 @@ begin
    --  ENABLE REGISTER
    -- --------------------------------------------------------------------------
 
-   any_sof <= or rx_sof_reg;   
+   any_sof <= or rx_sof_reg;
    any_eof <= or rx_eof_reg;
 
    -- counters start with first SOF
@@ -225,7 +225,7 @@ begin
          if ((CNT_CLEAR = '1' and DISABLE_ON_CLR = true) or RST = '1') then
             enable_reg <= '0';
          elsif (valid_word = '1' and any_sof = '1') then
-            enable_reg <= '1';  
+            enable_reg <= '1';
          end if;
       end if;
    end process;
@@ -261,7 +261,7 @@ begin
             when "110" =>
                bytes_cnt(r+1) <= bytes_cnt(r) + bytes_cnt_addend_110(r);
             when "111" =>
-               bytes_cnt(r+1) <= bytes_cnt(r) + bytes_cnt_addend_111(r);    
+               bytes_cnt(r+1) <= bytes_cnt(r) + bytes_cnt_addend_111(r);
             when others =>
                bytes_cnt(r+1) <= bytes_cnt(r);
          end case;
@@ -278,7 +278,7 @@ begin
          if (CNT_CLEAR = '1' or RST = '1') then
             bytes_cnt_reg <= (others => '0');
          elsif (cnt_reg_en = '1' and valid_word2 = '1') then
-            bytes_cnt_reg <= bytes_cnt_reg + bytes_cnt(REGIONS);  
+            bytes_cnt_reg <= bytes_cnt_reg + bytes_cnt(REGIONS);
          end if;
       end if;
    end process;
@@ -376,7 +376,7 @@ begin
          if (CNT_CLEAR = '1' or RST = '1') then
             ticks_cnt_reg <= (others => '0');
          elsif (cnt_reg_en = '1') then
-            ticks_cnt_reg <= ticks_cnt_reg + 1;  
+            ticks_cnt_reg <= ticks_cnt_reg + 1;
          end if;
       end if;
    end process;

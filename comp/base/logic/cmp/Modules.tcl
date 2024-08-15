@@ -12,5 +12,5 @@ set COMPONENTS [ list \
 
 set MOD "$MOD $ENTITY_BASE/cmp_top.vhd"
 
-# CMP_SYNTH with input and output registers for measurements 
+# CMP_SYNTH with input and output registers for measurements
 #set MOD "$MOD $ENTITY_BASE/synth/cmp_synth.vhd"

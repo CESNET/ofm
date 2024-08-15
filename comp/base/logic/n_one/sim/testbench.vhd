@@ -77,7 +77,7 @@ begin
       --! --------------------------------------------------------------------------
       D => n_one_d,
 
-      --! \name N one number 
+      --! \name N one number
       --! -------------------------------------------------------------------------
       N => n_one_n,
 
@@ -143,4 +143,4 @@ begin
 
       wait;
    end process;
-end architecture behavioral; 
+end architecture behavioral;

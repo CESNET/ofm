@@ -31,11 +31,11 @@ entity flu2axi is
       OUT_PIPE_EN          : boolean := false;
       --! use output register of input pipe
       OUT_PIPE_OUTREG      : boolean := false
-   );  
+   );
    port(
       CLK         : in std_logic;
       RESET       : in std_logic;
-      
+
       --! Frame Link Unaligned input interface
       RX_DATA       : in std_logic_vector(DATA_WIDTH-1 downto 0);
       RX_SOP_POS    : in std_logic_vector(SOP_POS_WIDTH-1 downto 0);
@@ -51,7 +51,7 @@ entity flu2axi is
       TX_TVALID     : out std_logic;
       TX_TLAST      : out std_logic;
       TX_TREADY     : in std_logic
-); 
+);
 end entity;
 
 -- ----------------------------------------------------------------------------
@@ -98,10 +98,10 @@ begin
    in_pipe_i : entity work.FLU_PIPE
    generic map(
       DATA_WIDTH     => DATA_WIDTH,
-      SOP_POS_WIDTH  => SOP_POS_WIDTH, 
+      SOP_POS_WIDTH  => SOP_POS_WIDTH,
       USE_OUTREG     => OUT_PIPE_OUTREG,
       FAKE_PIPE      => not IN_PIPE_EN
-   )   
+   )
    port map(
       CLK         => CLK,
       RESET       => RESET,
@@ -127,18 +127,18 @@ begin
    out_pipe_tdata 	<= in_pipe_data;
    out_pipe_tvalid 	<= in_pipe_src_rdy;
    out_pipe_tlast	   <= in_pipe_eop;
-   in_pipe_dst_rdy 	<= out_pipe_tready; 
+   in_pipe_dst_rdy 	<= out_pipe_tready;
 
 -- ----------------------------------------------------------------------------
 --                       TX_TKEEP SET
- 
+
    process (in_pipe_sop, in_pipe_eop, in_pipe_eop_pos, ext_sop_pos)
 
       --! Variables for converson std_logic_vector signals to integer
       variable var_eop_pos     : integer;
-      variable var_ext_sop_pos : integer;	
+      variable var_ext_sop_pos : integer;
    begin
-	
+
       var_eop_pos 	:= conv_integer(in_pipe_eop_pos);
       var_ext_sop_pos 	:= conv_integer(ext_sop_pos);
 
@@ -147,10 +147,10 @@ begin
       --! Packet ends in this transaction
       if (in_pipe_sop = '0' and in_pipe_eop = '1') then
          for i in 0 to tkeep_width-1 loop
-            if i <= var_eop_pos then 
+            if i <= var_eop_pos then
                out_pipe_tkeep(i) <= '1';
             else
-               out_pipe_tkeep(i) <= '0'; 
+               out_pipe_tkeep(i) <= '0';
             end if;
          end loop;
 
@@ -158,12 +158,12 @@ begin
       elsif (in_pipe_sop = '1' and in_pipe_eop = '0') then
          for i in 0 to tkeep_width-1 loop
             if i < var_ext_sop_pos then
-               out_pipe_tkeep(i) <= '0'; 
+               out_pipe_tkeep(i) <= '0';
             else
-               out_pipe_tkeep(i) <= '1'; 
+               out_pipe_tkeep(i) <= '1';
             end if;
          end loop;
- 
+
       --! Packets ends and starts in this transaction
       elsif (in_pipe_sop = '1' and in_pipe_eop = '1') then
 
@@ -201,18 +201,18 @@ begin
 
    --! Merging data to AXI pipe
    out_pipe_axi_data_in <= out_pipe_tdata & out_pipe_tkeep & out_pipe_tlast;
-   
+
    --! Output Pipe
    out_pipe_i : entity work.PIPE
    generic map(
-      DATA_WIDTH     => axi_pipe_width, 
+      DATA_WIDTH     => axi_pipe_width,
       USE_OUTREG     => OUT_PIPE_OUTREG,
       FAKE_PIPE      => not OUT_PIPE_EN
-   )   
+   )
    port map(
       CLK         => CLK,
-      RESET       => RESET, 
-      --! Input interface     
+      RESET       => RESET,
+      --! Input interface
       IN_DATA      => out_pipe_axi_data_in,
       IN_SRC_RDY   => out_pipe_tvalid,
       IN_DST_RDY   => out_pipe_tready,
@@ -224,6 +224,6 @@ begin
    TX_TDATA <= out_pipe_axi_data_out(axi_pipe_width-1 downto (DATA_WIDTH/8)+1);
    TX_TKEEP <= out_pipe_axi_data_out((DATA_WIDTH/8) downto 1);
    TX_TLAST <= out_pipe_axi_data_out(0);
-	
-end architecture;		
+
+end architecture;
 

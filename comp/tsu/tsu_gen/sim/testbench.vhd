@@ -60,7 +60,7 @@ architecture behavioral of testbench is
    constant SEL_CLK	           : std_logic_vector(31 downto 0) := X"00000020";
    constant NUM_CLK_PPS	        : std_logic_vector(31 downto 0) := X"00000024";
 
-   -- Signal declaration   
+   -- Signal declaration
    signal mi32_clk              : std_logic := '0';
    signal mi32_reset            : std_logic;
    signal clk                   : std_logic := '0';
@@ -69,7 +69,7 @@ architecture behavioral of testbench is
    signal clk_freq              : std_logic_vector(31 downto 0);
    signal clk_src               : std_logic_vector(15 downto 0);
    signal clk_sel               : std_logic_vector(max(CLK_SEL_WIDTH-1,0) downto 0);
-   
+
    -- mi32 bus interface
    signal mi32		              : t_mi32;
 
@@ -77,7 +77,7 @@ architecture behavioral of testbench is
    signal mi32_sim_ctrl         : t_ib_ctrl;
    signal mi32_sim_strobe       : std_logic := '0';
    signal mi32_sim_busy         : std_logic;
-   
+
    -- Output interface
    signal ts	   	           : std_logic_vector(63 downto 0);
    signal ts_dv     	           : std_logic;
@@ -95,9 +95,9 @@ signal TS_ERR	              : std_logic;
 --                      Architecture body
 -- ----------------------------------------------------------------------------
 begin
-   
+
    clk_freq <= conv_std_logic_vector(200000000-1,32);
-   
+
    -- -------------------------------------------------------------------------
    --                         TIMESTAMP UNIT
    -- -------------------------------------------------------------------------
@@ -107,27 +107,27 @@ begin
          --! \details Meanings of supported values: \n
          --! true = use multiplication in DSPs composed of adds and shifts \n
          --! false = look at TS_MULT_USE_DSP
-         TS_MULT_SMART_DSP => true, 
+         TS_MULT_SMART_DSP => true,
          --! \brief Selects whether to use DSPs for timestamp format conversion
          --! \details Meanings of supported values: \n
          --! true = use multipliers in DSPs \n
-         --! false = disable DSPs, use logic 
+         --! false = disable DSPs, use logic
          TS_MULT_USE_DSP   => true,
          --! \brief Width of PPS select signal
-         --! \details Used value must be in range from 1 to 16. 
+         --! \details Used value must be in range from 1 to 16.
          --! Should be greater or equal to base 2 logarithm from number of available PPS sources.
          PPS_SEL_WIDTH     => PPS_SEL_WIDTH,
          --! \brief Width of main CLK select signal
-         --! \details Used value must be in range from 1 to 16. 
+         --! \details Used value must be in range from 1 to 16.
          --! Should be greater or equal to base 2 logarithm from number of available CLK sources.
          CLK_SEL_WIDTH     => CLK_SEL_WIDTH
       )
       port map(
          --! \name Signals for MI_32 interface
-    
+
          --! Interface clock.
          MI_CLK        => mi32_clk,
-         --! Interface reset. 
+         --! Interface reset.
          MI_RESET      => mi32_reset,
          --! Data to write.
          MI_DWR        => mi32.dwr,
@@ -138,7 +138,7 @@ begin
          --! Write valid.
          MI_WR         => mi32.wr,
          --! Write data byte enable (not supported).
-         MI_BE         => mi32.be, 
+         MI_BE         => mi32.be,
          --! Read data.
          MI_DRD        => mi32.drd,
          --! Read/write address ready.
@@ -147,7 +147,7 @@ begin
          MI_DRDY       => mi32.drdy,
 
          --! \name PPS signal interface
-    
+
          --! Input PPS_N signal
          PPS_N         => pps_n,
          --! \brief Number of different PPS sources (on MI_CLK)
@@ -156,7 +156,7 @@ begin
          PPS_SEL       => pps_sel,
 
          --! \name Main CLK signal interface
-    
+
          --! Input CLK signal
          CLK           => clk,
          --! Synchronious reset with main clock
@@ -166,13 +166,13 @@ begin
          --! \brief Number of different CLK sources (on MI_CLK)
          CLK_SRC       => X"0001",
          --! \brief Select CLK source (on MI_CLK)
-         CLK_SEL       => open,    
-    
+         CLK_SEL       => open,
+
 
          --! \name Output timestamp interface (on main CLK)
-    
+
          --! \brief Timestamp in fractional (old) format
-         --! \details Fractional part of timestamp represents number of xanoseconds (one xanosecond is 2^(-32) seconds).  
+         --! \details Fractional part of timestamp represents number of xanoseconds (one xanosecond is 2^(-32) seconds).
          TS  	 	    => ts,
          --! \brief Timestamp in nanosecond (new) format
          --! \details Fractional part of timestamp represents number of nanoseconds (one nanosecond is 10^(-9) seconds).
@@ -247,7 +247,7 @@ begin
       mi32_reset <= '0';
       wait;
    end process;
-  
+
    -- ----------------------------------------------------
    -- Reset generation
    proc_reset : process(clk)
@@ -255,9 +255,9 @@ begin
       if rising_edge(clk) then
          reset <= reg_reset;
          reg_reset <= mi32_reset;
-      end if; 
+      end if;
    end process;
-  
+
    -- ----------------------------------------------------
    -- PPS_N pulse generator
    pps_gen : process

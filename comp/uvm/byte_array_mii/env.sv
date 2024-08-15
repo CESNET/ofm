@@ -11,7 +11,7 @@
 class env_rx #(int unsigned CHANNELS, int unsigned CHANNEL_WIDTH) extends uvm_env;
     `uvm_component_param_utils(uvm_byte_array_mii::env_rx #(CHANNELS, CHANNEL_WIDTH))
 
-    // High level agent 
+    // High level agent
     uvm_byte_array::agent m_byte_array_agent;
     uvm_byte_array::config_item m_byte_array_agent_config;
 
@@ -27,7 +27,7 @@ class env_rx #(int unsigned CHANNELS, int unsigned CHANNEL_WIDTH) extends uvm_en
 
     function new(string name, uvm_component parent);
         super.new(name, parent);
-        
+
         WHOLE_BYTES : assert((CHANNEL_WIDTH & 7) == 0);
     endfunction
 
@@ -42,10 +42,10 @@ class env_rx #(int unsigned CHANNELS, int unsigned CHANNEL_WIDTH) extends uvm_en
         m_mii_agent_config = new;
 
         m_byte_array_agent_config.active = m_config.active;
-        
+
         m_mii_agent_config.active = m_config.active;
         m_mii_agent_config.interface_name = m_config.interface_name;
-        
+
         uvm_config_db #(uvm_byte_array::config_item)::set(this, "m_byte_array_agent", "m_config", m_byte_array_agent_config);
         uvm_config_db #(uvm_mii::config_item)::set(this, "m_mii_agent", "m_config", m_mii_agent_config);
 
@@ -90,7 +90,7 @@ endclass
 class env_tx #(int unsigned CHANNELS, int unsigned CHANNEL_WIDTH) extends uvm_env;
     `uvm_component_param_utils(uvm_byte_array_mii::env_tx #(CHANNELS, CHANNEL_WIDTH))
 
-    // High level agent 
+    // High level agent
     uvm_byte_array::agent m_byte_array_agent;
     uvm_byte_array::config_item m_byte_array_agent_config;
 
@@ -105,7 +105,7 @@ class env_tx #(int unsigned CHANNELS, int unsigned CHANNEL_WIDTH) extends uvm_en
 
     function new(string name, uvm_component parent);
         super.new(name, parent);
-        
+
         WHOLE_BYTES : assert((CHANNEL_WIDTH & 7) == 0);
     endfunction
 
@@ -120,10 +120,10 @@ class env_tx #(int unsigned CHANNELS, int unsigned CHANNEL_WIDTH) extends uvm_en
         m_mii_agent_config = new;
 
         m_byte_array_agent_config.active = UVM_PASSIVE;
-        
+
         m_mii_agent_config.active = m_config.active;
         m_mii_agent_config.interface_name = m_config.interface_name;
-        
+
         uvm_config_db #(uvm_byte_array::config_item)::set(this, "m_byte_array_agent", "m_config", m_byte_array_agent_config);
         uvm_config_db #(uvm_mii::config_item)::set(this, "m_mii_agent", "m_config", m_mii_agent_config);
 

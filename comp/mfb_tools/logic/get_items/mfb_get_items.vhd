@@ -15,7 +15,7 @@ use work.type_pack.all;
 entity MFB_GET_ITEMS is
    generic(
       -- =======================================================================
-      -- MFB DATA BUS CONFIGURATION: 
+      -- MFB DATA BUS CONFIGURATION:
       -- =======================================================================
       REGIONS          : natural := 4; -- any power of two
       REGION_SIZE      : natural := 8; -- any power of two
@@ -23,7 +23,7 @@ entity MFB_GET_ITEMS is
       ITEM_WIDTH       : natural := 8; -- any power of two
       META_WIDTH       : natural := 8;
       -- =======================================================================
-      -- OTHER CONFIGURATION: 
+      -- OTHER CONFIGURATION:
       -- =======================================================================
       -- Set maximum supported frame lenght in bytes, is used to correctly set
       -- the data width of the word counter.
@@ -129,7 +129,7 @@ architecture FULL of MFB_GET_ITEMS is
 
 begin
 
-   assert (EXTRACTED_ITEMS > 0 and EXTRACTED_ITEMS <= REGION_ITEMS) 
+   assert (EXTRACTED_ITEMS > 0 and EXTRACTED_ITEMS <= REGION_ITEMS)
       report "Wrong EXTRACTED_ITEMS value! Minimum value is 1, maximum value is REGION_SIZE*BLOCK_SIZE."
       severity failure;
 
@@ -194,14 +194,14 @@ begin
          end if;
       end if;
    end process;
-   
+
    offset_g : for r in 0 to REGIONS-1 generate
       -- create offset of packet, is counted from begin of word
       s_sof_pos_wid(r)           <= unsigned(s_rx_sof_pos_arr(r)) & to_unsigned(0,LOG2_BLOCK_SIZE);
       s_sof_offset(r)            <= resize((to_unsigned(r,LOG2_REGIONS) & s_sof_pos_wid(r)),OFFSET_WIDTH);
       s_sof_offset_last_vld(r+1) <= s_sof_offset(r) when (s_rx_sof_vld(r) = '1') else s_sof_offset_last_vld(r);
       s_sof_offset_selected(r)   <= s_sof_offset(r) when (s_rx_sof_vld(r) = '1' and s_ex_over_region(r) = '0') else s_sof_offset_last_vld(r);
-      
+
       -- region offset of last extracted item, is counted from begin of region
       s_ex_region_offset(r) <= s_sof_pos_wid(r) + to_unsigned((EXTRACTED_OFFSET+EXTRACTED_ITEMS-1),EOF_POS_WIDTH+2);
 

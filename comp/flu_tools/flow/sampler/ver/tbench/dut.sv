@@ -10,7 +10,7 @@
  * TODO:
  *
  */
- 
+
 // ----------------------------------------------------------------------------
 //                        Module declaration
 // ----------------------------------------------------------------------------
@@ -37,10 +37,10 @@ flu_sampler #(
     // Common Interface
      .CLK               (CLK),
      .RESET             (RESET),
-     
+
      .RATE              (RATE),
      .PCKT_DISCARD      (PCKT_DISCARD),
- 
+
     // Port 0
      .RX_DATA     (RX.DATA),
      .RX_SOP_POS  (RX.SOP_POS),

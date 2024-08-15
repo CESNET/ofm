@@ -16,13 +16,13 @@ add_wave "-noupdate -label reset"   /testbench/uut/reset
 add_wave "-noupdate -label clk"     /testbench/uut/clk
 
 add wave -divider "Datasource"
-add_wave "-noupdate -hex -label data_in     " $TB_PATH/data_in       
-add_wave "-noupdate -hex -label src_rdy_in  " $TB_PATH/src_rdy_in    
+add_wave "-noupdate -hex -label data_in     " $TB_PATH/data_in
+add_wave "-noupdate -hex -label src_rdy_in  " $TB_PATH/src_rdy_in
 add_wave "-noupdate -hex -label dst_rdy_in  " $TB_PATH/dst_rdy_in
 
 add wave -divider "Data destination"
-add_wave "-noupdate -hex -label data_out    " $TB_PATH/data_out       
-add_wave "-noupdate -hex -label src_rdy_out " $TB_PATH/src_rdy_out    
+add_wave "-noupdate -hex -label data_out    " $TB_PATH/data_out
+add_wave "-noupdate -hex -label src_rdy_out " $TB_PATH/src_rdy_out
 add_wave "-noupdate -hex -label dst_rdy_out " $TB_PATH/dst_rdy_out
 
 add wave -divider "Special signals"

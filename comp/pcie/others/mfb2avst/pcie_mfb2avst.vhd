@@ -36,14 +36,14 @@ entity PCIE_MFB2AVST is
         TX_AVST_META   : out std_logic_vector(REGIONS*META_WIDTH-1 downto 0);
         TX_AVST_SOP    : out std_logic_vector(REGIONS-1 downto 0);
         TX_AVST_EOP    : out std_logic_vector(REGIONS-1 downto 0);
-        TX_AVST_EMPTY  : out std_logic_vector(REGIONS*log2(REGION_SIZE*BLOCK_SIZE)-1 downto 0); 
+        TX_AVST_EMPTY  : out std_logic_vector(REGIONS*log2(REGION_SIZE*BLOCK_SIZE)-1 downto 0);
         TX_AVST_VALID  : out std_logic_vector(REGIONS-1 downto 0);
         TX_AVST_READY  : in  std_logic
-    );	
+    );
 end entity;
 
 architecture behav of PCIE_MFB2AVST is
-    
+
     constant META_SIGNAL_WIDTH : natural := REGIONS*META_WIDTH;
     constant DATA_WIDTH        : natural := REGIONS*REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH;
     constant AVST_EMPTY_WIDTH  : natural := REGIONS*log2(REGION_SIZE*BLOCK_SIZE);
@@ -133,7 +133,7 @@ begin
     rename_gen : for i in 1 to REGIONS-1 generate
         pkt_cont(i) <= next_pkt(i-1);
     end generate;
-    
+
     valid_gen : for i in 0 to REGIONS-1 generate
         next_pkt(i)      <= (not pkt_cont(i) and     avst_sop(i) and not avst_eop(i)) or
                             (    pkt_cont(i) and not avst_sop(i) and not avst_eop(i)) or
@@ -150,7 +150,7 @@ begin
     -- ouput interface assignment to according signals
     -- ===============================================
     RX_MFB_DST_RDY <= mfb_dst_rdy;
-    TX_AVST_SOP    <= avst_sop; 
+    TX_AVST_SOP    <= avst_sop;
     TX_AVST_EOP    <= avst_eop;
 
 end behav;

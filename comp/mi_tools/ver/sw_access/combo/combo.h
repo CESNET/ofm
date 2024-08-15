@@ -3,7 +3,7 @@
  * \brief The main header file for the combo library model.
  * \author Lukas Kekely <kekely@cesnet.cz>
  * \date 2015
- */ 
+ */
  /*
  * Copyright (C) 2015 CESNET
  *
@@ -15,7 +15,7 @@
 
 #ifndef _LIBEROUTER_COMBO_H_
 #define _LIBEROUTER_COMBO_H_
- 
+
 #include "combosix.h"
 
 /*

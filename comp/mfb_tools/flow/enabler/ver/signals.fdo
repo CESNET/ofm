@@ -6,7 +6,7 @@
 #
 
 proc reg {NAME PATH} {
-    add wave -divider "$NAME"      
+    add wave -divider "$NAME"
     add_wave "-noupdate -hex" $PATH/REG_*
 }
 
@@ -16,11 +16,11 @@ proc rx {NAME PATH} {
 }
 
 proc tx {NAME PATH} {
-    add wave -divider "$NAME"      
+    add wave -divider "$NAME"
     add_wave "-noupdate -hex" $PATH/TX_*
 }
 
 proc inter {NAME PATH} {
-   add wave -divider "$NAME"  
+   add wave -divider "$NAME"
    add_wave "-noupdate -hex" $PATH/s_*
 }

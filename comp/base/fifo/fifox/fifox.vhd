@@ -13,7 +13,7 @@ use work.math_pack.all;
 -- Delay: WR and DI have no delay, FULL, DO and EMPTY is pre calculated and has no delay.
 -- STATUS has no delay, it reflects actual state of FIFOX, AFULL/AEMPTY have no delay
 -- because are STATUS dependant. Written data takes at least 2 CLK before
--- they can be read. 
+-- they can be read.
 
 -- A universal ``FIFO``, capable of implementation in multiple types of memories.
 -- Both ``DATA_WIDTH`` and ``ITEMS`` may be set to any value; however ``ITEMS``
@@ -140,20 +140,20 @@ architecture behavioral of FIFOX is
    --Address bus width
    constant ADDR_WIDTH     : integer := log2(ITEMS_INTER);
    -- Number of items in memory when almost full is triggered.
-   constant AFULL_CAPACITY : integer := ITEMS_INTER - ALMOST_FULL_OFFSET; 
+   constant AFULL_CAPACITY : integer := ITEMS_INTER - ALMOST_FULL_OFFSET;
    -- Set of 2 data output registers used with LUT memory impementation.
    -- (These registers are built in BRAM memory implementation.)
-   signal lut_mem_reg      : std_logic_vector(DATA_WIDTH-1 downto 0); 
+   signal lut_mem_reg      : std_logic_vector(DATA_WIDTH-1 downto 0);
    signal lut_mem_out      : std_logic_vector(DATA_WIDTH-1 downto 0);
 
    -- Data output register used with Ultra-RAM memory implementation.
    signal uram_mem_out     : std_logic_vector(DATA_WIDTH-1 downto 0);
-   
+
    signal sh_mem_reg      : std_logic_vector(DATA_WIDTH-1 downto 0);
    signal sh_mem_out      : std_logic_vector(DATA_WIDTH-1 downto 0);
 
    -- Input and output address bus registers. addr_xxx_cnt is actual
-   -- register used for address incrementation. addr_xxx_reg is 
+   -- register used for address incrementation. addr_xxx_reg is
    -- register used to slow down the adress by one clock cycle.
    signal addr_in_cnt      : unsigned(ADDR_WIDTH-1 downto 0);
    signal addr_out_cnt     : unsigned(ADDR_WIDTH-1 downto 0);
@@ -165,8 +165,8 @@ architecture behavioral of FIFOX is
    signal rd_en            : std_logic;
    signal true_read        : std_logic;
    signal true_write       : std_logic;
-   
-   -- Registers for EMPTY flag 
+
+   -- Registers for EMPTY flag
    signal empty_comp       : std_logic;
    signal empty_reg        : std_logic;
    -- Adress counter incerement signals
@@ -174,7 +174,7 @@ architecture behavioral of FIFOX is
    signal inc_out_cnt      : std_logic;
    -- Registers that show when adress top limit is reached.
    signal max_in           : std_logic;
-   signal max_out          : std_logic;   
+   signal max_out          : std_logic;
    -- RD registers
    signal rd_ce            : std_logic;
    signal rd_reg_ce        : std_logic;
@@ -192,32 +192,32 @@ architecture behavioral of FIFOX is
    -- best implementation according to the size of the FIFO and plaform used.
    -- If the DEVICE and ITEMS_INTER don't fit, BRAM will be used defaultly.
 
-   function auto_ram_type(DATA_WIDTH,ITEMS_INTER:natural; RAM_TYPE,DEVICE:string) 
+   function auto_ram_type(DATA_WIDTH,ITEMS_INTER:natural; RAM_TYPE,DEVICE:string)
       return string is
    begin
-      if (RAM_TYPE = "LUT") then 
+      if (RAM_TYPE = "LUT") then
          return "LUT";
-      elsif (RAM_TYPE = "BRAM") then 
+      elsif (RAM_TYPE = "BRAM") then
          return "BRAM";
-      elsif (RAM_TYPE = "URAM" AND DEVICE = "ULTRASCALE") then 
+      elsif (RAM_TYPE = "URAM" AND DEVICE = "ULTRASCALE") then
          return "URAM";
       elsif (RAM_TYPE = "SHIFT" ) then
          return "SHIFT";
       elsif (RAM_TYPE = "AUTO") then
-         if (DEVICE = "ULTRASCALE" OR DEVICE = "7SERIES") then 
+         if (DEVICE = "ULTRASCALE" OR DEVICE = "7SERIES") then
             if (ITEMS_INTER <= 16) then
                return "SHIFT";
-            elsif (ITEMS_INTER <= 64) then 
+            elsif (ITEMS_INTER <= 64) then
                return "LUT";
-            elsif ((ITEMS_INTER * DATA_WIDTH) >= 288000 AND DATA_WIDTH >= 72 AND DEVICE = "ULTRASCALE") then 
+            elsif ((ITEMS_INTER * DATA_WIDTH) >= 288000 AND DATA_WIDTH >= 72 AND DEVICE = "ULTRASCALE") then
                return "URAM";
-            else 
+            else
                return "BRAM";
             end if;
-         elsif (DEVICE = "ARRIA10" OR DEVICE = "STRATIX10" OR DEVICE = "AGILEX") then 
-            if (ITEMS_INTER <= 32) then 
+         elsif (DEVICE = "ARRIA10" OR DEVICE = "STRATIX10" OR DEVICE = "AGILEX") then
+            if (ITEMS_INTER <= 32) then
                return "LUT";
-            else 
+            else
                return "BRAM";
             end if;
          else
@@ -225,15 +225,15 @@ architecture behavioral of FIFOX is
             return "BRAM";
          end if;
       else
-         report "Wrong RAM_TYPE settings. BRAM memory used!";  
+         report "Wrong RAM_TYPE settings. BRAM memory used!";
          return "BRAM";
       end if;
    end function;
 
    constant RAM_TYPE_SELECTED : string := auto_ram_type(DATA_WIDTH,ITEMS_INTER,RAM_TYPE,DEVICE);
-  
+
    -- Enable signals have high fanout for data size higher than 1000
-   -- Vivado optimize this situation with clock buffer while implementation but this solution 
+   -- Vivado optimize this situation with clock buffer while implementation but this solution
    -- is terrible for timing so we need set max limit of fanout of this signals.
    attribute keep : string;
    attribute max_fanout : integer;
@@ -250,8 +250,8 @@ begin
       -- -------------------------------------------------------------------------
       --                   BRAM MEMOMRY GENERATION
       -- -------------------------------------------------------------------------
-      
-      bram_g : if RAM_TYPE_SELECTED = "BRAM"  generate 
+
+      bram_g : if RAM_TYPE_SELECTED = "BRAM"  generate
          bram_i : entity work.SDP_BRAM_BEHAV
             generic map(
                DATA_WIDTH  => DATA_WIDTH,
@@ -267,7 +267,7 @@ begin
                --READ INTERFACE
                RD_CLK      => CLK,           -- Input and output CLKs are same
                RD_RST      => RESET,
-               RD_CE       => rd_ce,         -- Output registers enable signal 
+               RD_CE       => rd_ce,         -- Output registers enable signal
                RD_REG_CE   => rd_reg_ce,     -- is accessible
                RD_ADDR     => std_logic_vector(addr_out_reg),
                RD_EN       => '1',           -- Data valid signal always generated
@@ -279,7 +279,7 @@ begin
       -- -------------------------------------------------------------------------
       --                   LUT MEMEORY GENERATION
       -- -------------------------------------------------------------------------
-      
+
       logic_g : if RAM_TYPE_SELECTED = "LUT" generate
          sdp_lutram_i : entity work.GEN_LUTRAM
          generic map (
@@ -348,9 +348,9 @@ begin
             DOB     => uram_mem_out,
             DOB_DV  => open
          );
-         
+
          -- Ultra-RAM respond to read request a clock cycle later. When not using
-         -- its pipeline, we need to put one more register in the way, so the 
+         -- its pipeline, we need to put one more register in the way, so the
          -- data on the output is 2 clock ticks away.
 
          uram_mem_reg :process (CLK)
@@ -358,8 +358,8 @@ begin
             if (rising_edge(CLK)) then
                if (rd_reg_ce = '1') then
                   DO <= uram_mem_out;
-               end if;  
-            end if;  
+               end if;
+            end if;
          end process;
 
       end generate;
@@ -367,7 +367,7 @@ begin
       -- -------------------------------------------------------------------------
       --                      FULL FLAG GENERATOR
       -- -------------------------------------------------------------------------
-      -- FULL signal is activated when ammount of items in memory equals the 
+      -- FULL signal is activated when ammount of items in memory equals the
       -- number of ITEMS_INTER maximum or is greater (because FULL is one CLK cycle
       -- slower).
 
@@ -463,9 +463,9 @@ begin
          -- -------------------------------------------------------------------------
          --                      FIFO WRITE ADDRESS COUNTER
          -- -------------------------------------------------------------------------
-      
+
          -- Input address register is inceremented when given command inc_in_cnt
-         -- comming from control unit. If addres reaches maximum, it is set to 0. 
+         -- comming from control unit. If addres reaches maximum, it is set to 0.
          -- Data protection is handled by FULL and EMPTY systems.
 
          cnt_in : process (CLK) -- Input address incrementation
@@ -501,7 +501,7 @@ begin
          -- -------------------------------------------------------------------------
 
          -- Output address register is inceremented when given command inc_out_cnt
-         -- comming from control unit. If addres reaches maximum, it is set to 0. 
+         -- comming from control unit. If addres reaches maximum, it is set to 0.
          -- Data protection is handled by FULL and EMPTY systems.
 
          cnt_out_out : process (CLK) -- Output address incrementation
@@ -608,9 +608,9 @@ begin
          -- ----------------------------------------------------------------------
          --                    SHIFT MEM OUTPUT ADDRESS COUNTER
          -- ----------------------------------------------------------------------
-         
+
          -- This output adress generator returns numbers between 0 and [ITEMS_INTER],
-         -- according to wr_en and sh_reg_rd signals. while begins at ITEMS_INTER, 
+         -- according to wr_en and sh_reg_rd signals. while begins at ITEMS_INTER,
          -- one abowe that is 0 and the continues onward.
 
          adrr_stat_gen_inc_dec : process (CLK)
@@ -639,7 +639,7 @@ begin
          -- ----------------------------------------------------------------------
          --                    SHIFT MEM CONTROL UNIT
          -- ----------------------------------------------------------------------
-      
+
          sh_reg_rd <= rd_ce AND NOT empty_comp;
 
       end generate sh_mem_g;

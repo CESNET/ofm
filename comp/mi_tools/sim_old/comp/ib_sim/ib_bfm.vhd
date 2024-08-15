@@ -103,10 +103,10 @@ ARCHITECTURE IB_BFM_ARCH OF IB_BFM IS
        ComplFifo.EndPtr := 0;
      end if;
      ComplFifo.Empty  := false;
-     ASSERT (ComplFifo.EndPtr /= ComplFifo.BeginPtr or ComplFifo.Items=0) 
+     ASSERT (ComplFifo.EndPtr /= ComplFifo.BeginPtr or ComplFifo.Items=0)
             REPORT "IB_BFM: Completition fifo overflow";
    END PROCEDURE;
-  
+
    -- -------------------------------------------------------------------------
    PROCEDURE getFifo(output : INOUT IbCmdVType) IS
    BEGIN
@@ -205,7 +205,7 @@ ARCHITECTURE IB_BFM_ARCH OF IB_BFM IS
          end if;
          i:= 0;
          while i < cmdV.Di.Length loop
-           to_bit_vector(cmdV.Di.Data(i/8), Data); 
+           to_bit_vector(cmdV.Di.Data(i/8), Data);
            if (LogTranscript) then
              fprint(output,"        DATA: 0x%s\n", to_string(Data, "%x"));
            end if;
@@ -240,7 +240,7 @@ ARCHITECTURE IB_BFM_ARCH OF IB_BFM IS
          end if;
          i:= 0;
          while i < cmdV.Di.Length loop
-           to_bit_vector(cmdV.Di.Data(i/8), Data); 
+           to_bit_vector(cmdV.Di.Data(i/8), Data);
            if (LogTranscript) then
              fprint(output,"        DATA: 0x%s\n", to_string(Data, "%x"));
            end if;
@@ -249,7 +249,7 @@ ARCHITECTURE IB_BFM_ARCH OF IB_BFM IS
            end if;
            i:=i+8;
          end loop;
-             
+
        WHEN others =>
 
     END CASE;
@@ -276,7 +276,7 @@ ARCHITECTURE IB_BFM_ARCH OF IB_BFM IS
      end if;
      RETURN (Length+Align)/8 + Plus;
    END FUNCTION;
-   
+
    -- -------------------------------------------------------------------------
    -- GetWriteData
    PROCEDURE GetWriteData(DataIn         : IN std_logic_vector(63 downto 0);
@@ -311,7 +311,7 @@ ARCHITECTURE IB_BFM_ARCH OF IB_BFM IS
                         signal   SRC_RDY_N : OUT std_logic;
                         signal   DST_RDY_N :  IN std_logic) IS
    BEGIN
-     
+
      DATA      <= trans.Di.SrcAddr & conv_std_logic_vector(trans.Di.Tag, 16) &
                   '0' & C_IB_L2LR_TRANSACTION & conv_std_logic_vector(trans.Di.Length,12);
      SRC_RDY_N <= '0';
@@ -405,7 +405,7 @@ ARCHITECTURE IB_BFM_ARCH OF IB_BFM IS
      VARIABLE count      : integer;
      VARIABLE WriteAlign : WriteAlignType;
    BEGIN
-     
+
      -- Send HDR0
      DATA      <= trans.Di.DstAddr & conv_std_logic_vector(trans.Di.Tag, 16) &
                   trans.Di.LastFlag & C_IB_RD_COMPL_TRANSACTION & conv_std_logic_vector(trans.Di.Length,12);
@@ -562,7 +562,7 @@ ARCHITECTURE IB_BFM_ARCH OF IB_BFM IS
        fprint(output,"IB_BFM: Host Memory Content\n");
        -- Show Content
        for i in 0 to MEMORY_SIZE/8 loop
-         to_bit_vector(Memory(i), Data); 
+         to_bit_vector(Memory(i), Data);
          fprint(output,"        DATA: 0x%s\n", to_string(Data, "%x"));
        end loop;
      end if;
@@ -570,7 +570,7 @@ ARCHITECTURE IB_BFM_ARCH OF IB_BFM IS
        fprint(outfile,"IB_BFM: Host Memory Content\n");
      -- Show Content
        for i in 0 to MEMORY_SIZE/8 loop
-         to_bit_vector(Memory(i), Data); 
+         to_bit_vector(Memory(i), Data);
          fprint(outfile,"        DATA: 0x%s\n", to_string(Data, "%x"));
        end loop;
      end if;
@@ -632,14 +632,14 @@ ARCHITECTURE IB_BFM_ARCH OF IB_BFM IS
 BEGIN
 
 
--- Send Packet Process -------------------------------------------------------- 
+-- Send Packet Process --------------------------------------------------------
 SEND_PACKETS: PROCESS
    file     log_file  : text;
 BEGIN
   IB.DOWN.DATA      <= (others => '0');
   IB.DOWN.SOP_N     <= '1';
   IB.DOWN.EOP_N     <= '1';
-  IB.DOWN.SRC_RDY_N <= '1'; 
+  IB.DOWN.SRC_RDY_N <= '1';
 
   IbCmd.Ack         <= '0';
   ComplReq.Ack      <= '0';
@@ -688,7 +688,7 @@ BEGIN
       -- Send Command done
       IbCmd.Ack <= NOT(IbCmd.Ack);
     end if;
-    
+
     if (ComplReq.Req = '1') then
       -- Send Request Acknowledge
       ComplReq.ReqAck <= NOT(ComplReq.ReqAck);
@@ -701,11 +701,11 @@ BEGIN
       -- Send Command done
       ComplReq.Ack <= NOT(ComplReq.Ack);
     end if;
-    
+
   END LOOP;
 END PROCESS;
 
--- Drive DST_RDY_N --------------------------------------------------------------- 
+-- Drive DST_RDY_N ---------------------------------------------------------------
 DRIVE_DST_RDY_N: PROCESS
 BEGIN
   LOOP
@@ -714,14 +714,14 @@ BEGIN
 END PROCESS;
 
 
--- Receive Packet Process -------------------------------------------------------- 
+-- Receive Packet Process --------------------------------------------------------
 RECEIVE_PACKETS: PROCESS
 BEGIN
   InitFifo; -- Init Completition fifo
 --  IB.UP.DST_RDY_N <= '0'; Replaced by DRIVE_DST_RDY_N process
   LOOP
     wait until (CLK'event and CLK='1' and IB.UP.SRC_RDY_N='0' and IB.UP.SOP_N='0' and IB.UP.DST_RDY_N='0');
-   
+
     CASE IB.UP.DATA(14 downto 12) IS
        WHEN C_IB_L2GW_TRANSACTION =>
          -- Receive Transaction
@@ -749,7 +749,7 @@ BEGIN
   END LOOP;
 END PROCESS;
 
--- Send Completitions -------------------------------------------------------- 
+-- Send Completitions --------------------------------------------------------
 SEND_COMPLETITIONS: PROCESS
   VARIABLE i : integer;
 BEGIN
@@ -769,7 +769,7 @@ BEGIN
     WAIT ON ComplReq.ReqAck;
     ComplReq.Req <= '0';
     WAIT ON ComplReq.Ack;
-    
+
   END LOOP;
 END PROCESS;
 

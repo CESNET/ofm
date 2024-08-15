@@ -1,7 +1,7 @@
 /*
  * testbench.sv: Top Entity for automatic test
  * Copyright (C) 2013 CESNET
- * Author: Lukas Kekely <kekely@cesnet.cz> 
+ * Author: Lukas Kekely <kekely@cesnet.cz>
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -10,7 +10,7 @@
  * TODO:
  *
  */
- 
+
 
 // ----------------------------------------------------------------------------
 //                                 TESTBENCH
@@ -25,7 +25,7 @@ module testbench;
   iFrameLinkUEditRx #(DATA_WIDTH, EOP_POS_WIDTH, SOP_POS_WIDTH,OFFSET_WIDTH)  RX (CLK, RESET);
   iFrameLinkUTx #(DATA_WIDTH, EOP_POS_WIDTH, SOP_POS_WIDTH)                   TX (CLK, RESET);
 
-  
+
   //-- Clock generation -------------------------------------------------------
   always #(CLK_PERIOD/2) CLK = ~CLK;
 

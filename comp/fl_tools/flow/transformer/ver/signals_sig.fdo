@@ -1,4 +1,4 @@
-# top_level_sig.fdo : Include file with signals 
+# top_level_sig.fdo : Include file with signals
 # Copyright (C) 2003 CESNET
 # Author: Petr Kobiersky <xkobie00@stud.fit.vutbr.cz>
 #
@@ -13,7 +13,7 @@
 source "./signals.fdo"
 
 # zmena nazvu testovanej komponenty
-add wave -divider "TRANSFORMER"  
+add wave -divider "TRANSFORMER"
 add_wave "-noupdate -color yellow -label RESET"   /testbench/RESET
 add_wave "-noupdate -color yellow -label CLK"     /testbench/CLK
 # zmena nazvu testovanej komponenty

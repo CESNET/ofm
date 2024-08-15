@@ -2,7 +2,7 @@
 //-- Copyright (C) 2023 CESNET z. s. p. o.
 //-- Author(s): Radek Iša  <isa@cesnet.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 class pcie_data#(MEATA_WIDTH) extends uvm_object;
     `uvm_object_param_utils(uvm_ptc::pcie_data#(MEATA_WIDTH))
@@ -31,7 +31,7 @@ endclass
 class dma_header_rc extends uvm_object;
     `uvm_object_utils(uvm_ptc::dma_header_rc)
 
-    int unsigned port; 
+    int unsigned port;
     int unsigned length;
     int unsigned completed;
     int unsigned tag;

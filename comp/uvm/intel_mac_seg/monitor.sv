@@ -1,7 +1,7 @@
 /*
  * file       : monitor.sv
  * Copyright (C) 2021 CESNET z. s. p. o.
- * description: Intel mac seq monitor 
+ * description: Intel mac seq monitor
  * date       : 2021
  * author     : Radek Iša <isa@cesnet.cz>
  *
@@ -19,7 +19,7 @@ class monitor #(int unsigned SEGMENTS) extends uvm_monitor;
     // ------------------------------------------------------------------------
     // Reference to the virtual interface
     virtual intel_mac_seg_if #(SEGMENTS).monitor vif;
-    
+
     // ------------------------------------------------------------------------
     // Analysis port used to send transactions to all connected components.
     uvm_analysis_port #(sequence_item #(SEGMENTS)) analysis_port;
@@ -41,7 +41,7 @@ class monitor #(int unsigned SEGMENTS) extends uvm_monitor;
         forever begin
             @(vif.monitor_cb);
 
-            // Capture actual data at interface 
+            // Capture actual data at interface
             {<<64{tr.data}}       =  vif.monitor_cb.DATA;
             {<<1{tr.inframe}}     =  vif.monitor_cb.INFRAME;
             {<<3{tr.eop_empty}}   =  vif.monitor_cb.EOP_EMPTY;

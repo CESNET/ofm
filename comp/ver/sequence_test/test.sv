@@ -2,7 +2,7 @@
 //-- Copyright (C) 2021 CESNET z. s. p. o.
 //-- Author(s): TomášBeneš <xbenes55@stud.fit.vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 import sv_common_pkg::*;
 import sv_mvb_pkg::*;
@@ -15,7 +15,7 @@ module testbench();
         static Sequence seq = new("sequenc 1", -1, mbx);
         Transaction tr;
         seq.addTransaction(tr);
-	
+
 	    $write("Test that insert common transaction: ");
         if(seq.listOfTransactions.size == 1)
 	        $write("passed\n");
@@ -62,7 +62,7 @@ module testbench();
         end else begin;
             $write("failed\n");
         end
-	    seq.display();	
+	    seq.display();
     endtask
 
     initial begin

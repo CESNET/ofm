@@ -33,7 +33,7 @@ set_property -dict [list \
 ] [get_ips gty_40ge]
 
 # Runtime Parameters
-set_property -dict { 
+set_property -dict {
   GENERATE_SYNTH_CHECKPOINT {1}
 } $gty_40ge
 

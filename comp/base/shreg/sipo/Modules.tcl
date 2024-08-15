@@ -6,7 +6,7 @@
 
 
 # packages:
-set PACKAGES "$PACKAGES $OFM_PATH/comp/base/pkg/math_pack.vhd" 
+set PACKAGES "$PACKAGES $OFM_PATH/comp/base/pkg/math_pack.vhd"
 
 # modules:
 set MOD "$MOD $ENTITY_BASE/sipo.vhd"

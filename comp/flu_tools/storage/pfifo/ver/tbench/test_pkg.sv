@@ -16,16 +16,16 @@
 // ----------------------------------------------------------------------------
 package test_pkg;
 
-    import math_pkg::*;       // log2() 
-    
+    import math_pkg::*;       // log2()
+
    // Include this file if you want to use standard SystemVerilog Scoreboard
    `include "scoreboard.sv"
-   
+
    // Include this file if you want to use C plus plus Scoreboard
    // `include "dpi/dpi_scoreboard.sv"
 
    // DUT GENERICS
-   parameter DATA_WIDTH = 512;   
+   parameter DATA_WIDTH = 512;
    parameter SOP_POS_WIDTH=3;
    parameter BLOCK_SIZE=1;
    parameter ITEMS=1024;
@@ -37,7 +37,7 @@ package test_pkg;
    parameter DISABLE_ASFIFO = FALSE;
 
    parameter EOP_POS_WIDTH=log2(DATA_WIDTH/8);
-   
+
    // CLOCKS AND RESETS
    parameter RX_CLK_PERIOD = 5ns;
    parameter RESET_TIME = 10*RX_CLK_PERIOD;
@@ -46,7 +46,7 @@ package test_pkg;
    // TRANSACTION FORMAT (GENERATOR 0)
    int       GENERATOR0_FLU_PACKET_SIZE_MAX = 1500;      // maximalna velkost paketov
    int       GENERATOR0_FLU_PACKET_SIZE_MIN = 8;         // minimalna velkost paketov
-   
+
    // DRIVER0 & MONITOR0 PARAMETERS
    parameter DRIVER0_DATA_WIDTH         = DATA_WIDTH;         // datova sirka driveru
    parameter DRIVER0_EOP_WIDTH          = EOP_POS_WIDTH;

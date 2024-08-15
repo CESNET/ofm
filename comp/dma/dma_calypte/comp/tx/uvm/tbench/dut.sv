@@ -1,8 +1,8 @@
-//-- dut.sv: Design under test 
+//-- dut.sv: Design under test
 //-- Copyright (C) 2022 CESNET z. s. p. o.
 //-- Author(s): Daniel Kriz <danielkriz@cesnet.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 import test::*;
 
@@ -106,5 +106,5 @@ module DUT(
         .PCIE_CC_MFB_DST_RDY       (/* mfb_tx.DST_RDY */)
     );
 
-    
+
 endmodule

@@ -46,7 +46,7 @@ package body ab_init_pack is
         return addr_base_arr_dto;
 
     end function;
-    
+
     function init_addr_base_to(ITEMS_X: integer; DATA_WIDTH: integer) return slv_array_t is
         variable v  : std_logic_vector(DATA_WIDTH-1 downto 0) := (others => '1');
         variable s1 : integer := 4;
@@ -110,7 +110,7 @@ package body ab_init_pack is
 
         --  Fill the mask with '0's and then ...
         mask := (others => '0');
-        -- ... overwrite '0's by '1's from the position of the first '1' to the last '1' 
+        -- ... overwrite '0's by '1's from the position of the first '1' to the last '1'
         mask(first_one_ind downto last_one_ind) := (others => '1');
         return mask;
     end function;

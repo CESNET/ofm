@@ -7,7 +7,7 @@
 --
 --
 
-library IEEE;  
+library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.std_logic_arith.all;
 use IEEE.std_logic_unsigned.all;
@@ -21,7 +21,7 @@ entity CONTROL_STATS is
       NUM_BYTES_WD      : integer := 48;
       NUM_PACKETS_WD    : integer := 48;
       ADDRESS_WIDTH     : integer := 10
-   );  
+   );
    port(
       CLK               : in  std_logic;
       RESET             : in  std_logic;
@@ -40,6 +40,6 @@ entity CONTROL_STATS is
       ADD_PACKET        : in  std_logic;
       SRC_RDY           : in  std_logic;
       DST_RDY           : out std_logic
-    ); 
+    );
 end entity;
 

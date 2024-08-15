@@ -54,13 +54,13 @@ architecture MI32_SIM_ARCH of MI32_SIM is
 
      -- Internal Bus 64 (IB_SIM)
      signal internal_bus64      : t_internal_bus64;
-     
+
      -- Local Bus 16 (LB_ROOT)
      signal local_bus16         : t_local_bus16;
 
 begin
 
--- Internal Bus simulation component -----------------------------------------   
+-- Internal Bus simulation component -----------------------------------------
 IB_SIM_U : entity work.IB_SIM
    generic map (
       UPSTREAM_LOG_FILE   => UPSTREAM_LOG_FILE,
@@ -99,7 +99,7 @@ LB_ROOT_U : entity work.LB_ROOT
       LOCAL_BUS      => local_bus16
   );
 
--- -----------------------Portmaping of LB_Endpoint ---------------------------   
+-- -----------------------Portmaping of LB_Endpoint ---------------------------
 LB_ENDPOINT_U : entity work.LB_ENDPOINT
    generic map (
       BASE_ADDR      => BASE_ADDR,

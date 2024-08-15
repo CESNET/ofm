@@ -13,14 +13,14 @@ proc rx {NAME PATH} {
    add_wave "-group {$NAME} -noupdate -hex" $PATH/RX_*
 }
 
-proc tx {NAME PATH} {    
+proc tx {NAME PATH} {
    add_wave "-group {$NAME} -noupdate -hex" $PATH/TX_*
 }
 
-proc int {NAME PATH} {    
+proc int {NAME PATH} {
    add_wave "-group {$NAME} -noupdate -hex" $PATH/s_*
 }
 
-proc all {NAME PATH} {  
+proc all {NAME PATH} {
    add_wave "-group {$NAME} -noupdate -hex" $PATH/*
 }

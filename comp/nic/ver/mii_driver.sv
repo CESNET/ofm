@@ -12,11 +12,11 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
- 
+
 
 
 class MiiDriver #(int WIDTH = 0, int LANE_WIDTH = 8) extends Driver;
-    
+
     // -- Private Class Attributes --
     localparam BYTES = WIDTH >> 3;
     localparam LANE_BYTES = LANE_WIDTH >> 3;
@@ -28,7 +28,7 @@ class MiiDriver #(int WIDTH = 0, int LANE_WIDTH = 8) extends Driver;
     protected int offset = 0;
     protected byte unsigned rxd[BYTES];
 
-    
+
     // -- Public Class Methods --
     function new(string inst, tTransMbx transMbx, virtual iMiiRx#(WIDTH).tb mii);
         super.new(inst, transMbx);
@@ -38,8 +38,8 @@ class MiiDriver #(int WIDTH = 0, int LANE_WIDTH = 8) extends Driver;
         this.mii.cb.RXC <= {BYTES{1'b1}};
         this.rxd = '{BYTES{8'h07}};
     endfunction
-    
-    
+
+
     // -- Private Class Methods --
     task moveLane();
         offset = offset + LANE_BYTES;

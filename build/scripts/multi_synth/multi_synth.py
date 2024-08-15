@@ -44,6 +44,7 @@ def run_synthesis(makefile_path,implement=False,quartus=False):
 # Parsing script arguments
 ##########
 
+
 parser = argparse.ArgumentParser()
 
 parser.add_argument("makefile", help="Name of Makefile for running synthesis")
@@ -168,7 +169,7 @@ if (args.setting==None):
         if (args.save_whole_project):
             # backup whole project
             system("cp -rf "+makefile_path+"/* "+res_dir_name+"/")
-    
+
     ##########
 else:
     ##########

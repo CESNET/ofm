@@ -167,7 +167,7 @@ class hbm_tester:
         ii = 0
         #print("REG_RUN_TEST: %s" % hex(ports_vector))
         self.comp.write32(self._REG_RUN_TEST, ports_vector)
-        
+
         while test_done == False:
             time.sleep(0.1)
             reg_done = self.comp.read32(self._REG_DONE_TEST)
@@ -218,6 +218,7 @@ class hbm_tester:
             self.set_config_reg(test_type, 1, rand_addr)
             self.run_test(hbm_ports)
             self.print_data_result(hbm_ports)
+
 
 if __name__ == '__main__':
     # Argument parsing

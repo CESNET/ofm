@@ -57,7 +57,7 @@ architecture V7_DSP_TOP of MUL48_TOP is
    signal ce_in_D     : std_logic;
    signal ce_out_D    : std_logic;
    signal p_D         : std_logic_vector(A_DATA_WIDTH+B_DATA_WIDTH-1 downto 0);
- 
+
 begin
 
    uut : entity work.MUL_DSP
@@ -76,7 +76,7 @@ begin
       CE_OUT      => ce_out_D,
       P           => p_D
    );
-   
+
     -- input registers
    process(CLK)
 	begin
@@ -102,11 +102,11 @@ begin
 	begin
 	   if (CLK'event) and (CLK='1') then
  	    if (RESET='1') then
-              P <= (others => '0'); 
+              P <= (others => '0');
 	    else
-              P <= p_D; 
+              P <= p_D;
   	    end if;
   	  end if;
  	end process;
- 
+
 end V7_DSP_TOP;

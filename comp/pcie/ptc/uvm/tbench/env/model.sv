@@ -2,7 +2,7 @@
 //-- Copyright (C) 2022 CESNET z. s. p. o.
 //-- Author(s): Daniel Kříž  <xkrizd01@vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 virtual class model_rc #(DMA_PORTS, PCIE_UPHDR_WIDTH) extends uvm_component;
     //`uvm_component_param_utils(uvm_ptc::model_rc#(DMA_PORTS, PCIE_UPHDR_WIDTH))

@@ -1,13 +1,13 @@
 --
 -- flu_demultiplexer.vhd: Demultiplexer for Frame Link Unaligned (not packet oriented!)
 -- Copyright (C) 2014 CESNET
--- Author: Vaclav Hummel <xhumme00@stud.fit.vutbr.cz> 
+-- Author: Vaclav Hummel <xhumme00@stud.fit.vutbr.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --
 -- $Id$
 --
--- TODO: 
+-- TODO:
 --
 --
 
@@ -25,14 +25,14 @@ use work.math_pack.all;
 entity FLU_DEMULTIPLEXER is
    generic(
        DATA_WIDTH    : integer :=512;
-       SOP_POS_WIDTH : integer :=3; 	
+       SOP_POS_WIDTH : integer :=3;
        INPUT_PORTS   : integer :=2
    );
    port(
        -- Common interface
       RST           : in  std_logic;
       CLK           : in  std_logic;
-      
+
       SEL           : in std_logic_vector(log2(INPUT_PORTS)-1 downto 0);
 
       -- Frame Link Unaligned input interfaces
@@ -42,7 +42,7 @@ entity FLU_DEMULTIPLEXER is
       RX_SOP        : in  std_logic;
       RX_EOP        : in  std_logic;
       RX_SRC_RDY    : in  std_logic;
-      RX_DST_RDY    : out std_logic; 
+      RX_DST_RDY    : out std_logic;
 
       -- Frame Link Unaligned concentrated interface
       TX_DATA       : out std_logic_vector(INPUT_PORTS*DATA_WIDTH-1 downto 0);
@@ -71,7 +71,7 @@ begin
       SEL         => SEL,
       DATA_OUT    => TX_DATA
    );
-   
+
    sop_pos_mx_i : entity work.GEN_DEMUX
    generic map (
       DATA_WIDTH  => SOP_POS_WIDTH,
@@ -82,7 +82,7 @@ begin
       SEL         => SEL,
       DATA_OUT    => TX_SOP_POS
    );
-   
+
    eop_pos_mx_i : entity work.GEN_DEMUX
    generic map (
       DATA_WIDTH  => EOP_POS_WIDTH,
@@ -93,7 +93,7 @@ begin
       SEL         => SEL,
       DATA_OUT    => TX_EOP_POS
    );
-   
+
    sop_mx_i : entity work.GEN_DEMUX
    generic map (
       DATA_WIDTH  => 1,
@@ -104,7 +104,7 @@ begin
       SEL         => SEL,
       DATA_OUT    => TX_SOP
    );
-   
+
    eop_mx_i : entity work.GEN_DEMUX
    generic map (
       DATA_WIDTH  => 1,
@@ -115,7 +115,7 @@ begin
       SEL         => SEL,
       DATA_OUT    => TX_EOP
    );
-   
+
    src_rdy_mx_i : entity work.GEN_DEMUX
    generic map (
       DATA_WIDTH  => 1,
@@ -126,7 +126,7 @@ begin
       SEL         => SEL,
       DATA_OUT    => TX_SRC_RDY
    );
-   
+
    dst_rdy_mx_i : entity work.GEN_MUX
    generic map (
       DATA_WIDTH  => 1,

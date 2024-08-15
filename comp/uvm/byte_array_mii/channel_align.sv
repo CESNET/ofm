@@ -15,10 +15,10 @@ class channel_align #(int unsigned CHANNEL_WIDTH) extends uvm_object;
     `uvm_object_param_utils(uvm_byte_array_mii::channel_align #(CHANNEL_WIDTH))
 
     localparam BYTES = CHANNEL_WIDTH >> 3;
-    
+
     function new(string name = "channel_align");
         super.new(name);
-        
+
         WHOLE_BYTES : assert((CHANNEL_WIDTH & 7) == 0);
     endfunction
 

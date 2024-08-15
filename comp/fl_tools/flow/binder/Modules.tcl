@@ -36,11 +36,11 @@ if { $ARCHGRP == "FULL" } {
    set MOD "$MOD $ENTITY_BASE/binder_simple.vhd"
 
    # Stupid Binder
-   set MOD "$MOD $ENTITY_BASE/binder_stupid.vhd"   
+   set MOD "$MOD $ENTITY_BASE/binder_stupid.vhd"
 
    # top level entity
    set MOD "$MOD $ENTITY_BASE/binder.vhd"
-   
+
 
    # components
    set COMPONENTS [list \

@@ -86,11 +86,11 @@ begin
    RX_DST_RDY_N   <= not dst_rdy;
    TX_SRC_RDY_N   <= not lblk;
 
-   TX_REM <= conv_std_logic_vector((conv_integer(act_byte)-1) + 1, 
+   TX_REM <= conv_std_logic_vector((conv_integer(act_byte)-1) + 1,
              log2(TX_DATA_WIDTH/8))
              when (lblk = '1')
              else (others => '0');
-   
+
    data_strobe <= dst_rdy and (not RX_SRC_RDY_N);
 
    dst_rdy <= (not lblk) or (not TX_DST_RDY_N)

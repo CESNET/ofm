@@ -1,4 +1,4 @@
-// dut.sv: Design under test 
+// dut.sv: Design under test
 // Copyright (C) 2024 CESNET z. s. p. o.
 // Author(s): Vladislav Valek <valekv@cesnet.cz>
 

@@ -104,7 +104,7 @@ begin
     MASTER_AMM_ADDRESS, MASTER_AMM_WRITE_DATA,
     MASTER_AMM_BURST_COUNT) <= master_out;
 
- 
+
     master_in(0)                                      <= MASTER_AMM_READ_DATA_VALID;
     master_in(AMM_DATA_WIDTH downto 1)                <= MASTER_AMM_READ_DATA;
 

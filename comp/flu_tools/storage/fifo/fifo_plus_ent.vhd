@@ -1,6 +1,6 @@
 -- fifo_plus_ent.vhd: Frame Link Unaliged Plus protocol generic FIFO
 -- Copyright (C) 2014 CESNET
--- Author: Lukas Kekely <kekely@cesnet.cz> 
+-- Author: Lukas Kekely <kekely@cesnet.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --
@@ -50,7 +50,7 @@ entity FLU_FIFO_PLUS is
       RX_EOP        : in std_logic;
       RX_SRC_RDY    : in std_logic;
       RX_DST_RDY    : out std_logic;
-      
+
       -- Frame Link Unaligned Plus output interface
       TX_CHANNEL    : out std_logic_vector(CHANNEL_WIDTH-1 downto 0);
       TX_DATA       : out std_logic_vector(DATA_WIDTH-1 downto 0);
@@ -60,7 +60,7 @@ entity FLU_FIFO_PLUS is
       TX_EOP        : out std_logic;
       TX_SRC_RDY    : out std_logic;
       TX_DST_RDY    : in std_logic;
-      
+
       -- FIFO state signals
       LSTBLK         : out std_logic;
       FULL           : out std_logic;

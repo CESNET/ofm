@@ -9,7 +9,7 @@
 -- TODO:
 --
 
-library IEEE;  
+library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.std_logic_arith.all;
 use IEEE.std_logic_unsigned.all;
@@ -23,20 +23,20 @@ use work.math_pack.all;
 --
 -- Shifts (NOT rotates!) the DATA_IN by SEL bits to LEFT/RIGHT.
 -- The rest bits are filled with '0'.
--- Doesn't provide the last combination (shift by DATA_WIDTH, that 
+-- Doesn't provide the last combination (shift by DATA_WIDTH, that
 --  leads to zeros) becouse of entity (backward compatibility) - it
 --  provides only log2(DATA_WIDTH) combinations.
 -- Shifting is possible by value in range: 0 to DATA_WIDTH-1
 --
 architecture shifter_behav of BARREL_BIT_SHIFTER is
-      
+
    --+ input to 'shifting' MUX
    signal mux_in : std_logic_vector(DATA_WIDTH * DATA_WIDTH - 1 downto 0);
 
 begin
 
 -- ----------------------------------------------------------------------------
---                 Generation of all possible combinations                   -- 
+--                 Generation of all possible combinations                   --
 -- ----------------------------------------------------------------------------
 
 -- generate n combinations (n = DATA_WIDTH)
@@ -86,7 +86,7 @@ end generate;
 
 
 -- ----------------------------------------------------------------------------
---                 Output MUX to select the right combination                -- 
+--                 Output MUX to select the right combination                --
 -- ----------------------------------------------------------------------------
 
 shifting_mux : entity work.GEN_MUX

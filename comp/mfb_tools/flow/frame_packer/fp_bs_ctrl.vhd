@@ -12,7 +12,7 @@ use work.math_pack.all;
 use work.type_pack.all;
 
 -- The purpose of this component is to generate select signal for each Barrel Shifter
-entity FP_BS_CTRL is 
+entity FP_BS_CTRL is
     generic(
         MFB_REGIONS         : natural := 1;
         MFB_REGION_SIZE     : natural := 8;
@@ -35,23 +35,23 @@ entity FP_BS_CTRL is
         RX_SRC_RDY      : in  std_logic;
         -- Channel per BS
         RX_CHANNEL_BS   : in  slv_array_t(MFB_REGIONS downto 0)(max(1,log2(RX_CHANNELS)) - 1 downto 0);
-        
-        -- Select signal for each BS 
+
+        -- Select signal for each BS
         TX_SEL          : out slv_array_t(MFB_REGIONS downto 0)(max(1, log2(MFB_REGIONS*MFB_REGION_SIZE)) - 1 downto 0);
         -- Pointrer increment per channel (unsigned array)
         TX_PTR_INC      : out u_array_2d_t(RX_CHANNELS - 1 downto 0)(MFB_REGIONS downto 0)(max(1,log2(MFB_REGIONS*MFB_REGION_SIZE)) + 1 - 1 downto 0);
         -- SRC_RDY per channel
         TX_SRC_RDY      : out std_logic_vector(RX_CHANNELS - 1 downto 0);
-        -- External demux select 
+        -- External demux select
         TX_CHANNEL_BS   : out slv_array_t(MFB_REGIONS downto 0)(max(1,log2(RX_CHANNELS)) - 1 downto 0)
     );
 end entity;
 
-architecture FULL of FP_BS_CTRL is 
+architecture FULL of FP_BS_CTRL is
     signal vld_sum_std          : slv_array_t(MFB_REGIONS downto 0)(max(1,log2(MFB_REGIONS*MFB_REGION_SIZE)) + 1 - 1 downto 0);
     signal sof_pos_uns          : u_array_t(MFB_REGIONS downto 0)(max(1,log2(MFB_REGION_SIZE)) - 1 downto 0);
-    
-    -- Demux 
+
+    -- Demux
     signal vld_sum_std_demux    : slv_array_t(MFB_REGIONS downto 0)(RX_CHANNELS*(max(1,log2(MFB_REGIONS*MFB_REGION_SIZE)) + 1) - 1 downto 0);
     signal vld_sum_std_demux_2d : slv_array_2d_t(MFB_REGIONS downto 0)(RX_CHANNELS - 1 downto 0)((max(1,log2(MFB_REGIONS*MFB_REGION_SIZE)) + 1) - 1 downto 0);
     signal vld_sum_uns_demux_2d : u_array_2d_t(MFB_REGIONS downto 0)(RX_CHANNELS - 1 downto 0)((max(1,log2(MFB_REGIONS*MFB_REGION_SIZE)) + 1) - 1 downto 0);
@@ -63,7 +63,7 @@ begin
     vld_to_std_g: for i in 0 to MFB_REGIONS generate
         vld_sum_std(i) <= std_logic_vector(to_unsigned(count_ones(RX_BLOCK_VLD(i)), max(1,log2(MFB_REGIONS*MFB_REGION_SIZE)) + 1));
     end generate;
-    
+
     -- Demux each BS increment number to the correct channel
     inc_demux_g: for i in 0 to MFB_REGIONS generate
         inc_demux_i: entity work.GEN_DEMUX
@@ -83,18 +83,18 @@ begin
     demux_per_bs_g: for i in 0 to MFB_REGIONS generate
         vld_sum_std_demux_2d(i) <= slv_array_deser(vld_sum_std_demux(i), RX_CHANNELS);
     end generate;
-    
+
     convert_to_uns_per_BS_g: for i in 0 to MFB_REGIONS generate
         convert_to_uns_per_ch_g: for j in 0 to RX_CHANNELS - 1 generate
             vld_sum_uns_demux_2d(i)(j)  <= unsigned(vld_sum_std_demux_2d(i)(j));
         end generate;
     end generate;
 
-    -- STD -> UNS conversion 
+    -- STD -> UNS conversion
     sof_to_uns_g: for i in 0 to MFB_REGIONS generate
         sof_pos_uns(i) <= unsigned(RX_SOF_POS_BS(i));
     end generate;
-    
+
     -- Sum of valid bits per BS and per channel
     vld_sum_per_bs(0)   <= (others => (others => '0'));
     sum_per_bs_g: for i in 0 to MFB_REGIONS - 1 generate
@@ -125,7 +125,7 @@ begin
             );
     end generate;
 
-    -- Pointer increment 
+    -- Pointer increment
     ptr_inc_per_bs_g: for i in 0 to MFB_REGIONS generate
         ptr_inc_per_ch_g: for j in 0 to RX_CHANNELS - 1 generate
             TX_PTR_INC(j)(i)  <= vld_sum_uns_demux_2d(i)(j);
@@ -138,7 +138,7 @@ begin
             src_rdy_per_bs(j)(i) <= '1' when (RX_CHANNEL_BS(j) = std_logic_vector(to_unsigned(i, max(1,log2(RX_CHANNELS))))) and (RX_SRC_RDY = '1') else '0';
         end generate;
     end generate;
-    
+
     -- SRC_RDY channel redistribution
     out_src_rdy_p: process(all)
         variable src_rdy_per_bs_v   : slv_array_t(MFB_REGIONS downto 0)(RX_CHANNELS - 1 downto 0);
@@ -153,7 +153,7 @@ begin
 
         TX_SRC_RDY  <= src_rdy_per_bs_v(src_rdy_per_bs_v'high);
     end process;
-    
+
     channel_sel_sync_p: process(all)
     begin
         if rising_edge(CLK) then

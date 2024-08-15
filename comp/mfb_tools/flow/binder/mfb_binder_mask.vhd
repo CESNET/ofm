@@ -33,7 +33,7 @@ entity MFB_BINDER_MASK is
    );
 end MFB_BINDER_MASK;
 
-architecture behavioral of MFB_BINDER_MASK is    
+architecture behavioral of MFB_BINDER_MASK is
 
    signal sof_mask                : std_logic_vector(REGIONS-1 downto 0);
    signal eof_mask                : std_logic_vector(REGIONS-1 downto 0);
@@ -63,7 +63,7 @@ begin
       eof_mask <= (others => '1');
       last_sof_masked_in <= (others => '0');
       last_sof_ce <= '0';
-      for r in REGIONS-1 downto 0 loop       
+      for r in REGIONS-1 downto 0 loop
          if (last_sof_masked_out(r) = '0') then
             if (IN_UNFINISHED_FRAME = '0') then
                exit;
@@ -72,7 +72,7 @@ begin
                sof_mask(r) <= '0';
                last_sof_masked_in(r) <= '1';
                last_sof_ce <= '1';
-               exit;    
+               exit;
             end if;
          else
             sof_mask(r-1 downto 0) <= (others => '0');
@@ -93,5 +93,5 @@ begin
    -- Output MUX
    OUT_SOF_MASKED <= sof_masked when (IN_MASK_ENABLE = '1') else IN_SOF;
    OUT_EOF_MASKED <= eof_masked when (IN_MASK_ENABLE = '1') else IN_EOF;
-    
+
 end architecture;

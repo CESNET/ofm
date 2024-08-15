@@ -22,7 +22,7 @@ CLK_PERIOD?=5.0
 
 # This is our main tool
 SYNTH ?= synplify_pro
-SYNTHFLAGS ?= -batch -tcl 
+SYNTHFLAGS ?= -batch -tcl
 SYNTHFILES ?= Synplify.tcl
 USER_ENV ?=
 NETCOPE_ENV ?= \
@@ -83,7 +83,7 @@ clean_build:
 	-@$(RM) *.edf *.prj stdout.log* synlog.tcl
 	-@$(RM) -r synth1 rev_1
 	-@$(RM) -r DevTree_paths.txt
-	-@$(RM) -r $(NETCOPE_TEMP) $(OUTPUT_NAME).synplify_pro.mk 
+	-@$(RM) -r $(NETCOPE_TEMP) $(OUTPUT_NAME).synplify_pro.mk
 
 # User's chance to add own cleaning stuff
 clean: clean_build $(CLEAN_DEPENDS)

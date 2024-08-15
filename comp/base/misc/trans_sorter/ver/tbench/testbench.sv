@@ -2,7 +2,7 @@
 //-- Copyright (C) 2020 CESNET z. s. p. o.
 //-- Author(s): Tomáš Beneš <xbenes55@stud.fit.vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 import test_pkg::*;
 `include "afull_ifc.sv";
@@ -19,8 +19,8 @@ module testbench;
 
     iMvbRx #(MAX_ID_CONFS, ID_WIDTH) RX_CONFS(CLK, RESET);
     iMvbTx #(MAX_ID_CONFS, ID_WIDTH) RX_CONFS_MONITOR(CLK, RESET);
-    
-    iAFull FIFO_AFULL(CLK); 
+
+    iAFull FIFO_AFULL(CLK);
 
     always #(CLK_PERIOD/2) CLK = ~CLK;
 
@@ -43,9 +43,9 @@ module testbench;
         .RX_TRANS           (RX_TRANS),
         .RX_TRANS_MONITOR   (RX_TRANS_MONITOR),
         .TX_TRANS           (TX_TRANS),
-        .TX_TRANS_MONITOR   (TX_TRANS),        
+        .TX_TRANS_MONITOR   (TX_TRANS),
         .RX_CONFS           (RX_CONFS),
         .RX_CONFS_MONITOR   (RX_CONFS_MONITOR)
     );
-    
+
 endmodule

@@ -12,7 +12,7 @@
 // Frame Link Interface
 `include "fl_ifc.sv"
 
-package sv_fl_pkg; 
+package sv_fl_pkg;
 
   import sv_common_pkg::*; // Import SV common classes
 

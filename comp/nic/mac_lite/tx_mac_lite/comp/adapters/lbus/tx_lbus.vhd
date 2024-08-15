@@ -236,7 +236,7 @@ begin
             end if;
         end if;
     end process;
-    
+
     OUT_LBUS_ERR <= (others => '0');
 
 end architecture;

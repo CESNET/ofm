@@ -16,7 +16,7 @@ architecture framelink of WATCHDOG_FRAMELINK is
 --! DATA_WIDTH for watchdog must be recalculated
 signal aux_data_width    : std_logic_vector
                            ((DATA_WIDTH-1 + RX_REM'length +4) downto 0);
-                           
+
 signal src_rdy_in        : std_logic;
 signal src_rdy_out       : std_logic;
 signal dst_rdy_in        : std_logic;
@@ -39,31 +39,31 @@ begin
       port map(
          CLK            => CLK,
          RESET          => RESET,
-     
+
          DATA_IN        => data_in,
          SRC_RDY_IN     => src_rdy_in,
          DST_RDY_IN     => DST_RDY_IN,
-     
+
          DATA_OUT       => data_out,
          SRC_RDY_OUT    => src_rdy_out,
          DST_RDY_OUT    => dst_rdy_out,
-         
+
          KEEP_ALIVE     => KEEP_ALIVE,
          COUNTER        => COUNTER,
          LOCKED         => LOCKED
       );
-      
+
    --! src_rdy is active in 0
    src_rdy_in <= not RX_SRC_RDY_IN;
    TX_SRC_RDY_OUT <= not src_rdy_out;
-   
+
    --! dst_rdy is active in 0
    dst_rdy_out <= not TX_DST_RDY_OUT;
    RX_DST_RDY_IN <= not dst_rdy_in;
-   
+
    --! composition of DATA_IN
    data_in <= RX_SOF_N & RX_SOP_N & RX_EOP_N & RX_EOF_N & RX_REM & RX_DATA;
-   
+
    --! decomposition of DATA_OUT
    TX_SOF_N <= data_out(data_out'high);
    TX_SOP_N <= data_out(data_out'high -1);
@@ -71,5 +71,5 @@ begin
    TX_EOF_N <= data_out(data_out'high -3);
    TX_REM   <= data_out((RX_DATA'length + RX_REM'length-1) downto RX_DATA'length);
    TX_DATA  <= data_out(RX_DATA'range);
-   
+
 end framelink;

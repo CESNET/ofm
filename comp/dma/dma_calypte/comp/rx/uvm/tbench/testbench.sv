@@ -115,7 +115,7 @@ module testbench;
 
 
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    // GRAY BOX CONNECTION 
+    // GRAY BOX CONNECTION
     assign mvb_dma.DATA = {DUT_U.VHDL_DUT_U.rx_dma_hdr_manager_i.DMA_CHANNEL, DUT_U.VHDL_DUT_U.rx_dma_hdr_manager_i.DMA_DISCARD};
     assign mvb_dma.VLD  = DUT_U.VHDL_DUT_U.rx_dma_hdr_manager_i.DMA_HDR_VLD;
     assign mvb_dma.SRC_RDY = DUT_U.VHDL_DUT_U.rx_dma_hdr_manager_i.DMA_HDR_SRC_RDY;

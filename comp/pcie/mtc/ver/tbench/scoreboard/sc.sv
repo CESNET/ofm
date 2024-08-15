@@ -28,7 +28,7 @@ class sc #(MI_WIDTH);
     endfunction
 
     task wait_done();
-        data.wait_done(); 
+        data.wait_done();
     endtask
 endclass
 

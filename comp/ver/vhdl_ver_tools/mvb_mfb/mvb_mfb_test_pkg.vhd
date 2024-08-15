@@ -44,12 +44,12 @@ package mvb_mfb_test_pkg is
    constant MFB_DOWN_ITEM_WIDTH : integer := 32;
 
    constant MFB_DOWN_ITEMS      : integer := MFB_DOWN_REGIONS*MFB_DOWN_REG_SIZE*MFB_DOWN_BLOCK_SIZE;
-   
+
    -------------------------------
-   
+
    constant DMA_TAG_WIDTH       : integer := DMA_REQUEST_TAG'high - DMA_REQUEST_TAG'low + 1;
    constant DMA_ID_WIDTH        : integer := DMA_REQUEST_UNITID'high - DMA_REQUEST_UNITID'low + 1;
-   
+
    constant RCB_SIZE            : integer := 64; -- 64 or 128 [B]
 
    constant DMA_ADDR_WIDTH      : integer := DMA_REQUEST_GLOBAL'high - DMA_REQUEST_GLOBAL'low + 1;
@@ -127,7 +127,7 @@ package mvb_mfb_test_pkg is
    function mvb_mfb_trans_cmp(t0 : mvb_mfb_trans_t; t1 : mvb_mfb_trans_t) return boolean;
    procedure mvb_mfb_trans_print(t : mvb_mfb_trans_t);
    procedure mvb_mfb_trans_fifo_print(fifo : slv_fifo_t);
-   
+
    -- MFB ptr work
    function get_block_ptr(mfb_i_ptr : integer; MFB_REG_SIZE : integer; MFB_BLOCK_SIZE : integer) return integer;
    function get_reg_ptr(mfb_i_ptr : integer; MFB_REG_SIZE : integer; MFB_BLOCK_SIZE : integer) return integer;
@@ -277,14 +277,14 @@ package body mvb_mfb_test_pkg is
       uniform(s1,s2,rand);
       X := integer(rand*real(max_length-min_length))+min_length;
       trans.length := X;
-      
+
       uniform(s1,s2,rand);
       X := integer(rand*real(100));
       trans.after_gap_length := 0;
       if (X<after_gap_chance) then
          uniform(s1,s2,rand);
          X := integer(rand*real(ag_max-ag_min))+ag_min;
-         
+
          trans.after_gap_length := X;
       end if;
 
@@ -292,7 +292,7 @@ package body mvb_mfb_test_pkg is
       trans.id  := X/(2**DMA_TAG_WIDTH);
       trans.tag := X mod (2**DMA_TAG_WIDTH);
       free_idtag_map(X) := '0';
-      
+
       trans.data        := random_vector(DMA_DATA_WIDTH,s1);
       trans.data_rd_ptr := 0;
 
@@ -833,7 +833,7 @@ package body mvb_mfb_test_pkg is
             trans0.data(MFB_UP_ITEM_WIDTH*mfb_i_ptr-1 downto 0) := mfb_i.data(MFB_UP_ITEM_WIDTH*mfb_i_ptr-1 downto 0);
             mvb_mfb_trans_merge(unfinished,trans0,trans1);
             unfinished := trans1;
-            
+
             if (eof_ptr/=-1) then
                -- finish the unfinished
                if (unfinished.length/=unfinished_expected_len) then
@@ -850,7 +850,7 @@ package body mvb_mfb_test_pkg is
                accepted(acc_ptr)           := unfinished;
                accepted_vld(acc_ptr)       := '1';
                acc_ptr := acc_ptr+1;
-               
+
                unfinished_vld := '0';
             end if;
          end if;
@@ -870,7 +870,7 @@ package body mvb_mfb_test_pkg is
                mvb_i_ptr := mvb_i_ptr+1;
                next;
             end if;
-            
+
             exit when (mfb_i_ptr=MFB_UP_ITEMS); -- end of MFB word
 
             -- get header info
@@ -1275,7 +1275,7 @@ package body mvb_mfb_test_pkg is
             trans0.data(MFB_DOWN_ITEM_WIDTH*mfb_i_ptr-1 downto 0) := mfb_i.data(MFB_DOWN_ITEM_WIDTH*mfb_i_ptr-1 downto 0);
             mvb_mfb_trans_merge(unfinished,trans0,trans1);
             unfinished := trans1;
-            
+
             if (eof_ptr/=-1) then
                -- finish the unfinished
                if (unfinished.length/=unfinished_expected_len) then
@@ -1292,7 +1292,7 @@ package body mvb_mfb_test_pkg is
                accepted(acc_ptr)           := unfinished;
                accepted_vld(acc_ptr)       := '1';
                acc_ptr := acc_ptr+1;
-               
+
                unfinished_vld := '0';
             end if;
          end if;
@@ -1305,7 +1305,7 @@ package body mvb_mfb_test_pkg is
                   mvb_i_ptr := mvb_i_ptr+1;
                   next;
                end if;
-               
+
                exit when (mfb_i_ptr=MFB_DOWN_ITEMS); -- end of MFB word
 
                -- find next sof

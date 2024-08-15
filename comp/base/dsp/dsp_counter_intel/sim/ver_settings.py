@@ -25,7 +25,7 @@ SETTINGS = {
         "COUNT_BY_WIDTH" : "27",
         "RESULT_WIDTH"   : "64",
     },
-    "_combinations_" : (  
+    "_combinations_" : (
     (), # Works the same as '("default",),' as the "default" is applied in every combination
     ("input_regs_dis",                                                                ),
     (                 "count_down",                                                   ),

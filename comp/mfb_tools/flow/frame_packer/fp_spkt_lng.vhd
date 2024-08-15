@@ -11,7 +11,7 @@ use IEEE.numeric_std.all;
 use work.math_pack.all;
 use work.type_pack.all;
 
-entity FP_SPKT_LNG is 
+entity FP_SPKT_LNG is
     generic(
         MFB_REGIONS         : natural := 1;
         MFB_REGION_SIZE     : natural := 8;
@@ -62,10 +62,10 @@ architecture FULL of FP_SPKT_LNG is
     signal fifox_empty        : std_logic;
     signal spkt_status        : std_logic_vector(max(1, log2(FIFO_DEPTH)) downto 0);
 
-    -- Timeout 
+    -- Timeout
     signal timeout_event      : std_logic;
     signal timeout_en         : std_logic;
-    signal timeout_cnt        : unsigned(max(1, log2(TIMEOUT_CLK_NO) + 1) - 1 downto 0):= (others => '0');    
+    signal timeout_cnt        : unsigned(max(1, log2(TIMEOUT_CLK_NO) + 1) - 1 downto 0):= (others => '0');
     signal timeout            : std_logic;
 
     -- Enable
@@ -74,21 +74,21 @@ architecture FULL of FP_SPKT_LNG is
 
 begin
 
-    -- Timeout 
-    timeout_p: process(all) 
+    -- Timeout
+    timeout_p: process(all)
     begin
         if rising_edge(CLK) then
             timeout_event <= '0';
             if RX_EXT_TIMEOUT = '0' then
                 if timeout_en = '1' then
                     if RX_PKT_SRC_RDY = '0' then
-                        if timeout_cnt = TIMEOUT_CLK_NO then 
+                        if timeout_cnt = TIMEOUT_CLK_NO then
                             timeout_event <= '1';
                             timeout_cnt   <= (others => '0');
-                        else 
+                        else
                             timeout_cnt <= timeout_cnt + 1;
                         end if;
-                    else 
+                    else
                         timeout_cnt <= (others => '0');
                     end if;
                 else
@@ -108,7 +108,7 @@ begin
         if rising_edge(CLK) then
             if timeout = '1' then
                 timeout_en  <= '0';
-            elsif RX_PKT_SRC_RDY = '1' then 
+            elsif RX_PKT_SRC_RDY = '1' then
                 timeout_en  <= '1';
             end if;
         end if;
@@ -142,7 +142,7 @@ begin
         if (or (new_length_v(new_length_v'high downto log2(SPKT_SIZE_MIN)))) = '1' then
             -- overflow - Stored values are sent and the current length is stored
             length_reg_d    <= current_length_v;
-            if spkt_eof_num = 0 then 
+            if spkt_eof_num = 0 then
                 spkt_wr_en      <= '0';
             else
                 spkt_wr_en      <= '1';
@@ -150,12 +150,12 @@ begin
         else
             -- the current packet will fit into set limits
             if timeout = '1' then
-                if rx_fifox_pkt_num = 0 then 
+                if rx_fifox_pkt_num = 0 then
                     spkt_wr_en  <= '0';
-                else 
+                else
                     spkt_wr_en  <= '1';
                 end if;
-            else 
+            else
                 length_reg_d    <= new_length_v;
             end if;
 
@@ -175,19 +175,19 @@ begin
             end if;
         end if;
     end process;
-    
+
     -- EOF counter - This process determines how many packets make up a SuperPacket
     process(all)
     begin
         if rising_edge(CLK) then
-            if RST = '1' then 
+            if RST = '1' then
                 spkt_eof_num    <= (others => '0');
             elsif (timeout = '1') then
                 spkt_eof_num    <= (others => '0');
             elsif (spkt_wr_en = '1') then
                 if (or(RX_PKT_SOF) = '1') then
                     spkt_eof_num    <= to_unsigned(count_ones(RX_PKT_SOF), spkt_eof_num'length);
-                else 
+                else
                     spkt_eof_num    <= (others => '0');
                 end if;
             elsif (RX_PKT_SRC_RDY = '1') and (or(RX_PKT_SOF) = '1') then
@@ -198,7 +198,7 @@ begin
 
     -- Send data at the same clock when timeout occurs
     timeout_handle_p: process(all)
-    begin 
+    begin
         if timeout = '1' then
             rx_fifox_length     <= length_reg_q + pkt_lng_sum;
             rx_fifox_pkt_num    <= spkt_eof_num + to_unsigned(count_ones(RX_PKT_SOF), spkt_eof_num'length);
@@ -262,7 +262,7 @@ begin
 
         if fifox_empty = '0' then
             rd_en   <= not(sp_completed_cnt_v(sp_completed_cnt_v'high));
-        else 
+        else
             rd_en   <= '0';
         end if;
     end process;

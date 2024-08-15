@@ -33,7 +33,7 @@ architecture FULL of testbench is
 
 begin
 
-    clk_gen : process 
+    clk_gen : process
     begin
         clk <= '1';
         wait for CLK_PERIOD / 2;
@@ -94,7 +94,7 @@ begin
             wr_data((w+1)*DATA_WIDTH-1 downto w*DATA_WIDTH) <= std_logic_vector(to_unsigned(4-w,DATA_WIDTH));
             wait for CLK_PERIOD;
         end loop;
-        
+
         wr_en   <= (others => '0');
         wr_addr <= (others => '0');
         wr_data <= (others => '0');

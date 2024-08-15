@@ -74,7 +74,7 @@ class avalon_rq_monitor extends sv_common_pkg::Monitor;
                 hl_tr.requester_id = hdr[63:48]; // Request ID. (63:56 = BUS NUM, 55:48 = VF ID)
             end
 
-            if(state == READ) begin 
+            if(state == READ) begin
                 int m_end = 8;
                 if (data.size() + m_end >= hl_tr.length) begin
                      m_end = hl_tr.length - data.size();

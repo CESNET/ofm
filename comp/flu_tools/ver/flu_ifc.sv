@@ -71,20 +71,20 @@ interface iFrameLinkURx #(DWIDTH=512, EOPWIDTH=6, SOPWIDTH=3) (input logic CLK, 
    // SOP. Then we declare, that after active cycle of EOP without SOP or with
    // SOP_POS <= EOP_POS, there may be no transfer during that sequence
    // (= until active SOP).
-  
+
    sequence sop_seq;
       ##[0:$] (SOP) && (SRC_RDY && DST_RDY);
    endsequence
 
    property NoDataAfterEOP;
-      @(posedge CLK) disable iff (RESET) 
-         (EOP) && (!SOP || SOP_POS*2**(EOPWIDTH-SOPWIDTH) <= EOP_POS) && (SRC_RDY && DST_RDY) |=> 
+      @(posedge CLK) disable iff (RESET)
+         (EOP) && (!SOP || SOP_POS*2**(EOPWIDTH-SOPWIDTH) <= EOP_POS) && (SRC_RDY && DST_RDY) |=>
 	    !(!SOP && (SRC_RDY && DST_RDY)) throughout sop_seq;
    endproperty
 
    assert property (NoDataAfterEOP)
       else $error("FrameLinkUnaligned transaction continued after RX_EOP.");
- 
+
 
    // -- Matching EOP after SOP ------------------------------------------------
    // Each SOP must be, after some time, followed by EOP. Each transaction must
@@ -97,7 +97,7 @@ interface iFrameLinkURx #(DWIDTH=512, EOPWIDTH=6, SOPWIDTH=3) (input logic CLK, 
    endsequence
 
    property EOPMatchSOP;
-      @(posedge CLK) disable iff (RESET) 
+      @(posedge CLK) disable iff (RESET)
          (SOP) && (!EOP || SOP_POS*2**(EOPWIDTH-SOPWIDTH) > EOP_POS) && (SRC_RDY && DST_RDY) |=>
        !(((SOP && !EOP) || (SOP && EOP && SOP_POS*2**(EOPWIDTH-SOPWIDTH) <= EOP_POS)) && (SRC_RDY && DST_RDY)) throughout eop_seq;
    endproperty
@@ -176,8 +176,8 @@ interface iFrameLinkUTx #(DWIDTH=512, EOP_WIDTH=6, SOP_WIDTH=3) (input logic CLK
    endsequence
 
    property NoDataAfterEOP;
-      @(posedge CLK) disable iff (RESET) 
-         (EOP) && (!SOP || SOP_POS*2**(EOP_WIDTH-SOP_WIDTH) <= EOP_POS) && (SRC_RDY && DST_RDY) |=> 
+      @(posedge CLK) disable iff (RESET)
+         (EOP) && (!SOP || SOP_POS*2**(EOP_WIDTH-SOP_WIDTH) <= EOP_POS) && (SRC_RDY && DST_RDY) |=>
 	    !(!SOP && (SRC_RDY && DST_RDY)) throughout sop_seq;
    endproperty
 
@@ -195,7 +195,7 @@ interface iFrameLinkUTx #(DWIDTH=512, EOP_WIDTH=6, SOP_WIDTH=3) (input logic CLK
    endsequence
 
    property EOPMatchSOP;
-      @(posedge CLK) disable iff (RESET) 
+      @(posedge CLK) disable iff (RESET)
          (SOP) && (!EOP || SOP_POS*2**(EOP_WIDTH-SOP_WIDTH) > EOP_POS) && (SRC_RDY && DST_RDY) |=>
        !(((SOP && !EOP) || (SOP && EOP && SOP_POS*2**(EOP_WIDTH-SOP_WIDTH) <= EOP_POS)) && (SRC_RDY && DST_RDY)) throughout eop_seq;
    endproperty

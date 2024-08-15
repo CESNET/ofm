@@ -10,7 +10,7 @@
  * TODO:
  *
  */
- 
+
 
 // ----------------------------------------------------------------------------
 //                                 TESTBENCH
@@ -18,16 +18,16 @@
 import test_pkg::*; // Test constants
 
 module testbench;
-   
+
   // -- Testbench wires and registers -----------------------------------------
   logic            CLK   = 0;
   logic            RESET;
-  
+
   // Input interface
   iNFifoTx #(DATA_WIDTH, FLOWS, BLOCK_SIZE, LUT_MEMORY, 0) FW (CLK, RESET);
   // Output interface
-  iMemRead #(DATA_WIDTH, FLOWS, BLOCK_SIZE)                MR (CLK, RESET); 
-    
+  iMemRead #(DATA_WIDTH, FLOWS, BLOCK_SIZE)                MR (CLK, RESET);
+
   //-- Clock generation -------------------------------------------------------
   // Clock constant in test_pkg
   always #(CLK_PERIOD/2) CLK = ~CLK;

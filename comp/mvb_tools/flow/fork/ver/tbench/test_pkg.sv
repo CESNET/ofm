@@ -14,7 +14,7 @@
  */
 
 package test_pkg;
-   
+
     import math_pkg::*;
 
     parameter OUTPUT_PORTS = 2;

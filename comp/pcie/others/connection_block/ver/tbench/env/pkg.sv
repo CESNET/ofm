@@ -1,5 +1,5 @@
 /*
- * file       : pkg.sv 
+ * file       : pkg.sv
  * description: test pkg
  * date       : 2020
  * author     : Radek Iša <isa@cesnet.cz>
@@ -17,7 +17,7 @@ package env;
      localparam ITEM_WIDTH = 32;
      localparam MFB_META_RX_WIDTH = 32+128;
      localparam MFB_META_TX_WIDTH = 3+32+128;
-    
+
     `include "sequencer.sv"
     `include "scoreboard.sv"
     `include "sequence.sv"

@@ -8,7 +8,7 @@
 `define MFB_PIPE_ENV_SV
 
 package uvm_mfb_pipe;
-    
+
     `include "uvm_macros.svh"
     import uvm_pkg::*;
 

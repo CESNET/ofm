@@ -14,8 +14,8 @@
 
 <description>
    <p>
-      This component is a generic decoder for FrameLink data flow. It should 
-      be used in components, where FrameLink interface is used and where is 
+      This component is a generic decoder for FrameLink data flow. It should
+      be used in components, where FrameLink interface is used and where is
       a need to recognize data parts (header, payload, footer) of frame.
    </p>
    <p>
@@ -72,7 +72,7 @@
    </p>
 
    <p>
-      It is important to note, that output signals (like SOHDR, EOF, ...) 
+      It is important to note, that output signals (like SOHDR, EOF, ...)
       of this decoder are NOT affected by SRC_RDY or DST_RDY signals.
       That means, that decoder output signals can be active for more than
       one clock cycle, if data transfer is interrupted by source or
@@ -98,7 +98,7 @@
             <td>150 MHz</td>
 			</tr>
 		<nazev>Chip utilization &amp; max design frequency</nazev>
-		</tab> 
+		</tab>
    </p>
 </body>
 </source>

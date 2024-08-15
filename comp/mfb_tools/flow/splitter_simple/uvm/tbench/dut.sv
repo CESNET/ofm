@@ -1,8 +1,8 @@
-//-- dut.sv: Design under test 
+//-- dut.sv: Design under test
 //-- Copyright (C) 2021 CESNET z. s. p. o.
 //-- Author(s): Tomáš Beneš <xbenes55@stud.fit.vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 import test::*;
 
@@ -79,5 +79,5 @@ module DUT (
         .TX_MFB_DST_RDY     (tx_mfb_dst_rdy)
     );
 
-    
+
 endmodule

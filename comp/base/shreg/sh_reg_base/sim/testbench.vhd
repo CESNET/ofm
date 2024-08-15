@@ -43,15 +43,15 @@ architecture behavioral of testbench is
    -----------------------
    -- clk signals
    signal CLK    : std_logic;
-	
-   -- Signals 
+
+   -- Signals
    signal in_data  : std_logic_vector(DATA_WIDTH -1 downto 0);
    signal out_data : std_logic_vector(DATA_WIDTH -1 downto 0);
    signal ce : std_logic;
 
    --testovaci signal
    signal   sig_test     : std_logic;
-   
+
 begin
 
 --------------------------
@@ -67,14 +67,14 @@ begin
    end process;
 
 
-   ----------- 
+   -----------
    --  UUT  --
    -----------
-   UUT: entity work.sh_reg_base_dynamic 
+   UUT: entity work.sh_reg_base_dynamic
        generic map(
          DATA_WIDTH  => DATA_WIDTH,
          NUM_BITS    => NUM_BITS,
-         
+
          INIT_TYPE   => 3,
          INIT        => x"B42f01f0FF00FF00",
          IS_CLK_INVERTED => '0' ,
@@ -85,14 +85,14 @@ begin
          CLK  => CLK,
          CE   => ce,
          ADDR => conv_std_logic_vector(NUM_BITS-1, log2(NUM_BITS)),
-         
+
          DIN  => in_data,
          DOUT => out_data
       );
 
    -----------------
    --	Testbench	--
-   ----------------- 
+   -----------------
    tb:process
 
      variable var_end : integer;
@@ -100,10 +100,10 @@ begin
    begin
 
 
-      -------------------------- 
+      --------------------------
       -- start simulation
       sig_test <= '1';
-      in_data <= (others => '0');   
+      in_data <= (others => '0');
       wait until CLK = '1';
       ce <= '0';
       wait until CLK = '0';
@@ -114,8 +114,8 @@ begin
         ce      <= '1';
         wait until CLK = '0';
      end loop;
-     
-   
+
+
       ----------------------------
       -- EXIT
       wait until CLK = '1';
@@ -123,7 +123,7 @@ begin
       wait until CLK = '0';
 
 
-      wait; 
+      wait;
    end process;
 
 end architecture behavioral;

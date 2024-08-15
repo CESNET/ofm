@@ -52,11 +52,11 @@ architecture FL_RXBUFFER_ARCH of FL_RXBUFFER is
    signal reg_fl_sig32       : std_logic_vector(31 downto 0);
    signal reg_fl_rem32       : std_logic_vector(31 downto 0);
    signal reg_fl_data32      : std_logic_vector(max(DATA_WIDTH, 32)-1 downto 0);
-   
+
 begin
    -- FL RX Buffer ready interface
    RX_DST_RDY_N        <= flfifo_rx_dst_rdy_n or (not reg_cmd(0));
-   
+
    -- signals that enable FL FIFO input and output
    flfifo_rx_src_rdy_n <= (not reg_cmd(0)) or RX_SRC_RDY_N;
    flfifo_tx_dst_rdy_n <= not reg_cmd(1);
@@ -167,7 +167,7 @@ begin
    -- Output registers ------------------------------------------------------
    -- signals that enable writing to the output registers
    output_we           <= reg_cmd(1) and (not flfifo_tx_src_rdy_n);
-   
+
    -- register reg_fl_rem ---------------------------------------------------
    reg_fl_remp: process(RESET, CLK)
    begin
@@ -224,7 +224,7 @@ begin
          when others =>
       end case;
    end process;
-   
+
    -- Output ----------------------------------------------------------------
    reg_cmd32       <= (31 downto 2 => '0') & reg_cmd;
    reg_status32    <= (31 downto 1 => '0') & reg_status;
@@ -243,7 +243,7 @@ begin
    fl_datago: if DATA_WIDTH >= 32 generate
       reg_fl_data32 <= reg_fl_data;
    end generate fl_datago;
-   
+
    -- generic multiplexor input are concatenated 32-bit signals
    mx_decoder_data_in <= reg_fl_data32 &
                          reg_fl_rem32 &

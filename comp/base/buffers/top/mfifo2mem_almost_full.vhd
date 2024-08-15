@@ -52,7 +52,7 @@ entity MFIFO2MEM_ALMOST_FULL is
     READ        : in  std_logic;
     PIPE_EN     : in  std_logic;
     EMPTY       : out std_logic_vector(FLOWS-1 downto 0);
-    
+
     -- new interface
     RD_ADDR       : in  std_logic_vector(log2(BLOCK_SIZE)-1 downto 0);
     REL_LEN       : in  std_logic_vector(log2(BLOCK_SIZE+1)*FLOWS-1 downto 0);
@@ -275,7 +275,7 @@ GEN_BLOCKS: for j in 0 to FLOWS-1 generate
       MULTI_WRITE => false,
       MULTI_READ  => true,
       FREE_ITEMS => FREE_ITEMS
-    ) 
+    )
     port map (
       CLK         => CLK,
       RESET       => sig_init(j),
@@ -323,7 +323,7 @@ buf_mem_i : entity work.BUF_MEM
     DATA_WIDTH => DATA_WIDTH,
     ITEMS      => BLOCK_SIZE*FLOWS,
     OUTPUT_REG => OUTPUT_REG
-  ) 
+  )
   port map (
     CLK      => CLK,
     RESET    => RESET,

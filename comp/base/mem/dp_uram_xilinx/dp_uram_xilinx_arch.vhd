@@ -28,7 +28,7 @@ architecture DP_URAM_XILINX_arch of DP_URAM_XILINX is
 
    component xpm_memory_tdpram
       generic (
-    
+
         -- Common module generics
         MEMORY_SIZE             : integer := 2048           ;
         MEMORY_PRIMITIVE        : string  := "auto"         ;
@@ -44,7 +44,7 @@ architecture DP_URAM_XILINX_arch of DP_URAM_XILINX is
         MEMORY_OPTIMIZATION     : string  := "true";
         CASCADE_HEIGHT          : integer := 0               ;
         SIM_ASSERT_CHK          : integer := 0               ;
-    
+
         -- Port A module generics
         WRITE_DATA_WIDTH_A : integer := 32          ;
         READ_DATA_WIDTH_A  : integer := 32          ;
@@ -54,7 +54,7 @@ architecture DP_URAM_XILINX_arch of DP_URAM_XILINX is
         READ_LATENCY_A     : integer := 2           ;
         WRITE_MODE_A       : string  := "no_change" ;
         RST_MODE_A         : string  := "SYNC"      ;
-    
+
         -- Port B module generics
         WRITE_DATA_WIDTH_B : integer := 32         ;
         READ_DATA_WIDTH_B  : integer := 32         ;
@@ -64,13 +64,13 @@ architecture DP_URAM_XILINX_arch of DP_URAM_XILINX is
         READ_LATENCY_B     : integer := 2          ;
         WRITE_MODE_B       : string  := "no_change";
         RST_MODE_B         : string  := "SYNC"
-    
+
       );
       port (
-    
+
         -- Common module ports
         sleep          : in  std_logic;
-    
+
         -- Port A module ports
         clka           : in  std_logic;
         rsta           : in  std_logic;
@@ -84,7 +84,7 @@ architecture DP_URAM_XILINX_arch of DP_URAM_XILINX is
         douta          : out std_logic_vector(READ_DATA_WIDTH_A-1 downto 0);
         sbiterra       : out std_logic;
         dbiterra       : out std_logic;
-    
+
         -- Port B module ports
         clkb           : in  std_logic;
         rstb           : in  std_logic;
@@ -291,7 +291,7 @@ architecture DP_URAM_XILINX_arch of DP_URAM_XILINX is
             end if;
          end if;
       end process;
-      
+
       -- RAM output data goes through a pipeline.
       process(CLK, memregb)
       begin

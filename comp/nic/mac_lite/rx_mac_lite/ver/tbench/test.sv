@@ -80,7 +80,7 @@ program TEST (
         mi32Driver  = new("Mi32 Driver", null, MI);
         mi32Monitor = new("Mi32 Monitor", MI);
 
-        mi32Driver.txDelayEn_wt      = 0; 
+        mi32Driver.txDelayEn_wt      = 0;
         mi32Driver.txDelayDisable_wt = 1;
         mi32Driver.txDelayLow        = 0;
         mi32Driver.txDelayHigh       = 1;
@@ -166,7 +166,7 @@ program TEST (
         mi32_tr.data    = FRAME_LEN_MIN;
         mi32Driver.sendTransaction(mi32_tr);
 
-        // MTU register 
+        // MTU register
         mi32_tr.address = 32'h34;
         mi32_tr.data    = FRAME_LEN_MAX;
         mi32Driver.sendTransaction(mi32_tr);
@@ -194,10 +194,10 @@ program TEST (
         bit [63:0] cfc;     // Correct Frames Counter
         bit [63:0] dfc;     // Discarded Frames Counter
         bit [63:0] bofc;    // Counter of frames discarded due to buffer overflow
-        bit [63:0] oroc;    // Octets Received OK Counter 
+        bit [63:0] oroc;    // Octets Received OK Counter
 
-        //Other RFC2819 counters 
-        bit [63:0] crc_err;             // Discarded frames due to bad CRC checksum     
+        //Other RFC2819 counters
+        bit [63:0] crc_err;             // Discarded frames due to bad CRC checksum
         bit [63:0] over_mtu;            // Discarded frames due to maximal MTU
         bit [63:0] below_min;           // Discarded frames due to minimal length
         bit [63:0] bcast_frames;        // Total Received broadcast frames
@@ -205,7 +205,7 @@ program TEST (
         bit [63:0] fragment_frames;     // Total Received fragment frames
         bit [63:0] jabber_frames;       // Total Received jabber frames
 
-        bit [63:0] frames_64;           //  
+        bit [63:0] frames_64;           //
         bit [63:0] frames_65_127;       //
         bit [63:0] frames_128_255;      //  Histogram
         bit [63:0] frames_256_511;      //  counters
@@ -273,7 +273,7 @@ program TEST (
         mi32Monitor.executeTransaction(mi32Transaction);
         bofc[63:32] = mi32Transaction.data;
 
-        // Read Octets Received OK Counter 
+        // Read Octets Received OK Counter
         // Low part
         mi32Transaction.address = 32'h3C;
         mi32Monitor.executeTransaction(mi32Transaction);
@@ -291,11 +291,11 @@ program TEST (
             mi32Transaction.rw      = 1;
             mi32Transaction.be      = '1;
             mi32Driver.sendTransaction(mi32Transaction);
-            
+
             mi32Transaction.rw      = 0;
             mi32Transaction.be      = '1;
         end
-        
+
         // Read Counter of discarded frames due to bad CRC
         // Low part
         mi32Transaction.address = RFC2819_ADDRESSES[0][USE_RFC2819_EXTENDED];
@@ -306,7 +306,7 @@ program TEST (
         mi32Transaction.address = RFC2819_ADDRESSES[14][USE_RFC2819_EXTENDED];
         mi32Monitor.executeTransaction(mi32Transaction);
         crc_err[63:32] = mi32Transaction.data;
-        
+
         // Read Counter of discarded frames due to length over MTU
         // Low part
         mi32Transaction.address = RFC2819_ADDRESSES[1][USE_RFC2819_EXTENDED];
@@ -317,7 +317,7 @@ program TEST (
         mi32Transaction.address = RFC2819_ADDRESSES[15][USE_RFC2819_EXTENDED];
         mi32Monitor.executeTransaction(mi32Transaction);
         over_mtu[63:32] = mi32Transaction.data;
-        
+
         // Read Counter of discarded frames due to length below min
         // Low part
         mi32Transaction.address = RFC2819_ADDRESSES[2][USE_RFC2819_EXTENDED];
@@ -450,28 +450,28 @@ program TEST (
         mi32Monitor.executeTransaction(mi32Transaction);
         frames_1024_1518[63:32] = mi32Transaction.data;
 
-        // Read Counter of frames with 1518 > length                                
-        // Low part                                                                                                                   
-        mi32Transaction.address = RFC2819_ADDRESSES[28][USE_RFC2819_EXTENDED];     
-        mi32Monitor.executeTransaction(mi32Transaction);                       
-        frames_over_1518[31:0]  = mi32Transaction.data;                       
-                                                                            
-        // High part                                                              
-        mi32Transaction.address = RFC2819_ADDRESSES[29][USE_RFC2819_EXTENDED];     
-        mi32Monitor.executeTransaction(mi32Transaction);                           
-        frames_over_1518[63:32] = mi32Transaction.data;   
+        // Read Counter of frames with 1518 > length
+        // Low part
+        mi32Transaction.address = RFC2819_ADDRESSES[28][USE_RFC2819_EXTENDED];
+        mi32Monitor.executeTransaction(mi32Transaction);
+        frames_over_1518[31:0]  = mi32Transaction.data;
+
+        // High part
+        mi32Transaction.address = RFC2819_ADDRESSES[29][USE_RFC2819_EXTENDED];
+        mi32Monitor.executeTransaction(mi32Transaction);
+        frames_over_1518[63:32] = mi32Transaction.data;
 
         // Read Counter of frames below 64
-        // Low part                                                                                                                   
-        mi32Transaction.address = RFC2819_ADDRESSES[30][USE_RFC2819_EXTENDED];     
-        mi32Monitor.executeTransaction(mi32Transaction);                       
-        frames_below_64[31:0]  = mi32Transaction.data;                       
-                                                                            
-        // High part                                                              
-        mi32Transaction.address = RFC2819_ADDRESSES[31][USE_RFC2819_EXTENDED];     
-        mi32Monitor.executeTransaction(mi32Transaction);                           
-        frames_below_64[63:32] = mi32Transaction.data;             
-                                                    
+        // Low part
+        mi32Transaction.address = RFC2819_ADDRESSES[30][USE_RFC2819_EXTENDED];
+        mi32Monitor.executeTransaction(mi32Transaction);
+        frames_below_64[31:0]  = mi32Transaction.data;
+
+        // High part
+        mi32Transaction.address = RFC2819_ADDRESSES[31][USE_RFC2819_EXTENDED];
+        mi32Monitor.executeTransaction(mi32Transaction);
+        frames_below_64[63:32] = mi32Transaction.data;
+
         // Switch to the base range from the IBUF
         if (USE_RFC2819_EXTENDED == 0) begin
             mi32Transaction.address = 32'h2C;
@@ -483,7 +483,7 @@ program TEST (
             mi32Transaction.rw      = 0;
             mi32Transaction.be      = '1;
         end
-        
+
         #(20*MI_CLK_PERIOD);
 
         // Display counters values
@@ -523,12 +523,12 @@ program TEST (
         for (int i = 0; i < MAC_COUNT; i++) begin
             // Read low 32 bits
             mi32Transaction.address = 32'h80 + 8*i;
-            mi32Monitor.executeTransaction(mi32Transaction);                           
+            mi32Monitor.executeTransaction(mi32Transaction);
             mac_array_read[i][0:3] = { << byte {mi32Transaction.data}};
 
             // Read high 16 bits + valid bit
             mi32Transaction.address = 32'h84 + 8*i;
-            mi32Monitor.executeTransaction(mi32Transaction);                           
+            mi32Monitor.executeTransaction(mi32Transaction);
             mac_array_read[i][4:5] = { << byte {mi32Transaction.data[15:0]}};
 
             $write("MAC %10d:   \t %p\n",i,mac_array_read[i]);

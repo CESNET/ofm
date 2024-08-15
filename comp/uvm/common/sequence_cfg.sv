@@ -1,7 +1,7 @@
 /*
  * file       :  sequence_cfg.sv
  * Copyright (C) 2023 CESNET z. s. p. o.
- * description:  sequence configuration  
+ * description:  sequence configuration
  * author     : Radek Iša <isa@cesnet.cz>
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -23,7 +23,7 @@ class sequence_cfg extends uvm_object;
         transactions_count = 0;
     endfunction
 
-    //return 
+    //return
     virtual function int unsigned next();
         return 1;
     endfunction
@@ -103,7 +103,7 @@ endclass
 ////////////////////////////////////////////////////////////////
 class sequence_cfg_data extends uvm_object;
     `uvm_object_utils(uvm_common::sequence_cfg_data)
-   
+
     int unsigned stop;
     int unsigned transactions[];
     static int unsigned obj_num = 0;
@@ -146,7 +146,7 @@ endclass
 
 class sequence_cfg_index extends sequence_cfg;
     `uvm_object_utils(uvm_common::sequence_cfg_index)
-   
+
     int unsigned index;
     sequence_cfg_data data;
 
@@ -173,7 +173,7 @@ endclass
 
 class sequences_cfg_sync#(int unsigned NUM) extends sequence_cfg;
     `uvm_object_param_utils(uvm_common::sequences_cfg_sync#(NUM))
-   
+
     sequence_cfg_data  data;
     sequence_cfg_index cfg[NUM];
 

@@ -58,7 +58,7 @@ entity DUT_WRAPPER is
         TX_VLD     : out std_logic_vector(ITEMS-1 downto 0);
         TX_SRC_RDY : out std_logic;
         TX_DST_RDY : in  std_logic
-    
+
         ---------------------------------------------------------------------------
     );
 end entity;
@@ -105,7 +105,7 @@ begin
         DST_CHANNELS   => DST_CHANNELS,
         MI_DATA_WIDTH  => MI_DATA_WIDTH,
         MI_ADDR_WIDTH  => MI_ADDR_WIDTH,
-    
+
         DEVICE  => DEVICE    )
     port map(
         CLK         => CLK,

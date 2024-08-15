@@ -83,7 +83,7 @@ architecture IB_SIM_ARCH of IB_SIM is
   signal write_align_eop_wr      : std_logic;
 
 begin
-     
+
 -- Upstream always ready
 internal_bus_up.DST_RDY_N <= '0';
 
@@ -143,7 +143,7 @@ port0_pipep: process(IB_RESET, IB_CLK)
 begin
    if (IB_RESET = '1') then
       internal_bus_down.DATA        <= X"0000000000000000";
-      internal_bus_down.SOP_N       <= '1'; 
+      internal_bus_down.SOP_N       <= '1';
       internal_bus_down.EOP_N       <= '1';
       internal_bus_down.SRC_RDY_N   <= '1';
    elsif (IB_CLK'event AND IB_CLK = '1') then
@@ -152,7 +152,7 @@ begin
        internal_bus_down.SOP_N      <= port0_out_sop_aux;
        internal_bus_down.EOP_N      <= port0_out_eop_aux;
        internal_bus_down.SRC_RDY_N  <= port0_out_src_rdy;
-     end if;  
+     end if;
    end if;
 end process;
 
@@ -189,7 +189,7 @@ ib_packet_fifo: entity work.fifo
       DATA_OUT(64)          => port0_out_sop,
       DATA_OUT(65)          => port0_out_eop,
       EMPTY                 => ib_packet_fifo_empty
-      ); 
+      );
 
 
 main : process
@@ -228,8 +228,8 @@ write_align_eop         <= '0';
 write_align_align_reg   <= (others => '0');
 write_align_length      <= (others => '0');
 write_align_init        <= '0';
-  
-   
+
+
 -- Wait when reset
 wait until (IB_RESET = '0');
 
@@ -248,11 +248,11 @@ while true loop
   file_name    := CTRL.PARAMS.FILE_NAME;
   trans_flag   := CTRL.PARAMS.TRANS_FLAG;
 
-  assert CTRL.PARAMS.LENGTH < 4096 report "Length must be 0, 4095" severity ERROR; 
-  
+  assert CTRL.PARAMS.LENGTH < 4096 report "Length must be 0, 4095" severity ERROR;
+
 -- LOCAL READ -----------------------------------------------------
   if (CTRL.OPER = LOCAL_READ or CTRL.OPER = LOCAL_READ_FILE) then
- 
+
     -- Open write file
     if (CTRL.OPER = LOCAL_READ_FILE) then
       file_open(out_file, file_name.arr(1 to file_name.len), WRITE_MODE);
@@ -272,7 +272,7 @@ while true loop
       BUSY <= '0';
     end if;
     wait until (ib_packet_fifo_full = '0' and IB_CLK'event and IB_CLK='1');
-    
+
 
     if (CTRL.READ_WAIT) then
        ib_packet_fifo_we <= '0';
@@ -350,11 +350,11 @@ while true loop
 
 -- LOCAL WRITE FILE ------------------------------------------------
   elsif (CTRL.OPER = LOCAL_WRITE_FILE) then
-     
+
     -- Generate local write transaction using file
     line_count:= file_line_count(file_name.arr(1 to file_name.len));
     file_open(in_file, file_name.arr(1 to file_name.len), READ_MODE);
-    
+
     if (CTRL.PARAMS.LENGTH = 0) then
        items2write:= line_count;
        length:= conv_std_logic_vector(line_count*8, 12);
@@ -366,7 +366,7 @@ while true loop
          items2write := CTRL.PARAMS.LENGTH/8+1;
        end if;
     end if;
-  
+
     -- Init Write Align Circuit
     write_align_align_reg <= dst_addr(2 downto 0);
     write_align_length    <= length;
@@ -386,8 +386,8 @@ while true loop
     while (items2write > 0) loop
       readline(in_file, in_line);
       hread(in_line, data, readFlag);
-      assert readFlag report "ib_local_write_file FILE read error" severity ERROR; 
-       
+      assert readFlag report "ib_local_write_file FILE read error" severity ERROR;
+
        -- Write 64 bit data to align circuit
        write_align_init        <= '0';
        write_align_data_in     <= data;
@@ -429,7 +429,7 @@ while true loop
     -- Generate local write transaction using file
     line_count:= file_line_count(file_name.arr(1 to file_name.len));
     file_open(in_file, file_name.arr(1 to file_name.len), READ_MODE);
-    
+
     if (CTRL.PARAMS.LENGTH = 0) then
        items2write:= (line_count / 2) + (line_count mod 2);
        length:= conv_std_logic_vector(line_count*4, 12);
@@ -469,7 +469,7 @@ while true loop
       else
          data32_2:=X"00000000";
       end if;
-       
+
        -- Write 64 bit data to align circuit
        write_align_init        <= '0';
        write_align_data_in     <= data32_2 & data32_1;
@@ -508,11 +508,11 @@ while true loop
 
  -- READ COMPLETITION ------------------------------------------------
   elsif (CTRL.OPER = READ_COMPLETITION) then
-     
+
     -- Generate local write transaction using file
     line_count:= file_line_count(file_name.arr(1 to file_name.len));
     file_open(in_file, file_name.arr(1 to file_name.len), READ_MODE);
-    
+
     if (CTRL.PARAMS.LENGTH = 0) then
        items2write:= line_count;
        length:= conv_std_logic_vector(line_count*8, 12);
@@ -524,7 +524,7 @@ while true loop
          items2write := CTRL.PARAMS.LENGTH/8+1;
        end if;
     end if;
-  
+
     -- Init Write Align Circuit
     write_align_align_reg <= dst_addr(2 downto 0);
     write_align_length    <= length;
@@ -544,8 +544,8 @@ while true loop
     while (items2write > 0) loop
       readline(in_file, in_line);
       hread(in_line, data, readFlag);
-      assert readFlag report "ib_local_write_file FILE read error" severity ERROR; 
-       
+      assert readFlag report "ib_local_write_file FILE read error" severity ERROR;
+
        -- Write 64 bit data to align circuit
        write_align_init        <= '0';
        write_align_data_in     <= data;
@@ -581,7 +581,7 @@ while true loop
  -- WRITE COMPLETITION ------------------------------------------------
   elsif (CTRL.OPER = WRITE_COMPLETITION) then
     -- Generate completition transaction (64 bit word)
-    ib_packet_data    <= dst_addr & tag & '1' & C_IB_WR_COMPL_TRANSACTION & length; 
+    ib_packet_data    <= dst_addr & tag & '1' & C_IB_WR_COMPL_TRANSACTION & length;
     ib_packet_sop     <= '0';
     ib_packet_eop     <= '1';
     ib_packet_fifo_we <= '1';
@@ -601,7 +601,7 @@ while true loop
     ib_packet_sop     <= '1';
     ib_packet_eop     <= '1';
     ib_packet_fifo_we <= '0';
-end loop;  
+end loop;
 
 
 end process;

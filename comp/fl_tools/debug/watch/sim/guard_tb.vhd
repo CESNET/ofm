@@ -71,7 +71,7 @@ begin
    DST_RDY_N <= '1';
    SRC_RDY_N <= '1';
 
-   RESET <= '1'; 
+   RESET <= '1';
    wait for 5*clkper;
    RESET <= '0';
    wait for 5*clkper;
@@ -112,7 +112,7 @@ begin
    SRC_RDY_N <= '1';
 
    -- second packet
-   wait for 5*clkper; 
+   wait for 5*clkper;
    SRC_RDY_N <= '0';
    SOF_N <= '0';
    SOP_N <= '0';

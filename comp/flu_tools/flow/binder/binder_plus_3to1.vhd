@@ -1,13 +1,13 @@
 --
 -- binder_plus_ent.vhd: Binder 3-1 component for Frame Link Unaligned Plus
 -- Copyright (C) 2017 CESNET
--- Author: Lukas Kekely <kekely@cesnet.cz> 
+-- Author: Lukas Kekely <kekely@cesnet.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --
 -- $Id$
 --
--- TODO: 
+-- TODO:
 --
 --
 library IEEE;
@@ -41,7 +41,7 @@ entity FLU_PLUS_BINDER_3TO1 is
       RX0_EOP       : in std_logic;
       RX0_SRC_RDY   : in std_logic;
       RX0_DST_RDY   : out std_logic;
-      
+
       -- Frame Link Unaligned input interface
       RX1_DATA      : in std_logic_vector(DATA_WIDTH-1 downto 0);
       RX1_CHANNEL   : in std_logic_vector(CHANNEL_WIDTH-1 downto 0);
@@ -70,7 +70,7 @@ entity FLU_PLUS_BINDER_3TO1 is
       TX_SOP        : out std_logic;
       TX_EOP        : out std_logic;
       TX_SRC_RDY    : out std_logic;
-      TX_DST_RDY    : in std_logic 
+      TX_DST_RDY    : in std_logic
    );
 end entity;
 
@@ -87,8 +87,8 @@ architecture ARCH of FLU_PLUS_BINDER_3TO1 is
    signal sop     : std_logic_vector(INPUT_PORTS-1 downto 0);
    signal eop     : std_logic_vector(INPUT_PORTS-1 downto 0);
    signal src_rdy : std_logic_vector(INPUT_PORTS-1 downto 0);
-   signal dst_rdy : std_logic_vector(INPUT_PORTS-1 downto 0); 
-   
+   signal dst_rdy : std_logic_vector(INPUT_PORTS-1 downto 0);
+
 begin
   flu_binder: entity work.FLU_PLUS_BINDER
   generic map(
@@ -120,9 +120,9 @@ begin
       TX_SOP        => TX_SOP,
       TX_EOP        => TX_EOP,
       TX_SRC_RDY    => TX_SRC_RDY,
-      TX_DST_RDY    => TX_DST_RDY  
+      TX_DST_RDY    => TX_DST_RDY
    );
-   
+
    data        <= RX2_DATA    & RX1_DATA    & RX0_DATA;
    channel     <= RX2_CHANNEL & RX1_CHANNEL & RX0_CHANNEL;
    sop_pos     <= RX2_SOP_POS & RX1_SOP_POS & RX0_SOP_POS;

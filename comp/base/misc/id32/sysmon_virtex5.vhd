@@ -3,7 +3,7 @@
 --! @file
 --! \brief System monitor component for Virtex-5 FPGAs
 --! \author Lukas Kekely <kekely@cesnet.cz>
---! \date 2012 
+--! \date 2012
 --!
 --! @section License
 --!
@@ -19,9 +19,9 @@ use IEEE.std_logic_unsigned.all;
 --! Part of IEEE standard library.
 use IEEE.numeric_std.all;
 
---! Library containing SYSMON component. 
+--! Library containing SYSMON component.
 library unisim;
---! Library containing SYSMON component. 
+--! Library containing SYSMON component.
 use unisim.vcomponents.ALL;
 
 --! \brief Architecture implementing system monitor component for Virtex-5 FPGAs.
@@ -36,7 +36,7 @@ begin
   -- real sysmon generate
   sysmon_gen : if (SYSMON_EN) generate
     -- MI connection
-    MI_ARDY              <= MI_RD or MI_WR; 
+    MI_ARDY              <= MI_RD or MI_WR;
     MI_DRDY              <= sysmon_drdy and (not reg_sysmon_wen);
     MI_DRD(31 downto 16) <= (others => '0');
     reg_sysmon_wen_p : process(CLK)
@@ -47,14 +47,14 @@ begin
         end if;
       end if;
     end process;
-   
-   
+
+
     -- sysmon signals
     sysmon_den     <= MI_RD or MI_WR;
     sysmon_addr    <= BANK & MI_ADDR(6 downto 2);
-    ALARM          <= sysmon_alm(0) or sysmon_alm(1) or sysmon_alm(2);       
-    
-    
+    ALARM          <= sysmon_alm(0) or sysmon_alm(1) or sysmon_alm(2);
+
+
     -- sysmon component
     SYSMON_INST : SYSMON
     generic map(
@@ -77,19 +77,19 @@ begin
       INIT_56 => X"caaa",
       INIT_57 => X"ae4e"
     ) port map (
-      RESET             => RESET,   
-      
-      DADDR(6 downto 0) => sysmon_addr, 
+      RESET             => RESET,
+
+      DADDR(6 downto 0) => sysmon_addr,
       DCLK              => CLK,
       DEN               => sysmon_den,
       DI(15 downto 0)   => MI_DWR(15 downto 0),
       DWE               => MI_WR,
       DO(15 downto 0)   => MI_DRD(15 downto 0),
       DRDY              => sysmon_drdy,
-     
+
       ALM(2 downto 0)   => sysmon_alm,
-      OT                => open,          
-     
+      OT                => open,
+
       VAUXN(15 downto 0)  => "0000000000000000",
       VAUXP(15 downto 0)  => "0000000000000000",
       CHANNEL(4 downto 0) => open,
@@ -105,8 +105,8 @@ begin
       JTAGMODIFIED        => open
     );
   end generate;
-  
-  
+
+
   -- fake sysmon generate
   no_sysmon_gen : if (not SYSMON_EN) generate
     MI_DRD  <= (others => '0');
@@ -118,7 +118,7 @@ begin
       end if;
     end process;
     MI_ARDY <= MI_RD or MI_WR;
-    ALARM   <= '0'; 
+    ALARM   <= '0';
   end generate;
 
 end architecture;

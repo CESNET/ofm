@@ -1,6 +1,6 @@
-# top_level_sig.fdo : Include file with signals 
+# top_level_sig.fdo : Include file with signals
 # Copyright (C) 2012 CESNET
-# Author: Pavel Benacek <benacek@cesnet.cz> 
+# Author: Pavel Benacek <benacek@cesnet.cz>
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -12,7 +12,7 @@
 
 source "./signals.fdo"
 
-add wave -divider "FLU_SAMPLER"  
+add wave -divider "FLU_SAMPLER"
 add_wave "-noupdate -color yellow -label RESET"   /testbench/RESET
 add_wave "-noupdate -color yellow -label CLK"     /testbench/CLK
 
@@ -34,5 +34,5 @@ flua_shifter_tx         "FLUA Shifter 1 - TX"         /testbench/DUT_U/VHDL_DUT_
 flua_shifter_internal   "FLUA Shifter 1 - Internal"   /testbench/DUT_U/VHDL_DUT_U/FLUA_TO_FLU_BIND_I/FLUA_SHIFTER_1_I/CORE_I
 
 binder_sync_rx          "Binder Sync - RX"            /testbench/DUT_U/VHDL_DUT_U/BINDER_SYNC_I
-binder_sync_tx          "Binder Sync - TX"            /testbench/DUT_U/VHDL_DUT_U/BINDER_SYNC_I 
-binder_sync_internal    "Binder Sync - Internal"      /testbench/DUT_U/VHDL_DUT_U/BINDER_SYNC_I 
+binder_sync_tx          "Binder Sync - TX"            /testbench/DUT_U/VHDL_DUT_U/BINDER_SYNC_I
+binder_sync_internal    "Binder Sync - Internal"      /testbench/DUT_U/VHDL_DUT_U/BINDER_SYNC_I

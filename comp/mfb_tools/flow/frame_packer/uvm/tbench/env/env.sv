@@ -32,12 +32,12 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MVB_IT
     //MVB interface - Verification
     protected uvm_meta::agent #(USR_RX_PKT_SIZE_MAX, RX_CHANNELS, HDR_META_WIDTH) m_info;
 
-    //Data generator 
+    //Data generator
     protected uvm_framepacker::generator #(USR_RX_PKT_SIZE_MAX, RX_CHANNELS, HDR_META_WIDTH, MVB_ITEM_WIDTH, MFB_ITEM_WIDTH) m_generator;
-    
+
     //Scoreboard
     scoreboard #(MVB_ITEM_WIDTH, MFB_ITEM_WIDTH, RX_CHANNELS, USR_RX_PKT_SIZE_MAX) m_scoreboard;
-    
+
     //Virtual sequencer
     uvm_framepacker::virt_sequencer#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, USR_RX_PKT_SIZE_MAX, RX_CHANNELS, HDR_META_WIDTH) vscr;
 
@@ -53,7 +53,7 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MVB_IT
 
     /////////////////////////////////////////////////////
     //                 BUILD PHASE                     //
-    /////////////////////////////////////////////////////  
+    /////////////////////////////////////////////////////
     function void build_phase(uvm_phase phase);
         uvm_logic_vector_array_mfb::config_item mfb_cfg_rx;
         uvm_logic_vector_array_mfb::config_item mfb_cfg_tx;
@@ -102,13 +102,13 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MVB_IT
             mvb_cfg_tx.seq_cfg.space_size_set(SPACE_SIZE_MIN_TX, SPACE_SIZE_MAX_TX);
             uvm_config_db#(uvm_logic_vector_mvb::config_item)::set(this, "mvb_tx_env", "m_config", mvb_cfg_tx);
 
-            //Flow Control unit 
+            //Flow Control unit
             for (int unsigned it = 0; it < RX_CHANNELS; it++) begin
                 m_flow_ctrl_cfg[it]                 = new;
-                m_flow_ctrl_cfg[it].active          = UVM_PASSIVE;  
+                m_flow_ctrl_cfg[it].active          = UVM_PASSIVE;
                 m_flow_ctrl_cfg[it].interface_name  = $sformatf("vif_mvb_flow_ctrl_%0d", it);
                 uvm_config_db #(uvm_logic_vector_mvb::config_item)::set(this, $sformatf("m_flow_ctrl_%0d", it), "m_config", m_flow_ctrl_cfg[it]);
-            end    
+            end
 
 
         //MFB interface - verification configuration
@@ -164,11 +164,11 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MVB_IT
 
         // MVB
         mvb_tx_env.analysis_port.connect(m_scoreboard.analysis_imp_mvb_tx);
-        
+
         for (int unsigned i = 0; i < RX_CHANNELS; i++) begin
             m_flow_ctrl[i].analysis_port.connect(m_scoreboard.m_model.analysis_export_flow_ctrl[i].analysis_export);
         end
-        
+
         //RESET
         m_reset.sync_connect(mfb_rx_env.reset_sync);
         m_reset.sync_connect(mfb_tx_env.reset_sync);

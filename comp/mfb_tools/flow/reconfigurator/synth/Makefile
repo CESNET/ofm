@@ -9,7 +9,7 @@ TOP_LEVEL_ENT=MFB_RECONFIGURATOR
 # export CLK_PERIOD=4.0
 # export DEVICE=ULTRASCALE
 
- all: comp
+all: comp
 
 include ../../../../../build/Makefile
 .PHONY: all

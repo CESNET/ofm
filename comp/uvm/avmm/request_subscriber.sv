@@ -7,7 +7,7 @@
 // Converts uvm_avmm::sequence_item_request to uvm_avmm::request_item
 class request_subscriber #(int unsigned ADDRESS_WIDTH, int unsigned DATA_WIDTH, int unsigned BURST_WIDTH) extends uvm_subscriber #(sequence_item_request #(ADDRESS_WIDTH, DATA_WIDTH, BURST_WIDTH));
     `uvm_component_param_utils(uvm_avmm::request_subscriber #(ADDRESS_WIDTH, DATA_WIDTH, BURST_WIDTH))
-    
+
     // Output port
     uvm_analysis_port #(request_item #(ADDRESS_WIDTH, DATA_WIDTH, BURST_WIDTH)) analysis_port;
 

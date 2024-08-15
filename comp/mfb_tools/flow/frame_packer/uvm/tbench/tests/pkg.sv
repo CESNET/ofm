@@ -38,7 +38,7 @@ package test;
     parameter MVB_ITEMS               = MFB_REGIONS;
     parameter MVB_ITEM_WIDTH          = $clog2(USR_RX_PKT_SIZE_MAX+1) + HDR_META_WIDTH + $clog2(RX_CHANNELS) + 1;
 
-    //Number of sequences 
+    //Number of sequences
     //parameter SEQ_MIN   = 10;
     //parameter SEQ_MAX   = 20;
 
@@ -56,6 +56,6 @@ package test;
     `include "sequence.sv"
     `include "test.sv"
     `include "speed.sv"
-    
+
 endpackage
 `endif

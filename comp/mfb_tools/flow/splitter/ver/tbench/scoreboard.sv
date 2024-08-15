@@ -38,11 +38,11 @@ endclass
 
 class ScoreboardMvbMonitorCbs extends MonitorCbs;
    mailbox mvbMbx;
-    
+
    function new (mailbox fMbx);
       mvbMbx = fMbx;
    endfunction
-    
+
    virtual task post_rx(Transaction transaction, string inst);
       MvbTransaction #(HDR_WIDTH) mvb_tr;
 
@@ -56,11 +56,11 @@ endclass
 
 class ScoreboardMfbMonitorCbs extends MonitorCbs;
    mailbox mfbMbx;
-    
+
    function new (mailbox fMbx);
       mfbMbx = fMbx;
    endfunction
-    
+
    virtual task post_rx(Transaction transaction, string inst);
       MfbTransaction #(MFB_ITEM_WIDTH) mfb_tr;
 
@@ -83,12 +83,12 @@ class Checker;
       sc_table = st;
       mfbMbx   = fMbx;
       mvbMbx   = vMbx;
-      index    = ind; 
+      index    = ind;
    endfunction
 
    task setEnabled();
       enabled = 1; // Model Enabling
-      fork         
+      fork
          run(); // Creating model subprocess
       join_none; // Don't wait for ending
    endtask
@@ -174,7 +174,7 @@ class Scoreboard;
          dutCheck[i]      = new(scoreTable[i],mfbMbx[i],mvbMbx[i],i);
       end
       generatorCbs = new(scoreTable);
-      
+
    endfunction
 
    task setEnabled();
@@ -182,7 +182,7 @@ class Scoreboard;
          dutCheck[i].setEnabled();
       end
    endtask
-        
+
    task setDisabled();
       for (int i = 0; i < SPLITTER_OUTPUTS; i++) begin
          dutCheck[i].setDisabled();

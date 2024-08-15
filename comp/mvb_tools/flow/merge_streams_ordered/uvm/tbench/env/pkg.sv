@@ -8,7 +8,7 @@
 `define MVB_MERGE_STREAMS_ORDERED_ENV_SV
 
 package uvm_mvb_merge_streams_ordered;
-    
+
     `include "uvm_macros.svh"
     import uvm_pkg::*;
 

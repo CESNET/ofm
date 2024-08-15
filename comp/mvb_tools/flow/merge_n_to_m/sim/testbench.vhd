@@ -83,7 +83,7 @@ begin
       --! \brief Common reset
       RESET => rst,
 
-      --! \name Input data 
+      --! \name Input data
       -- --------------------------------------------------------------------------
       INPUT_DATA => merge_input_data,
 
@@ -133,4 +133,4 @@ begin
 
       wait;
    end process;
-end architecture behavioral; 
+end architecture behavioral;

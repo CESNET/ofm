@@ -42,16 +42,16 @@ architecture FULL of DMAFIFO_MUX_1TO2 is
    signal fifo_out_h                : std_logic_vector (INPUT_DATA_WIDTH downto 0);
    signal data_low                  : std_logic_vector (INPUT_DATA_WIDTH + HDR_WIDTH + 2-1 downto 0);
    signal fifo_out_l                : std_logic_vector (INPUT_DATA_WIDTH + HDR_WIDTH + 2-1 downto 0);
-  
+
    --! FSM declaration
    type t_state is (LOW, HIGH );
    signal present_state, next_state : t_state;
 
-begin 
+begin
    -- ----------------------------------------------------------------------------
    --                             Architecture body
    -- ----------------------------------------------------------------------------
-   
+
    asfifo_low : entity work.ASFIFO_BRAM_XILINX
    generic map(
       DEVICE                  => DEVICE,
@@ -59,7 +59,7 @@ begin
       ITEMS                   => 512,
       FIRST_WORD_FALL_THROUGH => true,
       DO_REG                  => true,
-      ALMOST_FULL_OFFSET      => ALMOST_FULL_OFFSET,  
+      ALMOST_FULL_OFFSET      => ALMOST_FULL_OFFSET,
       ALMOST_EMPTY_OFFSET     => ALMOST_EMPTY_OFFSET
    )
    port map(
@@ -101,7 +101,7 @@ begin
       DO             => fifo_out_h,
       RD             => rd,
       EMPTY          => empty_h,
-      AEMPTY         => open  
+      AEMPTY         => open
        );
 
    ----------------------------------------------------------------------------
@@ -112,7 +112,7 @@ begin
    data_high       <=  RX_DATA & RX_EOP;
 
    ----------------------------------------------------------------------------
-   --                               DATA OUTPUT 
+   --                               DATA OUTPUT
    ----------------------------------------------------------------------------
 
    TX_DATA         <= fifo_out_h(INPUT_DATA_WIDTH downto 1) & fifo_out_l(INPUT_DATA_WIDTH+HDR_WIDTH+2-1 downto HDR_WIDTH+2);
@@ -127,7 +127,7 @@ begin
 
    ----------------------------------------------------------------------------
    --                              CONTROl logic
-   ----------------------------------------------------------------------------  
+   ----------------------------------------------------------------------------
 
    rd              <= '1' when TX_DST_RDY = '1' and tx_src_rdy_s = '1' else '0';
    tx_src_rdy_s    <= not (empty_l or empty_h);
@@ -151,9 +151,9 @@ begin
    begin
       next_state              <= LOW;
       case (present_state) is
-         when LOW => 
+         when LOW =>
             if (RX_SRC_RDY ='1' and rx_dst_rdy_s = '1' and RX_EOP = '0') then
-               next_state     <= HIGH; 
+               next_state     <= HIGH;
             end if ;
          when HIGH =>
          when others =>
@@ -182,4 +182,4 @@ begin
       end case;
    end process;
 
-end architecture FULL;  
+end architecture FULL;

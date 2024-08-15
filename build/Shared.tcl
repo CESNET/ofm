@@ -270,7 +270,7 @@ proc DeduceType {FNAME {TYPE ""}} {
         set type "QUARTUS_IP"
     } elseif {[regexp ".bd$" $FNAME] && $TYPE == ""} {
         set type "VIVADO_BD"
-    } 
+    }
     return $type
 }
 

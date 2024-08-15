@@ -21,7 +21,7 @@ entity fl_decompress is
       -- Common interface
       CLK            : in  std_logic;
       RESET          : in  std_logic;
-      
+
       -- Transmit interface
       TX_SRC_RDY_N   : in  std_logic;
       TX_DST_RDY_N   : in  std_logic; -- Is input, because this comp does not
@@ -30,10 +30,10 @@ entity fl_decompress is
       TX_EOP_N       : out std_logic;
       TX_SOF_N       : out std_logic;
       TX_EOF_N       : out std_logic;
-      
-      FL_JUICE       : in  std_logic_vector(WIRES-1 downto 0); 
+
+      FL_JUICE       : in  std_logic_vector(WIRES-1 downto 0);
          -- Compressed FL control signals
-         
+
       DISCARD        : in  std_logic;  -- Next item is SOF & SOP
       FRAME_PART     : in  std_logic
          -- Every cycle in '1' means one frame part
@@ -124,7 +124,7 @@ begin
    if(CLK'event and CLK = '1') then
       if(RESET = '1' or DISCARD='1') then
          reg_a1 <= '0';
-      elsif(TX_SRC_RDY_N = '0' and TX_DST_RDY_N = '0' and 
+      elsif(TX_SRC_RDY_N = '0' and TX_DST_RDY_N = '0' and
          ((FL_JUICE(0) = '0' and reg_a1 = '0') or sig_eof_n = '0')) then
          reg_a1 <= not reg_a1;
       end if;
@@ -137,7 +137,7 @@ begin
    if(CLK'event and CLK = '1') then
       if(RESET = '1' or DISCARD='1') then
          reg_a2 <= '0';
-      elsif(TX_SRC_RDY_N = '0' and TX_DST_RDY_N='0' and 
+      elsif(TX_SRC_RDY_N = '0' and TX_DST_RDY_N='0' and
          ((FL_JUICE(0)='0' and reg_a1='1' and reg_a2='0') or sig_eof_n='0')) then
          reg_a2 <= not reg_a2;
       end if;
@@ -152,8 +152,8 @@ wire1n_cond : if(WIRES > 1) generate
 end generate;
 
 wire1_cond : if(WIRES = 1) generate
-   sig_eof_n <=  not(not FL_JUICE(0) and ((not reg_got2) or 
-                                  (reg_a1 and not reg_got3) or 
+   sig_eof_n <=  not(not FL_JUICE(0) and ((not reg_got2) or
+                                  (reg_a1 and not reg_got3) or
                                   (reg_a1 and reg_a2)));
 end generate;
 

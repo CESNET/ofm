@@ -2,7 +2,7 @@
 //-- Copyright (C) 2020 CESNET z. s. p. o.
 //-- Author(s): Tomáš Beneš <xbenes55@stud.fit.vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 import test_pkg::*;
 
@@ -23,7 +23,7 @@ module DUT(
     logic                       mvb_rx_trans_dst_rdy;
 
     logic[ID_WIDTH-1:0]         mvb_rx_confs_id[MAX_ID_CONFS-1:0];
-    logic[MAX_ID_CONFS-1:0]     mvb_rx_confs_vld;   
+    logic[MAX_ID_CONFS-1:0]     mvb_rx_confs_vld;
 
     logic[ID_WIDTH-1:0]         mvb_tx_trans_id [MAX_TX_TRANS-1:0];
     logic[META_WIDTH-1:0]       mvb_tx_trans_meta [MAX_TX_TRANS-1:0];
@@ -34,7 +34,7 @@ module DUT(
     assign RX_TRANS_MONITOR.VLD      = RX_TRANS.VLD;
     assign RX_TRANS_MONITOR.SRC_RDY  = RX_TRANS.SRC_RDY;
     assign RX_TRANS_MONITOR.DST_RDY  = mvb_rx_trans_dst_rdy;
-    
+
     // -- ASSIGNING OF DATA FROM RX_CONFS INTERFACE TO RX_CONFS_MONITOR INTERFACE ------------------------------------------------
     assign RX_CONFS_MONITOR.DATA      = RX_CONFS.DATA;
     assign RX_CONFS_MONITOR.VLD       = RX_CONFS.VLD;
@@ -44,28 +44,28 @@ module DUT(
     generate
         // -- ASSIGNING OF DATA FROM RX_TRANS INTERFACE TO LOGIC -----------------------------------------------------------------
         assign RX_TRANS.DST_RDY = mvb_rx_trans_dst_rdy;
-        for (genvar i = 0 ; i < MAX_RX_TRANS ; i++ ) begin  
+        for (genvar i = 0 ; i < MAX_RX_TRANS ; i++ ) begin
             assign mvb_rx_trans_id[i]       = RX_TRANS.DATA[i*ITEM_WIDTH+ID_WIDTH-1:i*ITEM_WIDTH];
             assign mvb_rx_trans_meta[i]     = RX_TRANS.DATA[(i+1)*ITEM_WIDTH-1:i*ITEM_WIDTH+ID_WIDTH];
             assign mvb_rx_trans_src_rdy[i]  = RX_TRANS.SRC_RDY&&RX_TRANS.VLD[i];
         end
         // -- ASSIGNING OF DATA FROM RX_CONFS INTERFACE TO LOGIC -----------------------------------------------------------------
         assign RX_CONFS.DST_RDY=1;
-        for (genvar i = 0 ; i < MAX_ID_CONFS; i++ ) begin   
+        for (genvar i = 0 ; i < MAX_ID_CONFS; i++ ) begin
             assign mvb_rx_confs_id[i]  = RX_CONFS.DATA[(i+1)*ID_WIDTH-1:i*ID_WIDTH];
             assign mvb_rx_confs_vld[i] = RX_CONFS.SRC_RDY&&RX_CONFS.VLD[i];
 
         end
         // -- ASSIGNING OF DATA FROM LOGIC TO TX_TRANS INTERFACE -----------------------------------------------------------------
-        for (genvar i = 0 ; i < MAX_TX_TRANS ; i++ ) begin  
+        for (genvar i = 0 ; i < MAX_TX_TRANS ; i++ ) begin
             assign TX_TRANS.DATA[i*ITEM_WIDTH+ID_WIDTH-1:i*ITEM_WIDTH]       = mvb_tx_trans_id[i];
             assign TX_TRANS.DATA[(i+1)*ITEM_WIDTH-1:i*ITEM_WIDTH+ID_WIDTH]   = mvb_tx_trans_meta[i];
             assign TX_TRANS.VLD[i]                                              = mvb_tx_trans_src_rdy[i];
 
         end
         assign TX_TRANS.SRC_RDY = |mvb_tx_trans_src_rdy;
-    endgenerate 
-    
+    endgenerate
+
     // -- ASSIGNING DATA AND LOGIC TO DUT ----------------------------------------------------------------------------------------
     TRANS_SORTER #(
         .ID_WIDTH               (ID_WIDTH),

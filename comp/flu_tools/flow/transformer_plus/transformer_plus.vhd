@@ -32,7 +32,7 @@ begin
   assert (TX_SOP_POS_WIDTH<=log2(TX_DATA_WIDTH/8))
     report "FLU_TRANSFORMER: TX_SOP_POS_WIDTH cannot exceed log2(TX_DATA_WIDTH/8)."
     severity error;
-  
+
   -- data widths are equal
   GEN_ARCH_EQUAL: if (RX_DATA_WIDTH = TX_DATA_WIDTH) generate
     rx_sop_pos_augment <= RX_SOP_POS & (TX_SOP_POS_WIDTH-RX_SOP_POS_WIDTH downto 0 => '0');
@@ -41,9 +41,9 @@ begin
     TX_DATA    <= RX_DATA;
     TX_SOP_POS <= rx_sop_pos_augment(TX_SOP_POS_WIDTH downto 1);
     TX_EOP_POS <= RX_EOP_POS;
-    TX_SOP     <= RX_SOP; 
+    TX_SOP     <= RX_SOP;
     TX_EOP     <= RX_EOP;
-    TX_SRC_RDY <= RX_SRC_RDY;  
+    TX_SRC_RDY <= RX_SRC_RDY;
     RX_DST_RDY <= TX_DST_RDY;
   end generate;
 

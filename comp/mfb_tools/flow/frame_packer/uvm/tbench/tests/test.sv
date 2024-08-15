@@ -1,13 +1,13 @@
-// test.sv: Verification test 
+// test.sv: Verification test
 // Copyright (C) 2024 CESNET z. s. p. o.
 // Author:   David Beneš <xbenes52@vutbr.cz>
 
-// SPDX-License-Identifier: BSD-3-Clause 
+// SPDX-License-Identifier: BSD-3-Clause
 
 class ex_test extends uvm_test;
     `uvm_component_utils(test::ex_test);
 
-    
+
     // declare the Environment reference variable
     uvm_framepacker::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, SPACE_SIZE_MIN_RX, SPACE_SIZE_MAX_RX, SPACE_SIZE_MIN_TX, SPACE_SIZE_MAX_TX, RX_CHANNELS, USR_RX_PKT_SIZE_MAX, HDR_META_WIDTH) m_env;
     int unsigned timeout;
@@ -29,7 +29,7 @@ class ex_test extends uvm_test;
     task run_seq(uvm_phase phase);
         virt_sequence#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, RX_CHANNELS, FRAME_SIZE_MIN, FRAME_SIZE_MAX) m_vseq;
         m_vseq = virt_sequence#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, RX_CHANNELS, FRAME_SIZE_MIN, FRAME_SIZE_MAX)::type_id::create("m_vseq");
-        
+
         phase.raise_objection(this, "Start of rx sequence");
         m_vseq.init(phase);
 

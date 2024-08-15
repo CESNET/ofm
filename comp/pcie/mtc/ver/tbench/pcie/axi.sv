@@ -123,7 +123,7 @@ class pcie2Axi  extends pcie2common#(8);
         header[114:112] = bar;   //bar
         header[120:115] = barap; //bar aperature
 
-       {<<byte{headerArray}} = header; 
+       {<<byte{headerArray}} = header;
     endfunction
 
     task run();
@@ -196,11 +196,11 @@ class Axi2pcie  extends sv_common_pkg::MonitorCbs;
         int unsigned byte_count;
 
         $cast(tr, transaction);
-        header = { <<32 {tr.data[0:2]}}; 
+        header = { <<32 {tr.data[0:2]}};
         tag    = header[71:64];
         dword_count = header[42:32];
         byte_count  = header[28:16];
-        addr        = header[6:0]; 
+        addr        = header[6:0];
 
 
         if (verbose > 1) begin
@@ -218,7 +218,7 @@ class Axi2pcie  extends sv_common_pkg::MonitorCbs;
         compl = new();
         compl.data = new[dword_count];
         for (int it = 0; it < dword_count; it++) begin
-            compl.data[it] = tr.data[3 + it]; 
+            compl.data[it] = tr.data[3 + it];
         end
         compl.byte_count    = byte_count;
         compl.lower_address = addr;

@@ -25,7 +25,7 @@ architecture BEHAVIORAL Of TESTBENCH is
 
     constant BOX_SIZE               : integer := 2**INPUT_WIDTH / BOX_CNT;
     constant CLK_PERIOD             : time := 4 ns;     -- 266.66 MHz
-    constant RST_TIME               : time := 40 ns;   
+    constant RST_TIME               : time := 40 ns;
 
     signal sim_done                 : std_logic := '0';
 
@@ -51,11 +51,11 @@ architecture BEHAVIORAL Of TESTBENCH is
     end procedure echo;
 
 begin
-	
+
     ---------
     -- UUT --
     ---------
-    
+
     uut : entity work.HISTOGRAMER
     generic map(
         INPUT_WIDTH             => INPUT_WIDTH,
@@ -83,8 +83,8 @@ begin
     begin
         wait until rising_edge(clk) and read_box_vld = '1';
         echo("                      " & integer'image(to_integer(unsigned(read_box))));
-    end process; 
-    
+    end process;
+
     test_p : process
         procedure input_p (val : in integer)
         is
@@ -126,9 +126,9 @@ begin
         sim_done            <= '0';
 
         rst                 <= '1';
-        wait for RST_TIME;      
+        wait for RST_TIME;
         rst                 <= '0';
-        wait until rst_done = '1';      
+        wait until rst_done = '1';
 
         input_vld           <= '0';
         read_req            <= '0';

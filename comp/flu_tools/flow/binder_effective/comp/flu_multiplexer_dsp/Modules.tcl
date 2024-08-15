@@ -6,15 +6,15 @@
 
 # Base directories
 
-set DSP_MUX             "$OFM_PATH/comp/base/logic/mux_dsp" 
+set DSP_MUX             "$OFM_PATH/comp/base/logic/mux_dsp"
 
 # Packages
 set PACKAGES            "$OFM_PATH/comp/base/pkg/math_pack.vhd"
 
 # Componet lis
 set COMPONENTS [list \
-      [list "DSP_MULTIPLEXOR"    $DSP_MUX       "FULL" ]\  
-   ]   
+      [list "DSP_MULTIPLEXOR"    $DSP_MUX       "FULL" ]\
+   ]
 
 # Modules
 set MOD "$MOD $ENTITY_BASE/flu_multiplexer_dsp.vhd"

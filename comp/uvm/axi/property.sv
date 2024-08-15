@@ -1,15 +1,15 @@
-//-- property.sv: Properties for AXI bus 
+//-- property.sv: Properties for AXI bus
 //-- Copyright (C) 2022 CESNET z. s. p. o.
 //-- Author(s): Daniel Kříž <xkrizd01@vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 
 `include "uvm_macros.svh"
 import uvm_pkg::*;
 
 
-module axi_property 
+module axi_property
     (
         input RESET,
         axi_if vif

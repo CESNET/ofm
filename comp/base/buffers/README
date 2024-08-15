@@ -29,8 +29,8 @@ https://www.liberouter.org/trac/firmware/wiki/mem2nfifo_doc
 Verification:
 ~~~~~~~~~~~~~
  * status: verification environment ready, common configurations verified
- * https://www.liberouter.org/wiki/index.php/NetCOPE_(SystemVerilog)#FIFO2NFIFO 
- * https://www.liberouter.org/wiki/index.php/NetCOPE_(SystemVerilog)#MEM2NFIFO 
+ * https://www.liberouter.org/wiki/index.php/NetCOPE_(SystemVerilog)#FIFO2NFIFO
+ * https://www.liberouter.org/wiki/index.php/NetCOPE_(SystemVerilog)#MEM2NFIFO
 
 
 
@@ -71,12 +71,12 @@ nfifo2fifo
 
 nfifo2mem
  * status: verification environment for last version NOT ready => NOT verified
-           verification environment for previous version ready, common 
+           verification environment for previous version ready, common
            configurations verified
- * https://www.liberouter.org/wiki/index.php/NetCOPE_(SystemVerilog)#NFIFO2MEM 
- 
- 
- 
+ * https://www.liberouter.org/wiki/index.php/NetCOPE_(SystemVerilog)#NFIFO2MEM
+
+
+
                               =================
                                     nfifo
                               =================
@@ -105,4 +105,4 @@ https://www.liberouter.org/trac/firmware/wiki/nfifo_doc
 Verification:
 ~~~~~~~~~~~~~
  * status: verification environment ready, common configurations verified
- * https://www.liberouter.org/wiki/index.php/NetCOPE_(SystemVerilog)#NFIFO 
+ * https://www.liberouter.org/wiki/index.php/NetCOPE_(SystemVerilog)#NFIFO

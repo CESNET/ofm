@@ -25,7 +25,7 @@ entity FP_META_CONCATENATE is
         RX_MFB_DATA     : in  std_logic_vector(MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH-1 downto 0);
         -- Valid per packet
         RX_BLOCK_VLD    : in  slv_array_t(MFB_REGIONS downto 0)(MFB_REGIONS*MFB_REGION_SIZE - 1 downto 0);
-        -- SOF_POS in ONE HOT format 
+        -- SOF_POS in ONE HOT format
         RX_SOF_ONE_HOT  : in  slv_array_t(MFB_REGIONS downto 0)(MFB_REGIONS*MFB_REGION_SIZE - 1 downto 0);
         -- EOF_POS in ONE HOT format
         RX_EOF_ONE_HOT  : in  slv_array_t(MFB_REGIONS downto 0)(MFB_REGIONS*MFB_REGION_SIZE - 1 downto 0);
@@ -70,14 +70,14 @@ begin
     sof_oh_per_bs_g: for i in 0 to MFB_REGIONS generate
         sof_oh_per_block_g: for j in 0 to MFB_REGIONS*MFB_REGION_SIZE - 1 generate
             sof_oh_arr_per_bs(i)(j)    <= vld_arr_per_bs(i)(j) & RX_SOF_ONE_HOT(i)(j);
-        end generate;  
+        end generate;
     end generate;
 
     -- Copy One_hot eof array acros multiple fields
     eof_oh_per_bs_g: for i in 0 to MFB_REGIONS generate
         eof_oh_per_block_g: for j in 0 to MFB_REGIONS*MFB_REGION_SIZE - 1 generate
             eof_oh_arr_per_bs(i)(j)    <= sof_oh_arr_per_bs(i)(j) & RX_EOF_ONE_HOT(i)(j);
-        end generate;    
+        end generate;
     end generate;
 
     -- Copy Packet_length array acros multiple fields

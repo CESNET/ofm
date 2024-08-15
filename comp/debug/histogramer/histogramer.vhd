@@ -27,10 +27,10 @@ generic (
     READ_PRIOR              : boolean := false;
     -- Defines if read should erase box content
     CLEAR_BY_READ           : boolean := true;
-    -- Defines if BRAM should be sequentially erased after reset 
+    -- Defines if BRAM should be sequentially erased after reset
     CLEAR_BY_RST            : boolean := true
 );
-port(    
+port(
     CLK                     : in  std_logic;
     RST                     : in  std_logic;
     RST_DONE                : out std_logic;
@@ -64,7 +64,7 @@ architecture FULL of HISTOGRAMER is
     -- Constants --
     ---------------
 
-    -- Should equal BRAM latency 
+    -- Should equal BRAM latency
     constant PIPELINE_ITEMS     : integer := 2;
 
     constant ADDR_WIDTH         : integer := log2(BOX_CNT);
@@ -123,7 +123,7 @@ architecture FULL of HISTOGRAMER is
         variable res    : std_logic_vector(w - 1 downto 0);
     begin
         tmp     := unsigned('0' & a) + unsigned('0' & b);
-        res     := std_logic_vector(tmp(BOX_WIDTH - 1 downto 0)) when (tmp(w) = '0') else 
+        res     := std_logic_vector(tmp(BOX_WIDTH - 1 downto 0)) when (tmp(w) = '0') else
                    (others => '1');
         return res;
     end function;
@@ -178,31 +178,31 @@ begin
     pipeline_vld(0)     <= (input_write or input_read) and (not colision or feadback_to_first);
     pipeline_read(0)    <= input_read and (not colision or feadback_to_first);
     -- Select histogram box (adress) by cutting value
-    pipeline_addr(0)    <= INPUT(INPUT_WIDTH - 1 downto INPUT_WIDTH - ADDR_WIDTH) when (input_write = '1') else 
+    pipeline_addr(0)    <= INPUT(INPUT_WIDTH - 1 downto INPUT_WIDTH - ADDR_WIDTH) when (input_write = '1') else
                            READ_ADDR;
     -- Box initial value
-    input_pipeline_box  <= std_logic_vector(to_unsigned(1, BOX_WIDTH)) when (input_write = '1') else 
+    input_pipeline_box  <= std_logic_vector(to_unsigned(1, BOX_WIDTH)) when (input_write = '1') else
                            (others => '0');
     -- Colision between last and the first box => join to the first box
     -- Join to the last box would need adder and ovf detection before bram write port
-    -- which would have bad timing 
+    -- which would have bad timing
     -- Adding register would need next colision detection and the same problem would occur again
-    pipeline_box(0)     <= input_pipeline_box when (feadback_to_first = '0') else 
-                           add_handle_overflow(input_pipeline_box, last_pipeline_box);  
+    pipeline_box(0)     <= input_pipeline_box when (feadback_to_first = '0') else
+                           add_handle_overflow(input_pipeline_box, last_pipeline_box);
 
     -- Colision detection --
     ------------------------
 
     pipeline_colision_g : for i in PIPELINE_ITEMS - 1 downto 0 generate
-        colision_index(i) <= '1' when (pipeline_addr(0) = pipeline_addr(i + 1) and pipeline_vld(i + 1) = '1' and (INPUT_VLD = '1' or READ_REQ = '1')) else 
+        colision_index(i) <= '1' when (pipeline_addr(0) = pipeline_addr(i + 1) and pipeline_vld(i + 1) = '1' and (INPUT_VLD = '1' or READ_REQ = '1')) else
                              '0';
     end generate;
-    colision_last       <= '1' when (pipeline_addr(0) = last_pipeline_addr and last_pipeline_vld = '1' and (INPUT_VLD = '1' or READ_REQ = '1')) else 
+    colision_last       <= '1' when (pipeline_addr(0) = last_pipeline_addr and last_pipeline_vld = '1' and (INPUT_VLD = '1' or READ_REQ = '1')) else
                            '0';
     colision            <= (or colision_index); -- or colision_last;
 
     feadback_to_first   <= colision_last and not clear_result;
-    
+
     -- BRAM management --
     ---------------------
 
@@ -211,7 +211,7 @@ begin
 
     bram_write          <= (last_pipeline_vld and not feadback_to_first) when (bram_clear_done = '1') else
                            '1';
-    bram_write_addr     <= last_pipeline_addr when (bram_clear_done = '1') else 
+    bram_write_addr     <= last_pipeline_addr when (bram_clear_done = '1') else
                            bram_clear_addr;
     bram_write_data     <= (others => '0') when (clear_result = '1' or bram_clear_done = '0') else
                            last_pipeline_box;
@@ -236,7 +236,7 @@ begin
     end generate;
 
     -- Result creation (BRAM read data + pipeline box + handle last colision + handle overflow)
-    pipeline_box_res_tmp<= pipeline_box(PIPELINE_ITEMS) when (colision_index(PIPELINE_ITEMS - 1) = '0' or input_read = '1') else 
+    pipeline_box_res_tmp<= pipeline_box(PIPELINE_ITEMS) when (colision_index(PIPELINE_ITEMS - 1) = '0' or input_read = '1') else
                            pipeline_box_incr(PIPELINE_ITEMS);
     pipeline_box_res    <= add_handle_overflow(pipeline_box_res_tmp, bram_read_data);
 
@@ -259,7 +259,7 @@ begin
         pipeline_p : process(CLK)
         begin
             if (rising_edge(CLK)) then
-                if (RST = '1') then 
+                if (RST = '1') then
                     pipeline_vld(i)     <= '0';
                     pipeline_read(i)    <= '0';
                     pipeline_addr(i)    <= (others => '0');
@@ -269,7 +269,7 @@ begin
                     pipeline_addr(i)    <= pipeline_addr(i - 1);
 
                     -- Collision detected
-                    if (i > 1 and colision_index(i - 2) = '1') then 
+                    if (i > 1 and colision_index(i - 2) = '1') then
                         if (input_read = '1') then
                             pipeline_read(i)    <= '1';
                             pipeline_box(i)     <= pipeline_box(i - 1);
@@ -296,18 +296,18 @@ begin
             end if;
         end if;
     end process;
- 
+
     last_pipeline_box_p : process(CLK)
     begin
         if (rising_edge(CLK)) then
             if (RST = '1') then
                 last_pipeline_vld   <= '0';
-            else 
+            else
                 last_pipeline_vld   <= pipeline_vld(PIPELINE_ITEMS);
             end if;
         end if;
     end process;
- 
+
     -- Clear by RST --
     ------------------
 

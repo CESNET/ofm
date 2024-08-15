@@ -18,19 +18,19 @@ QUOTE="
 
 TARGET = combo
 SRCS = \
-    combosix.c \
-    $(LIBCOMBO_INCLUDE)/ibuf.c \
-    $(LIBCOMBO_INCLUDE)/obuf.c \
-    $(LIBCOMBO_INCLUDE)/phy.c \
-    $(LIBCOMBO_INCLUDE)/i2cms.c \
-    $(LIBCOMBO_INCLUDE)/i2c.c \
-    $(LIBCOMBO_INCLUDE)/mdio.c
+	combosix.c \
+	$(LIBCOMBO_INCLUDE)/ibuf.c \
+	$(LIBCOMBO_INCLUDE)/obuf.c \
+	$(LIBCOMBO_INCLUDE)/phy.c \
+	$(LIBCOMBO_INCLUDE)/i2cms.c \
+	$(LIBCOMBO_INCLUDE)/i2c.c \
+	$(LIBCOMBO_INCLUDE)/mdio.c
 
 
 OBJS = $(SRCS:%.c=%.o)
 
 all: lib$(TARGET).$(DLL_SUFFIX)
-	
+
 clean:
 	rm -fR *.o *.$(DLL_SUFFIX) $(LIBCOMBO_INCLUDE)/*.o
 

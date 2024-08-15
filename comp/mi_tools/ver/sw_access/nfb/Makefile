@@ -17,13 +17,13 @@ QUOTE="
 
 TARGET = nfb
 SRCS = \
-    src/nfb.c
+	src/nfb.c
 
 
 OBJS = $(SRCS:%.c=%.o)
 
 all: lib$(TARGET).$(DLL_SUFFIX)
-	
+
 clean:
 	rm -fR src/*.o *.$(DLL_SUFFIX)
 

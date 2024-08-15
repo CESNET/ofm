@@ -2,7 +2,7 @@
 //-- Copyright (C) 2020 CESNET z. s. p. o.
 //-- Author(s): Tomáš Beneš <xbenes55@stud.fit.vutbr.cz>
 //--
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 import sv_mvb_pkg::*;
 
@@ -16,14 +16,14 @@ class  PointerMover;
         acceptedTransaction = at;
         PTR_INT             = ptr;
     endfunction
-    
+
     function setEnabled();
         this.enabled=1;
         fork
             run();
         join_none;
     endfunction
-    
+
     function setDisabled();
         this.enabled=0;
     endfunction
@@ -103,10 +103,10 @@ class ScoreboardDriverCbs extends DriverCbs;
         globalScoreTable = gst;
         streamScoreTable = sst;
     endfunction
-        
+
     virtual task pre_tx(ref Transaction transaction, string inst);
     endtask
-        
+
     virtual task post_tx(Transaction transaction, string inst);
         if(VERBOSE_LEVEL > 0)begin
             $timeformat(-9, 3, " ns", 8);
@@ -121,18 +121,18 @@ class ScoreboardDriverCbs extends DriverCbs;
 endclass
 
 class ScoreboardStreamsMonitorCbs extends MonitorCbs;
-    
+
     TransactionTable #(0) sc_table;
-    
+
     function new (TransactionTable #(0) st);
         this.sc_table = st;
     endfunction
-    
+
     virtual task post_rx(Transaction transaction, string inst);
         MvbTransaction #(TX_GLOBAL_ITEM_WIDTH) incomingTransaction=new;
         MvbTransaction #(RX_ITEM_WIDTH) toBeRemoved=new;
         bit status=0;
-        
+
         $cast(incomingTransaction,transaction);
 
         // -- Assigning informations of the incoming transaction to new transaction with space for adress
@@ -145,7 +145,7 @@ class ScoreboardStreamsMonitorCbs extends MonitorCbs;
             $timeformat(-9, 3, " ns", 8);
             $write("%t New transaction on the output interface : ",$time);
             toBeRemoved.display();
-        end 
+        end
 
         // -- Test for checking if the address is align to ADRESS_ALIGNMENT
         if(incomingTransaction.data[ADDRES_WIDTH-1:0]%ADRESS_ALIGNMENT!=0)begin
@@ -172,20 +172,20 @@ class ScoreboardStreamsMonitorCbs extends MonitorCbs;
 endclass
 
 class ScoreboardGlobalMonitorCbs extends MonitorCbs;
-    
+
     TransactionTable #(0) sc_table;
     TransactionTable #(0) acceptedTransaction;
-    
+
     function new (TransactionTable #(0) st, TransactionTable #(0) at);
         this.sc_table = st;
         acceptedTransaction = at;
     endfunction
-    
+
     virtual task post_rx(Transaction transaction, string inst);
         MvbTransaction #(TX_GLOBAL_ITEM_WIDTH) incomingTransaction=new;
         MvbTransaction #(RX_ITEM_WIDTH) toBeRemoved=new;
         bit status=0;
-        
+
         $cast(incomingTransaction,transaction);
 
         // -- Assigning informations of the incoming transaction to new transaction with space for adress
@@ -198,7 +198,7 @@ class ScoreboardGlobalMonitorCbs extends MonitorCbs;
             $timeformat(-9, 3, " ns", 8);
             $write("%t New transaction on the output interface : ",$time);
             toBeRemoved.display();
-        end 
+        end
 
         // -- Test for checking if the address is align to ADRESS_ALIGNMENT
         if(incomingTransaction.data[ADDRES_WIDTH-1:0]%ADRESS_ALIGNMENT!=0)begin
@@ -289,7 +289,7 @@ class Scoreboard;
 
     task wait_for();
         int unsigned timeout = 0;
-        
+
         fork
             begin #(10000*CLK_PERIOD); timeout = 1; end
             begin wait((!GLOBAL_OUTPUT_EN || globalScoreTable.tr_table.size() == 0) && (!STREAM_OUTPUT_EN || streamScoreTable.tr_table.size() == 0)); end

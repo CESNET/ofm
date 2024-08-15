@@ -2,7 +2,7 @@
 # Copyright (C) 2023 CESNET z. s. p. o.
 # Author(s): Daniel Kondys <kondys@cesnet.cz>
 
-# SPDX-License-Identifier: BSD-3-Clause 
+# SPDX-License-Identifier: BSD-3-Clause
 
 proc all {NAME PATH} {
     add_wave -noupdate -group "all_signals_mix" -hex      $PATH/*

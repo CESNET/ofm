@@ -89,7 +89,7 @@ for i in range(len(fr_lengths)):
     # Check if speed meter 0 is done
     while drd != 1:
         drd = comp.read32(0x00005124)
-    
+
     # Retrieve results from speed meter 1
     drd = 0
     # Check if speed meter 1 is done

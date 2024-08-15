@@ -28,12 +28,12 @@ proc rx {NAME PATH} {
    add_wave -divider
 }
 
-proc tx {NAME PATH} {    
+proc tx {NAME PATH} {
    add_wave "-group {TX0} -group {MVB} -noupdate -hex" $PATH/TX0_MVB_HDR
    add_wave "-group {TX0} -group {MVB} -noupdate -hex" $PATH/TX0_MVB_VLD
    add_wave "-group {TX0} -group {MVB} -noupdate -hex" $PATH/TX0_MVB_SRC_RDY
    add_wave "-group {TX0} -group {MVB} -noupdate -hex" $PATH/TX0_MVB_DST_RDY
-   
+
    add_wave "-group {TX0} -group {MFB} -noupdate -hex" $PATH/TX0_MFB_DATA
    add_wave "-group {TX0} -group {MFB} -noupdate -hex" $PATH/TX0_MFB_SOF
    add_wave "-group {TX0} -group {MFB} -noupdate -hex" $PATH/TX0_MFB_EOF
@@ -41,7 +41,7 @@ proc tx {NAME PATH} {
    add_wave "-group {TX0} -group {MFB} -noupdate -hex" $PATH/TX0_MFB_EOF_POS
    add_wave "-group {TX0} -group {MFB} -noupdate -hex" $PATH/TX0_MFB_SRC_RDY
    add_wave "-group {TX0} -group {MFB} -noupdate -hex" $PATH/TX0_MFB_DST_RDY
-   
+
    add_wave "-group {TX1} -group {MVB} -noupdate -hex" $PATH/TX1_MVB_HDR
    add_wave "-group {TX1} -group {MVB} -noupdate -hex" $PATH/TX1_MVB_VLD
    add_wave "-group {TX1} -group {MVB} -noupdate -hex" $PATH/TX1_MVB_SRC_RDY
@@ -58,10 +58,10 @@ proc tx {NAME PATH} {
    add_wave -divider
 }
 
-proc int {NAME PATH} {    
+proc int {NAME PATH} {
    add_wave "-group {$NAME} -noupdate -hex" $PATH/s_*
 }
 
-proc all {NAME PATH} {  
+proc all {NAME PATH} {
    add_wave "-group {$NAME} -noupdate -hex" $PATH/*
 }

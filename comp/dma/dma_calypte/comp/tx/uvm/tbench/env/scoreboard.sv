@@ -2,7 +2,7 @@
 //-- Copyright (C) 2022 CESNET z. s. p. o.
 //-- Author(s): Daniel Kriz <danielkriz@cesnet.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 class stats;
 
@@ -264,7 +264,7 @@ class scoreboard #(CHANNELS, USR_ITEM_WIDTH, USER_META_WIDTH, CQ_ITEM_WIDTH,
     // Contructor of scoreboard.
     function new(string name, uvm_component parent);
         super.new(name, parent);
-        // DUT MODEL COMUNICATION 
+        // DUT MODEL COMUNICATION
         analysis_export_rx_packet = new("analysis_export_rx_packet", this);
         analysis_export_rx_meta   = new("analysis_export_rx_meta"  , this);
         analysis_export_tx_packet = new("analysis_export_tx_packet", this);

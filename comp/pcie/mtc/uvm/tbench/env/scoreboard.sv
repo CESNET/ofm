@@ -26,7 +26,7 @@ class scoreboard #(MFB_ITEM_WIDTH, MI_DATA_WIDTH, MI_ADDR_WIDTH) extends uvm_sco
     // Contructor of scoreboard.
     function new(string name, uvm_component parent);
         super.new(name, parent);
-        // DUT MODEL COMUNICATION 
+        // DUT MODEL COMUNICATION
         analysis_export_cc_data   = new("analysis_export_cc_data", this);
         analysis_export_cc_meta   = new("analysis_export_cc_meta", this);
     endfunction

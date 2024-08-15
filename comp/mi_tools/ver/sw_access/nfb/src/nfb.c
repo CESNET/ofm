@@ -61,7 +61,7 @@ struct nfb_device *nfb_open(const char *devname)
 
 	dev->fd = devname[strlen(devname)-5] - '0';
 	dev->path = devname;
-	
+
 	/* Read FDT from driver */
 	size = lseek(fd, 0, SEEK_END);
 	lseek(fd, 0, SEEK_SET);

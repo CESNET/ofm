@@ -186,7 +186,7 @@ entity MTC_WRAPPER is
         -- MI bus: data from master to slave (write data)
         MI_DWR            : out std_logic_vector(31 downto 0);
         -- MI bus: slave address
-        MI_ADDR           : out std_logic_vector(31 downto 0);    
+        MI_ADDR           : out std_logic_vector(31 downto 0);
         -- MI bus: byte enable
         MI_BE             : out std_logic_vector(3 downto 0);
         -- MI bus: read request
@@ -217,13 +217,13 @@ architecture full of MTC_WRAPPER is
     signal cq_mfb_eof_pos_out     : std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE*MFB_BLOCK_SIZE))-1 downto 0);
     signal cq_mfb_src_rdy_out     : std_logic;
     signal cq_mfb_dst_rdy_out     : std_logic;
-    
+
     signal cq_user_tph_present    : std_logic_vector(MFB_REGIONS-1 downto 0);
     signal cq_user_tph_type       : std_logic_vector(MFB_REGIONS*2-1 downto 0);
     signal cq_user_tph_st_tag     : std_logic_vector(MFB_REGIONS*8-1 downto 0);
     signal cq_user_fbe            : std_logic_vector(MFB_REGIONS*4-1 downto 0);
     signal cq_user_lbe            : std_logic_vector(MFB_REGIONS*4-1 downto 0);
-    
+
     signal cc_mfb_dst_rdy_out     : std_logic;
 
     signal cq_mfb_meta_arr        : slv_array_t(MFB_REGIONS-1 downto 0)(MFB_CQ_META_WIDTH-1 downto 0);
@@ -318,7 +318,7 @@ begin
         cq_user_lbe         <= (others => '0');
     end generate;
 
-    cq_mfb_meta_arr <= slv_array_deser(CQ_MFB_META,MFB_REGIONS); 
+    cq_mfb_meta_arr <= slv_array_deser(CQ_MFB_META,MFB_REGIONS);
 
     cq_mfb_meta_g: for i in 0 to MFB_REGIONS-1 generate
         cq_mfb_meta_new_arr(i)(PCIE_CQ_META_HEADER)        <= cq_mfb_meta_arr(i)(127 downto 0);

@@ -64,8 +64,8 @@ begin
                 fsm_pst <= fsm_nst;
             end if;
             fsm_cnt_reg   <= fsm_cnt_sig;
-            fsm_addr_reg  <= fsm_addr_sig; 
-            fsm_burst_reg <= fsm_burst_sig; 
+            fsm_addr_reg  <= fsm_addr_sig;
+            fsm_burst_reg <= fsm_burst_sig;
         end if;
     end process;
 

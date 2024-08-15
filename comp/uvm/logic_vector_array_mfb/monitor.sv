@@ -35,7 +35,7 @@ class monitor_logic_vector_array #(int unsigned REGIONS, int unsigned REGION_SIZ
 
     virtual function void process_sof(int unsigned index, int unsigned end_pos, uvm_mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) tr);
         int unsigned sof_pos = (SOF_POS_WIDTH != 0 ? BLOCK_SIZE*tr.sof_pos[index] : 0);
-        
+
         if (hi_tr != null) begin
             `uvm_error(this.get_full_name(), "\n\n\tTwo SOFs without an EOF between them were detected!\nThe frame's EOF is missing or a SOF has been duplicated.\n")
         end
@@ -63,11 +63,11 @@ class monitor_logic_vector_array #(int unsigned REGIONS, int unsigned REGION_SIZ
                     inframe = 1;
                     for (int unsigned jt = 0; jt <= tr.eof_pos[it]; jt++) begin
                         data.push_back(tr.data[it][(jt+1)*ITEM_WIDTH-1 -: ITEM_WIDTH]);
-                    end                    
+                    end
                     process_eof(it, tr);
                     process_sof(it, REGION_SIZE*BLOCK_SIZE-1, tr);
                 end else begin
-                    
+
                     int unsigned pos_end = tr.eof[it] ? tr.eof_pos[it] : (REGION_SIZE*BLOCK_SIZE-1);
 
                     if (tr.sof[it]) begin

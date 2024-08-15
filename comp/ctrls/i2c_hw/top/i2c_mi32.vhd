@@ -1,5 +1,5 @@
 --
--- I2C_HW.vhd: HW interface for I2C Protocol, MI32 interface 
+-- I2C_HW.vhd: HW interface for I2C Protocol, MI32 interface
 -- Copyright (C) 2009 CESNET
 -- Author(s): Stepan Friedl <friedl@liberouter.org>
 --
@@ -109,7 +109,7 @@ begin
    i2c_wen             <= (others => '0');
    i2c_wen(addr_index) <= MI32_WR;
 end process;
-           
+
 -- DRD_MX_REG: process(CLK)
 -- begin
 --    if CLK'event and CLK = '1' then
@@ -121,14 +121,14 @@ end process;
 --       MI32_DRDY <= MI32_RD;
 --    end if;
 -- end process;
-   MI32_DRD  <= i2c_drd(64*addr_index+31 downto 64*addr_index) 
+   MI32_DRD  <= i2c_drd(64*addr_index+31 downto 64*addr_index)
                 when (MI32_ADDR(2) = '0') else
                 i2c_drd(64*addr_index+63 downto 64*addr_index+32);
    MI32_DRDY <= MI32_RD;
 
 GEN_CTRL: for i in 0 to IFC_CNT-1 generate
 
-   I2C_HW_CTRL: entity work.i2c_master_top 
+   I2C_HW_CTRL: entity work.i2c_master_top
    generic map (
       PRER_INIT => PRER_INIT
    )
@@ -155,7 +155,7 @@ GEN_CTRL: for i in 0 to IFC_CNT-1 generate
       SCL_O(i) <= sig_scl_o(i);
       SCL_OEN(i) <= sig_scl_oen(i);
    end generate;
-   
+
    NO_TRISTATE: if (not SCL_TRISTATE) generate
       SCL_OEN(i) <= '0';
       SCL_O(i) <= sig_scl_o(i) when sig_scl_oen(i) = '0' else '1';

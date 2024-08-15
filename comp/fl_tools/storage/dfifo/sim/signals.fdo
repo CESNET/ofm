@@ -19,7 +19,7 @@ proc fl_input { BASE ID } {
    add_wave "-group {Write interface $ID} -noupdate -hex -label RX_EOF_N"      $BASE/input_rx_eof_n
    add_wave "-group {Write interface $ID} -noupdate -hex -label DISCARD"       $BASE/sig_discard
 }
-      
+
 proc fl_output { BASE ID } {
    add wave -divider "Read interface"
    add_wave "-group {Read interface $ID} -noupdate -hex -label TX_DATA"       $BASE/TX_DATA

@@ -6,7 +6,7 @@
 -- SPDX-License-Identifier: BSD-3-Clause
 --
 --
--- TODO: 
+-- TODO:
 --
 --
 
@@ -23,7 +23,7 @@ use work.math_pack.all;
 -- ----------------------------------------------------------------------------
 architecture FULL of FLUA_BINDER_10_EFF is
 
-   --! Conversion function from STD_LOGIC to boolean 
+   --! Conversion function from STD_LOGIC to boolean
    function To_Boolean(L: std_logic) return boolean is
    begin
       if(L = '1')then
@@ -32,7 +32,7 @@ architecture FULL of FLUA_BINDER_10_EFF is
          return false;
       end if;
    end function;
-   
+
    function To_Integer(L: boolean) return integer is
    begin
       if(L = true)then
@@ -41,7 +41,7 @@ architecture FULL of FLUA_BINDER_10_EFF is
          return 0;
       end if;
    end function;
-   
+
    function get_index(i: integer) return integer is
    begin
       if(i <= 4) then
@@ -50,19 +50,19 @@ architecture FULL of FLUA_BINDER_10_EFF is
          return i+6;
       end if;
    end function;
-   
+
    constant HDR_INSERT_EN : boolean := (HDR_ENABLE and HDR_INSERT);
    constant IDATA_PIPE_EN : boolean := To_Boolean(PIPELINE_MAP(5));
    constant IHEAD_PIPE_DISABLE : boolean := not(To_Boolean(PIPELINE_MAP(5)) and (HDR_ENABLE and not(HDR_INSERT)));
-   
+
    constant HDR_PARALL_EN : integer := To_Integer(HDR_ENABLE and not(HDR_INSERT));
    constant BINDER_PIPE : integer := conv_integer(PIPELINE_MAP(4 downto 0));
    constant BINDER_DSP  : integer := conv_integer(DSP_MAP);
 
    signal rx_hdr_dst_rdy_ins  : std_logic_vector(9 downto 0);
    signal rx_hdr_dst_rdy_pipe : std_logic_vector(9 downto 0);
-   
-   signal data_i     : std_logic_vector(16*DATA_WIDTH-1 downto 0); 
+
+   signal data_i     : std_logic_vector(16*DATA_WIDTH-1 downto 0);
    signal sop_pos_i  : std_logic_vector(16*SOP_POS_WIDTH-1 downto 0);
    signal eop_pos_i  : std_logic_vector(16*log2(DATA_WIDTH/8)-1 downto 0);
    signal sop_i      : std_logic_vector(16-1 downto 0);
@@ -73,10 +73,10 @@ architecture FULL of FLUA_BINDER_10_EFF is
    signal hdr_data_i    : std_logic_vector(16*HDR_WIDTH-1 downto 0);
    signal hdr_src_rdy_i : std_logic_vector(16-1 downto 0);
    signal hdr_dst_rdy_i : std_logic_vector(16-1 downto 0);
-   
+
    signal selected_from_i  : std_logic_vector(4 downto 0);
    signal distributed_to_i : std_logic_vector(15 downto 0);
-   
+
 begin
 
    RX_HDR_DST_RDY <= rx_hdr_dst_rdy_ins when (HDR_INSERT = true) else rx_hdr_dst_rdy_pipe;
@@ -87,15 +87,15 @@ begin
       generic map(
          --! FLU configuration
          DATA_WIDTH    => DATA_WIDTH,
-         SOP_POS_WIDTH => SOP_POS_WIDTH,      
-         
+         SOP_POS_WIDTH => SOP_POS_WIDTH,
+
          --! Enable/Disable header insertion
          --!   false - Disable Header insertion
          --!   true  - Enable Header insertion
          HDR_ENABLE    => HDR_INSERT_EN,
          --! Widht of the header (multiple of 8)
          HDR_WIDTH     => HDR_WIDTH,
-         
+
          -- Pipeline Config ------------------------
          -- Use input pipe
          OUT_PIPE_EN   => IDATA_PIPE_EN
@@ -128,14 +128,14 @@ begin
          TX_SRC_RDY     => src_rdy_i(get_index(i)),
          TX_DST_RDY     => dst_rdy_i(get_index(i))
       );
-      
+
       data_i(11*DATA_WIDTH-1 downto 5*DATA_WIDTH) <= (others => '0');
       sop_pos_i(11*SOP_POS_WIDTH-1 downto 5*SOP_POS_WIDTH) <= (others => '0');
       eop_pos_i(11*log2(DATA_WIDTH/8)-1 downto 5*log2(DATA_WIDTH/8)) <= (others => '0');
       sop_i(10 downto 5) <= (others => '0');
       eop_i(10 downto 5) <= (others => '0');
       src_rdy_i(10 downto 5) <= (others => '0');
-      
+
       --! \brief Input Header pipeline
       HDR_INS_HDR_PIPE_I:entity work.FLU_PIPE
       generic map(
@@ -146,10 +146,10 @@ begin
          FAKE_PIPE      => IHEAD_PIPE_DISABLE
       )
       port map(
-         -- Common interface 
+         -- Common interface
          CLK            => CLK,
          RESET          => RESET,
-         
+
          -- Input interface
          RX_DATA       => RX_HDR_DATA((i+1)*HDR_WIDTH-1 downto i*HDR_WIDTH),
          RX_SOP_POS    => (others=>'0'),
@@ -168,19 +168,19 @@ begin
          TX_SRC_RDY    => hdr_src_rdy_i(get_index(i)),
          TX_DST_RDY    => hdr_dst_rdy_i(get_index(i))
       );
-      
+
       hdr_data_i(11*HDR_WIDTH-1 downto 5*HDR_WIDTH) <= (others => '0');
-      hdr_src_rdy_i(10 downto 5) <= (others => '0');    
+      hdr_src_rdy_i(10 downto 5) <= (others => '0');
    end generate;
-   
+
    DATA_BINDER_I: entity work.FLU_BINDER_EFF
    generic map(
       --! FLU configuration
       DATA_WIDTH     => DATA_WIDTH,
-      SOP_POS_WIDTH  => SOP_POS_WIDTH,   
+      SOP_POS_WIDTH  => SOP_POS_WIDTH,
 
       --! Number of input ports
-      --! \brief Warning, only powers of two are allowed as 
+      --! \brief Warning, only powers of two are allowed as
       --! input port count. Minimal input ports are 2.
       INPUT_PORTS    => 16,
 
@@ -190,11 +190,11 @@ begin
       PIPELINE_MAP   => BINDER_PIPE,
 
       --! DSP multiplexer map, it tells to RR element if to choose a DSP based multiplexor
-      --! in the RR stage. Width and usage is similar to PIPELINE_MAP. 
+      --! in the RR stage. Width and usage is similar to PIPELINE_MAP.
       --!   '0' - don't use the DSP multiplexor
       --!   '1' - use the DSP multiplexor
       DSP_MAP        => BINDER_DSP,
-      
+
       --! Input Align map (It tells if input flow is aligned - can be computed as INPUT_PORTS)
       --!   '0' - input FLU flow is not alligned
       --!   '1' - input flow is alligned
@@ -220,9 +220,9 @@ begin
       --! Enable/disable the reservation of 128 bit gap
       --! NOTICE: If you enable this functionality, you should be sure
       --! that the minimal packet length is of the frame is 60 bytes.
-      --! This generic is tightly bounded with usage in network module and 
-      --! the FSM needs to be optimized for that usage. This generic can 
-      --! be used with DATA_WIDTH equals to 256 and 512 bits, because the 
+      --! This generic is tightly bounded with usage in network module and
+      --! the FSM needs to be optimized for that usage. This generic can
+      --! be used with DATA_WIDTH equals to 256 and 512 bits, because the
       --! author wants to keep the solution as simple as possible.
       --!   0 - Disable insertion of the 128 bit gap between FLU frames
       --!   1 - Enable insertion of the 128 bit gap between FLU frames
@@ -273,7 +273,7 @@ begin
       --! Information abou internal distribution interface (one bit on interface)
       DISTRIBUTED_TO => distributed_to_i
    );
-   
+
    with selected_from_i(4 downto 1) select
       SELECTED_FROM  <= "0000000001" & selected_from_i(0) when "0000",
                         "0000000010" & selected_from_i(0) when "0001",
@@ -286,7 +286,7 @@ begin
                         "0100000000" & selected_from_i(0) when "1110",
                         "1000000000" & selected_from_i(0) when "1111",
                         (others => 'X') when others;
-   
+
    DISTRIBUTED_TO <= distributed_to_i(15 downto 11) & distributed_to_i(4 downto 0);
 
 end architecture FULL;

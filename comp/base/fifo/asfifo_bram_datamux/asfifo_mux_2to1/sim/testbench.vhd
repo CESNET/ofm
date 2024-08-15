@@ -43,7 +43,7 @@ architecture behavioral of testbench is
    signal rst_rd   : std_logic;
    signal do       : std_logic_vector(TEST_WIDTH/2 - 1 downto 0);
    signal rd       : std_logic;
-   signal do_vld   : std_logic;                 
+   signal do_vld   : std_logic;
    signal aempty   : std_logic;
    signal empty    : std_logic;
 

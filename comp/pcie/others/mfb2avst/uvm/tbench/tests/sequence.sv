@@ -65,7 +65,7 @@ class virt_sequence#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDT
 
         fork
             run_axi_data();
-            forever begin 
+            forever begin
                 m_meta_sq.randomize();
                 m_meta_sq.start(p_sequencer.m_logic_vector_scr);
             end

@@ -94,7 +94,7 @@ class QueueNdpRx(QueueNdp):
         while self._dsc_free < 2:
             # TODO: check if can be flushed
             await Timer(10, units="ns")
-            
+
         ba = self._buffer_base + self._ctrl.sdp * self._packet_length_max
         self.update_desc_upper_address(ba)
 

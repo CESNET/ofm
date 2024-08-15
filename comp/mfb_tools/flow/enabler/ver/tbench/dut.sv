@@ -70,7 +70,7 @@ begin
       for (int i = 0; i < REGIONS; i = i +1) begin
          cnt_discarded = cnt_discarded + stat_discarded[i];
       end
-   end 
+   end
 end
 
 endmodule

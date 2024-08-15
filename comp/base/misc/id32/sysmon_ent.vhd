@@ -3,7 +3,7 @@
 --! @file
 --! \brief System monitor with MI32 interface entity
 --! \author Lukas Kekely <kekely@cesnet.cz>
---! \date 2012 
+--! \date 2012
 --!
 --! @section License
 --!
@@ -28,7 +28,7 @@ entity SYSMON_MI32 is
   );
   port (
     --! \name Basic signals
-    
+
     --! Global clock.
     --! \brief Global clock.
     --! \details For Virtex-5 the clock frequency must be in range from 2 Mhz to 200 MHz. \n
@@ -37,15 +37,15 @@ entity SYSMON_MI32 is
     --! Global reset.
     RESET          : in std_logic;
 
-    --! name Sysmon direct signals 
-    
+    --! name Sysmon direct signals
+
     --! Bank select for sysmon
-    BANK          : in std_logic_vector(1 downto 0);    
+    BANK          : in std_logic_vector(1 downto 0);
     --! Sysmon raised alarm, as programmed by SW
     ALARM         : out std_logic;
-    
+
     --! \name MI32 interface
-    
+
     --! Data to write.
     MI_DWR        : in  std_logic_vector(31 downto 0);
     --! Read/write address.
@@ -55,7 +55,7 @@ entity SYSMON_MI32 is
     --! Write valid.
     MI_WR         : in  std_logic;
     --! Write data byte enable (not supported).
-    MI_BE         : in  std_logic_vector(3 downto 0); 
+    MI_BE         : in  std_logic_vector(3 downto 0);
     --! Read data.
     MI_DRD        : out std_logic_vector(31 downto 0);
     --! Read/write address ready.

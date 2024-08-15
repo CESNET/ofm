@@ -3,7 +3,7 @@
 //-- Author(s): Radek Iša <isa@cesnet.cz>
 //--            Tomáš Beneš <xbenes55@stud.fit.vutbr.cz>
 //--
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 `include "mi_common_cbs.sv"
 
@@ -27,7 +27,7 @@ class scoreboard #(MI_WIDTH, MI_META_WIDTH);
             $write("-- %s\n", prefix);
             $write("----------------------------------------------------------------------------\n");
         end
-        
+
         $write("\tRQ COUNTS %d\n\tRS COUNTS %d\n", data.cmp_rq, data.cmp_rs);
         if (data.fifo_rq.size() != 0 || data.fifo_rs.size() != 0 ) begin
             $write("RQ RS STAY IN FIFO\n");

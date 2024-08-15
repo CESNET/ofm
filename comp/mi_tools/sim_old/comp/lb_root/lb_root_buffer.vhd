@@ -29,7 +29,7 @@ entity LB_ROOT_BUFFER is
       -- Common Interface
       CLK             : in std_logic;
       RESET           : in std_logic;
-            
+
       -- Write Interface
       ADDR_WR         : in  std_logic_vector(ADDR_WIDTH-1 downto 0);
       DWR             : in  std_logic_vector(63 downto 0);
@@ -75,7 +75,7 @@ architecture LB_ROOT_BUFFER_ARCH of LB_ROOT_BUFFER is
      signal addr_mux_sel            : std_logic_vector(1 downto 0);
      signal addr_mux                : std_logic_vector(ADDR_WIDTH-1 downto 0);
      signal be_mux                  : std_logic_vector(7 downto 0);
-     
+
      signal sof                     : std_logic;
      signal eof                     : std_logic;
 
@@ -100,7 +100,7 @@ architecture LB_ROOT_BUFFER_ARCH of LB_ROOT_BUFFER is
      signal drd_last_flag_set       : std_logic;
      signal drd_last_flag_rst       : std_logic;
 
-     
+
 
 begin
 

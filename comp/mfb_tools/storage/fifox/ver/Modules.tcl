@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 set SV_MFB_BASE   "$ENTITY_BASE/../../../ver"
-  
+
 set COMPONENTS [list \
       [ list "SV_MFB"   $SV_MFB_BASE  "FULL"] \
 ]

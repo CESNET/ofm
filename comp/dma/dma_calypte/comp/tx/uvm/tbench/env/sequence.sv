@@ -1,15 +1,15 @@
-//-- sequence.sv: Virtual sequencer 
+//-- sequence.sv: Virtual sequencer
 //-- Copyright (C) 2022 CESNET z. s. p. o.
 //-- Author(s): Radek Iša <isa@cesnet.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 class sequence_simple extends uvm_sequence#(uvm_dma_ll_rx::sequence_item);
     `uvm_object_param_utils(uvm_dma_ll::sequence_simple)
     `uvm_declare_p_sequencer(uvm_dma_ll_rx::sequencer)
 
     int unsigned packet_size_min = 64;
-    int unsigned packet_size_max = 2048; 
+    int unsigned packet_size_max = 2048;
 
 
     function new(string name = "uvm_dma_ll::sequence_simple");

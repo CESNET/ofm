@@ -32,7 +32,7 @@ entity MFB_ASFIFO_256to512 is
 
       TX_CLK        : in  std_logic;
       TX_RESET      : in  std_logic;
-      
+
       TX_DATA       : out std_logic_vector(4*1*4*32-1 downto 0);
       TX_SOF_POS    : out std_logic_vector(4*max(1,log2(1))-1 downto 0);
       TX_EOF_POS    : out std_logic_vector(4*max(1,log2(1*4))-1 downto 0);
@@ -44,7 +44,7 @@ entity MFB_ASFIFO_256to512 is
 end entity;
 
 architecture full of MFB_ASFIFO_256to512 is
-   
+
    signal rx_src_rdy_s : std_logic_vector(1 downto 0);
    signal rx_dst_rdy_s : std_logic_vector(1 downto 0);
    signal afull_s      : std_logic_vector(1 downto 0);
@@ -104,7 +104,7 @@ begin
 
          TX_CLK       => TX_CLK  ,
          TX_RESET     => TX_RESET,
-         
+
          TX_DATA      => asfifo_tx_data(i),
          TX_SOF_POS   => asfifo_tx_sof_pos(i),
          TX_EOF_POS   => asfifo_tx_eof_pos(i),
@@ -154,9 +154,9 @@ begin
 
    TX_SOF     <= (asfifo_tx_src_rdy(not_out_ptrI) and asfifo_tx_sof(not_out_ptrI)) & (asfifo_tx_src_rdy(out_ptrI) and asfifo_tx_sof(out_ptrI));
    TX_EOF     <= (asfifo_tx_src_rdy(not_out_ptrI) and asfifo_tx_eof(not_out_ptrI)) & (asfifo_tx_src_rdy(out_ptrI) and asfifo_tx_eof(out_ptrI));
-   
+
    TX_SRC_RDY <= allow_read;
-   
+
    asfifo_tx_dst_rdy(0) <= TX_DST_RDY and allow_read;
    asfifo_tx_dst_rdy(1) <= TX_DST_RDY and allow_read;
 

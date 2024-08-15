@@ -61,7 +61,7 @@ begin
 
   tb : process
   begin
-    
+
     mask <= (others => '0');
 
     for j in 0 to TEST_DATA_WIDTH-1 loop

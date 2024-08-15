@@ -212,7 +212,7 @@ begin
          X := integer(rand*real(ITEMS));
          op_item_sel(i) <= std_logic_vector(to_unsigned(X,log2(ITEMS)));
       end loop;
-      
+
       -- read gen
       for i in 0 to READ_PORTS-1 loop
          uniform(seed1,seed2,rand);
@@ -249,4 +249,4 @@ begin
       end loop;
    end process;
 
-end architecture behavioral; 
+end architecture behavioral;

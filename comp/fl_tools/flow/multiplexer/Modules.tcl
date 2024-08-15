@@ -18,5 +18,5 @@ set COMPONENTS [list \
 ]
 
 # packages
-set PACKAGES "$PACKAGES $OFM_PATH/comp/base/pkg/math_pack.vhd"  
-set MOD "$MOD $ENTITY_BASE/multiplexer.vhd"  
+set PACKAGES "$PACKAGES $OFM_PATH/comp/base/pkg/math_pack.vhd"
+set MOD "$MOD $ENTITY_BASE/multiplexer.vhd"

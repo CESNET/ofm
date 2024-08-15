@@ -26,14 +26,14 @@ program TEST (
   iFrameLinkTx.tb  TX,
   iFrameLinkTx.monitor MONITOR
   );
-  
+
   // --------------------------------------------------------------------------
   //                       Variables declaration
   // --------------------------------------------------------------------------
- 
+
   // AK MA KOMPONENTA VIAC DRIVEROV ALEBO MONITOROV TREBA ICH NA TOMTO MIESTE DEKLAROVAT A V TASKU
   // CREATEENVIRONMENT INSTANCIOVAT
-  
+
   FrameLinkTransaction                 flBlueprint;                             // Transaction
   Generator                            generator;                               // Generator
   FrameLinkDriver #(DRIVER0_DATA_WIDTH, DRIVER0_DREM_WIDTH)     flDriver;       // Driver
@@ -41,7 +41,7 @@ program TEST (
   FrameLinkResponder #(MONITOR0_DATA_WIDTH, MONITOR0_DREM_WIDTH)  flResponder;  // Responder
   Scoreboard                           scoreboard;                              // Scoreboard
   Coverage #(RX_DATA_WIDTH,RX_DREM_WIDTH,TX_DATA_WIDTH,TX_DREM_WIDTH) coverage; // Coverage
-  
+
   // --------------------------------------------------------------------------
   //                       Creating Environment tasks
   // --------------------------------------------------------------------------
@@ -59,16 +59,16 @@ program TEST (
       flBlueprint.packetSizeMax = packet_size_max;
       flBlueprint.packetSizeMin = packet_size_min;
       generator.blueprint       = flBlueprint;
-  endtask: createGeneratorEnvironment    
+  endtask: createGeneratorEnvironment
 
-  task createEnvironment();    
-    // Create driver    
+  task createEnvironment();
+    // Create driver
     flDriver  = new ("Driver0", generator.transMbx, RX);
-      flDriver.txDelayEn_wt             = DRIVER0_DELAYEN_WT; 
+      flDriver.txDelayEn_wt             = DRIVER0_DELAYEN_WT;
       flDriver.txDelayDisable_wt        = DRIVER0_DELAYDIS_WT;
       flDriver.txDelayLow               = DRIVER0_DELAYLOW;
       flDriver.txDelayHigh              = DRIVER0_DELAYHIGH;
-      flDriver.insideTxDelayEn_wt       = DRIVER0_INSIDE_DELAYEN_WT; 
+      flDriver.insideTxDelayEn_wt       = DRIVER0_INSIDE_DELAYEN_WT;
       flDriver.insideTxDelayDisable_wt  = DRIVER0_INSIDE_DELAYDIS_WT;
       flDriver.insideTxDelayLow         = DRIVER0_INSIDE_DELAYLOW;
       flDriver.insideTxDelayHigh        = DRIVER0_INSIDE_DELAYHIGH;
@@ -76,14 +76,14 @@ program TEST (
     flMonitor = new ("Monitor0", MONITOR);
     // Create responder
     flResponder = new ("Responder0", TX);
-      flResponder.rxDelayEn_wt            = MONITOR0_DELAYEN_WT; 
+      flResponder.rxDelayEn_wt            = MONITOR0_DELAYEN_WT;
       flResponder.rxDelayDisable_wt       = MONITOR0_DELAYDIS_WT;
       flResponder.rxDelayLow              = MONITOR0_DELAYLOW;
       flResponder.rxDelayHigh             = MONITOR0_DELAYHIGH;
-      flResponder.insideRxDelayEn_wt      = MONITOR0_INSIDE_DELAYEN_WT; 
+      flResponder.insideRxDelayEn_wt      = MONITOR0_INSIDE_DELAYEN_WT;
       flResponder.insideRxDelayDisable_wt = MONITOR0_INSIDE_DELAYDIS_WT;
       flResponder.insideRxDelayLow        = MONITOR0_INSIDE_DELAYLOW;
-      flResponder.insideRxDelayHigh       = MONITOR0_INSIDE_DELAYHIGH;    
+      flResponder.insideRxDelayHigh       = MONITOR0_INSIDE_DELAYHIGH;
     // Create scoreboard
     scoreboard = new;
     // Coverage class
@@ -100,7 +100,7 @@ program TEST (
   // --------------------------------------------------------------------------
   //                       Test auxilarity procedures
   // --------------------------------------------------------------------------
-  
+
   // --------------------------------------------------------------------------
   // Resets design
   task resetDesign();
@@ -124,7 +124,7 @@ program TEST (
   task disableTestEnvironment();
      // V PRIPADE POTREBY VYPNUT VSETKY POUZITE DRIVERY A MONITORY A RESPONDERY
      // Disable drivers
-     #(1000*CLK_PERIOD); 
+     #(1000*CLK_PERIOD);
      flDriver.setDisabled();
      // Disable monitors
      flMonitor.setDisabled();
@@ -148,7 +148,7 @@ program TEST (
      // Pokud je generator aktivni nic nedelej
      while (generator.enabled)
        #(CLK_PERIOD);
-     
+
      // Disable Test Enviroment
      disableTestEnvironment();
 
@@ -156,7 +156,7 @@ program TEST (
      scoreboard.display();
      coverage.display();
   endtask: test1
-  
+
   // --------------------------------------------------------------------------
   // Test Case 2
   // Generuje jednopaketove framy, ktore sa zmestia do jedneho slova driveru
@@ -179,7 +179,7 @@ program TEST (
     // se dokonci posilani a prijmani)
     #(1000*CLK_PERIOD); // TODO: pidat do driveru a monitoru busy bit
                         // a pouzit zde
-  
+
     // Disable everything show results
      generator.setDisabled();
      // Disable Test Environment
@@ -205,9 +205,9 @@ program TEST (
     // -------------------------------------
     test1();       // Run Test 1
     resetDesign();
-    
+
     test2();
-    
+
     // -------------------------------------
     // STOP TESTING
     // -------------------------------------

@@ -35,7 +35,7 @@ entity FP_BS_PER_PACKET is
         TX_SOF_ONE_HOT  : out slv_array_t(MFB_REGIONS downto 0)(MFB_REGIONS*MFB_REGION_SIZE - 1 downto 0);
         -- EOF_POS in ONE HOT format
         TX_EOF_ONE_HOT  : out slv_array_t(MFB_REGIONS downto 0)(MFB_REGIONS*MFB_REGION_SIZE - 1 downto 0);
-        -- Packet Length 
+        -- Packet Length
         TX_PKT_LNG      : out slv_array_t(MFB_REGIONS downto 0)(MFB_REGIONS*MFB_REGION_SIZE*max(1, log2(RX_PKT_SIZE_MAX + 1))- 1 downto 0)
     );
 end entity;
@@ -43,10 +43,10 @@ end entity;
 architecture FULL of FP_BS_PER_PACKET is
     ------------------------------------------------------------
     --                  CONSTANT DECLARATION                  --
-    ------------------------------------------------------------    
+    ------------------------------------------------------------
     constant RX_DATA_H      : natural:= MFB_BLOCK_SIZE*MFB_ITEM_WIDTH + 1 + 1 + 1 + max(1, log2(RX_PKT_SIZE_MAX + 1)) - 1;
     constant RX_VLD_H       : natural:= 1 + 1 + 1 + max(1, log2(RX_PKT_SIZE_MAX + 1)) - 1;
-    constant RX_SOH_H       : natural:= 1 + 1 + max(1, log2(RX_PKT_SIZE_MAX + 1)) - 1; 
+    constant RX_SOH_H       : natural:= 1 + 1 + max(1, log2(RX_PKT_SIZE_MAX + 1)) - 1;
     constant RX_EOH_H       : natural:= 1 + max(1, log2(RX_PKT_SIZE_MAX + 1)) - 1;
     constant RX_PKT_LNG_H   : natural:= max(1, log2(RX_PKT_SIZE_MAX + 1)) - 1;
     ------------------------------------------------------------

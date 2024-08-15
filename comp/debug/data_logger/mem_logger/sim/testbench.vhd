@@ -27,7 +27,7 @@ architecture BEHAVIORAL Of TESTBENCH is
 
 
     constant CLK_PERIOD             : time := 4 ns;     -- 266.66 MHz
-    constant RST_TIME               : time := 40 ns;   
+    constant RST_TIME               : time := 40 ns;
 
     signal sim_done                 : std_logic := '0';
 
@@ -63,13 +63,13 @@ architecture BEHAVIORAL Of TESTBENCH is
     end procedure echo;
 
 begin
-	
+
     ---------
     -- UUT --
     ---------
-    
+
     uut : entity work.MEM_LOGGER
-    generic map (    
+    generic map (
         MEM_DATA_WIDTH          => MEM_DATA_WIDTH       ,
         MEM_ADDR_WIDTH          => MEM_ADDR_WIDTH       ,
         MEM_BURST_COUNT_WIDTH   => MEM_BURST_COUNT_WIDTH,
@@ -77,7 +77,7 @@ begin
         MI_DATA_WIDTH           => MI_DATA_WIDTH        ,
         MI_ADDR_WIDTH           => MI_ADDR_WIDTH
     )
-    port map (    
+    port map (
         CLK                     => clk                ,
         RST                     => rst                ,
         RST_DONE                => rst_done           ,
@@ -102,14 +102,14 @@ begin
     mi_sim_i : entity work.MI_SIM
     generic map (
         MI_SIM_ID                 => 0
-    )                             
-    port map (                    
+    )
+    port map (
         CLK                       => clk,
         RESET                     => rst,
 
         MI32_DWR                  => mi_dwr,
         MI32_ADDR                 => mi_addr,
-        MI32_BE                   => mi_be, 
+        MI32_BE                   => mi_be,
         MI32_RD                   => mi_rd,
         MI32_WR                   => mi_wr,
         MI32_ARDY                 => mi_ardy,
@@ -118,7 +118,7 @@ begin
     );
 
     clk     <= not clk after CLK_PERIOD / 2 when sim_done /= '1' else '0';
-    
+
     test_p : process
         variable addr : std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
         variable data : std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
@@ -128,7 +128,7 @@ begin
         is
         begin
             addr := std_logic_vector(to_unsigned(addr_int, addr'length));
-            work.mi_sim_pkg.ReadData(addr, data, be, status(0), 0); 
+            work.mi_sim_pkg.ReadData(addr, data, be, status(0), 0);
             wait until rising_edge(clk);
 
             echo("Read " & integer'image(addr_int) & ": " & integer'image(to_integer(unsigned(data))));
@@ -140,7 +140,7 @@ begin
             addr := std_logic_vector(to_unsigned(addr_int, addr'length));
             data := std_logic_vector(to_unsigned(val, data'length));
             be   := (others => '1');
-            work.mi_sim_pkg.WriteData(addr, data, be, status(0), 0); 
+            work.mi_sim_pkg.WriteData(addr, data, be, status(0), 0);
             wait until rising_edge(clk);
 
             --echo("Write: " & integer'image(val));
@@ -158,7 +158,7 @@ begin
                 write_p(12, i);
 
                 addr := std_logic_vector(to_unsigned(20, addr'length));
-                work.mi_sim_pkg.ReadData(addr, data, be, status(0), 0); 
+                work.mi_sim_pkg.ReadData(addr, data, be, status(0), 0);
                 wait until rising_edge(clk);
                 echo("  " & integer'image(to_integer(unsigned(data))), false);
             end loop;
@@ -180,7 +180,7 @@ begin
                     write_p(12, i);
 
                     addr := std_logic_vector(to_unsigned(20, addr'length));
-                    work.mi_sim_pkg.ReadData(addr, data, be, status(0), 0); 
+                    work.mi_sim_pkg.ReadData(addr, data, be, status(0), 0);
                     wait until rising_edge(clk);
                     echo("  " & integer'image(to_integer(unsigned(data))), false);
                 end loop;
@@ -205,7 +205,7 @@ begin
         mem_read_data_valid <= '0';
 
         rst                 <= '1';
-        wait for RST_TIME;      
+        wait for RST_TIME;
         rst                 <= '0';
         wait until rising_edge(clk);
         wait until rst_done = '1';
@@ -318,7 +318,7 @@ begin
         stat_p("CTRLO_WIDTH       ", 3, 0);
         stat_p("CTRLI_WIDTH       ", 4, 0);
         stat_p("CNTER_WIDTH       ", 5, 0);
-         
+
         echo("Cnters:");
         stat_p("  write ticks          ", 13, 0);
         stat_p("  read  ticks          ", 13, 1);

@@ -9,7 +9,7 @@ class monitor #(int unsigned UPDATE_CNT_WIDTH) extends uvm_monitor;
 
     // Virtual interface
     virtual avst_crdt_if #(UPDATE_CNT_WIDTH).monitor vif;
-    
+
     // Analysis port
     uvm_analysis_port #(sequence_item #(UPDATE_CNT_WIDTH)) analysis_port;
 

@@ -25,15 +25,15 @@ package mux_lvl_func is
    function func_new_data_width(data_width : Integer) return integer;
 end package;
 
---! \brief Body of package with functions 
+--! \brief Body of package with functions
 package body mux_lvl_func is
-   
+
    -- number of multiplexers for lvl
    function func_new_data_width(data_width : Integer) return integer is
       variable width_mod : integer;
    begin
       width_mod := data_width mod 48;
-      if (width_mod = 0) then 
+      if (width_mod = 0) then
          return data_width;
       else
          return (data_width + (48 - width_mod));
@@ -53,13 +53,13 @@ package body mux_lvl_func is
       if (lvl = 0) then
          return first_lvl;
       end if;
-      
+
       for I in 1 to lvl loop
          others_lvl := num_inputs/2;
          lvl_mod    := num_inputs mod 2;
-         num_inputs := others_lvl + lvl_mod;        
+         num_inputs := others_lvl + lvl_mod;
       end loop;
-      
+
       return others_lvl;
    end function;
 
@@ -77,13 +77,13 @@ package body mux_lvl_func is
       if (lvl = 0) then
          return first_lvl;
       end if;
-      
+
       for I in 1 to lvl loop
          others_lvl := num_inputs/2;
          lvl_mod    := num_inputs mod 2;
-         num_inputs := others_lvl + lvl_mod;        
+         num_inputs := others_lvl + lvl_mod;
       end loop;
-      
+
       return lvl_mod;
    end function;
 

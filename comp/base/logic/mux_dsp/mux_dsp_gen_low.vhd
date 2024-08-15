@@ -21,12 +21,12 @@ use work.mux_lvl_func.all;
 entity MUX_DSP_GEN_LOW is
    generic (
       DATA_WIDTH  : integer := 512;
-      MUX_WIDTH   : integer := 8; 
+      MUX_WIDTH   : integer := 8;
       --! Input pipeline registers (0, 1)
       REG_IN      : integer := 1;
       --! Output pipeline registers (0, 1)
       REG_OUT     : integer := 1;
-      --! Pipeline between muxs levels (0, 1) 
+      --! Pipeline between muxs levels (0, 1)
       REG_LVL     : integer := 1
    );
    port (
@@ -42,7 +42,7 @@ entity MUX_DSP_GEN_LOW is
       CE_OUT   : in  std_logic;
       --! Clock enable for lvls
       CE_LVL   : in std_logic;
-      --! Select input data 
+      --! Select input data
       SEL      : in std_logic_vector(log2(MUX_WIDTH)-1 downto 0);
       --! output
       DATA_OUT : out std_logic_vector(DATA_WIDTH-1 downto 0)
@@ -64,7 +64,7 @@ begin
    GEN_LEVELS: for LVL in 0 to num_levels-1 generate
       constant num_of_mux  : integer := num_muxs(MUX_WIDTH, LVL);
       constant mod_of_mux  : integer := mod_muxs(MUX_WIDTH, LVL);
-          
+
       signal tmp_ce_in     : std_logic;
       signal tmp_ce_sel    : std_logic;
       signal tmp_ce_out    : std_logic;
@@ -87,7 +87,7 @@ begin
          GEN_CE_OFF: if(REG_LVL = 0) generate
             tmp_ce_sel     <= '1';
          end generate;
-         
+
          tmp_ce_in      <= '1';
       end generate;
 
@@ -141,10 +141,10 @@ begin
                RESET    => RESET,
                DATA_IN  => SEL(LVL downto LVL),
                DATA_OUT => tmp_SEL,
-               CE       => CE_LVL 
+               CE       => CE_LVL
             );
          end generate;
-         
+
          GNE_PIPE_NO_SEL: if(LVL = 0) generate
             tmp_SEL <= SEL(LVL downto LVL);
          end generate;
@@ -170,24 +170,24 @@ begin
             SEL      => tmp_SEL(0),
             CE_OUT   => tmp_ce_out,
             P        => lvls_array(LVL+1)(MUXS),
-            P_CAS    => lvls_array_cas(LVL+1)(MUXS)  
+            P_CAS    => lvls_array_cas(LVL+1)(MUXS)
          );
       end generate;
-      
+
       GNE_LAST: if (mod_of_mux > 0) generate
          signal tmp_pipe : std_logic_vector(DATA_WIDTH-1 downto 0);
-      begin 
+      begin
          process(CLK)
          begin
             if (CLK'event) and (CLK = '1') then
-               if (RESET = '1') then   
+               if (RESET = '1') then
                   tmp_pipe <= (others => '0');
                elsif (CE_OUT = '1') then
-                  tmp_pipe <= lvls_array(LVL)(num_of_mux*2);   
+                  tmp_pipe <= lvls_array(LVL)(num_of_mux*2);
                end if;
             end if;
          end process;
-         
+
          lvls_array(LVL+1)(num_of_mux) <= tmp_pipe;
       end generate;
    end generate;

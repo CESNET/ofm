@@ -87,11 +87,11 @@ begin
     gen_arch_equal_g: if (RX_REGIONS = TX_REGIONS) generate
         TX_DATA    <= RX_DATA;
         TX_META    <= RX_META;
-        TX_SOP     <= RX_SOP; 
+        TX_SOP     <= RX_SOP;
         TX_EOP     <= RX_EOP;
         TX_SOP_POS <= RX_SOP_POS;
         TX_EOP_POS <= RX_EOP_POS;
-        TX_SRC_RDY <= RX_SRC_RDY; 
+        TX_SRC_RDY <= RX_SRC_RDY;
         RX_DST_RDY <= TX_DST_RDY;
     end generate;
 

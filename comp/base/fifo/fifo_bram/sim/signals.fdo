@@ -6,6 +6,6 @@
 #
 
 proc all {NAME PATH} {
-   add wave -divider "$NAME"  
+   add wave -divider "$NAME"
    add_wave "-noupdate -hex" $PATH/*
 }

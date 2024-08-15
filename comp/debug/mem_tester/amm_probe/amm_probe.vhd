@@ -17,7 +17,7 @@ use work.hist_types.all;
 -- ----------------------------------
 -- ctrl                 BASE
 --              R       0. in   - reset
---                      1. in   - latency: req -> first data [default: req -> last data]  
+--                      1. in   - latency: req -> first data [default: req -> last data]
 --                      2. out  - write ticks                  overflow occured
 --                      3. out  - read  ticks                  overflow occured
 --                      4. out  - r/w   ticks                  overflow occured
@@ -31,16 +31,16 @@ use work.hist_types.all;
 --                      12. out - latency histogramer is LINEAR (else LOG)
 -- *(R = bit is rising edge triggered)
 -- ----------------------------------
--- write ticks          BASE + 0x04  
+-- write ticks          BASE + 0x04
 -- ----------------------------------
 -- read  ticks          BASE + 0x08
 -- ----------------------------------
--- r/w   ticks          BASE + 0x0C  
+-- r/w   ticks          BASE + 0x0C
 --                      ticks of the whole communication
 -- ----------------------------------
--- words written        BASE + 0x10  
+-- words written        BASE + 0x10
 -- ----------------------------------
--- words read           BASE + 0x14  
+-- words read           BASE + 0x14
 -- ----------------------------------
 -- requests made        BASE + 0x18
 -- ----------------------------------
@@ -79,7 +79,7 @@ use work.hist_types.all;
 -- Hangle change in burst count while response is running
 
 entity AMM_PROBE is
-generic (    
+generic (
     -- ================
     -- MI bus
     -- ================
@@ -100,14 +100,14 @@ generic (
     -- Others
     -- ================
 
-    AMM_PIPE_REGS           : integer := 1; 
+    AMM_PIPE_REGS           : integer := 1;
     MI_ADDR_BASE            : std_logic_vector(MI_ADDR_WIDTH - 1 downto 0) := (others => '0');
     -- Number of used MI addr LSB bits
     MI_ADDR_USED_BITS       : integer := MI_ADDR_WIDTH;
     HISTOGRAM_BOXES         : integer := 512;
     DEVICE                  : string
 );
-port(    
+port(
     -- ================
     -- Main
     -- ================
@@ -119,7 +119,7 @@ port(
     -- MI bus interface
     -- ================
 
-    MI_DWR                  : in  std_logic_vector(MI_DATA_WIDTH - 1 downto 0);  
+    MI_DWR                  : in  std_logic_vector(MI_DATA_WIDTH - 1 downto 0);
     MI_ADDR                 : in  std_logic_vector(MI_ADDR_WIDTH - 1 downto 0);
     MI_BE                   : in  std_logic_vector(MI_DATA_WIDTH / 8 - 1 downto 0);
     MI_RD                   : in  std_logic;
@@ -132,12 +132,12 @@ port(
     -- Avalon interface
     -- ================
 
-    AMM_READY               : in  std_logic;                                             
+    AMM_READY               : in  std_logic;
     AMM_READ                : in  std_logic;
     AMM_WRITE               : in  std_logic;
-    AMM_ADDRESS             : in  std_logic_vector(AMM_ADDR_WIDTH - 1 downto 0);  
-    AMM_READ_DATA           : in  std_logic_vector(AMM_DATA_WIDTH - 1 downto 0);        
-    AMM_WRITE_DATA          : in  std_logic_vector(AMM_DATA_WIDTH - 1 downto 0);       
+    AMM_ADDRESS             : in  std_logic_vector(AMM_ADDR_WIDTH - 1 downto 0);
+    AMM_READ_DATA           : in  std_logic_vector(AMM_DATA_WIDTH - 1 downto 0);
+    AMM_WRITE_DATA          : in  std_logic_vector(AMM_DATA_WIDTH - 1 downto 0);
     AMM_BURST_COUNT         : in  std_logic_vector(AMM_BURST_COUNT_WIDTH - 1 downto 0);
     AMM_READ_DATA_VALID     : in  std_logic
 );
@@ -149,9 +149,9 @@ architecture FULL of AMM_PROBE is
 
     -- MI BUS --
     -- Core
-    constant MI_ADDR_CUTOFF             : integer := log2(MI_DATA_WIDTH / 8); 
+    constant MI_ADDR_CUTOFF             : integer := log2(MI_DATA_WIDTH / 8);
 
-    -- Registers                         
+    -- Registers
     constant CTRL_REG_ID                : integer := 0;
     constant WR_TICKS_REG_ID            : integer := 1;
     constant RD_TICKS_REG_ID            : integer := 2;
@@ -172,11 +172,11 @@ architecture FULL of AMM_PROBE is
     constant LATENCY_TICKS_WIDTH_ID     : integer := 17;
     constant HIST_CNTER_CNT_ID          : integer := 18;
 
-    -- Bits - IN                         
+    -- Bits - IN
     constant RST_BIT                    : integer := 0;
     constant LATENCY_TO_FIRST_BIT       : integer := 1;
 
-    -- Bits - OUT                        
+    -- Bits - OUT
     constant WR_TICKS_OVF_BIT           : integer := 2;
     constant RD_TICKS_OVF_BIT           : integer := 3;
     constant RW_TICKS_OVF_BIT           : integer := 4;
@@ -189,11 +189,11 @@ architecture FULL of AMM_PROBE is
     constant LATENCY_HIST_OVF_BIT       : integer := 11;
     constant HIST_IS_LINEAR_BIT         : integer := 12;
 
-    -- Bits - constants                  
+    -- Bits - constants
     constant CTRL_LAST_IN_BIT           : integer := LATENCY_TO_FIRST_BIT;
     constant CTRL_LAST_OUT_BIT          : integer := HIST_IS_LINEAR_BIT;
 
-    -- PROBE --                          
+    -- PROBE --
     -- If larger ticks counters needed, one must break down data into multiple MI regs
     constant TICKS_WIDTH                : integer := MI_DATA_WIDTH;
     constant TICKS_LIMIT                : unsigned(TICKS_WIDTH - 1 downto 0) := (others => '1');
@@ -201,7 +201,7 @@ architecture FULL of AMM_PROBE is
     constant WORDS_CNT_WIDTH            : integer := MI_DATA_WIDTH;
     constant WORDS_CNT_LIMIT            : unsigned(WORDS_CNT_WIDTH - 1 downto 0) := (others => '1');
 
-    -- Max latency ticks = 4095 => with freq = 333.33 Mhz => max. latency = 12us 
+    -- Max latency ticks = 4095 => with freq = 333.33 Mhz => max. latency = 12us
     constant LATENCY_TICKS_WIDTH        : integer := 12;
     constant LATENCY_SUM_WIDTH          : integer := MI_DATA_WIDTH * 2;
     -- TODO
@@ -216,8 +216,8 @@ architecture FULL of AMM_PROBE is
     -- ----------------------------------------------------------------------- --
 
     function id_to_addr_f (addr : integer)
-    return std_logic_vector is 
-        constant mi_addr_base_int   : integer := to_integer(unsigned(MI_ADDR_BASE(MI_ADDR_USED_BITS - 1 downto MI_ADDR_CUTOFF))); 
+    return std_logic_vector is
+        constant mi_addr_base_int   : integer := to_integer(unsigned(MI_ADDR_BASE(MI_ADDR_USED_BITS - 1 downto MI_ADDR_CUTOFF)));
     begin
         return std_logic_vector(to_unsigned(mi_addr_base_int + addr, MI_ADDR_USED_BITS - MI_ADDR_CUTOFF));
     end function;
@@ -242,21 +242,21 @@ architecture FULL of AMM_PROBE is
 
     -- AMM BUS --
     -- Pipe (pipe(0) = original)
-    signal amm_pipe_ready               : std_logic_vector(AMM_PIPE_REGS downto 0);                                             
+    signal amm_pipe_ready               : std_logic_vector(AMM_PIPE_REGS downto 0);
     signal amm_pipe_read                : std_logic_vector(AMM_PIPE_REGS downto 0);
     signal amm_pipe_write               : std_logic_vector(AMM_PIPE_REGS downto 0);
-    signal amm_pipe_address             : slv_array_t(AMM_PIPE_REGS downto 0)(AMM_ADDR_WIDTH - 1 downto 0);  
-    signal amm_pipe_read_data           : slv_array_t(AMM_PIPE_REGS downto 0)(AMM_DATA_WIDTH - 1 downto 0);        
-    signal amm_pipe_write_data          : slv_array_t(AMM_PIPE_REGS downto 0)(AMM_DATA_WIDTH - 1 downto 0);       
+    signal amm_pipe_address             : slv_array_t(AMM_PIPE_REGS downto 0)(AMM_ADDR_WIDTH - 1 downto 0);
+    signal amm_pipe_read_data           : slv_array_t(AMM_PIPE_REGS downto 0)(AMM_DATA_WIDTH - 1 downto 0);
+    signal amm_pipe_write_data          : slv_array_t(AMM_PIPE_REGS downto 0)(AMM_DATA_WIDTH - 1 downto 0);
     signal amm_pipe_burst_count         : slv_array_t(AMM_PIPE_REGS downto 0)(AMM_BURST_COUNT_WIDTH - 1 downto 0);
     signal amm_pipe_read_data_valid     : std_logic_vector(AMM_PIPE_REGS downto 0);
     -- Intern
-    signal amm_intern_ready             : std_logic;                                             
+    signal amm_intern_ready             : std_logic;
     signal amm_intern_read              : std_logic;
     signal amm_intern_write             : std_logic;
-    signal amm_intern_address           : std_logic_vector(AMM_ADDR_WIDTH - 1 downto 0);  
-    signal amm_intern_read_data         : std_logic_vector(AMM_DATA_WIDTH - 1 downto 0);        
-    signal amm_intern_write_data        : std_logic_vector(AMM_DATA_WIDTH - 1 downto 0);       
+    signal amm_intern_address           : std_logic_vector(AMM_ADDR_WIDTH - 1 downto 0);
+    signal amm_intern_read_data         : std_logic_vector(AMM_DATA_WIDTH - 1 downto 0);
+    signal amm_intern_write_data        : std_logic_vector(AMM_DATA_WIDTH - 1 downto 0);
     signal amm_intern_burst_count       : std_logic_vector(AMM_BURST_COUNT_WIDTH - 1 downto 0);
     signal amm_intern_read_data_valid   : std_logic;
     -- Logic
@@ -290,15 +290,15 @@ architecture FULL of AMM_PROBE is
     signal rw_ticks_en_delayed          : std_logic;
     signal rw_ticks_ovf_occ             : std_logic;
 
-    signal wr_words                     : unsigned(WORDS_CNT_WIDTH - 1 downto 0);       
+    signal wr_words                     : unsigned(WORDS_CNT_WIDTH - 1 downto 0);
     signal wr_words_full                : std_logic;
     signal wr_words_ovf_occ             : std_logic;
 
-    signal rd_words                     : unsigned(WORDS_CNT_WIDTH - 1 downto 0);       
+    signal rd_words                     : unsigned(WORDS_CNT_WIDTH - 1 downto 0);
     signal rd_words_full                : std_logic;
     signal rd_words_ovf_occ             : std_logic;
 
-    signal req_cnt                      : unsigned(WORDS_CNT_WIDTH - 1 downto 0);       
+    signal req_cnt                      : unsigned(WORDS_CNT_WIDTH - 1 downto 0);
     signal req_cnt_full                 : std_logic;
     signal req_cnt_ovf_occ              : std_logic;
 
@@ -308,13 +308,13 @@ architecture FULL of AMM_PROBE is
 
     signal latency_hist_sel_cnter       : std_logic_vector(log2(HIST_CNTER_CNT) - 1 downto 0);
     signal latency_hist_cnt             : std_logic_vector(HIST_CNT_WIDTH - 1 downto 0);
-                             
-    signal latency_ticks_ovf            : std_logic; 
+
+    signal latency_ticks_ovf            : std_logic;
     signal latency_counters_ovf         : std_logic;
     signal latency_sum_ovf              : std_logic;
     signal latency_hist_cnt_ovf         : std_logic;
 
-    signal latency_ticks_ovf_occ        : std_logic; 
+    signal latency_ticks_ovf_occ        : std_logic;
     signal latency_counters_ovf_occ     : std_logic;
     signal latency_sum_ovf_occ          : std_logic;
 
@@ -372,10 +372,10 @@ begin
     -- CORE --
     total_rst_raw                   <= RST or mi_rst_req;
 
-    -- MI BUS --                     
-    -- Selection mechanism           
+    -- MI BUS --
+    -- Selection mechanism
     mi_addr_sliced                  <= MI_ADDR(MI_ADDR_USED_BITS - 1 downto MI_ADDR_CUTOFF);
-    -- Bits                          
+    -- Bits
     mi_rst_req_raw                  <= ctrl_reg(RST_BIT);
     latency_to_first_word           <= ctrl_reg(LATENCY_TO_FIRST_BIT);
 
@@ -387,31 +387,31 @@ begin
     ctrl_reg(LATENCY_CNTERS_OVF_BIT) <= latency_counters_ovf_occ;
     ctrl_reg(LATENCY_SUM_OVF_BIT)   <= latency_sum_ovf_occ;
     ctrl_reg(LATENCY_HIST_OVF_BIT)  <= latency_hist_cnt_ovf;
-    ctrl_reg(HIST_IS_LINEAR_BIT)    <= '1' when (HIST_VARIANT = LINEAR) else 
+    ctrl_reg(HIST_IS_LINEAR_BIT)    <= '1' when (HIST_VARIANT = LINEAR) else
                                        '0';
 
-    -- Ready signals                 
+    -- Ready signals
     MI_ARDY                         <= MI_RD or MI_WR;
 
-    -- AMM BUS --                    
-    -- Pipe                          
-    amm_pipe_ready          (0)     <= AMM_READY          ;  
-    amm_pipe_read           (0)     <= AMM_READ           ;  
-    amm_pipe_write          (0)     <= AMM_WRITE          ;  
-    amm_pipe_address        (0)     <= AMM_ADDRESS        ;  
-    amm_pipe_read_data      (0)     <= AMM_READ_DATA      ;  
-    amm_pipe_write_data     (0)     <= AMM_WRITE_DATA     ;  
-    amm_pipe_burst_count    (0)     <= AMM_BURST_COUNT    ;  
-    amm_pipe_read_data_valid(0)     <= AMM_READ_DATA_VALID;  
+    -- AMM BUS --
+    -- Pipe
+    amm_pipe_ready          (0)     <= AMM_READY          ;
+    amm_pipe_read           (0)     <= AMM_READ           ;
+    amm_pipe_write          (0)     <= AMM_WRITE          ;
+    amm_pipe_address        (0)     <= AMM_ADDRESS        ;
+    amm_pipe_read_data      (0)     <= AMM_READ_DATA      ;
+    amm_pipe_write_data     (0)     <= AMM_WRITE_DATA     ;
+    amm_pipe_burst_count    (0)     <= AMM_BURST_COUNT    ;
+    amm_pipe_read_data_valid(0)     <= AMM_READ_DATA_VALID;
 
-    amm_intern_ready                <= amm_pipe_ready          (AMM_PIPE_REGS);  
-    amm_intern_read                 <= amm_pipe_read           (AMM_PIPE_REGS);  
-    amm_intern_write                <= amm_pipe_write          (AMM_PIPE_REGS);  
-    amm_intern_address              <= amm_pipe_address        (AMM_PIPE_REGS);  
-    amm_intern_read_data            <= amm_pipe_read_data      (AMM_PIPE_REGS);  
-    amm_intern_write_data           <= amm_pipe_write_data     (AMM_PIPE_REGS);  
-    amm_intern_burst_count          <= amm_pipe_burst_count    (AMM_PIPE_REGS);  
-    amm_intern_read_data_valid      <= amm_pipe_read_data_valid(AMM_PIPE_REGS);  
+    amm_intern_ready                <= amm_pipe_ready          (AMM_PIPE_REGS);
+    amm_intern_read                 <= amm_pipe_read           (AMM_PIPE_REGS);
+    amm_intern_write                <= amm_pipe_write          (AMM_PIPE_REGS);
+    amm_intern_address              <= amm_pipe_address        (AMM_PIPE_REGS);
+    amm_intern_read_data            <= amm_pipe_read_data      (AMM_PIPE_REGS);
+    amm_intern_write_data           <= amm_pipe_write_data     (AMM_PIPE_REGS);
+    amm_intern_burst_count          <= amm_pipe_burst_count    (AMM_PIPE_REGS);
+    amm_intern_read_data_valid      <= amm_pipe_read_data_valid(AMM_PIPE_REGS);
 
     -- Logic
     amm_wr_req                      <= amm_intern_write and amm_intern_ready;
@@ -442,9 +442,9 @@ begin
                                        '0';
     req_cnt_full                    <= '1' when(req_cnt = WORDS_CNT_LIMIT and amm_rd_req = '1') else
                                        '0';
-    
+
     latency_meter_resp              <= amm_rd_resp and rd_burst_done when (latency_to_first_word = '0') else
-                                       amm_rd_resp and rd_burst_start; 
+                                       amm_rd_resp and rd_burst_start;
     ---------------
     -- Registers --
     ---------------
@@ -464,23 +464,23 @@ begin
             -- "case choice should be a locally static expression"
             if (mi_addr_sliced = id_to_addr_f(CTRL_REG_ID)          ) then
                 MI_DRD <= ctrl_reg;
-            elsif (mi_addr_sliced = id_to_addr_f(WR_TICKS_REG_ID)   ) then 
+            elsif (mi_addr_sliced = id_to_addr_f(WR_TICKS_REG_ID)   ) then
                 MI_DRD <= wr_ticks_reg;
-            elsif (mi_addr_sliced = id_to_addr_f(RD_TICKS_REG_ID)   ) then 
+            elsif (mi_addr_sliced = id_to_addr_f(RD_TICKS_REG_ID)   ) then
                 MI_DRD <= rd_ticks_reg;
-            elsif (mi_addr_sliced = id_to_addr_f(RW_TICKS_REG_ID)   ) then 
+            elsif (mi_addr_sliced = id_to_addr_f(RW_TICKS_REG_ID)   ) then
                 MI_DRD <= rw_ticks_reg;
-            elsif (mi_addr_sliced = id_to_addr_f(WR_WORDS_REG_ID)   ) then 
+            elsif (mi_addr_sliced = id_to_addr_f(WR_WORDS_REG_ID)   ) then
                 MI_DRD <= std_logic_vector(wr_words);
-            elsif (mi_addr_sliced = id_to_addr_f(RD_WORDS_REG_ID)   ) then 
+            elsif (mi_addr_sliced = id_to_addr_f(RD_WORDS_REG_ID)   ) then
                 MI_DRD <= std_logic_vector(rd_words);
-            elsif (mi_addr_sliced = id_to_addr_f(REQ_CNT_REG_ID)    ) then 
+            elsif (mi_addr_sliced = id_to_addr_f(REQ_CNT_REG_ID)    ) then
                 MI_DRD <= std_logic_vector(req_cnt);
-            elsif (mi_addr_sliced = id_to_addr_f(LATENCY_SUM_REG_1_ID)) then 
+            elsif (mi_addr_sliced = id_to_addr_f(LATENCY_SUM_REG_1_ID)) then
                 MI_DRD <= latency_sum_ticks(MI_DATA_WIDTH - 1 downto 0);
-            elsif (mi_addr_sliced = id_to_addr_f(LATENCY_SUM_REG_2_ID)) then 
+            elsif (mi_addr_sliced = id_to_addr_f(LATENCY_SUM_REG_2_ID)) then
                 MI_DRD <= latency_sum_ticks(MI_DATA_WIDTH * 2 - 1 downto MI_DATA_WIDTH);
-            elsif (mi_addr_sliced = id_to_addr_f(LATENCY_MIN_REG_ID)) then 
+            elsif (mi_addr_sliced = id_to_addr_f(LATENCY_MIN_REG_ID)) then
                 MI_DRD <=  (MI_DATA_WIDTH downto LATENCY_TICKS_WIDTH => '0') & latency_min_ticks;
             elsif (mi_addr_sliced = id_to_addr_f(LATENCY_MAX_REG_ID)) then
                 MI_DRD <=  (MI_DATA_WIDTH downto LATENCY_TICKS_WIDTH => '0') & latency_max_ticks;
@@ -517,9 +517,9 @@ begin
                 ctrl_reg(MI_DATA_WIDTH - 1 downto CTRL_LAST_OUT_BIT + 1)    <= (others => '0');
                 latency_hist_sel_cnter                                      <= (others => '0');
             elsif (MI_WR = '1') then
-                if (mi_addr_sliced = id_to_addr_f(CTRL_REG_ID)) then 
+                if (mi_addr_sliced = id_to_addr_f(CTRL_REG_ID)) then
                     ctrl_reg(CTRL_LAST_IN_BIT downto 0)  <= MI_DWR(CTRL_LAST_IN_BIT downto 0);
-                elsif (mi_addr_sliced = id_to_addr_f(LATENCY_HIST_SEL_ID)) then 
+                elsif (mi_addr_sliced = id_to_addr_f(LATENCY_HIST_SEL_ID)) then
                     latency_hist_sel_cnter  <= MI_DWR(latency_hist_sel_cnter'length - 1 downto 0);
                 end if;
             end if;
@@ -553,7 +553,7 @@ begin
 
     -- Burst counters
     wr_burst_p : process(CLK)
-    begin            
+    begin
         if (rising_edge(CLK)) then
             if (total_rst = '1' or (wr_burst_done = '1' and amm_wr_req = '1')) then
                 wr_burst    <= to_unsigned(1, AMM_BURST_COUNT_WIDTH);
@@ -564,7 +564,7 @@ begin
     end process;
 
     rd_burst_p : process(CLK)
-    begin            
+    begin
         if (rising_edge(CLK)) then
             if (total_rst = '1' or (rd_burst_done = '1' and amm_rd_resp = '1')) then
                 rd_burst    <= to_unsigned(1, AMM_BURST_COUNT_WIDTH);
@@ -577,7 +577,7 @@ begin
     -- PROBE --
     -- R/W ticks counters
     wr_ticks_p : process(CLK)
-    begin            
+    begin
         if (rising_edge(CLK)) then
             if (total_rst = '1' or (wr_ticks_full = '1' and wr_ticks_en = '1')) then
                 wr_ticks    <= to_unsigned(1, TICKS_WIDTH);
@@ -588,7 +588,7 @@ begin
     end process;
 
    rd_ticks_p : process(CLK)
-    begin            
+    begin
         if (rising_edge(CLK)) then
             if (total_rst = '1' or (rd_ticks_full = '1' and rd_ticks_en = '1')) then
                 rd_ticks    <= to_unsigned(1, TICKS_WIDTH);
@@ -599,7 +599,7 @@ begin
     end process;
 
    rw_ticks_p : process(CLK)
-    begin            
+    begin
         if (rising_edge(CLK)) then
             if (total_rst = '1' or (rw_ticks_full = '1' and rw_ticks_en = '1')) then
                 rw_ticks    <= to_unsigned(1, TICKS_WIDTH);
@@ -611,7 +611,7 @@ begin
 
     -- R/W tick EN (enable ticks counters on first r/w request)
     wr_ticks_en_p : process(CLK)
-    begin            
+    begin
         if (rising_edge(CLK)) then
             if (total_rst = '1') then
                 wr_ticks_en_delayed <= '0';
@@ -622,7 +622,7 @@ begin
     end process;
 
     rd_ticks_en_p : process(CLK)
-    begin            
+    begin
         if (rising_edge(CLK)) then
             if (total_rst = '1') then
                 rd_ticks_en_delayed <= '0';
@@ -633,7 +633,7 @@ begin
     end process;
 
     rw_ticks_en_p : process(CLK)
-    begin            
+    begin
         if (rising_edge(CLK)) then
             if (total_rst = '1') then
                 rw_ticks_en_delayed <= '0';
@@ -645,7 +645,7 @@ begin
 
     -- R/W ticks overflow occured
     wr_ticks_ovf_occ_p : process(CLK)
-    begin            
+    begin
         if (rising_edge(CLK)) then
             if (total_rst = '1') then
                 wr_ticks_ovf_occ    <= '0';
@@ -656,7 +656,7 @@ begin
     end process;
 
     rd_ticks_ovf_occ_p : process(CLK)
-    begin            
+    begin
         if (rising_edge(CLK)) then
             if (total_rst = '1') then
                 rd_ticks_ovf_occ    <= '0';
@@ -667,7 +667,7 @@ begin
     end process;
 
     rw_ticks_ovf_occ_p : process(CLK)
-    begin            
+    begin
         if (rising_edge(CLK)) then
             if (total_rst = '1') then
                 rw_ticks_ovf_occ    <= '0';
@@ -680,7 +680,7 @@ begin
     -- Save r/w ticks to mi regs only on r/w request (only last req ticks will be saved)
     -- Counter will be then still running
     wr_ticks_save_p : process(CLK)
-    begin            
+    begin
         if (rising_edge(CLK)) then
             if (total_rst = '1') then
                 wr_ticks_reg                <= (others => '0');
@@ -693,7 +693,7 @@ begin
     end process;
 
     rd_ticks_save_p : process(CLK)
-    begin            
+    begin
         if (rising_edge(CLK)) then
             if (total_rst = '1') then
                 rd_ticks_reg                <= (others => '0');
@@ -706,7 +706,7 @@ begin
     end process;
 
     rw_ticks_save_p : process(CLK)
-    begin            
+    begin
         if (rising_edge(CLK)) then
             if (total_rst = '1') then
                 rw_ticks_reg                <= (others => '0');
@@ -720,7 +720,7 @@ begin
 
     -- Words counters
     wr_words_p : process(CLK)
-    begin            
+    begin
         if (rising_edge(CLK)) then
             if (total_rst = '1' or wr_words_full = '1') then
                 wr_words    <= (others => '0');
@@ -731,7 +731,7 @@ begin
     end process;
 
     rd_words_p : process(CLK)
-    begin            
+    begin
         if (rising_edge(CLK)) then
             if (total_rst = '1' or rd_words_full = '1') then
                 rd_words    <= (others => '0');
@@ -742,7 +742,7 @@ begin
     end process;
 
     wr_words_ovf_occ_p : process(CLK)
-    begin            
+    begin
         if (rising_edge(CLK)) then
             if (total_rst = '1') then
                 wr_words_ovf_occ    <= '0';
@@ -753,7 +753,7 @@ begin
     end process;
 
     rd_words_ovf_occ_p : process(CLK)
-    begin            
+    begin
         if (rising_edge(CLK)) then
             if (total_rst = '1') then
                 rd_words_ovf_occ    <= '0';
@@ -764,7 +764,7 @@ begin
     end process;
 
     req_cnt_p : process(CLK)
-    begin            
+    begin
         if (rising_edge(CLK)) then
             if (total_rst = '1' or req_cnt_full = '1') then
                 req_cnt    <= (others => '0');
@@ -775,7 +775,7 @@ begin
     end process;
 
     req_cnt_ovf_occ_p : process(CLK)
-    begin            
+    begin
         if (rising_edge(CLK)) then
             if (total_rst = '1') then
                 req_cnt_ovf_occ    <= '0';
@@ -786,7 +786,7 @@ begin
     end process;
 
     latency_ticks_ovf_occ_p : process(CLK)
-    begin            
+    begin
         if (rising_edge(CLK)) then
             if (total_rst = '1') then
                 latency_ticks_ovf_occ   <= '0';
@@ -797,7 +797,7 @@ begin
     end process;
 
     latency_counters_ovf_occ_p : process(CLK)
-    begin            
+    begin
         if (rising_edge(CLK)) then
             if (total_rst = '1') then
                 latency_counters_ovf_occ   <= '0';
@@ -808,7 +808,7 @@ begin
     end process;
 
     latency_sum_ovf_occ_p : process(CLK)
-    begin            
+    begin
         if (rising_edge(CLK)) then
             if (total_rst = '1') then
                 latency_sum_ovf_occ   <= '0';

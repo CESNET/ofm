@@ -1,13 +1,13 @@
 --
 -- distributor_1to2.vhd: Two port wrapper for distributor component for Frame Link Unaligned
 -- Copyright (C) 2012 CESNET
--- Author: Lukas Kekely <kekely@cesnet.cz> 
+-- Author: Lukas Kekely <kekely@cesnet.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --
 -- $Id$
 --
--- TODO: 
+-- TODO:
 --
 --
 library IEEE;
@@ -38,7 +38,7 @@ entity FLU_DISTRIBUTOR_1TO2 is
       RX_SOP        : in std_logic;
       RX_EOP        : in std_logic;
       RX_SRC_RDY    : in std_logic;
-      RX_DST_RDY    : out std_logic; 
+      RX_DST_RDY    : out std_logic;
 
       -- Frame Link Unaligned output interfaces
       -- Interface 0
@@ -58,11 +58,11 @@ entity FLU_DISTRIBUTOR_1TO2 is
       TX1_EOP        : out std_logic;
       TX1_SRC_RDY    : out std_logic;
       TX1_DST_RDY    : in std_logic;
-      
+
       -- Distribution control interface
       INUM_MASK     : in std_logic_vector(2-1 downto 0);
       INUM_READY    : in std_logic;
-      INUM_NEXT     : out std_logic 
+      INUM_NEXT     : out std_logic
      );
 end entity;
 
@@ -113,7 +113,7 @@ begin
       INUM_READY    => INUM_READY,
       INUM_NEXT     => INUM_NEXT
    );
-     
+
    -- Interface 0
    TX0_DATA     <= data((0+1)*DATA_WIDTH-1 downto 0*DATA_WIDTH);
    TX0_SOP_POS  <= sop_pos((0+1)*SOP_POS_WIDTH-1 downto 0*SOP_POS_WIDTH);

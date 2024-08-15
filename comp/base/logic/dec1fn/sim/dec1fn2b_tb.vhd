@@ -47,11 +47,11 @@ begin
 
    port map (
       -- Input
-      
+
       ADDR            => u1_addr,
       DO	      => u1_do,
       ENABLE          => u1_enable
-      
+
    );
 
    uut2 : entity work.dec1fn2b
@@ -63,11 +63,11 @@ begin
 
    port map (
       -- Input
-      
+
       ADDR            => u2_addr,
       DI              => u2_di,
       ENABLE          => u2_enable
-      
+
    );
 
 -- ----------------------------------------------------------------
@@ -78,17 +78,17 @@ begin
 
    sim : process
    begin
-   
-   
+
+
    -- after start
-   
-      
+
+
    wait for 400 ns;
-   
+
 
 --    u2_enable <= '1';
 --    wait for 20 ns;
--- 
+--
 --    u2_di <= "10000000";
 --    wait for 100 ns;
 --    u2_di <= "01000000";
@@ -105,10 +105,10 @@ begin
 --    wait for 100 ns;
 --    u2_di <= "00000001";
 --    wait for 100 ns;
--- 
+--
 --    u2_enable <= '0';
 --    wait for 20 ns;
--- 
+--
 --    u2_di <= "10000000";
 --    wait for 100 ns;
 --    u2_di <= "01000000";
@@ -209,7 +209,7 @@ begin
    wait for 100 ns;
 
    wait;
-   
+
    end process;
 
 end behavioral;

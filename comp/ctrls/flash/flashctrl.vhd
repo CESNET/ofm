@@ -15,7 +15,7 @@
 -- CMDs: "0001": FLASH read cycle
 --       "0010": FLASH write cycle, ADDRESS and DATA = don't care
 --       others: RESERVED
--- 
+--
 -- DRD port:
 --
 -- 63                                       16  15       0
@@ -24,7 +24,7 @@
 -- +---------------------------------------+---+----------+
 --
 -- RDY: '0' = controller busy, '1' controller ready for next command
--- 
+--
 library ieee;
 use ieee.std_logic_1164.all;
 use IEEE.STD_LOGIC_ARITH.ALL;
@@ -78,8 +78,8 @@ entity flashctrl is
       --  Others FLASH signals
       -- =====================
 
-      -- WAIT      : in  std_logic;  -- Synchronous mode only      
-      -- ADV_N     : out std_logic;  -- Synchronous mode only. Tie LOW 
+      -- WAIT      : in  std_logic;  -- Synchronous mode only
+      -- ADV_N     : out std_logic;  -- Synchronous mode only. Tie LOW
       -- WP_N      : out std_logic;  -- Write protect - tie HIGH
       -- CLK       : out std_logic;  -- synchronous mode clock - tie LOW or HIGH
       -- Debug
@@ -88,7 +88,7 @@ entity flashctrl is
 end flashctrl;
 
 architecture structural of flashctrl is
-  
+
   -- ===================
   -- Flash Memory Timing
   -- ===================
@@ -101,16 +101,16 @@ architecture structural of flashctrl is
   constant T_WP   : integer := (50/CLK_PERIOD) + 1;
   -- Write pulse high time;
   constant T_WPH  : integer := (20/CLK_PERIOD) + 1;
-  
+
   --
   type TYPE_CONFIG_FSM_STATE is ( STATE_IDLE,
                                   STATE_READ,
                                   STATE_WRITE0,
                                   STATE_WRITE1
                                   );
-                                  
+
   signal fsm_state : TYPE_CONFIG_FSM_STATE;
-  
+
   --
   signal counter : std_logic_vector(8 downto 0);
   signal counter_top : std_logic_vector( counter'range );
@@ -125,9 +125,9 @@ architecture structural of flashctrl is
   signal flash_memory_oe_n : std_logic;
   signal flash_memory_fd_oe: std_logic;
   signal flash_memory_we_n : std_logic;
-  
+
   signal busy            : std_logic;
-  
+
 attribute iob: string;
 attribute iob of flash_memory_data_o  : signal is "TRUE";
 attribute iob of flash_memory_data    : signal is "TRUE";
@@ -144,12 +144,12 @@ begin
   OE_N  <= flash_memory_oe_n;
   D_OE  <= flash_memory_fd_oe;
   D_O   <= flash_memory_data_o;
-  WE_N  <= flash_memory_we_n;    -- Read only 
-  
+  WE_N  <= flash_memory_we_n;    -- Read only
+
   flash_memory_data <= D_I;
- 
+
   DRD(16) <= not busy;
-  
+
   process( RESET, CLK )
   begin
     if( RESET = '1' )then
@@ -162,22 +162,22 @@ begin
       else
          counter <= counter + 1;
       end if;
-      
+
       if (counter = counter_top )then
          counter_finish <= '1';
       else
          counter_finish <= '0';
       end if;
-      
+
       if (counter_reset = '1' )then
          counter_finished <= '0';
       elsif (counter = counter_top )then
          counter_finished <= '1';
       end if;
-      
+
     end if;
   end process;
-  
+
   DEBUG_STATE_OUT: process(FSM_STATE)
   begin
      case FSM_STATE is
@@ -193,20 +193,20 @@ begin
   process( RESET, CLK )
   begin
     if CLK = '1' and CLK'event then
-    
+
       flash_memory_cs_n  <= '1';
       flash_memory_oe_n  <= '1';
       flash_memory_fd_oe <= '0';
-      flash_memory_we_n  <= '1';      
+      flash_memory_we_n  <= '1';
       counter_reset      <= '1';
       busy               <= '1';
       RST_N              <= '1';
-      
+
       case FSM_STATE is
         when STATE_IDLE =>
             flash_memory_fd_oe <= '0';  -- Disable driving data bus
-            flash_memory_cs_n  <= '1';  -- 
-            flash_memory_we_n  <= '1';  -- 
+            flash_memory_cs_n  <= '1';  --
+            flash_memory_we_n  <= '1';  --
             flash_memory_oe_n  <= '1';  -- Flash output disable
             counter_reset      <= '1';  -- Stop the counter
             busy               <= '0';
@@ -220,21 +220,21 @@ begin
                   fsm_state           <= STATE_WRITE0;
                end if;
             end if;
-            -- DRD(31 downto 28) <= X"1"; 
-            
-            
+            -- DRD(31 downto 28) <= X"1";
+
+
         -- FLASH write seq:
         -- 0. CE=1; WE=1; Address; Data -> goto 2. (SETUP)
         -- 1. CE=0; WE=0; wait Twp  -> goto 3. (WRITE_PULSE, data latched on WE->1, addr latched on CE->0) (35ns)
         -- 2. CE=0; WE=1; wait Twc-Twp -> goto 4. (130-35=95ns)
         -- 4. done
-    
+
         -- FLASH write - phase 1 - pull WE low, SETUP data and address
-        when STATE_WRITE0 => 
-           flash_memory_fd_oe   <= '1'; -- Drive data bus        
-           flash_memory_cs_n    <= '0'; --                       
-           flash_memory_we_n    <= '0'; --                       
-           flash_memory_oe_n    <= '1'; -- Flash output disable  
+        when STATE_WRITE0 =>
+           flash_memory_fd_oe   <= '1'; -- Drive data bus
+           flash_memory_cs_n    <= '0'; --
+           flash_memory_we_n    <= '0'; --
+           flash_memory_oe_n    <= '1'; -- Flash output disable
            counter_reset        <= '0'; -- Run the counter
            counter_top          <= conv_std_logic_vector(T_WP, counter_top'length);
            if (counter_finish = '1') then
@@ -245,9 +245,9 @@ begin
 
         -- FLASH write - phase 2 - put WE high, hold data for T_WPH time
         when STATE_WRITE1 =>
-           flash_memory_fd_oe   <= '1'; -- Drive data bus        
-           flash_memory_cs_n    <= '0'; -- 
-           flash_memory_we_n    <= '1'; --                                 
+           flash_memory_fd_oe   <= '1'; -- Drive data bus
+           flash_memory_cs_n    <= '0'; --
+           flash_memory_we_n    <= '1'; --
            flash_memory_oe_n    <= '1'; -- Flash output disable
            counter_reset        <= '0';
            counter_top          <= conv_std_logic_vector(T_WPH, counter_top'length );
@@ -257,15 +257,15 @@ begin
               busy              <= '0';
            end if;
            -- DRD(31 downto 28) <= X"3";
-           
-        -- FLASH memory read 
-        when STATE_READ => 
-           flash_memory_fd_oe  <= '0'; -- Disable driving data bus        
-           flash_memory_cs_n   <= '0'; -- 
-           flash_memory_we_n   <= '1'; -- 
+
+        -- FLASH memory read
+        when STATE_READ =>
+           flash_memory_fd_oe  <= '0'; -- Disable driving data bus
+           flash_memory_cs_n   <= '0'; --
+           flash_memory_we_n   <= '1'; --
            flash_memory_oe_n   <= '0'; -- Flash output enable
            counter_top         <= conv_std_logic_vector(T_ACC, counter_top'length );
-           counter_reset       <= '0'; 
+           counter_reset       <= '0';
            if (counter_finish = '1') then
               fsm_state         <= STATE_IDLE;
               DRD(flash_memory_data'high downto 0) <= flash_memory_data;
@@ -273,22 +273,22 @@ begin
               busy              <= '0';
            end if;
            -- DRD(31 downto 28) <= X"4";
-           
+
         when others =>
       end case;
-      
+
       if (RESET = '1')then
           fsm_state           <= STATE_IDLE;
           counter_reset       <= '1';
           flash_memory_cs_n   <= '1';
           flash_memory_oe_n   <= '1';
-          -- flash_memory_fd_oe  <= '0'; -- Cannot be placed in the IOB when reset 
+          -- flash_memory_fd_oe  <= '0'; -- Cannot be placed in the IOB when reset
           flash_memory_we_n   <= '1';
           busy                <= '0';
           RST_N               <= '0';
       end if;
-      
+
     end if;
   end process;
-  
+
 end structural;

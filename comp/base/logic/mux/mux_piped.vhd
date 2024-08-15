@@ -63,7 +63,7 @@ use work.type_pack.all;
 --
 --    resulting pipeline --> ( 1 x MUX 8:1 )
 --    ----------------
--- 
+--
 -- By setting the MUX_LATENCY to 0 and OUTPUT_REG to false the component is reduced
 -- to one simple GEN_MUX.
 
@@ -146,17 +146,17 @@ architecture full of GEN_MUX_PIPED is
                              exit when (mux_widths_log(e)/=0);
                              non_zeros_index := non_zeros_index+1;
                          end loop;
-    
+
                          -- put all zero-sized multiplexers to the end of the pipeline
                          mux_widths_log := mux_widths_log(non_zeros_index-1 downto 0) & mux_widths_log(muxes-1 downto non_zeros_index);
                          ----
                      end if;
-                     
+
                      return mux_widths_log;
                  end if;
-    
+
                  -- else enlarge the multiplexer to double
-                 
+
                  ----
                  -- OPTIMALIZATION 1 (see unit Description)
                  if (OPTIMALIZATION_1) then
@@ -189,7 +189,7 @@ architecture full of GEN_MUX_PIPED is
 
     function getMuxWidths(mux_widths_log : i_array_t; latency : integer) return i_array_t is
         variable mux_widths : i_array_t(latency+1-1 downto 0);
-        variable muxes      : integer := latency+1; -- number of multiplexer levels 
+        variable muxes      : integer := latency+1; -- number of multiplexer levels
     begin
         for i in 0 to muxes-1 loop
             mux_widths(i) := 2**mux_widths_log(i);
@@ -199,7 +199,7 @@ architecture full of GEN_MUX_PIPED is
 
     function getMuxSelHighs(mux_widths_log : i_array_t; width, latency : integer) return i_array_t is
         variable mux_sel_highs : i_array_t(latency+1-1 downto 0);
-        variable muxes         : integer := latency+1; -- number of multiplexer levels 
+        variable muxes         : integer := latency+1; -- number of multiplexer levels
     begin
         mux_sel_highs(0) := log2(width)-1;
         for i in 1 to muxes-1 loop
@@ -210,7 +210,7 @@ architecture full of GEN_MUX_PIPED is
 
     function getMuxCnts(mux_widths_log : i_array_t; width, latency : integer) return i_array_t is
         variable mux_cnts : i_array_t(latency+1-1 downto 0);
-        variable muxes    : integer := latency+1; -- number of multiplexer levels 
+        variable muxes    : integer := latency+1; -- number of multiplexer levels
     begin
         mux_cnts(0) := width/(2**mux_widths_log(0));
         for i in 1 to muxes-1 loop
@@ -223,7 +223,7 @@ architecture full of GEN_MUX_PIPED is
     begin
         if (out_reg) then
             return 1;
-        else 
+        else
             return 0;
         end if;
     end function;

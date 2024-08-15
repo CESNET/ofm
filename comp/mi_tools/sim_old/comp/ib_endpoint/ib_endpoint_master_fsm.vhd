@@ -53,7 +53,7 @@ entity IB_ENDPOINT_MASTER_FSM is
 
    -- Last Read Req
    LAST_READ_REQ    : in std_logic;
-   
+
    -- ==========================
    -- Register control interface
    -- ==========================
@@ -138,7 +138,7 @@ state_trans: process(present_state, BM_REQ, BM_ACK, BM_TRANS_TYPE, BM_READ_ACK, 
          else
             next_state <= st_strict_wait;
          end if;
-           
+
       -- ST_SOP
       when st_sop =>
          -- End of transaction
@@ -220,7 +220,7 @@ output_logic: process(present_state, BM_REQ, BM_READ_ACK, BM_TRANS_TYPE, LAST_RE
          if (LAST_READ_REQ = '1') then
             RD_EOF_IN          <= '1';
          end if;
-        
+
       -- ST_WAIT
       when st_wait =>
          IDLE <= '1';

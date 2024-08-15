@@ -3,7 +3,7 @@
 --! \file
 --! \brief Generic AND.
 --! \author Vaclav Hummel <xhumme00@stud.fit.vutbr.cz>
---! \date 2013 
+--! \date 2013
 --!
 --! \section License
 --!
@@ -35,7 +35,7 @@ end entity;
 --! \brief Behavioral implementation of generic AND.
 architecture behav of GEN_AND is
 begin
-  
+
    --! ANDing process
    genandp:process(DI)
       variable o : std_logic;

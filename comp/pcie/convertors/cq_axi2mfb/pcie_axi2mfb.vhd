@@ -18,7 +18,7 @@ use work.type_pack.all;
 entity PCIE_CQ_AXI2MFB is
     generic(
         -- =======================================================================
-        -- MFB BUS CONFIGURATION: 
+        -- MFB BUS CONFIGURATION:
         --
         -- Supported configurations are: (2,1,8,32), (1,1,8,32)
         -- =======================================================================
@@ -136,7 +136,7 @@ architecture full of PCIE_CQ_AXI2MFB is
     signal cq_axi_last_in          : std_logic;
     signal cq_axi_vld_in           : std_logic;
     signal cq_axi_ready_in         : std_logic;
-    
+
     -- RX AXI TUSER division
     signal cq_axi_user_sop         : std_logic_vector(MFB_REGIONS-1 downto 0);
     signal cq_axi_user_sop_ptr     : slv_array_t(MFB_REGIONS-1 downto 0)(2-1 downto 0);

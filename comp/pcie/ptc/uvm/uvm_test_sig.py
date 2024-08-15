@@ -91,7 +91,7 @@ class MVB(Bus):
         self.total_width = self.nested_width[-1]
 
         self.mvb_items = self.total_width // item_width
-        
+
         assert self.total_width % item_width == 0
 
 
@@ -152,7 +152,7 @@ class MFB(Bus):
 
 # Define user MVB data subitems
 class DMAUpHdr(MVB):
-    items = list(zip(['length', 'type', 'firstib', 'lastib', 'tag', 'unitid', 'addr', 'vfid', 'relaxed'], 
+    items = list(zip(['length', 'type', 'firstib', 'lastib', 'tag', 'unitid', 'addr', 'vfid', 'relaxed'],
         [11, 1, 2, 2, 8, 8, 64, 8, 1]))
 
 class DMADownHdr(MVB):
@@ -160,11 +160,11 @@ class DMADownHdr(MVB):
         [11, 1, 4, 8, 8]))
 
 class RQHdr(MVB_HDR):
-    items = list(zip(['length', 'at', 'snoop', 'relaxed', 'ep', 'td', 'padd_0', 'tag_8', 'tc', 'tag_9', 'type_n', 'fmt', 'firstbe', 'lastbe', 'tag', 'req_id', 'global_id'], 
+    items = list(zip(['length', 'at', 'snoop', 'relaxed', 'ep', 'td', 'padd_0', 'tag_8', 'tc', 'tag_9', 'type_n', 'fmt', 'firstbe', 'lastbe', 'tag', 'req_id', 'global_id'],
                     [  10,       2,    1,       1,         1,    1,    3,        1,       3,    1,       5,        3,     4,         4,        8,     16,       64]))
 
 class RCHdr(MVB_HDR):
-    items = list(zip(['length', 'at', 'snoop', 'relaxed', 'ep', 'td', 'padd_0', 'tag_8', 'tc', 'tag_9', 'const', 'byte_cnt', 'bcm', 'complete_st', 'completer_id', 'low_addr', 'const_2', 'tag', 'req_id'], 
+    items = list(zip(['length', 'at', 'snoop', 'relaxed', 'ep', 'td', 'padd_0', 'tag_8', 'tc', 'tag_9', 'const', 'byte_cnt', 'bcm', 'complete_st', 'completer_id', 'low_addr', 'const_2', 'tag', 'req_id'],
                       [ 10,      2,    1,       1,         1,    1,    3,        1,       3,    1,       8,       12,         1,     3,             16,             7,          1,         8,     16]))
 
 

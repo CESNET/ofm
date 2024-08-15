@@ -1,6 +1,6 @@
 -- asfifo_ent.vhd: Frame Link Unaliged protocol generic ASFIFO
 -- Copyright (C) 2012 CESNET
--- Author: Pavel Benacek <benacek@cesnet.cz> 
+-- Author: Pavel Benacek <benacek@cesnet.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --
@@ -53,7 +53,7 @@ entity FLU_ASFIFO is
       RX_SRC_RDY    : in std_logic;
       RX_DST_RDY    : out std_logic;
       RX_STATUS     : out std_logic_vector(STATUS_WIDTH-1 downto 0);
-      
+
       -----------------------------------------------------
       --! \name Frame Link Unaligned output interface
       -----------------------------------------------------

@@ -5,7 +5,7 @@
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --
--- TODO: 
+-- TODO:
 --
 --
 
@@ -26,7 +26,7 @@ entity FLU_ALIGN is
       --! FLU protocol generics
       DATA_WIDTH    : integer:= 256;
       SOP_POS_WIDTH : integer:= 2;
-     
+
       -- Pipeline Config ------------------------
       -- Use input pipe
       IN_PIPE_EN           : boolean := false;
@@ -50,7 +50,7 @@ entity FLU_ALIGN is
    port(
        -- -------------------------------------------------
        -- \name Common interface
-       -- -------------------------------------------------  
+       -- -------------------------------------------------
       RESET          : in  std_logic;
       CLK            : in  std_logic;
 

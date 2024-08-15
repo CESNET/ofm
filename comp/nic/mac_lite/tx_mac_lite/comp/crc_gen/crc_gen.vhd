@@ -27,10 +27,10 @@ begin
         IMPLEMENTATION => "PARALLEL",
         CRC_END_IMPL   => CRC_END_IMPL,
         REG_BITMAP     => std_logic_vector(to_unsigned(254,32))
-    )             
-    port map(   
+    )
+    port map(
         -- CLOCK AND RESET
-        CLK           => CLK, 
+        CLK           => CLK,
         RESET         => RESET,
         -- INPUT MFB
         RX_DATA       => RX_DATA,

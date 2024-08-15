@@ -12,7 +12,7 @@
 set FIRMWARE_BASE         "../../../../.."
 set FL_TOOLS_BASE         "../../.."
 
-# adresa komponenty v SVN, treba zmenit podla konkretneho umiestnenia                                        
+# adresa komponenty v SVN, treba zmenit podla konkretneho umiestnenia
 set FL_DUT_BASE           "$FL_TOOLS_BASE/storage/asfifo_bram"
 # verifikacne prostredie komponenty
 set FL_DUT_VER_BASE       "$FL_DUT_BASE/ver"

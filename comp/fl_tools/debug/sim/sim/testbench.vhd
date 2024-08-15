@@ -17,8 +17,8 @@ use ieee.std_logic_arith.all;
 use ieee.std_logic_textio.all;
 use ieee.numeric_std.all;
 use std.textio.all;
-use work.fl_pkg.all; 
-use work.fl_sim_oper.all; 
+use work.fl_pkg.all;
+use work.fl_sim_oper.all;
 use work.fl_bfm_pkg.all;
 use work.fl_bfm_rdy_pkg.all;
 
@@ -56,15 +56,15 @@ architecture TESTBENCH_arch of TESTBENCH is
      signal FL_bus    : t_fl32;
      signal FL_bus2    : t_fl32;
      signal FL_bus3    : t_fl32;
-   
-     -- FL_SIM component ctrl      
+
+     -- FL_SIM component ctrl
      signal fl_sim_ctrl        : t_fl_ctrl;
      signal fl_sim_strobe      : std_logic;
      signal fl_sim_busy        : std_logic;
      signal fl_sim_ctrl1        : t_fl_ctrl;
      signal fl_sim_strobe1      : std_logic;
      signal fl_sim_busy1        : std_logic;
-     
+
 begin
 
 -- Reset generation -----------------------------------------------------------
@@ -75,7 +75,7 @@ begin
       reset <= '0';
       wait;
    end process reset_gen;
-   
+
 -- clk50 generator ------------------------------------------------------------
 clk50_gen : process
 begin
@@ -161,10 +161,10 @@ MONITOR_I: entity work.MONITOR
       RX_SOP_N=>FL_bus2.SOP_N,
       RX_EOP_N=>FL_bus2.EOP_N,
       RX_SRC_RDY_N=>FL_bus2.SRC_RDY_N,
-      RX_DST_RDY_N=>FL_bus2.DST_RDY_N      
+      RX_DST_RDY_N=>FL_bus2.DST_RDY_N
      );
-    
-     
+
+
 FL_BFM_U : entity work.FL_BFM
    generic map (
       DATA_WIDTH=>TX_DATA_WIDTH_X,
@@ -207,10 +207,10 @@ MONITOR_I1: entity work.MONITOR
       RX_SOP_N=>FL_bus3.SOP_N,
       RX_EOP_N=>FL_bus3.EOP_N,
       RX_SRC_RDY_N=>FL_bus3.SRC_RDY_N,
-      RX_DST_RDY_N=>FL_bus3.DST_RDY_N      
+      RX_DST_RDY_N=>FL_bus3.DST_RDY_N
      );
-    
-     
+
+
 FL_BFM_U1 : entity work.FL_BFM
    generic map (
       DATA_WIDTH=>TX_DATA_WIDTH_X,
@@ -229,8 +229,8 @@ FL_BFM_U1 : entity work.FL_BFM
       TX_EOP_N=>FL_bus3.EOP_N,
       TX_SRC_RDY_N=>FL_bus3.SRC_RDY_N,
       TX_DST_RDY_N=>FL_bus3.DST_RDY_N
-     );     
-     
+     );
+
 tb : process
 -- support function
 procedure fl_op(ctrl : in t_fl_ctrl) is

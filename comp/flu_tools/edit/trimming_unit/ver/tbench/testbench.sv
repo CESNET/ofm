@@ -10,7 +10,7 @@
  * TODO:
  *
  */
- 
+
 
 // ----------------------------------------------------------------------------
 //                                 TESTBENCH
@@ -19,12 +19,12 @@ import test_pkg::*; // Test constants
 
 module testbench;
    logic CLK = 0;
-   logic RESET; 
+   logic RESET;
    lengthInterface #(LENGTH_WIDTH) LENGTH (CLK, RESET);
    iFrameLinkURx #(DATA_WIDTH, EOP_POS_WIDTH, SOP_POS_WIDTH) RX (CLK, RESET);
    iFrameLinkUTx #(DATA_WIDTH, EOP_POS_WIDTH, SOP_POS_WIDTH) TX (CLK, RESET);
    iFrameLinkUTx #(DATA_WIDTH, EOP_POS_WIDTH, SOP_POS_WIDTH) MONITOR (CLK, RESET);
-  
+
   //-- Clock generation -------------------------------------------------------
   always #(CLK_PERIOD/2) CLK = ~CLK;
 

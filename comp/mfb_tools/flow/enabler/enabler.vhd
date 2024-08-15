@@ -29,7 +29,7 @@ use work.type_pack.all;
 entity MFB_ENABLER is
    generic(
       -- =======================================================================
-      -- MFB CONFIGURATION: 
+      -- MFB CONFIGURATION:
       -- =======================================================================
 
       REGIONS     : natural := 4;   -- any possitive value

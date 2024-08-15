@@ -9,7 +9,7 @@
 `define CHECKSUM_CALCULATOR_ENV_SV
 
 package uvm_checksum_calculator;
-    
+
     `include "uvm_macros.svh"
     import uvm_pkg::*;
 

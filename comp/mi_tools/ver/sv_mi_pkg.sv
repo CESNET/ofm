@@ -7,7 +7,7 @@
 // Frame Link Interface
 `include "mi_ifc.sv"
 
-package sv_mi_pkg; 
+package sv_mi_pkg;
     //define transaction types and directions
     typedef enum {TR_REQUEST, TR_RESPONSE} tr_type_t;
     typedef enum {OP_WRITE, OP_READ, OP_NONE} op_type_t;

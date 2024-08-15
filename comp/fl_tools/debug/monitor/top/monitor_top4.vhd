@@ -27,7 +27,7 @@ entity FL_MONITOR_TOP4 is
       FL_WIDTH    : integer;
       -- Monitored word width in bits
       WORD_WIDTH  : integer;
-      -- Monitored word position - Counts the i'th word (with WORD_WIDTH 
+      -- Monitored word position - Counts the i'th word (with WORD_WIDTH
       -- width) starting from 0
       WORD_POS    : integer
    );
@@ -59,7 +59,7 @@ entity FL_MONITOR_TOP4 is
       RX1_DATA       : in std_logic_vector(FL_WIDTH - 1 downto 0);
       RX1_DREM       : in std_logic_vector(log2(FL_WIDTH/8) - 1 downto 0);
       RX1_SRC_RDY_N  : in std_logic;
-      RX1_DST_RDY_N  : in std_logic; 
+      RX1_DST_RDY_N  : in std_logic;
 
       RX2_SOF_N      : in std_logic;
       RX2_SOP_N      : in std_logic;
@@ -68,7 +68,7 @@ entity FL_MONITOR_TOP4 is
       RX2_DATA       : in std_logic_vector(FL_WIDTH - 1 downto 0);
       RX2_DREM       : in std_logic_vector(log2(FL_WIDTH/8) - 1 downto 0);
       RX2_SRC_RDY_N  : in std_logic;
-      RX2_DST_RDY_N  : in std_logic; 
+      RX2_DST_RDY_N  : in std_logic;
 
       RX3_SOF_N      : in std_logic;
       RX3_SOP_N      : in std_logic;
@@ -77,7 +77,7 @@ entity FL_MONITOR_TOP4 is
       RX3_DATA       : in std_logic_vector(FL_WIDTH - 1 downto 0);
       RX3_DREM       : in std_logic_vector(log2(FL_WIDTH/8) - 1 downto 0);
       RX3_SRC_RDY_N  : in std_logic;
-      RX3_DST_RDY_N  : in std_logic; 
+      RX3_DST_RDY_N  : in std_logic;
 
       -- Memory interface
       MI             : inout t_mi32
@@ -106,7 +106,7 @@ architecture full of FL_MONITOR_TOP4 is
    signal monitor1_drdy      : std_logic;
    signal monitor2_drdy      : std_logic;
    signal monitor3_drdy      : std_logic;
-   
+
    signal monitor0_adc_wr     : std_logic;
    signal monitor1_adc_wr     : std_logic;
    signal monitor2_adc_wr     : std_logic;
@@ -124,7 +124,7 @@ begin
    monitor1_sel  <= '1' when MI.ADDR(9 downto 8) = "01" else '0';
    monitor2_sel  <= '1' when MI.ADDR(9 downto 8) = "10" else '0';
    monitor3_sel  <= '1' when MI.ADDR(9 downto 8) = "11" else '0';
-   
+
    -- ADC DATA OUT multiplexinig
    MI.DRD     <= monitor0_adc_do when monitor0_sel = '1' else
                  monitor1_adc_do when monitor1_sel = '1' else
@@ -140,13 +140,13 @@ begin
                   monitor1_drdy when monitor1_sel = '1' else
                   monitor2_drdy when monitor2_sel = '1' else
                   monitor3_drdy;
-   
+
    -- read request signals
    monitor0_adc_rd  <= MI.RD when monitor0_sel = '1' else '0';
    monitor1_adc_rd  <= MI.RD when monitor1_sel = '1' else '0';
    monitor2_adc_rd  <= MI.RD when monitor2_sel = '1' else '0';
    monitor3_adc_rd  <= MI.RD when monitor3_sel = '1' else '0';
-   
+
    -- write request
    monitor0_adc_wr  <= MI.WR when monitor0_sel = '1' else '0';
    monitor1_adc_wr  <= MI.WR when monitor1_sel = '1' else '0';
@@ -160,7 +160,7 @@ begin
          FL_WIDTH => FL_WIDTH,
          -- Monitored word width in bits
          WORD_WIDTH => WORD_WIDTH,
-         -- Monitored word position - Counts the i'th word (with WORD_WIDTH 
+         -- Monitored word position - Counts the i'th word (with WORD_WIDTH
          -- width) starting from 0
          WORD_POS => WORD_POS
       )
@@ -170,7 +170,7 @@ begin
          CLK       => CLK,
          -- This will set default monitored data after RESET
          DEFAULT_DATA => DEFAULT_DATA0,
-   
+
          -- Framelink interface of transmitting component
          SOF_N     => RX0_SOF_N,
          SOP_N     => RX0_SOP_N,
@@ -181,7 +181,7 @@ begin
          DST_RDY_N => RX0_DST_RDY_N,
          DATA      => RX0_DATA,
          DREM      => RX0_DREM,
-   
+
          -- Memory interface
          ADC_RD    => monitor0_adc_rd,
          ADC_WR    => monitor0_adc_wr,
@@ -198,7 +198,7 @@ begin
          FL_WIDTH => FL_WIDTH,
          -- Monitored word width in bits
          WORD_WIDTH => WORD_WIDTH,
-         -- Monitored word position - Counts the i'th word (with WORD_WIDTH 
+         -- Monitored word position - Counts the i'th word (with WORD_WIDTH
          -- width) starting from 0
          WORD_POS => WORD_POS
       )
@@ -208,7 +208,7 @@ begin
          CLK       => CLK,
          -- This will set default monitored data after RESET
          DEFAULT_DATA => DEFAULT_DATA1,
-   
+
          -- Framelink interface of transmitting component
          SOF_N     => RX1_SOF_N,
          SOP_N     => RX1_SOP_N,
@@ -219,7 +219,7 @@ begin
          DST_RDY_N => RX1_DST_RDY_N,
          DATA      => RX1_DATA,
          DREM      => RX1_DREM,
-   
+
          -- Memory interface
          ADC_RD    => monitor1_adc_rd,
          ADC_WR    => monitor1_adc_wr,
@@ -236,7 +236,7 @@ begin
          FL_WIDTH => FL_WIDTH,
          -- Monitored word width in bits
          WORD_WIDTH => WORD_WIDTH,
-         -- Monitored word position - Counts the i'th word (with WORD_WIDTH 
+         -- Monitored word position - Counts the i'th word (with WORD_WIDTH
          -- width) starting from 0
          WORD_POS => WORD_POS
       )
@@ -246,7 +246,7 @@ begin
          CLK       => CLK,
          -- This will set default monitored data after RESET
          DEFAULT_DATA => DEFAULT_DATA2,
-   
+
          -- Framelink interface of transmitting component
          SOF_N     => RX2_SOF_N,
          SOP_N     => RX2_SOP_N,
@@ -257,7 +257,7 @@ begin
          DST_RDY_N => RX2_DST_RDY_N,
          DATA      => RX2_DATA,
          DREM      => RX2_DREM,
-   
+
          -- Memory interface
          ADC_RD    => monitor2_adc_rd,
          ADC_WR    => monitor2_adc_wr,
@@ -274,7 +274,7 @@ begin
          FL_WIDTH => FL_WIDTH,
          -- Monitored word width in bits
          WORD_WIDTH => WORD_WIDTH,
-         -- Monitored word position - Counts the i'th word (with WORD_WIDTH 
+         -- Monitored word position - Counts the i'th word (with WORD_WIDTH
          -- width) starting from 0
          WORD_POS => WORD_POS
       )
@@ -284,7 +284,7 @@ begin
          CLK       => CLK,
          -- This will set default monitored data after RESET
          DEFAULT_DATA => DEFAULT_DATA3,
-   
+
          -- Framelink interface of transmitting component
          SOF_N     => RX3_SOF_N,
          SOP_N     => RX3_SOP_N,
@@ -295,7 +295,7 @@ begin
          DST_RDY_N => RX3_DST_RDY_N,
          DATA      => RX3_DATA,
          DREM      => RX3_DREM,
-   
+
          -- Memory interface
          ADC_RD    => monitor3_adc_rd,
          ADC_WR    => monitor3_adc_wr,

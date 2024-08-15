@@ -16,7 +16,7 @@
 
 
 package test_pkg;
-   
+
     import math_pkg::*;
 
 
@@ -28,7 +28,7 @@ package test_pkg;
     parameter MI_ADDR_WIDTH = 32;
     parameter OPT_MODE = 0;
     parameter DEVICE = "ULTRASCALE";
-    
+
     parameter NEW_RX_ITEM_WIDTH = ITEM_WIDTH+math_pkg::log2(SRC_CHANNELS);
     parameter NEW_TX_ITEM_WIDTH = ITEM_WIDTH+math_pkg::log2(DST_CHANNELS);
     parameter TRANSACTION_COUNT = 1000;

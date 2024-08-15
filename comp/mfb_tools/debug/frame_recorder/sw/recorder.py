@@ -13,8 +13,8 @@ import time
 
 
 # Implementation of dummy handlers for reading/writing of MI32 transactions.
-# These handlers are not required and are used for testing purposes only. 
-# The real implementation should call the csbus or appropriate tool. 
+# These handlers are not required and are used for testing purposes only.
+# The real implementation should call the csbus or appropriate tool.
 # Notice that real handles has to match with the provided prototypes.
 
 # NOTE: This variable is filled with data in the main function.
@@ -33,19 +33,19 @@ def load_memory(path):
 
 def write32(addr,data):
     """
-    Write the 32-bit transaction. The function throws the instance of 
+    Write the 32-bit transaction. The function throws the instance of
     IOError class when the write operation fails.
 
     Parametrs:
         - addr - write address
         - data - 32-bit data to write.
-    """ 
+    """
     print("Data write: 0x%05X ==> 0x%02X" % (addr,data))
 
 def read32(addr):
     """
     Read the 32-bit transaction. The function returns 32-bit number.
-    The function throws the instance of IOError class when the 
+    The function throws the instance of IOError class when the
     read operation fails.
 
     The type of returned vaue has to be long.
@@ -95,10 +95,10 @@ class RecorderReader(object):
     SOF_POS_OFFSET = 0x0C
     VLD_OFFSET     = 0x08
     CONTROL_OFFSET = 0x04
-    
+
     # Helping masks
     FIFO_SRC_RDY_MASK = 0x2
-    
+
     # Command constants
     CMD_FIFO_EN   = 0x1
     CMD_FIFO_DIS  = 0x0
@@ -120,7 +120,7 @@ class RecorderReader(object):
             - regions       - the number of MFB regions
             - region_size   - the width of one region
             - block_size    - size of one block
-            - item_width    - number of items in a block 
+            - item_width    - number of items in a block
             - write_handler - handler on the write function (capable to write a 32-bit transaction)
             - read_handler  - handler on the read function (capable to read a 32-bit transaction)
             - pcap          - path to the PCAP file
@@ -140,7 +140,7 @@ class RecorderReader(object):
         self.readh = read_handler
         # Remember the PCAP file
         self.pcap = pcap
-        # Store the base pointer 
+        # Store the base pointer
         self.base = base
         # Some saniti check of the input, the minimal item_width is 8 bits
         is_power2 = True if (item_width & (item_width-1)) == 0 else False
@@ -159,7 +159,7 @@ class RecorderReader(object):
         # Compute the widhth of sof and eof pos elements
         self.sof_elem_width = int(math.ceil(max(1,math.log(region_size,2))))
         self.eof_elem_width = int(math.ceil(max(1,math.log(region_size*block_size,2))))
-  
+
     def _wait_for_data(self):
         """
         Wait untill data are ready.
@@ -183,10 +183,10 @@ class RecorderReader(object):
         if self.sigterm and not(self.capture):
             return False
         return True
-    
+
     def read(self):
         """
-        The main function for the PCAP reconstruction from the MI32 stream. This function should be 
+        The main function for the PCAP reconstruction from the MI32 stream. This function should be
         ended with a CTRL+C signal.
         """
         # Enabling the capture and waiting for a small amount of time
@@ -200,7 +200,7 @@ class RecorderReader(object):
         try:
             packets = []
             mfb_words = []
-            # Check the state 
+            # Check the state
             while self._continue_capture():
                 # Wait for a valid word
                 self._wait_for_data()
@@ -235,7 +235,7 @@ class RecorderReader(object):
                 # Read the valid blocks
                 mfb["VLD"] = self.readh(self.base+self.VLD_OFFSET)
                 # Append the read MFB word
-                mfb_words.append(mfb) 
+                mfb_words.append(mfb)
                 # Decore the packet if available
                 while True:
                     packet = self._decode_packet(mfb_words)
@@ -248,7 +248,7 @@ class RecorderReader(object):
                         # Be paranoid and check that the number of packets is higher than 0
                         if (len(packets) == self.pkt_num and self.pkt_num > 0):
                             self.capture = False
-                    else: 
+                    else:
                         # No packet, break.
                         break
 
@@ -261,7 +261,7 @@ class RecorderReader(object):
             else:
                 print("No packets were captured.")
 
-        except IOError as e: 
+        except IOError as e:
             print("Error during read/write operation:", str(e))
 
     def _initialize_mfb(self,mfb_words):
@@ -269,8 +269,8 @@ class RecorderReader(object):
         Prepare the MFB structure for the next packet.
 
         Parameters:
-            - mfb_words - structure with captured MFB words. 
-        
+            - mfb_words - structure with captured MFB words.
+
         Returns new MFB structure.
         """
         # Remove all words but let the last one
@@ -295,7 +295,7 @@ class RecorderReader(object):
         elif (sop_data[0]):
             # SOP is after EOP, remove EOP.
             return self._remove_eop(mfb_words,eop_data)
-        else:   
+        else:
             # The SOP is not in the current word
             return []
 
@@ -304,25 +304,25 @@ class RecorderReader(object):
         Remove the SOP information from the MFB.
 
         Parameters:
-            - mfb_words - structure with captured MFB words. 
+            - mfb_words - structure with captured MFB words.
             - sop_data -  structure for detected SOP
         """
         # Invalidate the SOP in region
         sof_str_mask              = list('1'* self.regions)
-        sof_str_mask[sop_data[1]] = '0' 
+        sof_str_mask[sop_data[1]] = '0'
         # Reverse the mask and create a number from it (LSB is on the left)
         sof_mask  = long(''.join(sof_str_mask[::-1]),2)
         tmp_mask  = sof_mask << (self.regions+1) | long('1' * self.regions,2) << 1 | 0x1
         mfb_words[0]["VLD"] &= tmp_mask
-        return mfb_words    
-    
+        return mfb_words
+
 
     def _remove_eop(self,mfb_words,eop_data):
         """
         Remove the EOP information from the MFB.
 
         Parameters:
-            - mfb_words - structure with captured MFB words. 
+            - mfb_words - structure with captured MFB words.
             - sop_data -  structure for detected SOP
         """
         # Invalidate the EOF in region
@@ -332,8 +332,8 @@ class RecorderReader(object):
         eof_mask  = long(''.join(eof_str_mask[::-1]),2)
         tmp_mask  = long('1' * self.regions,2) << (self.regions+1) | eof_mask << 1 | 0x1
         mfb_words[0]["VLD"] &= tmp_mask
-        return mfb_words    
-        
+        return mfb_words
+
     def _det_start(self,mfb):
         """
         Detect the start in the MFB word.
@@ -361,11 +361,11 @@ class RecorderReader(object):
     def _det_end(self,mfb_word):
         """
         Detect the end of the MFB word.
-        
+
         Parameters:
             - mfb - mfb word structure
-    
-        The function returns a tuple which encodes the right end of the packet. 
+
+        The function returns a tuple which encodes the right end of the packet.
         """
         # Default values
         det = False
@@ -385,7 +385,7 @@ class RecorderReader(object):
         """
         This method extracts items in a byte oriented way.
 
-        Parameters: 
+        Parameters:
             - data - block data
             - item_num - number of the item (indexed from 0)
 
@@ -399,7 +399,7 @@ class RecorderReader(object):
             it = blk & 0xFF
             raw_pkt += chr(it)
             blk = blk >> 8
-        return raw_pkt 
+        return raw_pkt
 
     def _serialize_data(self,mfb_word,start_reg,start_blk,end_reg,end_item):
         """
@@ -407,7 +407,7 @@ class RecorderReader(object):
         of lists (i.e, regions and blocks).
 
         Parameters:
-            - mfb_word - list of lists 
+            - mfb_word - list of lists
             - start_reg - start region
             - start_blk - start block
             - end_reg - end region
@@ -420,12 +420,12 @@ class RecorderReader(object):
         tmp_start_blk  = start_blk
         for c_reg in range(start_reg,self.regions):
             # For each region (starting from the start region)
-            for c_blk in range(tmp_start_blk,self.region_size): 
+            for c_blk in range(tmp_start_blk,self.region_size):
                 # And for the starting block
                 blk = mfb_word[c_reg][c_blk]
                 # Extract one item
                 for i in range(0,self.block_size):
-                    raw_pkt += self._get_item(blk,i)             
+                    raw_pkt += self._get_item(blk,i)
                     # Check if we reached the last item
                     curr_item = c_blk*self.block_size + i
                     if c_reg == end_reg and end_item == curr_item:
@@ -434,27 +434,27 @@ class RecorderReader(object):
             # Ok, block captured, restart the block pointer at the end
             # of the region cycle.
             tmp_start_blk = 0
-            
+
         raise RuntimeError("Error during the data serialization")
-    
+
     def _decode_packet(self,mfb_words):
         """
-        Decode the packet from captured MFB words. Function also prepares the 
-        mfb_words structure for the next iteration (it removes the part of the 
+        Decode the packet from captured MFB words. Function also prepares the
+        mfb_words structure for the next iteration (it removes the part of the
         list which was identified as a packet, the EOF_POS signalization is also removed).
-        
+
         Parameters:
             - mfb_words - list of MFB word configuration which is represented as a dictionary.
 
-        The function returns the instance of scapy Packet or None 
-        """ 
-        # Check if the packet contains the EOF_POS block. If yes, data for the whole packet are 
+        The function returns the instance of scapy Packet or None
+        """
+        # Check if the packet contains the EOF_POS block. If yes, data for the whole packet are
         # presented.
         if len(mfb_words) == 0:
             return None
         end_det,end_reg,end_pos = self._det_end(mfb_words[-1])
         if not end_det:
-            # No end was detected. 
+            # No end was detected.
             return None
         # Detect the starting information
         start_det,start_reg,start_pos  = self._det_start(mfb_words[0])
@@ -462,14 +462,14 @@ class RecorderReader(object):
         # blocks into the hexadecimal representation (per bytes)
         if start_det == False and end_det == True:
             # Error ... start and end are expected
-            raise RuntimeError("Error during the packet decoding! No start has been detected.") 
+            raise RuntimeError("Error during the packet decoding! No start has been detected.")
 
         # Detect if first and last words are same --> one word transfewr
         one_word = True if mfb_words[0] == mfb_words[-1] else False
         # Decode the packet
         raw_pkt = ""
         # Prepare some helping extraction variables for the whole MFB word
-        last_reg_item_num = self.region_size*self.block_size-1 
+        last_reg_item_num = self.region_size*self.block_size-1
         last_reg_num      = self.regions-1
         # Check if the we have one word transfer. If not, setup the maximal end signal values
         for i in range(0,len(mfb_words)):
@@ -487,7 +487,7 @@ class RecorderReader(object):
                 raw_pkt += self._serialize_data(mfb_words[i]["WORD"],0,0,last_reg_num,last_reg_item_num)
 
         # Create a packet
-        ret = scapy.Ether(_pkt=raw_pkt) 
+        ret = scapy.Ether(_pkt=raw_pkt)
         mfb_words = []
         return ret
 
@@ -516,6 +516,7 @@ def main():
         reader.read()
     except IOError as e:
         print("Error during read/write operation: ",str(e))
+
 
 if __name__ == "__main__":
     main()

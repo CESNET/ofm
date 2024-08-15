@@ -37,7 +37,7 @@ architecture behavioral of testbench is
     -- Synchronization
     constant C_CLK_PER          : time := 5.0 ns;
     constant C_RST_TIME         : time := 10 * C_CLK_PER + 1 ns;
-        
+
     constant TEST_TIME          : integer := 1000;
 
     constant SOURCES            : integer := 5;
@@ -218,4 +218,4 @@ begin
         stop(0);
     end process;
 
-end architecture behavioral; 
+end architecture behavioral;

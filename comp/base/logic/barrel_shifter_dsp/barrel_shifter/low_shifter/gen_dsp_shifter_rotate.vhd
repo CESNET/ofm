@@ -9,14 +9,14 @@
 -- TODO:
 --
 
-library IEEE;  
+library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.std_logic_arith.all;
 use IEEE.std_logic_unsigned.all;
 
 use work.math_pack.all;
 
-entity GEN_DSP_SHIFTER_ROTATE is 
+entity GEN_DSP_SHIFTER_ROTATE is
    generic (
       DATA_WIDTH  : integer := 48;
       -- set true to shift left, false to shift right
@@ -44,7 +44,7 @@ end GEN_DSP_SHIFTER_ROTATE;
 
 architecture full of GEN_DSP_SHIFTER_ROTATE is
    signal zeros   : std_logic_vector(63 downto 0);
-   
+
    type cascade_t is array (0 to ((DATA_WIDTH/24) + (1 mod ((DATA_WIDTH mod 24) +1)))) of std_logic_vector(15 downto 0);
    signal cascade : cascade_t;
 
@@ -55,7 +55,7 @@ architecture full of GEN_DSP_SHIFTER_ROTATE is
 
 begin
    zeros <= (others => '0');
-   
+
    -- configure null bit
    process(NUM_SHIFT)
    begin
@@ -63,10 +63,10 @@ begin
          tmp_num_shift(0) <= '0';
       else
          tmp_num_shift(0) <= '1';
-      end if; 
+      end if;
    end process;
 
-   tmp_num_shift(16 downto 1) <= NUM_SHIFT; 
+   tmp_num_shift(16 downto 1) <= NUM_SHIFT;
 
    -- generate output registers
    GEN_OUTPUT_REGISTERS: if(REG_OUT = 1) generate
@@ -96,10 +96,10 @@ begin
          process(CLK)
          begin
             if (CLK'event) and (CLK = '1') then
-               if (RESET = '1') then   
+               if (RESET = '1') then
                      DATA_OUT <= (others => '0');
                elsif (CE_OUT = '1') then
-                     DATA_OUT <= data_out_reg;  
+                     DATA_OUT <= data_out_reg;
                end if;
             end if;
          end process;
@@ -124,15 +124,15 @@ begin
       data_out_reg <= data_out_inv;
    end generate;
 
-   DIV_DATA: for I in 0 to (DATA_WIDTH/24)-1 generate 
+   DIV_DATA: for I in 0 to (DATA_WIDTH/24)-1 generate
    begin
-      -- generate first shifter 
+      -- generate first shifter
       GEN_FIRST_DSP: if(I = 0) generate
          DSP_SHIFTER_inst: entity work.DSP_SHIFTER
             generic map(
-               REG_IN  => REG_IN, 
+               REG_IN  => REG_IN,
                EN_CAS_IN => 1
-            )   
+            )
             port map (
                CLK => CLK,
                RESET => RESET,
@@ -151,9 +151,9 @@ begin
       GEN_NEXT_DSP: if(I /= 0) generate
          DSP_SHIFTER_inst: entity work.DSP_SHIFTER
             generic map(
-               REG_IN  => REG_IN, 
+               REG_IN  => REG_IN,
                EN_CAS_IN => 1
-            )   
+            )
             port map (
                CLK => CLK,
                RESET => RESET,
@@ -171,7 +171,7 @@ begin
    GEN_LAST_DSP_MOD: if (DATA_WIDTH mod 24 > 0) generate
       signal data_in_mod : std_logic_vector(23 downto 0);
       signal data_out_mod : std_logic_vector(23 downto 0);
-   begin   
+   begin
       data_in_mod((DATA_WIDTH mod 24)-1 downto 0) <= data_in_inv(data_in_inv'LENGTH-1 downto data_in_inv'LENGTH-1-(DATA_WIDTH mod 24)+1);
       data_in_mod(23 downto (DATA_WIDTH mod 24)) <= (others => '0');
 
@@ -223,7 +223,7 @@ begin
          );
       end generate;
 
-      data_out_inv(data_out_inv'LENGTH-1 downto data_out_inv'LENGTH-1-(DATA_WIDTH mod 24)+1) <= data_out_mod((DATA_WIDTH mod 24)-1 downto 0); 
-   end generate; 
+      data_out_inv(data_out_inv'LENGTH-1 downto data_out_inv'LENGTH-1-(DATA_WIDTH mod 24)+1) <= data_out_mod((DATA_WIDTH mod 24)-1 downto 0);
+   end generate;
 end architecture;
 

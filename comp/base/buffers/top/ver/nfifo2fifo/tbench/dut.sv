@@ -10,7 +10,7 @@
  * TODO:
  *
  */
- 
+
 // ----------------------------------------------------------------------------
 //                        Module declaration
 // ----------------------------------------------------------------------------
@@ -25,7 +25,7 @@ module DUT (
 
 
 // Signals for DUT conection
-wire [DATA_WIDTH-1:0] fw_data_in;  
+wire [DATA_WIDTH-1:0] fw_data_in;
 wire [FLOWS-1:0] fw_write;
 wire [FLOWS-1:0] fw_full;
 genvar i;
@@ -51,16 +51,16 @@ NFIFO2FIFO #(
 
    VHDL_DUT_U (
     // Common Interface
-    
+
     //vyber signalov
     .CLK               (CLK),
     .RESET             (RESET),
- 
+
     // Write interface
     .DATA_IN            (fw_data_in),
     .WRITE              (fw_write),
     .FULL               (fw_full),
-    
+
     // Read interface
     .DATA_OUT           (FR.DATA_OUT),
     .DATA_VLD           (FR.DATA_VLD),
@@ -68,8 +68,8 @@ NFIFO2FIFO #(
     .READ               (FR.READ),
     .PIPE_EN            (FR.PIPE_EN),
     .EMPTY              (FR.EMPTY),
-    
-    .STATUS             (FR.STATUS)    
+
+    .STATUS             (FR.STATUS)
     );
 
 endmodule : DUT

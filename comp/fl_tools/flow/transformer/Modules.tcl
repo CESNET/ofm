@@ -17,7 +17,7 @@ if { $ARCHGRP == "FULL" } {
     set MOD "$MOD $ENTITY_BASE/transformer_down.vhd"
     set MOD "$MOD $ENTITY_BASE/transformer_up.vhd"
     set MOD "$MOD $ENTITY_BASE/transformer_down_8.vhd"
-    set MOD "$MOD $ENTITY_BASE/transformer_up_8.vhd"    
+    set MOD "$MOD $ENTITY_BASE/transformer_up_8.vhd"
     set MOD "$MOD $ENTITY_BASE/transformer.vhd"
 }
 

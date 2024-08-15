@@ -43,7 +43,7 @@ entity TX_MAC_LITE_SHIFTER is
         RX_MFB_DST_RDY : out std_logic;
 
         -- =====================================================================
-        --  TX MFB STREAM 
+        --  TX MFB STREAM
         -- =====================================================================
         TX_MFB_DATA    : out std_logic_vector(MFB_REGIONS*MFB_REGION_SIZE*MFB_BLOCK_SIZE*MFB_ITEM_WIDTH-1 downto 0);
         TX_MFB_SOF_POS : out std_logic_vector(MFB_REGIONS*max(1,log2(MFB_REGION_SIZE))-1 downto 0);

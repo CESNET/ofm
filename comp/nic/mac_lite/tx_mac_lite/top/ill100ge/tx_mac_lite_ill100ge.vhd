@@ -21,7 +21,7 @@ entity TX_MAC_LITE_ILL100GE is
         MFB_BLOCK_SIZE  : natural := 8; -- must be 8
         MFB_ITEM_WIDTH  : natural := 8; -- must be 8
         -- =====================================================================
-        -- OTHERS CONFIGURATION: 
+        -- OTHERS CONFIGURATION:
         -- =====================================================================
         -- Maximum allowed size of packet in bytes.
         PKT_MTU_BYTES   : natural := 16384;
@@ -160,7 +160,7 @@ begin
         RX_MFB_EOF_POS => mac_mfb_eof_pos,
         RX_MFB_SOF     => mac_mfb_sof,
         RX_MFB_EOF     => mac_mfb_eof,
-        RX_MFB_SRC_RDY => mac_mfb_src_rdy, 
+        RX_MFB_SRC_RDY => mac_mfb_src_rdy,
         RX_MFB_DST_RDY => mac_mfb_dst_rdy,
 
         TX_AVST_DATA   => TX_AVST_DATA,

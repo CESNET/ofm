@@ -19,7 +19,7 @@ class discard #(CHANNELS) extends uvm_component;
         uvm_logic_vector::sequence_item#(1) drop_tr;
         analysis_imp_rx_dma.get(drop_tr);
         drop = drop_tr.data;
-    endtask 
+    endtask
 
 endclass
 

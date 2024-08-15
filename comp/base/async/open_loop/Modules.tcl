@@ -4,7 +4,7 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-# Source files for all components 
+# Source files for all components
 
 set MOD "$ENTITY_BASE/open_loop.vhd"
 

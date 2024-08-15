@@ -6,7 +6,7 @@
 -- SPDX-License-Identifier: BSD-3-Clause
 --
 --
--- TODO: 
+-- TODO:
 --
 --
 
@@ -22,7 +22,7 @@ use work.math_pack.all;
 --                        Architecture declaration
 -- ----------------------------------------------------------------------------
 architecture FULL of FLU_BINDER_EFF is
-   --! Conversion function from STD_LOGIC to boolean 
+   --! Conversion function from STD_LOGIC to boolean
    function To_Boolean(L: std_logic) return boolean is
    begin
       if(L = '1')then
@@ -47,7 +47,7 @@ architecture FULL of FLU_BINDER_EFF is
 
    --! FLUA Binder configuration
    constant FLUA_BINDER_OUT_PIPE_OUTREG      : boolean := false;
-   
+
    --! RR_FLUA configuration (WARNING - don't change this value)
    constant RR_INPUTS            : integer := DIVISION_RATIO;
 
@@ -59,12 +59,12 @@ architecture FULL of FLU_BINDER_EFF is
 
    --! Number of RR selection stages
    constant RR_STAGES         : integer := log2(INPUT_PORTS)/log2(DIVISION_RATIO) + 1;
-  
+
    --! ID Width
    constant ID_WIDTH          : integer := log2(INPUT_PORTS)+1;
 
    --! STD_LOGIC pippeline map
-   constant PIPELINE_MAP_STD  : std_logic_vector := 
+   constant PIPELINE_MAP_STD  : std_logic_vector :=
       conv_std_logic_vector(PIPELINE_MAP,RR_STAGES);
 
    --! STD_LOGIC align map
@@ -72,7 +72,7 @@ architecture FULL of FLU_BINDER_EFF is
       conv_std_logic_vector(ALIGN_MAP,INPUT_PORTS);
 
    --! STD_LOGIC DSP stage map
-   constant DSP_MAP_STD       : std_logic_vector := 
+   constant DSP_MAP_STD       : std_logic_vector :=
       conv_std_logic_vector(DSP_MAP,RR_STAGES);
 
    --! RR stage data type (last line is final data type)
@@ -82,7 +82,7 @@ architecture FULL of FLU_BINDER_EFF is
    --! RR stage sop type (last line is final data type)
    type rr_sop_stages is array(0 to RR_STAGES-1) of
       std_logic_vector(REAL_PORT_COUNT-1 downto 0);
-  
+
    --! RR stage sop pos type (last line is final data type)
    type rr_sop_pos_stages is array(0 to RR_STAGES-1) of
       std_logic_vector(REAL_PORT_COUNT*SOP_POS_WIDTH-1 downto 0);
@@ -90,23 +90,23 @@ architecture FULL of FLU_BINDER_EFF is
    --! RR stage eop type (last line is final data type)
    type rr_eop_stages is array(0 to RR_STAGES-1) of
       std_logic_vector(REAL_PORT_COUNT-1 downto 0);
-  
+
    --! RR stage eop pos type (last line is final data type)
    type rr_eop_pos_stages is array(0 to RR_STAGES-1) of
       std_logic_vector(REAL_PORT_COUNT*EOP_POS_WIDTH-1 downto 0);
-   
+
    --! RR stage src_rdy type (last line is final data type)
    type rr_src_rdy_stages is array(0 to RR_STAGES-1) of
       std_logic_vector(REAL_PORT_COUNT-1 downto 0);
-   
+
    --! RR stage dst_rdy type (last line is final data type)
    type rr_dst_rdy_stages is array(0 to RR_STAGES-1) of
       std_logic_vector(REAL_PORT_COUNT-1 downto 0);
-  
+
    --! RR stage for selected ID
    type rr_id_stages is array(0 to RR_STAGES-1) of
       std_logic_vector(REAL_PORT_COUNT*ID_WIDTH downto 0);
-   
+
    --! RR Stage of Header data
    type rr_hdr_stages is array(0 to RR_STAGES-1) of
       std_logic_vector(REAL_PORT_COUNT*HDR_WIDTH-1 downto 0);
@@ -122,17 +122,17 @@ architecture FULL of FLU_BINDER_EFF is
    signal rr_dst_rdy       : rr_dst_rdy_stages;
    signal rr_id            : rr_id_stages;
    signal rr_hdr           : rr_hdr_stages;
-   
+
 
    --! From FLUA binder to BINDER_SYNC
-   signal sync_rx_hdr_data    : std_logic_vector(HDR_WIDTH-1 downto 0); 
+   signal sync_rx_hdr_data    : std_logic_vector(HDR_WIDTH-1 downto 0);
    signal sync_rx_data        : std_logic_vector(DATA_WIDTH-1 downto 0);
    signal sync_rx_sop_pos     : std_logic_vector(SOP_POS_WIDTH-1 downto 0);
    signal sync_rx_eop_pos     : std_logic_vector(log2(DATA_WIDTH/8)-1 downto 0);
    signal sync_rx_sop         : std_logic;
    signal sync_rx_eop         : std_logic;
    signal sync_rx_src_rdy     : std_logic;
-   signal sync_rx_dst_rdy     : std_logic; 
+   signal sync_rx_dst_rdy     : std_logic;
 
    signal pipe_tx_data        : std_logic_vector(DATA_WIDTH-1 downto 0);
    signal pipe_tx_sop_pos     : std_logic_vector(SOP_POS_WIDTH-1 downto 0);
@@ -158,7 +158,7 @@ begin
          --! FLU protocol generics
          DATA_WIDTH     => DATA_WIDTH,
          SOP_POS_WIDTH  => SOP_POS_WIDTH,
-        
+
          -- Pipeline Config ------------------------
          -- Use input pipe
          IN_PIPE_EN           => FLU2FLUA_IN_PIPE_EN,
@@ -174,7 +174,7 @@ begin
          OUT_PIPE_OUTREG      => FLU2FLUA_OUT_PIPE_OUTREG,
          -- Select type of PIPE implementation: "SHREG" or "REG"
          PIPE_TYPE            => PIPE_TYPE,
-         -- Base ID 
+         -- Base ID
          -- DISTRIBUTED_TO output will be disabled too
          ENABLE_DEBUG         => ENABLE_DEBUG,
          ID_WIDTH             => ID_WIDTH,
@@ -197,7 +197,7 @@ begin
           -- Common interface
          RESET          => RESET,
          CLK            => CLK,
-   
+
          -- Frame Link Unaligned input interface
          RX_DATA        => RX_DATA((i+1)*DATA_WIDTH-1 downto i*DATA_WIDTH),
          RX_SOP_POS     => RX_SOP_POS((i+1)*SOP_POS_WIDTH-1 downto i*SOP_POS_WIDTH),
@@ -206,7 +206,7 @@ begin
          RX_EOP         => RX_EOP(i),
          RX_SRC_RDY     => RX_SRC_RDY(i),
          RX_DST_RDY     => RX_DST_RDY(i),
-   
+
          -- Header input interface
          RX_HDR_DATA    => RX_HDR_DATA((i+1)*HDR_WIDTH-1 downto i*HDR_WIDTH),
          RX_HDR_SRC_RDY => RX_HDR_SRC_RDY(i),
@@ -214,9 +214,9 @@ begin
 
          -- Distributed to output (active when SOP = 1)
          DISTRIBUTED_TO => DISTRIBUTED_TO(i),
-      
+
          -- Frame Link Unaligned output lane 0
-         TX_DATA0       => rr_data(0)((2*i+1)*DATA_WIDTH-1 downto (2*i)*DATA_WIDTH), 
+         TX_DATA0       => rr_data(0)((2*i+1)*DATA_WIDTH-1 downto (2*i)*DATA_WIDTH),
          TX_HDR_DATA0   => rr_hdr(0)((2*i+1)*HDR_WIDTH-1 downto (2*i)*HDR_WIDTH),
          TX_SOP_POS0    => rr_sop_pos(0)((2*i+1)*SOP_POS_WIDTH-1 downto (2*i)*SOP_POS_WIDTH),
          TX_EOP_POS0    => rr_eop_pos(0)((2*i+1)*EOP_POS_WIDTH-1 downto (2*i)*EOP_POS_WIDTH),
@@ -224,7 +224,7 @@ begin
          TX_EOP0        => rr_eop(0)(2*i),
          TX_SRC_RDY0    => rr_src_rdy(0)(2*i),
          TX_DST_RDY0    => rr_dst_rdy(0)(2*i),
-         ID0            => rr_id(0)((2*i+1)*ID_WIDTH-1 downto (2*i)*ID_WIDTH), 
+         ID0            => rr_id(0)((2*i+1)*ID_WIDTH-1 downto (2*i)*ID_WIDTH),
 
          -- Frame Link Unaligned output lane 1
          TX_DATA1       => rr_data(0)((2*Get_Port(i)+2)*DATA_WIDTH-1 downto (2*Get_Port(i)+1)*DATA_WIDTH),
@@ -251,10 +251,10 @@ begin
                SOP_POS_WIDTH  => SOP_POS_WIDTH,
                --! Number of input input interfaces
                INPUTS         => RR_INPUTS,
-               
+
                --! Width of information ID
                ID_WIDTH       => ID_WIDTH,
-               ENABLE_ID      => ENABLE_DEBUG, 
+               ENABLE_ID      => ENABLE_DEBUG,
                -- Pipeline Config ------------------------
                -- Use input pipe
                OUT_PIPE_EN    => To_Boolean(PIPELINE_MAP_STD(i-1)),
@@ -265,17 +265,17 @@ begin
                HDR_ENABLE     => HDR_ENABLE,
                --! Widht of the header
                HDR_WIDTH      => HDR_WIDTH,
-               
+
                --! Enable DSP multiplexing
                ENABLE_DSP     => To_Boolean(DSP_MAP_STD(i-1))
             )
             port map(
                 -- -------------------------------------------------
                 -- \name Common interface
-                -- -------------------------------------------------  
+                -- -------------------------------------------------
                RESET          => RESET,
                CLK            => CLK,
-         
+
                -- --------------------------------------------------
                -- \name Frame Link Unaligned input interface
                -- --------------------------------------------------
@@ -288,7 +288,7 @@ begin
                RX_DST_RDY  => rr_dst_rdy(i-1)(RR_INPUTS*j+RR_INPUTS-1 downto RR_INPUTS*j),
                ID_IN       => rr_id(i-1)((RR_INPUTS*j+RR_INPUTS)*ID_WIDTH-1 downto (RR_INPUTS*j)*ID_WIDTH),
                RX_HDR      => rr_hdr(i-1)((RR_INPUTS*j+RR_INPUTS)*HDR_WIDTH-1 downto (RR_INPUTS*j)*HDR_WIDTH),
-              
+
                -- --------------------------------------------------
                -- \name Frame Link Unaligned output interface
                -- --------------------------------------------------
@@ -304,7 +304,7 @@ begin
             );
       end generate; -- End of generate loop for all ports
    end generate; -- End of generate loop for all stages
-  
+
    --! FLUA -> FLU binder
    FLUA_TO_FLU_BIND_I:entity work.FLUA_BINDER
       generic map(
@@ -313,7 +313,7 @@ begin
          DATA_WIDTH     => DATA_WIDTH,
          SOP_POS_WIDTH  => SOP_POS_WIDTH,
          ID_WIDTH       => ID_WIDTH,
-         ENABLE_ID      => ENABLE_DEBUG,    
+         ENABLE_ID      => ENABLE_DEBUG,
 
          -- Pipeline Config ------------------------
          -- Use output pipe
@@ -341,10 +341,10 @@ begin
       port map(
           -- -------------------------------------------------
           -- \name Common interface
-          -- -------------------------------------------------  
+          -- -------------------------------------------------
          RESET          => RESET,
          CLK            => CLK,
-   
+
          -- --------------------------------------------------
          -- \name Frame Link Unaligned input interface
          -- --------------------------------------------------
@@ -358,7 +358,7 @@ begin
          RX_SRC_RDY0    => rr_src_rdy(RR_STAGES-1)(0),
          RX_DST_RDY0    => rr_dst_rdy(RR_STAGES-1)(0),
          ID0            => rr_id(RR_STAGES-1)(ID_WIDTH-1 downto 0),
-         
+
          -- RX Lane 1
          RX_HDR_DATA1   => rr_hdr(RR_STAGES-1)(2*HDR_WIDTH-1 downto HDR_WIDTH),
          RX_DATA1       => rr_data(RR_STAGES-1)(2*DATA_WIDTH-1 downto DATA_WIDTH),
@@ -369,7 +369,7 @@ begin
          RX_SRC_RDY1    => rr_src_rdy(RR_STAGES-1)(1),
          RX_DST_RDY1    => rr_dst_rdy(RR_STAGES-1)(1),
          ID1            => rr_id(RR_STAGES-1)(2*ID_WIDTH-1 downto ID_WIDTH),
-         
+
          -- --------------------------------------------------
          -- \name Frame Link Unaligned output interface
          -- --------------------------------------------------
@@ -383,7 +383,7 @@ begin
          TX_DST_RDY     => sync_rx_dst_rdy,
          ID             => SELECTED_FROM
       );
-  
+
    --! Output synchronzation unit which defend agains timing loops (this
    --! module doesn't implement any pipeline)
    BINDER_SYNC_I:entity work.BINDER_SYNC

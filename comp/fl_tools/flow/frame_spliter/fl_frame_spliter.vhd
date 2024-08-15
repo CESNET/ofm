@@ -7,7 +7,7 @@
 --
 -- $Id$
 --
--- TODO: 
+-- TODO:
 --
 --
 
@@ -141,16 +141,16 @@ end process;
 --    end if;
 -- end process;
 
-Rovnost  <= '0' when (Counter=Split_Pos) 
+Rovnost  <= '0' when (Counter=Split_Pos)
 	                   else ('1');
 
 RX1_EOF <= (RX1_EOP or Rovnost or Status) and (RX_EOF_Nd or Status);
 
-RX2_SOF <= (RX2_SOP or Start) or (RX_SRC_RDY_Nd); 
+RX2_SOF <= (RX2_SOP or Start) or (RX_SRC_RDY_Nd);
 
 SRC_RDY_proc: process(RX_SRC_RDY_Nd,Status)
 begin
-      if(Status='0') then 
+      if(Status='0') then
          RX1_SRC <=RX_SRC_RDY_Nd;
          RX2_SRC <= '1';
       else
@@ -173,7 +173,7 @@ end process;
 
 EOP_proc: process(RX_EOP_Nd,Status)
 begin
-      if(Status='0') then 
+      if(Status='0') then
          RX1_EOP <= RX_EOP_Nd;
          RX2_EOP <= '1';
       else

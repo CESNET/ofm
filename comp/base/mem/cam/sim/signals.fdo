@@ -8,7 +8,7 @@
 
 proc blk_CAM { } {
    global CAM_PATH
-   
+
    add wave -divider "CAM"
    add_wave "-label reset -color yellow" $CAM_PATH/reset
    add_wave "-label clk -color yellow" $CAM_PATH/clk

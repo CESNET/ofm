@@ -1,6 +1,6 @@
 -- mvb_operation.vhd: Multi-Value Bus Operation component
 -- Copyright (C) 2024 CESNET z. s. p. o.
--- Author(s): Oliver Gurka <oliver.gurka@cesnet.cz> 
+-- Author(s): Oliver Gurka <oliver.gurka@cesnet.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 
@@ -14,7 +14,7 @@ use work.type_pack.all;
 -- This component enables optional transaction forking and response
 -- receiving based on :vhdl:portsignal:`RX_OP_EN`. Optionally forked data are sent
 -- to **TX Operation Interface** and responses are received from **RX Operation Interface**.
--- :vhdl:portsignal:`RX_OP_VLD` vector must be same as operation received from 
+-- :vhdl:portsignal:`RX_OP_VLD` vector must be same as operation received from
 -- :vhdl:portsignal:`TX_OP_VLD` (no shakedown behaviour must be present in operation unit)
 -- and responses must not be reordered.
 -- When shakedown behaviour of OP unit is required, one can put SHAKEDOWN before **RX Interface**.
@@ -40,7 +40,7 @@ entity MVB_OPERATION is
         --  it as consumable item.
         CONSUME_ITEM_WIDTH      : natural := 0;
 
-        -- Operation response MVB item width 
+        -- Operation response MVB item width
         RSP_ITEM_WIDTH          : natural := 24;
 
         -- When set to true, FIFOX will be instantiated to cover
@@ -61,7 +61,7 @@ entity MVB_OPERATION is
 
         -- Enables pipe on RX_OP_RESPONSE interface
         RX_OP_PIPE_EN           : boolean := true;
-        
+
 
         -- Defines what architecture is FIFO implemented on Options:
         --
@@ -74,7 +74,7 @@ entity MVB_OPERATION is
     port (
         CLK   : in std_logic;
         RESET : in std_logic;
-        
+
         -- ======================================================
         -- RX Interface
         --
@@ -88,10 +88,10 @@ entity MVB_OPERATION is
         RX_VLD          : in    std_logic_vector(MVB_ITEMS - 1 downto 0);
         RX_SRC_RDY      : in    std_logic;
         RX_DST_RDY      : out   std_logic;
-        
+
         -- ======================================================
         -- TX Operation Interface
-        -- 
+        --
         -- Interface to unit executing the operation.
         -- ======================================================
         TX_OP_DATA          : out   std_logic_vector(MVB_ITEMS * ITEM_WIDTH - 1 downto 0);
@@ -191,7 +191,7 @@ begin
 
     rx_fork_tx_data_arr <= slv_array_deser(rx_fork_tx_data, 2);
     rx_fork_tx_vld_arr  <= slv_array_deser(rx_fork_tx_vld, 2);
-    
+
     fork_sig_g : for i in 0 to MVB_ITEMS generate
         rx_fork_tx_data_data_arr(i)     <= rx_fork_tx_data_arr(i)(ITEM_WIDTH + 1 + CONSUME_ITEM_WIDTH - 1 downto ITEM_WIDTH + 1) & rx_fork_tx_data_arr(i)(ITEM_WIDTH - 1 downto 0);
         rx_fork_tx_data_op_en_arr(i)    <= rx_fork_tx_data_arr(i)(ITEM_WIDTH downto ITEM_WIDTH);
@@ -277,7 +277,7 @@ begin
         TX_DST_RDY  => rx_op_pipe_tx_dst_rdy
     );
 
-    lat_data_g : for i in 0 to MVB_ITEMS - 1 generate 
+    lat_data_g : for i in 0 to MVB_ITEMS - 1 generate
         lat_fifox_tx_data_op_en(i) <= lat_fifox_tx_data(i * (ITEM_WIDTH + 1) + ITEM_WIDTH);
     end generate;
     lat_fifox_tx_data_op_sent <= lat_fifox_tx_vld and lat_fifox_tx_data_op_en;

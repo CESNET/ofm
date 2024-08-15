@@ -58,28 +58,28 @@ architecture FULL of MUX48 is
    signal zeros   : std_logic_vector(63 downto 0);
    signal tmp_C   : std_logic_vector(47 downto 0);
    signal tmp_PCIN   : std_logic_vector(47 downto 0);
-begin  
+begin
 
    zeros <= X"0000000000000000";
-      
+
    GEN_CASCADE_OFF: if(CASCADE_EN = false) generate
       NEG_SEL_OFF: if(NEG_SEL = false) generate
          opmode   <= (0 => not SEL, 1 => not SEL, 4 => SEL, 5 => SEL, others => '0');
       end generate;
-      
+
       NEG_SEL_ON: if(NEG_SEL = true) generate
          opmode   <= (0 => SEL, 1 => SEL, 4 => not SEL, 5 => not SEL, others => '0');
       end generate;
-      
+
       tmp_C    <= B;
       tmp_PCIN <= (others => '0');
    end generate;
-   
+
    GEN_CASCADE_ON: if(CASCADE_EN = true) generate
       NEG_SEL_OFF: if(NEG_SEL = false) generate
          opmode   <= (0 => not SEL, 1 => not SEL, 4 => SEL, others => '0');
       end generate;
-      
+
       NEG_SEL_ON: if(NEG_SEL = true) generate
          opmode   <= (0 => SEL, 1 => SEL, 4 => not SEL, others => '0');
       end generate;
@@ -97,10 +97,10 @@ begin
       USE_DPORT => FALSE,    -- Select D port usage (TRUE or FALSE)
       USE_MULT => "NONE",    -- Select multiplier usage ("MULTIPLY", "DYNAMIC", or "NONE")
       -- Pattern Detector Attributes: Pattern Detection Configuration
-      AUTORESET_PATDET => "NO_RESET",  -- "NO_RESET", "RESET_MATCH", "RESET_NOT_MATCH" 
+      AUTORESET_PATDET => "NO_RESET",  -- "NO_RESET", "RESET_MATCH", "RESET_NOT_MATCH"
       MASK => X"000000000000",         -- 48-bit mask value for pattern detect (1=ignore)
       PATTERN => X"000000000000",      -- 48-bit pattern match for pattern detect
-      SEL_MASK => "MASK",              -- "C", "MASK", "ROUNDING_MODE1", "ROUNDING_MODE2" 
+      SEL_MASK => "MASK",              -- "C", "MASK", "ROUNDING_MODE1", "ROUNDING_MODE2"
       SEL_PATTERN => "PATTERN",           -- Select pattern value ("PATTERN" or "C")
       USE_PATTERN_DETECT => "NO_PATDET",  -- Enable pattern detect ("PATDET" or "NO_PATDET")
       -- Register Control Attributes: Pipeline Register Configuration

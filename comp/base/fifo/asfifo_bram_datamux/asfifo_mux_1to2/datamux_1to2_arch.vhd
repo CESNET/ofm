@@ -41,7 +41,7 @@ architecture FULL of ASFIFO_MUX_1TO2 is
    signal aempty_l                  : std_logic;
    signal aempty_h                  : std_logic;
    signal data_high                 : std_logic_vector (DATA_HALF_WIDTH downto 0);
-   signal data_low                  : std_logic_vector (DATA_HALF_WIDTH downto 0);  
+   signal data_low                  : std_logic_vector (DATA_HALF_WIDTH downto 0);
    signal fifo_in                   : std_logic_vector (OUTPUT_DATA_WIDTH downto 0);
    signal fifo_out_l                : std_logic_vector (DATA_HALF_WIDTH downto 0);
    signal fifo_out_h                : std_logic_vector (DATA_HALF_WIDTH downto 0);
@@ -106,12 +106,12 @@ begin -------------------------------------------------------------------------
       DO             => fifo_out_h,
       RD             => RD,
       EMPTY          => empty_h,
-      AEMPTY         => aempty_h  
+      AEMPTY         => aempty_h
        );
    ----------------------------Data input----------------------------------------
    data_low  (DATA_HALF_WIDTH-1 downto 0)  <= DI;
    data_high (DATA_HALF_WIDTH-1 downto 0)  <= DI;
-   --------------------------- Data output-----------------------------------------  
+   --------------------------- Data output-----------------------------------------
       DO_VLD   <= not (empty_l or empty_h);
       DO_VLD_H <= not (fifo_out_l (DATA_HALF_WIDTH) or empty_l);
       DO       <= fifo_out_h(DATA_HALF_WIDTH-1 downto 0) & fifo_out_l(DATA_HALF_WIDTH-1 downto 0);
@@ -120,7 +120,7 @@ begin -------------------------------------------------------------------------
 
      FULL         <= full_h   or full_l;
      AFULL        <= afull_h  or afull_l;
-     EMPTY        <= empty_l  or empty_h; 
+     EMPTY        <= empty_l  or empty_h;
      AEMPTY       <= aempty_l or aempty_h;
      data_low(DATA_HALF_WIDTH)  <= EOP;
      data_high(DATA_HALF_WIDTH) <= EOP;
@@ -130,7 +130,7 @@ begin -------------------------------------------------------------------------
    if (rising_edge (CLK_WR)) then
       if (RST_WR = '1') then
          present_state <= WRIGHTING_LOW;
-      elsif (WR ='1') then 
+      elsif (WR ='1') then
          present_state <= next_state;
       else
          present_state <= WRIGHTING_LOW;
@@ -144,7 +144,7 @@ begin -------------------------------------------------------------------------
    begin
       case (present_state) is
 
-      when WRIGHTING_LOW => 
+      when WRIGHTING_LOW =>
          if (EOP = '1') then
             next_state  <= WRIGHTING_LOW;
          else

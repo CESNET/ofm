@@ -136,7 +136,7 @@ class env_tx #(int unsigned REGIONS, int unsigned REGION_SIZE, int unsigned BLOC
     uvm_reset::sync_cbs                                               reset_sync;
 
     // ------------------------------------------------------------------------
-    // Definition of agents 
+    // Definition of agents
     uvm_logic_vector_array::agent#(ITEM_WIDTH) m_logic_vector_array_agent;
     uvm_logic_vector_array::config_item logic_vector_array_agent_cfg;
 

@@ -10,7 +10,7 @@
 
 set COMPONENTS [list \
     [list "FIFO"         $OFM_PATH/comp/base/fifo/fifo       "FULL"]  \
-] 
+]
 set MOD "$MOD $ENTITY_BASE/../ib_pkg.vhd"
 set MOD "$MOD $ENTITY_BASE/ib_sim_oper.vhd"
 set MOD "$MOD $ENTITY_BASE/ib_sim_loging.vhd"

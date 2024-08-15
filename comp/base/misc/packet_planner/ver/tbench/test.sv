@@ -2,9 +2,9 @@
 //-- Copyright (C) 2020 CESNET z. s. p. o.
 //-- Author(s): Tomáš Beneš <xbenes55@stud.fit.vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 // -- TODO: Implement a check of the order in which packets arrive in the DUT and in which packets exit the DUT of the TX/RX_STREAMS interfaces (make callbacks array of TX/RX_STREAMSinterfaces and assign to one set of callback one scoreboard).
-// -- This guarantees the control order in which packets arrives on individual streams. 
+// -- This guarantees the control order in which packets arrives on individual streams.
 
 import sv_mvb_pkg::*;
 import test_pkg::*;
@@ -99,7 +99,7 @@ program TEST (
             streamResponder[i].setEnabled();
         end
         globalResponder.setEnabled();
-        // -- Enabling process dedicated for moving SPACE_GLB pointer 
+        // -- Enabling process dedicated for moving SPACE_GLB pointer
         scoreboard.ptrMov.setEnabled();
     endtask
 

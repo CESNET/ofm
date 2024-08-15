@@ -41,7 +41,7 @@ architecture behavioral of testbench is
    constant C_QDR_RESET_TIME : time := 32 ns;
 
    -- QDR's generic parameters
-   
+
    constant C_QDR_NUMBER           : integer := 3;
    constant C_ADDR_WIDTH           : integer := 9;
    constant C_DATA_WIDTH           : integer := 144;
@@ -318,7 +318,7 @@ begin
       flu_rx_src_rdy <= '0';
       wait for 25*C_APP_CLK_PER;
       wait until (app_clk'event and app_clk = '1');
-      
+
       -- Two packets
       for i in 0 to 1 loop
          flu_rx_sop_pos <= "000";
@@ -454,7 +454,7 @@ begin
 
       wait for 50*C_APP_CLK_PER;
       wait until (app_clk'event and app_clk = '1');
-      
+
       -- two pakets
       next_state_src_rdy <= '1';
       next_state <= STORAGE_CLEAR;
@@ -597,7 +597,7 @@ begin
       next_state <= STORAGE_CAPTURE;
       wait until (app_clk'event and app_clk = '1' and next_state_dst_rdy = '1');
       next_state_src_rdy <= '0';
-      
+
       for i in 0 to 59 loop
          flu_rx_sop_pos <= "000";
          flu_rx_eop_pos <= "111111";

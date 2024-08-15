@@ -2,7 +2,7 @@
 //-- Copyright (C) 2021 CESNET z. s. p. o.
 //-- Author(s): Tomáš Beneš <xbenes55@stud.fit.vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 `ifndef MVB_CONFIG_SV
 `define MVB_CONFIG_SV
@@ -11,7 +11,7 @@
 class config_sequence extends uvm_object;
     `uvm_object_utils(uvm_mvb::config_sequence)
 
-    uvm_common::sequence_cfg state; 
+    uvm_common::sequence_cfg state;
 
     // configuration of probability of rdy signal in percentige
     int unsigned rdy_probability_min = 0;   // inside [0:100]

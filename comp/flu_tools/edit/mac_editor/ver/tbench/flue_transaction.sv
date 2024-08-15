@@ -55,7 +55,7 @@ class FrameLinkUEditTransaction #() extends Transaction;
    virtual function void display(string prefix = "");
       // Temporal variable for computation of 4byte shift
       integer tmp;
-      
+
       if (prefix != "")
       begin
          $write("---------------------------------------------------------\n");
@@ -86,7 +86,7 @@ class FrameLinkUEditTransaction #() extends Transaction;
         $write("%1b",dstMask[j]);
       end
       $write("\n");
-      
+
       $write("src Write: %1b\n", srcW);
       $write("src Data: ");
       for (integer j=0; j < 6; j++)
@@ -140,7 +140,7 @@ class FrameLinkUEditTransaction #() extends Transaction;
       show = 0;
       tr.packetSizeMax = packetSizeMax;
       tr.data = new[data.size];
-  
+
 
       tmpOrigIndex = 0;
       for(int j=0;j<tr.data.size;j++)
@@ -149,7 +149,7 @@ class FrameLinkUEditTransaction #() extends Transaction;
         tr.data[j] = data[tmpOrigIndex];
         tmpOrigIndex++;
       end
-     
+
       if(show == 1)
       begin
          $write("####\n");
@@ -166,7 +166,7 @@ class FrameLinkUEditTransaction #() extends Transaction;
             end
          end
       end
-      
+
       if(srcW == 1)
       begin
          for(int j=0;j<6;j++)
@@ -186,7 +186,7 @@ class FrameLinkUEditTransaction #() extends Transaction;
 
       toFLU = tr;
    endfunction : toFLU
- 	
+
    /**
     * Compare transactions.
     * Compares the current value of the object instance with the current value
@@ -227,7 +227,7 @@ class FrameLinkUEditTransaction #() extends Transaction;
              same = 0;
              $swrite(diff, "dst  data[%0d] does not match", j);
           end
-      
+
       for (integer j=0; j < 6; j++)
           if(srcData[j] != tr.srcData[j])
           begin
@@ -241,7 +241,7 @@ class FrameLinkUEditTransaction #() extends Transaction;
              same = 0;
              $swrite(diff, "dst mask [%0d] does not match", j);
           end
-      
+
       for (integer j=0; j < 6;j++)
           if(srcMask[j] != tr.srcMask[j])
           begin
@@ -253,14 +253,14 @@ class FrameLinkUEditTransaction #() extends Transaction;
       begin
          same = 0;
          $swrite(diff, "dst write command does not match");
-      end 
-      
+      end
+
       if(srcW != tr.srcW)
       begin
          same = 0;
          $swrite(diff, "src write command does not match");
-      end 
-      
+      end
+
       compare = same;
    endfunction: compare
 

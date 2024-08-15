@@ -27,14 +27,14 @@ program TEST (
   iFrameLinkTx.tb  TX,
   iFrameLinkTx.monitor MONITOR
   );
-  
+
   // --------------------------------------------------------------------------
   //                       Variables declaration
   // --------------------------------------------------------------------------
- 
+
   // AK MA KOMPONENTA VIAC DRIVEROV ALEBO MONITOROV TREBA ICH NA TOMTO MIESTE DEKLAROVAT A V TASKU
   // CREATEENVIRONMENT INSTANCIOVAT
-  
+
   FrameLinkUTransaction                 fluBlueprint;                             // Transaction
   Generator                            generator;                               // Generator
   FrameLinkUDriver #(DRIVER0_DATA_WIDTH, DRIVER0_EOP_WIDTH, DRIVER0_SOP_WIDTH)     fluDriver;       // Driver
@@ -42,7 +42,7 @@ program TEST (
   FrameLinkResponder #(MONITOR0_DATA_WIDTH, MONITOR0_DREM_WIDTH)  flResponder;  // Responder
   Scoreboard                           scoreboard;                              // Scoreboard
   // Coverage #(RX_DATA_WIDTH,RX_DREM_WIDTH,TX_DATA_WIDTH,TX_DREM_WIDTH) coverage; // Coverage
-  
+
   // --------------------------------------------------------------------------
   //                       Creating Environment tasks
   // --------------------------------------------------------------------------
@@ -59,30 +59,30 @@ program TEST (
       fluBlueprint.packetSizeMax = packet_size_max;
       fluBlueprint.packetSizeMin = packet_size_min;
       generator.blueprint       = fluBlueprint;
-  endtask: createGeneratorEnvironment    
+  endtask: createGeneratorEnvironment
 
-  task createEnvironment();    
-    // Create driver    
+  task createEnvironment();
+    // Create driver
     fluDriver  = new ("Driver0", generator.transMbx, RX);
-      fluDriver.insideTxDelayEn_wt       = DRIVER0_INSIDE_DELAYEN_WT; 
+      fluDriver.insideTxDelayEn_wt       = DRIVER0_INSIDE_DELAYEN_WT;
       fluDriver.insideTxDelayDisable_wt  = DRIVER0_INSIDE_DELAYDIS_WT;
       fluDriver.insideTxDelayLow         = DRIVER0_INSIDE_DELAYLOW;
       fluDriver.insideTxDelayHigh        = DRIVER0_INSIDE_DELAYHIGH;
       fluDriver.startPositionLow         = DRIVER0_START_POS_LOW;
-      fluDriver.startPositionHigh        = DRIVER0_START_POS_HIGH; 
-   
+      fluDriver.startPositionHigh        = DRIVER0_START_POS_HIGH;
+
     // Create monitor
     flMonitor = new ("Monitor0", MONITOR);
     // Create responder
     flResponder = new ("Responder0", TX);
-      flResponder.rxDelayEn_wt            = MONITOR0_DELAYEN_WT; 
+      flResponder.rxDelayEn_wt            = MONITOR0_DELAYEN_WT;
       flResponder.rxDelayDisable_wt       = MONITOR0_DELAYDIS_WT;
       flResponder.rxDelayLow              = MONITOR0_DELAYLOW;
       flResponder.rxDelayHigh             = MONITOR0_DELAYHIGH;
-      flResponder.insideRxDelayEn_wt      = MONITOR0_INSIDE_DELAYEN_WT; 
+      flResponder.insideRxDelayEn_wt      = MONITOR0_INSIDE_DELAYEN_WT;
       flResponder.insideRxDelayDisable_wt = MONITOR0_INSIDE_DELAYDIS_WT;
       flResponder.insideRxDelayLow        = MONITOR0_INSIDE_DELAYLOW;
-      flResponder.insideRxDelayHigh       = MONITOR0_INSIDE_DELAYHIGH;    
+      flResponder.insideRxDelayHigh       = MONITOR0_INSIDE_DELAYHIGH;
     // Create scoreboard
     scoreboard = new;
     // Coverage class
@@ -99,7 +99,7 @@ program TEST (
   // --------------------------------------------------------------------------
   //                       Test auxilarity procedures
   // --------------------------------------------------------------------------
-  
+
   // --------------------------------------------------------------------------
   // Resets design
   task resetDesign();
@@ -123,7 +123,7 @@ program TEST (
   task disableTestEnvironment();
      // V PRIPADE POTREBY VYPNUT VSETKY POUZITE DRIVERY A MONITORY A RESPONDERY
      // Disable drivers
-     #(1000*CLK_PERIOD); 
+     #(1000*CLK_PERIOD);
      fluDriver.setDisabled();
      // Disable monitors
      flMonitor.setDisabled();
@@ -147,7 +147,7 @@ program TEST (
      // Pokud je generator aktivni nic nedelej
      while (generator.enabled)
        #(CLK_PERIOD);
-     
+
      // Disable Test Enviroment
      disableTestEnvironment();
 
@@ -155,7 +155,7 @@ program TEST (
      scoreboard.display();
      //coverage.display();
   endtask: test1
-  
+
   // --------------------------------------------------------------------------
   // Test Case 2
   // Generate very short packets
@@ -191,10 +191,10 @@ program TEST (
     // create & enable environment
     createGeneratorEnvironment();
     createEnvironment();
-    
+
     // set zero delays
-    flResponder.rxDelayEn_wt        = 0; 
-    flResponder.insideRxDelayEn_wt  = 0; 
+    flResponder.rxDelayEn_wt        = 0;
+    flResponder.insideRxDelayEn_wt  = 0;
 
     // Enable Test environment
     enableTestEnvironment();
@@ -222,16 +222,16 @@ program TEST (
     // create & enable environment
     createGeneratorEnvironment();
     createEnvironment();
-    
+
     // set delays
-    flResponder.rxDelayEn_wt            = 5; 
+    flResponder.rxDelayEn_wt            = 5;
     flResponder.rxDelayDisable_wt       = 1;
     flResponder.rxDelayLow              = 0;
     flResponder.rxDelayHigh             = 4;
-    flResponder.insideRxDelayEn_wt      = 5; 
+    flResponder.insideRxDelayEn_wt      = 5;
     flResponder.insideRxDelayDisable_wt = 1;
     flResponder.insideRxDelayLow        = 0;
-    flResponder.insideRxDelayHigh       = 4;    
+    flResponder.insideRxDelayHigh       = 4;
 
     // Enable Test environment
     enableTestEnvironment();
@@ -248,7 +248,7 @@ program TEST (
     // Display Scoreboard
     scoreboard.display();
     //coverage.display();
-  endtask: test5 
+  endtask: test5
 
   // --------------------------------------------------------------------------
   //                           Main test part
@@ -265,13 +265,13 @@ program TEST (
     // -------------------------------------
     test1();       // Run Test 1
     resetDesign();
-    
+
     test2();
     //test3();
     test4();
     test5();
     $write("Verification finished successfully!\n");
-    
+
     // -------------------------------------
     // STOP TESTING
     // -------------------------------------

@@ -1,4 +1,4 @@
--- bootfpga_mi.vhd : Component for work with parallel x32 flash (two x16 FLASH 
+-- bootfpga_mi.vhd : Component for work with parallel x32 flash (two x16 FLASH
 --                   chips with separate control+data and common address)
 --!
 --! \file
@@ -52,7 +52,7 @@ port(
    D_I       : in  std_logic_vector(31 downto 0 );
    -- Data to flash
    D_O       : out std_logic_vector(31 downto 0 );
-   -- synchronous mode flash clock 
+   -- synchronous mode flash clock
    FCLK      : out std_logic;
 
    -- ==============
@@ -69,7 +69,7 @@ port(
    RST_N_1   : out std_logic;
    -- Write anable
    WE_N_1    : out std_logic;
-   -- Synchronous mode only      
+   -- Synchronous mode only
    FWAIT_1   : in  std_logic;
    -- Synchronous mode only
    ADV_N_1   : out std_logic;
@@ -90,7 +90,7 @@ port(
    RST_N_2   : out std_logic;
     -- Write anable
    WE_N_2    : out std_logic;
-   -- Synchronous mode only      
+   -- Synchronous mode only
    FWAIT_2   : in  std_logic;
    -- Synchronous mode only
    ADV_N_2   : out std_logic;
@@ -107,13 +107,13 @@ architecture full of bootfpga_flashx2_mi is
    signal boot2_rd_data :  std_logic_vector(63 downto 0);
    signal boot1_wr_str  :  std_logic;
    signal boot2_wr_str  :  std_logic;
-   
+
    signal ad1           :  std_logic_vector(AD'range);
    signal ad2           :  std_logic_vector(AD'range);
 
    signal timeout       :  std_logic_vector(25 downto 0) := (others => '0');
    signal timeout_en    :  std_logic := '0';
-   
+
 begin
 
    ADV_N_1 <= '0';
@@ -121,12 +121,12 @@ begin
    ADV_N_2 <= '0';
    WP_N_2  <= '1';
    FCLK    <= '0';
-      
+
    MI_ARDY     <= MI_RD or MI_WR;
    MI_DRDY     <= MI_RD;
-   
+
    -- INFO: X"E" is a Reload FPGA Design Command, we send it delayed. (cca 135ms @ 250 MHz)
-   -- INFO: Driver must detach device from the bus first. Otherwise is raised Kernel panic   
+   -- INFO: Driver must detach device from the bus first. Otherwise is raised Kernel panic
 
 --    timeoutp: process(CLK)
 --    begin
@@ -136,7 +136,7 @@ begin
 --          elsif MI_WR = '1' and MI_ADDR(2) = '1' and MI_DWR(31 downto 28) = X"E" then
 --             timeout_en  <= '1';
 --          end if;
--- 
+--
 --          if timeout_en = '1' and timeout(25) = '0' then
 --             timeout     <= timeout + 1;
 --          else
@@ -172,26 +172,26 @@ begin
    mi_datap : process(MI_ADDR,boot1_rd_data,boot2_rd_data)
    begin
       case MI_ADDR(3 downto 2) is
-         when "00" => 
+         when "00" =>
             MI_DRD(15 downto 0) <= boot1_rd_data(15 downto  0);
             MI_DRD(16)          <= boot1_rd_data(16) and boot2_rd_data(16); -- Ready flag
             MI_DRD(31 downto 17)<= boot1_rd_data(31 downto 17);
-         when "01" => 
+         when "01" =>
             MI_DRD              <= boot1_rd_data(63 downto 32);
-         when "10" => 
+         when "10" =>
             MI_DRD(15 downto 0) <= boot2_rd_data(15 downto  0);
             MI_DRD(16)          <= boot2_rd_data(16) and boot1_rd_data(16); -- Ready flag
             MI_DRD(31 downto 17)<= boot2_rd_data(31 downto 17);
-         when "11" => 
+         when "11" =>
             MI_DRD              <= boot2_rd_data(63 downto 32);
          when others => null;
       end case;
    end process;
-   
+
    ----------------------------------------------------------------------------
    -- First flash controller - LOW data words -------------------------------
-   ----------------------------------------------------------------------------   
-   
+   ----------------------------------------------------------------------------
+
    FLASHCTRL1_I: entity work.flashctrl
    generic map ( CLK_PERIOD => CLK_PERIOD )
    port map (
@@ -211,11 +211,11 @@ begin
       RST_N  => RST_N_1,
       WE_N   => WE_N_1
    );
-   
+
    ----------------------------------------------------------------------------
    -- Second flash controller - HIGH data words -------------------------------
    ----------------------------------------------------------------------------
-      
+
    FLASHCTRL2_I: entity work.flashctrl
    generic map ( CLK_PERIOD => CLK_PERIOD )
    port map (
@@ -235,8 +235,8 @@ begin
       RST_N  => RST_N_2,
       WE_N   => WE_N_2
    );
-   
+
    -- Address multiplexer
    AD <= ad2 when boot2_rd_data(16) = '0' else ad1;
-  
+
 end full;

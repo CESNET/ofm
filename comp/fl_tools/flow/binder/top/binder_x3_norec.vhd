@@ -61,7 +61,7 @@ entity FL_BINDER_X3_NOREC is
       RX2_DST_RDY_N  : out std_logic;
       RX2_DATA       : in  std_logic_vector(INPUT_WIDTH-1 downto 0);
       RX2_REM        : in  std_logic_vector(log2(INPUT_WIDTH/8)-1 downto 0);
-      
+
       -- output interface
       TX_SOF_N       : out std_logic;
       TX_SOP_N       : out std_logic;
@@ -79,7 +79,7 @@ architecture full of FL_BINDER_X3_NOREC is
    signal rx_data_i        : std_logic_vector(3*INPUT_WIDTH-1 downto 0);
    signal rx_rem_i         : std_logic_vector(3*log2(INPUT_WIDTH/8)-1 downto 0);
 begin
-   
+
    rx_data_i((0+1)*INPUT_WIDTH-1 downto 0*INPUT_WIDTH) <= RX0_DATA;
    rx_data_i((1+1)*INPUT_WIDTH-1 downto 1*INPUT_WIDTH) <= RX1_DATA;
    rx_data_i((2+1)*INPUT_WIDTH-1 downto 2*INPUT_WIDTH) <= RX2_DATA;
@@ -140,7 +140,7 @@ begin
       TX_DST_RDY_N   => TX_DST_RDY_N,
       TX_DATA        => TX_DATA,
       TX_REM         => TX_REM
-   ); 
+   );
 
-end architecture full; 
+end architecture full;
 

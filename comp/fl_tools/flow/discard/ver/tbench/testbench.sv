@@ -10,7 +10,7 @@
  * TODO:
  *
  */
- 
+
 
 // ----------------------------------------------------------------------------
 //                                 TESTBENCH
@@ -22,20 +22,20 @@ module testbench;
   // -- Testbench wires and interfaces ----------------------------------------
   logic            CLK   = 0;
   logic            RESET;
-  iFrameLinkRx #(DRIVER0_DATA_WIDTH, DRIVER0_DREM_WIDTH)   
+  iFrameLinkRx #(DRIVER0_DATA_WIDTH, DRIVER0_DREM_WIDTH)
                                                RX_DRIV [CHANNELS] (CLK, RESET);
-  iFrameLinkTx #(MONITOR0_DATA_WIDTH, MONITOR0_DREM_WIDTH) 
+  iFrameLinkTx #(MONITOR0_DATA_WIDTH, MONITOR0_DREM_WIDTH)
                                                TX_MUX  [CHANNELS] (CLK, RESET);
-  iFrameLinkRx #(DRIVER0_DATA_WIDTH, DRIVER0_DREM_WIDTH)   
+  iFrameLinkRx #(DRIVER0_DATA_WIDTH, DRIVER0_DREM_WIDTH)
                                                RX_DEMUX[CHANNELS] (CLK, RESET);
-  iFrameLinkTx #(MONITOR0_DATA_WIDTH, MONITOR0_DREM_WIDTH) 
+  iFrameLinkTx #(MONITOR0_DATA_WIDTH, MONITOR0_DREM_WIDTH)
                                                TX_MON  [CHANNELS] (CLK, RESET);
   iFrameLinkRx #(DRIVER0_DATA_WIDTH, DRIVER0_DREM_WIDTH)   RX (CLK, RESET);
   iFrameLinkTx #(MONITOR0_DATA_WIDTH, MONITOR0_DREM_WIDTH) TX (CLK, RESET);
   iMi32                                  MI (CLK, RESET);
   iDiscardStat #(CHANNELS, STATUS_WIDTH) DS (CLK, RESET);
 
-  
+
   //-- Clock generation -------------------------------------------------------
   always #(CLK_PERIOD/2) CLK = ~CLK;
 

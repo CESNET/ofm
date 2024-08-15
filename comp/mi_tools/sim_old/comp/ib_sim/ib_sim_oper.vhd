@@ -31,7 +31,7 @@ package ib_sim_oper is
       LEN   : integer;
       ARR   : string(1 to 256);
    end record;
-   
+
    -- t_ib_params type
    type t_ib_params is record
       DST_ADDR       : std_logic_vector(31 downto 0);
@@ -55,7 +55,7 @@ package ib_sim_oper is
       DO    : std_logic_vector(63 downto 0);
       DV    : std_logic;
    end record;
-   
+
 
 
 -- function declaration ---------------------------------------
@@ -71,7 +71,7 @@ package ib_sim_oper is
                           -- Wait for completition transaction
                           read_wait   : in boolean:=false)
                      return t_ib_ctrl;
- 
+
    -- Send Local Read Transaction (Readed data is saved to file)
                                -- Address from where are data readed
    function ib_local_read_file(src_addr    : in std_logic_vector(31 downto 0);
@@ -99,7 +99,7 @@ package ib_sim_oper is
                            -- Data to be writen
                            data       : in std_logic_vector(63 downto 0))
                      return t_ib_ctrl;
-   
+
    -- Send Local Write Transaction (Write data from file)
                                 -- Destination address of write transaction
    function ib_local_write_file(dst_addr   : in std_logic_vector(31 downto 0);
@@ -114,7 +114,7 @@ package ib_sim_oper is
                                 -- Filename from where are data writen (64 bit hexa values)
                                 file_name  : in string)
                      return t_ib_ctrl;
- 
+
    -- Send Local Write Transaction (Write 32 bit data from file)
                                   -- Destination address of write transaction
    function ib_local_write_file32(dst_addr   : in std_logic_vector(31 downto 0);
@@ -143,7 +143,7 @@ package ib_sim_oper is
                                  -- Filename from where are data writen
                                  file_name   : in string)
                      return t_ib_ctrl;
- 
+
    -- Send Read Completition Transaction with Last Frament Flag (Write data from file)
                                  -- Destination address of read completition
    function ib_read_completition(dst_addr    : in std_logic_vector(31 downto 0);
@@ -156,7 +156,7 @@ package ib_sim_oper is
                                  -- Filename from where are data writen
                                  file_name   : in string)
                      return t_ib_ctrl;
- 
+
    -- Send Write Completition Transaction
                                   -- Destination address of write completition
    function ib_write_completition(dst_addr    : in std_logic_vector(31 downto 0);
@@ -185,10 +185,10 @@ package body ib_sim_oper is
 -- ----------------------------------------------------------------
 -- function conv_file_name converts string type into the t_file_name
 -- type
--- 
+--
 -- Parameters:
 --    file_name : filename in string format
--- 
+--
 function conv_file_name(file_name : string) return t_file_name is
 variable result : t_file_name;
 begin
@@ -200,10 +200,10 @@ end;
 -- ----------------------------------------------------------------
 -- function conv_fn_file_name converts t_file_name type into the string
 -- type
--- 
+--
 -- Parameters:
 --    file_name : filename in t_file_name format
--- 
+--
 function conv_fn_string(file_name : t_file_name) return string is
 begin
    return file_name.arr(1 to file_name.len);
@@ -229,7 +229,7 @@ function file_line_count(file_name : in string) return integer is
 end;
 
 
--- --------------------------------------------------------------------------- 
+-- ---------------------------------------------------------------------------
    -- Send Local Read Transaction
                           -- Address from where are data readed
    function ib_local_read(src_addr    : in std_logic_vector(31 downto 0);
@@ -255,7 +255,7 @@ end;
       return result;
     end;
 
--- ---------------------------------------------------------------------------    
+-- ---------------------------------------------------------------------------
    -- Send Local Read Transaction (Readed data is saved to file)
                                -- Address from where are data readed
    function ib_local_read_file(src_addr    : in std_logic_vector(31 downto 0);
@@ -341,7 +341,7 @@ end;
    function ib_local_write_file32(dst_addr   : in std_logic_vector(31 downto 0);
                                   -- From where are write transaction generated
                                   src_addr   : in std_logic_vector(31 downto 0);
-                                  -- Length of writen data (when 0 all data from file is writen)                      
+                                  -- Length of writen data (when 0 all data from file is writen)
                                   length     : in integer;
                                   -- Transaction Tag
                                   tag        : in integer;
@@ -387,7 +387,7 @@ end;
       result.PARAMS.TRANS_FLAG :='1';
       result.PARAMS.FILE_NAME  :=conv_file_name(file_name);
       return result;
-   end; 
+   end;
 
 -- ---------------------------------------------------------------------------
    -- Send Read Completition Transaction without Last Fragment Flag (Write data from file)
@@ -412,10 +412,10 @@ end;
       result.PARAMS.TRANS_FLAG :='0'; -- Used to pass Last Fragment Flag value
       result.PARAMS.FILE_NAME  :=conv_file_name(file_name);
       return result;
-   end; 
+   end;
 
-                 
--- --------------------------------------------------------------------------- 
+
+-- ---------------------------------------------------------------------------
    -- Send Write Completition Transaction
                                   -- Destination address of write completition
    function ib_write_completition(dst_addr    : in std_logic_vector(31 downto 0);
@@ -435,7 +435,7 @@ end;
       result.PARAMS.TAG        :=tag;
       result.PARAMS.TRANS_FLAG :='1';
       return result;
-   end; 
+   end;
 
 
 end ib_sim_oper;

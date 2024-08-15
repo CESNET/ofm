@@ -17,7 +17,7 @@ entity NP_LUTRAM is
   generic(
     DATA_WIDTH  : integer := 1;
     ITEMS       : integer := 64;
-    WRITE_PORTS : integer := 1;     
+    WRITE_PORTS : integer := 1;
     READ_PORTS  : integer := 3;
     DEVICE      : string  := "7SERIES"
   );

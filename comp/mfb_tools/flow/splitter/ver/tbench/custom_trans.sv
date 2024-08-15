@@ -101,7 +101,7 @@ class CustomTransaction #(HDR_SIZE = 4, ITEM_WIDTH = 8) extends Transaction;
             return 0;
          end
       end
-      
+
       return 1;
    endfunction
 

@@ -8,8 +8,8 @@
 set PACKAGES "$PACKAGES $OFM_PATH/comp/base/pkg/math_pack.vhd"
 set PACKAGES "$PACKAGES $OFM_PATH/comp/base/pkg/type_pack.vhd"
 
-set MOD "$MOD $ENTITY_BASE/gen_nor_ent.vhd" 
-set MOD "$MOD $ENTITY_BASE/gen_nor.vhd" 
+set MOD "$MOD $ENTITY_BASE/gen_nor_ent.vhd"
+set MOD "$MOD $ENTITY_BASE/gen_nor.vhd"
 
 set CARRY_CHAIN_BASE    "$OFM_PATH/comp/base/logic/carry_chain"
 set GEN_NOR_FIXED_BASE    "$OFM_PATH/comp/base/logic/gen_nor/comp/gen_nor_fixed"

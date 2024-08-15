@@ -1,8 +1,8 @@
-//-- dut.sv: Design under test 
+//-- dut.sv: Design under test
 //-- Copyright (C) 2021 CESNET z. s. p. o.
 //-- Author(s): Tomáš Beneš <xbenes55@stud.fit.vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 import test::*;
 
@@ -12,7 +12,7 @@ module DUT (
     input logic     RX_RST,
     input logic     TX_RST,
     mvb_if.dut_rx   mvb_wr,
-    mvb_if.dut_tx   mvb_rd 
+    mvb_if.dut_tx   mvb_rd
     );
 
     logic FIFO_EMPTY;

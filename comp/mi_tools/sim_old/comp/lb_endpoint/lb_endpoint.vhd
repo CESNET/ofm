@@ -29,7 +29,7 @@ entity LB_ENDPOINT is
    port(
       -- Common Interface
       RESET         : in std_logic;
-      
+
       -- Local Bus Interface
       LB_CLK        : in std_logic;
       LOCALBUS      : inout t_local_bus16;

@@ -32,7 +32,7 @@ entity GEN_LUTRAM is
         -- Intel FPGAs with MLAB cells.
         DATA_WIDTH         : natural := 16;
         -- LUTRAM depth in words. The effective and recommended values for
-        -- the selected FPGAs: 
+        -- the selected FPGAs:
             -- Xilinx Ultrascale(+) = 32, 64
             -- Intel Stratix 10     = 32
         ITEMS              : natural := 32;
@@ -85,7 +85,7 @@ architecture FULL of GEN_LUTRAM is
     -- Intel ramstyle attribute (for better backward compatibility only)
     attribute ramstyle : string;
     attribute ramstyle of distmem : signal is "MLAB, no_rw_check";
-    
+
     -- Synplify ramstyle attribute
     attribute syn_ramstyle : string;
     attribute syn_ramstyle of distmem : signal is "select_ram";

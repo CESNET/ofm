@@ -113,11 +113,11 @@ architecture FULL of FLU2QDR is
    signal current_stateout  : fsmout_t;
    signal next_stateout     : fsmout_t;
 
-   
+
 begin
 
    --! FIFO logic --------------------------------------------------------------
-  
+
    fifo_startp: process(CLK)
    begin
       if (CLK'event and CLK = '1') then
@@ -221,7 +221,7 @@ begin
 
    --! input multiplexor
 
-   flu_mux_in <= flu_reg2 & flu_reg1 & flu_reg0;   
+   flu_mux_in <= flu_reg2 & flu_reg1 & flu_reg0;
 
    flu_muxe:entity work.GEN_MUX
    generic map(
@@ -241,7 +241,7 @@ begin
    --! input FSM ---------------------------------------------------------------
    --! FSM process
    fsminp: process(CLK)
-   begin 
+   begin
       if (CLK'event AND CLK = '1') then
          if (RST = '1') then
             current_statein <= fsmin_default;
@@ -288,7 +288,7 @@ begin
                   flu_reg_vld(1) <= '1';
                   next_statein <= fsmin_word1;
                elsif (FLU_TX_DST_RDY = '1' or state_disable = '1' or state_replay = '1'
-                      or state_replay_repeated = '1') then 
+                      or state_replay_repeated = '1') then
                   --! no input, but output is waiting, insert non-valid word
                   flu_reg_we(1) <= '1';
                   next_statein <= fsmin_word1;
@@ -372,7 +372,7 @@ begin
    --! QDR read request FSM
    --! FSM process
    fsmrdp: process(CLK)
-   begin 
+   begin
       if (CLK'event AND CLK = '1') then
          if (RST = '1') then
             current_staterd <= fsmrd_disable;
@@ -383,7 +383,7 @@ begin
    end process;
 
    --! FSM output/next state logic
-   next_state_logicrdp: process (current_staterd, QDR_TX_RD_DST_RDY, fifo_empty, rd_cnt_full, 
+   next_state_logicrdp: process (current_staterd, QDR_TX_RD_DST_RDY, fifo_empty, rd_cnt_full,
                                  next_state_disable, next_state_fifo, next_state_capture,
                                  next_state_replay, next_state_replay_repeated, next_state_clear,
                                  NEXT_STATE_SRC_RDY, fifo_start, fifo_pointer, fifo_pointer_ov,
@@ -406,7 +406,7 @@ begin
       fifo_pointer_init <= '0';
       fifo_pointer_inc <= '0';
       cnt_delay_inc <= '0';
-      
+
       case current_staterd is
 
          when fsmrd_disable =>
@@ -523,7 +523,7 @@ begin
                   next_staterd <= fsmrd_disable;
                end if;
             end if;
-            
+
          when fsmrd_replay_word1 =>
             next_staterd <= current_staterd;
             CURRENT_STATE <= STORAGE_REPLAY;
@@ -681,7 +681,7 @@ begin
    --! output FSM
    --! FSM process
    fsmoutp: process(CLK)
-   begin 
+   begin
       if (CLK'event AND CLK = '1') then
          if (RST = '1') then
             current_stateout <= fsmout_default;

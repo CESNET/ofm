@@ -1,6 +1,6 @@
 # Modules.tcl: Local include Modules tcl script
 # Copyright (C) 2012 CESNET
-# Author(s): Lukas Kekely <kekely@cesnet.cz>  
+# Author(s): Lukas Kekely <kekely@cesnet.cz>
 #
 # SPDX-License-Identifier: BSD-3-Clause
 

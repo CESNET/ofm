@@ -4,7 +4,7 @@
 #         Jakub Cabal    <jakubcabal@gmail.com>
 #
 # SPDX-License-Identifier: BSD-3-Clause
-# 
+#
 
 # Base directories
 set DISTMEM_BASE    "$OFM_PATH/comp/base/mem/gen_lutram/compatibility"
@@ -26,7 +26,7 @@ if { $ARCHGRP == "FULL" } {
     lappend SRCS(CONSTR_VIVADO) [list $ENTITY_BASE/asfifo.xdc SCOPED_TO_REF asfifo PROCESSING_ORDER LATE]
 }
 
-# Source file for empty component - empty architecture 
+# Source file for empty component - empty architecture
 if { $ARCHGRP == "EMPTY" } {
 }
 

@@ -17,20 +17,20 @@ entity testbench is
 end entity testbench;
 
 architecture behavioral of testbench is
-		
+
    --! Simulation constants
    constant DATA_WIDTH     : integer := 256;
    constant SOP_POS_WIDTH  : integer := 3;
-   constant IN_PIPE_EN     : boolean := false; 
-   constant IN_PIPE_OUTREG : boolean := false; 
-   constant OUT_PIPE_EN    : boolean := false; 
-   constant OUT_PIPE_OUTREG: boolean := false; 
+   constant IN_PIPE_EN     : boolean := false;
+   constant IN_PIPE_OUTREG : boolean := false;
+   constant OUT_PIPE_EN    : boolean := false;
+   constant OUT_PIPE_OUTREG: boolean := false;
    constant clkper         : time    := 8 ns;              --Clock period
    constant reset_time     : time    := 10*clkper + 1 ns;  --Reset duration
-   
+
    --! Common interface
    signal   CLK           : std_logic;
-   signal   RESET         : std_logic; 
+   signal   RESET         : std_logic;
 
    --! Frame Link Unaligned input interface
    signal   RX_DATA       :  std_logic_vector(DATA_WIDTH-1 downto 0);
@@ -46,8 +46,8 @@ architecture behavioral of testbench is
    signal  TX_TKEEP      :  std_logic_vector((DATA_WIDTH/8)-1 downto 0);
    signal  TX_TVALID     :  std_logic;
    signal  TX_TLAST      :  std_logic;
-   signal  TX_TREADY     :  std_logic; 
-      
+   signal  TX_TREADY     :  std_logic;
+
 begin
    UUT :  entity work.flu2axi
    generic map (DATA_WIDTH => DATA_WIDTH,
@@ -61,13 +61,13 @@ begin
       --! Common interface
       CLK          =>   CLK,
       RESET        =>   RESET,
-   
+
       --! Frame Link Unaligned input interface
       RX_DATA       =>   RX_DATA,
       RX_SOP_POS    =>   RX_SOP_POS,
       RX_EOP_POS    =>   RX_EOP_POS,
       RX_SOP        =>   RX_SOP,
-      RX_EOP        =>   RX_EOP, 
+      RX_EOP        =>   RX_EOP,
       RX_SRC_RDY    =>   RX_SRC_RDY,
       RX_DST_RDY    =>   RX_DST_RDY,
       --! AXI output interface
@@ -79,14 +79,14 @@ begin
 );
 
    --! Generate clock
-   clk_gen : process 
+   clk_gen : process
    begin
       CLK <= '1';
       wait for clkper/2;
       CLK <= '0';
       wait for clkper/2;
    end process clk_gen;
-   
+
    --! Generate reset
    reset_gen : process
    begin
@@ -95,9 +95,9 @@ begin
       RESET <= '0';
    wait;
    end process;
-   
 
-   --! Simulating input flow 
+
+   --! Simulating input flow
    input_flow : process
    begin
 
@@ -113,7 +113,7 @@ begin
 
       wait for reset_time;
       wait for 10*clkper;
- 
+
 
       --! Generate some packets
       wait for clkper;
@@ -127,7 +127,7 @@ begin
       RX_SRC_RDY <= '0';
       TX_TREADY  <= '0';
       RX_SOP     <= '0';
-      RX_EOP     <= '0';	
+      RX_EOP     <= '0';
       wait for 5*clkper;
 
       RX_SRC_RDY <= '1';
@@ -142,7 +142,7 @@ begin
       RX_SRC_RDY <= '0';
       TX_TREADY  <= '0';
       RX_SOP     <= '0';
-      RX_EOP     <= '0';	
+      RX_EOP     <= '0';
       wait for  5*clkper;
 
       RX_SRC_RDY <= '1';
@@ -154,7 +154,7 @@ begin
 
       RX_SRC_RDY <= '0';
       TX_TREADY  <= '0';
-      RX_EOP     <= '0';	
+      RX_EOP     <= '0';
       wait for  5*clkper;
 
       RX_SRC_RDY <= '1';
@@ -169,7 +169,7 @@ begin
       RX_SRC_RDY <= '0';
       TX_TREADY  <= '0';
       RX_SOP     <= '0';
-      RX_EOP     <= '0';	
+      RX_EOP     <= '0';
       wait;
 
    end process input_flow;

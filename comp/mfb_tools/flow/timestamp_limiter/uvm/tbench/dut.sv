@@ -23,7 +23,7 @@ module DUT (
 
     for (genvar regions = 0; regions < MFB_REGIONS; regions++) begin
         assign timestamp [(regions+1)*TIMESTAMP_WIDTH-1 -: TIMESTAMP_WIDTH] = mfb_rx.META[regions*RX_MFB_META_WIDTH + TIMESTAMP_WIDTH                            -1 -: TIMESTAMP_WIDTH];
-        if (QUEUES !=1) begin 
+        if (QUEUES !=1) begin
             assign mfb_queue [(regions+1)*$clog2(QUEUES)       -1 -: $clog2(QUEUES)       ] = mfb_rx.META[regions*RX_MFB_META_WIDTH + TIMESTAMP_WIDTH + $clog2(QUEUES)           -1 -: $clog2(QUEUES) ];
         end
         assign meta      [(regions+1)*MFB_META_WIDTH -1 -: MFB_META_WIDTH ] = mfb_rx.META[regions*RX_MFB_META_WIDTH + TIMESTAMP_WIDTH + $clog2(QUEUES) + MFB_META_WIDTH-1 -: MFB_META_WIDTH ];
@@ -79,5 +79,5 @@ module DUT (
 
     );
 
-    
+
 endmodule

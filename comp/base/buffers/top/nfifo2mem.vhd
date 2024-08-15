@@ -276,7 +276,7 @@ FIELD : for j in 0 to FLOWS-1 generate
       FIFO_DEPTH => INCOMP_ITEMS,
       USE_INREG  => false,
       USE_OUTREG => false
-    ) 
+    )
     port map (
       CLK    => CLK,
       RESET  => RESET,
@@ -286,7 +286,7 @@ FIELD : for j in 0 to FLOWS-1 generate
 
       RE     => blk_write_allow(j),
       DOUT   => incomp_dout(j),
- 
+
       FULL   => incomp_full(j),
       EMPTY  => incomp_empty(j)
     );
@@ -300,7 +300,7 @@ FIELD : for j in 0 to FLOWS-1 generate
       DATA_WIDTH => FLOW_WIDTH,
       ITEMS      => BLOCK_SIZE*FLOWS,
       OUTPUT_REG => OUTPUT_REG
-    ) 
+    )
     port map (
       CLK      => CLK,
       RESET    => RESET,
@@ -398,7 +398,7 @@ FIELD : for j in 0 to FLOWS-1 generate
       ITEMS       => BLOCK_SIZE,
       MULTI_WRITE => false,
       MULTI_READ  => true
-    ) 
+    )
     port map (
       CLK      => CLK,
       RESET    => RESET,
@@ -409,7 +409,7 @@ FIELD : for j in 0 to FLOWS-1 generate
       WR_REG   => blk_write_addr(j)(BLOCK_SIZE_W+FLOWS_W downto FLOWS_W),
       RD_CNT   => reg_read_addr(j),
       RD_REG   => reg_read_addr(j),
- 
+
       EMPTY    => blk_empty(j),
       FULL     => blk_full(j),
       STATUS   => blk_status(j)
@@ -433,7 +433,7 @@ FIELD : for j in 0 to FLOWS-1 generate
   glob_status_sigs : entity work.BUF_STATUS
     generic map (
       ITEMS => BLOCK_SIZE
-    ) 
+    )
     port map (
       CLK      => CLK,
       RESET    => RESET,
@@ -444,7 +444,7 @@ FIELD : for j in 0 to FLOWS-1 generate
       WR_REG   => glob_write_addr(j)(BLOCK_SIZE_W+FLOWS_W downto FLOWS_W),
       RD_CNT   => reg_read_addr(j),
       RD_REG   => reg_read_addr(j),
- 
+
       EMPTY    => open,
       FULL     => glob_full(j),
       STATUS   => glob_status(j)

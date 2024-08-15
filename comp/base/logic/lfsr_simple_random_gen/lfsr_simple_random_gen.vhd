@@ -26,7 +26,7 @@ use IEEE.numeric_std.all;
 --                      +-----+      +-----+      +-----+      +-----+
 --
 -- ENABLE is connected to enable of Flip-Flops.
--- DATA is output of all Flip-Flops. 
+-- DATA is output of all Flip-Flops.
 
 entity LFSR_SIMPLE_RANDOM_GEN is
    generic(
@@ -93,13 +93,13 @@ architecture FULL of LFSR_SIMPLE_RANDOM_GEN is
          -- TODO
          when 64 => v_xnor_taps := (64,63,61,60);
          -- Other data widths are currently not supported!
-         when others => v_xnor_taps := ( 0, 0, 0, 0);     
+         when others => v_xnor_taps := ( 0, 0, 0, 0);
       end case;
       return v_xnor_taps;
    end function;
 
    constant XNOR_TAPS : taps_array_t := fce_get_taps;
-   
+
    signal s_lfsr_xnor : std_logic;
    signal s_lfsr_reg  : std_logic_vector(DATA_WIDTH-1 downto 0) := RESET_SEED;
 

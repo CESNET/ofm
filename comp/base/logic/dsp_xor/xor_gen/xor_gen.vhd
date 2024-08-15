@@ -8,7 +8,7 @@
 
 -- [1] Explanation of component function with 384-bit input string. When 384-bit string is inputed,
 -- it is splited into two parts (383 downto 192) and (191 downto 0). These two parts are xored with
--- each other. 
+-- each other.
 -- Output DO_1 is result of xoring these two parts of the string.
 -- Output DO_2 is result of xoring first half and second half of the splited signal. Then:
 --    DO_2(1) is output for (383 downto 288) xored with (191 downto 96).
@@ -60,20 +60,20 @@ architecture VU_DSP of xor_gen is
    signal d : d_a;
    -- Number of DSP blocks
    constant c_dsp : integer := DATA_WIDTH/96;
-   
+
 begin
 
    -- Generation of XOR component from DSP based on DATA_WIDTH --
    GEN_XOR: for I in 0 to c_dsp-1 generate
    begin
-   
+
    -- Distribution of DI to DSP --
       GEN_sig: for J in 0 to 3 generate
       begin
          d(I)(96-1-J*12 downto 96-(J+1)*12) <= DI(DATA_WIDTH-1-I*12-J*c_dsp*12 downto DATA_WIDTH-(I+1)*12-J*c_dsp*12);
          d(I)(96/2-1-J*12 downto 96/2-(J+1)*12) <= DI(DATA_WIDTH/2-1-I*12-J*c_dsp*12 downto DATA_WIDTH/2-(I+1)*12-J*c_dsp*12);
       end generate;
-      
+
       -- Generating one DSP
       ONE_DSP: if (DATA_WIDTH = 96) generate
          UO: entity work.xor96
@@ -84,7 +84,7 @@ begin
             port map (
                CLK => CLK,
                RESET => RESET,
-               DI => DI, 
+               DI => DI,
                DO_96 => DO_1,
                DO_2x48 => DO_2,
                DO_4x24 => DO_4,
@@ -102,8 +102,8 @@ begin
             port map (
                CLK => CLK,
                RESET => RESET,
-               DI => d(I), 
-               PCOUT => casc(casc'LENGTH-1 downto casc'LENGTH-48), 
+               DI => d(I),
+               PCOUT => casc(casc'LENGTH-1 downto casc'LENGTH-48),
                CEI => CEI
             );
       end generate FIRST_DSP;
@@ -120,7 +120,7 @@ begin
                PCIN => casc(casc'LENGTH-1-48*(I-1) downto casc'LENGTH-48*I),
                PCOUT => casc(casc'LENGTH-1-48*I downto casc'LENGTH-48*(I+1)),
                CEI => CEI
-            );  
+            );
       end generate MIDDLE_DSP;
 
       LAST_DSP: if (I = c_dsp-1) and (DATA_WIDTH /= 96) generate
@@ -130,14 +130,14 @@ begin
                OREG => OREG
             )
             port map (
-               CLK => CLK, 
+               CLK => CLK,
                RESET => RESET,
                DI => d(I),
                PCIN => casc(casc'LENGTH-1-48*(I-1) downto 0),
                DO => xorout,
-               CEI => CEI, 
+               CEI => CEI,
                CEO => CEO
-            );  
+            );
 
             -- Outputs of wide XOR function --
             DO_1 <= xorout(3);

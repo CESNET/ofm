@@ -69,14 +69,14 @@ program TEST (
         rx_mfb_generator = new("RX MFB Generator",0);
         tx_mvb_generator = new("TX MVB Generator",0);
         tx_mfb_generator = new("TX MFB Generator",0);
-        
+
         rx_mvb_blueprint = new;
         tx_mvb_blueprint = new;
         mfb_blueprint    = new;
 
         mfb_blueprint.frameSizeMax = packet_size_max;
         mfb_blueprint.frameSizeMin = packet_size_min;
-        
+
         rx_mvb_generator.blueprint = rx_mvb_blueprint;
         rx_mfb_generator.blueprint =    mfb_blueprint;
         tx_mvb_generator.blueprint = tx_mvb_blueprint;
@@ -112,7 +112,7 @@ program TEST (
         rx_mfb_responder.wordDelayDisable_wt = 29;
         tx_mvb_responder.wordDelayDisable_wt = 29;
         tx_mfb_responder.wordDelayDisable_wt = 29;
-        
+
         //rx_mvb_scoreboard = new(VERBOSE_LEVEL);
         //rx_mfb_scoreboard = new(VERBOSE_LEVEL);
         //tx_mvb_scoreboard = new(VERBOSE_LEVEL);
@@ -165,7 +165,7 @@ program TEST (
         //        #(100*CLK_PERIOD) disable StayIdleWait0;
         //    join
         //end while(rx_mvb_monitor.busy || rx_mfb_monitor.busy || tx_mvb_monitor.busy || tx_mfb_monitor.busy);
-        
+
         mi_driver.setDisabled();
 
         rx_mvb_driver.setDisabled();
@@ -177,7 +177,7 @@ program TEST (
         rx_mfb_monitor.setDisabled();
         tx_mvb_monitor.setDisabled();
         tx_mfb_monitor.setDisabled();
-        
+
         rx_mvb_responder.setDisabled();
         rx_mfb_responder.setDisabled();
         tx_mvb_responder.setDisabled();
@@ -205,7 +205,7 @@ program TEST (
 
         ////////
         // Start Generators
-        
+
         // RX
         mi_trans.address = 32'h40+4; // Length
         mi_trans.data    = 64;
@@ -262,7 +262,7 @@ program TEST (
         rx_mfb_generator.setEnabled(TRANSACTION_COUNT);
         tx_mvb_generator.setEnabled(TRANSACTION_COUNT);
         tx_mfb_generator.setEnabled(TRANSACTION_COUNT);
-        
+
         wait(!rx_mvb_generator.enabled && !rx_mfb_generator.enabled && !tx_mvb_generator.enabled && !tx_mfb_generator.enabled);
 
         ////////
@@ -277,7 +277,7 @@ program TEST (
         ////////
 
         #(CLK_PERIOD*500);
-        
+
         //rx_mvb_scoreboard.display();
         //rx_mfb_scoreboard.display();
         //tx_mvb_scoreboard.display();

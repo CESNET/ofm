@@ -74,5 +74,5 @@ module DUT (
 
     );
 
-    
+
 endmodule

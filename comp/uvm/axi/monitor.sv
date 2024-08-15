@@ -2,7 +2,7 @@
 //-- Copyright (C) 2022 CESNET z. s. p. o.
 //-- Author(s): Daniel Kříž <xkrizd01@vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 // Definition of AXI monitor
 class monitor #(int unsigned DATA_WIDTH, int unsigned TUSER_WIDTH, int unsigned REGIONS) extends uvm_monitor;
@@ -18,7 +18,7 @@ class monitor #(int unsigned DATA_WIDTH, int unsigned TUSER_WIDTH, int unsigned 
     // ------------------------------------------------------------------------
     // Reference to the virtual interface
     virtual axi_if #(DATA_WIDTH, TUSER_WIDTH).monitor vif;
-    
+
     // ------------------------------------------------------------------------
     // Analysis port used to send transactions to all connected components.
     uvm_analysis_port #(sequence_item #(DATA_WIDTH, TUSER_WIDTH, REGIONS)) analysis_port;

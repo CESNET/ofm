@@ -39,13 +39,13 @@ entity DSP_PIPE_3x is
 end entity;
 
 architecture full of DSP_PIPE_3x is
-begin  
+begin
 
    DSP_REG: for I in 0 to (DATA_WIDTH/48)-1 generate
       DSP_PIPE_3x48_inst: entity work.DSP_PIPE_3x48
          generic map(
             NUM_REGS => NUM_REGS
-         )   
+         )
          port map (
             CLK => CLK,
             RESET => RESET,
@@ -58,7 +58,7 @@ begin
   DSP_REG_MOD: if (DATA_WIDTH mod 48 > 0) generate
       signal Amod : std_logic_vector(47 downto 0);
       signal Pmod : std_logic_vector(47 downto 0);
-   begin   
+   begin
       Amod((DATA_WIDTH mod 48)-1 downto 0) <= DATA_IN(DATA_IN'LENGTH-1 downto DATA_IN'LENGTH-(DATA_WIDTH mod 48));
       Amod(47 downto (DATA_WIDTH mod 48)) <= (others => '0');
       DATA_OUT(DATA_OUT'LENGTH-1 downto DATA_OUT'LENGTH-(DATA_WIDTH mod 48)) <= Pmod((DATA_WIDTH mod 48)-1 downto 0);
@@ -66,7 +66,7 @@ begin
       DSP_PIPE_3x48_inst: entity work.DSP_PIPE_3x48
          generic map(
             NUM_REGS => NUM_REGS
-         )   
+         )
          port map (
             CLK => CLK,
             RESET => RESET,
@@ -74,5 +74,5 @@ begin
             DATA_OUT => Pmod,
             CE => CE
          );
-   end generate; 
+   end generate;
 end architecture;

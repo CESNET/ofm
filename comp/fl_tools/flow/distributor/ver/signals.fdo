@@ -12,7 +12,7 @@
 #                       Signals of interfaces
 # -------------------------------------------------------------------
 proc rx {NAME PATH} {
-    add wave -divider "$NAME"      
+    add wave -divider "$NAME"
      add_wave "-noupdate  -color blue -hex -label RX_DATA"    $PATH/RX_DATA
      add_wave "-noupdate  -hex -label RX_REM"     $PATH/RX_REM
      add_wave "-noupdate  -label RX_SOF_N"        $PATH/RX_SOF_N
@@ -24,7 +24,7 @@ proc rx {NAME PATH} {
 }
 
 proc tx {NAME PATH} {
-    add wave -divider "$NAME"      
+    add wave -divider "$NAME"
      add_wave "-noupdate  -color blue -hex -label TX_DATA"    $PATH/TX_DATA
      add_wave "-noupdate  -hex -label TX_REM"     $PATH/TX_REM
      add_wave "-noupdate  -label TX_SOF_N"        $PATH/TX_SOF_N
@@ -36,7 +36,7 @@ proc tx {NAME PATH} {
 }
 
 proc internal {NAME PATH} {
-    add wave -divider "TX single"      
+    add wave -divider "TX single"
      add_wave "-noupdate  -color blue -hex -label TX_DATA"    $PATH/TX_DATA
      add_wave "-noupdate  -hex -label TX_REM"     $PATH/TX_REM
      add_wave "-noupdate  -label TX_SOF_N"        $PATH/TX_SOF_N
@@ -46,7 +46,7 @@ proc internal {NAME PATH} {
      add_wave "-noupdate  -color orange -label TX_SRC_RDY_N"    $PATH/TX_SRC_RDY_N
      add_wave "-noupdate  -color orange -label TX_DST_RDY_N"    $PATH/TX_DST_RDY_N
 
-    add wave -divider "$NAME"      
+    add wave -divider "$NAME"
      add_wave "-noupdate  -label TX_INTERFACE -hex"    $PATH/TX_INTERFACE
      add_wave "-noupdate  -hex -label reg_inum"    $PATH/reg_inum
      add_wave "-noupdate  -hex -label reg_inum_set"    $PATH/reg_inum_set

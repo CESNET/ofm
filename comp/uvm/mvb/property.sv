@@ -1,8 +1,8 @@
-//-- property.sv: Properties for mvb bus 
+//-- property.sv: Properties for mvb bus
 //-- Copyright (C) 2021 CESNET z. s. p. o.
 //-- Author(s): Tomáš Beneš <xbenes55@stud.fit.vutbr.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 `include "uvm_macros.svh"
 import uvm_pkg::*;
@@ -20,11 +20,11 @@ module mvb_property #(int unsigned ITEMS, int unsigned ITEM_WIDTH)
     // Properties.
     // -----------------------
 
-    // This property check if SRC_RDY does not does low until DST_RDY is low 
+    // This property check if SRC_RDY does not does low until DST_RDY is low
     property src_rdy_high_until_dst_rdy_high;
         @(posedge vif.CLK)
         disable iff(RESET || START)
-        $rose(vif.SRC_RDY) |-> (vif.SRC_RDY until vif.DST_RDY); 
+        $rose(vif.SRC_RDY) |-> (vif.SRC_RDY until vif.DST_RDY);
     endproperty
 
     // This property check if at least one VLD is high when SRC_RDY is high

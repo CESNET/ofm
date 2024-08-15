@@ -9,7 +9,7 @@
 -- TODO:
 --
 
-library IEEE;  
+library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.std_logic_arith.all;
 use IEEE.std_logic_unsigned.all;
@@ -17,10 +17,10 @@ use IEEE.std_logic_unsigned.all;
 use work.math_pack.all;
 
 -- ----------------------------------------------------------------------------
---                  ENTITY DECLARATION -- Barrel shifter                     -- 
+--                  ENTITY DECLARATION -- Barrel shifter                     --
 -- ----------------------------------------------------------------------------
 
-entity BARREL_BIT_SHIFTER is 
+entity BARREL_BIT_SHIFTER is
    generic (
       DATA_WIDTH  : integer := 8;
       -- set true to shift left, false to shift right

@@ -59,7 +59,7 @@ class scoreboard #(MFB_ITEM_WIDTH, MFB_META_WIDTH, MFB_REGIONS, DUT_PATH) extend
         // processed data from the output of the model connected to the analysis fifo
         m_model.out_mfb_data.connect(data_cmp.analysis_imp_model);
         m_model.out_mvb_data.connect(meta_cmp.analysis_imp_model);
-        
+
         // connects the data from the DUT to the analysis fifo
         out_mfb_data.connect(data_cmp.analysis_imp_dut);
         out_mvb_data.connect(meta_cmp.analysis_imp_dut);
@@ -71,7 +71,7 @@ class scoreboard #(MFB_ITEM_WIDTH, MFB_META_WIDTH, MFB_REGIONS, DUT_PATH) extend
         msg = {msg, $sformatf("\n\tDATA info %s", data_cmp.info())};
         msg = {msg, $sformatf("\n\tMETA info %s", meta_cmp.info())};
 
-        if (this.success() && this.used() == 0) begin 
+        if (this.success() && this.used() == 0) begin
             `uvm_info(get_type_name(), {msg, "\n\n\t---------------------------------------\n\t----     VERIFICATION SUCCESS      ----\n\t---------------------------------------"}, UVM_NONE)
         end else begin
             `uvm_info(get_type_name(), {msg, "\n\n\t---------------------------------------\n\t----     VERIFICATION FAILED       ----\n\t---------------------------------------"}, UVM_NONE)

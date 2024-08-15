@@ -10,7 +10,7 @@
  * TODO:
  *
  */
- 
+
 // ----------------------------------------------------------------------------
 //                        Module declaration
 // ----------------------------------------------------------------------------
@@ -35,7 +35,7 @@ trimming_unit_flu #(
     // Common Interface
      .CLK               (CLK),
      .RESET             (RESET),
- 
+
     // Port 0
      .RX_DATA      (RX.DATA),
      .RX_SOP_POS   (RX.SOP_POS),
@@ -53,7 +53,7 @@ trimming_unit_flu #(
      .TX_EOP       (TX.EOP),
      .TX_SRC_RDY   (TX.SRC_RDY),
      .TX_DST_RDY   (TX.DST_RDY),
-     
+
      .LENGTH       (LENGTH.LENGTH),
      .LENGTH_READY (LENGTH.LENGTH_READY),
      .LENGTH_NEXT  (LENGTH.LENGTH_NEXT)

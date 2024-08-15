@@ -53,7 +53,7 @@ X50MHZ_U : if (FREQUENCY = (LOCAL_BUS_FREQUENCY/2)) generate
    port map(
       -- Common Interface
       RESET      => reset_pipe,
-      
+
       -- Local Bus Interface
       LB_CLK      => LB_CLK,
       LB_DWR      => LOCALBUS.DWR,
@@ -91,7 +91,7 @@ X100MHZ_U: if (FREQUENCY = LOCAL_BUS_FREQUENCY) generate
    port map(
       -- Common Interface
       RESET      => reset_pipe,
-      
+
       -- Local Bus Interface
       LB_CLK      => LB_CLK,
       LB_DWR      => LOCALBUS.DWR,

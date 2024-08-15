@@ -17,7 +17,7 @@ use work.type_pack.all;
 entity PCIE_CC_MFB2AXI is
     generic(
         -- =======================================================================
-        -- MFB BUS CONFIGURATION: 
+        -- MFB BUS CONFIGURATION:
         --
         -- Supported configuration is: (2,1,8,32), (1,1,8,32)
         -- =======================================================================
@@ -138,7 +138,7 @@ begin
             end if;
         end process;
     end generate;
-            
+
     CC_AXI_DATA    <= CC_MFB_DATA;
     CC_AXI_KEEP    <= cc_keep;
     CC_AXI_USER    <= (others => '0');

@@ -24,7 +24,7 @@ add_wave "-color magenta -noupdate -hex -label RX_EOF_N"      /testbench/RX_EOF_
 add_wave "-color magenta -noupdate -hex -label fifo_rx_data"      /testbench/uut/fifo_rx_data
 add_wave "-color magenta -noupdate -hex -label par0_in"      /testbench/uut/par0_in
 add_wave "-color magenta -noupdate -hex -label par1_in"      /testbench/uut/par1_in
-      
+
 add wave -divider "Read interface"
 add_wave "-noupdate -hex -label TX_DATA"     /testbench/TX_DATA
 add_wave "-noupdate -hex -label TX_REM"      /testbench/TX_REM

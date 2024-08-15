@@ -1,13 +1,13 @@
 --
 -- binder_stupid.vhd: Binder N-1 component for Frame Link Unaligned (basic easy implementation)
 -- Copyright (C) 2012 CESNET
--- Author: Lukas Kekely <kekely@cesnet.cz> 
+-- Author: Lukas Kekely <kekely@cesnet.cz>
 --
 -- SPDX-License-Identifier: BSD-3-Clause
 --
 -- $Id$
 --
--- TODO: 
+-- TODO:
 --
 --
 
@@ -25,8 +25,8 @@ use work.math_pack.all;
 -- ----------------------------------------------------------------------------
 architecture STUPID of FLU_BINDER is
    constant EOP_POS_WIDTH : integer:=log2(DATA_WIDTH/8);
-   constant INUM_WIDTH    : integer:=log2(INPUT_PORTS); 
-   
+   constant INUM_WIDTH    : integer:=log2(INPUT_PORTS);
+
    signal rr_cnt_decoded  : std_logic_vector(INPUT_PORTS-1 downto 0);
    signal rr_masked       : std_logic_vector(INPUT_PORTS-1 downto 0);
    signal inum_rr_ready   : std_logic;
@@ -35,22 +35,22 @@ architecture STUPID of FLU_BINDER is
    signal inum_next       : std_logic;
    signal inum_base       : std_logic_vector(INUM_WIDTH-1 downto 0);
    signal inum_rr         : std_logic_vector(INUM_WIDTH-1 downto 0);
-   
+
 begin
    -- basic packet MUX connection
    rx_mx_i : entity work.FLU_MULTIPLEXER_PACKET
    generic map (
       DATA_WIDTH     => DATA_WIDTH,
-      SOP_POS_WIDTH  => SOP_POS_WIDTH, 	
+      SOP_POS_WIDTH  => SOP_POS_WIDTH,
       INPUT_PORTS    => INPUT_PORTS
    ) port map (
       RESET   => RESET,
       CLK     => CLK,
-      
+
       SEL       => inum,
       SEL_READY => inum_ready,
       SEL_NEXT  => inum_next,
-       
+
       RX_DATA       => RX_DATA,
       RX_SOP_POS    => RX_SOP_POS,
       RX_EOP_POS    => RX_EOP_POS,
@@ -58,7 +58,7 @@ begin
       RX_EOP        => RX_EOP,
       RX_SRC_RDY    => RX_SRC_RDY,
       RX_DST_RDY    => RX_DST_RDY,
-      
+
       TX_DATA       => TX_DATA,
       TX_SOP_POS    => TX_SOP_POS,
       TX_EOP_POS    => TX_EOP_POS,
@@ -67,7 +67,7 @@ begin
       TX_SRC_RDY    => TX_SRC_RDY,
       TX_DST_RDY    => TX_DST_RDY
    );
-   
+
    rr_cnt_i : process(CLK)
    begin
       if CLK'event and CLK='1' then

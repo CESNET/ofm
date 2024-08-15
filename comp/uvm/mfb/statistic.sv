@@ -1,8 +1,8 @@
-//-- statistic.sv : 
+//-- statistic.sv :
 //-- Copyright (C) 2024 CESNET z. s. p. o.
-//-- Author(s): Radek Iša <isa@cesnet.cz> 
+//-- Author(s): Radek Iša <isa@cesnet.cz>
 
-//-- SPDX-License-Identifier: BSD-3-Clause 
+//-- SPDX-License-Identifier: BSD-3-Clause
 
 
 class statistic #(int unsigned REGIONS, int unsigned REGION_SIZE, int unsigned BLOCK_SIZE, int unsigned ITEM_WIDTH, int unsigned META_WIDTH) extends uvm_subscriber#(sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH));

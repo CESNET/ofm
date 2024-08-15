@@ -24,7 +24,7 @@ entity SHAKEDOWN_ROTATE is
       SHIFT_LEFT : boolean := true
    );
    port(
-      -- Input data 
+      -- Input data
       DIN      : in  std_logic_vector(INPUTS*DATA_WIDTH-1 downto 0);
       -- Input data valid
       DIN_VLD  : in  std_logic_vector(INPUTS-1 downto 0);
@@ -32,7 +32,7 @@ entity SHAKEDOWN_ROTATE is
       -- Desired output rotation
       SEL      : in std_logic_vector(log2(OUTPUTS)-1 downto 0);
 
-      -- Output data 
+      -- Output data
       DOUT     : out std_logic_vector(OUTPUTS*DATA_WIDTH-1 downto 0);
       -- Output data valid
       DOUT_VLD : out std_logic_vector(OUTPUTS-1 downto 0)

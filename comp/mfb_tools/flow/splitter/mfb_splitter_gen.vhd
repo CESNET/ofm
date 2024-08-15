@@ -220,7 +220,7 @@ begin
         TX_MVB_VLD(i)     <= s_rx_mvb_vld    (TREE_STAGES)(i);
         TX_MVB_SRC_RDY(i) <= s_rx_mvb_src_rdy(TREE_STAGES)(i);
         s_rx_mvb_dst_rdy(TREE_STAGES)(i) <= TX_MVB_DST_RDY(i);
-    
+
         TX_MFB_DATA(i)    <= s_rx_mfb_data   (TREE_STAGES)(i);
         TX_MFB_SOF(i)     <= s_rx_mfb_sof    (TREE_STAGES)(i);
         TX_MFB_EOF(i)     <= s_rx_mfb_eof    (TREE_STAGES)(i);

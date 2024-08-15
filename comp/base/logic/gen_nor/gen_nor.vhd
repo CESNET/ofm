@@ -105,7 +105,7 @@ begin
             --! Output data, result of OR.
             DO => DO
          );
-      
+
       end generate;
 
    end generate;
