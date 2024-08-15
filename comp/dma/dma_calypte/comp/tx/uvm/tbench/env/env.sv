@@ -59,7 +59,7 @@ class env #(
 
     coverage #(PCIE_CQ_MFB_REGIONS, PCIE_CQ_MFB_REGION_SIZE, PCIE_CQ_MFB_BLOCK_SIZE, PCIE_CQ_MFB_ITEM_WIDTH, sv_pcie_meta_pack::PCIE_CQ_META_WIDTH) m_coverage;
 
-    scoreboard #(USR_MFB_ITEM_WIDTH, PCIE_CQ_MFB_ITEM_WIDTH, CHANNELS, DATA_POINTER_WIDTH, USR_MFB_META_WIDTH) m_scoreboard;
+    scoreboard #(USR_MFB_ITEM_WIDTH, PCIE_CQ_MFB_ITEM_WIDTH, CHANNELS, DATA_POINTER_WIDTH, USR_MFB_META_WIDTH, DEVICE) m_scoreboard;
 
     // Constructor of environment.
     function new(string name, uvm_component parent);
@@ -95,7 +95,7 @@ class env #(
         uvm_config_db #(uvm_mi::regmodel_config)::set(this, "m_regmodel_top", "m_config", m_mi_config);
         m_regmodel_top = uvm_mi::regmodel #(uvm_tx_dma_calypte_regs::regmodel_top #(CHANNELS), MI_WIDTH, MI_WIDTH)::type_id::create("m_regmodel_top", this);
 
-        m_scoreboard  = scoreboard #(USR_MFB_ITEM_WIDTH, PCIE_CQ_MFB_ITEM_WIDTH, CHANNELS, DATA_POINTER_WIDTH, USR_MFB_META_WIDTH)::type_id::create("m_scoreboard", this);
+        m_scoreboard  = scoreboard #(USR_MFB_ITEM_WIDTH, PCIE_CQ_MFB_ITEM_WIDTH, CHANNELS, DATA_POINTER_WIDTH, USR_MFB_META_WIDTH, DEVICE)::type_id::create("m_scoreboard", this);
 
         m_sequencer = sequencer #(USR_MFB_REGIONS, USR_MFB_REGION_SIZE, USR_MFB_BLOCK_SIZE, USR_MFB_ITEM_WIDTH, CHANNELS, HDR_META_WIDTH, PKT_SIZE_MAX)::type_id::create("m_sequencer", this);
 

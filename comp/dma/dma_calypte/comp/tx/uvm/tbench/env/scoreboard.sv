@@ -56,9 +56,10 @@ class scoreboard #(
     int unsigned CHANNELS,
     int unsigned DATA_POINTER_WIDTH,
     int unsigned USR_MFB_META_WIDTH,
+    string       DEVICE
 ) extends uvm_scoreboard;
 
-    `uvm_component_param_utils(uvm_tx_dma_calypte::scoreboard #(USR_MFB_ITEM_WIDTH, PCIE_CQ_MFB_ITEM_WIDTH, CHANNELS, DATA_POINTER_WIDTH, USR_MFB_META_WIDTH))
+    `uvm_component_param_utils(uvm_tx_dma_calypte::scoreboard #(USR_MFB_ITEM_WIDTH, PCIE_CQ_MFB_ITEM_WIDTH, CHANNELS, DATA_POINTER_WIDTH, USR_MFB_META_WIDTH, DEVICE))
 
     //INPUT TO DUT
     uvm_analysis_export #(uvm_logic_vector_array::sequence_item #(PCIE_CQ_MFB_ITEM_WIDTH))          m_pcie_cq_data_analysis_export;
@@ -69,7 +70,7 @@ class scoreboard #(
     uvm_analysis_export #(uvm_logic_vector_array::sequence_item #(USR_MFB_ITEM_WIDTH)) m_usr_data_analysis_export;
     uvm_analysis_export #(uvm_logic_vector::sequence_item #(USR_MFB_META_WIDTH))       m_usr_meta_analysis_export;
 
-    model #(USR_MFB_ITEM_WIDTH, PCIE_CQ_MFB_ITEM_WIDTH, CHANNELS, DATA_POINTER_WIDTH, USR_MFB_META_WIDTH) m_model;
+    model #(USR_MFB_ITEM_WIDTH, PCIE_CQ_MFB_ITEM_WIDTH, CHANNELS, DATA_POINTER_WIDTH, USR_MFB_META_WIDTH, DEVICE) m_model;
 
     local uvm_tx_dma_calypte_regs::regmodel_top #(CHANNELS)                                     m_regmodel_top;
     data_comparer #(USR_MFB_ITEM_WIDTH)                                                         m_data_cmp;
@@ -111,7 +112,7 @@ class scoreboard #(
 
     //build phase
     function void build_phase(uvm_phase phase);
-        m_model    = model #(USR_MFB_ITEM_WIDTH, PCIE_CQ_MFB_ITEM_WIDTH, CHANNELS, DATA_POINTER_WIDTH, USR_MFB_META_WIDTH)::type_id::create("m_model",    this);
+        m_model    = model #(USR_MFB_ITEM_WIDTH, PCIE_CQ_MFB_ITEM_WIDTH, CHANNELS, DATA_POINTER_WIDTH, USR_MFB_META_WIDTH, DEVICE)::type_id::create("m_model",    this);
         m_data_cmp = data_comparer #(USR_MFB_ITEM_WIDTH)                                                                          ::type_id::create("m_data_cmp", this);
         m_meta_cmp = uvm_common::comparer_ordered #(uvm_logic_vector::sequence_item #(USR_MFB_META_WIDTH))                        ::type_id::create("m_meta_cmp", this);
     endfunction

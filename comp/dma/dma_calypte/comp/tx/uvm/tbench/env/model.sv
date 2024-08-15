@@ -22,16 +22,16 @@ class discard #(int unsigned CHANNELS) extends uvm_component;
     endtask
 endclass
 
-//model
 class model #(
     int unsigned USR_MFB_ITEM_WIDTH,
     int unsigned PCIE_CQ_MFB_ITEM_WIDTH,
     int unsigned CHANNELS,
     int unsigned DATA_POINTER_WIDTH,
     int unsigned USR_MFB_META_WIDTH,
+    string DEVICE
 ) extends uvm_component;
 
-    `uvm_component_param_utils(uvm_tx_dma_calypte::model #(USR_MFB_ITEM_WIDTH, PCIE_CQ_MFB_ITEM_WIDTH, CHANNELS, DATA_POINTER_WIDTH, USR_MFB_META_WIDTH))
+    `uvm_component_param_utils(uvm_tx_dma_calypte::model #(USR_MFB_ITEM_WIDTH, PCIE_CQ_MFB_ITEM_WIDTH, CHANNELS, DATA_POINTER_WIDTH, USR_MFB_META_WIDTH, DEVICE))
 
     localparam DATA_ADDR_MASK = 2**DATA_POINTER_WIDTH-1;
 
@@ -144,11 +144,15 @@ class model #(
         logic [$clog2(CHANNELS)-1:0]   channel;
         logic [1-1:0]                  hdr_inf;
         logic                          res;
+        int unsigned                   fbe_ext;
+        int unsigned                   lbe_ext;
         int unsigned                   fbe;
         int unsigned                   lbe;
+        // This index points to a DW where the user data in the PCIE transaction begin.
+        // Each device has a different value of this index.
+        int unsigned                   usr_data_begin_idx;
 
         forever begin
-            int unsigned   start_it;
             logic [64-1:0] pcie_addr;
 
             //GET PCIE TRANSACTION
@@ -160,12 +164,33 @@ class model #(
             m_discard_comp.get_tr(drop);
             m_discard_wait = 0;
 
-            dword_cnt  = cq_data_tr.item.data[2][11-1 : 0];
+            // Parsing the input data according to the selected device
+            if (DEVICE == "ULTRASCALE") begin
+                dword_cnt          = cq_data_tr.data[2][11-1 : 0];
+                pcie_addr          = {cq_data_tr.data[1], cq_data_tr.data[0]};
+                fbe_ext            = cq_meta_tr.data[167-1 : 163];
+                lbe_ext            = dword_cnt > 1 ? cq_meta_tr.data[171-1 : 167] : cq_meta_tr.data[167-1 : 163];
+                usr_data_begin_idx = 4;
+
+            end else begin
+                logic is_4dw_tlp;
+                dword_cnt  = cq_meta_tr.data[10-1 : 0];
+                is_4dw_tlp = cq_meta_tr.data[29];
+
+                if (is_4dw_tlp == 1)
+                    pcie_addr = {cq_meta_tr.data[95:64], cq_meta_tr.data[127:96]};
+                else
+                    pcie_addr = cq_meta_tr.data[95:64];
+
+                fbe_ext            = cq_meta_tr.data[35:32];
+                lbe_ext            = dword_cnt > 1 ? cq_meta_tr.data[39:36] : cq_meta_tr.data[35:32];
+                usr_data_begin_idx = 0;
+            end
+
             if (dword_cnt == 0) begin
                 dword_cnt  = 1024;
             end
 
-            pcie_addr  = {cq_data_tr.item.data[1], cq_data_tr.item.data[0]};
             addr       = pcie_addr[DATA_POINTER_WIDTH-1 : 2];
             channel    = pcie_addr[(DATA_POINTER_WIDTH+1+$clog2(CHANNELS))-1 : DATA_POINTER_WIDTH+1];
             hdr_inf    = pcie_addr[(DATA_POINTER_WIDTH+1+$clog2(CHANNELS))];
@@ -183,36 +208,37 @@ class model #(
             debug_msg = { debug_msg, $sformatf("ADDR        : %0d\n", {addr, 2'b00})};
             debug_msg = { debug_msg, $sformatf("HDR FLAG    : %0b\n", (hdr_inf != 1'b0))};
             debug_msg = { debug_msg, $sformatf("DW CNT      : %0d\n", dword_cnt)};
-            debug_msg = { debug_msg, $sformatf("FBE         : %b\n", cq_meta_tr.item.data[167-1 : 163])};
-            debug_msg = { debug_msg, $sformatf("LBE         : %b\n", dword_cnt > 1 ? cq_meta_tr.item.data[171-1 : 167] : cq_meta_tr.item.data[167-1 : 163])};
+            debug_msg = { debug_msg, $sformatf("FBE         : %b\n", fbe_ext)};
+            debug_msg = { debug_msg, $sformatf("LBE         : %b\n", lbe_ext)};
             debug_msg = { debug_msg, $sformatf("DATA        : %s\n", cq_data_tr.convert2string())};
             debug_msg = { debug_msg, $sformatf("================================================================================= \n")};
             `uvm_info(this.get_full_name(), debug_msg, UVM_MEDIUM);
 
             //if PCIE transaction is not DMA HEADER
             if (hdr_inf == 1'b0) begin
-                fbe = encode_fbe(cq_meta_tr.item.data[167-1 : 163]);
+                fbe = encode_fbe(fbe_ext);
+
                 if (dword_cnt <= 1) begin
-                    lbe = encode_lbe(cq_meta_tr.item.data[167-1 : 163]);
+                    lbe = encode_lbe(lbe_ext);
                     for (int unsigned it = fbe; it < lbe; it++) begin
-                         m_channel_info[channel].memory[{addr, 2'b00} + it] = cq_data_tr.item.data[4][(it+1)*8-1 -: 8];
+                         m_channel_info[channel].memory[{addr, 2'b00} + it] = cq_data_tr.data[usr_data_begin_idx][(it+1)*8-1 -: 8];
                     end
                 end else begin
                     logic [DATA_POINTER_WIDTH-1:0] addr_act = {addr, 2'b00};
-                    lbe = encode_lbe(cq_meta_tr.item.data[171-1 : 167]);
+                    lbe = encode_lbe(lbe_ext);
                     //peeling start
                     for (int unsigned it = fbe; it < 4; it++) begin
-                         m_channel_info[channel].memory[addr_act + it] = cq_data_tr.item.data[4][(it+1)*8-1 -: 8];
+                         m_channel_info[channel].memory[addr_act + it] = cq_data_tr.data[usr_data_begin_idx][(it+1)*8-1 -: 8];
                     end
                     addr_act = (addr_act + 4) & DATA_ADDR_MASK;
                     //Main loop
                     for (int unsigned it = 1; (it+1) < dword_cnt; it++) begin
-                         {<<8{m_channel_info[channel].memory[addr_act +: 4]}} = cq_data_tr.item.data[4 + it];
+                         {<<8{m_channel_info[channel].memory[addr_act +: 4]}} = cq_data_tr.data[usr_data_begin_idx + it];
                          addr_act = (addr_act + 4) & DATA_ADDR_MASK;
                     end
                     //peeling end
                     for (int unsigned it = 0; it < lbe; it++) begin
-                         m_channel_info[channel].memory[addr_act + it] = cq_data_tr.item.data[4 + dword_cnt-1][(it+1)*8-1 -: 8];
+                         m_channel_info[channel].memory[addr_act + it] = cq_data_tr.data[usr_data_begin_idx + dword_cnt-1][(it+1)*8-1 -: 8];
                     end
                 end
 
@@ -225,15 +251,13 @@ class model #(
                 logic [24-1 : 0] dma_meta;
                 logic [DATA_POINTER_WIDTH-1 : 0] frame_pointer;
 
-                packet_size   = cq_data_tr.item.data[4][16-1 : 0];
-                frame_pointer = cq_data_tr.item.data[4][32-1 : 16];
-                dma_meta      = cq_data_tr.item.data[5][32-1 : 8];
+                packet_size   = cq_data_tr.data[usr_data_begin_idx][16-1 : 0];
+                frame_pointer = cq_data_tr.data[usr_data_begin_idx][32-1 : 16];
+                dma_meta      = cq_data_tr.data[usr_data_begin_idx+1][32-1 : 8];
 
                 if (drop == 1'b0) begin
-                    usr_tx_data_tr      = uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(USR_MFB_ITEM_WIDTH))::type_id::create("usr_tx_data_tr", this);
-                    usr_tx_data_tr.item = uvm_logic_vector_array::sequence_item #(USR_MFB_ITEM_WIDTH)::type_id::create("usr_tx_data_tr.item", this);
-                    usr_tx_meta_tr      = uvm_common::model_item #(uvm_logic_vector::sequence_item #(USR_MFB_META_WIDTH))::type_id::create("usr_tx_meta_tr", this);
-                    usr_tx_meta_tr.item = uvm_logic_vector::sequence_item #(USR_MFB_META_WIDTH)::type_id::create("usr_tx_meta_tr.item", this);
+                    usr_tx_data_tr      = uvm_logic_vector_array::sequence_item #(USR_MFB_ITEM_WIDTH)::type_id::create("usr_tx_data_tr", this);
+                    usr_tx_meta_tr      = uvm_logic_vector::sequence_item #(USR_MFB_META_WIDTH)::type_id::create("usr_tx_meta_tr", this);
 
                     usr_tx_data_tr.start = m_channel_info[channel].infs;
                     usr_tx_data_tr.time_array_add(cq_data_tr.start);
