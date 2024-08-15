@@ -64,7 +64,7 @@ virtual class comparer_base_unordered #(type MODEL_ITEM, type DUT_ITEM = MODEL_I
 
         dut_sends += 1;
         //try get item from DUT
-        `uvm_info(this.get_full_name(), $sformatf("\n\tReceived transactions from DUT\n%s", tr.convert2string()), UVM_FULL);
+        `uvm_info(this.get_full_name(), $sformatf("\n\tReceived transactions from DUT\n%s", dut_item2string(tr)), UVM_FULL);
         while (it < model_items.size() && w_end == 0) begin
             w_end = compare(model_items[it], tr);
             if (w_end == 0) begin
@@ -110,7 +110,7 @@ virtual class comparer_base_unordered #(type MODEL_ITEM, type DUT_ITEM = MODEL_I
             if (delay >= dut_tr_timeout) begin
                 errors++;
                `uvm_error(this.get_full_name(), $sformatf("\n\tTransaction from DUT is delayed %0dns. Probably stuck.\n\tErrors/Compared %0d/%0d\n%s\n\nDUT transactions:\n%s",
-                                                         delay/1ns, errors, compared, model_items[0].convert2string(),
+                                                         delay/1ns, errors, compared, model_item2string(model_items[0]),
                                                          this.dut_tr_get(model_items[0], model_items[0].time_last())));
                 model_items.delete(0);
             end else begin
@@ -128,7 +128,7 @@ virtual class comparer_base_unordered #(type MODEL_ITEM, type DUT_ITEM = MODEL_I
                 errors++;
                 `uvm_error(this.get_full_name(), $sformatf("\n\tTransaction %0d from DUT is unexpected.\n\tErrors/Compared %0d/%0d Output time %0dns. Delay %0dns. Probably unexpected transaction.\n%s\n\n%s",
                                                            dut_items[0].get_transaction_id(), errors, compared, dut_items[0].time_last()/1ns, delay/1ns,
-                                                           dut_items[0].convert2string(), this.model_tr_get(dut_items[0])));
+                                                           dut_item2string(dut_items[0]), this.model_tr_get(dut_items[0])));
                 dut_items.delete(0);
             end else begin
                 #(model_tr_timeout - delay);
@@ -141,11 +141,11 @@ virtual class comparer_base_unordered #(type MODEL_ITEM, type DUT_ITEM = MODEL_I
         msg = $sformatf("\n\tErrors %0d Compared %0d Wait for tramsaction DUT(%0d) MODEL(%0d)", errors, compared, dut_items.size(), model_items.size());
         if (data == 1) begin
             for (int unsigned it = 0; it < model_items.size(); it++) begin
-                msg = {msg, $sformatf("\n\nModels transaction : %0d", it) , model_items[it].convert2string()};
+                msg = {msg, $sformatf("\n\nModels transaction : %0d", it) , model_item2string(model_items[it])};
             end
             msg = {msg, "\n\n"};
             for (int unsigned it = 0; it < dut_items.size(); it++) begin
-                msg = {msg, $sformatf("\n\nDUT transactions : %0d", it), dut_items[it].convert2string()};
+                msg = {msg, $sformatf("\n\nDUT transactions : %0d", it), dut_item2string(dut_items[it])};
             end
         end
         return msg;
