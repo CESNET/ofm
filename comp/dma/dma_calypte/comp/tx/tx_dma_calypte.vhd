@@ -87,7 +87,7 @@ entity TX_DMA_CALYPTE is
 
         ST_SP_DBG_SIGNAL_W : natural := 4;
         -- Size of the largest packets that can be transmitted on the USR_TX_MFB interface.
-        PKT_SIZE_MAX   : natural := 2**11
+        PKT_SIZE_MAX   : natural := 2**12
         );
     port (
         CLK   : in std_logic;
@@ -128,7 +128,7 @@ entity TX_DMA_CALYPTE is
         -- Transmits responses to read requests received on the CQ interface
         -- =========================================================================================
         PCIE_CC_MFB_DATA    : out std_logic_vector(PCIE_CC_MFB_REGIONS*PCIE_CC_MFB_REGION_SIZE*PCIE_CC_MFB_BLOCK_SIZE*PCIE_CC_MFB_ITEM_WIDTH-1 downto 0) := (others => '0');
-        PCIE_CC_MFB_META    : out std_logic_vector(PCIE_CC_META_WIDTH -1 downto 0)                                                                       := (others => '0');
+        PCIE_CC_MFB_META    : out std_logic_vector(PCIE_CC_MFB_REGIONS*PCIE_CC_META_WIDTH -1 downto 0)                                                                       := (others => '0');
         PCIE_CC_MFB_SOF     : out std_logic_vector(PCIE_CC_MFB_REGIONS -1 downto 0)                                                                      := (others => '0');
         PCIE_CC_MFB_EOF     : out std_logic_vector(PCIE_CC_MFB_REGIONS -1 downto 0)                                                                      := (others => '0');
         PCIE_CC_MFB_SOF_POS : out std_logic_vector(PCIE_CC_MFB_REGIONS*max(1, log2(PCIE_CC_MFB_REGION_SIZE)) -1 downto 0)                                := (others => '0');
