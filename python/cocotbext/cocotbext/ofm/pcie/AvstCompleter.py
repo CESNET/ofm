@@ -6,6 +6,7 @@ from cocotb.clock import Clock
 import traceback
 import sys
 from ..utils import concat, deconcat, SerializableHeader
+from .AvstRequester import AvstBase
 
 
 class RequestHeaderEmpty(SerializableHeader):
@@ -19,8 +20,10 @@ class CompletionHeader(SerializableHeader):
     items = list(zip(['tlp_prfx', 'lower_addr', 'res1', 'tag_l', 'req_id', 'byte_cnt', 'res2', 'compl_stat', 'compl_id', 'dwords', 'addr_type', 'attr_l', 'res3', 'attr_h', 'tag_m', 'traff_cls', 'tag_h', 'tlp_type', 'fmt'],
                      [32, 7, 1, 8, 16, 12, 1, 3, 16, 10, 2, 2, 4, 1, 1, 3, 1, 5, 3]))
 
-class AvstCompleter:
+class AvstCompleter(AvstBase):
     def __init__(self, cq_driver, cc_driver, cc_monitor):
+        super().__init__(cq_driver)
+
         self._cq = cq_driver
         self._cc = cc_driver
         self._ccm = cc_monitor
@@ -79,23 +82,7 @@ class AvstCompleter:
             header.tag_l, header.tag_m, header.tag_h = deconcat([tag, 8, 1, 1])
         header.req_t = req_type << 6
         header.length = dwords
-
-        header = header.serialize()
-        sop = 1
-        eop = 0
-        empty = 0
-        while len(data) > self._avst_width:
-            data_word = concat(list(zip(data[:self._avst_width], [8]*self._avst_width)))
-            await self._cq.write_cq({"DATA": data_word, "HDR": header, "SOP": sop, "EOP": eop, "EMPTY": empty, "PREFIX": 0, "BAR_RANGE": 0}, sync=sync)
-
-            header = header_empty
-            sop = 0
-            data = data[self._avst_width:]
-
-        data_word = concat(list(zip(data[:len(data)], [8]*len(data))))
-        eop = 1
-        empty = (self._avst_width - len(data)) // 4 if len(data) > 0 else 0
-        await self._cq.write_cq({"DATA": data_word, "HDR": header, "SOP": sop, "EOP": eop, "EMPTY": empty, "PREFIX": 0, "BAR_RANGE": 0}, sync=sync)
+        await self._send_frame(self._cq.write_cq, data, header, header_empty, sync)
 
 
     def _handle_cc_transaction(self, transaction):
