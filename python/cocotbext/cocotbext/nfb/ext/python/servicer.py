@@ -1,6 +1,5 @@
 import logging
 import cocotb
-import types
 
 import nfb.ext.python as ext
 
@@ -21,7 +20,7 @@ class Servicer(ext.AbstractNfb):
     class NdpQueueRx(NdpQueue, ext.AbstractNdpQueueRx):
         def burst_get(self, count):
             msg = self._q.recvmsg()
-            if msg == None:
+            if msg is None:
                 return []
 
             self._burst_temp.append(msg)
@@ -60,13 +59,12 @@ class Servicer(ext.AbstractNfb):
     def read(self, bus_node, node, offset, nbyte):
         mi, base = self.get_node_base(bus_node, node)
         data = yield mi.read(offset, nbyte)
-        self._log.debug(f"comp read: size: {nbyte:>2}, offset: {offset:04x}, path: {node.path}/{node.name}, data:", data)
-        return bytes(data)
+        self._log.debug(f"MI read : size: {nbyte:>2}, offset: {offset:04x}, path: {node.path}/{node.name}, data: {data.hex()}")
+        return data
 
     @cocotb.function
     def write(self, bus_node, node, offset, data):
         mi, base = self.get_node_base(bus_node, node)
         nbyte = len(data)
-        data = list(data)
-        self._log.debug(f"comp write: size: {nbyte:>2}, offset: {offset:04x}, path: {node.path}/{node.name}, data:", data)
+        self._log.debug(f"MI write: size: {nbyte:>2}, offset: {offset:04x}, path: {node.path}/{node.name}, data: {data.hex()}")
         yield mi.write(offset, data)

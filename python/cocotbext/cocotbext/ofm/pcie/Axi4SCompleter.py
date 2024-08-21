@@ -124,16 +124,17 @@ class Axi4SCompleter:
             user.sop = 0
             data = data[cnt:]
 
-    async def read(self, addr, byte_count):
+    async def read(self, addr: int, byte_count: int) -> bytes:
         # TODO: split big reads to more transactions
         e = Event()
         await self._queue_send.put(((addr, byte_count, 0, []), e))
         await e.wait()
-        return e.data
+        return bytes(e.data)
 
-    async def write(self, addr, data):
+    async def write(self, addr: int, data: bytes):
         # TODO: split big writes to more transactions
         e = Event()
+        data = list(data)
         await self._queue_send.put(((addr, len(data), 1, data), e))
         data = await e.wait()
 
