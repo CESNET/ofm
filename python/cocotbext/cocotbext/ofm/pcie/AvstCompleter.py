@@ -64,13 +64,17 @@ class AvstCompleter:
 
         if req_type == 1:
             assert len(data) == byte_count
-            data = [0] * (addr % 4) + data + [0] * ((addr + byte_count) % 4)
+            data = [0] * (addr % 4) + data + [0] * (-(addr + byte_count) % 4)
 
+        dwords = (addr % 4 + byte_count + 3) // 4
         addr_l, addr_h = deconcat([addr, 32, 32])
+
         header.addr = concat([(addr_h,32),(addr_l,32)]) & ~3
         header.fbe = [0xF, 0xE, 0xC, 0x8][addr % 4]
-        dwords = (addr % 4 + byte_count + 3) // 4
-        header.lbe = [0xF, 0x1, 0x3, 0x7][(addr + byte_count) % 4] if dwords > 1 else 0
+        header.lbe = [0xF, 0x1, 0x3, 0x7][(addr + byte_count) % 4]
+        if dwords <= 1:
+            header.fbe &= header.lbe
+            header.lbe = 0
         if tag != None:
             header.tag_l, header.tag_m, header.tag_h = deconcat([tag, 8, 1, 1])
         header.req_t = req_type << 6
@@ -82,7 +86,7 @@ class AvstCompleter:
         empty = 0
         while len(data) > self._avst_width:
             data_word = concat(list(zip(data[:self._avst_width], [8]*self._avst_width)))
-            await self._cq.write({"DATA": data_word, "HDR": header, "SOP": sop, "EOP": eop, "EMPTY": empty, "PREFIX": 0, "BAR_RANGE": 0}, sync=sync)
+            await self._cq.write_cq({"DATA": data_word, "HDR": header, "SOP": sop, "EOP": eop, "EMPTY": empty, "PREFIX": 0, "BAR_RANGE": 0}, sync=sync)
 
             header = header_empty
             sop = 0
@@ -90,7 +94,7 @@ class AvstCompleter:
 
         data_word = concat(list(zip(data[:len(data)], [8]*len(data))))
         eop = 1
-        empty = self._avst_width - len(data) // 4 if len(data) > 0 else 0
+        empty = (self._avst_width - len(data)) // 4 if len(data) > 0 else 0
         await self._cq.write_cq({"DATA": data_word, "HDR": header, "SOP": sop, "EOP": eop, "EMPTY": empty, "PREFIX": 0, "BAR_RANGE": 0}, sync=sync)
 
 
@@ -106,7 +110,8 @@ class AvstCompleter:
 
             trigger, item, req_data = self._read_requests[tag]
             addr, byte_count, req_type, orig_data = item
-            req_data = data[:byte_count]
+            offset = addr % 4
+            req_data = data[offset:byte_count+offset]
             # firstBe = [0xF, 0xE, 0xC, 0x8][addr % 4]
             # lastBe = [0xF, 0x1, 0x3, 0x7][(addr + byte_count) % 4]
             # fixme: BE & length & completed = 0

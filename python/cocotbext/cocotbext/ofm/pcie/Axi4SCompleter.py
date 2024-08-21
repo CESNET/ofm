@@ -74,10 +74,11 @@ class Axi4SCompleter:
 
         trigger, item, req_data = self._read_requests[hdr.tag]
         addr, byte_count, req_type, orig_data = item
+        offset = addr % 4 if len(req_data) == 0 else 0
         # firstBe = [0xF, 0xE, 0xC, 0x8][addr % 4]
         # lastBe = [0xF, 0x1, 0x3, 0x7][(addr + byte_count) % 4]
         # fixme: BE & length & completed = 0
-        req_data.extend(data[:byte_count])
+        req_data.extend(data[offset:byte_count+offset])
         completed = True
 
         if completed:
@@ -103,7 +104,7 @@ class Axi4SCompleter:
 
         if req_type == 1:
             assert len(data) == byte_count
-            data = [0] * (addr % 4) + data + [0] * ((addr + byte_count) % 4)
+            data = [0] * (addr % 4) + data + [0] * (-(addr + byte_count) % 4)
 
         if tag != None:
             header.tag = tag
