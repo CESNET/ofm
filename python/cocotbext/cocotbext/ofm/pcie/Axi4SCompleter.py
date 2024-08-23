@@ -65,6 +65,8 @@ class Axi4SCompleter:
 
     def _handle_cc_transaction(self, tr):
         data = list(reversed(tr["TDATA"]))
+        # FIXME: Monitor sends values as bytes
+        tlast = bool(tr['TLAST'][0])
         if self._cc_inframe == None:
             h = len(CompletionHeader()) // 8
             hdrbytes, data = data[:h], data[h:]
@@ -74,19 +76,21 @@ class Axi4SCompleter:
 
         trigger, item, req_data = self._read_requests[hdr.tag]
         addr, byte_count, req_type, orig_data = item
-        offset = addr % 4 if len(req_data) == 0 else 0
-        # firstBe = [0xF, 0xE, 0xC, 0x8][addr % 4]
-        # lastBe = [0xF, 0x1, 0x3, 0x7][(addr + byte_count) % 4]
-        # fixme: BE & length & completed = 0
-        req_data.extend(data[offset:byte_count+offset])
-        completed = True
 
-        if completed:
-            del self._read_requests[hdr.tag]
-            trigger.set(req_data)
-            self._tag_queue.put_nowait(hdr.tag)
+        # Splitted completion for request
+        is_first = len(req_data) == 0
+        is_last = len(req_data) + len(data) >= byte_count
 
-        self._cc_inframe = None
+        off_s = addr % 4 if is_first else 0
+        off_e = byte_count - len(req_data) if is_last and tlast else len(data)
+        req_data.extend(data[off_s:off_s+off_e])
+
+        if tlast:
+            self._cc_inframe = None
+            if is_last:
+                del self._read_requests[hdr.tag]
+                trigger.set(req_data)
+                self._tag_queue.put_nowait(hdr.tag)
 
     async def _cq_req(self, addr, byte_count, req_type=0, data=[], tag=None, sync=True):
         header_empty = RequestHeaderEmpty()

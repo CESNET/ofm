@@ -59,6 +59,8 @@ class Servicer(ext.AbstractNfb):
     def read(self, bus_node, node, offset, nbyte):
         mi, base = self.get_node_base(bus_node, node)
         data = yield mi.read(offset, nbyte)
+        if data is None:
+            data = bytes()
         self._log.debug(f"MI read : size: {nbyte:>2}, offset: {offset:04x}, path: {node.path}/{node.name}, data: {data.hex()}")
         return data
 
