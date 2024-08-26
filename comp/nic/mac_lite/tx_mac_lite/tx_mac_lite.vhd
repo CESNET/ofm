@@ -185,6 +185,8 @@ architecture FULL of TX_MAC_LITE is
     constant MD_ITEM_WIDTH       : natural := tsel(RESIZE_ON_TX,RX_ITEM_WIDTH,TX_ITEM_WIDTH);
 
     constant MD_DATA_W           : natural := MD_REGIONS*MD_REGION_SIZE*MD_BLOCK_SIZE*MD_ITEM_WIDTH;
+
+    constant NUM_OF_PKTS         : natural := tsel(DEVICE="ULTRASCALE" and TX_REGIONS = 1 and TX_REGION_SIZE = 1,1,4);
     constant LEN_WIDTH           : natural := log2(PKT_MTU_BYTES+1);
     constant DFIFO_ITEMS         : natural := 2**log2(div_roundup((PKT_MTU_BYTES+1),(MD_DATA_W/8)));
     constant FRAME_LEN_MIN       : natural := tsel(RX_INCLUDE_CRC,64,60);
@@ -576,6 +578,7 @@ begin
             MFB_BLOCK_SIZE        => MD_BLOCK_SIZE,
             MFB_ITEM_WIDTH        => MD_ITEM_WIDTH,
             PKT_MTU               => PKT_MTU_BYTES,
+            NUM_OF_PKTS           => NUM_OF_PKTS,
             TRANS_FIFO_SIZE       => TRANS_FIFO_SIZE,
             F_GAP_ADJUST_EN       => true,
             F_GAP_ADJUST_SIZE_AVG => 24,
