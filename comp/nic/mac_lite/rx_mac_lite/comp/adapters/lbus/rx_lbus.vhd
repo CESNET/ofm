@@ -52,6 +52,7 @@ architecture FULL of RX_MAC_LITE_ADAPTER_LBUS is
     signal in_lbus_data_ser : std_logic_vector(SEGMENTS*128-1 downto 0);
     signal in_lbus_sop_vld  : std_logic_vector(SEGMENTS-1 downto 0);
     signal in_lbus_eop_vld  : std_logic_vector(SEGMENTS-1 downto 0);
+    signal in_lbus_err_vld  : std_logic_vector(SEGMENTS-1 downto 0);
     signal in_lbus_sop_pos  : std_logic_vector(log2(SEGMENTS)-1 downto 0);
     signal in_lbus_eop_pos  : slv_array_t(SEGMENTS-1 downto 0)(4-1 downto 0);
     signal mfb_sof_pos_comp : std_logic_vector(REGIONS*max(1,log2(REGION_SIZE))-1 downto 0);
@@ -69,12 +70,13 @@ begin
 
     in_lbus_sop_vld <= IN_LBUS_SOP and IN_LBUS_ENA;
     in_lbus_eop_vld <= IN_LBUS_EOP and IN_LBUS_ENA;
+    in_lbus_err_vld <= IN_LBUS_ERR and in_lbus_eop_vld;
 
     process (all)
     begin
         in_lbus_sop_pos <= (others => '0');
         for i in 0 to SEGMENTS-1 loop
-            if (IN_LBUS_SOP(i) = '1') then
+            if (in_lbus_sop_vld(i) = '1') then
                 in_lbus_sop_pos <= std_logic_vector(to_unsigned(i,in_lbus_sop_pos'length));
             end if;
         end loop;
@@ -90,7 +92,7 @@ begin
     begin
         mfb_eof_pos_comp <= (others => '0');
         for i in 0 to SEGMENTS-1 loop
-            if (IN_LBUS_EOP(i) = '1') then
+            if (in_lbus_eop_vld(i) = '1') then
                 mfb_eof_pos_comp <= std_logic_vector(to_unsigned(i,log2(SEGMENTS))) & in_lbus_eop_pos(i);
             end if;
         end loop;
@@ -104,7 +106,7 @@ begin
             OUT_MFB_SOF_POS  <= mfb_sof_pos_comp;
             OUT_MFB_EOF(0)   <= or in_lbus_eop_vld;
             OUT_MFB_EOF_POS  <= mfb_eof_pos_comp;
-            OUT_MFB_ERROR(0) <= or IN_LBUS_ERR;
+            OUT_MFB_ERROR(0) <= or in_lbus_err_vld;
             OUT_MFB_SRC_RDY  <= or IN_LBUS_ENA;
             if (RESET = '1') then
                 OUT_MFB_SRC_RDY <= '0';
