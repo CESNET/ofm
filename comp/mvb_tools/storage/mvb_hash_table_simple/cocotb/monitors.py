@@ -3,7 +3,7 @@ from cocotbext.ofm.mvb.monitors import MVBMonitor
 class MVB_HASH_TABLE_SIMPLE_Monitor(MVBMonitor):
     _signals = ["data", "match", "vld", "src_rdy", "dst_rdy"]
 
-    def recieve_data(self, data, offset):
+    def receive_data(self, data, offset):
         match_val = self.bus.match.value
         match_val.big_endian = False
 
