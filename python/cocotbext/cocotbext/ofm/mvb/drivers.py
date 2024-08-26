@@ -108,7 +108,7 @@ class MVBDriver(BusDriver):
         """
 
         self.log.debug(f"ITEM {self._vld_item_cnt}:")
-        self.log.debug(f"recieved item: {data}")
+        self.log.debug(f"sending item: {data}")
 
         self._data[self._item_offset*self._item_width:(self._item_offset+1)*self._item_width] = data
 

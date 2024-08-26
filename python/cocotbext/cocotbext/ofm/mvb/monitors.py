@@ -32,18 +32,18 @@ class MVBMonitor(BusMonitor):
         self._item_width = self._word_width // self._items
 
     def _is_valid_word(self, signal_src_rdy, signal_dst_rdy) -> bool:
-        """Checks if the recieved word is valid transaction."""
+        """Checks if the received word is valid transaction."""
 
         if signal_dst_rdy is None:
             return (signal_src_rdy.value == 1)
         else:
             return (signal_src_rdy.value == 1) and (signal_dst_rdy.value == 1)
 
-    def recieve_data(self, data, offset):
+    def receive_data(self, data, offset):
         self._recv(data[offset*self._item_width:(offset+1)*self._item_width])
 
     async def _monitor_recv(self) -> None:
-        """Recieve function used with cocotb testbench."""
+        """Receive function used with cocotb testbench."""
 
         # Avoid spurious object creation by recycling
         clk_re = RisingEdge(self.clock)
@@ -64,10 +64,10 @@ class MVBMonitor(BusMonitor):
                 for offset in range(self._items):
                     if (vld[self._items-offset-1]):
                         self.log.debug(f"ITEM {self.item_cnt}")
-                        self.log.debug(f"recieved item: {data_bytes[offset*self._item_width:(offset+1)*self._item_width]}")
+                        self.log.debug(f"received item: {data_bytes[offset*self._item_width:(offset+1)*self._item_width]}")
                         self.log.debug(f"word: {data_bytes}")
                         self.log.debug(f"item vld: {vld[self._items-offset-1]}")
                         self.log.debug(f"word vld: {vld}")
-                        self.recieve_data(data_bytes, offset)
+                        self.receive_data(data_bytes, offset)
 
                         self.item_cnt += 1
