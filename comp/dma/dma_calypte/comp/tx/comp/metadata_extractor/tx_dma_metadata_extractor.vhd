@@ -77,7 +77,8 @@ end entity;
 
 architecture FULL of TX_DMA_METADATA_EXTRACTOR is
 
-    constant MFB_LENGTH        : natural := PCIE_MFB_REGIONS*PCIE_MFB_REGION_SIZE*PCIE_MFB_BLOCK_SIZE*PCIE_MFB_ITEM_WIDTH;
+    constant MFB_LENGTH         : natural := PCIE_MFB_REGIONS*PCIE_MFB_REGION_SIZE*PCIE_MFB_BLOCK_SIZE*PCIE_MFB_ITEM_WIDTH;
+    constant BAR_APERTURE_INTEL : natural := 24;
 
     -- =============================================================================================
     -- Defining ranges for meta signal
@@ -109,6 +110,9 @@ architecture FULL of TX_DMA_METADATA_EXTRACTOR is
     -- =============================================================================================
     -- Internal Signals
     -- =============================================================================================
+    -- the extracted pcie header
+    signal pcie_hdr_data_int     : std_logic_vector(PCIE_META_REQ_HDR_W -1 downto 0);
+
     -- extracted fields from the PCIe header
     signal pcie_hdr_addr         : std_logic_vector(63 downto 0);
     signal pcie_hdr_bar_id       : std_logic_vector(2 downto 0);
@@ -176,8 +180,13 @@ begin
             OUT_FIRST_IB   => open,
             OUT_LAST_IB    => open,
             OUT_BYTE_COUNT => pcie_tr_byte_cnt);
-
     -- =============================================================================================
+
+    device_sel_pcie_hdr_g: if (DEVICE = "ULTRASCALE") generate
+        pcie_hdr_data_int <= PCIE_MFB_DATA(PCIE_CQ_META_HEADER);
+    else generate
+        pcie_hdr_data_int <= PCIE_MFB_META(PCIE_CQ_META_HEADER);
+    end generate;
 
     pcie_hdr_deparser_i : entity work.PCIE_CQ_HDR_DEPARSER
         generic map (
@@ -198,11 +207,11 @@ begin
             OUT_ADDR_LEN     => open,
             OUT_REQ_TYPE     => open,
 
-            IN_HEADER     => PCIE_MFB_DATA(PCIE_CQ_META_HEADER),
+            IN_HEADER     => pcie_hdr_data_int
             IN_FBE        => PCIE_MFB_META(PCIE_CQ_META_FBE),
             IN_LBE        => PCIE_MFB_META(PCIE_CQ_META_LBE),
-            -- TODO: connect this for Intel FPGA
-            IN_INTEL_META => (others => '0'));
+
+            IN_INTEL_META => std_logic_vector(to_unsigned(BAR_APERTURE_INTEL, 6)) & PCIE_MFB_META(PCIE_CQ_META_BAR) & (8 - 1 downto 0 => '0'));
 
     -- =============================================================================================
     -- creates mask for pcie addr based on the BAR APERTURE value in the PCIE header
@@ -248,38 +257,52 @@ begin
 
     pcie_mfb_meta_int <= lbe_decoded & fbe_decoded & pcie_tr_byte_cnt & (MFB_LENGTH/8 -1 downto 0 => '0') & chan_num_int & pcie_addr_masked(63 downto 2) & is_dma_hdr;
 
-    pcie_hdr_cutter_i : entity work.MFB_CUTTER_SIMPLE
-        generic map (
-            REGIONS        => PCIE_MFB_REGIONS,
-            REGION_SIZE    => PCIE_MFB_REGION_SIZE,
-            BLOCK_SIZE     => PCIE_MFB_BLOCK_SIZE,
-            ITEM_WIDTH     => PCIE_MFB_ITEM_WIDTH,
-            META_WIDTH     => META_LBE_O + META_LBE_W,
-            META_ALIGNMENT => 0,
-            -- 4 because the PCIe header is 4 DW long
-            CUTTED_ITEMS   => 4)
-        port map (
-            CLK   => CLK,
-            RESET => RESET,
+    -- Cutter is used only for Xilinx devices
+    pcie_hdr_cutter_g: if (DEVICE="ULTRASCALE" or DEVICE="7SERIES") generate
+        pcie_hdr_cutter_i : entity work.MFB_CUTTER_SIMPLE
+            generic map (
+                REGIONS        => PCIE_MFB_REGIONS,
+                REGION_SIZE    => PCIE_MFB_REGION_SIZE,
+                BLOCK_SIZE     => PCIE_MFB_BLOCK_SIZE,
+                ITEM_WIDTH     => PCIE_MFB_ITEM_WIDTH,
+                META_WIDTH     => META_LBE_O + META_LBE_W,
+                META_ALIGNMENT => 0,
+                -- 4 because the PCIe header is 4 DW long
+                CUTTED_ITEMS   => 4
+            )
+            port map (
+                CLK   => CLK,
+                RESET => RESET,
 
-            RX_DATA    => PCIE_MFB_DATA,
-            RX_META    => pcie_mfb_meta_int,
-            RX_SOF     => PCIE_MFB_SOF,
-            RX_EOF     => PCIE_MFB_EOF,
-            RX_SOF_POS => PCIE_MFB_SOF_POS,
-            RX_EOF_POS => PCIE_MFB_EOF_POS,
-            RX_SRC_RDY => PCIE_MFB_SRC_RDY,
-            RX_DST_RDY => PCIE_MFB_DST_RDY,
-            RX_CUT     => PCIE_MFB_SOF,
+                RX_DATA    => PCIE_MFB_DATA,
+                RX_META    => pcie_mfb_meta_int,
+                RX_SOF     => PCIE_MFB_SOF,
+                RX_EOF     => PCIE_MFB_EOF,
+                RX_SOF_POS => PCIE_MFB_SOF_POS,
+                RX_EOF_POS => PCIE_MFB_EOF_POS,
+                RX_SRC_RDY => PCIE_MFB_SRC_RDY,
+                RX_DST_RDY => PCIE_MFB_DST_RDY,
+                RX_CUT     => PCIE_MFB_SOF,
 
-            TX_DATA    => cutt_mfb_data,
-            TX_META    => cutt_mfb_meta,
-            TX_SOF     => cutt_mfb_sof,
-            TX_EOF     => cutt_mfb_eof,
-            TX_SOF_POS => cutt_mfb_sof_pos,
-            TX_EOF_POS => cutt_mfb_eof_pos,
-            TX_SRC_RDY => cutt_mfb_src_rdy,
-            TX_DST_RDY => cutt_mfb_dst_rdy);
+                TX_DATA    => cutt_mfb_data,
+                TX_META    => cutt_mfb_meta,
+                TX_SOF     => cutt_mfb_sof,
+                TX_EOF     => cutt_mfb_eof,
+                TX_SOF_POS => cutt_mfb_sof_pos,
+                TX_EOF_POS => cutt_mfb_eof_pos,
+                TX_SRC_RDY => cutt_mfb_src_rdy,
+                TX_DST_RDY => cutt_mfb_dst_rdy);
+    else generate
+        -- Just connecting the signals
+        cutt_mfb_data       <= PCIE_MFB_DATA;
+        cutt_mfb_meta       <= pcie_mfb_meta_int;
+        cutt_mfb_sof        <= PCIE_MFB_SOF;
+        cutt_mfb_eof        <= PCIE_MFB_EOF;
+        cutt_mfb_sof_pos    <= PCIE_MFB_SOF_POS;
+        cutt_mfb_eof_pos    <= PCIE_MFB_EOF_POS;
+        cutt_mfb_src_rdy    <= PCIE_MFB_SRC_RDY;
+        PCIE_MFB_DST_RDY    <= cutt_mfb_dst_rdy;
+    end generate;
 
     mfb_auxiliary_signals_i : entity work.MFB_AUXILIARY_SIGNALS
         generic map (
