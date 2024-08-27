@@ -1,6 +1,7 @@
 import sys
 import re
 
+
 def modelsim_handle(items):
     # First stage: fetch information about signals.
     # This is done by catching output of the 'describe' commands into a temporary file
@@ -25,59 +26,69 @@ def modelsim_handle(items):
                 item.parse_description(desc)
                 item.add_wave()
 
+
 # Not so pretty and sophisticated function for adding signals to the wave window
-def add_wave(path, name = None):
+def add_wave(path, name=None):
     cmd = 'add wave'
     if isinstance(path, list):
         cmd += ' -group { ' + (name if name else '') + ' }'
         cmd += ' ' + " ".join(path) + ''
     else:
-        if name == None:
+        if name is None:
             cmd += ' {' + path + '}'
         else:
             cmd += ' {' + (name if name else '') + ' {' + path + '}}'
     print(cmd)
 
 # Escape square brackets
+
+
 def escape_sb(string):
-        return string.replace("[", "\[").replace("]", "\]")
+    return string.replace("[", "\\[").replace("]", "\\]")
+
 
 class Bus:
     items = []
-    def __init__(self, path, suffix = ''):
+
+    def __init__(self, path, suffix=''):
         self.path = path
         self.suffix = suffix
+
     def add_wave(self, file):
         pass
+
     def parse_description(self, file):
         pass
+
     def query_description(self):
         pass
+
     def query_nested_width(self, file):
         self.nested_width = []
-        l = file.readline()
+        ln = file.readline()
         # INFO: Automatically parsed nested arrays is currently not fully supported
-        m = re.search(r'Array\(.*\) \[length (.*)\] of', l)
+        m = re.search(r'Array\(.*\) \[length (.*)\] of', ln)
         while m:
             self.nested_width.append(int(m[1]))
-            l = file.readline()
-            m = re.search(r'Array\(.*\) \[length (.*)\] of', l)
+            ln = file.readline()
+            m = re.search(r'Array\(.*\) \[length (.*)\] of', ln)
 
         # Consume empty line
-        l = file.readline()
-        assert l.strip() == ""
+        ln = file.readline()
+        assert ln.strip() == ""
+
 
 class MVB(Bus):
     def query_description(self):
         print(f'puts $fileId [describe "{self.path}MVB_DATA{escape_sb(self.suffix)}"]')
 
-    def add_wave(self, prefix = None):
+    def add_wave(self, prefix=None):
         offset = 0
         for j in range(self.mvb_items):
             for i, item in enumerate(self.items):
                 name, width = item
-                if name != None:
-                    add_wave(f'{self.path}MVB_DATA{self.suffix}[{offset+width-1}:{offset}]', (prefix if prefix != None else self.path.split('/')[-1]) + name + str(j))
+                if name is not None:
+                    add_wave(f'{self.path}MVB_DATA{self.suffix}[{offset + width - 1}:{offset}]', (prefix if prefix is not None else self.path.split('/')[-1]) + name + str(j))
                 offset += width
 
         add_wave(f'{self.path}MVB_VLD{self.suffix}')
@@ -99,13 +110,13 @@ class MVB_HDR(Bus):
     def query_description(self):
         print(f'puts $fileId [describe "{self.path}MVB_HDR_DATA{escape_sb(self.suffix)}"]')
 
-    def add_wave(self, prefix = None):
+    def add_wave(self, prefix=None):
         offset = 0
         for j in range(self.mvb_items):
             for i, item in enumerate(self.items):
                 name, width = item
-                if name != None:
-                    add_wave(f'{self.path}MVB_HDR_DATA{self.suffix}[{offset+width-1}:{offset}]', (prefix if prefix != None else self.path.split('/')[-1]) + name + str(j))
+                if name is not None:
+                    add_wave(f'{self.path}MVB_HDR_DATA{self.suffix}[{offset + width - 1}:{offset}]', (prefix if prefix is not None else self.path.split('/')[-1]) + name + str(j))
                 offset += width
 
         add_wave(f'{self.path}MVB_VLD{self.suffix}')
@@ -144,28 +155,40 @@ class MFB(Bus):
             self.parts = 1
         width = self.total_width // self.parts
         for offset in range(self.parts):
-            add_wave(f'{self.path}MFB_DATA{self.suffix}[{offset*width+width-1}:{offset*width}]')
+            add_wave(f'{self.path}MFB_DATA{self.suffix}[{offset * width + width - 1}:{offset * width}]')
         add_wave(f'{self.path}MFB_SOF{self.suffix}')
         add_wave(f'{self.path}MFB_EOF{self.suffix}')
         add_wave(f'{self.path}MFB_SRC_RDY{self.suffix}')
         add_wave(f'{self.path}MFB_DST_RDY{self.suffix}')
 
+
 # Define user MVB data subitems
 class DMAUpHdr(MVB):
-    items = list(zip(['length', 'type', 'firstib', 'lastib', 'tag', 'unitid', 'addr', 'vfid', 'relaxed'],
-        [11, 1, 2, 2, 8, 8, 64, 8, 1]))
+    items = list(zip(
+        ['length', 'type', 'firstib', 'lastib', 'tag', 'unitid', 'addr', 'vfid', 'relaxed'],
+        [11, 1, 2, 2, 8, 8, 64, 8, 1],
+    ))
+
 
 class DMADownHdr(MVB):
-    items = list(zip(['length', 'completed', None, 'tag', 'unit'],
-        [11, 1, 4, 8, 8]))
+    items = list(zip(
+        ['length', 'completed', None, 'tag', 'unit'],
+        [11, 1, 4, 8, 8]
+    ))
+
 
 class RQHdr(MVB_HDR):
-    items = list(zip(['length', 'at', 'snoop', 'relaxed', 'ep', 'td', 'padd_0', 'tag_8', 'tc', 'tag_9', 'type_n', 'fmt', 'firstbe', 'lastbe', 'tag', 'req_id', 'global_id'],
-                    [  10,       2,    1,       1,         1,    1,    3,        1,       3,    1,       5,        3,     4,         4,        8,     16,       64]))
+    items = list(zip(
+        ['length', 'at', 'snoop', 'relaxed', 'ep', 'td', 'padd_0', 'tag_8', 'tc', 'tag_9', 'type_n', 'fmt', 'firstbe', 'lastbe', 'tag', 'req_id', 'global_id'],
+        [10, 2, 1, 1, 1, 1, 3, 1, 3, 1, 5, 3, 4, 4, 8, 16, 64]
+    ))
+
 
 class RCHdr(MVB_HDR):
-    items = list(zip(['length', 'at', 'snoop', 'relaxed', 'ep', 'td', 'padd_0', 'tag_8', 'tc', 'tag_9', 'const', 'byte_cnt', 'bcm', 'complete_st', 'completer_id', 'low_addr', 'const_2', 'tag', 'req_id'],
-                      [ 10,      2,    1,       1,         1,    1,    3,        1,       3,    1,       8,       12,         1,     3,             16,             7,          1,         8,     16]))
+    items = list(zip(
+        ['length', 'at', 'snoop', 'relaxed', 'ep', 'td', 'padd_0', 'tag_8', 'tc', 'tag_9', 'const', 'byte_cnt', 'bcm', 'complete_st', 'completer_id', 'low_addr', 'const_2', 'tag', 'req_id'],
+        [10, 2, 1, 1, 1, 1, 3, 1, 3, 1, 8, 12, 1, 3, 16, 7, 1, 8, 16],
+    ))
 
 
 # Create list of requested signals / buses
