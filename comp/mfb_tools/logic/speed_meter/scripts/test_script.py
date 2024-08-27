@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import sys
-import time
 import os
 import nfb
 import csv
@@ -10,8 +9,8 @@ import csv
 args = []
 args = sys.argv[1:]
 
-dev=nfb.NFBDevice()
-comp=dev.getComp("netcope,bus,mi", 0)
+dev = nfb.NFBDevice()
+comp = dev.getComp("netcope,bus,mi", 0)
 
 # Speed meter clock frequency
 sm_clk_freq = 200000000 # 200 MHz
@@ -75,9 +74,9 @@ for i in range(len(fr_lengths)):
     print("Length: " + str(length))
 
     # Set frame length of TX generator(s)
-    comp.write32(0x00005184, length-4)
+    comp.write32(0x00005184, length - 4)
     print("Actual generator length: " + str(comp.read32(0x00005184))) # a quick check of written length
-    comp.write32(0x00005284, length-4)
+    comp.write32(0x00005284, length - 4)
 
     # Start TX generator(s)
     comp.write32(0x00005180, 0x1)
@@ -102,18 +101,18 @@ for i in range(len(fr_lengths)):
 
     # -------------------------------------------
     # Speed meter 0
-    drd = comp.read32(0x00005128)*8/(10**9) # read accumulated bytes and convert to Gigabits
+    drd = comp.read32(0x00005128) * 8 / (10**9) # read accumulated bytes and convert to Gigabits
     sm_ticks = comp.read32(0x00005120) # read number of ticks until the speed meter reached max values
-    sm_run_time = sm_ticks/sm_clk_freq
-    sm0_speed = round(drd/sm_run_time, 2)
+    sm_run_time = sm_ticks / sm_clk_freq
+    sm0_speed = round(drd / sm_run_time, 2)
     print("Speed meter 0 data: " + str(sm0_speed) + " [Gbps]")
 
     # -------------------------------------------
     # Speed meter 1
-    drd = comp.read32(0x00005228)*8/(10**9) # read accumulated bytes and convert to Gigabits
+    drd = comp.read32(0x00005228) * 8 / (10**9) # read accumulated bytes and convert to Gigabits
     sm_ticks = comp.read32(0x00005220) # read number of ticks until the speed meter reached max values
-    sm_run_time = sm_ticks/sm_clk_freq
-    sm1_speed = round(drd/sm_run_time, 2)
+    sm_run_time = sm_ticks / sm_clk_freq
+    sm1_speed = round(drd / sm_run_time, 2)
     print("Speed meter 1 data: " + str(sm1_speed) + " [Gbps]")
 
     # -------------------------------------------
@@ -125,4 +124,3 @@ f.close()
 
 #print MAC stats
 os.system('nfb-eth')
-
