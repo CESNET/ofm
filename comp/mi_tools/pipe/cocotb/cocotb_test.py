@@ -10,11 +10,12 @@ from cocotb.triggers import RisingEdge, ClockCycles
 from drivers import MIMasterDriverTB as MIMasterDriver
 from drivers import MISlaveDriverTB as MISlaveDriver
 from cocotbext.ofm.mi.monitors import MIMasterMonitor, MISlaveMonitor
-from cocotbext.ofm.ver.generators import *
+from cocotbext.ofm.ver.generators import random_packets
 from cocotb_bus.drivers import BitDriver
 from cocotb_bus.scoreboard import Scoreboard
 
 import itertools
+
 
 class testbench():
     def __init__(self, dut, debug=False):
@@ -38,7 +39,7 @@ class testbench():
             self.master_stream_in.log.setLevel(cocotb.logging.DEBUG)
             self.master_stream_out.log.setLevel(cocotb.logging.DEBUG)
 
-    def model(self, transaction:bytes, testcase:int):
+    def model(self, transaction: bytes, testcase: int):
         """Model the DUT based on the input transaction"""
         if testcase == 0:
             self.expected_output_slave.append(transaction)
@@ -53,8 +54,9 @@ class testbench():
         self.dut.RESET.value = 0
         await RisingEdge(self.dut.CLK)
 
+
 @cocotb.test()
-async def run_test(dut, pkt_count:int=1000, item_width_min:int = 1, item_width_max:int = 32):
+async def run_test(dut, pkt_count: int = 1000, item_width_min: int = 1, item_width_max: int = 32):
     # Start clock generator
     cocotb.start_soon(Clock(dut.CLK, 5, units='ns').start())
     tb = testbench(dut)
@@ -86,7 +88,7 @@ async def run_test(dut, pkt_count:int=1000, item_width_min:int = 1, item_width_m
 
                 byte_enable = 15 if testcase == 0 else byte_enable
 
-                tb.model((int.from_bytes(transaction[0:tb.master_stream_in.addr_width], 'little') + i*tb.master_stream_in.addr_width, int.from_bytes(transaction[i*tb.master_stream_in.data_width:(i+1)*tb.master_stream_in.data_width], 'little'), byte_enable), testcase)
+                tb.model((int.from_bytes(transaction[0:tb.master_stream_in.addr_width], 'little') + i * tb.master_stream_in.addr_width, int.from_bytes(transaction[i * tb.master_stream_in.data_width:(i + 1) * tb.master_stream_in.data_width], 'little'), byte_enable), testcase)
 
             if testcase == 0:
                 """read test"""

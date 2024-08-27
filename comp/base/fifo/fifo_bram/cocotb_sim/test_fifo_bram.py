@@ -11,20 +11,22 @@ from queue import Queue
 from cocotb.triggers import FallingEdge
 from cocotb.triggers import RisingEdge
 
+
 #Clock generator
 @cocotb.coroutine
 def clock_gen(clk, period=10):
     while True:
         clk.value = 0
-        yield Timer(period/2, units='ns')
+        yield Timer(period / 2, units='ns')
         clk.value = 1
-        yield Timer(period/2, units='ns')
+        yield Timer(period / 2, units='ns')
+
 
 @cocotb.test()
 async def fifo_bram_randomised_test(dut):
     NUMBER_OF_TRANSACTIONS = 10
     PERIOD = 10
-    ITEMS = 1024
+    # ITEMS = 1024
     clkedgeF = FallingEdge(dut.CLK)
     clkedgeR = RisingEdge(dut.CLK)
 
@@ -34,7 +36,7 @@ async def fifo_bram_randomised_test(dut):
     data_in = 0
     #data_out = 0
     read = 0
-    data_stream = Queue(maxsize = 0)
+    data_stream = Queue(maxsize=0)
 
     cocotb.fork(clock_gen(dut.CLK, PERIOD))
 
@@ -74,7 +76,7 @@ async def fifo_bram_randomised_test(dut):
             print(dut.DO.value.integer)
             print(data_out)
             assert dut.DO.value == data_out, "Randomised test failed with: {A} and {B}".format(
-            A=dut.DO.value.integer, B=data_out)
+                A=dut.DO.value.integer, B=data_out)
             cnt_read += 1
             #ver_done = 1
 

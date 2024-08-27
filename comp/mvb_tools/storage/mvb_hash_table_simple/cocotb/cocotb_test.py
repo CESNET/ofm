@@ -20,7 +20,7 @@ from cocotb.triggers import RisingEdge, ClockCycles
 from cocotbext.ofm.mi.drivers import MIMasterDriver as MIDriver
 from drivers import MVB_HASH_TABLE_SIMPLE_Driver as MVBDriver
 from monitors import MVB_HASH_TABLE_SIMPLE_Monitor as MVBMonitor
-from cocotbext.ofm.ver.generators import *
+from cocotbext.ofm.ver.generators import random_packets
 from cocotb_bus.drivers import BitDriver
 from cocotb_bus.scoreboard import Scoreboard
 
@@ -52,6 +52,7 @@ _HASH_WIDTH     = 0x0C
 _HASH_KEY_WIDTH = 0x10
 _TABLE_CAPACITY = 0x14
 
+
 class testbench():
     def __init__(self, dut, debug=False) -> None:
         self.dut = dut
@@ -73,7 +74,7 @@ class testbench():
             self.stream_out.log.setLevel(cocotb.logging.DEBUG)
             self.mi_interface.log.setLevel(cocotb.logging.DEBUG)
 
-    def load_file(self, path:str, params:dict) -> (dict, list, list, dict):
+    def load_file(self, path: str, params: dict) -> (dict, list, list, dict):
         """function for loading data from configuration files.
 
             Args:
@@ -116,7 +117,7 @@ class testbench():
                 out_keys.append(mvb_key)
                 out_data[mvb_key] = data
 
-                table.append([h, (mvb_key << (self.stream_out._item_width*8+1)) + ((data << 1) + 1)])
+                table.append([h, (mvb_key << (self.stream_out._item_width * 8 + 1)) + ((data << 1) + 1)])
 
             out_config.append(table)
 
@@ -135,8 +136,9 @@ class testbench():
         self.dut.RST.value = 0
         await RisingEdge(self.dut.CLK)
 
+
 @cocotb.test()
-async def run_test(dut, config_file:str="test_configs/test_config_1B.yaml", config_method:str="script", pkt_count:int=10000):
+async def run_test(dut, config_file: str = "test_configs/test_config_1B.yaml", config_method: str = "script", pkt_count: int = 10000):
     #Function that runs the cocotb test
 
     #Args:
@@ -173,29 +175,29 @@ async def run_test(dut, config_file:str="test_configs/test_config_1B.yaml", conf
     cocotb.log.debug(f"TABLE_CAPACITY: {table_capacity}")
 
     """Asserting that the read configuration match configuration of the drivers connected to the component."""
-    assert(mvb_items == tb.stream_in._items)
-    assert(mvb_key_width_bytes == tb.stream_in._item_width)
-    assert(data_out_width_bytes == tb.stream_out._item_width)
-    assert(hash_width == log2(table_capacity))
+    assert mvb_items == tb.stream_in._items
+    assert mvb_key_width_bytes == tb.stream_in._item_width
+    assert data_out_width_bytes == tb.stream_out._item_width
+    assert hash_width == log2(table_capacity)
 
     """Loading configuration from a config file"""
     comp_conf, config, model_keys, model_data = tb.load_file(config_file, hash_func_params)
 
     """Asserting that parametres of component match with parametres in config file"""
-    assert(mvb_key_width == comp_conf["mvb_key_width"])
-    assert(data_out_width == comp_conf["data_out_width"])
-    assert(hash_width == comp_conf["hash_width"])
-    assert(hash_key_width == comp_conf["hash_key_width"])
-    assert(table_capacity == comp_conf["table_capacity"])
+    assert mvb_key_width == comp_conf["mvb_key_width"]
+    assert data_out_width == comp_conf["data_out_width"]
+    assert hash_width == comp_conf["hash_width"]
+    assert hash_key_width == comp_conf["hash_key_width"]
+    assert table_capacity == comp_conf["table_capacity"]
 
     item_width = mvb_key_width_bytes
 
     """Component can be configured from directly from a config file or via script in sw.toolkit configured by the same file."""
     if config_method == "file":
-        hash_key_bytes = (comp_conf["hash_key"]).to_bytes(comp_conf["hash_key_width"] // 8, 'little')
+        hash_key_bytes = comp_conf["hash_key"].to_bytes(comp_conf["hash_key_width"] // 8, 'little')
 
         for i in range(ceildiv(4, len(hash_key_bytes))):
-            await tb.mi_interface.write32(_HASH_KEY_REG, hash_key_bytes[4*i : 4*(i+1)])
+            await tb.mi_interface.write32(_HASH_KEY_REG, hash_key_bytes[4*i:4*(i+1)])
 
         await tb.mi_interface.write32(_COMMAND_REG, _CLEAR_TABLES.to_bytes(1, 'little'))
 
@@ -204,22 +206,23 @@ async def run_test(dut, config_file:str="test_configs/test_config_1B.yaml", conf
 
             for j in range(len(config[i])):
                 address_bytes = config[i][j][0].to_bytes(mvb_key_width_bytes, 'little')
-                data_bytes = config[i][j][1].to_bytes(mvb_key_width_bytes+data_out_width_bytes+1, 'little')
+                data_bytes = config[i][j][1].to_bytes(mvb_key_width_bytes + data_out_width_bytes + 1, 'little')
 
                 await tb.mi_interface.write32(_ADDR_REG, address_bytes)
 
                 for k in range(ceildiv(4, len(data_bytes))):
-                    await tb.mi_interface.write32(_DATA_REG, data_bytes[4*k : 4*(k+1)])
+                    await tb.mi_interface.write32(_DATA_REG, data_bytes[4*k:4*(k+1)])
 
                 await tb.mi_interface.write32(_COMMIT_REG, b'\x00')
 
     elif config_method == "script":
-        dtb = get_dtb(comp_name = "MVB_HASH_TABLE_SIMPLE",
-                          comp_base = 0,
-                          comp_offset = 0x40,
-                          compatible_str = "cesnet,ndk,mvb_hash_table_simple",
-                          bus_name = "MI",
-                          version = 17)
+        dtb = get_dtb(
+            comp_name="MVB_HASH_TABLE_SIMPLE",
+            comp_base=0,
+            comp_offset=0x40,
+            compatible_str="cesnet,ndk,mvb_hash_table_simple",
+            bus_name="MI",
+            version=17)
 
         servicer = Servicer(device=tb.mi_interface, dtb=dtb)
         dev = await cocotb.external(nfb.open)(servicer.path())

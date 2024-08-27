@@ -4,15 +4,11 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-import itertools
-import random
-
 import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import RisingEdge, ClockCycles
 from cocotbext.ofm.mi.drivers import MIMasterDriver as MIDriver
-from cocotbext.ofm.ver.generators import *
-from cocotb_bus.drivers import BitDriver
+from cocotbext.ofm.ver.generators import random_packets
 from cocotb_bus.scoreboard import Scoreboard
 
 
@@ -40,6 +36,7 @@ class testbench():
         self.dut.RESET.value = 0
         await RisingEdge(self.dut.CLK)
 
+
 @cocotb.test()
 async def run_test(dut, pkt_count=1000, item_width_min=1, item_width_max=32):
     # Start clock generator
@@ -57,7 +54,7 @@ async def run_test(dut, pkt_count=1000, item_width_min=1, item_width_max=32):
 
         assert output == transaction
 
-    cocotb.log.info(f"DONE")
+    cocotb.log.info("DONE")
 
     cocotb.log.info("\nREAD AND WRITE TEST\n")
 
@@ -69,7 +66,7 @@ async def run_test(dut, pkt_count=1000, item_width_min=1, item_width_max=32):
 
         assert output == transaction
 
-    cocotb.log.info(f"DONE")
+    cocotb.log.info("DONE")
 
     cocotb.log.info("\nREAD64 AND WRITE64 TEST\n")
 
@@ -81,6 +78,6 @@ async def run_test(dut, pkt_count=1000, item_width_min=1, item_width_max=32):
 
         assert output == transaction
 
-    cocotb.log.info(f"DONE")
+    cocotb.log.info("DONE")
 
     raise tb.scoreboard.result

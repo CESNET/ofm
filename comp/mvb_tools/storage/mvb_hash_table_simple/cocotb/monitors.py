@@ -1,5 +1,6 @@
 from cocotbext.ofm.mvb.monitors import MVBMonitor
 
+
 class MVB_HASH_TABLE_SIMPLE_Monitor(MVBMonitor):
     _signals = ["data", "match", "vld", "src_rdy", "dst_rdy"]
 
@@ -10,9 +11,6 @@ class MVB_HASH_TABLE_SIMPLE_Monitor(MVBMonitor):
         self.log.debug(f"MATCH: {match_val}")
 
         if match_val[offset] == 1:
-            self._recv((data[offset*self._item_width : (offset+1)*self._item_width], 1)) #k match signalu pridat offset
+            self._recv((data[offset*self._item_width:(offset+1)*self._item_width], 1)) # k match signalu pridat offset
         else:
-            self._recv((self._item_width*b'\x00', 0))
-
-
-
+            self._recv((self._item_width * b'\x00', 0))

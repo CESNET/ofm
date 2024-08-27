@@ -18,6 +18,7 @@ async def read_mi(dut, addr):
 
     return data
 
+
 async def send_mfb(dut, byte_cnt):
     bytes_in_word = 2**len(dut.RX_EOF_POS)
 
@@ -35,6 +36,7 @@ async def send_mfb(dut, byte_cnt):
 
     dut.RX_SRC_RDY.value = 0
 
+
 async def init(dut):
     # Start clock generator
     cocotb.start_soon(Clock(dut.CLK, 10, 'ns').start())
@@ -47,13 +49,14 @@ async def init(dut):
 
     dut.RX_DST_RDY.value = 1
 
+
 @cocotb.test()
 async def test_bytes_conut(dut):
     """Send transaction and check byte counter with MI READ"""
     await init(dut)
 
     for i in range(1650):
-        await send_mfb(dut, i+1)
+        await send_mfb(dut, i + 1)
     # MI latency of DUT is 3 CLK cycles
     await Timer(30, 'ns')
 
@@ -61,6 +64,7 @@ async def test_bytes_conut(dut):
     assert await read_mi(dut, 0) == 5
     # Check that transaction have 193 bytes
     assert await read_mi(dut, 8) == 16543
+
 
 @cocotb.test()
 async def test_reset(dut):

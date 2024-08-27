@@ -11,9 +11,10 @@ from cocotb.clock import Clock
 from cocotb.triggers import RisingEdge, ClockCycles
 from cocotbext.ofm.mvb.drivers import MVBDriver
 from cocotbext.ofm.mvb.monitors import MVBMonitor
-from cocotbext.ofm.ver.generators import *
+from cocotbext.ofm.ver.generators import random_packets
 from cocotb_bus.drivers import BitDriver
 from cocotb_bus.scoreboard import Scoreboard
+
 
 class testbench():
     def __init__(self, dut, debug=False):
@@ -44,6 +45,7 @@ class testbench():
         await ClockCycles(self.dut.CLK, 2)
         self.dut.RESET.value = 0
         await RisingEdge(self.dut.CLK)
+
 
 @cocotb.test()
 async def run_test(dut, pkt_count=10000, item_width=1):

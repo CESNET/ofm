@@ -1,7 +1,5 @@
-import cocotb
-from cocotb.triggers import ClockCycles
 from cocotbext.ofm.mi.drivers import MIMasterDriver, MISlaveDriver
-from random import randint
+
 
 class MIMasterDriverTB(MIMasterDriver):
     """Driver derived from MIMasterDriver intended for MI Pipe Test."""
@@ -31,6 +29,7 @@ class MIMasterDriverTB(MIMasterDriver):
                     event.set()
                 if callback:
                     callback(transaction)
+
 
 class MISlaveDriverTB(MISlaveDriver):
     """Driver derived from MISlaveDriver intended for MI Pipe Test."""
@@ -62,4 +61,3 @@ class MISlaveDriverTB(MISlaveDriver):
                     event.set()
                 if callback:
                     callback(transaction)
-
