@@ -1,14 +1,13 @@
-import time
 import queue
 import logging
-import fdt
 
 import cocotb
 from cocotb.triggers import Timer
 
+
 class CommonAsyncServicer():
     def path(self):
-        raise NotImplemented()
+        raise NotImplementedError()
 
     def get_node_base(self, bus_node, comp_node):
         # TODO: fix mi[0]
@@ -22,7 +21,7 @@ class CommonAsyncServicer():
         try:
             mi, base = self.get_node_base(bus_node, comp_node)
             data = yield mi.read(base + offset, nbyte)
-            self._log.debug(f"comp read: size: {nbyte:>2}, offset: {offset:04x}, path: {node.path}/{node.name}, data:", data)
+            self._log.debug(f"comp read: size: {nbyte:>2}, offset: {offset:04x}, path: {comp_node.path}/{comp_node.name}, data:", data)
         except Exception as e:
             self._log.error("comp read failed: ", e)
         return bytes(data)
@@ -33,11 +32,12 @@ class CommonAsyncServicer():
             mi, base = self.get_node_base(bus_node, comp_node)
             nbyte = len(data)
             data = list(data)
-            self._log.debug(f"comp write: size: {nbyte:>2}, offset: {offset:04x}, path: {node.path}/{node.name}, data:", data)
+            self._log.debug(f"comp write: size: {nbyte:>2}, offset: {offset:04x}, path: {comp_node.path}/{comp_node.name}, data:", data)
             yield mi.write(base + offset, data)
         except Exception as e:
-            self._log.error(f"comp write failed:", e)
+            self._log.error("comp write failed:", e)
         return len(data)
+
 
 class CommonServicer(CommonAsyncServicer):
     def __init__(self, device, dtb, server_addr=('127.0.0.1', 63239), *args, **kwargs):
@@ -67,8 +67,8 @@ class CommonServicer(CommonAsyncServicer):
             try:
                 d = yield fn(mi_base, data)
                 q.put(d)
-            except Exception as e:
-                self._log.error(f"comp access failed")
+            except Exception:
+                self._log.error("comp access failed")
                 q.put(None)
 
     def _nfb_comp_write(self, fdtoffset, nbyte, offset, data):

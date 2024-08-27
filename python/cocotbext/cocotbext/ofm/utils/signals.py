@@ -4,7 +4,7 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-async def await_signal_sync(clk_re, signal, value:int = 1) -> None:
+async def await_signal_sync(clk_re, signal, value: int = 1) -> None:
     """Synchronously waits until the value of the passed signal becomes passed value.
 
     Note:
@@ -20,7 +20,8 @@ async def await_signal_sync(clk_re, signal, value:int = 1) -> None:
     while signal.value != value:
         await clk_re
 
-def get_signal_value_in_bytes(signal, big_endian:bool = False) -> bytes:
+
+def get_signal_value_in_bytes(signal, big_endian: bool = False) -> bytes:
     """Get value of a OUT signals in bytes.
 
     Args:
@@ -36,5 +37,3 @@ def get_signal_value_in_bytes(signal, big_endian:bool = False) -> bytes:
     sig_val.big_endian = big_endian
 
     return sig_val.buff
-
-

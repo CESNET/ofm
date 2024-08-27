@@ -6,8 +6,10 @@
 
 import random
 
-def random_delays_config(items:int, params_dic:dict) -> (dict, int, int):
-    """Generate configuration of random delay generator based on passed dictionary. If no dictionary was passed, configuratoin is generated with default parameters.
+
+def random_delays_config(items: int, params_dic: dict) -> (dict, int, int):
+    """Generate configuration of random delay generator based on passed dictionary.
+    If no dictionary was passed, configuratoin is generated with default parameters.
 
         Args:
             items: number of MVB items.
@@ -15,7 +17,8 @@ def random_delays_config(items:int, params_dic:dict) -> (dict, int, int):
 
         Returns:
             cDelays: settings of random delays.
-            mode: fill delay with: mode 0 - previous transaction, mode 1 - 0, mode 2 - random integer from 0-256, mode 3 - with ascii value of X
+            mode: fill delay with: mode 0 - previous transaction,
+                mode 1 - 0, mode 2 - random integer from 0-256, mode 3 - with ascii value of X
             delays_fill: the character, with which the delays will be filled with.
 
     """
@@ -26,7 +29,7 @@ def random_delays_config(items:int, params_dic:dict) -> (dict, int, int):
 
     #parameters for whole invalid words
     wordDelayEnable_wt = params_dic.get("wordDelayEnable_wt", 10)
-    wordDelayDisable_wt= params_dic.get("wordDelayDisable_wt", 90)
+    wordDelayDisable_wt = params_dic.get("wordDelayDisable_wt", 90)
     wordDelayLow = params_dic.get("wordDelayLow", 0)
     wordDelayHigh = params_dic.get("wordDelayHigh", 50)
 
@@ -34,7 +37,7 @@ def random_delays_config(items:int, params_dic:dict) -> (dict, int, int):
     ivgEnable_wt = params_dic.get("ivgEnable_wt", 3)
     ivgDisable_wt = params_dic.get("ivgDisable_wt", 1)
     ivgLow = params_dic.get("ivgLow", 0)
-    ivgHigh = params_dic.get("ivgHigh", 2*items-1)
+    ivgHigh = params_dic.get("ivgHigh", 2 * items - 1)
 
     cDelays["wordDelayEn_wt"] = (wordDelayDisable_wt, wordDelayEnable_wt)
     cDelays["wordDelay"] = range(wordDelayLow, wordDelayHigh)
@@ -42,10 +45,10 @@ def random_delays_config(items:int, params_dic:dict) -> (dict, int, int):
     cDelays["ivg"] = range(ivgLow, ivgHigh)
 
     delays_fill = {
-	0: None,
-	1: 0,
-	2: random.randrange(0, 256),
-	3: ord('X'),
+        0: None,
+        1: 0,
+        2: random.randrange(0, 256),
+        3: ord('X'),
     }[mode]
 
     return cDelays, mode, delays_fill

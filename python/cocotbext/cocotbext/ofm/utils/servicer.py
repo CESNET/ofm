@@ -1,6 +1,5 @@
 import logging
 import cocotb
-import types
 
 import nfb.ext.python as ext
 
@@ -30,4 +29,3 @@ class Servicer(ext.AbstractNfb):
         #data = list(data)
         self._log.debug(f"comp write: size: {nbyte:>2}, offset: {offset:04x}, path: {node.path}/{node.name}, data:", data)
         yield mi.write(offset, data)
-

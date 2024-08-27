@@ -4,7 +4,7 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-def ceildiv(bus_width:int, transaction_len:int) -> int:
+def ceildiv(bus_width: int, transaction_len: int) -> int:
     """Calculates to how many transmission must the transaction be divided.
 
     Args:

@@ -4,7 +4,7 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-def int_to_bits(integer:int, lenght:int) -> list:
+def int_to_bits(integer: int, lenght: int) -> list:
     result = list()
 
     for _ in range(lenght):
@@ -13,7 +13,8 @@ def int_to_bits(integer:int, lenght:int) -> list:
 
     return result
 
-def bits_to_int(bits:list, num_of_bits:int, big_endian:bool=True) -> int:
+
+def bits_to_int(bits: list, num_of_bits: int, big_endian: bool = True) -> int:
     result = 0
 
     if big_endian:
@@ -24,12 +25,14 @@ def bits_to_int(bits:list, num_of_bits:int, big_endian:bool=True) -> int:
 
     return result
 
-def not_bits(bits:list, length:int) -> list:
+
+def not_bits(bits: list, length: int) -> list:
     for i in range(length):
-        bits[i] = not(bits[i])
+        bits[i] = not (bits[i])
     return bits
 
-def and_bits(bits1:list, bits2:list, length:int) -> list:
+
+def and_bits(bits1: list, bits2: list, length: int) -> list:
     result = list()
 
     for i in range(length):
@@ -37,7 +40,8 @@ def and_bits(bits1:list, bits2:list, length:int) -> list:
 
     return result
 
-def or_bits(bits1:list, bits2:list, length:int) -> list:
+
+def or_bits(bits1: list, bits2: list, length: int) -> list:
     result = list()
 
     for i in range(length):
@@ -45,7 +49,8 @@ def or_bits(bits1:list, bits2:list, length:int) -> list:
 
     return result
 
-def xor_bits(bits1:list, bits2:list, length:int) -> list:
+
+def xor_bits(bits1: list, bits2: list, length: int) -> list:
     result = list()
 
     for i in range(length):

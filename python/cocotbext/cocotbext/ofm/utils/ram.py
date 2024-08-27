@@ -9,7 +9,7 @@ class RAM:
         return int.from_bytes(self.r(addr, byte_count), byteorder=byteorder)
 
     def w(self, addr, byte):
-        self._mem[addr : addr + len(byte)] = byte
+        self._mem[addr: addr + len(byte)] = byte
 
     def r(self, addr, byte_count):
-        return self._mem[addr : addr + byte_count]
+        return self._mem[addr: addr + byte_count]

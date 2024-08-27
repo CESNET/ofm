@@ -1,6 +1,5 @@
 from typing import Any
 
-import cocotb
 from cocotb.triggers import Event
 
 from ..base.drivers import BusDriver
@@ -19,7 +18,7 @@ class AvstEthDriver(BusDriver):
         self._bus_segment_width = self._bus_width // self._bus_segments
 
         self._cfg_update(
-            bits_per_word = len(self.bus.data),
+            bits_per_word=len(self.bus.data),
         )
 
         self.clear_control_signals()
@@ -87,7 +86,7 @@ class AvstEthDriver(BusDriver):
         elif isinstance(transaction, bytes):
             data = memoryview(transaction)
         else:
-            raise NotImplemented
+            raise NotImplementedError
 
         assert len(data)
 

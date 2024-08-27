@@ -4,12 +4,10 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-import cocotb
-import cocotb.queue
 from cocotbext.ofm.base.drivers import BusDriver
-from cocotb.triggers import RisingEdge
 from cocotbext.ofm.utils.math import ceildiv
 from cocotbext.ofm.utils.signals import await_signal_sync
+
 
 class MIMasterDriver(BusDriver):
     """Master driver intended for the MI BUS that allows sending data to and recieving from the bus.
@@ -50,7 +48,7 @@ class MIMasterDriver(BusDriver):
         self.bus.wr.value = self._wr
         self.bus.rd.value = self._rd
 
-    async def write(self, addr:int, dwr:bytes, byte_enable:int=None, sync:bool=True) -> None:
+    async def write(self, addr: int, dwr: bytes, byte_enable: int = None, sync: bool = True) -> None:
         """writes variable-lenght transaction to the write signals of the MI bus.
 
         Note:
@@ -67,9 +65,9 @@ class MIMasterDriver(BusDriver):
         cycles = ceildiv(self.data_width, len(dwr))
 
         for i in range(cycles):
-            await self.write32(addr + i*self.data_width, dwr[i*self.data_width : (i+1)*self.data_width], byte_enable,  sync)
+            await self.write32(addr + i * self.data_width, dwr[i * self.data_width: (i + 1) * self.data_width], byte_enable, sync)
 
-    async def write32(self, addr:int, dwr:bytes, byte_enable:int=None, sync:bool=True) -> None:
+    async def write32(self, addr: int, dwr: bytes, byte_enable: int = None, sync: bool = True) -> None:
         """writes two 4B transaction to the write signals of the MI bus.
 
         Args:
@@ -103,7 +101,7 @@ class MIMasterDriver(BusDriver):
         if sync:
             await self._clk_re
 
-    async def write64(self, addr:int, dwr:bytes, byte_enable:int=None, sync:bool=True) -> None:
+    async def write64(self, addr: int, dwr: bytes, byte_enable: int = None, sync: bool = True) -> None:
         """writes two 4B transaction to the write signals of the MI bus.
 
         Args:
@@ -116,7 +114,7 @@ class MIMasterDriver(BusDriver):
 
         await self.write(addr, dwr, byte_enable, sync)
 
-    async def read(self, addr:int, byte_count:bytes, byte_enable:int=None, sync:bool=True) -> bytes:
+    async def read(self, addr: int, byte_count: bytes, byte_enable: int = None, sync: bool = True) -> bytes:
         """Reads variable-lenght transaction from the read signals of the MI bus.
 
         Note:
@@ -137,11 +135,11 @@ class MIMasterDriver(BusDriver):
         cycles = ceildiv(self.data_width, byte_count)
 
         for i in range(cycles):
-            drd[i*self.data_width : (i+1)*self.data_width] = await self.read32(addr+i*self.data_width, byte_enable, sync)
+            drd[i * self.data_width: (i + 1) * self.data_width] = await self.read32(addr + i * self.data_width, byte_enable, sync)
 
-        return bytes(drd[0 : byte_count])
+        return bytes(drd[0: byte_count])
 
-    async def read32(self, addr:int, byte_enable:int=None, sync:bool=True) -> bytes:
+    async def read32(self, addr: int, byte_enable: int = None, sync: bool = True) -> bytes:
         """Reads one 4B transaction from the read signals of the MI bus.
 
         Args:
@@ -185,7 +183,7 @@ class MIMasterDriver(BusDriver):
 
         return bytes(drd)
 
-    async def read64(self, addr:int, byte_enable:int=None, sync:bool=True) -> bytes:
+    async def read64(self, addr: int, byte_enable: int = None, sync: bool = True) -> bytes:
         """Reads two 4B transaction from the read signals of the MI bus.
 
         Args:
@@ -236,7 +234,7 @@ class MISlaveDriver(BusDriver):
         self.bus.drdy.value = self._drdy
         self.bus.drd.value = int.from_bytes(self._drd, 'little')
 
-    async def write(self, drd:bytes, sync:bool=True) -> None:
+    async def write(self, drd: bytes, sync: bool = True) -> None:
         """writes variable-lenght transaction to the read signals MI bus.
 
         Note:
@@ -251,9 +249,9 @@ class MISlaveDriver(BusDriver):
         cycles = ceildiv(self.data_width, len(drd))
 
         for i in range(cycles):
-            await self.write32(drd[i*4 : i*4 + 4], sync)
+            await self.write32(drd[i * 4: i * 4 + 4], sync)
 
-    async def write32(self, drd:bytes, sync:bool=True) -> None:
+    async def write32(self, drd: bytes, sync: bool = True) -> None:
         """writes one 4B transaction to the read signals of the MI bus.
 
         Args:
@@ -279,7 +277,7 @@ class MISlaveDriver(BusDriver):
             self._clear_control_signals()
             self._propagate_control_signals()
 
-    async def write64(self, drd:bytes, sync:bool=True) -> None:
+    async def write64(self, drd: bytes, sync: bool = True) -> None:
         """writes two 4B transaction to the read signals of the MI bus.
 
         Args:
@@ -289,4 +287,3 @@ class MISlaveDriver(BusDriver):
         """
 
         await self.write(drd, sync)
-

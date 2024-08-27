@@ -1,10 +1,7 @@
 import cocotb
 import cocotb.queue
-from cocotb.triggers import Timer, Event, RisingEdge
-from cocotb.clock import Clock
+from cocotb.triggers import Event, RisingEdge
 
-import traceback
-import sys
 from ..utils import concat, deconcat, SerializableHeader
 from .AvstRequester import AvstBase
 
@@ -12,13 +9,24 @@ from .AvstRequester import AvstBase
 class RequestHeaderEmpty(SerializableHeader):
     items = list(zip([], []))
 
+
 class RequestHeader(SerializableHeader):
-    items = list(zip(['addr', 'fbe', 'lbe', 'tag_l', 'req_id', 'length', 'addr_t', 'att_l', 'res1', 'attr_h', 'tag_m', 'traff_cls', 'tag_h', 'req_t'],
-                [64, 4, 4, 8, 16, 10, 2, 2, 4, 1, 1, 3, 1, 8]))
+    items = list(zip(
+        ['addr', 'fbe', 'lbe', 'tag_l', 'req_id', 'length', 'addr_t', 'att_l', 'res1', 'attr_h', 'tag_m', 'traff_cls', 'tag_h', 'req_t'],
+        [64, 4, 4, 8, 16, 10, 2, 2, 4, 1, 1, 3, 1, 8],
+    ))
+
 
 class CompletionHeader(SerializableHeader):
-    items = list(zip(['tlp_prfx', 'lower_addr', 'res1', 'tag_l', 'req_id', 'byte_cnt', 'res2', 'compl_stat', 'compl_id', 'dwords', 'addr_type', 'attr_l', 'res3', 'attr_h', 'tag_m', 'traff_cls', 'tag_h', 'tlp_type', 'fmt'],
-                     [32, 7, 1, 8, 16, 12, 1, 3, 16, 10, 2, 2, 4, 1, 1, 3, 1, 5, 3]))
+    items = list(zip(
+        [
+            'tlp_prfx', 'lower_addr', 'res1', 'tag_l', 'req_id', 'byte_cnt',
+            'res2', 'compl_stat', 'compl_id', 'dwords', 'addr_type', 'attr_l',
+            'res3', 'attr_h', 'tag_m', 'traff_cls', 'tag_h', 'tlp_type', 'fmt',
+        ],
+        [32, 7, 1, 8, 16, 12, 1, 3, 16, 10, 2, 2, 4, 1, 1, 3, 1, 5, 3],
+    ))
+
 
 class AvstCompleter(AvstBase):
     def __init__(self, cq_driver, cc_driver, cc_monitor):
@@ -40,7 +48,6 @@ class AvstCompleter(AvstBase):
         cc_monitor.add_callback(self._handle_cc_transaction)
         cocotb.start_soon(self._cq_loop())
 
-
     async def _cq_loop(self):
         re = RisingEdge(self._cq.clock)
         await re
@@ -55,11 +62,10 @@ class AvstCompleter(AvstBase):
             if item[2] == 0:  # req_type=0 => read
                 tag = await self._tag_queue.get()
                 self._read_requests[tag] = (trigger, item, [])
-            if tag == None:
+            if tag is None:
                 trigger.set()
 
             await self._cq_req(*item, tag=tag, sync=False)
-
 
     async def _cq_req(self, addr, byte_count, req_type=0, data=[], tag=None, sync=True):
         header_empty = RequestHeaderEmpty()
@@ -72,18 +78,17 @@ class AvstCompleter(AvstBase):
         dwords = (addr % 4 + byte_count + 3) // 4
         addr_l, addr_h = deconcat([addr, 32, 32])
 
-        header.addr = concat([(addr_h,32),(addr_l,32)]) & ~3
+        header.addr = concat([(addr_h, 32), (addr_l, 32)]) & ~3
         header.fbe = [0xF, 0xE, 0xC, 0x8][addr % 4]
         header.lbe = [0xF, 0x1, 0x3, 0x7][(addr + byte_count) % 4]
         if dwords <= 1:
             header.fbe &= header.lbe
             header.lbe = 0
-        if tag != None:
+        if tag is not None:
             header.tag_l, header.tag_m, header.tag_h = deconcat([tag, 8, 1, 1])
         header.req_t = req_type << 6
         header.length = dwords
         await self._send_frame(self._cq.write_cq, data, header, header_empty, sync)
-
 
     def _handle_cc_transaction(self, transaction):
         header_bytes, data_bytes = transaction
@@ -98,7 +103,7 @@ class AvstCompleter(AvstBase):
             trigger, item, req_data = self._read_requests[tag]
             addr, byte_count, req_type, orig_data = item
             offset = addr % 4
-            req_data = data[offset:byte_count+offset]
+            req_data = data[offset:byte_count + offset]
             # firstBe = [0xF, 0xE, 0xC, 0x8][addr % 4]
             # lastBe = [0xF, 0x1, 0x3, 0x7][(addr + byte_count) % 4]
             # fixme: BE & length & completed = 0
@@ -107,14 +112,12 @@ class AvstCompleter(AvstBase):
             trigger.set(req_data)
             self._tag_queue.put_nowait(tag)
 
-
     async def read(self, addr, byte_count) -> bytes:
         # TODO: split big reads to more transactions
         e = Event()
         await self._queue_send.put(((addr, byte_count, 0, []), e))
         await e.wait()
         return bytes(e.data)
-
 
     async def write(self, addr, data: bytes):
         # TODO: split big writes to more transactions
@@ -123,20 +126,16 @@ class AvstCompleter(AvstBase):
         await self._queue_send.put(((addr, len(data), 1, data), e))
         data = await e.wait()
 
-
     async def read64(self, addr):
         rawdata = await self.read(addr, 8)
         return int.from_bytes(bytes(rawdata), byteorder="little")
-
 
     async def read32(self, addr):
         rawdata = await self.read(addr, 4)
         return int.from_bytes(bytes(rawdata), byteorder="little")
 
-
     async def write32(self, addr, val):
         await self.write(addr, list(val.to_bytes(4, byteorder="little")))
-
 
     async def write64(self, addr, val):
         await self.write(addr, list(val.to_bytes(8, byteorder="little")))

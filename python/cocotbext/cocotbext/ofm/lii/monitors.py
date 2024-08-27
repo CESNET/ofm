@@ -4,12 +4,13 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-import cocotb
 from cocotb_bus.monitors import BusMonitor
 from cocotb.triggers import RisingEdge
 
+
 class LIIProtocolError(Exception):
     pass
+
 
 class LIIMonitor(BusMonitor):
     _signals = ["d", "db", "sof", "eof", "rdy"]
@@ -46,10 +47,10 @@ class LIIMonitor(BusMonitor):
             is_sof = False
             sof_pos = 0
             for ii in range(len(self.bus.sof.value)):
-                print(self.bus.sof.value[len(self.bus.sof.value)-1-ii])
-                if self.bus.sof.value[len(self.bus.sof.value)-1-ii] == 1:
+                print(self.bus.sof.value[len(self.bus.sof.value) - 1 - ii])
+                if self.bus.sof.value[len(self.bus.sof.value) - 1 - ii] == 1:
                     is_sof = True
-                    sof_pos = ii*8
+                    sof_pos = ii * 8
 
             if self.bus.eof.value == 1:
                 if not in_frame:

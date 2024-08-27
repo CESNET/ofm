@@ -6,6 +6,7 @@ import nfb.libnfb
 
 e = cocotb.external
 
+
 class QueueManager:
     def __init__(self, dev):
         nfb = dev.nfb
@@ -16,19 +17,21 @@ class QueueManager:
         ])
 
         self.rx, self.tx = (
-                [queue(dev, node, i*2 + buf_off)
-                    for queue, compatible, buf_off in d
-                        for i, node in enumerate(nfb.fdt_get_compatible(compatible))]
-                for d in compatibles)
+            [
+                queue(dev, node, i * 2 + buf_off)
+                for queue, compatible, buf_off in d
+                for i, node in enumerate(nfb.fdt_get_compatible(compatible))
+            ] for d in compatibles
+        )
 
     async def send(self, pkt, index=None, flush=True):
-        if index == None:
+        if index is None:
             index = [i for i in range(len(self.tx))]
         for i in index:
             await self.tx[i].send(pkt, flush)
 
     async def flush(self, index=None):
-        if index == None:
+        if index is None:
             index = [i for i in range(len(self.tx))]
         for i in index:
             await self.tx[i].flush()
@@ -66,10 +69,10 @@ class QueueNdp:
         self._dsc_free -= 1
 
     async def start(self):
-        upd = memoryview(self._ram._mem)[self._upd_base:self._upd_base+8]
+        upd = memoryview(self._ram._mem)[self._upd_base:self._upd_base + 8]
         try:
             await e(self._ctrl.start)(self._dsc_base, self._hdr_base, self._upd_base, upd, self._desc_cnt, self._desc_cnt)
-        except Exception as ex:
+        except Exception:
             await e(self._ctrl.stop)(force=True)
             await e(self._ctrl.start)(self._dsc_base, self._hdr_base, self._upd_base, upd, self._desc_cnt, self._desc_cnt)
 
@@ -98,7 +101,7 @@ class QueueNdpRx(QueueNdp):
         ba = self._buffer_base + self._ctrl.sdp * self._packet_length_max
         self.update_desc_upper_address(ba)
 
-        desc2 = (2 << 62) | ((self._packet_length_max & 0xFFFF) << 32) | (ba & 0x3FFFFFFF)
+        #desc2 = (2 << 62) | ((self._packet_length_max & 0xFFFF) << 32) | (ba & 0x3FFFFFFF)
         desc = self._ctrl.desc2(ba, self._packet_length_max, next=False)
         self._push_one_desc(desc)
         if flush:
@@ -144,7 +147,7 @@ class QueueNdpTx(QueueNdp):
 
         while self._dsc_free < 2:
             hdp = self._ctrl.update_hdp()
-            prev = self._dsc_free
+            #prev = self._dsc_free
             self._dsc_free = (hdp - (self._ctrl.sdp + 1)) & self._ctrl.mdp
             if self._dsc_free < 2:
                 # FIXME: when flush = False, assure that sdp is flushed when

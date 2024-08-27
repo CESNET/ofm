@@ -2,7 +2,6 @@ import os
 import lzma
 import libfdt
 import fdt
-import logging
 
 import nfb
 
@@ -12,7 +11,6 @@ from .queue import QueueManager
 from .ext.python import Servicer as NfbPythonServicer
 
 import cocotb
-from cocotb.triggers import Timer, RisingEdge, Combine
 
 e = cocotb.external
 

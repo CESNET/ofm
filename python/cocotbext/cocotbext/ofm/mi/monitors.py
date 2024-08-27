@@ -4,12 +4,10 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-import cocotb
 from cocotb_bus.monitors import BusMonitor
 from cocotb.triggers import RisingEdge
 from cocotbext.ofm.utils.signals import get_signal_value_in_bytes
 
-import random
 
 class MIMasterMonitor(BusMonitor):
     """Master monitor intended for monitoring the MI BUS OUTPUT side.
@@ -57,7 +55,7 @@ class MIMasterMonitor(BusMonitor):
                 be_list = list()
                 be_list[0:len(be)] = be
                 first_be = be_list.index(1)
-                last_be = (be_list+[0]).index(0, first_be)
+                last_be = (be_list + [0]).index(0, first_be)
                 dwr_recv = dwr_bytes[first_be:last_be]
 
                 self.log.debug(f"ITEM     {self.item_cnt}")
@@ -121,4 +119,3 @@ class MISlaveMonitor(BusMonitor):
                 self._recv((int.from_bytes(addr_bytes, 'little'), int.from_bytes(drd_bytes, 'little'), be_int))
 
                 self.item_cnt += 1
-
