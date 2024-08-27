@@ -13,6 +13,7 @@ import subprocess as sp
 
 import nfb
 
+
 # find etherlink connection information
 def find_etherlink_info():
     ss_prg    = sp.Popen(["ss", "-tlp"], stdout=sp.PIPE)
@@ -66,14 +67,14 @@ comp_addr_span  = comp_addr_space[1]
 conn_info = find_etherlink_info()
 
 # start etherlink application
-if conn_info == None:
+if conn_info is None:
     etherlink_bin = args.etherlink
     resource_path = "--uio-driver-path=/sys/bus/pci/devices/{}/resource0".format(pci_slot)
     start_address = "--start-address={}".format(hex(comp_addr_start))
     address_span  = "--address-span={}".format(hex(comp_addr_span))
     etherlink_prg = sp.Popen([etherlink_bin, resource_path, start_address, address_span])
     conn_info     = find_etherlink_info()
-    if conn_info == None:
+    if conn_info is None:
         print("ERROR: Cannot start etherlink application (make sure you're running the script with sudo privileges)")
         exit(1)
 else:

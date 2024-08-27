@@ -9,6 +9,7 @@ import time
 import math
 import argparse
 
+
 class hbm_tester:
     DT_COMPATIBLE = "cesnet,ofm,hbm_tester"
 
@@ -38,7 +39,7 @@ class hbm_tester:
         self.comp = dev.comp_open(self.node)
         self.ports = 32 # TODO register
         self.width = 256 # TODO register
-        self.clk_period = (1/450000000)*1e9 # TODO register
+        self.clk_period = (1 / 450000000) * 1e9 # TODO register
 
     def reset_all_counters(self):
         self.comp.write32(self._REG_RESET, self.get_ports_vector(self.ports))
@@ -50,7 +51,7 @@ class hbm_tester:
         self.comp.write32(self._REG_TIME, test_length)
 
     def set_config_reg(self, test_type, test_phase, rand_addr):
-        if (rand_addr == True):
+        if rand_addr is True:
             rand_test_val = self._CONF_RAND_ADDR_EN
         else:
             rand_test_val = self._CONF_DISABLED
@@ -168,7 +169,7 @@ class hbm_tester:
         #print("REG_RUN_TEST: %s" % hex(ports_vector))
         self.comp.write32(self._REG_RUN_TEST, ports_vector)
 
-        while test_done == False:
+        while test_done is False:
             time.sleep(0.1)
             reg_done = self.comp.read32(self._REG_DONE_TEST)
             #print("REG_DONE_TEST: %s" % hex(reg_done))
@@ -184,7 +185,7 @@ class hbm_tester:
         time.sleep(0.1)
 
     def get_addr_mode_string(self, rand_addr):
-        if rand_addr == True:
+        if rand_addr is True:
             return "pseudorandom"
         else:
             return "sequential"
@@ -223,11 +224,11 @@ class hbm_tester:
 if __name__ == '__main__':
     # Argument parsing
     args = argparse.ArgumentParser()
-    args.add_argument("-i","--index", action="store", nargs='?', default='0')
-    args.add_argument("-d","--device", action="store", nargs='?', default='0')
-    args.add_argument("-t","--test", action="store", nargs='?', choices=['speed', 'latency', 'integrity', 'coherency'], default='speed')
-    args.add_argument("-r","--random", action='store_true', help="Use random addressing (only for latency or speed test), default is sequential.")
-    args.add_argument("-p","--ports", action="store", nargs='?', default='0', help="Number of actived ports (channels), default is all.")
+    args.add_argument("-i", "--index", action="store", nargs='?', default='0')
+    args.add_argument("-d", "--device", action="store", nargs='?', default='0')
+    args.add_argument("-t", "--test", action="store", nargs='?', choices=['speed', 'latency', 'integrity', 'coherency'], default='speed')
+    args.add_argument("-r", "--random", action='store_true', help="Use random addressing (only for latency or speed test), default is sequential.")
+    args.add_argument("-p", "--ports", action="store", nargs='?', default='0', help="Number of actived ports (channels), default is all.")
     #args.add_argument("-l","--length", action="store", nargs='?', default='0xFFFFFF', help="Length of test in clock cycles (only for latency or speed test), default is 0xFFFFFF.")
     arguments = args.parse_args()
 
@@ -239,9 +240,8 @@ if __name__ == '__main__':
     arg_ports = int(arguments.ports[0], 0)
     if arg_ports == 0:
         arg_ports = tester.ports
-    arg_length = 0xFFFFF #int(arguments.length[0], 0)
+    arg_length = 0xFFFFF # int(arguments.length[0], 0)
 
     tester.hbm_test(arguments.test, arguments.random, arg_ports, arg_length)
     # reset config register after test
     #tester.set_config_reg("none", 0, False)
-

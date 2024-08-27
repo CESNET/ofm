@@ -3,11 +3,11 @@
 # Author(s): Lukas Nevrkla <xnevrk03@stud.fit.vutbr.cz>
 
 import nfb
-import time
 import math
 import sys
 import json
 import argparse
+
 
 class DataLogger(nfb.BaseComp):
 
@@ -138,13 +138,13 @@ class DataLogger(nfb.BaseComp):
         return self.load_slices(width)
 
     def load_config(self):
-        config = { }
-        config["CNTER_CNT"]         = self.stat_read(self._ID_CNTER_CNT    , en_slices=False)
-        config["VALUE_CNT"]         = self.stat_read(self._ID_VALUE_CNT    , en_slices=False)
+        config = {}
+        config["CNTER_CNT"]         = self.stat_read(self._ID_CNTER_CNT,     en_slices=False)
+        config["VALUE_CNT"]         = self.stat_read(self._ID_VALUE_CNT,     en_slices=False)
         config["MI_DATA_WIDTH"]     = self.stat_read(self._ID_MI_DATA_WIDTH, en_slices=False)
-        config["CTRLO_WIDTH"]       = self.stat_read(self._ID_CTRLO_WIDTH  , en_slices=False)
-        config["CTRLI_WIDTH"]       = self.stat_read(self._ID_CTRLI_WIDTH  , en_slices=False)
-        config["CNTER_WIDTH"]       = self.stat_read(self._ID_CNTER_WIDTH  , en_slices=False)
+        config["CTRLO_WIDTH"]       = self.stat_read(self._ID_CTRLO_WIDTH,   en_slices=False)
+        config["CTRLI_WIDTH"]       = self.stat_read(self._ID_CTRLI_WIDTH,   en_slices=False)
+        config["CNTER_WIDTH"]       = self.stat_read(self._ID_CNTER_WIDTH,   en_slices=False)
 
         config["VALUE_WIDTH"]       = []
         config["VALUE_EN"]          = []
@@ -154,18 +154,18 @@ class DataLogger(nfb.BaseComp):
         config["HIST_STEP"]         = []
 
         for i in range(0, config["VALUE_CNT"]):
-            en_parsed = { }
+            en_parsed = {}
             en = self.stat_read(self._ID_VALUE_EN, i, en_slices=False)
             en_parsed["MIN"]  = ((en & 0b0001) > 0)
             en_parsed["MAX"]  = ((en & 0b0010) > 0)
             en_parsed["SUM"]  = ((en & 0b0100) > 0)
             en_parsed["HIST"] = ((en & 0b1000) > 0)
 
-            config["VALUE_EN"       ].append(en_parsed)
-            config["VALUE_WIDTH"    ].append(self.stat_read(self._ID_VALUE_WIDTH    , i, en_slices=False))
+            config["VALUE_EN"]       .append(en_parsed)
+            config["VALUE_WIDTH"]    .append(self.stat_read(self._ID_VALUE_WIDTH,     i, en_slices=False))
             config["SUM_EXTRA_WIDTH"].append(self.stat_read(self._ID_SUM_EXTRA_WIDTH, i, en_slices=False))
-            config["HIST_BOX_CNT"   ].append(self.stat_read(self._ID_HIST_BOX_CNT   , i, en_slices=False))
-            config["HIST_BOX_WIDTH" ].append(self.stat_read(self._ID_HIST_BOX_WIDTH , i, en_slices=False))
+            config["HIST_BOX_CNT"]   .append(self.stat_read(self._ID_HIST_BOX_CNT,    i, en_slices=False))
+            config["HIST_BOX_WIDTH"] .append(self.stat_read(self._ID_HIST_BOX_WIDTH,  i, en_slices=False))
 
             hist_max  = 2 ** config["VALUE_WIDTH"][i]
             hist_step = hist_max / config["HIST_BOX_CNT"][i]
@@ -217,7 +217,7 @@ class DataLogger(nfb.BaseComp):
             val["max"] = self.stat_read(self._ID_VALUE_MAX, index)
         if self.config["VALUE_EN"][index]["SUM"]:
             val["sum"] = self.stat_read(self._ID_VALUE_SUM, index)
-            val["avg"] = val["sum"] / val["cnt"] if val["cnt"] !=0 else 0
+            val["avg"] = val["sum"] / val["cnt"] if val["cnt"] != 0 else 0
         if self.config["VALUE_EN"][index]["HIST"]:
             val["hist"] = []
             for b in range(0, self.config["HIST_BOX_CNT"][index]):
@@ -253,21 +253,22 @@ class DataLogger(nfb.BaseComp):
 
 
 def parseParams():
-    parser = argparse.ArgumentParser(description =
-        """data_logger control script""",
+    parser = argparse.ArgumentParser(
+        description="data_logger control script",
     )
 
     access = parser.add_argument_group('card access arguments')
-    access.add_argument('-d', '--device', default=nfb.libnfb.Nfb.default_device,
-                        metavar='device', help = """device with target FPGA card""")
-    access.add_argument('-i', '--index',        type=int, metavar='index', default=0, help = """index inside DevTree""")
+    access.add_argument(
+        '-d', '--device', default=nfb.libnfb.Nfb.default_device,
+        metavar='device', help="device with target FPGA card")
+    access.add_argument(
+        '-i', '--index', type=int, metavar='index', default=0, help="index inside DevTree")
 
     common = parser.add_argument_group('common arguments')
     #common.add_argument('-p', '--print', action='store_true', help = """print registers""")
-    common.add_argument('--rst', action='store_true', help = """reset mem_tester and mem_logger""")
+    common.add_argument('--rst', action='store_true', help="reset mem_tester and mem_logger")
     args = parser.parse_args()
     return args
-
 
 
 if __name__ == '__main__':

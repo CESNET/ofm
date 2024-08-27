@@ -24,7 +24,7 @@ Arguments:
 
 import nfb
 from cocotbext.ofm.utils.math import ceildiv
-from cocotbext.ofm.utils.binary_utils import *
+from cocotbext.ofm.utils.binary_utils import int_to_bits, xor_bits, bits_to_int
 import colorama
 import sys
 from math import log2
@@ -72,7 +72,7 @@ class MVB_HASH_TABLE_SIMPLE_TOOLKIT(nfb.BaseComp):
     def __init__(self, inter=False, mod_path="", **kwargs) -> None:
         self._name = "MVB_HASH_TABLE_SIMPLE"
 
-        self.hash_key = 2534237992 #10884469298454947624
+        self.hash_key = 2534237992 # 10884469298454947624
 
         """Setting defaults to component configuration parametres."""
         self.conected_to_comp = False
@@ -87,16 +87,16 @@ class MVB_HASH_TABLE_SIMPLE_TOOLKIT(nfb.BaseComp):
 
         """Setting script parametres."""
         self.t_keys = list()
-        self.t_hash_table = self.table_capacity*[[False, 0]]
+        self.t_hash_table = self.table_capacity * [[False, 0]]
         self.t_used = 0
         self.t_params = ["TOEPLITZ", toeplitz_hash, self.t_keys, self.t_hash_table, self.t_used]
 
         self.x_keys = list()
-        self.x_hash_table = self.table_capacity*[[False, 0]]
+        self.x_hash_table = self.table_capacity * [[False, 0]]
         self.x_used = 0
         self.x_params = ["SIMPLE_XOR", simple_xor_hash, self.x_keys, self.x_hash_table, self.x_used]
 
-        self.commands = {"add": self.comm_add, "replace": self.comm_replace, "remove": self.comm_remove, "clear": self.comm_clear, "list": self.comm_list, "commit": self.comm_commit, "save":self.comm_save, "load":self.comm_load, "hash":self.comm_hash, "testkey":self.comm_testkey, "comparehashes": self.comm_comparehashes, "hwconfig": self.comm_hwconfig, "help": self.comm_help}
+        self.commands = {"add": self.comm_add, "replace": self.comm_replace, "remove": self.comm_remove, "clear": self.comm_clear, "list": self.comm_list, "commit": self.comm_commit, "save": self.comm_save, "load": self.comm_load, "hash": self.comm_hash, "testkey": self.comm_testkey, "comparehashes": self.comm_comparehashes, "hwconfig": self.comm_hwconfig, "help": self.comm_help}
 
         """Setting up servicer."""
         try:
@@ -108,7 +108,7 @@ class MVB_HASH_TABLE_SIMPLE_TOOLKIT(nfb.BaseComp):
 
             self.conected_to_comp = True
 
-        except:
+        except Exception:
             print(f"{colorama.Fore.RED}Error:{colorama.Style.RESET_ALL} Failed to open {self._name} component.")
 
         if mod_path != "":
@@ -119,7 +119,7 @@ class MVB_HASH_TABLE_SIMPLE_TOOLKIT(nfb.BaseComp):
         else:
             self.comm_commit(silent=True)
 
-    def get_params(self, table:str) -> list:
+    def get_params(self, table: str) -> list:
         """Gets parametres of the requested table.
             Args:
                 table: name of the table
@@ -140,7 +140,7 @@ class MVB_HASH_TABLE_SIMPLE_TOOLKIT(nfb.BaseComp):
                 return int(data)
             else:
                 return float(data)
-        except:
+        except Exception:
             return str(data)
 
     def get_hw_config(self) -> None:
@@ -218,10 +218,10 @@ class MVB_HASH_TABLE_SIMPLE_TOOLKIT(nfb.BaseComp):
             else:
                 try:
                     self.commands.get(command, self.error)(*arguments)
-                except:
+                except Exception:
                     self.error()
 
-    def comm_add(self, key:int=None, data:int=None, table:str="toeplitz", recurse=False) -> None:
+    def comm_add(self, key: int = None, data: int = None, table: str = "toeplitz", recurse=False) -> None:
         """Adds a value to a chosen table, the position of the value is decided by the hash of the key.
 
         Args:
@@ -230,19 +230,19 @@ class MVB_HASH_TABLE_SIMPLE_TOOLKIT(nfb.BaseComp):
             table: decided to which table is the value to be added to. Toeplitz table is chosen by default, other option is 'xor' for adding to the simple xor table.
 
         """
-        if key == None or data == None:
+        if key is None or data is None:
             print(f"{colorama.Fore.RED}{colorama.Fore.RED}Error:{colorama.Style.RESET_ALL}{colorama.Style.RESET_ALL} Invalid arguments. Usage of add: add (key) (data) (table=[*toeplitz, xor]).")
             return
 
         try:
-            key.to_bytes(self.mvb_key_width//8, 'little')
-        except:
+            key.to_bytes(self.mvb_key_width // 8, 'little')
+        except Exception:
             print(f"{colorama.Fore.RED}{colorama.Fore.RED}Error:{colorama.Style.RESET_ALL}{colorama.Style.RESET_ALL} Key value {key} can't be represented on {self.mvb_key_width} bits.")
             return
 
         try:
-            data.to_bytes(self.data_out_width//8, 'little')
-        except:
+            data.to_bytes(self.data_out_width // 8, 'little')
+        except Exception:
             print(f"{colorama.Fore.RED}{colorama.Fore.RED}Error:{colorama.Style.RESET_ALL}{colorama.Style.RESET_ALL} Data value {data} can't be represented on {self.data_out_width} bits.")
             return
 
@@ -252,7 +252,7 @@ class MVB_HASH_TABLE_SIMPLE_TOOLKIT(nfb.BaseComp):
 
         params = self.get_params(table)
 
-        if params == None:
+        if params is None:
             print(f"{colorama.Fore.RED}Error:{colorama.Style.RESET_ALL} Invalid table. Possible tables are both, toeplitz, xor.")
             return
 
@@ -265,7 +265,7 @@ class MVB_HASH_TABLE_SIMPLE_TOOLKIT(nfb.BaseComp):
         if used < self.table_capacity:
             hash_key = hash_function(key, self.hash_func_params)
 
-            if hash_table[hash_key][0] == False:
+            if hash_table[hash_key][0] is False:
                 keys.append(key)
                 hash_table[hash_key] = [True, data]
 
@@ -273,10 +273,10 @@ class MVB_HASH_TABLE_SIMPLE_TOOLKIT(nfb.BaseComp):
                 self.t_params[4] += 1 if table == "toeplitz" else 0
                 self.x_params[4] += 1 if table == "xor" else 0
 
-                print(f"{colorama.Fore.GREEN}Success:{colorama.Style.RESET_ALL} Record number {used-1} sucessfully added to position {hash_key} in {name} TABLE.")
+                print(f"{colorama.Fore.GREEN}Success:{colorama.Style.RESET_ALL} Record number {used - 1} sucessfully added to position {hash_key} in {name} TABLE.")
 
             else:
-                if self.num_of_tables == 1 or recurse == True:
+                if self.num_of_tables == 1 or recurse:
                     print(f"{colorama.Fore.RED}Error:{colorama.Style.RESET_ALL} Record can't be added, position {hash_key} in {name} TABLE is already occupied. You can save it to a different one or use replace (table=[toeplitz, xor]) (record_num) (key) (data) to replace it or remove (mode=[record, hash]) (table=[toeplitz, xor]) (num) to delete it.")
                     return
                 else:
@@ -286,7 +286,7 @@ class MVB_HASH_TABLE_SIMPLE_TOOLKIT(nfb.BaseComp):
         else:
             print(f"{colorama.Fore.RED}Error:{colorama.Style.RESET_ALL} Record can't be added, because {name} TABLE is full. You can save it to a different one or use replace (table=[toeplitz, xor]) (record_num) (key) (data)  or remove (mode=[record, hash]) (table=[toeplitz, xor]) (num) to make space.")
 
-    def comm_list(self, mode:str=None, table:str="both") -> None:
+    def comm_list(self, mode: str = None, table: str = "both") -> None:
         """Lists the contents of the table(s).
 
             Args:
@@ -295,7 +295,7 @@ class MVB_HASH_TABLE_SIMPLE_TOOLKIT(nfb.BaseComp):
 
         """
 
-        if mode == None:
+        if mode is None:
             print(f"{colorama.Fore.RED}Error:{colorama.Style.RESET_ALL} Invalid arguments. Usage of list: list (mode=[records, table]) (table=[*both, toeplitz, xor]).")
             return
 
@@ -303,7 +303,7 @@ class MVB_HASH_TABLE_SIMPLE_TOOLKIT(nfb.BaseComp):
         params = [self.t_params] if table == "toeplitz" else params
         params = [self.x_params] if table == "xor" else params
 
-        if params == None:
+        if params is None:
             print(f"{colorama.Fore.RED}Error:{colorama.Style.RESET_ALL} Invalid table. Possible tables are both, toeplitz, xor.")
             return
 
@@ -325,7 +325,7 @@ class MVB_HASH_TABLE_SIMPLE_TOOLKIT(nfb.BaseComp):
                     hash_key = hash_function(keys[j], self.hash_func_params)
                     print(f"\n{colorama.Fore.BLUE  + colorama.Style.BRIGHT}RECORD {j}:{colorama.Style.RESET_ALL}\n\tPOSITION = {hash_key}\n\tKEY = {keys[j]}\n\tDATA = {hash_table[hash_key][1]}")
 
-                print(f"\n {colorama.Fore.BLUE  + colorama.Style.BRIGHT}{used} used, {self.table_capacity-used} free.{colorama.Style.RESET_ALL}\n")
+                print(f"\n {colorama.Fore.BLUE  + colorama.Style.BRIGHT}{used} used, {self.table_capacity - used} free.{colorama.Style.RESET_ALL}\n")
 
             elif mode == "table":
                 print(f"\n{colorama.Fore.GREEN  + colorama.Style.BRIGHT}{name} TABLE:{colorama.Style.RESET_ALL}\n")
@@ -338,13 +338,13 @@ class MVB_HASH_TABLE_SIMPLE_TOOLKIT(nfb.BaseComp):
 
                     print(f"{color}{j}: VALID = {hash_table[j][0]} ; DATA = {hash_table[j][1]}")
 
-                print(f"\n {colorama.Fore.BLUE + colorama.Style.BRIGHT}{used} used, {self.table_capacity-used} free.{colorama.Style.RESET_ALL}\n")
+                print(f"\n {colorama.Fore.BLUE + colorama.Style.BRIGHT}{used} used, {self.table_capacity - used} free.{colorama.Style.RESET_ALL}\n")
 
             else:
                 print(f"{colorama.Fore.RED}Error:{colorama.Style.RESET_ALL} Invalid arguments. Usage of list: list (mode=[records, table]) (table=[*both, toeplitz, xor]).")
                 return
 
-    def comm_replace(self, table:str=None, record_num:int=None, key:str=None, data:str=None) -> None:
+    def comm_replace(self, table: str = None, record_num: int = None, key: str = None, data: str = None) -> None:
         """Replaces record with a diffent one.
 
         Args:
@@ -355,13 +355,13 @@ class MVB_HASH_TABLE_SIMPLE_TOOLKIT(nfb.BaseComp):
 
         """
 
-        if table == None or record_num == None or key == None or data == None:
+        if table is None or record_num is None or key is None or data is None:
             print(f"{colorama.Fore.RED}Error:{colorama.Style.RESET_ALL} Invalid arguments. Usage of replace: replace (table=[toeplitz, xor]) (num) (key) (data).")
             return
 
         params = self.get_params(table)
 
-        if params == None:
+        if params is None:
             print(f"{colorama.Fore.RED}Error:{colorama.Style.RESET_ALL} Invalid table. Possible tables are both, toeplitz, xor.")
             return
 
@@ -385,9 +385,9 @@ class MVB_HASH_TABLE_SIMPLE_TOOLKIT(nfb.BaseComp):
             print(f"{colorama.Fore.GREEN}Success:{colorama.Style.RESET_ALL} Record number {record_num} sucessfully ovewritten and added to position {hash_key} in {name} TABLE.")
 
         else:
-            print(f"{colorama.Fore.RED}Error:{colorama.Style.RESET_ALL} Record {record_num} is out of range of 0:{self.t_used-1} indexes of records.")
+            print(f"{colorama.Fore.RED}Error:{colorama.Style.RESET_ALL} Record {record_num} is out of range of 0:{self.t_used - 1} indexes of records.")
 
-    def comm_remove(self, mode:str=None, table:str=None, num:int=None, silent:bool=False) -> None:
+    def comm_remove(self, mode: str = None, table: str = None, num: int = None, silent: bool = False) -> None:
         """Removes record from the chosen table, or data directly from the table and the tied record.
 
         Args:
@@ -398,21 +398,18 @@ class MVB_HASH_TABLE_SIMPLE_TOOLKIT(nfb.BaseComp):
 
         """
 
-        if table == None or mode == None or num == None:
+        if table is None or mode is None or num is None:
             print(f"{colorama.Fore.RED}Error:{colorama.Style.RESET_ALL} Invalid arguments. Usage of remove: remove (mode=[record, hash]) (table=[toeplitz, xor]) (num).")
             return
 
         params = self.get_params(table)
 
-        if params == None:
+        if params is None:
             print(f"{colorama.Fore.RED}Error:{colorama.Style.RESET_ALL} Invalid table. Possible tables are both, toeplitz, xor.")
             return
 
-        name = params[0]
-        hash_function = params[1]
-        keys = params[2]
-        hash_table = params[3]
-        used = params[4]
+        # name = params[0]
+        hash_function, keys, hash_table, used = params[1:5]
 
         if mode == "record":
             if num < used:
@@ -423,15 +420,15 @@ class MVB_HASH_TABLE_SIMPLE_TOOLKIT(nfb.BaseComp):
                 self.t_params[4] -= 1 if table == "toeplitz" else 0
                 self.x_params[4] -= 1 if table == "xor" else 0
 
-                if not(silent):
+                if not silent:
                     print(f"{colorama.Fore.GREEN}Success:{colorama.Style.RESET_ALL} Record {num} successfully removed.")
 
             else:
-                print(f"{colorama.Fore.RED}Error:{colorama.Style.RESET_ALL} Record {num} is out of range of 0:{used-1} indexes of records.")
+                print(f"{colorama.Fore.RED}Error:{colorama.Style.RESET_ALL} Record {num} is out of range of 0:{used - 1} indexes of records.")
 
         elif mode == "hash":
             if num < self.table_capacity:
-                if hash_table[num][0] == True:
+                if hash_table[num][0] is True:
                     hash_table[num][0] = False
 
                     for i in range(used):
@@ -450,12 +447,12 @@ class MVB_HASH_TABLE_SIMPLE_TOOLKIT(nfb.BaseComp):
                     print(f"{colorama.Fore.RED}Error:{colorama.Style.RESET_ALL} Position {num} is already empty.")
 
             else:
-                print(f"{colorama.Fore.RED}Error:{colorama.Style.RESET_ALL} Position {num} is out of range of 0:{self.table_capacity-1} indexed of hash_table.")
+                print(f"{colorama.Fore.RED}Error:{colorama.Style.RESET_ALL} Position {num} is out of range of 0:{self.table_capacity - 1} indexed of hash_table.")
 
         else:
             print(f"{colorama.Fore.RED}Error:{colorama.Style.RESET_ALL} Invalid mode. The possible modes are: record, hash")
 
-    def comm_clear(self, table:str=None, silent=False) -> None:
+    def comm_clear(self, table: str = None, silent=False) -> None:
         """Clears all data in the chosen table.
 
         Args:
@@ -463,32 +460,32 @@ class MVB_HASH_TABLE_SIMPLE_TOOLKIT(nfb.BaseComp):
             silent: cancels print outs.
 
         """
-        if table == None:
+        if table is None:
             print(f"{colorama.Fore.RED}Error:{colorama.Style.RESET_ALL} Invalid arguments. Usage of clear: clear (table=[toeplitz, xor]).")
             return
 
         params = self.get_params(table)
 
-        if params == None:
+        if params is None:
             print(f"{colorama.Fore.RED}Error:{colorama.Style.RESET_ALL} Invalid table. Possible tables are both, toeplitz, xor.")
             return
 
         clear_safe_switch = False
 
-        if silent == False:
+        if not silent:
             clear_safe_switch = input(f"{colorama.Fore.RED}You are about to delete all records in {params[0]} TABLE. Are you sure? (y/n) {colorama.Style.RESET_ALL}") == "y"
 
         if clear_safe_switch or silent:
             params[2].clear()
-            params[3] = self.table_capacity*[[False, 0]]
+            params[3] = self.table_capacity * [[False, 0]]
 
             self.t_params[4] = 0 if table == "toeplitz" else self.t_params[4]
             self.x_params[4] = 0 if table == "xor" else self.x_params[4]
 
-            if silent == False:
+            if not silent:
                 print(f"{colorama.Fore.GREEN}Success:{colorama.Style.RESET_ALL} {params[0]} TABLE has been cleared.")
         else:
-            if silent == False:
+            if not silent:
                 print("Clear operation aborted.")
 
     def comm_hwconfig(self) -> None:
@@ -497,7 +494,7 @@ class MVB_HASH_TABLE_SIMPLE_TOOLKIT(nfb.BaseComp):
         print(f"\n{colorama.Fore.BLUE + colorama.Style.BRIGHT}CONNECTED TO COMPONENT:{colorama.Style.RESET_ALL} {self.conected_to_comp}")
         print(f"\n{colorama.Fore.BLUE + colorama.Style.BRIGHT}MVB_KEY_WIDTH:{colorama.Style.RESET_ALL} {self.mvb_key_width}\n{colorama.Fore.BLUE + colorama.Style.BRIGHT}DATA_OUT_WIDTH:{colorama.Style.RESET_ALL} {self.data_out_width}\n{colorama.Fore.BLUE + colorama.Style.BRIGHT}HASH_WIDTH:{colorama.Style.RESET_ALL} {self.hash_width}\n{colorama.Fore.BLUE + colorama.Style.BRIGHT}self.hash_key_WIDTH:{colorama.Style.RESET_ALL} {self.hash_key_width}\n{colorama.Fore.BLUE + colorama.Style.BRIGHT}TABLE_CAPACITY:{colorama.Style.RESET_ALL} {self.table_capacity}\n")
 
-    def comm_commit(self, silent:bool=False) -> None:
+    def comm_commit(self, silent: bool = False) -> None:
         """Upload data from the tables to component.
 
         Args:
@@ -505,19 +502,19 @@ class MVB_HASH_TABLE_SIMPLE_TOOLKIT(nfb.BaseComp):
 
         """
 
-        if self.conected_to_comp == False:
+        if not self.conected_to_comp:
             print(f"{colorama.Fore.RED}Error:{colorama.Style.RESET_ALL} Can't commit, connection to component not active.")
             return
 
-        if silent == False:
+        if not silent:
             if input("Commit to component? (y/n): ") == "n":
                 print("Commit operation aborted.")
                 return
 
-        hash_key_bytes = (self.hash_key).to_bytes(self.hash_key_width//8, 'little')
+        hash_key_bytes = (self.hash_key).to_bytes(self.hash_key_width // 8, 'little')
 
         for i in range(ceildiv(4, len(hash_key_bytes))):
-            self._comp.write32(self._HASH_KEY_REG, int.from_bytes(hash_key_bytes[4*i : 4*(i+1)], 'little'))
+            self._comp.write32(self._HASH_KEY_REG, int.from_bytes(hash_key_bytes[4 * i: 4 * (i + 1)], 'little'))
 
         self._comp.write32(self._COMMAND_REG, self._CLEAR_TABLES)
 
@@ -526,25 +523,22 @@ class MVB_HASH_TABLE_SIMPLE_TOOLKIT(nfb.BaseComp):
         for i in range(self.num_of_tables):
             self._comp.write32(self._COMMAND_REG, i)
 
-            name = params[i][0]
-            hash_function = params[i][1]
-            keys = params[i][2]
-            hash_table = params[i][3]
-            used = params[i][4]
+            # name = params[i][0]
+            hash_function, keys, hash_table, used = params[i][1:5]
 
             for j in range(len(keys)):
                 hash_key = hash_function(keys[j], self.hash_func_params)
-                address_bytes = hash_key.to_bytes(self.mvb_key_width//8, 'little')
-                data_bytes = ((int(keys[j]) << (self.data_out_width+1)) + (hash_table[hash_key][1] << 1) + 1).to_bytes((self.mvb_key_width//8)+(self.data_out_width//8)+1, 'little')
+                address_bytes = hash_key.to_bytes(self.mvb_key_width // 8, 'little')
+                data_bytes = ((int(keys[j]) << (self.data_out_width + 1)) + (hash_table[hash_key][1] << 1) + 1).to_bytes((self.mvb_key_width // 8) + (self.data_out_width // 8) + 1, 'little')
 
                 self._comp.write32(self._ADDR_REG, int.from_bytes(address_bytes, 'little'))
 
                 for k in range(ceildiv(4, len(data_bytes))):
-                    self._comp.write32(self._DATA_REG, int.from_bytes(data_bytes[4*k : 4*(k+1)], 'little'))
+                    self._comp.write32(self._DATA_REG, int.from_bytes(data_bytes[4 * k: 4 * (k + 1)], 'little'))
 
                 self._comp.write32(self._COMMIT_REG, 0)
 
-    def comm_save(self, path:str=None, silent:bool=False) -> None:
+    def comm_save(self, path: str = None, silent: bool = False) -> None:
         """Save configuration to a file.
 
         Args:
@@ -552,12 +546,12 @@ class MVB_HASH_TABLE_SIMPLE_TOOLKIT(nfb.BaseComp):
             silent: if True, cancels print-outs.
 
         """
-        if path == None:
+        if path is None:
             print(f"{colorama.Fore.RED}Error:{colorama.Style.RESET_ALL} Invalid arguments. Usage of save: save (path).")
             return
         try:
             fp = open(path, 'w+')
-        except:
+        except Exception:
             print(f"{colorama.Fore.RED}Error:{colorama.Style.RESET_ALL} Failed to create file {path}.")
             return
 
@@ -600,10 +594,10 @@ class MVB_HASH_TABLE_SIMPLE_TOOLKIT(nfb.BaseComp):
         yaml.safe_dump(yaml_data, fp)
         fp.close()
 
-        if not(silent):
+        if not silent:
             print(f"{colorama.Fore.GREEN}Success:{colorama.Style.RESET_ALL} Configuration successfully saved to {path}.")
 
-    def comm_load(self, path:str=None, silent:bool=False) -> None:
+    def comm_load(self, path: str = None, silent: bool = False) -> None:
         """Loads config file.
 
         Args:
@@ -611,17 +605,17 @@ class MVB_HASH_TABLE_SIMPLE_TOOLKIT(nfb.BaseComp):
             silent: if True, cancels print-outs.
         """
 
-        if path == None:
+        if path is None:
             print(f"{colorama.Fore.RED}Error:{colorama.Style.RESET_ALL} Invalid arguments. Usage of load: load (path).")
             return
 
-        if (len(self.t_keys) > 0 or len(self.x_keys) > 0) and not(silent):
+        if (len(self.t_keys) > 0 or len(self.x_keys) > 0) and not silent:
             if input(f"{colorama.Fore.RED}Warning:{colorama.Style.RESET_ALL} Unsaved changes will be ovewritten. Continue? (y/n) ") != "y":
                 print("Load operation aborted.")
                 return
         try:
             fp = open(path, 'r')
-        except:
+        except Exception:
             print(f"{colorama.Fore.RED}Error:{colorama.Style.RESET_ALL} Failed to open file {path}.")
             return
 
@@ -629,29 +623,28 @@ class MVB_HASH_TABLE_SIMPLE_TOOLKIT(nfb.BaseComp):
 
         try:
             yaml_data = yaml.safe_load(fp)
-
-        except:
+        except Exception:
             print(f"{colorama.Fore.RED}Error:{colorama.Style.RESET_ALL} Failed to read yaml data.")
             return
 
         comp_conf = yaml_data.get("mvb_hash_table_simple", None)
 
-        if comp_conf == None:
+        if comp_conf is None:
             print(f"{colorama.Fore.RED}Error:{colorama.Style.RESET_ALL} Configuration file not intended for MVB_HASH_TABLE_SIMPLE or in a wrong format.")
             return
 
         self.hash_key = comp_conf["hash_key"]
 
-        if self.conected_to_comp == True:
+        if self.conected_to_comp:
             try:
-                assert(self.mvb_key_width == comp_conf["mvb_key_width"])
-                assert(self.data_out_width == comp_conf["data_out_width"])
-                assert(self.table_capacity == comp_conf["table_capacity"])
-                assert(self.hash_width == comp_conf["hash_width"])
-                assert(self.hash_key_width == comp_conf["hash_key_width"])
-                assert(self.num_of_tables == comp_conf["num_of_tables"])
+                assert (self.mvb_key_width == comp_conf["mvb_key_width"])
+                assert (self.data_out_width == comp_conf["data_out_width"])
+                assert (self.table_capacity == comp_conf["table_capacity"])
+                assert (self.hash_width == comp_conf["hash_width"])
+                assert (self.hash_key_width == comp_conf["hash_key_width"])
+                assert (self.num_of_tables == comp_conf["num_of_tables"])
 
-            except:
+            except Exception:
                 print(f"{colorama.Fore.RED}Error:{colorama.Style.RESET_ALL} Parameter missing or parametres in configuration file and in connected component don't match.")
                 return
 
@@ -688,16 +681,16 @@ class MVB_HASH_TABLE_SIMPLE_TOOLKIT(nfb.BaseComp):
                     hash_table[h] = [True, data]
                     params[i][4] += 1
 
-                except:
+                except Exception:
                     print(f"{colorama.Fore.RED}Error:{colorama.Style.RESET_ALL} Data in record missing or in wrong format.")
                     return
 
         fp.close()
 
-        if not(silent):
+        if not silent:
             print(f"{colorama.Fore.GREEN}Success:{colorama.Style.RESET_ALL} Configuration successfully loaded.")
 
-    def comm_hash(self, hash_function:str=None, num:int=None) -> None:
+    def comm_hash(self, hash_function: str = None, num: int = None) -> None:
         """Calculates hash from the passed number using the chosen hash function (used for testing).
 
         Args:
@@ -706,7 +699,7 @@ class MVB_HASH_TABLE_SIMPLE_TOOLKIT(nfb.BaseComp):
 
         """
 
-        if hash_function == None or num == None:
+        if hash_function is None or num is None:
             print(f"{colorama.Fore.RED}Error:{colorama.Style.RESET_ALL} Invalid arguments. Usage of hash: hash (hash_function=[toeplitz, xor]) (num).")
             return
 
@@ -725,7 +718,7 @@ class MVB_HASH_TABLE_SIMPLE_TOOLKIT(nfb.BaseComp):
 
         """
 
-        if hash_function == None:
+        if hash_function is None:
             print(f"{colorama.Fore.RED}Error:{colorama.Style.RESET_ALL} Invalid arguments. Usage of hash: testkey (hash_function=[toeplitz, xor]).")
 
         if hash_function == "toeplitz":
@@ -756,7 +749,7 @@ class MVB_HASH_TABLE_SIMPLE_TOOLKIT(nfb.BaseComp):
         print(f"{colorama.Fore.RED}Error:{colorama.Style.RESET_ALL} Invalid command or arguments. Use command 'help' to view usage.")
 
 
-def toeplitz_hash(mvb_key:int, params:dict) -> int:
+def toeplitz_hash(mvb_key: int, params: dict) -> int:
     """Calculates hash using the toeplitz hash function.
 
     Args:
@@ -778,7 +771,7 @@ def toeplitz_hash(mvb_key:int, params:dict) -> int:
     hash_bits = hash_width * [0]
 
     for i in range(mvb_key_width):
-        key_slice = hash_key_bits[i : i+hash_width]
+        key_slice = hash_key_bits[i:i+hash_width]
         key_hash = hash_width * [0]
 
         if mvb_key_bits[i] == 1:
@@ -788,7 +781,8 @@ def toeplitz_hash(mvb_key:int, params:dict) -> int:
 
     return bits_to_int(hash_bits, len(hash_bits))
 
-def simple_xor_hash(mvb_key:int, params:dict) -> int:
+
+def simple_xor_hash(mvb_key: int, params: dict) -> int:
     """Calculates hash using the simple xor hash function.
 
     Args:
@@ -811,6 +805,7 @@ def simple_xor_hash(mvb_key:int, params:dict) -> int:
     hash_bits = xor_bits(mvb_key_bits[::-1], hash_key_bits[::-1], hash_width)
 
     return bits_to_int(hash_bits[::-1], hash_width)
+
 
 def main() -> None:
     """Main function of the script if run from the terminal."""
@@ -852,7 +847,7 @@ def main() -> None:
 
     try:
         dev = nfb.open(dev_path)
-    except:
+    except Exception:
         print(f"{colorama.Fore.RED}Error:{colorama.Style.RESET_ALL} Failed to open '{dev_path}' Starting in offline mode.")
 
     MVB_HASH_TABLE_SIMPLE_TOOLKIT(inter, mod_path, dev=dev)

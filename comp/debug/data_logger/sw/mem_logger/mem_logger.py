@@ -7,6 +7,7 @@ import argparse
 import nfb
 from data_logger.data_logger import DataLogger
 
+
 class MemLogger(DataLogger):
 
     DT_COMPATIBLE = "netcope,mem_logger"
@@ -23,7 +24,7 @@ class MemLogger(DataLogger):
             self.config["MEM_BURST_WIDTH"]  = self.get_bits(ctrli, self.mi_width, self.mi_width * 2)
             self.config["MEM_FREQ_KHZ"]     = self.get_bits(ctrli, self.mi_width, self.mi_width * 3)
 
-        except:
+        except Exception:
             print("ERROR while opening MemLogger component!\nMaybe unsupported FPGA firmware?!")
             exit(1)
 
@@ -111,7 +112,7 @@ class MemLogger(DataLogger):
         for i, v in enumerate(stats["latency"]["hist"]):
             end   = self.ticks_to_s((i + 1) * hist_step - 1) * 10**9
             stats["latency"]["hist_ns"][end] = v
-        stats["latency"]["hist_ns"]= self.trim_hist(stats["latency"]["hist_ns"])
+        stats["latency"]["hist_ns"] = self.trim_hist(stats["latency"]["hist_ns"])
 
         return stats
 
@@ -138,37 +139,37 @@ class MemLogger(DataLogger):
         res += self.line_to_str("read requests    ", stats['rd_req_cnt'])
         res += self.line_to_str("  requested words", stats['rd_req_words'])
         res += self.line_to_str("  received words ", stats['rd_resp_words'])
-        res += f"Handshakes:\n"
+        res += "Handshakes:\n"
         res += self.line_to_str("  avmm rdy hold      ", stats['rdy_hold_read'] + stats['rdy_hold_write'])
         res += self.line_to_str("  avmm rdy hold (rd) ", stats['rdy_hold_read'])
         res += self.line_to_str("  avmm rdy hold (wr) ", stats['rdy_hold_write'])
         res += self.line_to_str("  no request         ", stats["request_hold"])
         res += self.line_to_str("  wait               ", stats["wait"])
-        res += f"Flow:\n"
+        res += "Flow:\n"
         res += self.line_to_str("  write", stats['wr_flow_gbs'],      "Gb/s")
         res += self.line_to_str("  read ", stats['rd_flow_gbs'],      "Gb/s")
         res += self.line_to_str("  total", stats['total_flow_gbs'],   "Gb/s")
-        res += f"Time:\n"
+        res += "Time:\n"
         res += self.line_to_str("  write", stats['wr_time_ms'],       "ms")
         res += self.line_to_str("  read ", stats['rd_time_ms'],       "ms")
         res += self.line_to_str("  total", stats['total_time_ms'],    "ms")
-        res += f"Latency:\n"
+        res += "Latency:\n"
         res += self.line_to_str("  min",   stats['latency']["min_ns"], "ns")
         res += self.line_to_str("  max",   stats['latency']["max_ns"], "ns")
         res += self.line_to_str("  avg",   stats['latency']["avg_ns"], "ns")
-        res += f"  histogram [ns]:\n"
+        res += "  histogram [ns]:\n"
         if len(stats['latency']['hist_ns']) > 0:
             prev = 0
             for k, v in stats['latency']['hist_ns'].items():
                 if v != 0:
                     res += self.line_to_str(f"    {prev:> 6.1f} -{k:> 6.1f} ...", v)
                 prev = k
-        res += f"Errors:\n"
+        res += "Errors:\n"
         res += self.line_to_str("  zero burst count", stats['err_zero_burst'])
         res += self.line_to_str("  simultaneous r+w", stats['err_simult_rw'])
 
         if self.config['VALUE_CNT'] > 1:
-            res += f"Paralel reads count:\n"
+            res += "Paralel reads count:\n"
             res += self.line_to_str("  min",   stats['paralel_read']["min"], "")
             res += self.line_to_str("  max",   stats['paralel_read']["max"], "")
             res += self.line_to_str("  avg",   stats['paralel_read']["avg"], "")
@@ -184,8 +185,8 @@ class MemLogger(DataLogger):
 
     def config_to_str(self):
         res = ""
-        res += f"Mem_logger config:\n"
-        res += f"------------------\n"
+        res += "Mem_logger config:\n"
+        res += "------------------\n"
         res += f"MEM_DATA_WIDTH:     {self.config['MEM_DATA_WIDTH']}\n"
         res += f"MEM_ADDR_WIDTH:     {self.config['MEM_ADDR_WIDTH']}\n"
         res += f"MEM_BURST_WIDTH     {self.config['MEM_BURST_WIDTH']}\n"
@@ -193,7 +194,7 @@ class MemLogger(DataLogger):
         res += f"LATENCY_WIDTH:      {self.config['VALUE_WIDTH'][0]}\n"
         res += f"HIST_BOX_CNT:       {self.config['HIST_BOX_CNT'][0]}\n"
         res += f"HIST_BOX_WIDTH:     {self.config['HIST_BOX_WIDTH'][0]}\n"
-        res += f"\n"
+        res += "\n"
         return res
 
     def print(self):
@@ -202,19 +203,20 @@ class MemLogger(DataLogger):
         stats = self.load_stats()
         print(self.stats_to_str(stats))
 
+
 def parseParams():
-    parser = argparse.ArgumentParser(description =
-        """mem_logger control script""",
+    parser = argparse.ArgumentParser(
+        description="mem_logger control script",
     )
 
     access = parser.add_argument_group('card access arguments')
     access.add_argument('-d', '--device', default=nfb.libnfb.Nfb.default_device,
-                        metavar='device', help = """device with target FPGA card""")
-    access.add_argument('-i', '--index',        type=int, metavar='index', default=0, help = """index inside DevTree""")
+                        metavar='device', help="""device with target FPGA card""")
+    access.add_argument('-i', '--index', type=int, metavar='index', default=0, help="""index inside DevTree""")
 
     common = parser.add_argument_group('common arguments')
     #common.add_argument('-p', '--print', action='store_true', help = """print registers""")
-    common.add_argument('--rst', action='store_true', help = """reset mem_tester and mem_logger""")
+    common.add_argument('--rst', action='store_true', help="""reset mem_tester and mem_logger""")
     args = parser.parse_args()
     return args
 

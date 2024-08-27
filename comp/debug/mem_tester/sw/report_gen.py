@@ -7,24 +7,21 @@
 # sudo yum install texlive
 # pandoc mem_tester_report.md -o mem_tester_report.pdf -V geometry:a4paper -V geometry:margin=2cm -f markdown-implicit_figures
 
-import os
 import subprocess
-import sys
 import argparse
 import json
 import numpy as np
 
 import nfb
-from mem_tester                 import MemTester
-from mem_logger.mem_logger      import MemLogger
-from logger_tools.logger_tools  import LoggerTools
-from graph_gen.graph_gen        import GraphGen
-from pdf_gen.pdf_gen            import PDFGen
+from mem_tester import MemTester
+from mem_logger.mem_logger import MemLogger
+from logger_tools.logger_tools import LoggerTools
+from graph_gen.graph_gen import GraphGen
+from pdf_gen.pdf_gen import PDFGen
+
 
 class ReportGen:
-    def __init__(self, graph_gen,
-        dev         = "/dev/nfb0"
-    ):
+    def __init__(self, graph_gen, dev="/dev/nfb0"):
         self.graph_gen      = graph_gen
         self.dev            = dev
 
@@ -105,8 +102,8 @@ class ReportGen:
 # MAIN #
 ########
 
- # https://stackoverflow.com/questions/3173320/text-progress-bar-in-terminal-with-block-characters
-def print_progress(progress, txt='Complete', prefix = 'Progress', decimals = 1, length = 30, fill = '█', printEnd = "\r"):
+# https://stackoverflow.com/questions/3173320/text-progress-bar-in-terminal-with-block-characters
+def print_progress(progress, txt='Complete', prefix='Progress', decimals=1, length=30, fill='█', printEnd="\r"):
     """
     Call in a loop to create terminal progress bar
     @params:
@@ -130,23 +127,26 @@ def print_progress(progress, txt='Complete', prefix = 'Progress', decimals = 1, 
     percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
     filledLength = int(length * iteration // total)
     bar = fill * filledLength + '-' * (length - filledLength)
-    print(f'\r{prefix} |{bar}| {percent}% {txt:<30}', end = printEnd)
+    print(f'\r{prefix} |{bar}| {percent}% {txt:<30}', end=printEnd)
     # Print New Line on Complete
     if iteration >= total:
         progress[2] = True
         print()
 
+
 def parseParams():
-    parser = argparse.ArgumentParser(description ="""Report generator for mem_tester component""")
+    parser = argparse.ArgumentParser(description="""Report generator for mem_tester component""")
     parser.add_argument('-d', '--device', default=nfb.libnfb.Nfb.default_device,
-                        metavar='device', help = """device with target FPGA card.""")
+                        metavar='device', help="""device with target FPGA card.""")
     parser.add_argument('format', nargs='?', default='pdf', choices=['md', 'pdf'],
-                        help = """Format of the output report)""")
+                        help="""Format of the output report)""")
     args = parser.parse_args()
     return args
 
+
 def run_cmd(cmd):
     return subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE).stdout.read().strip().decode("utf-8")
+
 
 def latency_table(pdf, bursts, latencies):
     header  = ['Latency x burst']
@@ -163,8 +163,6 @@ def latency_table(pdf, bursts, latencies):
     pdf.table(header, data)
 
 
-
-
 if __name__ == '__main__':
     args        = parseParams()
 
@@ -173,7 +171,7 @@ if __name__ == '__main__':
     img_path    = 'fig/'
 
     tools       = LoggerTools()
-    graph_gen   = GraphGen(folder=img_path, ratio=(13,6), output=[".png"])
+    graph_gen   = GraphGen(folder=img_path, ratio=(13, 6), output=[".png"])
     gen         = ReportGen(graph_gen, dev=args.device)
     pdf         = PDFGen()
 
@@ -203,7 +201,6 @@ if __name__ == '__main__':
         test_params = {'rand_addr': True, 'addr_lim_scale': addr_scale, 'only_one_simult_read': True}
         gen.test('rand-burst-one-simult', 'Test different burst lengths', index, test_params, 'burst_cnt', burst_seq)
 
-
         ## Get data ##
 
         print_progress(progress, 'processing data')
@@ -222,7 +219,7 @@ if __name__ == '__main__':
 
         # Plot data flow
         print_progress(progress, 'generating graphs')
-        graph_gen.init_plots()  #title="Data flow")
+        graph_gen.init_plots()  # title="Data flow")
         graph_gen.basic_plot(burst_seq_b, [
             seq_data['wr_flow_gbs'],
             seq_data['rd_flow_gbs'],
@@ -263,7 +260,7 @@ if __name__ == '__main__':
             limits = (min(burst_seq_b), max(burst_seq_b), min(data['latency']['min_ns']) - offset, max(data['latency']['max_ns']) - offset)
             hist_arr /= np.array(data["rd_req_cnt"])
 
-            graph_gen.init_plots()  #title="Read latency")
+            graph_gen.init_plots()  # title="Read latency")
             graph_gen.basic_plot(burst_seq_b, [
                 data['latency']["min_ns"],
                 #data['latency']["avg_ns"],
@@ -283,7 +280,6 @@ if __name__ == '__main__':
             #graph_gen.set_ylabel("occurrence")
             #graph_gen.plot_save(f"{index}_latency_" + type + f'_zoom_{zoom_burst}')
 
-
     ## Generate PDF ##
     print_progress(progress, 'generating report')
     pdf.heading(1, "Memory tester report")
@@ -299,18 +295,19 @@ if __name__ == '__main__':
     pdf.heading(2, "Test conditions")
     header  = ['Parameter', 'Value']
     data    = []
-    data.append([f"device          ",   info['dev']       ])
-    data.append([f"card name       ",   card              ])
-    data.append([f"project name    ",   proj              ])
-    data.append([f"build time      ",   build             ])
-    data.append([f"mem_tester count",   info['tester_cnt']])
-    data.append([f"mem_logger count",   info['logger_cnt']])
+    data.append(["device          ",   info['dev']])
+    data.append(["card name       ",   card])
+    data.append(["project name    ",   proj])
+    data.append(["build time      ",   build])
+    data.append(["mem_tester count",   info['tester_cnt']])
+    data.append(["mem_logger count",   info['logger_cnt']])
     pdf.table(header, data)
 
     header  = ['Interface', 'DATA WIDTH', 'ADDRESS WIDTH', 'BURST WIDTH', 'Frequency [MHz]']
     data    = []
     for i in range(info['logger_cnt']):
-        data.append([i,
+        data.append([
+            i,
             info['logger_config'][i]['MEM_DATA_WIDTH'],
             info['logger_config'][i]['MEM_ADDR_WIDTH'],
             info['logger_config'][i]['MEM_BURST_WIDTH'],
@@ -329,20 +326,22 @@ if __name__ == '__main__':
             pdf.text(f"Errors:\n {full_data['errs'][0]}")
 
         full_data = full_data['stats']
-        header  = ['Statistic', 'Sequential indexing', 'Random indexing']
-        data    = []
-        get_row = lambda txt, data, unit: [txt, f"{data[0]:<.2f} {unit}", f"{data[1]:<.2f} {unit}"]
-        data.append(get_row("total time",      full_data['total_time_ms'], "ms"    ))
-        data.append(get_row("write time",      full_data['wr_time_ms'],    "ms"    ))
-        data.append(get_row("read time",       full_data['rd_time_ms'],    "ms"    ))
-        data.append(get_row("total data flow", full_data['total_flow_gbs'],"Gbps"  ))
-        data.append(get_row("write data flow", full_data['wr_flow_gbs'],   "Gbps"  ))
-        data.append(get_row("read data flow",  full_data['rd_flow_gbs'],   "Gbps"  ))
-        data.append(get_row("min read latency",full_data['latency']['min_ns'], "ns"))
-        data.append(get_row("avg read latency",full_data['latency']['avg_ns'], "ns"))
-        data.append(get_row("max read latency",full_data['latency']['max_ns'], "ns"))
-        pdf.table(header, data)
+        header = ['Statistic', 'Sequential indexing', 'Random indexing']
 
+        def get_row(txt, data, unit):
+            return [txt, f"{data[0]:<.2f} {unit}", f"{data[1]:<.2f} {unit}"]
+
+        data = []
+        data.append(get_row("total time",       full_data['total_time_ms'],     "ms"))
+        data.append(get_row("write time",       full_data['wr_time_ms'],        "ms"))
+        data.append(get_row("read time",        full_data['rd_time_ms'],        "ms"))
+        data.append(get_row("total data flow",  full_data['total_flow_gbs'],    "Gbps"))
+        data.append(get_row("write data flow",  full_data['wr_flow_gbs'],       "Gbps"))
+        data.append(get_row("read data flow",   full_data['rd_flow_gbs'],       "Gbps"))
+        data.append(get_row("min read latency", full_data['latency']['min_ns'], "ns"))
+        data.append(get_row("avg read latency", full_data['latency']['avg_ns'], "ns"))
+        data.append(get_row("max read latency", full_data['latency']['max_ns'], "ns"))
+        pdf.table(header, data)
 
         pdf.heading(2, "Maximum data flow")
         pdf.text(f"*following tests were performed on {addr_scale * 100:<.2f}% of the whole memory address space and tested different burst counts")
@@ -360,7 +359,6 @@ if __name__ == '__main__':
         pdf.image(img_path + f'{index}_latency_rand.png')
         latency_table(pdf, table_bursts, rand_data)
 
-
         pdf.heading(2, "Read latency (sequential read)")
         pdf.text("*mem_tester waits for every read response before starting another")
         pdf.heading(3, "Test with sequential addressing")
@@ -370,7 +368,6 @@ if __name__ == '__main__':
         pdf.heading(3, "Test with random addressing")
         pdf.image(img_path + f'{index}_latency_rand_one_simult.png')
         latency_table(pdf, table_bursts, rand_data_one_simult)
-
 
     print_progress(progress, 'finishing report')
     pdf.save(report_file)

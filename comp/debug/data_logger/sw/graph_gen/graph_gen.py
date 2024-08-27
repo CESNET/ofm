@@ -7,6 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 
+
 class GraphGen:
     def __init__(self, folder="", ratio=(10, 4), output=[".pdf", ".png"]):
         self.folder = folder
@@ -69,11 +70,12 @@ class GraphGen:
 
     def plot_2d(self, data, index=None, log=False, limits=None, min=None, ip="none", cmap='jet', **kwargs):
         ax = self.indexToAx(index)
-        log = LogNorm() if log else None #"log" if log else None
+        log = LogNorm() if log else None  # "log" if log else None
         if min is not None:
             data[data <= min] = np.nan
 
-        im = ax.imshow(data,
+        im = ax.imshow(
+            data,
             extent=limits,
             aspect='auto',
             norm=log,
@@ -103,4 +105,3 @@ class GraphGen:
         if index is not None:
             ax = ax[index]
         return ax
-

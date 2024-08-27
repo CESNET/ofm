@@ -2,7 +2,6 @@
 # Copyright (C) 2022 CESNET z. s. p. o.
 # Author(s): Lukas Nevrkla <xnevrk03@stud.fit.vutbr.cz>
 
-import pytest
 from mem_tester import MemTester
 from mem_logger.mem_logger import MemLogger
 
@@ -17,8 +16,10 @@ from mem_logger.mem_logger import MemLogger
 
 device = '/dev/nfb0'
 
+
 def comp_cnt(comp=MemTester.DT_COMPATIBLE):
     return MemTester.compatible_cnt(comp=comp, dev=device)
+
 
 def test_comp_cnt():
     tester_cnt = comp_cnt()
@@ -29,14 +30,18 @@ def test_comp_cnt():
 
     assert logger_cnt == tester_cnt, "Number of mem_testers does not match number of mem_loggers"
 
+
 def open(index):
     logger = MemLogger(index=index, dev=device)
     tester = MemTester(logger, index=index, dev=device)
     return tester
 
+
 def test_open():
     for i in range(0, comp_cnt()):
         open(i)
+
+
 def test_status():
     for i in range(0, comp_cnt()):
         tester = open(i)
@@ -45,6 +50,7 @@ def test_status():
         assert status["calib_succ"] or status["calib_fail"], "Memory calibration was not finished"
         assert status["calib_succ"], "Memory calibration was not successful"
         assert status["amm_ready"], "Memory is not ready"
+
 
 def test_config():
     for i in range(0, comp_cnt()):
@@ -55,6 +61,7 @@ def test_config():
         assert config["MEM_ADDR_WIDTH"]     > 0, f"Invalid MEM_ADDR_WIDTH    ({config['MEM_ADDR_WIDTH']})"
         assert config["MEM_BURST_WIDTH"]    > 0, f"Invalid MEM_BURST_WIDTH   ({config['MEM_BURST_WIDTH']})"
         assert config["MEM_FREQ_KHZ"]       > 0, f"Invalid MEM_FREQ_KHZ      ({config['MEM_FREQ_KHZ']})"
+
 
 def test_seq():
     for i in range(0, comp_cnt()):
