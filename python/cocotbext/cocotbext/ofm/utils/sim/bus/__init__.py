@@ -4,6 +4,7 @@ from .. import modelsim as ms
 class Bus():
     _w = ms
     _SIGNALS = [] # or {}
+
     def __init__(self, instance, prefix, index=None, label=None, sep='_'):
         self._instance = instance
         self._prefix = prefix
@@ -21,7 +22,8 @@ class Bus():
         os = []
         for s in self._SIGNALS:
             os.append(self._get_handle(s))
-        self._w.add_wave(*os, group=self._label)#, expand=self._prefix)
+        self._w.add_wave(*os, group=self._label) # , expand=self._prefix)
+
 
 class MvbBus(Bus):
     _SIGNALS = ['DATA', 'VLD', 'SRC_RDY', 'DST_RDY']
@@ -41,8 +43,10 @@ class MvbBus(Bus):
         name = self._w.cmd(f"virtual function {{{self._w.cocotb2path(sr)} and {self._w.cocotb2path(dr)}}} transfer")
         self._w.add_wave(name, group=self._label, label='transfer')
 
+
 class MfbBus(Bus):
     _SIGNALS = ['DATA', 'SRC_RDY', 'DST_RDY', 'SOF', 'EOF', 'SOF_POS', 'EOF_POS']
+
 
 class MiBus(Bus):
     _SIGNALS = ['ADDR', 'DWR', 'BE', 'RD', 'WR', 'DRD', 'ARDY', 'DRDY']
@@ -50,7 +54,7 @@ class MiBus(Bus):
 
 class DmaUpMvbBus(MvbBus):
     _ITEMS = [
-        ('length',     range( 0, 11)),
+        ('length',     range(0,  11)),
         ('type',       range(11, 12)),
         ('firstib',    range(12, 14)),
         ('lastib',     range(14, 16)),
@@ -60,9 +64,10 @@ class DmaUpMvbBus(MvbBus):
         ('relaxed',    range(96, 97)),
     ]
 
+
 class DmaDownMvbBus(MvbBus):
     _ITEMS = [
-        ('length',     range( 0, 11)),
+        ('length',     range(0,  11)),
         ('completed',  range(11, 12)),
         ('tag',        range(12, 20)),
         ('unitid',     range(20, 28)),

@@ -1,7 +1,7 @@
 import copy
 
 import cocotb
-from cocotb.triggers import ClockCycles, FallingEdge, First, RisingEdge
+from cocotb.triggers import RisingEdge
 from cocotb_bus.drivers import BusDriver
 
 

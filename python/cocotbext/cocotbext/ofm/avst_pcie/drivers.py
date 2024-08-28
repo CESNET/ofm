@@ -1,7 +1,7 @@
 import copy
 
 import cocotb
-from cocotb.triggers import ClockCycles, FallingEdge, First, RisingEdge
+from cocotb.triggers import RisingEdge
 from cocotb_bus.drivers import BusDriver
 from cocotb.queue import Queue
 
@@ -24,14 +24,11 @@ class AvstPcieDriverMaster(BusDriver):
 
         cocotb.start_soon(self.send_transaction())
 
-
     async def write_cq(self, data, sync=True):
         self._cq_q.put_nowait((data, sync))
 
-
     async def write_rc(self, data, sync=True):
         self._rc_q.put_nowait((data, sync))
-
 
     async def send_transaction(self):
         while True:
@@ -45,7 +42,6 @@ class AvstPcieDriverMaster(BusDriver):
                 data, sync = self._rc_q.get_nowait()
 
             await self._write(data, sync)
-
 
     async def _write(self, data, sync=True):
         data = copy.copy(data)

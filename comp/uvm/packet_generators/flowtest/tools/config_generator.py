@@ -15,6 +15,7 @@ import ipaddress
 from typing import Optional
 from requests.structures import CaseInsensitiveDict
 
+
 class ConfigGenerator:
 
     ### PARAMETERS ###
@@ -69,14 +70,14 @@ class ConfigGenerator:
 
     ### INITIALIZING ###
 
-    def __init__(self, config : Optional[CaseInsensitiveDict] = None) -> None:
+    def __init__(self, config: Optional[CaseInsensitiveDict] = None) -> None:
         self.actual_packet_size_max_probability = self.PACKET_MIN_SIZE
         self.total_layers_probability = 100
 
         if config is not None:
             self.__apply_config(config)
 
-    def __apply_config(self, config : CaseInsensitiveDict) -> None:
+    def __apply_config(self, config: CaseInsensitiveDict) -> None:
         parameters = [attribute for attribute in dir(self) if attribute[0].isupper()] # Gets only parameters (e.g. PACKET_MIN_SIZE)
         for parameter in parameters:
             if parameter in config:
@@ -84,7 +85,7 @@ class ConfigGenerator:
 
     ### ENCAPSULATION GENERATION ###
 
-    def __generate_layer(self, layer_posible_typed : list) -> dict:
+    def __generate_layer(self, layer_posible_typed: list) -> dict:
         layer = {}
         if len(layer_posible_typed) != 1:
             type = random.choices(layer_posible_typed, weights=[5, 3], # In purpose of evenly distributed protocol headers.
@@ -98,7 +99,7 @@ class ConfigGenerator:
         if type == 'vlan':
             layer['id'] = random.randint(0, 4095)
         elif type == 'mpls':
-            layer['label'] = random.randint(0, pow(2, 20)-1)
+            layer['label'] = random.randint(0, pow(2, 20) - 1)
 
             if layer_posible_typed.count('vlan') != 0: # VLAN cannot follow MPLS.
                 layer_posible_typed.remove('vlan')
@@ -124,7 +125,7 @@ class ConfigGenerator:
         probability = random.randint(0, self.total_layers_probability)
         if probability == 0: # The encapsulation element with 0 probability of generation is useless.
             return None
-        encapsulation_element['probability'] = str(probability)+'%'
+        encapsulation_element['probability'] = str(probability) + '%'
         self.total_layers_probability = self.total_layers_probability - probability
 
         return encapsulation_element
@@ -143,7 +144,7 @@ class ConfigGenerator:
     ### IPv4 GENERATION ###
 
     def __generate_ipv4_address(self) -> str:
-        return str(ipaddress.IPv4Address(random.randint(0, pow(2, 32)-1)))+'/'+str(random.randint(self.IPv4_PREFIX_MIN, self.IPv4_PREFIX_MAX))
+        return str(ipaddress.IPv4Address(random.randint(0, pow(2, 32) - 1))) + '/' + str(random.randint(self.IPv4_PREFIX_MIN, self.IPv4_PREFIX_MAX))
 
     def __generate_ipv4_range(self) -> list:
         ipv4_range = self.MANDATORY_IPv4_ADDRESS_RANGES.copy()
@@ -159,7 +160,7 @@ class ConfigGenerator:
         ipv4 = {}
 
         fragmentation_probability = random.randint(0, 100)
-        ipv4['fragmentation_probability'] = str(fragmentation_probability)+'%'
+        ipv4['fragmentation_probability'] = str(fragmentation_probability) + '%'
 
         ipv4['min_packet_size_to_fragment'] = random.randint(self.IPv4_MIN_PACKET_SIZE_TO_FRAGMENT_MIN, self.IPv4_MIN_PACKET_SIZE_TO_FRAGMENT_MAX)
 
@@ -172,7 +173,7 @@ class ConfigGenerator:
     ### IPv6 GENERATION ###
 
     def __generate_ipv6_address(self) -> str:
-        return str(ipaddress.IPv6Address(random.randint(0, pow(2, 128)-1)))+'/'+str(random.randint(self.IPv6_PREFIX_MIN, self.IPv6_PREFIX_MAX))
+        return str(ipaddress.IPv6Address(random.randint(0, pow(2, 128) - 1))) + '/' + str(random.randint(self.IPv6_PREFIX_MIN, self.IPv6_PREFIX_MAX))
 
     def __generate_ipv6_range(self):
         ipv6_range = self.MANDATORY_IPv6_ADDRESS_RANGES.copy()
@@ -188,7 +189,7 @@ class ConfigGenerator:
         ipv6 = {}
 
         fragmentation_probability = random.randint(0, 100)
-        ipv6['fragmentation_probability'] = str(fragmentation_probability)+'%'
+        ipv6['fragmentation_probability'] = str(fragmentation_probability) + '%'
 
         ipv6['min_packet_size_to_fragment'] = random.randint(self.IPv6_MIN_PACKET_SIZE_TO_FRAGMENT_MIN, self.IPv6_MIN_PACKET_SIZE_TO_FRAGMENT_MAX)
 
@@ -201,7 +202,8 @@ class ConfigGenerator:
     ### MAC GENERATION ###
 
     def __generate_mac_address(self) -> str:
-        return ("%02x:%02x:%02x:%02x:%02x:%02x/%d" % # MAC address format.
+        return (
+            "%02x:%02x:%02x:%02x:%02x:%02x/%d" % # MAC address format.
             (
                 random.randint(0, 255),
                 random.randint(0, 255),
@@ -235,8 +237,8 @@ class ConfigGenerator:
     ### PACKET SIZE PROBABILITIES GENERATION ###
 
     def __generate_packet_size_bounds(self) -> str:
-        lower_bound = self.actual_packet_size_max_probability+1
-        upper_bound = random.randint(lower_bound+self.PACKET_SIZE_MIN_STEP, lower_bound+min(self.PACKET_SIZE_MAX_STEP, self.PACKET_MAX_SIZE-lower_bound))
+        lower_bound = self.actual_packet_size_max_probability + 1
+        upper_bound = random.randint(lower_bound + self.PACKET_SIZE_MIN_STEP, lower_bound + min(self.PACKET_SIZE_MAX_STEP, self.PACKET_MAX_SIZE - lower_bound))
         self.actual_packet_size_max_probability = upper_bound
         packet_size_bounds = f'{lower_bound}-{upper_bound}'
 
@@ -245,7 +247,7 @@ class ConfigGenerator:
     def __generate_packet_size_probabilities(self) -> dict:
         packet_size_probabilities = {}
 
-        while (self.PACKET_MAX_SIZE-self.actual_packet_size_max_probability) > self.PACKET_SIZE_MIN_STEP:
+        while (self.PACKET_MAX_SIZE - self.actual_packet_size_max_probability) > self.PACKET_SIZE_MIN_STEP:
             packet_size_bounds = self.__generate_packet_size_bounds()
             packet_size_probabilities[packet_size_bounds] = random.random()
 
@@ -257,8 +259,8 @@ class ConfigGenerator:
         config = {}
 
         config['encapsulation'] = self.__generate_encapsulation()
-        config['ipv4'         ] = self.__generate_ipv4()
-        config['ipv6'         ] = self.__generate_ipv6()
+        config['ipv4'] = self.__generate_ipv4()
+        config['ipv6'] = self.__generate_ipv6()
 
         mac = self.__generate_mac()
         if len(mac) != 0:
@@ -273,40 +275,46 @@ class ConfigGenerator:
 
 ### MANDATORY ADDRESSES PROCESSING ###
 
-def extend_list_attribute(dictionary : dict, attribute : str, value: list) -> None:
+
+def extend_list_attribute(dictionary: dict, attribute: str, value: list) -> None:
     if attribute in dictionary:
         dictionary[attribute].extend(value)
     else:
         dictionary[attribute] = value
 
-def add_ipv4_from_arguments(config : dict, ipv4_string : str) -> None:
+
+def add_ipv4_from_arguments(config: dict, ipv4_string: str) -> None:
     ipv4_addresses_from_arguments = ipv4_string.split(';')
     extend_list_attribute(config, 'MANDATORY_IPv4_ADDRESS_RANGES', ipv4_addresses_from_arguments)
 
-def add_ipv6_from_arguments(config : dict, ipv6_string : str) -> None:
+
+def add_ipv6_from_arguments(config: dict, ipv6_string: str) -> None:
     ipv6_addresses_from_arguments = ipv6_string.split(';')
     extend_list_attribute(config, 'MANDATORY_IPv6_ADDRESS_RANGES', ipv6_addresses_from_arguments)
 
-def add_mac_from_arguments(config : dict, mac_string : str) -> None:
+
+def add_mac_from_arguments(config: dict, mac_string: str) -> None:
     mac_addresses_from_arguments = mac_string.split(';')
     extend_list_attribute(config, 'MANDATORY_MAC_ADDRESS_RANGES', mac_addresses_from_arguments)
 
 ### ARGUMENT PARSING ###
 
+
 def parse_arguments() -> argparse.Namespace:
     argument_parser = argparse.ArgumentParser()
 
-    argument_parser.add_argument('-o', '--output', type=str, help='Output file for generated config.',                                 required=True)
-    argument_parser.add_argument('-s', '--seed',   type=int, help='Seed for randomization.',                                           default=int(time.time()*1000))
-    argument_parser.add_argument('-c', '--config', type=str, help='Input configuration json file.',                                    default=None)
-    argument_parser.add_argument('--ipv4',         type=str, help='IPv4 addresses in format \"addr1/mask1;addr2/mask2;addr3/mask3\".', default=None)
-    argument_parser.add_argument('--ipv6',         type=str, help='IPv6 addresses in format \"addr1/mask1;addr2/mask2;addr3/mask3\".', default=None)
-    argument_parser.add_argument('--mac',          type=str, help='MAC addresses in format \"addr1/mask1;addr2/mask2;addr3/mask3\".',  default=None)
+    argument_parser.add_argument('-o', '--output', type=str, help='Output file for generated config.', required=True)
+    argument_parser.add_argument('-s', '--seed', type=int, help='Seed for randomization.', default=int(time.time() * 1000))
+    argument_parser.add_argument('-c', '--config', type=str, help='Input configuration json file.', default=None)
+    argument_parser.add_argument('--ipv4', type=str, help='IPv4 addresses in format \"addr1/mask1;addr2/mask2;addr3/mask3\".', default=None)
+    argument_parser.add_argument('--ipv6', type=str, help='IPv6 addresses in format \"addr1/mask1;addr2/mask2;addr3/mask3\".', default=None)
+    argument_parser.add_argument('--mac', type=str, help='MAC addresses in format \"addr1/mask1;addr2/mask2;addr3/mask3\".', default=None)
 
     arguments = argument_parser.parse_args()
     return arguments
 
 ### MAIN ###
+
 
 def main() -> None:
     arguments = parse_arguments()

@@ -17,6 +17,7 @@ class IdleGenerator():
     Some idle generators need to know more about the bus parameters and should be parametrized
     with proper configure call.
     """
+
     def __init__(self):
         # some generators need to be fully configured before the put/get method can be called
         self._cfg_complete = False
@@ -61,7 +62,7 @@ class EthernetRateLimiter(IdleGenerator):
     Ensure the driver puts transaction with "end" argument.
     """
 
-    def __init__(self):
+    def __init__(self, bitrate):
         super().__init__()
 
         self._bitrate = bitrate

@@ -4,13 +4,11 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-import cocotb
 from cocotbext.ofm.base.drivers import BusDriver
-from cocotb.triggers import RisingEdge
 from cocotbext.ofm.mvb.utils import random_delays_config
 
 import random
-import string
+
 
 class MVBDriver(BusDriver):
     """Driver intender for the MVB bus used for sending transactions to the bus.
@@ -62,7 +60,7 @@ class MVBDriver(BusDriver):
             if self._mode == 1 or self._mode == 3:
                 self._data[i] = self._delays_fill
             elif self._mode == 2:
-                self._data[i] = random.randrange(0,256)
+                self._data[i] = random.randrange(0, 256)
         self._vld = 0
 
     async def _move_item(self) -> None:
@@ -90,7 +88,7 @@ class MVBDriver(BusDriver):
             if self.bus.dst_rdy.value == 1:
                 break
 
-        if random.choices((0,1), weights=self._cDelays["wordDelayEn_wt"], k=1)[0]:
+        if random.choices((0, 1), weights=self._cDelays["wordDelayEn_wt"], k=1)[0]:
             for i in self._cDelays["wordDelay"]:
                 self._fill_empty_word()
                 self._src_rdy = 1
@@ -99,7 +97,7 @@ class MVBDriver(BusDriver):
 
         self._clear_control_signals()
 
-    async def _send_data(self, data:bytes) -> None:
+    async def _send_data(self, data: bytes) -> None:
         """Prepares and sends transaction to the MVB bus.
 
            Args:
@@ -110,13 +108,13 @@ class MVBDriver(BusDriver):
         self.log.debug(f"ITEM {self._vld_item_cnt}:")
         self.log.debug(f"sending item: {data}")
 
-        self._data[self._item_offset*self._item_width:(self._item_offset+1)*self._item_width] = data
+        self._data[self._item_offset * self._item_width:(self._item_offset + 1) * self._item_width] = data
 
         self.log.debug(f"word: {self._data}")
 
-        self._vld += 1<<(self._item_cnt%self._items)
+        self._vld += 1 << (self._item_cnt % self._items)
 
-        self.log.debug(f"item vld: {1<<(self._item_cnt%self._items)}")
+        self.log.debug(f"item vld: {1 << (self._item_cnt % self._items)}")
         self.log.debug(f"word vld: {self._vld}")
 
         self._src_rdy = 1
@@ -126,15 +124,15 @@ class MVBDriver(BusDriver):
 
         await self._move_item()
 
-        if random.choices((0,1), weights=self._cDelays["ivgEn_wt"], k=1)[0]:
+        if random.choices((0, 1), weights=self._cDelays["ivgEn_wt"], k=1)[0]:
             for i in self._cDelays["ivg"]:
                 if self._mode:
                     for i in range(self._item_width):
                         if self._mode == 2:
                             self._delays_fill = random.randrange(0, 256)
-                        self._data[self._item_offset*self._item_width+i] = self._delays_fill
+                        self._data[self._item_offset * self._item_width + i] = self._delays_fill
                 else:
-                    self._data[self._item_offset*self._item_width:(self._item_offset+1)*self._item_width] = data
+                    self._data[self._item_offset * self._item_width:(self._item_offset + 1) * self._item_width] = data
 
                 self._src_rdy = 1
                 self._item_cnt += 1
@@ -159,4 +157,3 @@ class MVBDriver(BusDriver):
 
             await self._move_word()
             await self._move_word()
-

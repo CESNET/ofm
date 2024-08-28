@@ -2,7 +2,7 @@
 # Copyright (C) 2022 CESNET z. s. p. o.
 # Author(s): Lukas Nevrkla <xnevrk03@stud.fit.vutbr.cz>
 
-from setuptools import setup, find_packages
+from setuptools import setup
 
 # Install:
 # python3 setup.py install --user
@@ -14,7 +14,7 @@ setup(
     description='Package with data_logger tools',
     author='Lukáš Nevrkla',
     author_email='xnevrk03@stud.fit.vutbr.cz',
-    packages = [
+    packages=[
         'data_logger',
         'mem_logger',
         "graph_gen",

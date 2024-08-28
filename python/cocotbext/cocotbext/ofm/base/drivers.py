@@ -20,7 +20,7 @@ class BusDriver(cbd.BusDriver):
         self._clk_re = RisingEdge(clock)
 
         self._cfg = dict(
-            clk_freq = kwargs.get("clk_freq"),
+            clk_freq=kwargs.get("clk_freq"),
         )
 
         self._idle_gen = IdleGenerator()

@@ -4,12 +4,12 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-import cocotb
 from cocotb_bus.drivers import BusDriver
 from cocotb.triggers import RisingEdge
 from cocotbext.ofm.mfb.utils import get_mfb_params
 
 import copy
+
 
 class MFBDriver(BusDriver):
     _signals = ["data", "sof_pos", "eof_pos", "sof", "eof", "src_rdy", "dst_rdy"]
@@ -18,7 +18,9 @@ class MFBDriver(BusDriver):
         BusDriver.__init__(self, entity, name, clock, array_idx=array_idx)
         self.clock = clock
         self.frame_cnt = 0
-        self._regions, self._region_size, self._block_size, self._item_width = get_mfb_params(self.bus.data, self.bus.sof_pos, self.bus.eof_pos, self.bus.sof, mfb_params)
+        self._regions, self._region_size, self._block_size, self._item_width = get_mfb_params(
+            self.bus.data, self.bus.sof_pos, self.bus.eof_pos, self.bus.sof, mfb_params
+        )
         self._items = self._regions * self._region_size * self._block_size
         self._region_items = self._region_size * self._block_size
         self._item_offset = 0
@@ -76,8 +78,8 @@ class MFBDriver(BusDriver):
         if (self._src_rdy):
             self._writeWord()
         else:
-           self._fillEmptyWord()
-           self.bus.src_rdy.value = 0
+            self._fillEmptyWord()
+            self.bus.src_rdy.value = 0
 
         while True:
             await re

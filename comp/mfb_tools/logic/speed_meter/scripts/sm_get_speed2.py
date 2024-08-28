@@ -4,7 +4,7 @@
 
 import argparse as ap
 import nfb
-import ofm.comp.mfb_tools.logic.speed_meter as sm
+import ofm.comp.mfb_tools.logic.speed_meter as speedmeter
 
 
 parser = ap.ArgumentParser()
@@ -19,18 +19,19 @@ dev = nfb.open(args.device)
 cores_cnt = len(dev.fdt_get_compatible(f"cesnet,{args.app_string},app_core"))
 
 speeds = [] # the speed measured by the speed meter in each of the App cores
-speed_meters = [sm.SpeedMeter(dev=dev, index=i) for i in range(cores_cnt)]
+speed_meters = [speedmeter.SpeedMeter(dev=dev, index=i) for i in range(cores_cnt)]
 for sm in speed_meters:
     speed_bps, speed_pps = sm.get_speed()
 
     if args.type == "b":
-        speeds.append(f"{speed_bps/10**9:.2f}")
+        speeds.append(f"{speed_bps / 10**9:.2f}")
     else:
         speeds.append(f"{speed_pps:.0f}")
 
-    if args.clear: sm.clear_data()
+    if args.clear:
+        sm.clear_data()
 
 units = "Gbps" if args.type == "b" else "pps"
 
-for i,s in enumerate(speeds):
+for i, s in enumerate(speeds):
     print(f"Speed meter {i}: {s} {units}")

@@ -1,7 +1,6 @@
 import cocotb
 import cocotb.queue
-from cocotb.triggers import Timer, Event, RisingEdge
-from cocotb.clock import Clock
+from cocotb.triggers import Event, RisingEdge
 
 from ..utils import concat, SerializableHeader
 
@@ -11,20 +10,36 @@ class RequestHeaderEmpty(SerializableHeader):
 
 
 class RequestHeader(SerializableHeader):
-    items = list(zip(['addr', 'length', 'type', 'res1', 'req_id', 'tag', 'func', 'bar', 'barap', 'res2'],
-                [64, 11, 4, 1, 16, 8, 8, 3, 6, 7]))
+    items = list(zip(
+        ['addr', 'length', 'type', 'res1', 'req_id', 'tag', 'func', 'bar', 'barap', 'res2'],
+        [64, 11, 4, 1, 16, 8, 8, 3, 6, 7],
+    ))
+
 
 class RequestUser(SerializableHeader):
-    items = list(zip(['firstBe', 'lastBe', 'byte_en', 'sop', 'discontinue', 'tph_present', 'tph_type', 'tph_st_tag', 'parity'],
-                [4, 4, 32, 1, 1, 1, 2, 8, 32]))
+    items = list(zip(
+        ['firstBe', 'lastBe', 'byte_en', 'sop', 'discontinue', 'tph_present', 'tph_type', 'tph_st_tag', 'parity'],
+        [4, 4, 32, 1, 1, 1, 2, 8, 32],
+    ))
+
 
 class RequestUser512(SerializableHeader):
-    items = list(zip(['firstBe', 'firstBe1', 'lastBe', 'lastBe1', 'res1', 'sop', 'res2'],
-                [4, 4, 4, 4, 64, 1, 0]))
+    items = list(zip(
+        ['firstBe', 'firstBe1', 'lastBe', 'lastBe1', 'res1', 'sop', 'res2'],
+        [4, 4, 4, 4, 64, 1, 0],
+    ))
+
 
 class CompletionHeader(SerializableHeader):
-    items = list(zip(['lower_address', 'r1', 'at', 'r2', 'byte_count', 'lrc', 'r3', 'dword_count', 'completion_status', 'poisoned', 'r4', 'rid', 'tag', 'cid', 'cid_en', 'tc', 'attr', 'ecrc'],
-                     [7, 1, 2, 6, 13, 1, 2, 11, 3, 1, 1, 16, 8, 16, 1, 3, 3, 1]))
+    items = list(zip(
+        [
+            'lower_address', 'r1', 'at', 'r2', 'byte_count', 'lrc', 'r3',
+            'dword_count', 'completion_status', 'poisoned', 'r4', 'rid',
+            'tag', 'cid', 'cid_en', 'tc', 'attr', 'ecrc'
+        ],
+        [7, 1, 2, 6, 13, 1, 2, 11, 3, 1, 1, 16, 8, 16, 1, 3, 3, 1],
+    ))
+
 
 class Axi4SCompleter:
     def __init__(self, cq_driver, cc_driver, cc_monitor):
@@ -58,7 +73,7 @@ class Axi4SCompleter:
             if item[2] == 0:  # req_type = read
                 tag = await self._tag_queue.get()
                 self._read_requests[tag] = (trigger, item, [])
-            if tag == None:
+            if tag is None:
                 trigger.set()
 
             await self._cq_req(*item, tag=tag, sync=False)
@@ -67,7 +82,7 @@ class Axi4SCompleter:
         data = list(reversed(tr["TDATA"]))
         # FIXME: Monitor sends values as bytes
         tlast = bool(tr['TLAST'][0])
-        if self._cc_inframe == None:
+        if self._cc_inframe is None:
             h = len(CompletionHeader()) // 8
             hdrbytes, data = data[:h], data[h:]
             self._cc_inframe = CompletionHeader.deserialize(int.from_bytes(hdrbytes, byteorder='little'))
@@ -83,7 +98,7 @@ class Axi4SCompleter:
 
         off_s = addr % 4 if is_first else 0
         off_e = byte_count - len(req_data) if is_last and tlast else len(data)
-        req_data.extend(data[off_s:off_s+off_e])
+        req_data.extend(data[off_s:off_s + off_e])
 
         if tlast:
             self._cc_inframe = None
@@ -110,7 +125,7 @@ class Axi4SCompleter:
             assert len(data) == byte_count
             data = [0] * (addr % 4) + data + [0] * (-(addr + byte_count) % 4)
 
-        if tag != None:
+        if tag is not None:
             header.tag = tag
         header.barap = 26
         header.addr = addr & ~3
@@ -119,7 +134,7 @@ class Axi4SCompleter:
 
         while len(data) or len(header):
             cnt = min(self._axi_width - len(header) // 8, len(data))
-            tdata = concat([(header.serialize(), len(header))] + list(zip(data[:cnt], [8]*cnt)))
+            tdata = concat([(header.serialize(), len(header))] + list(zip(data[:cnt], [8] * cnt)))
             tuser = user.serialize()
             tkeep = 2**(cnt // 4 + len(header) // 32) - 1
             await self._cq.write({"TDATA": tdata, "TUSER": tuser, "TKEEP": tkeep}, sync=sync)

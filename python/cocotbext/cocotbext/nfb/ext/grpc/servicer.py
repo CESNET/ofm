@@ -1,7 +1,5 @@
-import time
 import queue
 import logging
-import fdt
 
 import cocotb
 from cocotb.triggers import Timer
@@ -44,8 +42,8 @@ class Servicer(nfb_grpc_pb2_grpc.NfbExtensionServicer):
             try:
                 d = yield fn(mi_base, data)
                 q.put(d)
-            except Exception as e:
-                self._log.error(f"comp access failed")
+            except Exception:
+                self._log.error("comp access failed")
                 q.put(None)
 
     def GetFdt(self, request, context):

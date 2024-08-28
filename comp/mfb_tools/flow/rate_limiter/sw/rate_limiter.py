@@ -41,7 +41,7 @@ class RateLimiter(nfb.BaseComp):
             self._name = "Rate Limiter"
             if "index" in kwargs:
                 self._name += " " + str(kwargs.get("index"))
-        except:
+        except Exception:
             print("Error while opening Rate Limiter component!")
 
     def _fix_sec_len(self, orig_speed, sec_len, freq, min_speed):
@@ -56,8 +56,8 @@ class RateLimiter(nfb.BaseComp):
 
         # TODO: automatic setting
         mfb_word_width = 512 # 100G -> 512, 400G -> 2048
-        min_speed = 1 + 3*mfb_word_width/8
-        fixed_sec_len = self._fix_sec_len(speed*125_000_000, sec_len, freq*1_000_000, min_speed)
+        min_speed = 1 + 3 * mfb_word_width / 8
+        fixed_sec_len = self._fix_sec_len(speed * 125_000_000, sec_len, freq * 1_000_000, min_speed)
 
         self._comp.write32(self._REG_SEC_LEN, fixed_sec_len)
 
@@ -80,7 +80,7 @@ class RateLimiter(nfb.BaseComp):
         # TODO: automatic setting
         mfb_regions = 1 # 100G -> 1, 400G -> 4
         min_speed = 1 + mfb_regions
-        fixed_sec_len = self._fix_sec_len(speed, sec_len, freq*1_000_000, min_speed)
+        fixed_sec_len = self._fix_sec_len(speed, sec_len, freq * 1_000_000, min_speed)
 
         self._comp.write32(self._REG_SEC_LEN, fixed_sec_len)
 
@@ -150,9 +150,8 @@ class RateLimiter(nfb.BaseComp):
             print("Frequency:       {} MHz".format(frequency))
             print("Output speed:    {0} {1}".format(output_speeds, limit_s))
             print("Output speed:    {0} {1}".format(alt_speeds, limit_alt_s))
-        except:
+        except Exception:
             print("{}: Error while reading configuration!".format(self._name))
-
 
     def configure(self, cfg):
         """Configure component"""
@@ -180,7 +179,7 @@ class RateLimiter(nfb.BaseComp):
                     self._comp.write32(speed_reg, self._conv_Gbs2Bscn(speed, cfg["section_length"], frequency))
                 speed_reg += 4
                 available -= 1
-        except:
+        except Exception:
             print("{}: Error while writing configuration!".format(self._name))
         finally:
             auxiliary_flags = 0
@@ -201,4 +200,3 @@ class RateLimiter(nfb.BaseComp):
         """Stop traffic shaping"""
 
         self._comp.write32(self._REG_STATUS, 0)
-

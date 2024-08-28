@@ -6,20 +6,24 @@
 
 import sys
 import os
-import pdb
 import scapy.all as scapy
 
+# Testing stuff ###############################################################
+# Import the tested code
+import player
+import recorder
+
 # Extend the path and insert python modules
-sys.path.append(os.path.join(os.path.abspath("../.."),"frame_player","sw"))
-sys.path.append(os.path.join(os.path.abspath("../.."),"frame_recorder","sw"))
+sys.path.append(os.path.join(os.path.abspath("../.."), "frame_player", "sw"))
+sys.path.append(os.path.join(os.path.abspath("../.."), "frame_recorder", "sw"))
 
 # Configuration ###############################################################
 # MFB configurations to test
 configs_list = (
-    (1,8,8,8),
-    (2,8,8,8),
-    (4,8,8,8),
-    (8,8,8,8),
+    (1, 8, 8, 8),
+    (2, 8, 8, 8),
+    (4, 8, 8, 8),
+    (8, 8, 8, 8),
 )
 
 # Folder with testing pcaps
@@ -31,19 +35,15 @@ fifo_depth  = 1024
 # Output pcap file
 out_pcap    = os.path.abspath("./output.pcap")
 
-# Testing stuff ###############################################################
-# Import the tested code
-import player
-import recorder
-
 # Path with test PCAPs
 pcaps = os.listdir(pcap_path)
 
-def compare_pcaps(input_file,output_file):
+
+def compare_pcaps(input_file, output_file):
     """
     Compare two pcap files if the content is same.
     """
-    print("Comparing %s with %s file." % (input_file,output_file))
+    print("Comparing %s with %s file." % (input_file, output_file))
     # Opent both pcaps in scapy
     in_packets = scapy.rdpcap(input_file)
     out_packets = scapy.rdpcap(output_file)
@@ -51,7 +51,7 @@ def compare_pcaps(input_file,output_file):
     # Search for all input packets in the output pcap file
     for in_pkt in in_packets:
         # I know, this is not efficient but it is enough for testing purposes
-        if not(in_pkt in out_packets):
+        if in_pkt not in out_packets:
             print("Following packet wasn't find in the %s!" % (output_file))
             in_pkt.display()
             return False
@@ -59,22 +59,23 @@ def compare_pcaps(input_file,output_file):
     print("Both PCAP files contain same packets!")
     return True
 
+
 def main():
     """
     Main testing process.
     """
     # Iterate over all test scenarios and test the serialization and deserialization for
     # each file.
-    for regs,reg_size,block_size,item_width in configs_list:
+    for regs, reg_size, block_size, item_width in configs_list:
         for pcap in pcaps:
-            print("Testing MFB configuration (%d,%d,%d,%d)" % (regs,reg_size,block_size,item_width))
+            print("Testing MFB configuration (%d,%d,%d,%d)" % (regs, reg_size, block_size, item_width))
             print("Input PCAP file:  %s" % (pcap))
             # Absolute PCAP path
-            abs_pcap_path = os.path.join(pcap_path,pcap)
+            abs_pcap_path = os.path.join(pcap_path, pcap)
             # Prepare the player object and use read/write function in the player module
-            play = player.PlayerConfigurator(regs,reg_size,block_size,item_width,fifo_depth,player.write32,player.read32,abs_pcap_path,0x0)
+            play = player.PlayerConfigurator(regs, reg_size, block_size, item_width, fifo_depth, player.write32, player.read32, abs_pcap_path, 0x0)
             # Prepare the recorder object and use read/wrute function in the recorder module
-            rec  = recorder.RecorderReader(regs,reg_size,block_size,item_width,recorder.write32,recorder.read32,out_pcap,0x0,False,0)
+            rec  = recorder.RecorderReader(regs, reg_size, block_size, item_width, recorder.write32, recorder.read32, out_pcap, 0x0, False, 0)
             # Remove old pickle file
             if os.path.exists("memory.pickle"):
                 os.remove("memory.pickle")
@@ -88,7 +89,7 @@ def main():
             try:
                 recorder.load_memory("memory.pickle")
                 rec.read()
-            except IOError as e:
+            except IOError:
                 print("Error during the loading of pickled memory!")
                 return 0x1
             except Exception as e:
@@ -97,7 +98,7 @@ def main():
                 return 0x1
 
             # Compare both pcaps
-            if not compare_pcaps(abs_pcap_path,out_pcap):
+            if not compare_pcaps(abs_pcap_path, out_pcap):
                 return 0x1
 
     # End the function

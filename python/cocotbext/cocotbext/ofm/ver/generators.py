@@ -6,6 +6,7 @@
 
 import random
 
+
 def random_byte():
     """
     Random byte generator
@@ -13,11 +14,13 @@ def random_byte():
     while True:
         yield random.randrange(256)
 
+
 def random_bytes(bytes_count: int, generator):
     """
     Generate N random bytes from *generator*
     """
     return bytes(next(generator) for i in range(bytes_count))
+
 
 def random_packets(min_size=4, max_size=64, count=10):
     """

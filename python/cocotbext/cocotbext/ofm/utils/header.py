@@ -6,7 +6,7 @@ def concat(values):
     return ret
 
 
-def deconcat(values=[0,0]):
+def deconcat(values=[0, 0]):
     vector = values[0]
     ret = []
     for width in values[1:]:

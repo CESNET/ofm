@@ -36,7 +36,7 @@ class SpeedMeter(nfb.BaseComp):
             self._name = "Speed Meter"
             if "index" in kwargs:
                 self._name += " " + str(kwargs.get("index"))
-        except:
+        except Exception:
             print("Error while opening Speed Meter component!")
 
     def test_complete(self):
@@ -65,7 +65,7 @@ class SpeedMeter(nfb.BaseComp):
             frequency  = self._comp.read32(self._REG_FREQ) * 1_000_000
             bps_speed  = float(frequency) / ticks * self._comp.read32(self._REG_BYTES)
             pkts_speed = float(frequency) / ticks * self._comp.read32(self._REG_SOFS)
-            return bps_speed*8, pkts_speed
+            return bps_speed * 8, pkts_speed
         else:
             return 0, 0
 
@@ -73,4 +73,3 @@ class SpeedMeter(nfb.BaseComp):
         """Reset measurement statistics"""
 
         self._comp.write32(self._REG_CLEAR, 0x1)
-

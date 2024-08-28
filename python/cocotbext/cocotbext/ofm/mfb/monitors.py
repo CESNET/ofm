@@ -4,13 +4,14 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-import cocotb
 from cocotb_bus.monitors import BusMonitor
 from cocotb.triggers import RisingEdge
 from cocotbext.ofm.mfb.utils import get_mfb_params, signal_unpack
 
+
 class MFBProtocolError(Exception):
     pass
+
 
 class MFBMonitor(BusMonitor):
     _signals = ["data", "sof_pos", "eof_pos", "sof", "eof", "src_rdy", "dst_rdy"]
@@ -19,7 +20,9 @@ class MFBMonitor(BusMonitor):
         BusMonitor.__init__(self, entity, name, clock, array_idx=array_idx)
 
         self.frame_cnt = 0
-        self._regions, self._region_size, self._block_size, self._item_width = get_mfb_params(self.bus.data, self.bus.sof_pos, self.bus.eof_pos, self.bus.sof, mfb_params)
+        self._regions, self._region_size, self._block_size, self._item_width = get_mfb_params(
+            self.bus.data, self.bus.sof_pos, self.bus.eof_pos, self.bus.sof, mfb_params
+        )
         self._region_items = self._region_size * self._block_size
         self._sof_arr = [0] * self._regions
         self._eof_arr = [0] * self._regions
@@ -63,10 +66,10 @@ class MFBMonitor(BusMonitor):
 
                 for rr in range(self._regions):
                     eof_done = False
-                    rs_inx = (rr*self._region_items)
-                    re_inx = (rr*self._region_items+self._region_items)
-                    ee_idx = (rr*self._region_items+self._eof_pos_arr[rr]+1)
-                    ss_idx = (rr*self._region_items+(self._sof_pos_arr[rr]*self._block_size))
+                    rs_inx = (rr * self._region_items)
+                    re_inx = (rr * self._region_items + self._region_items)
+                    ee_idx = (rr * self._region_items + self._eof_pos_arr[rr] + 1)
+                    ss_idx = (rr * self._region_items + (self._sof_pos_arr[rr] * self._block_size))
 
                     #print("rs_inx " + str(rs_inx))
                     #print("re_inx " + str(re_inx))

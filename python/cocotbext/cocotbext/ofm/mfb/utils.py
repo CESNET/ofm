@@ -20,15 +20,15 @@ def get_mfb_params(signal_data, signal_sof_pos, signal_eof_pos, signal_sof, para
             eps = len(signal_eof_pos) // regions
 
         region_size = 2**sps
-        block_size = 2**(eps-sps)
-        item_width = dw // (regions*region_size*block_size)
+        block_size = 2**(eps - sps)
+        item_width = dw // (regions * region_size * block_size)
     else:
         regions = params_dic["regions"]
         region_size = params_dic["region_size"]
         block_size = params_dic["block_size"]
         item_width = params_dic["item_width"]
 
-        dw = regions*region_size*block_size*item_width
+        dw = regions * region_size * block_size * item_width
 
         if regions != len(signal_sof):
             signal_sof.log.error("MFB parameters do not correspond to signals length!")
@@ -45,6 +45,7 @@ def get_mfb_params(signal_data, signal_sof_pos, signal_eof_pos, signal_sof, para
 
     return regions, region_size, block_size, item_width
 
+
 def signal_unpack(items, signal):
     signal_arr = [0] * items
 
@@ -54,7 +55,7 @@ def signal_unpack(items, signal):
     size = len(signal) // items
 
     for ii in range(items):
-        bi = (items-ii-1) * size
-        signal_arr[ii] = signal.value[bi:(bi+size-1)].integer
+        bi = (items - ii - 1) * size
+        signal_arr[ii] = signal.value[bi:(bi + size - 1)].integer
 
     return signal_arr

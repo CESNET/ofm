@@ -2,6 +2,7 @@ import cocotb
 from cocotb_bus.monitors import BusMonitor
 from cocotb.triggers import RisingEdge
 
+
 class Axi4Stream(BusMonitor):
     _signals = ["TVALID", "TREADY"]
     _optional_signals = ["TDATA", "TLAST", "TSTRB", "TKEEP", "TID", "TDEST", "TUSER"]

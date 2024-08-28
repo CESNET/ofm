@@ -1,10 +1,5 @@
-import operator
-from functools import reduce
-
 import cocotb
 from cocotb.queue import Queue
-from cocotb.triggers import Timer
-from cocotb.clock import Clock
 
 from ..utils import concat, deconcat, SerializableHeader
 
@@ -12,13 +7,27 @@ from ..utils import concat, deconcat, SerializableHeader
 class CompletionHeaderEmpty(SerializableHeader):
     items = list(zip([], []))
 
+
 class RequestHeader(SerializableHeader):
-    items = list(zip(['addr', 'fbe', 'lbe', 'tag_l', 'req_id', 'dwords', 'res', 'attr_l', 'pois_req', 'ecrc', 'res', 'attr_h', 'tag_m', 'prio', 'tag_h', 'tlp_type', 'addr_len', 'req_type'],
-                [64, 4, 4, 8, 16, 10, 2, 2, 1, 1, 2, 1, 1, 3, 1, 5, 1, 2]))
+    items = list(zip(
+        [
+            'addr', 'fbe', 'lbe', 'tag_l', 'req_id', 'dwords', 'res',
+            'attr_l', 'pois_req', 'ecrc', 'res', 'attr_h', 'tag_m',
+            'prio', 'tag_h', 'tlp_type', 'addr_len', 'req_type'
+        ],
+        [64, 4, 4, 8, 16, 10, 2, 2, 1, 1, 2, 1, 1, 3, 1, 5, 1, 2],
+    ))
+
 
 class CompletionHeader(SerializableHeader):
-    items = list(zip(['padding', 'low_addr', 'res1', 'tag_l', 'res2', 'byte_cnt', 'res3', 'compl_stat', 'res4', 'dwords', 'res5', 'attr_l', 'res6', 'attr_h', 'tag_m', 'res7', 'tag_h', 'tlp_type', 'fmt'],
-                [32, 7, 1, 8, 16, 12, 1, 3, 16, 10, 2, 2, 4, 1, 1, 3, 1, 5, 3]))
+    items = list(zip(
+        [
+            'padding', 'low_addr', 'res1', 'tag_l', 'res2', 'byte_cnt',
+            'res3', 'compl_stat', 'res4', 'dwords', 'res5', 'attr_l',
+            'res6', 'attr_h', 'tag_m', 'res7', 'tag_h', 'tlp_type', 'fmt'
+        ],
+        [32, 7, 1, 8, 16, 12, 1, 3, 16, 10, 2, 2, 4, 1, 1, 3, 1, 5, 3],
+    ))
 
 
 def numberOfSetBits(i):
@@ -42,25 +51,31 @@ class AvstBase:
         self._avst_width = len(bus.DATA) // 8
 
     async def _send_frame(self, cb, data, header, header_empty, sync):
-            _avst_width = self._avst_width // self._segs
-            orig_data = data
-            seg, dwr, sop, eop, emp, hdr = 0, 0, 0, 0, 0, 0
-            end = False
-            while not end:
-                length = min(_avst_width, len(data))
-                begin = len(data) == len(orig_data)
-                end = len(data) == length
-                dwr |= concat(list(zip(data[:length], [8]*length))) << (seg * _avst_width * 8)
-                emp |= (((_avst_width - length) // 4) if length else 0) << (seg * self._empty_width)
-                hdr |= (header.serialize() if begin else header_empty.serialize()) << (seg * self._hdr_width)
-                sop |= (1 if begin else 0) << seg
-                eop |= (1 if end else 0) << seg
+        _avst_width = self._avst_width // self._segs
+        orig_data = data
+        seg, dwr, sop, eop, emp, hdr = 0, 0, 0, 0, 0, 0
+        end = False
+        while not end:
+            length = min(_avst_width, len(data))
+            begin = len(data) == len(orig_data)
+            end = len(data) == length
+            dwr |= concat(list(zip(data[:length], [8] * length))) << (seg * _avst_width * 8)
+            emp |= (((_avst_width - length) // 4) if length else 0) << (seg * self._empty_width)
+            hdr |= (header.serialize() if begin else header_empty.serialize()) << (seg * self._hdr_width)
+            sop |= (1 if begin else 0) << seg
+            eop |= (1 if end else 0) << seg
 
-                seg += 1
-                if seg == self._segs or end:
-                    await cb({"DATA": dwr, "HDR": hdr, "SOP": sop, "EOP": eop, "EMPTY": emp, "PREFIX": 0, "BAR_RANGE": 0, "VALID": 2**seg-1}, sync=sync)
-                    seg, dwr, sop, eop, emp, hdr = 0, 0, 0, 0, 0, 0
-                data = data[length:]
+            seg += 1
+            if seg == self._segs or end:
+                await cb(
+                    {
+                        "DATA": dwr, "HDR": hdr, "SOP": sop, "EOP": eop, "EMPTY": emp, "PREFIX": 0, "BAR_RANGE": 0, "VALID": 2**seg - 1
+                    },
+                    sync=sync,
+                )
+                seg, dwr, sop, eop, emp, hdr = 0, 0, 0, 0, 0, 0
+            data = data[length:]
+
 
 class AvstRequester(AvstBase):
     def __init__(self, ram, rq_driver, rc_driver, rq_monitor):

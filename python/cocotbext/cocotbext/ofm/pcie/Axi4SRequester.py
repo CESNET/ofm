@@ -3,8 +3,6 @@ from functools import reduce
 
 import cocotb
 from cocotb.queue import Queue
-from cocotb.triggers import Timer
-from cocotb.clock import Clock
 
 from ..utils import concat, SerializableHeader
 
@@ -20,20 +18,48 @@ def byte_deserialize(data):
 
 
 class RequestHeader(SerializableHeader):
-    items = list(zip(['at', 'addr', 'dword_count', 'type', 'poisoned_request', 'req_id', 'tag', 'completer_id', 'req_id_en', 'tc', 'attr', 'force_ecrc'],
-                [2, 62, 11, 4, 1, 16, 8, 16, 1, 3, 3, 1]))
+    items = list(zip(
+        [
+            'at', 'addr', 'dword_count', 'type', 'poisoned_request',
+            'req_id', 'tag', 'completer_id', 'req_id_en', 'tc', 'attr', 'force_ecrc',
+        ],
+        [2, 62, 11, 4, 1, 16, 8, 16, 1, 3, 3, 1],
+    ))
+
 
 class CompletionHeader(SerializableHeader):
-    items = list(zip(['addr', 'error_code', 'byte_count', 'locked_read_completion', 'request_completed', 'res1', 'dword_count', 'completion_status', 'poisoned_completion', 'res2', 'requester_id', 'tag', 'completer_id', 'res3', 'tc', 'attr', 'res4'],
-                [12, 4, 13, 1, 1, 1, 11, 3, 1, 1, 16, 8, 16, 1, 3, 3, 1]))
+    items = list(zip(
+        [
+            'addr', 'error_code', 'byte_count', 'locked_read_completion',
+            'request_completed', 'res1', 'dword_count', 'completion_status',
+            'poisoned_completion', 'res2', 'requester_id', 'tag', 'completer_id',
+            'res3', 'tc', 'attr', 'res4',
+        ],
+        [12, 4, 13, 1, 1, 1, 11, 3, 1, 1, 16, 8, 16, 1, 3, 3, 1],
+    ))
+
 
 class RqUser(SerializableHeader):
-    items = list(zip(['first_be0', 'first_be1', 'last_be0', 'last_be1', 'addr_offset0', 'addr_offset1', 'sop', 'sop0', 'sop1', 'eop', 'eop0', 'eop1', 'discontinue', 'tph_present', 'tph_type', 'tph_st_tag', 'tph_indirect_tag_en', 'seq_num0', 'seq_num1', 'parity'],
-                [4, 4, 4, 4, 2, 2, 2, 2, 2, 2, 4, 4, 1, 2, 4, 16, 2, 6, 6, 64]))
+    items = list(zip(
+        [
+            'first_be0', 'first_be1', 'last_be0', 'last_be1', 'addr_offset0',
+            'addr_offset1', 'sop', 'sop0', 'sop1', 'eop', 'eop0', 'eop1',
+            'discontinue', 'tph_present', 'tph_type', 'tph_st_tag',
+            'tph_indirect_tag_en', 'seq_num0', 'seq_num1', 'parity',
+        ],
+        [4, 4, 4, 4, 2, 2, 2, 2, 2, 2, 4, 4, 1, 2, 4, 16, 2, 6, 6, 64],
+    ))
+
 
 class RcUser(SerializableHeader):
-    items = list(zip(['be', 'sop', 'sop0', 'sop1', 'sop2', 'sop3', 'eop', 'eop0', 'eop1', 'eop2', 'eop3', 'discontinue', 'parity'],
-                [64, 4, 2, 2, 2, 2, 4, 4, 4, 4, 4, 1, 64]))
+    items = list(zip(
+        [
+            'be', 'sop', 'sop0', 'sop1', 'sop2', 'sop3',
+            'eop', 'eop0', 'eop1', 'eop2', 'eop3', 'discontinue', 'parity'
+        ],
+        [64, 4, 2, 2, 2, 2, 4, 4, 4, 4, 4, 1, 64],
+    ))
+
 
 def bm(bits):
     return (2**bits) - 1
@@ -83,9 +109,9 @@ class Axi4SRequester:
 
         sop_pos = [getattr(tuser, 'sop{:d}'.format(i)) for i in range(bin(tuser.sop).count("1"))]
         eop_pos = [getattr(tuser, 'eop{:d}'.format(i)) for i in range(bin(tuser.eop).count("1"))]
-        fbe     = [getattr(tuser, 'first_be{:d}'.format(i))    for i in range(bin(tuser.sop).count("1"))]
-        lbe     = [getattr(tuser, 'last_be{:d}'.format(i))     for i in range(bin(tuser.sop).count("1"))]
-        addr_off= [getattr(tuser, 'addr_offset{:d}'.format(i)) for i in range(bin(tuser.sop).count("1"))]
+        fbe = [getattr(tuser, 'first_be{:d}'.format(i)) for i in range(bin(tuser.sop).count("1"))]
+        lbe = [getattr(tuser, 'last_be{:d}'.format(i)) for i in range(bin(tuser.sop).count("1"))]
+        addr_off = [getattr(tuser, 'addr_offset{:d}'.format(i)) for i in range(bin(tuser.sop).count("1"))]
 
         if self._rq_inframe:
             if eop_pos:
@@ -97,8 +123,8 @@ class Axi4SRequester:
 
         while sop_pos:
             meta = (fbe.pop(0), lbe.pop(0), addr_off.pop(0))
-            dwords = (eop_pos[0] if eop_pos else (self._rq_width // 32-1)) - sop_pos[0] * 4 + 1
-            self._rq_inframe = Frame(meta).append(tdata >> (sop_pos[0] * (self._rq_width//(2**2))), dwords)
+            dwords = (eop_pos[0] if eop_pos else (self._rq_width // 32 - 1)) - sop_pos[0] * 4 + 1
+            self._rq_inframe = Frame(meta).append(tdata >> (sop_pos[0] * (self._rq_width // (2**2))), dwords)
             if eop_pos:
                 self.handle_request(self._rq_inframe)
                 self._rq_inframe = None
@@ -152,7 +178,6 @@ class Axi4SRequester:
                 [(header.serialize(), len(header))]
                 + [(byte_deserialize(data), len(data) * 8)]
             )
-            bits = len(data) * 8 + len(header)
             while dword_count > 0:
                 tkeep = bm(self._rq_width // 32)
                 if dword_count < self._rq_width // 32:

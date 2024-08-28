@@ -5,9 +5,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import random
-import cocotb
 from cocotb_bus.drivers import BusDriver
 from cocotb.triggers import RisingEdge
+
 
 class LIIDriver(BusDriver):
     _signals = ["d", "db", "sof", "eof", "rdy", "crcok", "crcvld"]
@@ -101,7 +101,7 @@ class LIIDriver(BusDriver):
 
     async def _send_crc_status(self, crc_status):
         # Random idle bytes
-        for ii in range(random.randint(4, 4*self._bytes)):
+        for ii in range(random.randint(4, 4 * self._bytes)):
             await self._move_byte()
 
         while (self.bus.crcvld.value == 1) or (self._vld_flag != 0):

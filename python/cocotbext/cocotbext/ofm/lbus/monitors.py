@@ -1,4 +1,3 @@
-import cocotb
 from cocotb_bus.monitors import BusMonitor
 from cocotb.triggers import RisingEdge
 
@@ -22,7 +21,7 @@ class LBusMonitor(BusMonitor):
             for i in range(self._segments):
                 if self.bus.ena.value.integer & (1 << i):
                     if self.bus.sop.value.integer & (1 << i):
-                        assert packet == None
+                        assert packet is None
                         packet = []
 
                     data = self.bus.data[i].value.buff

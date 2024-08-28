@@ -1,4 +1,3 @@
-import cocotb
 from cocotb_bus.monitors import BusMonitor
 from cocotb.triggers import RisingEdge
 
@@ -21,7 +20,7 @@ class AvstEthMonitor(BusMonitor):
 
             if self.bus.valid.value and self.bus.ready.value:
                 if self.bus.sop.value:
-                    assert packet == None
+                    assert packet is None
                     packet = []
 
                 data = self.bus.data.value.buff

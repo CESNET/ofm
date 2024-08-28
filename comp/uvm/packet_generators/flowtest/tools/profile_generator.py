@@ -16,6 +16,7 @@ from typing import TextIO
 from collections import KeysView
 from requests.structures import CaseInsensitiveDict
 
+
 class ProfileGenerator:
 
     ### PARAMETERS ##
@@ -50,11 +51,11 @@ class ProfileGenerator:
 
     ### INITIALIZING ###
 
-    def __init__(self, config : Optional[CaseInsensitiveDict] = None) -> None:
+    def __init__(self, config: Optional[CaseInsensitiveDict] = None) -> None:
         if config is not None:
             self.__apply_config(config)
 
-    def __apply_config(self, config : CaseInsensitiveDict) -> None:
+    def __apply_config(self, config: CaseInsensitiveDict) -> None:
         parameters = [attribute for attribute in dir(self) if attribute[0].isupper()] # Gets only parameters (e.g. START_TIME_MIN)
         for parameter in parameters:
             if parameter in config:
@@ -108,11 +109,11 @@ class ProfileGenerator:
         return records
 
     @staticmethod
-    def __get_header_from_record(record : dict) -> KeysView:
+    def __get_header_from_record(record: dict) -> KeysView:
         header = record.keys()
         return header
 
-    def write_profile(self, profile_file : TextIO) -> None:
+    def write_profile(self, profile_file: TextIO) -> None:
         records = self.__generate_records()
         header = self.__get_header_from_record(records[0])
 
@@ -122,12 +123,13 @@ class ProfileGenerator:
 
 ### ARGUMENTS PARSING ###
 
+
 def parse_arguments() -> argparse.Namespace:
     argument_parser = argparse.ArgumentParser()
 
-    argument_parser.add_argument('-o', '--output',          type=str, help='Output file for generated profile.',      required=True)
-    argument_parser.add_argument('-s', '--seed',            type=int, help='Seed for randomization.',                 default=int(time.time()*1000))
-    argument_parser.add_argument('-c', '--config',          type=str, help='Input configuration json file.',          default=None)
+    argument_parser.add_argument('-o', '--output', type=str, help='Output file for generated profile.', required=True)
+    argument_parser.add_argument('-s', '--seed', type=int, help='Seed for randomization.', default=int(time.time() * 1000))
+    argument_parser.add_argument('-c', '--config', type=str, help='Input configuration json file.', default=None)
     argument_parser.add_argument('--forward-packet-number', type=int, help='Number of packets in forward direction.', default=None)
     argument_parser.add_argument('--reverse-packet-number', type=int, help='Number of packets in reverse direction.', default=None)
 
@@ -135,6 +137,7 @@ def parse_arguments() -> argparse.Namespace:
     return arguments
 
 ### MAIN ###
+
 
 def main() -> None:
     arguments = parse_arguments()

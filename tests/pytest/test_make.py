@@ -3,6 +3,7 @@ import os
 import re
 import pytest
 
+
 def pytest_generate_tests(metafunc):
     funcarglist = metafunc.cls.params[metafunc.function.__name__]
     argnames = sorted(funcarglist[0])
@@ -14,17 +15,17 @@ def pytest_generate_tests(metafunc):
 class TestClass:
     # a map specifying multiple argument sets for a test method
     basepath = '../../'
-    makefiles = os.popen(f'cd {basepath}; grep --include Makefile "all: comp" -Rl comp/*').read()
+    makefiles = os.popen(f'cd {basepath}; grep --include Makefile "all: comp" -Rl comp/*').read().split("\n")
     params = {
-        "test_make": [dict(makefile=x, synth='quartus') for x in makefiles.split("\n") if x] +
-                     [dict(makefile=x, synth='vivado')  for x in makefiles.split("\n") if x],
+        "test_make": [dict(makefile=x, synth='quartus') for x in makefiles if x] +
+                     [dict(makefile=x, synth='vivado') for x in makefiles if x],
     }
 
     def test_make(self, makefile, synth):
         makepath = TestClass.basepath + makefile
         ret = os.system(f'make SYNTH={synth} -C $(dirname {makepath}) > {makepath}_{synth}_makerun.log 2> {makepath}_{synth}_makerun_err.log')
         if ret:
-            self.parse_error_log(makefile, synth)
+            error = self.parse_error_log(makefile, synth)
             pytest.fail(error)
 
     def parse_error_log(self, makefile, synth):
@@ -45,4 +46,4 @@ class TestClass:
             pytest.skip(error)
 
         if re.match('.*crc32_ethernet.*doesn\'t exists!.*', error):
-            pytest.skip(f'crc32 is not in this repository')
+            pytest.skip('crc32 is not in this repository')

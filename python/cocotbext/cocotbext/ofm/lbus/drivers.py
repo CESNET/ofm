@@ -1,13 +1,9 @@
 from typing import Any
 
-import cocotb
 from cocotb.triggers import Event
 
 from ..base.drivers import BusDriver
 from ..base.transaction import IdleTransaction
-
-import copy
-import operator
 
 #def byte_deserialize(data):
 #    return reduce(operator.or_, [(data[i] & 0xff) << (8*i) for i in range(len(data))])
@@ -22,7 +18,7 @@ class LBusDriver(BusDriver):
         self._bytes_per_item = len(self.bus.data[0]) // 8
 
         self._cfg_update(
-            bits_per_word = self._bytes_per_item * 8 * self._segments
+            bits_per_word=self._bytes_per_item * 8 * self._segments
         )
         self._next_segment = 0
         self.clear_control_signals()
@@ -96,11 +92,10 @@ class LBusDriver(BusDriver):
         elif isinstance(transaction, bytes):
             data = memoryview(transaction)
         else:
-            raise NotImplemented
+            raise NotImplementedError
 
         assert len(data)
 
-        orig_data = data
         datalen = len(data)
         bpi = self._bytes_per_item
         empty_items = 0

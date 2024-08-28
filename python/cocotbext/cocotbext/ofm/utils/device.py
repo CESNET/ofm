@@ -1,5 +1,6 @@
 import fdt
 
+
 def get_dtb(comp_name: str, comp_base: int, comp_offset: int, compatible_str: str, bus_name: str, version: int = 17):
     """Creates a Device Tree represented as binary blob.
 
