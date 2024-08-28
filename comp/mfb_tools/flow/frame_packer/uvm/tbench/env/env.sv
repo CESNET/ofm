@@ -32,7 +32,7 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, SPACE_
     //MVB interface - Verification
     protected uvm_meta::agent #(PKT_MTU, RX_CHANNELS, HDR_META_WIDTH) m_info;
 
-    //Data generator 
+    //Data generator
     protected uvm_framepacker::generator #(PKT_MTU, RX_CHANNELS, HDR_META_WIDTH, MFB_ITEM_WIDTH) m_generator;
 
     //Scoreboard

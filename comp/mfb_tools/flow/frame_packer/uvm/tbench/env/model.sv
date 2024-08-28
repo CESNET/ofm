@@ -102,7 +102,7 @@ class model #(RX_CHANNELS, PKT_MTU, META_WIDTH,  MFB_ITEM_WIDTH) extends uvm_com
             // $write(dbg, "FIFO_STATE \n %0s \n", debug_fifo_state.convert2string());
             // `uvm_info(this.get_full_name(), dbg, UVM_MEDIUM);
 
-            if (tr_last.data[1] == 1) begin 
+            if (tr_last.data[1] == 1) begin
                 uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH) tr_mfb_out;
                 uvm_logic_vector::sequence_item #($clog2(RX_CHANNELS) + $clog2(PKT_MTU+1) + META_WIDTH + 1) tr_mvb_out;
 

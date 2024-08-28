@@ -109,7 +109,7 @@ class monitor_logic_vector #(int unsigned REGIONS, int unsigned REGION_SIZE, int
     uvm_reset::sync_terminate reset_sync;
     config_item::meta_type meta_behav;
 
-    protected int unsigned items;  
+    protected int unsigned items;
     protected uvm_logic_vector::sequence_item#(META_WIDTH) hi_tr;
 
     function new (string name, uvm_component parent);

@@ -1,9 +1,9 @@
 /*
  * file       : sequence_item.sv
  * Copyright (C) 2024 CESNET z. s. p. o.
- * description: base sequence_item which provide some added function. (ADDED time when packet have been received) 
+ * description: base sequence_item which provide some added function. (ADDED time when packet have been received)
  * date       : 2021
- * author     : Radek Iša <isa@cesnet.cz> 
+ * author     : Radek Iša <isa@cesnet.cz>
  *
  * SPDX-License-Identifier: BSD-3-Clause
 */

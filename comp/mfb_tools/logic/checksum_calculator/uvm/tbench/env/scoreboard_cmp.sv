@@ -33,14 +33,13 @@ class chsum_calc_cmp #(MVB_DATA_WIDTH, MFB_META_WIDTH) extends uvm_common::compa
         return ret;
     endfunction
 
-    
+
     virtual function string dut_item2string(DUT_ITEM tr);
         logic [MVB_DATA_WIDTH-1 : 0]  data;
         logic                         bypass;
         logic [MFB_META_WIDTH-1 : 0]  meta;
         string msg;
 
-        
         {meta, bypass, data} = tr.data;
         msg = tr.time2string();
         msg = {msg, $sformatf("\n\tbypass %b",  bypass)};
