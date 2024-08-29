@@ -86,25 +86,25 @@ architecture FULL of TX_DMA_METADATA_EXTRACTOR is
     constant META_PCIE_ADDR_W  : natural := 62;
     constant META_CHAN_NUM_W   : natural := log2(CHANNELS);
     constant META_BE_W         : natural := MFB_LENGTH/8;
+    constant META_BYTE_CNT_W   : natural := 13;
     constant META_FBE_W        : natural := 4;
     constant META_LBE_W        : natural := 4;
-    constant META_BYTE_CNT_W   : natural := 13;
 
     constant META_IS_DMA_HDR_O : natural := 0;
     constant META_PCIE_ADDR_O  : natural := META_IS_DMA_HDR_O + META_IS_DMA_HDR_W;
     constant META_CHAN_NUM_O   : natural := META_PCIE_ADDR_O + META_PCIE_ADDR_W;
     constant META_BE_O         : natural := META_CHAN_NUM_O + META_CHAN_NUM_W;
-    constant META_FBE_O        : natural := META_BE_O + META_BE_W;
+    constant META_BYTE_CNT_O   : natural := META_BE_O + META_BE_W;
+    constant META_FBE_O        : natural := META_BYTE_CNT_O + META_BYTE_CNT_W;
     constant META_LBE_O        : natural := META_FBE_O + META_FBE_W;
-    constant META_BYTE_CNT_O   : natural := META_LBE_O + META_LBE_W;
 
     subtype META_IS_DMA_HDR is natural range META_IS_DMA_HDR_O + META_IS_DMA_HDR_W -1 downto META_IS_DMA_HDR_O;
     subtype META_PCIE_ADDR is natural range META_PCIE_ADDR_O + META_PCIE_ADDR_W -1 downto META_PCIE_ADDR_O;
     subtype META_CHAN_NUM is natural range META_CHAN_NUM_O + META_CHAN_NUM_W -1 downto META_CHAN_NUM_O;
     subtype META_BE is natural range META_BE_O + META_BE_W -1 downto META_BE_O;
+    subtype META_BYTE_CNT is natural range META_BYTE_CNT_O + META_BYTE_CNT_W -1 downto META_BYTE_CNT_O;
     subtype META_FBE is natural range META_FBE_O + META_FBE_W -1 downto META_FBE_O;
     subtype META_LBE is natural range META_LBE_O + META_LBE_W -1 downto META_LBE_O;
-    subtype META_BYTE_CNT is natural range META_BYTE_CNT_O + META_BYTE_CNT_W -1 downto META_BYTE_CNT_O;
 
     -- =============================================================================================
     -- Internal Signals
@@ -130,11 +130,11 @@ architecture FULL of TX_DMA_METADATA_EXTRACTOR is
     -- contains the last byte enable, first byte enable signals from the PCIE META input, the size
     -- of a current PCIE transaction in bytes and one bit indication if DMA header is included in a
     -- current transaction
-    signal pcie_mfb_meta_int : std_logic_vector(META_BYTE_CNT_O + META_BYTE_CNT_W -1 downto 0);
+    signal pcie_mfb_meta_int : std_logic_vector(META_LBE_O + META_LBE_W -1 downto 0);
     signal pcie_tr_byte_cnt  : std_logic_vector(META_BYTE_CNT_W -1 downto 0);
 
     signal cutt_mfb_data    : std_logic_vector(MFB_LENGTH -1 downto 0);
-    signal cutt_mfb_meta    : std_logic_vector(META_BYTE_CNT_O + META_BYTE_CNT_W -1 downto 0);
+    signal cutt_mfb_meta    : std_logic_vector(META_LBE_O + META_LBE_W -1 downto 0);
     signal cutt_mfb_sof     : std_logic_vector(PCIE_MFB_REGIONS -1 downto 0);
     signal cutt_mfb_eof     : std_logic_vector(PCIE_MFB_REGIONS -1 downto 0);
     signal cutt_mfb_sof_pos : std_logic_vector(PCIE_MFB_REGIONS*max(1, log2(PCIE_MFB_REGION_SIZE)) -1 downto 0);
@@ -143,7 +143,7 @@ architecture FULL of TX_DMA_METADATA_EXTRACTOR is
     signal cutt_mfb_dst_rdy : std_logic;
 
     signal aux_mfb_data    : std_logic_vector(MFB_LENGTH -1 downto 0);
-    signal aux_mfb_meta    : std_logic_vector(META_BYTE_CNT_O + META_BYTE_CNT_W -1 downto 0);
+    signal aux_mfb_meta    : std_logic_vector(META_LBE_O + META_LBE_W - 1 downto 0);
     signal aux_mfb_sof     : std_logic_vector(PCIE_MFB_REGIONS -1 downto 0);
     signal aux_mfb_eof     : std_logic_vector(PCIE_MFB_REGIONS -1 downto 0);
     signal aux_mfb_sof_pos : std_logic_vector(PCIE_MFB_REGIONS*max(1, log2(PCIE_MFB_REGION_SIZE)) -1 downto 0);
@@ -246,7 +246,7 @@ begin
             FBE_OUT => fbe_decoded,
             LBE_OUT => lbe_decoded);
 
-    pcie_mfb_meta_int <= pcie_tr_byte_cnt & lbe_decoded & fbe_decoded & (MFB_LENGTH/8 -1 downto 0 => '0') & chan_num_int & pcie_addr_masked(63 downto 2) & is_dma_hdr;
+    pcie_mfb_meta_int <= lbe_decoded & fbe_decoded & pcie_tr_byte_cnt & (MFB_LENGTH/8 -1 downto 0 => '0') & chan_num_int & pcie_addr_masked(63 downto 2) & is_dma_hdr;
 
     pcie_hdr_cutter_i : entity work.MFB_CUTTER_SIMPLE
         generic map (
@@ -254,7 +254,7 @@ begin
             REGION_SIZE    => PCIE_MFB_REGION_SIZE,
             BLOCK_SIZE     => PCIE_MFB_BLOCK_SIZE,
             ITEM_WIDTH     => PCIE_MFB_ITEM_WIDTH,
-            META_WIDTH     => META_BYTE_CNT_O + META_BYTE_CNT_W,
+            META_WIDTH     => META_LBE_O + META_LBE_W,
             META_ALIGNMENT => 0,
             -- 4 because the PCIe header is 4 DW long
             CUTTED_ITEMS   => 4)
@@ -287,7 +287,7 @@ begin
             REGION_SIZE   => PCIE_MFB_REGION_SIZE,
             BLOCK_SIZE    => PCIE_MFB_BLOCK_SIZE,
             ITEM_WIDTH    => PCIE_MFB_ITEM_WIDTH,
-            META_WIDTH    => META_BYTE_CNT_O + META_BYTE_CNT_W,
+            META_WIDTH    => META_LBE_O + META_LBE_W,
             REGION_AUX_EN => FALSE,
             BLOCK_AUX_EN  => FALSE,
             ITEM_AUX_EN   => TRUE)
@@ -319,7 +319,6 @@ begin
             TX_ITEM_VLD      => mfb_aux_item_vld_int);
 
     -- This quasi state machine stores the LBE value till the end of a packet
-    -- TODO: For more regions, this has to be multiplied
     lbe_reg_p : process (CLK) is
     begin
         if (rising_edge(CLK)) then
