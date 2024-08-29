@@ -148,13 +148,14 @@ with open(of_name, "w") as of:
 
         # Vivado values parsing
         # synthesis
-        v_syn_llut = grep("LUT as Logic  ", d + vivado_syn_util, 6, 12)
-        v_syn_mlut = grep("LUT as Memory ", d + vivado_syn_util, 6, 12)
-        v_syn_reg = grep("CLB Registers ", d + vivado_syn_util, 5, 11)
-        v_syn_carry = grep("CARRY8        ", d + vivado_syn_util, 4, 10)
-        v_syn_bram = grep("Block RAM Tile", d + vivado_syn_util, 6, 12)
-        v_syn_uram = grep("URAM          ", d + vivado_syn_util, 4, 10)
-        v_syn_dsp = grep("DSPs          ", d + vivado_syn_util, 4, 10)
+        v_syn_llut = grep("LUT as Logic  ", d + vivado_syn_util, 6, 14)
+        v_syn_mlut = grep("LUT as Memory ", d + vivado_syn_util, 6, 14)
+        v_syn_reg = grep("CLB Registers ", d + vivado_syn_util, 5, 13)
+        v_syn_carry = grep("CARRY8        ", d + vivado_syn_util, 4, 12)
+        v_syn_bram = grep("Block RAM Tile", d + vivado_syn_util, 6, 14)
+        v_syn_uram = grep("URAM          ", d + vivado_syn_util, 4, 12)
+        v_syn_dsp = grep("DSPs          ", d + vivado_syn_util, 4, 12)
+
         # implementation
         v_imp_llut = grep("LUT as Logic  ", d + vivado_imp_util, 6)
         v_imp_llut_proc = grep("LUT as Logic  ", d + vivado_imp_util, 10)
