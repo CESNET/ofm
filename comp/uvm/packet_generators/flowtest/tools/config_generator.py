@@ -71,7 +71,9 @@ class ConfigGenerator:
 
     def __init__(self, config : Optional[CaseInsensitiveDict] = None) -> None:
         self.actual_packet_size_max_probability = self.PACKET_MIN_SIZE
-        self.total_layers_probability = 100
+        #HOTFIX: this fix round error in FlowTest generator
+        self.total_layers_probability = 99
+        #self.total_layers_probability = 100
 
         if config is not None:
             self.__apply_config(config)
