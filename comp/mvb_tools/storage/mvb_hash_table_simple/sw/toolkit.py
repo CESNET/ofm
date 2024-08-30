@@ -23,8 +23,8 @@ Arguments:
 """
 
 import nfb
+from cocotb.types import LogicArray, Range
 from cocotbext.ofm.utils.math import ceildiv
-from cocotbext.ofm.utils.binary_utils import int_to_bits, xor_bits, bits_to_int
 import colorama
 import sys
 from math import log2
@@ -72,7 +72,7 @@ class MVB_HASH_TABLE_SIMPLE_TOOLKIT(nfb.BaseComp):
     def __init__(self, inter=False, mod_path="", **kwargs) -> None:
         self._name = "MVB_HASH_TABLE_SIMPLE"
 
-        self.hash_key = 2534237992 # 10884469298454947624
+        self.hash_key = 2534237992  # 10884469298454947624
 
         """Setting defaults to component configuration parametres."""
         self.conected_to_comp = False
@@ -83,7 +83,12 @@ class MVB_HASH_TABLE_SIMPLE_TOOLKIT(nfb.BaseComp):
         self.hash_key_width = 32
         self.num_of_tables = 2
 
-        self.hash_func_params = {"hash_key": self.hash_key, "mvb_key_width": self.mvb_key_width, "hash_key_width": self.hash_key_width, "hash_width": self.hash_width}
+        self.hash_func_params = {
+            "hash_key": self.hash_key,
+            "mvb_key_width": self.mvb_key_width,
+            "hash_key_width": self.hash_key_width,
+            "hash_width": self.hash_width
+        }
 
         """Setting script parametres."""
         self.t_keys = list()
@@ -96,7 +101,21 @@ class MVB_HASH_TABLE_SIMPLE_TOOLKIT(nfb.BaseComp):
         self.x_used = 0
         self.x_params = ["SIMPLE_XOR", simple_xor_hash, self.x_keys, self.x_hash_table, self.x_used]
 
-        self.commands = {"add": self.comm_add, "replace": self.comm_replace, "remove": self.comm_remove, "clear": self.comm_clear, "list": self.comm_list, "commit": self.comm_commit, "save": self.comm_save, "load": self.comm_load, "hash": self.comm_hash, "testkey": self.comm_testkey, "comparehashes": self.comm_comparehashes, "hwconfig": self.comm_hwconfig, "help": self.comm_help}
+        self.commands = {
+            "add": self.comm_add,
+            "replace": self.comm_replace,
+            "remove": self.comm_remove,
+            "clear": self.comm_clear,
+            "list": self.comm_list,
+            "commit": self.comm_commit,
+            "save": self.comm_save,
+            "load": self.comm_load,
+            "hash": self.comm_hash,
+            "testkey": self.comm_testkey,
+            "comparehashes": self.comm_comparehashes,
+            "hwconfig": self.comm_hwconfig,
+            "help": self.comm_help
+        }
 
         """Setting up servicer."""
         try:
@@ -152,13 +171,24 @@ class MVB_HASH_TABLE_SIMPLE_TOOLKIT(nfb.BaseComp):
         self.hash_key_width = self._comp.read32(self._HASH_KEY_WIDTH)
         self.table_capacity = self._comp.read32(self._TABLE_CAPACITY)
 
-        self.hash_func_params = {"hash_key": self.hash_key, "mvb_key_width": self.mvb_key_width, "hash_key_width": self.hash_key_width, "hash_width": self.hash_width}
+        self.hash_func_params = {
+            "hash_key": self.hash_key,
+            "mvb_key_width": self.mvb_key_width,
+            "hash_key_width": self.hash_key_width,
+            "hash_width": self.hash_width
+        }
 
-        self.hash_func_params = {"hash_key": self.hash_key, "mvb_key_width": self.mvb_key_width, "hash_key_width": self.hash_key_width, "hash_width": self.hash_width}
+        self.hash_func_params = {
+            "hash_key": self.hash_key,
+            "mvb_key_width": self.mvb_key_width,
+            "hash_key_width": self.hash_key_width,
+            "hash_width": self.hash_width
+        }
 
     def test_key(self, hash_function) -> int:
-        """Tests the requested hash function for internal collisions caused by the key, where collision is a situation, where same hash is calcuted for one or more
-           different keys from the whole range of the key's values. If lot of collisions occur, it's best to consider using a different hash key.
+        """Tests the requested hash function for internal collisions caused by the key, where collision is a situation,
+        where same hash is calcuted for one or more different keys from the whole range of the key's values. If lot of
+        collisions occur, it's best to consider using a different hash key.
 
         Args:
             hash_funtion: reference to a function used for calculating the hash (in other words, the hash function function :D).
@@ -182,7 +212,8 @@ class MVB_HASH_TABLE_SIMPLE_TOOLKIT(nfb.BaseComp):
         return collisions
 
     def test_collisions(self, hash_function1, hash_function2) -> list:
-        """Tests collisions between two different hash functions, where collision is a situation, where for the same key both hash functions calculate the same hash.
+        """Tests collisions between two different hash functions, where collision is a situation, where for the same key both
+        hash functions calculate the same hash.
 
         Args:
             hash_function1: reference to a function used for calculating the hash (in other words, the hash function function :D).
@@ -201,7 +232,8 @@ class MVB_HASH_TABLE_SIMPLE_TOOLKIT(nfb.BaseComp):
         return collisions
 
     def command_line(self) -> None:
-        """Main interface of the interactive mode used to input commands. Runs until the 'exit' or 'quit' commands. All the command line commands are prefixed with 'comm'."""
+        """Main interface of the interactive mode used to input commands. Runs until the 'exit' or 'quit' commands.
+        All the command line commands are prefixed with 'comm'."""
 
         print(f"{colorama.Fore.BLUE + colorama.Style.BRIGHT}MVB HASH TABLE SIMPLE TOOLKIT, version 0.1\nCopyright (C) 2024 CESNET z. s. p. o.\nInput command 'help' for more info.\n{colorama.Style.RESET_ALL}")
 
@@ -225,9 +257,11 @@ class MVB_HASH_TABLE_SIMPLE_TOOLKIT(nfb.BaseComp):
         """Adds a value to a chosen table, the position of the value is decided by the hash of the key.
 
         Args:
-            key: mvb key, to which is the added value to be connected. The hash that decided position of the value in table is calculated from this number.
+            key: mvb key, to which is the added value to be connected. The hash that decided position of the value in table
+            is calculated from this number.
             data: value to be added to the table.
-            table: decided to which table is the value to be added to. Toeplitz table is chosen by default, other option is 'xor' for adding to the simple xor table.
+            table: decided to which table is the value to be added to. Toeplitz table is chosen by default, other option is
+            'xor' for adding to the simple xor table.
 
         """
         if key is None or data is None:
@@ -408,7 +442,6 @@ class MVB_HASH_TABLE_SIMPLE_TOOLKIT(nfb.BaseComp):
             print(f"{colorama.Fore.RED}Error:{colorama.Style.RESET_ALL} Invalid table. Possible tables are both, toeplitz, xor.")
             return
 
-        # name = params[0]
         hash_function, keys, hash_table, used = params[1:5]
 
         if mode == "record":
@@ -432,8 +465,8 @@ class MVB_HASH_TABLE_SIMPLE_TOOLKIT(nfb.BaseComp):
                     hash_table[num][0] = False
 
                     for i in range(used):
-                        #print(f"DEBUG: self.t_keys: {self.t_keys}")
-                        #print(f"DEBUG: i: {i}, self.t_keys[{i}] = {self.t_keys[i]}")
+                        # print(f"DEBUG: self.t_keys: {self.t_keys}")
+                        # print(f"DEBUG: i: {i}, self.t_keys[{i}] = {self.t_keys[i]}")
                         if num == hash_function(keys[i], self.hash_func_params):
                             del keys[i]
                             break
@@ -656,7 +689,12 @@ class MVB_HASH_TABLE_SIMPLE_TOOLKIT(nfb.BaseComp):
             self.hash_key_width = comp_conf["hash_key_width"]
             self.num_of_tables = comp_conf["num_of_tables"]
 
-        self.hash_func_params = {"hash_key": self.hash_key, "mvb_key_width": self.mvb_key_width, "hash_key_width": self.hash_key_width, "hash_width": self.hash_width}
+        self.hash_func_params = {
+            "hash_key": self.hash_key,
+            "mvb_key_width": self.mvb_key_width,
+            "hash_key_width": self.hash_key_width,
+            "hash_width": self.hash_width
+        }
 
         for i in range(self.num_of_tables):
             clear_table = "toeplitz" if i == 0 else "xor"
@@ -766,20 +804,20 @@ def toeplitz_hash(mvb_key: int, params: dict) -> int:
     hash_key_width = params["hash_key_width"]
     hash_width = params["hash_width"]
 
-    hash_key_bits = int_to_bits(hash_key, hash_key_width)
-    mvb_key_bits = int_to_bits(mvb_key, mvb_key_width)
-    hash_bits = hash_width * [0]
+    hash_key_bits = LogicArray(hash_key, Range(hash_key_width-1, 'downto', 0))
+    mvb_key_bits = LogicArray(mvb_key, Range(mvb_key_width-1, 'downto', 0))
+    hash_bits = LogicArray(0, Range(hash_width-1, 'downto', 0))
 
-    for i in range(mvb_key_width):
-        key_slice = hash_key_bits[i:i+hash_width]
-        key_hash = hash_width * [0]
+    for i in Range(mvb_key_width-1, 'downto', 0):
+        key_slice = hash_key_bits[hash_key_width-(mvb_key_width-1-i)-1 : hash_key_width-hash_width-(mvb_key_width-1-i)]
+        key_hash = LogicArray(0, Range(hash_width-1, 'downto', 0))
 
-        if mvb_key_bits[i] == 1:
+        if mvb_key_bits[i]:
             key_hash = key_slice
 
-        hash_bits = xor_bits(hash_bits, key_hash, hash_width)
+        hash_bits = hash_bits ^ key_hash
 
-    return bits_to_int(hash_bits, len(hash_bits))
+    return hash_bits.integer
 
 
 def simple_xor_hash(mvb_key: int, params: dict) -> int:
@@ -799,12 +837,12 @@ def simple_xor_hash(mvb_key: int, params: dict) -> int:
     hash_key_width = params["hash_key_width"]
     hash_width = params["hash_width"]
 
-    hash_key_bits = int_to_bits(hash_key, hash_key_width)
-    mvb_key_bits = int_to_bits(mvb_key, mvb_key_width)
+    hash_key_bits = LogicArray(hash_key, Range(hash_key_width, 'downto', 0))
+    mvb_key_bits = LogicArray(mvb_key, Range(mvb_key_width, 'downto', 0))
 
-    hash_bits = xor_bits(mvb_key_bits[::-1], hash_key_bits[::-1], hash_width)
+    hash_bits = mvb_key_bits[hash_width-1 : 0] ^ hash_key_bits[hash_width-1 : 0]
 
-    return bits_to_int(hash_bits[::-1], hash_width)
+    return hash_bits.integer
 
 
 def main() -> None:
