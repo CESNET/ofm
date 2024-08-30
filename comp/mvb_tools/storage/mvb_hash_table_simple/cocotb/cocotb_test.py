@@ -139,14 +139,14 @@ class testbench():
 
 @cocotb.test()
 async def run_test(dut, config_file: str = "test_configs/test_config_1B.yaml", config_method: str = "script", pkt_count: int = 10000):
-    #Function that runs the cocotb test
+    # Function that runs the cocotb test
 
-    #Args:
-    #    dut: dut
-    #    config_file: file from which is to be loaded the configuration to be uploaded into the component.
-    #    config_method: how is the component to be configured. There are two options: directly from the file ('file'),
-    #                   or via configuration script to which is the file passed ('script').
-    #    pkt_count: how many random packets are to be generated.
+    # Args:
+    #     dut: dut
+    #     config_file: file from which is to be loaded the configuration to be uploaded into the component.
+    #     config_method: how is the component to be configured. There are two options: directly from the file ('file'),
+    #                    or via configuration script to which is the file passed ('script').
+    #     pkt_count: how many random packets are to be generated.
 
     cocotb.start_soon(Clock(dut.CLK, 5, units='ns').start())
     tb = testbench(dut, debug=True)
