@@ -130,7 +130,6 @@ architecture FULL of RX_DMA_HDR_MANAGER is
 
     -- Status registers. This register represents if channel is running or it is stopped.
     signal channel_status_reg : std_logic_vector(CHANNELS-1 downto 0);
-    signal channel_start      : std_logic_vector(CHANNELS-1 downto 0);
     signal channel_stop_vld   : std_logic;
     -- Before channel is stopped all generated dma headers have to be send out before stop request arrives.
     signal channel_stop_size  : unsigned(log2(16) downto 0);
@@ -243,18 +242,6 @@ begin
     --=====================================================================
     -- RUN channels
     --=====================================================================
-    channel_start_p : process (all)
-    begin
-
-        channel_start <= (others => '0');
-
-        if (START_REQ_VLD = '1') then
-
-            channel_start(to_integer(unsigned(START_REQ_CHANNEL))) <= '1';
-
-        end if;
-    end process;
-
     channel_status_p : process (CLK)
     begin
         if (rising_edge(CLK)) then
@@ -366,7 +353,8 @@ begin
             POINTER_UPDATE_DATA => HDP_UPDATE_DATA,
             POINTER_UPDATE_EN   => HDP_UPDATE_EN,
 
-            CHANNEL_RESET => channel_start,
+            START_REQ_VLD     => START_REQ_VLD,
+            START_REQ_CHANNEL => START_REQ_CHANNEL,
 
             INPUT_DISC     => (not channel_status_reg(to_integer(unsigned(input_channel)))),
             INPUT_CHANNEL  => input_channel,
@@ -412,7 +400,8 @@ begin
             POINTER_UPDATE_DATA => HHP_UPDATE_DATA,
             POINTER_UPDATE_EN   => HHP_UPDATE_EN,
 
-            CHANNEL_RESET => channel_start,
+            START_REQ_VLD     => START_REQ_VLD,
+            START_REQ_CHANNEL => START_REQ_CHANNEL,
 
             INPUT_DISC     => (not channel_status_reg(to_integer(unsigned(input_channel)))),
             INPUT_CHANNEL  => input_channel,

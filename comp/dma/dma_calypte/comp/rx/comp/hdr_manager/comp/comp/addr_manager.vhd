@@ -67,8 +67,12 @@ entity ADDR_MANAGER is
         -- Requested channel
         CHANNEL       : in std_logic_vector(log2(CHANNELS)-1 downto 0);
         CHANNEL_VLD   : in std_logic;
-        -- if one bit of this signal is set, the coresponding channel's HW address is reset
-        CHANNEL_RESET : in std_logic_vector(CHANNELS-1 downto 0);
+
+        -- =====================================================================
+        -- Detect start request of a channel (for the reset of internal pointer)
+        -- =====================================================================
+        START_REQ_VLD     : in std_logic;
+        START_REQ_CHANNEL : in std_logic_vector(log2(CHANNELS) -1 downto 0);
 
         -- =====================================================================
         -- RESPONSE ADDRES (To be inserted to the PCIex header)
@@ -83,10 +87,13 @@ end entity;
 
 architecture FULL of ADDR_MANAGER is
 
-    signal hw_pointers_reg : u_array_t (0 to CHANNELS-1)(POINTER_WIDTH-1 downto 0);
-    signal hw_pointer_wr   : std_logic;
-    signal hw_pointer_new  : unsigned(POINTER_WIDTH-1 downto 0);
-    signal hw_offset       : unsigned(ADDR_WIDTH-1 downto 0);
+    signal hw_pointer_wr      : std_logic;
+    signal hw_pointer_wr_addr : std_logic_vector(log2(CHANNELS) -1 downto 0);
+    signal hw_pointer_wr_data : std_logic_vector(POINTER_WIDTH -1 downto 0);
+    signal hw_pointer_rd_data : std_logic_vector(POINTER_WIDTH -1 downto 0);
+
+    signal hw_pointer_new      : unsigned(POINTER_WIDTH-1 downto 0);
+    signal hw_offset           : unsigned(ADDR_WIDTH-1 downto 0);
 
     signal channel_act_reg     : unsigned(log2(CHANNELS)-1 downto 0);
     signal channel_act_vld_reg : std_logic;
@@ -95,47 +102,29 @@ architecture FULL of ADDR_MANAGER is
     signal packet_next : std_logic;
 
 begin
-
-
-
     --=====================================================================
-    -- HW pointers
+    -- Storage of HW pointers
     --=====================================================================
-    -- stores the HW pointers internally
-    hw_pointers_reg_p : process(CLK)
-    begin
-        if (rising_edge(CLK)) then
-            for IT in 0 to CHANNELS-1 loop
+    -- Upon the start of a channel, the pointer has to be cleared
+    hw_pointer_wr_addr <= std_logic_vector(channel_act_reg) when START_REQ_VLD = '0' else START_REQ_CHANNEL;
+    hw_pointer_wr_data <= std_logic_vector(hw_pointer_new)  when START_REQ_VLD = '0' else (others => '0');
 
-                -- HW pointer is reset after request for channel start has arrived
-                if (CHANNEL_RESET(IT) = '1') then
-
-                    hw_pointers_reg(IT) <= (others => '0');
-
-                elsif (hw_pointer_wr = '1' and channel_act_reg = to_unsigned(IT, log2(CHANNELS))) then
-
-                    hw_pointers_reg(IT) <= hw_pointer_new;
-
-                end if;
-            end loop;
-        end if;
-    end process;
-
-    -- TODO :  IN FUTURE if channel num is bigger then we can save some resource with using MEM instead registers
-    --hw_pointers : entity  work.sdp_memx
-    --generic map (
-    --
-    --)
-    --port map (
-    --    CLK   => CLK,
-    --    RESET => RESET,
-    --    --write
-    --    WR_DATA => hw_pointer_data_wr,
-    --    WR_ADDR => hw_pointer_channel_wr,
-    --    WR_EN   => hw_pointer_en,
-    --    --read
-    --    RD
-    --);
+    hw_pointers_lutram_i : entity work.GEN_LUTRAM
+        generic map (
+            DATA_WIDTH         => POINTER_WIDTH,
+            ITEMS              => CHANNELS,
+            RD_PORTS           => 1,
+            RD_LATENCY         => 0,
+            WRITE_USE_RD_ADDR0 => FALSE,
+            MLAB_CONSTR_RDW_DC => FALSE,
+            DEVICE             => DEVICE)
+        port map (
+            CLK     => CLK,
+            WR_EN   => hw_pointer_wr,
+            WR_ADDR => hw_pointer_wr_addr,
+            WR_DATA => hw_pointer_wr_data,
+            RD_ADDR => std_logic_vector(channel_act_reg),
+            RD_DATA => hw_pointer_rd_data);
 
     --=====================================================================
     -- STORE CHANNEL
@@ -162,21 +151,21 @@ begin
     ADDR_CHANNEL <= CHANNEL when packet_next = '1' else std_logic_vector(channel_act_reg);
 
     -- writing new values of the HW pointer for the specific channel
-    hw_pointer_wr  <= packet_vld;
+    hw_pointer_wr  <= packet_vld or START_REQ_VLD;
     -- increment by 1 thus the pointer points to the next block and mask the pointer bits so the pointer would not
     -- overflow
-    hw_pointer_new <= unsigned(std_logic_vector(hw_pointers_reg(to_integer(channel_act_reg)) + 1) and ADDR_MASK);
+    hw_pointer_new <= unsigned(std_logic_vector(unsigned(hw_pointer_rd_data) + 1) and ADDR_MASK);
 
     -- channel_act_vld_reg asserts only if the input CHANNEL_VLD asserts too, for the output address to be valid,
     -- the HW pointer must not match the SW pointer
-    packet_vld  <= '1' when channel_act_vld_reg = '1' and hw_pointer_new /= unsigned(ADDR_SW_POINTER) else '0';
+    packet_vld  <= '1' when channel_act_vld_reg = '1' and hw_pointer_new /= unsigned(ADDR_SW_POINTER) and START_REQ_VLD = '0' else '0';
 
     -- the components accepts a new packet either when the processing of the previous has been finished or the
     -- component is in the idle state
     packet_next <= '1' when packet_vld = '1' or channel_act_vld_reg = '0'                             else '0';
 
     ADDR     <= std_logic_vector(unsigned(ADDR_BASE) + hw_offset);
-    OFFSET   <= std_logic_vector(hw_pointers_reg(to_integer(channel_act_reg)));
+    OFFSET   <= hw_pointer_rd_data;
     ADDR_VLD <= packet_vld;
 
     POINTER_UPDATE_CHAN <= std_logic_vector(channel_act_reg);
@@ -193,7 +182,7 @@ begin
         -- setting
         hw_offset <=
             (ADDR_WIDTH-1 downto POINTER_WIDTH +log2(BLOCK_SIZE) => '0')
-            & hw_pointers_reg(to_integer(channel_act_reg))
+            & unsigned(hw_pointer_rd_data)
             & (log2(BLOCK_SIZE)-1 downto 0 => '0');
 
     else generate
@@ -208,7 +197,7 @@ begin
             if (rising_edge(CLK)) then
                 for IT in 0 to CHANNELS-1 loop
                     -- reset is not required because cannel have to be stopped after reset
-                    if (CHANNEL_RESET(IT) = '1') then
+                    if (START_REQ_VLD = '1' and START_REQ_CHANNEL = std_logic_vector(to_unsigned(IT, log2(CHANNELS)))) then
                         hw_pointers_offset_reg(IT) <= (others => '0');
                     elsif (hw_pointer_wr = '1' and channel_act_reg = to_unsigned(IT, log2(CHANNELS))) then
                         if (hw_pointer_new = 0) then

@@ -52,10 +52,10 @@ entity PCIE_ADDR_GEN is
         POINTER_UPDATE_EN   : out std_logic;
 
         -- =====================================================================
-        -- RESET ADDRESS MANAGER
+        -- Incoming start request (for the reset of the ADDR_MANAGER)
         -- =====================================================================
-        -- if one bit of this signal is set, the coresponding channel's HW address is reset
-        CHANNEL_RESET : in  std_logic_vector(CHANNELS-1 downto 0);
+        START_REQ_VLD     : in std_logic;
+        START_REQ_CHANNEL : in std_logic_vector(log2(CHANNELS) -1 downto 0);
 
         -- =====================================================================
         -- REQUEST ADDRES FOR CHANNEL (Metadata instructions)
@@ -260,7 +260,9 @@ begin
 
             CHANNEL       => channel,
             CHANNEL_VLD   => channel_vld,
-            CHANNEL_RESET => CHANNEL_RESET,
+
+            START_REQ_VLD     => START_REQ_VLD,
+            START_REQ_CHANNEL => START_REQ_CHANNEL,
 
             ADDR     => addr,
             OFFSET   => offset,
