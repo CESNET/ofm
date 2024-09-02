@@ -81,31 +81,31 @@ class tr_planner #(ITEM_WIDTH, RQ_TUSER_WIDTH, PCIE_DOWNHDR_WIDTH, RCB_SIZE, CLK
                                  8'b01001010, pcie_tr.tag_9, pcie_tr.tc, pcie_tr.tag_8, pcie_tr.padd_0,
                                  pcie_tr.td, pcie_tr.ep, pcie_tr.relaxed, pcie_tr.snoop, pcie_tr.at, comp_length};
 
-                $swrite(debug_msg, "%s\n\t ============= RC PCIE MVB ================== \n", debug_msg);
-                $swrite(debug_msg, "%s\n\t Generated RC request MVB number %d: %s\n", debug_msg, mvb_cnt, comp_hdr.convert2string());
-                $swrite(debug_msg, "%s\n\t Deparsed RC MVB TR: \n", debug_msg);
+                debug_msg = {debug_msg, $sformatf("\n\t ============= RC PCIE MVB ================== \n")};
+                debug_msg = {debug_msg, $sformatf("\n\t Generated RC request MVB number %d: %s\n",  mvb_cnt, comp_hdr.convert2string())};
+                debug_msg = {debug_msg, $sformatf("\n\t Deparsed RC MVB TR: \n")};
 
-                $swrite(debug_msg, "%s\n\t PACKET SIZE:       %0d", debug_msg, pcie_tr.len);
-                $swrite(debug_msg, "%s\n\t LEN OF PART:       %0d", debug_msg, comp_length);
-                $swrite(debug_msg, "%s\n\t ATRIBUTES:        0x%h", debug_msg, pcie_tr.at);
-                $swrite(debug_msg, "%s\n\t SNOOP:            0x%h", debug_msg, pcie_tr.snoop);
-                $swrite(debug_msg, "%s\n\t RELAXED:          0x%h", debug_msg, pcie_tr.relaxed);
-                $swrite(debug_msg, "%s\n\t ERROR POISON:     0x%h", debug_msg, pcie_tr.ep);
-                $swrite(debug_msg, "%s\n\t TD:               0x%h", debug_msg, pcie_tr.td);
-                $swrite(debug_msg, "%s\n\t PADD0:            0x%h", debug_msg, pcie_tr.padd_0);
-                $swrite(debug_msg, "%s\n\t TAG_8:            0x%h", debug_msg, pcie_tr.tag_8);
-                $swrite(debug_msg, "%s\n\t TRAFFIC CLASS:    0x%h", debug_msg, pcie_tr.tc);
-                $swrite(debug_msg, "%s\n\t TAG_9:            0x%h", debug_msg, pcie_tr.tag_9);
-                $swrite(debug_msg, "%s\n\t CONST:            0x%h", debug_msg, 8'b01001010);
-                $swrite(debug_msg, "%s\n\t BYTE CNT:         0x%h", debug_msg, byte_count);
-                $swrite(debug_msg, "%s\n\t BYTE CNT HDR:     0x%h", debug_msg, comp_hdr.data[43 : 32]);
-                $swrite(debug_msg, "%s\n\t BCM:              0x%h", debug_msg, bcm);
-                $swrite(debug_msg, "%s\n\t COMPLETE STATUS:  0x%h", debug_msg, complete_st);
-                $swrite(debug_msg, "%s\n\t COMPLETER ID:     0x%h", debug_msg, completer_id);
-                $swrite(debug_msg, "%s\n\t LOW ADDRESS:      0x%h", debug_msg, address);
-                $swrite(debug_msg, "%s\n\t CONST:            0x%h", debug_msg, 1'b0);
-                $swrite(debug_msg, "%s\n\t TAG:              0x%h", debug_msg, pcie_tr.tag);
-                $swrite(debug_msg, "%s\n\t REQUEST ID:       0x%h", debug_msg, pcie_tr.req_id);
+                debug_msg = {debug_msg, $sformatf("\n\t PACKET SIZE:       %0d",  pcie_tr.len)};
+                debug_msg = {debug_msg, $sformatf("\n\t LEN OF PART:       %0d",  comp_length)};
+                debug_msg = {debug_msg, $sformatf("\n\t ATRIBUTES:        0x%h",  pcie_tr.at)};
+                debug_msg = {debug_msg, $sformatf("\n\t SNOOP:            0x%h",  pcie_tr.snoop)};
+                debug_msg = {debug_msg, $sformatf("\n\t RELAXED:          0x%h",  pcie_tr.relaxed)};
+                debug_msg = {debug_msg, $sformatf("\n\t ERROR POISON:     0x%h",  pcie_tr.ep)};
+                debug_msg = {debug_msg, $sformatf("\n\t TD:               0x%h",  pcie_tr.td)};
+                debug_msg = {debug_msg, $sformatf("\n\t PADD0:            0x%h",  pcie_tr.padd_0)};
+                debug_msg = {debug_msg, $sformatf("\n\t TAG_8:            0x%h",  pcie_tr.tag_8)};
+                debug_msg = {debug_msg, $sformatf("\n\t TRAFFIC CLASS:    0x%h",  pcie_tr.tc)};
+                debug_msg = {debug_msg, $sformatf("\n\t TAG_9:            0x%h",  pcie_tr.tag_9)};
+                debug_msg = {debug_msg, $sformatf("\n\t CONST:            0x%h",  8'b01001010)};
+                debug_msg = {debug_msg, $sformatf("\n\t BYTE CNT:         0x%h",  byte_count)};
+                debug_msg = {debug_msg, $sformatf("\n\t BYTE CNT HDR:     0x%h",  comp_hdr.data[43 : 32])};
+                debug_msg = {debug_msg, $sformatf("\n\t BCM:              0x%h",  bcm)};
+                debug_msg = {debug_msg, $sformatf("\n\t COMPLETE STATUS:  0x%h",  complete_st)};
+                debug_msg = {debug_msg, $sformatf("\n\t COMPLETER ID:     0x%h",  completer_id)};
+                debug_msg = {debug_msg, $sformatf("\n\t LOW ADDRESS:      0x%h",  address)};
+                debug_msg = {debug_msg, $sformatf("\n\t CONST:            0x%h",  1'b0)};
+                debug_msg = {debug_msg, $sformatf("\n\t TAG:              0x%h",  pcie_tr.tag)};
+                debug_msg = {debug_msg, $sformatf("\n\t REQUEST ID:       0x%h",  pcie_tr.req_id)};
 
                 // $write("\n\t BYTE CNT:         0x%h", comp_hdr.data[43 : 32]);
 
@@ -140,20 +140,20 @@ class tr_planner #(ITEM_WIDTH, RQ_TUSER_WIDTH, PCIE_DOWNHDR_WIDTH, RCB_SIZE, CLK
                 // [91 : 89] Transaction Class
                 // [94 : 92] Attributes
 
-                $swrite(debug_msg, "%s\n\t ============= RC PCIE MFB ================== \n", debug_msg);
-                $swrite(debug_msg, "%s\t LOW ADDR            0x%h \n", debug_msg, comp_hdr.data[11 : 0]);
-                $swrite(debug_msg, "%s\t ERROR CODE          0x%h \n", debug_msg, comp_hdr.data[15 : 12]);
-                $swrite(debug_msg, "%s\t BYTE CNT            0x%h \n", debug_msg, comp_hdr.data[28 : 16]);
-                $swrite(debug_msg, "%s\t REQUEST COMPLETED   0x%h \n", debug_msg, comp_hdr.data[30]);
-                $swrite(debug_msg, "%s\t DWORD COUNT         0x%h \n", debug_msg, comp_hdr.data[42 : 32]);
-                $swrite(debug_msg, "%s\t COMPLETITION STATUS 0x%h \n", debug_msg, comp_hdr.data[45 : 43]);
-                $swrite(debug_msg, "%s\t REQUESTER ID        0x%h \n", debug_msg, comp_hdr.data[63 : 48]);
-                $swrite(debug_msg, "%s\t TAG                 0x%h \n", debug_msg, comp_hdr.data[71 : 64]);
-                $swrite(debug_msg, "%s\t TAG                 0x%h \n", debug_msg, pcie_tr.tag);
-                $swrite(debug_msg, "%s\t COMPLETER ID         %0d \n", debug_msg, comp_hdr.data[87 : 72]);
-                $swrite(debug_msg, "%s\t TR CLASS             %0d \n", debug_msg, comp_hdr.data[91 : 89]);
-                $swrite(debug_msg, "%s\t ATTRIBUTES           %0d \n", debug_msg, comp_hdr.data[94 : 92]);
-                $swrite(debug_msg, "%s\t DOWN SEQ           :  %s \n", debug_msg, comp_hdr.convert2string());
+                debug_msg = {debug_msg, $sformatf("\n\t ============= RC PCIE MFB ================== \n")};
+                debug_msg = {debug_msg, $sformatf("\t LOW ADDR            0x%h \n",  comp_hdr.data[11 : 0])};
+                debug_msg = {debug_msg, $sformatf("\t ERROR CODE          0x%h \n",  comp_hdr.data[15 : 12])};
+                debug_msg = {debug_msg, $sformatf("\t BYTE CNT            0x%h \n",  comp_hdr.data[28 : 16])};
+                debug_msg = {debug_msg, $sformatf("\t REQUEST COMPLETED   0x%h \n",  comp_hdr.data[30])};
+                debug_msg = {debug_msg, $sformatf("\t DWORD COUNT         0x%h \n",  comp_hdr.data[42 : 32])};
+                debug_msg = {debug_msg, $sformatf("\t COMPLETITION STATUS 0x%h \n",  comp_hdr.data[45 : 43])};
+                debug_msg = {debug_msg, $sformatf("\t REQUESTER ID        0x%h \n",  comp_hdr.data[63 : 48])};
+                debug_msg = {debug_msg, $sformatf("\t TAG                 0x%h \n",  comp_hdr.data[71 : 64])};
+                debug_msg = {debug_msg, $sformatf("\t TAG                 0x%h \n",  pcie_tr.tag)};
+                debug_msg = {debug_msg, $sformatf("\t COMPLETER ID         %0d \n",  comp_hdr.data[87 : 72])};
+                debug_msg = {debug_msg, $sformatf("\t TR CLASS             %0d \n",  comp_hdr.data[91 : 89])};
+                debug_msg = {debug_msg, $sformatf("\t ATTRIBUTES           %0d \n",  comp_hdr.data[94 : 92])};
+                debug_msg = {debug_msg, $sformatf("\t DOWN SEQ           :  %s \n",  comp_hdr.convert2string())};
 
                 comp_data.data = new[comp_length + (PCIE_DOWNHDR_WIDTH/32)];
                 comp_data.data[0 : 3-1] = {<<32{comp_hdr.data}};

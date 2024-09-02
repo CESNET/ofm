@@ -8,8 +8,8 @@ class scoreboard #(RX0_ITEM_WIDTH, RX1_ITEM_WIDTH, TX_ITEM_WIDTH) extends uvm_sc
     `uvm_component_utils(merge_items::scoreboard #(RX0_ITEM_WIDTH, RX1_ITEM_WIDTH, TX_ITEM_WIDTH))
 
     // Analysis components.
-    uvm_common::subscriber #(uvm_logic_vector::sequence_item #(RX0_ITEM_WIDTH)) analysis_imp_mvb_rx0;
-    uvm_common::subscriber #(uvm_logic_vector::sequence_item #(RX1_ITEM_WIDTH)) analysis_imp_mvb_rx1;
+    uvm_analysis_export #(uvm_logic_vector::sequence_item #(RX0_ITEM_WIDTH)) analysis_imp_mvb_rx0;
+    uvm_analysis_export #(uvm_logic_vector::sequence_item #(RX1_ITEM_WIDTH)) analysis_imp_mvb_rx1;
 
     uvm_analysis_export #(uvm_logic_vector::sequence_item #(TX_ITEM_WIDTH))  analysis_imp_mvb_tx;
     uvm_analysis_export #(uvm_logic_vector::sequence_item #(RX0_ITEM_WIDTH)) analysis_imp_mvb_tx0;
@@ -31,6 +31,8 @@ class scoreboard #(RX0_ITEM_WIDTH, RX1_ITEM_WIDTH, TX_ITEM_WIDTH) extends uvm_sc
         analysis_imp_mvb_tx0 = new("analysis_imp_mvb_tx0", this);
         analysis_imp_mvb_tx1 = new("analysis_imp_mvb_tx1", this);
 
+        analysis_imp_mvb_rx0 = new("analysis_imp_mvb_rx0", this);
+        analysis_imp_mvb_rx1 = new("analysis_imp_mvb_rx1", this);
     endfunction
 
     function int unsigned success();
@@ -50,10 +52,6 @@ class scoreboard #(RX0_ITEM_WIDTH, RX1_ITEM_WIDTH, TX_ITEM_WIDTH) extends uvm_sc
     endfunction
 
     function void build_phase(uvm_phase phase);
-
-        analysis_imp_mvb_rx0 = uvm_common::subscriber #(uvm_logic_vector::sequence_item #(RX0_ITEM_WIDTH))::type_id::create("analysis_imp_mvb_rx0", this);
-        analysis_imp_mvb_rx1 = uvm_common::subscriber #(uvm_logic_vector::sequence_item #(RX1_ITEM_WIDTH))::type_id::create("analysis_imp_mvb_rx1", this);
-
         cmp  = uvm_common::comparer_ordered #(uvm_logic_vector::sequence_item #(TX_ITEM_WIDTH)) ::type_id::create("cmp",  this);
         cmp0 = uvm_common::comparer_ordered #(uvm_logic_vector::sequence_item #(RX0_ITEM_WIDTH))::type_id::create("cmp0", this);
         cmp1 = uvm_common::comparer_ordered #(uvm_logic_vector::sequence_item #(RX1_ITEM_WIDTH))::type_id::create("cmp1", this);
@@ -70,10 +68,10 @@ class scoreboard #(RX0_ITEM_WIDTH, RX1_ITEM_WIDTH, TX_ITEM_WIDTH) extends uvm_sc
     function void connect_phase(uvm_phase phase);
 
         // Connects input data to the input of the models
-        analysis_imp_mvb_rx0.port.connect(m_model      .model_mvb_in0.analysis_export);
-        analysis_imp_mvb_rx1.port.connect(m_model      .model_mvb_in1.analysis_export);
-        analysis_imp_mvb_rx0.port.connect(m_model_pipe0.model_mvb_in .analysis_export);
-        analysis_imp_mvb_rx1.port.connect(m_model_pipe1.model_mvb_in .analysis_export);
+        analysis_imp_mvb_rx0.connect(m_model      .model_mvb_in0.analysis_export);
+        analysis_imp_mvb_rx1.connect(m_model      .model_mvb_in1.analysis_export);
+        analysis_imp_mvb_rx0.connect(m_model_pipe0.model_mvb_in .analysis_export);
+        analysis_imp_mvb_rx1.connect(m_model_pipe1.model_mvb_in .analysis_export);
 
         // Processed data from the output of the model connected to the analysis fifo
         m_model      .model_mvb_out.connect(cmp .analysis_imp_model);
@@ -90,7 +88,7 @@ class scoreboard #(RX0_ITEM_WIDTH, RX1_ITEM_WIDTH, TX_ITEM_WIDTH) extends uvm_sc
     function void report_phase(uvm_phase phase);
         string msg = "\n";
 
-        $swrite(msg, "%s\n\tDATA STUCK INSIDE\t\nRX0:%d, RX1:%d", msg, m_model.model_mvb_in0.used(), m_model.model_mvb_in1.used());
+        msg = {msg, $sformatf("\n\tDATA STUCK INSIDE\t\nRX0:%d, RX1:%d",  m_model.model_mvb_in0.used(), m_model.model_mvb_in1.used())};
 
         if (this.success() && this.used() == 0) begin
             `uvm_info(get_type_name(), {msg, "\n\n\t---------------------------------------\n\t----     VERIFICATION SUCCESS      ----\n\t---------------------------------------"}, UVM_NONE)

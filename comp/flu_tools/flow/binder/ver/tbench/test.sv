@@ -71,7 +71,8 @@ program TEST (
 
     // Create driver
     for (int i=0; i<PORTS; i++) begin
-    $swrite(driverLabel, "Driver %0d", i);
+
+    driverLabel = $sformatf( "Driver %0d", i);
     fluDriver[i]  = new (driverLabel, generator[i].transMbx, vRX[i]);
       fluDriver[i].insideTxDelayEn_wt       = DRIVER0_INSIDE_DELAYEN_WT;
       fluDriver[i].insideTxDelayDisable_wt  = DRIVER0_INSIDE_DELAYDIS_WT;

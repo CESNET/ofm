@@ -55,6 +55,7 @@ class monitor #(int unsigned CHANNELS, int unsigned WIDTH) extends uvm_monitor;
             si.clk_en = vif.monitor_cb.CLK_EN;
 
             // Write sequence item to analysis port.
+            si.start[this.get_full_name()] = $time();
             analysis_port.write(si);
         end
     endtask

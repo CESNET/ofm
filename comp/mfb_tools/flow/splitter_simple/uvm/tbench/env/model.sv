@@ -10,19 +10,19 @@ class model #(ITEM_WIDTH, META_WIDTH, CHANNELS) extends uvm_component;
 
     localparam SEL_WIDTH = $clog2(CHANNELS);
 
-    uvm_common::fifo#(uvm_common::model_item#(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))) in_data;
-    uvm_common::fifo#(uvm_common::model_item#(uvm_logic_vector::sequence_item #($clog2(CHANNELS) + META_WIDTH))) in_meta;
+    uvm_tlm_analysis_fifo#(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))               in_data;
+    uvm_tlm_analysis_fifo#(uvm_logic_vector::sequence_item #($clog2(CHANNELS) + META_WIDTH)) in_meta;
 
-    uvm_analysis_port #(uvm_common::model_item#(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))) out_data[CHANNELS];
-    uvm_analysis_port #(uvm_common::model_item#(uvm_logic_vector::sequence_item #(META_WIDTH)))      out_meta[CHANNELS];
+    uvm_analysis_port #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)) out_data[CHANNELS];
+    uvm_analysis_port #(uvm_logic_vector::sequence_item #(META_WIDTH))      out_meta[CHANNELS];
 
-    protected uvm_common::model_item#(uvm_logic_vector::sequence_item #($clog2(CHANNELS) + META_WIDTH)) headers[$];
+    protected uvm_logic_vector::sequence_item #($clog2(CHANNELS) + META_WIDTH) headers[$];
 
     function new(string name = "model", uvm_component parent = null);
         super.new(name, parent);
 
-        in_data = null; //new("in_data", this);
-        in_meta = null; //new("in_meta", this);
+        in_data = new("in_data", this);
+        in_meta = new("in_meta", this);
         for (int unsigned it = 0; it < CHANNELS; it++) begin
             string str_it;
 
@@ -48,14 +48,14 @@ class model #(ITEM_WIDTH, META_WIDTH, CHANNELS) extends uvm_component;
 
     task run_meta(uvm_phase phase);
         forever begin
-            uvm_common::model_item#(uvm_logic_vector::sequence_item #($clog2(CHANNELS) + META_WIDTH)) tr_in;
-            uvm_common::model_item#(uvm_logic_vector::sequence_item #(META_WIDTH))                    tr_out;
+            uvm_logic_vector::sequence_item #($clog2(CHANNELS) + META_WIDTH) tr_in;
+            uvm_logic_vector::sequence_item #(META_WIDTH)                    tr_out;
             int unsigned channel;
             string msg;
 
             in_meta.get(tr_in);
             if (this.get_report_verbosity_level() >= UVM_FULL) begin
-                msg = tr_in.item.convert2string();
+                msg = tr_in.convert2string();
             end else begin
                 msg = "";
             end
@@ -63,16 +63,14 @@ class model #(ITEM_WIDTH, META_WIDTH, CHANNELS) extends uvm_component;
             //save it for data
             headers.push_back(tr_in);
             //Create output header
-            tr_out = uvm_common::model_item#(uvm_logic_vector::sequence_item #(META_WIDTH))::type_id::create("tr_output_meta", this);
+            tr_out = uvm_logic_vector::sequence_item #(META_WIDTH)::type_id::create("tr_output_meta", this);
             tr_out.start = tr_in.start;
-            tr_out.tag   = tr_in.tag;
-            tr_out.item  = uvm_logic_vector::sequence_item #(META_WIDTH)::type_id::create("tr_out_meta_item", this);
-            tr_out.item.data = tr_in.item.data[META_WIDTH-1:0];
-            channel          = tr_in.item.data[SEL_WIDTH + META_WIDTH-1 : META_WIDTH];
+            tr_out.data  = tr_in.data[META_WIDTH-1:0];
+            channel      = tr_in.data[SEL_WIDTH + META_WIDTH-1 : META_WIDTH];
 
             if (channel >= CHANNELS) begin
                 string msg;
-                $swrite(msg, "\n\tWrong channel num %0d Channel range is 0-%0d", channel, CHANNELS-1);
+                msg = $sformatf( "\n\tWrong channel num %0d Channel range is 0-%0d", channel, CHANNELS-1);
                 `uvm_fatal(this.get_full_name(), msg);
             end else begin
                 `uvm_info(this.get_full_name(), $sformatf("\nINPUT\n\t%s\nOUTPUT : \n%s\n\n", msg, tr_out.convert2string()), UVM_HIGH);
@@ -83,9 +81,9 @@ class model #(ITEM_WIDTH, META_WIDTH, CHANNELS) extends uvm_component;
 
     task run_data(uvm_phase phase);
         forever begin
-            uvm_common::model_item#(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)) tr_in;
-            uvm_common::model_item#(uvm_logic_vector::sequence_item #($clog2(CHANNELS) + META_WIDTH)) tr_in_meta;
-            uvm_common::model_item#(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)) tr_out;
+            uvm_logic_vector_array::sequence_item#(ITEM_WIDTH) tr_in;
+            uvm_logic_vector::sequence_item #($clog2(CHANNELS) + META_WIDTH) tr_in_meta;
+            uvm_logic_vector_array::sequence_item#(ITEM_WIDTH) tr_out;
             int unsigned channel;
             string msg;
 
@@ -93,21 +91,20 @@ class model #(ITEM_WIDTH, META_WIDTH, CHANNELS) extends uvm_component;
             wait (headers.size != 0);
             tr_in_meta = headers.pop_front();
             if (this.get_report_verbosity_level() >= UVM_FULL) begin
-                msg = $sformatf("\nMeta %s\nDATA\n%s\n", tr_in.item.convert2string(), tr_in_meta.item.convert2string());
+                msg = $sformatf("\nMeta %s\nDATA\n%s\n", tr_in.convert2string(), tr_in_meta.convert2string());
             end else begin
                 msg = "";
             end
 
-            tr_out = uvm_common::model_item#(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))::type_id::create("tr_out" ,this);
+            tr_out = uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)::type_id::create("tr_out" ,this);
             tr_out.start = tr_in.start;
             tr_out.time_array_add(tr_in_meta.start);
-            tr_out.tag  = tr_in.tag;
-            tr_out.item = tr_in.item;
-            channel     = tr_in_meta.item.data[SEL_WIDTH + META_WIDTH-1 : META_WIDTH];
+            tr_out.data = tr_in.data;
+            channel     = tr_in_meta.data[SEL_WIDTH + META_WIDTH-1 : META_WIDTH];
 
             if (channel >= CHANNELS) begin
                 string msg;
-                $swrite(msg, "\n\tWrong channel num %0d Channel range is 0-%0d", channel, CHANNELS-1);
+                msg = $sformatf( "\n\tWrong channel num %0d Channel range is 0-%0d", channel, CHANNELS-1);
                 `uvm_fatal(this.get_full_name(), msg);
             end else begin
                 `uvm_info(this.get_full_name(), $sformatf("\nINPUT\n\t%s\nOUTPUT : \n%s\n\n", msg, tr_out.convert2string()), UVM_HIGH);

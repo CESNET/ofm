@@ -26,17 +26,16 @@ package uvm_common;
     `include "sync.sv"
 
     `include "sequence_cfg.sv"
+    `include "sequence_item.sv"
     `include "sequence.sv"
     `include "sequence_library.sv"
 
-    `include "model_item.sv"
     `include "fifo.sv"
-    `include "subscriber.sv"
 
     `include "comparer_base.sv"
     `include "comparer_tagged.sv"
     `include "comparer_ordered.sv"
-    `include "comparer_disordered.sv"
+    `include "comparer_unordered.sv"
     `include "comparer.sv"
 
     `include "stats.sv"

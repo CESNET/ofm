@@ -287,14 +287,14 @@ class FrameLinkUEditTransaction #(int offsetWidth = 8,int enMask = 1) extends Tr
       if (data.size != tr.data.size)
       begin
          same = 0;
-         $swrite(diff, "packetSize does not match");
+         diff = $sformatf( "packetSize does not match");
       end
 
       for (integer j=0; j < data.size; j++)
          if (data[j] != tr.data[j])
          begin
             same = 0;
-            $swrite(diff, "data[%0d] does not match", j);
+            diff = $sformatf( "data[%0d] does not match", j);
          end
 
       // Now, compare the data from the FLU Edit transaction
@@ -302,33 +302,33 @@ class FrameLinkUEditTransaction #(int offsetWidth = 8,int enMask = 1) extends Tr
           if(newData[j] != tr.newData[j])
           begin
              same = 0;
-             $swrite(diff, "new data[%0d] does not match", j);
+             diff = $sformatf( "new data[%0d] does not match", j);
           end
 
       for (integer j=0; j < 4;j++)
           if(mask[j] != tr.mask[j])
           begin
              same = 0;
-             $swrite(diff, "mask [%0d] does not match", j);
+             diff = $sformatf( "mask [%0d] does not match", j);
           end
 
       for (integer j=0; j < offsetWidth;j++)
           if(offset[j] != tr.offset[j])
           begin
              same = 0;
-             $swrite(diff, "offset [%0d] does not match", j);
+             diff = $sformatf( "offset [%0d] does not match", j);
           end
 
       if(insertData != tr.insertData)
       begin
          same = 0;
-         $swrite(diff, "insertData command does not match");
+         diff = $sformatf( "insertData command does not match");
       end
 
       if(maskEnabled != tr.maskEnabled)
       begin
          same = 0;
-         $swrite(diff, "maskEnabled parameter does not match");
+         diff = $sformatf( "maskEnabled parameter does not match");
       end
 
       compare = same;

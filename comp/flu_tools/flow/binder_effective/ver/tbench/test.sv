@@ -90,7 +90,7 @@ program TEST (
 
     // Create driver
     for (int i=0; i<PORTS; i++) begin
-    $swrite(driverLabel, "Driver %0d", i);
+    driverLabel = $sformatf( "Driver %0d", i);
     fluDriver[i]  = new (driverLabel, generator[i].transMbx, vRX[i]);
       fluDriver[i].insideTxDelayEn_wt       = DRIVER0_INSIDE_DELAYEN_WT;
       fluDriver[i].insideTxDelayDisable_wt  = DRIVER0_INSIDE_DELAYDIS_WT;
@@ -102,8 +102,8 @@ program TEST (
       fluDriver[i].startPositionLow         = DRIVER0_START_POS_LOW*enableAlign;
       fluDriver[i].startPositionHigh        = DRIVER0_START_POS_HIGH*enableAlign;
 
-   $swrite(driverLabel, "Hdr Driver %0d",i);
-   fluhdrDriver[i] = new (driverLabel, generator_hdr[i].transMbx, vRX_hdr[i]);
+      driverLabel = $sformatf( "Hdr Driver %0d",i);
+      fluhdrDriver[i] = new (driverLabel, generator_hdr[i].transMbx, vRX_hdr[i]);
       fluhdrDriver[i].insideTxDelayEn_wt       = DRIVER_HDR_INSIDE_DELAYEN_WT;
       fluhdrDriver[i].insideTxDelayDisable_wt  = DRIVER_HDR_INSIDE_DELAYDIS_WT;
       fluhdrDriver[i].insideTxDelayLow         = DRIVER_HDR_INSIDE_DELAYLOW;

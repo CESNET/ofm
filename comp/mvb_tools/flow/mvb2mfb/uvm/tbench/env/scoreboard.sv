@@ -14,7 +14,7 @@ class scoreboard #(MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, MFB_META_WIDTH) extends uvm_s
     uvm_common::comparer_ordered #(uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH))          data_cmp;
     uvm_common::comparer_ordered #(uvm_logic_vector::sequence_item#(MFB_META_WIDTH)) meta_cmp;
 
-    uvm_common::subscriber #(uvm_logic_vector::sequence_item#(MVB_ITEM_WIDTH))       analysis_imp_mvb_data;
+    uvm_analysis_export #(uvm_logic_vector::sequence_item#(MVB_ITEM_WIDTH))       analysis_imp_mvb_data;
 
     model #(MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, MFB_META_WIDTH) m_model;
 
@@ -25,6 +25,7 @@ class scoreboard #(MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, MFB_META_WIDTH) extends uvm_s
         out_data   = new("out_data", this);
         out_meta   = new("out_meta", this);
 
+        analysis_imp_mvb_data = new("analysis_imp_mvb_data", this);
     endfunction
 
     function int unsigned success();
@@ -45,8 +46,6 @@ class scoreboard #(MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, MFB_META_WIDTH) extends uvm_s
     function void build_phase(uvm_phase phase);
         m_model = model#(MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, MFB_META_WIDTH)::type_id::create("m_model", this);
 
-        analysis_imp_mvb_data = uvm_common::subscriber #(uvm_logic_vector::sequence_item#(MVB_ITEM_WIDTH))::type_id::create("analysis_imp_mvb_data", this);
-
         data_cmp = uvm_common::comparer_ordered #(uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH))::type_id::create("data_cmp", this);
         meta_cmp = uvm_common::comparer_ordered #(uvm_logic_vector::sequence_item#(MFB_META_WIDTH))::type_id::create("meta_cmp", this);
 
@@ -57,7 +56,7 @@ class scoreboard #(MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, MFB_META_WIDTH) extends uvm_s
     function void connect_phase(uvm_phase phase);
 
         // connects input data to the input of the model
-        analysis_imp_mvb_data.port.connect(m_model.input_mvb.analysis_export);
+        analysis_imp_mvb_data.connect(m_model.input_mvb.analysis_export);
 
         // processed data from the output of the model connected to the analysis fifo
         m_model.out_data.connect(data_cmp.analysis_imp_model);
@@ -71,8 +70,8 @@ class scoreboard #(MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, MFB_META_WIDTH) extends uvm_s
     function void report_phase(uvm_phase phase);
         string msg = "\n";
 
-        $swrite(msg, "%s\n\DATA info %s", msg, data_cmp.info());
-        $swrite(msg, "%s\n\tMETA info %s", msg, meta_cmp.info());
+        msg = {msg, $sformatf("\n\DATA info %s",  data_cmp.info())};
+        msg = {msg, $sformatf("\n\tMETA info %s",  meta_cmp.info())};
 
         if (this.success() && this.used() == 0) begin
             `uvm_info(get_type_name(), {msg, "\n\n\t---------------------------------------\n\t----     VERIFICATION SUCCESS      ----\n\t---------------------------------------"}, UVM_NONE)

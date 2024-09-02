@@ -52,7 +52,7 @@ import sv_fl_pkg::*;
     virtual task post_tx(Transaction transaction, string inst);
       for(int i=0; i< pInputCount; i++) begin
         string driverLabel;
-        $swrite(driverLabel, "Driver %0d", i);
+        driverLabel = $sformatf("Driver %0d", i);
         if (driverLabel == inst) begin
           pktCnt[i]++;
           break;

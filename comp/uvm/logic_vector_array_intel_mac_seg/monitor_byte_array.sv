@@ -62,6 +62,7 @@ class monitor_byte_array #(int unsigned SEGMENTS) extends uvm_logic_vector_array
                 state = NO_FRAME;
                 hl_tr = uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)::type_id::create("hl_tr", this);
                 hl_tr.data = data;
+                hl_tr.start[this.get_full_name()] = $time();
                 analysis_port.write(hl_tr);
             end
         end

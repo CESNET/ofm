@@ -8,11 +8,11 @@ class model #(RX0_ITEM_WIDTH, RX1_ITEM_WIDTH, TX_ITEM_WIDTH) extends uvm_compone
     `uvm_component_param_utils(merge_items::model #(RX0_ITEM_WIDTH, RX1_ITEM_WIDTH, TX_ITEM_WIDTH))
 
     // Model inputs
-    uvm_tlm_analysis_fifo #(uvm_common::model_item #(uvm_logic_vector::sequence_item #(RX0_ITEM_WIDTH))) model_mvb_in0;
-    uvm_tlm_analysis_fifo #(uvm_common::model_item #(uvm_logic_vector::sequence_item #(RX1_ITEM_WIDTH))) model_mvb_in1;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(RX0_ITEM_WIDTH)) model_mvb_in0;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(RX1_ITEM_WIDTH)) model_mvb_in1;
 
     // Model outputs
-    uvm_analysis_port #(uvm_common::model_item #(uvm_logic_vector::sequence_item #(TX_ITEM_WIDTH))) model_mvb_out;
+    uvm_analysis_port #(uvm_logic_vector::sequence_item #(TX_ITEM_WIDTH)) model_mvb_out;
 
     function new(string name = "model", uvm_component parent = null);
         super.new(name, parent);
@@ -24,18 +24,19 @@ class model #(RX0_ITEM_WIDTH, RX1_ITEM_WIDTH, TX_ITEM_WIDTH) extends uvm_compone
     endfunction
 
     task run_phase(uvm_phase phase);
-        uvm_common::model_item #(uvm_logic_vector::sequence_item #(RX0_ITEM_WIDTH)) tr_mvb_in0;
-        uvm_common::model_item #(uvm_logic_vector::sequence_item #(RX1_ITEM_WIDTH)) tr_mvb_in1;
-        uvm_common::model_item #(uvm_logic_vector::sequence_item #(TX_ITEM_WIDTH))  tr_mvb_out;
+        uvm_logic_vector::sequence_item #(RX0_ITEM_WIDTH) tr_mvb_in0;
+        uvm_logic_vector::sequence_item #(RX1_ITEM_WIDTH) tr_mvb_in1;
+        uvm_logic_vector::sequence_item #(TX_ITEM_WIDTH)  tr_mvb_out;
 
         forever begin
             model_mvb_in0.get(tr_mvb_in0);
             model_mvb_in1.get(tr_mvb_in1);
 
-            tr_mvb_out      = uvm_common::model_item          #(uvm_logic_vector::sequence_item #(TX_ITEM_WIDTH))::type_id::create("tr_mvb_out");
-            tr_mvb_out.item = uvm_logic_vector::sequence_item #(TX_ITEM_WIDTH)                                   ::type_id::create("tr_mvb_out_item");
+            tr_mvb_out = uvm_logic_vector::sequence_item #(TX_ITEM_WIDTH)::type_id::create("tr_mvb_out_item");
 
-            tr_mvb_out.item.data = { tr_mvb_in1.item.data, tr_mvb_in0.item.data };
+            tr_mvb_out.data = { tr_mvb_in1.data, tr_mvb_in0.data };
+            tr_mvb_out.time_array_add(tr_mvb_in0.start);
+            tr_mvb_out.time_array_add(tr_mvb_in1.start);
 
             model_mvb_out.write(tr_mvb_out);
 

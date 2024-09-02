@@ -60,7 +60,7 @@ program TEST (
     for(int i=0; i<CHANNELS; i++) begin
       string generatorLabel;
 
-      $swrite(generatorLabel, "RX Generator %0d", i);
+      generatorLabel = $sformatf( "RX Generator %0d", i);
       generator[i]= new(generatorLabel, i);
       flBlueprint = new;
       flBlueprint.packetCount   = packet_count;
@@ -84,7 +84,7 @@ program TEST (
     for(int i=0; i<CHANNELS; i++) begin
       string scoreboardLabel;
 
-      $swrite(scoreboardLabel, "Scoreboard %0d", i);
+      scoreboardLabel = $sformatf( "Scoreboard %0d", i);
       scoreboard[i] = new(scoreboardLabel);
     end
 
@@ -92,7 +92,7 @@ program TEST (
     for(int i=0; i<CHANNELS; i++) begin
       string driverLabel;
 
-      $swrite(driverLabel, "Driver %0d", i);
+      driverLabel = $sformatf( "Driver %0d", i);
       flDriver[i]    = new (driverLabel, generator[i].transMbx, vRX[i]);
       flDriver[i].txDelayEn_wt             = DRIVER_DELAYEN_WT;
       flDriver[i].txDelayDisable_wt        = DRIVER_DELAYDIS_WT;
@@ -111,8 +111,8 @@ program TEST (
       string monitorLabel;
       string responderLabel;
 
-      $swrite(monitorLabel, "Monitor %0d", i);
-      $swrite(responderLabel, "Responder %0d", i);
+      monitorLabel = $sformatf( "Monitor %0d", i);
+      responderLabel = $sformatf( "Responder %0d", i);
       flMonitor[i]   = new (monitorLabel, vMONITOR[i]);
       flResponder[i] = new (responderLabel, vTX[i]);
         flResponder[i].rxDelayEn_wt            = MONITOR_DELAYEN_WT;

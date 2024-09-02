@@ -13,8 +13,8 @@ class scoreboard #(MFB_REGIONS, MFB_ITEM_WIDTH, MFB_META_WIDTH) extends uvm_scor
 
     protected model #(MFB_REGIONS, MFB_ITEM_WIDTH, MFB_META_WIDTH) m_model;
 
-    uvm_common::subscriber #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) m_data_subscriber;
-    uvm_common::subscriber #(uvm_logic_vector::sequence_item #(MFB_META_WIDTH))       m_meta_subscriber;
+    uvm_analysis_export #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) m_data_subscriber;
+    uvm_analysis_export #(uvm_logic_vector::sequence_item #(MFB_META_WIDTH))       m_meta_subscriber;
 
     protected uvm_common::comparer_ordered #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) data_cmp;
     protected uvm_common::comparer_ordered #(uvm_logic_vector::sequence_item #(MFB_META_WIDTH))       meta_cmp;
@@ -25,6 +25,9 @@ class scoreboard #(MFB_REGIONS, MFB_ITEM_WIDTH, MFB_META_WIDTH) extends uvm_scor
 
         data_dut = new("data_dut", this);
         meta_dut = new("meta_dut", this);
+
+        m_data_subscriber = new("m_data_subscriber", this);
+        m_meta_subscriber = new("m_meta_subscriber", this);
 
     endfunction
 
@@ -46,9 +49,6 @@ class scoreboard #(MFB_REGIONS, MFB_ITEM_WIDTH, MFB_META_WIDTH) extends uvm_scor
 
 
     function void build_phase(uvm_phase phase);
-        m_data_subscriber = uvm_common::subscriber #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))::type_id::create("m_data_subscriber", this);
-        m_meta_subscriber = uvm_common::subscriber #(uvm_logic_vector::sequence_item #(MFB_META_WIDTH))      ::type_id::create("m_meta_subscriber", this);
-
         m_model = model #(MFB_REGIONS, MFB_ITEM_WIDTH, MFB_META_WIDTH)::type_id::create("m_model", this);
 
         data_cmp = uvm_common::comparer_ordered #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))::type_id::create("data_cmp", this);
@@ -59,8 +59,8 @@ class scoreboard #(MFB_REGIONS, MFB_ITEM_WIDTH, MFB_META_WIDTH) extends uvm_scor
     function void connect_phase(uvm_phase phase);
 
         // connects the input data (from the Subscriber - connection in Env) to the input of the Model
-        m_data_subscriber.port.connect(m_model.input_data.analysis_export);
-        m_meta_subscriber.port.connect(m_model.input_meta.analysis_export);
+        m_data_subscriber.connect(m_model.input_data.analysis_export);
+        m_meta_subscriber.connect(m_model.input_meta.analysis_export);
         // and then from the Model to the Comparator
         m_model.out_data.connect(data_cmp.analysis_imp_model);
         m_model.out_meta.connect(meta_cmp.analysis_imp_model);

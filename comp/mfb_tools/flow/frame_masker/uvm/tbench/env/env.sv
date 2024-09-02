@@ -67,8 +67,8 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_ME
     function void connect_phase(uvm_phase phase);
 
         // connects input data to the Subscriber in the Scoreboard
-        m_env_rx.analysis_port_data.connect(sc.m_data_subscriber.analysis_export);
-        m_env_rx.analysis_port_meta.connect(sc.m_meta_subscriber.analysis_export);
+        m_env_rx.analysis_port_data.connect(sc.m_data_subscriber);
+        m_env_rx.analysis_port_meta.connect(sc.m_meta_subscriber);
 
         m_env_tx.analysis_port_data.connect(sc.data_dut);
         m_env_tx.analysis_port_meta.connect(sc.meta_dut);

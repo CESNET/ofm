@@ -130,7 +130,7 @@ class NppTxSoftware #(int pChannels) extends NppSoftware #(pChannels);
 
          #(0);
          if(enabled) begin
-            $swrite(label, "Monitor%0d", channel);
+            label = $sformatf( "Monitor%0d", channel);
             $cast(to, transaction);
             foreach (cbs[channel]) cbs[channel].pre_tx(to, label);
             putTransaction(transaction);

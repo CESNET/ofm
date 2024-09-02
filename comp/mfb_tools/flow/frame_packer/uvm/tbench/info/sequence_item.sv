@@ -70,7 +70,7 @@ class sequence_item #(USR_RX_PKT_SIZE_MAX, RX_CHANNELS, HDR_META_WIDTH) extends 
     function string convert2string();
         string ret;
 
-        $swrite(ret, ,"\tPacket_size : %h\n\tMeta : %h\n\tChannel : %0d\n\tDiscard : \b\n", packet_size, meta, channel, discard);
+        ret = $sformatf("\tPacket_size : %h\n\tMeta : %h\n\tChannel : %0d\n\tDiscard : %b\n", packet_size, meta, channel, discard);
 
         return ret;
     endfunction

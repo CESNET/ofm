@@ -4,7 +4,7 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause
 
-class sequence_item #(int unsigned DATA_WIDTH, int unsigned TUSER_WIDTH, int unsigned REGIONS) extends uvm_sequence_item;
+class sequence_item #(int unsigned DATA_WIDTH, int unsigned TUSER_WIDTH, int unsigned REGIONS) extends uvm_common::sequence_item;
 
     // ------------------------------------------------------------------------
     // Registration of object tools
@@ -77,7 +77,7 @@ class sequence_item #(int unsigned DATA_WIDTH, int unsigned TUSER_WIDTH, int uns
     function string convert2string();
         string output_string = "";
 
-        $sformat(output_string, {"\n\tTDATA: %b\n\tTUSER: %b\n\tTKEEP: %b\n\tTLAST: %b\n\tTVALID: %b\n\tTREADY: %b\n"},
+        output_string = $sformatf({"\n\tTDATA: %b\n\tTUSER: %b\n\tTKEEP: %b\n\tTLAST: %b\n\tTVALID: %b\n\tTREADY: %b\n"},
             tdata,
             tuser,
             tkeep,
@@ -87,7 +87,7 @@ class sequence_item #(int unsigned DATA_WIDTH, int unsigned TUSER_WIDTH, int uns
         );
 
         for (int unsigned it = 0; it < REGIONS; it++) begin
-            $swrite(output_string, "%s\n\t-- id %0d\n\tDATA %h\n",output_string, it, tdata[it]);
+            output_string = {output_string, $sformatf("\n\t-- id %0d\n\tDATA %h\n",  it, tdata[it])};
         end
 
         return output_string;

@@ -4,7 +4,7 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause
 
-class sequence_item #(int unsigned REGIONS, int unsigned REGION_SIZE, int unsigned BLOCK_SIZE, int unsigned ITEM_WIDTH, int unsigned META_WIDTH) extends uvm_sequence_item;
+class sequence_item #(int unsigned REGIONS, int unsigned REGION_SIZE, int unsigned BLOCK_SIZE, int unsigned ITEM_WIDTH, int unsigned META_WIDTH) extends uvm_common::sequence_item;
 
     // ------------------------------------------------------------------------
     // Registration of object tools
@@ -86,7 +86,7 @@ class sequence_item #(int unsigned REGIONS, int unsigned REGION_SIZE, int unsign
         );
 
         for (int unsigned it = 0; it < REGIONS; it++) begin
-            $swrite(output_string, "%s\n\t-- id %0d\n\tVALID %b \n\tEOP %b EMPTY %0d\n\tSOP %b\n\tDATA %h\n\tMETA %h\n",output_string, it, valid[it], eop[it], empty[it], sop[it], data[it], meta[it]);
+            output_string = {output_string, $sformatf("\n\t-- id %0d\n\tVALID %b \n\tEOP %b EMPTY %0d\n\tSOP %b\n\tDATA %h\n\tMETA %h\n",  it, valid[it], eop[it], empty[it], sop[it], data[it], meta[it])};
         end
 
         return output_string;

@@ -102,8 +102,8 @@ program TEST (
       string monitorLabel;
       string responderLabel;
 
-      $swrite(monitorLabel, "Monitor %0d", i);
-      $swrite(responderLabel, "Responder %0d", i);
+      monitorLabel = $sformatf( "Monitor %0d", i);
+      responderLabel = $sformatf( "Responder %0d", i);
       fluMonitor[i]   = new (monitorLabel, vMONITOR[i]);
       fluResponder[i] = new (responderLabel, vTX[i]);
 

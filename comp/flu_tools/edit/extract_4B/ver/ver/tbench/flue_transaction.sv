@@ -166,21 +166,21 @@ class FrameLinkUEditTransaction #(int offsetWidth = 10) extends Transaction;
       if (data.size != tr.data.size)
       begin
          same = 0;
-         $swrite(diff, "packetSize does not match");
+         diff = "packetSize does not match";
       end
 
       for (integer j=0; j < data.size; j++)
          if (data[j] != tr.data[j])
          begin
             same = 0;
-            $swrite(diff, "data[%0d] does not match", j);
+            diff = $sformatf( "data[%0d] does not match", j);
          end
 
       for (integer j=0; j < offsetWidth;j++)
           if(offset[j] != tr.offset[j])
           begin
              same = 0;
-             $swrite(diff, "offset [%0d] does not match", j);
+             diff = $sformatf( "offset [%0d] does not match", j);
           end
 
       compare = same;

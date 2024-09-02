@@ -247,22 +247,22 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_score
             $cast(packet_model, tr_model);
 
             compared++;
-            $swrite(msg, "\nSegments errors/compared : %0d/%0d Packet num %0d", errors, compared, packet_model.packet_num);
+            msg = $sformatf("\nSegments errors/compared : %0d/%0d Packet num %0d", errors, compared, packet_model.packet_num);
 
             if (!((m_regmodel.channel[packet_model.channel].status.get() & 32'h1 ) | (m_regmodel.channel[packet_model.channel].control.get() & 32'h1))) begin
-                $swrite(msg, "%s\nReceived packet on stopped channel Packet is:\n\t\tPart is : %s\n\t\tChannel : %0d\n\t\tPart %0d/%0d", msg, packet_model.data_packet == 1 ? "DATA" : "HEADER",  packet_model.channel, packet_model.part, packet_model.part_num);
+                msg = {msg, $sformatf("\nReceived packet on stopped channel Packet is:\n\t\tPart is : %s\n\t\tChannel : %0d\n\t\tPart %0d/%0d",  packet_model.data_packet == 1 ? "DATA" : "HEADER",  packet_model.channel, packet_model.part, packet_model.part_num)};
                 `uvm_error(this.get_full_name(), msg);
             end
 
             if (pcie_compare(tr_dut.item, tr_dut.meta, packet_model, tr_meta_model) == 0) begin
                 errors++;
 
-                $swrite(msg, "%s\nExpected transaction is:\n\t\tPart is : %s\n\t\tChannel : %0d\n\t\tPart %0d/%0d\n\t\tInput time : %dns", msg, packet_model.data_packet == 1 ? "DATA" : "HEADER",  packet_model.channel, packet_model.part, packet_model.part_num, packet_model.start_time/1ns);
+                msg = {msg, $sformatf("\nExpected transaction is:\n\t\tPart is : %s\n\t\tChannel : %0d\n\t\tPart %0d/%0d\n\t\tInput time : %dns",  packet_model.data_packet == 1 ? "DATA" : "HEADER",  packet_model.channel, packet_model.part, packet_model.part_num, packet_model.start_time/1ns)};
                 msg = $sformatf("%s\nMODEL transaction%s\nDUT Transaction%s", msg, tr_model.convert2string(), tr_dut.item.convert2string());
                 msg = $sformatf("%s\nMODEL META%s\nDUT META%s\n\tDUT doesnt match MODEL transaction", msg, tr_meta_model.convert2string(), tr_dut.meta.convert2string());
                 `uvm_error(this.get_full_name(), msg);
             end else begin
-                $swrite(msg, "%s\nRecive correct transaction :\n\t\tPart is : %s\n\t\tChannel : %0d\n\t\tPart %0d/%0d\n\t\tPart is delay from SOF on input %0dns", msg, packet_model.data_packet == 1 ? "DATA" : "HEADER",  packet_model.channel, packet_model.part, packet_model.part_num, (tr_dut.output_time - packet_model.start_time)/1ns);
+                msg = {msg, $sformatf("\nRecive correct transaction :\n\t\tPart is : %s\n\t\tChannel : %0d\n\t\tPart %0d/%0d\n\t\tPart is delay from SOF on input %0dns",  packet_model.data_packet == 1 ? "DATA" : "HEADER",  packet_model.channel, packet_model.part, packet_model.part_num, (tr_dut.output_time - packet_model.start_time)/1ns)};
                 `uvm_info(this.get_full_name(), $sformatf("%s\nTransaction%s", msg, tr_model.convert2string()), UVM_MEDIUM);
             end
 
@@ -285,11 +285,11 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_score
         string str = "";
 
         m_delay.count(min, max, avg, std_dev);
-        $swrite(str, "%s\n\tDelay statistic (SOF to SOF) => min : %0dns, max : %0dns, avearge : %0dns, standard deviation : %0dns", str, min, max, avg, std_dev);
+        str = {str, $sformatf("\n\tDelay statistic (SOF to SOF) => min : %0dns, max : %0dns, avearge : %0dns, standard deviation : %0dns",  min, max, avg, std_dev)};
         m_input_speed.count(min, max, avg, std_dev);
-        $swrite(str, "%s\n\tSpeed input  statistic (MFB RX)  => min : %0dGb/s, max : %0dGb/s, avearge : %0dG/s, standard deviation : %0dG/s", str, min*8, max*8, avg*8, std_dev*8);
+        str = {str, $sformatf("\n\tSpeed input  statistic (MFB RX)  => min : %0dGb/s, max : %0dGb/s, avearge : %0dG/s, standard deviation : %0dG/s",  min*8, max*8, avg*8, std_dev*8)};
         m_output_speed.count(min, max, avg, std_dev);
-        $swrite(str, "%s\n\tSpeed output statistic (PCIE TX) => min : %0dGb/s, max : %0dGb/s, avearge : %0dG/s, standard deviation : %0dG/s", str, min*8, max*8, avg*8, std_dev*8);
+        str = {str, $sformatf("\n\tSpeed output statistic (PCIE TX) => min : %0dGb/s, max : %0dGb/s, avearge : %0dG/s, standard deviation : %0dG/s",  min*8, max*8, avg*8, std_dev*8)};
         if (errors == 0) begin
             `uvm_info(this.get_full_name(), {str, "\n\n\t---------------------------------------\n\t----     VERIFICATION SUCCESS      ----\n\t---------------------------------------"}, UVM_NONE)
         end else begin

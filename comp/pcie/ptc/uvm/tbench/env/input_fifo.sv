@@ -59,7 +59,7 @@ class model_rc_input_fifo#(MEATA_WIDTH) extends uvm_common::fifo#(dma_header_rq)
                 mfb.get(tr_mfb);
                 tr.data = tr_mfb.data;
                 if (tr_mfb.data.size() != tr.hdr.length) begin
-                    $swrite(msg, "%s\n\tDATA SIZE: %d META SIZE: %d", msg, tr_mfb.data.size(), tr.hdr.length);
+                    msg = {msg, $sformatf("\n\tDATA SIZE: %d META SIZE: %d",  tr_mfb.data.size(), tr.hdr.length)};
                     `uvm_fatal(this.get_full_name(), msg);
                 end
             end else begin

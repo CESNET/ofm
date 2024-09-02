@@ -52,7 +52,7 @@ program TEST (
     for(int i=0; i<INPUT_COUNT; i++) begin
       string generatorLabel;
 
-      $swrite(generatorLabel, "RX Generator %0d", i);
+      generatorLabel = $sformatf("RX Generator %0d", i);
       generator[i]= new(generatorLabel, i);
       flBlueprint = new;
       flBlueprint.packetCount   = packet_count;
@@ -75,7 +75,8 @@ program TEST (
     for(int i=0; i<INPUT_COUNT; i++) begin
       string driverLabel;
 
-      $swrite(driverLabel, "Driver %0d", i);
+
+      driverLabel = $sformatf("Driver %0d", i);
       flDriver[i]    = new (driverLabel, generator[i].transMbx, vRX[i]);
       flDriver[i].txDelayEn_wt             = DRIVER_DELAYEN_WT;
       flDriver[i].txDelayDisable_wt        = DRIVER_DELAYDIS_WT;

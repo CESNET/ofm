@@ -57,14 +57,14 @@ class scoreboard #(ITEM_WIDTH) extends uvm_scoreboard;
             dut_out_fifo.get(tr_dut);
             model_out_fifo.get(tr_model);
 
-            $swrite(debug_msg, "%s\n\t Model MVB TR: %s\n", debug_msg, tr_model.convert2string());
-            $swrite(debug_msg, "%s\n\t DUT MVB TR: %s\n",   debug_msg, tr_dut.convert2string());
+            debug_msg = {debug_msg, $sformatf("\n\t Model MVB TR: %s\n",  tr_model.convert2string())};
+            debug_msg = {debug_msg, $sformatf("\n\t DUT MVB TR: %s\n",  tr_dut.convert2string())};
             `uvm_info(this.get_full_name(), debug_msg ,UVM_MEDIUM);
 
             compared++;
             if (tr_model.compare(tr_dut) == 0) begin
                 errors++;
-                $swrite(msg, "\nTransactions doesnt match\n\tMODEL Transaction\n%s\n\n\tDUT Transaction\n%s", tr_model.convert2string(), tr_dut.convert2string());
+                msg = $sformatf( "\nTransactions doesnt match\n\tMODEL Transaction\n%s\n\n\tDUT Transaction\n%s", tr_model.convert2string(), tr_dut.convert2string());
                 `uvm_error(this.get_full_name(), msg);
             end
         end
@@ -72,10 +72,10 @@ class scoreboard #(ITEM_WIDTH) extends uvm_scoreboard;
 
     virtual function void report_phase(uvm_phase phase);
         string msg = "\n";
-        $swrite(msg, "%sCompared/errors: %0d/%0d \n", msg, compared, errors);
-        $swrite(msg, "%sCount of items inside RX fifo: %d \n", msg, dut_out_fifo.used());
-        $swrite(msg, "%sCount of items inside TX fifo: %d \n", msg, model_out_fifo.used());
-        $swrite(msg, "%sErrors : %d \n", msg, errors);
+        msg = {msg, $sformatf("Compared/errors: %0d/%0d \n",  compared, errors)};
+        msg = {msg, $sformatf("Count of items inside RX fifo: %d \n",  dut_out_fifo.used())};
+        msg = {msg, $sformatf("Count of items inside TX fifo: %d \n",  model_out_fifo.used())};
+        msg = {msg, $sformatf("Errors : %d \n",  errors)};
 
         if (errors == 0 && this.used() == 0) begin
             `uvm_info(get_type_name(), $sformatf("%s\n\n\t---------------------------------------\n\t----     VERIFICATION SUCCESS      ----\n\t---------------------------------------", msg), UVM_NONE)

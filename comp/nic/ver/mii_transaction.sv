@@ -108,18 +108,18 @@ class MiiTransaction extends Transaction;
         MiiTransaction tr;
         assert($cast(tr, to));
         if(data.size != tr.data.size) begin
-            $swrite(diff, "dataSize does not match");
+            diff = "dataSize does not match";
             return 0;
         end
         for(int i=0; i < data.size; i++)
             if(data[i] != tr.data[i]) begin
-                $swrite(diff, "data[%0d] does not match", i);
+                diff = $sformatf( "data[%0d] does not match", i);
                 return 0;
             end
         if(kind == -1)
             for(int i=0; i<crc.size; i++)
                 if(crc[i] != tr.crc[i]) begin
-                    $swrite(diff, "crc[%0d] does not match", i);
+                    diff = $sformatf( "crc[%0d] does not match", i);
                     return 0;
                 end
         return 1;

@@ -70,23 +70,23 @@ class CustomTransaction #(HDR_WIDTH = 128, PAYLOAD_ITEM_WIDTH = 32) extends Tran
       $cast(tr, to);
 
       if (header != tr.header) begin
-         $swrite(diff, "header does not match");
+         diff = $sformatf( "header does not match");
          return 0;
       end
 
       if (payload_en != tr.payload_en) begin
-         $swrite(diff, "payload enable does not match");
+         diff = $sformatf( "payload enable does not match");
          return 0;
       end
 
       if (tr.payload_en == 1) begin
          if (payload != tr.payload) begin
             if (payload.size != tr.payload.size) begin
-               $swrite(diff, "payload size does not match");
+               diff = $sformatf( "payload size does not match");
             end else begin
                for (int j=0; j < payload.size; j++) begin
                   if (payload[j] != tr.payload[j]) begin
-                     $swrite(diff, "Items #%1d does not match", j);
+                     diff = $sformatf( "Items #%1d does not match", j);
                      break;
                   end
                end

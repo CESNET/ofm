@@ -49,6 +49,7 @@ class monitor #(int unsigned DATA_WIDTH, logic FAST_SOF, int unsigned META_WIDTH
                 tr.rxseqerr    = vif.monitor_cb.RXSEQERR;
                 tr.crcerr      = vif.monitor_cb.CRCERR;
                 // Write transaction to analysis port.
+                tr.start[this.get_full_name()] = $time();
                 analysis_port.write(tr);
             end
         end

@@ -6,9 +6,9 @@
 
 // Environment for functional verification of encode.
 
-class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, SPACE_SIZE_MIN_RX, SPACE_SIZE_MAX_RX, SPACE_SIZE_MIN_TX, SPACE_SIZE_MAX_TX, RX_CHANNELS, USR_RX_PKT_SIZE_MAX, HDR_META_WIDTH) extends uvm_env;
+class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, SPACE_SIZE_MIN_RX, SPACE_SIZE_MAX_RX, SPACE_SIZE_MIN_TX, SPACE_SIZE_MAX_TX, RX_CHANNELS, PKT_MTU, HDR_META_WIDTH) extends uvm_env;
     //MACROS
-    `uvm_component_param_utils(uvm_framepacker::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, SPACE_SIZE_MIN_RX, SPACE_SIZE_MAX_RX, SPACE_SIZE_MIN_TX, SPACE_SIZE_MAX_TX, RX_CHANNELS, USR_RX_PKT_SIZE_MAX, HDR_META_WIDTH));
+    `uvm_component_param_utils(uvm_framepacker::env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, SPACE_SIZE_MIN_RX, SPACE_SIZE_MAX_RX, SPACE_SIZE_MIN_TX, SPACE_SIZE_MAX_TX, RX_CHANNELS, PKT_MTU, HDR_META_WIDTH));
 
     /////////////////////////////////////////////////////
     //             COMPONENT DECLARATION               //
@@ -20,8 +20,8 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MVB_IT
     protected uvm_logic_vector_array_mfb::env_tx #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, 0) mfb_tx_env;
 
     //MVB_interface - uvm_logic_vector_mvb
-    protected uvm_logic_vector_mvb::env_rx #(MFB_REGIONS, MVB_ITEM_WIDTH) mvb_rx_env;
-    protected uvm_logic_vector_mvb::env_tx #(MFB_REGIONS, MVB_ITEM_WIDTH) mvb_tx_env;
+    protected uvm_logic_vector_mvb::env_rx #(MFB_REGIONS, $clog2(RX_CHANNELS) + $clog2(PKT_MTU+1))                  mvb_rx_env;
+    protected uvm_logic_vector_mvb::env_tx #(MFB_REGIONS, $clog2(RX_CHANNELS) + $clog2(PKT_MTU+1) + HDR_META_WIDTH + 1) mvb_tx_env;
 
     //Internal signals from shifter
     protected uvm_logic_vector_mvb::env_tx #(1, 2) m_flow_ctrl[RX_CHANNELS];
@@ -30,16 +30,16 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MVB_IT
     protected uvm_logic_vector_array::agent#(MFB_ITEM_WIDTH) m_byte_array_agent;
 
     //MVB interface - Verification
-    protected uvm_meta::agent #(USR_RX_PKT_SIZE_MAX, RX_CHANNELS, HDR_META_WIDTH) m_info;
+    protected uvm_meta::agent #(PKT_MTU, RX_CHANNELS, HDR_META_WIDTH) m_info;
 
     //Data generator
-    protected uvm_framepacker::generator #(USR_RX_PKT_SIZE_MAX, RX_CHANNELS, HDR_META_WIDTH, MVB_ITEM_WIDTH, MFB_ITEM_WIDTH) m_generator;
+    protected uvm_framepacker::generator #(PKT_MTU, RX_CHANNELS, HDR_META_WIDTH, MFB_ITEM_WIDTH) m_generator;
 
     //Scoreboard
-    scoreboard #(MVB_ITEM_WIDTH, MFB_ITEM_WIDTH, RX_CHANNELS, USR_RX_PKT_SIZE_MAX) m_scoreboard;
+    scoreboard #(RX_CHANNELS, PKT_MTU, HDR_META_WIDTH,  MFB_ITEM_WIDTH) m_scoreboard;
 
     //Virtual sequencer
-    uvm_framepacker::virt_sequencer#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, USR_RX_PKT_SIZE_MAX, RX_CHANNELS, HDR_META_WIDTH) vscr;
+    uvm_framepacker::virt_sequencer#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, PKT_MTU, RX_CHANNELS, HDR_META_WIDTH) vscr;
 
     //Reset
     uvm_reset::agent m_reset;
@@ -130,14 +130,14 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MVB_IT
         //Build of components
         mfb_rx_env         = uvm_logic_vector_array_mfb::env_rx #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, 0)::type_id::create("mfb_rx_env", this);
         mfb_tx_env         = uvm_logic_vector_array_mfb::env_tx #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, 0)::type_id::create("mfb_tx_env", this);
-        mvb_rx_env         = uvm_logic_vector_mvb::env_rx #(MFB_REGIONS, MVB_ITEM_WIDTH)::type_id::create("mvb_rx_env", this);
-        mvb_tx_env         = uvm_logic_vector_mvb::env_tx #(MFB_REGIONS, MVB_ITEM_WIDTH)::type_id::create("mvb_tx_env", this);
+        mvb_rx_env         = uvm_logic_vector_mvb::env_rx #(MFB_REGIONS, $clog2(RX_CHANNELS) + $clog2(PKT_MTU+1))::type_id::create("mvb_rx_env", this);
+        mvb_tx_env         = uvm_logic_vector_mvb::env_tx #(MFB_REGIONS, $clog2(RX_CHANNELS) + $clog2(PKT_MTU+1) + HDR_META_WIDTH + 1)::type_id::create("mvb_tx_env", this);
         m_byte_array_agent = uvm_logic_vector_array::agent#(MFB_ITEM_WIDTH)::type_id::create("m_byte_array_agent", this);
-        m_info             = uvm_meta::agent#(USR_RX_PKT_SIZE_MAX, RX_CHANNELS, HDR_META_WIDTH)::type_id::create("m_info", this);
+        m_info             = uvm_meta::agent#(PKT_MTU, RX_CHANNELS, HDR_META_WIDTH)::type_id::create("m_info", this);
         m_reset            = uvm_reset::agent::type_id::create("m_reset", this);
-        m_generator        = uvm_framepacker::generator #(USR_RX_PKT_SIZE_MAX, RX_CHANNELS, HDR_META_WIDTH, MVB_ITEM_WIDTH, MFB_ITEM_WIDTH)::type_id::create("m_generator", this);
-        m_scoreboard       = scoreboard #(MVB_ITEM_WIDTH, MFB_ITEM_WIDTH, RX_CHANNELS, USR_RX_PKT_SIZE_MAX)::type_id::create("m_scoreboard", this);
-        vscr               = uvm_framepacker::virt_sequencer#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MVB_ITEM_WIDTH, USR_RX_PKT_SIZE_MAX, RX_CHANNELS, HDR_META_WIDTH)::type_id::create("mfb_vscr",this);
+        m_generator        = uvm_framepacker::generator #(PKT_MTU, RX_CHANNELS, HDR_META_WIDTH, MFB_ITEM_WIDTH)::type_id::create("m_generator", this);
+        m_scoreboard       = scoreboard #(RX_CHANNELS, PKT_MTU, HDR_META_WIDTH,  MFB_ITEM_WIDTH)::type_id::create("m_scoreboard", this);
+        vscr               = uvm_framepacker::virt_sequencer#(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, PKT_MTU, RX_CHANNELS, HDR_META_WIDTH)::type_id::create("mfb_vscr",this);
         for (int unsigned it = 0; it < RX_CHANNELS; it++) begin
             m_flow_ctrl[it] = uvm_logic_vector_mvb::env_tx #(1, 2)::type_id::create($sformatf("m_flow_ctrl_%0d", it), this);
         end
@@ -152,12 +152,12 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MVB_IT
 
         //MVB data contain information about channel
         //Connect RX environment
-        mfb_rx_env.analysis_port_data.connect(m_scoreboard.analysis_imp_mfb_rx_data.analysis_export);
+        mfb_rx_env.analysis_port_data.connect(m_scoreboard.analysis_imp_mfb_rx_data);
         mvb_rx_env.analysis_port.connect(m_scoreboard.analysis_imp_mvb_rx);
 
         //Connect TX environment
         //Meter
-        mfb_tx_env.analysis_port_data.connect(m_scoreboard.analysis_imp_mfb_tx_data.analysis_export);
+        mfb_tx_env.analysis_port_data.connect(m_scoreboard.analysis_imp_mfb_tx_data);
 
         //Model
         mfb_tx_env.analysis_port_data.connect(m_scoreboard.data_cmp.analysis_imp_dut);
@@ -192,13 +192,13 @@ class env #(MFB_REGIONS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MVB_IT
     /////////////////////////////////////////////////////
     virtual task run_phase(uvm_phase phase);
         sequence_mfb_data #(MFB_ITEM_WIDTH) mfb_data_seq;
-        sequence_mvb_data #(MVB_ITEM_WIDTH) mvb_data_seq;
+        sequence_mvb_data #($clog2(RX_CHANNELS) + $clog2(PKT_MTU+1)) mvb_data_seq;
 
         mfb_data_seq           = sequence_mfb_data #(MFB_ITEM_WIDTH)::type_id::create("mfb_data_seq", this);
         mfb_data_seq.tr_export = m_generator.byte_array_export;
         mfb_data_seq.randomize();
 
-        mvb_data_seq           = sequence_mvb_data #(MVB_ITEM_WIDTH)::type_id::create("mvb_data_seq", this);
+        mvb_data_seq           = sequence_mvb_data #($clog2(RX_CHANNELS) + $clog2(PKT_MTU+1))::type_id::create("mvb_data_seq", this);
         mvb_data_seq.tr_export = m_generator.logic_vector_export;
         mvb_data_seq.randomize();
 

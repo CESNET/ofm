@@ -46,7 +46,7 @@ program TEST (
     dpiconnect_devicetree_display(0);
     RESET=1;
     #RESET_TIME     RESET = 0;
-    $swrite(params, "%0d", ITEMS);
+    params = $sformatf( "%0d", ITEMS);
     dpicall("paramsctl", params, ret);
     dpicall("directctl", params, ret);
     dpicall("comboctl", params, ret);

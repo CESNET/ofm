@@ -8,14 +8,14 @@ class scoreboard #(DATA_WIDTH, STATUS_WIDTH, ITEMS, ALMOST_FULL_OFFSET, ALMOST_E
     `uvm_component_utils(uvm_fifox::scoreboard #(DATA_WIDTH, STATUS_WIDTH, ITEMS, ALMOST_FULL_OFFSET, ALMOST_EMPTY_OFFSET))
 
     // Analysis components.
-    uvm_common::subscriber #(uvm_logic_vector::sequence_item #(DATA_WIDTH)) analysis_imp_mvb_rx;
+    uvm_analysis_export #(uvm_logic_vector::sequence_item #(DATA_WIDTH)) analysis_imp_mvb_rx;
 
     uvm_analysis_export #(uvm_logic_vector::sequence_item #(DATA_WIDTH))     analysis_imp_mvb_tx;
     uvm_analysis_export #(uvm_logic_vector::sequence_item #(STATUS_WIDTH+2)) analysis_imp_mvb_status;
 
     // Comparer instance
     uvm_common::comparer_ordered #(uvm_logic_vector::sequence_item #(DATA_WIDTH)) cmp;
-    status_comparer #(uvm_logic_vector::sequence_item #(STATUS_WIDTH+2)) status_cmp;
+    status_comparer #(STATUS_WIDTH) status_cmp;
 
     // Model instance
     uvm_pipe::model #(DATA_WIDTH) m_pipe_model;
@@ -25,6 +25,7 @@ class scoreboard #(DATA_WIDTH, STATUS_WIDTH, ITEMS, ALMOST_FULL_OFFSET, ALMOST_E
     function new(string name, uvm_component parent);
         super.new(name, parent);
 
+        analysis_imp_mvb_rx     = new("analysis_imp_mvb_rx",     this);
         analysis_imp_mvb_tx     = new("analysis_imp_mvb_tx",     this);
         analysis_imp_mvb_status = new("analysis_imp_mvb_status", this);
 
@@ -44,12 +45,10 @@ class scoreboard #(DATA_WIDTH, STATUS_WIDTH, ITEMS, ALMOST_FULL_OFFSET, ALMOST_E
 
     function void build_phase(uvm_phase phase);
 
-        analysis_imp_mvb_rx = uvm_common::subscriber #(uvm_logic_vector::sequence_item #(DATA_WIDTH))::type_id::create("analysis_imp_mvb_rx", this);
-
         cmp = uvm_common::comparer_ordered #(uvm_logic_vector::sequence_item #(DATA_WIDTH))::type_id::create("cmp", this);
         cmp.model_tr_timeout_set(200us);
 
-        status_cmp = status_comparer #(uvm_logic_vector::sequence_item #(STATUS_WIDTH+2))::type_id::create("status_cmp", this);
+        status_cmp = status_comparer #(STATUS_WIDTH)::type_id::create("status_cmp", this);
         status_cmp.model_tr_timeout_set(200us);
 
         m_pipe_model = uvm_pipe::model #(DATA_WIDTH)::type_id::create("m_pipe_model", this);
@@ -60,7 +59,7 @@ class scoreboard #(DATA_WIDTH, STATUS_WIDTH, ITEMS, ALMOST_FULL_OFFSET, ALMOST_E
     function void connect_phase(uvm_phase phase);
 
         // Connects input data to the input of the model
-        analysis_imp_mvb_rx.port.connect(m_pipe_model.model_mvb_in.analysis_export);
+        analysis_imp_mvb_rx.connect(m_pipe_model.model_mvb_in.analysis_export);
 
         // Connects output data of the models
         m_pipe_model.model_mvb_out.connect(cmp       .analysis_imp_model);

@@ -4,7 +4,7 @@
 
 // SPDX-License-Identifier: BSD-3-Clause
 
-class memory_model #(int unsigned ADDRESS_WIDTH, int unsigned DATA_WIDTH, int unsigned BURST_WIDTH) extends uvm_component;
+class memory_model #(longint unsigned ADDRESS_WIDTH, longint unsigned DATA_WIDTH, int unsigned BURST_WIDTH) extends uvm_component;
     `uvm_component_param_utils(uvm_avmm::memory_model #(ADDRESS_WIDTH, DATA_WIDTH, BURST_WIDTH))
 
     localparam DATA_WIDTH_BYTES = DATA_WIDTH / 8;
@@ -76,7 +76,7 @@ class memory_model #(int unsigned ADDRESS_WIDTH, int unsigned DATA_WIDTH, int un
             command = $sformatf("dd if=/dev/%s of=\"%s\" bs=%0d count=1",
                         dev_source,
                         memory_filepath,
-                        (2**ADDRESS_WIDTH) * DATA_WIDTH
+                        (2**ADDRESS_WIDTH)*DATA_WIDTH
             );
 
             assert($system(command) == 0)

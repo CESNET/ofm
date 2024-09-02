@@ -52,6 +52,7 @@ class monitor #(int unsigned SEGMENTS) extends uvm_monitor;
             tr.ready              =  vif.monitor_cb.READY;
 
             // Write sequence item to analysis port.
+            tr.start[this.get_full_name()] = $time();
             analysis_port.write(tr);
         end
     endtask

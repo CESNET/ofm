@@ -19,8 +19,8 @@ class model_base #(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE, MI_DATA_WIDTH, MI_ADDR
 
     virtual task get_pcie_request(output pcie_info info, logic [MFB_ITEM_WIDTH-1:0] data[]);
         logic[sv_pcie_meta_pack::PCIE_META_REQ_HDR_W-1 : 0] hdr;
-        uvm_common::model_item #(uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH))                  cq_data_tr;
-        uvm_common::model_item #(uvm_logic_vector::sequence_item#(sv_pcie_meta_pack::PCIE_CQ_META_WIDTH)) cq_meta_tr;
+        uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH)                  cq_data_tr;
+        uvm_logic_vector::sequence_item#(sv_pcie_meta_pack::PCIE_CQ_META_WIDTH) cq_meta_tr;
 
         logic [64-1 : 0] addr;
         logic [6-1 : 0] bar_ap = 6'd26;
@@ -29,27 +29,27 @@ class model_base #(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE, MI_DATA_WIDTH, MI_ADDR
         int unsigned hdr_offset = 0;
 
         analysis_imp_cq_meta.get(cq_meta_tr);
-        meta = cq_meta_tr.item.data[sv_pcie_meta_pack::PCIE_CQ_META_WIDTH-1 : sv_pcie_meta_pack::PCIE_META_REQ_HDR_W];
+        meta = cq_meta_tr.data[sv_pcie_meta_pack::PCIE_CQ_META_WIDTH-1 : sv_pcie_meta_pack::PCIE_META_REQ_HDR_W];
 
         `uvm_info(this.get_full_name(), cq_meta_tr.convert2string() ,UVM_MEDIUM)
 
         if (IS_MFB_META_DEV) begin
             // Only Intel
-            hdr      = cq_meta_tr.item.data[sv_pcie_meta_pack::PCIE_META_REQ_HDR_W-1 : 0];
+            hdr      = cq_meta_tr.data[sv_pcie_meta_pack::PCIE_META_REQ_HDR_W-1 : 0];
             info.fbe      = hdr[36-1 : 32];
             info.lbe      = hdr[40-1 : 36];
             info.dw_cnt   = hdr[10-1 : 0];
             info.tr_type = uvm_pcie_hdr::encode_type(hdr[32-1 : 24], IS_INTEL_DEV);
 
             analysis_imp_cq_data.get(cq_data_tr);
-            data = cq_data_tr.item.data;
+            data = cq_data_tr.data;
         end else begin
             if (IS_INTEL_DEV) begin
                 analysis_imp_cq_data.get(cq_data_tr);
                 `uvm_info(this.get_full_name(), cq_data_tr.convert2string() ,UVM_MEDIUM)
                 // GET HEADER
                 for (int unsigned it = 0; it < (sv_pcie_meta_pack::PCIE_META_REQ_HDR_W/MFB_ITEM_WIDTH); it++) begin
-                    hdr[((it+1)*32-1) -: 32] = cq_data_tr.item.data[it];
+                    hdr[((it+1)*32-1) -: 32] = cq_data_tr.data[it];
                 end
 
                 info.fbe        = hdr[36-1 : 32];
@@ -61,7 +61,7 @@ class model_base #(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE, MI_DATA_WIDTH, MI_ADDR
                 `uvm_info(this.get_full_name(), cq_data_tr.convert2string() ,UVM_MEDIUM)
                 // GET HEADER
                 for (int unsigned it = 0; it < (sv_pcie_meta_pack::PCIE_META_REQ_HDR_W/MFB_ITEM_WIDTH); it++) begin
-                    hdr[((it+1)*32-1) -: 32] = cq_data_tr.item.data[it];
+                    hdr[((it+1)*32-1) -: 32] = cq_data_tr.data[it];
                 end
 
                 info.dw_cnt            = hdr[75-1 : 64];
@@ -83,9 +83,9 @@ class model_base #(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE, MI_DATA_WIDTH, MI_ADDR
             end
         end
 
-        data = new[cq_data_tr.item.data.size()-hdr_offset];
-        for (int unsigned it = 0; it < (cq_data_tr.item.data.size() - hdr_offset); it++) begin
-           data[it] = cq_data_tr.item.data[hdr_offset + it];
+        data = new[cq_data_tr.data.size()-hdr_offset];
+        for (int unsigned it = 0; it < (cq_data_tr.data.size() - hdr_offset); it++) begin
+           data[it] = cq_data_tr.data[hdr_offset + it];
         end
 
 
@@ -156,18 +156,15 @@ class model_base #(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE, MI_DATA_WIDTH, MI_ADDR
         logic[sv_pcie_meta_pack::PCIE_META_CPL_HDR_W-1 : 0]                                       hdr  = '0;
         logic[sv_pcie_meta_pack::PCIE_CC_META_WIDTH-sv_pcie_meta_pack::PCIE_META_CPL_HDR_W-1 : 0] meta = '0;
 
-        uvm_common::model_item #(uvm_mtc::cc_mtc_item#(MFB_ITEM_WIDTH))                                   cc_tr;
-        uvm_common::model_item #(uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH))                  cc_data_tr;
-        uvm_common::model_item #(uvm_logic_vector::sequence_item#(sv_pcie_meta_pack::PCIE_CC_META_WIDTH)) cc_meta_tr;
+        uvm_mtc::cc_mtc_item#(MFB_ITEM_WIDTH)                                   cc_tr;
+        uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH)                  cc_data_tr;
+        uvm_logic_vector::sequence_item#(sv_pcie_meta_pack::PCIE_CC_META_WIDTH) cc_meta_tr;
 
-        cc_tr           = uvm_common::model_item #(uvm_mtc::cc_mtc_item#(MFB_ITEM_WIDTH))::type_id::create("cc_tr");
-        cc_tr.item      = new();
+        cc_tr           = new();
 
-        cc_data_tr      = uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))::type_id::create("cc_data_tr");
-        cc_data_tr.item = uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)::type_id::create("cc_data_tr_item");
-        cc_meta_tr      = uvm_common::model_item #(uvm_logic_vector::sequence_item #(sv_pcie_meta_pack::PCIE_CC_META_WIDTH))::type_id::create("cc_meta_tr");
-        cc_meta_tr.item = uvm_logic_vector::sequence_item #(sv_pcie_meta_pack::PCIE_CC_META_WIDTH)::type_id::create("cc_meta_tr_item");
-        cc_meta_tr.item.data = '0;
+        cc_data_tr = uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)::type_id::create("cc_data_tr_item");
+        cc_meta_tr = uvm_logic_vector::sequence_item #(sv_pcie_meta_pack::PCIE_CC_META_WIDTH)::type_id::create("cc_meta_tr_item");
+        cc_meta_tr.data = '0;
 
         tag = info.tag;
         if (IS_INTEL_DEV) begin
@@ -179,25 +176,25 @@ class model_base #(MFB_ITEM_WIDTH, DEVICE, ENDPOINT_TYPE, MI_DATA_WIDTH, MI_ADDR
             meta = {8'b00000000, info.tph_st_tag, 5'b00000, info.tph_type, info.tph_present, info.lbe, info.fbe};
         end
 
-        cc_meta_tr.item.data[sv_pcie_meta_pack::PCIE_META_CPL_HDR_W-1 : 0] = hdr;
+        cc_meta_tr.data[sv_pcie_meta_pack::PCIE_META_CPL_HDR_W-1 : 0] = hdr;
         if (!IS_MFB_META_DEV) begin
             if ((info.tr_type == uvm_pcie_hdr::TYPE_ERR) && IS_XILINX_DEV) begin
-                cc_data_tr.item.data = {hdr[1*32-1 : 0*32], hdr[2*32-1 : 1*32], hdr[3*32-1 : 2*32], meta[1*32-1 : 0*32], 32'h0, 32'h0, 32'h0, 32'h0, data};
+                cc_data_tr.data = {hdr[1*32-1 : 0*32], hdr[2*32-1 : 1*32], hdr[3*32-1 : 2*32], meta[1*32-1 : 0*32], 32'h0, 32'h0, 32'h0, 32'h0, data};
             end else begin
-                cc_data_tr.item.data = {hdr[1*32-1 : 0*32], hdr[2*32-1 : 1*32], hdr[3*32-1 : 2*32], data};
+                cc_data_tr.data = {hdr[1*32-1 : 0*32], hdr[2*32-1 : 1*32], hdr[3*32-1 : 2*32], data};
             end
         end else begin
             if ((info.tr_type == uvm_pcie_hdr::TYPE_ERR)) begin
-                cc_data_tr.item.data = {32'h0, data};
-                cc_meta_tr.item.data[sv_pcie_meta_pack::PCIE_CC_META_WIDTH-1 : sv_pcie_meta_pack::PCIE_META_CPL_HDR_W] = meta;
+                cc_data_tr.data = {32'h0, data};
+                cc_meta_tr.data[sv_pcie_meta_pack::PCIE_CC_META_WIDTH-1 : sv_pcie_meta_pack::PCIE_META_CPL_HDR_W] = meta;
             end else begin
-                cc_data_tr.item.data = data;
+                cc_data_tr.data = data;
             end
         end
 
-        cc_tr.item.data_tr = cc_data_tr.item;
-        cc_tr.item.tag     = info.tag;
-        cc_tr.item.error   = (info.tr_type == uvm_pcie_hdr::TYPE_ERR);
+        cc_tr.data_tr = cc_data_tr;
+        cc_tr.tag     = info.tag;
+        cc_tr.error   = (info.tr_type == uvm_pcie_hdr::TYPE_ERR);
         analysis_port_cc.write(cc_tr);
         analysis_port_cc_meta.write(cc_meta_tr);
     endfunction

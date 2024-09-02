@@ -8,10 +8,10 @@ class model #(ITEM_WIDTH, META_WIDTH) extends uvm_component;
     `uvm_component_param_utils(uvm_mfb_pipe::model#(ITEM_WIDTH, META_WIDTH))
 
     //Model I/O
-    uvm_tlm_analysis_fifo #(uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(ITEM_WIDTH)))  data_in;
-    uvm_tlm_analysis_fifo #(uvm_common::model_item #(uvm_logic_vector::sequence_item #(META_WIDTH)))        meta_in;
-    uvm_analysis_port #(uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(ITEM_WIDTH)))      data_out;
-    uvm_analysis_port #(uvm_common::model_item #(uvm_logic_vector::sequence_item #(META_WIDTH)))            meta_out;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item #(ITEM_WIDTH))  data_in;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item #(META_WIDTH))        meta_in;
+    uvm_analysis_port #(uvm_logic_vector_array::sequence_item #(ITEM_WIDTH))      data_out;
+    uvm_analysis_port #(uvm_logic_vector::sequence_item #(META_WIDTH))            meta_out;
 
     function new(string name = "model", uvm_component parent = null);
         super.new(name, parent);
@@ -34,7 +34,7 @@ class model #(ITEM_WIDTH, META_WIDTH) extends uvm_component;
     endfunction
 
     task run_data();
-        uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(ITEM_WIDTH)) tr_mfb_data_in;
+        uvm_logic_vector_array::sequence_item #(ITEM_WIDTH) tr_mfb_data_in;
 
         forever begin
             data_in.get(tr_mfb_data_in);
@@ -43,7 +43,7 @@ class model #(ITEM_WIDTH, META_WIDTH) extends uvm_component;
     endtask
 
     task run_meta();
-        uvm_common::model_item #(uvm_logic_vector::sequence_item #(META_WIDTH)) tr_mfb_meta_in;
+        uvm_logic_vector::sequence_item #(META_WIDTH) tr_mfb_meta_in;
 
         forever begin
             meta_in.get(tr_mfb_meta_in);

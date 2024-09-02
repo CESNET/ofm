@@ -5,7 +5,7 @@
 //-- SPDX-License-Identifier: BSD-3-Clause
 
 // This class represents high level transaction, which can be reusable for other components.
-class sequence_item #(int unsigned DATA_WIDTH)extends uvm_sequence_item;
+class sequence_item #(int unsigned DATA_WIDTH)extends uvm_common::sequence_item;
 
     // Registration of object tools.
     `uvm_object_param_utils(uvm_logic_vector::sequence_item#(DATA_WIDTH))

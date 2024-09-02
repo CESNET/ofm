@@ -4,7 +4,7 @@
 
 //-- SPDX-License-Identifier: BSD-3-Clause
 
-class cc_mtc_item#(MFB_ITEM_WIDTH);
+class cc_mtc_item#(MFB_ITEM_WIDTH) extends uvm_common::sequence_item;
 
     uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH) data_tr;
     logic [8-1 : 0]                                         tag;
@@ -13,7 +13,7 @@ class cc_mtc_item#(MFB_ITEM_WIDTH);
     function string convert2string();
         string msg;
 
-        $swrite(msg, "\n\tDATA %s\n TAG %h\n ERROR %h", data_tr.convert2string(), tag, error);
+        msg = $sformatf( "\n\tDATA %s\n TAG %h\n ERROR %h", data_tr.convert2string(), tag, error);
         return msg;
     endfunction
 
@@ -24,14 +24,14 @@ virtual class model #(MFB_ITEM_WIDTH, MI_DATA_WIDTH, MI_ADDR_WIDTH) extends uvm_
     `uvm_component_param_utils(uvm_mtc::model #(MFB_ITEM_WIDTH, MI_DATA_WIDTH, MI_ADDR_WIDTH))
 
     //REQUEST (PCIE -> MI)
-    uvm_tlm_analysis_fifo #(uvm_common::model_item #(uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH)))                  analysis_imp_cq_data;
-    uvm_tlm_analysis_fifo #(uvm_common::model_item #(uvm_logic_vector::sequence_item#(sv_pcie_meta_pack::PCIE_CQ_META_WIDTH))) analysis_imp_cq_meta;
-    uvm_analysis_port     #(uvm_common::model_item #(uvm_mi::sequence_item_request #(MI_DATA_WIDTH, MI_ADDR_WIDTH, 0)))        analysis_port_mi_data;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH))                  analysis_imp_cq_data;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(sv_pcie_meta_pack::PCIE_CQ_META_WIDTH)) analysis_imp_cq_meta;
+    uvm_analysis_port     #(uvm_mi::sequence_item_request #(MI_DATA_WIDTH, MI_ADDR_WIDTH, 0))        analysis_port_mi_data;
 
     //RESPONSE (MI -> PCIE)
-    uvm_tlm_analysis_fifo #(uvm_common::model_item #(uvm_mi::sequence_item_response #(MI_DATA_WIDTH)))                         analysis_imp_cc_mi;
-    uvm_analysis_port     #(uvm_common::model_item #(uvm_logic_vector::sequence_item#(sv_pcie_meta_pack::PCIE_CC_META_WIDTH))) analysis_port_cc_meta;
-    uvm_analysis_port     #(uvm_common::model_item #(uvm_mtc::cc_mtc_item#(MFB_ITEM_WIDTH)))                                   analysis_port_cc;
+    uvm_tlm_analysis_fifo #(uvm_mi::sequence_item_response #(MI_DATA_WIDTH))                         analysis_imp_cc_mi;
+    uvm_analysis_port     #(uvm_logic_vector::sequence_item#(sv_pcie_meta_pack::PCIE_CC_META_WIDTH)) analysis_port_cc_meta;
+    uvm_analysis_port     #(uvm_mtc::cc_mtc_item#(MFB_ITEM_WIDTH))                                   analysis_port_cc;
 
     protected int unsigned mi_tr_cnt;
     protected int unsigned pcie_cg_cnt;
@@ -114,7 +114,7 @@ virtual class model #(MFB_ITEM_WIDTH, MI_DATA_WIDTH, MI_ADDR_WIDTH) extends uvm_
     pure virtual task get_pcie_request(output pcie_info info, logic [MFB_ITEM_WIDTH-1:0] data[]);
 
     task run_request();
-        uvm_common::model_item #(uvm_mi::sequence_item_request #(MI_DATA_WIDTH, MI_ADDR_WIDTH, 0))        mi_tr;
+        uvm_mi::sequence_item_request #(MI_DATA_WIDTH, MI_ADDR_WIDTH, 0)        mi_tr;
 
         logic [4-1 : 0]      fbe;
         logic [4-1 : 0]      lbe;
@@ -147,7 +147,6 @@ virtual class model #(MFB_ITEM_WIDTH, MI_DATA_WIDTH, MI_ADDR_WIDTH) extends uvm_
 
                 for (int unsigned it = 0; it < info.dw_cnt; it++) begin
                     logic read;
-                    mi_tr      = uvm_common::model_item #(uvm_mi::sequence_item_request #(MI_DATA_WIDTH, MI_ADDR_WIDTH, 0))::type_id::create("mi_tr");
 
                     if (it == 0) begin
                         be = info.fbe;
@@ -158,13 +157,14 @@ virtual class model #(MFB_ITEM_WIDTH, MI_DATA_WIDTH, MI_ADDR_WIDTH) extends uvm_
                     end
 
                     if (info.tr_type == uvm_pcie_hdr::TYPE_WRITE) begin
-                        mi_tr.item = gen_mi_write(mi_addr + it*4, data[it], be);
+                        mi_tr = gen_mi_write(mi_addr + it*4, data[it], be);
+                        analysis_port_mi_data.write(mi_tr);
                     end else if (info.tr_type == uvm_pcie_hdr::TYPE_READ) begin
-                        mi_tr.item = gen_mi_read(mi_addr + it*4, be);
+                        mi_tr = gen_mi_read(mi_addr + it*4, be);
+                        analysis_port_mi_data.write(mi_tr);
                     end else begin
-                        mi_tr.item = null;
+                        mi_tr = null;
                     end
-                    analysis_port_mi_data.write(mi_tr);
                 end
             end
 
@@ -191,7 +191,7 @@ virtual class model #(MFB_ITEM_WIDTH, MI_DATA_WIDTH, MI_ADDR_WIDTH) extends uvm_
             logic [8-1 : 0]  tag;
             logic [8-1 : 0]  bus_num;
 
-            uvm_common::model_item #(uvm_mi::sequence_item_response #(MI_DATA_WIDTH)) mi_cc_tr;
+            uvm_mi::sequence_item_response #(MI_DATA_WIDTH) mi_cc_tr;
             pcie_info info;
 
             wait(request_rd.size() != 0);
@@ -202,8 +202,8 @@ virtual class model #(MFB_ITEM_WIDTH, MI_DATA_WIDTH, MI_ADDR_WIDTH) extends uvm_
                 for (int unsigned it = 0; it < info.dw_cnt; it++) begin
                     do begin
                         analysis_imp_cc_mi.get(mi_cc_tr);
-                    end while(mi_cc_tr.item.drdy !== 1);
-                    data_fifo.push_back(mi_cc_tr.item.drd);
+                    end while(mi_cc_tr.drdy !== 1);
+                    data_fifo.push_back(mi_cc_tr.drd);
                 end
             end
 

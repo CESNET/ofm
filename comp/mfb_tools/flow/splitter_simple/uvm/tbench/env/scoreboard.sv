@@ -12,16 +12,10 @@ class comparer_data #(ITEM_WIDTH, META_WIDTH) extends uvm_common::comparer_base_
         super.new(name, parent);
     endfunction
 
-    virtual function int unsigned compare(uvm_common::model_item #(MODEL_ITEM) tr_model, uvm_common::dut_item #(DUT_ITEM) tr_dut);
-        return tr_model.item.compare(tr_dut.in_item);
+    virtual function int unsigned compare(MODEL_ITEM tr_model, DUT_ITEM tr_dut);
+        return tr_model.compare(tr_dut);
     endfunction
 
-    virtual function string message(uvm_common::model_item #(MODEL_ITEM) tr_model, uvm_common::dut_item #(DUT_ITEM) tr_dut);
-        string msg = "";
-        $swrite(msg, "%s\n\tDUT PACKET %s\n\n",   msg, tr_dut.convert2string());
-        $swrite(msg, "%s\n\tMODEL PACKET%s\n\n",  msg, tr_model.convert2string());
-        return msg;
-    endfunction
 endclass
 
 class comparer_meta #(ITEM_WIDTH, META_WIDTH) extends uvm_common::comparer_base_ordered#(uvm_logic_vector::sequence_item #(META_WIDTH), uvm_logic_vector::sequence_item #(META_WIDTH));
@@ -31,15 +25,8 @@ class comparer_meta #(ITEM_WIDTH, META_WIDTH) extends uvm_common::comparer_base_
         super.new(name, parent);
     endfunction
 
-    virtual function int unsigned compare(uvm_common::model_item #(MODEL_ITEM) tr_model, uvm_common::dut_item #(DUT_ITEM) tr_dut);
-        return tr_model.item.compare(tr_dut.in_item);
-    endfunction
-
-    virtual function string message(uvm_common::model_item #(MODEL_ITEM) tr_model, uvm_common::dut_item #(DUT_ITEM) tr_dut);
-        string msg = "";
-        $swrite(msg, "%s\n\tDUT PACKET %s\n\n",   msg, tr_dut.convert2string());
-        $swrite(msg, "%s\n\tMODEL PACKET%s\n\n",  msg, tr_model.convert2string());
-        return msg;
+    virtual function int unsigned compare(MODEL_ITEM tr_model, DUT_ITEM tr_dut);
+        return tr_model.compare(tr_dut);
     endfunction
 endclass
 
@@ -81,8 +68,6 @@ class scoreboard #(ITEM_WIDTH, META_WIDTH, CHANNELS) extends uvm_scoreboard;
 
     function void build_phase(uvm_phase phase);
         m_model    = model #(ITEM_WIDTH, META_WIDTH, CHANNELS)::type_id::create("m_model", this);
-        m_model.in_data = uvm_common::fifo_model_input#(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)              )::type_id::create("in_data", m_model);
-        m_model.in_meta = uvm_common::fifo_model_input#(uvm_logic_vector::sequence_item #($clog2(CHANNELS) + META_WIDTH))::type_id::create("in_meta", m_model);
 
         for (int it = 0; it < CHANNELS; it++) begin
             string it_string;
@@ -95,13 +80,8 @@ class scoreboard #(ITEM_WIDTH, META_WIDTH, CHANNELS) extends uvm_scoreboard;
     endfunction
 
     function void connect_phase(uvm_phase phase);
-        uvm_common::fifo_model_input#(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)              ) model_in_data;
-        uvm_common::fifo_model_input#(uvm_logic_vector::sequence_item #($clog2(CHANNELS) + META_WIDTH)) model_in_meta;
-
-        $cast(model_in_data, m_model.in_data);
-        $cast(model_in_meta, m_model.in_meta);
-        input_data.connect(model_in_data.analysis_export);
-        input_meta.connect(model_in_meta.analysis_export);
+        input_data.connect(m_model.in_data.analysis_export);
+        input_meta.connect(m_model.in_meta.analysis_export);
 
         for (int it = 0; it < CHANNELS; it++) begin
             string i_string;

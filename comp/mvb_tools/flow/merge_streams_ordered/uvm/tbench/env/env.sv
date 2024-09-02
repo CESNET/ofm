@@ -94,9 +94,9 @@ class env #(MVB_ITEMS, MVB_ITEM_WIDTH, RX_STREAMS) extends uvm_env;
 
         // RX environments connection
         for (int port = 0; port < RX_STREAMS; port++) begin
-            m_rx_mvb_env[port].analysis_port.connect(m_scbrd.rx_mvb_analysis_imp[port].analysis_export);
+            m_rx_mvb_env[port].analysis_port.connect(m_scbrd.rx_mvb_analysis_imp[port]);
         end
-        m_rx_sel_mvb_env      .analysis_port.connect(m_scbrd.rx_sel_mvb_analysis_imp  .analysis_export);
+        m_rx_sel_mvb_env      .analysis_port.connect(m_scbrd.rx_sel_mvb_analysis_imp);
 
         // TX environment connection
         m_tx_mvb_env.analysis_port.connect(m_scbrd.tx_mvb_analysis_exp);

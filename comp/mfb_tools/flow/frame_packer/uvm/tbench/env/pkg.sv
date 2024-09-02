@@ -17,7 +17,6 @@ package uvm_framepacker;
     `include "generator.sv"
     `include "model.sv"
     `include "scoreboard_cmp.sv"
-    `include "meter.sv"
     `include "scoreboard.sv"
     `include "env.sv"
 

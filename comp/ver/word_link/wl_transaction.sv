@@ -99,14 +99,14 @@ class WordLinkTransaction extends Transaction;
       if (data.size != tr.data.size)
       begin
          same = 0;
-         $swrite(diff, "dataSize does not match");
+         diff = $sformatf( "dataSize does not match");
       end
 
       for (integer j=0; j < data.size; j++)
          if (data[j] != tr.data[j])
          begin
             same = 0;
-            $swrite(diff, "data[%0d] does not match", j);
+            diff = $sformatf( "data[%0d] does not match", j);
          end
 
       compare = same;

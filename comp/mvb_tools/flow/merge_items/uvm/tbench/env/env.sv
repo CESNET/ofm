@@ -92,8 +92,8 @@ class env #(RX0_ITEMS, RX1_ITEMS, RX0_ITEM_WIDTH, RX1_ITEM_WIDTH, TX_ITEM_WIDTH)
     // Connect agent's ports with ports from scoreboard.
     function void connect_phase(uvm_phase phase);
 
-        m_env_rx0.analysis_port.connect(sc.analysis_imp_mvb_rx0.analysis_export);
-        m_env_rx1.analysis_port.connect(sc.analysis_imp_mvb_rx1.analysis_export);
+        m_env_rx0.analysis_port.connect(sc.analysis_imp_mvb_rx0);
+        m_env_rx1.analysis_port.connect(sc.analysis_imp_mvb_rx1);
 
         m_env_tx .analysis_port.connect(sc.analysis_imp_mvb_tx );
         m_env_tx0.analysis_port.connect(sc.analysis_imp_mvb_tx0);

@@ -274,18 +274,18 @@ class down_model #(DMA_PORTS) extends uvm_component;
                 `uvm_error(this.get_full_name(), $sformatf("\n\tPort %0d is out of range [0:%0d]", tr_rc.port, DMA_PORTS));
             end
 
-            $swrite(debug_msg, "%s\n\t ================ DOWN MODEL =============== \n", debug_msg);
+            debug_msg = {debug_msg, $sformatf("\n\t ================ DOWN MODEL =============== \n")};
             if (this.get_report_verbosity_level() >= UVM_FULL) begin
-                $swrite(debug_msg, "%s\t PORT:                %0d\n", debug_msg, tr_rc.port);
-                $swrite(debug_msg, "%s\t LENGTH:              %0d\n", debug_msg, tr_rc.length);
-                $swrite(debug_msg, "%s\t COMPLETED:           %0d\n", debug_msg, tr_rc.completed);
-                $swrite(debug_msg, "%s\t TAG:                 %0d\n", debug_msg, tr_rc.tag);
-                $swrite(debug_msg, "%s\t UNIT ID:             %0d\n", debug_msg, tr_rc.unit_id);
-                $swrite(debug_msg, "%s\t DATA:                %p\n", debug_msg, tr_rc.data);
+                debug_msg = {debug_msg, $sformatf("\t PORT:                %0d\n",  tr_rc.port)};
+                debug_msg = {debug_msg, $sformatf("\t LENGTH:              %0d\n",  tr_rc.length)};
+                debug_msg = {debug_msg, $sformatf("\t COMPLETED:           %0d\n",  tr_rc.completed)};
+                debug_msg = {debug_msg, $sformatf("\t TAG:                 %0d\n",  tr_rc.tag)};
+                debug_msg = {debug_msg, $sformatf("\t UNIT ID:             %0d\n",  tr_rc.unit_id)};
+                debug_msg = {debug_msg, $sformatf("\t DATA:                %p\n",  tr_rc.data)};
             end
 
-            $swrite(debug_msg, "%s\t DOWN MODEL META IN:  %h\n",  debug_msg, tr_out.meta);
-            $swrite(debug_msg, "%s\t DOWN MODEL MFB IN:   %p\n",  debug_msg, tr_out.data);
+            debug_msg = {debug_msg, $sformatf("\t DOWN MODEL META IN:  %h\n",  tr_out.meta)};
+            debug_msg = {debug_msg, $sformatf("\t DOWN MODEL MFB IN:   %p\n",  tr_out.data)};
             `uvm_info(this.get_full_name(), debug_msg ,UVM_HIGH);
 
         end

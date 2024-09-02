@@ -15,11 +15,11 @@ class model extends uvm_component;
     localparam LOGIC_WIDTH = 6;
     localparam ITEM_WIDTH = 8;
 
-    uvm_tlm_analysis_fifo #(uvm_common::model_item#(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)))  rx_packet;
-    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(1))         rx_error;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)) rx_packet;
+    uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(1))                rx_error;
 
-    uvm_analysis_port#(uvm_common::model_item#(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)))    tx_packet;
-    uvm_analysis_port#(uvm_logic_vector::sequence_item#(LOGIC_WIDTH)) tx_error;
+    uvm_analysis_port#(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))    tx_packet;
+    uvm_analysis_port#(uvm_logic_vector::sequence_item#(LOGIC_WIDTH))         tx_error;
 
     function new(string name, uvm_component parent = null);
         super.new(name, parent);
@@ -30,19 +30,16 @@ class model extends uvm_component;
     endfunction
 
     task run();
-        uvm_common::model_item#(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))    rx_tr_packet;
+        uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)    rx_tr_packet;
         uvm_logic_vector::sequence_item#(1)           rx_tr_error;
 
-        uvm_common::model_item#(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))    tx_tr_packet;
+        uvm_logic_vector_array::sequence_item#(ITEM_WIDTH)    tx_tr_packet;
         uvm_logic_vector::sequence_item#(LOGIC_WIDTH) tx_tr_error;
 
         forever begin
             rx_packet.get(rx_tr_packet);
             rx_error.get(rx_tr_error);
 
-            tx_tr_packet = uvm_common::model_item#(uvm_logic_vector_array::sequence_item#(ITEM_WIDTH))::type_id::create("tx_tr_packet", this);
-            tx_tr_packet.start = rx_tr_packet.start;
-            $cast(tx_tr_packet.item, rx_tr_packet.item.clone());
             tx_tr_error = uvm_logic_vector::sequence_item#(LOGIC_WIDTH)::type_id::create("model_tx_meta");
             tx_tr_error.data = 'z;
             if (rx_tr_error.data == 0) begin
@@ -51,7 +48,7 @@ class model extends uvm_component;
                 tx_tr_error.data[5] = 1'b1;
             end
 
-            tx_packet.write(tx_tr_packet);
+            tx_packet.write(rx_tr_packet);
 			tx_error.write(tx_tr_error);
         end
     endtask

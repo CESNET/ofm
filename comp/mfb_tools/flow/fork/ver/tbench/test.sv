@@ -47,7 +47,7 @@ program TEST (
         driver.setCallbacks(scoreboard.driverCbs);
         foreach(monitor[i]) begin
             string name;
-            $swrite(name, "Monitor %0d ", i);
+            name = $sformatf( "Monitor %0d ", i);
             monitor[i] = new(name, vTX[i]);
             monitor[i].setCallbacks(scoreboard.monitorCbs[i]);
         end

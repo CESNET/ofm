@@ -11,7 +11,7 @@ class status_model #(ITEMS, WRITE_PORTS, READ_PORTS, ALMOST_FULL_OFFSET, ALMOST_
     uvm_probe::cbs_simple #(1+$clog2(WRITE_PORTS+1)+$clog2(READ_PORTS+1)) status_in;
 
     // Model outputs
-    uvm_analysis_port #(uvm_common::model_item #(uvm_logic_vector::sequence_item #(2))) model_out;
+    uvm_analysis_port #(uvm_logic_vector::sequence_item #(2)) model_out;
 
     function new(string name = "status_model", uvm_component parent = null);
         super.new(name, parent);
@@ -30,7 +30,7 @@ class status_model #(ITEMS, WRITE_PORTS, READ_PORTS, ALMOST_FULL_OFFSET, ALMOST_
 
     task run_phase(uvm_phase phase);
 
-        uvm_common::model_item #(uvm_logic_vector::sequence_item #(2)) tr_out;
+        uvm_logic_vector::sequence_item #(2) tr_out;
 
         logic afull;
         logic aempty;
@@ -52,9 +52,9 @@ class status_model #(ITEMS, WRITE_PORTS, READ_PORTS, ALMOST_FULL_OFFSET, ALMOST_
             afull  = (status_wr + wr >= ITEMS - ALMOST_FULL_OFFSET) ? 1 : 0;
             aempty = (status_rd[$] - rd <= ALMOST_EMPTY_OFFSET)     ? 1 : 0;
 
-            tr_out = uvm_common::model_item #(uvm_logic_vector::sequence_item #(2))::type_id::create("tr_out");
-            tr_out.item = uvm_logic_vector::sequence_item #(2)::type_id::create("tr_out.item");
-            tr_out.item.data = { afull, aempty };
+            tr_out = uvm_logic_vector::sequence_item #(2)::type_id::create("tr_out", this);
+            tr_out.data = { afull, aempty };
+            tr_out.start[this.get_full_name()] = $time();
             model_out.write(tr_out);
 
             // Updates the read status
@@ -72,10 +72,10 @@ class status_model #(ITEMS, WRITE_PORTS, READ_PORTS, ALMOST_FULL_OFFSET, ALMOST_
 
     task send_initial_transactions();
 
-        uvm_common::model_item #(uvm_logic_vector::sequence_item #(2)) tr_out;
-        tr_out = uvm_common::model_item #(uvm_logic_vector::sequence_item #(2))::type_id::create("tr_out");
-        tr_out.item = uvm_logic_vector::sequence_item #(2)::type_id::create("tr_out.item");
-        tr_out.item.data = { 1'b0, 1'b1 };
+        uvm_logic_vector::sequence_item #(2) tr_out;
+        tr_out = uvm_logic_vector::sequence_item #(2)::type_id::create("tr_out", this);
+        tr_out.data = { 1'b0, 1'b1 };
+        tr_out.start[this.get_full_name()] = $time();
         model_out.write(tr_out);
 
     endtask

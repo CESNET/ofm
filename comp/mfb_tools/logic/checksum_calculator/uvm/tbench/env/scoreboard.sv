@@ -7,8 +7,8 @@
 class scoreboard #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY, MFB_META_WIDTH) extends uvm_scoreboard;
     `uvm_component_param_utils(uvm_checksum_calculator::scoreboard #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY, MFB_META_WIDTH))
 
-    uvm_common::subscriber #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))         input_data;
-    uvm_common::subscriber #(uvm_logic_vector::sequence_item #(META_WIDTH))                   input_meta;
+    uvm_analysis_export #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH))         input_data;
+    uvm_analysis_export #(uvm_logic_vector::sequence_item #(META_WIDTH))                   input_meta;
     uvm_analysis_export #(uvm_logic_vector::sequence_item #(MVB_DATA_WIDTH+1+MFB_META_WIDTH)) dut_out_mvb;
 
     uvm_checksum_calculator::chsum_calc_cmp #(MVB_DATA_WIDTH, MFB_META_WIDTH)         data_cmp;
@@ -20,12 +20,13 @@ class scoreboard #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LEN
         super.new(name, parent);
 
         dut_out_mvb        = new("dut_out_mvb", this);
-
+        input_data = new("input_data", this);
+        input_meta = new("input_meta", this);
     endfunction
 
     function int unsigned success();
-        int unsigned ret = 0;
-        ret |= data_cmp.success();
+        int unsigned ret = 1;
+        ret &= data_cmp.success();
         return ret;
     endfunction
 
@@ -39,26 +40,14 @@ class scoreboard #(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LEN
     function void build_phase(uvm_phase phase);
         m_model    = model#(META_WIDTH, MVB_DATA_WIDTH, MFB_ITEM_WIDTH, OFFSET_WIDTH, LENGTH_WIDTH, VERBOSITY, MFB_META_WIDTH)::type_id::create("m_model", this);
 
-        m_model.input_data = uvm_common::fifo_convertor #(uvm_common::model_item #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)))::type_id::create("model_input_data", this);
-        m_model.input_meta = uvm_common::fifo_convertor #(uvm_common::model_item #(uvm_logic_vector::sequence_item #(META_WIDTH)))::type_id::create("model_input_meta", this);
-
-        input_data = uvm_common::subscriber #(uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH))::type_id::create("input_data", this);
-        input_meta = uvm_common::subscriber #(uvm_logic_vector::sequence_item#(META_WIDTH))::type_id::create("input_meta", this);
-
         data_cmp = uvm_checksum_calculator::chsum_calc_cmp #(MVB_DATA_WIDTH, MFB_META_WIDTH)::type_id::create("data_cmp", this);
         data_cmp.model_tr_timeout_set(1ms);
 
     endfunction
 
     function void connect_phase(uvm_phase phase);
-
-        uvm_common::fifo_convertor#(uvm_common::model_item#(uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH))) data_in;
-        uvm_common::fifo_convertor#(uvm_common::model_item#(uvm_logic_vector::sequence_item#(META_WIDTH)))           meta_in;
-
-        $cast(data_in, m_model.input_data);
-        input_data.port.connect(data_in.analysis_export);
-        $cast(meta_in, m_model.input_meta);
-        input_meta.port.connect(meta_in.analysis_export);
+        input_data.connect(m_model.input_data.analysis_export);
+        input_meta.connect(m_model.input_meta.analysis_export);
 
         m_model.out_checksum.connect(data_cmp.analysis_imp_model);
         dut_out_mvb.connect(data_cmp.analysis_imp_dut);

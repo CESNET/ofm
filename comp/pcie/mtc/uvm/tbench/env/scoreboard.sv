@@ -8,13 +8,13 @@ class scoreboard #(MFB_ITEM_WIDTH, MI_DATA_WIDTH, MI_ADDR_WIDTH) extends uvm_sco
     `uvm_component_param_utils(uvm_mtc::scoreboard #(MFB_ITEM_WIDTH, MI_DATA_WIDTH, MI_ADDR_WIDTH))
 
     // MODEL INPUT
-    uvm_common::subscriber #(uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH))                  analysis_export_cq_data;
-    uvm_common::subscriber #(uvm_logic_vector::sequence_item#(sv_pcie_meta_pack::PCIE_CQ_META_WIDTH)) analysis_export_cq_meta;
+    uvm_analysis_export #(uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH))                  analysis_export_cq_data;
+    uvm_analysis_export #(uvm_logic_vector::sequence_item#(sv_pcie_meta_pack::PCIE_CQ_META_WIDTH)) analysis_export_cq_meta;
     uvm_mtc::mi_subscriber #(MI_DATA_WIDTH, MI_ADDR_WIDTH) mi_scrb;
     // DUT OUTPUT
     uvm_analysis_export #(uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH))                  analysis_export_cc_data;
     uvm_analysis_export #(uvm_logic_vector::sequence_item#(sv_pcie_meta_pack::PCIE_CC_META_WIDTH)) analysis_export_cc_meta;
-    uvm_common::subscriber #(uvm_mi::sequence_item_response #(MI_DATA_WIDTH))                      analysis_export_cc_mi;
+    uvm_analysis_export #(uvm_mi::sequence_item_response #(MI_DATA_WIDTH))                         analysis_export_cc_mi;
 
     // COMPARERS
     uvm_mtc::mi_cmp_rq #(MI_DATA_WIDTH, uvm_mi::sequence_item_request #(MI_DATA_WIDTH, MI_ADDR_WIDTH, 0))   m_mi_cmp_rq;
@@ -26,6 +26,11 @@ class scoreboard #(MFB_ITEM_WIDTH, MI_DATA_WIDTH, MI_ADDR_WIDTH) extends uvm_sco
     // Contructor of scoreboard.
     function new(string name, uvm_component parent);
         super.new(name, parent);
+        analysis_export_cq_data = new("analysis_export_cq_data", this);
+        analysis_export_cq_meta = new("analysis_export_cq_meta", this);
+
+        analysis_export_cc_mi = new("analysis_export_cc_mi", this);
+
         // DUT MODEL COMUNICATION
         analysis_export_cc_data   = new("analysis_export_cc_data", this);
         analysis_export_cc_meta   = new("analysis_export_cc_meta", this);
@@ -55,9 +60,6 @@ class scoreboard #(MFB_ITEM_WIDTH, MI_DATA_WIDTH, MI_ADDR_WIDTH) extends uvm_sco
     function void build_phase(uvm_phase phase);
         m_model = model #(MFB_ITEM_WIDTH, MI_DATA_WIDTH, MI_ADDR_WIDTH)::type_id::create("m_model", this);
 
-        analysis_export_cq_data = uvm_common::subscriber #(uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH))::type_id::create("analysis_export_cq_data", this);
-        analysis_export_cq_meta = uvm_common::subscriber #(uvm_logic_vector::sequence_item#(sv_pcie_meta_pack::PCIE_CQ_META_WIDTH))::type_id::create("analysis_export_cq_meta", this);
-        analysis_export_cc_mi = uvm_common::subscriber #(uvm_mi::sequence_item_response #(MI_DATA_WIDTH))::type_id::create("analysis_export_cc_mi", this);
 
         m_mi_cmp_rq      = uvm_mtc::mi_cmp_rq #(MI_DATA_WIDTH, uvm_mi::sequence_item_request #(MI_DATA_WIDTH, MI_ADDR_WIDTH, 0))::type_id::create("m_mi_cmp_rq", this);
         m_mi_cmp_meta_rs = uvm_common::comparer_ordered #(uvm_logic_vector::sequence_item#(sv_pcie_meta_pack::PCIE_CC_META_WIDTH))::type_id::create("m_mi_cmp_meta_rs", this);
@@ -70,9 +72,9 @@ class scoreboard #(MFB_ITEM_WIDTH, MI_DATA_WIDTH, MI_ADDR_WIDTH) extends uvm_sco
     endfunction
 
     function void connect_phase(uvm_phase phase);
-        analysis_export_cq_data.port.connect(m_model.analysis_imp_cq_data.analysis_export);
-        analysis_export_cq_meta.port.connect(m_model.analysis_imp_cq_meta.analysis_export);
-        analysis_export_cc_mi.port.connect(m_model.analysis_imp_cc_mi.analysis_export);
+        analysis_export_cq_data.connect(m_model.analysis_imp_cq_data.analysis_export);
+        analysis_export_cq_meta.connect(m_model.analysis_imp_cq_meta.analysis_export);
+        analysis_export_cc_mi.connect(m_model.analysis_imp_cc_mi.analysis_export);
 
         m_model.analysis_port_mi_data.connect(m_mi_cmp_rq.analysis_imp_model);
         mi_scrb.port.connect(m_mi_cmp_rq.analysis_imp_dut);

@@ -10,7 +10,6 @@ class monitor #(int unsigned DATA_WIDTH) extends uvm_monitor;
 
     // Used to send transactions to all connected components.
     uvm_analysis_port #(sequence_item #(DATA_WIDTH)) analysis_port;
-    sequence_item #(DATA_WIDTH) item;
 
     // Creates new instance of this class.
     function new (string name, uvm_component parent);
@@ -20,7 +19,6 @@ class monitor #(int unsigned DATA_WIDTH) extends uvm_monitor;
     // Instantiates child components.
     function void build_phase(uvm_phase phase);
         analysis_port = new("analysis port", this);
-        item = sequence_item#(DATA_WIDTH)::type_id::create("item");
     endfunction
 
 endclass

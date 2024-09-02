@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
 */
 
-class sequence_item #(int unsigned SEGMENTS) extends uvm_sequence_item;
+class sequence_item #(int unsigned SEGMENTS) extends uvm_common::sequence_item;
     `uvm_object_param_utils(uvm_intel_mac_seg::sequence_item#(SEGMENTS));
 
     rand logic [64-1:0] data[SEGMENTS];
@@ -61,10 +61,10 @@ class sequence_item #(int unsigned SEGMENTS) extends uvm_sequence_item;
 
     function string convert2string();
         string s = "";
-        $swrite(s, "intel_seq_mac::sequence_item valid %d ready %d\n\t", valid, ready);
+        s = $sformatf("intel_seq_mac::sequence_item valid %d ready %d\n\t", valid, ready);
         for (int unsigned it = 0; it < SEGMENTS; it++) begin
-            $swrite(s, "%sItem %d:\n\t\tDATA : %h\n\t\tinframe %b\n\t\teop_empty %d\n\t\t, fcs_error : %b\n\t\terror : %b\n\t\t status data: %b\n",
-                    s, it, data[it], inframe[it], eop_empty[it], fcs_error[it], error[it], status_data[it]);
+            s = {s, $sformatf("Item %d:\n\t\tDATA : %h\n\t\tinframe %b\n\t\teop_empty %d\n\t\t, fcs_error : %b\n\t\terror : %b\n\t\t status data: %b\n",
+                    it, data[it], inframe[it], eop_empty[it], fcs_error[it], error[it], status_data[it])};
         end
        return s;
     endfunction

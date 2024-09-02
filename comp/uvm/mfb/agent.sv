@@ -64,7 +64,7 @@ class agent_rx #(int unsigned REGIONS, int unsigned REGION_SIZE, int unsigned BL
         // Get interface instance
         if(!uvm_config_db #(virtual mfb_if #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH))::get(null, "", m_config.interface_name, vif)) begin
             string str;
-            $swrite(str, "Cannot find 'mfb_if' with name %s, probably not set!", m_config.interface_name);
+           str = $sformatf("Cannot find 'mfb_if' with name %s, probably not set!", m_config.interface_name);
             `uvm_fatal(this.get_full_name(), str);
         end
 

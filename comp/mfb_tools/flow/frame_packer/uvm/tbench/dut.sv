@@ -15,13 +15,13 @@ module DUT (
     mvb_if.dut_tx   mvb_tx
     );
 
+    localparam RX_MVB_ITEM_WIDTH = $clog2(RX_CHANNELS) + $clog2(USR_RX_PKT_SIZE_MAX+1);
+    localparam TX_MVB_ITEM_WIDTH = $clog2(RX_CHANNELS) + $clog2(USR_RX_PKT_SIZE_MAX+1) + HDR_META_WIDTH + 1;
     localparam MVB_LEN_WIDTH = $clog2(USR_RX_PKT_SIZE_MAX+1);
     localparam MVB_CHANNEL_WIDTH = $clog2(RX_CHANNELS);
 
     logic [MFB_REGIONS*MVB_LEN_WIDTH-1:0]     rx_mvb_len;
-    logic [MFB_REGIONS*HDR_META_WIDTH-1:0]    rx_mvb_hdr_meta;
     logic [MFB_REGIONS*MVB_CHANNEL_WIDTH-1:0] rx_mvb_channel;
-    logic [MFB_REGIONS-1:0]                   rx_mvb_discard;
 
     logic [MFB_REGIONS*MVB_LEN_WIDTH-1:0]     tx_mvb_len;
     logic [MFB_REGIONS*HDR_META_WIDTH-1:0]    tx_mvb_hdr_meta;
@@ -44,23 +44,19 @@ module DUT (
     wire logic pipe_src_rdy;
     wire logic pipe_dst_rdy;
 
-    // {rx_mvb_len, mvb_hdr_meta, mvb_channel, mvb_discard} 1 + $clog2(RX_CHANNELS) + HDR_META_WIDTH + $clog2(USR_RX_PKT_SIZE_MAX+1) = MVB_ITEM_WIDTH
     generate
         for (genvar r = 0; r < MFB_REGIONS; r++) begin
-            assign rx_mvb_len      [(r+1)*MVB_LEN_WIDTH-1 : r*MVB_LEN_WIDTH]           = mvb_rx.DATA[(r+1)*(MVB_ITEM_WIDTH)-1 : (r+1)*MVB_ITEM_WIDTH - MVB_LEN_WIDTH];
-            assign rx_mvb_hdr_meta [(r+1)*HDR_META_WIDTH-1 : r*HDR_META_WIDTH]         = mvb_rx.DATA[(r+1)*(MVB_ITEM_WIDTH) - MVB_LEN_WIDTH-1 : (r+1)*MVB_ITEM_WIDTH - MVB_LEN_WIDTH - HDR_META_WIDTH];
-            assign rx_mvb_channel  [(r+1)*MVB_CHANNEL_WIDTH-1 : r*MVB_CHANNEL_WIDTH]   = mvb_rx.DATA[(r+1)*(MVB_ITEM_WIDTH) - MVB_LEN_WIDTH - HDR_META_WIDTH-1 : (r+1)*MVB_ITEM_WIDTH - MVB_LEN_WIDTH - HDR_META_WIDTH - MVB_CHANNEL_WIDTH];
-            assign rx_mvb_discard  [r]                                                 = mvb_rx.DATA[r*MVB_ITEM_WIDTH];
+            assign {rx_mvb_len[(r+1)*MVB_LEN_WIDTH-1 -: MVB_LEN_WIDTH], rx_mvb_channel  [(r+1)*MVB_CHANNEL_WIDTH-1 -: MVB_CHANNEL_WIDTH]} = mvb_rx.DATA[(r+1)*(RX_MVB_ITEM_WIDTH)-1 -: RX_MVB_ITEM_WIDTH];
         end
     endgenerate
 
     generate
         for (genvar r = 0; r < MFB_REGIONS; r++) begin
             // Discard
-            assign mvb_tx.DATA[(r+1)*(MVB_ITEM_WIDTH)-1 : (r+1)*MVB_ITEM_WIDTH - MVB_LEN_WIDTH]                                                                         = tx_mvb_len      [(r+1)*MVB_LEN_WIDTH-1 : r*MVB_LEN_WIDTH];
-            assign mvb_tx.DATA[(r+1)*(MVB_ITEM_WIDTH) - MVB_LEN_WIDTH-1 : (r+1)*MVB_ITEM_WIDTH - MVB_LEN_WIDTH - HDR_META_WIDTH]                                        = tx_mvb_hdr_meta [(r+1)*HDR_META_WIDTH-1 : r*HDR_META_WIDTH];
-            assign mvb_tx.DATA[(r+1)*(MVB_ITEM_WIDTH) - MVB_LEN_WIDTH - HDR_META_WIDTH-1 : (r+1)*MVB_ITEM_WIDTH - MVB_LEN_WIDTH - HDR_META_WIDTH - MVB_CHANNEL_WIDTH]   = tx_mvb_channel  [(r+1)*MVB_CHANNEL_WIDTH-1 : r*MVB_CHANNEL_WIDTH];
-            assign mvb_tx.DATA[r*MVB_ITEM_WIDTH]                                                                                                                        = tx_mvb_discard  [r];
+            assign mvb_tx.DATA[(r+1)*(TX_MVB_ITEM_WIDTH)-1 -: TX_MVB_ITEM_WIDTH] = {tx_mvb_len      [(r+1)*MVB_LEN_WIDTH-1 : r*MVB_LEN_WIDTH],
+                                                                              tx_mvb_hdr_meta [(r+1)*HDR_META_WIDTH-1 : r*HDR_META_WIDTH],
+                                                                              tx_mvb_discard  [r],
+                                                                              tx_mvb_channel  [(r+1)*MVB_CHANNEL_WIDTH-1 : r*MVB_CHANNEL_WIDTH]};
         end
     endgenerate
 

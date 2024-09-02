@@ -24,7 +24,7 @@ module DMA_LL_PROPERTY  #(DEVICE, USER_REGIONS, USER_REGION_SIZE, USER_BLOCK_SIZ
     ///////////////////
     // Start check properties after first clock
     initial begin
-        $sformat(module_name, "%m");
+        module_name = $sformatf("%m");
         @(posedge mfb_tx.CLK)
         #(10ps)
         START = 1'b0;

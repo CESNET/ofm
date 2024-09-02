@@ -8,8 +8,8 @@
 class scoreboard #(MFB_ITEM_WIDTH, MFB_META_WIDTH, MFB_REGIONS, DUT_PATH) extends uvm_scoreboard;
     `uvm_component_param_utils(uvm_rx_mac_lite_buffer::scoreboard #(MFB_ITEM_WIDTH, MFB_META_WIDTH, MFB_REGIONS, DUT_PATH))
 
-    uvm_common::subscriber #(uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH)) analysis_imp_mfb_data;
-    uvm_common::subscriber #(uvm_logic_vector::sequence_item#(MFB_META_WIDTH))       analysis_imp_mfb_meta;
+    uvm_analysis_export #(uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH)) analysis_imp_mfb_data;
+    uvm_analysis_export #(uvm_logic_vector::sequence_item#(MFB_META_WIDTH))       analysis_imp_mfb_meta;
 
     uvm_analysis_export #(uvm_logic_vector_array::sequence_item #(MFB_ITEM_WIDTH)) out_mfb_data;
     uvm_analysis_export #(uvm_logic_vector::sequence_item #(MFB_META_WIDTH))       out_mvb_data;
@@ -21,6 +21,9 @@ class scoreboard #(MFB_ITEM_WIDTH, MFB_META_WIDTH, MFB_REGIONS, DUT_PATH) extend
     // Contructor of scoreboard.
     function new(string name, uvm_component parent);
         super.new(name, parent);
+
+        analysis_imp_mfb_data = new("analysis_imp_mfb_data", this);
+        analysis_imp_mfb_meta = new("analysis_imp_mfb_meta", this);
 
         out_mfb_data = new("out_mfb_data", this);
         out_mvb_data = new("out_mvb_data", this);
@@ -44,17 +47,14 @@ class scoreboard #(MFB_ITEM_WIDTH, MFB_META_WIDTH, MFB_REGIONS, DUT_PATH) extend
     function void build_phase(uvm_phase phase);
         m_model = model#(MFB_ITEM_WIDTH, MFB_META_WIDTH, MFB_REGIONS, DUT_PATH)::type_id::create("m_model", this);
 
-        analysis_imp_mfb_data = uvm_common::subscriber #(uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH))::type_id::create("analysis_imp_mfb_data", this);
-        analysis_imp_mfb_meta = uvm_common::subscriber #(uvm_logic_vector::sequence_item#(MFB_META_WIDTH))::type_id::create("analysis_imp_mfb_meta", this);
-
         data_cmp = uvm_common::comparer_ordered #(uvm_logic_vector_array::sequence_item#(MFB_ITEM_WIDTH))::type_id::create("data_cmp", this);
         meta_cmp = uvm_common::comparer_ordered #(uvm_logic_vector::sequence_item#(MFB_META_WIDTH))::type_id::create("meta_cmp", this);
     endfunction
 
     function void connect_phase(uvm_phase phase);
         // connects input data to the input of the model
-        analysis_imp_mfb_data.port.connect(m_model.input_mfb_data.analysis_export);
-        analysis_imp_mfb_meta.port.connect(m_model.input_mfb_meta.analysis_export);
+        analysis_imp_mfb_data.connect(m_model.input_mfb_data.analysis_export);
+        analysis_imp_mfb_meta.connect(m_model.input_mfb_meta.analysis_export);
 
         // processed data from the output of the model connected to the analysis fifo
         m_model.out_mfb_data.connect(data_cmp.analysis_imp_model);

@@ -15,9 +15,9 @@ class coverage #(int unsigned ITEMS, int unsigned ITEM_WIDTH) extends uvm_subscr
         // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
         // -- Coverage of transferred data.
         data : coverpoint item {
-            bins low    = {[ITEM_WIDTH'(0)                                  : ITEM_WIDTH'(2**(ITEM_WIDTH-8))]};
-            bins mid    = {[ITEM_WIDTH'(2**(ITEM_WIDTH-8)+1)                : ITEM_WIDTH'(2**(ITEM_WIDTH-2))]};
-            bins higth  = {[ITEM_WIDTH'(2**(ITEM_WIDTH-2)+1)                : ITEM_WIDTH'(2**ITEM_WIDTH-1)]};
+            bins low    = {[ITEM_WIDTH'(0)                                  : ITEM_WIDTH'(2)**(ITEM_WIDTH-8)]};
+            bins mid    = {[ITEM_WIDTH'(2)**(ITEM_WIDTH-8)+1                : ITEM_WIDTH'(2)**(ITEM_WIDTH-2)]};
+            bins higth  = {[ITEM_WIDTH'(2)**(ITEM_WIDTH-2)+1                : $]};
         }
 
         vld_transfered_items : coverpoint vld iff (seq_item.src_rdy & seq_item.dst_rdy){

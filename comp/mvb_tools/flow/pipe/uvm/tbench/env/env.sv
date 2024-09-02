@@ -66,7 +66,7 @@ class env #(ITEMS, ITEM_WIDTH) extends uvm_env;
     // Connect agent's ports with ports from scoreboard.
     function void connect_phase(uvm_phase phase);
 
-        rx_env.analysis_port.connect(m_scoreboard.analysis_imp_mvb_rx.analysis_export);
+        rx_env.analysis_port.connect(m_scoreboard.analysis_imp_mvb_rx);
         tx_env.analysis_port.connect(m_scoreboard.analysis_imp_mvb_tx);
 
         m_reset.sync_connect(rx_env.reset_sync);

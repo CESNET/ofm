@@ -13,6 +13,7 @@ class monitor_logic_vector_array #(int unsigned REGIONS, int unsigned REGION_SIZ
 
     uvm_reset::sync_terminate reset_sync;
     localparam SOF_POS_WIDTH = $clog2(REGION_SIZE);
+    protected int unsigned items;
     protected uvm_logic_vector_array::sequence_item #(ITEM_WIDTH) hi_tr;
     protected logic [ITEM_WIDTH-1 : 0] data[$];
 
@@ -20,12 +21,16 @@ class monitor_logic_vector_array #(int unsigned REGIONS, int unsigned REGION_SIZ
         super.new(name, parent);
         analysis_export = new("analysis_export", this);
         hi_tr = null;
+        items = 0;
         reset_sync = new();
     endfunction
 
     virtual function void process_eof(int unsigned index, uvm_mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) tr);
         if (hi_tr != null) begin
             hi_tr.data = data;
+            items++;
+            hi_tr.set_transaction_id(items);
+            hi_tr.start[this.get_full_name()] = $time();
             analysis_port.write(hi_tr);
             hi_tr = null;
         end else begin
@@ -104,12 +109,14 @@ class monitor_logic_vector #(int unsigned REGIONS, int unsigned REGION_SIZE, int
     uvm_reset::sync_terminate reset_sync;
     config_item::meta_type meta_behav;
 
-    local uvm_logic_vector::sequence_item#(META_WIDTH) hi_tr;
+    protected int unsigned items;
+    protected uvm_logic_vector::sequence_item#(META_WIDTH) hi_tr;
 
     function new (string name, uvm_component parent);
         super.new(name, parent);
         analysis_export = new("analysis_export", this);
         reset_sync = new();
+        items = 0;
     endfunction
 
     virtual function void write(uvm_mfb::sequence_item #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) tr);
@@ -118,10 +125,16 @@ class monitor_logic_vector #(int unsigned REGIONS, int unsigned REGION_SIZE, int
                 if (tr.sof[i] && meta_behav == config_item::META_SOF) begin
                     hi_tr = uvm_logic_vector::sequence_item#(META_WIDTH)::type_id::create("hi_tr");
                     hi_tr.data = tr.meta[i];
+                    items++;
+                    hi_tr.set_transaction_id(items);
+                    hi_tr.start[this.get_full_name()] = $time();
                     analysis_port.write(hi_tr);
                 end else if (tr.eof[i] && meta_behav == config_item::META_EOF) begin
                     hi_tr = uvm_logic_vector::sequence_item#(META_WIDTH)::type_id::create("hi_tr");
                     hi_tr.data = tr.meta[i];
+                    items++;
+                    hi_tr.set_transaction_id(items);
+                    hi_tr.start[this.get_full_name()] = $time();
                     analysis_port.write(hi_tr);
                 end
             end

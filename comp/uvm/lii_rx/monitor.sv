@@ -53,6 +53,7 @@ class monitor #(int unsigned DATA_WIDTH, logic FAST_SOF, int unsigned META_WIDTH
                 tr.crc_vld     = vif.monitor_cb.CRC_VLD;
                 tr.crc_ok      = vif.monitor_cb.CRC_OK;
                 // Write transaction to analysis port.
+                tr.start[this.get_full_name()] = $time();
                 analysis_port.write(tr);
             end
         end

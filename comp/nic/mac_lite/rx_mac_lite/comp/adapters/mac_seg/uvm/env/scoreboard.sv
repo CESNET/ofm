@@ -86,9 +86,9 @@ class scoreboard extends uvm_scoreboard;
             if (tr_model_packet.compare(tr_dut_packet) == 0 || tr_model_error.compare(tr_dut_error) == 0) begin
                 string str = "";
                 errors++;
-                $swrite(str, "%s\n\terrors %0d packet %0d", str, errors, compared);
-                $swrite(str, "%s\n\tPACKET FROM DUT\n\t%s\n\tEXPECTED PACKET\n\t%s", str, tr_dut_packet.convert2string(), tr_model_packet.convert2string());
-                $swrite(str, "%s\n\tERROR FROM DUT\n\t%s\n\tEXPECTED ERROR\n\t%s",str, tr_dut_error.convert2string(), tr_model_error.convert2string());
+                str = {str, $sformatf("\n\terrors %0d packet %0d",  errors, compared)};
+                str = {str, $sformatf("\n\tPACKET FROM DUT\n\t%s\n\tEXPECTED PACKET\n\t%s",  tr_dut_packet.convert2string(), tr_model_packet.convert2string())};
+                str = {str, $sformatf("\n\tERROR FROM DUT\n\t%s\n\tEXPECTED ERROR\n\t%s",  tr_dut_error.convert2string(), tr_model_error.convert2string())};
                `uvm_error(this.get_full_name(), str);
             end
             if (compared % 1000 == 0) begin
@@ -101,8 +101,8 @@ class scoreboard extends uvm_scoreboard;
     virtual function void report_phase(uvm_phase phase);
         string str = "";
 
-        $swrite(str, "\n\tCompared transaction %d\n\tErrors %d\n\tDUT TX fifo %d\n\tModel TX fifo %d", compared, errors, dut_fifo_packet.used(), model_fifo_packet.used());
-        $swrite(str, "%s\n\tDUT TX fifo error : %d\n\tModel TX fifo error : %d\n", str, dut_fifo_error.used(), model_fifo_error.used());
+        str = $sformatf( "\n\tCompared transaction %d\n\tErrors %d\n\tDUT TX fifo %d\n\tModel TX fifo %d", compared, errors, dut_fifo_packet.used(), model_fifo_packet.used());
+        str = {str, $sformatf("\n\tDUT TX fifo error : %d\n\tModel TX fifo error : %d\n",  dut_fifo_error.used(), model_fifo_error.used())};
 
         if (errors == 0 && dut_fifo_packet.used() == 0 && model_fifo_packet.used() == 0 && dut_fifo_error.used() == 0 && model_fifo_error.used() == 0) begin
             `uvm_info(get_type_name(), {str, "\n\t---------------------------------------\n\t----     VERIFICATION SUCCESS      ----\n\t---------------------------------------"}, UVM_NONE)

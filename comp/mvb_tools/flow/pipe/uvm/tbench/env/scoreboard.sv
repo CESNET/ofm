@@ -8,8 +8,7 @@ class scoreboard #(ITEM_WIDTH) extends uvm_scoreboard;
     `uvm_component_utils(uvm_pipe::scoreboard #(ITEM_WIDTH))
 
     // Analysis components.
-    uvm_common::subscriber #(uvm_logic_vector::sequence_item #(ITEM_WIDTH)) analysis_imp_mvb_rx;
-
+    uvm_analysis_export #(uvm_logic_vector::sequence_item #(ITEM_WIDTH)) analysis_imp_mvb_rx;
     uvm_analysis_export #(uvm_logic_vector::sequence_item #(ITEM_WIDTH)) analysis_imp_mvb_tx;
 
     uvm_common::comparer_ordered #(uvm_logic_vector::sequence_item #(ITEM_WIDTH)) cmp;
@@ -20,6 +19,7 @@ class scoreboard #(ITEM_WIDTH) extends uvm_scoreboard;
     function new(string name, uvm_component parent);
         super.new(name, parent);
 
+        analysis_imp_mvb_rx = new("analysis_imp_mvb_rx",  this);
         analysis_imp_mvb_tx = new("analysis_imp_mvb_tx",  this);
 
     endfunction
@@ -38,8 +38,6 @@ class scoreboard #(ITEM_WIDTH) extends uvm_scoreboard;
 
     function void build_phase(uvm_phase phase);
 
-        analysis_imp_mvb_rx = uvm_common::subscriber #(uvm_logic_vector::sequence_item #(ITEM_WIDTH))::type_id::create("analysis_imp_mvb_rx", this);
-
         cmp = uvm_common::comparer_ordered #(uvm_logic_vector::sequence_item #(ITEM_WIDTH))::type_id::create("cmp",  this);
         cmp.model_tr_timeout_set(200us);
 
@@ -50,8 +48,7 @@ class scoreboard #(ITEM_WIDTH) extends uvm_scoreboard;
     function void connect_phase(uvm_phase phase);
 
         // Connects input data to the input of the models
-        analysis_imp_mvb_rx.port.connect(m_model.model_mvb_in.analysis_export);
-
+        analysis_imp_mvb_rx.connect(m_model.model_mvb_in.analysis_export);
         // Processed data from the output of the model connected to the analysis fifo
         m_model.model_mvb_out.connect(cmp.analysis_imp_model);
 

@@ -48,6 +48,7 @@ class monitor #(int unsigned ITEMS, int unsigned ITEM_WIDTH) extends uvm_monitor
                 si.data[i] = vif.monitor_cb.DATA[(i+1)*ITEM_WIDTH - 1 -: ITEM_WIDTH];
             end
 
+            si.start[this.get_full_name()] = $time();
             si.vld      = vif.monitor_cb.VLD;
             si.src_rdy  = vif.monitor_cb.SRC_RDY;
             si.dst_rdy  = vif.monitor_cb.DST_RDY;

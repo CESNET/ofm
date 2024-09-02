@@ -9,8 +9,8 @@ class scoreboard #(ITEM_WIDTH, TX_PORTS) extends uvm_scoreboard;
     `uvm_component_utils(uvm_mvb_demux::scoreboard #(ITEM_WIDTH, TX_PORTS))
 
     // Analysis components.
-    uvm_common::subscriber #(uvm_logic_vector::sequence_item#(ITEM_WIDTH + $clog2(TX_PORTS)))  rx_mvb_analysis_imp;
-    uvm_analysis_export    #(uvm_logic_vector::sequence_item#(ITEM_WIDTH))                     tx_mvb_analysis_exp [TX_PORTS -1 : 0];
+    uvm_analysis_export #(uvm_logic_vector::sequence_item#(ITEM_WIDTH + $clog2(TX_PORTS)))  rx_mvb_analysis_imp;
+    uvm_analysis_export #(uvm_logic_vector::sequence_item#(ITEM_WIDTH))                     tx_mvb_analysis_exp [TX_PORTS -1 : 0];
 
     uvm_common::comparer_ordered #(uvm_logic_vector::sequence_item #(ITEM_WIDTH)) port_cmp[TX_PORTS -1 : 0];
 
@@ -22,6 +22,8 @@ class scoreboard #(ITEM_WIDTH, TX_PORTS) extends uvm_scoreboard;
         for (int port = 0; port < TX_PORTS; port ++) begin
             tx_mvb_analysis_exp[port] = new($sformatf("tx_mvb_analysis_exp_%0d", port), this);
         end
+
+        rx_mvb_analysis_imp = new("rx_mvb_analysis_imp", this);
     endfunction
 
     function int unsigned used();
@@ -36,7 +38,6 @@ class scoreboard #(ITEM_WIDTH, TX_PORTS) extends uvm_scoreboard;
     endfunction
 
     function void build_phase(uvm_phase phase);
-        rx_mvb_analysis_imp = uvm_common::subscriber #(uvm_logic_vector::sequence_item#(ITEM_WIDTH + $clog2(TX_PORTS)))::type_id::create("rx_mvb_analysis_imp", this);
 
         for (int port = 0; port < TX_PORTS; port ++) begin
             port_cmp[port] = uvm_common::comparer_ordered #(uvm_logic_vector::sequence_item #(ITEM_WIDTH))::type_id::create($sformatf("port_cmp_%0d", port), this);
@@ -47,7 +48,7 @@ class scoreboard #(ITEM_WIDTH, TX_PORTS) extends uvm_scoreboard;
     endfunction
 
     function void connect_phase(uvm_phase phase);
-        rx_mvb_analysis_imp.port.connect(m_model.rx_mvb_analysis_fifo.analysis_export);
+        rx_mvb_analysis_imp.connect(m_model.rx_mvb_analysis_fifo.analysis_export);
 
         for (int port = 0; port < TX_PORTS; port++) begin
             tx_mvb_analysis_exp[port]        .connect(port_cmp[port].analysis_imp_dut);
@@ -65,7 +66,7 @@ class scoreboard #(ITEM_WIDTH, TX_PORTS) extends uvm_scoreboard;
             errors   = errors   + port_cmp[port].errors;
         end
 
-        $swrite(msg, "%s\tDATA Compared/errors: %0d/%0d\n", msg, compared, errors);
+        msg = {msg, $sformatf("\tDATA Compared/errors: %0d/%0d\n",  compared, errors)};
 
         if (this.used() == 0) begin
             `uvm_info(get_type_name(), $sformatf("%s\n\n\t---------------------------------------\n\t----     VERIFICATION SUCCESS      ----\n\t---------------------------------------", msg), UVM_NONE)

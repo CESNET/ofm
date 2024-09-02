@@ -139,7 +139,7 @@
        if (partCount != tr.partCount)
        begin
          same = 0;
-         $swrite(diff, "partCount does not match");
+         diff = $sformatf( "partCount does not match");
        end
 
        for (integer i=0; i<partCount; i++)
@@ -147,7 +147,7 @@
          if (data[i].size != tr.data[i].size)
          begin
            same = 0;
-           $swrite(diff, "partSize[%0d] does not match", i);
+           diff = $sformatf( "partSize[%0d] does not match", i);
          end
        end
 
@@ -156,7 +156,7 @@
            if (data[i][j] != tr.data[i][j])
            begin
              same = 0;
-             $swrite(diff, "data[%0d][%0d] does not match", i, j);
+             diff = $sformatf( "data[%0d][%0d] does not match", i, j);
            end
 
        compare = same;
@@ -270,37 +270,37 @@
        if (frameErr != tr.frameErr)
        begin
          same = 0;
-         $swrite(diff, "frameErr does not match");
+         diff = "frameErr does not match";
        end
 
        if (macErr != tr.macErr)
        begin
          same = 0;
-         $swrite(diff, "frameErr does not match");
+         diff = "frameErr does not match";
        end
 
        if (mintuErr != tr.mintuErr)
        begin
          same = 0;
-         $swrite(diff, "mintuErr does not match");
+         diff = "mintuErr does not match";
        end
 
        if (mtuErr != tr.mtuErr)
        begin
          same = 0;
-         $swrite(diff, "mtuErr does not match");
+         diff = "mtuErr does not match";
        end
 
        if (crcErr != tr.crcErr)
        begin
          same = 0;
-         $swrite(diff, "crcErr does not match");
+         diff = "crcErr does not match";
        end
 
        if (frameLen != tr.frameLen)
        begin
          same = 0;
-         $swrite(diff, "frameLen does not match");
+         diff = "frameLen does not match";
        end
 
        compare = same;

@@ -111,7 +111,7 @@
        if (packetCount != tr.packetCount)
        begin
          same = 0;
-         $swrite(diff, "packetCount does not match");
+         diff = "packetCount does not match";
        end
 
        for (integer i=0; i<packetCount; i++)
@@ -119,7 +119,7 @@
          if (data[i].size != tr.data[i].size)
          begin
            same = 0;
-           $swrite(diff, "packetSize[%0d] does not match", i);
+           diff = $sformatf( "packetSize[%0d] does not match", i);
          end
        end
 
@@ -128,7 +128,7 @@
            if (data[i][j] != tr.data[i][j])
            begin
              same = 0;
-             $swrite(diff, "data[%0d][%0d] does not match", i, j);
+             diff = $sformatf( "data[%0d][%0d] does not match", i, j);
            end
 
        compare = same;

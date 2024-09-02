@@ -54,7 +54,7 @@
        $cast(tr, transaction);
 
        for(i=0; i < pChannels; i++) begin
-         $swrite(driverLabel, "Driver %0d", i);
+         driverLabel = $sformatf("Driver %0d", i);
          if (driverLabel == inst) break;
        end
 
