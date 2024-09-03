@@ -20,6 +20,12 @@ class sequence_base #(type CONFIG_TYPE, type REQ=uvm_common::sequence_item, type
     virtual function void config_set(CONFIG_TYPE cfg);
         this.cfg = cfg;
     endfunction
+
+    virtual task pre_start();
+        if (this.cfg == null) begin
+            this.cfg = new();
+        end
+    endtask
 endclass
 
 
