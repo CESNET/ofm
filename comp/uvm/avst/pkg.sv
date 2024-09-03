@@ -14,6 +14,8 @@ package uvm_avst;
 
     `include "config.sv"
     `include "sequence_item.sv"
+
+    `include "statistic.sv"
     `include "sequencer.sv"
     `include "sequence.sv"
     `include "driver.sv"
