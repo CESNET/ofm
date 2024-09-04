@@ -96,19 +96,22 @@ entity RX_DMA_HDR_MANAGER is
         INF_DST_RDY  : out std_logic;
 
         -- =====================================================================
-        -- PCIE HEADER (MVB OUTPUT)
+        -- PCIE HEADERs (MVB OUTPUT)
         -- =====================================================================
-        -- PCIE header size, the values can be:
+        -- PCIE header size, the values can be (also applies for DATA_PCIE_HDR_SIZE):
         --
-        -- * 0 => PCIE_HDR(3*32-1 downto 0) bits are valid,
-        -- * 1 => PCIE_HDR(4*32-1 downto 0) bits are valid
-        PCIE_HDR_SIZE              : out std_logic;
-        -- PCIE header content, can be vendor specific
-        PCIE_HDR                   : out std_logic_vector(4*32-1 downto 0);
-        PCIE_HDR_VLD               : out std_logic_vector(0 downto 0);
-        PCIE_HDR_SRC_RDY_DATA_TRAN : out std_logic;
-        PCIE_HDR_SRC_RDY_DMA_HDR   : out std_logic;
-        PCIE_HDR_DST_RDY           : in  std_logic;
+        -- * 0 => DMA_PCIE_HDR(3*32-1 downto 0) bits are valid,
+        -- * 1 => DMA_PCIE_HDR(4*32-1 downto 0) bits are valid
+        DMA_PCIE_HDR_SIZE    : out std_logic;
+        -- PCIE header content (vendor specific)
+        DMA_PCIE_HDR         : out std_logic_vector(4*32-1 downto 0);
+        DMA_PCIE_HDR_SRC_RDY : out std_logic;
+        DMA_PCIE_HDR_DST_RDY : in  std_logic;
+
+        DATA_PCIE_HDR_SIZE    : out std_logic;
+        DATA_PCIE_HDR         : out std_logic_vector(4*32-1 downto 0);
+        DATA_PCIE_HDR_SRC_RDY : out std_logic;
+        DATA_PCIE_HDR_DST_RDY : in  std_logic;
 
         -- =====================================================================
         -- PCIE HEADER (MVB OUTPUT)
@@ -159,13 +162,12 @@ architecture FULL of RX_DMA_HDR_MANAGER is
     signal pcie_hdr_dma_fifo_empty : std_logic;
 
     -- Storing fifo for pcie header, this one is for data pcie header.
-    signal pcie_hdr_data_fifo_in    : std_logic_vector(1 +1 +4*32 -1 downto 0);
+    signal pcie_hdr_data_fifo_in    : std_logic_vector(1 +4*32 -1 downto 0);
     signal pcie_hdr_data_fifo_wr    : std_logic;
     signal pcie_hdr_data_fifo_full  : std_logic;
-    signal pcie_hdr_data_fifo_do    : std_logic_vector(1 +1 +4*32 -1 downto 0);
+    signal pcie_hdr_data_fifo_do    : std_logic_vector(1 +4*32 -1 downto 0);
     signal pcie_hdr_data_fifo_rd    : std_logic;
     signal pcie_hdr_data_fifo_empty : std_logic;
-    signal pcie_end_packet          : std_logic;
 
     -- Storing fifo for dma header. The DMA header contains the information of a packet.
     signal dma_hdr_fifo_in     : std_logic_vector(log2(CHANNELS) +1 +64 -1 downto 0);
@@ -368,7 +370,7 @@ begin
             OUT_ADDR_VLD  => data_hdr_addr_vld,
             OUT_DISC      => data_hdr_discard,
             OUT_FIRST     => data_hdr_first,
-            OUT_LAST      => data_packet_end,
+            OUT_LAST      => open,
             OUT_DST_RDY   => data_hdr_rdy
         );
 
@@ -480,15 +482,13 @@ begin
             OUT_HEADER    => pcie_hdr_data_trans);
 
     pcie_hdr_len_data_trans <= '1' when (DEVICE = "ULTRASCALE" or data_hdr_addr(64-1 downto 32) /= (32-1 downto 0 => '0')) else '0';
-    pcie_hdr_data_fifo_in   <= data_packet_end -- set if packet end with this header
-                             & pcie_hdr_len_data_trans
-                             & pcie_hdr_data_trans;
+    pcie_hdr_data_fifo_in   <= pcie_hdr_len_data_trans & pcie_hdr_data_trans;
     pcie_hdr_data_fifo_wr <= data_hdr_addr_vld;
 
 
     pcie_hdr_data_fifo_i : entity work.fifox
         generic map (
-            DATA_WIDTH         => 1 +1 +4*32,     --  END_PACKET + SIZE + PCIE HDR
+            DATA_WIDTH         => 1 +4*32,     --  END_PACKET + SIZE + PCIE HDR
             ITEMS              => 64,
             DEVICE             => DEVICE,
             ALMOST_FULL_OFFSET => 2
@@ -506,38 +506,15 @@ begin
             EMPTY => pcie_hdr_data_fifo_empty
             );
 
-    -- state machine which decides whether we reached the end of a segment according to the output PCIe headers
-    pcie_end_packet_p : process(CLK)
-    begin
-        if (rising_edge(CLK)) then
-            if (RESET = '1') then
-                pcie_end_packet <= '0';
-            elsif (
-                pcie_end_packet = '0'
-                and pcie_hdr_data_fifo_do(1 +1 +4*32 -1) = '1'  -- value of the signal data_packet_end
-                and pcie_hdr_data_fifo_rd = '1'
-                ) then
-
-                pcie_end_packet <= '1';
-
-            elsif (pcie_end_packet = '1' and pcie_hdr_dma_fifo_rd = '1') then
-                pcie_end_packet <= '0';
-
-            end if;
-        end if;
-    end process;
-
-
     -- MULTIPLEXOR if the end of segment has been reached then switch the output to the PCIe headers for the DMA
     -- header, otherwise choose the PCIe headers for the ordinary data
-    (PCIE_HDR_SIZE, PCIE_HDR) <= pcie_hdr_data_fifo_do(1 +4*32 -1 downto 0) when pcie_end_packet = '0' else pcie_hdr_dma_fifo_do;
-    PCIE_HDR_VLD              <= "1";
-    -- PCIE_HDR_SRC_RDY          <= (not pcie_hdr_data_fifo_empty)             when pcie_end_packet = '0' else (not pcie_hdr_dma_fifo_empty);
-    PCIE_HDR_SRC_RDY_DATA_TRAN <= (not pcie_hdr_data_fifo_empty);
-    PCIE_HDR_SRC_RDY_DMA_HDR   <= (not pcie_hdr_dma_fifo_empty);
+    (DMA_PCIE_HDR_SIZE, DMA_PCIE_HDR) <= pcie_hdr_dma_fifo_do;
+    DMA_PCIE_HDR_SRC_RDY              <= (not pcie_hdr_dma_fifo_empty);
+    pcie_hdr_dma_fifo_rd              <= DMA_PCIE_HDR_DST_RDY and (not pcie_hdr_dma_fifo_empty);
 
-    pcie_hdr_data_fifo_rd <= PCIE_HDR_DST_RDY and (not pcie_hdr_data_fifo_empty) when pcie_end_packet = '0' else '0';
-    pcie_hdr_dma_fifo_rd  <= PCIE_HDR_DST_RDY and (not pcie_hdr_dma_fifo_empty)  when pcie_end_packet = '1' else '0';
+    (DATA_PCIE_HDR_SIZE, DATA_PCIE_HDR) <= pcie_hdr_data_fifo_do;
+    DATA_PCIE_HDR_SRC_RDY               <= (not pcie_hdr_data_fifo_empty);
+    pcie_hdr_data_fifo_rd               <= DATA_PCIE_HDR_DST_RDY and (not pcie_hdr_data_fifo_empty);
 
     --=====================================================================
     -- DMA HDR FIRST REG

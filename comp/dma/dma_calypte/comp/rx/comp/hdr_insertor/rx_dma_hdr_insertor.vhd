@@ -76,18 +76,19 @@ entity RX_DMA_HDR_INSERTOR is
         TX_MFB_DST_RDY : in  std_logic;
 
         -- =========================================================================================
-        -- Header manager interface
-        --
-        -- Adheres to the MVB specification.
+        -- Header manager MVB interface
         -- =========================================================================================
-        HDRM_PCIE_HDR_DATA : in std_logic_vector(127 downto 0);
+        -- log. 0 means header is 3 DW long
+        -- log. 1 means header is 4 DW long
+        HDRM_DMA_PCIE_HDR_SIZE    : in  std_logic;
+        HDRM_DMA_PCIE_HDR         : in  std_logic_vector(127 downto 0);
+        HDRM_DMA_PCIE_HDR_SRC_RDY : in  std_logic;
+        HDRM_DMA_PCIE_HDR_DST_RDY : out std_logic;
 
-        -- - log. 0 means header is 3 DW long
-        -- - log. 1 means header is 4 DW long
-        HDRM_PCIE_HDR_TYPE              : in  std_logic;
-        HDRM_PCIE_HDR_SRC_RDY_DATA_TRAN : in  std_logic;
-        HDRM_PCIE_HDR_SRC_RDY_DMA_HDR   : in  std_logic;
-        HDRM_PCIE_HDR_DST_RDY           : out std_logic;
+        HDRM_DATA_PCIE_HDR_SIZE    : in  std_logic;
+        HDRM_DATA_PCIE_HDR         : in  std_logic_vector(127 downto 0);
+        HDRM_DATA_PCIE_HDR_SRC_RDY : in  std_logic;
+        HDRM_DATA_PCIE_HDR_DST_RDY : out std_logic;
 
         HDRM_DMA_CHAN_NUM    : in  std_logic_vector((log2(CHANNELS)-1) downto 0);
         HDRM_PKT_DROP        : in  std_logic;
@@ -187,7 +188,7 @@ begin
                 -- The Intel doesn't have to wait for DMA_HDR
                 if (RX_MFB_SRC_RDY = '1'
                     -- PCIe header found
-                    and HDRM_PCIE_HDR_SRC_RDY_DATA_TRAN = '1'
+                    and HDRM_DATA_PCIE_HDR_SRC_RDY = '1'
                     and HDRM_PKT_DROP = '0'
                     -- DMA header found
                     and HDRM_DMA_HDR_SRC_RDY = '1'
@@ -206,7 +207,7 @@ begin
                                 -- For Xilinx we are waiting for PCIE HDR of DMA_HDR because it will fit in the last word of MFB (in second region)
                                 TX_REGIONS = 2
                                 and
-                                HDRM_PCIE_HDR_SRC_RDY_DMA_HDR = '1'
+                                HDRM_DMA_PCIE_HDR_SRC_RDY = '1'
                                 and
                                 RX_MFB_EOF = '1'
                             )
@@ -265,7 +266,7 @@ begin
             when DMA_HDR_SEND =>
 
                 -- Just wait for valid PCIE_HDR for DMA_HDR
-                if (HDRM_PCIE_HDR_SRC_RDY_DMA_HDR = '1') then
+                if (HDRM_DMA_PCIE_HDR_SRC_RDY = '1') then
                     tprocess_nst <= IDLE;
                 end if;
         end case;
@@ -277,9 +278,10 @@ begin
     tshift_logic_p : process (all) is
     begin
 
-        RX_MFB_DST_RDY        <= TX_MFB_DST_RDY;
-        HDRM_PCIE_HDR_DST_RDY <= TX_MFB_DST_RDY;
-        HDRM_DMA_HDR_DST_RDY  <= TX_MFB_DST_RDY;
+        RX_MFB_DST_RDY             <= '0';
+        HDRM_DMA_PCIE_HDR_DST_RDY  <= '0';
+        HDRM_DATA_PCIE_HDR_DST_RDY <= '0';
+        HDRM_DMA_HDR_DST_RDY       <= '0';
 
         shift_sel_nst <= shift_sel_pst;
 
@@ -303,21 +305,16 @@ begin
                 -- dropped. (PCIE  headers on the input are always valid)
 
                 -- The PCIe header for data transaction - one of the condition to move to another state
-                if (HDRM_PCIE_HDR_SRC_RDY_DATA_TRAN = '1') then
-                    shift_sel_nst         <= HDRM_PCIE_HDR_TYPE;
-                    HDRM_PCIE_HDR_DST_RDY <= '0';
+                if (HDRM_DATA_PCIE_HDR_SRC_RDY = '1') then
+                    shift_sel_nst              <= HDRM_DATA_PCIE_HDR_SIZE;
                 end if;
 
                 -- awaiting the arrival of valid DMA header with the information if packet should be dropped or not
                 if (HDRM_DMA_HDR_SRC_RDY = '1') then
-
-                    HDRM_DMA_HDR_DST_RDY <= '0';
-
                     -- when valid PKT_DROP signal is captured, then the next valid packet should be dropped
                     if (HDRM_PKT_DROP = '1') then
 
-                        RX_MFB_DST_RDY        <= '1';
-                        HDRM_PCIE_HDR_DST_RDY <= '0';
+                        RX_MFB_DST_RDY <= '1';
 
                         -- if valid SOF is captured, current DMA header is also dropped
                         if (RX_MFB_EOF = '1' and RX_MFB_SRC_RDY = '1') then
@@ -329,9 +326,6 @@ begin
 
             when TRANSACTION_SEND =>
 
-                RX_MFB_DST_RDY        <= '0';
-                HDRM_PCIE_HDR_DST_RDY <= '0';
-                HDRM_DMA_HDR_DST_RDY  <= '0';
                 if (IS_INTEL = FALSE) then
 
                     if (TX_REGIONS = 1) then
@@ -339,7 +333,7 @@ begin
                         if (high_shift_val_pst = "11") then
                             -- switch the PCIE header on the input to the next one
                             -- DMA_HDR request
-                            HDRM_PCIE_HDR_DST_RDY <= TX_MFB_DST_RDY;
+                            HDRM_DATA_PCIE_HDR_DST_RDY <= TX_MFB_DST_RDY;
 
                             -- switch also the word on the input but only if a current packet does not contain an EOF
                             -- because the transmission needs to be paused and the special transaction with a DMA
@@ -355,14 +349,14 @@ begin
                         -- switch to the next header because it will be needed by the write of the last word of the
                         -- transaction when there is also a DMA header transaction to be written at once
                         if (high_shift_val_pst = "01" and RX_MFB_EOF = '1') then
-                            HDRM_PCIE_HDR_DST_RDY <= TX_MFB_DST_RDY;
+                            HDRM_DMA_PCIE_HDR_DST_RDY <= TX_MFB_DST_RDY;
                         end if;
 
                         if (high_shift_val_pst = "11") then
 
                             RX_MFB_DST_RDY        <= TX_MFB_DST_RDY;
                             -- switch the PCIE header on the input to the next one (for the next transaction)
-                            HDRM_PCIE_HDR_DST_RDY <= TX_MFB_DST_RDY;
+                            HDRM_DATA_PCIE_HDR_DST_RDY <= TX_MFB_DST_RDY;
 
                             if (RX_MFB_EOF = '1') then
                                 HDRM_DMA_HDR_DST_RDY  <= TX_MFB_DST_RDY;
@@ -376,7 +370,7 @@ begin
                     if (TX_REGIONS = 1) then
                         if (high_shift_val_pst = "11") then
                             -- PCIe_HDR request
-                            HDRM_PCIE_HDR_DST_RDY <= TX_MFB_DST_RDY;
+                            HDRM_DATA_PCIE_HDR_DST_RDY <= TX_MFB_DST_RDY;
 
                             -- No DMA_HDR - new data request
                             if (RX_MFB_EOF = '0') then
@@ -386,7 +380,7 @@ begin
                     else
                         if (high_shift_val_pst = "10") then
                             -- PCIe_HDR request
-                            HDRM_PCIE_HDR_DST_RDY <= TX_MFB_DST_RDY;
+                            HDRM_DATA_PCIE_HDR_DST_RDY <= TX_MFB_DST_RDY;
 
                             -- No DMA_HDR - new data request
                             if (RX_MFB_EOF = '0') then
@@ -400,16 +394,13 @@ begin
             when DMA_HDR_SEND =>
 
                 -- release the headers on the input and allow next packet to arrive
-                HDRM_PCIE_HDR_DST_RDY <= TX_MFB_DST_RDY;
+                HDRM_DMA_PCIE_HDR_DST_RDY  <= TX_MFB_DST_RDY;
 
-                if (HDRM_PCIE_HDR_SRC_RDY_DMA_HDR = '1') then
+                if (HDRM_DMA_PCIE_HDR_SRC_RDY = '1') then
 
                     RX_MFB_DST_RDY       <= TX_MFB_DST_RDY;
                     HDRM_DMA_HDR_DST_RDY <= TX_MFB_DST_RDY;
                     dma_hdr_last         <= '1';
-                else
-                    HDRM_DMA_HDR_DST_RDY <= '0';
-                    RX_MFB_DST_RDY       <= '0';
                 end if;
         end case;
     end process;
@@ -446,12 +437,12 @@ begin
             when IDLE =>
 
                 if (RX_MFB_SRC_RDY = '1'
-                    and HDRM_PCIE_HDR_SRC_RDY_DATA_TRAN = '1'
+                    and HDRM_DATA_PCIE_HDR_SRC_RDY = '1'
                     and HDRM_PKT_DROP = '0'
                     and HDRM_DMA_HDR_SRC_RDY = '1'
                     and (TX_REGIONS = 1
                          or
-                         (TX_REGIONS = 2 and HDRM_PCIE_HDR_SRC_RDY_DMA_HDR = '1' and RX_MFB_EOF = '1')
+                         (TX_REGIONS = 2 and HDRM_DMA_PCIE_HDR_SRC_RDY = '1' and RX_MFB_EOF = '1')
                          or
                          (TX_REGIONS = 2 and RX_MFB_EOF = '0')
                          )
@@ -462,10 +453,10 @@ begin
                     if (IS_INTEL = FALSE) then
                         high_shift_val_nst <= INIT_SHIFT;
 
-                        if (HDRM_PCIE_HDR_TYPE = '0') then
-                            TX_MFB_DATA <= bshifter_data_out(TX_MFB_DATA'high downto 96) & HDRM_PCIE_HDR_DATA(95 downto 0);
+                        if (HDRM_DATA_PCIE_HDR_SIZE = '0') then
+                            TX_MFB_DATA <= bshifter_data_out(TX_MFB_DATA'high downto 96) & HDRM_DATA_PCIE_HDR(95 downto 0);
                         else
-                            TX_MFB_DATA <= bshifter_data_out(TX_MFB_DATA'high downto 128) & HDRM_PCIE_HDR_DATA(127 downto 0);
+                            TX_MFB_DATA <= bshifter_data_out(TX_MFB_DATA'high downto 128) & HDRM_DATA_PCIE_HDR(127 downto 0);
                         end if;
                     else
                         -- There is no such think as INIT_SHIFT needed for Intel devices
@@ -504,14 +495,14 @@ begin
                         -- that the initial shift is at its highest value (e.q. "011")
                         high_shift_val_nst <= high_shift_val_pst;
 
-                        if (HDRM_PCIE_HDR_TYPE = '0') then
+                        if (HDRM_DMA_PCIE_HDR_SIZE = '0') then
 
                             if (TX_REGIONS = 2 and RX_MFB_EOF = '1') then
 
                                 -- Not for intel
                                 TX_MFB_DATA <= (TX_MFB_DATA'high downto 96 + 64 + (TX_MFB_DATA'length / 2) => '0')
                                             & HDRM_DMA_HDR_DATA
-                                            & HDRM_PCIE_HDR_DATA(95 downto 0)
+                                            & HDRM_DMA_PCIE_HDR(95 downto 0)
                                             & ((TX_MFB_DATA'length / 2) - 1 downto 96 => '0')
                                             & bshifter_data_out(95 downto 0);
 
@@ -526,7 +517,7 @@ begin
                             if (TX_REGIONS = 2 and RX_MFB_EOF = '1') then
                                 TX_MFB_DATA <= (TX_MFB_DATA'high downto 128 + 64 + (TX_MFB_DATA'length / 2) => '0')
                                             & HDRM_DMA_HDR_DATA
-                                            & HDRM_PCIE_HDR_DATA(127 downto 0)
+                                            & HDRM_DMA_PCIE_HDR(127 downto 0)
                                             & ((TX_MFB_DATA'length / 2) - 1 downto 128 => '0')
                                             & bshifter_data_out(127 downto 0);
 
@@ -543,8 +534,6 @@ begin
                     if (TX_REGIONS = 1) then
                         if (high_shift_val_pst = "11") then
 
-                            -- high_shift_val_nst <= high_shift_val_pst;
-
                             -- The packet will be aligned "111"
                             TX_MFB_EOF      <= std_logic_vector(to_unsigned(1, TX_MFB_EOF'length));
                             TX_MFB_EOF_POS  <= std_logic_vector(to_unsigned(7, TX_MFB_EOF_POS'length));
@@ -552,8 +541,6 @@ begin
                         end if;
                     else
                         if (high_shift_val_pst = "10") then
-
-                            -- high_shift_val_nst <= high_shift_val_pst;
 
                             -- The packet will be aligned "111000"
                             TX_MFB_EOF      <= std_logic_vector(to_unsigned(2, TX_MFB_EOF'length));
@@ -568,7 +555,7 @@ begin
             -- For intel this state will be used for both regions
             when DMA_HDR_SEND =>
 
-                if (HDRM_PCIE_HDR_SRC_RDY_DMA_HDR = '1') then
+                if (HDRM_DMA_PCIE_HDR_SRC_RDY = '1') then
 
                     -- Both
                     TX_MFB_SOF     <= std_logic_vector(to_unsigned(1, TX_MFB_SOF'length));
@@ -578,11 +565,11 @@ begin
                     -- Xilinx
                     intel_hdr: if (IS_INTEL = FALSE) then
                         -- load the DMA header and some other non-important data
-                        if (HDRM_PCIE_HDR_TYPE = '0') then
-                            TX_MFB_DATA    <= (TX_MFB_DATA'high downto 96 + 64 => '0') & HDRM_DMA_HDR_DATA & HDRM_PCIE_HDR_DATA(95 downto 0);
+                        if (HDRM_DMA_PCIE_HDR_SIZE = '0') then
+                            TX_MFB_DATA    <= (TX_MFB_DATA'high downto 96 + 64 => '0') & HDRM_DMA_HDR_DATA & HDRM_DMA_PCIE_HDR(95 downto 0);
                             TX_MFB_EOF_POS <= std_logic_vector(to_unsigned(4, TX_MFB_EOF_POS'length));
                         else
-                            TX_MFB_DATA    <= (TX_MFB_DATA'high downto 128 + 64 => '0') & HDRM_DMA_HDR_DATA & HDRM_PCIE_HDR_DATA(127 downto 0);
+                            TX_MFB_DATA    <= (TX_MFB_DATA'high downto 128 + 64 => '0') & HDRM_DMA_HDR_DATA & HDRM_DMA_PCIE_HDR(127 downto 0);
                             TX_MFB_EOF_POS <= std_logic_vector(to_unsigned(5, TX_MFB_EOF_POS'length));
                         end if;
                     -- Intel - both regions
@@ -634,8 +621,12 @@ begin
             process (all) is
             begin
                 tx_mfb_meta_arr(i) <= (others => '0');
-                -- PCIe HDR for Intel P/R-Tile
-                tx_mfb_meta_arr(i)(PCIE_RQ_META_HEADER) <= HDRM_PCIE_HDR_DATA;
+
+                if (tprocess_pst = DMA_HDR_SEND) then
+                    tx_mfb_meta_arr(i)(PCIE_RQ_META_HEADER) <= HDRM_DMA_PCIE_HDR;
+                else
+                    tx_mfb_meta_arr(i)(PCIE_RQ_META_HEADER) <= HDRM_DATA_PCIE_HDR;
+                end if;
             end process;
         end generate;
     end generate;
