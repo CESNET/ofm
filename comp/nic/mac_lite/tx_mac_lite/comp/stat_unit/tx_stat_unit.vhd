@@ -59,14 +59,16 @@ end entity;
 
 architecture FULL of TX_MAC_LITE_STAT_UNIT is
 
+    constant REGION_CNT_W       : natural := max(log2(MFB_REGIONS+1), 2);
+
     signal frame_len_arr        : slv_array_t(MFB_REGIONS-1 downto 0)(LENGTH_WIDTH-1 downto 0);
     signal frame_len_full_arr   : slv_array_t(MFB_REGIONS-1 downto 0)(LENGTH_WIDTH-1 downto 0);
     signal frame_len_full       : std_logic_vector(MFB_REGIONS*LENGTH_WIDTH-1 downto 0);
 
-    signal inc_total_frames     : std_logic_vector(MFB_REGIONS-1 downto 0);
-    signal inc_sent_frames      : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal inc_total_frames     : std_logic_vector(REGION_CNT_W-1 downto 0);
+    signal inc_sent_frames      : std_logic_vector(REGION_CNT_W-1 downto 0);
     signal inc_sent_bytes       : std_logic_vector(LENGTH_WIDTH-1 downto 0);
-    signal inc_discarded_frames : std_logic_vector(MFB_REGIONS-1 downto 0);
+    signal inc_discarded_frames : std_logic_vector(REGION_CNT_W-1 downto 0);
 
     signal cnt_total_frames     : std_logic_vector(64-1 downto 0);
     signal cnt_sent_frames      : std_logic_vector(64-1 downto 0);
@@ -84,7 +86,7 @@ begin
     sum_one_total_frame_i : entity work.SUM_ONE
     generic map(
         INPUT_WIDTH  => MFB_REGIONS,
-        OUTPUT_WIDTH => MFB_REGIONS,
+        OUTPUT_WIDTH => REGION_CNT_W,
         OUTPUT_REG   => True
     )
     port map(
@@ -103,7 +105,7 @@ begin
     sum_one_sent_frame_i : entity work.SUM_ONE
     generic map(
         INPUT_WIDTH  => MFB_REGIONS,
-        OUTPUT_WIDTH => MFB_REGIONS,
+        OUTPUT_WIDTH => REGION_CNT_W,
         OUTPUT_REG   => True
     )
     port map(
@@ -122,7 +124,7 @@ begin
     sum_one_discarded_frame_i : entity work.SUM_ONE
     generic map(
         INPUT_WIDTH  => MFB_REGIONS,
-        OUTPUT_WIDTH => MFB_REGIONS,
+        OUTPUT_WIDTH => REGION_CNT_W,
         OUTPUT_REG   => True
     )
     port map(
@@ -174,7 +176,7 @@ begin
 
     cnt_total_frames_i : entity work.DSP_COUNTER
     generic map (
-        INPUT_WIDTH  => MFB_REGIONS,
+        INPUT_WIDTH  => REGION_CNT_W,
         OUTPUT_WIDTH => 64,
         INPUT_REGS   => true,
         DEVICE       => DEVICE,
@@ -191,7 +193,7 @@ begin
 
     cnt_sent_frames_i : entity work.DSP_COUNTER
     generic map (
-        INPUT_WIDTH  => MFB_REGIONS,
+        INPUT_WIDTH  => REGION_CNT_W,
         OUTPUT_WIDTH => 64,
         INPUT_REGS   => true,
         DEVICE       => DEVICE,
@@ -208,7 +210,7 @@ begin
 
     cnt_discarded_frames_i : entity work.DSP_COUNTER
     generic map (
-        INPUT_WIDTH  => MFB_REGIONS,
+        INPUT_WIDTH  => REGION_CNT_W,
         OUTPUT_WIDTH => 64,
         INPUT_REGS   => true,
         DEVICE       => DEVICE,
