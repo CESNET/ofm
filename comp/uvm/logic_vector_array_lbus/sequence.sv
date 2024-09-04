@@ -204,7 +204,7 @@ class sequence_library_tx extends uvm_sequence_library #(uvm_lbus::sequence_item
 
 endclass
 
-class sequence_library_tx_fullspeed extends uvm_sequence_library #(uvm_lbus::sequence_item);
+class sequence_library_tx_fullspeed extends sequence_library_tx;
     `uvm_object_utils(uvm_logic_vector_array_lbus::sequence_library_tx_fullspeed)
     `uvm_sequence_library_utils(uvm_logic_vector_array_lbus::sequence_library_tx_fullspeed)
 
