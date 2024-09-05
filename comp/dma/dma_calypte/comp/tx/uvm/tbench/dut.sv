@@ -47,11 +47,6 @@ module DUT (
         .PCIE_CQ_MFB_BLOCK_SIZE   (PCIE_CQ_MFB_BLOCK_SIZE),
         .PCIE_CQ_MFB_ITEM_WIDTH   (PCIE_CQ_MFB_ITEM_WIDTH),
 
-        .PCIE_CC_MFB_REGIONS      (PCIE_CC_MFB_REGIONS),
-        .PCIE_CC_MFB_REGION_SIZE  (PCIE_CC_MFB_REGION_SIZE),
-        .PCIE_CC_MFB_BLOCK_SIZE   (PCIE_CC_MFB_BLOCK_SIZE),
-        .PCIE_CC_MFB_ITEM_WIDTH   (PCIE_CC_MFB_ITEM_WIDTH),
-
         .DMA_HDR_POINTER_WIDTH    (DMA_HDR_POINTER_WIDTH),
         .DATA_POINTER_WIDTH       (DATA_POINTER_WIDTH),
         .CHANNELS                 (CHANNELS),
@@ -93,15 +88,6 @@ module DUT (
         .PCIE_CQ_MFB_DST_RDY      (cq_mfb.DST_RDY),
 
         .ST_SP_DBG_CHAN           (),
-        .ST_SP_DBG_META           (),
-
-        .PCIE_CC_MFB_DATA         (),
-        .PCIE_CC_MFB_META         (),
-        .PCIE_CC_MFB_SOF_POS      (),
-        .PCIE_CC_MFB_EOF_POS      (),
-        .PCIE_CC_MFB_SOF          (),
-        .PCIE_CC_MFB_EOF          (),
-        .PCIE_CC_MFB_SRC_RDY      (),
-        .PCIE_CC_MFB_DST_RDY      ()
+        .ST_SP_DBG_META           ()
     );
 endmodule

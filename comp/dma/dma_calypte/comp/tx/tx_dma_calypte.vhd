@@ -37,14 +37,6 @@ entity TX_DMA_CALYPTE is
         PCIE_CQ_MFB_ITEM_WIDTH  : natural := 32;
 
         -- =========================================================================================
-        -- Output PCIe interface (Completer Completion) MFB setting
-        -- =========================================================================================
-        PCIE_CC_MFB_REGIONS     : natural := 1;
-        PCIE_CC_MFB_REGION_SIZE : natural := 1;
-        PCIE_CC_MFB_BLOCK_SIZE  : natural := 8;
-        PCIE_CC_MFB_ITEM_WIDTH  : natural := 32;
-
-        -- =========================================================================================
         -- Setting of internal components
         -- =========================================================================================
         -- Pointer width for data and hdr buffers. The data pointer points to bytes of the packet.
@@ -100,20 +92,6 @@ entity TX_DMA_CALYPTE is
         PCIE_CQ_MFB_EOF_POS : in  std_logic_vector(PCIE_CQ_MFB_REGIONS*max(1, log2(PCIE_CQ_MFB_REGION_SIZE*PCIE_CQ_MFB_BLOCK_SIZE)) -1 downto 0);
         PCIE_CQ_MFB_SRC_RDY : in  std_logic;
         PCIE_CQ_MFB_DST_RDY : out std_logic := '1';
-
-        -- =========================================================================================
-        -- PCIe Completer Completion MFB interface
-        --
-        -- Transmits responses to read requests received on the CQ interface
-        -- =========================================================================================
-        PCIE_CC_MFB_DATA    : out std_logic_vector(PCIE_CC_MFB_REGIONS*PCIE_CC_MFB_REGION_SIZE*PCIE_CC_MFB_BLOCK_SIZE*PCIE_CC_MFB_ITEM_WIDTH-1 downto 0) := (others => '0');
-        PCIE_CC_MFB_META    : out std_logic_vector(PCIE_CC_MFB_REGIONS*PCIE_CC_META_WIDTH -1 downto 0)                                                                       := (others => '0');
-        PCIE_CC_MFB_SOF     : out std_logic_vector(PCIE_CC_MFB_REGIONS -1 downto 0)                                                                      := (others => '0');
-        PCIE_CC_MFB_EOF     : out std_logic_vector(PCIE_CC_MFB_REGIONS -1 downto 0)                                                                      := (others => '0');
-        PCIE_CC_MFB_SOF_POS : out std_logic_vector(PCIE_CC_MFB_REGIONS*max(1, log2(PCIE_CC_MFB_REGION_SIZE)) -1 downto 0)                                := (others => '0');
-        PCIE_CC_MFB_EOF_POS : out std_logic_vector(PCIE_CC_MFB_REGIONS*max(1, log2(PCIE_CC_MFB_REGION_SIZE*PCIE_CC_MFB_BLOCK_SIZE)) -1 downto 0)         := (others => '0');
-        PCIE_CC_MFB_SRC_RDY : out std_logic                                                                                                              := '0';
-        PCIE_CC_MFB_DST_RDY : in  std_logic;
 
         -- =========================================================================================
         -- Debugging signals
