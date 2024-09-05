@@ -4,8 +4,8 @@
 
 // SPDX-License-Identifier: BSD-3-Clause
 
-class ex_test extends uvm_test;
-    typedef uvm_component_registry#(test::ex_test, "test::ex_test") type_id;
+class ex_test #(MFB_REGIONS, MVB_ITEMS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH, MVB_ITEM_WIDTH) extends uvm_test;
+    typedef uvm_component_registry#(test::ex_test #(MFB_REGIONS, MVB_ITEMS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH, MVB_ITEM_WIDTH), "test::ex_test") type_id;
 
     // declare the Environment reference variable
     uvm_mvb2mfb::env #(MFB_REGIONS, MVB_ITEMS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH, MVB_ITEM_WIDTH) m_env;

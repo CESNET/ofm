@@ -9,11 +9,24 @@ import uvm_pkg::*;
 `include "uvm_macros.svh"
 import test::*;
 
-module testbench;
+module testbench #(
+    int unsigned MVB_ITEMS,
+    int unsigned MVB_ITEM_WIDTH_RAW,
+    int unsigned MFB_REGIONS,
+    int unsigned MFB_REGION_SIZE,
+    int unsigned MFB_BLOCK_SIZE,
+    int unsigned MFB_ITEM_WIDTH,
+    int unsigned MFB_ALIGNMENT,
+    int unsigned MFB_META_WIDTH,
+    string DEVICE
+);
+
+    localparam int unsigned MVB_ITEM_WIDTH = MVB_ITEM_WIDTH_RAW+MFB_META_WIDTH;
 
     //TESTS
-    typedef test::ex_test ex_test;
-    typedef test::speed speed;
+    typedef test::ex_test #(MFB_REGIONS, MVB_ITEMS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH, MVB_ITEM_WIDTH) ex_test;
+    typedef test::speed #(MFB_REGIONS, MVB_ITEMS, MFB_REGION_SIZE, MFB_BLOCK_SIZE, MFB_ITEM_WIDTH, MFB_META_WIDTH, MVB_ITEM_WIDTH) speed;
+
 
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // Signals
@@ -53,7 +66,18 @@ module testbench;
 
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // DUT
-    DUT DUT_U (
+    DUT #(
+        .MVB_ITEMS          (MVB_ITEMS),
+        .MVB_ITEM_WIDTH_RAW (MVB_ITEM_WIDTH_RAW),
+        .MFB_REGIONS        (MFB_REGIONS),
+        .MFB_REGION_SIZE    (MFB_REGION_SIZE),
+        .MFB_BLOCK_SIZE     (MFB_BLOCK_SIZE),
+        .MFB_ITEM_WIDTH     (MFB_ITEM_WIDTH),
+        .MFB_ALIGNMENT      (MFB_ALIGNMENT),
+        .MFB_META_WIDTH     (MFB_META_WIDTH),
+        .MVB_ITEM_WIDTH     (MVB_ITEM_WIDTH),
+        .DEVICE             (DEVICE)
+    ) DUT_U (
         .CLK        (CLK),
         .RST        (reset.RESET),
         .mvb_rx     (mvb_rx),

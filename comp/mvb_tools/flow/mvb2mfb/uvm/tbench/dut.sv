@@ -4,10 +4,18 @@
 
 // SPDX-License-Identifier: BSD-3-Clause
 
-
-import test::*;
-
-module DUT (
+module DUT #(
+    int unsigned MVB_ITEMS,
+    int unsigned MVB_ITEM_WIDTH_RAW,
+    int unsigned MFB_REGIONS,
+    int unsigned MFB_REGION_SIZE,
+    int unsigned MFB_BLOCK_SIZE,
+    int unsigned MFB_ITEM_WIDTH,
+    int unsigned MFB_ALIGNMENT,
+    int unsigned MFB_META_WIDTH,
+    int unsigned MVB_ITEM_WIDTH,
+    string DEVICE
+) (
     input logic     CLK,
     input logic     RST,
     mvb_if.dut_rx   mvb_rx,
