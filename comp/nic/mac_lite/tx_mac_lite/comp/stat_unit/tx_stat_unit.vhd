@@ -187,7 +187,7 @@ begin
         CLK_EN    => '1',
         RESET     => CTRL_RESET_CNT,
         INCREMENT => inc_total_frames,
-        MAX_VAL   => (others => '0'),
+        MAX_VAL   => (others => '1'),
         RESULT    => cnt_total_frames
     );
 
@@ -204,7 +204,7 @@ begin
         CLK_EN    => '1',
         RESET     => CTRL_RESET_CNT,
         INCREMENT => inc_sent_frames,
-        MAX_VAL   => (others => '0'),
+        MAX_VAL   => (others => '1'),
         RESULT    => cnt_sent_frames
     );
 
@@ -221,7 +221,7 @@ begin
         CLK_EN    => '1',
         RESET     => CTRL_RESET_CNT,
         INCREMENT => inc_discarded_frames,
-        MAX_VAL   => (others => '0'),
+        MAX_VAL   => (others => '1'),
         RESULT    => cnt_discarded_frames
     );
 
@@ -238,7 +238,7 @@ begin
         CLK_EN    => '1',
         RESET     => CTRL_RESET_CNT,
         INCREMENT => inc_sent_bytes,
-        MAX_VAL   => (others => '0'),
+        MAX_VAL   => (others => '1'),
         RESULT    => cnt_sent_bytes
     );
 
