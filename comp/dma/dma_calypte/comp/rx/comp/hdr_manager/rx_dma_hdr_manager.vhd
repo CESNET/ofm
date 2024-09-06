@@ -441,8 +441,14 @@ begin
             OUT_HEADER    => pcie_hdr_dma_hdr);
 
     pcie_hdr_len_dma_trans <= '1' when (DEVICE = "ULTRASCALE" or dma_hdr_addr(64-1 downto 32) /= (32-1 downto 0 => '0')) else '0';
-    pcie_hdr_dma_fifo_in <= pcie_hdr_len_dma_trans & pcie_hdr_dma_hdr;
-    pcie_hdr_dma_fifo_wr <= dma_hdr_addr_vld;
+
+    pcie_hdr_dma_reg_p: process (CLK) is
+    begin
+        if (rising_edge(CLK)) then
+            pcie_hdr_dma_fifo_in <= pcie_hdr_len_dma_trans & pcie_hdr_dma_hdr;
+            pcie_hdr_dma_fifo_wr <= dma_hdr_addr_vld;
+        end if;
+    end process;
 
     pcie_hdr_dma_fifo_i : entity work.fifox
         generic map (
@@ -482,9 +488,14 @@ begin
             OUT_HEADER    => pcie_hdr_data_trans);
 
     pcie_hdr_len_data_trans <= '1' when (DEVICE = "ULTRASCALE" or data_hdr_addr(64-1 downto 32) /= (32-1 downto 0 => '0')) else '0';
-    pcie_hdr_data_fifo_in   <= pcie_hdr_len_data_trans & pcie_hdr_data_trans;
-    pcie_hdr_data_fifo_wr <= data_hdr_addr_vld;
 
+    pcie_hdr_data_reg_p: process (CLK) is
+    begin
+        if (rising_edge(CLK)) then
+            pcie_hdr_data_fifo_in <= pcie_hdr_len_data_trans & pcie_hdr_data_trans;
+            pcie_hdr_data_fifo_wr <= data_hdr_addr_vld;
+        end if;
+    end process;
 
     pcie_hdr_data_fifo_i : entity work.fifox
         generic map (

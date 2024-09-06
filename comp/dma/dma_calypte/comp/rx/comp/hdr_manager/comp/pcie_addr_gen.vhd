@@ -115,17 +115,41 @@ architecture FULL of PCIE_ADDR_GEN is
     -- driving signals
     signal input_rdy      : std_logic;
     signal dst_rdy_reg    : std_logic;
+
+    -- input pipe signals
+    signal input_data_pipe    : std_logic_vector(1 + INPUT_CHANNEL'length + INPUT_SIZE'length -1 downto 0);
+    signal input_src_rdy_pipe : std_logic;
 begin
 
-    input_rdy     <= INPUT_SRC_RDY and packet_next and dst_rdy_reg;
-    INPUT_DST_RDY <= packet_next  and dst_rdy_reg;
+    input_pipe_i : entity work.PIPE
+        generic map (
+            DATA_WIDTH    => 1 + INPUT_CHANNEL'length + INPUT_SIZE'length,
+            PIPE_TYPE     => "REG",
+            OPT           => "REG",
+            FAKE_PIPE     => FALSE,
+            USE_OUTREG    => TRUE,
+            RESET_BY_INIT => FALSE,
+            DEVICE        => DEVICE)
+        port map (
+            CLK        => CLK,
+            RESET      => RESET,
+
+            IN_DATA    => INPUT_DISC & INPUT_CHANNEL & INPUT_SIZE,
+            IN_SRC_RDY => INPUT_SRC_RDY,
+            IN_DST_RDY => INPUT_DST_RDY,
+
+            OUT_DATA    => input_data_pipe,
+            OUT_SRC_RDY => input_src_rdy_pipe,
+            OUT_DST_RDY => packet_next and dst_rdy_reg);
+
+    input_rdy <= input_src_rdy_pipe and packet_next and dst_rdy_reg;
 
     input_process : process (CLK)
     begin
         if (rising_edge(CLK)) then
             -- Set data if new packet is receive
             if (input_rdy = '1') then
-                channel  <= INPUT_CHANNEL;
+                channel  <= input_data_pipe(log2(CHANNELS)+log2(PKT_MTU+1) -1 downto log2(PKT_MTU+1));
             end if;
 
             dst_rdy_reg <= OUT_DST_RDY;
@@ -163,7 +187,7 @@ begin
         state_next <= state_r0;
 
         -- choose if next packet are going to be discarded or received
-        if (INPUT_DISC = '0') then
+        if (input_data_pipe(log2(CHANNELS)+log2(PKT_MTU+1)) = '0') then
             fsm_new_status_next := PACKET_NEW;
         else
             fsm_new_status_next := PACKET_DISCARD;
@@ -205,7 +229,7 @@ begin
     begin
         if (rising_edge(CLK)) then
             if (input_rdy = '1') then
-                pkt_size <= unsigned(INPUT_SIZE);
+                pkt_size <= unsigned(input_data_pipe(log2(PKT_MTU+1) -1 downto 0));
             elsif ((state_r0 = PACKET_RECEIVE  or state_r0 = PACKET_NEW) and segment_next = '1' and dst_rdy_reg = '1') then
                 pkt_size <= pkt_size - BLOCK_SIZE;
             end if;
@@ -269,12 +293,15 @@ begin
             ADDR_VLD => addr_vld
         );
 
-    OUT_ADDR       <= addr;
-    OUT_OFFSET     <= offset;
-    OUT_ADDR_VLD   <= addr_vld;
-    OUT_LAST       <= packet_end;
-    OUT_FIRST      <= '1' when state_r1 = PACKET_DISCARD or (state_r1 = PACKET_NEW and addr_vld = '1') else '0';
-    OUT_DISC       <= '1' when state_r1 = PACKET_DISCARD else '0';
-    --OUT_DST_RDY
-
+    out_reg_p: process (CLK) is
+    begin
+        if (rising_edge(CLK)) then
+            OUT_ADDR       <= addr;
+            OUT_OFFSET     <= offset;
+            OUT_ADDR_VLD   <= addr_vld;
+            OUT_LAST       <= packet_end;
+            OUT_FIRST      <= '1' when state_r1 = PACKET_DISCARD or (state_r1 = PACKET_NEW and addr_vld = '1') else '0';
+            OUT_DISC       <= '1' when state_r1 = PACKET_DISCARD else '0';
+        end if;
+    end process;
 end architecture;
