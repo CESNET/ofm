@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NP LUT RAM &mdash; Open FPGA Modules Docs  documentation</title>
+  <title>Register FIFO &mdash; Open FPGA Modules Docs  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme_overrides.css?v=b530091d" />
 
@@ -20,9 +20,7 @@
         <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
-    <link rel="search" title="Search" href="../../../../search.html" />
-    <link rel="next" title="Simple dual-port BRAM" href="../sdp_bram/readme.html" />
-    <link rel="prev" title="Memory modules" href="../../../../memory.html" /> 
+    <link rel="search" title="Search" href="../../../../search.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -52,25 +50,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../build/readme.html">Build System</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Components:</span></p>
-<ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="../../../../base.html">Basic Tools</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../../../../async.html">Asynchronous modules</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../../../../memory.html">Memory modules</a><ul class="current">
-<li class="toctree-l3 current"><a class="current reference internal" href="#">NP LUT RAM</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../sdp_bram/readme.html">Simple dual-port BRAM</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../sdp_bram/readme.html#simple-dual-port-bram-with-byte-enable">Simple dual-port BRAM with Byte Enable</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../mp_bram/readme.html">Multi-port BRAM</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../lvt_mem/readme.html">Live value table memory</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../memory.html#references">References</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="../../../../fifo.html">FIFO components</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../../dsp.html">DSP components</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../../shift.html">Shift registers</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../../logic.html">Basic logic elements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../../misc.html">Miscellaneous</a></li>
-</ul>
-</li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../base.html">Basic Tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../ctrls.html">Controllers &amp; TSU</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../fl.html">FL Tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../flu.html">FLU Tools</a></li>
@@ -101,11 +82,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="../../../../base.html">Basic Tools</a></li>
-          <li class="breadcrumb-item"><a href="../../../../memory.html">Memory modules</a></li>
-      <li class="breadcrumb-item active">NP LUT RAM</li>
+      <li class="breadcrumb-item active">Register FIFO</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../../../../_sources/comp/base/mem/np_lutram/readme.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../../../../_sources/comp/base/fifo/reg_fifo/readme.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -113,12 +92,21 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="np-lut-ram">
-<span id="np-lutram"></span><h1>NP LUT RAM<a class="headerlink" href="#np-lut-ram" title="Link to this heading"></a></h1>
+  <section id="register-fifo">
+<span id="reg-fifo"></span><h1>Register FIFO<a class="headerlink" href="#register-fifo" title="Link to this heading"></a></h1>
 <dl class="vhdl autoentity">
-<dt class="sig sig-object vhdl" id="vhdl-entity-np_lutram">
-<span class="k"><span class="pre">ENTITY</span> </span><span class="sig-name descname"><span class="pre">np_lutram</span></span><span class="k"> <span class="pre">IS</span></span><a class="headerlink" href="#vhdl-entity-np_lutram" title="Link to this definition"></a></dt>
-<dd><p>Generic N-port distributed LUT memory</p>
+<dt class="sig sig-object vhdl" id="vhdl-entity-reg_fifo">
+<span class="k"><span class="pre">ENTITY</span> </span><span class="sig-name descname"><span class="pre">REG_FIFO</span></span><span class="k"> <span class="pre">IS</span></span><a class="headerlink" href="#vhdl-entity-reg_fifo" title="Link to this definition"></a></dt>
+<dd><p>This component is the most primitive FIFO here which is made of registers that buffers data also when the
+output TX_DST_RDY is deasserted. In that case, the buffer keeps an output RX_DST_RDY asserted
+unless the FIFO is full. If the TX_DST_RDY is asserted, the buffer behaves as a set of register
+stages of the size ITEMS.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>It is advised to use this component only on a very limited amounts of DATA_WIDTH*ITEMS.
+Otherwise the consumption of the registers can be huge. For more items, refer to other types
+of FIFO.</p>
+</div>
 <span class="sig-name descname">Generics</span><table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Generic</p></th>
@@ -128,30 +116,21 @@
 </tr>
 </thead>
 <tbody>
-<tr class="row-even" id="vhdl-gengeneric-np_lutram-data_width"><td><p>DATA_WIDTH</p></td>
-<td><p>integer</p></td>
-<td><p>1</p></td>
+<tr class="row-even" id="vhdl-gengeneric-reg_fifo-data_width"><td><p>DATA_WIDTH</p></td>
+<td><p>natural</p></td>
+<td><p>256</p></td>
+<td><p>Bit width of data</p></td>
+</tr>
+<tr class="row-odd" id="vhdl-gengeneric-reg_fifo-items"><td><p>ITEMS</p></td>
+<td><p>natural</p></td>
+<td><p>2</p></td>
 <td></td>
 </tr>
-<tr class="row-odd" id="vhdl-gengeneric-np_lutram-items"><td><p>ITEMS</p></td>
-<td><p>integer</p></td>
-<td><p>64</p></td>
-<td></td>
-</tr>
-<tr class="row-even" id="vhdl-gengeneric-np_lutram-write_ports"><td><p>WRITE_PORTS</p></td>
-<td><p>integer</p></td>
-<td><p>1</p></td>
-<td></td>
-</tr>
-<tr class="row-odd" id="vhdl-gengeneric-np_lutram-read_ports"><td><p>READ_PORTS</p></td>
-<td><p>integer</p></td>
-<td><p>3</p></td>
-<td></td>
-</tr>
-<tr class="row-even" id="vhdl-gengeneric-np_lutram-device"><td><p>DEVICE</p></td>
-<td><p>string</p></td>
-<td><p>“7SERIES”</p></td>
-<td></td>
+<tr class="row-even" id="vhdl-gengeneric-reg_fifo-fake_fifo"><td><p>FAKE_FIFO</p></td>
+<td><p>boolean</p></td>
+<td><p>FALSE)</p></td>
+<td><p>If this is true, the input data are directly connected to the output as well as the
+handshaking signals.</p></td>
 </tr>
 </tbody>
 </table>
@@ -164,34 +143,44 @@
 </tr>
 </thead>
 <tbody>
-<tr class="row-even" id="vhdl-portsignal-np_lutram-di"><td><p>DI</p></td>
-<td><p>slv_array_t(WRITE_PORTS-1 downto 0)(DATA_WIDTH-1 downto 0)</p></td>
-<td><p>in</p></td>
-<td></td>
-</tr>
-<tr class="row-odd" id="vhdl-portsignal-np_lutram-we"><td><p>WE</p></td>
-<td><p>std_logic_vector(WRITE_PORTS-1 downto 0)</p></td>
-<td><p>in</p></td>
-<td></td>
-</tr>
-<tr class="row-even" id="vhdl-portsignal-np_lutram-wclk"><td><p>WCLK</p></td>
+<tr class="row-even" id="vhdl-portsignal-reg_fifo-clk"><td><p>CLK</p></td>
 <td><p>std_logic</p></td>
 <td><p>in</p></td>
 <td></td>
 </tr>
-<tr class="row-odd" id="vhdl-portsignal-np_lutram-addra"><td><p>ADDRA</p></td>
-<td><p>slv_array_t(WRITE_PORTS-1 downto 0)(LOG2(ITEMS)-1 downto 0)</p></td>
+<tr class="row-odd" id="vhdl-portsignal-reg_fifo-rst"><td><p>RST</p></td>
+<td><p>std_logic</p></td>
 <td><p>in</p></td>
 <td></td>
 </tr>
-<tr class="row-even" id="vhdl-portsignal-np_lutram-addrb"><td><p>ADDRB</p></td>
-<td><p>slv_array_t(READ_PORTS-1 downto 0)(LOG2(ITEMS)-1 downto 0)</p></td>
+<tr class="row-even" id="vhdl-portsignal-reg_fifo-rx_data"><td><p>RX_DATA</p></td>
+<td><p>std_logic_vector(DATA_WIDTH-1 downto 0)</p></td>
 <td><p>in</p></td>
 <td></td>
 </tr>
-<tr class="row-odd" id="vhdl-portsignal-np_lutram-dob"><td><p>DOB</p></td>
-<td><p>slv_array_t(READ_PORTS-1 downto 0)(DATA_WIDTH-1 downto 0)</p></td>
+<tr class="row-odd" id="vhdl-portsignal-reg_fifo-rx_src_rdy"><td><p>RX_SRC_RDY</p></td>
+<td><p>std_logic</p></td>
+<td><p>in</p></td>
+<td></td>
+</tr>
+<tr class="row-even" id="vhdl-portsignal-reg_fifo-rx_dst_rdy"><td><p>RX_DST_RDY</p></td>
+<td><p>std_logic</p></td>
 <td><p>out</p></td>
+<td></td>
+</tr>
+<tr class="row-odd" id="vhdl-portsignal-reg_fifo-tx_data"><td><p>TX_DATA</p></td>
+<td><p>std_logic_vector(DATA_WIDTH -1 downto 0)</p></td>
+<td><p>out</p></td>
+<td></td>
+</tr>
+<tr class="row-even" id="vhdl-portsignal-reg_fifo-tx_src_rdy"><td><p>TX_SRC_RDY</p></td>
+<td><p>std_logic</p></td>
+<td><p>out</p></td>
+<td></td>
+</tr>
+<tr class="row-odd" id="vhdl-portsignal-reg_fifo-tx_dst_rdy"><td><p>TX_DST_RDY</p></td>
+<td><p>std_logic)</p></td>
+<td><p>in</p></td>
 <td></td>
 </tr>
 </tbody>
@@ -203,10 +192,7 @@
 
            </div>
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../../../../memory.html" class="btn btn-neutral float-left" title="Memory modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../sdp_bram/readme.html" class="btn btn-neutral float-right" title="Simple dual-port BRAM" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
+          <footer>
 
   <hr/>
 
