@@ -1205,7 +1205,7 @@ begin
     dsp_comp_hdp_i : entity work.DSP_COMPARATOR
     generic map(
         INPUT_DATA_WIDTH => POINTER_WIDTH,
-        INPUT_REGS_EN    => false,
+        INPUT_REGS_EN    => true,
         DEVICE           => DEVICE,
         MODE             => "><="
     )
@@ -1228,7 +1228,7 @@ begin
     dsp_comp_hhp_i : entity work.DSP_COMPARATOR
     generic map(
         INPUT_DATA_WIDTH => POINTER_WIDTH,
-        INPUT_REGS_EN    => false,
+        INPUT_REGS_EN    => true,
         DEVICE           => DEVICE,
         MODE             => "><="
     )

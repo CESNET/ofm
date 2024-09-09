@@ -12,14 +12,6 @@ use work.math_pack.all;
 use work.type_pack.all;
 use work.pcie_meta_pack.all;
 
--- This core provides simple DMA functionality for both RX and TX directions.
--- The design was primary focused on the lowest latency possible for the
--- transaction from the input of the DMA core to reach its output. The block scheme
--- as well as its connection to the NDK design is provided in the following figure:
---
--- .. figure:: img/tx_calypte_block-dma_whole_block.svg
---     :align: center
---     :scale: 100%
 entity DMA_CALYPTE is
     generic(
         -- ==========================================================================================
@@ -55,13 +47,6 @@ entity DMA_CALYPTE is
         PCIE_CQ_MFB_BLOCK_SIZE  : natural := 8;
         PCIE_CQ_MFB_ITEM_WIDTH  : natural := 32;
 
-        -- Completer Completion MFB interface configration, allowed configurations are:
-        -- (1,1,8,32)
-        PCIE_CC_MFB_REGIONS     : natural := 2;
-        PCIE_CC_MFB_REGION_SIZE : natural := 1;
-        PCIE_CC_MFB_BLOCK_SIZE  : natural := 8;
-        PCIE_CC_MFB_ITEM_WIDTH  : natural := 32;
-
         -- Width of User Header Metadata information
         -- on RX: added to header sent to header Buffer in RAM
         -- on TX: extracted from descriptor and propagated to output
@@ -84,6 +69,9 @@ entity DMA_CALYPTE is
         -- Defines width of Packet length signals.
         -- the maximum is 2**16 - 1
         USR_RX_PKT_SIZE_MAX : natural := 2**12;
+        -- Enables an additional register of the transaction buffer that improves
+        -- throughput
+        TRBUF_REG_EN        : boolean := false;
 
         -- =====================================================================
         -- TX DMA settings
@@ -177,16 +165,6 @@ entity DMA_CALYPTE is
         PCIE_CQ_MFB_EOF_POS : in  std_logic_vector(PCIE_CQ_MFB_REGIONS*max(1, log2(PCIE_CQ_MFB_REGION_SIZE*PCIE_CQ_MFB_BLOCK_SIZE)) -1 downto 0);
         PCIE_CQ_MFB_SRC_RDY : in  std_logic;
         PCIE_CQ_MFB_DST_RDY : out std_logic := '1';
-
-        -- Response interface for PCIe CQ requests
-        PCIE_CC_MFB_DATA    : out std_logic_vector(PCIE_CC_MFB_REGIONS*PCIE_CC_MFB_REGION_SIZE*PCIE_CC_MFB_BLOCK_SIZE*PCIE_CC_MFB_ITEM_WIDTH-1 downto 0);
-        PCIE_CC_MFB_META    : out std_logic_vector(PCIE_CC_MFB_REGIONS*PCIE_CC_META_WIDTH -1 downto 0);
-        PCIE_CC_MFB_SOF     : out std_logic_vector(PCIE_CC_MFB_REGIONS -1 downto 0);
-        PCIE_CC_MFB_EOF     : out std_logic_vector(PCIE_CC_MFB_REGIONS -1 downto 0);
-        PCIE_CC_MFB_SOF_POS : out std_logic_vector(PCIE_CC_MFB_REGIONS*max(1, log2(PCIE_CC_MFB_REGION_SIZE)) -1 downto 0);
-        PCIE_CC_MFB_EOF_POS : out std_logic_vector(PCIE_CC_MFB_REGIONS*max(1, log2(PCIE_CC_MFB_REGION_SIZE*PCIE_CC_MFB_BLOCK_SIZE)) -1 downto 0);
-        PCIE_CC_MFB_SRC_RDY : out std_logic;
-        PCIE_CC_MFB_DST_RDY : in  std_logic;
 
         -- ==========================================================================================
         -- MI interface for SW access
@@ -289,7 +267,8 @@ begin
                 CNTRS_WIDTH    => DSP_CNT_WIDTH,
                 HDR_META_WIDTH => HDR_META_WIDTH,
                 PKT_SIZE_MAX   => USR_RX_PKT_SIZE_MAX,
-                TRBUF_FIFO_EN  => FALSE)
+                TRBUF_FIFO_EN  => FALSE,
+                TRBUF_REG_EN   => TRBUF_REG_EN)
 
             port map (
                 CLK   => CLK,
@@ -407,11 +386,6 @@ begin
                 PCIE_CQ_MFB_BLOCK_SIZE  => PCIE_CQ_MFB_BLOCK_SIZE,
                 PCIE_CQ_MFB_ITEM_WIDTH  => PCIE_CQ_MFB_ITEM_WIDTH,
 
-                PCIE_CC_MFB_REGIONS     => PCIE_CC_MFB_REGIONS,
-                PCIE_CC_MFB_REGION_SIZE => PCIE_CC_MFB_REGION_SIZE,
-                PCIE_CC_MFB_BLOCK_SIZE  => PCIE_CC_MFB_BLOCK_SIZE,
-                PCIE_CC_MFB_ITEM_WIDTH  => PCIE_CC_MFB_ITEM_WIDTH,
-
                 DATA_POINTER_WIDTH    => TX_PTR_WIDTH,
                 DMA_HDR_POINTER_WIDTH => TX_PTR_WIDTH-3,
                 CHANNELS              => TX_CHANNELS,
@@ -444,15 +418,6 @@ begin
                 PCIE_CQ_MFB_SRC_RDY => inp_fifo_mfb_src_rdy,
                 PCIE_CQ_MFB_DST_RDY => inp_fifo_mfb_dst_rdy,
 
-                PCIE_CC_MFB_DATA    => PCIE_CC_MFB_DATA,
-                PCIE_CC_MFB_META    => PCIE_CC_MFB_META,
-                PCIE_CC_MFB_SOF     => PCIE_CC_MFB_SOF,
-                PCIE_CC_MFB_EOF     => PCIE_CC_MFB_EOF,
-                PCIE_CC_MFB_SOF_POS => PCIE_CC_MFB_SOF_POS,
-                PCIE_CC_MFB_EOF_POS => PCIE_CC_MFB_EOF_POS,
-                PCIE_CC_MFB_SRC_RDY => PCIE_CC_MFB_SRC_RDY,
-                PCIE_CC_MFB_DST_RDY => PCIE_CC_MFB_DST_RDY,
-
                 ST_SP_DBG_CHAN => ST_SP_DBG_CHAN,
                 ST_SP_DBG_META => ST_SP_DBG_META,
 
@@ -482,14 +447,6 @@ begin
         USR_TX_MFB_SRC_RDY <= '0';
 
         PCIE_CQ_MFB_DST_RDY <= '1';
-
-        PCIE_CC_MFB_DATA    <= (others => '0');
-        PCIE_CC_MFB_META    <= (others => '0');
-        PCIE_CC_MFB_SOF     <= (others => '0');
-        PCIE_CC_MFB_EOF     <= (others => '0');
-        PCIE_CC_MFB_SOF_POS <= (others => '0');
-        PCIE_CC_MFB_EOF_POS <= (others => '0');
-        PCIE_CC_MFB_SRC_RDY <= '0';
 
         ST_SP_DBG_CHAN <= (others => '0');
         ST_SP_DBG_META <= (others => '0');

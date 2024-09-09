@@ -4,6 +4,8 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
+set GEN_LUTRAM_BASE "$OFM_PATH/comp/base/mem/gen_lutram"
 
+lappend COMPONENTS [list "GEN_LUTRAM" $GEN_LUTRAM_BASE "FULL"]
 
 lappend MOD "$ENTITY_BASE/addr_manager.vhd"

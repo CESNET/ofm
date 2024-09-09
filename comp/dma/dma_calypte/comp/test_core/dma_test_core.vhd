@@ -215,21 +215,17 @@ architecture FULL of DMA_TEST_CORE is
     constant TIMESTAMP_WIDTH  : positive := 11;
     constant LAT_PARAL_EVENTS : positive := 64;
 
-    signal rx_mfb_sof_out_chan : std_logic_vector(RX_CHANNELS -1 downto 0);
-    signal tx_mfb_sof_in_chan : std_logic_vector(RX_CHANNELS -1 downto 0);
-
-    signal lat_meas_val_vld    : std_logic_vector(RX_CHANNELS -1 downto 0);
-    signal lat_meas_val        : slv_array_t(RX_CHANNELS -1 downto 0)(TIMESTAMP_WIDTH -1 downto 0);
-    signal lat_meas_fifo_full  : std_logic_vector(RX_CHANNELS -1 downto 0);
-    signal lat_meas_fifo_items : slv_array_t(RX_CHANNELS -1 downto 0)(log2(LAT_PARAL_EVENTS) downto 0);
+    signal lat_meas_val_vld    : std_logic;
+    signal lat_meas_val        : std_logic_vector(TIMESTAMP_WIDTH -1 downto 0);
+    signal lat_meas_fifo_full  : std_logic;
+    signal lat_meas_fifo_items : std_logic_vector(log2(LAT_PARAL_EVENTS) downto 0);
 
     type meas_fsm_state_t is (S_IDLE, S_COUNT_TESTING_PACKETS, S_TEST_FINISHED);
-    type meas_fsm_state_arr_t is array (RX_CHANNELS -1 downto 0) of meas_fsm_state_t;
-    signal meas_fsm_pst : meas_fsm_state_arr_t := (others => S_IDLE);
-    signal meas_fsm_nst : meas_fsm_state_arr_t := (others => S_IDLE);
-    signal pkt_cnt_pst : u_array_t(RX_CHANNELS -1 downto 0)(15 downto 0);
-    signal pkt_cnt_nst : u_array_t(RX_CHANNELS -1 downto 0)(15 downto 0);
-    signal test_finished : std_logic_vector(RX_CHANNELS -1 downto 0);
+    signal meas_fsm_pst : meas_fsm_state_t := S_IDLE;
+    signal meas_fsm_nst : meas_fsm_state_t := S_IDLE;
+    signal pkt_cnt_pst : unsigned(15 downto 0);
+    signal pkt_cnt_nst : unsigned(15 downto 0);
+    signal test_finished : std_logic;
 
     -- =============================================================================================
     -- Reset FSM
@@ -494,12 +490,12 @@ begin
                 MI_ADDR_WIDTH   => MI_WIDTH,
 
                 CNTER_CNT       => 0,
-                VALUE_CNT       => RX_CHANNELS,
+                VALUE_CNT       => 1,
 
                 -- MUX for MFB Generator + all signals to control the generator
                 CTRLO_WIDTH     => data_logger_ctrlo'length,
                 -- Counter
-                CTRLI_WIDTH     => RX_CHANNELS+64+RX_CHANNELS*((log2(LAT_PARAL_EVENTS)+1)+1),
+                CTRLI_WIDTH     => 1+64+log2(LAT_PARAL_EVENTS)+1+1,
 
                 CNTER_WIDTH     => 64,
                 VALUE_WIDTH     => (others => TIMESTAMP_WIDTH),
@@ -524,15 +520,15 @@ begin
                 CTRLI         => (
                     test_finished &
                     mfb_gen_ctrl_pkt_cnt &
-                    slv_array_ser(lat_meas_fifo_items) &
+                    lat_meas_fifo_items &
                     lat_meas_fifo_full),
 
                 CNTERS_INCR   => (others => '0'),
                 CNTERS_SUBMIT => (others => '0'),
                 CNTERS_DIFF   => (others => (others => '0')),
 
-                VALUES_VLD    => lat_meas_val_vld,
-                VALUES        => slv_array_ser(lat_meas_val),
+                VALUES_VLD    => (others => lat_meas_val_vld),
+                VALUES        => lat_meas_val,
 
                 MI_DWR        => mi_dwr_split(2),
                 MI_ADDR       => mi_addr_split(2),
@@ -543,96 +539,86 @@ begin
                 MI_DRD        => mi_drd_split(2),
                 MI_DRDY       => mi_drdy_split(2));
 
-        -- Genrerate multiple latency meters to measure on multiple channels
-        lat_meter_chan_g: for i in 0 to (RX_CHANNELS-1) generate
+        latency_meter_i : entity work.LATENCY_METER
+            generic map (
+                DATA_WIDTH         => TIMESTAMP_WIDTH,
+                MAX_PARALEL_EVENTS => LAT_PARAL_EVENTS,
+                DEVICE             => DEVICE)
+            port map (
+                CLK         => CLK,
+                RST         => RESET or data_logger_rst,
 
-            -- This makes only vlid SOF/EOF for specific channel
-            rx_mfb_sof_out_chan(i) <= RX_MFB_SOF_OUT(0) when to_integer(unsigned(RX_MFB_META_CHAN_OUT)) = i else '0';
-            tx_mfb_sof_in_chan(i)  <= TX_MFB_SOF_IN(0) when to_integer(unsigned(TX_MFB_META_CHAN_IN)) = i else '0';
+                START_EVENT => RX_MFB_SOF_OUT(0) and RX_MFB_SRC_RDY_OUT and RX_MFB_DST_RDY_OUT,
+                END_EVENT   => TX_MFB_SOF_IN(0)  and TX_MFB_SRC_RDY_IN  and TX_MFB_DST_RDY_IN,
 
-            latency_meter_i : entity work.LATENCY_METER
-                generic map (
-                    DATA_WIDTH         => TIMESTAMP_WIDTH,
-                    MAX_PARALEL_EVENTS => LAT_PARAL_EVENTS,
-                    DEVICE             => DEVICE)
-                port map (
-                    CLK         => CLK,
-                    RST         => RESET or data_logger_rst,
+                LATENCY_VLD => lat_meas_val_vld,
+                LATENCY     => lat_meas_val,
 
-                    START_EVENT => rx_mfb_sof_out_chan(i) and RX_MFB_SRC_RDY_OUT and RX_MFB_DST_RDY_OUT,
-                    END_EVENT   => tx_mfb_sof_in_chan(i) and TX_MFB_SRC_RDY_IN and TX_MFB_DST_RDY_IN,
+                FIFO_FULL   => lat_meas_fifo_full,
+                FIFO_ITEMS  => lat_meas_fifo_items);
 
-                    LATENCY_VLD => lat_meas_val_vld(i),
-                    LATENCY     => lat_meas_val(i),
-
-                    FIFO_FULL   => lat_meas_fifo_full(i),
-                    FIFO_ITEMS  => lat_meas_fifo_items(i));
-
-            meas_director_fsm_reg_p : process (CLK) is
-            begin
-                if (rising_edge(CLK)) then
-                    if (RESET = '1' or data_logger_rst = '1') then
-                        meas_fsm_pst(i) <= S_IDLE;
-                        pkt_cnt_pst(i)  <= (others => '0');
-                    else
-                        meas_fsm_pst(i) <= meas_fsm_nst(i);
-                        pkt_cnt_pst(i)  <= pkt_cnt_nst(i);
-                    end if;
+        meas_director_fsm_reg_p : process (CLK) is
+        begin
+            if (rising_edge(CLK)) then
+                if (RESET = '1' or data_logger_rst = '1') then
+                    meas_fsm_pst <= S_IDLE;
+                    pkt_cnt_pst  <= (others => '0');
+                else
+                    meas_fsm_pst <= meas_fsm_nst;
+                    pkt_cnt_pst  <= pkt_cnt_nst;
                 end if;
-            end process;
+            end if;
+        end process;
 
-            meas_director_fsm_nst_logic_p : process (all) is
-                variable bst_init_count : unsigned(15 downto 0);
-                variable bst_mode_en    : std_logic;
-            begin
-                meas_fsm_nst(i) <= meas_fsm_pst(i);
-                pkt_cnt_nst(i)  <= pkt_cnt_pst(i);
+        meas_director_fsm_nst_logic_p : process (all) is
+            variable bst_init_count : unsigned(15 downto 0);
+            variable bst_mode_en    : std_logic;
+        begin
+            meas_fsm_nst <= meas_fsm_pst;
+            pkt_cnt_nst  <= pkt_cnt_pst;
 
-                test_finished(i) <= '0';
+            test_finished <= '0';
 
-                bst_init_count := unsigned(mfb_gen_ctrl_chan_inc(31 downto 16));
-                bst_mode_en    := mfb_gen_ctrl_chan_inc(9);
+            bst_init_count := unsigned(mfb_gen_ctrl_chan_inc(31 downto 16));
+            bst_mode_en    := mfb_gen_ctrl_chan_inc(9);
 
-                case meas_fsm_pst(i) is
-                    when S_IDLE =>
+            case meas_fsm_pst is
+                when S_IDLE =>
 
-                        -- Enable testing check only when burst mode in the generator is enabled
-                        if (mfb_gen_ctrl_en = '1'
-                            and bst_mode_en = '1'
-                            and rx_mfb_sof_out_chan(i) = '1'
-                            and RX_MFB_SRC_RDY_OUT = '1'
-                            and RX_MFB_DST_RDY_OUT = '1') then
+                    -- Enable testing check only when burst mode in the generator is enabled
+                    if (mfb_gen_ctrl_en = '1'
+                        and bst_mode_en = '1'
+                        and RX_MFB_SRC_RDY_OUT = '1'
+                        and RX_MFB_DST_RDY_OUT = '1') then
 
-                            meas_fsm_nst(i) <= S_COUNT_TESTING_PACKETS;
-                            pkt_cnt_nst(i)  <= bst_init_count - 1;
-                        end if;
+                        meas_fsm_nst <= S_COUNT_TESTING_PACKETS;
+                        pkt_cnt_nst  <= bst_init_count - 1;
+                    end if;
 
-                    when S_COUNT_TESTING_PACKETS =>
+                when S_COUNT_TESTING_PACKETS =>
 
-                        if (
-                            tx_mfb_sof_in_chan(i) = '1'
-                            and RX_MFB_SRC_RDY_OUT = '1'
-                            and RX_MFB_DST_RDY_OUT = '1'
-                            and pkt_cnt_pst(i) > 0) then
+                    if (
+                        RX_MFB_SRC_RDY_OUT = '1'
+                        and RX_MFB_DST_RDY_OUT = '1'
+                        and pkt_cnt_pst > 0) then
 
-                            pkt_cnt_nst(i) <= pkt_cnt_pst(i) -1;
-                        end if;
+                        pkt_cnt_nst <= pkt_cnt_pst -1;
+                    end if;
 
-                        if (pkt_cnt_pst(i) = 0 and unsigned(lat_meas_fifo_items(i)) = 0) then
-                            meas_fsm_nst(i) <= S_TEST_FINISHED;
-                        end if;
+                    if (pkt_cnt_pst = 0 and unsigned(lat_meas_fifo_items) = 0) then
+                        meas_fsm_nst <= S_TEST_FINISHED;
+                    end if;
 
-                    when S_TEST_FINISHED =>
+                when S_TEST_FINISHED =>
 
-                        test_finished(i) <= '1';
+                    test_finished <= '1';
 
-                        if (mfb_gen_ctrl_en = '0') then
-                            meas_fsm_nst(i) <= S_IDLE;
-                        end if;
+                    if (mfb_gen_ctrl_en = '0') then
+                        meas_fsm_nst <= S_IDLE;
+                    end if;
 
-                end case;
-            end process;
-        end generate;
+            end case;
+        end process;
 
         mfb_generator_i: entity work.MFB_GENERATOR
             generic map (

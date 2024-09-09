@@ -8,11 +8,11 @@
 set UVM_PATH "$OFM_PATH/comp/uvm"
 
 lappend COMPONENTS \
-      [ list "SV_COMMON"           "$UVM_PATH/common"                           "FULL"] \
-      [ list "SV_RESET"            "$UVM_PATH/reset"                            "FULL"] \
-      [ list "SV_BYTE_ARRAY_MFB"   "$UVM_PATH/logic_vector_array_mfb"           "FULL"] \
-      [ list "SV_MVB_LOGIC_VECTOR" "$UVM_PATH/logic_vector_mvb"                 "FULL"] \
-      [ list "SV_MI"               "$UVM_PATH/mi"                               "FULL"] \
+      [ list "SV_COMMON"                 "$UVM_PATH/common"                 "FULL"] \
+      [ list "SV_RESET"                  "$UVM_PATH/reset"                  "FULL"] \
+      [ list "SV_LOGIC_VECTOR_ARRAY_MFB" "$UVM_PATH/logic_vector_array_mfb" "FULL"] \
+      [ list "SV_LOGIC_VECTOR_MVB"       "$UVM_PATH/logic_vector_mvb"       "FULL"] \
+      [ list "SV_MI"                     "$UVM_PATH/mi"                     "FULL"] \
 
 lappend MOD "$OFM_PATH/comp/base/pkg/pcie_meta_pack.sv"
 lappend MOD "$OFM_PATH/comp/base/pkg/dma_bus_pack.sv"

@@ -24,6 +24,7 @@ SETTINGS = {
         "CNTRS_WIDTH"             : "64",
         "PKT_SIZE_MAX"            : "2**16-1",
         "OPT_BUFF"                : "0",
+        "TRBUF_REG_EN"            : "0",
 
         "PCIE_LEN_MIN"            : "1",
         "PCIE_LEN_MAX"            : "256",
@@ -45,21 +46,21 @@ SETTINGS = {
     "32_channels" : {
         "CHANNELS"                : "32",
     },
-    "opt_fifo_en" : {
-        "OPT_BUFF"                : "1",
+    "trbuf_reg_en" : {
+        "TRBUF_REG_EN"            : "1",
     },
     "_combinations_" : (
-    (                                                                                 ), # default
-    #(             "16_channels",                                                      ),
-    (             "32_channels",                                                      ),
-    (                            "2_regions",                                         ),
-    # (             "32_channels", "2_regions",                                         ),
-    # (             "16_channels", "2_regions",                                         ),
-    (                                             "opt_fifo_en",                      ),
-    # (             "16_channels",                  "opt_fifo_en",                      ),
-    # (             "32_channels",                  "opt_fifo_en",                      ),
-    (                            "2_regions",     "opt_fifo_en",                      ),
-    # (             "32_channels", "2_regions",     "opt_fifo_en",                      ),
-    # (             "16_channels", "2_regions",     "opt_fifo_en",                      ),
+    # (                                            ), # default
+    # ("16_channels",                              ),
+    ("32_channels",                              ),
+    (               "2_regions",                 ),
+    # ("32_channels", "2_regions",                 ),
+    # ("16_channels", "2_regions",                 ),
+    # (                            "trbuf_reg_en", ),
+    # ("16_channels",              "trbuf_reg_en", ),
+    ("32_channels",              "trbuf_reg_en", ),
+    (               "2_regions", "trbuf_reg_en", ),
+    # ("32_channels", "2_regions", "trbuf_reg_en", ),
+    ("16_channels", "2_regions", "trbuf_reg_en", ),
     ),
 }
