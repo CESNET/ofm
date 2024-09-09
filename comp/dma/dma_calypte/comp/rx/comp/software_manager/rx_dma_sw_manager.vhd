@@ -1052,18 +1052,17 @@ begin
     -- =====================================================================
     --  Stop request logic
     -- =====================================================================
-
     stop_fsm_pst_reg_p : process(CLK)
     begin
         if (rising_edge(CLK)) then
 
-            stop_fsm_pst         <= stop_fsm_nst;
-            stop_fsm_channel_reg <= stop_fsm_channel;
-
             if (RESET = '1') then
                 stop_fsm_pst <= IDLE;
+                stop_fsm_channel_reg <= (others => '0');
+            else
+                stop_fsm_pst         <= stop_fsm_nst;
+                stop_fsm_channel_reg <= stop_fsm_channel;
             end if;
-
         end if;
     end process;
 
