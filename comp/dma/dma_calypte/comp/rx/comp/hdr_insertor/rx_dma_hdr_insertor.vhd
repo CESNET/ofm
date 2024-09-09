@@ -14,13 +14,10 @@ use work.math_pack.all;
 use work.type_pack.all;
 use work.pcie_meta_pack.all;
 
--- This component accepts buffered PCIe transactions (currently set to 128 Bytes). And sends them
--- with appropriate PCIe header. When end of a packet is processed, the DMA header is sent after
--- that.
-
--- Note: std_logic_vector(to_unsigned(BAR_APERTURE_INTEL, 6)) & pcie_mfb_meta_arr(i)(PCIE_CQ_META_BAR) & (8 - 1 downto 0 => '0')
--- 6 +
--- TODO: Add PCIe header to metadata
+-- This component accepts buffered PCIe transactions (currently set to the
+-- length of 128 Bytes). And sends them with appropriate PCIe header. When end of a
+-- packet is processed, the DMA header is sent after that in a separate transaction.
+--
 entity RX_DMA_HDR_INSERTOR is
     generic (
         -- =========================================================================================
@@ -39,9 +36,6 @@ entity RX_DMA_HDR_INSERTOR is
         TX_REGION_SIZE : natural := 1;
         TX_BLOCK_SIZE  : natural := 8;
         TX_ITEM_WIDTH  : natural := 32;
-
-        CHANNELS     : natural := 8;
-        PKT_SIZE_MAX : natural := 2**16 - 1;
 
         DEVICE       : string  := "ULTRASCALE"
     );
@@ -90,22 +84,17 @@ entity RX_DMA_HDR_INSERTOR is
         HDRM_DATA_PCIE_HDR_SRC_RDY : in  std_logic;
         HDRM_DATA_PCIE_HDR_DST_RDY : out std_logic;
 
-        HDRM_DMA_CHAN_NUM    : in  std_logic_vector((log2(CHANNELS)-1) downto 0);
         HDRM_PKT_DROP        : in  std_logic;
         HDRM_DMA_HDR_DATA    : in  std_logic_vector(63 downto 0);
         HDRM_DMA_HDR_SRC_RDY : in  std_logic;
-        HDRM_DMA_HDR_DST_RDY : out std_logic;
-
-        -- asserts for 1 clock period when the transmission of a packet has been completed
-        HDRM_PKT_CNTR_CHAN : out std_logic_vector((log2(CHANNELS)-1) downto 0);
-        HDRM_PKT_SENT_INC  : out std_logic;
-        HDRM_PKT_DISC_INC  : out std_logic;
-        HDRM_PKT_SIZE      : out std_logic_vector((log2(PKT_SIZE_MAX+1) - 1) downto 0)
+        HDRM_DMA_HDR_DST_RDY : out std_logic
     );
 end entity;
 
 architecture FULL of RX_DMA_HDR_INSERTOR is
 
+    -- On Intel devices, the PCIe header is sent in a TX_MFB_META bus separated from the data on the
+    -- TX_MFB_DATA.
     constant IS_INTEL         : boolean := (DEVICE = "STRATIX10") or (DEVICE = "AGILEX");
 
     signal bshifter_data_out  : std_logic_vector(RX_MFB_DATA'range);
@@ -117,14 +106,9 @@ architecture FULL of RX_DMA_HDR_INSERTOR is
     signal shift_sel_pst      : std_logic;
     signal shift_sel_nst      : std_logic;
 
-    type tran_process_state_type is (IDLE, TRANSACTION_SEND, DMA_HDR_SEND);
+    type tran_process_state_type is (IDLE, TRANSACTION_SEND, DMA_HDR_SEND, PKT_DROP);
     signal tprocess_pst : tran_process_state_type := IDLE;
     signal tprocess_nst : tran_process_state_type := IDLE;
-
-    signal dma_hdr_last     : std_logic;
-    signal dma_hdr_last_reg : std_logic;
-    signal pkt_drop         : std_logic;
-    signal pkt_drop_reg     : std_logic;
 
     signal tx_mfb_meta_arr : slv_array_t(TX_REGIONS-1 downto 0)(PCIE_RQ_META_WIDTH-1 downto 0);
 
@@ -185,42 +169,26 @@ begin
         case tprocess_pst is
             when IDLE =>
 
-                -- The Intel doesn't have to wait for DMA_HDR
-                if (RX_MFB_SRC_RDY = '1'
-                    -- PCIe header found
-                    and HDRM_DATA_PCIE_HDR_SRC_RDY = '1'
-                    and HDRM_PKT_DROP = '0'
-                    -- DMA header found
-                    and HDRM_DMA_HDR_SRC_RDY = '1'
-                    and
-                    (
-                        -- The data in "intel packet" will be aligned - there is no room for DMA_HDR in second region
-                        IS_INTEL
-                    or
-                        (
-                            -- One region:
-                            -- The PCIe HDR for DMA HDR is handled in different place
-                            TX_REGIONS = 1
-                            -- Two regions:
-                            or
-                            (
-                                -- For Xilinx we are waiting for PCIE HDR of DMA_HDR because it will fit in the last word of MFB (in second region)
-                                TX_REGIONS = 2
-                                and
-                                HDRM_DMA_PCIE_HDR_SRC_RDY = '1'
-                                and
-                                RX_MFB_EOF = '1'
-                            )
-                            or
-                            (
-                                -- Normal data transafer
-                                TX_REGIONS = 2 and RX_MFB_EOF = '0'
-                            )
-                        )
-                    )
-                ) then
+                if (RX_MFB_SRC_RDY = '1') then
 
-                    tprocess_nst <= TRANSACTION_SEND;
+                    if (HDRM_PKT_DROP = '1' and HDRM_DMA_HDR_SRC_RDY = '1' and RX_MFB_EOF = '0') then
+                        tprocess_nst <= PKT_DROP;
+
+                    -- Don't wait for the DMA header if that does not arrive go forward.
+                    elsif (HDRM_PKT_DROP = '0' or HDRM_DMA_HDR_SRC_RDY = '0') then
+                        if (HDRM_DATA_PCIE_HDR_SRC_RDY = '1'
+                            -- The data in "intel packet" will be aligned - there is no room for DMA_HDR in second region
+                            and (IS_INTEL
+                                -- The PCIe HDR for DMA HDR is handled in different place
+                                or (TX_REGIONS = 1
+                                    -- For Xilinx we are waiting for PCIE HDR of DMA_HDR because it will fit in the last word of MFB (in second region)
+                                    or (TX_REGIONS = 2 and HDRM_DMA_PCIE_HDR_SRC_RDY = '1' and RX_MFB_EOF = '1' and HDRM_DMA_HDR_SRC_RDY = '1')
+                                    -- Normal data transafer
+                                    or (TX_REGIONS = 2 and RX_MFB_EOF = '0')
+                        ))) then
+                            tprocess_nst <= TRANSACTION_SEND;
+                        end if;
+                    end if;
                 end if;
 
             when TRANSACTION_SEND =>
@@ -233,11 +201,7 @@ begin
                             tprocess_nst <= DMA_HDR_SEND;
                         -- For two regions - the DMA header is able to fit in second region of the TX word
                         -- So doesn't matter whether there is or is not the EOF
-                        elsif (
-                            (RX_MFB_EOF = '1' and TX_REGIONS = 2)
-                            or
-                            RX_MFB_EOF = '0'
-                            ) then
+                        elsif ((RX_MFB_EOF = '1' and TX_REGIONS = 2) or RX_MFB_EOF = '0') then
 
                             tprocess_nst <= IDLE;
                         end if;
@@ -266,7 +230,13 @@ begin
             when DMA_HDR_SEND =>
 
                 -- Just wait for valid PCIE_HDR for DMA_HDR
-                if (HDRM_DMA_PCIE_HDR_SRC_RDY = '1') then
+                if (HDRM_DMA_PCIE_HDR_SRC_RDY = '1' and HDRM_DMA_HDR_SRC_RDY = '1') then
+                    tprocess_nst <= IDLE;
+                end if;
+
+            when PKT_DROP =>
+
+                if (RX_MFB_EOF = '1' and RX_MFB_SRC_RDY = '1') then
                     tprocess_nst <= IDLE;
                 end if;
         end case;
@@ -285,10 +255,6 @@ begin
 
         shift_sel_nst <= shift_sel_pst;
 
-        -- signals which are used to create pulses for the packet counters
-        dma_hdr_last <= '0';
-        pkt_drop     <= '0';
-
         case tprocess_pst is
             -- In this state, the component waits for the arrival of three crucial components, a valid packet, the
             -- PCIEX header and the DMA header
@@ -306,7 +272,7 @@ begin
 
                 -- The PCIe header for data transaction - one of the condition to move to another state
                 if (HDRM_DATA_PCIE_HDR_SRC_RDY = '1') then
-                    shift_sel_nst              <= HDRM_DATA_PCIE_HDR_SIZE;
+                    shift_sel_nst <= HDRM_DATA_PCIE_HDR_SIZE;
                 end if;
 
                 -- awaiting the arrival of valid DMA header with the information if packet should be dropped or not
@@ -314,12 +280,11 @@ begin
                     -- when valid PKT_DROP signal is captured, then the next valid packet should be dropped
                     if (HDRM_PKT_DROP = '1') then
 
-                        RX_MFB_DST_RDY <= '1';
+                        RX_MFB_DST_RDY <= TX_MFB_DST_RDY;
 
                         -- if valid SOF is captured, current DMA header is also dropped
                         if (RX_MFB_EOF = '1' and RX_MFB_SRC_RDY = '1') then
-                            HDRM_DMA_HDR_DST_RDY <= '1';
-                            pkt_drop             <= '1';
+                            HDRM_DMA_HDR_DST_RDY <= TX_MFB_DST_RDY;
                         end if;
                     end if;
                 end if;
@@ -360,9 +325,7 @@ begin
 
                             if (RX_MFB_EOF = '1') then
                                 HDRM_DMA_HDR_DST_RDY  <= TX_MFB_DST_RDY;
-                                dma_hdr_last          <= '1';
                             end if;
-
                         end if;
                     end if;
                 else
@@ -396,11 +359,18 @@ begin
                 -- release the headers on the input and allow next packet to arrive
                 HDRM_DMA_PCIE_HDR_DST_RDY  <= TX_MFB_DST_RDY;
 
-                if (HDRM_DMA_PCIE_HDR_SRC_RDY = '1') then
+                if (HDRM_DMA_PCIE_HDR_SRC_RDY = '1' and HDRM_DMA_HDR_SRC_RDY = '1') then
 
                     RX_MFB_DST_RDY       <= TX_MFB_DST_RDY;
                     HDRM_DMA_HDR_DST_RDY <= TX_MFB_DST_RDY;
-                    dma_hdr_last         <= '1';
+                end if;
+
+            when PKT_DROP =>
+
+                RX_MFB_DST_RDY <= TX_MFB_DST_RDY;
+
+                if (RX_MFB_EOF = '1' and RX_MFB_SRC_RDY = '1') then
+                    HDRM_DMA_HDR_DST_RDY <= TX_MFB_DST_RDY;
                 end if;
         end case;
     end process;
@@ -436,13 +406,18 @@ begin
         case tprocess_pst is
             when IDLE =>
 
+                -- valid data on the input
                 if (RX_MFB_SRC_RDY = '1'
+                    -- valid PCIe header for the data
                     and HDRM_DATA_PCIE_HDR_SRC_RDY = '1'
-                    and HDRM_PKT_DROP = '0'
-                    and HDRM_DMA_HDR_SRC_RDY = '1'
+                    -- Not a valid drop signal for the current packet
+                    and (not (HDRM_PKT_DROP = '1' and HDRM_DMA_HDR_SRC_RDY = '1'))
                     and (TX_REGIONS = 1
                          or
-                         (TX_REGIONS = 2 and HDRM_DMA_PCIE_HDR_SRC_RDY = '1' and RX_MFB_EOF = '1')
+                         -- The 2 region configuration needs to have a valid DMA header with the
+                         -- ending transaction since this can fit to the second region of the last
+                         -- of the last word of a PCIe transaction
+                         (TX_REGIONS = 2 and HDRM_DMA_PCIE_HDR_SRC_RDY = '1' and HDRM_DMA_HDR_SRC_RDY = '1' and RX_MFB_EOF = '1')
                          or
                          (TX_REGIONS = 2 and RX_MFB_EOF = '0')
                          )
@@ -580,6 +555,8 @@ begin
                         high_shift_val_nst  <= (others => '0');
                     end if;
                 end if;
+
+            when PKT_DROP => null;
         end case;
     end process;
 
@@ -632,22 +609,4 @@ begin
     end generate;
 
     TX_MFB_META <= slv_array_ser(tx_mfb_meta_arr);
-
-    --=============================================================================================================
-    -- Edge detector for the information if the packet has already been sent
-    --=============================================================================================================
-    dma_hdr_last_reg_p : process (CLK) is
-    begin
-        if (rising_edge(CLK)) then
-            dma_hdr_last_reg <= dma_hdr_last;
-            pkt_drop_reg     <= pkt_drop;
-        end if;
-    end process;
-
-    HDRM_PKT_SENT_INC  <= '1' when (dma_hdr_last = '1' and dma_hdr_last_reg = '0') else '0';
-    HDRM_PKT_DISC_INC  <= '1' when (pkt_drop = '1' and pkt_drop_reg = '0')         else '0';
-    -- choose only the valid bits from the DMA header for the packet counters
-    HDRM_PKT_SIZE      <= HDRM_DMA_HDR_DATA(log2(PKT_SIZE_MAX + 1) - 1 downto 0);
-    HDRM_PKT_CNTR_CHAN <= HDRM_DMA_CHAN_NUM;
-
 end architecture;

@@ -13,12 +13,11 @@ library work;
 use work.math_pack.all;
 use work.type_pack.all;
 
--- This component manages ring buffers in RAM where the data are sent.
--- Every channel has its own ring buffer.
---
--- Component is working as follows: After receiving request address for the specific
--- channel, the HW pointers are increased and the address for storing the data in RAM is created. The design cna
--- only manage constant size data.
+-- This component manages addresses and pointer for each channel. Component is
+-- working as follows: After receiving address request for the specific
+-- channel, the HW pointers are increased and the address for storing the data
+-- in RAM is created. The addres is valid as soon as the corresponding
+-- area in a host memory is free.
 entity ADDR_MANAGER is
     generic (
         -- number of managed channels
@@ -29,6 +28,7 @@ entity ADDR_MANAGER is
         ADDR_WIDTH    : integer := 64;
         -- width of a pointer to the ring buffer log2(NUMBER_OF_ITEMS)
         POINTER_WIDTH : integer := 16;
+        -- Specified device: "ULTRASCALE", "STRATIX10" or "AGILEX"
         DEVICE        : string  := "ULTRASCALE"
         );
 
@@ -102,6 +102,10 @@ architecture FULL of ADDR_MANAGER is
     signal packet_next : std_logic;
 
 begin
+    assert (2**log2(BLOCK_SIZE) = BLOCK_SIZE)
+        report "ERROR: BLOCK_SIZE which is not power of two is not supported yet actual block size is " & integer'image(BLOCK_SIZE) & ". If you want to try on your own risk, delete this assert"
+        severity FAILURE;
+
     --=====================================================================
     -- Storage of HW pointers
     --=====================================================================
@@ -152,8 +156,8 @@ begin
 
     -- writing new values of the HW pointer for the specific channel
     hw_pointer_wr  <= packet_vld or START_REQ_VLD;
-    -- increment by 1 thus the pointer points to the next block and mask the pointer bits so the pointer would not
-    -- overflow
+    -- increment by 1 thus the pointer points to the next block and mask the pointer bits so the
+    -- pointer would not overflow
     hw_pointer_new <= unsigned(std_logic_vector(unsigned(hw_pointer_rd_data) + 1) and ADDR_MASK);
 
     -- channel_act_vld_reg asserts only if the input CHANNEL_VLD asserts too, for the output address to be valid,
@@ -162,7 +166,14 @@ begin
 
     -- the components accepts a new packet either when the processing of the previous has been finished or the
     -- component is in the idle state
-    packet_next <= '1' when packet_vld = '1' or channel_act_vld_reg = '0'                             else '0';
+    packet_next <= '1' when packet_vld = '1' or channel_act_vld_reg = '0' else '0';
+
+    -- assumes addresing to bytes, the new value of the pointer is shifted according to the current BLOCK_SIZE
+    -- setting
+    hw_offset <=
+        (ADDR_WIDTH-1 downto POINTER_WIDTH +log2(BLOCK_SIZE) => '0')
+        & unsigned(hw_pointer_rd_data)
+        & (log2(BLOCK_SIZE)-1 downto 0 => '0');
 
     ADDR     <= std_logic_vector(unsigned(ADDR_BASE) + hw_offset);
     OFFSET   <= hw_pointer_rd_data;
@@ -171,47 +182,4 @@ begin
     POINTER_UPDATE_CHAN <= std_logic_vector(channel_act_reg);
     POINTER_UPDATE_DATA <= std_logic_vector(hw_pointer_new);
     POINTER_UPDATE_EN   <= packet_vld;
-
-    --=============================================================================================================
-    -- Addr offset calculation according to the BLOCK_SIZE setting
-    --=============================================================================================================
-    check_data_alignment_g : if 2**log2(BLOCK_SIZE) = BLOCK_SIZE generate
-    begin
-
-        -- assumes addresing to bytes, the new value of the pointer is shifted according to the current BLOCK_SIZE
-        -- setting
-        hw_offset <=
-            (ADDR_WIDTH-1 downto POINTER_WIDTH +log2(BLOCK_SIZE) => '0')
-            & unsigned(hw_pointer_rd_data)
-            & (log2(BLOCK_SIZE)-1 downto 0 => '0');
-
-    else generate
-        signal hw_pointers_offset_reg : u_array_t (0 to CHANNELS-1)(POINTER_WIDTH + log2(BLOCK_SIZE)-1 downto 0);
-    begin
-        assert (2**log2(BLOCK_SIZE) = BLOCK_SIZE)
-            report "ERROR: BLOCK_SIZE which is not power of two is not supported yet actual block size is " & integer'image(BLOCK_SIZE) & ". If you want to try on your own risk, delete this assert"
-            severity FAILURE;
-
-        hw_pointers_offsets : process(CLK)
-        begin
-            if (rising_edge(CLK)) then
-                for IT in 0 to CHANNELS-1 loop
-                    -- reset is not required because cannel have to be stopped after reset
-                    if (START_REQ_VLD = '1' and START_REQ_CHANNEL = std_logic_vector(to_unsigned(IT, log2(CHANNELS)))) then
-                        hw_pointers_offset_reg(IT) <= (others => '0');
-                    elsif (hw_pointer_wr = '1' and channel_act_reg = to_unsigned(IT, log2(CHANNELS))) then
-                        if (hw_pointer_new = 0) then
-                            hw_pointers_offset_reg(IT) <= (others => '0');
-                        else
-                            hw_pointers_offset_reg(IT) <= hw_pointers_offset_reg(IT) + BLOCK_SIZE;
-                        end if;
-                    end if;
-                end loop;
-            end if;
-        end process;
-
-        hw_offset <= (ADDR_WIDTH-1 downto POINTER_WIDTH-log2(BLOCK_SIZE) => '0') & hw_pointers_offset_reg(to_integer(channel_act_reg));
-    end generate;
-    --=============================================================================================================
-
 end architecture;

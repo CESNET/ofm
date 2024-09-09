@@ -113,7 +113,6 @@ entity DMA_CALYPTE is
         -- =====================================================================
         -- RX DMA User-side MFB
         -- =====================================================================
-        USR_RX_MFB_META_PKT_SIZE : in std_logic_vector(log2(USR_RX_PKT_SIZE_MAX + 1) -1 downto 0);
         USR_RX_MFB_META_CHAN     : in std_logic_vector(log2(RX_CHANNELS) -1 downto 0);
         USR_RX_MFB_META_HDR_META : in std_logic_vector(HDR_META_WIDTH -1 downto 0);
 
@@ -285,7 +284,6 @@ begin
 
                 USER_RX_MFB_META_HDR_META => USR_RX_MFB_META_HDR_META,
                 USER_RX_MFB_META_CHAN     => USR_RX_MFB_META_CHAN,
-                USER_RX_MFB_META_PKT_SIZE => USR_RX_MFB_META_PKT_SIZE,
 
                 USER_RX_MFB_DATA    => USR_RX_MFB_DATA,
                 USER_RX_MFB_SOF     => USR_RX_MFB_SOF,

@@ -1,11 +1,11 @@
 # Modules.tcl: Components include script
 # Copyright (C) 2022 CESNET
-# Author(s): Radek Iša <isa@cesnet.cz>
+# Author(s): Vladislav Valek <xvalek14@vutbr.cz>
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
+set GEN_LUTRAM_BASE "$OFM_PATH/comp/base/mem/gen_lutram"
 
-lappend COMPONENTS [ list "COMP" "$ENTITY_BASE/comp"             "FULL" ]
-lappend COMPONENTS [ list "PIPE" "$OFM_PATH/comp/base/misc/pipe" "FULL" ]
+lappend COMPONENTS [list "GEN_LUTRAM" $GEN_LUTRAM_BASE "FULL"]
 
-lappend MOD "$ENTITY_BASE/pcie_addr_gen.vhd"
+lappend MOD "$ENTITY_BASE/addr_manager.vhd"

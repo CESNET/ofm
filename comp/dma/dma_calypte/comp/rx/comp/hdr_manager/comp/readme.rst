@@ -1,6 +1,6 @@
-.. _rx_dma_pcie_addr_gen:
+.. _rx_dma_addr_manager:
 
-PCIe Addres Generator
----------------------
+Address Manager
+===============
 
-.. vhdl:autoentity:: PCIE_ADDR_GEN
+.. vhdl:autoentity:: ADDR_MANAGER
