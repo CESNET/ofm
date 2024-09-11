@@ -37,7 +37,6 @@ class MFBMonitor(BusMonitor):
 
     async def _monitor_recv(self):
         """Watch the pins and reconstruct transactions."""
-
         # Avoid spurious object creation by recycling
         clkedge = RisingEdge(self.clock)
         frame = b""
@@ -50,7 +49,8 @@ class MFBMonitor(BusMonitor):
                 continue
 
             if self._is_valid_word(self.bus.src_rdy, self.bus.dst_rdy):
-                #print("valid MFB word")
+                self.log.debug("valid MFB word")
+
                 data_val = self.bus.data.value
                 data_val.big_endian = False
                 data_bytes = data_val.buff
@@ -59,10 +59,11 @@ class MFBMonitor(BusMonitor):
                 self._eof_arr = signal_unpack(self._regions, self.bus.eof)
                 self._sof_pos_arr = signal_unpack(self._regions, self.bus.sof_pos)
                 self._eof_pos_arr = signal_unpack(self._regions, self.bus.eof_pos)
-                #print("sof_arr " + str(self._sof_arr))
-                #print("eof_arr " + str(self._eof_arr))
-                #print("sof_pos_arr " + str(self._sof_pos_arr))
-                #print("eof_pos_arr " + str(self._eof_pos_arr))
+
+                self.log.debug(f"sof_arr {str(self._sof_arr)}")
+                self.log.debug(f"eof_arr {str(self._eof_arr)}")
+                self.log.debug(f"sof_pos_arr {str(self._sof_pos_arr)}")
+                self.log.debug(f"eof_pos_arr {str(self._eof_pos_arr)}")
 
                 for rr in range(self._regions):
                     eof_done = False
@@ -71,39 +72,41 @@ class MFBMonitor(BusMonitor):
                     ee_idx = (rr * self._region_items + self._eof_pos_arr[rr] + 1)
                     ss_idx = (rr * self._region_items + (self._sof_pos_arr[rr] * self._block_size))
 
-                    #print("rs_inx " + str(rs_inx))
-                    #print("re_inx " + str(re_inx))
-                    #print("ee_idx " + str(ee_idx))
-                    #print("ss_idx " + str(ss_idx))
+                    self.log.debug(f"rs_inx {str(rs_inx)}")
+                    self.log.debug(f"re_inx {str(re_inx)}")
+                    self.log.debug(f"ee_idx {str(ee_idx)}")
+                    self.log.debug(f"ss_idx {str(ss_idx)}")
 
                     if (self._eof_arr[rr] == 1) and (in_frame):
-                        #print("Frame End")
+                        self.log.debug("Frame End")
                         in_frame = False
                         eof_done = True
                         frame += data_bytes[rs_inx:ee_idx]
-                        #print("frame done " + frame.hex())
+                        self.log.debug(f"frame done {frame.hex()}")
                         self._recv(frame)
                         self.frame_cnt += 1
 
                     frame += data_bytes[rs_inx:re_inx]
-                    #print("frame middle " + frame.hex())
+                    if in_frame:
+                        self.log.debug(f"frame middle {frame.hex()}")
 
                     if self._sof_arr[rr] == 1:
-                        #print("Frame Start")
+                        self.log.debug("Frame Start")
                         if in_frame:
                             raise MFBProtocolError("Duplicate start-of-frame received on MFB bus!")
                         in_frame = True
                         frame = b""
 
                         if (self._eof_arr[rr] == 1) and (not eof_done):
-                            #print("Frame End in single region")
+                            self.log.debug("Frame End in single region")
                             if not in_frame:
                                 raise MFBProtocolError("Duplicate end-of-frame received on MFB bus!")
                             in_frame = False
                             frame += data_bytes[ss_idx:ee_idx]
-                            #print("frame done single" + frame.hex())
+                            self.log.debug(f"frame done single {frame.hex()}")
                             self._recv(frame)
                             self.frame_cnt += 1
+
                         else:
                             frame += data_bytes[ss_idx:re_inx]
-                            #print("frame start " + frame.hex())
+                            self.log.debug(f"frame start {frame.hex()}")
