@@ -66,6 +66,7 @@ class MFBMonitor(BusMonitor):
                 self.log.debug(f"eof_pos_arr {str(self._eof_pos_arr)}")
 
                 for rr in range(self._regions):
+                    # Iterating through the regions.
                     eof_done = False
                     rs_inx = (rr * self._region_items)
                     re_inx = (rr * self._region_items + self._region_items)
@@ -78,6 +79,7 @@ class MFBMonitor(BusMonitor):
                     self.log.debug(f"ss_idx {str(ss_idx)}")
 
                     if (self._eof_arr[rr] == 1) and (in_frame):
+                        # Checks if there is a packet that is being processed and if it ends in this region.
                         self.log.debug("Frame End")
                         in_frame = False
                         eof_done = True
@@ -88,9 +90,11 @@ class MFBMonitor(BusMonitor):
 
                     frame += data_bytes[rs_inx:re_inx]
                     if in_frame:
+                        # Region with a valid 'middle of packet'.
                         self.log.debug(f"frame middle {frame.hex()}")
 
                     if self._sof_arr[rr] == 1:
+                        # Checking for beginning of a packet.
                         self.log.debug("Frame Start")
                         if in_frame:
                             raise MFBProtocolError("Duplicate start-of-frame received on MFB bus!")
@@ -98,6 +102,7 @@ class MFBMonitor(BusMonitor):
                         frame = b""
 
                         if (self._eof_arr[rr] == 1) and (not eof_done):
+                            # Checking if the packet ends in the same regions where it began.
                             self.log.debug("Frame End in single region")
                             if not in_frame:
                                 raise MFBProtocolError("Duplicate end-of-frame received on MFB bus!")
@@ -108,5 +113,6 @@ class MFBMonitor(BusMonitor):
                             self.frame_cnt += 1
 
                         else:
+                            # Packet continues into another region.
                             frame += data_bytes[ss_idx:re_inx]
                             self.log.debug(f"frame start {frame.hex()}")
