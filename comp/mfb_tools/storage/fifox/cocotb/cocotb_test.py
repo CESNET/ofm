@@ -29,11 +29,9 @@ class testbench():
         self.scoreboard = Scoreboard(dut)
         self.scoreboard.add_interface(self.stream_out, self.expected_output)
 
-        #self.stream_in_recovered = AvalonSTMonitor(dut, "stream_in", dut.clk, callback=self.model)
         if debug:
             self.stream_in.log.setLevel(cocotb.logging.DEBUG)
             self.stream_out.log.setLevel(cocotb.logging.DEBUG)
-
 
     def model(self, transaction):
         """Model the DUT based on the input transaction"""
