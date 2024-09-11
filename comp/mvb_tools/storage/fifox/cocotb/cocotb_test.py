@@ -14,6 +14,7 @@ from cocotbext.ofm.mvb.monitors import MVBMonitor
 from cocotbext.ofm.ver.generators import random_packets
 from cocotb_bus.drivers import BitDriver
 from cocotb_bus.scoreboard import Scoreboard
+from cocotbext.ofm.utils.throughput_probe import ThroughputProbe, ThroughputProbeMvbInterface
 
 
 class testbench():
@@ -22,6 +23,10 @@ class testbench():
         self.stream_in = MVBDriver(dut, "RX", dut.CLK)
         self.backpressure = BitDriver(dut.TX_DST_RDY, dut.CLK)
         self.stream_out = MVBMonitor(dut, "TX", dut.CLK)
+
+        self.throughput_probe = ThroughputProbe(ThroughputProbeMvbInterface(self.stream_out), throughput_units="items")
+        self.throughput_probe.set_log_period(10)
+        self.throughput_probe.add_log_interval(0, None)
 
         # Create a scoreboard on the stream_out bus
         self.pkts_sent = 0
@@ -65,5 +70,8 @@ async def run_test(dut, pkt_count=10000, item_width=1):
             last_num = tb.stream_out.item_cnt // 1000
             cocotb.log.info(f"Number of transactions processed: {tb.stream_out.item_cnt}/{pkt_count}")
         await ClockCycles(dut.CLK, 100)
+
+    tb.throughput_probe.log_max_throughput()
+    tb.throughput_probe.log_average_throughput()
 
     raise tb.scoreboard.result
