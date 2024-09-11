@@ -18,8 +18,8 @@ class MFBMonitor(BusMonitor):
 
     def __init__(self, entity, name, clock, array_idx=None, mfb_params=None):
         BusMonitor.__init__(self, entity, name, clock, array_idx=array_idx)
-
         self.frame_cnt = 0
+        self.item_cnt = 0
         self._regions, self._region_size, self._block_size, self._item_width = get_mfb_params(
             self.bus.data, self.bus.sof_pos, self.bus.eof_pos, self.bus.sof, mfb_params
         )
@@ -84,13 +84,15 @@ class MFBMonitor(BusMonitor):
                         in_frame = False
                         eof_done = True
                         frame += data_bytes[rs_inx:ee_idx]
+                        self.item_cnt += len(data_bytes[rs_inx:ee_idx])*8 // self._item_width
                         self.log.debug(f"frame done {frame.hex()}")
                         self._recv(frame)
                         self.frame_cnt += 1
 
-                    frame += data_bytes[rs_inx:re_inx]
                     if in_frame:
                         # Region with a valid 'middle of packet'.
+                        frame += data_bytes[rs_inx:re_inx]
+                        self.item_cnt += len(data_bytes[rs_inx:re_inx])*8 // self._item_width
                         self.log.debug(f"frame middle {frame.hex()}")
 
                     if self._sof_arr[rr] == 1:
@@ -108,6 +110,7 @@ class MFBMonitor(BusMonitor):
                                 raise MFBProtocolError("Duplicate end-of-frame received on MFB bus!")
                             in_frame = False
                             frame += data_bytes[ss_idx:ee_idx]
+                            self.item_cnt += len(data_bytes[ss_idx:ee_idx])*8 // self._item_width
                             self.log.debug(f"frame done single {frame.hex()}")
                             self._recv(frame)
                             self.frame_cnt += 1
@@ -115,4 +118,5 @@ class MFBMonitor(BusMonitor):
                         else:
                             # Packet continues into another region.
                             frame += data_bytes[ss_idx:re_inx]
+                            self.item_cnt += len(data_bytes[ss_idx:re_inx])*8 // self._item_width
                             self.log.debug(f"frame start {frame.hex()}")
