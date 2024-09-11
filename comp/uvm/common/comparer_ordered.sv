@@ -22,6 +22,8 @@ virtual class comparer_base_ordered #(type MODEL_ITEM, type DUT_ITEM = MODEL_ITE
 
     function new(string name, uvm_component parent = null);
         super.new(name, parent);
+        compared  = 0;
+        errors    = 0;
         dut_sends = 0;
     endfunction
 
@@ -86,8 +88,7 @@ virtual class comparer_base_ordered #(type MODEL_ITEM, type DUT_ITEM = MODEL_ITE
 
     function string model_tr_get(DUT_ITEM tr);
         string msg = "";
-        msg = {msg, "\nMODEL ITEM : ", dut_item2string(tr)};
-        msg = {msg, "\nDUT ITEMS : "};
+        msg = {msg, "\nMODEL ITEMS : "};
 
         for (int unsigned it = 0; it < model_items.size(); it++) begin
             msg = {msg, $sformatf("\n\n%s", model_item2string(model_items[it]))};
@@ -103,7 +104,7 @@ virtual class comparer_base_ordered #(type MODEL_ITEM, type DUT_ITEM = MODEL_ITE
             if (delay >= dut_tr_timeout) begin
                 errors++;
                `uvm_error(this.get_full_name(), $sformatf("\n\tTransaction from DUT is delayed %0dns. Probably stuck.\n\tErrors/Compared %0d/%0d\n%s\n\nDUT transactions:\n%s",
-                                                         errors, compared, delay/1ns, model_item2string(model_items[0]),
+                                                         delay/1ns, errors, compared, model_item2string(model_items[0]),
                                                          this.dut_tr_get(model_items[0], model_items[0].time_last())));
                 model_items.delete(0);
             end else begin
