@@ -14,14 +14,19 @@ from cocotbext.ofm.mfb.monitors import MFBMonitor
 from cocotbext.ofm.ver.generators import random_packets
 from cocotb_bus.drivers import BitDriver
 from cocotb_bus.scoreboard import Scoreboard
+from cocotbext.ofm.utils.throughput_probe import ThroughputProbe, ThroughputProbeMfbInterface
 
 
 class testbench():
-    def __init__(self, dut):
+    def __init__(self, dut, debug=False):
         self.dut = dut
         self.stream_in = MFBDriver(dut, "RX", dut.CLK)
         self.backpressure = BitDriver(dut.TX_DST_RDY, dut.CLK)
         self.stream_out = MFBMonitor(dut, "TX", dut.CLK)
+
+        self.throughput_probe = ThroughputProbe(ThroughputProbeMfbInterface(self.stream_out), throughput_units="bits")
+        self.throughput_probe.add_log_interval(0, None)
+        self.throughput_probe.set_log_period(10)
 
         # Create a scoreboard on the stream_out bus
         self.pkts_sent = 0
@@ -29,7 +34,9 @@ class testbench():
         self.scoreboard = Scoreboard(dut)
         self.scoreboard.add_interface(self.stream_out, self.expected_output)
 
-        #self.stream_in_recovered = AvalonSTMonitor(dut, "stream_in", dut.clk, callback=self.model)
+        if debug:
+            self.stream_in.log.setLevel(cocotb.logging.DEBUG)
+            self.stream_out.log.setLevel(cocotb.logging.DEBUG)
 
     def model(self, transaction):
         """Model the DUT based on the input transaction"""
@@ -46,14 +53,14 @@ class testbench():
 @cocotb.test()
 async def run_test(dut, pkt_count=10000, frame_size_min=60, frame_size_max=512):
     # Start clock generator
-    cocotb.start_soon(Clock(dut.CLK, 5, units='ns').start())
-    tb = testbench(dut)
+    cocotb.start_soon(Clock(dut.CLK, 5, units="ns").start())
+    tb = testbench(dut, debug=False)
     await tb.reset()
     tb.backpressure.start((1, i % 5) for i in itertools.count())
 
     for transaction in random_packets(frame_size_min, frame_size_max, pkt_count):
         tb.model(transaction)
-        #print("generated transaction: " + transaction.hex())
+        cocotb.log.debug("generated transaction: " + transaction.hex())
         tb.stream_in.append(transaction)
 
     last_num = 0
@@ -64,8 +71,11 @@ async def run_test(dut, pkt_count=10000, frame_size_min=60, frame_size_max=512):
         await ClockCycles(dut.CLK, 100)
 
     await ClockCycles(dut.CLK, 100)
-    #print("RX: %d/%d" % (tb.stream_in.frame_cnt, pkt_count))
-    #print("TX: %d/%d" % (tb.stream_out.frame_cnt, pkt_count))
-    #print("SC: %d/%d" % (tb.pkts_sent, pkt_count))
+    cocotb.log.debug("RX: %d/%d" % (tb.stream_in.frame_cnt, pkt_count))
+    cocotb.log.debug("TX: %d/%d" % (tb.stream_out.frame_cnt, pkt_count))
+    cocotb.log.debug("SC: %d/%d" % (tb.pkts_sent, pkt_count))
+
+    tb.throughput_probe.log_max_throughput()
+    tb.throughput_probe.log_average_throughput()
 
     raise tb.scoreboard.result

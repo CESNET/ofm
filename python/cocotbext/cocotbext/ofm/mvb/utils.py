@@ -8,7 +8,8 @@ import random
 
 
 def random_delays_config(items: int, params_dic: dict) -> (dict, int, int):
-    """Generate configuration of random delay generator based on passed dictionary.
+    """
+    Generate configuration of random delay generator based on passed dictionary.
     If no dictionary was passed, configuratoin is generated with default parameters.
 
         Args:
@@ -20,20 +21,18 @@ def random_delays_config(items: int, params_dic: dict) -> (dict, int, int):
             mode: fill delay with: mode 0 - previous transaction,
                 mode 1 - 0, mode 2 - random integer from 0-256, mode 3 - with ascii value of X
             delays_fill: the character, with which the delays will be filled with.
-
     """
-
     cDelays = dict()
 
     mode = params_dic.get("mode", 1)
 
-    #parameters for whole invalid words
+    # parameters for whole invalid words
     wordDelayEnable_wt = params_dic.get("wordDelayEnable_wt", 10)
     wordDelayDisable_wt = params_dic.get("wordDelayDisable_wt", 90)
     wordDelayLow = params_dic.get("wordDelayLow", 0)
     wordDelayHigh = params_dic.get("wordDelayHigh", 50)
 
-    #parameters for whole invalid items
+    # parameters for whole invalid items
     ivgEnable_wt = params_dic.get("ivgEnable_wt", 3)
     ivgDisable_wt = params_dic.get("ivgDisable_wt", 1)
     ivgLow = params_dic.get("ivgLow", 0)

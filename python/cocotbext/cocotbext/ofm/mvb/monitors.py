@@ -13,28 +13,26 @@ class MVBProtocolError(Exception):
 
 
 class MVBMonitor(BusMonitor):
-    """Master monitor intended for monitoring the MVB bus.
+    """
+    Master monitor intended for monitoring the MVB bus.
 
     Atributes:
         item_cnt(int): number of MVB transaction proccessed.
         _items(int): number of MVB items.
         _word_width(int): width of MVB word in bytes.
         _item_width(int): width of MVB item in bytes.
-
     """
-
     _signals = ["data", "vld", "src_rdy", "dst_rdy"]
 
     def __init__(self, entity, name, clock, array_idx=None) -> None:
         super().__init__(entity, name, clock, array_idx=array_idx)
         self.item_cnt = 0
         self._items = len(self.bus.vld)
-        self._word_width = len(self.bus.data) // 8 # width in bytes
+        self._word_width = len(self.bus.data) // 8  # width in bytes
         self._item_width = self._word_width // self._items
 
     def _is_valid_word(self, signal_src_rdy, signal_dst_rdy) -> bool:
         """Checks if the received word is valid transaction."""
-
         if signal_dst_rdy is None:
             return (signal_src_rdy.value == 1)
         else:
@@ -45,7 +43,6 @@ class MVBMonitor(BusMonitor):
 
     async def _monitor_recv(self) -> None:
         """Receive function used with cocotb testbench."""
-
         # Avoid spurious object creation by recycling
         clk_re = RisingEdge(self.clock)
 
