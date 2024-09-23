@@ -50,6 +50,10 @@ class model_accept#(CHANNELS) extends uvm_subscriber#(uvm_mvb::sequence_item#(1,
         super.new(name, parent);
     endfunction
 
+    function int unsigned used();
+        return fifo.size() != 0;
+    endfunction
+
     virtual function void write(uvm_mvb::sequence_item#(1, 1) t);
         if (t.src_rdy == 1'b1 && t.dst_rdy == 1'b1) begin
             for (int unsigned it = 0; it < 1; it++) begin
@@ -101,14 +105,21 @@ class model #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_component;
     local regmodel#(CHANNELS) m_regmodel;
     local int unsigned        pkt_sent_cntr [CHANNELS];
     local int unsigned        pkt_disc_cntr [CHANNELS];
+    local int unsigned        bytes_sent_cntr [CHANNELS];
+    local int unsigned        bytes_disc_cntr [CHANNELS];
     local int unsigned        pkt_cntr_total_chan [CHANNELS];
-    local int unsigned        pkt_sent_cntr_total;
-    local int unsigned        pkt_disc_cntr_total;
-    local int unsigned        pkt_cntr_total;
+
+    typedef struct {
+        int unsigned pkt_sent_cntr [CHANNELS];
+        int unsigned pkt_disc_cntr [CHANNELS];
+        int unsigned bytes_sent_cntr [CHANNELS];
+        int unsigned bytes_disc_cntr [CHANNELS];
+    } pkt_cntrs_storage;
+
+    pkt_cntrs_storage m_pkt_cntrs_storage;
 
     local model_data m_data[CHANNELS];
     local status_cbs m_status_cbs[CHANNELS];
-
 
     function new (string name, uvm_component parent = null);
         super.new(name, parent);
@@ -120,14 +131,25 @@ class model #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_component;
         for (int unsigned it = 0; it < CHANNELS; it++) begin
             m_data[it]       = new();
             m_status_cbs[it] = new(m_data[it]);
+
             pkt_sent_cntr[it] = 0;
             pkt_disc_cntr[it] = 0;
+            bytes_sent_cntr[it] = 0;
+            bytes_disc_cntr[it] = 0;
             pkt_cntr_total_chan[it] = 0;
+            m_pkt_cntrs_storage.pkt_sent_cntr[it] = 0;
+            m_pkt_cntrs_storage.pkt_disc_cntr[it] = 0;
+            m_pkt_cntrs_storage.bytes_sent_cntr[it] = 0;
+            m_pkt_cntrs_storage.bytes_disc_cntr[it] = 0;
         end
+    endfunction
 
-        pkt_sent_cntr_total = 0;
-        pkt_disc_cntr_total = 0;
-        pkt_cntr_total = 0;
+    function int unsigned used();
+        int unsigned ret = 0;
+        ret |= (analysis_imp_rx.used() != 0);
+        ret |= (analysis_imp_rx_meta.used() != 0);
+        ret |= (analysis_dma.used() != 0);
+        return ret;
     endfunction
 
     function void regmodel_set(regmodel#(CHANNELS) m_regmodel);
@@ -348,7 +370,6 @@ class model #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_component;
 
             //get packet
             analysis_imp_rx.get(tr);
-            pkt_cntr_total++;
             pkt_cntr_total_chan[info.channel]++;
 
             //Check if packet have been discared of send when starting or stopping channel
@@ -358,12 +379,12 @@ class model #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_component;
             // Check whether packet is accepted or not
             if (pkt_drop) begin
                 pkt_disc_cntr[info.channel]++;
-                pkt_disc_cntr_total++;
+                bytes_disc_cntr[info.channel] += tr.data.size();
                  msg = $sformatf("\n\t\nPacket Dropped:\n RX CHANNEL: %0d\n META: %h\n PACKET SIZE: %0d\n%s", info.channel, info.meta, info.packet_size, tr.convert2string());
                 `uvm_info(this.get_full_name(), msg,  UVM_MEDIUM);
             end else begin
                 pkt_sent_cntr[info.channel]++;
-                pkt_sent_cntr_total++;
+                bytes_sent_cntr[info.channel] += tr.data.size();
                 msg = $sformatf("\n\t\nPacket Accepted:\n RX CHANNEL: %0d\n META: %h\n PACKET SIZE: %0d\n%s", info.channel, info.meta, info.packet_size, tr.convert2string());
                 `uvm_info(this.get_full_name(), msg,  UVM_MEDIUM);
                 packet_send(tr.data, info.input_time, info.channel, info.meta);
@@ -371,27 +392,12 @@ class model #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_component;
         end
     endtask
 
-    function void report_phase(uvm_phase phase);
-        string msg = "\n";
-
-        msg = {msg, $sformatf("\tMODEL STATS:\n")};
-        msg = {msg, $sformatf("\t--------------------------------------------\n")};
-        msg = {msg, $sformatf("\tPer channel:\n")};
-        msg = {msg, $sformatf("\t--------------------------------------------\n")};
-        msg = {msg, $sformatf("\tChan. num\t| Received\t| Discarded\t| Total \n")};
-
+    function void extract_phase(uvm_phase phase);
         for (int unsigned it = 0; it < CHANNELS; it++) begin
-            msg = {msg, $sformatf("\t%0d\t| %0d\t| %0d\t| %0d\n", it, pkt_sent_cntr[it], pkt_disc_cntr[it], pkt_cntr_total_chan[it])};
+            m_pkt_cntrs_storage.pkt_sent_cntr[it]   = pkt_sent_cntr[it];
+            m_pkt_cntrs_storage.bytes_sent_cntr[it] = bytes_sent_cntr[it];
+            m_pkt_cntrs_storage.pkt_disc_cntr[it]   = pkt_disc_cntr[it];
+            m_pkt_cntrs_storage.bytes_disc_cntr[it] = bytes_disc_cntr[it];
         end
-
-        msg = {msg, $sformatf("\t--------------------------------------------\n")};
-        msg = {msg, $sformatf("\n\tAll channels:\n")};
-        msg = {msg, $sformatf("\t--------------------------------------------\n")};
-        msg = {msg, $sformatf("\tReceived: %0d\n",  pkt_sent_cntr_total)};
-        msg = {msg, $sformatf("\tDiscarded: %0d\n", pkt_disc_cntr_total)};
-        msg = {msg, $sformatf("\tTotal: %0d\n",     pkt_cntr_total)};
-
-        `uvm_info(this.get_full_name(), msg, UVM_NONE)
     endfunction
-
 endclass

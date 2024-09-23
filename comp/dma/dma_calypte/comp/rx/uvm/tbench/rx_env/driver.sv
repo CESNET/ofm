@@ -28,6 +28,13 @@ class driver#(CHANNELS, PKT_SIZE_MAX) extends uvm_component;
         sem = new(1);
     endfunction
 
+    function int unsigned used();
+        int unsigned ret = 0;
+        ret |= (byte_array_export.num() != 0);
+        ret |= (logic_vector_export.num() != 0);
+        return ret;
+    endfunction
+
     // ------------------------------------------------------------------------
     // Starts driving signals to interface
     task run_phase(uvm_phase phase);

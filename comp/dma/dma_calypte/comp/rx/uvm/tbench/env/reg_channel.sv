@@ -17,8 +17,10 @@ class reg_channel extends uvm_reg_block;
     rand uvm_dma_ll::addr_register         hdr_base;
     rand uvm_dma_ll::pointer_register      data_mask;
     rand uvm_dma_ll::pointer_register      hdr_mask;
-    rand uvm_dma_ll::cnt_register          packets_cnt;
-    rand uvm_dma_ll::cnt_register          bytes_cnt;
+    rand uvm_dma_ll::cnt_register          sent_packets_cnt;
+    rand uvm_dma_ll::cnt_register          sent_bytes_cnt;
+    rand uvm_dma_ll::cnt_register          disc_packets_cnt;
+    rand uvm_dma_ll::cnt_register          disc_bytes_cnt;
 
     function new(string name = "reg_block");
         super.new(name, build_coverage(UVM_NO_COVERAGE));
@@ -47,9 +49,13 @@ class reg_channel extends uvm_reg_block;
         $cast(c_frontdoor, frontdoor.clone());
         hdr_mask.set_frontdoor(c_frontdoor);
         $cast(c_frontdoor, frontdoor.clone());
-        packets_cnt.set_frontdoor(c_frontdoor);
+        sent_packets_cnt.set_frontdoor(c_frontdoor);
         $cast(c_frontdoor, frontdoor.clone());
-        bytes_cnt.set_frontdoor(c_frontdoor);
+        sent_bytes_cnt.set_frontdoor(c_frontdoor);
+        $cast(c_frontdoor, frontdoor.clone());
+        disc_packets_cnt.set_frontdoor(c_frontdoor);
+        $cast(c_frontdoor, frontdoor.clone());
+        disc_bytes_cnt.set_frontdoor(c_frontdoor);
     endfunction
 
     virtual function void build(uvm_reg_addr_t base, int unsigned bus_width);
@@ -64,8 +70,10 @@ class reg_channel extends uvm_reg_block;
         hdr_base  = uvm_dma_ll::addr_register::type_id::create("hdr_base");
         data_mask  = uvm_dma_ll::pointer_register::type_id::create("data_mask");
         hdr_mask   = uvm_dma_ll::pointer_register::type_id::create("hdr_mask");
-        packets_cnt = uvm_dma_ll::cnt_register::type_id::create("packets_cnt");
-        bytes_cnt   = uvm_dma_ll::cnt_register::type_id::create("bytes_cnt");
+        sent_packets_cnt = uvm_dma_ll::cnt_register::type_id::create("sent_packets_cnt");
+        sent_bytes_cnt   = uvm_dma_ll::cnt_register::type_id::create("sent_bytes_cnt");
+        disc_packets_cnt = uvm_dma_ll::cnt_register::type_id::create("disc_packets_cnt");
+        disc_bytes_cnt   = uvm_dma_ll::cnt_register::type_id::create("disc_bytes_cnt");
         //BUILD and CONFIGURE register
         control.build();
         status.build();
@@ -77,8 +85,10 @@ class reg_channel extends uvm_reg_block;
         hdr_base.build();
         data_mask.build();
         hdr_mask.build();
-        packets_cnt.build();
-        bytes_cnt.build();
+        sent_packets_cnt.build();
+        sent_bytes_cnt.build();
+        disc_packets_cnt.build();
+        disc_bytes_cnt.build();
 
         control.configure(this);
         status.configure(this);
@@ -90,24 +100,28 @@ class reg_channel extends uvm_reg_block;
         hdr_base.configure(this);
         data_mask.configure(this);
         hdr_mask.configure(this);
-        packets_cnt.configure(this);
-        bytes_cnt.configure(this);
+        sent_packets_cnt.configure(this);
+        sent_bytes_cnt.configure(this);
+        disc_packets_cnt.configure(this);
+        disc_bytes_cnt.configure(this);
 
         //create map
         this.default_map = create_map("MAP", base, bus_width/8, UVM_LITTLE_ENDIAN);
         //Add registers to map
-        this.default_map.add_reg(control        , 'h00, "RW");
-        this.default_map.add_reg(status         , 'h04, "RO");
-        this.default_map.add_reg(sw_data_pointer, 'h10, "RW");
-        this.default_map.add_reg(sw_hdr_pointer , 'h14, "RW");
-        this.default_map.add_reg(hw_data_pointer, 'h18, "RO");
-        this.default_map.add_reg(hw_hdr_pointer , 'h1C, "RO");
-        this.default_map.add_reg(data_base      , 'h40, "RW");
-        this.default_map.add_reg(hdr_base       , 'h48, "RW");
-        this.default_map.add_reg(data_mask      , 'h58, "RW");
-        this.default_map.add_reg(hdr_mask       , 'h5C, "RW");
-        this.default_map.add_reg(packets_cnt    , 'h60, "RO");
-        this.default_map.add_reg(bytes_cnt      , 'h68, "RO");
+        this.default_map.add_reg(control          , 'h00, "RW");
+        this.default_map.add_reg(status           , 'h04, "RO");
+        this.default_map.add_reg(sw_data_pointer  , 'h10, "RW");
+        this.default_map.add_reg(sw_hdr_pointer   , 'h14, "RW");
+        this.default_map.add_reg(hw_data_pointer  , 'h18, "RO");
+        this.default_map.add_reg(hw_hdr_pointer   , 'h1C, "RO");
+        this.default_map.add_reg(data_base        , 'h40, "RW");
+        this.default_map.add_reg(hdr_base         , 'h48, "RW");
+        this.default_map.add_reg(data_mask        , 'h58, "RW");
+        this.default_map.add_reg(hdr_mask         , 'h5C, "RW");
+        this.default_map.add_reg(sent_packets_cnt , 'h60, "RW");
+        this.default_map.add_reg(sent_bytes_cnt   , 'h68, "RW");
+        this.default_map.add_reg(disc_packets_cnt , 'h70, "RW");
+        this.default_map.add_reg(disc_bytes_cnt   , 'h78, "RW");
 
         this.lock_model();
     endfunction

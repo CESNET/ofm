@@ -90,6 +90,11 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_score
     } output_type;
     local output_type out_data[$];
 
+    uvm_reg_data_t pkt_cnt          [CHANNELS];
+    uvm_reg_data_t byte_cnt         [CHANNELS];
+    uvm_reg_data_t discard_pkt_cnt  [CHANNELS];
+    uvm_reg_data_t discard_byte_cnt [CHANNELS];
+
     // Contructor of scoreboard.
     function new(string name, uvm_component parent);
         super.new(name, parent);
@@ -131,6 +136,16 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_score
 
         m_model.analysis_port_tx.connect(model_output.analysis_export);
         m_model.analysis_port_tx_meta.connect(model_meta_output.analysis_export);
+    endfunction
+
+    function int unsigned used();
+        int unsigned ret = 0;
+        ret |= (dut_data_output.used() != 0);
+        ret |= (dut_meta_output.used() != 0);
+        ret |= (model_output.used() != 0);
+        ret |= (model_meta_output.used() != 0);
+        ret |= (m_model.used() != 0);
+        return ret;
     endfunction
 
     function bit pcie_compare(uvm_logic_vector_array::sequence_item#(32) tr_dut, uvm_logic_vector::sequence_item#(META_WIDTH) tr_meta_dut, model_packet packet_model, uvm_logic_vector::sequence_item#(META_WIDTH) tr_meta_model);
@@ -266,13 +281,65 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_score
         real avg;
         real std_dev;
         string str = "";
+        int    pkt_cntr_diff;
+        int    byte_cntr_diff;
+        int    disc_pkt_cntr_diff;
+        int    disc_byte_cntr_diff;
 
+        //-----------------------------------------------------------------------
+        // Counter statistics (latency and throughput on each interface)
+        //-----------------------------------------------------------------------
+        str = {str, $sformatf("\n\t------------------------------------------------------------------\n")};
+        str = {str, $sformatf("\tPacket counters\n")};
+        str = {str, $sformatf("\t------------------------------------------------------------------\n")};
+
+        str = {str, $sformatf("\t------------------------------------------------------------------------------------------------------------------------------------------------\n")};
+        str = {str, $sformatf("\t|          |                           Packets                         |                                 Bytes                                 |\n")};
+        str = {str, $sformatf("\t|          |-----------------------------------------------------------|-----------------------------------------------------------------------|\n")};
+        str = {str, $sformatf("\t|  Channel |          Received           |          Discarded          |              Received             |             Discarded             |\n")};
+        str = {str, $sformatf("\t|          |-----------------------------|-----------------------------|-----------------------------------|-----------------------------------|\n")};
+        str = {str, $sformatf("\t|          |  Model  |   DUT   |   Diff  |  Model  |   DUT   |   Diff  |   Model   |    DUT    |    Diff   |   Model   |    DUT    |    Diff   |\n")};
+        str = {str, $sformatf("\t|----------------------------------------------------------------------------------------------------------------------------------------------|\n")};
+
+        for (int unsigned it = 0; it < CHANNELS; it++) begin
+            pkt_cntr_diff       = pkt_cnt[it]          - m_model.m_pkt_cntrs_storage.pkt_sent_cntr[it];
+            byte_cntr_diff      = byte_cnt[it]         - m_model.m_pkt_cntrs_storage.bytes_sent_cntr[it];
+            disc_pkt_cntr_diff  = discard_pkt_cnt[it]  - m_model.m_pkt_cntrs_storage.pkt_disc_cntr[it];
+            disc_byte_cntr_diff = discard_byte_cnt[it] - m_model.m_pkt_cntrs_storage.bytes_disc_cntr[it];
+
+            str = {str, $sformatf("\t|   %2d     |  %6d |  %6d |  %6d |  %6d |  %6d |  %6d |  %8d |  %8d |  %8d |  %8d |  %8d |  %8d |\n",
+                                  it,
+                                  m_model.m_pkt_cntrs_storage.pkt_sent_cntr[it],
+                                  pkt_cnt[it],
+                                  pkt_cntr_diff,
+                                  m_model.m_pkt_cntrs_storage.pkt_disc_cntr[it],
+                                  discard_pkt_cnt[it],
+                                  disc_pkt_cntr_diff,
+                                  m_model.m_pkt_cntrs_storage.bytes_sent_cntr[it],
+                                  byte_cnt[it],
+                                  byte_cntr_diff,
+                                  m_model.m_pkt_cntrs_storage.bytes_disc_cntr[it],
+                                  discard_byte_cnt[it],
+                                  disc_byte_cntr_diff
+                                  )};
+
+            if (pkt_cntr_diff != 0 || byte_cntr_diff != 0 || disc_pkt_cntr_diff != 0 || disc_byte_cntr_diff != 0)
+                errors++;
+        end
+
+        //-----------------------------------------------------------------------
+        // Performance statistics (latency and throughput on each interface)
+        //-----------------------------------------------------------------------
+        str = {str, $sformatf("\n\t------------------------------------------------------------------\n")};
+        str = {str, $sformatf("\tPerformance statistics\n")};
+        str = {str, $sformatf("\t------------------------------------------------------------------\n")};
         m_delay.count(min, max, avg, std_dev);
-        str = {str, $sformatf("\n\tDelay statistic (SOF to SOF) => min : %0dns, max : %0dns, avearge : %0dns, standard deviation : %0dns",  min, max, avg, std_dev)};
+        str = {str, $sformatf("\tDelay statistic (SOF to SOF) => min : %0dns, max : %0dns, avearge : %0dns, standard deviation : %0dns\n",  min, max, avg, std_dev)};
         m_input_speed.count(min, max, avg, std_dev);
-        str = {str, $sformatf("\n\tSpeed input  statistic (MFB RX)  => min : %0dGb/s, max : %0dGb/s, avearge : %0dG/s, standard deviation : %0dG/s",  min*8, max*8, avg*8, std_dev*8)};
+        str = {str, $sformatf("\tSpeed input  statistic (MFB RX)  => min : %0dGb/s, max : %0dGb/s, avearge : %0dG/s, standard deviation : %0dG/s\n",  min*8, max*8, avg*8, std_dev*8)};
         m_output_speed.count(min, max, avg, std_dev);
-        str = {str, $sformatf("\n\tSpeed output statistic (PCIE TX) => min : %0dGb/s, max : %0dGb/s, avearge : %0dG/s, standard deviation : %0dG/s",  min*8, max*8, avg*8, std_dev*8)};
+        str = {str, $sformatf("\tSpeed output statistic (PCIE TX) => min : %0dGb/s, max : %0dGb/s, avearge : %0dG/s, standard deviation : %0dG/s\n",  min*8, max*8, avg*8, std_dev*8)};
+
         if (errors == 0) begin
             `uvm_info(this.get_full_name(), {str, "\n\n\t---------------------------------------\n\t----     VERIFICATION SUCCESS      ----\n\t---------------------------------------"}, UVM_NONE)
         end else begin

@@ -27,6 +27,10 @@ class env #(REGIONS, REGION_SIZE, BLOCK_SIZE, CHANNELS, PKT_SIZE_MAX) extends uv
         super.new(name, parent);
     endfunction
 
+    function int unsigned used();
+        return m_driver.used();
+    endfunction
+
     // Create base components of environment.
     function void build_phase(uvm_phase phase);
         uvm_byte_array::config_item     m_byte_array_agent_cfg;

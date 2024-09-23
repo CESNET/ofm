@@ -26,6 +26,13 @@ class env #(USER_REGIONS, USER_REGION_SIZE, USER_BLOCK_SIZE, USER_ITEM_WIDTH, PC
         super.new(name, parent);
     endfunction
 
+    function int unsigned used();
+        int unsigned ret = 0;
+        ret |= (m_env_rx.used() != 0);
+        ret |= (sc.used() != 0);
+        return ret;
+    endfunction
+
     // Create base components of environment.
     function void build_phase(uvm_phase phase);
         uvm_reset::config_item                  m_config_reset;
