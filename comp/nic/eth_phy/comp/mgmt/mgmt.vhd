@@ -864,6 +864,8 @@ begin
                    mi_drd_i(16+2) <= '1';  -- r1.7.2
                    if pma_mode(1 downto 0) /= "00" then -- 10GBASE-LX4 (0x04) not supported
                       mi_drd_i(16+1 downto 16+0) <= pma_mode(1 downto 0); -- SR or -LR or -ER
+                   else
+                      mi_drd_i(16+1 downto 16+0) <= "10"; -- SR or -LR or -ER
                    end if;
              end case;
           when "0000100" => -- PMA transmit disable & status 2 -- 0x...C
@@ -1294,8 +1296,8 @@ begin
                end if;
             when  25 =>
                pma_mode <= "000"; -- 25GBASE-CR
-            when  others => -- TBD
-               pma_mode <= "000";
+            when  others => -- 10GBASE-LR
+               pma_mode <= "010";
          end case;
          scr_bypass_r <= "00";
          pcs_lpbk     <= '0';
