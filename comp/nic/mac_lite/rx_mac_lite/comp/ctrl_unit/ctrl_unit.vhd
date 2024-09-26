@@ -798,7 +798,7 @@ begin
                 s_cam_re_reg0 <= '0';
                 s_cam_re_reg1 <= '0';
             else
-                s_mi_rd_reg   <= s_mi_rd;
+                s_mi_rd_reg   <= s_mi_rd and s_cam_rdy;
                 s_mi_drdy     <= s_mi_rd_reg;
                 s_cam_re_reg0 <= s_cam_re;
                 s_cam_re_reg1 <= s_cam_re_reg0;
