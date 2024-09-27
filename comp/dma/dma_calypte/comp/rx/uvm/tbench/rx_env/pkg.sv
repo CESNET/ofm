@@ -7,7 +7,6 @@
 `ifndef RX_ENV_PKG
 `define RX_ENV_PKG
 
-//package byte_array_mfb_env;
 package uvm_dma_ll_rx;
 
     `include "uvm_macros.svh"

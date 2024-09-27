@@ -217,7 +217,6 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_score
 
     task run_phase(uvm_phase phase);
         string msg = "";
-        //int f;
         model_packet              packet_model;
         uvm_logic_vector_array::sequence_item#(32)   tr_model;
         uvm_logic_vector::sequence_item#(META_WIDTH) tr_meta_model;
@@ -228,16 +227,11 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_score
             run_input();
         join_none
 
-        //f = $fopen("output.csv","w");
-
         forever begin
             msg = "";
 
             wait (out_data.size() != 0);
             tr_dut = out_data.pop_front();
-            // Get transaction from model
-            //tr_meta_model = uvm_logic_vector::sequence_item#(META_WIDTH)::type_id::create("tr_meta_model");
-            //tr_meta_model.data = '0;
 
             model_meta_output.get(tr_meta_model);
             model_output.get(tr_model);
@@ -259,16 +253,12 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_score
                 `uvm_info(this.get_full_name(), $sformatf("%s\nTransaction%s", msg, tr_model.convert2string()), UVM_MEDIUM);
             end
 
-            //count stats
-            //if (packet_model.part == packet_model.part_num && packet_model.data_packet == 1) begin
             //Count delay if you get first data packet.
             if (packet_model.part == 1 && packet_model.data_packet == 1) begin
-                //$fwrite(f,"%d\n",((tr_dut.output_time - packet_model.start_time)/1ns));
                 m_delay.next_val((tr_dut.output_time - packet_model.start_time)/1ns);
             end
         end
     endtask
-
 
     function void report_phase(uvm_phase phase);
         real min;

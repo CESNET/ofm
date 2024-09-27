@@ -62,7 +62,6 @@ module DMA_LL_PROPERTY  #(DEVICE, USER_REGIONS, USER_REGION_SIZE, USER_BLOCK_SIZ
     //simplyfied rule
     property sof_eof_src_rdy;
         @(posedge mfb_tx.CLK) disable iff(RESET || START)
-        //mfb_tx.SRC_RDY |-> !$isunknown(mfb_tx.EOF);
         (mfb_tx.SRC_RDY && (mfb_tx.SOF != 0)) |-> mfb_tx.SRC_RDY s_until_with (mfb_tx.EOF != 0);
     endproperty
 
@@ -70,6 +69,4 @@ module DMA_LL_PROPERTY  #(DEVICE, USER_REGIONS, USER_REGION_SIZE, USER_BLOCK_SIZ
         else begin
             `uvm_error(module_name, "\n\tMFB To PCIE must'n stop sending data in middle of frame");
         end
-
-
 endmodule

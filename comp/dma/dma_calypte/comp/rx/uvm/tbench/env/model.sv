@@ -239,8 +239,6 @@ class model #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_component;
             packet_output.part         = it+1;
             packet_output.start_time   = start_time;
 
-            // dbg_msg = packet_output.convert2string();
-            // `uvm_info(this.get_full_name(), dbg_msg,  UVM_MEDIUM);
             addr = m_regmodel.channel[channel].data_base.get() + (m_data[channel].data_ptr*128);
             m_data[channel].data_ptr = (m_data[channel].data_ptr + 1) & m_regmodel.channel[channel].data_mask.get();
             get_pcie_header(128, addr, pcie_hdr_tmp, pcie_meta_tmp);
@@ -348,10 +346,6 @@ class model #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_component;
 
             uvm_probe_discard.get({pkt_drop});
 
-            // // DEBUG
-            // $display("PROBE_DROP:    %d", pkt_drop);
-            // $display("PROBE_CHANNEL: %d", pkt_channel);
-
             //get packet
             analysis_imp_rx.get(tr);
             pkt_cntr_total++;
@@ -360,15 +354,6 @@ class model #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_component;
             //Check if packet have been discared of send when starting or stopping channel
             wait (analysis_dma.fifo.size() != 0);
             dma_discard = analysis_dma.fifo.pop_front();
-
-            // msg = "";
-            // msg = {msg, $sformatf("\n\tINPUT TIME: %0dns\n", info.input_time/1ns)};
-            // msg = {msg, $sformatf("\tPACKET NUMBER: %0d\n", packets)};
-            // msg = {msg, $sformatf("\tDISCARD: %h\n", dma_discard)};
-            // msg = {msg, $sformatf("\tDISCARD CHANNEL: %h\n", dma_channel)};
-            // msg = {msg, $sformatf("\tCHANNEL: %h\n", info.channel)};
-            // msg = {msg, $sformatf("\tPACKET: %s\n", tr.convert2string())};
-            // `uvm_info(this.get_full_name(), msg,  UVM_MEDIUM);
 
             // Check whether packet is accepted or not
             if (pkt_drop) begin

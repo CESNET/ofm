@@ -9,7 +9,6 @@ class sequencer#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH, CHANN
 
     uvm_reset::sequencer  m_reset;
     uvm_dma_ll_rx::sequencer m_packet;
-    //uvm_mfb::sequencer #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, 0) m_pcie;
     uvm_mfb::sequencer #(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, META_WIDTH) m_pcie;
     uvm_dma_ll::regmodel #(CHANNELS)  m_regmodel;
 

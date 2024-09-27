@@ -6,7 +6,6 @@
 
 
 class base#(USER_REGIONS, USER_REGION_SIZE, USER_BLOCK_SIZE, USER_ITEM_WIDTH, PCIE_UP_REGIONS, PCIE_UP_REGION_SIZE, PCIE_UP_BLOCK_SIZE, PCIE_UP_ITEM_WIDTH, PCIE_UP_META_WIDTH, CHANNELS, PKT_SIZE_MAX, MI_WIDTH, DEVICE) extends uvm_test;
-    //`uvm_component_utils(test::base#(REGIONS, REGION_SIZE, BLOCK_SIZE, ITEM_WIDTH, CHANNELS, PKT_SIZE_MAX, DEVICE));
     typedef uvm_component_registry#(test::base#(USER_REGIONS, USER_REGION_SIZE, USER_BLOCK_SIZE, USER_ITEM_WIDTH, PCIE_UP_REGIONS, PCIE_UP_REGION_SIZE, PCIE_UP_BLOCK_SIZE, PCIE_UP_ITEM_WIDTH, PCIE_UP_META_WIDTH, CHANNELS, PKT_SIZE_MAX, MI_WIDTH, DEVICE), "test::base") type_id;
 
 
@@ -41,7 +40,6 @@ class base#(USER_REGIONS, USER_REGION_SIZE, USER_BLOCK_SIZE, USER_ITEM_WIDTH, PC
 
         //RISE OBJECTION
         phase.raise_objection(this);
-        //phase.phase_done.set_drain_time(this, DRAIN_TIME);
 
         m_vseq.init(m_env.m_regmodel.m_regmodel);
         m_vseq.randomize();
