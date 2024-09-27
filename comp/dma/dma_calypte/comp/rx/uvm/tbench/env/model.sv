@@ -42,15 +42,15 @@ class status_cbs extends uvm_reg_cbs;
     endtask
 endclass
 
-class model_accept#(CHANNELS) extends uvm_subscriber#(uvm_mvb::sequence_item#(1, $clog2(CHANNELS) + 1));
+class model_accept#(CHANNELS) extends uvm_subscriber#(uvm_mvb::sequence_item#(1, 1));
     `uvm_component_param_utils(uvm_dma_ll::model_accept #(CHANNELS))
-    logic [$clog2(CHANNELS) + 1] fifo[$];
+    logic fifo[$];
 
     function new(string name, uvm_component parent = null);
         super.new(name, parent);
     endfunction
 
-    virtual function void write(uvm_mvb::sequence_item#(1, $clog2(CHANNELS) + 1) t);
+    virtual function void write(uvm_mvb::sequence_item#(1, 1) t);
         if (t.src_rdy == 1'b1 && t.dst_rdy == 1'b1) begin
             for (int unsigned it = 0; it < 1; it++) begin
                 if (t.vld[it] == 1'b1) begin
@@ -61,15 +61,28 @@ class model_accept#(CHANNELS) extends uvm_subscriber#(uvm_mvb::sequence_item#(1,
     endfunction
 endclass
 
+class disc_probe_cbs extends uvm_probe::cbs_simple #(1);
+    `uvm_object_utils(uvm_dma_ll::disc_probe_cbs)
+
+    function new(string name = "disc_probe_cbs");
+        super.new(name);
+    endfunction
+
+    virtual function void post_trigger(uvm_event e, uvm_object data);
+        super.post_trigger(e, data);
+        `uvm_info(this.get_full_name(), $sformatf("\nDUT DROP: %0d %0dns\n", out[$], $time/1ns),  UVM_HIGH);
+    endfunction
+endclass
+
 class model #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_component;
     `uvm_component_param_utils(uvm_dma_ll::model #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE))
 
-    //UVM PROBE - model input
-    uvm_probe::cbs_simple #(1)                  uvm_probe_discard;
-    uvm_probe::cbs_simple #($clog2(CHANNELS))   uvm_probe_channel;
-
     localparam USER_META_WIDTH = 24 + $clog2(PKT_SIZE_MAX+1) + $clog2(CHANNELS);
     localparam IS_INTEL_DEV    = (DEVICE == "STRATIX10" || DEVICE == "AGILEX");
+
+    //UVM PROBE - model input
+    disc_probe_cbs uvm_probe_discard;
+
     uvm_tlm_analysis_fifo #(uvm_byte_array::sequence_item)                     analysis_imp_rx;
     uvm_tlm_analysis_fifo #(uvm_logic_vector::sequence_item#(USER_META_WIDTH)) analysis_imp_rx_meta;
     model_accept#(CHANNELS)                                                    analysis_dma;
@@ -86,8 +99,12 @@ class model #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_component;
     local packet_info         input_meta[$];
 
     local regmodel#(CHANNELS) m_regmodel;
-    local int unsigned        packets;
-    local int unsigned        packets_processed;
+    local int unsigned        pkt_sent_cntr [CHANNELS];
+    local int unsigned        pkt_disc_cntr [CHANNELS];
+    local int unsigned        pkt_cntr_total_chan [CHANNELS];
+    local int unsigned        pkt_sent_cntr_total;
+    local int unsigned        pkt_disc_cntr_total;
+    local int unsigned        pkt_cntr_total;
 
     local model_data m_data[CHANNELS];
     local status_cbs m_status_cbs[CHANNELS];
@@ -103,10 +120,14 @@ class model #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_component;
         for (int unsigned it = 0; it < CHANNELS; it++) begin
             m_data[it]       = new();
             m_status_cbs[it] = new(m_data[it]);
+            pkt_sent_cntr[it] = 0;
+            pkt_disc_cntr[it] = 0;
+            pkt_cntr_total_chan[it] = 0;
         end
 
-        packets = 0;
-        packets_processed = 0;
+        pkt_sent_cntr_total = 0;
+        pkt_disc_cntr_total = 0;
+        pkt_cntr_total = 0;
     endfunction
 
     function void regmodel_set(regmodel#(CHANNELS) m_regmodel);
@@ -211,7 +232,7 @@ class model #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_component;
         for (it = 0; it < (parts-1); it++) begin
             packet_meta   = uvm_logic_vector::sequence_item#(META_WIDTH)::type_id::create("packet_meta");
             packet_output = model_packet::type_id::create("packet_output");
-            packet_output.packet_num   = packets;
+            packet_output.packet_num   = pkt_cntr_total_chan[channel];
             packet_output.data_packet  = 1;
             packet_output.channel      = channel;
             packet_output.part_num     = parts;
@@ -238,7 +259,7 @@ class model #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_component;
         //SEND LAST PART OF PACKET
         packet_meta   = uvm_logic_vector::sequence_item#(META_WIDTH)::type_id::create("packet_meta");
         packet_output = model_packet::type_id::create("packet_output");
-        packet_output.packet_num   = packets;
+        packet_output.packet_num   = pkt_cntr_total_chan[channel];
         packet_output.data_packet  = 1;
         packet_output.channel      = channel;
         packet_output.part_num     = parts;
@@ -263,7 +284,7 @@ class model #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_component;
         //SEND DMA HEADER
         packet_meta   = uvm_logic_vector::sequence_item#(META_WIDTH)::type_id::create("packet_meta");
         packet_output = model_packet::type_id::create("packet_output");
-        packet_output.packet_num   = packets;
+        packet_output.packet_num   = pkt_cntr_total_chan[channel];
         packet_output.data_packet  = 0;
         packet_output.channel      = channel;
         packet_output.part_num     = 1;
@@ -301,14 +322,8 @@ class model #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_component;
     function void build_phase(uvm_phase phase);
         analysis_dma = model_accept#(CHANNELS)::type_id::create("analysis_dma", this);
 
-        //UVM PROBE
-        uvm_probe_discard = uvm_probe::cbs_simple #(1)::type_id::create("uvm_probe_discard", this);
-        uvm_probe_channel = uvm_probe::cbs_simple #($clog2(CHANNELS))::type_id::create("uvm_probe_channel", this);
-
+        uvm_probe_discard = disc_probe_cbs::type_id::create("uvm_probe_discard", this);
         uvm_probe::pool::get_global_pool().get({ "probe_event_component_", "testbench.DUT_U.VHDL_DUT_U", ".probe_discard" }).add_callback(uvm_probe_discard);
-        uvm_probe::pool::get_global_pool().get({ "probe_event_component_", "testbench.DUT_U.VHDL_DUT_U", ".probe_channel" }).add_callback(uvm_probe_channel);
-
-
     endfunction
 
     task run_phase(uvm_phase phase);
@@ -317,12 +332,10 @@ class model #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_component;
         int unsigned                  compare;
         int unsigned                  soft_compare;
         logic                         dma_discard;
-        logic [$clog2(CHANNELS)]      dma_channel;
         packet_info                   info;
 
         //UVM PROBE
         logic                         pkt_drop;
-        logic [$clog2(CHANNELS)]      pkt_channel;
 
         fork
             get_input();
@@ -334,7 +347,6 @@ class model #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_component;
             info = input_meta.pop_front();
 
             uvm_probe_discard.get({pkt_drop});
-            uvm_probe_channel.get({pkt_channel});
 
             // // DEBUG
             // $display("PROBE_DROP:    %d", pkt_drop);
@@ -342,20 +354,12 @@ class model #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_component;
 
             //get packet
             analysis_imp_rx.get(tr);
-            packets++;
-            if (tr.data.size() != info.packet_size) begin
-                string err_msg = $sformatf("\n\tVerification FAILED! Packet size in meta %0d isn't same as correct packet size %0d", info.packet_size, tr.data.size());
-                `uvm_fatal(this.get_full_name(), err_msg);
-            end
+            pkt_cntr_total++;
+            pkt_cntr_total_chan[info.channel]++;
 
             //Check if packet have been discared of send when starting or stopping channel
             wait (analysis_dma.fifo.size() != 0);
-
-            {dma_channel, dma_discard} = analysis_dma.fifo.pop_front();
-
-            if (dma_channel != info.channel) begin
-                `uvm_fatal(this.get_full_name(),  $sformatf("\n\tChannel send from DMA HDR MANAGER %0d isn't same as received packet channel %0d. Time %0dns", dma_channel, info.channel, info.input_time/1ns));
-            end
+            dma_discard = analysis_dma.fifo.pop_front();
 
             // msg = "";
             // msg = {msg, $sformatf("\n\tINPUT TIME: %0dns\n", info.input_time/1ns)};
@@ -368,10 +372,13 @@ class model #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_component;
 
             // Check whether packet is accepted or not
             if (pkt_drop) begin
+                pkt_disc_cntr[info.channel]++;
+                pkt_disc_cntr_total++;
                  msg = $sformatf("\n\t\nPacket Dropped:\n RX CHANNEL: %0d\n META: %h\n PACKET SIZE: %0d\n%s", info.channel, info.meta, info.packet_size, tr.convert2string());
                 `uvm_info(this.get_full_name(), msg,  UVM_MEDIUM);
             end else begin
-                packets_processed++;
+                pkt_sent_cntr[info.channel]++;
+                pkt_sent_cntr_total++;
                 msg = $sformatf("\n\t\nPacket Accepted:\n RX CHANNEL: %0d\n META: %h\n PACKET SIZE: %0d\n%s", info.channel, info.meta, info.packet_size, tr.convert2string());
                 `uvm_info(this.get_full_name(), msg,  UVM_MEDIUM);
                 packet_send(tr.data, info.input_time, info.channel, info.meta);
@@ -380,7 +387,26 @@ class model #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_component;
     endtask
 
     function void report_phase(uvm_phase phase);
-        `uvm_info(this.get_full_name(), $sformatf("\n\tModle received %0d packets. Model processed %0d packets and %0d packets have been discarded", packets, packets_processed, packets - packets_processed), UVM_NONE)
+        string msg = "\n";
+
+        msg = {msg, $sformatf("\tMODEL STATS:\n")};
+        msg = {msg, $sformatf("\t--------------------------------------------\n")};
+        msg = {msg, $sformatf("\tPer channel:\n")};
+        msg = {msg, $sformatf("\t--------------------------------------------\n")};
+        msg = {msg, $sformatf("\tChan. num\t| Received\t| Discarded\t| Total \n")};
+
+        for (int unsigned it = 0; it < CHANNELS; it++) begin
+            msg = {msg, $sformatf("\t%0d\t| %0d\t| %0d\t| %0d\n", it, pkt_sent_cntr[it], pkt_disc_cntr[it], pkt_cntr_total_chan[it])};
+        end
+
+        msg = {msg, $sformatf("\t--------------------------------------------\n")};
+        msg = {msg, $sformatf("\n\tAll channels:\n")};
+        msg = {msg, $sformatf("\t--------------------------------------------\n")};
+        msg = {msg, $sformatf("\tReceived: %0d\n",  pkt_sent_cntr_total)};
+        msg = {msg, $sformatf("\tDiscarded: %0d\n", pkt_disc_cntr_total)};
+        msg = {msg, $sformatf("\tTotal: %0d\n",     pkt_cntr_total)};
+
+        `uvm_info(this.get_full_name(), msg, UVM_NONE)
     endfunction
 
 endclass

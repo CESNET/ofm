@@ -19,7 +19,6 @@ lappend COMPONENTS [ list "SV_PROBE_UVM"              "$UVM_PATH/probe"         
 
 lappend MOD "$OFM_PATH/comp/base/pkg/pcie_meta_pack.sv"
 
-lappend MOD "$ENTITY_BASE/tbench/info/pkg.sv"
 lappend MOD "$ENTITY_BASE/tbench/rx_env/pkg.sv"
 lappend MOD "$ENTITY_BASE/tbench/env/pkg.sv"
 lappend MOD "$ENTITY_BASE/tbench/tests/pkg.sv"

@@ -15,10 +15,11 @@ class virt_seq#(PCIE_UP_REGIONS, PCIE_UP_REGION_SIZE, PCIE_UP_BLOCK_SIZE, PCIE_U
     uvm_reset::sequence_start              m_reset;
 
     uvm_byte_array::sequence_lib m_packet;
-    uvm_dma_ll_info::sequence_lib#(CHANNELS)  m_info;
 
     uvm_dma_ll::reg_sequence#(CHANNELS)     m_reg;
     uvm_sequence#(uvm_mfb::sequence_item #(PCIE_UP_REGIONS, PCIE_UP_REGION_SIZE, PCIE_UP_BLOCK_SIZE, PCIE_UP_ITEM_WIDTH, PCIE_UP_META_WIDTH)) m_pcie;
+
+    local logic m_done;
 
     virtual function void init(uvm_dma_ll::regmodel#(CHANNELS) m_regmodel);
         uvm_mfb::sequence_lib_tx#(PCIE_UP_REGIONS, PCIE_UP_REGION_SIZE, PCIE_UP_BLOCK_SIZE, PCIE_UP_ITEM_WIDTH, PCIE_UP_META_WIDTH) m_pcie_lib;
@@ -31,11 +32,8 @@ class virt_seq#(PCIE_UP_REGIONS, PCIE_UP_REGION_SIZE, PCIE_UP_BLOCK_SIZE, PCIE_U
         //m_packet.max_random_count = 2;
         m_packet.min_random_count = 80;
         m_packet.max_random_count = 100;
-
-        m_info   = uvm_dma_ll_info::sequence_lib#(CHANNELS)::type_id::create("m_info");
-        m_info.init_sequence();
-        m_info.min_random_count = 150;
-        m_info.max_random_count = 200;
+        m_packet.cfg = new();
+        m_packet.cfg.array_size_set(60,PKT_SIZE_MAX);
 
         m_reg    =  uvm_dma_ll::reg_sequence#(CHANNELS)::type_id::create("m_reg");
         m_reg.m_regmodel = m_regmodel;
@@ -63,6 +61,8 @@ class virt_seq#(PCIE_UP_REGIONS, PCIE_UP_REGION_SIZE, PCIE_UP_BLOCK_SIZE, PCIE_U
     endfunction
 
     task body();
+        m_done = 0;
+
         fork
             run_reset();
             begin
@@ -74,12 +74,14 @@ class virt_seq#(PCIE_UP_REGIONS, PCIE_UP_REGION_SIZE, PCIE_UP_BLOCK_SIZE, PCIE_U
         #(50ns)
 
         fork
-            m_packet.start(p_sequencer.m_packet.m_data);
-            forever begin
-                m_info.randomize();
-                m_info.start(p_sequencer.m_packet.m_info);
+            begin
+                m_packet.start(p_sequencer.m_packet.m_data);
+                m_done = 1;
             end
+
             run_mfb();
         join_any
+
+        wait((& m_done) == 1);
     endtask
 endclass

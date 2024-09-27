@@ -15,7 +15,6 @@ class env #(REGIONS, REGION_SIZE, BLOCK_SIZE, CHANNELS, PKT_SIZE_MAX) extends uv
 
     //toplevel
     uvm_byte_array::agent   m_byte_array_agent;
-    uvm_dma_ll_info::agent  m_info_agent;
     //low level
     uvm_byte_array_mfb::env_rx #(REGIONS, REGION_SIZE, BLOCK_SIZE, MFB_META_WIDTH) m_env_rx;
     //implementa later
@@ -30,7 +29,6 @@ class env #(REGIONS, REGION_SIZE, BLOCK_SIZE, CHANNELS, PKT_SIZE_MAX) extends uv
 
     // Create base components of environment.
     function void build_phase(uvm_phase phase);
-        uvm_dma_ll_info::config_item         m_info_agent_cfg;
         uvm_byte_array::config_item     m_byte_array_agent_cfg;
         uvm_byte_array_mfb::config_item m_env_rx_cfg;
 
@@ -39,15 +37,11 @@ class env #(REGIONS, REGION_SIZE, BLOCK_SIZE, CHANNELS, PKT_SIZE_MAX) extends uv
         end
 
         //TOP level agent
-        m_info_agent_cfg       = new();
         m_byte_array_agent_cfg = new();
-        m_info_agent_cfg.active       = m_config.active;
         m_byte_array_agent_cfg.active = m_config.active;
 
-        uvm_config_db #(uvm_dma_ll_info::config_item   )::set(this, "m_info_agent", "m_config", m_info_agent_cfg);
         uvm_config_db #(uvm_byte_array::config_item)::set(this, "m_byte_array_agent", "m_config", m_byte_array_agent_cfg);
 
-        m_info_agent         = uvm_dma_ll_info::agent::type_id::create("m_info_agent", this);
         m_byte_array_agent   = uvm_byte_array::agent::type_id::create("m_byte_array_agent", this);
         // LOW level agent
         m_env_rx_cfg = new;
@@ -69,10 +63,8 @@ class env #(REGIONS, REGION_SIZE, BLOCK_SIZE, CHANNELS, PKT_SIZE_MAX) extends uv
     // Connect agent's ports with ports from scoreboard.
     function void connect_phase(uvm_phase phase);
         if (m_config.active == UVM_ACTIVE) begin
-            m_sequencer.m_info = m_info_agent.m_sequencer;
             m_sequencer.m_data = m_byte_array_agent.m_sequencer;
 
-            m_driver.seq_item_port_info.connect(m_info_agent.m_sequencer.seq_item_export);
             m_driver.seq_item_port_byte_array.connect(m_byte_array_agent.m_sequencer.seq_item_export);
         end
 
@@ -94,7 +86,6 @@ class env #(REGIONS, REGION_SIZE, BLOCK_SIZE, CHANNELS, PKT_SIZE_MAX) extends uv
             fork
                 logic_vector_seq.start(m_env_rx.m_sequencer.m_meta);
                 byte_array_seq.start(m_env_rx.m_sequencer.m_data);
-
             join
         end
     endtask

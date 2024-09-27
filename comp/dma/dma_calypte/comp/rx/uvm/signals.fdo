@@ -29,6 +29,23 @@ proc ints {PATH} {
     add_wave [list -noupdate -hex -group "INTERNALS"] $PATH/hdr_log_dst_rdy
 }
 
+proc high_level_view {PATH} {
+    add_wave [list -noupdate -hex -group "HIGH LEVEL DASHBOARD"] $PATH/rx_dma_sw_manager_i/start_fsm_pst
+    add_wave [list -noupdate -hex -group "HIGH LEVEL DASHBOARD"] $PATH/rx_dma_sw_manager_i/start_fsm_nst
+    add_wave [list -noupdate -hex -group "HIGH LEVEL DASHBOARD"] $PATH/rx_dma_sw_manager_i/stop_fsm_pst
+    add_wave [list -noupdate -hex -group "HIGH LEVEL DASHBOARD"] $PATH/rx_dma_sw_manager_i/stop_fsm_nst
+    add_wave [list -noupdate -hex -group "HIGH LEVEL DASHBOARD"] $PATH/rx_dma_hdr_manager_i/chan_state_change_pst
+    add_wave [list -noupdate -hex -group "HIGH LEVEL DASHBOARD"] $PATH/rx_dma_hdr_manager_i/chan_state_change_nst
+    add_wave [list -noupdate -hex -group "HIGH LEVEL DASHBOARD"] $PATH/rx_dma_hdr_insertor_i/tprocess_pst
+    add_wave [list -noupdate -hex -group "HIGH LEVEL DASHBOARD"] $PATH/rx_dma_hdr_insertor_i/tprocess_nst
+    add_wave [list -noupdate -hex -group "HIGH LEVEL DASHBOARD"] $PATH/rx_dma_hdr_manager_i/pkt_process_pst
+    add_wave [list -noupdate -hex -group "HIGH LEVEL DASHBOARD"] $PATH/rx_dma_hdr_manager_i/pkt_process_nst
+    add_wave [list -noupdate -hex -group "HIGH LEVEL DASHBOARD" -label "pcie_hdr_data_tran_fifo_status"] $PATH/rx_dma_hdr_manager_i/pcie_hdr_data_tran_fifo_i/STATUS
+    add_wave [list -noupdate -hex -group "HIGH LEVEL DASHBOARD" -label "pcie_hdr_dma_hdr_tran_fifo_status"] $PATH/rx_dma_hdr_manager_i/pcie_hdr_dma_hdr_tran_fifo_i/STATUS
+    add_wave [list -noupdate -hex -group "HIGH LEVEL DASHBOARD"] $PATH/rx_dma_hdr_manager_i/dma_hdr_fifo_status
+    add_wave [list -noupdate -hex -group "HIGH LEVEL DASHBOARD" -label "input_fifo_status"] $PATH/rx_dma_hdr_manager_i/input_mvb_fifo_i/STATUS
+}
+
 proc hdr_ins {PATH} {
     add_wave [list -noupdate -hex -group "HDR_INSERTOR"] "$PATH/rx_dma_hdr_insertor_i/RX_MFB_DATA(1023 downto 768)"
     add_wave [list -noupdate -hex -group "HDR_INSERTOR"] "$PATH/rx_dma_hdr_insertor_i/RX_MFB_DATA(767 downto 512)"
@@ -55,10 +72,6 @@ proc hdr_ins {PATH} {
     add_wave [list -noupdate -hex -group "HDR_INSERTOR"] $PATH/rx_dma_hdr_insertor_i/shift_sel_nst
     add_wave [list -noupdate -hex -group "HDR_INSERTOR"] $PATH/rx_dma_hdr_insertor_i/tprocess_pst
     add_wave [list -noupdate -hex -group "HDR_INSERTOR"] $PATH/rx_dma_hdr_insertor_i/tprocess_nst
-    add_wave [list -noupdate -hex -group "HDR_INSERTOR"] $PATH/rx_dma_hdr_insertor_i/dma_hdr_last
-    add_wave [list -noupdate -hex -group "HDR_INSERTOR"] $PATH/rx_dma_hdr_insertor_i/dma_hdr_last_reg
-    add_wave [list -noupdate -hex -group "HDR_INSERTOR"] $PATH/rx_dma_hdr_insertor_i/pkt_drop
-    add_wave [list -noupdate -hex -group "HDR_INSERTOR"] $PATH/rx_dma_hdr_insertor_i/pkt_drop_reg
 }
 
 proc inp_buff {PATH} {
@@ -71,10 +84,10 @@ proc trans_buff {PATH} {
 
 proc hdr_mgr {PATH} {
     add_wave [list -noupdate -hex -group "HDR_MANAGER"] $PATH/rx_dma_hdr_manager_i/*
-    add_wave [list -noupdate -hex -group "HDR_MANAGER" -group "DATA ADDR GEN"]                   $PATH/rx_dma_hdr_manager_i/data_pcie_addr_gen_i/*
-    add_wave [list -noupdate -hex -group "HDR_MANAGER" -group "DATA ADDR GEN" -group "ADDR MGR"] $PATH/rx_dma_hdr_manager_i/data_pcie_addr_gen_i/addr_manager_i/*
-    add_wave [list -noupdate -hex -group "HDR_MANAGER" -group "DMA ADDR GEN"]                    $PATH/rx_dma_hdr_manager_i/dma_pcie_addr_gen_i/*
-    add_wave [list -noupdate -hex -group "HDR_MANAGER" -group "DMA ADDR GEN" -group "ADDR MGR"]  $PATH/rx_dma_hdr_manager_i/dma_pcie_addr_gen_i/addr_manager_i/*
+    add_wave [list -noupdate -hex -group "HDR_MANAGER"] $PATH/rx_dma_hdr_manager_i/pcie_hdr_data_tran_fifo_i/STATUS
+    add_wave [list -noupdate -hex -group "HDR_MANAGER"] $PATH/rx_dma_hdr_manager_i/pcie_hdr_dma_hdr_tran_fifo_i/STATUS
+    add_wave [list -noupdate -hex -group "HDR_MANAGER" -group "DATA ADDR MGR"] $PATH/rx_dma_hdr_manager_i/data_pcie_addr_mgr_i/*
+    add_wave [list -noupdate -hex -group "HDR_MANAGER" -group "DMA ADDR MGR"]  $PATH/rx_dma_hdr_manager_i/dma_hdr_pcie_addr_mgr_i/*
 }
 
 proc sw_mgr {PATH} {

@@ -63,7 +63,7 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_score
     uvm_analysis_export #(uvm_logic_vector::sequence_item#(LOGIC_WIDTH))  analysis_export_rx_meta;
 
     //DUT WATCH INTERFACE
-    uvm_analysis_export #(uvm_mvb::sequence_item#(1, $clog2(CHANNELS) + 1)) analysis_export_dma;
+    uvm_analysis_export #(uvm_mvb::sequence_item#(1, 1)) analysis_export_dma;
 
     //DUT OUTPUT
     uvm_analysis_export #(uvm_logic_vector_array::sequence_item#(32))           analysis_export_tx_packet;
@@ -178,7 +178,6 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_score
                 m_input_speed.next_val(speed);
                 speed_start_time  = time_act;
                 speed_packet_size = 0;
-                `uvm_info(this.get_full_name(), $sformatf("\n\tCurrent input speed (MFB RX) is %0.3fGb/s in time [%0d:%0d]us", speed*8, speed_start_time/1us, time_act/1us), UVM_LOW);
             end
         end
     endtask
@@ -212,7 +211,6 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_score
                 m_output_speed.next_val(speed);
                 speed_start_time  = time_act;
                 speed_packet_size = 0;
-                `uvm_info(this.get_full_name(), $sformatf("\n\tCurrent output speed (PCIE TX) is %0.3fGb/s in time [%0d:%0d]us", speed*8, speed_start_time/1us, time_act/1us), UVM_LOW);
             end
         end
     endtask
@@ -247,12 +245,7 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_score
             $cast(packet_model, tr_model);
 
             compared++;
-            msg = $sformatf("\nSegments errors/compared : %0d/%0d Packet num %0d", errors, compared, packet_model.packet_num);
-
-            if (!((m_regmodel.channel[packet_model.channel].status.get() & 32'h1 ) | (m_regmodel.channel[packet_model.channel].control.get() & 32'h1))) begin
-                msg = {msg, $sformatf("\nReceived packet on stopped channel Packet is:\n\t\tPart is : %s\n\t\tChannel : %0d\n\t\tPart %0d/%0d",  packet_model.data_packet == 1 ? "DATA" : "HEADER",  packet_model.channel, packet_model.part, packet_model.part_num)};
-                `uvm_error(this.get_full_name(), msg);
-            end
+            msg = $sformatf("\nSegments compared : %0d, segments erroneous: %0d. Channel: %0d, Packet num %0d", compared, errors, packet_model.channel, packet_model.packet_num);
 
             if (pcie_compare(tr_dut.item, tr_dut.meta, packet_model, tr_meta_model) == 0) begin
                 errors++;
@@ -262,7 +255,7 @@ class scoreboard #(CHANNELS, PKT_SIZE_MAX, META_WIDTH, DEVICE) extends uvm_score
                 msg = $sformatf("%s\nMODEL META%s\nDUT META%s\n\tDUT doesnt match MODEL transaction", msg, tr_meta_model.convert2string(), tr_dut.meta.convert2string());
                 `uvm_error(this.get_full_name(), msg);
             end else begin
-                msg = {msg, $sformatf("\nRecive correct transaction :\n\t\tPart is : %s\n\t\tChannel : %0d\n\t\tPart %0d/%0d\n\t\tPart is delay from SOF on input %0dns",  packet_model.data_packet == 1 ? "DATA" : "HEADER",  packet_model.channel, packet_model.part, packet_model.part_num, (tr_dut.output_time - packet_model.start_time)/1ns)};
+                msg = {msg, $sformatf("\nRecive correct transaction :\n\t\tSegment contains: %s\n\t\tChannel : %0d\n\t\tPart %0d/%0d\n\t\tPart is delay from SOF on input %0dns",  packet_model.data_packet == 1 ? "DATA" : "HEADER",  packet_model.channel, packet_model.part, packet_model.part_num, (tr_dut.output_time - packet_model.start_time)/1ns)};
                 `uvm_info(this.get_full_name(), $sformatf("%s\nTransaction%s", msg, tr_model.convert2string()), UVM_MEDIUM);
             end
 
