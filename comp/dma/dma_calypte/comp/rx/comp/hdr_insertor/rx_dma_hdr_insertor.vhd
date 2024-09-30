@@ -412,16 +412,14 @@ begin
                     and HDRM_DATA_PCIE_HDR_SRC_RDY = '1'
                     -- Not a valid drop signal for the current packet
                     and (not (HDRM_PKT_DROP = '1' and HDRM_DMA_HDR_SRC_RDY = '1'))
-                    and (TX_REGIONS = 1
-                         or
-                         -- The 2 region configuration needs to have a valid DMA header with the
-                         -- ending transaction since this can fit to the second region of the last
-                         -- of the last word of a PCIe transaction
-                         (TX_REGIONS = 2 and HDRM_DMA_PCIE_HDR_SRC_RDY = '1' and HDRM_DMA_HDR_SRC_RDY = '1' and RX_MFB_EOF = '1')
-                         or
-                         (TX_REGIONS = 2 and RX_MFB_EOF = '0')
-                         )
-                    ) then
+                    and (IS_INTEL
+                        or (TX_REGIONS = 1
+                            or (TX_REGIONS = 2 and HDRM_DMA_PCIE_HDR_SRC_RDY = '1' and HDRM_DMA_HDR_SRC_RDY = '1' and RX_MFB_EOF = '1')
+                            -- The 2 region configuration needs to have a valid DMA header with the
+                            -- ending transaction since this can fit to the second region of the last
+                            -- of the last word of a PCIe transaction
+                            or (TX_REGIONS = 2 and RX_MFB_EOF = '0')
+                ))) then
 
                     -- Place the PCIe header at the beginning of the data (Xilinx only)
                     -- For Intel, the header is placed in Meta signal and is valid with SOF - The HDR_TYPE is not relevant
