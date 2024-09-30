@@ -1,4 +1,4 @@
--- rx_dma_hdr_manager.vhd: this component generates pcie header and dma headers for the incoming packet
+-- rx_dma_calypte_hdr_manager.vhd: this component generates pcie header and dma headers for the incoming packet
 -- Copyright (c) 2024 CESNET z.s.p.o.
 -- Author(s): Vladislav Valek <valekv@cesnet.cz>
 --
@@ -16,7 +16,7 @@ use work.math_pack.all;
 -- not set. Third action is generate pcie header for dma header if DMA_DISCARD
 -- is not set. In case when DMA_DISCARD is set then no pcie headers are
 -- generated.
-entity RX_DMA_HDR_MANAGER is
+entity RX_DMA_CALYPTE_HDR_MANAGER is
     generic (
         MFB_REGIONS : natural := 1;
 
@@ -141,7 +141,7 @@ entity RX_DMA_HDR_MANAGER is
         );
 end entity;
 
-architecture FULL of RX_DMA_HDR_MANAGER is
+architecture FULL of RX_DMA_CALYPTE_HDR_MANAGER is
 
     -- Byte length of a segment, e.g. the length of a PCIe transaction with data
     constant DATA_SEGMENT_SIZE : natural := 128;
@@ -722,7 +722,7 @@ begin
     -- =============================================================================================
     -- PCIe header generation
     -- =============================================================================================
-    data_pcie_addr_mgr_i : entity work.ADDR_MANAGER
+    data_pcie_addr_mgr_i : entity work.RX_DMA_CALYPTE_ADDR_MANAGER
         generic map (
             CHANNELS      => CHANNELS,
             BLOCK_SIZE    => DATA_SEGMENT_SIZE,
@@ -768,7 +768,7 @@ begin
 
             OUT_HEADER => pcie_hdr_data_tran);
 
-    dma_hdr_pcie_addr_mgr_i : entity work.ADDR_MANAGER
+    dma_hdr_pcie_addr_mgr_i : entity work.RX_DMA_CALYPTE_ADDR_MANAGER
         generic map (
             CHANNELS      => CHANNELS,
             BLOCK_SIZE    => 8,

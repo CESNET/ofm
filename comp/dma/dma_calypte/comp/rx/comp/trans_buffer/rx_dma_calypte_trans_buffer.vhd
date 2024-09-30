@@ -1,4 +1,4 @@
--- rx_dma_trans_buffer.vhd: this component divides each packet into 128B chunks when the
+-- rx_dma_calypte_trans_buffer.vhd: this component divides each packet into 128B chunks when the
 -- beginning of each chunk is set to the third MFB block of the first word
 -- Copyright (c) 2022 CESNET z.s.p.o.
 -- Author(s): Vladislav Valek  <xvalek14@vutbr.cz>
@@ -14,7 +14,7 @@ use work.math_pack.all;
 
 -- This component contols the successfull buffering of input data on the block specified by the
 -- `BUFFERED_DATA_SIZE` generic parameter. Whole buffer content is then set on the output MFB bus.
-entity RX_DMA_TRANS_BUFFER is
+entity RX_DMA_CALYPTE_TRANS_BUFFER is
     generic (
         -- The amount of data which needs to be buffered in bytes
         BUFFERED_DATA_SIZE : integer := 128;
@@ -62,7 +62,7 @@ entity RX_DMA_TRANS_BUFFER is
 
 end entity;
 
-architecture FULL of RX_DMA_TRANS_BUFFER is
+architecture FULL of RX_DMA_CALYPTE_TRANS_BUFFER is
 
     constant BUFFER_DEPTH : positive := BUFFERED_DATA_SIZE/(RX_REGION_SIZE*RX_BLOCK_SIZE);
 

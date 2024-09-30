@@ -1,4 +1,4 @@
--- addr_manager.vhd: manages free space and addresses for PCIe transactions
+-- rx_dma_calypte_addr_manager.vhd: manages free space and addresses for PCIe transactions
 -- Copyright (c) 2022 CESNET z.s.p.o.
 -- Author(s): Radek Iša <isa@cesnet.cz>
 --
@@ -18,7 +18,7 @@ use work.type_pack.all;
 -- channel, the HW pointers are increased and the address for storing the data
 -- in RAM is created. The addres is valid as soon as the corresponding
 -- area in a host memory is free.
-entity ADDR_MANAGER is
+entity RX_DMA_CALYPTE_ADDR_MANAGER is
     generic (
         -- number of managed channels
         CHANNELS      : integer;
@@ -85,7 +85,7 @@ entity ADDR_MANAGER is
 
 end entity;
 
-architecture FULL of ADDR_MANAGER is
+architecture FULL of RX_DMA_CALYPTE_ADDR_MANAGER is
 
     signal hw_pointer_wr      : std_logic;
     signal hw_pointer_wr_addr : std_logic_vector(log2(CHANNELS) -1 downto 0);

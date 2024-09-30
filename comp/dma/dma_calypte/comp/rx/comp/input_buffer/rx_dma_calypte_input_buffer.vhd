@@ -1,4 +1,4 @@
--- input_buffer.vhd: input buffer for MFB data which issues the realignment of
+-- rx_dma_calypte_input_buffer.vhd: input buffer for MFB data which issues the realignment of
 -- the input data to be aligned to the block no. SHIFT_BLOCKS
 -- Copyright (c) 2022 CESNET z.s.p.o.
 -- Author(s): Vladislav Valek  <xvalek14@vutbr.cz>
@@ -15,7 +15,7 @@ use work.math_pack.all;
 -- This component accepts incoming data on the input and aligns them to the beginning block of the
 -- MFB bus. This component also splits a word which contains two packets. The purpose is to align
 -- the data se they can be easily buffered by whole words in the following component.
-entity RX_DMA_INPUT_BUFFER is
+entity RX_DMA_CALYPTE_INPUT_BUFFER is
 
     generic (
         -- =========================================================================================
@@ -51,7 +51,7 @@ entity RX_DMA_INPUT_BUFFER is
 
 end entity;
 
-architecture FULL of RX_DMA_INPUT_BUFFER is
+architecture FULL of RX_DMA_CALYPTE_INPUT_BUFFER is
 
     constant SHIFT_TO_BLOCK : natural := 0;
 

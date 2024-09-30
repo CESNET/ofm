@@ -17,13 +17,13 @@ set MFB_FIFOX_BASE           "$OFM_PATH/comp/mfb_tools/storage/fifox"
 set MFB_FRAME_LNG_CHECK_BASE "$OFM_PATH/comp/mfb_tools/logic/frame_lng_check"
 
 lappend COMPONENTS \
-      [ list "RX_DMA_HDR_INSERTOR"    $HDR_INSERTOR_BASE         "FULL"] \
-      [ list "RX_DMA_HDR_MANAGER"     $HDR_MANAGER_BASE          "FULL"] \
-      [ list "RX_DMA_TRANS_BUFFER"    $TRANS_BUFFER_BASE         "FULL"] \
-      [ list "RX_DMA_INPUT_BUFFER"    $INPUT_BUFFER_BASE         "FULL"] \
-      [ list "RX_DMA_SW_MANAGER"      $SW_MANAGER_BASE           "FULL"] \
-      [ list "MFB_FIFOX"              $MFB_FIFOX_BASE            "FULL"] \
-      [ list "MFB_FRAME_LNG_CHECK"    $MFB_FRAME_LNG_CHECK_BASE  "FULL"] \
+      [ list "RX_DMA_CALYPTE_HDR_INSERTOR" $HDR_INSERTOR_BASE         "FULL"] \
+      [ list "RX_DMA_CALYPTE_HDR_MANAGER"  $HDR_MANAGER_BASE          "FULL"] \
+      [ list "RX_DMA_CALYPTE_TRANS_BUFFER" $TRANS_BUFFER_BASE         "FULL"] \
+      [ list "RX_DMA_CALYPTE_INPUT_BUFFER" $INPUT_BUFFER_BASE         "FULL"] \
+      [ list "RX_DMA_CALYPTE_SW_MANAGER"   $SW_MANAGER_BASE           "FULL"] \
+      [ list "MFB_FIFOX"                   $MFB_FIFOX_BASE            "FULL"] \
+      [ list "MFB_FRAME_LNG_CHECK"         $MFB_FRAME_LNG_CHECK_BASE  "FULL"] \
 
 
 lappend MOD "$ENTITY_BASE/rx_dma_calypte.vhd"

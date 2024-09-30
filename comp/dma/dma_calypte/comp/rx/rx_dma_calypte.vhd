@@ -288,7 +288,7 @@ begin
         report "RX_LL_DMA: The design is not set for such PCIe MFB configuration, the valid are: MFB#(1,1,8,32), MFB#(2,1,8,32)."
         severity FAILURE;
 
-    rx_dma_sw_manager_i : entity work.RX_DMA_SW_MANAGER
+    rx_dma_sw_manager_i : entity work.RX_DMA_CALYPTE_SW_MANAGER
         generic map (
             DEVICE             => DEVICE,
             CHANNELS           => CHANNELS,
@@ -358,7 +358,7 @@ begin
 
     USER_RX_MFB_DST_RDY <= hdr_log_dst_rdy and data_path_dst_rdy;
 
-    rx_dma_hdr_manager_i : entity work.RX_DMA_HDR_MANAGER
+    rx_dma_hdr_manager_i : entity work.RX_DMA_CALYPTE_HDR_MANAGER
         generic map (
             MFB_REGIONS   => USER_RX_MFB_REGIONS,
             CHANNELS      => CHANNELS,
@@ -426,7 +426,7 @@ begin
             PKT_CNTR_DISC_INC => hdrm_pkt_disc_inc,
             PKT_CNTR_PKT_SIZE => hdrm_pkt_sent_bytes);
 
-    rx_dma_hdr_insertor_i : entity work.RX_DMA_HDR_INSERTOR
+    rx_dma_hdr_insertor_i : entity work.RX_DMA_CALYPTE_HDR_INSERTOR
         generic map (
             RX_REGION_SIZE => MFB_REGION_SIZE_TRBUF2INS,
             RX_BLOCK_SIZE  => MFB_BLOCK_SIZE_TRBUF2INS,
@@ -536,7 +536,7 @@ begin
 
     else generate
 
-        transaction_buffer_i : entity work.RX_DMA_TRANS_BUFFER
+        transaction_buffer_i : entity work.RX_DMA_CALYPTE_TRANS_BUFFER
             generic map (
                 RX_REGION_SIZE => MFB_REGION_SIZE_INBUF2TRBUF,
                 RX_BLOCK_SIZE  => MFB_BLOCK_SIZE_INBUF2TRBUF,
@@ -607,7 +607,7 @@ begin
             TX_LNG_OVF_ERR => stat_frame_lng_ovf_err,
             TX_FRAME_LNG   => stat_frame_lng);
 
-    input_buffer_i : entity work.RX_DMA_INPUT_BUFFER
+    input_buffer_i : entity work.RX_DMA_CALYPTE_INPUT_BUFFER
         generic map (
             REGION_SIZE => USER_RX_MFB_REGION_SIZE,
             BLOCK_SIZE  => USER_RX_MFB_BLOCK_SIZE,

@@ -1,4 +1,4 @@
--- rx_dma_hdr_insertor.vhd: inserts PCIex header to each transfer and sends DMA header afterwards
+-- rx_dma_calypte_hdr_insertor.vhd: inserts PCIex header to each transfer and sends DMA header afterwards
 -- Copyright (c) 2022 CESNET z.s.p.o.
 -- Author(s): Vladislav Valek  <xvalek14@vutbr.cz>
 --
@@ -18,7 +18,7 @@ use work.pcie_meta_pack.all;
 -- length of 128 Bytes). And sends them with appropriate PCIe header. When end of a
 -- packet is processed, the DMA header is sent after that in a separate transaction.
 --
-entity RX_DMA_HDR_INSERTOR is
+entity RX_DMA_CALYPTE_HDR_INSERTOR is
     generic (
         -- =========================================================================================
         -- RX MFB configuration
@@ -91,7 +91,7 @@ entity RX_DMA_HDR_INSERTOR is
     );
 end entity;
 
-architecture FULL of RX_DMA_HDR_INSERTOR is
+architecture FULL of RX_DMA_CALYPTE_HDR_INSERTOR is
 
     -- On Intel devices, the PCIe header is sent in a TX_MFB_META bus separated from the data on the
     -- TX_MFB_DATA.

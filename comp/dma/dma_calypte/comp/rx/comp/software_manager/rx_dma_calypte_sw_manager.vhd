@@ -1,4 +1,4 @@
--- software_manager.vhd: software manager which serves as an interface
+-- rx_dma_calypte_sw_manager.vhd: software manager which serves as an interface
 -- between MI bus (software side) and the RX DMA system as a whole
 -- Copyright (c) 2022 CESNET z.s.p.o.
 -- Author(s): Vladislav Valek  <xvalek14@vutbr.cz>, Jakub Cabal <cabal@cesnet.cz>
@@ -16,7 +16,7 @@ use work.dma_bus_pack.all;
 -- This entity initializes configuration and status registers for RX DMA Calypte controller. Its generic
 -- implementation allows to create configuration space for arbitrary number of channels. It also
 -- provides the access to registers from MI interface connected to designated software driver.
-entity RX_DMA_SW_MANAGER is
+entity RX_DMA_CALYPTE_SW_MANAGER is
 generic(
     -- Traget device
     DEVICE             : string  := "STRATIX10";
@@ -122,7 +122,7 @@ port (
 );
 end entity;
 
-architecture FULL of RX_DMA_SW_MANAGER is
+architecture FULL of RX_DMA_CALYPTE_SW_MANAGER is
 
     -- =====================================================================
     --  Constants, aliases, functions
