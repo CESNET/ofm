@@ -243,7 +243,8 @@ architecture behavioral of mgmt is
 
 signal mi_addr_masked : std_logic_vector(31 downto 0);
 signal mi_drd_i     : std_logic_vector(31 downto 0);
-signal pma_mode     : std_logic_vector(2 downto 0);
+signal pma_mode     : std_logic_vector(6 downto 0);
+signal pma_mode_set : std_logic_vector(6 downto 0);
 signal pma_fault    : std_logic;
 signal pma_rxl_stat : std_logic;
 signal pma_rst      : std_logic := '0';
@@ -360,6 +361,10 @@ alias SPEED_CAP_50G  : std_logic is speed_cap_int(3);
 alias SPEED_CAP_100G : std_logic is speed_cap_int(9);
 alias SPEED_CAP_200G : std_logic is speed_cap_int(12);
 alias SPEED_CAP_400G : std_logic is speed_cap_int(15);
+
+-- Requested PMA mode (software attempts to set this mode)
+alias pm_req    : std_logic_vector(2 downto 0) is MI_DWR(18 downto 16);
+alias pm_req_hi : std_logic_vector(3 downto 0) is MI_DWR(22 downto 19);
 
 function AND_REDUCE (D : in std_logic_vector) return std_logic is
 variable tmp : std_logic;
@@ -801,73 +806,8 @@ begin
           when "0000011" => -- r1.6, r1.7: PMA  control 2 & devices in package (high word)
              mi_drd_i(15 downto 0)  <= X"0000"; -- Devices in package -- r1.6
              --
-             mi_drd_i(31 downto 22) <= "0000000000"; -- r1.7.15:6
-             case speed_int is
-                when 400 =>
-                   mi_drd_i(16+6 downto 16+3) <= "1011"; -- r1.7.6:3
-                   mi_drd_i(16+2 downto 16+0) <= pma_mode; -- r1.7.2:0
-                   if pma_mode = "111" or pma_mode = "011" then
-                       mi_drd_i(16+2 downto 16+0) <= pma_mode; -- 400GBASE-SR8 or -FR8
-                   else
-                       mi_drd_i(16+2 downto 16+0) <= "100";    -- 400GBASE-LR8
-                   end if;
-                when 200 =>
-                   mi_drd_i(16+6 downto 16+3) <= "1010"; -- r1.7.6:3
-                   if pma_mode = "001" or pma_mode = "010" or pma_mode = "011" or pma_mode = "100" then
-                       mi_drd_i(16+2 downto 16+0) <= pma_mode; -- 200GBASE-CR4, -SR4, -DR4, -FR4
-                   else
-                       mi_drd_i(16+2 downto 16+0) <= "101";    -- 200GBASE-LR4
-                   end if;
-                when 100 =>
-                   if (PMA_LANES = 10) then
-                      mi_drd_i(16+6 downto 16+1) <= "010100";                      -- r1.7.5:0 -xR10
-                      mi_drd_i(16+0)             <= pma_mode(0) or (not AN_ABLE);  -- r1.7.0   0 = CR10, AN must be supported; 1 = SR10, always supported
-                   elsif (PMA_LANES = 2) then
-                      mi_drd_i(16+6 downto 16+2) <= "10010";                        -- r1.7.6:2 -xR2
-                      if pma_mode(1 downto 0) = "01" and AN_ABLE = '1' then -- -CR2 mode requested
-                          mi_drd_i(16+1 downto 16+0)  <= "01";  -- r1.7.1:0   01 = CR2, supported on with AN
-                      else
-                          mi_drd_i(16+1 downto 16+0)  <= "10";  -- r1.7.1:0   10 = SR2, allways supported
-                      end if;
-                   elsif (PMA_LANES = 1) then
-                      mi_drd_i(16+6 downto 16+3) <= "1001";
-                      if pma_mode = "101" or pma_mode = "100" then
-                          mi_drd_i(16+2 downto 16+0) <= pma_mode; -- 100GBASE-LR1 pr 100GBASE-FR1
-                      else
-                          mi_drd_i(16+2 downto 16+0) <= "011";    -- 100GBASE-DR
-                      end if;
-                   else -- PMA_LANES = 4
-                      mi_drd_i(16+5 downto 16+3) <= "101"; -- r1.7.5:3
-                      mi_drd_i(16+2)             <= RSFEC_ABLE and fec_en_r;  -- r1.7.2
-                      mi_drd_i(16+1)             <= '1';  -- r1.7.1: -SR4/-CR4/-LR4, no -KP4/-KR4 support
-                      mi_drd_i(16+0)             <= pma_mode(0); --
-                   end if;
-               when  50 =>
-                   mi_drd_i(16+6 downto 16+3) <= "1000"; -- r1.7.6:3
-                   if pma_mode = "101" or pma_mode = "010" or pma_mode = "011" or pma_mode = "100" then
-                      mi_drd_i(16+2 downto 16+0) <= pma_mode;
-                   else
-                      mi_drd_i(16+2 downto 16+0) <= "001";
-                   end if;
-               when  40 =>
-                   mi_drd_i(16+5 downto 16+3) <= "100"; -- r1.7.5:3
-                   mi_drd_i(16+2) <= '0';  -- r1.7.2
-                   mi_drd_i(16+1) <= '1'; -- -SR4 and -LR4 only
-                   mi_drd_i(16+0) <= pma_mode(0); -- SR4 or -LR4
-               when  25 =>
-                   mi_drd_i(16+5 downto 16+3) <= "111"; -- r1.7.5:3
-                   mi_drd_i(16+2) <= '0';  -- r1.7.2
-                   mi_drd_i(16+1) <= RSFEC_ABLE and pma_mode(1); -- SR
-                   mi_drd_i(16+0) <= '0'; -- KR modes not supported
-               when  others => -- 10
-                   mi_drd_i(16+5 downto 16+3) <= "000"; -- r1.7.5:3
-                   mi_drd_i(16+2) <= '1';  -- r1.7.2
-                   if pma_mode(1 downto 0) /= "00" then -- 10GBASE-LX4 (0x04) not supported
-                      mi_drd_i(16+1 downto 16+0) <= pma_mode(1 downto 0); -- SR or -LR or -ER
-                   else
-                      mi_drd_i(16+1 downto 16+0) <= "10"; -- SR or -LR or -ER
-                   end if;
-             end case;
+             mi_drd_i(16+15 downto 16+7) <= "000000000"; -- r1.7.15:7
+             mi_drd_i(16+ 6 downto 16+0) <= pma_mode;     -- r1.7.6:0
           when "0000100" => -- PMA transmit disable & status 2 -- 0x...C
              mi_drd_i(15 downto 0)  <= "1011" & tx_fault & rx_fault & "0100000001"; -- Status 2 - r1.8
              if SPEED_CAP_10G = '1' then
@@ -906,8 +846,7 @@ begin
                 mi_drd_i(16+13 downto 16+12) <= "00"; -- 100GBASE-KR4 & 100GBASE-KP4
                 mi_drd_i(16+14)              <= '0';  -- 100GBASE-CR4
              elsif (PMA_LANES = 4) then
-                mi_drd_i(16+14)              <= SPEED_CAP_100G and RSFEC_ABLE; -- 100GBASE-CR4
-                mi_drd_i(16+7)               <= (SPEED_CAP_100G and RSFEC_ABLE);
+                mi_drd_i(16+7)               <= (SPEED_CAP_100G and RSFEC_ABLE); -- 100GBASE-SR4
                 mi_drd_i(16+9 downto 16+8)   <= "00"; -- 100GBASE-SR10 & 100GBASE-CR10
                 mi_drd_i(16+11 downto 16+10) <= SPEED_CAP_100G & SPEED_CAP_100G; -- 100GBASE-ER4 & 100GBASE-LR4
                 mi_drd_i(16+13 downto 16+12) <= "00"; -- 100GBASE-KR4 & 100GBASE-KP4
@@ -930,10 +869,11 @@ begin
           when "0001010" => -- r 1.20, r1.21 - PMA/PMD extended ability register
              mi_drd_i(15 downto 0)  <= X"0000"; -- r1.20 -- 50G PMA/PMD extended ability register
              mi_drd_i(15) <= '1'; -- 50G PMA remote loopback ability
+             mi_drd_i(5) <= SPEED_CAP_50G; -- 50GBASE-ER
              mi_drd_i(4) <= SPEED_CAP_50G; -- 50GBASE-LR
              mi_drd_i(3) <= SPEED_CAP_50G; -- 50GBASE-FR
              mi_drd_i(2) <= SPEED_CAP_50G; -- 50GBASE-SR
-             mi_drd_i(1) <= SPEED_CAP_50G; -- 50GBASE-CR  NOTE: "AN_ABLE" should be TRUE to be ieee compliant
+             mi_drd_i(1) <= SPEED_CAP_50G and AN_ABLE; -- 50GBASE-CR
              mi_drd_i(0) <= '0';           -- 50GBASE-KR
              mi_drd_i(31 downto 16) <= X"0000"; -- r1.21 -- 2.5G/5G PMA/PMD extended ability register
           when "0001011" => -- r 1.22, r1.23 - PMA/PMD extended ability register
@@ -945,7 +885,7 @@ begin
              mi_drd_i(16+4) <= SPEED_CAP_200G; -- 200GBASE-FR4
              mi_drd_i(16+3) <= SPEED_CAP_200G; -- 200GBASE-DR4
              mi_drd_i(16+2) <= SPEED_CAP_200G; -- 200GBASE-SR4
-             mi_drd_i(16+1) <= SPEED_CAP_200G; -- 200GBASE-CR4 NOTE: "AN_ABLE" should be TRUE to be ieee compliant
+             mi_drd_i(16+1) <= SPEED_CAP_200G and AN_ABLE; -- 200GBASE-CR4
              mi_drd_i(16+0) <= '0';            -- 200GBASE-KR4
           when "0001100" => -- r 1.24, r1.25 - PMA/PMD extended ability register
              mi_drd_i(15 downto 0)  <= X"0000"; -- r1.24 -- 400G PMA/PMD extended ability register
@@ -965,7 +905,7 @@ begin
              mi_drd_i(15 downto 0)  <= X"0000"; -- r1.26 -- 40/100G PMA/PMD extended ability register 2
              if PMA_LANES = 2 then
                  mi_drd_i(9)  <= SPEED_CAP_100G;             -- 100GBASE-SR2
-                 mi_drd_i(8)  <= SPEED_CAP_100G;             -- 100GBASE-CR2 NOTE: "AN_ABLE" should be TRUE to be ieee compliant
+                 mi_drd_i(8)  <= SPEED_CAP_100G and AN_ABLE; -- 100GBASE-CR2
                  mi_drd_i(7)  <= '0';                        -- 100GBASE-KR2
              elsif PMA_LANES = 1 then
                  mi_drd_i(6)  <= '0';            -- 100GBASE-ZR
@@ -1240,6 +1180,124 @@ begin
    end if;
 end process;
 
+-- -------------------------------------------------------------------------------------
+-- PMA mode settings --------------------------------------------------------------------
+-- -------------------------------------------------------------------------------------
+-- Set PMA mode (by writing reg 1.7) according to supported features
+-- When the requsted mode is not supported, the current mode is preserved
+set_pma_mode_p: process(all)
+begin
+   case speed_int is
+
+      when 400 =>
+         -- For 400GE, only the  400GBASE-SR8 -FR8 and -LR8 are supported
+         pma_mode_set <= pma_mode;  -- Unsupported PMA mode - do not change
+         if pm_req_hi(3 downto 0) = "1100" then --
+             pma_mode_set(6 downto 2) <= "11000";
+             pma_mode_set(1 downto 0) <= pm_req(1 downto 0);
+         elsif pm_req_hi(3 downto 0) = "1011" then --
+            pma_mode_set(6 downto 3) <= "1011";
+            if pm_req = "111" or pm_req = "011" or pm_req = "100" or pm_req = "010" then
+               pma_mode_set(2 downto 0) <= pm_req; -- 400GBASE-SR8 or -FR8 -DR4
+            end if;
+         end if;
+
+      when 200 =>
+         -- For 200GE, only the 200GBASE-CR4, -SR4, -DR4, -FR4 and -LR4 are supported
+         pma_mode_set <= pma_mode;  -- Do not change the PMA mode by default
+         if pm_req_hi(3 downto 0) = "1010" then
+            if pm_req = "001" and AN_ABLE = '1' then
+               pma_mode_set(6 downto 3) <= "1010";
+               pma_mode_set(2 downto 0) <= pm_req; -- 200GBASE-CR4
+            elsif pm_req = "010" or pm_req = "011" or pm_req = "100" or pm_req = "101" then
+               pma_mode_set(6 downto 3) <= "1010";
+               pma_mode_set(2 downto 0) <= pm_req; -- 200GBASE-SR4, -DR4, -FR4, -LR4
+            end if;
+         elsif pm_req_hi(3 downto 0) = "1011" then
+            if pm_req = "000" then
+               pma_mode_set(6 downto 3) <= "1011";
+               pma_mode_set(2 downto 0) <= pm_req; -- 200GBASE-ER4
+            end if;
+         end if;
+
+      when 100 =>
+         pma_mode_set <= pma_mode;  -- Do not change the PMA mode by default
+         if (PMA_LANES = 10) and pm_req_hi(3 downto 0) = "0101" then
+            pma_mode_set(6 downto 1) <= "010100";
+            pma_mode_set(         0) <= pm_req(0) or (not AN_ABLE); -- 0 = CR10 -> AN must be supported; 1 = SR10 -> always supported
+         elsif (PMA_LANES = 2) and pm_req_hi(3 downto 0) = "1001" then
+            pma_mode_set(6 downto 2) <= "10010";
+            pma_mode_set(1 downto 0) <= pma_mode(1 downto 0);  -- Do not change the PMA mode by default
+            if pm_req(1 downto 0) = "01" and AN_ABLE = '1' then -- -CR2 mode requested
+               pma_mode_set(1 downto 0)  <= "01";  -- 100GBASE-CR2, supported only with AN
+            elsif pm_req(1 downto 0) = "10" then
+               pma_mode_set(1 downto 0)  <= "10";  -- 100GBASE-SR2
+            end if;
+         elsif (PMA_LANES = 1) and pm_req_hi(3 downto 0) = "1001" then
+            pma_mode_set(6 downto 3) <= "1001";
+            pma_mode_set(2 downto 0) <= pma_mode(2 downto 0);  -- Do not change the PMA mode by default
+            if pm_req = "101" or pm_req = "100" or pm_req = "011" then
+               pma_mode_set(2 downto 0) <= pm_req; -- 100GBASE-LR1 pr 100GBASE-FR1
+            end if;
+         elsif (PMA_LANES = 4) and pm_req_hi(3 downto 0) = "0101" then -- PMA_LANES = 4 -> -- 100GBASE-xR4
+            pma_mode_set(6 downto 3) <= "0101";
+            pma_mode_set(2 downto 0) <= pma_mode(2 downto 0);  -- Do not change the PMA mode by default
+            if pm_req(2) = '1' then -- 100GBASE modes with RS-FEC
+               if RSFEC_ABLE = '1' and fec_en_r = '1' then
+                  pma_mode_set(2 downto 0) <= pm_req;
+               end if;
+            elsif pm_req(1) = '1' then
+               pma_mode_set(2 downto 0) <= pm_req;
+            end if;
+         end if;
+
+      when  50 =>
+         pma_mode_set <= pma_mode;  -- Do not change the PMA mode by default
+         if pm_req_hi(3 downto 0) = "1000" then
+            if pm_req = "101" or pm_req = "010" or pm_req = "011" or pm_req = "100" then
+               pma_mode_set(2 downto 0) <= pm_req; -- 50GBASE-ER, -LR, -FR, -SR,
+            elsif pm_req = "001" and AN_ABLE = '1' then
+               pma_mode_set(2 downto 0) <= pm_req; -- 50GBASE-CR
+            end if;
+         end if;
+
+      when  40 =>
+         pma_mode_set <= pma_mode;  -- Do not change the PMA mode by default
+         if pm_req_hi(3 downto 0) = "0100" then
+            if pm_req = "010" or pm_req = "011" then
+               pma_mode_set(2 downto 0) <= pm_req;
+            end if;
+         end if;
+
+      when  25 =>
+         pma_mode_set <= pma_mode;  -- Do not change the PMA mode by default
+         if pm_req_hi(3 downto 1) = "011" then
+            if pm_req_hi(0) = '1' then
+               if pm_req = "010" and RSFEC_ABLE = '1' then
+                  pma_mode_set(3 downto 0) <= "1010"; -- 25GBASE-SR (warning: not compliant, AN should be also supported)
+               elsif pm_req = "000" then
+                  pma_mode_set(3 downto 0) <= "1000"; -- 25GBASE-CR-S (warning: not compliant, AN should be also supported)
+               end if;
+            else
+               if (pm_req = "110" or pm_req = "101") and (RSFEC_ABLE = '1') then
+                  pma_mode_set(3 downto 0) <= '0' & pm_req; -- 25GBASE-LR or 25GBASE-ER
+               end if;
+            end if;
+         end if;
+
+      when  others => -- 10
+         pma_mode_set <= pma_mode;  -- Do not change the PMA mode by default
+         if pm_req_hi = "0000" then
+            if pm_req = "111" or pm_req = "110" or pm_req = "101" then
+                pma_mode_set(2 downto 0) <= pm_req; -- 10GBASE-LR or 10GBASE-SR 10GBASE-ER
+            end if;
+         end if;
+      end case;
+   end process;
+
+-- -------------------------------------------------------------------------------------
+-- -------------------------------------------------------------------------------------
+
 MI_READ_REGS: process(MI_CLK)
 begin
    if MI_CLK'event and MI_CLK = '1' then
@@ -1275,29 +1333,31 @@ begin
       if async_rst_mi = '1' then
          case speed_int is -- default PMA modes
             when 400 => -- 400GBASE-SR8 TBD: -CR8 mode would be better, however it is not defined in ieee yet
-               pma_mode <= "111";
-            when 200 => -- 200GBASE-CR4
-               pma_mode <= "001";
-            when  50 => -- 50GBASE-CR
-               pma_mode <= "001";
+               pma_mode <= "1011111";
+            when 200 => -- 200GBASE-SR4
+               pma_mode <= "1010010";
+            when  50 => -- 50GBASE-SR
+               pma_mode <= "1000010";
             when  100 => -- 100GBASE
                if PMA_LANES = 10 then
-                   pma_mode <= "101"; -- 100GBASE-SR10
+                   pma_mode <= "0101001"; -- 100GBASE-SR10
                elsif PMA_LANES = 4 then
                    if RSFEC_ABLE = '1' and RSFEC_EN_INIT = '1' then
-                       pma_mode <= "111"; -- 100GBASE-SR4 (RSFEC on)
+                       pma_mode <= "0101111"; -- 100GBASE-SR4 (RSFEC on)
                    else
-                       pma_mode <= "010"; -- 100GBASE-LR4
+                       pma_mode <= "0101010"; -- 100GBASE-LR4
                    end if;
                elsif PMA_LANES = 2 then
-                   pma_mode <= "001"; -- 100GBASE-CR2
+                  pma_mode <= "1001010"; -- 100GBASE-SR2
                else
-                   pma_mode <= "011"; -- 100GBASE-DR
+                  pma_mode <= "1001011"; -- 100GBASE-DR
                end if;
+            when  40 => -- 40GBASE-SR4
+               pma_mode <= "0100010";
             when  25 =>
-               pma_mode <= "000"; -- 25GBASE-CR
+               pma_mode <= "0111000"; -- 25GBASE-CR
             when  others => -- 10GBASE-LR
-               pma_mode <= "010";
+               pma_mode <= "0000110";
          end case;
          scr_bypass_r <= "00";
          pcs_lpbk     <= '0';
@@ -1356,7 +1416,7 @@ begin
                   end if;
                when "00011" => -- r1.7: PMA  control 2 & devices in package (high word)
                   if (MI_BE(2) = '1') then
-                     pma_mode  <= MI_DWR(18 downto 16);
+                     pma_mode  <= pma_mode_set;
                      fec_en_r  <= MI_DWR(18);
                   end if;
                when "00100" => -- PMA transmit disable
