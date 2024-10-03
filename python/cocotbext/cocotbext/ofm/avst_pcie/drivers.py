@@ -15,6 +15,7 @@ class AvstPcieDriverMaster(BusDriver):
         self._re = RisingEdge(self.clock)
         self._ready_latency = 27
         self.current_ready_latency = 0
+        self.in_frame = False
 
         if self._ready_latency == 0:
             self._write = self._write_rl_0
@@ -36,16 +37,42 @@ class AvstPcieDriverMaster(BusDriver):
         self._rc_q.put_nowait((data, sync))
 
     async def send_transaction(self):
+        queue_select = None
+
         while True:
-            if self._rc_q.empty():
-                if self._cq_q.empty():
-                    await self._re
-                    continue
-                else:
-                    data, sync = self._cq_q.get_nowait()
+            # The algorithm below ensures that when data in queues are in words
+            # (not whole transactions). Only data from one queue between SOF
+            # and EOF are sent (doesn't allow for words of different
+            # transactions to mix).
+            if queue_select is None:
+                if not self._cq_q.empty():
+                    queue_select = self._cq_q
+                # More prioryty Queue is response
+                if not self._rc_q.empty():
+                    queue_select = self._rc_q
+
+            # Both queue is empty
+            if queue_select is None or queue_select.empty():
+                await self._re
             else:
-                data, sync = self._rc_q.get_nowait()
-            await self._write(data, sync)
+                data, sync = queue_select.get_nowait()
+                await self._write(data, sync)
+
+            if not self.in_frame:
+                queue_select = None
+
+    async def _write_data(self, data):
+        for signal, value in data.items():
+            if signal != "":
+                region_mask = 0x1
+                for region in range(len(self.bus.SOP)):
+                    if signal == "EOP" and (value & region_mask) != 0:
+                        self.in_frame = False
+                    if signal == "SOP" and (value & region_mask) != 0:
+                        self.in_frame = True
+                    region_mask <<= 1
+                getattr(self.bus, signal).value = value
+        await self._re
 
     async def _write_rl(self, data, sync=True):
         """
@@ -64,12 +91,7 @@ class AvstPcieDriverMaster(BusDriver):
         if sync:
             await self._re
 
-        self.bus.VALID.value = 1
-        for signal, value in data.items():
-            if signal != "":
-                getattr(self.bus, signal).value = value
-
-        await self._re
+        await self._write_data(data)
         self.bus.VALID.value = 0
 
     async def _write_rl_0(self, data, sync=True):
@@ -85,6 +107,7 @@ class AvstPcieDriverMaster(BusDriver):
             await self._re
 
         self.bus.VALID.value = 1
+        await self._write_data(data)
 
         for signal, value in data.items():
             if signal != "":
