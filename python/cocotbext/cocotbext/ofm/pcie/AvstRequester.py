@@ -111,11 +111,11 @@ class AvstRequester(AvstBase):
         header, payload = req
         byte_count = header.dwords * 4
 
-        addr_h, addr_l = deconcat([header.addr, 32, 32])
         if header.addr_len == 0: # 32-bit address
+            addr_h, addr_l = deconcat([header.addr, 32, 32])
             addr = addr_l
         else: # 64-bit address
-            addr = concat([(addr_l, 32), (addr_h, 32)])
+            addr = header.addr
 
         if header.req_type == 1: # write
             self._ram.w(addr, payload)
