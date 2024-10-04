@@ -1,3 +1,5 @@
+import random
+
 import cocotb
 from cocotb.triggers import RisingEdge
 from cocotb_bus.drivers import BusDriver
@@ -45,9 +47,11 @@ class AvstPcieDriverMaster(BusDriver):
             # and EOF are sent (doesn't allow for words of different
             # transactions to mix).
             if queue_select is None:
-                if not self._cq_q.empty():
+                # Selecting QUEUE for data
+                # Randomly select priority to prevent starvation
+                priority_queue = random.choice([0, 1])
+                if not self._cq_q.empty() and (priority_queue == 0 or self._rc_q.empty()):
                     queue_select = self._cq_q
-                # More prioryty Queue is response
                 if not self._rc_q.empty():
                     queue_select = self._rc_q
 
