@@ -30,11 +30,13 @@ class AvstPcieDriverMaster(BusDriver):
 
         cocotb.start_soon(self.send_transaction())
 
+    # Parameter Sync is deprecated and can be remove anytime. Please dont use it
     async def write_cq(self, data, sync=True):
-        self._cq_q.put_nowait((data, sync))
+        self._cq_q.put_nowait(data)
 
+    # Parameter Sync is deprecated and can be remove anytime. Please dont use it
     async def write_rc(self, data, sync=True):
-        self._rc_q.put_nowait((data, sync))
+        self._rc_q.put_nowait(data)
 
     async def send_transaction(self):
         queue_select = None
@@ -55,8 +57,8 @@ class AvstPcieDriverMaster(BusDriver):
             if queue_select is None or queue_select.empty():
                 await self._re
             else:
-                data, sync = queue_select.get_nowait()
-                await self._write(data, sync)
+                data = queue_select.get_nowait()
+                await self._write(data)
 
             if not self.in_frame:
                 queue_select = None
@@ -74,7 +76,7 @@ class AvstPcieDriverMaster(BusDriver):
                 getattr(self.bus, signal).value = value
         await self._re
 
-    async def _write_rl(self, data, sync=True):
+    async def _write_rl(self, data):
         """
         Write data on the interface when ready latency is not zero.
         """
@@ -88,22 +90,16 @@ class AvstPcieDriverMaster(BusDriver):
         else:
             self.current_ready_latency = self._ready_latency
 
-        if sync:
-            await self._re
-
         await self._write_data(data)
         self.bus.VALID.value = 0
 
-    async def _write_rl_0(self, data, sync=True):
+    async def _write_rl_0(self, data):
         """
         Write data on interface when ready latency is zero
         In this case interface behaves simular to MFB
         """
         #Wait for ready signal
         while not self.bus.READY.value:
-            await self._re
-
-        if sync:
             await self._re
 
         self.bus.VALID.value = 1
