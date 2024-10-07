@@ -100,9 +100,6 @@ class AvstPcieDriverMaster(BusDriver):
         Write data on interface when ready latency is zero
         In this case interface behaves simular to MFB
         """
-        #Wait for ready signal
-        while not self.bus.READY.value:
-            await self._re
 
         self.bus.VALID.value = 1
         await self._write_data(data)
