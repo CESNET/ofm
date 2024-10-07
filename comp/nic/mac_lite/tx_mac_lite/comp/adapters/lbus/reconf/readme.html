@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../../../../../../../">
 <head>
@@ -9,15 +11,11 @@
       <link rel="stylesheet" type="text/css" href="../../../../../../../../_static/css/theme_overrides.css?v=b530091d" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../../../../../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../../../../../../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../../../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../../../../../../_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="../../../../../../../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../../../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../../../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../../../../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../../../../search.html" />
@@ -36,9 +34,6 @@
           <a href="../../../../../../../../index.html" class="icon icon-home">
             Open FPGA Modules Docs
           </a>
-              <div class="version">
-                Git branch: main, <br> Git hash: 47adbf61
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../../../../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -256,7 +251,8 @@ ones.</p>
 controlled by the <cite>sh_fsm</cite> state machine. The simplified transition diagram
 looks like the following:</p>
 <figure class="align-center">
-<a class="reference internal image-reference" href="../../../../../../../../_images/adapter_fsm-Simplified.svg"><img alt="../../../../../../../../_images/adapter_fsm-Simplified.svg" src="../../../../../../../../_images/adapter_fsm-Simplified.svg" style="width: 50%;" /></a>
+<a class="reference internal image-reference" href="../../../../../../../../_images/adapter_fsm-Simplified.svg"><img alt="../../../../../../../../_images/adapter_fsm-Simplified.svg" src="../../../../../../../../_images/adapter_fsm-Simplified.svg" style="width: 50%;" />
+</a>
 </figure>
 <p>Next follows a short description of the behavior in each state.</p>
 <section id="idle">
@@ -321,7 +317,8 @@ resolution of those examples is done with respect to MFB blocks. The input
 configuration is MFB #(1,8,8,8) and the output is MFB #(1,4,16,8). This is shown
 in the following figure:</p>
 <figure class="align-center">
-<a class="reference internal image-reference" href="../../../../../../../../_images/mfb_lbus_reconf_realignment-General.svg"><img alt="../../../../../../../../_images/mfb_lbus_reconf_realignment-General.svg" src="../../../../../../../../_images/mfb_lbus_reconf_realignment-General.svg" style="width: 20%;" /></a>
+<a class="reference internal image-reference" href="../../../../../../../../_images/mfb_lbus_reconf_realignment-General.svg"><img alt="../../../../../../../../_images/mfb_lbus_reconf_realignment-General.svg" src="../../../../../../../../_images/mfb_lbus_reconf_realignment-General.svg" style="width: 20%;" />
+</a>
 </figure>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -330,7 +327,8 @@ in the following figure:</p>
 <section id="scenario-1">
 <h3>Scenario 1<a class="headerlink" href="#scenario-1" title="Link to this heading"></a></h3>
 <figure class="align-center">
-<a class="reference internal image-reference" href="../../../../../../../../_images/mfb_lbus_reconf_realignment-Simple_real.svg"><img alt="../../../../../../../../_images/mfb_lbus_reconf_realignment-Simple_real.svg" src="../../../../../../../../_images/mfb_lbus_reconf_realignment-Simple_real.svg" style="width: 20%;" /></a>
+<a class="reference internal image-reference" href="../../../../../../../../_images/mfb_lbus_reconf_realignment-Simple_real.svg"><img alt="../../../../../../../../_images/mfb_lbus_reconf_realignment-Simple_real.svg" src="../../../../../../../../_images/mfb_lbus_reconf_realignment-Simple_real.svg" style="width: 20%;" />
+</a>
 </figure>
 <p>This figure shows the simplest case in which a basic shift is performed. The
 <cite>RX_SOF</cite> is read in the first register and the frame is shifted
@@ -346,7 +344,8 @@ and then to the second register.</p>
 <section id="scenario-2">
 <h3>Scenario 2<a class="headerlink" href="#scenario-2" title="Link to this heading"></a></h3>
 <figure class="align-center">
-<a class="reference internal image-reference" href="../../../../../../../../_images/mfb_lbus_reconf_realignment-Shift_whole.svg"><img alt="../../../../../../../../_images/mfb_lbus_reconf_realignment-Shift_whole.svg" src="../../../../../../../../_images/mfb_lbus_reconf_realignment-Shift_whole.svg" style="width: 20%;" /></a>
+<a class="reference internal image-reference" href="../../../../../../../../_images/mfb_lbus_reconf_realignment-Shift_whole.svg"><img alt="../../../../../../../../_images/mfb_lbus_reconf_realignment-Shift_whole.svg" src="../../../../../../../../_images/mfb_lbus_reconf_realignment-Shift_whole.svg" style="width: 20%;" />
+</a>
 </figure>
 <p>A small frame named <em>A</em> begins in the second register and ends in the first,
 but after the shift, the frame moves entirely to the output word. There is no
@@ -355,7 +354,8 @@ need to care for the B frame because it can be processed in the following cycle.
 <section id="scenario-3">
 <h3>Scenario 3<a class="headerlink" href="#scenario-3" title="Link to this heading"></a></h3>
 <figure class="align-center">
-<a class="reference internal image-reference" href="../../../../../../../../_images/mfb_lbus_reconf_realignment-Two_together.svg"><img alt="../../../../../../../../_images/mfb_lbus_reconf_realignment-Two_together.svg" src="../../../../../../../../_images/mfb_lbus_reconf_realignment-Two_together.svg" style="width: 20%;" /></a>
+<a class="reference internal image-reference" href="../../../../../../../../_images/mfb_lbus_reconf_realignment-Two_together.svg"><img alt="../../../../../../../../_images/mfb_lbus_reconf_realignment-Two_together.svg" src="../../../../../../../../_images/mfb_lbus_reconf_realignment-Two_together.svg" style="width: 20%;" />
+</a>
 </figure>
 <p>Two frames occur in the second register, the realignment of the word is done
 by only shifting the <em>B</em> frame. The frame <em>B</em>
@@ -370,7 +370,8 @@ its <cite>SOF_POS</cite> value gained in previous transactions.</p>
 <section id="scenario-4">
 <span id="mfb-to-lbus-reconf-scenario4"></span><h3>Scenario 4<a class="headerlink" href="#scenario-4" title="Link to this heading"></a></h3>
 <figure class="align-center">
-<a class="reference internal image-reference" href="../../../../../../../../_images/mfb_lbus_reconf_realignment-Two_together_back.svg"><img alt="../../../../../../../../_images/mfb_lbus_reconf_realignment-Two_together_back.svg" src="../../../../../../../../_images/mfb_lbus_reconf_realignment-Two_together_back.svg" style="width: 50%;" /></a>
+<a class="reference internal image-reference" href="../../../../../../../../_images/mfb_lbus_reconf_realignment-Two_together_back.svg"><img alt="../../../../../../../../_images/mfb_lbus_reconf_realignment-Two_together_back.svg" src="../../../../../../../../_images/mfb_lbus_reconf_realignment-Two_together_back.svg" style="width: 50%;" />
+</a>
 </figure>
 <p>The ending frame <em>A</em> is not shifted and the <em>B</em> frame is shifted in the <em>UP</em>
 direction. The reversal of the
@@ -387,7 +388,8 @@ beginning of the word on the output.</p>
 <section id="scenario-5">
 <span id="mfb-to-lbus-reconf-scenario5"></span><h3>Scenario 5<a class="headerlink" href="#scenario-5" title="Link to this heading"></a></h3>
 <figure class="align-center">
-<a class="reference internal image-reference" href="../../../../../../../../_images/mfb_lbus_reconf_realignment-End_to_curr.svg"><img alt="../../../../../../../../_images/mfb_lbus_reconf_realignment-End_to_curr.svg" src="../../../../../../../../_images/mfb_lbus_reconf_realignment-End_to_curr.svg" style="width: 20%;" /></a>
+<a class="reference internal image-reference" href="../../../../../../../../_images/mfb_lbus_reconf_realignment-End_to_curr.svg"><img alt="../../../../../../../../_images/mfb_lbus_reconf_realignment-End_to_curr.svg" src="../../../../../../../../_images/mfb_lbus_reconf_realignment-End_to_curr.svg" style="width: 20%;" />
+</a>
 </figure>
 <p>The frame <em>A</em> undergoes ordinary shifting where the shadowed part has been
 processed previously. The current shift causes the <cite>EOF</cite> of a current frame to
@@ -398,7 +400,8 @@ next frame.</p>
 <section id="scenario-6">
 <h3>Scenario 6<a class="headerlink" href="#scenario-6" title="Link to this heading"></a></h3>
 <figure class="align-center">
-<a class="reference internal image-reference" href="../../../../../../../../_images/mfb_lbus_reconf_realignment-End_to_curr_sec.svg"><img alt="../../../../../../../../_images/mfb_lbus_reconf_realignment-End_to_curr_sec.svg" src="../../../../../../../../_images/mfb_lbus_reconf_realignment-End_to_curr_sec.svg" style="width: 20%;" /></a>
+<a class="reference internal image-reference" href="../../../../../../../../_images/mfb_lbus_reconf_realignment-End_to_curr_sec.svg"><img alt="../../../../../../../../_images/mfb_lbus_reconf_realignment-End_to_curr_sec.svg" src="../../../../../../../../_images/mfb_lbus_reconf_realignment-End_to_curr_sec.svg" style="width: 20%;" />
+</a>
 </figure>
 <p>This case is a slight modification of the previous one. The current shift causes
 the <em>A</em> frame to appear entirely in the output word. In the next cycle, only the

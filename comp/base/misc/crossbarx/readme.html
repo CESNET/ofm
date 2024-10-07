@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../../../../">
 <head>
@@ -9,15 +11,11 @@
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme_overrides.css?v=b530091d" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
@@ -36,9 +34,6 @@
           <a href="../../../../index.html" class="icon icon-home">
             Open FPGA Modules Docs
           </a>
-              <div class="version">
-                Git branch: main, <br> Git hash: 47adbf61
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -131,7 +126,8 @@ The unit propagates Completed signal for each done Transaction together with its
 These Completed signals have the same order as the input Transactions (within each Stream).</p>
 <section id="block-diagram">
 <h2>Block diagram<a class="headerlink" href="#block-diagram" title="Link to this heading"></a></h2>
-<a class="reference internal image-reference" href="../../../../_images/CrossbarX.svg" id="crossbarx-block-diagram"><img alt="" id="crossbarx-block-diagram" src="../../../../_images/CrossbarX.svg" style="width: 100%;" /></a>
+<a class="reference internal image-reference" href="../../../../_images/CrossbarX.svg" id="crossbarx-block-diagram"><img alt="" id="crossbarx-block-diagram" src="../../../../_images/CrossbarX.svg" style="width: 100%;" />
+</a>
 </section>
 <section id="generics">
 <span id="crossbarx-generics"></span><h2>Generics<a class="headerlink" href="#generics" title="Link to this heading"></a></h2>
@@ -379,7 +375,8 @@ The main advantage of the CrossbarX is its scalability when performing parallel 
 For this reason, the component allows to setup multiple <em>independent</em> Streams od Transactions.
 Each Stream’s Transactions are processed in its own pipeline.
 Only when the Transactions reach the component Planner, they are selected for parallel execution based on their read / write collisions.</p>
-<a class="reference internal image-reference" href="../../../../_images/crossbarx_trans_simple.svg" id="crossbarx-trans-processing"><img alt="" id="crossbarx-trans-processing" src="../../../../_images/crossbarx_trans_simple.svg" style="width: 100%;" /></a>
+<a class="reference internal image-reference" href="../../../../_images/crossbarx_trans_simple.svg" id="crossbarx-trans-processing"><img alt="" id="crossbarx-trans-processing" src="../../../../_images/crossbarx_trans_simple.svg" style="width: 100%;" />
+</a>
 <p>Each Transaction describes a block of data currently stored somewhere in the Source Buffer and ready to be transfered somewhere to the Desctination Buffer.
 The preprocessing pipeline of each Stream disects each Transactions to atomic <em>Instructions</em>.
 This disection is described in the Transaction processing <a class="reference internal" href="#crossbarx-trans-processing"><span class="std std-ref">diagram</span></a>.
