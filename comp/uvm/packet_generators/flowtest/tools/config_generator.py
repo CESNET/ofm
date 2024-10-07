@@ -99,7 +99,7 @@ class ConfigGenerator:
         layer['type'] = type
 
         if type == 'vlan':
-            layer['id'] = random.randint(0, 4095)
+            layer['id'] = random.randint(1, 4095)
         elif type == 'mpls':
             layer['label'] = random.randint(0, pow(2, 20) - 1)
 
