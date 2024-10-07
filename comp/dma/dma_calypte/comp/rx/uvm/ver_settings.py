@@ -22,7 +22,7 @@ SETTINGS = {
         "POINTER_WIDTH"           : "16",
         "SW_ADDR_WIDTH"           : "64",
         "CNTRS_WIDTH"             : "64",
-        "PKT_SIZE_MAX"            : "2**16-1",
+        "PKT_SIZE_MAX"            : "2**12",
         "OPT_BUFF"                : "0",
         "TRBUF_REG_EN"            : "0",
 
@@ -30,15 +30,8 @@ SETTINGS = {
         "PCIE_LEN_MAX"            : "256",
     },
     "2_regions"  : {
-        "USER_MFB_REGIONS"        : "1",
         "USER_MFB_REGION_SIZE"    : "8",
-        "USER_MFB_BLOCK_SIZE"     : "8",
-        "USER_MFB_ITEM_WIDTH"     : "8",
-
         "PCIE_UP_MFB_REGIONS"     : "2",
-        "PCIE_UP_MFB_REGION_SIZE" : "1",
-        "PCIE_UP_MFB_BLOCK_SIZE"  : "8",
-        "PCIE_UP_MFB_ITEM_WIDTH"  : "32",
     },
     "16_channels" : {
         "CHANNELS"                : "16",
@@ -49,18 +42,26 @@ SETTINGS = {
     "trbuf_reg_en" : {
         "TRBUF_REG_EN"            : "1",
     },
+    "intel_dev" : {
+        "DEVICE"                  : "\\\"AGILEX\\\"",
+    },
     "_combinations_" : (
-    # (                                            ), # default
-    # ("16_channels",                              ),
-    ("32_channels",                              ),
-    (               "2_regions",                 ),
-    # ("32_channels", "2_regions",                 ),
-    # ("16_channels", "2_regions",                 ),
-    # (                            "trbuf_reg_en", ),
-    # ("16_channels",              "trbuf_reg_en", ),
-    ("32_channels",              "trbuf_reg_en", ),
-    (               "2_regions", "trbuf_reg_en", ),
-    # ("32_channels", "2_regions", "trbuf_reg_en", ),
-    ("16_channels", "2_regions", "trbuf_reg_en", ),
+    # (                                           ), # default
+    # ("16_channels",                             ),
+    ("32_channels",                             ),
+
+    (               "2_regions",                ),
+    # ("32_channels", "2_regions",                ),
+    # ("16_channels", "2_regions",                ),
+    #
+    # (                            "trbuf_reg_en",),
+    ("16_channels",              "trbuf_reg_en",),
+    # ("32_channels",              "trbuf_reg_en",),
+    # (               "2_regions", "trbuf_reg_en",),
+    ("32_channels", "2_regions", "trbuf_reg_en",),
+    # ("16_channels", "2_regions", "trbuf_reg_en",),
+
+    # (               "2_regions",                 "intel_dev",),
+    ("16_channels", "2_regions",                 "intel_dev",),
     ),
 }

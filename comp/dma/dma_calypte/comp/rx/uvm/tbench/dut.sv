@@ -15,17 +15,11 @@ module DMA_LL_DUT #(DEVICE, USER_REGIONS, USER_REGION_SIZE, USER_BLOCK_SIZE, USE
     );
 
     // UVM_PROBE //
-    // Drop indicator + Drop Channel
-    // Trigger: hdr_dma_hdr_src_rdy & hdr_dma_hdr_dst_rdy
-    bind RX_DMA_CALYPTE: VHDL_DUT_U probe_inf #(1)                probe_discard((hdrm_dma_hdr_src_rdy & hdrm_dma_hdr_dst_rdy & (RESET === 1'b0)), hdrm_pkt_drop, CLK);
-    bind RX_DMA_CALYPTE: VHDL_DUT_U probe_inf #($clog2(CHANNELS)) probe_channel((hdrm_dma_hdr_src_rdy & hdrm_dma_hdr_dst_rdy & (RESET === 1'b0)), hdrm_dma_hdr_chan_num, CLK);
+    bind RX_DMA_CALYPTE: VHDL_DUT_U probe_inf #(1) probe_discard((hdrm_dma_hdr_src_rdy & hdrm_dma_hdr_dst_rdy & (RESET === 1'b0)), hdrm_pkt_drop, CLK);
 
-    logic [$clog2(PKT_SIZE_MAX+1)-1:0] packet_size;
     logic [$clog2(CHANNELS)-1:0]       channel;
     logic [24-1:0]                     meta;
 
-    //{packet_size, channel, meta} 24 + $clog2(PKT_SIZE_MAX+1) + $clog2(CHANNELS)
-    assign packet_size[$clog2(PKT_SIZE_MAX+1)-1 -: $clog2(PKT_SIZE_MAX+1)] = mfb_rx.META[24 + $clog2(PKT_SIZE_MAX+1) + $clog2(CHANNELS)-1 -: $clog2(PKT_SIZE_MAX+1)];
     assign channel[$clog2(CHANNELS)-1 -: $clog2(CHANNELS)]                 = mfb_rx.META[24 + $clog2(CHANNELS)-1                          -: $clog2(CHANNELS)];
     assign meta[24-1 -: 24]                                                = mfb_rx.META[24 -1                                            -: 24];
 
@@ -35,8 +29,6 @@ module DMA_LL_DUT #(DEVICE, USER_REGIONS, USER_REGION_SIZE, USER_BLOCK_SIZE, USE
         assign  mfb_tx.SOF_POS = sof_pos;
     end
     endgenerate
-
-    // assign mfb_tx.EOF_POS[$clog2(PCIE_UP_ITEM_WIDTH)-1:0] = '1;
 
     RX_DMA_CALYPTE #(
         .DEVICE           (DEVICE),
@@ -72,7 +64,6 @@ module DMA_LL_DUT #(DEVICE, USER_REGIONS, USER_REGION_SIZE, USER_BLOCK_SIZE, USE
 
         .USER_RX_MFB_META_HDR_META    (meta),
         .USER_RX_MFB_META_CHAN        (channel),
-        .USER_RX_MFB_META_PKT_SIZE    (packet_size),
 
         .USER_RX_MFB_DATA        (mfb_rx.DATA),
         .USER_RX_MFB_SOF_POS     (mfb_rx.SOF_POS),
@@ -91,6 +82,4 @@ module DMA_LL_DUT #(DEVICE, USER_REGIONS, USER_REGION_SIZE, USER_BLOCK_SIZE, USE
         .PCIE_UP_MFB_SRC_RDY  (mfb_tx.SRC_RDY),
         .PCIE_UP_MFB_DST_RDY  (mfb_tx.DST_RDY)
     );
-
-
 endmodule

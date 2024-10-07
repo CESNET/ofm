@@ -16,7 +16,7 @@ class env #(USER_REGIONS, USER_REGION_SIZE, USER_BLOCK_SIZE, USER_ITEM_WIDTH, PC
     uvm_reset::agent m_reset;
     uvm_dma_ll_rx::env #(USER_REGIONS, USER_REGION_SIZE, USER_BLOCK_SIZE, CHANNELS, PKT_SIZE_MAX)                                          m_env_rx;
     uvm_logic_vector_array_mfb::env_tx #(PCIE_UP_REGIONS, PCIE_UP_REGION_SIZE, PCIE_UP_BLOCK_SIZE, PCIE_UP_ITEM_WIDTH, PCIE_UP_META_WIDTH) m_env_tx;
-    uvm_mvb::agent_rx#(1, $clog2(CHANNELS) + 1)                                                                                            m_dma;
+    uvm_mvb::agent_rx#(1, 1)                                                                                            m_dma;
     uvm_mi::regmodel#(regmodel#(CHANNELS), MI_WIDTH, MI_WIDTH) m_regmodel;
 
     scoreboard #(CHANNELS, PKT_SIZE_MAX, PCIE_UP_META_WIDTH, DEVICE) sc;
@@ -24,6 +24,13 @@ class env #(USER_REGIONS, USER_REGION_SIZE, USER_BLOCK_SIZE, USER_ITEM_WIDTH, PC
     // Constructor of environment.
     function new(string name, uvm_component parent);
         super.new(name, parent);
+    endfunction
+
+    function int unsigned used();
+        int unsigned ret = 0;
+        ret |= (m_env_rx.used() != 0);
+        ret |= (sc.used() != 0);
+        return ret;
     endfunction
 
     // Create base components of environment.
@@ -57,7 +64,7 @@ class env #(USER_REGIONS, USER_REGION_SIZE, USER_BLOCK_SIZE, USER_ITEM_WIDTH, PC
         m_dma_config.active = UVM_PASSIVE;
         m_dma_config.interface_name = "vif_dma";
         uvm_config_db #(uvm_mvb::config_item)::set(this, "m_dma", "m_config", m_dma_config);
-        m_dma = uvm_mvb::agent_rx#(1, $clog2(CHANNELS) + 1)::type_id::create("m_dma", this);
+        m_dma = uvm_mvb::agent_rx#(1, 1)::type_id::create("m_dma", this);
 
         m_mi_config = new();
         m_mi_config.addr_base            = 'h0;

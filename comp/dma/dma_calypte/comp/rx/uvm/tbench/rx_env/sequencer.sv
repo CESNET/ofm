@@ -8,7 +8,6 @@ class sequencer extends uvm_sequencer;
     `uvm_component_utils(uvm_dma_ll_rx::sequencer);
 
     uvm_byte_array::sequencer  m_data;
-    uvm_dma_ll_info::sequencer m_info;
 
     function new(string name, uvm_component parent = null);
         super.new(name, parent);

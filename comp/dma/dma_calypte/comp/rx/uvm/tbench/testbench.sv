@@ -31,7 +31,7 @@ module testbench;
     reset_if                                                                                                   reset(CLK);
     mfb_if #(test::USER_REGIONS, USER_REGION_SIZE, USER_BLOCK_SIZE, USER_ITEM_WIDTH, USER_META_WIDTH)          mfb_rx(CLK);
     mfb_if #(PCIE_UP_REGIONS, PCIE_UP_REGION_SIZE, PCIE_UP_BLOCK_SIZE, PCIE_UP_ITEM_WIDTH, PCIE_UP_META_WIDTH) mfb_tx(CLK);
-    mvb_if #(1, $clog2(test::CHANNELS) + 1)                                                                    mvb_dma(CLK);
+    mvb_if #(1, 1)                                                                                             mvb_dma(CLK);
     mi_if #(MI_WIDTH, MI_WIDTH) mi_config(CLK);
 
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -47,7 +47,7 @@ module testbench;
         uvm_config_db#(virtual reset_if)::set(null, "", "vif_reset", reset);
         uvm_config_db#(virtual mfb_if #(test::USER_REGIONS, USER_REGION_SIZE, USER_BLOCK_SIZE, USER_ITEM_WIDTH, USER_META_WIDTH))::set(null, "", "vif_rx", mfb_rx);
         uvm_config_db#(virtual mfb_if #(PCIE_UP_REGIONS, PCIE_UP_REGION_SIZE, PCIE_UP_BLOCK_SIZE, PCIE_UP_ITEM_WIDTH, PCIE_UP_META_WIDTH))::set(null, "", "vif_tx", mfb_tx);
-        uvm_config_db#(virtual mvb_if #(1, $clog2(test::CHANNELS) + 1))::set(null, "", "vif_dma", mvb_dma);
+        uvm_config_db#(virtual mvb_if #(1, 1))::set(null, "", "vif_dma", mvb_dma);
         uvm_config_db#(virtual mi_if #(MI_WIDTH, MI_WIDTH))::set(null, "", "vif_mi", mi_config);
 
         m_root = uvm_root::get();
@@ -117,8 +117,8 @@ module testbench;
 
     // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
     // GRAY BOX CONNECTION
-    assign mvb_dma.DATA = {DUT_U.VHDL_DUT_U.rx_dma_hdr_manager_i.DMA_CHANNEL, DUT_U.VHDL_DUT_U.rx_dma_hdr_manager_i.DMA_DISCARD};
-    assign mvb_dma.VLD  = DUT_U.VHDL_DUT_U.rx_dma_hdr_manager_i.DMA_HDR_VLD;
+    assign mvb_dma.DATA = DUT_U.VHDL_DUT_U.rx_dma_hdr_manager_i.DMA_DISCARD;
+    assign mvb_dma.VLD  = '1;
     assign mvb_dma.SRC_RDY = DUT_U.VHDL_DUT_U.rx_dma_hdr_manager_i.DMA_HDR_SRC_RDY;
     assign mvb_dma.DST_RDY = DUT_U.VHDL_DUT_U.rx_dma_hdr_manager_i.DMA_HDR_DST_RDY;
 

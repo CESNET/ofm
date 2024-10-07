@@ -79,7 +79,6 @@ entity RX_DMA_CALYPTE is
         -- =========================================================================================================
         USER_RX_MFB_META_HDR_META : in  std_logic_vector(HDR_META_WIDTH-1 downto 0)       := (others => '0');
         USER_RX_MFB_META_CHAN     : in  std_logic_vector(log2(CHANNELS)-1 downto 0)       := (others => '0');
-        USER_RX_MFB_META_PKT_SIZE : in  std_logic_vector(log2(PKT_SIZE_MAX+1)-1 downto 0) := (others => '0');
 
         USER_RX_MFB_DATA     : in  std_logic_vector(USER_RX_MFB_REGIONS*USER_RX_MFB_REGION_SIZE*USER_RX_MFB_BLOCK_SIZE*USER_RX_MFB_ITEM_WIDTH-1 downto 0);
         USER_RX_MFB_SOF      : in  std_logic_vector(USER_RX_MFB_REGIONS - 1 downto 0);
@@ -160,7 +159,6 @@ architecture FULL of RX_DMA_CALYPTE is
     signal hdrm_data_pcie_hdr_src_rdy : std_logic;
     signal hdrm_data_pcie_hdr_dst_rdy : std_logic;
 
-    signal hdrm_dma_hdr_chan_num : std_logic_vector((log2(CHANNELS)-1) downto 0);
     signal hdrm_pkt_drop         : std_logic;
     signal hdrm_dma_hdr_data     : std_logic_vector (63 downto 0);
     signal hdrm_dma_hdr_src_rdy  : std_logic;
@@ -187,13 +185,31 @@ architecture FULL of RX_DMA_CALYPTE is
     signal trbuf_fifo_rx_src_rdy : std_logic;
     signal trbuf_fifo_rx_dst_rdy : std_logic;
 
-    -- Interconnect from input buffer to transaction buffer
-    signal mfb_data_inbuf2trbuf    : std_logic_vector(MFB_REGION_SIZE_INBUF2TRBUF*MFB_BLOCK_SIZE_INBUF2TRBUF*MFB_ITEM_WIDTH_INBUF2TRBUF-1 downto 0);
-    signal mfb_eof_pos_inbuf2trbuf : std_logic_vector(max(1, log2(MFB_REGION_SIZE_INBUF2TRBUF*MFB_BLOCK_SIZE_INBUF2TRBUF))-1 downto 0);
-    signal mfb_sof_inbuf2trbuf     : std_logic;
-    signal mfb_eof_inbuf2trbuf     : std_logic;
-    signal mfb_src_rdy_inbuf2trbuf : std_logic;
-    signal mfb_dst_rdy_inbuf2trbuf : std_logic;
+    -- =============================================================================================
+    -- Frame length checker ---> Transaction buffer
+    -- =============================================================================================
+    signal mfb_data_lng_check    : std_logic_vector(MFB_REGION_SIZE_INBUF2TRBUF*MFB_BLOCK_SIZE_INBUF2TRBUF*MFB_ITEM_WIDTH_INBUF2TRBUF-1 downto 0);
+    signal mfb_sof_lng_check     : std_logic_vector(USER_RX_MFB_REGIONS -1 downto 0);
+    signal mfb_eof_lng_check     : std_logic_vector(USER_RX_MFB_REGIONS -1 downto 0);
+    signal mfb_eof_pos_lng_check : std_logic_vector(max(1, log2(MFB_REGION_SIZE_INBUF2TRBUF*MFB_BLOCK_SIZE_INBUF2TRBUF))-1 downto 0);
+    signal mfb_src_rdy_lng_check : std_logic;
+    signal mfb_dst_rdy_lng_check : std_logic;
+
+    signal stat_frame_lng : std_logic_vector(log2(PKT_SIZE_MAX+1) -1 downto 0);
+    signal stat_frame_lng_max_err : std_logic_vector(USER_RX_MFB_REGIONS -1 downto 0);
+    signal stat_frame_lng_min_err : std_logic_vector(USER_RX_MFB_REGIONS -1 downto 0);
+    signal stat_frame_lng_ovf_err : std_logic_vector(USER_RX_MFB_REGIONS -1 downto 0);
+
+    -- =============================================================================================
+    -- Input buffer ---> Frame length checker
+    -- =============================================================================================
+    signal mfb_data_inbuf    : std_logic_vector(USER_RX_MFB_REGIONS*USER_RX_MFB_REGION_SIZE*USER_RX_MFB_BLOCK_SIZE*USER_RX_MFB_ITEM_WIDTH-1 downto 0);
+    signal mfb_sof_inbuf     : std_logic;
+    signal mfb_eof_inbuf     : std_logic;
+    signal mfb_sof_pos_inbuf : std_logic_vector(max(1, USER_RX_MFB_REGIONS*log2(USER_RX_MFB_REGION_SIZE))-1 downto 0);
+    signal mfb_eof_pos_inbuf : std_logic_vector(max(1, USER_RX_MFB_REGIONS*log2(USER_RX_MFB_REGION_SIZE*USER_RX_MFB_BLOCK_SIZE))-1 downto 0);
+    signal mfb_src_rdy_inbuf : std_logic;
+    signal mfb_dst_rdy_inbuf : std_logic;
 
 
     -- additional DST rdy signals which control the transfers of data between the Header management logic and Data
@@ -250,8 +266,8 @@ architecture FULL of RX_DMA_CALYPTE is
     -- attribute mark_debug of trbuf_fifo_tx_src_rdy : signal is "true";
     -- attribute mark_debug of trbuf_fifo_tx_dst_rdy : signal is "true";
 
-    -- attribute mark_debug of mfb_src_rdy_inbuf2trbuf : signal is "true";
-    -- attribute mark_debug of mfb_dst_rdy_inbuf2trbuf : signal is "true";
+    -- attribute mark_debug of mfb_src_rdy_inbuf : signal is "true";
+    -- attribute mark_debug of mfb_dst_rdy_inbuf : signal is "true";
     -- attribute mark_debug of stop_req_chan  : signal is "true";
     -- attribute mark_debug of stop_req_vld   : signal is "true";
     -- attribute mark_debug of stop_req_done  : signal is "true";
@@ -272,7 +288,7 @@ begin
         report "RX_LL_DMA: The design is not set for such PCIe MFB configuration, the valid are: MFB#(1,1,8,32), MFB#(2,1,8,32)."
         severity FAILURE;
 
-    rx_dma_sw_manager_i : entity work.RX_DMA_SW_MANAGER
+    rx_dma_sw_manager_i : entity work.RX_DMA_CALYPTE_SW_MANAGER
         generic map (
             DEVICE             => DEVICE,
             CHANNELS           => CHANNELS,
@@ -342,8 +358,9 @@ begin
 
     USER_RX_MFB_DST_RDY <= hdr_log_dst_rdy and data_path_dst_rdy;
 
-    rx_dma_hdr_manager_i : entity work.RX_DMA_HDR_MANAGER
+    rx_dma_hdr_manager_i : entity work.RX_DMA_CALYPTE_HDR_MANAGER
         generic map (
+            MFB_REGIONS   => USER_RX_MFB_REGIONS,
             CHANNELS      => CHANNELS,
             PKT_MTU       => PKT_SIZE_MAX,
             METADATA_SIZE => HDR_META_WIDTH,
@@ -381,10 +398,13 @@ begin
 
             INF_META     => USER_RX_MFB_META_HDR_META,
             INF_CHANNEL  => USER_RX_MFB_META_CHAN,
-            INF_PKT_SIZE => USER_RX_MFB_META_PKT_SIZE,
-            INF_VLD      => "1",
             INF_SRC_RDY  => USER_RX_MFB_SRC_RDY and data_path_dst_rdy and USER_RX_MFB_SOF(0),
             INF_DST_RDY  => hdr_log_dst_rdy,
+
+            STAT_PKT_LNG => stat_frame_lng,
+            MFB_EOF      => mfb_eof_lng_check,
+            MFB_SRC_RDY  => mfb_src_rdy_lng_check,
+            MFB_DST_RDY  => mfb_dst_rdy_lng_check,
 
             DMA_PCIE_HDR_SIZE    => hdrm_dma_pcie_hdr_size,
             DMA_PCIE_HDR         => hdrm_dma_pcie_hdr,
@@ -396,14 +416,17 @@ begin
             DATA_PCIE_HDR_SRC_RDY => hdrm_data_pcie_hdr_src_rdy,
             DATA_PCIE_HDR_DST_RDY => hdrm_data_pcie_hdr_dst_rdy,
 
-            DMA_CHANNEL     => hdrm_dma_hdr_chan_num,
             DMA_DISCARD     => hdrm_pkt_drop,
             DMA_HDR         => hdrm_dma_hdr_data,
-            DMA_HDR_VLD     => open,
             DMA_HDR_SRC_RDY => hdrm_dma_hdr_src_rdy,
-            DMA_HDR_DST_RDY => hdrm_dma_hdr_dst_rdy);
+            DMA_HDR_DST_RDY => hdrm_dma_hdr_dst_rdy,
 
-    rx_dma_hdr_insertor_i : entity work.RX_DMA_HDR_INSERTOR
+            PKT_CNTR_CHAN     => hdrm_pkt_sent_chan,
+            PKT_CNTR_SENT_INC => hdrm_pkt_sent_inc,
+            PKT_CNTR_DISC_INC => hdrm_pkt_disc_inc,
+            PKT_CNTR_PKT_SIZE => hdrm_pkt_sent_bytes);
+
+    rx_dma_hdr_insertor_i : entity work.RX_DMA_CALYPTE_HDR_INSERTOR
         generic map (
             RX_REGION_SIZE => MFB_REGION_SIZE_TRBUF2INS,
             RX_BLOCK_SIZE  => MFB_BLOCK_SIZE_TRBUF2INS,
@@ -414,8 +437,6 @@ begin
             TX_BLOCK_SIZE  => PCIE_UP_MFB_BLOCK_SIZE,
             TX_ITEM_WIDTH  => PCIE_UP_MFB_ITEM_WIDTH,
 
-            CHANNELS     => CHANNELS,
-            PKT_SIZE_MAX => PKT_SIZE_MAX,
             DEVICE       => DEVICE
         )
         port map (
@@ -447,16 +468,10 @@ begin
             HDRM_DATA_PCIE_HDR_SRC_RDY => hdrm_data_pcie_hdr_src_rdy,
             HDRM_DATA_PCIE_HDR_DST_RDY => hdrm_data_pcie_hdr_dst_rdy,
 
-            HDRM_DMA_CHAN_NUM    => hdrm_dma_hdr_chan_num,
             HDRM_PKT_DROP        => hdrm_pkt_drop,
             HDRM_DMA_HDR_DATA    => hdrm_dma_hdr_data,
             HDRM_DMA_HDR_SRC_RDY => hdrm_dma_hdr_src_rdy,
-            HDRM_DMA_HDR_DST_RDY => hdrm_dma_hdr_dst_rdy,
-
-            HDRM_PKT_CNTR_CHAN => hdrm_pkt_sent_chan,
-            HDRM_PKT_SENT_INC  => hdrm_pkt_sent_inc,
-            HDRM_PKT_DISC_INC  => hdrm_pkt_disc_inc,
-            HDRM_PKT_SIZE      => hdrm_pkt_sent_bytes);
+            HDRM_DMA_HDR_DST_RDY => hdrm_dma_hdr_dst_rdy);
 
     tr_buf_fifo_g: if (TRBUF_FIFO_EN) generate
 
@@ -513,15 +528,15 @@ begin
 
     tr_buff_g : if (BUFFERED_DATA_SIZE = MFB_REGION_SIZE_INBUF2TRBUF*MFB_BLOCK_SIZE_INBUF2TRBUF) generate
 
-        trbuf_fifo_rx_data      <= mfb_data_inbuf2trbuf;
-        trbuf_fifo_rx_sof       <= mfb_sof_inbuf2trbuf;
-        trbuf_fifo_rx_eof       <= mfb_eof_inbuf2trbuf;
-        trbuf_fifo_rx_src_rdy   <= mfb_src_rdy_inbuf2trbuf;
-        mfb_dst_rdy_inbuf2trbuf <= trbuf_fifo_rx_dst_rdy;
+        trbuf_fifo_rx_data      <= mfb_data_inbuf;
+        trbuf_fifo_rx_sof       <= mfb_sof_inbuf;
+        trbuf_fifo_rx_eof       <= mfb_eof_inbuf;
+        trbuf_fifo_rx_src_rdy   <= mfb_src_rdy_inbuf;
+        mfb_dst_rdy_inbuf <= trbuf_fifo_rx_dst_rdy;
 
     else generate
 
-        transaction_buffer_i : entity work.RX_DMA_TRANS_BUFFER
+        transaction_buffer_i : entity work.RX_DMA_CALYPTE_TRANS_BUFFER
             generic map (
                 RX_REGION_SIZE => MFB_REGION_SIZE_INBUF2TRBUF,
                 RX_BLOCK_SIZE  => MFB_BLOCK_SIZE_INBUF2TRBUF,
@@ -533,12 +548,12 @@ begin
                 CLK => CLK,
                 RST => RESET,
 
-                RX_MFB_DATA    => mfb_data_inbuf2trbuf,
-                RX_MFB_EOF_POS => mfb_eof_pos_inbuf2trbuf,
-                RX_MFB_SOF     => mfb_sof_inbuf2trbuf,
-                RX_MFB_EOF     => mfb_eof_inbuf2trbuf,
-                RX_MFB_SRC_RDY => mfb_src_rdy_inbuf2trbuf,
-                RX_MFB_DST_RDY => mfb_dst_rdy_inbuf2trbuf,
+                RX_MFB_DATA    => mfb_data_lng_check,
+                RX_MFB_EOF_POS => mfb_eof_pos_lng_check,
+                RX_MFB_SOF     => mfb_sof_lng_check(0),
+                RX_MFB_EOF     => mfb_eof_lng_check(0),
+                RX_MFB_SRC_RDY => mfb_src_rdy_lng_check,
+                RX_MFB_DST_RDY => mfb_dst_rdy_lng_check,
 
                 TX_MFB_DATA    => trbuf_fifo_rx_data,
                 TX_MFB_SOF_POS => trbuf_fifo_rx_sof_pos,
@@ -550,7 +565,49 @@ begin
 
     end generate;
 
-    input_buffer_i : entity work.RX_DMA_INPUT_BUFFER
+    mfb_frame_lng_check_i : entity work.MFB_FRAME_LNG_CHECK
+        generic map (
+            REGIONS     => USER_RX_MFB_REGIONS,
+            REGION_SIZE => USER_RX_MFB_REGION_SIZE,
+            BLOCK_SIZE  => USER_RX_MFB_BLOCK_SIZE,
+            ITEM_WIDTH  => USER_RX_MFB_ITEM_WIDTH,
+
+            META_WIDTH  => 0,
+            LNG_WIDTH   => log2(PKT_SIZE_MAX+1),
+            REG_BITMAP  => "0000")
+        port map (
+            CLK            => CLK,
+            RESET          => RESET,
+
+            FRAME_LNG_MAX  => std_logic_vector(to_unsigned(PKT_SIZE_MAX, log2(PKT_SIZE_MAX+1))),
+            FRAME_LNG_MIN  => std_logic_vector(to_unsigned(60,           log2(PKT_SIZE_MAX+1))),
+
+            RX_DATA        => mfb_data_inbuf,
+            RX_META        => (others => '0'),
+            RX_SOF(0)      => mfb_sof_inbuf,
+            RX_EOF(0)      => mfb_eof_inbuf,
+            RX_SOF_POS     => mfb_sof_pos_inbuf,
+            RX_EOF_POS     => mfb_eof_pos_inbuf,
+            RX_SRC_RDY     => mfb_src_rdy_inbuf,
+            RX_DST_RDY     => mfb_dst_rdy_inbuf,
+
+            TX_DATA        => mfb_data_lng_check,
+            TX_META        => open,
+            TX_SOF         => open,
+            TX_EOF         => mfb_eof_lng_check,
+            TX_SOF_POS     => open,
+            TX_EOF_POS     => mfb_eof_pos_lng_check,
+            TX_SRC_RDY     => mfb_src_rdy_lng_check,
+            TX_DST_RDY     => mfb_dst_rdy_lng_check,
+
+            -- an error of maximum packet length does not make sense since
+            -- packet beyond this length are not supported by the design
+            TX_LNG_MAX_ERR => stat_frame_lng_max_err,
+            TX_LNG_MIN_ERR => stat_frame_lng_min_err,
+            TX_LNG_OVF_ERR => stat_frame_lng_ovf_err,
+            TX_FRAME_LNG   => stat_frame_lng);
+
+    input_buffer_i : entity work.RX_DMA_CALYPTE_INPUT_BUFFER
         generic map (
             REGION_SIZE => USER_RX_MFB_REGION_SIZE,
             BLOCK_SIZE  => USER_RX_MFB_BLOCK_SIZE,
@@ -567,12 +624,12 @@ begin
             RX_MFB_SRC_RDY => USER_RX_MFB_SRC_RDY and hdr_log_dst_rdy,
             RX_MFB_DST_RDY => data_path_dst_rdy,
 
-            TX_MFB_DATA    => mfb_data_inbuf2trbuf,
-            TX_MFB_SOF_POS => open,
-            TX_MFB_EOF_POS => mfb_eof_pos_inbuf2trbuf,
-            TX_MFB_SOF     => mfb_sof_inbuf2trbuf,
-            TX_MFB_EOF     => mfb_eof_inbuf2trbuf,
-            TX_MFB_SRC_RDY => mfb_src_rdy_inbuf2trbuf,
-            TX_MFB_DST_RDY => mfb_dst_rdy_inbuf2trbuf);
+            TX_MFB_DATA    => mfb_data_inbuf,
+            TX_MFB_SOF_POS => mfb_sof_pos_inbuf,
+            TX_MFB_EOF_POS => mfb_eof_pos_inbuf,
+            TX_MFB_SOF     => mfb_sof_inbuf,
+            TX_MFB_EOF     => mfb_eof_inbuf,
+            TX_MFB_SRC_RDY => mfb_src_rdy_inbuf,
+            TX_MFB_DST_RDY => mfb_dst_rdy_inbuf);
 
 end architecture;

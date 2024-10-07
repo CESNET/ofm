@@ -4,7 +4,7 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-lappend MOD "$ENTITY_BASE/rx_dma_input_buffer.vhd"
+lappend MOD "$ENTITY_BASE/rx_dma_calypte_input_buffer.vhd"
 
 lappend COMPONENTS [list "BARREL_SHIFTER_GEN" "$OFM_PATH/comp/base/logic/barrel_shifter" "FULL"]
 

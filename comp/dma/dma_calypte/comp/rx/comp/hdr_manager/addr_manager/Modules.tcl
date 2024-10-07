@@ -8,4 +8,4 @@ set GEN_LUTRAM_BASE "$OFM_PATH/comp/base/mem/gen_lutram"
 
 lappend COMPONENTS [list "GEN_LUTRAM" $GEN_LUTRAM_BASE "FULL"]
 
-lappend MOD "$ENTITY_BASE/addr_manager.vhd"
+lappend MOD "$ENTITY_BASE/rx_dma_calypte_addr_manager.vhd"

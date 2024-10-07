@@ -17,4 +17,4 @@ lappend COMPONENTS \
     [ list "DSP_COMPARATOR"     "$DSP_COMP_BASE"                        "FULL" ] \
     [ list "CNT_MULTI_MEMX"     "$MEMX_COUNTER_BASE"                    "FULL" ] \
 
-lappend MOD "$ENTITY_BASE/rx_dma_sw_manager.vhd"
+lappend MOD "$ENTITY_BASE/rx_dma_calypte_sw_manager.vhd"

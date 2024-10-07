@@ -1,6 +1,6 @@
-.. _rx_dma_trans_buffer:
+.. _rx_dma_calypte_trans_buffer:
 
 Transaction Buffer
 ==================
 
-.. vhdl:autoentity:: RX_DMA_TRANS_BUFFER
+.. vhdl:autoentity:: RX_DMA_CALYPTE_TRANS_BUFFER

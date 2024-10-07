@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 lappend PACKAGES "$OFM_PATH/comp/base/pkg/pcie_meta_pack.vhd"
 
-lappend MOD "$ENTITY_BASE/rx_dma_hdr_insertor.vhd"
+lappend MOD "$ENTITY_BASE/rx_dma_calypte_hdr_insertor.vhd"
 
 lappend COMPONENTS [list "BARREL_SHIFTER_GEN" "$OFM_PATH/comp/base/logic/barrel_shifter" "FULL"]
 

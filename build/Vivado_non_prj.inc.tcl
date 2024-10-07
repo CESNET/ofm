@@ -117,6 +117,15 @@ proc EvalFile {FNAME OPT} {
         read_bd $FNAME
         puts "BD added: $FNAME"
         generate_target all [get_files $FNAME] -force
+    } elseif {$opt(TYPE) == "VIVADO_TCL"} {
+        if {[info exists opt(PHASE)] && "ADD_FILES" in $opt(PHASE)} {
+            puts "Running script: $FNAME"
+            set vars ""
+            if {[info exists opt(VARS)]} {
+                set vars $opt(VARS)
+            }
+            source_with_vars $FNAME $vars
+        }
     }
 
     foreach {param_name param_value} $OPT {

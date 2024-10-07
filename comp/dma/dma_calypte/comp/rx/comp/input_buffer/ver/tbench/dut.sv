@@ -13,7 +13,7 @@ module DUT (
     iMfbTx.dut TX
 );
 
-    RX_DMA_INPUT_BUFFER #(
+    RX_DMA_CALYPTE_INPUT_BUFFER #(
         .REGION_SIZE (REGION_SIZE),
         .BLOCK_SIZE  (BLOCK_SIZE),
         .ITEM_WIDTH  (ITEM_WIDTH)

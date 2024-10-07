@@ -49,10 +49,13 @@ class start_channel extends uvm_sequence;
 
         //startup channel
         m_regmodel.control.write(status,  32'h1,  .parent(this));
-        do begin
+        #(100ns)
+        m_regmodel.status.read(status, data, .parent(this));
+
+        while ((data & 32'h1) == 0) begin
             #(300ns)
             m_regmodel.status.read(status, data, .parent(this));
-        end while ((data & 32'h1) == 0);
+        end
     endtask
 endclass
 
@@ -137,13 +140,15 @@ class stop_channel extends uvm_sequence;
 
         //startup channel
         m_regmodel.control.write(status, 32'h0, .parent(this));
-        do begin
+        #(100ns)
+        m_regmodel.status.read(status, data, .parent(this));
+
+        while ((data & 32'h1) == 1) begin
             #(300ns)
-            // end required update pointers
             seq_update.randomize();
             seq_update.start(null);
             m_regmodel.status.read(status, data, .parent(this));
-        end while ((data & 32'h1) == 1);
+        end
     endtask
 endclass
 
