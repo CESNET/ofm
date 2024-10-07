@@ -112,10 +112,10 @@
            <div itemprop="articleBody">
              
   <section id="input-buffer">
-<span id="rx-dma-input-buffer"></span><h1>Input Buffer<a class="headerlink" href="#input-buffer" title="Link to this heading"></a></h1>
+<span id="rx-dma-calypte-input-buffer"></span><h1>Input Buffer<a class="headerlink" href="#input-buffer" title="Link to this heading"></a></h1>
 <dl class="vhdl autoentity">
-<dt class="sig sig-object vhdl" id="vhdl-entity-rx_dma_input_buffer">
-<span class="k"><span class="pre">ENTITY</span> </span><span class="sig-name descname"><span class="pre">RX_DMA_INPUT_BUFFER</span></span><span class="k"> <span class="pre">IS</span></span><a class="headerlink" href="#vhdl-entity-rx_dma_input_buffer" title="Link to this definition"></a></dt>
+<dt class="sig sig-object vhdl" id="vhdl-entity-rx_dma_calypte_input_buffer">
+<span class="k"><span class="pre">ENTITY</span> </span><span class="sig-name descname"><span class="pre">RX_DMA_CALYPTE_INPUT_BUFFER</span></span><span class="k"> <span class="pre">IS</span></span><a class="headerlink" href="#vhdl-entity-rx_dma_calypte_input_buffer" title="Link to this definition"></a></dt>
 <dd><p>This component accepts incoming data on the input and aligns them to the beginning block of the
 MFB bus. This component also splits a word which contains two packets. The purpose is to align
 the data se they can be easily buffered by whole words in the following component.</p>
@@ -133,17 +133,17 @@ the data se they can be easily buffered by whole words in the following componen
 <td><p>=====</p></td>
 <td><p>The number of regions is always set to 1</p></td>
 </tr>
-<tr class="row-odd" id="vhdl-gengeneric-rx_dma_input_buffer-region_size"><td><p>REGION_SIZE</p></td>
+<tr class="row-odd" id="vhdl-gengeneric-rx_dma_calypte_input_buffer-region_size"><td><p>REGION_SIZE</p></td>
 <td><p>integer</p></td>
 <td><p>4</p></td>
 <td></td>
 </tr>
-<tr class="row-even" id="vhdl-gengeneric-rx_dma_input_buffer-block_size"><td><p>BLOCK_SIZE</p></td>
+<tr class="row-even" id="vhdl-gengeneric-rx_dma_calypte_input_buffer-block_size"><td><p>BLOCK_SIZE</p></td>
 <td><p>integer</p></td>
 <td><p>8</p></td>
 <td></td>
 </tr>
-<tr class="row-odd" id="vhdl-gengeneric-rx_dma_input_buffer-item_width"><td><p>ITEM_WIDTH</p></td>
+<tr class="row-odd" id="vhdl-gengeneric-rx_dma_calypte_input_buffer-item_width"><td><p>ITEM_WIDTH</p></td>
 <td><p>integer</p></td>
 <td><p>8</p></td>
 <td></td>
@@ -159,82 +159,82 @@ the data se they can be easily buffered by whole words in the following componen
 </tr>
 </thead>
 <tbody>
-<tr class="row-even" id="vhdl-portsignal-rx_dma_input_buffer-clk"><td><p>CLK</p></td>
+<tr class="row-even" id="vhdl-portsignal-rx_dma_calypte_input_buffer-clk"><td><p>CLK</p></td>
 <td><p>std_logic</p></td>
 <td><p>in</p></td>
 <td></td>
 </tr>
-<tr class="row-odd" id="vhdl-portsignal-rx_dma_input_buffer-rst"><td><p>RST</p></td>
+<tr class="row-odd" id="vhdl-portsignal-rx_dma_calypte_input_buffer-rst"><td><p>RST</p></td>
 <td><p>std_logic</p></td>
 <td><p>in</p></td>
 <td></td>
 </tr>
-<tr class="row-even" id="vhdl-portsignal-rx_dma_input_buffer-rx_mfb_data"><td><p>RX_MFB_DATA</p></td>
+<tr class="row-even" id="vhdl-portsignal-rx_dma_calypte_input_buffer-rx_mfb_data"><td><p>RX_MFB_DATA</p></td>
 <td><p>std_logic_vector(REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0)</p></td>
 <td><p>in</p></td>
 <td></td>
 </tr>
-<tr class="row-odd" id="vhdl-portsignal-rx_dma_input_buffer-rx_mfb_sof"><td><p>RX_MFB_SOF</p></td>
+<tr class="row-odd" id="vhdl-portsignal-rx_dma_calypte_input_buffer-rx_mfb_sof"><td><p>RX_MFB_SOF</p></td>
 <td><p>std_logic</p></td>
 <td><p>in</p></td>
 <td></td>
 </tr>
-<tr class="row-even" id="vhdl-portsignal-rx_dma_input_buffer-rx_mfb_eof"><td><p>RX_MFB_EOF</p></td>
+<tr class="row-even" id="vhdl-portsignal-rx_dma_calypte_input_buffer-rx_mfb_eof"><td><p>RX_MFB_EOF</p></td>
 <td><p>std_logic</p></td>
 <td><p>in</p></td>
 <td></td>
 </tr>
-<tr class="row-odd" id="vhdl-portsignal-rx_dma_input_buffer-rx_mfb_sof_pos"><td><p>RX_MFB_SOF_POS</p></td>
+<tr class="row-odd" id="vhdl-portsignal-rx_dma_calypte_input_buffer-rx_mfb_sof_pos"><td><p>RX_MFB_SOF_POS</p></td>
 <td><p>std_logic_vector(max(1, log2(REGION_SIZE))-1 downto 0)</p></td>
 <td><p>in</p></td>
 <td></td>
 </tr>
-<tr class="row-even" id="vhdl-portsignal-rx_dma_input_buffer-rx_mfb_eof_pos"><td><p>RX_MFB_EOF_POS</p></td>
+<tr class="row-even" id="vhdl-portsignal-rx_dma_calypte_input_buffer-rx_mfb_eof_pos"><td><p>RX_MFB_EOF_POS</p></td>
 <td><p>std_logic_vector(max(1, log2(REGION_SIZE*BLOCK_SIZE))-1 downto 0)</p></td>
 <td><p>in</p></td>
 <td></td>
 </tr>
-<tr class="row-odd" id="vhdl-portsignal-rx_dma_input_buffer-rx_mfb_src_rdy"><td><p>RX_MFB_SRC_RDY</p></td>
+<tr class="row-odd" id="vhdl-portsignal-rx_dma_calypte_input_buffer-rx_mfb_src_rdy"><td><p>RX_MFB_SRC_RDY</p></td>
 <td><p>std_logic</p></td>
 <td><p>in</p></td>
 <td></td>
 </tr>
-<tr class="row-even" id="vhdl-portsignal-rx_dma_input_buffer-rx_mfb_dst_rdy"><td><p>RX_MFB_DST_RDY</p></td>
+<tr class="row-even" id="vhdl-portsignal-rx_dma_calypte_input_buffer-rx_mfb_dst_rdy"><td><p>RX_MFB_DST_RDY</p></td>
 <td><p>std_logic</p></td>
 <td><p>out</p></td>
 <td></td>
 </tr>
-<tr class="row-odd" id="vhdl-portsignal-rx_dma_input_buffer-tx_mfb_data"><td><p>TX_MFB_DATA</p></td>
+<tr class="row-odd" id="vhdl-portsignal-rx_dma_calypte_input_buffer-tx_mfb_data"><td><p>TX_MFB_DATA</p></td>
 <td><p>std_logic_vector(REGION_SIZE*BLOCK_SIZE*ITEM_WIDTH-1 downto 0)</p></td>
 <td><p>out</p></td>
 <td></td>
 </tr>
-<tr class="row-even" id="vhdl-portsignal-rx_dma_input_buffer-tx_mfb_sof"><td><p>TX_MFB_SOF</p></td>
+<tr class="row-even" id="vhdl-portsignal-rx_dma_calypte_input_buffer-tx_mfb_sof"><td><p>TX_MFB_SOF</p></td>
 <td><p>std_logic</p></td>
 <td><p>out</p></td>
 <td></td>
 </tr>
-<tr class="row-odd" id="vhdl-portsignal-rx_dma_input_buffer-tx_mfb_eof"><td><p>TX_MFB_EOF</p></td>
+<tr class="row-odd" id="vhdl-portsignal-rx_dma_calypte_input_buffer-tx_mfb_eof"><td><p>TX_MFB_EOF</p></td>
 <td><p>std_logic</p></td>
 <td><p>out</p></td>
 <td></td>
 </tr>
-<tr class="row-even" id="vhdl-portsignal-rx_dma_input_buffer-tx_mfb_sof_pos"><td><p>TX_MFB_SOF_POS</p></td>
+<tr class="row-even" id="vhdl-portsignal-rx_dma_calypte_input_buffer-tx_mfb_sof_pos"><td><p>TX_MFB_SOF_POS</p></td>
 <td><p>std_logic_vector(max(1, log2(REGION_SIZE))-1 downto 0)</p></td>
 <td><p>out</p></td>
 <td></td>
 </tr>
-<tr class="row-odd" id="vhdl-portsignal-rx_dma_input_buffer-tx_mfb_eof_pos"><td><p>TX_MFB_EOF_POS</p></td>
+<tr class="row-odd" id="vhdl-portsignal-rx_dma_calypte_input_buffer-tx_mfb_eof_pos"><td><p>TX_MFB_EOF_POS</p></td>
 <td><p>std_logic_vector(max(1, log2(REGION_SIZE*BLOCK_SIZE))-1 downto 0)</p></td>
 <td><p>out</p></td>
 <td></td>
 </tr>
-<tr class="row-even" id="vhdl-portsignal-rx_dma_input_buffer-tx_mfb_src_rdy"><td><p>TX_MFB_SRC_RDY</p></td>
+<tr class="row-even" id="vhdl-portsignal-rx_dma_calypte_input_buffer-tx_mfb_src_rdy"><td><p>TX_MFB_SRC_RDY</p></td>
 <td><p>std_logic</p></td>
 <td><p>out</p></td>
 <td></td>
 </tr>
-<tr class="row-odd" id="vhdl-portsignal-rx_dma_input_buffer-tx_mfb_dst_rdy"><td><p>TX_MFB_DST_RDY</p></td>
+<tr class="row-odd" id="vhdl-portsignal-rx_dma_calypte_input_buffer-tx_mfb_dst_rdy"><td><p>TX_MFB_DST_RDY</p></td>
 <td><p>std_logic</p></td>
 <td><p>in</p></td>
 <td></td>
