@@ -30,12 +30,10 @@ class AvstPcieDriverMaster(BusDriver):
 
         cocotb.start_soon(self.send_transaction())
 
-    # Parameter Sync is deprecated and can be remove anytime. Please dont use it
-    async def write_cq(self, data, sync=True):
+    async def write_cq(self, data):
         self._cq_q.put_nowait(data)
 
-    # Parameter Sync is deprecated and can be remove anytime. Please dont use it
-    async def write_rc(self, data, sync=True):
+    async def write_rc(self, data):
         self._rc_q.put_nowait(data)
 
     async def send_transaction(self):

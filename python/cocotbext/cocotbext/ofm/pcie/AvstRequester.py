@@ -50,7 +50,7 @@ class AvstBase:
         self._hdr_width = len(bus.HDR) // self._segs
         self._avst_width = len(bus.DATA) // 8
 
-    async def _send_frame(self, cb, data, header, header_empty, sync):
+    async def _send_frame(self, cb, data, header, header_empty):
         _avst_width = self._avst_width // self._segs
         orig_data = data
         seg, dwr, sop, eop, emp, hdr = 0, 0, 0, 0, 0, 0
@@ -71,7 +71,6 @@ class AvstBase:
                     {
                         "DATA": dwr, "HDR": hdr, "SOP": sop, "EOP": eop, "EMPTY": emp, "PREFIX": 0, "BAR_RANGE": 0, "VALID": 2**seg - 1
                     },
-                    sync=sync,
                 )
                 seg, dwr, sop, eop, emp, hdr = 0, 0, 0, 0, 0, 0
             data = data[length:]
@@ -148,4 +147,4 @@ class AvstRequester(AvstBase):
             header.compl_stat = 1
             # WTF is this?
             header.low_addr = 0  # Info: increment for each consequent completion
-            await self._send_frame(self._cdriver.write_rc, data, header, header_empty, False)
+            await self._send_frame(self._cdriver.write_rc, data, header, header_empty)
