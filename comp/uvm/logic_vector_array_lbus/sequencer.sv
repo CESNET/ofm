@@ -11,9 +11,8 @@
 class sequencer_tx extends uvm_sequencer;
     `uvm_component_utils(uvm_logic_vector_array_lbus::sequencer_tx);
 
-    // A lower limit of the queue to start accepting new items from high-level sequences
-    // For optimization
-    localparam int unsigned REQUEST_QUEUE_SATURATION = 10;
+    // A lower limit of the request queue to start accepting new items from high-level sequences
+    localparam int unsigned REQUEST_QUEUE_SATURATION_THRESHOLD = 10;
 
     // Sequencers
     uvm_logic_vector_array::sequencer #(8) packet;
@@ -46,21 +45,18 @@ class sequencer_tx extends uvm_sequencer;
         forever begin
             // Reset logic
             if (reset_sync.has_been_reset()) begin
-                //if (request_queue.size() > 0) begin
-                //    `uvm_info(this.get_full_name(), $sformatf("\n\tRESET OF THE request_queue(%0d)\n", request_queue.size()), UVM_NONE)
-                //end
                 request_queue.delete();
             end
 
-            wait(request_queue.size() < REQUEST_QUEUE_SATURATION);
+            wait(request_queue.size() < REQUEST_QUEUE_SATURATION_THRESHOLD);
 
             packet.get_next_item(packet_item);
             error.get_next_item(error_item);
 
+            prepare_requests(packet_item, error_item);
+
             packet.item_done();
             error.item_done();
-
-            prepare_requests(packet_item, error_item);
         end
     endtask
 
@@ -70,14 +66,10 @@ class sequencer_tx extends uvm_sequencer;
         int unsigned segment_offset = 0;
         int unsigned data_offset = 0;
 
-        //`uvm_info(this.get_full_name(), $sformatf("\n\tSTART OF THE prepare_requests\n"), UVM_NONE)
-
         try_to_fit_into_previous_request(request, active_segment);
 
         forever begin
             logic [8-1 : 0] databyte = packet_item.data[data_offset];
-
-            //`uvm_info(this.get_full_name(), $sformatf("\n\tSTATE1:\n\tactive_segment %0d\n\tsegment_offset %0d\n\tdata_offset %0d\n\tpacket_item.data.size() %0d\n", active_segment, segment_offset, data_offset, packet_item.data.size()), UVM_NONE)
 
             // Create a new request object
             if (request == null) begin
@@ -101,8 +93,6 @@ class sequencer_tx extends uvm_sequencer;
                 request.eop[active_segment] = 1'b0;
             end
 
-            //`uvm_info(this.get_full_name(), $sformatf("\n\tSTATE2:\n\tdatabyte %0h\n\trequest %s\n", databyte, request.convert2string()), UVM_NONE)
-
             data_offset++;
             if (data_offset != packet_item.data.size()) begin
                 // Update logic
@@ -116,8 +106,6 @@ class sequencer_tx extends uvm_sequencer;
                     request_queue.push_back(request);
                     request = null;
                 end
-
-                //`uvm_info(this.get_full_name(), $sformatf("\n\tSTATE3:\n\trequest_queue.size() %0d\n", request_queue.size()), UVM_NONE)
             end
             else begin
                 // Loop exit
@@ -132,8 +120,6 @@ class sequencer_tx extends uvm_sequencer;
         request.err[active_segment] = error_item.data;
         request.mty[4*(active_segment+1)-1 -: 4] = (128/8)-segment_offset-1;
         request_queue.push_back(request);
-
-        //`uvm_info(this.get_full_name(), $sformatf("\n\tSTATE4:\n\trequest %s\n\tmty %0d:%0d:%0d:%0d\n", request.convert2string(), request.mty[16-1 -: 4], request.mty[12-1 -: 4], request.mty[8-1 -: 4], request.mty[4-1 -: 4]), UVM_NONE)
     endfunction
 
     function void try_to_fit_into_previous_request(output uvm_lbus::sequence_item request, output int unsigned active_segment);
