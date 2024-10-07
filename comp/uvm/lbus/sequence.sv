@@ -129,7 +129,7 @@ class sequence_library_rx extends uvm_common::sequence_library #(config_sequence
         init_sequence_library();
     endfunction
 
-    function void init_sequence(config_sequence param_cfg = null);
+    virtual function void init_sequence(config_sequence param_cfg = null);
         uvm_common::sequence_library::init_sequence(param_cfg);
         add_sequence(sequence_rx          ::get_type());
         add_sequence(sequence_rx_stop     ::get_type());
@@ -138,7 +138,7 @@ class sequence_library_rx extends uvm_common::sequence_library #(config_sequence
 
 endclass
 
-class sequence_library_rx_fullspeed extends uvm_common::sequence_library #(config_sequence, sequence_item);
+class sequence_library_rx_fullspeed extends sequence_library_rx;
     `uvm_object_utils(uvm_lbus::sequence_library_rx_fullspeed)
     `uvm_sequence_library_utils(uvm_lbus::sequence_library_rx_fullspeed)
 
@@ -148,7 +148,7 @@ class sequence_library_rx_fullspeed extends uvm_common::sequence_library #(confi
         init_sequence_library();
     endfunction
 
-    function void init_sequence(config_sequence param_cfg = null);
+    virtual function void init_sequence(config_sequence param_cfg = null);
         uvm_common::sequence_library::init_sequence(param_cfg);
         add_sequence(sequence_rx_fullspeed::get_type());
     endfunction
