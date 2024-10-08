@@ -65,9 +65,9 @@ class AvstCompleter(AvstBase):
             if tag is None:
                 trigger.set()
 
-            await self._cq_req(*item, tag=tag, sync=False)
+            await self._cq_req(*item, tag=tag)
 
-    async def _cq_req(self, addr, byte_count, req_type=0, data=[], tag=None, sync=True):
+    async def _cq_req(self, addr, byte_count, req_type=0, data=[], tag=None):
         header_empty = RequestHeaderEmpty()
         header = RequestHeader()
 
@@ -88,7 +88,7 @@ class AvstCompleter(AvstBase):
             header.tag_l, header.tag_m, header.tag_h = deconcat([tag, 8, 1, 1])
         header.req_t = req_type << 6
         header.length = dwords
-        await self._send_frame(self._cq.write_cq, data, header, header_empty, sync)
+        await self._send_frame(self._cq.write_cq, data, header, header_empty)
 
     def _handle_cc_transaction(self, transaction):
         header_bytes, data_bytes = transaction
